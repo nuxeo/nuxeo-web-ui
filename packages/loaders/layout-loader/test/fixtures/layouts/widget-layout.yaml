@@ -1,0 +1,14 @@
+element: dummy-layout
+widgets:
+  - &title
+    field: dc:title
+    mode: edit
+    name: title
+  - &description
+    field: dc:description
+    name: description
+elements:
+  - *title
+  - *description
+
+

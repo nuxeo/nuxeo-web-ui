@@ -2,14 +2,12 @@ import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-element.js';
-{{#each imports}}
-import '@nuxeo/nuxeo-ui-elements/widgets/{{this}}.js';
-{{/each}}
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-input.js';
 
-window.customElements.define('{{element}}', class extends mixinBehaviors([LayoutBehavior], Nuxeo.Element) {
+window.customElements.define('field-layout', class extends mixinBehaviors([LayoutBehavior], Nuxeo.Element) {
 
   static get is() {
-    return '{{element}}';
+    return 'field-layout';
   }
 
   static get template() {
@@ -47,24 +45,17 @@ window.customElements.define('{{element}}', class extends mixinBehaviors([Layout
         }
       </style>
 
-      {{#each elements}}
-      {{#if label}}
+      <nuxeo-input role="widget" value="{{document.properties.dc:title}}" label="[[i18n('label.dublincore.title')]]" type="text"></nuxeo-input>
       <div role="widget">
-        <label>[[i18n('{{label}}')]]</label>
-        <{{is}}{{#each attributes}} {{this.name}}="{{{this.value}}}"{{/each}}>{{{content}}}</{{is}}>
+        <label>[[i18n('label.dublincore.description')]]</label>
+        <div>[[document.properties.dc:description]]</div>
       </div>
-      {{else}}
-      <{{is}} role="widget"{{#each attributes}} {{this.name}}="{{{this.value}}}"{{/each}}>{{{content}}}</{{is}}>
-      {{/if}}
-      {{/each}}
     `;
   }
 
   static get properties() {
     return {
-      {{#each properties}}
-      {{this.name}}: { type: {{this.type}} },
-      {{/each}}
+      document: { type: Object },
     };
   }
 });

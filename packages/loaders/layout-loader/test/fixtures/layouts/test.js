@@ -45,7 +45,7 @@ window.customElements.define('dummy-layout', class extends mixinBehaviors([Layou
         }
       </style>
 
-      <nuxeo-input role="widget" name="title" label="[[i18n('label.dublincore.title')]]" value="{{document.properties.dc:title}}"></nuxeo-input>
+      <nuxeo-input role="widget" name="title" value="{{document.properties.dc:title}}" label="[[i18n('label.dublincore.title')]]" type="text"></nuxeo-input>
       <div role="widget">
         <label>[[i18n('label.dublincore.description')]]</label>
         <div name="description">[[document.properties.dc:description]]</div>

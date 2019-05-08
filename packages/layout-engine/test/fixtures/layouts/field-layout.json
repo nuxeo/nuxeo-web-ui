@@ -1,0 +1,13 @@
+{
+  "element": "field-layout",
+  "mode": "edit",
+  "elements":[
+    {
+      "field": "dc:title"
+    },
+    {
+      "field": "dc:description",
+      "mode": "view"
+    }
+  ]
+}

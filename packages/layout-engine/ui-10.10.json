@@ -1,0 +1,1137 @@
+{
+  "catalog": {
+    "widgets": [
+      "nuxeo-file",
+      "nuxeo-image-viewer",
+      "nuxeo-pdf-viewer",
+      "nuxeo-video-viewer",
+      "iron-autogrow-textarea",
+      "iron-dropdown",
+      "iron-image",
+      "iron-input",
+      "iron-label",
+      "iron-list",
+      "paper-badge",
+      "paper-button",
+      "paper-checkbox",
+      "paper-fab",
+      "paper-icon-button",
+      "paper-input",
+      "paper-slider",
+      "paper-toggle-button"
+    ]
+  },
+  "contributions": {
+    "slots": [
+      "ADMINISTRATION_MENU",
+      "ADMINISTRATION_PAGES",
+      "ANALYTICS_ITEMS",
+      "ANALYTICS_PAGES",
+      "BLOB_ACTIONS",
+      "COLLECTION_ACTIONS",
+      "CREATE_POPUP_ITEMS",
+      "CREATE_POPUP_PAGES",
+      "DOCUMENT_ACTIONS",
+      "DOCUMENT_CREATE_ACTIONS",
+      "DOCUMENT_LISTING_ACTIONS",
+      "DOCUMENT_VIEWS_ITEMS",
+      "DOCUMENT_VIEWS_PAGES",
+      "DRAWER_ITEMS",
+      "DRAWER_PAGES",
+      "FILE_UPLOAD_ACTIONS",
+      "PAGES",
+      "RESULTS_ACTIONS",
+      "RESULTS_SELECTION_ACTIONS",
+      "THEMES",
+      "USER_MENU",
+      "PUBLISH_ITEMS",
+      "PUBLISH_PAGES"
+    ],
+    "ui": {
+      "actions": {
+        "BLOB_ACTIONS": {
+          "icon": "editor:insert-drive-file",
+          "label": "Blob Actions",
+          "contextVariables": [
+            "user",
+            "document",
+            "blob",
+            "xpath"
+          ]
+        },
+        "COLLECTION_ACTIONS": {
+          "icon": "image:collections-bookmark",
+          "label": "Collection Actions",
+          "contextVariables": [
+            "collection",
+            "selectedItems",
+            "items"
+          ]
+        },
+        "DOCUMENT_ACTIONS": {
+          "icon": "description",
+          "label": "Document Actions",
+          "contextVariables": [
+            "document",
+            "clipboard"
+          ]
+        },
+        "DOCUMENT_CREATE_ACTIONS": {
+          "icon": "add-circle",
+          "label": "Document Create Actions",
+          "contextVariables": [
+            "hostVisible",
+            "subtypes"
+          ]
+        },
+        "FILE_UPLOAD_ACTIONS": {
+          "icon": "file-upload",
+          "label": "File Upload Actions",
+          "contextVariables": []
+        },
+        "RESULTS_ACTIONS": {
+          "icon": "search",
+          "label": "Results Actions",
+          "contextVariables": [
+            "baseUrl",
+            "displayMode",
+            "nxProvider",
+            "selectedItems",
+            "items",
+            "columns",
+            "document"
+          ]
+        },
+        "RESULTS_SELECTION_ACTIONS": {
+          "icon": "search",
+          "label": "Results Selection Actions",
+          "contextVariables": [
+            "baseUrl",
+            "displayMode",
+            "nxProvider",
+            "selectedItems",
+            "items",
+            "columns",
+            "document"
+          ]
+        }
+      },
+      "document": {
+        "pill": "DOCUMENT_VIEWS_ITEMS",
+        "page": "DOCUMENT_VIEWS_PAGES"
+      },
+      "drawer": {
+        "menu": "DRAWER_ITEMS",
+        "page": "DRAWER_PAGES"
+      },
+      "main": {
+        "user": {
+          "menu": "USER_MENU",
+          "page": "PAGES"
+        },
+        "administration": {
+          "menu": "ADMINISTRATION_MENU",
+          "page": "ADMINISTRATION_PAGES"
+        }
+      },
+      "themes": "THEMES"
+    }
+  },
+  "themes": ["dark", "default", "kawaii", "light"],
+  "inspector": {
+    "blacklist": {
+      "behaviors": [
+        "Polymer.IronA11yKeysBehavior",
+        "Polymer.IronFitBehavior",
+        "Polymer.IronMenuBehavior",
+        "Polymer.IronOverlayBehavior",
+        "Polymer.IronResizableBehavior",
+        "Polymer.IronScrollTargetBehavior",
+        "Polymer.IronValidatableBehavior",
+        "Polymer.IronValidatorBehavior",
+        "Polymer.IronFormElementBehavior",
+        "Polymer.PaperDialogBehavior",
+        "Polymer.PaperCheckedElementBehavior",
+        "Polymer.PaperInkyFocusBehavior",
+        "Polymer.PaperButtonBehavior",
+        "Polymer.PaperRippleBehavior",
+        "Polymer.PropertyEffects",
+        "Polymer.ElementMixin",
+        "Nuxeo.I18nBehavior",
+        "Nuxeo.FiltersBehavior"
+      ],
+      "properties": [
+        ""
+      ],
+      "elements": [
+        ""
+      ]
+    },
+    "whitelist": {
+      "behaviors": [
+        "Polymer.IronRangeBehavior",
+        "Nuxeo.UploaderBehavior"
+      ],
+      "properties": [
+        ""
+      ],
+      "elements": [
+        ""
+      ]
+    },
+    "defaultProperties": [
+      "active",
+      "checked",
+      "disabled",
+      "enabled",
+      "focused",
+      "label",
+      "maxlength",
+      "name",
+      "readonly",
+      "required",
+      "value"
+    ],
+    "content": [
+      "div",
+      "span",
+      "paper-button"
+    ]
+  },
+  "templates": {
+    "string": {
+      "view": {
+        "is": "div",
+        "attributes": [],
+        "content": "[[$field]]",
+        "label": "$label"
+      },
+      "edit": {
+        "is": "nuxeo-input",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "type",
+            "value": "text"
+          },
+          {
+            "name": "minlength",
+            "value": "$minLength"
+          },
+          {
+            "name": "maxlength",
+            "value": "$maxLength"
+          },
+          {
+            "name": "pattern",
+            "value": "$pattern"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "longString": {
+      "view": {
+        "is": "div",
+        "attributes": [],
+        "content": "[[$field]]",
+        "label": "$label"
+      },
+      "edit": {
+        "is": "nuxeo-input",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "type",
+            "value": "text"
+          },
+          {
+            "name": "minlength",
+            "value": "$minLength"
+          },
+          {
+            "name": "maxlength",
+            "value": "$maxLength"
+          },
+          {
+            "name": "pattern",
+            "value": "$pattern"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "string[]": {
+      "view": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "orderable",
+            "value": "true"
+          },
+          {
+            "name": "editable",
+            "value": "true"
+          }
+        ]
+      }
+    },
+    "integer": {
+      "view": {
+        "is": "div",
+        "attributes": [],
+        "content": "[[$field]]",
+        "label": "$label"
+      },
+      "edit": {
+        "is": "nuxeo-input",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "type",
+            "value": "number"
+          },
+          {
+            "name": "min",
+            "value": "$minRange"
+          },
+          {
+            "name": "max",
+            "value": "$maxRange"
+          },
+          {
+            "name": "pattern",
+            "value": "$pattern"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "long": {
+      "view": {
+        "is": "div",
+        "attributes": [],
+        "content": "[[$field]]",
+        "label": "$label"
+      },
+      "edit": {
+        "is": "nuxeo-input",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "type",
+            "value": "number"
+          },
+          {
+            "name": "min",
+            "value": "$minRange"
+          },
+          {
+            "name": "max",
+            "value": "$maxRange"
+          },
+          {
+            "name": "pattern",
+            "value": "$pattern"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "integer[]": {
+      "view": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "orderable",
+            "value": "true"
+          },
+          {
+            "name": "editable",
+            "value": "true"
+          }
+        ]
+      }
+    },
+    "double": {
+      "view": {
+        "is": "div",
+        "attributes": [],
+        "content": "[[$field]]",
+        "label": "$label"
+      },
+      "edit": {
+        "is": "nuxeo-input",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "type",
+            "value": "number"
+          },
+          {
+            "name": "step",
+            "value": "0.01"
+          },
+          {
+            "name": "min",
+            "value": "$minRange"
+          },
+          {
+            "name": "max",
+            "value": "$maxRange"
+          },
+          {
+            "name": "pattern",
+            "value": "$pattern"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "double[]": {
+      "view": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "orderable",
+            "value": "true"
+          },
+          {
+            "name": "editable",
+            "value": "true"
+          }
+        ]
+      }
+    },
+    "boolean": {
+      "view": {
+        "is": "div",
+        "attributes": [],
+        "content": "[[$field]]",
+        "label": "$label"
+      },
+      "edit": {
+        "is": "paper-checkbox",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "checked",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "boolean[]": {
+      "view": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "orderable",
+            "value": "true"
+          },
+          {
+            "name": "editable",
+            "value": "true"
+          }
+        ]
+      }
+    },
+    "date": {
+      "view": {
+        "is": "div",
+        "attributes": [],
+        "content": "[[formatDate($field)]]",
+        "label": "$label"
+      },
+      "edit": {
+        "is": "nuxeo-date-picker",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "date[]": {
+      "view": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "orderable",
+            "value": "true"
+          },
+          {
+            "name": "editable",
+            "value": "true"
+          }
+        ]
+      }
+    },
+    "complex[]": {
+      "view": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-data-table",
+        "attributes": [
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "items",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "orderable",
+            "value": "true"
+          },
+          {
+            "name": "editable",
+            "value": "true"
+          }
+        ]
+      }
+    },
+    "blob": {
+      "view": {
+        "is": "nuxeo-file",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "[[$field]]"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-file",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          }
+        ]
+      }
+    },
+    "blob[]": {
+      "view": {
+        "is": "nuxeo-document-attachments",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "document",
+            "value": "{{document}}"
+          },
+          {
+            "name": "xpath",
+            "value": "$xpath"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-dropzone",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "document",
+            "value": "{{document}}"
+          },
+          {
+            "name": "xpath",
+            "value": "$xpath"
+          },
+          {
+            "name": "blob-list",
+            "value": "true"
+          },
+          {
+            "name": "blob-append",
+            "value": "true"
+          }
+        ]
+      }
+    },
+    "user/group": {
+      "view": {
+        "is": "nuxeo-user-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "[[$field]]"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "readonly",
+            "value": "true"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-user-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          }
+        ]
+      }
+    },
+    "user/group[]": {
+      "view": {
+        "is": "nuxeo-user-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "[[$field]]"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "multiple",
+            "value": "true"
+          },
+          {
+            "name": "readonly",
+            "value": "true"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-user-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "multiple",
+            "value": "true"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "directory": {
+      "view": {
+        "is": "nuxeo-directory-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "[[$field]]"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "readonly",
+            "value": "true"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-directory-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "directory[]": {
+      "view": {
+        "is": "nuxeo-directory-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "[[$field]]"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "multiple",
+            "value": "true"
+          },
+          {
+            "name": "readonly",
+            "value": "true"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-directory-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "multiple",
+            "value": "true"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "document": {
+      "view": {
+        "is": "nuxeo-document-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "[[$field]]"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "readonly",
+            "value": "true"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-document-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "document[]": {
+      "view": {
+        "is": "nuxeo-document-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "[[$field]]"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "readonly",
+            "value": "true"
+          },
+          {
+            "name": "multiple",
+            "value": "true"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-document-suggestion",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "label",
+            "value": "[[i18n('$label')]]"
+          },
+          {
+            "name": "multiple",
+            "value": "true"
+          },
+          {
+            "name": "required",
+            "value": "$required"
+          }
+        ]
+      }
+    },
+    "terms": {
+      "edit": {
+        "is": "nuxeo-checkbox-aggregation",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "data",
+            "value": "$aggregate"
+          }
+        ]
+      }
+    },
+    "significant_terms": {
+      "edit": {
+        "is": "nuxeo-checkbox-aggregation",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "data",
+            "value": "$aggregate"
+          }
+        ]
+      }
+    },
+    "range": {
+      "edit": {
+        "is": "nuxeo-checkbox-aggregation",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "data",
+            "value": "$aggregate"
+          }
+        ]
+      }
+    },
+    "date_range": {
+      "edit": {
+        "is": "nuxeo-checkbox-aggregation",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "data",
+            "value": "$aggregate"
+          }
+        ]
+      }
+    },
+    "histogram": {
+      "edit": {
+        "is": "nuxeo-checkbox-aggregation",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "data",
+            "value": "$aggregate"
+          }
+        ]
+      }
+    },
+    "date_histogram": {
+      "edit": {
+        "is": "nuxeo-checkbox-aggregation",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "data",
+            "value": "$aggregate"
+          }
+        ]
+      }
+    },
+    "column": {
+      "view": {
+        "is": "nuxeo-data-table-column",
+        "attributes": [
+          {
+            "name": "name",
+            "value": "[[i18n('$label')]]"
+          }
+        ]
+      }
+    }
+  },
+  "templates_wf": {
+    "blob[]": {
+      "view": {
+        "is": "nuxeo-file",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "[[$field]]"
+          },
+          {
+            "name": "multiple",
+            "value": "true"
+          },
+          {
+            "name": "readonly",
+            "value": "true"
+          }
+        ]
+      },
+      "edit": {
+        "is": "nuxeo-file",
+        "label": "$label",
+        "attributes": [
+          {
+            "name": "value",
+            "value": "{{$field}}"
+          },
+          {
+            "name": "multiple",
+            "value": "true"
+          }
+
+        ]
+      }
+    }
+  },
+  "editors": {
+    "search": {
+      "templates": {
+        "grid": {
+          "name": "Grid",
+          "icon": "icons:apps",
+          "element": "nuxeo-data-grid",
+          "path": "search/nuxeo-data-grid-template.html"
+        },
+        "justifiedgrid": {
+          "name": "Justified Grid",
+          "icon": "icons:view-quilt",
+          "element": "nuxeo-justified-grid",
+          "path": "search/nuxeo-justified-grid-template.html"
+        },
+        "list": {
+          "name": "List",
+          "icon": "icons:menu",
+          "element": "nuxeo-data-list",
+          "path": "search/nuxeo-data-list-template.html"
+        },
+        "table": {
+          "name": "Table",
+          "icon": "icons:list",
+          "element": "nuxeo-data-table",
+          "path": "search/nuxeo-data-table-template.html"
+        }
+      }
+    }
+  },
+  "elements": {
+    "templates": {
+      "default": {
+        "label": "Title/description element template",
+        "path": "nuxeo-title-description-element-template.html"
+      },
+      "layout": {
+        "label": "Sample layout template",
+        "path": "nuxeo-element-layout.html"
+      },
+      "document-page": {
+        "label": "Document Page template",
+        "path": "nuxeo-document-page-template.html"
+      },
+      "drawer-page": {
+        "label": "Drawer Page template",
+        "path": "nuxeo-drawer-page-template.html"
+      },
+      "main-page": {
+        "label": "Main Page template",
+        "path": "nuxeo-main-page-template.html"
+      },
+      "dialog-action": {
+        "label": "Dialog Action template",
+        "path": "nuxeo-dialog-action-template.html"
+      },
+      "script-action": {
+        "label": "Script Action template",
+        "path": "nuxeo-script-action-template.html"
+      }
+    }
+  }
+}

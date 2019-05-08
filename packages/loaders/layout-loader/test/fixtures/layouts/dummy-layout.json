@@ -9,12 +9,16 @@
           "value": "title"
         },
         {
+          "name":"value",
+          "value":"{{document.properties.dc:title}}"
+        },
+        {
           "name": "label",
           "value": "[[i18n('label.dublincore.title')]]"
         },
         {
-          "name":"value",
-          "value":"{{document.properties.dc:title}}"
+          "name": "type",
+          "value": "text"
         }
       ]
     },
@@ -27,8 +31,7 @@
         }
       ],
       "content": "[[document.properties.dc:description]]",
-      "label": "label.dublincore.description",
-      "hidden": "[[!document.properties.dc:description]]"
+      "label": "label.dublincore.description"
     }
   ],
   "properties":[

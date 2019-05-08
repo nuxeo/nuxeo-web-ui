@@ -1,0 +1,7 @@
+element: dummy-layout
+elements:
+  - field: dc:title
+    mode: edit
+    name: title
+  - field: dc:description
+    name: description

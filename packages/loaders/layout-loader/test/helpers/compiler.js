@@ -17,13 +17,13 @@ module.exports = (fixture) => {
       modules: ['node_modules', resolve(basePath, '../..')],
     },
     resolve: {
-      extensions: ['.js', '.json'],
+      extensions: ['.js', '.json', '.yaml'],
     },
     module: {
       rules: [
         {
           type: 'javascript/auto', // skip default json loader
-          test: /\.json$/,
+          test: /\.(json|yaml)$/,
           include: [resolve(basePath, 'fixtures/layouts')],
           use: [
             {

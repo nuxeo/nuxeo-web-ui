@@ -1,0 +1,767 @@
+{
+  "events": {
+    "emptyDocumentModelCreated": "Empty document created",
+    "aboutToCreate": "About to create",
+    "documentCreated": "Document created",
+    "beforeDocumentModification": "Before document modification",
+    "documentModified": "Document modified",
+    "documentImported": "Document imported",
+    "aboutToRemove": "About to remove",
+    "documentRemoved": "Document removed",
+    "aboutToRemoveVersion": "About to remove version",
+    "versionRemoved": "Version Removed",
+    "beforeDocumentSecurityModification": "Before document security modification",
+    "documentSecurityUpdated": "Document security updated",
+    "documentLocked": "Document locked",
+    "documentUnlocked": "Document unlocked",
+    "aboutToCopy": "About to copy",
+    "documentCreatedByCopy": "Document created by copy",
+    "documentDuplicated": "Document duplicated",
+    "aboutToMove": "About to move",
+    "documentMoved": "Document moved",
+    "documentPublished": "Document published",
+    "documentProxyPublished": "Document proxy published",
+    "documentProxyUpdated": "Document proxy updated",
+    "sectionContentPublished": "Section content published",
+    "beforeRestoringDocument": "Before restoring document",
+    "documentRestored": "Document restored",
+    "sessionSaved": "Session saved",
+    "childrenOrderChanged": "Children order changed",
+    "aboutToCheckout": "About to checkout",
+    "documentCheckedOut": "Document checked out",
+    "aboutToCheckIn": "About to check in",
+    "documentCheckedIn": "Document checked in",
+    "subscriptionAssigned": "Subscription assigned",
+    "emailDocumentSend": "E-Mail document sent",
+    "lifecycle_transition_event": "Lifecycle transition event",
+    "workflowCanceled": "Workflow canceled",
+    "beforeAddedToCollection": "Before added to collection",
+    "addedToCollection": "Added to collection",
+    "beforeRemovedFromCollection": "Before removed from collection",
+    "removedFromCollection": "Removed from collection"
+  },
+  "permissions": {
+    "Write": "Edit",
+    "Read": "Read",
+    "Browse": "Browse",
+    "ReadWrite": "Read & Edit",
+    "AddChildren": "Add Children",
+    "RemoveChildren": "Remove Children",
+    "ReadChildren": "Read Children",
+    "WriteSecurity": "Edit Security",
+    "ReadSecurity": "Read Security",
+    "WriteLifeCycle": "Edit LifeCycle",
+    "ReadLifeCycle": "Read LifeCycle",
+    "ReadProperties": "Read Properties",
+    "WriteProperties": "Edit Properties",
+    "ManageWorkflows": "Manage Workflows",
+    "ReviewParticipant": "Review Participant",
+    "Everything": "Manage Everything",
+    "Version": "Version",
+    "ReadVersion": "Read Version",
+    "WriteVersion": "Write Version",
+    "Remove": "Remove",
+    "ReadRemove": "Remove",
+    "Unlock": "Unlock",
+    "CanAskForPublishing": "Can ask for publishing",
+    "ReadCanCollect": "Can Collect",
+    "DataVisualization": "Data Visualization",
+    "Comment": "Comment",
+    "Moderate": "Moderate"
+  },
+  "facets": [
+    {
+      "id": "Folderish",
+      "label": "Document is folderish",
+      "description": "Document becomes a container for other documents. Needed for folders or similar document types."
+    },
+    {
+      "id": "Orderable",
+      "label": "Children of this document are orderable",
+      "description": "Allows to manage the order of this document's children. Requires the folderish facet."
+    },
+    {
+      "id": "Versionable",
+      "label": "Document is versionable",
+      "description": "Allows to create versions for this document type."
+    },
+    {
+      "id": "Publishable",
+      "label": "Document can be published",
+      "description": "Displays the publishing tab (unless you forbid it in the tabs filtering section)."
+    },
+    {
+      "id": "Commentable",
+      "label": "Document can be commented",
+      "description": "Displays the comment tab (unless you forbid it in the tabs filtering section), and the document instance's comments in the summary tab"
+    },
+    {
+      "id": "HiddenInNavigation",
+      "label": "Document is hidden in navigation",
+      "description": "The document type won't appear in the tree and in the folder content listing."
+    },
+    {
+      "id": "HiddenInFacetedSearch",
+      "deprecated": true,
+      "label": "Document is hidden in faceted search results",
+      "description": "The document will not appear in faceted search results, but will still appear in navigation and standard search results."
+    },
+    {
+      "id": "SuperSpace",
+      "label": "Document is a superspace",
+      "description": "Enables local configuration (choosing enabled document types, search forms...) for people having management rights on this space. Requires the folderish facet. The document type will be available in the seam context as variable \"currentSuperSpace\" when navigating in its children documents. Various features in DM are based on this like the display of local configuration tab and the notifications configuration."
+    },
+    {
+      "id": "NXTag",
+      "label": "Document can be tagged",
+      "description": "Allows to manage tags to your document type. Available starting from Nuxeo Server LTS 2017.",
+      "schemas": [
+        "facetedTag"
+      ]
+    },
+    {
+      "id": "HasRelatedText",
+      "label": "Full-text indexing of related text",
+      "description": "Facet to be used for full-text indexing of related text content (e.g. comments, annotations, tags...)"
+    },
+    {
+      "id": "Task",
+      "schemas": [
+        "task"
+      ],
+      "label": "Document is a task",
+      "description": "For advanced users only. The document type can be used as task type by the workflow if it has this facet, the \"Routing task\" facet and the \"task\" life cycle "
+    },
+    {
+      "id": "RoutingTask",
+      "label": "Document is a core routing task",
+      "description": "For advanced users only. The document type can be used as a core routing task type if it has this facet, the \"Task\" facet and the \"task\" life cycle "
+    },
+    {
+      "id": "Indexable",
+      "deprecated": true,
+      "label": "Document is indexable",
+      "description": "This facet is an old marker that is not used anymore, it can safely be removed."
+    },
+    {
+      "id": "PublishSpace",
+      "label": "Document is a publish space",
+      "description": "For advanced users only. Use this facet for document types replacing the Section document type."
+    },
+    {
+      "id": "MasterPublishSpace",
+      "label": "Document is a publish space root",
+      "description": "For advanced users only. Use this facet for document types replacing the SectionRoot document type."
+    },
+    {
+      "id": "Collection",
+      "label": "Document is a collection",
+      "description": "The document type is a collection of others documents (it references them but does not contain them).",
+      "schemas": [
+        "collection"
+      ]
+    },
+    {
+      "id": "NotCollectionMember",
+      "label": "Document cannot be added to a collection",
+      "description": "Facet to be used on document types that should not be referenced in a collection. By default, all document types can be referenced in a collection, so this facet is useful to flag document types that should not be.",
+      "schemas": [
+        "collectionMember"
+      ]
+    }
+  ],
+  "vocabularies": [
+    {
+      "id": "continent",
+      "hierarchical": "false"
+    },
+    {
+      "id": "country",
+      "parent": "continent",
+      "hierarchical": "false"
+    },
+    {
+      "id": "topic",
+      "hierarchical": "false"
+    },
+    {
+      "id": "subtopic",
+      "parent": "topic",
+      "hierarchical": "false"
+    },
+    {
+      "id": "subject",
+      "hierarchical": "false"
+    },
+    {
+      "id": "sort_order",
+      "hierarchical": "false"
+    },
+    {
+      "id": "search_operators",
+      "hierarchical": "false"
+    },
+    {
+      "id": "nature",
+      "hierarchical": "false"
+    },
+    {
+      "id": "language",
+      "hierarchical": "false"
+    }
+  ],
+  "schemas": {
+    "common": {
+      "icon": "string",
+      "icon-expanded": "string"
+    },
+    "uid": {
+      "uid": "string",
+      "major_version": "integer",
+      "minor_version": "integer"
+    },
+    "dublincore": {
+      "@prefix": "dc",
+      "title": "string",
+      "description": "string",
+      "rights": "string",
+      "source": "string",
+      "coverage": {
+        "type": "string",
+        "referenceConfiguration": {
+          "name": "directoryResolver",
+          "parameters": {
+            "directory": "l10ncoverage"
+          }
+        }
+      },
+      "format": "string",
+      "language": "string",
+      "creator": {
+        "type": "string",
+        "referenceConfiguration": {
+          "name": "userManagerResolver",
+          "parameters": {
+            "type": "user"
+          }
+        }
+      },
+      "created": "date",
+      "modified": "date",
+      "issued": "date",
+      "valid": "date",
+      "expired": "date",
+      "subjects": {
+        "type": "string[]",
+        "referenceConfiguration": {
+          "name": "directoryResolver",
+          "parameters": {
+            "directory": "l10nsubjects"
+          }
+        }
+      },
+      "contributors": {
+        "type": "string[]",
+        "referenceConfiguration": {
+          "name": "userManagerResolver",
+          "parameters": {
+            "type": "user"
+          }
+        }
+      },
+      "lastContributor": {
+        "type": "string",
+        "referenceConfiguration": {
+          "name": "userManagerResolver",
+          "parameters": {
+            "type": "user"
+          }
+        }
+      },
+      "nature": {
+        "type": "string",
+        "referenceConfiguration": {
+          "name": "directoryResolver",
+          "parameters": {
+            "directory": "nature"
+          }
+        }
+      },
+      "publisher": "string"
+    },
+    "file": {
+      "content": "blob"
+    },
+    "files": {
+      "files": "blob[]"
+    },
+    "note": {
+      "note": "string",
+      "mime_type": "string",
+      "stylesheet_filename": "string",
+      "stylesheet_content": "blob",
+      "transform_result": "blob"
+    },
+    "domain": {
+      "display_type": "boolean",
+      "content_roots": "string[]"
+    },
+    "webcontainer": {
+      "@prefix": "webc",
+      "isWebContainer": "boolean",
+      "name": "string",
+      "url": "string",
+      "template": "string",
+      "theme": "string",
+      "themePage": "string",
+      "themePerspective": "string",
+      "email": "string",
+      "welcomeText": "string",
+      "baseline": "string",
+      "welcomeMedia": "blob",
+      "logo": "blob",
+      "moderationType": "string",
+      "useCaptcha": "boolean"
+    },
+    "publishing": {
+      "@prefix": "publish",
+      "sections": "string[]"
+    },
+    "post": {
+      "title": "string",
+      "author": "string",
+      "text": "string",
+      "creationDate": "date",
+      "filename": "string",
+      "fileContent": "blob"
+    },
+    "thread": {
+      "moderated": "boolean",
+      "moderators": "string[]"
+    },
+    "mail": {
+      "@prefix": "mail",
+      "messageId": "string",
+      "sender": "string",
+      "sending_date": "date",
+      "recipients": "string[]",
+      "cc_recipients": "string[]",
+      "text": "string",
+      "htmlText": "string"
+    },
+    "protocol": {
+      "@prefix": "prot",
+      "email": "string",
+      "password": "string",
+      "protocol_type": "string",
+      "host": "string",
+      "port": "string",
+      "socket_factory_fallback": "boolean",
+      "socket_factory_port": "string",
+      "starttls_enable": "boolean",
+      "ssl_protocols": "string",
+      "emails_limit": "integer"
+    },
+    "blog": {
+      "@prefix": "blog",
+      "accept_trackback": "boolean",
+      "accept_comment": "boolean",
+      "feedburner_id": "string",
+      "akismet_id": "string",
+      "google_analytics_id": "string"
+    },
+    "blogpost": {
+      "@prefix": "blogpost",
+      "atomid": "string",
+      "accept_trackback": "boolean"
+    },
+    "webpage": {
+      "@prefix": "webp",
+      "pushtomenu": "boolean",
+      "template": "string",
+      "tags": "string",
+      "content": "string",
+      "isRichtext": "boolean",
+      "theme": "string",
+      "themePage": "string",
+      "themePerspective": "string"
+    },
+    "contextualLink": {
+      "@prefix": "clink",
+      "link": "string"
+    },
+    "task": {
+      "@prefix": "nt",
+      "actors": "string[]",
+      "initiator": "string",
+      "targetDocumentId": "string",
+      "name": "string",
+      "type": "string",
+      "processId": "string",
+      "accepted": "boolean",
+      "dueDate": "date",
+      "task_variables": {
+        "type": "task_variable[]",
+        "fields": {
+          "key": "string",
+          "value": "string"
+        }
+      },
+      "taskComments": {
+        "type": "task_comment[]",
+        "fields": {
+          "author": "string",
+          "creationDate": "date",
+          "text": "string"
+        }
+      }
+    },
+    "collectionMember": {
+      "@prefix": "collectionMember",
+      "collectionIds": "string[]"
+    },
+    "collection": {
+      "@prefix": "collection",
+      "documentIds": "string[]"
+    },
+    "facetedTag": {
+      "@prefix": "nxtag",
+      "tags": {
+        "type": "complex[]",
+        "fields": {
+          "label": "string",
+          "username": "string"
+        }
+      }
+    }
+  },
+  "doctypes": {
+    "Root": {
+      "parent": "Folder",
+      "schemas": [
+        "common",
+        "dublincore"
+      ],
+      "facets": [
+        "Folderish"
+      ]
+    },
+    "Document": {
+      "label": "Nothing",
+      "description": "By extending a document type, you will inherit some of its configuration (metadata, facets...). If you select \"Nothing\", you will only have the \"Dublin Core\" metadata. Select \"File\" if the main goal of your document type is to hold a binary, and \"Folder\" if you want to create a custom Folder.",
+      "isSimpleTypeToExtend": true,
+      "parent": null,
+      "schemas": [],
+      "facets": [],
+      "subtypes": [],
+      "actions": []
+    },
+    "File": {
+      "label": "File",
+      "description": "Inherit from File if you want to design a document that aims at holding a file, with different metadata, with a different icon, lifecycle, ...",
+      "isSimpleTypeToExtend": true,
+      "parent": "Document",
+      "schemas": [
+        "common",
+        "dublincore",
+        "file",
+        "uid",
+        "files"
+      ],
+      "facets": [
+        "Versionable",
+        "Publishable",
+        "Commentable",
+        "Downloadable",
+        "HasRelatedText",
+        "NXTag"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_VIEW",
+        "TAB_EDIT",
+        "TAB_FILES_EDIT",
+        "TAB_PUBLISH",
+        "TAB_RELATIONS",
+        "TAB_CONTENT_JBPM",
+        "TAB_MY_SUBSCRIPTIONS",
+        "view_comments",
+        "TAB_CONTENT_HISTORY",
+        "TAB_PREVIEW",
+        "TAB_MANAGE"
+      ]
+    },
+    "Note": {
+      "parent": "Document",
+      "schemas": [
+        "common",
+        "dublincore",
+        "note",
+        "uid",
+        "files"
+      ],
+      "facets": [
+        "Versionable",
+        "Publishable",
+        "Commentable",
+        "HasRelatedText",
+        "NXTag"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_VIEW",
+        "TAB_EDIT",
+        "TAB_FILES_EDIT",
+        "TAB_PUBLISH",
+        "TAB_RELATIONS",
+        "TAB_CONTENT_JBPM",
+        "TAB_MY_SUBSCRIPTIONS",
+        "view_comments",
+        "TAB_CONTENT_HISTORY",
+        "TAB_PREVIEW",
+        "TAB_MANAGE"
+      ]
+    },
+    "Folder": {
+      "label": "Folder",
+      "description": "Inherit from Folder if you want to create a custom Folder with some different icons, metadata, allowed content types...",
+      "isSimpleTypeToExtend": true,
+      "parent": "Document",
+      "schemas": [
+        "common",
+        "dublincore"
+      ],
+      "facets": [
+        "Folderish",
+        "NXTag"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_CONTENT",
+        "TAB_EDIT",
+        "TAB_MY_SUBSCRIPTIONS",
+        "TAB_CONTENT_HISTORY",
+        "TAB_MANAGE"
+      ]
+    },
+    "OrderedFolder": {
+      "parent": "Document",
+      "schemas": [
+        "common",
+        "dublincore"
+      ],
+      "facets": [
+        "Folderish",
+        "Orderable"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_CONTENT",
+        "TAB_EDIT",
+        "TAB_MY_SUBSCRIPTIONS",
+        "TAB_CONTENT_HISTORY",
+        "TAB_MANAGE"
+      ]
+    },
+    "Workspace": {
+      "parent": "Folder",
+      "schemas": [
+        "file",
+        "files",
+        "webcontainer",
+        "publishing"
+      ],
+      "facets": [
+        "SuperSpace"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_CONTENT",
+        "TAB_WORKSPACE_EDIT",
+        "TAB_MY_SUBSCRIPTIONS",
+        "TAB_CONTENT_HISTORY",
+        "TAB_MANAGE"
+      ]
+    },
+    "Section": {
+      "parent": "Folder",
+      "schemas": [
+        "file"
+      ],
+      "facets": [
+        "SuperSpace"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_SECTION_CONTENT",
+        "TAB_EDIT",
+        "TAB_MY_SUBSCRIPTIONS",
+        "TAB_CONTENT_HISTORY",
+        "TAB_MANAGE"
+      ]
+    },
+    "Domain": {
+      "parent": "Folder",
+      "schemas": [
+        "domain"
+      ],
+      "facets": [
+        "SuperSpace"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_CONTENT",
+        "TAB_WORKSPACE_EDIT",
+        "TAB_CONTENT_HISTORY",
+        "TAB_MANAGE"
+      ]
+    },
+    "WorkspaceRoot": {
+      "parent": "Folder",
+      "schemas": [],
+      "facets": [
+        "SuperSpace"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_CONTENT",
+        "TAB_WORKSPACE_EDIT",
+        "TAB_CONTENT_HISTORY",
+        "TAB_MANAGE"
+      ]
+    },
+    "SectionRoot": {
+      "parent": "Folder",
+      "schemas": [],
+      "facets": [
+        "SuperSpace"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_CONTENT",
+        "TAB_WORKSPACE_EDIT",
+        "TAB_CONTENT_HISTORY",
+        "TAB_MANAGE"
+      ]
+    },
+    "TemplateRoot": {
+      "parent": "Folder",
+      "schemas": [],
+      "facets": [
+        "SuperSpace"
+      ],
+      "subtypes": [],
+      "actions": [
+        "TAB_CONTENT",
+        "TAB_WORKSPACE_EDIT",
+        "TAB_CONTENT_HISTORY",
+        "TAB_MANAGE"
+      ]
+    },
+    "Forum": {
+      "parent": "Document",
+      "schemas": [
+        "common",
+        "dublincore"
+      ],
+      "facets": [
+        "Folderish"
+      ]
+    },
+    "Thread": {
+      "parent": "Document",
+      "schemas": [
+        "common",
+        "dublincore",
+        "thread"
+      ],
+      "facets": [
+        "Commentable"
+      ]
+    },
+    "Post": {
+      "parent": "Document",
+      "schemas": [
+        "common",
+        "dublincore",
+        "post"
+      ],
+      "facets": [
+        "HiddenInNavigation",
+        "Commentable"
+      ]
+    },
+    "MailMessage": {
+      "parent": "Document",
+      "schemas": [
+        "common",
+        "dublincore",
+        "uid",
+        "mail",
+        "files"
+      ],
+      "facets": [
+        "Commentable",
+        "NXTag"
+      ]
+    },
+    "MailFolder": {
+      "parent": "Folder",
+      "schemas": [
+        "protocol"
+      ],
+      "facets": []
+    },
+    "Collection": {
+      "parent": "Document",
+      "schemas": [
+        "uid",
+        "dublincore",
+        "common"
+      ],
+      "facets": [
+        "Versionable",
+        "Collection",
+        "NotCollectionMember",
+        "NXTag"
+      ]
+    },
+    "Collections": {
+      "parent": "Folder",
+      "facets": [
+        "NotCollectionMember"
+      ]
+    }
+  },
+  "lifecycles": {
+    "default": {
+      "description": "Default life cycle for documents",
+      "states": [
+        "project",
+        "approved",
+        "obsolete",
+        "deleted"
+      ],
+      "transitions": [
+        "approve",
+        "obsolete",
+        "delete",
+        "undelete",
+        "backToProject"
+      ]
+    },
+    "task": {
+      "description": "Life cycle for documents that can be configured as task document type",
+      "states": [
+        "opened",
+        "ended",
+        "cancelled"
+      ],
+      "transitions": [
+        "end",
+        "cancel",
+        "delete"
+      ]
+    }
+  }
+}

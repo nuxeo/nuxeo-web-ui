@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/nuxeo/nuxeo-web-ui#readme",
   "dependencies": {
+    "js-yaml": "^3.13.1",
     "layout-engine": "file:../../layout-engine",
     "loader-utils": "^1.2.3",
     "schema-utils": "^1.0.0",

@@ -100,7 +100,7 @@ const common = merge([
   {
     entry: './index.js',
     resolve: {
-      extensions: ['.js', '.html', '.json'],
+      extensions: ['.js', '.html', '.json', '.yaml'],
       // set absolute modules path to avoid duplicates
       modules: [resolve(__dirname, 'node_modules')],
     },
@@ -129,7 +129,7 @@ const common = merge([
         },
         {
           type: 'javascript/auto', // skip default json loader
-          test: /\.json$/,
+          test: /\.(json|yaml)$/,
           include: [resolve(__dirname, 'elements/document')],
           use: [
             {

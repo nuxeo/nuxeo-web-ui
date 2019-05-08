@@ -3,11 +3,8 @@
   "elements":[
     {
       "is": "nuxeo-input",
+      "name": "title",
       "attributes":[
-        {
-          "name": "name",
-          "value": "title"
-        },
         {
           "name": "label",
           "value": "[[i18n('label.dublincore.title')]]"
@@ -20,27 +17,9 @@
     },
     {
       "is": "div",
-      "attributes":[
-        {
-          "name": "name",
-          "value": "description"
-        }
-      ],
+      "name": "description",
       "content": "[[document.properties.dc:description]]",
-      "label": "label.dublincore.description",
-      "hidden": "[[!document.properties.dc:description]]"
-    }
-  ],
-  "properties":[
-    {
-      "name":"document",
-      "type":"Object",
-      "doctype":"Workspace",
-      "schemas":[
-        "dublincore",
-        "common",
-        "uid"
-      ]
+      "label": "label.dublincore.description"
     }
   ]
 }
