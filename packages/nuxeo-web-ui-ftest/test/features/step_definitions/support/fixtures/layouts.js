@@ -70,7 +70,11 @@ global.fieldRegistry.register('nuxeo-date-picker',
   element => moment(element.element('vaadin-text-field').getValue(), global.dateFormat)
     .format(global.dateFormat),
   (element, value) => {
-    element.element('vaadin-text-field').click();
+    const date = element.element('vaadin-text-field');
+    if (date.getValue()) {
+      date.element('div[part="clear-button"]').click();
+    }
+    date.click();
     const keys = moment(value, global.dateFormat).format('L');
     driver.keys(keys);
     driver.keys('Enter');
