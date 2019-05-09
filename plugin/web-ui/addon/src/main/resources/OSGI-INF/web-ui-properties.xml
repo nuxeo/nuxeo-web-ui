@@ -28,6 +28,9 @@
     <property name="org.nuxeo.web.ui.dateFormat">LL</property>
     <property name="org.nuxeo.web.ui.dateTimeFormat">LLL</property>
 
+    <!-- First Day Of Week -->
+    <property name="org.nuxeo.web.ui.firstDayOfWeek"></property>
+
     <!-- S3 Direct upload -->
     <property name="org.nuxeo.web.ui.s3.useDirectUpload">${nuxeo.s3storage.useDirectUpload:=false}</property>
   </extension>
