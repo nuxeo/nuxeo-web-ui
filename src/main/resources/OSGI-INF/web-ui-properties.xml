@@ -27,5 +27,8 @@
     <!-- Date (time) format -->
     <property name="org.nuxeo.web.ui.dateFormat">LL</property>
     <property name="org.nuxeo.web.ui.dateTimeFormat">LLL</property>
+
+    <!-- First Day Of Week -->
+    <property name="org.nuxeo.web.ui.firstDayOfWeek"></property>
   </extension>
 </component>
