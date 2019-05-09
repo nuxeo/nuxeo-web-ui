@@ -4,6 +4,7 @@ const merge = require('webpack-merge');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { ProvidePlugin } = require('webpack');
+const glob = require('glob');
 
 const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
 
@@ -11,6 +12,75 @@ const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production
 const TARGET = ENV === 'production' ? resolve('target/classes/web/nuxeo.war/ui') : resolve('.');
 
 const tmp = [{ from: `.tmp`, to: join(TARGET) }];
+
+const PACKAGES = process.env.PACKAGES ? process.env.PACKAGES.split(',').map((p) => p.trim()) : [];
+
+// inspired by https://github.com/rmarscher/virtual-module-webpack-plugin/
+class PackageModulizerPlugin {
+  constructor(options) {
+    this.options = options;
+  }
+
+  apply(compiler) {
+    let packages;
+    if (typeof this.options.packages === 'string') {
+      packages = [this.options.packages];
+    }
+    if (Array.isArray(this.options.packages)) {
+      ({ packages } = this.options);
+    }
+    if (typeof this.options.contents === 'function') {
+      packages = this.options.packages();
+    }
+
+    /* compiler.hooks.afterEnvironment.tap('PackageModulizerPlugin', ...) */
+    compiler.hooks.contextModuleFactory.tap('PackageModulizerPlugin', () => {
+      packages.forEach((pkg) => {
+        let includes = [];
+        if (typeof pkg.include === 'string') {
+          includes = [pkg.include];
+        } else if (Array.isArray(pkg.include)) {
+          ({ include: includes } = pkg);
+        } else if (typeof pkg.include === 'function') {
+          includes = pkg.include();
+        }
+        let files = [];
+        includes.forEach((include) => {
+          files = files.concat(glob.sync(join(pkg.rootPath, include, '**')));
+        });
+        files.forEach((file) =>
+          PackageModulizerPlugin.populateFilesystem({
+            fs: compiler.inputFileSystem,
+            modulePath: resolve(join(pkg.targetPath, file.replace(join(pkg.rootPath), ''))),
+            originalPath: file,
+          }),
+        );
+      });
+    });
+  }
+
+  static populateFilesystem(options) {
+    const { fs, modulePath, originalPath } = options;
+    console.log(`Populating cached fs with "${modulePath}" from "${originalPath}"`);
+
+    let stats;
+    try {
+      stats = fs.fileSystem.statSync(modulePath);
+    } catch {
+      stats = fs.fileSystem.statSync(originalPath);
+    }
+    fs._statStorage.data.set(modulePath, [null, stats]);
+    if (stats.isDirectory()) {
+      let children = fs.fileSystem.readdirSync(originalPath);
+      try {
+        children = children.concat(fs.fileSystem.readdirSync(modulePath));
+      } catch {}
+      fs._readdirStorage.data.set(modulePath, [null, children]);
+    } else if (stats.isFile()) {
+      fs._readFileStorage.data.set(modulePath, [null, fs.fileSystem.readFileSync(originalPath)]);
+    }
+  }
+}
 
 const polyfills = [
   {
@@ -122,7 +192,7 @@ const common = merge([
             {
               loader: 'ifdef-loader',
               options: {
-                USE_HTML_IMPORTS: process.env.USE_HTML_IMPORTS,
+                NO_HTML_IMPORTS: process.env.NO_HTML_IMPORTS,
               },
             },
           ],
@@ -168,14 +238,31 @@ const common = merge([
         THREE: 'three',
         jQuery: 'jquery',
       }),
-    ],
+    ]
+      .concat(
+        process.env.NO_HTML_IMPORTS &&
+          new PackageModulizerPlugin({
+            packages: PACKAGES.map((a) => {
+              return {
+                rootPath: join('addons', a),
+                include: 'document',
+                targetPath: 'elements',
+              };
+            }),
+          }),
+      )
+      .filter(Boolean),
   },
 ]);
 
 const development = merge([
   {
     devtool: 'cheap-module-source-map',
-    plugins: [new CopyWebpackPlugin([...tmp, ...polyfills, ...addons, ...thirdparty], { debug: 'info' })],
+    plugins: [
+      new CopyWebpackPlugin([...tmp, ...polyfills, ...(!process.env.NO_HTML_IMPORTS ? addons : []), ...thirdparty], {
+        debug: 'info',
+      }),
+    ],
     devServer: {
       contentBase: TARGET,
       compress: true,
@@ -212,7 +299,7 @@ const production = merge([
         ...polyfills,
         ...thirdparty,
         ...layouts,
-        ...addons,
+        ...(!process.env.NO_HTML_IMPORTS ? addons : []),
         ...assets,
         { from: 'manifest.json' },
         { from: 'index.css' },

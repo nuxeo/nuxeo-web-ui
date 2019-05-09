@@ -39,6 +39,7 @@ module.exports = {
         allow: ['warn', 'error'],
       },
     ],
+    'no-empty': ['error', { allowEmptyCatch: true }],
     'no-multi-assign': 'off',
     'no-param-reassign': 'off',
     'no-plusplus': 'off',

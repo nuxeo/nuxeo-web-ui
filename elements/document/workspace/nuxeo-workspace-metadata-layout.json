@@ -22,6 +22,11 @@
         }
       ],
       "content": "[[document.properties.dc:description]]"
+    },
+    {
+      "is": "div",
+      "label": "JSON generated",
+      "content": "I was generated from a JSON model! :D"
     }
   ],
   "properties":[

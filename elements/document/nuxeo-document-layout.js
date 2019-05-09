@@ -93,13 +93,16 @@ Polymer({
       } else {
         this.appendChild(this.element);
       }
-      /// #if USE_HTML_IMPORTS
+      /// #if NO_HTML_IMPORTS
+      import(
+        /* webpackMode: "eager" */
+        /* webpackChunkName: "[request]" */
+        // eslint-disable-next-line comma-dangle
+        `./${doctype}/${name}?entity="document"`
+      ).then(this._onLayoutLoaded.bind(this));
+      /// #else
       const href = this.resolveUrl(`${doctype}/${name}.html`);
       importHref(href, this._onLayoutLoaded.bind(this));
-      /// #else
-      import(/* webpackMode: "eager" */
-      /* webpackChunkName: "[request]" */
-      `./${doctype}/${name}?entity="document"`).then(this._onLayoutLoaded.bind(this));
       /// #endif
       /* this._href = this.resolveUrl(`${doctype}/${name}.html`); */
     } /*  else if (document === undefined) {
