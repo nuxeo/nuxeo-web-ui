@@ -119,7 +119,9 @@ export const DocumentContentBehavior = [
     },
 
     _canSort(document, options) {
-      return !(document && this.hasFacet(document, 'Orderable')) && Array.isArray(options) && options.length > 0;
+      return !(document && this.hasFacet(document, 'Orderable')) && options
+        ? Array.isArray(options) && options.length > 0
+        : true;
     },
 
     _displaySort(document, field) {
