@@ -1,9 +1,10 @@
-const { resolve, join } = require('path');
+const { resolve, join, basename } = require('path');
 const merge = require('webpack-merge');
 // const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { ProvidePlugin } = require('webpack');
+const { DefinePlugin } = require('webpack');
 const glob = require('glob');
 
 const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
@@ -29,7 +30,7 @@ class PackageModulizerPlugin {
     if (Array.isArray(this.options.packages)) {
       ({ packages } = this.options);
     }
-    if (typeof this.options.contents === 'function') {
+    if (typeof this.options.packages === 'function') {
       packages = this.options.packages();
     }
 
@@ -44,6 +45,8 @@ class PackageModulizerPlugin {
         } else if (typeof pkg.include === 'function') {
           includes = pkg.include();
         }
+
+        // cache modules to be dynamically imported
         let files = [];
         includes.forEach((include) => {
           files = files.concat(glob.sync(join(pkg.rootPath, include, '**')));
@@ -61,7 +64,7 @@ class PackageModulizerPlugin {
 
   static populateFilesystem(options) {
     const { fs, modulePath, originalPath } = options;
-    console.log(`Populating cached fs with "${modulePath}" from "${originalPath}"`);
+    console.log(`[package-modulizer-plugin] populating cached fs with "${modulePath}" from "${originalPath}"`);
 
     let stats;
     try {
@@ -238,15 +241,18 @@ const common = merge([
         THREE: 'three',
         jQuery: 'jquery',
       }),
+      new DefinePlugin({
+        __PACKAGES__: JSON.stringify(PACKAGES.map((pkg) => basename(pkg))),
+      }),
     ]
       .concat(
         process.env.NO_HTML_IMPORTS &&
           new PackageModulizerPlugin({
-            packages: PACKAGES.map((a) => {
+            packages: PACKAGES.map((pkg) => {
               return {
-                rootPath: join('addons', a),
-                include: 'document',
+                rootPath: pkg,
                 targetPath: 'elements',
+                include: 'document',
               };
             }),
           }),
