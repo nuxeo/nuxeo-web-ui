@@ -34,6 +34,12 @@ class PackageModulizerPlugin {
       packages = this.options.packages();
     }
 
+    let root = this.options.root || 'addons';
+    if (typeof root === 'function') {
+      root = this.options.root();
+    }
+    const rootPath = resolve(root);
+
     /* compiler.hooks.afterEnvironment.tap('PackageModulizerPlugin', ...) */
     compiler.hooks.contextModuleFactory.tap('PackageModulizerPlugin', () => {
       packages.forEach((pkg) => {
@@ -45,16 +51,41 @@ class PackageModulizerPlugin {
         } else if (typeof pkg.include === 'function') {
           includes = pkg.include();
         }
+        const pkgRootPath = typeof pkg.rootPath === 'function' ? pkg.rootPath() : pkg.rootPath;
+        const pkgTargetPath = typeof pkg.targetPath === 'function' ? pkg.targetPath() : pkg.targetPath;
+        let files;
+
+        if (!resolve(pkgRootPath).startsWith(rootPath)) {
+          // here we're loading a package outside the root package folder ("addons"), which means that
+          // we'll have to cache it's resources under "addons", to allow dynamic imports to work
+          files = glob.sync(join(pkgRootPath, '**'));
+          files.forEach((file) => {
+            // files covered by the includes can be handled later
+            const skip = includes.some((include) => file.startsWith(join(pkgRootPath, include)));
+            if (!skip) {
+              PackageModulizerPlugin.populateFilesystem({
+                fs: compiler.inputFileSystem,
+                modulePath: resolve(join(rootPath, basename(pkgRootPath), file.replace(pkgRootPath, ''))),
+                originalPath: file,
+              });
+            }
+          });
+          compiler.hooks.emit.tapAsync('PackageModulizerPlugin', (compilation, callback) => {
+            // make the files watchable
+            files.forEach((file) => compilation.fileDependencies.add(resolve(file)));
+            callback();
+          });
+        }
 
         // cache modules to be dynamically imported
-        let files = [];
+        files = [];
         includes.forEach((include) => {
-          files = files.concat(glob.sync(join(pkg.rootPath, include, '**')));
+          files = files.concat(glob.sync(join(pkgRootPath, include, '**')));
         });
         files.forEach((file) =>
           PackageModulizerPlugin.populateFilesystem({
             fs: compiler.inputFileSystem,
-            modulePath: resolve(join(pkg.targetPath, file.replace(join(pkg.rootPath), ''))),
+            modulePath: resolve(join(pkgTargetPath, file.replace(pkgRootPath, ''))),
             originalPath: file,
           }),
         );
@@ -64,6 +95,7 @@ class PackageModulizerPlugin {
 
   static populateFilesystem(options) {
     const { fs, modulePath, originalPath } = options;
+    // eslint-disable-next-line no-console
     console.log(`[package-modulizer-plugin] populating cached fs with "${modulePath}" from "${originalPath}"`);
 
     let stats;
