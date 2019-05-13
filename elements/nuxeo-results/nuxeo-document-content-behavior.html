@@ -121,7 +121,9 @@ limitations under the License.
     },
 
     _canSort: function(document, options) {
-      return !(document && this.hasFacet(document, 'Orderable')) && Array.isArray(options) && options.length > 0;
+      return !(document && this.hasFacet(document, 'Orderable')) && options
+        ? Array.isArray(options) && options.length > 0
+        : true;
     },
 
     _displaySort: function(document, field) {
