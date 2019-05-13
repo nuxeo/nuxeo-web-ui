@@ -78,7 +78,7 @@ Polymer({
   observers: ['_updateContainer(type, property)'],
 
   created() {
-    Object.keys(this.properties).forEach((prop) => {
+    Object.keys(DiffBehavior.properties).forEach((prop) => {
       // XXX: use a method observer per property to keep databinding between the object diff and it's child
       // Note: we're not using a property observer here because we need to pass not only the value but also the
       // property name, in order to be able to set it on the child.
@@ -102,7 +102,7 @@ Polymer({
       }),
     );
 
-    Object.keys(this.properties).forEach((prop) => {
+    Object.keys(DiffBehavior.properties).forEach((prop) => {
       this._instance[prop] = this[prop];
     });
 
