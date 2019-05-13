@@ -78,6 +78,11 @@ Then('I can see the {string} child document is at position "{int}"', function (t
   this.ui.browser.indexOfChild(title).should.equals(pos - 1);
 });
 
+When('I sort the content by {string} in {string} order', function (field, order) {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.sortContent(field, order);
+});
+
 Then('I can see {int} document(s)', function (numberOfResults) {
   const results = this.ui.browser.currentPageResults;
   results.waitForVisible();
