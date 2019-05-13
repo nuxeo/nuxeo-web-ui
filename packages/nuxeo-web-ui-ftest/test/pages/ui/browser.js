@@ -218,6 +218,27 @@ export default class Browser extends BasePage {
     return -1;
   }
 
+  sortContent(field, order) {
+    driver.waitUntil(() => {
+      this.waitForChildren();
+      const columnIndex = this.currentPage.elements('nuxeo-data-table nuxeo-data-table-column')
+        .value.map(col => col.getAttribute('sortBy'))
+        .findIndex(colSortByField => colSortByField && colSortByField.toLowerCase() === field.toLowerCase());
+      if (columnIndex === -1) {
+        throw new Error('Field not found');
+      }
+      const sortElt = this.currentPage.elements('nuxeo-data-table nuxeo-data-table-row[header] nuxeo-data-table-cell')
+        .value[columnIndex].element('nuxeo-data-table-column-sort');
+      const currentSorting = sortElt.elements('paper-icon-button').getAttribute('direction');
+      if (currentSorting && order.toLowerCase() === currentSorting.toLowerCase()) {
+        return true;
+      } else {
+        sortElt.click();
+        return false;
+      }
+    });
+  }
+
   /*
    * Results might vary with the viewport size as only visible items are taken into account.
    */
