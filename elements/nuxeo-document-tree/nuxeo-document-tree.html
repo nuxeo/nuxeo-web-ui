@@ -234,6 +234,8 @@ limitations under the License.
           this._fetchDocument();
         }.bind(this));
 
+        window.addEventListener('document-created', this._fetchDocument.bind(this));
+
         this.controller = {
           getChildren: function(node, page) {
             this.$.children.params = [node.uid];
@@ -259,14 +261,17 @@ limitations under the License.
 
       _fetchDocument: function() {
         if (this.visible && this.docPath) {
-          this._noPermission = false;
-          this.$.doc.execute().catch(function(err) {
-            if (err && err.status === 403) {
-              this._noPermission = true;
-            } else {
-              throw err;
-            }
-          }.bind(this));
+          this.__fetchDebouncer = Polymer.Debouncer.debounce(this.__fetchDebouncer, Polymer.Async.timeOut.after(150),
+            function() {
+              this._noPermission = false;
+              this.$.doc.execute().catch(function(err) {
+                if (err && err.status === 403) {
+                  this._noPermission = true;
+                } else {
+                  throw err;
+                }
+              }.bind(this));
+            }.bind(this));
         }
       },
 
