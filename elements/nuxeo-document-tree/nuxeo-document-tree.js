@@ -19,6 +19,8 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import '@polymer/paper-spinner/paper-spinner.js';
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
@@ -243,6 +245,8 @@ Polymer({
       this._fetchDocument();
     });
 
+    window.addEventListener('document-created', this._fetchDocument.bind(this));
+
     this.controller = {
       getChildren: function(node, page) {
         this.$.children.params = [node.uid];
@@ -268,13 +272,15 @@ Polymer({
 
   _fetchDocument() {
     if (this.visible && this.docPath) {
-      this._noPermission = false;
-      this.$.doc.execute().catch((err) => {
-        if (err && err.status === 403) {
-          this._noPermission = true;
-        } else {
-          throw err;
-        }
+      this.__fetchDebouncer = Debouncer.debounce(this.__fetchDebouncer, timeOut.after(150), () => {
+        this._noPermission = false;
+        this.$.doc.execute().catch((err) => {
+          if (err && err.status === 403) {
+            this._noPermission = true;
+          } else {
+            throw err;
+          }
+        });
       });
     }
   },
