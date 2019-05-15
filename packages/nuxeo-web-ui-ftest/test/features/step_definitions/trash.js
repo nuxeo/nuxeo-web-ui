@@ -40,26 +40,26 @@ Then('I cannot trash selected documents', function () {
 
 Then('I can permanently delete selected documents', function () {
   this.ui.browser.selectionToolbar.waitForVisible();
-  this.ui.browser.selectionToolbar.deleteDocuments();
+  this.ui.browser.currentPageResults.deleteDocuments();
   driver.alertAccept();
   this.ui.browser.selectionToolbar.waitForNotVisible();
 });
 
 Then('I cannot permanently delete selected documents', function () {
   this.ui.browser.selectionToolbar.waitForVisible();
-  this.ui.browser.selectionToolbar.deleteDocumentsButton.isExisting().should.be.false;
+  this.ui.browser.currentPageResults.deleteDocumentsButton.isExisting().should.be.false;
 });
 
 Then('I can untrash selected documents', function () {
   this.ui.browser.selectionToolbar.waitForVisible();
-  this.ui.browser.selectionToolbar.untrashDocuments();
+  this.ui.browser.currentPageResults.untrashDocuments();
   driver.alertAccept();
   this.ui.browser.selectionToolbar.waitForNotVisible();
 });
 
 Then('I cannot untrash selected documents', function () {
   this.ui.browser.selectionToolbar.waitForVisible();
-  this.ui.browser.selectionToolbar.untrashDocumentsButton.isExisting().should.be.false;
+  this.ui.browser.currentPageResults.untrashDocumentsButton.isExisting().should.be.false;
 });
 
 Then('I can trash current document', function () {
