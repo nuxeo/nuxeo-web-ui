@@ -144,7 +144,7 @@ export const DocumentCreationBehavior = [
         (this.suggesterParent ? this.targetPath.replace(/(.+)\/$/, '$1') === this.suggesterParent.path : false) ||
         (this.suggesterChildren ? this.suggesterChildren.some((child) => this.targetPath === child.path) : false);
       this.set('isValidTargetPath', valid);
-      this.fire('nx-document-creation-suggester-parent-changed', { isValidTargetPath: valid });
+      this.fire('nx-document-creation-suggester-parent-changed', { isValidTargetPath: valid, parentPath: this.targetPath, suggesterChildren: this.suggesterChildren});
     },
 
     _validateLocation() {

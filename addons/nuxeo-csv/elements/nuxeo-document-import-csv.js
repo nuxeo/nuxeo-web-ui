@@ -264,7 +264,7 @@ Polymer({
             disabled
             always-float-label
           ></nuxeo-path-suggestion>
-          <span class="error">[[targetLocationError]]</span>
+          <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
         </div>
 
         <div id="dropzone" class="vertical layout flex step">
@@ -498,10 +498,6 @@ Polymer({
     this._clear();
   },
 
-  listeners: {
-    'nx-document-creation-parent-validated': '_parentValidated',
-  },
-
   observers: ['_observeFiles(files.*)', '_visibleOnStage(visible,stage)', '_observeVisible(visible)'],
 
   _i18n(label, params) {
@@ -532,27 +528,6 @@ Polymer({
     } else if (this._waitProgressId) {
       clearTimeout(this._waitProgressId);
     }
-  },
-
-  _parentValidated() {
-    if (this.isValidTargetPath) {
-      if (
-        this.suggesterParent &&
-        this.suggesterParent.contextParameters &&
-        this.suggesterParent.contextParameters.permissions
-      ) {
-        // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren,
-        // so we had to rely on Write.
-        if (
-          this.suggesterParent.contextParameters.permissions.indexOf('Write') > -1 ||
-          this.suggesterParent.contextParameters.permissions.indexOf('AddChildren') > -1
-        ) {
-          this.set('targetLocationError', '');
-          return;
-        }
-      }
-    }
-    this.set('targetLocationError', this.i18n('documentImport.error.cannotImport'));
   },
 
   _removeBlob() {
