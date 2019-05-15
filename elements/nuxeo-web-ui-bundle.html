@@ -665,9 +665,17 @@
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="untrashSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="40">
+<!-- TRASH RESULT SELECTION ACTIONS -->
+
+<nuxeo-slot-content name="untrashSelectionAction" slot="TRASH_RESULTS_SELECTION_ACTIONS" order="10">
   <template>
     <nuxeo-untrash-documents-button documents="[[selectedItems]]"></nuxeo-untrash-documents-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="hardDeleteSelectionAction" slot="TRASH_RESULTS_SELECTION_ACTIONS" order="20">
+  <template>
+    <nuxeo-delete-documents-button documents="[[selectedItems]]" hard></nuxeo-delete-documents-button>
   </template>
 </nuxeo-slot-content>
 
