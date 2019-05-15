@@ -66,6 +66,19 @@ Feature: Trash Management
     When I select the "TrashedFile1" document
     Then I cannot untrash selected documents
 
+  Scenario: I can permanently delete documents
+    Given I have the following documents
+      | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
+      | Workspace     | ws               | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                   |                  |        |            |
+    And I have the following trashed documents
+      | doctype       | title            | path                      |
+      | File          | TrashedFile1     | /default-domain/ws        |
+    When I login as "Administrator"
+    And I browse to the document with path "/default-domain/ws"
+    Then I can navigate to trash pill
+    When I select the "TrashedFile1" document
+    Then I can permanently delete selected documents
+
   Scenario: I cannot permanently delete documents
     Given I have the following documents
       | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
