@@ -134,8 +134,9 @@ Polymer({
         on-clear-selected-items="_clearSelectedItems"
       >
         <nuxeo-actions-menu>
-          <slot name="selectionActions"></slot>
-          <nuxeo-slot slot="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+          <slot name="selectionActions">
+            <nuxeo-slot slot="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+          </slot>
         </nuxeo-actions-menu>
       </nuxeo-selection-toolbar>
 

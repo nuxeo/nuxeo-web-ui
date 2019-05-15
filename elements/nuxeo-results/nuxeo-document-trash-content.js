@@ -100,12 +100,17 @@ Polymer({
       document="[[document]]"
       display-quick-filters
       display-sort
+      action-context="{{actionContext}}"
       sort-options="[[sortOptions]]"
     >
       <div slot="actions">
         <template is="dom-if" if="[[hasPermission(document, 'Everything')]]">
           <paper-button noink on-tap="_emptyTrash">[[i18n('documentTrashContent.emptyTrash')]]</paper-button>
         </template>
+      </div>
+
+      <div slot="selectionActions">
+        <nuxeo-slot slot="TRASH_RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
       </div>
 
       <!-- Grid view -->
