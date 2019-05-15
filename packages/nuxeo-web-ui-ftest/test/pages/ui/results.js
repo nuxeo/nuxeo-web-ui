@@ -69,4 +69,26 @@ export default class Results extends BasePage {
     const rows = this.getResults(displayMode);
     return rows.value.filter(result => result.getAttribute('hidden') === null).length;
   }
+
+  deleteDocuments() {
+    const el = this.deleteDocumentsButton;
+    el.waitForVisible();
+    el.click();
+  }
+
+  untrashDocuments() {
+    const el = this.untrashDocumentsButton;
+    el.waitForVisible();
+    el.click();
+  }
+
+  get deleteDocumentsButton() {
+    // XXX: using a more specific selector here to ensure we can check for isExisting()
+    return this.el.element('nuxeo-delete-documents-button[hard] #deleteAllButton');
+  }
+
+  get untrashDocumentsButton() {
+    // XXX: using a more specific selector here to ensure we can check for isExisting()
+    return this.el.element('nuxeo-untrash-documents-button #untrashAllButton');
+  }
 }
