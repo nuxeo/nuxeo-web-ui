@@ -1073,7 +1073,7 @@ Polymer({
 
   _navigate(e) {
     if (e.detail.doc) {
-      this.navigateTo('browse', e.detail.doc.path);
+      this.navigateTo('browse', e.detail.doc.path, e.detail.docAction);
       if (e.detail.isFromCollection) {
         this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.index);
       }
@@ -1254,12 +1254,13 @@ Polymer({
       this._removeFromRecentlyViewed([e.detail.doc]);
       const enrichers = e.detail.doc.contextParameters;
       if (enrichers) {
+        const docAction = e.detail.hard ? 'trash' : null;
         if (enrichers.firstAccessibleAncestor) {
-          this._navigate({ detail: { doc: enrichers.firstAccessibleAncestor } });
+          this._navigate({ detail: { doc: enrichers.firstAccessibleAncestor, docAction } });
         } else if (enrichers.breadcrumb) {
           const { entries } = enrichers.breadcrumb;
           if (entries.length > 1) {
-            this._navigate({ detail: { doc: entries[entries.length - 2] } });
+            this._navigate({ detail: { doc: entries[entries.length - 2], docAction } });
           }
         }
       }
