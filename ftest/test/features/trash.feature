@@ -130,6 +130,8 @@ Feature: Trash Management
     When I login as "Administrator"
     And I browse to the document
     Then I can permanently delete current document
+    And I can see the "Domain" document
+    And I am on the trash pill
 
   Scenario: I cannot permanently delete current document
     Given I have a File document trashed

@@ -56,12 +56,16 @@ export default class Browser extends BasePage {
     return new DocumentTask('nuxeo-document-task');
   }
 
-  get currentPage() {
+  get currentPageName() {
     // get selected pill to get it's name
     this.waitForVisible('#documentViewsItems nuxeo-page-item.iron-selected');
     const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
-    // get active page
-    return this._section(pill.getAttribute('name'));
+    // get active page name
+    return pill.getAttribute('name');
+  }
+
+  get currentPage() {
+    return this._section(this.currentPageName);
   }
 
   /**

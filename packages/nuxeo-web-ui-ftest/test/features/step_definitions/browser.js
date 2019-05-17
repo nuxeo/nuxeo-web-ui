@@ -24,6 +24,11 @@ Then('I cannot see to {word} pill', function (pill) {
   this.ui.browser.waitForNotVisible(`nuxeo-page-item[name='${pill.toLowerCase()}']`).should.be.true;
 });
 
+Then('I am on the {word} pill', function (pill) {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.currentPageName.should.equal(pill);
+});
+
 When('I click {string} in the {word} tree', function (title, tab) {
   const section = this.ui.drawer._section(tab);
   section.waitForVisible();
