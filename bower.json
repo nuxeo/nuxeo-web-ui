@@ -5,7 +5,7 @@
     "alloyeditor": "0.7.5",
     "iron-elements": "PolymerElements/iron-elements#^1.0.0",
     "jsPlumb": "2.0.4",
-    "marked-element": "PolymerElements/marked-element#1.1.1",
+    "marked-element": "PolymerElements/marked-element#1.1.2",
     "moment": "2.10.6",
     "nuxeo-elements": "maintenance-1.0.x",
     "nuxeo-ui-elements": "maintenance-1.0.x",
