@@ -893,15 +893,6 @@ Polymer({
    */
   _fetch(el) {
     this.loading = true;
-    // Ensure that objects are not sent as query parameters
-    Object.keys(this.params).forEach((k) => {
-      const value = this.params[k];
-      if (Array.isArray(value)) {
-        this.params[k] = value.map((item) => (item && item['entity-type'] ? item.uid || item.id : item));
-      } else {
-        this.params[k] = value && value['entity-type'] ? value.uid || value.id : value;
-      }
-    });
     return el
       .fetch()
       .then(() => {
