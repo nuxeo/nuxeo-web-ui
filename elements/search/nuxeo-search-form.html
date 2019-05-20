@@ -868,17 +868,6 @@ limitations under the License.
        */
       _fetch: function(el) {
         this.loading = true;
-        // Ensure that objects are not sent as query parameters
-        Object.keys(this.params).forEach(function(k) {
-          var value = this.params[k];
-          if (Array.isArray(value)) {
-            this.params[k] = value.map(function(item) {
-              return (item && item['entity-type']) ? (item.uid || item.id) : item;
-            });
-          } else {
-            this.params[k] = (value && value['entity-type']) ? (value.uid || value.id) : value;
-          }
-        }.bind(this));
         return el.fetch().then(function() {
           this.loading = false;
         }.bind(this)).catch(function(err) {
