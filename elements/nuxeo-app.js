@@ -565,7 +565,7 @@ Polymer({
             icon="nuxeo:admin"
             label="app.administration"
             class="admin-icon"
-            hidden$="[[!_hasAdministrationPermissions(currentUser)]]"
+            hidden$="[[!hasAdministrationPermissions(currentUser)]]"
           >
           </nuxeo-menu-icon>
           <nuxeo-menu-icon
@@ -589,7 +589,7 @@ Polymer({
           >
             <nuxeo-slot slot="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-            <template is="dom-if" if="[[_hasAdministrationPermissions(currentUser)]]">
+            <template is="dom-if" if="[[hasAdministrationPermissions(currentUser)]]">
               <div name="administration">
                 <div class="header">[[i18n('app.administration')]]</div>
                 <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
@@ -1344,10 +1344,6 @@ Polymer({
         this.i18n(documents.length === 1 ? 'app.document.addedToCollection' : 'app.documents.addedToCollection'),
       );
     });
-  },
-
-  _hasAdministrationPermissions(user) {
-    return user.isAdministrator || this.isMember(user, 'powerusers');
   },
 
   _errorUrl() {
