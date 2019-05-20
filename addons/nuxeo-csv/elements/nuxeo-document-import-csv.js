@@ -18,6 +18,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { DocumentCreationBehavior } from '../../../elements/nuxeo-document-creation/nuxeo-document-creation-behavior.js';
@@ -173,7 +174,9 @@ Polymer({
       }
 
       .error {
-        color: var(--nuxeo-warn-text);
+        border-left: 4px solid var(--nuxeo-warn-text);
+        color: var(--primary-text-color);
+        padding-left: 8px;
       }
 
       .importing-label {
@@ -244,7 +247,7 @@ Polymer({
       }
     </style>
 
-    <nuxeo-connection id="nx"></nuxeo-connection>
+    <nuxeo-connection id="nx" user="{{currentUser}}"></nuxeo-connection>
     <nuxeo-resource id="csvImportRes"></nuxeo-resource>
     <nuxeo-operation id="cvsImportStatus" op="CSV.ImportStatus"></nuxeo-operation>
     <nuxeo-operation id="cvsImportResultOp" op="CSV.ImportResult"></nuxeo-operation>
@@ -264,10 +267,10 @@ Polymer({
             disabled
             always-float-label
           ></nuxeo-path-suggestion>
-          <span class="error">[[targetLocationError]]</span>
+          <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
         </div>
 
-        <div id="dropzone" class="vertical layout flex step">
+        <div id="dropzone" class="vertical layout flex step" hidden="[[!canCreate]]">
           <input hidden id="uploadFiles" type="file" on-change="_fileChanged" accept=".csv" />
           <template is="dom-if" if="[[!hasFile]]">
             <div class="vertical layout center center-justified flex">
@@ -315,14 +318,16 @@ Polymer({
           </template>
         </div>
 
-        <div class="options">
+        <div class="options" hidden="[[!canCreate]]">
           <div class="layout vertical">
             <paper-toggle-button checked="{{receiveEmailReport}}"
               >[[i18n('csv.import.option.emailReport')]]</paper-toggle-button
             >
-            <paper-toggle-button checked="{{enableImportMode}}"
-              >[[i18n('csv.import.option.useImportMode')]]</paper-toggle-button
-            >
+            <paper-toggle-button
+              checked="{{enableImportMode}}"
+              disabled$="[[!hasAdministrationPermissions(currentUser)]]"
+              >[[i18n('csv.import.option.useImportMode')]]
+            </paper-toggle-button>
           </div>
         </div>
 
@@ -416,7 +421,14 @@ Polymer({
   `,
 
   is: 'nuxeo-document-import-csv',
-  behaviors: [I18nBehavior, IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior, RoutingBehavior],
+  behaviors: [
+    I18nBehavior,
+    IronResizableBehavior,
+    UploaderBehavior,
+    DocumentCreationBehavior,
+    RoutingBehavior,
+    FiltersBehavior,
+  ],
 
   properties: {
     accept: {
@@ -498,10 +510,6 @@ Polymer({
     this._clear();
   },
 
-  listeners: {
-    'nx-document-creation-parent-validated': '_parentValidated',
-  },
-
   observers: ['_observeFiles(files.*)', '_visibleOnStage(visible,stage)', '_observeVisible(visible)'],
 
   _i18n(label, params) {
@@ -532,27 +540,6 @@ Polymer({
     } else if (this._waitProgressId) {
       clearTimeout(this._waitProgressId);
     }
-  },
-
-  _parentValidated() {
-    if (this.isValidTargetPath) {
-      if (
-        this.suggesterParent &&
-        this.suggesterParent.contextParameters &&
-        this.suggesterParent.contextParameters.permissions
-      ) {
-        // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren,
-        // so we had to rely on Write.
-        if (
-          this.suggesterParent.contextParameters.permissions.indexOf('Write') > -1 ||
-          this.suggesterParent.contextParameters.permissions.indexOf('AddChildren') > -1
-        ) {
-          this.set('targetLocationError', '');
-          return;
-        }
-      }
-    }
-    this.set('targetLocationError', this.i18n('documentImport.error.cannotImport'));
   },
 
   _removeBlob() {
