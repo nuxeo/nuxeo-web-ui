@@ -219,8 +219,10 @@ Polymer({
   _parentPathChanged(e) {
     if (
       e.detail.isValidTargetPath &&
-      (!this.parent || (this.parentPath && this.parent.path !== this.parentPath.replace(/(.+)\/$/, '$1')))
+      (!this.parent || (e.detail.parentPath && this.parent.path !== e.detail.parentPath.replace(/(.+)\/$/, '$1')))
     ) {
+      this.parentPath = e.detail.parentPath;
+      this.suggesterChildren = e.detail.suggesterChildren;
       this.$.defaultDoc.get();
     }
   },
