@@ -302,6 +302,7 @@ limitations under the License.
         this._hasFiles = false;
         this.$.doc.get().then(function(response) {
           this.set('document.properties.' + this._parsedXpath, this.get(this._parsedXpath, response.properties));
+          this.fire('document-updated');
         }.bind(this));
       },
 

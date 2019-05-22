@@ -52,7 +52,7 @@ limitations under the License.
     <h3>[[i18n('documentAttachments.heading')]]</h3>
 
     <div class="vertical layout">
-      <template is="dom-repeat" items="[[_computeFiles(document, xpath)]]">
+      <template is="dom-repeat" items="[[_computeFiles(document.*, xpath)]]">
         <nuxeo-document-blob document="[[document]]" xpath="[[_computeBlobXpath(xpath, index)]]"></nuxeo-document-blob>
       </template>
 
