@@ -3,6 +3,7 @@
 import BasePage from '../base';
 import DocumentPage from './browser/document_page';
 import CollapsibleDocumentPage from './browser/collapsible_document_page';
+import AddToCollectionDialog from './browser/add_to_collection_dialog';
 import PublicationDialog from './browser/publication_dialog';
 import DocumentPermissions from './browser/document_permissions';
 import DocumentPublications from './browser/document_publications';
@@ -105,19 +106,14 @@ export default class Browser extends BasePage {
   }
 
   addToCollection(name) {
-    const addToCollectionButton = this.el.element('nuxeo-add-to-collection-button paper-icon-button');
-    addToCollectionButton.waitForVisible();
-    addToCollectionButton.click();
-    const selectivity = this.el.element('#add-to-collection-dialog nuxeo-selectivity');
-    selectivity.waitForVisible();
-    selectivity.waitForVisible('#input');
-    selectivity.click('#input');
-    selectivity.waitForVisible('.selectivity-search-input');
-    selectivity.element('.selectivity-search-input').setValue(name);
-    selectivity.waitForVisible('.selectivity-result-item.highlight');
-    selectivity.click('.selectivity-result-item.highlight');
-    driver.waitForEnabled('#add-to-collection-dialog paper-button[name="add"]');
-    driver.click('#add-to-collection-dialog paper-button[name="add"]');
+    const button = this.el.element('nuxeo-add-to-collection-button');
+    button.waitForVisible();
+    if (!button.isExisting('#dialog') || !button.isVisible('#dialog')) {
+      button.click();
+    }
+    const dialog = new AddToCollectionDialog(`${this._selector}  nuxeo-add-to-collection-button #dialog`);
+    dialog.waitForVisible();
+    dialog.addToCollection(name);
     this.el.waitForVisible('nuxeo-document-collections nuxeo-tag');
   }
 

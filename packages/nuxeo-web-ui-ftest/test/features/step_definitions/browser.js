@@ -63,6 +63,11 @@ Then('I can see the selection toolbar', function () {
   this.ui.browser.selectionToolbar.waitForVisible();
 });
 
+Then('I can add selection to the {string} collection', function (collectionName) {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.selectionToolbar.addToCollectionDialog.addToCollection(collectionName);
+});
+
 Then('I can add selection to clipboard', function () {
   this.ui.browser.waitForVisible();
   this.ui.browser.selectionToolbar.addToClipboard();

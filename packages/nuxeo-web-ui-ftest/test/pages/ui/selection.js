@@ -1,12 +1,28 @@
 
 
 import BasePage from '../base';
+import AddToCollectionDialog from './browser/add_to_collection_dialog';
 import PublicationDialog from './browser/publication_dialog';
 
 export default class Selection extends BasePage {
   addToClipboard() {
     this.el.element('nuxeo-clipboard-documents-button').click();
     this.waitForNotVisible();
+  }
+
+  get addDocumentsToCollectionButton() {
+    return this.el.element('nuxeo-add-to-collection-documents-button');
+  }
+
+  get addToCollectionDialog() {
+    const button = this.addDocumentsToCollectionButton;
+    button.waitForVisible();
+    if (!button.isExisting('#dialog') || !button.isVisible('#dialog')) {
+      button.click();
+    }
+    const dialog = new AddToCollectionDialog(`${this._selector} nuxeo-add-to-collection-documents-button #dialog`);
+    dialog.waitForVisible();
+    return dialog;
   }
 
   moveDown() {
