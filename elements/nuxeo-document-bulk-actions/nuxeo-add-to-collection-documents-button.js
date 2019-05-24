@@ -25,7 +25,7 @@ import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-selectivity.js';
+import { escapeHTML } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-selectivity.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-textarea.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -205,7 +205,7 @@ Polymer({
     const label = item.displayLabel || item.title;
     // if we are adding a new entry with the _newEntryFormatter
     // we don't want to escape the HTML
-    return item.id === -1 ? label : this.$.nxSelect.escapeHTML(label);
+    return item.id === -1 ? label : escapeHTML(label);
   },
 
   _newEntryFormatter(term) {
