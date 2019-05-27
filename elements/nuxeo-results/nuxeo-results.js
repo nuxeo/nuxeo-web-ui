@@ -156,12 +156,12 @@ Polymer({
         >
 
         <div class="rightHand">
-          <slot name="actions"></slot>
+          <slot name="actions">
+            <!-- 0.9 compatibility -->
+            <nuxeo-slot slot="DOCUMENT_LISTING_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
 
-          <!-- 0.9 compatibility -->
-          <nuxeo-slot slot="DOCUMENT_LISTING_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
-
-          <nuxeo-slot slot="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+            <nuxeo-slot slot="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+          </slot>
 
           <div class="viewModes">
             <template is="dom-repeat" items="[[_displayModes]]">
