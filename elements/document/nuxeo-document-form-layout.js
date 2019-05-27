@@ -33,17 +33,28 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
-      .actions {
-        @apply --buttons-bar;
-        @apply --layout-horizontal;
-        @apply --layout-flex;
-        @apply --layout-justified;
+      #form,
+      form {
+        @apply --layout-vertical;
+        height: 100%;
       }
 
       .scrollable {
+        margin-top: 24px;
         padding: 0 24px;
-        max-height: 60vh;
         @apply --layout-scroll;
+        @apply --layout-flex;
+        @apply --layout-vertical;
+      }
+
+      .actions {
+        @apply --buttons-bar;
+        @apply --layout-horizontal;
+        @apply --layout-justified;
+      }
+
+      nuxeo-document-layout {
+        margin-bottom: 24px;
       }
     </style>
 

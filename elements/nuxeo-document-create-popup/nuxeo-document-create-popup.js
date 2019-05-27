@@ -17,16 +17,17 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/iron-pages/iron-pages.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
-import '../document/nuxeo-document-create.js';
-import '../document/nuxeo-document-import.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import '@nuxeo/nuxeo-elements/nuxeo-document.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
+import '../document/nuxeo-document-create.js';
+import '../document/nuxeo-document-import.js';
 
 /**
 `nuxeo-document-create-popup`
@@ -39,6 +40,14 @@ Polymer({
       :host {
         --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
         display: block;
+      }
+
+      nuxeo-dialog {
+        display: flex;
+        flex-direction: column;
+        height: var(--nuxeo-document-create-popup-height, 80vh);
+        width: var(--nuxeo-document-create-popup-width, 65vw);
+        margin: 0;
       }
 
       paper-tabs {
@@ -62,8 +71,8 @@ Polymer({
       }
 
       #holder {
-        height: 80vh;
-        width: 65vw;
+        height: 100%;
+        width: 100%;
       }
 
       iron-pages {
@@ -81,7 +90,7 @@ Polymer({
     <nuxeo-document id="defaultDoc" doc-path="[[parentPath]]" enrichers="permissions, subtypes" response="{{parent}}">
     </nuxeo-document>
 
-    <paper-dialog id="createDocDialog" opened="{{opened}}" modal no-auto-focus>
+    <nuxeo-dialog id="createDocDialog" opened="{{opened}}" modal no-auto-focus>
       <paper-tabs hidden$="[[!_showTabs]]" selected="{{selectedTab}}" attr-for-selected="name" noink>
         <nuxeo-slot slot="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
       </paper-tabs>
@@ -104,7 +113,7 @@ Polymer({
           ></nuxeo-document-import>
         </iron-pages>
       </div>
-    </paper-dialog>
+    </nuxeo-dialog>
   `,
 
   is: 'nuxeo-document-create-popup',

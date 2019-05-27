@@ -35,14 +35,18 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles">
-      .container {
+      nuxeo-dialog {
+        height: 100%;
+        max-height: var(--nuxeo-document-form-popup-max-height, 60vh);
+        min-width: var(--nuxeo-document-form-popup-min-width, 915px);
         margin: 0;
-        padding: 24px 0 0 0;
       }
-      @media (min-width: 1024px) {
-        nuxeo-dialog {
-          min-width: 915px;
-        }
+
+      .container {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
       }
     </style>
 
