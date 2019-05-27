@@ -89,7 +89,7 @@ Polymer({
 
       .container {
         margin: 0 2rem;
-        padding: 0 1rem 0 0;
+        padding: 0;
         display: inline-block;
         @apply --layout-flex;
         @apply --layout-vertical;
