@@ -21,6 +21,7 @@ Feature: User
       | lastname             | Smith         |
       | company              | Nuxeo         |
       | email                | test@test.com |
+      | group                | members       |
       | password             | test          |
       | passwordConfirmation | test          |
 
