@@ -14,6 +14,7 @@ fixtures.workflows = {
         method: 'basic',
         username: initiator,
         password: fixtures.users.DEFAULT_PASSWORD,
+        headers: { nx_es_sync: 'true' },
       },
       baseURL: process.env.NUXEO_URL,
     });
