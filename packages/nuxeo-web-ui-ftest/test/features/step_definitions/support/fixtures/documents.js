@@ -74,7 +74,7 @@ fixtures.documents = {
           .input(uploader)
           .context(params.context)
           .params(params)
-          .execute({ headers: { nx_es_sync: 'true' } });
+          .execute();
       } else {
         document.properties['file:content'] = {
           'upload-batch': result.blob['upload-batch'],
@@ -96,7 +96,7 @@ fixtures.documents = {
       .input(uploader)
       .context(params.context)
       .params(params)
-      .execute({ headers: { nx_es_sync: 'true' } })
+      .execute()
       .then((docs) => {
         const doc = docs.entries[0];
         liveDocuments.push(doc.uid);
