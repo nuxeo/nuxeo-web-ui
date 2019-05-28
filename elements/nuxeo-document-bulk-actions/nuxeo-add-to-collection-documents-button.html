@@ -87,7 +87,7 @@ limitations under the License.
 
       <div class="buttons">
         <paper-button noink dialog-dismiss>[[i18n('addToCollectionDocumentsButton.dialog.cancel')]]</paper-button>
-        <paper-button noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
+        <paper-button name="add" noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
           [[i18n('addToCollectionDocumentsButton.dialog.add')]]
         </paper-button>
       </div>
