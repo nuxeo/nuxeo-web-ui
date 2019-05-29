@@ -111,6 +111,14 @@ Polymer({
     return this.root.getElementById(`${this.layout}-button`);
   },
 
+  connectedCallback() {
+    this.addEventListener('iron-overlay-opened', this._formLayoutOpened);
+  },
+
+  disconnectedCallback() {
+    this.removeEventListener('iron-overlay-opened', this._formLayoutOpened);
+  },
+
   _isAvailable(doc) {
     return doc && doc.type !== 'Root' && this.hasPermission(doc, 'Write') && this._isMutable(doc);
   },
@@ -125,5 +133,14 @@ Polymer({
 
   _closeDialog() {
     this.dialog.close();
+  },
+
+  _formLayoutOpened(e) {
+    const multipleDialogs =
+      e.composedPath().filter((el) => el.tagName === 'NUXEO-DIALOG' || el.tagName === 'PAPER-DIALOG').length > 1;
+    if (!multipleDialogs) {
+      const { layout } = this.$.layout.$;
+      layout.applyAutoFocus();
+    }
   },
 });

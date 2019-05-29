@@ -68,6 +68,13 @@ Polymer({
     return this.$.layout.element;
   },
 
+  applyAutoFocus() {
+    const focusableElement = this._getFocusableElement(this.element);
+    if (focusableElement) {
+      focusableElement.focus();
+    }
+  },
+
   validate() {
     return this.$.layout.validate();
   },
@@ -104,6 +111,29 @@ Polymer({
         element: this.element,
         layout: this.layout,
       });
+      this.applyAutoFocus();
     });
+  },
+
+  _getFocusableElement(parent) {
+    if (parent && parent.shadowRoot && !parent.shadowRoot.activeElement) {
+      const nodes = Array.from(parent.shadowRoot.querySelectorAll('*')).filter((node) => {
+        const style = window.getComputedStyle(node);
+        return !node.disabled && style.display !== 'none' && style.visibility !== 'hidden';
+      });
+      let focusableElement = nodes.find((node) => node.autofocus);
+      if (focusableElement) {
+        return focusableElement;
+      }
+
+      nodes
+        .filter((node) => node.shadowRoot)
+        .forEach((node) => {
+          focusableElement = this._getFocusableElement(node);
+          if (focusableElement) {
+            return focusableElement;
+          }
+        });
+    }
   },
 });
