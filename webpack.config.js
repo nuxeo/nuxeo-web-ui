@@ -142,7 +142,7 @@ const common = merge([
         title: 'Nuxeo',
         template: 'index.html',
         nuxeo: {
-          packages: JSON.stringify(process.env.NUXEO_PACKAGES || '').split().filter(Boolean),
+          packages: JSON.stringify((process.env.NUXEO_PACKAGES || '').split(/[\s,]+/).filter(Boolean)),
           url: process.env.NUXEO_URL || '/nuxeo',
         },
       }),
