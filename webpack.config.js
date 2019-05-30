@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ProvidePlugin } = require('webpack');
+const PackageModulizerPlugin = require('package-modulizer-plugin');
 
 const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
 
@@ -179,7 +180,20 @@ const common = merge([
           url: process.env.NUXEO_URL || '/nuxeo',
         },
       }),
-    ],
+    ]
+      .concat(
+        process.env.NO_HTML_IMPORTS &&
+          new PackageModulizerPlugin({
+            packages: NUXEO_PACKAGES.map((a) => {
+              return {
+                rootPath: join('addons', a),
+                include: 'document',
+                targetPath: 'elements',
+              };
+            }),
+          }),
+      )
+      .filter(Boolean),
   },
 ]);
 
