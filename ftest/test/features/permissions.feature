@@ -9,8 +9,8 @@ Feature: Permissions
     And I browse to the document
 
   Scenario: Give a permission to user
-    When I give ReadWrite permission to "Susan" on the document
-    Then I can see that "Susan" has the ReadWrite permission
+    When I give Edit permission to "Susan" on the document
+    Then I can see that "Susan" has the Edit permission
     When I logout
     And I login as "Susan"
     And I browse to the document
@@ -23,7 +23,7 @@ Feature: Permissions
   Scenario: Edit permission
     Given "Susan" has ReadWrite permission on the document
     When I browse to the document
-    And I edit the ReadWrite permission on the document for "Susan" to start tomorrow
+    And I edit the Edit permission on the document for "Susan" to start tomorrow
     And I logout
     And I login as "Susan"
     Then I can't view the document
@@ -54,9 +54,9 @@ Feature: Permissions
     Then I can't view the document
 
   Scenario: Set a permission to multiple users at the same time
-    When I give ReadWrite permission on the document to the following users:
+    When I give Edit permission on the document to the following users:
       | name  |
       | John  |
       | Susan |
-    Then I can see that "John" has the ReadWrite permission
-    And I can see that "Susan" has the ReadWrite permission
+    Then I can see that "John" has the Edit permission
+    And I can see that "Susan" has the Edit permission
