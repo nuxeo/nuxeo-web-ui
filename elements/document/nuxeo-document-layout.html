@@ -61,6 +61,13 @@ limitations under the License.
         return this.$.layout.element;
       },
 
+      applyAutoFocus: function() {
+        var focusableElement = this._getFocusableElement(this.element);
+        if (focusableElement) {
+          focusableElement.focus();
+        }
+      },
+
       validate: function() {
         return this.$.layout.validate();
       },
@@ -96,10 +103,35 @@ limitations under the License.
               element: this.element,
               layout: this.layout
             });
+            this.applyAutoFocus();
           }.bind(this));
         }
-      }
+      },
 
+      _getFocusableElement: function(parent) {
+        if (parent && parent.shadowRoot && !parent.shadowRoot.activeElement) {
+          var nodes = Array.from(parent.shadowRoot.querySelectorAll('*')).filter(function(node) {
+            var style = window.getComputedStyle(node);
+            return !node.disabled && style.display !== 'none' && style.visibility !== 'hidden';
+          });
+          var focusableElement = nodes.find(function(node) {
+            return node.autofocus;
+          });
+          if (focusableElement) {
+            return focusableElement;
+          }
+
+          var componentNodes = nodes.filter(function(node) {
+            return node.shadowRoot;
+          });
+          for (var i = 0; i < componentNodes.length; i++) {
+            focusableElement = this._getFocusableElement(componentNodes[i]);
+            if (focusableElement) {
+              return focusableElement;
+            }
+          }
+        }
+      },
     });
   </script>
 </dom-module>
