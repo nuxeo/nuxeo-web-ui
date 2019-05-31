@@ -43,7 +43,7 @@ Polymer({
   _template: html`
     <nuxeo-layout
       id="layout"
-      href="[[_formHref(provider, searchName)]]"
+      href="[[_href]]"
       model="[[_formModel(provider, aggregations, params)]]"
       error="[[i18n('documentSearchForm.layoutNotFound', searchName)]]"
       on-element-changed="_formChanged"
@@ -91,9 +91,12 @@ Polymer({
         return {};
       },
     },
+    _href: {
+      type: String,
+    },
   },
 
-  observers: ['_paramsChanged(params.*)'],
+  observers: ['_paramsChanged(params.*)', '_loadLayout(provider, searchName)'],
 
   get element() {
     return this.$.layout.element;
@@ -111,9 +114,20 @@ Polymer({
     }
   },
 
-  _formHref(provider, searchName) {
-    const name = (searchName || provider).toLowerCase();
-    return this.resolveUrl(`${name}/${['nuxeo', name, 'search-form'].join('-')}.html`);
+  _loadLayout(provider, searchName) {
+    const sName = (searchName || provider).toLowerCase();
+    const name = ['nuxeo', sName, 'search-form'].join('-');
+    /// #if NO_HTML_IMPORTS
+    this.$.layout.importFn = () =>
+      import(
+        /* webpackMode: "eager" */
+        /* webpackChunkName: "[request]" */
+        // eslint-disable-next-line comma-dangle
+        `./${sName}/${name}?entity="document"`
+      ).then(() => name);
+    /// #else
+    this._href = this.resolveUrl(`${sName}/${name}.html`);
+    /// #endif
   },
 
   _formModel() {

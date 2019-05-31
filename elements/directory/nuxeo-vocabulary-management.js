@@ -153,7 +153,7 @@ Polymer({
         <form>
           <nuxeo-layout
             id="layout"
-            href="[[_layoutHref(_selectedSchema)]]"
+            href="[[_href]]"
             model="[[_layoutModel(_selectedEntry)]]"
             error="[[i18n('documentVocabularyManagement.layoutNotFound', _selectedSchema)]]"
             on-element-changed="_elementChanged"
@@ -193,9 +193,12 @@ Polymer({
       type: String,
       computed: '_schemaFor(selectedVocabulary)',
     },
+    _href: {
+      type: String,
+    },
   },
 
-  observers: ['_refresh(selectedVocabulary)'],
+  observers: ['_refresh(selectedVocabulary)', '_loadLayout(_selectedSchema)'],
 
   _visibleChanged() {
     if (this.visible && !this.vocabularies) {
@@ -208,9 +211,20 @@ Polymer({
   /**
    * Returns the href for the current layout element
    */
-  _layoutHref(schema) {
+  _loadLayout(schema) {
     const lowerCaseSchema = schema.toLowerCase();
-    return this.resolveUrl(`${lowerCaseSchema}/nuxeo-${lowerCaseSchema}-edit-layout.html`);
+    const name = `nuxeo-${lowerCaseSchema}-edit-layout`;
+    /// #if NO_HTML_IMPORTS
+    this.$.layout.importFn = () =>
+      import(
+        /* webpackMode: "eager" */
+        /* webpackChunkName: "[request]" */
+        // eslint-disable-next-line comma-dangle
+        `./${lowerCaseSchema}/${name}?entity="document"`
+      ).then(() => name);
+    /// #else
+    this._href = this.resolveUrl(`${lowerCaseSchema}/${name}.html`);
+    /// #endif
   },
 
   _layoutModel() {

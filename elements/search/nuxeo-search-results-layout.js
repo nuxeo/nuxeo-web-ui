@@ -30,7 +30,7 @@ Polymer({
   _template: html`
     <nuxeo-layout
       id="results"
-      href="[[_resultsHref(searchName)]]"
+      href="[[_href]]"
       model="[[_resultsModel(searchName,nxProvider)]]"
       error="[[i18n('searchResults.layoutNotFound', searchName)]]"
       on-element-changed="_formChanged"
@@ -44,7 +44,10 @@ Polymer({
     /**
      * The name of the search layout.
      * */
-    searchName: String,
+    searchName: {
+      type: String,
+      observer: '_loadLayout',
+    },
     /**
      * The `nuxeo-page-provider` instance used to perform the search.
      * */
@@ -64,6 +67,9 @@ Polymer({
     results: {
       type: Object,
       notify: true,
+    },
+    _href: {
+      type: String,
     },
   },
 
@@ -85,9 +91,19 @@ Polymer({
     }
   },
 
-  _resultsHref() {
+  _loadLayout() {
     const name = ['nuxeo', this.searchName.toLowerCase(), 'search-results'].join('-');
-    return this.resolveUrl([this.searchName.toLowerCase(), `${name}.html`].join('/'));
+    /// #if NO_HTML_IMPORTS
+    this.$.results.importFn = () =>
+      import(
+        /* webpackMode: "eager" */
+        /* webpackChunkName: "[request]" */
+        // eslint-disable-next-line comma-dangle
+        `./${this.searchName.toLowerCase()}/${name}?entity="document"`
+      ).then(() => name);
+    /// #else
+    this._href = this.resolveUrl([this.searchName.toLowerCase(), `${name}.html`].join('/'));
+    /// #endif
   },
 
   _resultsModel() {

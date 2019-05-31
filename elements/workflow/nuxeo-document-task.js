@@ -201,9 +201,19 @@ Polymer({
    */
   _updateTaskLayout(task) {
     if (task) {
+      const name = ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
+      /// #if NO_HTML_IMPORTS
+      this.$.layout.importFn = () =>
+        import(
+          /* webpackMode: "eager" */
+          /* webpackChunkName: "[request]" */
+          // eslint-disable-next-line comma-dangle
+          `./${task.workflowModelName.toLowerCase()}/${name}?entity="document"`
+        ).then(() => name);
+      /// #else
       this._href = null;
-      const layout = ['nuxeo', task.nodeName.toLowerCase(), 'layout'].join('-');
-      this._href = this.resolveUrl(`${task.workflowModelName.toLowerCase()}/${layout}.html`);
+      this._href = this.resolveUrl(`${task.workflowModelName.toLowerCase()}/${name}.html`);
+      /// #endif
     }
   },
 
