@@ -27,6 +27,7 @@ class PackageModulizerPlugin {
 
     /* compiler.hooks.afterEnvironment.tap('PackageModulizerPlugin', ...) */
     compiler.hooks.contextModuleFactory.tap('PackageModulizerPlugin', () => {
+      const rootChildren = [];
       packages.forEach((pkg) => {
         let includes = [];
         if (typeof pkg.include === 'string') {
@@ -38,6 +39,7 @@ class PackageModulizerPlugin {
         }
         const pkgRootPath = typeof pkg.rootPath === 'function' ? pkg.rootPath() : pkg.rootPath;
         const pkgTargetPath = typeof pkg.targetPath === 'function' ? pkg.targetPath() : pkg.targetPath;
+        rootChildren.push(basename(pkgRootPath));
         let files;
 
         if (!resolve(pkgRootPath).startsWith(rootPath)) {
@@ -75,6 +77,7 @@ class PackageModulizerPlugin {
           }),
         );
       });
+      compiler.inputFileSystem._readdirStorage.data.set(rootPath, [null, rootChildren]);
     });
   }
 
