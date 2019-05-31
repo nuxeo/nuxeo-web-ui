@@ -318,7 +318,7 @@ Polymer({
           this.fire('notify', { message: this.i18n('vocabularyManagement.successfullyDeleted') });
         },
         (err) => {
-          if (err.status === 401) {
+          if (err.message && err.message.match('Found more than one result in getEntry')) {
             this.fire('notify', {
               message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n(
                 'vocabularyManagement.cannotDelete.referencedEntry',
