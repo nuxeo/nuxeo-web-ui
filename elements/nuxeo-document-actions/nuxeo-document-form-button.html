@@ -99,6 +99,14 @@ limitations under the License.
         },
       },
 
+      connectedCallback: function() {
+        this.addEventListener('iron-overlay-opened', this._formLayoutOpened);
+      },
+
+      disconnectedCallback: function() {
+        this.removeEventListener('iron-overlay-opened', this._formLayoutOpened);
+      },
+
       get dialog() {
         return this.root.getElementById(this.layout + '-dialog');
       },
@@ -121,7 +129,18 @@ limitations under the License.
 
       _closeDialog: function() {
         this.dialog.close();
-      }
+      },
+
+      _formLayoutOpened: function(e) {
+        var multipleDialogs =
+          e.composedPath().filter(function(el) {
+            return el.tagName === 'NUXEO-DIALOG' || el.tagName === 'PAPER-DIALOG';
+          }).length > 1;
+        if (!multipleDialogs) {
+          var layout = this.$.layout.$.layout;
+          layout.applyAutoFocus();
+        }
+      },
     });
   </script>
 </dom-module>
