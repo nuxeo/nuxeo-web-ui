@@ -14,6 +14,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+/// #if NO_HTML_IMPORTS
+function loadTheme(theme) {
+  const template = document.createElement('template');
+  template.innerHTML = theme;
+  document.head.appendChild(template.content);
+}
+
+import(`./${localStorage.getItem('theme') || 'default'}/theme.html`)
+  .then((m) => loadTheme(m.default))
+  .catch(() => import(`./default/theme.html`).then((m) => loadTheme(m.default)));
+
+/// #else
 const url = `themes/${localStorage.getItem('theme') || 'default'}/theme.html`;
 const xhr = new XMLHttpRequest();
 xhr.open('HEAD', url, false);
@@ -30,3 +42,4 @@ xhr.onreadystatechange = function() {
   }
 };
 xhr.send(null);
+/// #endif

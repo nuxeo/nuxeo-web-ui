@@ -26,6 +26,7 @@
     "package-modulizer-plugin": "file:packages/package-modulizer-plugin",
     "polymer-cli": "^1.9.0",
     "polymer-webpack-loader": "^2.0.3",
+    "raw-loader": "^2.0.0",
     "replace": "^1.0.1",
     "style-loader": "^0.23.1",
     "webpack": "^4.29.6",

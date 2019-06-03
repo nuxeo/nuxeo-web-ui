@@ -144,13 +144,18 @@ const common = merge([
               },
               {
                 test: /\.html$/,
-                exclude: [resolve(__dirname, 'elements'), /index\.html$/],
+                exclude: [resolve(__dirname, 'elements'), resolve(__dirname, 'themes'), /index\.html$/],
                 use: {
                   loader: 'html-loader',
                   options: {
                     exportAsEs6Default: true,
                   },
                 },
+              },
+              {
+                test: /\.html$/,
+                include: [resolve(__dirname, 'themes')],
+                use: 'raw-loader',
               },
             ]
           : [
