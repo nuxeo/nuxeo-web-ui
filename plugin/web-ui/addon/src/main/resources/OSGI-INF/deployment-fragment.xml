@@ -5,7 +5,6 @@
     <!-- Unzip the contents of our web application into the server -->
     <unzip from="${bundle.fileName}" to="/" prefix="web">
       <include>web/nuxeo.war/**</include>
-      <exclude>**/index.html</exclude>
     </unzip>
 
     <!-- Add fallback to two-letter locales -->
