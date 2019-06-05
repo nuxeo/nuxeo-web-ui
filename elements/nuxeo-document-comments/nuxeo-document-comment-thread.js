@@ -286,6 +286,7 @@ Polymer({
   },
 
   _refresh() {
+    this.set('comments', []);
     this._fetchComments(this.allCommentsLoaded);
   },
 
