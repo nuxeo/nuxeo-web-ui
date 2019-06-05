@@ -43,6 +43,11 @@ limitations under the License.
 
   <target name="build" depends="init">
     <npm-run script="build" />
+    <copy todir="target/classes/web/nuxeo.war/ui">
+      <fileset dir="../../../dist">
+        <exclude name="index.html"/>
+      </fileset>
+    </copy>
   </target>
 
   <macrodef name="npm-run">

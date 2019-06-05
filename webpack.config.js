@@ -1,6 +1,6 @@
 const { resolve, join } = require('path');
 const merge = require('webpack-merge');
-// const CleanWebpackPlugin = require('clean-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -9,7 +9,7 @@ const { ProvidePlugin } = require('webpack');
 const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
 
 // we can copy things to 'src' in dev mode since if uses a mem fs
-const TARGET = ENV === 'production' ? resolve('plugin/web-ui/addon/target/classes/web/nuxeo.war/ui') : resolve('.');
+const TARGET = ENV === 'production' ? resolve('dist') : resolve('.');
 
 const tmp = [{ from: `.tmp`, to: join(TARGET) }];
 
@@ -183,8 +183,7 @@ const production = merge([
       },
     },
     plugins: [
-      // clean is done by maven
-      // new CleanWebpackPlugin([TARGET], { verbose: true }),
+      new CleanWebpackPlugin([TARGET]),
       new CopyWebpackPlugin([
         ...tmp,
         ...polyfills,
