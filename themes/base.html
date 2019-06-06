@@ -297,6 +297,11 @@ limitations under the License.
       padding: .7em 1.8em;
     };
 
+    --nuxeo-document-create-popup-height: 85vh;
+    --nuxeo-document-create-popup-width: 65vw;
+    --nuxeo-document-form-popup-max-height: 60vh;
+    --nuxeo-document-form-popup-min-width: 915px;
+
     --iron-data-table: {
       font-family: var(--nuxeo-app-font);
     };
@@ -443,6 +448,8 @@ limitations under the License.
   @media (max-width: 1024px) {
 	  html {
       font-size: 14px;
+      --nuxeo-document-create-popup-width: 90%;
+      --nuxeo-document-form-popup-min-width: 90%;
 
       --nuxeo-dialog: {
         min-width: 0;

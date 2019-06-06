@@ -36,20 +36,18 @@ limitations under the License.
         display: inline-block;
       }
 
-      .container {
-        margin: 0;
-        padding: 24px 0 0 0;
-      }
-
       nuxeo-dialog {
-        min-width: 915px;
+        height: 100%;
+        max-height: var(--nuxeo-document-form-popup-max-height, 60vh);
+        min-width: var(--nuxeo-document-form-popup-min-width, 915px);
+        margin: 0;
       }
 
-      @media (max-width: 1024px) {
-        nuxeo-dialog {
-          min-width: 0;
-          width: 90%;
-        }
+      .container {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
       }
     </style>
 

@@ -23,6 +23,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-dialog.html">
 <link rel="import" href="../document/nuxeo-document-create.html">
 <link rel="import" href="../document/nuxeo-document-import.html">
 
@@ -34,10 +35,17 @@ limitations under the License.
 <dom-module id="nuxeo-document-create-popup">
   <template>
     <style include="iron-flex">
-
       :host {
         --paper-tabs-selection-bar-color: var(--nuxeo-primary-color);
         display: block;
+      }
+
+      nuxeo-dialog {
+        display: flex;
+        flex-direction: column;
+        height: var(--nuxeo-document-create-popup-height, 80vh);
+        width: var(--nuxeo-document-create-popup-width, 65vw);
+        margin: 0;
       }
 
       paper-tabs {
@@ -61,8 +69,8 @@ limitations under the License.
       }
 
       #holder {
-        height: 80vh;
-        width: 65vw;
+        height: 100%;
+        width: 100%;
       }
 
       iron-pages {
@@ -82,7 +90,7 @@ limitations under the License.
                     response="{{parent}}">
     </nuxeo-document>
 
-    <paper-dialog id="createDocDialog"
+    <nuxeo-dialog id="createDocDialog"
                   opened="{{opened}}"
                   modal
                   no-auto-focus>
@@ -105,7 +113,7 @@ limitations under the License.
                                  suggester-children="{{suggesterChildren}}"></nuxeo-document-import>
         </iron-pages>
       </div>
-    </paper-dialog>
+    </nuxeo-dialog>
 
   </template>
 
