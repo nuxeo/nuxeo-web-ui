@@ -135,7 +135,7 @@ exports.config = {
   baseUrl: process.env.NUXEO_WEB_UI_URL || process.env.NUXEO_URL || 'http://localhost:8080/nuxeo/',
   //
   // Default timeout for all waitFor* commands.
-  waitforTimeout: 10000,
+  waitforTimeout: 20000,
 
   waitforInterval: 250,
   //
@@ -205,7 +205,7 @@ exports.config = {
     profile: [], // <string[]> (name) specify the profile to use
     strict: true, // <boolean> fail if there are any undefined or pending steps
     tagExpression: '', // <string> (expression) only execute the features or scenarios with tags matching the expression
-    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : 20000, // <number> timeout for step definitions
+    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : 25000, // <number> timeout for step definitions
     ignoreUndefinedDefinitions: false, // <boolean> Enable this config to treat undefined definitions as warnings.
   },
   //
