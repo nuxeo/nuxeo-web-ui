@@ -6,7 +6,7 @@
   },
   "scripts": {
     "lint": "eslint test",
-    "publish:snapshot": "npm --registry=https://mavenin.nuxeo.com/nexus3/repository/npmjs-nuxeo/ publish --tag SNAPSHOT",
+    "publish:snapshot": "npm --registry=https://mavenin.nuxeo.com/nexus/repository/npmjs-nuxeo/ publish --tag SNAPSHOT",
     "prepublish:snapshot": "npm run lint",
     "publish:release": "npm --registry=https://registry.npmjs.org/ publish",
     "prepublish:release": "npm run lint"
