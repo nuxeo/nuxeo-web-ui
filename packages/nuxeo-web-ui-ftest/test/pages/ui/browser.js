@@ -306,32 +306,35 @@ export default class Browser extends BasePage {
   }
 
   clickDocumentActionMenu(selector) {
-    return driver.waitUntil(() => {
-      try {
-        let action = this.el.element(selector);
-        action.waitForExist();
-        if (!action.isVisible()) {
-          const menu = this.el.element('nuxeo-actions-menu ');
-          menu.waitForVisible('#dropdownButton');
-          menu.click('#dropdownButton');
-          menu.waitForVisible('paper-listbox');
-          menu.waitForVisible('[slot="dropdown"] .label');
-          menu.waitForEnabled('[slot="dropdown"] .label');
-        }
-        action = this.el.element(selector);
-        action.waitForVisible();
-        action.waitForEnabled();
-        action.click();
-        return true;
-      } catch (e) {
-        return false;
-      }
-    }, 'Cannot click document action');
+    const menu = this.el.element('nuxeo-actions-menu');
+    menu.waitForExist(selector);
+    const children = menu.elements('nuxeo-actions-menu > *:not([show-label])');
+    const childrenWidth = children.value.map(child => child.getElementSize('width')).reduce((a, b) => a + b, 0);
+    if (childrenWidth > menu.getElementSize('width')) {
+      // this means that the menu-actions-menu didn't update yet
+      // let's wait for the dropdown button to show up
+      menu.waitForVisible('#dropdownButton');
+    }
+    let action = menu.element(selector);
+    if (action.getAttribute('show-label') != null) {
+      // if the element is inside the dropdown, we need to expand it
+      menu.click('#dropdownButton');
+      menu.waitForVisible('paper-listbox');
+      menu.waitForVisible('[slot="dropdown"] .label');
+      menu.waitForEnabled('[slot="dropdown"] .label');
+    }
+    menu.waitForVisible(selector);
+    action = menu.element(selector);
+    action.waitForVisible('.action');
+    action.waitForEnabled('.action');
+    // let's make sure we're clicking on the div the has the click event handler
+    // using shadowExecute because webdriver's click uses a position which may not be valid given the dropdown animation
+    action.shadowExecute('.action', element => element.click());
   }
 
   startWorkflow(workflow) {
     // click the action to trigger the dialog
-    this.clickDocumentActionMenu('.document-actions nuxeo-workflow-button paper-icon-button');
+    this.clickDocumentActionMenu('nuxeo-workflow-button');
     // select the workflow
     const workflowSelect = this.el.element('.document-actions nuxeo-workflow-button nuxeo-select');
     workflowSelect.waitForVisible();
@@ -357,7 +360,7 @@ export default class Browser extends BasePage {
   }
 
   get publishDialog() {
-    this.clickDocumentActionMenu('.document-actions nuxeo-publish-button');
+    this.clickDocumentActionMenu('nuxeo-publish-button');
     const publishDialog = new PublicationDialog('#publishDialog');
     publishDialog.waitForVisible();
     return publishDialog;
