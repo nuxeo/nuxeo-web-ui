@@ -108,6 +108,16 @@ Polymer({
         display: inline-block;
       }
 
+      .left-ellipsis {
+        direction: rtl;
+        text-align: left;
+      }
+
+      .right-ellipsis {
+        direction: ltr;
+        text-align: right;
+      }
+
       @media (max-width: 1024px) {
         .current-icon {
           display: none;
@@ -121,7 +131,7 @@ Polymer({
       <div class="current-icon">
         <iron-icon src="[[_icon(document, url)]]"></iron-icon>
       </div>
-      <div class="doc-path">
+      <div class$="doc-path [[_ellipsisDirection()]]">
         <a href$="[[urlFor('browse', document.path)]]" class="current breadcrumb-item breadcrumb-item-current">
           [[_title(document)]]
         </a>
@@ -180,6 +190,13 @@ Polymer({
       return url ? url + document.properties['common:icon'] : '';
     }
     return '';
+  },
+
+  _ellipsisDirection() {
+    if (document.dir !== 'rtl') {
+      return 'left-ellipsis';
+    }
+    return 'right-ellipsis';
   },
 
   get _enrichers() {
