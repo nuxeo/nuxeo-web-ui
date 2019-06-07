@@ -35,6 +35,9 @@ Polymer({
       :host {
         min-height: 3em;
         @apply --layout-flex;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .breadcrumb {

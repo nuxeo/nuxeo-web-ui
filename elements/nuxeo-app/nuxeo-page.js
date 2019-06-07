@@ -66,6 +66,10 @@ Polymer({
         z-index: 1;
       }
 
+      #header::slotted(*) {
+        overflow-x: hidden;
+      }
+
       #header::slotted(*), /* chrome, safari */
       #toolbar::slotted(*) {
         /* firefox */
