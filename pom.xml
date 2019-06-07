@@ -16,16 +16,14 @@
   <modules>
     <module>plugin/web-ui/addon</module>
     <module>plugin/web-ui/marketplace</module>
+    <module>plugin/itests/addon</module>
+    <module>plugin/itests/marketplace</module>
+    <module>ftest/</module>
   </modules>
 
   <profiles>
     <profile>
       <id>ftest</id>
-      <modules>
-        <module>plugin/itests/addon</module>
-        <module>plugin/itests/marketplace</module>
-        <module>ftest/</module>
-      </modules>
     </profile>
     <profile>
       <id>metrics</id>

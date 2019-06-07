@@ -1,3 +1,4 @@
+@critical
 Feature: Home
 
   I have a home page

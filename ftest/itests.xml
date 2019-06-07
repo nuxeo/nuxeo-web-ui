@@ -18,7 +18,7 @@
     </copy>
   </target>
 
-  <target name="run-tests" depends="_init">
+  <target name="prepare-tests" depends="_init">
     <condition property="cmd.npm" value="npm.cmd" else="npm">
       <os family="windows"/>
     </condition>
@@ -36,9 +36,22 @@
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
     </exec>
+  </target>
+
+  <target name="run-critical-tests" depends="prepare-tests" unless="maven.profile.ftest">
+    <exec executable="${cmd.npm}" failonerror="true">
+      <arg value="run" />
+      <arg value="test:critical" />
+    </exec>
+  </target>
+
+  <target name="run-all-tests" depends="prepare-tests" if="maven.profile.ftest">
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="test" />
     </exec>
+  </target>
+
+  <target name="run-tests" depends="run-critical-tests,run-all-tests">
   </target>
 
 </project>

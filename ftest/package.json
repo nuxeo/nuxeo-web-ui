@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "test": "nuxeo-web-ui-ftest --report --screenshots --headless",
+    "test:critical": "nuxeo-web-ui-ftest --tags=@critical --report --screenshots --headless",
     "test:dev": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo --url=http://localhost:5000/",
     "test:watch": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo  --url=http://localhost:5000/ --tags=@watch --debug"
   },
