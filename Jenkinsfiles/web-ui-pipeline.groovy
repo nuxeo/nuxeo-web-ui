@@ -122,15 +122,18 @@ timestamps {
                                 if (uiel) {
                                     sh "npm install --no-package-lock ../nuxeo-elements/ui/${uiel}"
                                 }
-                                withEnv(["NODE_OPTIONS=--max-old-space-size=4096"]) {
-                                    def profiles = []
-                                    if (!params.SKIP_IT_TESTS) profiles.add('ftest')
-                                    if (params.GENERATE_METRICS) profiles.add('metrics')
-                                    withCredentials([usernamePassword(credentialsId: 'SAUCE_WEB_UI_ACCESS_KEY', passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
-                                        sh "mvn clean install ${profiles.isEmpty() ? "" : "-P" + profiles.join(",")} -DskipInstall"
+                                try {
+                                    withEnv(["NODE_OPTIONS=--max-old-space-size=4096"]) {
+                                        def profiles = []
+                                        if (!params.SKIP_IT_TESTS) profiles.add('ftest')
+                                        if (params.GENERATE_METRICS) profiles.add('metrics')
+                                        withCredentials([usernamePassword(credentialsId: 'SAUCE_WEB_UI_ACCESS_KEY', passwordVariable: 'SAUCE_ACCESS_KEY', usernameVariable: 'SAUCE_USERNAME')]) {
+                                            sh "mvn clean install ${profiles.isEmpty() ? "" : "-P" + profiles.join(",")} -DskipInstall"
+                                        }
                                     }
+                                } finally {
+                                    archiveArtifacts '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/marketplace-itests/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
                                 }
-                                archive '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/marketplace-itests/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
                             }
                         } else {
                             echo 'No need to build nuxeo-web-ui'
