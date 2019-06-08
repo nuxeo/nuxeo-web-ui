@@ -81,7 +81,7 @@
   "app.document.removedFromFavorites": "Document enlevé des favoris.",
   "app.document.subscribed": "Vous suivez maintenant ce document.",
   "app.document.untrashed.error": "Erreur lors de la restauration des documents",
-  "app.document.untrashed.success": "Documents restaurés avec succès",
+  "app.document.untrashed.success": "Document restauré avec succès",
   "app.document.unlocked": "Document déverrouillé",
   "app.document.unsubscribed": "Vous ne suivez plus ce document.",
   "app.documents.addedToClipboard": "Documents ajoutés au presse-papier.",
