@@ -1,0 +1,26 @@
+{
+  "name": "nuxeo-web-ui-cypressio",
+  "version": "1.0.0",
+  "scripts": {
+    "cypress:open": "$(npm bin)/cypress open",
+    "test": "$(npm bin)/cypress run --browser chrome --env nuxeoUrl=http://localhost:8080",
+    "rf": "$(npm bin)/cypress run --browser chrome --env nuxeoUrl=https://nightly-rainforest.nuxeo.com",
+    "dev:local": "$(npm bin)/cypress run --browser chrome --env nuxeoUrl=http://localhost:8080 --no-exit",
+    "dev:rf": "$(npm bin)/cypress run --browser chrome --env nuxeoUrl=https://nightly-rainforest.nuxeo.com --no-exit"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "chai-jquery": "^2.1.0",
+    "cypress": "^3.3.1",
+    "cypress-cucumber-preprocessor": "^1.11.2",
+    "eslint": "^5.16.0",
+    "jquery": "^3.4.1",
+    "nuxeo": "^3.14.0"
+  },
+  "dependencies": {
+    "chai": "^4.2.0"
+  },
+  "cypress-cucumber-preprocessor": {
+    "step_definitions": "./cypress/support/step_definitions/"
+  }
+}

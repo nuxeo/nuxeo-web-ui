@@ -33,6 +33,12 @@
         <module>plugin/metrics</module>
       </modules>
     </profile>
+    <profile>
+      <id>cypressio</id>
+      <modules>
+        <module>cypressio/</module>
+      </modules>
+    </profile>
   </profiles>
 
   <dependencyManagement>
