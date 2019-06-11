@@ -142,6 +142,7 @@ Polymer({
           sort-by="[[_displaySort(document, 'dc:title')]]"
           filter-by="title"
           flex="100"
+          filter-expression="$term*"
         >
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
