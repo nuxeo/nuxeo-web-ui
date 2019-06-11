@@ -27,7 +27,17 @@ const suggestionSet = (element, value) => {
       }
       element.waitForVisible(isMulti ? '.selectivity-multiple-input' : '.selectivity-search-input');
       element.element(isMulti ? '.selectivity-multiple-input' : '.selectivity-search-input').setValue(values[i]);
-      element.waitForVisible('.selectivity-result-item.highlight');
+      driver.waitUntil(() => {
+        if (element.isVisible('.selectivity-result-item.highlight')) {
+          try {
+            const highlight = element.element('.selectivity-result-item.highlight');
+            return highlight.getText().trim().includes(values[i]);
+          } catch (e) {
+            return false;
+          }
+        }
+        return false;
+      });
       element.click('.selectivity-result-item.highlight');
     }
   // it's a reset
