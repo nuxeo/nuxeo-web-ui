@@ -303,7 +303,7 @@ limitations under the License.
               this._refresh();
               this.fire('notify', {message: this.i18n('vocabularyManagement.successfullyDeleted')});
             }.bind(this), function(err) {
-              if (err.status === 401) {
+              if (err.status === 409) {
                 this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' +
                                             this.i18n('vocabularyManagement.cannotDelete.referencedEntry')});
               } else {
