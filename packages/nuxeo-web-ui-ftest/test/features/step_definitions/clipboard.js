@@ -32,3 +32,15 @@ Then('I can see the clipboard has {int} item(s)', function (nb) {
   this.ui.drawer.clipboard.waitForVisible();
   driver.waitUntil(() => this.ui.drawer.clipboard.nbItems === nb);
 });
+Then('I can see clipboard actions disabled', function () {
+  if (!this.ui.drawer.clipboard.isVisible()) {
+    this.ui.drawer.open('clipboard');
+  }
+  const moveButton = this.ui.drawer.clipboard.moveButton;
+  moveButton.waitForVisible();
+  driver.waitUntil(() => moveButton.getAttribute('disabled') === 'true');
+
+  const pasteButton = this.ui.drawer.clipboard.pasteButton;
+  pasteButton.waitForVisible();
+  driver.waitUntil(() => pasteButton.getAttribute('disabled') === 'true');
+});

@@ -14,15 +14,23 @@ export default class Clipboard extends BasePage {
     return count;
   }
 
+  get moveButton() {
+    return this.el.element('#move');
+  }
+
+  get pasteButton() {
+    return this.el.element('#paste');
+  }
+
   move() {
-    const moveBtn = this.el.element('#move');
+    const moveBtn = this.moveButton;
     moveBtn.waitForVisible();
     moveBtn.waitForEnabled();
     moveBtn.click();
   }
 
   paste() {
-    const copyBtn = this.el.element('#paste');
+    const copyBtn = this.pasteButton;
     copyBtn.waitForVisible();
     copyBtn.waitForEnabled();
     copyBtn.click();
