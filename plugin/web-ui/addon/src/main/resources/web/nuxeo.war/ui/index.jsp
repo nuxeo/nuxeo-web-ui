@@ -108,6 +108,7 @@ limitations under the License.
   <script defer src="vendor/alloy/alloy-editor-all.js"></script>
 
   <script>
+    window.polymerSkipLoadingFontRoboto = true;
     var Nuxeo = Nuxeo || {};
     Nuxeo.UI = Nuxeo.UI || {};
     Nuxeo.UI.config = <%= cs.getPropertiesAsJson("org.nuxeo.web.ui") %>;

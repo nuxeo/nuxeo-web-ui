@@ -6,6 +6,7 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ProvidePlugin } = require('webpack');
 const PackageModulizerPlugin = require('package-modulizer-plugin');
+const HtmlWebpackPreconnectPlugin = require('html-webpack-preconnect-plugin');
 
 const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
 
@@ -184,7 +185,9 @@ const common = merge([
           packages: JSON.stringify(NUXEO_PACKAGES),
           url: process.env.NUXEO_URL || '/nuxeo',
         },
+        preconnect: ['https://fonts.googleapis.com'],
       }),
+      new HtmlWebpackPreconnectPlugin(),
     ]
       .concat(
         process.env.NO_HTML_IMPORTS &&
