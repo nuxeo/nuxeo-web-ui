@@ -193,6 +193,10 @@ limitations under the License.
         this.$.latestEditedDocs.fetch();
         this.$.recentStorage.reload();
         this._fetchFavorite().then(function(favorite) {
+          if (!(favorite && favorite.uid)) {
+            return;
+          }
+
           this.$.favoritesProvider.params = [favorite.uid];
           this.$.favoritesProvider.page = 1;
           this.$.favoriteDocs.fetch();
