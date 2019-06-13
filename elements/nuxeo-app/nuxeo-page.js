@@ -42,7 +42,7 @@ Polymer({
       #content {
         flex: 1 1 auto;
         position: relative;
-        overflow-y: auto;
+        overflow-y: hidden;
         padding: 16px 16px 0 16px;
       }
 
