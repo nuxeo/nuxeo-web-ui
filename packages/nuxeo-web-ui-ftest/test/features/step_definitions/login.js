@@ -12,6 +12,7 @@ Given('user {string} exists in group {string}', (username, group) => fixtures.us
     properties: {
       username,
       firstName: username,
+      email: `${username}@test.com`,
       password: fixtures.users.DEFAULT_PASSWORD,
       groups: [group],
     },
@@ -24,6 +25,7 @@ Given('user {string} exists', username => fixtures.users.create(
     properties: {
       username,
       firstName: username,
+      email: `${username}@test.com`,
       password: fixtures.users.DEFAULT_PASSWORD,
     },
   },
