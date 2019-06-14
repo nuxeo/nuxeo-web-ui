@@ -76,12 +76,12 @@ limitations under the License.
       <template is="dom-if" if="[[_hasObjectInnerChanges(delta)]]">
         <template is="dom-if" if="[[!hideDeletions]]">
           <div class="deletion">
-            <span class="deleted">[[formatDirectory(delta.id.0)]]</span>
+            <span class="deleted">[[formatDirectory(originalValue)]]</span>
           </div>
         </template>
         <template is="dom-if" if="[[!hideAdditions]]">
           <div class="addition">
-            <span class="added">[[formatDirectory(delta.id.1)]]</span>
+            <span class="added">[[formatDirectory(newValue)]]</span>
           </div>
         </template>
       </template>
