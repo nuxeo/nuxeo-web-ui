@@ -84,12 +84,12 @@ limitations under the License.
       <template is="dom-if" if="[[_hasObjectInnerChanges(delta)]]">
         <template is="dom-if" if="[[!hideDeletions]]">
           <div class="deletion">
-            <nuxeo-user-tag user="[[delta.id.0]]"></nuxeo-user-tag>
+            <nuxeo-user-tag user="[[originalValue]]"></nuxeo-user-tag>
           </div>
         </template>
         <template is="dom-if" if="[[!hideAdditions]]">
           <div class="addition">
-            <nuxeo-user-tag user="[[delta.id.1]]"></nuxeo-user-tag>
+            <nuxeo-user-tag user="[[newValue]]"></nuxeo-user-tag>
           </div>
         </template>
       </template>
