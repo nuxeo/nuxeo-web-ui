@@ -6,3 +6,4 @@ plugin/
 target/
 .tmp/
 index.html
+dist/

@@ -4,3 +4,4 @@ packages/nuxeo-web-ui-ftest/*
 plugin/
 target/
 .tmp/
+dist/
