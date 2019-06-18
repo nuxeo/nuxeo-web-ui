@@ -15,15 +15,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 /// #if NO_HTML_IMPORTS
-function loadTheme(theme) {
-  const template = document.createElement('template');
-  template.innerHTML = theme;
-  document.head.appendChild(template.content);
+function importTheme(theme) {
+  return import(
+    /* webpackChunkName: "[request]" */
+    // eslint-disable-next-line comma-dangle
+    `./${theme}/theme.html`
+  ).then((m) => {
+    const template = document.createElement('template');
+    template.innerHTML = m.default;
+    document.head.appendChild(template.content);
+  });
 }
 
-import(`./${localStorage.getItem('theme') || 'default'}/theme.html`)
-  .then((m) => loadTheme(m.default))
-  .catch(() => import(`./default/theme.html`).then((m) => loadTheme(m.default)));
+importTheme(localStorage.getItem('theme') || 'default').catch(() => importTheme('default'));
 
 /// #else
 const url = `themes/${localStorage.getItem('theme') || 'default'}/theme.html`;

@@ -335,17 +335,55 @@ setPassiveTouchGestures(true);
 
 /// #if NO_HTML_IMPORTS
 // eslint-disable-next-line no-unused-vars
+/* eslint-disable comma-dangle */
 const pages = {
-  'nuxeo-home': () => import('./nuxeo-home.html'),
-  'nuxeo-browser': () => import('./nuxeo-browser.html'),
-  'nuxeo-tasks': () => import('./nuxeo-tasks.html'),
-  'nuxeo-admin': () => import('./nuxeo-admin.html'),
-  'nuxeo-profile': () => import('./nuxeo-profile.html'),
-  'nuxeo-themes': () => import('./nuxeo-themes.html'),
-  'nuxeo-diff-page': () => import('./nuxeo-diff-page.html'),
-  'nuxeo-user-authorized-apps': () => import('./nuxeo-user-authorized-apps.html'),
-  'nuxeo-user-cloud-services': () => import('./nuxeo-user-cloud-services.html'),
+  'nuxeo-home': () =>
+    import(
+      /* webpackChunkName: "nuxeo-home" */
+      './nuxeo-home.html'
+    ),
+  'nuxeo-browser': () =>
+    import(
+      /* webpackChunkName: "nuxeo-browser" */
+      './nuxeo-browser.html'
+    ),
+  'nuxeo-tasks': () =>
+    import(
+      /* webpackChunkName: "nuxeo-tasks" */
+      './nuxeo-tasks.html'
+    ),
+  'nuxeo-admin': () =>
+    import(
+      /* webpackChunkName: "nuxeo-admin" */
+      './nuxeo-admin.html'
+    ),
+  'nuxeo-profile': () =>
+    import(
+      /* webpackChunkName: "nuxeo-profile" */
+      './nuxeo-profile.html'
+    ),
+  'nuxeo-themes': () =>
+    import(
+      /* webpackChunkName: "nuxeo-themes" */
+      './nuxeo-themes.html'
+    ),
+  'nuxeo-diff-page': () =>
+    import(
+      /* webpackChunkName: "nuxeo-diff-page" */
+      './nuxeo-diff-page.html'
+    ),
+  'nuxeo-user-authorized-apps': () =>
+    import(
+      /* webpackChunkName: "nuxeo-user-authorized-apps" */
+      './nuxeo-user-authorized-apps.html'
+    ),
+  'nuxeo-user-cloud-services': () =>
+    import(
+      /* webpackChunkName: "nuxeo-user-cloud-services" */
+      './nuxeo-user-cloud-services.html'
+    ),
 };
+/* eslint-enable comma-dangle */
 /// #endif
 
 /**

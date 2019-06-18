@@ -362,7 +362,11 @@ Polymer({
   created() {
     if (!_customLoadPromise) {
       /// #if NO_HTML_IMPORTS
-      _customLoadPromise = import('./imports.html');
+      _customLoadPromise = import(
+        /* webpackChunkName: "diff-imports" */
+        // eslint-disable-next-line comma-dangle
+        './imports.html'
+      );
       /// #else
       _customLoadPromise = new Promise((resolve, reject) => {
         importHref(this.resolveUrl('imports.html'), resolve, reject);
