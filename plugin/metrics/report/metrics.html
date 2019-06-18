@@ -38,6 +38,7 @@
         // table.addColumn('number', 'Loaded');
         table.addColumn('number', 'App ready');
         table.addColumn('number', 'Page loaded');
+        table.addColumn('number', 'Browser DOM Changed');
 
         var rows = Object.keys(data).map((browser) => [
           browser,
@@ -45,7 +46,8 @@
           data[browser].firstContentfulPaint / 1000.0,
           data[browser].domContentLoaded / 1000.0,
           data[browser].userTiming.find((e) => e.name == 'nuxeo-app.ready').startTime / 1000.0,
-          data[browser].userTiming.find((e) => e.name == 'nuxeo-app.page-loaded').startTime / 1000.0
+          data[browser].userTiming.find((e) => e.name == 'nuxeo-app.page-loaded').startTime / 1000.0,
+          data[browser].userTiming.find((e) => e.name == 'nuxeo-browser.dom-changed').duration / 1000.0
         ]);
 
         table.addRows(rows);

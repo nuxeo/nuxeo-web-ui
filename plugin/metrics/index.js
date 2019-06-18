@@ -1,17 +1,51 @@
-const webdriverio = require('webdriverio');
-const sauce = require('./lib/sauce.js');
-const { capabilities } = require('./wdio.conf.js');
 const fs = require('fs');
+const { multiremote } = require('webdriverio');
+var selenium = require('selenium-standalone');
 
-function bench() {
-    var client = webdriverio.multiremote(capabilities);
+async function runSelenium() {
+    return new Promise((resolve, reject) => selenium.install({}, function(err) {
+        if (err) {
+            debugger;
+            reject();
+        } else {
+            selenium.start(function(err, proc) {
+                if (err) {
+                    proc.kill();
+                    reject()
+                } else {
+                    resolve(proc);
+                }
+            })
+        }
+    }));
+}
 
+async function bench() {
+    const selenium = await runSelenium();
+    var client = multiremote({
+        chrome: {
+            desiredCapabilities: {
+                browserName: 'chrome',
+            }
+        },
+        firefox: {
+            desiredCapabilities: {
+                browserName: 'firefox',
+            }
+        },
+        safari: {
+            desiredCapabilities: {
+                browserName: 'safari',
+            }
+        },
+    });
     return client.init()
-        .url('http://localhost:8080/nuxeo/ui')
+        /* .setNetworkConditions({}, 'Good 3G') */
+        .url('http://localhost:8080/nuxeo/ui/#!/browse/default-domain/workspaces/demo')
         .setValue('#username', 'Administrator')
         .setValue('#password', 'Administrator')
         .click('[name="Submit"]')
-        .waitUntil(() => client.execute(() => document.readyState === 'complete'))
+        /* .waitUntil(() => client.execute(() => document.readyState === 'complete')) */
         .pause(10000) // wait 10s before gathering all the metrics
         .execute(() => Nuxeo.Performance.report())
         .then((data) => {
@@ -19,13 +53,11 @@ function bench() {
             Object.keys(data).forEach((browser) => {
                 res[browser] = data[browser].value;
             });
-            fs.writeFileSync(`target/report/metrics.json`, JSON.stringify(res));
+            fs.writeFileSync(`report/metrics.json`, JSON.stringify(res));
         })
         .end()
-        .catch((err) => console.log(err));
+        .catch((err) => console.log(err))
+        .finally(() => selenium.kill());
 }
 
-sauce.connect(capabilities)
-.then(bench)
-.then(() => sauce.close())
-.catch((e) => console.error(e));
+bench().catch((e) => console.error(e));

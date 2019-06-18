@@ -1,22 +1,18 @@
-exports.capabilities = {
-  chrome: {
+exports.config = {
+    services: ['selenium-standalone'],
+    chrome: {
+        desiredCapabilities: {
+            browserName: 'chrome',
+        }
+    },
+    firefox: {
+        desiredCapabilities: {
+            browserName: 'firefox',
+        }
+    },
+    safari: {
       desiredCapabilities: {
-          browserName: 'chrome',
-          platform: 'Windows 10',
-          version: '',
+          browserName: 'safari',
       }
-  },
-  firefox: {
-      desiredCapabilities: {
-          browserName: 'firefox',
-          platform: 'Windows 10',
-          version: '',
-      }
-  },
-  edge: {
-      desiredCapabilities: {
-          browserName: 'microsoftedge',
-          version: ''
-      }
-  }
+    },
 };
