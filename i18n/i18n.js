@@ -19,7 +19,23 @@ import { XHRLocaleResolver } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.
 const baseUrl = window.nuxeo.I18n.baseUrl || window.location.origin + window.location.pathname;
 const msgFolder = `${baseUrl + (baseUrl.endsWith('/') ? '' : '/')}i18n`;
 window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';
+/// #if NO_HTML_IMPORTS
+function importMessagesFile(language) {
+  return import(
+    /* webpackMode: "eager" */ /* webpackChunkName: "[request]" */
+    // eslint-disable-next-line comma-dangle
+    `./messages${language === 'en' ? '' : `-${language}`}.json`
+  ).then((m) => {
+    window.nuxeo.I18n[language] = JSON.parse(m.default); // cache this locale
+    window.nuxeo.I18n.language = language;
+    return Promise.resolve(m.default);
+  });
+}
+window.nuxeo.I18n.localeResolver = () =>
+  importMessagesFile(window.nuxeo.I18n.language).catch(() => importMessagesFile('en'));
+/// #else
 window.nuxeo.I18n.localeResolver = new XHRLocaleResolver(msgFolder);
+/// #endif
 window.nuxeo.I18n.loadLocale().then(() => {
   /* Set html lang attribute. Required by the better-dateinput element */
   document.getElementsByTagName('html')[0].lang = window.nuxeo.I18n.language;

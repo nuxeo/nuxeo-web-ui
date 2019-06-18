@@ -158,6 +158,12 @@ const common = merge([
                 include: [resolve(__dirname, 'themes')],
                 use: 'raw-loader',
               },
+              {
+                test: /.json$/,
+                type: 'javascript/auto', // skip default json loader
+                include: [resolve(__dirname, 'i18n')],
+                loader: 'raw-loader',
+              },
             ]
           : [
               {
