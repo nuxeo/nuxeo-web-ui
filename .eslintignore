@@ -1,9 +1,9 @@
 metrics/
 node_modules/
-packages/nuxeo-web-ui-ftest/*
-!packages/nuxeo-web-ui-ftest/test
+packages/
 plugin/
 target/
+dist/
 .tmp/
 index.html
 dist/

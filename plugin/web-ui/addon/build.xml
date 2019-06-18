@@ -41,8 +41,11 @@ limitations under the License.
     <!-- npm-run script="${lint.script}" /-->
   </target>
 
-  <target name="build" depends="init">
+  <target name="npm-build" depends="init" unless="skipBuild">
     <npm-run script="build" />
+  </target>
+
+  <target name="build" depends="npm-build">
     <copy todir="target/classes/web/nuxeo.war/ui">
       <fileset dir="../../../dist">
         <exclude name="index.html"/>
