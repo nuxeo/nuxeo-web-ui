@@ -132,7 +132,7 @@ timestamps {
                                         }
                                     }
                                 } finally {
-                                    archiveArtifacts '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/marketplace-itests/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
+                                    archiveArtifacts '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
                                 }
                             }
                         } else {
