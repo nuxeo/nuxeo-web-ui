@@ -957,7 +957,7 @@ Polymer({
     const layout = this.$$('#document-import');
 
     // run our custom validation function first to allow setting custom native validity
-    const result = (!layout || layout.validate()) && this._doNativeValidation(this.$.form) && this.$.form.validate();
+    const result = this._doNativeValidation(this.$.form) && this.$.form.validate();
 
     if (result || !layout) {
       return result;
