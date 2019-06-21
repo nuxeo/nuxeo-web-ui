@@ -219,7 +219,7 @@
   "cloudConsumers.errorCreating": "An error occurred while creating the client.",
   "cloudConsumers.errorDeleting": "An error occurred while deleting the client.",
   "cloudConsumers.errorEditing": "An error occurred while editing the client.",
-  "cloudConsumers.isEnabled": "Enabled",
+  "cloudConsumers.isEnabled": "Habilitado",
   "cloudConsumers.name": "Name",
   "cloudConsumers.redirect": "Redirect URIs",
   "cloudConsumers.secret": "Client Secret",
