@@ -22,6 +22,7 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -196,8 +197,9 @@ Polymer({
       <template is="dom-if" if="[[_hasDocument(doc)]]">
         <a class="title" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
           <div class="dataContainer">
-            <div class="title">[[doc.title]]</div>
+            <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
+            <nuxeo-tooltip for="title">[[doc.title]]</nuxeo-tooltip>
           </div>
         </a>
         <div class="actions">
