@@ -17,9 +17,8 @@ limitations under the License.
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { IronFormElementBehavior } from '@polymer/iron-form-element-behavior';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-element.js';
-import './nuxeo-ai-icons.js';
+import './nuxeo-ai-suggestion.js';
 
 /**
  * `nuxeo-ai-suggestions` allows selecting one or more tags.
@@ -32,7 +31,7 @@ import './nuxeo-ai-icons.js';
  *
  * @memberof Nuxeo
  */
-class AISuggestions extends mixinBehaviors([I18nBehavior, IronFormElementBehavior], Nuxeo.Element) {
+class AISuggestions extends mixinBehaviors([IronFormElementBehavior], Nuxeo.Element) {
   static get template() {
     return html`
       <style>
@@ -47,7 +46,7 @@ class AISuggestions extends mixinBehaviors([I18nBehavior, IronFormElementBehavio
           display: none;
         }
 
-        .suggestion {
+        nuxeo-ai-suggestion {
           margin: 0 10px 10px 0;
           padding: 5px 9px 5px;
 
@@ -66,27 +65,24 @@ class AISuggestions extends mixinBehaviors([I18nBehavior, IronFormElementBehavio
           @apply --layout-center;
         }
 
-        .suggestion:hover {
-          background-color: var(--nuxeo-artificial-intelligence-confidence-hover, rgba(74, 144, 246, 0.1));
-        }
-
-        .chosen {
+        nuxeo-ai-suggestion[match] {
           opacity: 0.3;
           pointer-events: none;
         }
 
-        iron-icon {
-          --iron-icon-fill-color: var(--nuxeo-artificial-intelligence-confidence-color, #4a90e2);
-          margin-left: 7px;
-          height: 1.2em;
+        nuxeo-ai-suggestion:hover {
+          background-color: var(--nuxeo-artificial-intelligence-confidence-hover, rgba(74, 144, 246, 0.1));
         }
       </style>
 
       <template is="dom-repeat" items="[[suggestions]]">
-        <div class$="suggestion [[_styleSuggestion(item, _inputMatches)]]" on-click="_selectSuggestion">
-          <span>[[idFunction(item.name)]]</span>
-          <iron-icon icon="[[_getConfidenceIcon(item.confidence)]]"></iron-icon>
-        </div>
+        <nuxeo-ai-suggestion
+          suggestion="[[item]]"
+          match$="[[_machesInput(item, _inputMatches)]]"
+          threshold="[[threshold]]"
+          property="[[property]]"
+          on-click="_selectSuggestion"
+        ></nuxeo-ai-suggestion>
       </template>
     `;
   }
@@ -166,21 +162,8 @@ class AISuggestions extends mixinBehaviors([I18nBehavior, IronFormElementBehavio
     this._inputMatches = matches;
   }
 
-  _styleSuggestion(suggestion) {
-    return this._inputMatches && suggestion.name && this._inputMatches.get(suggestion.name) ? 'chosen' : '';
-  }
-
-  _getConfidenceIcon(confidenceLevel) {
-    const interval = (1 - this.threshold) / 3;
-    let icon;
-    if (confidenceLevel >= this.threshold && confidenceLevel < this.threshold + interval) {
-      icon = 'nuxeo-ai:confidence-level-low';
-    } else if (confidenceLevel >= this.threshold + interval && confidenceLevel < this.threshold + 2 * interval) {
-      icon = 'nuxeo-ai:confidence-level-medium';
-    } else if (confidenceLevel >= this.threshold + 2 * interval && confidenceLevel <= 1) {
-      icon = 'nuxeo-ai:confidence-level-high';
-    }
-    return icon;
+  _machesInput(suggestion) {
+    return this._inputMatches && suggestion.name && this._inputMatches.get(suggestion.name);
   }
 
   _selectSuggestion(event) {

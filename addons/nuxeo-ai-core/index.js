@@ -110,19 +110,21 @@ const AISuggestionManager = (() => {
           response.forEach((service) => {
             service.suggestions.forEach((suggestion) => {
               const element = model[`document.properties.${suggestion.property}`];
-              const suggestionWidget = _getSuggestionWidget(element);
-              if (!suggestionWidget.property) {
-                // convert path to xpath
-                suggestionWidget.property = suggestion.property;
-              }
-              suggestionWidget.suggestions = suggestion.values;
-              suggestionWidget.document = layout.document;
-              // set up binding
-              suggestionWidget.addEventListener('document-changed', (evt) => {
-                if ('path' in evt.detail && 'value' in evt.detail) {
-                  layout.notifyPath(evt.detail.path);
+              if (element) {
+                const suggestionWidget = _getSuggestionWidget(element);
+                if (!suggestionWidget.property) {
+                  // convert path to xpath
+                  suggestionWidget.property = suggestion.property;
                 }
-              });
+                suggestionWidget.suggestions = suggestion.values;
+                suggestionWidget.document = layout.document;
+                // set up binding
+                suggestionWidget.addEventListener('document-changed', (evt) => {
+                  if ('path' in evt.detail && 'value' in evt.detail) {
+                    layout.notifyPath(evt.detail.path);
+                  }
+                });
+              }
             });
           });
         });
@@ -136,7 +138,12 @@ document.addEventListener('document-layout-changed', (e) => {
     return;
   }
   const layout = e.detail.element;
-  layout._documentChanged = () => AISuggestionManager.updateWidgetSuggestions(layout);
-  layout._createMethodObserver('_documentChanged(document.*)', true);
-  AISuggestionManager.updateWidgetSuggestions(e.detail.element);
+  if (!layout) {
+    return;
+  }
+  customElements.whenDefined(layout.tagName.toLowerCase()).then(() => {
+    layout._documentChanged = () => AISuggestionManager.updateWidgetSuggestions(layout);
+    layout._createMethodObserver('_documentChanged(document.*)', true);
+    AISuggestionManager.updateWidgetSuggestions(e.detail.element);
+  });
 });
