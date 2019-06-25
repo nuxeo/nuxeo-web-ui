@@ -26,8 +26,32 @@ import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.j
 Polymer({
   _template: html`
     <style>
-      #statsResult {
-        height: 60vh;
+      .page {
+        @apply --layout-horizontal;
+      }
+
+      .main {
+        @apply --layout-vertical;
+        @apply --layout-flex-3;
+        padding: 2em 1em 0 2em;
+        overflow: hidden;
+      }
+
+      .mainCard {
+        padding: 1em;
+      }
+
+      .sideCard {
+        padding: 1em 2em;
+      }
+
+      .side {
+        @apply --layout-vertical;
+        @apply --layout-flex-2;
+        position: relative;
+        margin-bottom: var(--nuxeo-card-margin-bottom, 16px);
+        min-height: 60vh;
+        padding: 2em 2em 0 0;
       }
 
       .totalLabel {
@@ -38,142 +62,128 @@ Polymer({
         @apply --layout-horizontal;
         @apply --layout-wrap;
       }
+
+      /* #exportDatasetBtn {
+            color: var(--nuxeo-button-primary-text);
+            background-color: var(--nuxeo-button-primary-focus);
+        } */
     </style>
 
-    <nuxeo-operation id="aiStats" op="AI.DatasetStats" response="{{_stats}}"></nuxeo-operation>
     <nuxeo-operation id="aiExport" op="AI.DatasetExport"></nuxeo-operation>
-    <nuxeo-card heading="[[i18n('admin.ai.export')]]">
-      <paper-textarea
-        id="queryInput"
-        type="search"
-        label="[[i18n('admin.ai.query')]]"
-        value="{{query}}"
-        placeholder="[[i18n('imaging.query.placeholder')]]"
-        autofocus
-      >
-      </paper-textarea>
-      <paper-input id="inputs" label="[[i18n('admin.ai.inputs')]]" value="{{inProps}}"></paper-input>
-      <paper-input id="outputs" label="[[i18n('admin.ai.outputs')]]" value="{{outProps}}"></paper-input>
-      <paper-input id="split" label="[[i18n('admin.ai.split')]]" value="{{splitProp}}"></paper-input>
-      <paper-button on-tap="_recompute">[[i18n('admin.ai.stats.action')]]</paper-button>
-      <paper-button on-tap="_export">[[i18n('admin.ai.export.action')]]</paper-button>
-    </nuxeo-card>
-    <nuxeo-card heading="[[i18n('admin.ai.stats')]]">
-      <div class="row-container">
-        <span class="totalLabel">[[_computeLabel(_stats, 'total', i18n)]]</span>
-        <span class="totalLabel">[[_computeLabel(_stats, 'count', i18n)]]</span>
+    <nuxeo-operation id="aiExportStatus" op="AI.ExportStatus" on-response="_statusReceived"> </nuxeo-operation>
+    <div class="page">
+      <div class="main">
+        <nuxeo-card heading="[[i18n('admin.ai.model.selection')]]">
+          <div class="mainCard">
+            <nuxeo-input class="widget" value="{{typeName}}" label="Document Type" type="text"> </nuxeo-input>
+            <nuxeo-document-suggestion
+              on-selected-item-changed="_updateItem"
+              value="{{fetchedDoc}}"
+              label=""
+              placeholder="[[i18n('admin.ai.model.listing')]]"
+              min-chars="0"
+              role="widget"
+              operation="AI.GetModel"
+            >
+            </nuxeo-document-suggestion>
+
+            <paper-button id="exportDatasetBtn" noink on-tap="_export"
+              >[[i18n('admin.ai.export.action')]]
+            </paper-button>
+          </div>
+        </nuxeo-card>
       </div>
-      <nuxeo-data-table id="statsResult" items="[[_filter(_stats)]]">
-        <nuxeo-data-table-column name="[[i18n('admin.ai.stats.field')]]" flex="10">
-          <template>
-            [[item.field]]
-          </template>
-        </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('admin.ai.stats.type')]]" flex="10">
-          <template>
-            [[item.type]]
-          </template>
-        </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('admin.ai.stats.value')]]" flex="50">
-          <template>
-            [[_displayVal(item)]]
-          </template>
-        </nuxeo-data-table-column>
-      </nuxeo-data-table>
-    </nuxeo-card>
-    <nuxeo-card heading="[[i18n('admin.ai.export')]]">
-      <div class="row-container">
-        [[_exportText]]
+      <div class="side">
+        <nuxeo-card heading="[[i18n('admin.ai.export')]]">
+          <div class="sideCard">
+            <div>
+              <template is="dom-repeat" items="[[statuses]]">
+                <nuxeo-ai-export-progress status="[[item]]"></nuxeo-ai-export-progress>
+              </template>
+            </div>
+          </div>
+        </nuxeo-card>
       </div>
-    </nuxeo-card>
+    </div>
   `,
 
   is: 'nuxeo-admin-ai-export',
   behaviors: [LayoutBehavior],
 
   properties: {
-    inProps: {
-      type: String,
-      value: 'dc:title,file:content',
-    },
-    outProps: {
-      type: String,
-      value: 'dc:lastContributor',
-    },
-    splitProp: {
-      type: String,
-      value: '80',
-    },
-    query: {
-      type: String,
-      value: "SELECT * FROM Document WHERE ecm:primaryType = 'File'",
-    },
-    _exportText: {
+    typeName: {
       type: String,
       value: '',
     },
-    _stats: {
-      type: String,
+    fetchedDoc: {
+      type: Object,
+    },
+    currentDoc: {
+      type: Object,
+    },
+
+    statuses: {
+      type: Array,
+      value: [],
     },
   },
 
-  _displayVal(val) {
-    if (val.numericValue != null) {
-      return val.numericValue;
+  ready() {
+    this.$.aiExportStatus.execute();
+  },
+
+  _statusReceived(resp) {
+    let pollTime = 30000;
+    this.statuses = resp.detail.response.value;
+    // defines if the tab is currently active if so, we want to poll more often
+    if (this.offsetParent !== null) {
+      pollTime = 2000;
     }
-    if (val.type === 'terms') {
-      let toReturn = '';
-      for (let i = 0, len = val.value.length; i < len; i++) {
-        toReturn += ` ${val.value[i].key} (${val.value[i].docCount})`;
-      }
-      return toReturn;
-    }
-    return JSON.stringify(val.value);
+
+    setTimeout(this._poll, pollTime, this.$.aiExportStatus);
   },
 
-  _filter(items) {
-    return items && items.filter((item) => !(item.type === 'total' || item.type === 'count'));
+  _poll(func) {
+    return func.execute();
   },
 
-  _computeLabel(theStats, fieldName) {
-    const foundItem = theStats && theStats.find((item) => item.type === fieldName);
-    return foundItem && this.i18n(`admin.ai.export.${fieldName}`, foundItem.numericValue);
-  },
-
-  _recompute() {
-    this.$.aiStats.params = {
-      query: this.query,
-      inputs: this.inProps,
-      outputs: this.outProps,
-    };
-    this.$.aiStats
-      .execute()
-      .then((response) => {
-        if (response === undefined || response.length === 0) {
-          this.fire('notify', { message: this.i18n('admin.ai.stats.none') });
-        }
-      })
-      .catch(() => {
-        this.fire('notify', { message: this.i18n('admin.ai.stats.error') });
-      });
+  _updateItem(e) {
+    this.$.currentDoc = e.detail.value;
   },
 
   _export() {
+    if (!this._canExport()) {
+      this.fire('notify', { message: 'Type and Model are required parameters' });
+      return;
+    }
+    const props = this.$.currentDoc.properties;
+    const inputs = props['ai_model:inputs'];
+    const input = inputs.map((e) => e.name).join(',');
+
+    const outputs = props['ai_model:outputs'];
+    const output = outputs.map((e) => e.name).join(',');
+
+    const query =
+      `SELECT * FROM Document WHERE ecm:isProxy = 0` +
+      ` AND ecm:isVersion = 0 AND ecm:isTrashed = 0 AND ecm:primaryType = '${this.typeName}'`;
     this.$.aiExport.params = {
-      query: this.query,
-      inputs: this.inProps,
-      outputs: this.outProps,
-      split: this.splitProp,
+      query,
+      inputs: input,
+      outputs: output,
     };
+
     this.$.aiExport
       .execute()
       .then((response) => {
-        this._exportText = this.i18n('admin.ai.export.id', response.value);
         this.fire('notify', { message: this.i18n('admin.ai.export.success') });
+        return response.value;
       })
       .catch(() => {
-        this._exportText = '';
         this.fire('notify', { message: this.i18n('admin.ai.export.error') });
       });
+  },
+
+  _canExport() {
+    return this.typeName.length !== 0 && this.$.currentDoc !== undefined;
   },
 });
