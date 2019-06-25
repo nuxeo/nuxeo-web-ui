@@ -23,11 +23,11 @@ Given(/^I have the following users$/, table => Promise.all(
     'entity-type': 'user',
     properties: {
       username: row[0],
-      email: `${row[0]}@test.com`,
       firstName: row[1],
       lastName: row[2],
       password: fixtures.users.DEFAULT_PASSWORD,
-      groups: row[3],
+      email: row[3],
+      groups: row[4],
     },
   }))
 ));
