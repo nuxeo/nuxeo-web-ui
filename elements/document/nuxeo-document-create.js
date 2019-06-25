@@ -27,6 +27,7 @@ import '@polymer/paper-spinner/paper-spinner-lite.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-a11y-keys/iron-a11y-keys.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import './nuxeo-document-layout.js';
@@ -82,9 +83,31 @@ Polymer({
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 -3px 0 var(--nuxeo-link-hover-color) inset;
       }
 
-      .typeSelection iron-icon {
+      .typeIconWrapper {
+        display: flex;
+        flex: 1.5;
+        align-items: flex-end;
+      }
+
+      .typeIcon {
         width: var(--nuxeo-document-creation-form-icon-width, 42px);
         height: var(--nuxeo-document-creation-form-icon-height, 42px);
+      }
+
+      .typeLabelWrapper {
+        display: flex;
+        flex: 1;
+        align-items: flex-start;
+      }
+
+      .typeLabel {
+        width: 100%;
+        margin-top: 1em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        word-break: break-word;
+        line-height: normal;
       }
 
       .container {
@@ -114,11 +137,6 @@ Polymer({
         width: 1.2rem;
         height: 1.2rem;
         margin-right: 8px;
-      }
-
-      .typeSelection div {
-        margin-top: 1em;
-        word-break: break-word;
       }
 
       .buttons {
@@ -188,8 +206,13 @@ Polymer({
                   on-tap="_selectType"
                   data-args$="[[type]]"
                 >
-                  <iron-icon src="[[_getTypeIcon(type)]]"></iron-icon>
-                  <div>[[_getTypeLabel(type)]]</div>
+                  <div class="typeIconWrapper">
+                    <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
+                  </div>
+                  <div class="typeLabelWrapper">
+                    <div class="typeLabel">[[_getTypeLabel(type)]]</div>
+                    <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
+                  </div>
                 </paper-button>
               </template>
             </div>
