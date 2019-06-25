@@ -7,10 +7,10 @@ Feature: Search
       | accounting | Accounting |
       | marketing  | Marketing  |
     And I have the following users
-      | username | firstname | lastname | group      |
-      | JSmith   | John      | Smith    | managers   |
-      | SJones   | Susan     | Jones    | accounting |
-      | BJones   | Bob       | Jones    | marketing  |
+      | username | firstname | lastname | email           | group      |
+      | JSmith   | John      | Smith    | JSmith@test.com | managers   |
+      | SJones   | Susan     | Jones    | SJones@test.com | accounting |
+      | BJones   | Bob       | Jones    | BJones@test.com | marketing  |
     And I have the following documents
       | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
       | Workspace  | Test_Workspace   | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                 |                  |        |            |
