@@ -1101,9 +1101,7 @@ Polymer({
   },
 
   _updateCollectionMenu(e) {
-    if (e.detail.provider) {
-      this.$$('#collectionsForm').loadCollection(e.detail.collection, e.detail.provider);
-    }
+    this.$$('#collectionsForm').loadCollection(e.detail.collection);
   },
 
   _showSearchResults(e) {
