@@ -46,7 +46,7 @@ export const TokenBehavior = [
     get resource() {
       if (!this._resource) {
         this._set_resource(document.createElement('nuxeo-resource'));
-        this._attachDom(this._resource);
+        this.shadowRoot.appendChild(this._resource);
       }
 
       return this._resource;
