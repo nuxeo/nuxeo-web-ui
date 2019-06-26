@@ -207,6 +207,15 @@ Polymer({
           >
           </nuxeo-page-provider>
 
+          <nuxeo-page-provider
+            id="membersProvider"
+            provider="default_content_collection"
+            schemas="dublincore,common"
+            page-size="40"
+            enrichers="thumbnail, permissions"
+          >
+          </nuxeo-page-provider>
+
           <nuxeo-data-list
             nx-provider="collectionsProvider"
             id="collectionsList"
@@ -249,6 +258,7 @@ Polymer({
             selection-enabled
             select-on-tap
             as="member"
+            nx-provider="membersProvider"
             empty-label="[[i18n('collections.members.empty')]]"
             empty-label-when-filtered="[[i18n('collections.members.empty')]]"
           >
@@ -503,14 +513,12 @@ Polymer({
     this.$.collectionsList.fetch();
   },
 
-  loadCollection(collection, provider) {
-    if (provider) {
-      this.$.membersList.nxProvider = provider;
-      if (collection && this.selectedCollection && this.selectedCollection.uid === collection.uid) {
-        this.$.membersList.reset();
-        this.$.membersList.fetch();
-        this.displayCollections();
-      }
+  loadCollection(collection) {
+    if (collection && this.selectedCollection && this.selectedCollection.uid === collection.uid) {
+      this.$.membersProvider.params = [collection.uid];
+      this.$.membersList.reset();
+      this.$.membersList.fetch();
+      this.displayCollections();
     }
   },
 });
