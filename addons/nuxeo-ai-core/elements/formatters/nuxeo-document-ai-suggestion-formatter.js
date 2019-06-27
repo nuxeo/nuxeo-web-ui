@@ -17,12 +17,14 @@ limitations under the License.
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { IronOverlayBehavior } from '@polymer/iron-overlay-behavior/iron-overlay-behavior.js';
+import { NeonAnimationRunnerBehavior } from '@polymer/neon-animation/neon-animation-runner-behavior.js';
 import '@polymer/polymer/lib/elements/dom-if.js';
 import '@polymer/iron-image/iron-image.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-element.js';
 import AISuggestionMixin from '../nuxeo-ai-suggestion-mixin.js';
-import './nuxeo-ai-suggestion-formatter-styles.js';
+import '../nuxeo-ai-icons.js';
+import '../nuxeo-ai-suggestion-formatter-styles.js';
 
 class DocumentAISuggestionDetails extends mixinBehaviors(
   [IronOverlayBehavior, NeonAnimationRunnerBehavior],
@@ -33,18 +35,67 @@ class DocumentAISuggestionDetails extends mixinBehaviors(
       <style>
         :host {
           @apply --shadow-elevation-2dp;
-          display: inline-block;
-          padding: 10px;
+          @apply --layout-vertical;
           background: var(--nuxeo-box);
+          overflow: hidden;
+          user-select: text;
+        }
+        #close {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          padding: 10px;
+          width: 32px;
+          height: 32px;
+        }
+        #container {
+          padding: 12px;
           overflow: auto;
+          cursor: auto;
         }
       </style>
-      <slot></slot>
+      <div id="container">
+        <slot></slot>
+      </div>
+      <paper-icon-button id="close" noink icon="nuxeo:clear" on-tap="close"></paper-icon-button>
     `;
   }
 
   static get is() {
     return 'nuxeo-document-ai-suggestion-details';
+  }
+
+  ready() {
+    super.ready();
+    this.addEventListener('click', (e) => e.stopPropagation());
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('neon-animation-finish', this._onNeonAnimationFinish);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('neon-animation-finish', this._onNeonAnimationFinish);
+  }
+
+  _renderOpened() {
+    this.cancelAnimation();
+    this.playAnimation('entry');
+  }
+
+  _renderClosed() {
+    this.cancelAnimation();
+    this.playAnimation('exit');
+  }
+
+  _onNeonAnimationFinish() {
+    if (this.opened) {
+      this._finishRenderOpened();
+    } else {
+      this._finishRenderClosed();
+    }
   }
 }
 customElements.define(DocumentAISuggestionDetails.is, DocumentAISuggestionDetails);
@@ -54,7 +105,7 @@ class DocumentAISuggestionFormatter extends AISuggestionMixin(Nuxeo.Element) {
     return html`
       <style include="nuxeo-ai-suggestion-formatter-styles">
         :host {
-          padding: 0;
+          padding: 0 0 0 5px;
         }
         #main {
           @apply --layout-horizontal;
@@ -91,13 +142,24 @@ class DocumentAISuggestionFormatter extends AISuggestionMixin(Nuxeo.Element) {
           width: 32px;
           height: 24px;
           padding: 4px;
-          margin: 5px 0;
+          margin: 2px 0;
           border-left: 1px solid var(--divider-color);
         }
         nuxeo-document-ai-suggestion-details {
           cursor: default;
           max-width: 320px;
           max-height: 248px;
+        }
+
+        @media only screen and (orientation: portrait) and (max-width: 480px) {
+          nuxeo-document-ai-suggestion-details {
+            cursor: default;
+            left: 0 !important;
+            right: 0;
+            bottom: 0;
+            top: unset !important;
+            max-width: unset !important;
+          }
         }
       </style>
       <div id="main">
@@ -106,37 +168,37 @@ class DocumentAISuggestionFormatter extends AISuggestionMixin(Nuxeo.Element) {
       </div>
       <div id="split" on-click="_open">
         <paper-icon-button icon="icons:arrow-drop-down" noink></paper-icon-button>
-        <nuxeo-document-ai-suggestion-details
-          id="details"
-          vertical-align="top"
-          horizontal-align="right"
-          dynamic-align
-          no-overlap
-          vertical-offset="16"
-          scroll-action="refit"
-          auto-fit-on-attach
-        >
-          <div id="content">
-            <dom-if if="[[suggestion.value.properties.file:content]]">
-              <template>
-                <iron-image
-                  class="thumbnail"
-                  position="left"
-                  sizing="contain"
-                  src="[[_thumbnail(suggestion.value)]]"
-                ></iron-image>
-              </template>
-            </dom-if>
-            <p class="title">
-              [[suggestion.value.title]]
-            </p>
-            <p class="description" hidden$="[[!suggestion.value.properties.dc:description]]">
-              [[suggestion.value.properties.dc:description]]
-            </p>
-            <p class="path">[[suggestion.value.path]]</p>
-          </div>
-        </nuxeo-document-ai-suggestion-details>
       </div>
+      <nuxeo-document-ai-suggestion-details
+        id="details"
+        vertical-align="top"
+        horizontal-align="right"
+        dynamic-align
+        no-overlap
+        vertical-offset="16"
+        scroll-action="refit"
+        auto-fit-on-attach
+      >
+        <div id="content">
+          <dom-if if="[[suggestion.value.properties.file:content.data]]">
+            <template>
+              <iron-image
+                class="thumbnail"
+                position="left"
+                sizing="contain"
+                src="[[_thumbnail(suggestion.value)]]"
+              ></iron-image>
+            </template>
+          </dom-if>
+          <p class="title">
+            [[suggestion.value.title]]
+          </p>
+          <p class="description" hidden$="[[!suggestion.value.properties.dc:description]]">
+            [[suggestion.value.properties.dc:description]]
+          </p>
+          <p class="path">[[suggestion.value.path]]</p>
+        </div>
+      </nuxeo-document-ai-suggestion-details>
       <div id="anchor"></div>
     `;
   }
@@ -148,6 +210,26 @@ class DocumentAISuggestionFormatter extends AISuggestionMixin(Nuxeo.Element) {
   ready() {
     super.ready();
     this.$.details.positionTarget = this.$.anchor;
+    this._handleResize = () => {
+      if (window.matchMedia('only screen and (orientation: portrait) and (max-width: 480px)').matches) {
+        this.$.details.entryAnimation = 'slide-from-bottom-animation';
+        this.$.details.exitAnimation = 'slide-down-animation';
+      } else {
+        this.$.details.entryAnimation = 'fade-in-animation';
+        this.$.details.exitAnimation = 'fade-out-animation';
+      }
+    };
+    this._handleResize();
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener('resize', this._handleResize);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('resize', this._handleResize);
   }
 
   _open(e) {
