@@ -142,8 +142,8 @@ document.addEventListener('document-layout-changed', (e) => {
     return;
   }
   customElements.whenDefined(layout.tagName.toLowerCase()).then(() => {
-    layout._documentChanged = () => AISuggestionManager.updateWidgetSuggestions(layout);
-    layout._createMethodObserver('_documentChanged(document.*)', true);
+    layout.__aiDocumentChanged = () => AISuggestionManager.updateWidgetSuggestions(layout);
+    layout.constructor.createMethodObserver('__aiDocumentChanged(document.*)', true);
     AISuggestionManager.updateWidgetSuggestions(e.detail.element);
   });
 });

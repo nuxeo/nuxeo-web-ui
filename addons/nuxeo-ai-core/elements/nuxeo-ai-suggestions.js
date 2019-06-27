@@ -48,30 +48,6 @@ class AISuggestions extends mixinBehaviors([IronFormElementBehavior], Nuxeo.Elem
 
         nuxeo-ai-suggestion {
           margin: 0 10px 10px 0;
-          padding: 5px 9px 5px;
-
-          border-radius: 2em;
-          background-color: var(--nuxeo-tag-background, transparent);
-
-          cursor: pointer;
-
-          -webkit-touch-callout: none;
-          -webkit-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-          user-select: none;
-
-          @apply --layout-horizontal;
-          @apply --layout-center;
-        }
-
-        nuxeo-ai-suggestion[match] {
-          opacity: 0.3;
-          pointer-events: none;
-        }
-
-        nuxeo-ai-suggestion:hover {
-          background-color: var(--nuxeo-artificial-intelligence-confidence-hover, rgba(74, 144, 246, 0.1));
         }
       </style>
 

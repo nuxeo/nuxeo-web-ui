@@ -17,20 +17,10 @@ limitations under the License.
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-element.js';
 import './nuxeo-ai-icons.js';
+import AISuggestionMixin from './nuxeo-ai-suggestion-mixin.js';
 import AISuggestionFormatters from './nuxeo-ai-suggestion-formatters.js';
 
-/**
- * `nuxeo-ai-suggestion` allows selecting one or more tags.
- *
- *     <nuxeo-ai-suggestion document="{{document}}"
- *       property="dc:description"
- *       suggestions="[[suggestions]]"
- *       threshold=0.7>
- *     </nuxeo-ai-suggestion>
- *
- * @memberof Nuxeo
- */
-class AISuggestion extends Nuxeo.Element {
+class AISuggestion extends AISuggestionMixin(Nuxeo.Element) {
   static get template() {
     return html`
       <style>
@@ -53,35 +43,28 @@ class AISuggestion extends Nuxeo.Element {
     return 'nuxeo-ai-suggestion';
   }
 
-  static get properties() {
-    return {
-      property: {
-        type: String,
-      },
-      suggestion: {
-        type: Object,
-      },
-      threshold: {
-        type: Number,
-      },
-    };
-  }
-
   static get observers() {
     return ['_updateContainer(suggestion, property)'];
   }
 
+  created() {
+    Object.keys(this.constructor.properties).forEach((prop) => {
+      this.constructor.createMethodObserver(`_forwardProp("${prop}", ${prop})`);
+    });
+  }
+
+  _forwardProp(prop, value) {
+    if (this._instance) {
+      this._instance[prop] = value;
+    }
+  }
+
   _updateContainer(suggestion, property) {
-    this._instance = document.createElement(
-      AISuggestionFormatters.get(
-        suggestion.value && suggestion.value['entity-type']
-          ? {
-              type: suggestion.value['entity-type'],
-              property,
-            }
-          : {},
-      ),
-    );
+    let ruleset = {};
+    if (suggestion.value && suggestion.value['entity-type']) {
+      ruleset = { type: suggestion.value['entity-type'], property };
+    }
+    this._instance = document.createElement(AISuggestionFormatters.get(ruleset));
 
     Object.keys(this.constructor.properties).forEach((prop) => {
       this._instance[prop] = this[prop];
