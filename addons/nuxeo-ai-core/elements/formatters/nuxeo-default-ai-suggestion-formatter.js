@@ -16,63 +16,21 @@ limitations under the License.
 */
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-element.js';
+import AISuggestionMixin from '../nuxeo-ai-suggestion-mixin.js';
 import '../nuxeo-ai-icons.js';
+import '../nuxeo-ai-suggestion-formatter-styles.js';
 
-class DefaultAISuggestionFormatter extends Nuxeo.Element {
+class DefaultAISuggestionFormatter extends AISuggestionMixin(Nuxeo.Element) {
   static get template() {
     return html`
-      <style>
-        :host {
-          @apply --layout-horizontal;
-        }
-        span {
-          @apply --layout-flex;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        iron-icon {
-          --iron-icon-fill-color: var(--nuxeo-artificial-intelligence-confidence-color, #4a90e2);
-          margin-left: 7px;
-          height: 1.2em;
-        }
-      </style>
+      <style include="nuxeo-ai-suggestion-formatter-styles"></style>
       <span>[[_idFunction(suggestion.name)]]</span>
       <iron-icon icon="[[_getConfidenceIcon(suggestion.confidence)]]"></iron-icon>
     `;
   }
 
   static get is() {
-    return 'nuxeo-default-suggestion-formatter';
-  }
-
-  static get properties() {
-    return {
-      property: {
-        type: String,
-      },
-      suggestion: {
-        type: Object,
-      },
-    };
-  }
-
-  _idFunction(item) {
-    const id = ['computeId', 'uid', 'id'].find((key) => Object.prototype.hasOwnProperty.call(item, key));
-    return id ? item[id] : item;
-  }
-
-  _getConfidenceIcon(confidenceLevel) {
-    const interval = (1 - this.threshold) / 3;
-    let icon;
-    if (confidenceLevel >= this.threshold && confidenceLevel < this.threshold + interval) {
-      icon = 'nuxeo-ai:confidence-level-low';
-    } else if (confidenceLevel >= this.threshold + interval && confidenceLevel < this.threshold + 2 * interval) {
-      icon = 'nuxeo-ai:confidence-level-medium';
-    } else if (confidenceLevel >= this.threshold + 2 * interval && confidenceLevel <= 1) {
-      icon = 'nuxeo-ai:confidence-level-high';
-    }
-    return icon;
+    return 'nuxeo-default-ai-suggestion-formatter';
   }
 }
 customElements.define(DefaultAISuggestionFormatter.is, DefaultAISuggestionFormatter);

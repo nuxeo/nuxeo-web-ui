@@ -16,37 +16,33 @@ limitations under the License.
 */
 import DefaultAISuggestionFormatter from './formatters/nuxeo-default-ai-suggestion-formatter.js';
 
-const _formatters = {
+const FORMATTERS = {
   default: DefaultAISuggestionFormatter.is,
+  types: {},
+  properties: {},
 };
 
-const AISuggestionFormatters = new (class {
-  register(formatter, rules) {
+const AISuggestionFormatters = {
+  register: (formatter, rules) => {
     if (rules.type) {
-      if (!_formatters.types) {
-        _formatters.types = {};
-      }
-      _formatters.types[rules.type] = formatter;
+      FORMATTERS.types[rules.type] = formatter;
     }
     if (rules.property) {
-      if (!_formatters.properties) {
-        _formatters.properties = {};
-      }
-      _formatters.properties[rules.property] = formatter;
+      FORMATTERS.properties[rules.property] = formatter;
     }
-  }
+  },
 
-  get(rules) {
+  get: (rules) => {
     let formatter = null;
-    if (_formatters.properties && rules.property) {
-      formatter = _formatters.properties[rules.property];
+    if (rules.property) {
+      formatter = FORMATTERS.properties[rules.property];
     }
-    if (!formatter && _formatters.types && rules.type) {
-      formatter = _formatters.types[rules.type];
+    if (!formatter && rules.type) {
+      formatter = FORMATTERS.types[rules.type];
     }
-    return formatter || _formatters.default;
-  }
-})();
+    return formatter || FORMATTERS.default;
+  },
+};
 Nuxeo.AISuggestionFormatters = AISuggestionFormatters;
 
 export default AISuggestionFormatters;
