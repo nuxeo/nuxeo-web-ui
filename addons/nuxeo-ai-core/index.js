@@ -23,6 +23,7 @@ import './elements/nuxeo-ai-suggestions.js';
 import './elements/nuxeo-ai-export-progress.js';
 import AISuggestionFormatters from './elements/nuxeo-ai-suggestion-formatters.js';
 import DocumentAISuggestionFormatter from './elements/formatters/nuxeo-document-ai-suggestion-formatter.js';
+import DirectoryAISuggestionFormatter from './elements/formatters/nuxeo-directory-ai-suggestion-formatter.js';
 
 import html from './nuxeo-ai-core.html';
 
@@ -31,6 +32,7 @@ tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);
 
 AISuggestionFormatters.register(DocumentAISuggestionFormatter.is, { type: 'document' });
+AISuggestionFormatters.register(DirectoryAISuggestionFormatter.is, { type: 'directoryEntry' });
 
 const AISuggestionManager = (() => {
   const _map = new WeakMap(); // store field elements and suggestion widgets without preventing gc
