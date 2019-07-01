@@ -70,10 +70,13 @@ Polymer({
         max-width: 128px;
         height: 128px;
         margin: 4px;
+        padding: 4px;
         border: none;
         text-align: center;
         box-shadow: none;
         background-color: var(--nuxeo-dialog-buttons-bar);
+        @apply --layout-vertical;
+        @apply --nuxeo-document-create-selection-button;
       }
 
       .typeSelection paper-button:hover {
@@ -83,31 +86,23 @@ Polymer({
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 -3px 0 var(--nuxeo-link-hover-color) inset;
       }
 
-      .typeIconWrapper {
-        display: flex;
-        flex: 1.5;
-        align-items: flex-end;
-      }
-
       .typeIcon {
+        /* These variables are deprecated. Instead, use the mixin bellow */
         width: var(--nuxeo-document-creation-form-icon-width, 42px);
         height: var(--nuxeo-document-creation-form-icon-height, 42px);
-      }
-
-      .typeLabelWrapper {
-        display: flex;
-        flex: 1;
-        align-items: flex-start;
+        @apply --nuxeo-document-create-selection-icon;
       }
 
       .typeLabel {
         width: 100%;
         margin-top: 1em;
         overflow: hidden;
+        line-height: normal;
         text-overflow: ellipsis;
+        text-align: center;
         white-space: nowrap;
         word-break: break-word;
-        line-height: normal;
+        @apply --nuxeo-document-create-selection-label;
       }
 
       .container {
@@ -202,17 +197,13 @@ Polymer({
                 <paper-button
                   noink
                   name$="[[type.type]]"
-                  class="docTypeButton vertical layout"
+                  class="docTypeButton"
                   on-tap="_selectType"
                   data-args$="[[type]]"
                 >
-                  <div class="typeIconWrapper">
-                    <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
-                  </div>
-                  <div class="typeLabelWrapper">
-                    <div class="typeLabel">[[_getTypeLabel(type)]]</div>
-                    <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
-                  </div>
+                  <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
+                  <div class="typeLabel">[[_getTypeLabel(type)]]</div>
+                  <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
                 </paper-button>
               </template>
             </div>
