@@ -322,9 +322,7 @@ Polymer({
   _validate() {
     const layout = this.$['document-create'];
     const result =
-      this._doNativeValidation(this.$.form) &&
-      this.$.form.validate() &&
-      this._isValidType(this.selectedDocType);
+      this._doNativeValidation(this.$.form) && this.$.form.validate() && this._isValidType(this.selectedDocType);
     if (result) {
       return result;
     }
