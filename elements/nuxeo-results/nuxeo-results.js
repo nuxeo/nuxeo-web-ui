@@ -38,7 +38,7 @@ It supports multiple display modes and handles toggling between them.
 Each display mode is associated to a display element which has to be declared as a children with `class="results"` and
 must also have a `name` and `icon` to be used as toggle button, ex:
 
-  <nuxeo-datatable class="results" name="table" icon="icon="icons:list">
+  <nuxeo-data-table class="results" name="table" icon="icon="icons:list">
 
 The current page provider will be injected in each view as `nxProvider` so a property with this name should be available
 in each results element.
