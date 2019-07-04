@@ -162,10 +162,7 @@ class DocumentAISuggestionFormatter extends AISuggestionMixin(Nuxeo.Element) {
           }
         }
       </style>
-      <div id="main">
-        <span>[[suggestion.value.title]]</span>
-        <iron-icon icon="[[_getConfidenceIcon(suggestion.confidence)]]"></iron-icon>
-      </div>
+      ${this.buttonTemplate}
       <div id="split" on-click="_open">
         <paper-icon-button icon="icons:arrow-drop-down" noink></paper-icon-button>
       </div>
@@ -179,27 +176,42 @@ class DocumentAISuggestionFormatter extends AISuggestionMixin(Nuxeo.Element) {
         scroll-action="refit"
         auto-fit-on-attach
       >
-        <div id="content">
-          <dom-if if="[[suggestion.value.properties.file:content.data]]">
-            <template>
-              <iron-image
-                class="thumbnail"
-                position="left"
-                sizing="contain"
-                src="[[_thumbnail(suggestion.value)]]"
-              ></iron-image>
-            </template>
-          </dom-if>
-          <p class="title">
-            [[suggestion.value.title]]
-          </p>
-          <p class="description" hidden$="[[!suggestion.value.properties.dc:description]]">
-            [[suggestion.value.properties.dc:description]]
-          </p>
-          <p class="path">[[suggestion.value.path]]</p>
-        </div>
+        ${this.detailsTemplate}
       </nuxeo-document-ai-suggestion-details>
       <div id="anchor"></div>
+    `;
+  }
+
+  static get buttonTemplate() {
+    return html`
+      <div id="main">
+        <span>[[suggestion.value.title]]</span>
+        <iron-icon icon="[[_getConfidenceIcon(suggestion.confidence)]]"></iron-icon>
+      </div>
+    `;
+  }
+
+  static get detailsTemplate() {
+    return html`
+      <div id="content">
+        <dom-if if="[[suggestion.value.properties.file:content.data]]">
+          <template>
+            <iron-image
+              class="thumbnail"
+              position="left"
+              sizing="contain"
+              src="[[_thumbnail(suggestion.value)]]"
+            ></iron-image>
+          </template>
+        </dom-if>
+        <p class="title">
+          [[suggestion.value.title]]
+        </p>
+        <p class="description" hidden$="[[!suggestion.value.properties.dc:description]]">
+          [[suggestion.value.properties.dc:description]]
+        </p>
+        <p class="path">[[suggestion.value.path]]</p>
+      </div>
     `;
   }
 
