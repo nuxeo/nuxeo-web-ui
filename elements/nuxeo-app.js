@@ -523,7 +523,7 @@ Polymer({
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
-    <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]" response="{{currentDocument}}"></nuxeo-document>
+    <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"></nuxeo-document>
 
     <nuxeo-sardine hidden></nuxeo-sardine>
 
@@ -898,7 +898,6 @@ Polymer({
     this.loading = true;
     this.docId = id;
     this.docPath = path;
-    this.docAction = action;
     this.$.doc.headers = this._computeHeaders();
     this.$.doc.enrichers = this._computeEnrichers();
     this.$.doc
@@ -920,6 +919,7 @@ Polymer({
           ? doc
           : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
         this.set('currentDocument', doc);
+        this.docAction = action;
         this.loading = false;
         this.show(page);
       })
