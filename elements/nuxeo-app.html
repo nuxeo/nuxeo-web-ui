@@ -289,7 +289,6 @@ limitations under the License.
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"
-                    response="{{currentDocument}}"
                     enrichers="[[enrichers]]"
                     headers="[[headers]]">
     </nuxeo-document>
@@ -631,7 +630,6 @@ limitations under the License.
         this.loading = true;
         this.docId = id;
         this.docPath = path;
-        this.docAction = action;
         this.$.doc.get().then(function(doc) {
           if (this.docId && !doc.isVersion) {
             this.docId = '';
@@ -648,6 +646,7 @@ limitations under the License.
           this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
             doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
           this.set('currentDocument', doc);
+          this.docAction = action;
           this.loading = false;
           this.show(page);
         }.bind(this)).catch(function(err) {
