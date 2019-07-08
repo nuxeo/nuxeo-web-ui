@@ -281,6 +281,8 @@ Polymer({
     },
   },
 
+  observers: ['_visibilityOrAutoChanged(visible, auto)'],
+
   ready() {
     if (!this._nxProvider) {
       this._nxProvider = this.$.provider;
@@ -298,6 +300,12 @@ Polymer({
 
   toggleExpand() {
     this.$$('#collapse').toggle();
+  },
+
+  _visibilityOrAutoChanged() {
+    if (this.visible && this.auto) {
+      this._search();
+    }
   },
 
   _expandIcon(opened) {
