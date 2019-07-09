@@ -18,7 +18,9 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import './elements/admin-ai-core.js';
 import './elements/admin-ai-export.js';
+import './elements/admin-ai-advanced-export.js';
 import './elements/nuxeo-ai-suggestions.js';
+import './elements/nuxeo-ai-export-progress.js';
 
 import html from './nuxeo-ai-core.html';
 

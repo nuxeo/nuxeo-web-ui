@@ -10,3 +10,5 @@ npm-debug.log
 .screenshots/
 *.iml
 .idea
+.java-version
+.vscode
