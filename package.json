@@ -68,9 +68,9 @@
   },
   "dependencies": {
     "@nuxeo/chart-elements": "^4.0.0-SNAPSHOT",
-    "@nuxeo/nuxeo-dataviz-elements": "^3.0.0-SNAPSHOT",
-    "@nuxeo/nuxeo-elements": "^3.0.0-SNAPSHOT",
-    "@nuxeo/nuxeo-ui-elements": "^3.0.0-SNAPSHOT",
+    "@nuxeo/nuxeo-dataviz-elements": "3.0.0-SNAPSHOT",
+    "@nuxeo/nuxeo-elements": "3.0.0-SNAPSHOT",
+    "@nuxeo/nuxeo-ui-elements": "3.0.0-SNAPSHOT",
     "@nuxeo/page": "^1.11.4-SNAPSHOT",
     "@polymer/app-layout": "^3.0.0",
     "@polymer/iron-a11y-announcer": "^3.0.0",
