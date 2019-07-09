@@ -14,7 +14,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import '@nuxeo/nuxeo-elements/nuxeo-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 
@@ -23,157 +25,194 @@ import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.j
 @group Nuxeo UI
 @element nuxeo-admin-ai-export
 */
-Polymer({
-  _template: html`
-    <style>
-      #statsResult {
-        height: 60vh;
-      }
-
-      .totalLabel {
-        padding-right: 20px;
-      }
-
-      .row-container {
-        @apply --layout-horizontal;
-        @apply --layout-wrap;
-      }
-    </style>
-
-    <nuxeo-operation id="aiStats" op="AI.DatasetStats" response="{{_stats}}"></nuxeo-operation>
-    <nuxeo-operation id="aiExport" op="AI.DatasetExport"></nuxeo-operation>
-    <nuxeo-card heading="[[i18n('admin.ai.export')]]">
-      <paper-textarea
-        id="queryInput"
-        type="search"
-        label="[[i18n('admin.ai.query')]]"
-        value="{{query}}"
-        placeholder="[[i18n('imaging.query.placeholder')]]"
-        autofocus
-      >
-      </paper-textarea>
-      <paper-input id="inputs" label="[[i18n('admin.ai.inputs')]]" value="{{inProps}}"></paper-input>
-      <paper-input id="outputs" label="[[i18n('admin.ai.outputs')]]" value="{{outProps}}"></paper-input>
-      <paper-input id="split" label="[[i18n('admin.ai.split')]]" value="{{splitProp}}"></paper-input>
-      <paper-button on-tap="_recompute">[[i18n('admin.ai.stats.action')]]</paper-button>
-      <paper-button on-tap="_export">[[i18n('admin.ai.export.action')]]</paper-button>
-    </nuxeo-card>
-    <nuxeo-card heading="[[i18n('admin.ai.stats')]]">
-      <div class="row-container">
-        <span class="totalLabel">[[_computeLabel(_stats, 'total', i18n)]]</span>
-        <span class="totalLabel">[[_computeLabel(_stats, 'count', i18n)]]</span>
-      </div>
-      <nuxeo-data-table id="statsResult" items="[[_filter(_stats)]]">
-        <nuxeo-data-table-column name="[[i18n('admin.ai.stats.field')]]" flex="10">
-          <template>
-            [[item.field]]
-          </template>
-        </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('admin.ai.stats.type')]]" flex="10">
-          <template>
-            [[item.type]]
-          </template>
-        </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('admin.ai.stats.value')]]" flex="50">
-          <template>
-            [[_displayVal(item)]]
-          </template>
-        </nuxeo-data-table-column>
-      </nuxeo-data-table>
-    </nuxeo-card>
-    <nuxeo-card heading="[[i18n('admin.ai.export')]]">
-      <div class="row-container">
-        [[_exportText]]
-      </div>
-    </nuxeo-card>
-  `,
-
-  is: 'nuxeo-admin-ai-export',
-  behaviors: [LayoutBehavior],
-
-  properties: {
-    inProps: {
-      type: String,
-      value: 'dc:title,file:content',
-    },
-    outProps: {
-      type: String,
-      value: 'dc:lastContributor',
-    },
-    splitProp: {
-      type: String,
-      value: '80',
-    },
-    query: {
-      type: String,
-      value: "SELECT * FROM Document WHERE ecm:primaryType = 'File'",
-    },
-    _exportText: {
-      type: String,
-      value: '',
-    },
-    _stats: {
-      type: String,
-    },
-  },
-
-  _displayVal(val) {
-    if (val.numericValue != null) {
-      return val.numericValue;
-    }
-    if (val.type === 'terms') {
-      let toReturn = '';
-      for (let i = 0, len = val.value.length; i < len; i++) {
-        toReturn += ` ${val.value[i].key} (${val.value[i].docCount})`;
-      }
-      return toReturn;
-    }
-    return JSON.stringify(val.value);
-  },
-
-  _filter(items) {
-    return items && items.filter((item) => !(item.type === 'total' || item.type === 'count'));
-  },
-
-  _computeLabel(theStats, fieldName) {
-    const foundItem = theStats && theStats.find((item) => item.type === fieldName);
-    return foundItem && this.i18n(`admin.ai.export.${fieldName}`, foundItem.numericValue);
-  },
-
-  _recompute() {
-    this.$.aiStats.params = {
-      query: this.query,
-      inputs: this.inProps,
-      outputs: this.outProps,
-    };
-    this.$.aiStats
-      .execute()
-      .then((response) => {
-        if (response === undefined || response.length === 0) {
-          this.fire('notify', { message: this.i18n('admin.ai.stats.none') });
+class AdminAIExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element, LayoutBehavior) {
+  static get template() {
+    return html`
+      <style>
+        .page {
+          @apply --layout-horizontal;
         }
-      })
-      .catch(() => {
-        this.fire('notify', { message: this.i18n('admin.ai.stats.error') });
-      });
-  },
+
+        .main {
+          @apply --layout-vertical;
+          @apply --layout-flex-3;
+          padding: 2em 1em 0 2em;
+          overflow: hidden;
+        }
+
+        .mainCard {
+          padding: 1em;
+        }
+
+        .sideCard {
+          padding: 1em 2em;
+        }
+
+        .side {
+          @apply --layout-vertical;
+          @apply --layout-flex-2;
+          position: relative;
+          margin-bottom: var(--nuxeo-card-margin-bottom, 16px);
+          min-height: 60vh;
+          padding: 2em 2em 0 0;
+        }
+
+        .totalLabel {
+          padding-right: 20px;
+        }
+
+        .row-container {
+          @apply --layout-horizontal;
+          @apply --layout-wrap;
+        }
+
+        /* #exportDatasetBtn {
+            color: var(--nuxeo-button-primary-text);
+            background-color: var(--nuxeo-button-primary-focus);
+        } */
+      </style>
+
+      <nuxeo-operation id="aiExport" op="AI.DatasetExport"></nuxeo-operation>
+      <nuxeo-operation id="aiExportStatus" op="AI.ExportStatus" on-response="_statusReceived"> </nuxeo-operation>
+      <div class="page">
+        <div class="main">
+          <nuxeo-card heading="[[i18n('admin.ai.model.selection')]]">
+            <div class="mainCard">
+              <nuxeo-input class="widget" value="{{typeName}}" label="Document Type" type="text"> </nuxeo-input>
+              <nuxeo-document-suggestion
+                on-selected-item-changed="_updateItem"
+                label=""
+                placeholder="[[i18n('admin.ai.model.listing')]]"
+                min-chars="0"
+                role="widget"
+                operation="AI.GetModel"
+              >
+              </nuxeo-document-suggestion>
+
+              <paper-button id="exportDatasetBtn" noink on-tap="_export"
+                >[[i18n('admin.ai.export.action')]]
+              </paper-button>
+            </div>
+          </nuxeo-card>
+        </div>
+        <div class="side">
+          <nuxeo-card heading="[[i18n('admin.ai.export')]]">
+            <div class="sideCard">
+              <div>
+                <template is="dom-repeat" items="[[statuses]]">
+                  <nuxeo-ai-export-progress status="[[item]]"></nuxeo-ai-export-progress>
+                </template>
+              </div>
+            </div>
+          </nuxeo-card>
+        </div>
+      </div>
+    `;
+  }
+
+  static get is() {
+    return 'nuxeo-admin-ai-export';
+  }
+
+  static get properties() {
+    return {
+      /**
+       * Type to be used in query for export
+       */
+      typeName: {
+        type: String,
+        value: '',
+      },
+      /**
+       * Document received from AI Cloud
+       */
+      currentDoc: {
+        type: Object,
+      },
+      /**
+       * A list of statuses from BAF
+       */
+      statuses: {
+        type: Array,
+        value: [],
+      },
+      /**
+       * Flag to determine visibility of this element
+       */
+      visible: {
+        type: Boolean,
+        value: false,
+        observer: '_visibleChanged',
+      },
+      /**
+       * reference for scheduled call
+       */
+      _timeOut: {
+        type: Number,
+      },
+    };
+  }
+
+  _visibleChanged(newVal) {
+    if (newVal) {
+      this.$.aiExportStatus.execute();
+    } else if (!newVal && this._timeOut) {
+      clearTimeout(this._timeOut);
+    }
+  }
+
+  _statusReceived(resp) {
+    this.statuses = resp.detail.response.value;
+    // defines if the tab is currently active if so, we want to poll more often
+    if (this.visible) {
+      this._timeOut = setTimeout(this._poll, 2000, this.$.aiExportStatus);
+    }
+  }
+
+  _poll(func) {
+    return func.execute();
+  }
+
+  _updateItem(e) {
+    this.$.currentDoc = e.detail.value;
+  }
 
   _export() {
+    if (!this._canExport()) {
+      this.fire('notify', { message: 'Type and Model are required parameters' });
+      return;
+    }
+    const props = this.$.currentDoc.properties;
+    const inputs = props['ai_model:inputs'];
+    const input = inputs.map((e) => e.name).join(',');
+
+    const outputs = props['ai_model:outputs'];
+    const output = outputs.map((e) => e.name).join(',');
+
+    const query =
+      `SELECT * FROM Document WHERE ecm:isProxy = 0` +
+      ` AND ecm:isVersion = 0 AND ecm:isTrashed = 0 AND ecm:primaryType = '${this.typeName}'`;
     this.$.aiExport.params = {
-      query: this.query,
-      inputs: this.inProps,
-      outputs: this.outProps,
-      split: this.splitProp,
+      query,
+      inputs: input,
+      outputs: output,
     };
+
     this.$.aiExport
       .execute()
       .then((response) => {
-        this._exportText = this.i18n('admin.ai.export.id', response.value);
         this.fire('notify', { message: this.i18n('admin.ai.export.success') });
+        return response.value;
       })
       .catch(() => {
-        this._exportText = '';
         this.fire('notify', { message: this.i18n('admin.ai.export.error') });
       });
-  },
-});
+  }
+
+  _canExport() {
+    return this.typeName.length !== 0 && this.$.currentDoc != null;
+  }
+}
+
+customElements.define(AdminAIExport.is, AdminAIExport);
+Nuxeo.AdminAIExport = AdminAIExport;
