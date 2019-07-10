@@ -275,6 +275,8 @@ limitations under the License.
         }
       },
 
+      observers: ['_visibilityOrAutoChanged(visible, auto)'],
+
       ready: function() {
         if (!this._nxProvider) {
           this._nxProvider = this.$.provider;
@@ -292,6 +294,12 @@ limitations under the License.
 
       toggleExpand: function() {
         this.$$('#collapse').toggle();
+      },
+
+      _visibilityOrAutoChanged: function() {
+        if (this.visible && this.auto) {
+          this._search();
+        }
       },
 
       _expandIcon: function(opened) {
