@@ -1,0 +1,16 @@
+apiVersion: skaffold/v1beta11
+kind: Config
+build:
+  tagPolicy:
+    envTemplate:
+      template: "{{.DOCKER_REGISTRY}}/{{.ORG}}/{{.IMAGE_NAME}}:{{.VERSION}}"
+  artifacts:
+    - image: nuxeo-web-ui/server
+      context: server
+    - image: nuxeo-web-ui
+      context: .
+      docker:
+        buildArgs:
+          SERVER_IMAGE: "{{.DOCKER_REGISTRY}}/{{.ORG}}/nuxeo-web-ui/server:{{.VERSION}}"
+  local:
+    useDockerCLI: true

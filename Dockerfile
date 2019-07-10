@@ -1,3 +1,4 @@
-FROM nuxeo-web-ui/server:3.0.0-SNAPSHOT
+ARG SERVER_IMAGE=nuxeo-web-ui/server
+FROM $SERVER_IMAGE
 
 COPY dist/ ui/
