@@ -30,9 +30,17 @@ void setGitHubBuildStatus(String context, String message, String state) {
   ])
 }
 
+def WEBUI_VERSION
+
 pipeline {
   agent {
     label "jenkins-maven-nodejs-nuxeo"
+  }
+  environment {
+    ORG = 'nuxeo'
+
+    // NXBT-2885: need "Pipeline Utility Steps"
+    // WEBUI_VERSION = readJSON(file: 'package.json').version
   }
   stages {
     stage('Install dependencies and run lint') {
@@ -45,6 +53,7 @@ pipeline {
           script {
             def nodeVersion = sh(script: 'node -v', returnStdout: true).trim()
             echo "node version: ${nodeVersion}"
+            WEBUI_VERSION =  sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
           }
           sh 'npm install --no-package-lock'
           sh 'npm run lint'
@@ -98,6 +107,30 @@ pipeline {
         }
         failure {
           setGitHubBuildStatus('package', 'Nuxeo package build', 'FAILURE')
+        }
+      }
+    }
+    stage('Build and deploy Docker image') {
+      steps {
+        setGitHubBuildStatus('docker', 'Build and deploy Docker image', 'PENDING')
+        container('mavennodejs') {
+          withEnv(["VERSION=${WEBUI_VERSION}-${BRANCH_NAME}-${BUILD_NUMBER}"]) {
+            echo """
+            -----------------------------
+            Build and deploy Docker image
+            -----------------------------
+            Image tag: ${VERSION}
+            """
+            sh 'skaffold build'
+          }
+        }
+      }
+      post {
+        success {
+          setGitHubBuildStatus('docker', 'Build and deploy Docker image', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('docker', 'Build and deploy Docker image', 'FAILURE')
         }
       }
     }
