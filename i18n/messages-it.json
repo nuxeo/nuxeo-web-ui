@@ -53,6 +53,8 @@
   "admin.ai.stats.field": "Nome Proprietà",
   "admin.ai.stats.type": "Tipo di statistica",
   "admin.ai.stats.value": "Valore",
+  "admin.ai.model.selection": "Model selection",
+  "admin.ai.model.listing": "Click here to view model list",
   "admin.usersAndGroups.heading": "Utenti e gruppi",
   "analytics.after": "Dopo",
   "analytics.before": "Prima",

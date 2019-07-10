@@ -53,6 +53,8 @@
   "admin.ai.stats.field": "Propietate-izena",
   "admin.ai.stats.type": "Estatistika mota",
   "admin.ai.stats.value": "Balioa",
+  "admin.ai.model.selection": "Model selection",
+  "admin.ai.model.listing": "Click here to view model list",
   "admin.usersAndGroups.heading": "Erabiltzaile eta pasahitzak",
   "analytics.after": "Noiztik",
   "analytics.before": "Noiz arte",
