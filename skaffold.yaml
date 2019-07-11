@@ -5,12 +5,11 @@ build:
     envTemplate:
       template: "{{.DOCKER_REGISTRY}}/{{.ORG}}/{{.IMAGE_NAME}}:{{.VERSION}}"
   artifacts:
-    - image: nuxeo-web-ui/server
-      context: server
+    # NXP-27732: need Docker 17.05+ to use ARG in FROM (only 17.03 avail on GKE)
+    #- image: nuxeo-web-ui/server
+    #  context: server
     - image: nuxeo-web-ui
       context: .
-      docker:
-        buildArgs:
-          SERVER_IMAGE: "{{.DOCKER_REGISTRY}}/{{.ORG}}/nuxeo-web-ui/server:{{.VERSION}}"
-  local:
-    useDockerCLI: true
+    #  docker:
+    #    buildArgs:
+    #      SERVER_IMAGE: "{{.DOCKER_REGISTRY}}/{{.ORG}}/nuxeo-web-ui/server:{{.VERSION}}"
