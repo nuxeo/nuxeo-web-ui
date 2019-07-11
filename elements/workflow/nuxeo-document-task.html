@@ -201,9 +201,24 @@ limitations under the License.
             id: this.$.layout.element.task.id,
             variables: this.$.layout.element.task.variables
           };
-          this.$.taskRequest.put().then(function(task) {
-            this.fire('workflowTaskProcessed', { task: task });
-          }.bind(this));
+
+          this.$.taskRequest.put()
+            .then(function(task) {
+              this.fire('workflowTaskProcessed', { task: task });
+            }.bind(this))
+            .catch(function(error) {
+              if (error.status === 409 || error.status === 403) {
+                this.fire('notify', {
+                  message: this.i18n('tasks.submit.error.' + (error.status === 409 ? 'alreadyFinished' : 'noPermissions')),
+                  dismissible: true,
+                  duration: 30000,
+                });
+                this.fire('workflowTaskProcessed');
+              } else {
+                this.fire('notify', { message: this.i18n('tasks.submit.error') });
+                throw error;
+              }
+            }.bind(this));
         }
       },
 
