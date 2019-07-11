@@ -1,15 +1,36 @@
 apiVersion: skaffold/v1beta11
 kind: Config
 build:
+  insecureRegistries:
+    - ${DOCKER_REGISTRY}
   tagPolicy:
     envTemplate:
       template: "{{.DOCKER_REGISTRY}}/{{.ORG}}/{{.IMAGE_NAME}}:{{.VERSION}}"
   artifacts:
-    # NXP-27732: need Docker 17.05+ to use ARG in FROM (only 17.03 avail on GKE)
-    #- image: nuxeo-web-ui/server
-    #  context: server
+    - image: nuxeo-web-ui/server
+      context: server
+      kaniko:
+        dockerfile: Dockerfile
+        buildArgs:
+          DOCKER_REGISTRY: ${DOCKER_REGISTRY}
+        buildContext:
+          localDir: {}
+        flags:
+          - --insecure
+          - --insecure-pull
+          - --insecure-registry=${DOCKER_REGISTRY}
     - image: nuxeo-web-ui
       context: .
-    #  docker:
-    #    buildArgs:
-    #      SERVER_IMAGE: "{{.DOCKER_REGISTRY}}/{{.ORG}}/nuxeo-web-ui/server:{{.VERSION}}"
+      kaniko:
+        dockerfile: Dockerfile
+        buildArgs:
+          DOCKER_REGISTRY: ${DOCKER_REGISTRY}
+          SERVER_IMAGE: ${DOCKER_REGISTRY}/${ORG}/nuxeo-web-ui/server:${VERSION}
+        buildContext:
+          localDir: {}
+        flags:
+          - --insecure
+          - --insecure-pull
+          - --insecure-registry=${DOCKER_REGISTRY}
+  cluster:
+    namespace: webui

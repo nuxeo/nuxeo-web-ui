@@ -126,7 +126,8 @@ pipeline {
             -----------------------------
             Image tag: ${VERSION}
             """
-            sh 'skaffold build'
+            sh 'envsubst < skaffold.yaml > skaffold.yaml~gen'
+            sh 'skaffold build -f skaffold.yaml~gen'
           }
         }
       }
