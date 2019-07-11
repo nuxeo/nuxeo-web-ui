@@ -3,7 +3,8 @@
 
 ## Nuxeo Web UI
 
-> Ongoing work to build a new Nuxeo Web UI. See [demo](https://webui-demo.nuxeo.com/nuxeo/ui/), use `demo`/`demo` for credentials.
+### About
+Nuxeo Web UI is a standard base web application for Nuxeo Platform. It is highly customizable and scalable, developed with [Polymer](https://polymer-library.polymer-project.org/) and leveraging [nuxeo-elements](https://github.com/nuxeo/nuxeo-elements), our library of custom elements.
 
 ## Getting Started
 
