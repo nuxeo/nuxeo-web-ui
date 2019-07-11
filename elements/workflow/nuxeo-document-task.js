@@ -220,9 +220,24 @@ Polymer({
         id: this.$.layout.element.task.id,
         variables: this.$.layout.element.task.variables,
       };
-      this.$.taskRequest.put().then((task) => {
-        this.fire('workflowTaskProcessed', { task });
-      });
+      this.$.taskRequest
+        .put()
+        .then((task) => {
+          this.fire('workflowTaskProcessed', { task });
+        })
+        .catch((error) => {
+          if (error.status === 409 || error.status === 403) {
+            this.fire('notify', {
+              message: this.i18n(`tasks.submit.error.${error.status === 409 ? 'alreadyFinished' : 'noPermissions'}`),
+              dismissible: true,
+              duration: 30000,
+            });
+            this.fire('workflowTaskProcessed');
+          } else {
+            this.fire('notify', { message: this.i18n('tasks.submit.error') });
+            throw error;
+          }
+        });
     }
   },
 
