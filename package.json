@@ -61,8 +61,7 @@
     "lint": "npm run lint:polymer && npm run lint:eslint && npm run lint:prettier",
     "win-lint": "npm run win-lint:polymer && npm run lint:eslint && npm run lint:prettier",
     "format": "npm run format:polymer && npm run format:prettier && npm run format:eslint",
-    "win-format": "npm run win-format:polymer && npm run format:prettier && npm run format:eslint",
-    "info:version": "echo $npm_package_version"
+    "win-format": "npm run win-format:polymer && npm run format:prettier && npm run format:eslint"
   },
   "engines": {
     "node": ">=8.0"
@@ -139,6 +138,7 @@
     "@webcomponents/html-imports": "^1.2.0",
     "aws-sdk": "^2.420.0",
     "d3": "^4.13.0",
+    "dotenv": "^8.0.0",
     "es6-promise": "^4.0.0",
     "extend": "^3.0.2",
     "jquery": "^3.3.1",
