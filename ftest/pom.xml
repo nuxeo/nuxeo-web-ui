@@ -44,6 +44,27 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.nuxeo.marketplace.dam</groupId>
+      <artifactId>marketplace</artifactId>
+      <version>6.5.0-SNAPSHOT</version>
+      <type>zip</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.nuxeo.marketplace.csv</groupId>
+      <artifactId>marketplace-csv</artifactId>
+      <version>1.8.0-SNAPSHOT</version>
+      <type>zip</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.nuxeo.ecm.platform</groupId>
+      <artifactId>nuxeo-platform-spreadsheet-package</artifactId>
+      <version>11.1-SNAPSHOT</version>
+      <type>zip</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.nuxeo.web.ui</groupId>
       <artifactId>nuxeo-web-ui-marketplace-itests</artifactId>
       <type>zip</type>

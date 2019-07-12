@@ -1,0 +1,3 @@
+"name","type","dc:title","dc:description","file:content","dc:nature","dc:source"
+"nuxeo-csv-userdoc","File","Nuxeo CSV User documentation","This is the user guide for Nuxeo CSV","NuxeoCSV-USERDOC.pdf","procedure","http://doc.nuxeo.com"
+"Nuxeo-csv-sample-3","File","Nuxeo CSV Sample","This a second file imported with Nuxeo CSV","nuxeo-csv-sample-3.odt","article","http://doc.nuxeo.com"

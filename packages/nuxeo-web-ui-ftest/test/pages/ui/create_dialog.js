@@ -8,6 +8,10 @@ export default class CreateDialog extends BasePage {
     return new DocumentCreate('nuxeo-document-create');
   }
 
+  get csvImportTab() {
+    return this.el.element('paper-tabs paper-tab[name="importCSV"]');
+  }
+
   get createButton() {
     return this.el.element('paper-button[id="create"]');
   }

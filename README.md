@@ -22,13 +22,22 @@ This makes the Web UI available on http://0.0.0.0:5000/ to locally test. A nuxeo
 ```xml
 <component name="org.nuxeo.corsi.demo">
   <extension target="org.nuxeo.ecm.platform.web.common.requestcontroller.service.RequestControllerService" point="corsConfig">
-    <corsConfig name="foobar" supportedMethods="GET,POST,HEAD,OPTIONS,DELETE,PUT" 
+    <corsConfig name="foobar" supportedMethods="GET,POST,HEAD,OPTIONS,DELETE,PUT"
 exposedHeaders="Accept-Ranges,Content-Range,Content-Encoding,Content-Length,Content-Disposition">
       <pattern>/nuxeo/.*</pattern>
     </corsConfig>
   </extension>
 </component>
 ```
+
+To test other addons locally, you can use the `NUXEO_PACKAGES` environment variable. To load Nuxeo CSV and DAM addons, for example:
+
+```sh
+NUXEO_PACKAGES="nuxeo-csv nuxeo-dam" npm run start
+```
+
+| INFO: Local dev Web UI available on **http://0.0.0.0:5000/** but http://0.0.0.0:5000/nuxeo will lead to the Nuxeo-hosted Web UI (same as http://0.0.0.0:8080/)|
+| --- |
 
 #### Run tests
 
@@ -61,11 +70,11 @@ This will build the  `plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-
 mvn clean install -Pftest
 ```
 
-This also builds the marketplace running the functionnal tests.
+This also builds the marketplace running the functional tests.
 
 ## License
 
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) 
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 

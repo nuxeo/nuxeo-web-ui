@@ -337,7 +337,13 @@ Polymer({
               >[[i18n('command.cancel')]]</paper-button
             >
           </div>
-          <paper-button noink class="primary" on-tap="_import" disabled$="[[!_canImport(_creating,hasFile)]]">
+          <paper-button
+            id="create"
+            noink
+            class="primary"
+            on-tap="_import"
+            disabled$="[[!_canImport(_creating,hasFile)]]"
+          >
             [[i18n('command.create')]]
           </paper-button>
           <div class="layout" hidden$="[[!_creating]]">

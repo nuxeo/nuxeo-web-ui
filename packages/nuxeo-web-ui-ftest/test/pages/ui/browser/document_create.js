@@ -4,6 +4,10 @@ import BasePage from '../../base';
 import DocumentLayout from './document_layout';
 
 export default class DocumentCreate extends BasePage {
+  get fileInput() {
+    return this.el.element('#uploadFiles');
+  }
+
   getDoctypeButton(docType) {
     return this.el.element(`div[name="typeSelection"] paper-button[name="${docType}"]`);
   }

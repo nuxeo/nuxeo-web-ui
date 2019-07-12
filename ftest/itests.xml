@@ -10,11 +10,16 @@
   <import file="${out.dir}/nuxeo-ftest.xml" />
 
   <property name="mp.install" value="file:${out.dir}/nuxeo-web-ui-marketplace-${maven.project.version}.zip,
-    file:${out.dir}/nuxeo-web-ui-marketplace-itests-${maven.project.version}.zip" />
+    file:${out.dir}/nuxeo-web-ui-marketplace-itests-${maven.project.version}.zip,
+    file:${out.dir}/marketplace-6.5.0-SNAPSHOT.zip,
+    file:${out.dir}/marketplace-csv-1.8.0-SNAPSHOT.zip" />
   <target name="prepare-environment" depends="_init,prepare-db,prepare-tomcat">
     <copy todir="${out.dir}">
       <artifact:file key="org.nuxeo.web.ui:nuxeo-web-ui-marketplace::zip" />
+      <artifact:file key="org.nuxeo.marketplace.dam:marketplace::zip" />
+      <artifact:file key="org.nuxeo.marketplace.csv:marketplace-csv::zip" />
       <artifact:file key="org.nuxeo.web.ui:nuxeo-web-ui-marketplace-itests::zip" />
+      <fileset dir="test/resources"/>
     </copy>
   </target>
 
