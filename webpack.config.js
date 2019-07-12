@@ -6,6 +6,9 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ProvidePlugin } = require('webpack');
 
+// read .env file and assign to process.env
+require('dotenv').config();
+
 const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
 
 // we can copy things to 'src' in dev mode since if uses a mem fs
