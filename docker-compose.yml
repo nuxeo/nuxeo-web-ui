@@ -1,0 +1,23 @@
+version: '3.5'
+services:
+  proxy:
+    image: nginx
+    volumes:
+      - ./server/nginx.proxy.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    links:
+      - nuxeo
+      - webui
+
+  webui:
+    image: nuxeo-web-ui:${NUXEO_WEB_UI_VERSION}
+    build:
+      context: .
+    
+  nuxeo:
+    image: nuxeo/nuxeo:${NUXEO_VERSION}
+    environment:
+      - NUXEO_DEV_MODE
+      - NUXEO_PACKAGES
+      - NUXEO_CLID

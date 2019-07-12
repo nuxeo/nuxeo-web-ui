@@ -11,6 +11,24 @@ npm install
 
 ### Development workflow
 
+#### Configure
+
+For convenience you should create an `.env` file to set default environment variables:
+
+```sh
+cp .env.sample .env
+```
+
+#### Environment variables
+
+Variable | Used by | Description | Default
+--- | --- | --- | ---
+NUXEO_PACKAGES | Webpack, Docker (Nuxeo) | List of packages to enable for Web UI and Nuxeo
+NUXEO_URL | Webpack | URL used to connect to Nuxeo server from Web UI | /nuxeo
+NUXEO_HOST | Webpack | Nuxeo host address to proxy calls from the dev server | localhost:8080 
+NUXEO_WEB_UI_VERSION | Docker compose | Version of Web UI image to build /start
+NUXEO_VERSION | Docker compose | Version of Nuxeo server to launch
+
 #### Serve / watch
 
 ```sh
@@ -46,6 +64,18 @@ npm run build
 ```
 
 Build and optimize the current project, ready for deployment. This includes linting as well as vulcanization, image, script, stylesheet and HTML optimization and minification.
+
+#### Run with Docker Compose
+
+After building the project with `npm run build` you can try a Docker compose based deployment with:
+
+```sh
+docker-compose up --build
+```
+
+This builds the `nuxeo-web-ui` Docker image and starts the Docker compose cluster.
+
+Web UI will then be available at http://localhost:8080/nuxeo/ui
 
 ### Production workflow
 
