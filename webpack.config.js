@@ -144,6 +144,7 @@ const common = merge([
       new HtmlWebpackPlugin({
         title: 'Nuxeo',
         template: 'index.html',
+        baseUrl: process.env.BASE_URL || '/',
         nuxeo: {
           packages: JSON.stringify((process.env.NUXEO_PACKAGES || '').split(/[\s,]+/).filter(Boolean)),
           url: process.env.NUXEO_URL || '/nuxeo',

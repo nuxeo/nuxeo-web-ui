@@ -61,7 +61,7 @@ limitations under the License.
   <body>
     <nuxeo-connection url="<%= htmlWebpackPlugin.options.nuxeo.url %>"></nuxeo-connection>
 
-    <nuxeo-app base-url="/" unresolved>
+    <nuxeo-app base-url="<%= htmlWebpackPlugin.options.baseUrl %>" unresolved>
       <div id="sidebar">
         <img src="themes/default/logo.png" />
       </div>

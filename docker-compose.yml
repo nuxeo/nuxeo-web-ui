@@ -14,6 +14,9 @@ services:
     image: nuxeo-web-ui:${NUXEO_WEB_UI_VERSION}
     build:
       context: .
+    environment:
+      - NUXEO_PACKAGES
+      - BASE_URL=/nuxeo/ui/
     
   nuxeo:
     image: nuxeo/nuxeo:${NUXEO_VERSION}
