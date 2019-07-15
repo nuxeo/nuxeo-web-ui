@@ -55,8 +55,8 @@ Polymer({
       <div class="action" on-click="_show">
         <paper-icon-button id="button" icon="nuxeo:spreadsheet"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
       </div>
-      <nuxeo-tooltip for="button">[[_label]]</nuxeo-tooltip>
     </template>
 
     <paper-dialog id="dialog" class="dialog" with-backdrop>

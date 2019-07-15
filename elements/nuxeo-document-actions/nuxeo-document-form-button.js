@@ -54,8 +54,8 @@ Polymer({
       <div class="action" on-tap="_openDialog">
         <paper-icon-button noink id="[[layout]]-button" icon="[[icon]]"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[i18n(label)]]</span>
+        <nuxeo-tooltip>[[i18n(label)]]</nuxeo-tooltip>
       </div>
-      <nuxeo-tooltip for="[[layout]]-button">[[i18n(label)]]</nuxeo-tooltip>
     </template>
 
     <nuxeo-dialog id="[[layout]]-dialog" no-auto-focus with-backdrop modal>

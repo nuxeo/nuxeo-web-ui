@@ -44,8 +44,8 @@ Polymer({
     <div id="render" class="action" on-tap="_toggleDialog">
       <paper-icon-button noink icon="[[icon]]" src="[[iconSrc]]"></paper-icon-button>
       <span class="label" hidden$="[[!showLabel]]">[[i18n(label)]]</span>
+      <paper-tooltip>[[i18n(tooltip)]]</paper-tooltip>
     </div>
-    <paper-tooltip for="render">[[i18n(tooltip)]]</paper-tooltip>
 
     <nuxeo-dialog id="dialog" modal no-auto-focus>
       <h2>[[i18n('renderTemplateButton.dialog.heading')]]</h2>

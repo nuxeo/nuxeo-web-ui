@@ -64,8 +64,8 @@ Polymer({
       <div class="action" on-tap="_toggleDialog">
         <paper-icon-button id="shareBtn" icon="[[icon]]" noink></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
       </div>
-      <nuxeo-tooltip for="shareBtn">[[_label]]</nuxeo-tooltip>
     </template>
 
     <nuxeo-dialog id="dialog" with-backdrop>
