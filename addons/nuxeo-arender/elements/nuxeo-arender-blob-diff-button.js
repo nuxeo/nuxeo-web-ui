@@ -72,8 +72,8 @@ Polymer({
 
     <div class="action" on-tap="_openDialog">
       <paper-icon-button noink id="aRenderblobDiffButton" icon="[[icon]]"></paper-icon-button>
+      <nuxeo-tooltip>[[i18n('documentDiffButton.blob.tooltip')]]</nuxeo-tooltip>
     </div>
-    <nuxeo-tooltip for="aRenderblobDiffButton">[[i18n('documentDiffButton.blob.tooltip')]]</nuxeo-tooltip>
 
     <nuxeo-dialog on-iron-overlay-closed="_closeDialog" id="aRenderBlobDiffDialog" with-backdrop>
       <template>

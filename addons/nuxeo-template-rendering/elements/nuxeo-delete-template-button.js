@@ -41,8 +41,8 @@ Polymer({
     <div id="delete" class="action" on-tap="_toggleDialog">
       <paper-icon-button icon="icons:delete-sweep" noink></paper-icon-button>
       <span class="label" hidden$="[[!showLabel]]">[[i18n('deleteTemplateButton.tooltip')]]</span>
+      <paper-tooltip>[[i18n('deleteTemplateButton.tooltip')]]</paper-tooltip>
     </div>
-    <paper-tooltip for="delete">[[i18n('deleteTemplateButton.tooltip')]]</paper-tooltip>
 
     <nuxeo-dialog id="dialog" modal no-auto-focus>
       <h2>[[i18n('deleteTemplateButton.dialog.heading')]]</h2>

@@ -47,8 +47,8 @@ Polymer({
         <div class="action" on-tap="_toggleDialog">
           <paper-icon-button id="replaceBtn" icon="[[icon]]" noink></paper-icon-button>
           <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+          <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
         </div>
-        <nuxeo-tooltip for="replaceBtn">[[_label]]</nuxeo-tooltip>
       </template>
     </dom-if>
 

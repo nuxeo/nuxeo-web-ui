@@ -41,8 +41,8 @@ Polymer({
       <div class="action" on-tap="toggle">
         <paper-icon-button icon="[[icon]]" active="[[inClipboard]]" noink></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
       </div>
-      <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
     </template>
   `,
 

@@ -40,8 +40,8 @@ Polymer({
       <div class="action" on-tap="remove">
         <paper-icon-button noink id="removeButton" icon="nuxeo:remove"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
       </div>
-      <nuxeo-tooltip for="removeButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
   `,
 

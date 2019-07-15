@@ -37,8 +37,8 @@ Polymer({
       <div class="action" on-tap="addToClipBoard">
         <paper-icon-button noink id="clipboardButton" icon="icons:content-paste"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
       </div>
-      <nuxeo-tooltip for="clipboardButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
   `,
 

@@ -43,8 +43,8 @@ Polymer({
       <div class="action" on-tap="deleteDocuments">
         <paper-icon-button icon="[[_icon]]" id="deleteAllButton"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
       </div>
-      <nuxeo-tooltip for="deleteAllButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
   `,
 

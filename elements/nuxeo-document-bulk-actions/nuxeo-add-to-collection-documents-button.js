@@ -59,8 +59,8 @@ Polymer({
       <div class="action" on-tap="_toggleDialog">
         <paper-icon-button noink icon="nuxeo:collections" id="addColBut"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
       </div>
-      <nuxeo-tooltip for="addColBut" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
 
     <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup" with-backdrop>

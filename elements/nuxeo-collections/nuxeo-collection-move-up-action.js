@@ -39,8 +39,8 @@ Polymer({
       <div class="action" on-tap="moveUp">
         <paper-icon-button noink id="upButton" icon="icons:arrow-upward"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
       </div>
-      <nuxeo-tooltip for="upButton" position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
     </template>
   `,
 
