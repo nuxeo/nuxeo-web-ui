@@ -31,6 +31,10 @@ export default class DocumentTask extends BasePage {
     return this.el.element('#delegatedActors nuxeo-tags');
   }
 
+  get taskLayout() {
+    return this.el.element('#layout');
+  }
+
   setUserOrGroup(userOrGroup) {
     const fieldEl = this.el.element('[name="userGroup"]');
     fixtures.layouts.setValue(fieldEl, userOrGroup);
