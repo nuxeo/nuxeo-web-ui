@@ -89,7 +89,7 @@ Polymer({
           e.preventDefault();
           return;
         default:
-          return;
+          break;
       }
     }
     this.fire('pressed', e.detail, {});
