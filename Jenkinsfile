@@ -53,7 +53,6 @@ pipeline {
           script {
             def nodeVersion = sh(script: 'node -v', returnStdout: true).trim()
             echo "node version: ${nodeVersion}"
-            WEBUI_VERSION =  sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
           }
           sh 'npm install --no-package-lock'
           sh 'npm run lint'
@@ -114,7 +113,13 @@ pipeline {
       steps {
         setGitHubBuildStatus('docker', 'Build and deploy Docker image', 'PENDING')
         container('mavennodejs') {
-          withEnv(["VERSION=${WEBUI_VERSION}-${BRANCH_NAME}-${BUILD_NUMBER}"]) {
+          script {
+            WEBUI_VERSION =  sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
+            if (BRANCH_NAME != 'master') {
+              WEBUI_VERSION += "-${BRANCH_NAME}";
+            }
+          }
+          withEnv(["VERSION=${WEBUI_VERSION}"]) {
             echo """
             -----------------------------
             Build and deploy Docker image
