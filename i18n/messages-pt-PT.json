@@ -707,6 +707,7 @@
   "label.security.permission.readProperties": "Ler propriedades",
   "label.security.permission.readRemove": "Remover",
   "label.security.permission.readSecurity": "Segurança de leitura",
+  "label.security.permission.readWrite": "Edit",
   "label.security.permission.remove": "Remover",
   "label.security.permission.removeChildren": "Remover filhos",
   "label.security.permission.version": "Versão",

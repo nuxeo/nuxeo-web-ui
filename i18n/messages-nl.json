@@ -707,6 +707,7 @@
   "label.security.permission.readProperties": "Eigenschappen lezen",
   "label.security.permission.readRemove": "Verwijderen",
   "label.security.permission.readSecurity": "Beveiliging lezen",
+  "label.security.permission.readWrite": "Edit",
   "label.security.permission.remove": "Verwijderen",
   "label.security.permission.removeChildren": "Onderliggende verwijderen",
   "label.security.permission.version": "Versie",

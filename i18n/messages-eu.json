@@ -707,6 +707,7 @@
   "label.security.permission.readProperties": "Propietateak irakurri",
   "label.security.permission.readRemove": "Ezabatu",
   "label.security.permission.readSecurity": "Segurtasuna irakurri",
+  "label.security.permission.readWrite": "Edit",
   "label.security.permission.remove": "Ezabatu",
   "label.security.permission.removeChildren": "Umeak ezabatu",
   "label.security.permission.version": "Bertsioa",

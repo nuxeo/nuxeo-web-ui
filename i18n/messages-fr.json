@@ -707,6 +707,7 @@
   "label.security.permission.readProperties": "Consulter les propriétés",
   "label.security.permission.readRemove": "Supprimer",
   "label.security.permission.readSecurity": "Consulter les permissions",
+  "label.security.permission.readWrite": "Edit",
   "label.security.permission.remove": "Supprimer",
   "label.security.permission.removeChildren": "Supprimer des sous-documents",
   "label.security.permission.version": "Version",

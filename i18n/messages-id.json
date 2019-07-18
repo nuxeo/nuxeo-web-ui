@@ -707,6 +707,7 @@
   "label.security.permission.readProperties": "Baca properti",
   "label.security.permission.readRemove": "Hapus",
   "label.security.permission.readSecurity": "Baca keamanan",
+  "label.security.permission.readWrite": "Edit",
   "label.security.permission.remove": "Hapus",
   "label.security.permission.removeChildren": "Menghapus anak",
   "label.security.permission.version": "Versi",

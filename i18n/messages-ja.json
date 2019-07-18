@@ -707,6 +707,7 @@
   "label.security.permission.readProperties": "プロパティの読み出し",
   "label.security.permission.readRemove": "削除",
   "label.security.permission.readSecurity": "セキュリティの読み出し",
+  "label.security.permission.readWrite": "Edit",
   "label.security.permission.remove": "削除",
   "label.security.permission.removeChildren": "下位階層の削除",
   "label.security.permission.version": "バージョン",
