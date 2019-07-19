@@ -1,9 +1,10 @@
 const Finder = require('fs-finder');
 const fs = require('fs');
+const minimist = require('minimist');
 
 module.exports = (argv) => {
   let features = [];
-  const args = require('minimist')(argv.slice(2));
+  const args = minimist(argv.slice(2));
   /*
    * XXX
    * tagExpression is being used only for syntax purposes, since we are not evaluating expressions.
@@ -11,7 +12,7 @@ module.exports = (argv) => {
    */
   if (args.cucumberOpts && args.cucumberOpts.tagExpression) {
     const files = Finder.from('./test/features').findFiles('*.feature');
-    features = files.filter(file => fs.readFileSync(file, 'utf8').includes(args.cucumberOpts.tagExpression));
+    features = files.filter((file) => fs.readFileSync(file, 'utf8').includes(args.cucumberOpts.tagExpression));
   } else {
     features = './test/features/*.feature';
   }

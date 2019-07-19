@@ -1,5 +1,3 @@
-
-
 import BasePage from '../../base';
 
 export default class Vocabulary extends BasePage {
@@ -27,27 +25,29 @@ export default class Vocabulary extends BasePage {
   }
 
   waitForHasEntry(id, reverse) {
-    const el = this.el;
+    const { el } = this;
     driver.waitForVisible('#table');
-    driver.waitUntil(() => {
-      const cells = el.elements('#table nuxeo-data-table-cell').value;
-      if (reverse) {
-        return cells.every(cell => cell.getText().trim() !== id);
-      } else {
-        return cells.some(cell => cell.getText().trim() === id);
-      }
-    }, reverse ? 'The vocabulary does have such entry' : 'The vocabulary does not have such entry');
+    driver.waitUntil(
+      () => {
+        const cells = el.elements('#table nuxeo-data-table-cell').value;
+        if (reverse) {
+          return cells.every((cell) => cell.getText().trim() !== id);
+        }
+        return cells.some((cell) => cell.getText().trim() === id);
+      },
+      reverse ? 'The vocabulary does have such entry' : 'The vocabulary does not have such entry',
+    );
     return true;
   }
 
   deleteEntry(index) {
-    const selector = `#delete-button-${(index - 1)}`;
+    const selector = `#delete-button-${index - 1}`;
     this.el.element(selector).click();
     driver.alertAccept();
   }
 
   editEntry(index, label) {
-    const selector = `#edit-button-${(index - 1)}`;
+    const selector = `#edit-button-${index - 1}`;
     this.el.element(selector).click();
     const dialog = this.el.element('nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])');
     dialog.waitForVisible();
@@ -64,9 +64,8 @@ export default class Vocabulary extends BasePage {
     const res = this.el.elements('#table #items nuxeo-data-table-row');
     if (res && res.value) {
       return res.value.length;
-    } else {
-      return 0;
     }
+    return 0;
   }
 
   table() {
@@ -76,8 +75,7 @@ export default class Vocabulary extends BasePage {
 
   get isVocabularyTableFilled() {
     this.el.waitForVisible('#table nuxeo-data-table-row');
-    return !this.el.elements('#table nuxeo-data-table-row').value
-      .some(row => row.getText().trim().length === 0);
+    return !this.el.elements('#table nuxeo-data-table-row').value.some((row) => row.getText().trim().length === 0);
   }
 
   get hasEditDialog() {

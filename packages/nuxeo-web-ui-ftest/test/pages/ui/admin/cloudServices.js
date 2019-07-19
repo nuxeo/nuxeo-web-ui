@@ -1,5 +1,3 @@
-
-
 import BasePage from '../../base';
 
 export default class CloudServices extends BasePage {
@@ -72,34 +70,38 @@ export default class CloudServices extends BasePage {
   }
 
   clickElementName(name) {
-    const selector = `[name="${(name)}"]`;
+    const selector = `[name="${name}"]`;
     driver.waitForVisible(selector);
     this.el.element(selector).click();
   }
 
   waitForHasProvider(id, reverse) {
-    const el = this.el;
-    driver.waitUntil(() => {
-      const providers = el.elements('[name="serviceName"').value;
-      if (reverse) {
-        return providers.every(provider => provider.getText().trim() !== id);
-      } else {
-        return providers.some(provider => provider.getText().trim() === id);
-      }
-    }, reverse ? 'The cloud services does have such provider' : 'The cloud services does not have such provider');
+    const { el } = this;
+    driver.waitUntil(
+      () => {
+        const providers = el.elements('[name="serviceName"').value;
+        if (reverse) {
+          return providers.every((provider) => provider.getText().trim() !== id);
+        }
+        return providers.some((provider) => provider.getText().trim() === id);
+      },
+      reverse ? 'The cloud services does have such provider' : 'The cloud services does not have such provider',
+    );
     return true;
   }
 
   waitForHasClient(id, reverse) {
-    const el = this.el;
-    driver.waitUntil(() => {
-      const clients = el.elements('[name="id"').value;
-      if (reverse) {
-        return clients.every(client => client.getText().trim() !== id);
-      } else {
-        return clients.some(client => client.getText().trim() === id);
-      }
-    }, reverse ? 'The cloud services does have such client' : 'The cloud services does not have such client');
+    const { el } = this;
+    driver.waitUntil(
+      () => {
+        const clients = el.elements('[name="id"').value;
+        if (reverse) {
+          return clients.every((client) => client.getText().trim() !== id);
+        }
+        return clients.some((client) => client.getText().trim() === id);
+      },
+      reverse ? 'The cloud services does have such client' : 'The cloud services does not have such client',
+    );
     return true;
   }
 

@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 
 export default class Group extends BasePage {
@@ -48,6 +46,7 @@ export default class Group extends BasePage {
   fillMultipleValues(table) {
     table.rows().forEach((row) => {
       if (row[0] === 'groupName') {
+        // eslint-disable-next-line prefer-destructuring
         global.groups[row[1]] = row[1];
       }
       const fieldEl = this.getField(row[0]);

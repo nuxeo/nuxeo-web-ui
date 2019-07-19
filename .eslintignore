@@ -1,6 +1,5 @@
 metrics/
 node_modules/
-packages/
 target/
 dist/
 .tmp/

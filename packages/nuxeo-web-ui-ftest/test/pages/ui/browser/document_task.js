@@ -1,5 +1,3 @@
-
-
 import BasePage from '../../base';
 
 export default class DocumentTask extends BasePage {
@@ -42,7 +40,7 @@ export default class DocumentTask extends BasePage {
 
   actorExists(element, actor) {
     const users = element.elements('nuxeo-user-tag .tag a').value;
-    return users.some(user => user.getText() === `${actor}`);
+    return users.some((user) => user.getText() === `${actor}`);
   }
 
   performAction(name) {

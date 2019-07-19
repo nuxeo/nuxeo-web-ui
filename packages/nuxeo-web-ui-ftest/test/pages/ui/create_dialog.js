@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 import DocumentCreate from './browser/document_create';
 

@@ -29,9 +29,8 @@ export default class DocumentCommentThread extends BasePage {
     });
     if (match) {
       return new DocumentComment(match);
-    } else {
-      throw new Error(`Not found any comment authored by "${user}" with the following text: "${text}"`);
     }
+    throw new Error(`Not found any comment authored by "${user}" with the following text: "${text}"`);
   }
 
   writeComment(text) {

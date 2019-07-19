@@ -1,16 +1,13 @@
-import {
-  Then,
-  When,
-} from 'cucumber';
+import { Then, When } from 'cucumber';
 
 let currentDocType;
 
-When('I click the Create Document button', function () {
+When('I click the Create Document button', function() {
   this.ui.createButton.waitForVisible();
   this.ui.createButton.click();
 });
 
-When('I select {word} from the Document Type menu', function (docType) {
+When('I select {word} from the Document Type menu', function(docType) {
   this.ui.createDialog.waitForVisible();
   const button = this.ui.createDialog.documentCreate.getDoctypeButton(docType);
   button.waitForVisible();
@@ -18,7 +15,7 @@ When('I select {word} from the Document Type menu', function (docType) {
   currentDocType = docType;
 });
 
-When('I create a document with the following properties:', function (table) {
+When('I create a document with the following properties:', function(table) {
   this.ui.createDialog.documentCreate.waitForVisible();
   this.ui.createDialog.documentCreate.layout(currentDocType).fillMultipleValues(table);
   this.ui.createDialog.documentCreate.layout(currentDocType).getField('title').should.not.be.empty;
@@ -29,6 +26,6 @@ When('I create a document with the following properties:', function (table) {
   this.doc = { type: currentDocType, title };
 });
 
-Then('I see the {word} page', function (docType) {
+Then('I see the {word} page', function(docType) {
   this.ui.browser.documentPage(docType).view.waitForVisible();
 });

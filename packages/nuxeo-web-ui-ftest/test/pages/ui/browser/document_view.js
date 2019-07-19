@@ -1,5 +1,3 @@
-
-
 import BasePage from '../../base';
 import NoteEditor from '../note_editor';
 

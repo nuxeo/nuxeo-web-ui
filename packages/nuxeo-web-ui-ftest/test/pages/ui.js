@@ -1,5 +1,3 @@
-
-
 import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
 import Drawer from './ui/drawer';
@@ -62,7 +60,7 @@ export default class UI extends BasePage {
   }
 
   get searchResults() {
-    const displayMode = this.results.displayMode;
+    const { displayMode } = this.results;
     return new Search(`nuxeo-data-${displayMode}`);
   }
 
@@ -165,6 +163,6 @@ export default class UI extends BasePage {
   }
 
   waitForToastNotVisible() {
-    driver.waitUntil(() => driver.elements('paper-toast').value.every(toast => !toast.isVisible()));
+    driver.waitUntil(() => driver.elements('paper-toast').value.every((toast) => !toast.isVisible()));
   }
 }

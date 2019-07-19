@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 import AddToCollectionDialog from './browser/add_to_collection_dialog';
 import PublicationDialog from './browser/publication_dialog';

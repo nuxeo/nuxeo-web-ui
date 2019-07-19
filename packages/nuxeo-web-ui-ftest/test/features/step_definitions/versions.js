@@ -1,22 +1,20 @@
-import {
-  When,
-} from 'cucumber';
+import { When } from 'cucumber';
 
-When(/^I can see the version info bar with text "(.*)"$/, function (text) {
+When(/^I can see the version info bar with text "(.*)"$/, function(text) {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versionInfoBar.waitForVisible();
   page.versionInfoBar.getText().should.equal(text);
 });
 
-When(/^The document is unversioned$/, function () {
+When(/^The document is unversioned$/, function() {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
   page.versions.createVersionButton.waitForVisible();
 });
 
-When(/^I click the Create Version button$/, function () {
+When(/^I click the Create Version button$/, function() {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
@@ -24,7 +22,7 @@ When(/^I click the Create Version button$/, function () {
   page.versions.createVersionButton.click();
 });
 
-When(/^The create version dialog appears$/, function () {
+When(/^The create version dialog appears$/, function() {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
@@ -33,7 +31,7 @@ When(/^The create version dialog appears$/, function () {
   page.versions.dialog.waitForVisible('paper-button[dialog-confirm]');
 });
 
-When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, function (v1, v2, v3, v4) {
+When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, function(v1, v2, v3, v4) {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
@@ -42,7 +40,7 @@ When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, function (
   page.versions.dialogNextMajor.getText().should.equal(`${v3}.${v4}`);
 });
 
-When(/^I create a (major|minor) version$/, function (versionType) {
+When(/^I create a (major|minor) version$/, function(versionType) {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
@@ -55,13 +53,13 @@ When(/^I create a (major|minor) version$/, function (versionType) {
       page.versions.dialogMinorOption.click();
       break;
     default:
-      // do nothing
+    // do nothing
   }
   page.versions.dialogConfirmButton.waitForVisible();
   page.versions.dialogConfirmButton.click();
 });
 
-When(/^The document version is ([^"]*)$/, function (label) {
+When(/^The document version is ([^"]*)$/, function(label) {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
@@ -69,7 +67,7 @@ When(/^The document version is ([^"]*)$/, function (label) {
   driver.waitUntil(() => page.versions.toggle.getText() === label, `No version found with label "${label}"`);
 });
 
-When(/^I click the versions list$/, function () {
+When(/^I click the versions list$/, function() {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
@@ -78,7 +76,7 @@ When(/^I click the versions list$/, function () {
   page.versions.listItems.waitForVisible();
 });
 
-When(/^I click the versions list at index (\d+)$/, function (index) {
+When(/^I click the versions list at index (\d+)$/, function(index) {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
@@ -89,21 +87,24 @@ When(/^I click the versions list at index (\d+)$/, function (index) {
   page.versions.listItem(index).click();
 });
 
-When(/^Versions item index at (\d+) is ([^"]*)$/, function (index, text) {
+When(/^Versions item index at (\d+) is ([^"]*)$/, function(index, text) {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
-  page.versions.listItemTitle(index).getText().should.equals(text);
+  page.versions
+    .listItemTitle(index)
+    .getText()
+    .should.equals(text);
 });
 
-When(/^Versions count is (\d+)$/, function (count) {
+When(/^Versions count is (\d+)$/, function(count) {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
   page.versions.listCount.should.equal(count);
 });
 
-When(/^I click the Create Version button in versions list$/, function () {
+When(/^I click the Create Version button in versions list$/, function() {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.versions.waitForVisible();
@@ -112,7 +113,7 @@ When(/^I click the Create Version button in versions list$/, function () {
   page.versions.listCreateVersionButton.click();
 });
 
-When(/^I can restore version$/, function () {
+When(/^I can restore version$/, function() {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.waitForVisible();
   page.restoreVersionButton.waitForVisible();

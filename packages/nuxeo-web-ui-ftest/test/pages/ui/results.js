@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 
 export default class Results extends BasePage {
@@ -13,12 +11,16 @@ export default class Results extends BasePage {
 
   get displayMode() {
     this.resultActions.waitForVisible();
-    const displayMode = this.resultActions.value.filter(result => result.getAttribute('disabled') !== null);
-    return displayMode[0].getAttribute('title').replace('Switch to ', '').replace(/ view| View/, '').toLowerCase();
+    const displayMode = this.resultActions.value.filter((result) => result.getAttribute('disabled') !== null);
+    return displayMode[0]
+      .getAttribute('title')
+      .replace('Switch to ', '')
+      .replace(/ view| View/, '')
+      .toLowerCase();
   }
 
   get toggleTableView() {
-    return this.resultActions.value.find(e => e.getAttribute('title').includes('Table View'));
+    return this.resultActions.value.find((e) => e.getAttribute('title').includes('Table View'));
   }
 
   get toggleColumnSettings() {
@@ -67,7 +69,7 @@ export default class Results extends BasePage {
 
   resultsCount(displayMode) {
     const rows = this.getResults(displayMode);
-    return rows.value.filter(result => result.getAttribute('hidden') === null).length;
+    return rows.value.filter((result) => result.getAttribute('hidden') === null).length;
   }
 
   deleteDocuments() {

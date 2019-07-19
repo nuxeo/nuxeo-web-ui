@@ -1,30 +1,27 @@
-import {
-  Then,
-  When,
-} from 'cucumber';
+import { Then, When } from 'cucumber';
 
-When(/^I select group from the dropdown menu$/, function () {
+When(/^I select group from the dropdown menu$/, function() {
   this.ui.group.dropdown.waitForVisible();
   this.ui.group.groupItem.click();
 });
 
-When(/^I can see the new group form$/, function () {
+When(/^I can see the new group form$/, function() {
   this.ui.group.createGroupForm.waitForVisible();
 });
 
-Then(/^I can create a group with the following properties:$/, function (table) {
+Then(/^I can create a group with the following properties:$/, function(table) {
   this.ui.group.fillMultipleValues(table);
   this.ui.group.createGroupButton.click();
 });
 
-Then(/^I can search for the following groups$/, function (table) {
+Then(/^I can search for the following groups$/, function(table) {
   table.rows().forEach((row) => {
     this.ui.group.searchFor(row[0]);
     this.ui.group.searchResult(row[0]).waitForVisible().should.be.true;
   });
 });
 
-Then(/^I can edit the following groups$/, function (table) {
+Then(/^I can edit the following groups$/, function(table) {
   table.rows().forEach((row) => {
     this.ui.group.searchFor(row[0]);
     this.ui.group.searchResult(row[0]).waitForVisible();
@@ -38,7 +35,7 @@ Then(/^I can edit the following groups$/, function (table) {
   });
 });
 
-Then(/^I can delete the following groups$/, function (table) {
+Then(/^I can delete the following groups$/, function(table) {
   table.rows().forEach((row) => {
     this.ui.group.searchFor(row[0]);
     this.ui.group.searchResult(row[0]).waitForVisible();

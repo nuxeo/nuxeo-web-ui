@@ -1,5 +1,3 @@
-
-
 import BasePage from '../../base';
 
 export default class DocumentAttachments extends BasePage {

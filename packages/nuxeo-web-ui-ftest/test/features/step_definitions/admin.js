@@ -1,14 +1,10 @@
-import {
-  Given,
-  Then,
-  When,
-} from 'cucumber';
+import { Given, Then, When } from 'cucumber';
 
-Then('I can see the administration menu', function () {
+Then('I can see the administration menu', function() {
   this.ui.drawer.administration.waitForVisible().should.be.true;
 });
 
-Then('I cannot see the administration button', function () {
+Then('I cannot see the administration button', function() {
   this.ui.adminButton.waitForVisible(browser.options.waitForTimeout, true).should.be.true;
 });
 
@@ -19,32 +15,32 @@ When('I click {string} in the administration menu', (text) => {
   el.click();
 });
 
-Then('I can see the analytics page', function () {
+Then('I can see the analytics page', function() {
   this.ui.administration.analytics.waitForVisible();
 });
 
-Then('I can see the users and groups page', function () {
+Then('I can see the users and groups page', function() {
   this.ui.administration.userAndGroupManagement.waitForVisible().should.be.true;
 });
 
-Then('I can see the vocabulary page', function () {
+Then('I can see the vocabulary page', function() {
   this.ui.administration.vocabularyManagement.waitForVisible().should.be.true;
 });
 
-Then('I can see the audit page', function () {
+Then('I can see the audit page', function() {
   this.ui.administration.audit.waitForVisible().should.be.true;
 });
 
-Then('I can see the cloud services page', function () {
+Then('I can see the cloud services page', function() {
   this.ui.administration.cloudServices.waitForVisible().should.be.true;
 });
 
-Given('I am on cloud services page', function () {
+Given('I am on cloud services page', function() {
   this.ui.administration.goToCloudServices();
 });
 
 // ¯\_(ツ)_/¯ no way to escape a / character in cucumber expressions
-When(/^I click the new user\/group button$/, function () {
+When(/^I click the new user\/group button$/, function() {
   this.ui.administration.userGroupCreateButton.waitForVisible();
   this.ui.administration.userGroupCreateButton.click();
 });
