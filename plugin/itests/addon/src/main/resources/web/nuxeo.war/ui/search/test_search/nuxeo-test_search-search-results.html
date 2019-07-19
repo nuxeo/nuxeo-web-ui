@@ -110,7 +110,7 @@
         nxProvider: Object,
       },
 
-      _navigate: function(e) {
+      _navigate(e) {
         this.fire('navigate', { doc: (e.model || e.detail).item });
       },
     });

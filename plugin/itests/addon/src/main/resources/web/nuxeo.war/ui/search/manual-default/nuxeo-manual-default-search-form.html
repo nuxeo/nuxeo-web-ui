@@ -49,14 +49,14 @@
         },
       },
 
-      clear: function() {
+      clear() {
         this.searchTerm = '';
         this._search();
       },
 
-      _search: function() {
+      _search() {
         if (this.searchTerm) {
-          this.set('params.ecm_fulltext', this.formatFulltext(this.searchTerm) + '*');
+          this.set('params.ecm_fulltext', `${this.formatFulltext(this.searchTerm)}*`);
           this.set(
             'params.highlight',
             'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name',
@@ -68,7 +68,7 @@
         }
       },
 
-      _checkForEnter: function(e) {
+      _checkForEnter(e) {
         if (e.keyCode === 13) {
           this._search();
         }
