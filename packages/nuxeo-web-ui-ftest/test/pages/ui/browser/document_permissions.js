@@ -1,5 +1,3 @@
-
-
 import BasePage from '../../base';
 
 export default class DocumentPermissions extends BasePage {
@@ -40,18 +38,16 @@ export default class DocumentPermissions extends BasePage {
     this.el.waitForVisible();
     if (field === 'begin' || field === 'end') {
       return this.el.element(`[id="${field}"]`);
-    } else {
-      return this.el.element(`[name="${field}"]`);
     }
+    return this.el.element(`[name="${field}"]`);
   }
 
   getEditField(field) {
     this.el.waitForVisible();
     if (field === 'begin' || field === 'end') {
       return this.el.element(`nuxeo-document-acl-table nuxeo-popup-permission [id="${field}"]`);
-    } else {
-      return this.el.element(`nuxeo-document-acl-table nuxeo-popup-permission [name="${field}"]`);
     }
+    return this.el.element(`nuxeo-document-acl-table nuxeo-popup-permission [name="${field}"]`);
   }
 
   setFieldValue(field, value) {
@@ -72,7 +68,7 @@ export default class DocumentPermissions extends BasePage {
     const timeFrame = opts.timeFrame || '';
     const begin = opts.begin || '';
     const end = opts.end || '';
-    const notify = opts.notify;
+    const { notify } = opts;
     if (name) {
       this.setFieldValue('userGroup', name);
     }
@@ -93,7 +89,7 @@ export default class DocumentPermissions extends BasePage {
     const timeFrame = opts.timeFrame || '';
     const begin = opts.begin || '';
     const end = opts.end || '';
-    const notify = opts.notify;
+    const { notify } = opts;
     this.editFieldValue('right', permission);
     this.editFieldValue(timeFrame, timeFrame);
     if (timeFrame === 'datebased') {

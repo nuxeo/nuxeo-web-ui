@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 import Vocabulary from './admin/vocabulary';
 import CloudServices from './admin/cloudServices';

@@ -1,6 +1,4 @@
-import {
-  After,
-} from 'cucumber';
+import { After } from 'cucumber';
 import Nuxeo from 'nuxeo';
 import nuxeo from '../services/client';
 
@@ -23,13 +21,16 @@ fixtures.workflows = {
       attachedDocumentIds: [document.uid],
     };
 
-    return client.workflows().start(workflowModelName, workflowOptions).then((workflowInstance) => {
-      runningWorkflows.push(workflowInstance.id);
-      return workflowInstance;
-    });
+    return client
+      .workflows()
+      .start(workflowModelName, workflowOptions)
+      .then((workflowInstance) => {
+        runningWorkflows.push(workflowInstance.id);
+        return workflowInstance;
+      });
   },
 
-  delete: workflowInstanceId => nuxeo.workflows().delete(workflowInstanceId),
+  delete: (workflowInstanceId) => nuxeo.workflows().delete(workflowInstanceId),
 
   removeInstance: (workflowInstanceId) => {
     const index = runningWorkflows.indexOf(workflowInstanceId);
@@ -39,9 +40,13 @@ fixtures.workflows = {
   },
 };
 
-After(() => Promise.all(Object.keys(runningWorkflows)
-  .map((index) => {
-    const workflowInstanceId = runningWorkflows[index];
-    return fixtures.workflows.delete(workflowInstanceId)
-      .then(() => fixtures.workflows.removeInstance(workflowInstanceId));
-  })));
+After(() =>
+  Promise.all(
+    Object.keys(runningWorkflows).map((index) => {
+      const workflowInstanceId = runningWorkflows[index];
+      return fixtures.workflows
+        .delete(workflowInstanceId)
+        .then(() => fixtures.workflows.removeInstance(workflowInstanceId));
+    }),
+  ),
+);

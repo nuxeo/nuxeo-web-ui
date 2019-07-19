@@ -1,5 +1,3 @@
-
-
 export default class Login {
   set username(username) {
     driver.waitForVisible('#username');

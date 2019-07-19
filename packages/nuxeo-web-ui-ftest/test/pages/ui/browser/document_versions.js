@@ -1,5 +1,3 @@
-
-
 import BasePage from '../../base';
 
 export default class DocumentVersions extends BasePage {
@@ -10,9 +8,8 @@ export default class DocumentVersions extends BasePage {
   get dialog() {
     if (this.list.isVisible()) {
       return this.el.element('nuxeo-document-versions-list nuxeo-document-create-version #dialog:not([aria-hidden])');
-    } else {
-      return this.el.element('nuxeo-document-create-version #dialog:not([aria-hidden])');
     }
+    return this.el.element('nuxeo-document-create-version #dialog:not([aria-hidden])');
   }
 
   get dialogMajorOption() {

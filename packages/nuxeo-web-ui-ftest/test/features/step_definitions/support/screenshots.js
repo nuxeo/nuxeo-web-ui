@@ -3,8 +3,8 @@ import { After } from 'cucumber';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 
-After(function (scenario) {
-  const status = scenario.result.status;
+After(function(scenario) {
+  const { status } = scenario.result;
   if (status === 'failed') {
     mkdirp.sync(process.env.SCREENSHOTS_PATH);
     const filename = path.join(process.env.SCREENSHOTS_PATH, `${scenario.pickle.name} (${status}).png`);

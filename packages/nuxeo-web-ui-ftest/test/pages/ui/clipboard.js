@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 
 export default class Clipboard extends BasePage {
@@ -42,9 +40,8 @@ export default class Clipboard extends BasePage {
       if (item.isVisible() && item.getText('.list-item-title').trim() === title) {
         item.click('iron-icon.remove');
         return true;
-      } else {
-        return false;
       }
+      return false;
     });
   }
 }

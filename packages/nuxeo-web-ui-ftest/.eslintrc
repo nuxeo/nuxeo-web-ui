@@ -1,44 +1,22 @@
 {
-  'extends': 'airbnb-base',
-  'root': true,
-  'rules': {
-    'class-methods-use-this': 0,
-    'comma-dangle': ["error", "always-multiline"],
-    'consistent-return': 0,
-    'func-names': 0,
-    'max-len': [2, 120, 2, {
-      'ignoreUrls': true,
-      'ignoreComments': false
-    }],
-    'new-cap': [2, {
-      'capIsNewExceptions': [
-        'Given',
-        'When',
-        'Then',
-        'After',
-        'Before',
-      ]
-    }],
-    'no-unused-expressions': 0,
-    'no-param-reassign': 0,
-    'no-plusplus': 0,
-    'no-else-return': 0,
-    'no-return-assign': 0,
-    'no-throw-literal': 0,
-    'no-underscore-dangle': 0,
-    'prefer-destructuring': 0,
-    'radix': 0
-  },
-  'globals': {
-    'addedComments': true,
-    'driver': true,
-    'fixtures': true,
-    'liveCollections': true,
-    'liveDocuments': true,
-    'runningWorkflows': true,
-    'users': true,
-    'groups': true,
-    'browser': true,
-    'moment': true,
+  "overrides": [
+    {
+      "files": ["test/features/step_definitions/*.js"],
+      "rules": {
+        "no-unused-expressions": "off"
+      }
+    }
+  ],
+  "globals": {
+    "addedComments": true,
+    "driver": true,
+    "fixtures": true,
+    "liveCollections": true,
+    "liveDocuments": true,
+    "runningWorkflows": true,
+    "users": true,
+    "groups": true,
+    "browser": true,
+    "moment": true
   }
 }

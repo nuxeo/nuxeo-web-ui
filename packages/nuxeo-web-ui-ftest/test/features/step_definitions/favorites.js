@@ -1,11 +1,9 @@
-import {
-  Then,
-} from 'cucumber';
+import { Then } from 'cucumber';
 
-Then('I can see the document belongs to the favorites', function () {
+Then('I can see the document belongs to the favorites', function() {
   this.ui.drawer.favorites.hasDocument(this.doc).should.be.true;
 });
 
-Then('I can remove the document from the favorites', function () {
+Then('I can remove the document from the favorites', function() {
   this.ui.drawer.favorites.removeDocument(this.doc).should.be.true;
 });

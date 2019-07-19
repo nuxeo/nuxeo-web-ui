@@ -1,7 +1,4 @@
-import {
-  After,
-  Before,
-} from 'cucumber';
+import { After, Before } from 'cucumber';
 import nuxeo, { BlobHelper } from '../services/client';
 
 global.liveDocuments = [];
@@ -22,43 +19,71 @@ fixtures.documents = {
     }
     return doc;
   },
-  create: (parent, document) => nuxeo.repository().create(parent, document).then((doc) => {
-    liveDocuments.push(doc.uid);
-    return doc;
-  }),
-  createWithAuthor: (parent, document, username) => nuxeo.repository()
-    .create(parent, document)
-    .then((doc) => {
-      liveDocuments.push(doc.uid);
-      if (username) {
-        return doc.set({
-          'dc:creator': username,
-        }).save();
-      }
-      return doc;
-    }),
-  addTag: (document, tag) => nuxeo.operation('Services.TagDocument')
-    .input(document)
-    .params({
-      tags: tag,
-    })
-    .execute()
-    .catch((error) => {
-      throw new Error(error);
-    }),
-  createVersion: (document, versionType) => nuxeo.operation('Document.CreateVersion').input(document.uid).params({
-    increment: versionType,
-    saveDocument: true,
-  }).execute(),
-  setPermissions: (document, permission, username) => nuxeo.operation('Document.AddPermission')
-    .input(typeof document === 'string' ? document : document.uid).params({
-      permission,
-      username,
-    }).execute(),
-  delete: document => nuxeo.repository().delete(document.path).then(() => {
-    liveDocuments.splice(liveDocuments.indexOf(document.uid), 1);
-  }),
-  trash: document => nuxeo.operation('Document.Trash').input(document.uid).execute().then(doc => doc),
+  create: (parent, document) =>
+    nuxeo
+      .repository()
+      .create(parent, document)
+      .then((doc) => {
+        liveDocuments.push(doc.uid);
+        return doc;
+      }),
+  createWithAuthor: (parent, document, username) =>
+    nuxeo
+      .repository()
+      .create(parent, document)
+      .then((doc) => {
+        liveDocuments.push(doc.uid);
+        if (username) {
+          return doc
+            .set({
+              'dc:creator': username,
+            })
+            .save();
+        }
+        return doc;
+      }),
+  addTag: (document, tag) =>
+    nuxeo
+      .operation('Services.TagDocument')
+      .input(document)
+      .params({
+        tags: tag,
+      })
+      .execute()
+      .catch((error) => {
+        throw new Error(error);
+      }),
+  createVersion: (document, versionType) =>
+    nuxeo
+      .operation('Document.CreateVersion')
+      .input(document.uid)
+      .params({
+        increment: versionType,
+        saveDocument: true,
+      })
+      .execute(),
+  setPermissions: (document, permission, username) =>
+    nuxeo
+      .operation('Document.AddPermission')
+      .input(typeof document === 'string' ? document : document.uid)
+      .params({
+        permission,
+        username,
+      })
+      .execute(),
+  delete: (document) =>
+    nuxeo
+      .repository()
+      .delete(document.path)
+      .then(() => {
+        liveDocuments.splice(liveDocuments.indexOf(document.uid), 1);
+      }),
+  trash: (document) =>
+    nuxeo
+      .operation('Document.Trash')
+      .input(document.uid)
+      .execute()
+      .then((doc) => doc),
   attach: (document, blobPath, asAttachment = false) => {
     const blob = BlobHelper.fromPath(blobPath);
     const uploader = nuxeo.batchUpload();
@@ -70,18 +95,18 @@ fixtures.documents = {
             currentDocument: document.path,
           },
         };
-        return nuxeo.operation('BlobHolder.AttachOnCurrentDocument')
+        return nuxeo
+          .operation('BlobHolder.AttachOnCurrentDocument')
           .input(uploader)
           .context(params.context)
           .params(params)
           .execute();
-      } else {
-        document.properties['file:content'] = {
-          'upload-batch': result.blob['upload-batch'],
-          'upload-fileId': '0',
-        };
-        return nuxeo.repository().update(document);
       }
+      document.properties['file:content'] = {
+        'upload-batch': result.blob['upload-batch'],
+        'upload-fileId': '0',
+      };
+      return nuxeo.repository().update(document);
     });
   },
   import: (parent, blobPath) => {
@@ -92,24 +117,42 @@ fixtures.documents = {
       },
     };
     const uploader = nuxeo.batchUpload();
-    return uploader.upload(blob).then(() => nuxeo.operation('FileManager.Import')
-      .input(uploader)
-      .context(params.context)
-      .params(params)
-      .execute()
-      .then((docs) => {
-        const doc = docs.entries[0];
-        liveDocuments.push(doc.uid);
-        return doc;
-      }));
+    return uploader.upload(blob).then(() =>
+      nuxeo
+        .operation('FileManager.Import')
+        .input(uploader)
+        .context(params.context)
+        .params(params)
+        .execute()
+        .then((docs) => {
+          const doc = docs.entries[0];
+          liveDocuments.push(doc.uid);
+          return doc;
+        }),
+    );
   },
-  getDocument: ref => nuxeo.repository().fetch(ref),
+  getDocument: (ref) => nuxeo.repository().fetch(ref),
 };
 
-Before(function () {
-  return nuxeo.repository().fetch('/default-domain').then((doc) => { this.doc = doc; });
+Before(function() {
+  return nuxeo
+    .repository()
+    .fetch('/default-domain')
+    .then((doc) => {
+      this.doc = doc;
+    });
 });
 
-After(() => Promise.all(liveDocuments
-  .map(docUid => nuxeo.repository().delete(docUid).catch(() => {}))) // eslint-disable-line arrow-body-style
-  .then(() => { liveDocuments = []; }));
+After(() =>
+  Promise.all(
+    liveDocuments.map((docUid) =>
+      nuxeo
+        .repository()
+        .delete(docUid)
+        .catch(() => {}),
+    ),
+  ) // eslint-disable-line arrow-body-style
+    .then(() => {
+      liveDocuments = [];
+    }),
+);

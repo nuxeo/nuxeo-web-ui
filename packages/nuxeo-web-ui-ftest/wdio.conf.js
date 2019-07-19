@@ -1,4 +1,6 @@
+const chai = require('chai');
 const path = require('path');
+const processor = require('./scripts/specs-processor.js');
 
 const reporters = ['spec'];
 if (process.env.JUNIT_REPORT_PATH) {
@@ -24,9 +26,7 @@ const capability = {
 switch (capability.browserName) {
   case 'chrome':
     capability.chromeOptions = {
-      args: [
-        '--no-sandbox',
-      ],
+      args: ['--no-sandbox'],
     };
     if (process.env.HEADLESS) {
       capability.chromeOptions.args.push('--window-size=1920,1080');
@@ -82,7 +82,7 @@ exports.config = {
   // NPM script (see https://docs.npmjs.com/cli/run-script) then the current working
   // directory is where your package.json resides, so `wdio` will be called from there.
   //
-  specs: require('./scripts/specs-processor.js')(process.argv),
+  specs: processor(process.argv),
   // Patterns to exclude.
   exclude: [
     // 'path/to/excluded/files'
@@ -194,9 +194,11 @@ exports.config = {
   //
   // If you are using Cucumber you need to specify the location of your step definitions.
   cucumberOpts: {
-    require: [path.join(__dirname, 'test/features/step_definitions/**/*.js')], // <string[]> (file/dir) require files before executing features
+    // <string[]> (file/dir) require files before executing features
+    require: [path.join(__dirname, 'test/features/step_definitions/**/*.js')],
     backtrace: true, // <boolean> show full backtrace for errors
-    // compiler: ['js:babel-register'],       // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
+    // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
+    // compiler: ['js:babel-register'],
     dryRun: false, // <boolean> invoke formatters without executing steps
     failFast: !process.env.RUN_ALL, // <boolean> abort the run on first failure
     colors: true, // <boolean> disable colors in formatter output
@@ -236,7 +238,6 @@ exports.config = {
     /**
      * Setup the Chai assertion framework
      */
-    const chai = require('chai');
     global.expect = chai.expect;
     global.assert = chai.assert;
     global.should = chai.should();

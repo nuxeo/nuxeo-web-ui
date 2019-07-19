@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 import DocumentPage from './browser/document_page';
 import CollapsibleDocumentPage from './browser/collapsible_document_page';
@@ -17,9 +15,8 @@ export default class Browser extends BasePage {
     const page = fixtures.layouts.page[docType] || 'nuxeo-document-page';
     if (page === 'nuxeo-collapsible-document-page') {
       return new CollapsibleDocumentPage(page, docType);
-    } else {
-      return new DocumentPage(page, docType);
     }
+    return new DocumentPage(page, docType);
   }
 
   browseTo(path) {
@@ -125,7 +122,7 @@ export default class Browser extends BasePage {
       }
       try {
         const collections = page.elements('nuxeo-document-collections nuxeo-tag').value;
-        return collections.every(collection => collection.getText().trim() !== name);
+        return collections.every((collection) => collection.getText().trim() !== name);
       } catch (e) {
         return false;
       }
@@ -141,7 +138,7 @@ export default class Browser extends BasePage {
       }
       try {
         const collections = page.elements('nuxeo-document-collections nuxeo-tag a').value;
-        return collections.some(collection => collection.getText().trim() === name);
+        return collections.some((collection) => collection.getText().trim() === name);
       } catch (e) {
         return false;
       }
@@ -150,7 +147,7 @@ export default class Browser extends BasePage {
   }
 
   removeFromCollection(name) {
-    const el = this.el;
+    const { el } = this;
     el.waitForVisible('nuxeo-document-collections nuxeo-tag');
     const collections = this.el.elements('nuxeo-document-collections nuxeo-tag').value;
     collections.some((collection) => {
@@ -185,32 +182,35 @@ export default class Browser extends BasePage {
   }
 
   waitForHasChild(doc) {
-    const el = this.el;
+    const { el } = this;
     el.waitForVisible('nuxeo-data-table nuxeo-data-table-row a.title');
     const titles = el.elements('nuxeo-data-table nuxeo-data-table-row a.title');
-    return titles.value.some(title => title.getText().trim() === doc.title);
+    return titles.value.some((title) => title.getText().trim() === doc.title);
   }
 
   clickChild(title) {
     this.waitForChildren();
     return this.rows.value.some((row) => {
-      if (row.isVisible('nuxeo-data-table-cell a.title')
-          && row.getText('nuxeo-data-table-cell a.title').trim() === title) {
+      if (
+        row.isVisible('nuxeo-data-table-cell a.title') &&
+        row.getText('nuxeo-data-table-cell a.title').trim() === title
+      ) {
         row.click();
         return true;
-      } else {
-        return false;
       }
+      return false;
     });
   }
 
   indexOfChild(title) {
     this.waitForChildren();
-    const rows = this.rows;
+    const { rows } = this;
     let i;
     for (i = 0; i < rows.value.length; i++) {
-      if (rows.value[i].isVisible('nuxeo-data-table-cell a.title')
-          && rows.value[i].getText('nuxeo-data-table-cell a.title').trim() === title) {
+      if (
+        rows.value[i].isVisible('nuxeo-data-table-cell a.title') &&
+        rows.value[i].getText('nuxeo-data-table-cell a.title').trim() === title
+      ) {
         // minus 1 because of the table header
         return i - 1;
       }
@@ -221,21 +221,22 @@ export default class Browser extends BasePage {
   sortContent(field, order) {
     driver.waitUntil(() => {
       this.waitForChildren();
-      const columnIndex = this.currentPage.elements('nuxeo-data-table nuxeo-data-table-column')
-        .value.map(col => col.getAttribute('sortBy'))
-        .findIndex(colSortByField => colSortByField && colSortByField.toLowerCase() === field.toLowerCase());
+      const columnIndex = this.currentPage
+        .elements('nuxeo-data-table nuxeo-data-table-column')
+        .value.map((col) => col.getAttribute('sortBy'))
+        .findIndex((colSortByField) => colSortByField && colSortByField.toLowerCase() === field.toLowerCase());
       if (columnIndex === -1) {
         throw new Error('Field not found');
       }
-      const sortElt = this.currentPage.elements('nuxeo-data-table nuxeo-data-table-row[header] nuxeo-data-table-cell')
+      const sortElt = this.currentPage
+        .elements('nuxeo-data-table nuxeo-data-table-row[header] nuxeo-data-table-cell')
         .value[columnIndex].element('nuxeo-data-table-column-sort');
       const currentSorting = sortElt.elements('paper-icon-button').getAttribute('direction');
       if (currentSorting && order.toLowerCase() === currentSorting.toLowerCase()) {
         return true;
-      } else {
-        sortElt.click();
-        return false;
       }
+      sortElt.click();
+      return false;
     });
   }
 
@@ -245,7 +246,7 @@ export default class Browser extends BasePage {
   waitForNbChildren(nb) {
     this.currentPage.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
     driver.waitUntil(() => {
-      const rows = this.rows;
+      const { rows } = this;
       let count = 0;
       rows.value.forEach((row) => {
         if (row.isVisible() && row.isVisible('nuxeo-data-table-cell a.title')) {
@@ -309,7 +310,7 @@ export default class Browser extends BasePage {
     const menu = this.el.element('nuxeo-actions-menu');
     menu.waitForExist(selector);
     const children = menu.elements('nuxeo-actions-menu > *:not([show-label])');
-    const childrenWidth = children.value.map(child => child.getElementSize('width')).reduce((a, b) => a + b, 0);
+    const childrenWidth = children.value.map((child) => child.getElementSize('width')).reduce((a, b) => a + b, 0);
     if (childrenWidth > menu.getElementSize('width')) {
       // this means that the menu-actions-menu didn't update yet
       // let's wait for the dropdown button to show up
@@ -329,7 +330,7 @@ export default class Browser extends BasePage {
     action.waitForEnabled('.action');
     // let's make sure we're clicking on the div the has the click event handler
     // using shadowExecute because webdriver's click uses a position which may not be valid given the dropdown animation
-    action.shadowExecute('.action', element => element.click());
+    action.shadowExecute('.action', (element) => element.click());
   }
 
   startWorkflow(workflow) {
@@ -346,9 +347,12 @@ export default class Browser extends BasePage {
   _selectChildDocument(title, deselect) {
     this.waitForChildren();
     const found = this.rows.value.some((row) => {
-      if ((deselect ? row.isVisible('nuxeo-data-table-checkbox[checked]')
-        : row.isVisible('nuxeo-data-table-checkbox:not([checked])'))
-          && row.getText('nuxeo-data-table-cell a.title').trim() === title) {
+      if (
+        (deselect
+          ? row.isVisible('nuxeo-data-table-checkbox[checked]')
+          : row.isVisible('nuxeo-data-table-checkbox:not([checked])')) &&
+        row.getText('nuxeo-data-table-cell a.title').trim() === title
+      ) {
         row.element('nuxeo-data-table-checkbox').click();
         return true;
       }

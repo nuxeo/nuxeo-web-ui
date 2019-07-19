@@ -1,5 +1,3 @@
-
-
 export default class BasePage {
   constructor(selector) {
     this._selector = selector;

@@ -1,6 +1,4 @@
-import {
-  After,
-} from 'cucumber';
+import { After } from 'cucumber';
 import Nuxeo from 'nuxeo';
 
 global.addedComments = [];
@@ -19,7 +17,9 @@ fixtures.comments = {
       baseURL: process.env.NUXEO_URL,
       headers: { nx_es_sync: 'true' },
     });
-    return nuxeo.request(`/id/${parentId}/@comment`).post(params)
+    return nuxeo
+      .request(`/id/${parentId}/@comment`)
+      .post(params)
       .then((response) => {
         if (response.ancestorIds.length === 1) {
           addedComments.push(response);
@@ -27,7 +27,9 @@ fixtures.comments = {
       });
   },
 
-  get: (author, text) => addedComments.find(item => item.author === author && item.text === text),
+  get: (author, text) => addedComments.find((item) => item.author === author && item.text === text),
 };
 
-After(() => addedComments = []);
+After(() => {
+  addedComments = [];
+});

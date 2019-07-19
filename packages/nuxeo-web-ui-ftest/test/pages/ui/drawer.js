@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 import Clipboard from './clipboard';
 import Collections from './collections';

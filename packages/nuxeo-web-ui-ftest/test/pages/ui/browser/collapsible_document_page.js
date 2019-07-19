@@ -1,5 +1,3 @@
-
-
 import DocumentPage from './document_page';
 
 export default class CollapsibleDocumentPage extends DocumentPage {

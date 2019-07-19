@@ -1,5 +1,3 @@
-
-
 import Results from './results';
 import DocumentPermissions from './browser/document_permissions';
 
@@ -79,6 +77,6 @@ export default class Search extends Results {
 
   quickSearchResultsCount() {
     const rows = this.el.element('#results #selector').elements('a.item');
-    return rows.value.filter(result => result.getAttribute('hidden') === null).length;
+    return rows.value.filter((result) => result.getAttribute('hidden') === null).length;
   }
 }

@@ -1,17 +1,15 @@
-import {
-  Then,
-} from 'cucumber';
+import { Then } from 'cucumber';
 
-Then('I can see the list of recently viewed documents', function () {
+Then('I can see the list of recently viewed documents', function() {
   this.ui.drawer.recents.waitForVisible().should.be.true;
 });
 
-Then('I can see the list of recently viewed documents has {int} item(s)', function (nb) {
+Then('I can see the list of recently viewed documents has {int} item(s)', function(nb) {
   this.ui.drawer.recents.waitForVisible();
   this.ui.drawer.recents.nbItems.should.be.equals(nb);
 });
 
-Then('I can see the list of recently viewed documents has {string} document', function (title) {
+Then('I can see the list of recently viewed documents has {string} document', function(title) {
   this.ui.drawer.recents.waitForVisible();
   this.ui.drawer.recents.el.hasElementByTextContent('#recentDocumentsList .list-item-title', title).should.be.true;
 });

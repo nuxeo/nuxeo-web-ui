@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 
 export default class Favorites extends BasePage {
@@ -16,16 +14,16 @@ export default class Favorites extends BasePage {
         favorite.click('iron-icon.remove');
         driver.waitUntil(() => !this._hasDocument(doc, this.el));
         return true;
-      } else {
-        return false;
       }
+      return false;
     });
   }
 
   // prevent usage of this.el inside waitUntil
   _hasDocument(doc, el) {
     const favorites = el.elements('#favoritesList').value;
-    return favorites.some(favorite => favorite.isVisible('.list-item-title')
-                                        && favorite.getText('.list-item-title').trim() === doc.title);
+    return favorites.some(
+      (favorite) => favorite.isVisible('.list-item-title') && favorite.getText('.list-item-title').trim() === doc.title,
+    );
   }
 }

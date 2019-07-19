@@ -1,5 +1,3 @@
-
-
 import BasePage from '../base';
 
 export default class User extends BasePage {
@@ -11,9 +9,8 @@ export default class User extends BasePage {
     this.el.waitForVisible(parent);
     if (field === 'password' || field === 'passwordConfirmation') {
       return this.el.element(`${parent} [id="${field}"]`);
-    } else {
-      return this.el.element(`${parent} [name="${field}"]`);
     }
+    return this.el.element(`${parent} [name="${field}"]`);
   }
 
   get dropdown() {
@@ -61,6 +58,7 @@ export default class User extends BasePage {
     const parent = opts.parent || '';
     table.rows().forEach((row) => {
       if (row[0] === 'username') {
+        // eslint-disable-next-line prefer-destructuring
         global.users[row[1]] = row[1];
         this.el.element('paper-toggle-button[name="password-toggle"]').waitForVisible();
         this.el.element('paper-toggle-button[name="password-toggle"]').click();
