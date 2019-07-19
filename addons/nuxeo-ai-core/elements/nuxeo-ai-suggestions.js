@@ -130,7 +130,7 @@ class AISuggestions extends mixinBehaviors([IronFormElementBehavior], Nuxeo.Elem
     if (this.suggestions.length > 0) {
       const isArray = Array.isArray(currentValue);
       this.suggestions.forEach((suggestion) => {
-        const suggestedValue = this.idFunction(suggestion.name);
+        const suggestedValue = this.idFunction(suggestion.value);
         const match = isArray ? currentValue.includes(suggestedValue) : currentValue === suggestedValue;
         matches.set(suggestedValue, match);
       });
@@ -139,7 +139,7 @@ class AISuggestions extends mixinBehaviors([IronFormElementBehavior], Nuxeo.Elem
   }
 
   _machesInput(suggestion) {
-    return this._inputMatches && suggestion.name && this._inputMatches.get(suggestion.name);
+    return this._inputMatches && suggestion.value && this._inputMatches.get(suggestion.value);
   }
 
   _selectSuggestion(event) {
@@ -148,7 +148,7 @@ class AISuggestions extends mixinBehaviors([IronFormElementBehavior], Nuxeo.Elem
     if (!this.get(propertyPath)) {
       this._createNestedObjectRecursive(this.document.properties, this.property.split('/'));
     }
-    const value = this.idFunction(suggestion.name);
+    const value = this.idFunction(suggestion.value);
     if (Array.isArray(this.get(propertyPath))) {
       // XXX: we're doing this instead of `this.push(propertyPath, value);` because the push will produce
       // a `<propertyPath>.splices` which might not reflect to widgets with the value double bound to
