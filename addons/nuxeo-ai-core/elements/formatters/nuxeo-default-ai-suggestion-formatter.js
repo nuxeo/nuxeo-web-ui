@@ -24,7 +24,7 @@ class DefaultAISuggestionFormatter extends AISuggestionMixin(Nuxeo.Element) {
   static get template() {
     return html`
       <style include="nuxeo-ai-suggestion-formatter-styles"></style>
-      <span>[[_idFunction(suggestion.name)]]</span>
+      <span>[[_idFunction(suggestion.value)]]</span>
       <iron-icon icon="[[_getConfidenceIcon(suggestion.confidence)]]"></iron-icon>
     `;
   }
