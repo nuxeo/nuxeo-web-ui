@@ -28,7 +28,6 @@
     </exec>
     <exec executable="${cmd.npm}" dir="../packages/nuxeo-web-ui-ftest" failonerror="true">
       <arg value="run" />
-      <arg value="lint" />
     </exec>
     <delete includeEmptyDirs="yes" failonerror="false">
       <fileset dir="node_modules" defaultexcludes="no" followsymlinks="false" />

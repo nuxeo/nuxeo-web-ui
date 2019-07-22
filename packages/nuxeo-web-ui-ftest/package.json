@@ -5,11 +5,8 @@
     "nuxeo-web-ui-ftest": "./bin/nuxeo-web-ui-ftest.js"
   },
   "scripts": {
-    "lint": "eslint test",
     "publish:snapshot": "npm --registry=https://mavenin.nuxeo.com/nexus/repository/npmjs-nuxeo/ publish --tag SNAPSHOT",
-    "prepublish:snapshot": "npm run lint",
-    "publish:release": "npm --registry=https://registry.npmjs.org/ publish",
-    "prepublish:release": "npm run lint"
+    "publish:release": "npm --registry=https://registry.npmjs.org/ publish"
   },
   "license": "Apache-2.0",
   "dependencies": {
@@ -18,9 +15,6 @@
     "chai": "^4.1.2",
     "cucumber": "^4.1.0",
     "cucumber-junit": "^1.7.1",
-    "eslint": "^5.6.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0",
     "fs-finder": "^1.8.1",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",

@@ -55,11 +55,10 @@ pipeline {
             echo "node version: ${nodeVersion}"
           }
           sh 'npm install --no-package-lock'
-          sh 'npm run lint'
           dir('packages/nuxeo-web-ui-ftest') {
             sh 'npm install --no-package-lock'
-            sh 'npm run lint'
           }
+          sh 'npm run lint'
         }
       }
       post {

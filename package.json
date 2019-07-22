@@ -61,7 +61,8 @@
     "lint": "npm run lint:polymer && npm run lint:eslint && npm run lint:prettier",
     "win-lint": "npm run win-lint:polymer && npm run lint:eslint && npm run lint:prettier",
     "format": "npm run format:polymer && npm run format:prettier && npm run format:eslint",
-    "win-format": "npm run win-format:polymer && npm run format:prettier && npm run format:eslint"
+    "win-format": "npm run win-format:polymer && npm run format:prettier && npm run format:eslint",
+    "postinstall": "cd packages/nuxeo-web-ui-ftest && npm install"
   },
   "engines": {
     "node": ">=8.0"
