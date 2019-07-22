@@ -122,10 +122,12 @@ limitations under the License.
             <span>[[i18n('documentPage.legalHold')]]</span>
           </template>
           <template is="dom-if" if="[[document.retainUntil]]">
-            <span>[[_computeRetentionUntiLabel(document)]]</span>
-          </template>
-          <template is="dom-if" if="[[_isRetainIndeterminate(document)]]">
-            <span>[[i18n('documentPage.retainIndeterminate')]]</span>
+            <template is="dom-if" if="[[!isRetentionDateIndeterminate(document)]]">
+              <span>[[_computeRetentionUntiLabel(document)]]</span>
+            </template>
+            <template is="dom-if" if="[[isRetentionDateIndeterminate(document)]]">
+              <span>[[i18n('documentPage.retainIndeterminate')]]</span>
+            </template>
           </template>
         </div>
       </div>
@@ -241,10 +243,6 @@ limitations under the License.
 
       _toggleGraphDialog: function(e) {
         this.$$('#graph-' + e.model.workflow.id).show();
-      },
-
-      _isRetainIndeterminate: function(doc) {
-        return doc && this.isRecord(doc) && !doc.hasLegalHold && !doc.retainUntil;
       }
 
     });
