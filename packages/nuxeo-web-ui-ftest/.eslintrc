@@ -1,12 +1,4 @@
 {
-  "overrides": [
-    {
-      "files": ["test/features/step_definitions/*.js"],
-      "rules": {
-        "no-unused-expressions": "off"
-      }
-    }
-  ],
   "globals": {
     "addedComments": true,
     "driver": true,
@@ -18,5 +10,13 @@
     "groups": true,
     "browser": true,
     "moment": true
-  }
+  },
+  "overrides": [
+    {
+      "files": ["test/features/step_definitions/*.js"],
+      "rules": {
+        "no-unused-expressions": "off"
+      }
+    }
+  ]
 }
