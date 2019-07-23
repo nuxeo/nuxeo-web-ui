@@ -665,6 +665,7 @@
   "label.security.permission.writeLifeCycle": "Edit lifecycle",
   "label.security.permission.writeProperties": "Edit properties",
   "label.security.permission.writeSecurity": "Edit security",
+  "label.security.permission.manageRecord": "Manage record",
   "label.size": "Size",
   "label.state": "State",
   "label.type": "Type",
