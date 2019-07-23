@@ -1,0 +1,17 @@
+FROM node:lts
+
+RUN npm config set @nuxeo:registry=https://mavenin.nuxeo.com/nexus/repository/npmjs-nuxeo
+
+WORKDIR /ui
+
+# Copy package.json and install dependencies
+COPY package*.json ./
+
+RUN npm install
+
+# Copy application source code
+COPY . .
+
+EXPOSE 5000
+
+CMD ["npm", "start"]

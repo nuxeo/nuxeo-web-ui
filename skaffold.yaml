@@ -19,6 +19,18 @@ build:
           - --insecure
           - --insecure-pull
           - --insecure-registry=${DOCKER_REGISTRY}
+    - image: nuxeo-web-ui/dev
+      context: .
+      kaniko:
+        dockerfile: Dockerfile.dev
+        buildArgs:
+          DOCKER_REGISTRY: ${DOCKER_REGISTRY}
+        buildContext:
+          localDir: {}
+        flags:
+          - --insecure
+          - --insecure-pull
+          - --insecure-registry=${DOCKER_REGISTRY}
     - image: nuxeo-web-ui
       context: .
       kaniko:
