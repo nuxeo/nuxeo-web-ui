@@ -45,7 +45,7 @@ Polymer({
 
       iron-icon {
         cursor: pointer;
-        margin-left: 10px;
+        margin: 20px 0 0 10px;
       }
 
       iron-icon:hover {
