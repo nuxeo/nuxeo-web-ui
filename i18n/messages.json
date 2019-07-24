@@ -827,6 +827,8 @@
   "retention.rule.label.applicationPolicy.heading": "Retention policy application",
   "retention.rule.label.applicationPolicy.manual": "Manual",
   "retention.rule.label.applicationPolicy.manual.description": "The retention policy has to be manually applied to the documents by the users.",
+  "retention.rule.label.applicationPolicy.docTypes": "Document types",
+  "retention.rule.label.applicationPolicy.docTypes.placeholder": "Select document types",
   "retention.rule.label.applicationPolicy.placehodler": "Select the policy",
   "retention.rule.label.duration.heading": "Retention duration",
   "retention.rule.label.duration.years": "Years",
