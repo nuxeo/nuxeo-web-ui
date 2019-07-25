@@ -4,7 +4,7 @@
   "scripts": {
     "test": "nuxeo-web-ui-ftest --report --screenshots --headless",
     "test:dev": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo --url=http://localhost:5000/",
-    "test:watch": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo  --url=http://localhost:5000/ --tags=@watch --debug"
+    "test:watch": "nuxeo-web-ui-ftest --nuxeoUrl=http://localhost:8080/nuxeo  --url=http://localhost:5000/ --tags='@watch' --debug"
   },
   "license": "Apache-2.0",
   "dependencies": {

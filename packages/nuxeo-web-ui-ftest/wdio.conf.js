@@ -206,7 +206,9 @@ exports.config = {
     source: false, // <boolean> hide source uris
     profile: [], // <string[]> (name) specify the profile to use
     strict: true, // <boolean> fail if there are any undefined or pending steps
-    tagExpression: '', // <string> (expression) only execute the features or scenarios with tags matching the expression
+    // <string> (expression) only execute the features or scenarios with tags matching the expression
+    // Details can be found here: https://cucumber.io/docs/cucumber/api/#tag-expressions
+    tagExpression: process.env.TAG_EXPRESSION,
     timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : 25000, // <number> timeout for step definitions
     ignoreUndefinedDefinitions: false, // <boolean> Enable this config to treat undefined definitions as warnings.
   },
