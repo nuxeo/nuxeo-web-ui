@@ -165,12 +165,8 @@ class AdminAIExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element, Layout
     this.statuses = resp.detail.response.value;
     // defines if the tab is currently active if so, we want to poll more often
     if (this.visible) {
-      this._timeOut = setTimeout(this._poll, 2000, this.$.aiExportStatus);
+      this._timeOut = setTimeout(() => this.$.aiExportStatus.execute(), 2000);
     }
-  }
-
-  _poll(func) {
-    return func.execute();
   }
 
   _updateItem(e) {
