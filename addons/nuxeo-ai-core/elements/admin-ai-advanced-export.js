@@ -40,54 +40,90 @@ class AdminAIAdvancedExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element
           @apply --layout-horizontal;
           @apply --layout-wrap;
         }
+
+        .page {
+          @apply --layout-horizontal;
+        }
+
+        .main {
+          @apply --layout-vertical;
+          @apply --layout-flex-3;
+          padding: 2em 1em 0 2em;
+          overflow: hidden;
+        }
+
+        .side {
+          @apply --layout-vertical;
+          @apply --layout-flex-2;
+          position: relative;
+          margin-bottom: var(--nuxeo-card-margin-bottom, 16px);
+          min-height: 60vh;
+          padding: 2em 2em 0 0;
+        }
+
+        .totalLabel {
+          padding-right: 20px;
+        }
       </style>
 
       <nuxeo-operation id="aiStats" op="AI.DatasetStats" response="{{_stats}}"></nuxeo-operation>
       <nuxeo-operation id="aiExport" op="AI.DatasetExport"></nuxeo-operation>
-      <nuxeo-card heading="[[i18n('admin.ai.export')]]">
-        <paper-textarea
-          id="queryInput"
-          type="search"
-          label="[[i18n('admin.ai.query')]]"
-          value="{{query}}"
-          placeholder="[[i18n('imaging.query.placeholder')]]"
-          autofocus
-        >
-        </paper-textarea>
-        <nuxeo-input id="inputs" label="[[i18n('admin.ai.inputs')]]" value="{{inProps}}" required></nuxeo-input>
-        <nuxeo-input id="outputs" label="[[i18n('admin.ai.outputs')]]" value="{{outProps}}" required></nuxeo-input>
-        <nuxeo-input id="split" label="[[i18n('admin.ai.split')]]" value="{{splitProp}}"></nuxeo-input>
-        <paper-button on-tap="_recompute">[[i18n('admin.ai.stats.action')]]</paper-button>
-        <paper-button on-tap="_export">[[i18n('admin.ai.export.action')]]</paper-button>
-      </nuxeo-card>
-      <nuxeo-card heading="[[i18n('admin.ai.stats')]]">
-        <div class="row-container">
-          <span class="totalLabel">[[_computeLabel(_stats, 'total', i18n)]]</span>
-          <span class="totalLabel">[[_computeLabel(_stats, 'count', i18n)]]</span>
+      <nuxeo-operation id="aiExportStatus" op="AI.ExportStatus" on-response="_statusReceived"></nuxeo-operation>
+      <div class="page">
+        <div class="main">
+          <nuxeo-card heading="[[i18n('admin.ai.export')]]">
+            <paper-textarea
+              id="queryInput"
+              type="search"
+              label="[[i18n('admin.ai.query')]]"
+              value="{{query}}"
+              placeholder="[[i18n('imaging.query.placeholder')]]"
+              autofocus
+            >
+            </paper-textarea>
+            <paper-input id="inputs" label="[[i18n('admin.ai.inputs')]]" value="{{inProps}}"></paper-input>
+            <paper-input id="outputs" label="[[i18n('admin.ai.outputs')]]" value="{{outProps}}"></paper-input>
+            <paper-input id="split" label="[[i18n('admin.ai.split')]]" value="{{splitProp}}"></paper-input>
+            <paper-button on-tap="_recompute">[[i18n('admin.ai.stats.action')]]</paper-button>
+            <paper-button on-tap="_export">[[i18n('admin.ai.export.action')]]</paper-button>
+          </nuxeo-card>
+          <nuxeo-card heading="[[i18n('admin.ai.stats')]]">
+            <div class="row-container">
+              <span class="totalLabel">[[_computeLabel(_stats, 'total', i18n)]]</span>
+              <span class="totalLabel">[[_computeLabel(_stats, 'count', i18n)]]</span>
+            </div>
+            <nuxeo-data-table id="statsResult" items="[[_filter(_stats)]]">
+              <nuxeo-data-table-column name="[[i18n('admin.ai.stats.field')]]" flex="10">
+                <template>
+                  [[item.field]]
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('admin.ai.stats.type')]]" flex="10">
+                <template>
+                  [[item.type]]
+                </template>
+              </nuxeo-data-table-column>
+              <nuxeo-data-table-column name="[[i18n('admin.ai.stats.value')]]" flex="50">
+                <template>
+                  [[_displayVal(item)]]
+                </template>
+              </nuxeo-data-table-column>
+            </nuxeo-data-table>
+          </nuxeo-card>
         </div>
-        <nuxeo-data-table id="statsResult" items="[[_filter(_stats)]]">
-          <nuxeo-data-table-column name="[[i18n('admin.ai.stats.field')]]" flex="10">
-            <template>
-              [[item.field]]
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('admin.ai.stats.type')]]" flex="10">
-            <template>
-              [[item.type]]
-            </template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('admin.ai.stats.value')]]" flex="50">
-            <template>
-              [[_displayVal(item)]]
-            </template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
-      </nuxeo-card>
-      <nuxeo-card heading="[[i18n('admin.ai.export')]]">
-        <div class="row-container">
-          [[_exportText]]
+
+        <div class="side">
+          <nuxeo-card heading="[[i18n('admin.ai.export')]]">
+            <div class="sideCard">
+              <div>
+                <template is="dom-repeat" items="[[statuses]]">
+                  <nuxeo-ai-export-progress status="[[item]]"></nuxeo-ai-export-progress>
+                </template>
+              </div>
+            </div>
+          </nuxeo-card>
         </div>
-      </nuxeo-card>
+      </div>
     `;
   }
 
@@ -138,6 +174,33 @@ class AdminAIAdvancedExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element
        */
       _stats: {
         type: String,
+      },
+      /**
+       * Document received from AI Cloud
+       */
+      currentDoc: {
+        type: Object,
+      },
+      /**
+       * A list of statuses from BAF
+       */
+      statuses: {
+        type: Array,
+        value: [],
+      },
+      /**
+       * Flag to determine visibility of this element
+       */
+      visible: {
+        type: Boolean,
+        value: false,
+        observer: '_visibleChanged',
+      },
+      /**
+       * reference for scheduled call
+       */
+      _timeOut: {
+        type: Number,
       },
     };
   }
@@ -201,6 +264,22 @@ class AdminAIAdvancedExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element
         this._exportText = '';
         this.fire('notify', { message: this.i18n('admin.ai.export.error') });
       });
+  }
+
+  _visibleChanged(newVal) {
+    if (newVal) {
+      this.$.aiExportStatus.execute();
+    } else if (!newVal && this._timeOut) {
+      clearTimeout(this._timeOut);
+    }
+  }
+
+  _statusReceived(resp) {
+    this.statuses = resp.detail.response.value;
+    // defines if the tab is currently active if so, we want to poll more often
+    if (this.visible) {
+      this._timeOut = setTimeout(() => this.$.aiExportStatus.execute(), 2000);
+    }
   }
 }
 
