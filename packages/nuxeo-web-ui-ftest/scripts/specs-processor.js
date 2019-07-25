@@ -1,18 +1,23 @@
 const Finder = require('fs-finder');
 const fs = require('fs');
 const minimist = require('minimist');
+const { TagExpressionParser } = require('cucumber-tag-expressions');
 
 module.exports = (argv) => {
   let features = [];
   const args = minimist(argv.slice(2));
-  /*
-   * XXX
-   * tagExpression is being used only for syntax purposes, since we are not evaluating expressions.
-   * It would only be full featured after this NXP-26660 being addressed.
-   */
   if (args.cucumberOpts && args.cucumberOpts.tagExpression) {
     const files = Finder.from('./test/features').findFiles('*.feature');
-    features = files.filter((file) => fs.readFileSync(file, 'utf8').includes(args.cucumberOpts.tagExpression));
+    const expression = new TagExpressionParser().parse(args.cucumberOpts.tagExpression);
+    features = files.filter((file) => {
+      let tags = fs.readFileSync(file, 'utf8').match(/^\s*@\w+/gm);
+      if (tags) {
+        // filter tags by removing meaningless spaces and duplicates
+        tags = [...new Set(tags.map((tag) => tag.trim()))];
+        return expression.evaluate(tags);
+      }
+      return false;
+    });
   } else {
     features = './test/features/*.feature';
   }

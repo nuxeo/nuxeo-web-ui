@@ -79,6 +79,7 @@ if (argv.headless) {
 
 if (argv.tags) {
   args.push(`--cucumberOpts.tagExpression=${argv.tags}`);
+  process.env.TAG_EXPRESSION = argv.tags;
 }
 
 if (argv.debug) {
