@@ -38,7 +38,7 @@ pipeline {
   }
   environment {
     ORG = 'nuxeo'
-
+    APP_NAME = 'nuxeo-web-ui'
     // NXBT-2885: need "Pipeline Utility Steps"
     // WEBUI_VERSION = readJSON(file: 'package.json').version
   }
@@ -136,6 +136,21 @@ pipeline {
         }
         failure {
           setGitHubBuildStatus('docker', 'Build and deploy Docker image', 'FAILURE')
+        }
+      }
+    }
+    stage('Deploy Preview') {
+      when {
+        branch 'PR-*'
+      }
+      steps {
+        container('mavennodejs') {
+          withEnv(["PREVIEW_VERSION=$WEBUI_VERSION"]) {
+            dir('charts/preview') {
+              sh "make preview" // does some env subst before "jx step helm build"
+              sh "jx preview"
+            }
+          }
         }
       }
     }

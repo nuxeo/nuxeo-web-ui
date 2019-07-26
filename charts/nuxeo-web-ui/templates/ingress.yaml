@@ -1,0 +1,19 @@
+{{- if .Values.nuxeo.webui.ingress.enabled -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "nuxeo.webui.fullname" . }}
+  labels:
+    app: {{ template "nuxeo.webui.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.nuxeo.webui.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  backend:
+    serviceName: {{ template "nuxeo.webui.fullname" . }}
+    servicePort: {{ .Values.nuxeo.webui.service.externalPort}}
+{{- end -}}

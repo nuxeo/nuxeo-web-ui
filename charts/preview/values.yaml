@@ -1,0 +1,41 @@
+expose:
+  Annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
+  config:
+    exposer: Ingress
+    http: true
+    tlsacme: false
+
+cleanup:
+  Args:
+    - --cleanup
+  Annotations:
+    helm.sh/hook: pre-delete
+    helm.sh/hook-delete-policy: hook-succeeded
+
+nuxeo:
+  nuxeo:
+    service:
+      annotations:
+        fabric8.io/expose: "true"
+        fabric8.io/ingress.path: /nuxeo/
+        fabric8.io/ingress.name: preview
+  mongodb:
+    deploy: false
+  postgresql:
+    deploy: false
+
+preview:
+  nuxeo:
+    webui:
+      image:
+        repository:
+        tag:
+      fullnameOverride: preview
+      packages: nuxeo-dam
+      service:
+        annotations:
+          fabric8.io/expose: "true"
+          fabric8.io/ingress.path: /
+          fabric8.io/ingress.name: preview

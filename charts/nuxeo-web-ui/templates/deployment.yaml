@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "nuxeo.webui.fullname" . }}
+  labels:
+    draft: {{ default "draft-app" .Values.draft }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  replicas: {{ .Values.nuxeo.webui.replicaCount }}
+  template:
+    metadata:
+      labels:
+        draft: {{ default "draft-app" .Values.draft }}
+        app: {{ template "nuxeo.webui.fullname" . }}
+{{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.nuxeo.webui.image.repository }}:{{ .Values.nuxeo.webui.image.tag }}"
+        imagePullPolicy: {{ .Values.nuxeo.webui.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.nuxeo.webui.service.internalPort }}
