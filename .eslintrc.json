@@ -35,6 +35,7 @@
     "CKEDITOR": true,
     "jQuery": true,
     "confirm": true,
-    "jsondiffpatch": true
+    "jsondiffpatch": true,
+    "Set": true
   }
 }

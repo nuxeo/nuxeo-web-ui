@@ -114,19 +114,22 @@ limitations under the License.
     </template>
 
     <!-- Record -->
-    <template is="dom-if" if="[[isUnderRetentionOrLegalHold(document)]]">
+    <template is="dom-if" if="[[document.isRecord]]">
       <div id="legalHoldInfoBar" class="bar record">
         <div class="layout horizontal center flex">
           <iron-icon icon="icons:info"></iron-icon>
+          <template is="dom-if" if="[[!isUnderRetentionOrLegalHold(document)]]">
+              <span>[[i18n('documentPage.record')]]</span>
+          </template>
           <template is="dom-if" if="[[document.hasLegalHold]]">
-            <span>[[i18n('documentPage.legalHold')]]</span>
+              <span>[[i18n('documentPage.legalHold')]]</span>
           </template>
           <template is="dom-if" if="[[document.retainUntil]]">
             <template is="dom-if" if="[[!isRetentionDateIndeterminate(document)]]">
-              <span>[[_computeRetentionUntiLabel(document)]]</span>
+              <span hidden="[[document.hasLegalHold]]">[[_computeRetentionUntiLabel(document)]]</span>
             </template>
             <template is="dom-if" if="[[isRetentionDateIndeterminate(document)]]">
-              <span>[[i18n('documentPage.retainIndeterminate')]]</span>
+              <span hidden="[[document.hasLegalHold]]">[[i18n('documentPage.retainIndeterminate')]]</span>
             </template>
           </template>
         </div>
