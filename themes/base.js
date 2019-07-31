@@ -21,7 +21,11 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 const template = html`
   <dom-module id="nuxeo-styles">
     <template>
-      <style include="iron-positioning">
+      <style>
+        [hidden] {
+          display: none !important;
+        }
+
         /* headings */
         h1,
         h2,
@@ -113,7 +117,7 @@ const template = html`
           hyphens: auto;
         }
 
-        /* */
+        /* nuxeo page */
         .header {
           @apply --layout-horizontal;
           @apply --layout-center;
@@ -123,6 +127,26 @@ const template = html`
           text-transform: uppercase;
           text-overflow: ellipsis;
           color: var(--nuxeo-drawer-header);
+        }
+
+        /* layouts */
+        nuxeo-document-viewer[role='widget'],
+        nuxeo-video-info[role='widget'],
+        nuxeo-video-conversions[role='widget'],
+        nuxeo-note-editor[role='widget'] {
+          @apply --nuxeo-widget-container;
+        }
+
+        *[role='widget'] div.multiline {
+          @apply --nuxeo-widget-div-multiline;
+        }
+
+        *[role='widget'] div {
+          @apply --nuxeo-widget-div;
+        }
+
+        *[role='widget'] {
+          @apply --nuxeo-widget;
         }
       </style>
     </template>
@@ -556,6 +580,26 @@ const template = html`
         --nuxeo-suggester-media-width: calc(100% - 90px);
 
         --nuxeo-suggester-media-margin-left: 1.2rem;
+
+        /* layout rules */
+        --nuxeo-widget: {
+          margin-bottom: 16px;
+        }
+
+        --nuxeo-widget-container: {
+          @apply --paper-card;
+        }
+
+        --nuxeo-widget-div: {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          word-break: break-word;
+          hyphens: auto;
+        }
+
+        --nuxeo-widget-div-multiline: {
+          white-space: pre-line;
+        }
       }
 
       @media (max-width: 1024px) {
