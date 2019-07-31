@@ -61,6 +61,13 @@ Polymer({
         transition: opacity 300ms ease-in-out;
       }
 
+      #views slot::slotted(*) {
+        display: block;
+        position: relative;
+        min-height: var(--nuxeo-results-view-min-height, calc(100vh - 130px - var(--nuxeo-app-top)));
+        height: var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top)));
+      }
+
       .displayMode {
         @apply --nuxeo-action;
       }

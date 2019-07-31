@@ -47,7 +47,10 @@ Polymer({
       .results {
         @apply --layout-vertical;
         @apply --layout-flex;
-        min-height: var(--nuxeo-document-content-min-height, calc(100vh - 216px - var(--nuxeo-app-top)));
+        --nuxeo-results-view-min-height: var(
+          --nuxeo-document-content-min-height,
+          calc(100vh - 216px - var(--nuxeo-app-top))
+        );
         margin-bottom: var(--nuxeo-document-content-margin-bottom, 0);
       }
 
