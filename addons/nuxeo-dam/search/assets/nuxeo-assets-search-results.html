@@ -22,17 +22,7 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-assets-search-results">
   <template>
-    <style include="nuxeo-styles">
-      nuxeo-data-table {
-        display: block;
-        position: relative;
-        min-height: calc(100vh - 130px - var(--nuxeo-app-top));
-      }
-
-      nuxeo-justified-grid {
-        height: calc(100vh - 10em);
-      }
-    </style>
+    <style include="nuxeo-styles"></style>
 
     <nuxeo-results name="assets" nx-provider="[[nxProvider]]">
       <nuxeo-justified-grid name="grid" icon="icons:apps" class="results" selection-enabled>
