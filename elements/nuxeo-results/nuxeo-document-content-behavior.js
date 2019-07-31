@@ -189,7 +189,15 @@ export const DocumentContentBehavior = [
     },
 
     _computeParams(document) {
-      return document ? { ecm_parentId: document.uid, ecm_trashed: this.isTrashed(document) } : {};
+      if (document) {
+        if (this.hasFacet(document, 'Orderable')) {
+          this.$.nxProvider.set('sort', { 'ecm:pos': 'ASC' });
+        } else {
+          this.$.nxProvider.set('sort', {});
+        }
+        return { ecm_parentId: document.uid, ecm_trashed: this.isTrashed(document) };
+      }
+      return {};
     },
 
     _computeSortOptions() {

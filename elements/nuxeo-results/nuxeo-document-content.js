@@ -328,16 +328,4 @@ Polymer({
      */
     emptyLabelWhenFiltered: String,
   },
-
-  _computeParams(document) {
-    if (document) {
-      if (this.hasFacet(document, 'Orderable')) {
-        this.$.nxProvider.set('sort', { 'ecm:pos': 'ASC' });
-      } else {
-        this.$.nxProvider.set('sort', {});
-      }
-      return { ecm_parentId: document.uid, ecm_trashed: this.isTrashed(document) };
-    }
-    return {};
-  },
 });
