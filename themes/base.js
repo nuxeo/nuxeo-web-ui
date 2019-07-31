@@ -581,6 +581,14 @@ const template = html`
 
         --nuxeo-suggester-media-margin-left: 1.2rem;
 
+        --nuxeo-document-content-min-height: calc(100vh - 216px - var(--nuxeo-app-top));
+        --nuxeo-document-content-margin-bottom: 0;
+        --nuxeo-document-trash-content-min-height: calc(100vh - 168px - var(--nuxeo-app-top));
+        --nuxeo-document-trash-content-margin-bottom: 0;
+
+        --nuxeo-results-view-height: calc(100vh - 130px - var(--nuxeo-app-top));
+        --nuxeo-results-view-min-height: calc(100vh - 130px - var(--nuxeo-app-top));
+
         /* layout rules */
         --nuxeo-widget: {
           margin-bottom: 16px;
