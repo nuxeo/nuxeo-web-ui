@@ -170,7 +170,7 @@ class AdminAIExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element, Layout
   }
 
   _updateItem(e) {
-    this.$.currentDoc = e.detail.value;
+    this.currentDoc = e.detail.value;
   }
 
   _export() {
@@ -178,7 +178,7 @@ class AdminAIExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element, Layout
       this.fire('notify', { message: 'Type and Model are required parameters' });
       return;
     }
-    const props = this.$.currentDoc.properties;
+    const props = this.currentDoc.properties;
     const inputs = props['ai_model:inputs'];
     const input = inputs.map((e) => e.name).join(',');
 
@@ -192,6 +192,10 @@ class AdminAIExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element, Layout
       query,
       inputs: input,
       outputs: output,
+      model_id: this.currentDoc.uid,
+      model_name: props['ai_model:name'],
+      model_start_date: props['ai_model:training_information'].start,
+      model_end_date: props['ai_model:training_information'].end,
     };
 
     this.$.aiExport
@@ -206,7 +210,7 @@ class AdminAIExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element, Layout
   }
 
   _canExport() {
-    return this.typeName.length !== 0 && this.$.currentDoc != null;
+    return this.typeName.length !== 0 && this.currentDoc != null;
   }
 }
 
