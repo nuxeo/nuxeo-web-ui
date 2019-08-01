@@ -34,6 +34,7 @@ limitations under the License.
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
       <arg value="--no-package-lock" />
+      <arg value="--engine-strict" />
     </exec>
   </target>
 
