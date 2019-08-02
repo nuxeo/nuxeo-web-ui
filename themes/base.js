@@ -130,19 +130,15 @@ const template = html`
         }
 
         /* layouts */
-        nuxeo-document-viewer[role='widget'],
-        nuxeo-video-info[role='widget'],
-        nuxeo-video-conversions[role='widget'],
-        nuxeo-note-editor[role='widget'] {
-          @apply --nuxeo-widget-container;
+        div[role='widget'] > div.multiline {
+          white-space: pre-line;
         }
 
-        *[role='widget'] div.multiline {
-          @apply --nuxeo-widget-div-multiline;
-        }
-
-        *[role='widget'] div {
-          @apply --nuxeo-widget-div;
+        div[role='widget'] > div {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          word-break: break-word;
+          hyphens: auto;
         }
 
         *[role='widget'] {
@@ -592,21 +588,6 @@ const template = html`
         /* layout rules */
         --nuxeo-widget: {
           margin-bottom: 16px;
-        }
-
-        --nuxeo-widget-container: {
-          @apply --paper-card;
-        }
-
-        --nuxeo-widget-div: {
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          word-break: break-word;
-          hyphens: auto;
-        }
-
-        --nuxeo-widget-div-multiline: {
-          white-space: pre-line;
         }
       }
 

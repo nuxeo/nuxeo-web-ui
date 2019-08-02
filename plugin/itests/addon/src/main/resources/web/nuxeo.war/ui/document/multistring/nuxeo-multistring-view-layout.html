@@ -5,7 +5,11 @@
 -->
 <dom-module id="nuxeo-multistring-view-layout">
   <template>
-    <style include="nuxeo-styles"></style>
+    <style include="nuxeo-styles">
+      :host {
+        @apply --paper-card;
+      }
+    </style>
     <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
   </template>
 
