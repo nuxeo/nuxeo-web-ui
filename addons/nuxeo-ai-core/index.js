@@ -93,6 +93,10 @@ const AISuggestionManager = (() => {
       document.querySelector('nuxeo-app').appendChild(op);
     }
     op.input = doc;
+    op.params = {
+      references: true,
+      updatedDocument: doc,
+    };
     return op.execute();
   }
 
