@@ -54,7 +54,7 @@ class AISuggestions extends mixinBehaviors([IronFormElementBehavior], Nuxeo.Elem
       <template is="dom-repeat" items="[[suggestions]]">
         <nuxeo-ai-suggestion
           suggestion="[[item]]"
-          match$="[[_machesInput(item, _inputMatches)]]"
+          match$="[[_matchesInput(item, _inputMatches)]]"
           threshold="[[threshold]]"
           property="[[property]]"
           on-click="_selectSuggestion"
@@ -127,19 +127,21 @@ class AISuggestions extends mixinBehaviors([IronFormElementBehavior], Nuxeo.Elem
     // XXX: this method memoizes matching between the property value and the suggestions
     const matches = new Map();
     const currentValue = this.get(this._parsePropertyPath());
-    if (this.suggestions.length > 0) {
+    if (this.suggestions.length > 0 && currentValue) {
       const isArray = Array.isArray(currentValue);
       this.suggestions.forEach((suggestion) => {
         const suggestedValue = this.idFunction(suggestion.value);
-        const match = isArray ? currentValue.includes(suggestedValue) : currentValue === suggestedValue;
+        const match = isArray
+          ? currentValue.map((i) => this.idFunction(i)).includes(suggestedValue)
+          : this.idFunction(currentValue) === suggestedValue;
         matches.set(suggestedValue, match);
       });
     }
     this._inputMatches = matches;
   }
 
-  _machesInput(suggestion) {
-    return this._inputMatches && suggestion.value && this._inputMatches.get(suggestion.value);
+  _matchesInput(suggestion) {
+    return this._inputMatches && suggestion.value && this._inputMatches.get(this.idFunction(suggestion.value));
   }
 
   _selectSuggestion(event) {
