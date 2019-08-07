@@ -30,7 +30,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
-import '../nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import '../nuxeo-keys/nuxeo-keys.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';

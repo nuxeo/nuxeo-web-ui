@@ -25,7 +25,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-aggregation/nuxeo-dropdown-aggregation.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-grid/nuxeo-data-grid.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
-import '../nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import '../nuxeo-data-grid/nuxeo-document-grid-thumbnail.js';
 import './nuxeo-results.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
