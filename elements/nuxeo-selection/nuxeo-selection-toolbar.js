@@ -20,7 +20,7 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-dialog-scrollable/paper-dialog-scrollable.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
-import '../nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 

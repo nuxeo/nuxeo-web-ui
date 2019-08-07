@@ -60,7 +60,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
-import './nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
 import './nuxeo-recent-documents/nuxeo-recent-documents.js';
 import './nuxeo-results/nuxeo-results.js';

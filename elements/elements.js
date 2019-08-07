@@ -86,6 +86,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-audit-page-provider.js';
 // Nuxeo UI Elements -->
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/dataviz/nuxeo-document-distribution-chart.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-preview.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-aggregation/nuxeo-checkbox-aggregation.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-aggregation/nuxeo-dropdown-aggregation.js';
@@ -213,7 +214,6 @@ import './nuxeo-document-versions/nuxeo-document-versions.js';
 import './nuxeo-document-blob/nuxeo-document-blob.js';
 import './nuxeo-document-highlight/nuxeo-document-highlights.js';
 import './nuxeo-document-history/nuxeo-document-history.js';
-import './nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import './nuxeo-dropzone/nuxeo-dropzone.js';
 import './nuxeo-collections/nuxeo-collection-move-up-action.js';
 import './nuxeo-collections/nuxeo-collection-move-down-action.js';
