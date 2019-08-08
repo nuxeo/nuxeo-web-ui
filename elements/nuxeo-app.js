@@ -1148,7 +1148,7 @@ Polymer({
 
   _refreshAndFetchTasks() {
     // let's refresh the current document since it might have been changed (ex: state and version)
-    this.refresh();
+    this.fire('document-updated');
     this._fetchTasks();
   },
 
@@ -1238,10 +1238,12 @@ Polymer({
 
   _documentLocked() {
     this._toast(this.i18n('app.document.locked'));
+    this.fire('document-updated');
   },
 
   _documentUnlocked() {
     this._toast(this.i18n('app.document.unlocked'));
+    this.fire('document-updated');
   },
 
   _documentDeleted(e) {
