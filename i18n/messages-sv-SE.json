@@ -25,7 +25,6 @@
   "activity.workflowTaskAssigned": "startade en granskning",
   "activity.workflowTaskCompleted": "slutförde en granskningsuppgift",
   "accessibility.logo": "Programlogotyp",
-  "accessibility.thumbnail": "Miniatyrbild av {0}",
   "addToCollectionDocumentsButton.dialog.add": "Lägg till i samlingen",
   "addToCollectionDocumentsButton.dialog.cancel": "Avbryt",
   "addToCollectionDocumentsButton.dialog.collections": "Samlingar",

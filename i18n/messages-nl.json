@@ -25,7 +25,6 @@
   "activity.workflowTaskAssigned": "is een review gestart",
   "activity.workflowTaskCompleted": "heeft een reviewtaak voltooid",
   "accessibility.logo": "Applicatielogo",
-  "accessibility.thumbnail": "Miniatuurpictogram van {0}",
   "addToCollectionDocumentsButton.dialog.add": "Toevoegen aan Collectie",
   "addToCollectionDocumentsButton.dialog.cancel": "Annuleren",
   "addToCollectionDocumentsButton.dialog.collections": "Collecties",

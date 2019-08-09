@@ -25,7 +25,6 @@
   "activity.workflowTaskAssigned": "revisión iniciada",
   "activity.workflowTaskCompleted": "tarea de revisión completada",
   "accessibility.logo": "Logotipo de la aplicación",
-  "accessibility.thumbnail": "Miniatura de {0}",
   "addToCollectionDocumentsButton.dialog.add": "Añadir a la colección",
   "addToCollectionDocumentsButton.dialog.cancel": "Cancelar",
   "addToCollectionDocumentsButton.dialog.collections": "Colecciones",
