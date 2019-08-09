@@ -881,7 +881,7 @@ limitations under the License.
 
       _refreshAndFetchTasks: function() {
         // let's refresh the current document since it might have been changed (ex: state and version)
-        this.refresh();
+        this.fire('document-updated');
         this._fetchTasks();
       },
 
@@ -970,10 +970,12 @@ limitations under the License.
 
       _documentLocked: function() {
         this._toast(this.i18n('app.document.locked'));
+        this.fire('document-updated');
       },
 
       _documentUnlocked: function() {
         this._toast(this.i18n('app.document.unlocked'));
+        this.fire('document-updated');
       },
 
       _documentDeleted: function(e) {
