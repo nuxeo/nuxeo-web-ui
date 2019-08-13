@@ -427,8 +427,9 @@ Polymer({
     }
     if (view) {
       // initialize columns
-      if (this.columns.length === 0 && Array.isArray(view.columns) && view.columns.length > 0) {
-        this.set('columns', view.columns);
+      this.set('columns', view.columns);
+      if (Array.isArray(view.columns)) {
+        this.listen(view, 'columns-changed', '_columnsChanged');
       }
       // restore settings
       if (this._settings) {
@@ -442,7 +443,6 @@ Polymer({
         this.selectItems(this.selectedItems.slice());
       }
       // listen for columns, settings and selection changed
-      this.listen(view, 'columns-changed', '_columnsChanged');
       this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
       this.listen(view, 'settings-changed', '_saveViewSettings');
       this.listen(view, 'items-changed', '_itemsChanged');
