@@ -90,7 +90,7 @@ Polymer({
   },
 
   _isAvailable() {
-    return this.nxProvider !== null && this.columns.length;
+    return this.nxProvider !== null && this.columns && this.columns.length;
   },
 
   _show() {
