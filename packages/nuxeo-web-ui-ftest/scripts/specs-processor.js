@@ -10,7 +10,7 @@ module.exports = (argv) => {
     const files = Finder.from('./test/features').findFiles('*.feature');
     const expression = new TagExpressionParser().parse(args.cucumberOpts.tagExpression);
     features = files.filter((file) => {
-      let tags = fs.readFileSync(file, 'utf8').match(/^\s*@\w+/gm);
+      let tags = fs.readFileSync(file, 'utf8').match(/^\s*@\w+/gm) || [];
       if (tags) {
         // filter tags by removing meaningless spaces and duplicates
         tags = [...new Set(tags.map((tag) => tag.trim()))];
