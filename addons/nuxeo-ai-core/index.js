@@ -108,7 +108,7 @@ const AISuggestionManager = (() => {
      * 3) update suggestions on suggestion widgets
      */
     updateWidgetSuggestions: (layout) => {
-      if (!layout) {
+      if (!layout || !layout.document) {
         return;
       }
       _updateDebouncer = Debouncer.debounce(_updateDebouncer, timeOut.after(500), () => {
