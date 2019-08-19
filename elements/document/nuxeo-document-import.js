@@ -711,6 +711,7 @@ Polymer({
 
   ready() {
     this.connection = this.$.nx;
+    this.$.docRequest.$.nxResource.set('uncancelable', true);
     this.setupDropZone(this.$.dropzone);
     this._clear();
     this.addEventListener('element-changed', this._layoutUpdated.bind(this), true);
