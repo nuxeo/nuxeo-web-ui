@@ -180,6 +180,37 @@ pipeline {
         }
       }
     }
+    stage('Functional tests') {
+      when {
+        branch 'PR-*'
+      }
+      steps {
+        setGitHubBuildStatus('test', 'Functional tests', 'PENDING')
+        container('mavennodejs') {
+          script {
+            PREVIEW_URL =  sh(script: 'jx get preview -c', returnStdout: true).trim()
+          }
+          dir('ftest') {
+            echo '''
+              ------------------------
+              Running Functional tests
+              ------------------------
+            '''
+            sh 'chrome --version'
+            sh 'npm install --no-package-lock'
+            sh "npx nuxeo-web-ui-ftest --nuxeoUrl=$PREVIEW_URL/nuxeo --url=$PREVIEW_URL --report --screenshots --headless --tags='not @ignore' "
+          }
+        }
+      }
+      post {
+        success {
+          setGitHubBuildStatus('test', 'Functional tests', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('test', 'Functional tests', 'FAILURE')
+        }
+      }
+    }
     stage('Publish Docker Images') {
       when {
         branch 'master'
