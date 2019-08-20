@@ -102,19 +102,6 @@ Polymer({
       sortInfos.push({ sortColumn: key, sortAscending: provider.sort[key] === 'asc' });
     });
 
-    // convert provider.params and provider.aggregations to properties
-    const properties = {};
-    if (provider.params) {
-      Object.keys(provider.params).forEach((key) => {
-        properties[key] = provider.params[key];
-      });
-    }
-    if (provider.aggregations) {
-      Object.keys(provider.aggregations).forEach((key) => {
-        properties[key] = provider.aggregations[key].selection;
-      });
-    }
-
     // convert datatable.columns to columns
     const columns = [];
     this.columns.forEach((c) => {
@@ -127,12 +114,28 @@ Polymer({
       pageProviderName: provider.provider,
       pageSize: provider.pageSize,
       currentPage: provider.page,
-      namedParameters: provider.params,
-      searchDocument: { properties },
       sortInfos,
       resultColumns: columns,
       executed: false,
     };
+
+    if (Array.isArray(provider.params)) {
+      state.queryParameters = provider.params;
+    } else {
+      // convert provider.params and provider.aggregations to properties
+      const properties = {};
+      if (provider.params) {
+        Object.keys(provider.params).forEach((key) => {
+          properties[key] = provider.params[key];
+        });
+      }
+      if (provider.aggregations) {
+        Object.keys(provider.aggregations).forEach((key) => {
+          properties[key] = provider.aggregations[key].selection;
+        });
+      }
+      state.searchDocument = { properties };
+    }
 
     this.$.iframe.src = `${this.$.nxconn.url}/spreadsheet/?cv=${encodeURIComponent(
       b64EncodeUnicode(JSON.stringify(state)),
