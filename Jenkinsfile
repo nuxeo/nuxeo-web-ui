@@ -154,6 +154,22 @@ pipeline {
         }
       }
     }
+    stage('Functional tests') {
+      when {
+        branch 'PR-*'
+      }
+      steps {
+        container('mavennodejs') {
+          script {
+            PREVIEW_URL =  sh(script: 'jx get preview -c', returnStdout: true).trim()
+          }
+          dir('ftest') {
+            sh 'npm install --no-package-lock'
+            sh "./node_modules/.bin/nuxeo-web-ui-ftest --nuxeoUrl=$PREVIEW_URL/nuxeo --url=$PREVIEW_URL/ --report --screenshots --headless --tags='not @ignore' "
+          }
+        }
+      }
+    }
   }
   post {
     success {
