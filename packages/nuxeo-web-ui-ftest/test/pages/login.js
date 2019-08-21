@@ -15,8 +15,10 @@ export default class Login {
   }
 
   static get() {
-    const baseUrl = process.env.NUXEO_URL || '';
-    driver.url(baseUrl ? `${baseUrl}/logout` : 'logout');
+    const nuxeoUrl = process.env.NUXEO_URL || '';
+    driver.url(nuxeoUrl ? `${nuxeoUrl}/logout` : 'logout');
+    // XXX - force redirect after logout
+    driver.url(nuxeoUrl ? `${nuxeoUrl}/login.jsp` : 'login.jsp');
     return new this();
   }
 }
