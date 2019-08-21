@@ -64,12 +64,20 @@ if (process.env.DRIVER_VERSION) {
   drivers[process.env.BROWSER].version = process.env.DRIVER_VERSION;
 }
 
+// use selenium standalone if not using grid
+const services = [];
+if (!process.env.SELENIUM_HOSTNAME) {
+  services.push('selenium-standalone');
+}
+
 // transform nuxeo-web-ui-ftest requires
 require('babel-register')({
   ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/,
 });
 
 exports.config = {
+  host: process.env.SELENIUM_HOSTNAME || '127.0.0.1',
+
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],
@@ -161,7 +169,7 @@ exports.config = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: ['selenium-standalone'],
+  services,
 
   seleniumArgs: { drivers },
 

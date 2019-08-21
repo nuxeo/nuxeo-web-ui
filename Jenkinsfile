@@ -31,6 +31,7 @@ void setGitHubBuildStatus(String context, String message, String state) {
 }
 
 def WEBUI_VERSION
+def FTEST_CHART = "nuxeo-web-ui-ftest-${BRANCH_NAME.toLowerCase()}"
 
 pipeline {
   agent {
@@ -159,14 +160,43 @@ pipeline {
         branch 'PR-*'
       }
       steps {
+        setGitHubBuildStatus('test', 'Functional tests', 'PENDING')
         container('mavennodejs') {
           script {
             PREVIEW_URL =  sh(script: 'jx get preview -c', returnStdout: true).trim()
           }
           dir('ftest') {
-            sh 'npm install --no-package-lock'
-            sh "./node_modules/.bin/nuxeo-web-ui-ftest --nuxeoUrl=$PREVIEW_URL/nuxeo --url=$PREVIEW_URL/ --report --screenshots --headless --tags='not @ignore' "
+            sh """
+              # initialize Helm
+              helm init --client-only
+
+              # install Selenium hub and Chrome
+              jx step helm install --name $FTEST_CHART --set chrome.enabled=true stable/selenium
+
+              # export Selenium hostname
+              export SELENIUM_HOSTNAME=\$(kubectl get svc $FTEST_CHART-selenium-hub -o=template --template={{.spec.clusterIP}})
+
+              # install npm deps
+              npm install --no-package-lock
+
+              # launch tests
+              npx nuxeo-web-ui-ftest --nuxeoUrl=$PREVIEW_URL/nuxeo --url=$PREVIEW_URL --report --screenshots --headless --tags='not @ignore'
+            """
           }
+        }
+      }
+      post {
+        always {
+          container('mavennodejs') {
+            // clean up
+            sh "helm delete $FTEST_CHART"
+          }
+        }
+        success {
+          setGitHubBuildStatus('test', 'Functional tests', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('test', 'Functional tests', 'FAILURE')
         }
       }
     }
