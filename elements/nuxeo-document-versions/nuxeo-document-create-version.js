@@ -91,15 +91,6 @@ Polymer({
       }
     </style>
 
-    <nuxeo-document
-      id="doc"
-      headers="[[headers]]"
-      doc-id="[[document.uid]]"
-      data="{{document}}"
-      response="{{document}}"
-    >
-    </nuxeo-document>
-
     <nuxeo-operation
       id="opCreateVersion"
       op="Document.CreateVersion"
