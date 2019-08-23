@@ -18,7 +18,7 @@ export default class PublicationDialog extends BasePage {
           const versionsList = new DocumentVersions(`${this._selector} #version`);
           versionsList.toggle.waitForVisible();
           versionsList.toggle.click();
-          versionsList.listItems.waitForVisible();
+          versionsList.list.waitForVisible();
           versionsList.selectVersion(version);
         }
         if (override) {
