@@ -1,6 +1,6 @@
 FROM node:lts
 
-RUN npm config set @nuxeo:registry=https://mavenin.nuxeo.com/nexus/repository/npmjs-nuxeo
+RUN npm config set registry=http://nexus/repository/npmjs-all/
 
 WORKDIR /ui
 
