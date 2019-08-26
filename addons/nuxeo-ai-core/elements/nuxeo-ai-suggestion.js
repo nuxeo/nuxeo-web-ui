@@ -44,7 +44,7 @@ class AISuggestion extends AISuggestionMixin(Nuxeo.Element) {
   }
 
   static get observers() {
-    return ['_updateContainer(suggestion, property)'];
+    return ['_updateContainer(suggestion, property, match)'];
   }
 
   created() {
