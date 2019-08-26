@@ -64,17 +64,18 @@ class AISuggestion extends AISuggestionMixin(Nuxeo.Element) {
     if (suggestion.value && suggestion.value['entity-type']) {
       ruleset = { type: suggestion.value['entity-type'], property };
     }
-    this._instance = document.createElement(AISuggestionFormatters.get(ruleset));
-
+    const formatter = AISuggestionFormatters.get(ruleset);
+    if (!this._instance || this._instance.nodeName.toLowerCase() !== formatter) {
+      this._instance = document.createElement(formatter);
+      if (this.$.container.hasChildNodes()) {
+        this.$.container.replaceChild(this._instance, this.$.container.firstChild);
+      } else {
+        this.$.container.appendChild(this._instance);
+      }
+    }
     Object.keys(this.constructor.properties).forEach((prop) => {
       this._instance[prop] = this[prop];
     });
-
-    if (this.$.container.hasChildNodes()) {
-      this.$.container.replaceChild(this._instance, this.$.container.firstChild);
-    } else {
-      this.$.container.appendChild(this._instance);
-    }
   }
 }
 
