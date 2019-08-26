@@ -200,7 +200,7 @@ limitations under the License.
       },
 
       _resultsFilter: function(entry) {
-        return entry.id.indexOf('-999999') === -1;
+        return entry.id && entry.id.indexOf('-999999') === -1;
       },
 
       _resultAndSelectionFormatter: function(item) {
