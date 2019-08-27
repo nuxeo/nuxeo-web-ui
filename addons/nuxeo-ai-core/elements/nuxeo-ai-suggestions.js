@@ -49,6 +49,10 @@ class AISuggestions extends mixinBehaviors([IronFormElementBehavior], Nuxeo.Elem
         nuxeo-ai-suggestion {
           margin: 0 10px 10px 0;
         }
+
+        nuxeo-ai-suggestion[match] {
+          pointer-events: none;
+        }
       </style>
 
       <template is="dom-repeat" items="[[suggestions]]">
