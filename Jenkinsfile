@@ -160,7 +160,7 @@ pipeline {
       script {
         if (BRANCH_NAME == 'master') {
           // update JIRA issue
-          // step([$class: 'JiraIssueUpdater', issueSelector: [$class: 'DefaultIssueSelector'], scm: scm])
+          step([$class: 'JiraIssueUpdater', issueSelector: [$class: 'DefaultIssueSelector'], scm: scm])
         }
       }
     }
