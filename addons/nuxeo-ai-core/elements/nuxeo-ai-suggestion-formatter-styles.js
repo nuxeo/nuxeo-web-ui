@@ -33,7 +33,6 @@ const template = html`
         }
         :host([match]) {
           opacity: 0.3;
-          pointer-events: none;
         }
         :host(:hover) {
           background-color: var(--nuxeo-artificial-intelligence-confidence-hover, rgba(74, 144, 246, 0.1));
