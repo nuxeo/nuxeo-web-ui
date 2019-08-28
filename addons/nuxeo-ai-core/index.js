@@ -42,8 +42,8 @@ const AISuggestionManager = (() => {
   let _updateDebouncer = null;
   let op = null;
 
-  function _getSuggestionWidget(element) {
-    if (!_map.has(element)) {
+  function _getSuggestionWidget(element, createIfNotExists = true) {
+    if (!_map.has(element) && createIfNotExists) {
       const suggestionWidget = document.createElement('nuxeo-ai-suggestions');
       suggestionWidget.style.marginBottom = '8px';
       element.parentNode.insertBefore(suggestionWidget, element.nextElementSibling);
@@ -55,7 +55,7 @@ const AISuggestionManager = (() => {
 
   function _clearSuggestions(model) {
     Object.values(model).forEach((element) => {
-      const suggestionWidget = _getSuggestionWidget(element);
+      const suggestionWidget = _getSuggestionWidget(element, false);
       if (suggestionWidget) {
         suggestionWidget.suggestions = [];
       }
@@ -107,44 +107,48 @@ const AISuggestionManager = (() => {
      * 2) add a suggestion widget to each field that has suggestions (if no widget was added yet)
      * 3) update suggestions on suggestion widgets
      */
-    updateWidgetSuggestions: (layout) => {
+    updateWidgetSuggestions: (layout, path) => {
       if (!layout || !layout.document) {
         return;
       }
-      _updateDebouncer = Debouncer.debounce(_updateDebouncer, timeOut.after(500), () => {
-        const model = _getBoundElements(layout, 'document.properties');
-        _getSuggestions(layout.document).then((response) => {
-          /*
-           * Inefficient approach that should be changed as soon as the response from server includes more information
-           * (e.g. all output fields) to only clear the elements in need.
-           * Ticket created to analyse and tackle this need: NXP-26314
-           */
-          _clearSuggestions(model);
-          response.forEach((service) => {
-            service.suggestions.forEach((suggestion) => {
-              const element = model[`document.properties.${suggestion.property}`];
-              if (element) {
-                const suggestionWidget = _getSuggestionWidget(element);
-                if (!suggestionWidget.property) {
-                  // convert path to xpath
-                  suggestionWidget.property = suggestion.property;
+      const aiModels = layout.document.contextParameters && layout.document.contextParameters.aiModels;
+      const isModelInput = path && aiModels && aiModels.inputs.includes(path.replace('document.properties.', ''));
+
+      const model = _getBoundElements(layout, 'document.properties');
+      const widget = _getSuggestionWidget(path && model[path], false);
+      if (widget && Array.isArray(widget.suggestions) && widget.suggestions.length > 0) {
+        widget._matchInput();
+      }
+      if (!path || isModelInput) {
+        _updateDebouncer = Debouncer.debounce(_updateDebouncer, timeOut.after(500), () => {
+          _getSuggestions(layout.document).then((response) => {
+            _clearSuggestions(model);
+            response.forEach((service) => {
+              service.suggestions.forEach((suggestion) => {
+                const element = model[`document.properties.${suggestion.property}`];
+                if (element) {
+                  const suggestionWidget = _getSuggestionWidget(element);
+                  if (!suggestionWidget.property) {
+                    // convert path to xpath
+                    suggestionWidget.property = suggestion.property;
+                  }
+                  suggestionWidget.suggestions = suggestion.values;
+                  suggestionWidget.document = layout.document;
+                  // set up binding
+                  if (!suggestionWidget._notifyDocumentChanges) {
+                    suggestionWidget._notifyDocumentChanges = (evt) => {
+                      if ('path' in evt.detail && 'value' in evt.detail) {
+                        layout.notifyPath(evt.detail.path);
+                      }
+                    };
+                    suggestionWidget.addEventListener('document-changed', suggestionWidget._notifyDocumentChanges);
+                  }
                 }
-                suggestionWidget.suggestions = suggestion.values;
-                suggestionWidget.document = layout.document;
-                // set up binding
-                if (!suggestionWidget._notifyDocumentChanges) {
-                  suggestionWidget._notifyDocumentChanges = (evt) => {
-                    if ('path' in evt.detail && 'value' in evt.detail) {
-                      layout.notifyPath(evt.detail.path);
-                    }
-                  };
-                  suggestionWidget.addEventListener('document-changed', suggestionWidget._notifyDocumentChanges);
-                }
-              }
+              });
             });
           });
         });
-      });
+      }
     },
   };
 })();
@@ -158,7 +162,7 @@ document.addEventListener('document-layout-changed', (e) => {
     return;
   }
   customElements.whenDefined(layout.tagName.toLowerCase()).then(() => {
-    layout.__aiDocumentChanged = () => AISuggestionManager.updateWidgetSuggestions(layout);
+    layout.__aiDocumentChanged = (event) => AISuggestionManager.updateWidgetSuggestions(layout, event.path);
     layout.constructor.createMethodObserver('__aiDocumentChanged(document.*)', true);
     AISuggestionManager.updateWidgetSuggestions(e.detail.element);
   });
