@@ -156,6 +156,27 @@ pipeline {
     }
   }
   post {
+    success {
+      container('mavennodejs') {
+        script {
+          if (BRANCH_NAME == 'master') {
+            def src =  "\$DOCKER_REGISTRY/\$ORG/nuxeo-web-ui:$WEBUI_VERSION"
+            def target =  "\$PUBLIC_DOCKER_REGISTRY/\$ORG/nuxeo-web-ui:$WEBUI_VERSION"
+            echo """
+              -----------------------
+              Publishing Docker image
+              -----------------------
+              $target
+            """
+            sh """
+              docker pull $src
+              docker tag $src $target
+              docker push $target
+            """
+          }
+        }
+      }
+    }
     always {
       script {
         if (BRANCH_NAME == 'master') {
