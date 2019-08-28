@@ -132,11 +132,14 @@ const AISuggestionManager = (() => {
                 suggestionWidget.suggestions = suggestion.values;
                 suggestionWidget.document = layout.document;
                 // set up binding
-                suggestionWidget.addEventListener('document-changed', (evt) => {
-                  if ('path' in evt.detail && 'value' in evt.detail) {
-                    layout.notifyPath(evt.detail.path);
-                  }
-                });
+                if (!suggestionWidget._notifyDocumentChanges) {
+                  suggestionWidget._notifyDocumentChanges = (evt) => {
+                    if ('path' in evt.detail && 'value' in evt.detail) {
+                      layout.notifyPath(evt.detail.path);
+                    }
+                  };
+                  suggestionWidget.addEventListener('document-changed', suggestionWidget._notifyDocumentChanges);
+                }
               }
             });
           });
