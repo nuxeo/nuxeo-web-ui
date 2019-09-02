@@ -59,7 +59,7 @@ Polymer({
         --paper-listbox-background-color: transparent;
       }
 
-      #documentViewsItems > [name='comments'] {
+      #documentViewsItems > nuxeo-page-item:first-of-type {
         margin: 0;
       }
 
@@ -214,11 +214,15 @@ Polymer({
           <!-- activity -->
           <div class="section">
             <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
-              <nuxeo-page-item name="comments" label="[[i18n('documentPage.comments')]]"></nuxeo-page-item>
+              <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
+                <nuxeo-page-item name="comments" label="[[i18n('documentPage.comments')]]"></nuxeo-page-item>
+              </template>
               <nuxeo-page-item name="activity" label="[[i18n('documentPage.activity')]]"></nuxeo-page-item>
             </paper-listbox>
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
-              <nuxeo-document-comment-thread name="comments" uid="[[document.uid]]"></nuxeo-document-comment-thread>
+              <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
+                <nuxeo-document-comment-thread name="comments" uid="[[document.uid]]"></nuxeo-document-comment-thread>
+              </template>
               <nuxeo-document-activity name="activity" document="[[document]]"></nuxeo-document-activity>
             </iron-pages>
           </div>
@@ -233,6 +237,7 @@ Polymer({
   properties: {
     document: {
       type: Object,
+      observer: '_documentChanged',
     },
     selectedTab: {
       type: String,
@@ -246,6 +251,10 @@ Polymer({
       reflectToAttribute: true,
       observer: '_openedChanged',
     },
+  },
+
+  _documentChanged(doc) {
+    this.selectedTab = this.hasFacet(doc, 'Commentable') ? 'comments' : 'activity';
   },
 
   _openedChanged() {
