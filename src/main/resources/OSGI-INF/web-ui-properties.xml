@@ -30,5 +30,8 @@
 
     <!-- First Day Of Week -->
     <property name="org.nuxeo.web.ui.firstDayOfWeek"></property>
+
+    <!-- Comments only on doc with 'Commentable' facet ? -->
+    <property name="org.nuxeo.web.ui.enforceCommentable">false</property>
   </extension>
 </component>
