@@ -209,13 +209,13 @@ limitations under the License.
           <!-- activity -->
           <div class="section">
             <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
-              <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
+              <template is="dom-if" if="[[_isCommentable(document)]]">
                 <nuxeo-page-item name="comments" label="[[i18n('documentPage.comments')]]"></nuxeo-page-item>
               </template>
               <nuxeo-page-item name="activity" label="[[i18n('documentPage.activity')]]"></nuxeo-page-item>
             </paper-listbox>
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
-              <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
+              <template is="dom-if" if="[[_isCommentable(document)]]">
                 <nuxeo-document-comment-thread name="comments" uid="[[document.uid]]"></nuxeo-document-comment-thread>
               </template>
               <nuxeo-document-activity name="activity" document="[[document]]"></nuxeo-document-activity>
@@ -249,8 +249,17 @@ limitations under the License.
 
       },
 
+      _isCommentable: function(doc) {
+        if (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enforceCommentable) {
+          if (!this.hasFacet(doc, 'Commentable')) {
+            return false;
+          }
+        }
+        return true;
+      },
+
       _documentChanged: function(doc) {
-        this.selectedTab = this.hasFacet(doc, 'Commentable') ? 'comments' : 'activity';
+        this.selectedTab = this._isCommentable(doc) ? 'comments' : 'activity';
       },
 
       _openedChanged: function() {
