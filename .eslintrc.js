@@ -70,5 +70,12 @@ module.exports = {
         'global-require': 'off',
       },
     },
+    {
+      files: ['addons/**/ftest/test/features/step_definitions/**/*.js'],
+      rules: {
+        'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+        'no-unused-expressions': 'off'
+      },
+    },
   ],
 };
