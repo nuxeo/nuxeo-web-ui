@@ -68,13 +68,14 @@ module.exports = {
         'import/no-dynamic-require': 'off',
         'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
         'global-require': 'off',
+        'no-console': 'off',
       },
     },
     {
       files: ['addons/**/ftest/test/features/step_definitions/**/*.js'],
       rules: {
         'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
-        'no-unused-expressions': 'off'
+        'no-unused-expressions': 'off',
       },
     },
   ],
