@@ -9,10 +9,12 @@
     "node": ">=10.12.0"
   },
   "devDependencies": {
+    "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@open-wc/eslint-config": "^0.3.0",
     "@open-wc/prettier-config": "^0.1.0",
     "@open-wc/webpack-import-meta-loader": "^0.2.1",
     "@webcomponents/webcomponentsjs": "^2.0.0",
+    "babel-preset-env": "^1.7.0",
     "clean-webpack-plugin": "^1.0.0",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "^2.1.1",
@@ -25,6 +27,7 @@
     "http-server": "^0.11.1",
     "husky": "^1.0.0",
     "lint-staged": "^8.0.0",
+    "minimist": "^1.2.0",
     "npm-run-all": "^4.1.5",
     "polymer-cli": "^1.9.0",
     "replace": "^1.0.1",
@@ -66,7 +69,10 @@
     "win-lint": "npm run win-lint:polymer && npm run lint:eslint && npm run lint:prettier",
     "format": "npm run format:polymer && npm run format:prettier && npm run format:eslint",
     "win-format": "npm run win-format:polymer && npm run format:prettier && npm run format:eslint",
-    "postinstall": "cd packages/nuxeo-web-ui-ftest && npm install"
+    "preinstall": "cd packages/nuxeo-web-ui-ftest && npm install",
+    "test": "node scripts/test-runner.js --report --screenshots --headless --tags='not @ignore'",
+    "test:dev": "node scripts/test-runner.js --nuxeoUrl=http://localhost:8080/nuxeo --url=http://localhost:5000/",
+    "test:watch": "node scripts/test-runner.js --nuxeoUrl=http://localhost:8080/nuxeo  --url=http://localhost:5000/ --tags='@watch' --debug"
   },
   "dependencies": {
     "@nuxeo/chart-elements": "^4.0.0-SNAPSHOT",
