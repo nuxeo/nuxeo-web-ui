@@ -15,6 +15,7 @@
     <copy todir="${out.dir}">
       <artifact:file key="org.nuxeo.web.ui:nuxeo-web-ui-marketplace::zip" />
       <artifact:file key="org.nuxeo.web.ui:nuxeo-web-ui-marketplace-itests::zip" />
+      <artifact:file key="org.nuxeo.marketplace.dam:marketplace::zip" />
     </copy>
   </target>
 
@@ -22,20 +23,10 @@
     <condition property="cmd.npm" value="npm.cmd" else="npm">
       <os family="windows"/>
     </condition>
-    <delete dir="../../../nuxeo-web-ui-ftest/node_modules" failonerror="true" />
-    <exec executable="${cmd.npm}" dir="../packages/nuxeo-web-ui-ftest" failonerror="true">
+    <exec executable="${cmd.npm}" dir="../" failonerror="true">
       <arg value="install" />
     </exec>
-    <exec executable="${cmd.npm}" dir="../packages/nuxeo-web-ui-ftest" failonerror="true">
-      <arg value="run" />
-    </exec>
-    <delete includeEmptyDirs="yes" failonerror="false">
-      <fileset dir="node_modules" defaultexcludes="no" followsymlinks="false" />
-    </delete>
-    <exec executable="${cmd.npm}" failonerror="true">
-      <arg value="install" />
-    </exec>
-    <exec executable="${cmd.npm}" failonerror="true">
+    <exec executable="${cmd.npm}" dir="../" failonerror="true">
       <arg value="test" />
     </exec>
   </target>
