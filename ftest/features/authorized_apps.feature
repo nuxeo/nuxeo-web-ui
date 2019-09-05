@@ -17,7 +17,7 @@ Feature: Authorized Applications
   Scenario: View authorized applications
     When I am on user authorized applications page
     Then I can only see 2 authorized applications
-    
+
   Scenario: Revoke access to an authorized application
     When I am on user authorized applications page
     Then I can revoke access for "My Client" application

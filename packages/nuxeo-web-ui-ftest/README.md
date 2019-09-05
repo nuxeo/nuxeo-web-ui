@@ -25,7 +25,7 @@ npm install @nuxeo/nuxeo-web-ui-ftest@^2.2.0
 
 Cucumber tests are written in [Gherkin](https://docs.cucumber.io/gherkin/reference/), which are then translated into JavaScript instructions that run commands using the WebDriver protocol. Tests are written in feature files (ending with the .feature extension), which are composed by a set of Scenarios with one or more Steps. Step definitions are instructions defined in JavaScript files that match the steps used in the feature files, which can run WebdriverIO commands and make assertions.
 
-The framework reads feature files, step definitions and resources by convention, so your project needs to follow a particular structure. Features files are read from the `test/features` folder, step definitions from `test/features/step_definitions`, and test resources (e.g. test images) are loaded from `test/resources`.
+The framework reads feature files, step definitions and resources by convention, so your project needs to follow a particular structure. Features files are read from the `features` folder, step definitions from `features/step_definitions`, and test resources (e.g. test images) are loaded from `test/resources`.
 
 ```
 .

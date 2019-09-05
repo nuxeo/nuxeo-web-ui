@@ -13,7 +13,7 @@
   },
   "overrides": [
     {
-      "files": ["test/features/step_definitions/*.js"],
+      "files": ["features/step_definitions/*.js"],
       "rules": {
         "no-unused-expressions": "off"
       }
