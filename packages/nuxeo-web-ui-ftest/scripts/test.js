@@ -5,7 +5,7 @@
  *   --cucumberReport: path to file containing the report that will be used by cucumber-html-report;
  *                     by default set to ./target/cucumber-reports/report.json
  *   --features: an array of paths from which to load feature files from;
- *               by default set to ./test/features/*.feature
+ *               by default set to ./features/*.feature
  *   --junitReport: path to file containing the junit report generated from the cucumber report;
  *                  by default set to ./target/surefire-reports/TEST-report.xml
  *   --nuxeoUrl: the url of the nuxeo platform server instance to test, fall back on --url or http://localhost:8080
@@ -15,7 +15,7 @@
  *   --screenshotPath: path to to which the screenshots will be saved;
  *                     by default set to ./target/screenshots
  *   --stepDefinitions: an array of paths from which to load step definitions from;
- *                      by default set to ./test/features/step_definitions if the path exists
+ *                      by default set to ./features/step_definitions if the path exists
  *   --tags: only scenarios containing these tags will be ran
  *   --watch: watch for changes in tests and rerun them
  *   --wdioConfig: pass a custom wdio config file
@@ -33,7 +33,7 @@ const { spawn } = require('child_process');
 const wdioBin = require.resolve('webdriverio/bin/wdio');
 const argv = require('minimist')(process.argv.slice(2));
 
-const defaultDef = './test/features/step_definitions';
+const defaultDef = './features/step_definitions';
 
 const args = [argv.wdioConfig ? argv.wdioConfig : path.join(__dirname, '../wdio.conf.js')];
 

@@ -22,4 +22,3 @@ Feature: User Cloud Services
     When I am on user cloud services page
     Then I can delete token for provider "test-oauth2-provider" that belongs to me
     And I can only see 1 provider token that belongs to me
-

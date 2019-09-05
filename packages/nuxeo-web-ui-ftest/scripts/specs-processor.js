@@ -7,7 +7,7 @@ module.exports = (argv) => {
   let features = [];
   const args = minimist(argv.slice(2));
   if (args.cucumberOpts && args.cucumberOpts.tagExpression) {
-    const files = Finder.from('./test/features').findFiles('*.feature');
+    const files = Finder.from('./features').findFiles('*.feature');
     const expression = new TagExpressionParser().parse(args.cucumberOpts.tagExpression);
     features = files.filter((file) => {
       let tags = fs.readFileSync(file, 'utf8').match(/^\s*@\w+/gm) || [];
@@ -19,7 +19,7 @@ module.exports = (argv) => {
       return false;
     });
   } else {
-    features = './test/features/*.feature';
+    features = './features/*.feature';
   }
   return features;
 };
