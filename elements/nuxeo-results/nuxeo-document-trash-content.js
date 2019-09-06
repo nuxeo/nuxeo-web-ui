@@ -113,7 +113,7 @@ Polymer({
       </div>
 
       <div slot="selectionActions">
-        <nuxeo-slot slot="TRASH_RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+        <nuxeo-slot name="TRASH_RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
       </div>
 
       <!-- Grid view -->

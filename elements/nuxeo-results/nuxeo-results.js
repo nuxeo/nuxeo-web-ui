@@ -142,7 +142,7 @@ Polymer({
       >
         <nuxeo-actions-menu>
           <slot name="selectionActions">
-            <nuxeo-slot slot="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+            <nuxeo-slot name="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
           </slot>
         </nuxeo-actions-menu>
       </nuxeo-selection-toolbar>
@@ -164,7 +164,7 @@ Polymer({
 
         <div class="rightHand">
           <slot name="actions">
-            <nuxeo-slot slot="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+            <nuxeo-slot name="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
           </slot>
 
           <div class="viewModes">

@@ -24,7 +24,7 @@ limitations under the License.
   <template>
     <template is="dom-if" if="[[visible]]">
       <iron-pages selected="{{selected}}" attr-for-selected="name" selected-attribute="visible">
-        <nuxeo-slot slot="ADMINISTRATION_PAGES" model="[[actionContext]]"></nuxeo-slot>
+        <nuxeo-slot name="ADMINISTRATION_PAGES" model="[[actionContext]]"></nuxeo-slot>
       </iron-pages>
     </template>
   </template>

@@ -64,20 +64,20 @@ limitations under the License.
         <template is="dom-if" if="[[!isTrashed(document)]]">
           <div class="document-actions">
             <nuxeo-actions-menu>
-              <nuxeo-slot slot="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+              <nuxeo-slot name="DOCUMENT_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
             </nuxeo-actions-menu>
           </div>
         </template>
       </div>
       <div slot="tabs">
         <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
-          <nuxeo-slot slot="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
+          <nuxeo-slot name="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
         </paper-listbox>
       </div>
       <div>
         <div id="nxContent">
           <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
-            <nuxeo-slot slot="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
+            <nuxeo-slot name="DOCUMENT_VIEWS_PAGES" model="[[viewsContext]]"></nuxeo-slot>
           </iron-pages>
         </div>
       </div>
