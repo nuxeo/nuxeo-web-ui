@@ -559,7 +559,7 @@ Polymer({
           selected-class="selected"
           on-iron-activate="_toggleDrawer"
         >
-          <nuxeo-slot slot="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
+          <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
           <nuxeo-menu-icon
             name="administration"
             icon="nuxeo:admin"
@@ -587,13 +587,13 @@ Polymer({
             selected-attribute="visible"
             on-iron-items-changed="_updateSearch"
           >
-            <nuxeo-slot slot="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
+            <nuxeo-slot name="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
 
             <template is="dom-if" if="[[hasAdministrationPermissions(currentUser)]]">
               <div name="administration">
                 <div class="header">[[i18n('app.administration')]]</div>
                 <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
-                  <nuxeo-slot slot="ADMINISTRATION_MENU" model="[[actionContext]]"></nuxeo-slot>
+                  <nuxeo-slot name="ADMINISTRATION_MENU" model="[[actionContext]]"></nuxeo-slot>
                 </iron-selector>
               </div>
             </template>
@@ -601,7 +601,7 @@ Polymer({
             <div name="profile" class="layout vertical">
               <div class="header">[[_displayUser(currentUser)]]</div>
               <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
-                <nuxeo-slot slot="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
+                <nuxeo-slot name="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
                 <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout(url)]]"></nuxeo-menu-item>
               </iron-selector>
             </div>
@@ -616,7 +616,7 @@ Polymer({
       <!-- pages -->
       <paper-header-panel slot="main" mode="seamed">
         <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
-          <nuxeo-slot slot="PAGES" model="[[actionContext]]"></nuxeo-slot>
+          <nuxeo-slot name="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
           <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
 

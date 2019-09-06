@@ -92,11 +92,11 @@ Polymer({
 
     <nuxeo-dialog id="createDocDialog" opened="{{opened}}" modal no-auto-focus>
       <paper-tabs hidden$="[[!_showTabs]]" selected="{{selectedTab}}" attr-for-selected="name" noink>
-        <nuxeo-slot slot="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
+        <nuxeo-slot name="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
       </paper-tabs>
       <div id="holder" class="vertical layout flex">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
-          <nuxeo-slot slot="CREATE_POPUP_PAGES" model="[[importContext]]"></nuxeo-slot>
+          <nuxeo-slot name="CREATE_POPUP_PAGES" model="[[importContext]]"></nuxeo-slot>
           <nuxeo-document-create
             id="simpleCreation"
             name="create"

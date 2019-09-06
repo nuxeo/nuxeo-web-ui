@@ -341,7 +341,7 @@ Polymer({
               </div>
               <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom')]]</span>
               <div class="importActions horizontal layout wrap">
-                <nuxeo-slot slot="FILE_UPLOAD_ACTIONS" empty="{{!hasContributions}}"></nuxeo-slot>
+                <nuxeo-slot name="FILE_UPLOAD_ACTIONS" empty="{{!hasContributions}}"></nuxeo-slot>
               </div>
             </div>
           </template>
@@ -416,7 +416,7 @@ Polymer({
                   >&nbsp;[[i18n('documentImportForm.linkFilesFrom')]]&nbsp;</span
                 >
                 <div class="importActions horizontal layout wrap">
-                  <nuxeo-slot slot="FILE_UPLOAD_ACTIONS" empty="{{!hasContributions}}"></nuxeo-slot>
+                  <nuxeo-slot name="FILE_UPLOAD_ACTIONS" empty="{{!hasContributions}}"></nuxeo-slot>
                 </div>
               </div>
             </div>

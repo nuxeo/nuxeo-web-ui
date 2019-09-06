@@ -89,11 +89,11 @@ Polymer({
 
     <nuxeo-dialog id="publishDialog" modal opened="{{opened}}" no-auto-focus>
       <paper-tabs selected="{{selectedTab}}" attr-for-selected="name" noink>
-        <nuxeo-slot slot="PUBLISH_ITEMS" model="[[publishContext]]"></nuxeo-slot>
+        <nuxeo-slot name="PUBLISH_ITEMS" model="[[publishContext]]"></nuxeo-slot>
       </paper-tabs>
       <div id="container" class="vertical layout flex">
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
-          <nuxeo-slot slot="PUBLISH_PAGES" model="[[publishContext]]"></nuxeo-slot>
+          <nuxeo-slot name="PUBLISH_PAGES" model="[[publishContext]]"></nuxeo-slot>
         </iron-pages>
       </div>
     </nuxeo-dialog>

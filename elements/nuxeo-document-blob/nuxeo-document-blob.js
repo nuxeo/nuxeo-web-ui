@@ -78,7 +78,7 @@ Polymer({
         </div>
         <div class="actions">
           <nuxeo-actions-menu>
-            <nuxeo-slot slot="BLOB_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+            <nuxeo-slot name="BLOB_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
           </nuxeo-actions-menu>
         </div>
       </div>

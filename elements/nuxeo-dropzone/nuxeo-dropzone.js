@@ -171,7 +171,7 @@ Polymer({
           >[[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]</a
         >
         <div class="actions">
-          <nuxeo-slot slot="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
+          <nuxeo-slot name="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
         </div>
       </div>
     </div>

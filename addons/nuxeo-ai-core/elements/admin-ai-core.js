@@ -42,13 +42,13 @@ Polymer({
       </div>
       <div slot="tabs">
         <paper-listbox selected="{{selected}}" attr-for-selected="name">
-          <nuxeo-slot slot="AI_ITEMS"></nuxeo-slot>
+          <nuxeo-slot name="AI_ITEMS"></nuxeo-slot>
         </paper-listbox>
       </div>
       <div>
         <template is="dom-if" if="[[visible]]">
           <iron-pages selected="[[selected]]" attr-for-selected="name" selected-attribute="visible">
-            <nuxeo-slot slot="AI_PAGES"></nuxeo-slot>
+            <nuxeo-slot name="AI_PAGES"></nuxeo-slot>
           </iron-pages>
         </template>
       </div>
