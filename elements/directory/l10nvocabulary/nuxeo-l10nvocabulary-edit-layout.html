@@ -1,0 +1,98 @@
+<!--
+@license
+(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!--
+`nuxeo-l10nvocabulary-edit-layout`
+@group Nuxeo UI
+@element nuxeo-l10nvocabulary-edit-layout
+-->
+<dom-module id="nuxeo-l10nvocabulary-edit-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.id')]]"
+      name="id"
+      value="{{entry.properties.id::change}}"
+      required
+      readonly$="[[!new]]"
+    >
+    </nuxeo-input>
+
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.label_en')]]"
+      name="label"
+      value="{{entry.properties.label_en::change}}"
+    >
+    </nuxeo-input>
+
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.label_fr')]]"
+      name="label"
+      value="{{entry.properties.label_fr::change}}"
+    >
+    </nuxeo-input>
+
+    <div role="widget">
+      <label>[[i18n('vocabularyManagement.edit.obsolete')]]</label>
+      <paper-toggle-button checked$="[[_isObsolete(entry.properties.obsolete)]]" on-change="_obsoleteChanged" noink>
+      </paper-toggle-button>
+    </div>
+
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('vocabularyManagement.edit.ordering')]]"
+      name="ordering"
+      type="number"
+      value="{{entry.properties.ordering::change}}"
+    >
+    </nuxeo-input>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-l10nvocabulary-edit-layout',
+      behaviors: [Nuxeo.I18nBehavior],
+      properties: {
+        entry: {
+          type: Object,
+          observer: '_entryChanged',
+        },
+
+        new: {
+          type: Boolean,
+          value: false,
+        },
+      },
+
+      _entryChanged() {
+        this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
+      },
+
+      _isObsolete(obsolete) {
+        return obsolete === 1;
+      },
+
+      _obsoleteChanged() {
+        this.entry.properties.obsolete = this.entry.properties.obsolete > 0 ? 0 : 1;
+      },
+    });
+  </script>
+</dom-module>
