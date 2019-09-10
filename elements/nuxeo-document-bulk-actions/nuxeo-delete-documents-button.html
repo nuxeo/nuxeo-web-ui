@@ -139,7 +139,8 @@ limitations under the License.
        * Checks if a single given document has 'Everything' permission to delete or 'Write' to trash
        */
       _docHasPermissions: function(document) {
-        return this.hasPermission(document, 'Everything') || (!this.hard && this.hasPermission(document, 'Write'));
+        return !this.isUnderRetentionOrLegalHold(document) &&
+          (this.hasPermission(document, 'Everything') || (!this.hard && this.hasPermission(document, 'Write')));
       },
 
       _computeIcon: function(hard) {
