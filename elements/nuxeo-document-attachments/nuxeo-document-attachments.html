@@ -93,7 +93,7 @@ limitations under the License.
       },
 
       _hasWritePermission: function (doc) {
-        return doc && this.hasPermission(doc, 'Write') &&
+        return doc && !doc.isRecord && this.hasPermission(doc, 'Write') &&
           !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc);
       },
 

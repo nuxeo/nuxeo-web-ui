@@ -259,7 +259,8 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
          * Expected format : ['quickfilter1','quickfilter2']
          */
         quickFilters: {
-          type: Array
+          type: Array,
+          notify: true,
         },
         /**
          * If enabled, it allows to sort the results of the search results.
