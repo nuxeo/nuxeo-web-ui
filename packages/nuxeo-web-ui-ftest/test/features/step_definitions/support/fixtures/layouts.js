@@ -18,20 +18,19 @@ const suggestionSet = (element, value) => {
     element.scrollIntoView('#input');
     for (let i = 0; i < values.length; i++) {
       element.waitForVisible(isMulti ? 'input' : '#input');
-      // sometimes the caret is not clickable (e.g. in dialog ...)
-      // and clicking the input does not open suggestion (e.g. in search drawer content)
-      // ¯\_(ツ)_/¯
-      try {
-        element.element(isMulti ? 'input' : '.selectivity-caret').click();
-      } catch (err) {
-        element.element(isMulti ? 'input' : '#input').click();
+      element.element(isMulti ? 'input' : '.selectivity-caret').click();
+      const dropdown = element.element('.selectivity-dropdown:last-child');
+      if (isMulti) {
+        element.waitForVisible('.selectivity-multiple-input');
+        element.element('.selectivity-multiple-input').setValue(values[i]);
+      } else {
+        dropdown.waitForVisible('.selectivity-search-input');
+        dropdown.element('.selectivity-search-input').setValue(values[i]);
       }
-      element.waitForVisible(isMulti ? '.selectivity-multiple-input' : '.selectivity-search-input');
-      element.element(isMulti ? '.selectivity-multiple-input' : '.selectivity-search-input').setValue(values[i]);
       driver.waitUntil(() => {
-        if (element.isVisible('.selectivity-result-item.highlight')) {
+        if (dropdown.isVisible('.selectivity-result-item.highlight')) {
           try {
-            const highlight = element.element('.selectivity-result-item.highlight');
+            const highlight = dropdown.element('.selectivity-result-item.highlight');
             return highlight
               .getText()
               .trim()
@@ -42,7 +41,7 @@ const suggestionSet = (element, value) => {
         }
         return false;
       });
-      element.click('.selectivity-result-item.highlight');
+      dropdown.click('.selectivity-result-item.highlight');
     }
     // it's a reset
   } else if (element.getAttribute('multiple')) {
