@@ -222,7 +222,7 @@ limitations under the License.
       },
 
       _targetFormatter: function(doc) {
-        return doc.title;
+        return this.$.target.escapeHTML(doc.title);
       }
     });
   </script>
