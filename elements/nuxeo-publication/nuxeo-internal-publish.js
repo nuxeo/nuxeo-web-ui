@@ -29,6 +29,7 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
+import { escapeHTML } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-selectivity.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-document-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
@@ -237,6 +238,6 @@ Polymer({
   },
 
   _targetFormatter(doc) {
-    return doc.title;
+    return escapeHTML(doc.title);
   },
 });
