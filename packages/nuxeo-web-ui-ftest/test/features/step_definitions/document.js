@@ -4,7 +4,7 @@ Given('I have a {word} document', function(docType) {
   docType = docType || 'File';
   const doc = fixtures.documents.init(docType);
   // create the document
-  return fixtures.documents.create(this.doc.path, doc).then((d) => {
+  return fixtures.documents.create(this.doc.path || '/default-domain', doc).then((d) => {
     this.doc = d;
   });
 });
