@@ -4,6 +4,9 @@ RUN npm config set registry=http://nexus/repository/npmjs-all/
 
 WORKDIR /ui
 
+# Copy packages
+COPY packages ./packages
+
 # Copy package.json and install dependencies
 COPY package*.json ./
 
