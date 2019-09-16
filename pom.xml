@@ -18,6 +18,10 @@
     <module>plugin/web-ui/marketplace</module>
   </modules>
 
+  <properties>
+    <marketplace.dam.version>6.5.0-SNAPSHOT</marketplace.dam.version>
+  </properties>
+
   <profiles>
     <profile>
       <id>ftest</id>
@@ -57,6 +61,12 @@
         <groupId>org.nuxeo.web.ui</groupId>
         <artifactId>nuxeo-web-ui-marketplace-itests</artifactId>
         <version>${project.version}</version>
+        <type>zip</type>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.marketplace.dam</groupId>
+        <artifactId>marketplace</artifactId>
+        <version>${marketplace.dam.version}</version>
         <type>zip</type>
       </dependency>
     </dependencies>

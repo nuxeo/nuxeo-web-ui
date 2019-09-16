@@ -49,6 +49,12 @@
       <type>zip</type>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.nuxeo.marketplace.dam</groupId>
+      <artifactId>marketplace</artifactId>
+      <type>zip</type>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

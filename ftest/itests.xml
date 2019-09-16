@@ -10,7 +10,8 @@
   <import file="${out.dir}/nuxeo-ftest.xml" />
 
   <property name="mp.install" value="file:${out.dir}/nuxeo-web-ui-marketplace-${maven.project.version}.zip,
-    file:${out.dir}/nuxeo-web-ui-marketplace-itests-${maven.project.version}.zip" />
+    file:${out.dir}/nuxeo-web-ui-marketplace-itests-${maven.project.version}.zip,
+    file:${out.dir}/marketplace-${marketplace.dam.version}.zip" />
   <target name="prepare-environment" depends="_init,prepare-db,prepare-tomcat">
     <copy todir="${out.dir}">
       <artifact:file key="org.nuxeo.web.ui:nuxeo-web-ui-marketplace::zip" />
@@ -27,6 +28,7 @@
       <arg value="install" />
     </exec>
     <exec executable="${cmd.npm}" dir="../" failonerror="true">
+      <env key="NUXEO_PACKAGES" value="nuxeo-dam"/>
       <arg value="test" />
     </exec>
   </target>
