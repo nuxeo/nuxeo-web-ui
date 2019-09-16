@@ -840,6 +840,7 @@
   "retention.search.docTypes": "Document type",
   "retention.search.futureRetainUntil": "Future expiration date",
   "retention.search.pastRetainUntil": "Past expiration date",
+  "retention.search.retainUtil": "Expiration date",
   "retention.search.rules": "Rules",
   "retention.indefinitely": "Indefinitely",
   "retention.rule.emptyRules": "No Rules",
