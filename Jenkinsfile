@@ -209,6 +209,10 @@ pipeline {
         failure {
           setGitHubBuildStatus('test', 'Functional tests', 'FAILURE')
         }
+        always {
+          archiveArtifacts artifacts: '**/target/cucumber-reports/**, **/target/screenshots/*.png'
+          cucumber fileIncludePattern: '**/*.json', jsonReportDirectory: 'ftest/target/cucumber-reports/', sortingMethod: 'NATURAL'
+        }
       }
     }
     stage('Publish Docker Images') {
