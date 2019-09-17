@@ -534,7 +534,7 @@ Polymer({
     <nuxeo-resource
       id="task"
       path="/task/[[currentTaskId]]"
-      headers='{"X-NXfetch.document": "properties", "X-NXfetch.task": "targetDocumentIds,actors"}'
+      headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label", "X-NXfetch-directoryEntry": "parent", "X-NXfetch.task": "targetDocumentIds,actors"}'
     ></nuxeo-resource>
 
     <!-- app layout -->
