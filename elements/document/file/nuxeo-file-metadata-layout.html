@@ -84,7 +84,9 @@ limitations under the License.
       <nuxeo-date name="expired" datetime="[[document.properties.dc:expired]]"></nuxeo-date>
     </div>
 
-    <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
+    <template is="dom-if" if="[[hasSchema(document, 'files')]]">
+      <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
+    </template>
 
   </template>
 
