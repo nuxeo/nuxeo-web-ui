@@ -11,12 +11,12 @@
 
   <property name="mp.install" value="file:${out.dir}/nuxeo-web-ui-marketplace-${maven.project.version}.zip,
     file:${out.dir}/nuxeo-web-ui-marketplace-itests-${maven.project.version}.zip,
-    file:${out.dir}/marketplace-${marketplace.dam.version}.zip" />
+    file:${out.dir}/nuxeo-dam-package-${nuxeo.platform.version}.zip" />
   <target name="prepare-environment" depends="_init,prepare-db,prepare-tomcat">
     <copy todir="${out.dir}">
       <artifact:file key="org.nuxeo.web.ui:nuxeo-web-ui-marketplace::zip" />
       <artifact:file key="org.nuxeo.web.ui:nuxeo-web-ui-marketplace-itests::zip" />
-      <artifact:file key="org.nuxeo.marketplace.dam:marketplace::zip" />
+      <artifact:file key="org.nuxeo.packages:nuxeo-dam-package::zip" />
     </copy>
   </target>
 
