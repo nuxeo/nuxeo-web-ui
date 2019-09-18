@@ -112,6 +112,7 @@ limitations under the License.
     <nuxeo-document id="currentTaskDoc"
                     doc-id="[[_docId(current)]]"
                     enrichers="preview, breadcrumb"
+                    headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label", "X-NXfetch-directoryEntry": "parent"}'
                     response="{{currentTaskDocument}}"></nuxeo-document>
 
     <nuxeo-page>
