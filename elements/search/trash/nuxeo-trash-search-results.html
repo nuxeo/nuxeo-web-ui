@@ -31,8 +31,13 @@ limitations under the License.
       display-mode="list"
       display-quick-filters
       display-sort
+      action-context="{{actionContext}}"
       sort-options="[[sortOptions]]"
     >
+      <div slot="selectionActions">
+        <nuxeo-slot name="TRASH_RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+      </div>
+
       <nuxeo-data-grid
         name="grid"
         icon="nuxeo:view-thumbnails"
