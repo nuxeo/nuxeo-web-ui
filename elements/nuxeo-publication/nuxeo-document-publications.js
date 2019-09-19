@@ -46,12 +46,22 @@ Polymer({
         margin-top: 8px;
       }
 
+      .left-ellipsis {
+        direction: rtl;
+        text-align: left;
+      }
+
+      .right-ellipsis {
+        direction: ltr;
+        text-align: right;
+      }
+
       .ellipsis {
+        width: calc(100% - 38px);
+        display: block;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-        display: block;
-        width: calc(100% - 38px);
       }
 
       .capitalize {
@@ -108,7 +118,9 @@ Polymer({
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.path')]]" flex="200">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="path ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.path]]</a>
+            <a class$="path ellipsis [[_ellipsisDirection()]]" href$="[[urlFor('browse', item.path)]]"
+              >[[item.path]]&lrm;</a
+            >
             <nuxeo-tooltip>[[item.path]]</nuxeo-tooltip>
           </template>
         </nuxeo-data-table-column>
@@ -294,5 +306,12 @@ Polymer({
       .catch(function() {
         this.fire('notify', { message: this.i18n('publication.unpublish.all.error') });
       });
+  },
+
+  _ellipsisDirection() {
+    if (document.dir !== 'rtl') {
+      return 'left-ellipsis';
+    }
+    return 'right-ellipsis';
   },
 });
