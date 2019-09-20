@@ -223,19 +223,19 @@ Polymer({
           <span>[[_newDocumentLabel(selectedDocType)]]</span>
         </div>
         <div id="editor" class="container">
-          <div class="suggester">
-            <nuxeo-path-suggestion
-              id="pathSuggesterEdit"
-              value="{{targetPath}}"
-              label="[[i18n('documentCreationForm.location')]]"
-              parent="{{suggesterParent}}"
-              children="{{suggesterChildren}}"
-              disabled
-              always-float-label
-            ></nuxeo-path-suggestion>
-            <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
-          </div>
           <paper-dialog-scrollable id="editScrollable">
+            <div class="suggester">
+              <nuxeo-path-suggestion
+                id="pathSuggesterEdit"
+                value="{{targetPath}}"
+                label="[[i18n('documentCreationForm.location')]]"
+                parent="{{suggesterParent}}"
+                children="{{suggesterChildren}}"
+                disabled
+                always-float-label
+              ></nuxeo-path-suggestion>
+              <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
+            </div>
             <iron-form id="form">
               <form class="form vertical layout flex">
                 <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
