@@ -97,7 +97,7 @@ Polymer({
       params="[[_computeParams(_src)]]"
       sort='{"dc:modified": "desc", "uid:major_version": "desc", "uid:minor_version": "desc"}'
       enrichers="thumbnail, permissions"
-      headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label"}'
+      headers='{"fetch-document": "properties", "translate-directoryEntry": "label"}'
       schemas="dublincore,common,uid,rendition"
     >
     </nuxeo-page-provider>

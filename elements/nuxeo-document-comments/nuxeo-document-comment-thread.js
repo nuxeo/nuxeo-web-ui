@@ -205,7 +205,7 @@ Polymer({
       currentPageIndex: 0,
     };
     this.$.commentRequest.headers = {
-      'X-NXfetch.comment': 'repliesSummary',
+      'fetch-comment': 'repliesSummary',
     };
     this.$.commentRequest
       .get()

@@ -523,11 +523,11 @@ Polymer({
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
     <nuxeo-operation id="moveDocumentsOp" sync-indexing></nuxeo-operation>
 
-    <nuxeo-resource id="tasks" path="/task" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
+    <nuxeo-resource id="tasks" path="/task" headers='{"fetch-task": "targetDocumentIds,actors"}'></nuxeo-resource>
     <nuxeo-resource
       id="task"
       path="/task/[[currentTaskId]]"
-      headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label", "X-NXfetch-directoryEntry": "parent", "X-NXfetch.task": "targetDocumentIds,actors"}'
+      headers='{"fetch-document": "properties", "translate-directoryEntry": "label", "fetch-directoryEntry": "parent", "fetch-task": "targetDocumentIds,actors"}'
     ></nuxeo-resource>
 
     <!-- app layout -->
