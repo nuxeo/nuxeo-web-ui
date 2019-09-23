@@ -139,7 +139,7 @@ Polymer({
           <template is="dom-repeat" items="[[_breadcrumb(document)]]">
             <span class$="breadcrumb-item [[_computeCssClass(index, document)]]">
               <a href$="[[urlFor('browse', item.path)]]">
-                <span class="breadcrumb-item-title">[[item.title]]</span>
+                <span class="breadcrumb-item-title">[[item.title]]&lrm;</span>
               </a>
               <span class="breadcrumb-divider">&gt;</span>
             </span>
