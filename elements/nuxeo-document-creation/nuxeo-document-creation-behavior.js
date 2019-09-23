@@ -89,8 +89,8 @@ export const DocumentCreationBehavior = [
       schemaFetcher.params = { type: this.selectedDocType.type };
       schemaFetcher.headers = {
         properties: '*',
-        'X-NXfetch.document': 'properties',
-        'X-NXtranslate.directoryEntry': 'label',
+        'fetch-document': 'properties',
+        'translate-directoryEntry': 'label',
       };
       return schemaFetcher.get().then((doc) => {
         if (properties) {

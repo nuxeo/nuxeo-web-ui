@@ -439,11 +439,11 @@ Polymer({
     /**
      * @ignore
      * The headers passed on to `provider`.
-     * Already set by default are 'X-NXfetch.document': 'properties' and 'X-NXtranslate.directoryEntry': 'label'.
+     * Already set by default are 'fetch-document': 'properties' and 'translate-directoryEntry': 'label'.
      */
     headers: {
       type: Object,
-      value: { 'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label' },
+      value: { 'fetch-document': 'properties', 'translate-directoryEntry': 'label' },
     },
     /**
      * The schemas passed on to `provider` (like `dublincore`, `uid`, `file`...).
