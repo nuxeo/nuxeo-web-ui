@@ -203,7 +203,7 @@ Polymer({
             sort='{"dc:modified": "desc"}'
             schemas="dublincore,common"
             enrichers="permissions"
-            headers='{"X-NXfetch.document": "properties"}'
+            headers='{"fetch-document": "properties"}'
           >
           </nuxeo-page-provider>
 
