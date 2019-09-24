@@ -98,7 +98,7 @@ process.env.BROWSER = argv.browser || process.env.BROWSER || 'chrome';
 
 process.env.FORCE_COLOR = true;
 
-const wdio = spawn(wdioBin, args, { env: process.env, stdio: ['inherit', 'pipe', 'pipe'] });
+const wdio = spawn('node', [wdioBin, ...args], { env: process.env, stdio: ['inherit', 'pipe', 'pipe'] });
 
 wdio.stdout.pipe(process.stdout);
 wdio.stderr.pipe(process.stderr);
