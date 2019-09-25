@@ -51,29 +51,32 @@ Polymer({
       }
     </style>
 
-    <h3>[[i18n('documentAttachments.heading')]]</h3>
+    <template is="dom-if" if="[[_isAvailable(document, xpath)]]">
+      <h3>[[i18n('documentAttachments.heading')]]</h3>
 
-    <div class="vertical layout">
-      <template is="dom-repeat" items="[[_computeFiles(document.*, xpath)]]">
-        <nuxeo-document-blob document="[[document]]" xpath="[[_computeBlobXpath(xpath, index)]]"></nuxeo-document-blob>
+      <div class="vertical layout">
+        <template is="dom-repeat" items="[[_computeFiles(document.*, xpath)]]">
+          <nuxeo-document-blob document="[[document]]" xpath="[[_computeBlobXpath(xpath, index)]]">
+          </nuxeo-document-blob>
+        </template>
+
+        <template is="dom-if" if="[[!_hasFiles(document)]]">
+          <div class="empty">[[i18n('documentAttachments.empty')]]</div>
+        </template>
+      </div>
+
+      <template is="dom-if" if="[[_hasWritePermission(document)]]">
+        <nuxeo-dropzone
+          document="{{document}}"
+          xpath="[[xpath]]"
+          uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
+          message="[[i18n('documentAttachments.upload.add')]]"
+          drag-content-message="[[i18n('documentAttachments.upload.drop')]]"
+          blob-list
+          update-document
+        >
+        </nuxeo-dropzone>
       </template>
-
-      <template is="dom-if" if="[[!_hasFiles(document)]]">
-        <div class="empty">[[i18n('documentAttachments.empty')]]</div>
-      </template>
-    </div>
-
-    <template is="dom-if" if="[[_hasWritePermission(document)]]">
-      <nuxeo-dropzone
-        document="{{document}}"
-        xpath="[[xpath]]"
-        uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
-        message="[[i18n('documentAttachments.upload.add')]]"
-        drag-content-message="[[i18n('documentAttachments.upload.drop')]]"
-        blob-list
-        update-document
-      >
-      </nuxeo-dropzone>
     </template>
   `,
 
@@ -111,5 +114,9 @@ Polymer({
       return `files:files/${index}/file`;
     }
     return `${xpath}/${index}`;
+  },
+
+  _isAvailable(document, xpath) {
+    return document && xpath && this.hasSchema(document, xpath.split(':')[0]);
   },
 });
