@@ -303,12 +303,7 @@ Polymer({
         }
 
         const { entries } = doc.contextParameters.breadcrumb;
-        const lastEntry = entries[entries.length - 1];
-        if (this.hasFacet(lastEntry, 'Folderish') || entries.length === 1) {
-          this.docPath = lastEntry.path;
-        } else {
-          this.docPath = entries[entries.length - 2].path;
-        }
+        this.docPath = entries[entries.length - 1].path;
 
         for (let i = 0; i < entries.length - 1; i++) {
           const entry = entries[i];
@@ -321,7 +316,7 @@ Polymer({
   },
 
   _documentChanged() {
-    if (this.document) {
+    if (this.document && this.hasFacet(this.document, 'Folderish')) {
       this.$.tree.style.display = 'block';
     }
   },
