@@ -833,6 +833,8 @@
   "retention.events.empty": "No past events",
   "retention.events.fired.success": "Event successfully fired",
   "retention.events.history": "Past retention events",
+  "retention.holdToggleButton.label.heading": "Legal hold",
+  "retention.holdToggleButton.label.description": "Description",
   "retention.holdToggleButton.bulk.hold": "Legal hold set",
   "retention.holdToggleButton.bulk.hold.poll": "Setting legal hold",
   "retention.holdToggleButton.bulk.unhold": "Legal hold unset",
