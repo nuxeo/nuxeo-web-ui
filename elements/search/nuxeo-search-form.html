@@ -485,7 +485,7 @@ limitations under the License.
                 for (var param in params) {
                   var value = params[param];
                   if (value && param !== 'dc:title') {
-                    result[param.startsWith('defaults:') ? param.replace('defaults:', '') : param] = value;
+                    result[param] = value;
                   }
                 }
                 // allow search to be visible on JSF UI
