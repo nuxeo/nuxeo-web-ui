@@ -511,7 +511,7 @@ Polymer({
             Object.keys(params).forEach((param) => {
               const value = params[param];
               if (value && param !== 'dc:title') {
-                result[param.startsWith('defaults:') ? param.replace('defaults:', '') : param] = value;
+                result[param] = value;
               }
             });
             // allow search to be visible on JSF UI
