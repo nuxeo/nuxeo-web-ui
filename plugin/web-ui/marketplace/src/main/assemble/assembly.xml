@@ -12,7 +12,7 @@
       <fileset dir="src/main/resources" />
       <filterset>
         <filter token="VERSION" value="${maven.project.version}" />
-        <filter token="DISTRIB_VERSION" value="${nuxeo.distribution.version}" />
+        <filter token="DISTRIB_VERSION" value="${nuxeo.platform.version}" />
       </filterset>
     </copy>
 
