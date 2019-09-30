@@ -1,7 +1,4 @@
-# XXX: can't sequence kaniko builds so image might not be ready yet!
-# ARG SERVER_IMAGE=nuxeo-web-ui/server
-# FROM $SERVER_IMAGE
-FROM nginx
-COPY server/nginx.conf /etc/nginx/nginx.conf
+FROM packages.nuxeo.com:5000/nuxeo/nginx-centos7:0.0.1
 
+COPY server/nginx.conf /etc/nginx/nginx.conf
 COPY dist/ ui/

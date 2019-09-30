@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   proxy:
-    image: nginx
+    image: packages.nuxeo.com:5000/nuxeo/nginx-centos7:0.0.1
     volumes:
       - ./server/nginx.proxy.conf:/etc/nginx/nginx.conf:ro
     ports:
