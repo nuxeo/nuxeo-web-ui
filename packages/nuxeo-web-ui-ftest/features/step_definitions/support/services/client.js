@@ -5,7 +5,7 @@ import Nuxeo, { Blob } from 'nuxeo';
 export default new Nuxeo({
   auth: { method: 'basic', username: 'Administrator', password: 'Administrator' },
   baseURL: process.env.NUXEO_URL,
-  headers: { nx_es_sync: 'true' },
+  headers: { 'nx-es-sync': 'true' },
 });
 
 export class BlobHelper {

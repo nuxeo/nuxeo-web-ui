@@ -15,7 +15,7 @@ fixtures.comments = {
     const nuxeo = new Nuxeo({
       auth: { method: 'basic', username: author, password: users[author] },
       baseURL: process.env.NUXEO_URL,
-      headers: { nx_es_sync: 'true' },
+      headers: { 'nx-es-sync': 'true' },
     });
     return nuxeo
       .request(`/id/${parentId}/@comment`)
