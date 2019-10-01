@@ -16,6 +16,10 @@ cleanup:
 
 nuxeo:
   nuxeo:
+    image:
+      repository: packages.nuxeo.com:5000/nuxeo/nuxeo
+      tag: 11.1-SNAPSHOT
+      pullPolicy: Always
     service:
       annotations:
         fabric8.io/expose: "true"
