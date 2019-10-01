@@ -1095,7 +1095,7 @@ Polymer({
   },
 
   _smartImportLocalFiles(params) {
-    return this.batchExecute('FileManager.Import', params, { nx_es_sync: 'true', 'X-Batch-No-Drop': 'true' });
+    return this.batchExecute('FileManager.Import', params, { 'nx-es-sync': 'true', 'X-Batch-No-Drop': 'true' });
   },
 
   _smartImportRemoteFiles(params) {
