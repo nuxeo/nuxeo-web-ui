@@ -61,7 +61,8 @@ Polymer({
         transition: opacity 300ms ease-in-out;
       }
 
-      #views slot::slotted(*) {
+      #views slot::slotted(*),
+      #views::slotted(*) /* edge */ {
         display: block;
         position: relative;
         height: var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top)));
