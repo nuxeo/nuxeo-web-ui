@@ -198,7 +198,7 @@ pipeline {
             '''
             sh 'chrome --version'
             sh 'npm install --no-package-lock'
-            sh "npx nuxeo-web-ui-ftest --nuxeoUrl=$PREVIEW_URL/nuxeo --url=$PREVIEW_URL --report --screenshots --headless --tags='not @ignore' "
+            sh "npx nuxeo-web-ui-ftest --nuxeoUrl=$PREVIEW_URL/nuxeo --url=$PREVIEW_URL --report --screenshots --headless --tags='not @ignore and not @itest' "
           }
         }
       }
