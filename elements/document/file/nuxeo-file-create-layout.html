@@ -104,6 +104,46 @@ limitations under the License.
          */
         document: Object,
       },
+
+      validate() {
+        console.warn('validate');
+      },
+
+      beforeCancel() {
+        // these can must return a Boolean or a Promise resolving to a Boolean
+        // return window.confirm('Are you sure you want to cancel? You will lose all unsaved changes.');
+        console.warn('beforeCancel');
+        return Promise.resolve(window.confirm('Are you sure you want to cancel? You will lose all unsaved changes.'));
+      },
+
+      afterCancel() {
+        console.warn('afterCancel');
+      },
+
+      beforeBack() {
+        console.warn('beforeBack');
+      },
+
+      afterBack() {
+        console.warn('afterBack');
+      },
+
+      beforeSubmit() {
+        console.warn('beforeSubmit');
+        if (this.document.properties['dc:title'] === this.document.properties['dc:description']) {
+          return window.confirm(
+            "Title and Description are exactly the same, which isn't much helpful. Do you want to proceed anyway?",
+          );
+        }
+      },
+
+      afterSubmit(response) {
+        console.warn('afterSubmit', response);
+      },
+
+      catchSubmit(error) {
+        console.warn('catchSubmit', error);
+      },
     });
   </script>
 </dom-module>
