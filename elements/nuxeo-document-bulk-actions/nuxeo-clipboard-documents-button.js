@@ -77,7 +77,13 @@ Polymer({
   },
 
   _isAvailable() {
-    return this.documents.every((doc) => this.isCollectionMember(doc) && !this.isTrashed(doc));
+    return this.documents.every(
+      (doc) =>
+        (this.isCollectionMember(doc) || doc.facets.includes('Collection')) &&
+        !this.isTrashed(doc) &&
+        !this.hasType(doc, 'Favorites') &&
+        !doc.isVersion,
+    );
   },
 
   _computeLabel() {
