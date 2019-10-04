@@ -77,7 +77,10 @@ limitations under the License.
 
       _isAvailable: function() {
         return this.documents.every(function(doc) {
-          return this.isCollectionMember(doc);
+          return (this.isCollectionMember(doc) || doc.facets.includes('Collection')) &&
+            !this.isTrashed(doc) &&
+            !this.hasType(doc, 'Favorites') &&
+            !doc.isVersion;
         }.bind(this));
       }
 
