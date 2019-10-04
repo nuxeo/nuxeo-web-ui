@@ -35,6 +35,23 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { DocumentCreationBehavior } from '../nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 
+function hook(action, element) {
+  const runHook = async (stage, ...args) => {
+    if (element && stage && action) {
+      const fnName = `${stage.toLocaleLowerCase()}${action}`;
+      if (element[fnName]) {
+        const res = element[fnName](...args);
+        return !res || res.constructor !== Promise ? Promise.resolve(res) : res;
+      }
+    }
+  };
+  return {
+    before: (...args) => runHook('before', ...args),
+    after: (...args) => runHook('after', ...args),
+    catch: (...args) => runHook('catch', ...args),
+  };
+}
+
 /**
 `nuxeo-document-create`
 @group Nuxeo UI
@@ -212,9 +229,7 @@ Polymer({
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button noink dialog-dismiss on-tap="_cancel" class="secondary"
-              >[[i18n('command.cancel')]]</paper-button
-            >
+            <paper-button noink on-tap="_cancel" class="secondary">[[i18n('command.cancel')]]</paper-button>
           </div>
         </div>
       </div>
@@ -253,7 +268,7 @@ Polymer({
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button class="secondary" noink dialog-dismiss on-tap="_cancel" disabled$="[[creating]]"
+            <paper-button class="secondary" noink on-tap="_cancel" disabled$="[[creating]]"
               >[[i18n('command.cancel')]]</paper-button
             >
           </div>
@@ -340,6 +355,10 @@ Polymer({
     this.fire('nx-creation-wizard-hide-tabs');
   },
 
+  get layout() {
+    return this.$['document-create'].$.layout.element;
+  },
+
   async _create() {
     if (!this._isValidType(this.selectedDocType) || !this.canCreate) {
       return;
@@ -348,7 +367,7 @@ Polymer({
     this._setCreating(true);
     const valid = await innerLayout.validate();
     if (!valid) {
-      const elementsToValidate = innerLayout._getValidatableElements(innerLayout.element.root);
+      const elementsToValidate = innerLayout._getValidatableElements(this.layout.root);
       const invalidField = elementsToValidate.find((node) => node.invalid);
       if (invalidField) {
         invalidField.scrollIntoView();
@@ -357,16 +376,29 @@ Polymer({
       this._setCreating(false);
       return;
     }
+
+    const submitHook = hook('Submit', this.layout);
+
+    if ((await submitHook.before()) === false) {
+      return;
+    }
+
     this.document.name = this.document.name || this._sanitizeName(this.document.properties['dc:title']);
     this.$.docRequest
       .post()
-      .then((response) => {
+      .then(async (response) => {
         this.$.creationStats.storeType(this.selectedDocType.id);
         this._clear();
+        if ((await submitHook.after(response)) === false) {
+          return;
+        }
         this.navigateTo('browse', response.path);
         this._notify(response);
       })
-      .catch((err) => {
+      .catch(async (err) => {
+        if ((await submitHook.catch(err)) === false) {
+          return;
+        }
         if (err && err['entity-type'] === 'validation_report') {
           this.$['document-create'].reportValidation(err);
         } else {
@@ -377,15 +409,32 @@ Polymer({
       .finally(() => this._setCreating(false));
   },
 
-  _back() {
-    this._clear();
-    this.fire('nx-creation-wizard-show-tabs');
+  async _back() {
+    const { before, after } = hook('Back', this.layout);
+    if ((await before()) !== false) {
+      this._clear();
+      this.fire('nx-creation-wizard-show-tabs');
+      after();
+    }
   },
 
-  _cancel() {
-    this._clear();
-    this.document = undefined;
-    this.fire('nx-creation-wizard-show-tabs');
+  async _cancel() {
+    if (!this.layout) {
+      this.fire('nx-creation-wizard-show-tabs');
+      this.fire('nx-document-creation-finished');
+    } else {
+      const { before, after } = hook('Cancel', this.layout);
+      if ((await before()) === false) {
+        return;
+      }
+      this._clear();
+      this.document = undefined;
+      if ((await after()) === false) {
+        return;
+      }
+      this.fire('nx-creation-wizard-show-tabs');
+      this.fire('nx-document-creation-finished');
+    }
   },
 
   _newDocumentLabel() {
