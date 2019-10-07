@@ -130,7 +130,7 @@ Polymer({
     let name = `${prefix}-x86_64.AppImage`;
     pkgs.push({
       name,
-      platform: 'GNU/Linux',
+      platform: 'Linux',
       url: `${baseUrl}/${name}`,
     });
 
