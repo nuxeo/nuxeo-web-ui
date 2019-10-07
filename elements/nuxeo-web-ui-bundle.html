@@ -202,7 +202,7 @@
   </template>
 </nuxeo-slot-content>
 
-<!-- COLECTION ACTIONS -->
+<!-- COLLECTION ACTIONS -->
 
 <nuxeo-slot-content name="removeCollectionAction" slot="COLLECTION_ACTIONS" order="10">
   <template>
@@ -210,35 +210,24 @@
     </nuxeo-collection-remove-action>
   </template>
 </nuxeo-slot-content>
-<!--
-<nuxeo-slot-content name="moveTopCollectionAction" slot="COLLECTION_ACTIONS" order="20">
+
+<nuxeo-slot-content name="downloadSelectionAction" slot="COLLECTION_ACTIONS" order="15">
   <template>
-    <nuxeo-collection-move-top-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
-    </nuxeo-collection-move-top-action>
+    <nuxeo-download-documents-button documents="[[selectedItems]]"> </nuxeo-download-documents-button>
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="moveUpCollectionAction" slot="COLLECTION_ACTIONS" order="30">
+<nuxeo-slot-content name="addToClipboardSelectionAction" slot="COLLECTION_ACTIONS" order="20">
   <template>
-    <nuxeo-collection-move-up-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
-    </nuxeo-collection-move-up-action>
+    <nuxeo-clipboard-documents-button documents="[[selectedItems]]"> </nuxeo-clipboard-documents-button>
   </template>
 </nuxeo-slot-content>
 
-<nuxeo-slot-content name="moveDownCollectionAction" slot="COLLECTION_ACTIONS" order="40">
+<nuxeo-slot-content name="publishSelectionAction" slot="COLLECTION_ACTIONS" order="25">
   <template>
-    <nuxeo-collection-move-down-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
-    </nuxeo-collection-move-down-action>
+    <nuxeo-publish-button documents="[[selectedItems]]"></nuxeo-publish-button>
   </template>
 </nuxeo-slot-content>
-
-<nuxeo-slot-content name="moveBottomCollectionAction" slot="COLLECTION_ACTIONS" order="50">
-  <template>
-    <nuxeo-collection-move-bottom-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
-    </nuxeo-collection-move-bottom-action>
-  </template>
-</nuxeo-slot-content>
--->
 
 <!-- DOCUMENT ACTIONS -->
 
