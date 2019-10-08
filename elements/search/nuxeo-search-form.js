@@ -73,8 +73,12 @@ Polymer({
         @apply --nx-actions-button;
       }
 
-      .actions .reset {
-        margin-bottom: 1rem;
+      .auto-search {
+        padding: 0.5rem;
+      }
+
+      .action-buttons {
+        @apply --layout-horizontal;
       }
 
       nuxeo-data-list {
@@ -287,29 +291,6 @@ Polymer({
             params="{{params}}"
             on-search-form-layout-changed="_formChanged"
           ></nuxeo-search-form-layout>
-          <div class="layout vertical row" hidden$="[[!displayAutoControl]]">
-            <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
-            <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
-          </div>
-          <div class="actions">
-            <paper-button
-              noink
-              class="reset"
-              disabled$="[[!dirty]]"
-              on-tap="_reset"
-              hidden$="[[!_isSavedSearch(selectedSearchIdx)]]"
-            >
-              [[i18n('command.Reset')]]
-            </paper-button>
-            <div class="layout horizontal">
-              <paper-button noink class="primary clear" on-tap="_clear">
-                [[i18n('command.clear')]]
-              </paper-button>
-              <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
-                [[i18n('command.search')]]
-              </paper-button>
-            </div>
-          </div>
           <paper-spinner-lite active$="[[loading]]" hidden$="[[!loading]]"></paper-spinner-lite>
         </div>
 
@@ -340,6 +321,21 @@ Polymer({
               </div>
             </template>
           </nuxeo-data-list>
+        </div>
+
+        <div class="actions" hidden$="{{queue}}">
+          <div class="auto-search" hidden$="[[!displayAutoControl]]">
+            <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
+            <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
+          </div>
+          <div class="action-buttons">
+            <paper-button noink class="reset" disabled$="[[!dirty]]" on-tap="_reset">
+              [[i18n('command.Reset')]]
+            </paper-button>
+            <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
+              [[i18n('command.search')]]
+            </paper-button>
+          </div>
         </div>
       </div>
     </div>
@@ -737,14 +733,18 @@ Polymer({
   },
 
   _reset() {
-    const _el = this.$['saved-search'];
-    _el.searchId = this.selectedSearch.id;
-    _el.get().then((response) => {
-      this.params = this._mutateParams(response.params);
-      this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
-      this.form.searchTerm = this.searchTerm;
-      this.dirty = false;
-    });
+    if (!this.isSavedSearch) {
+      this._clear();
+    } else {
+      const _el = this.$['saved-search'];
+      _el.searchId = this.selectedSearch.id;
+      _el.get().then((response) => {
+        this.params = this._mutateParams(response.params);
+        this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
+        this.form.searchTerm = this.searchTerm;
+        this.dirty = false;
+      });
+    }
   },
 
   saveAs() {
