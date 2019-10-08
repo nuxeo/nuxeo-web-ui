@@ -69,18 +69,6 @@ Feature: Search
     | managers   | 1               |
     | Test       | 5               |
 
-  Scenario: Test Search
-    When I click the "test_search" button
-    And I perform a author search for Bob on test_search
-    Then I can see 5 search results
-    When I clear the author search on test_search
-    Then I can see more than 5 search results
-
-  Scenario: Manual Search Fulltext
-    When I click the "manualSearch" button
-    And I perform a fulltext search for hello on manualSearch
-    Then I can see 2 search results
-
   Scenario: Plural Term Full Text Search
     Given I have the following documents
       | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
