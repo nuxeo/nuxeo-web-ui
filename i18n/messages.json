@@ -474,6 +474,7 @@
   "driveSyncToggleButton.sync": "Synchronize",
   "driveSyncToggleButton.unsync": "Unsynchronize",
   "dropzone.add": "Upload main file",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.uploaded": "File uploaded",
   "dublincoreEdit.directorySuggestion.placeholder": "Select a value.",
   "easyshare.copy.label": "Copy the link and share the document {0}.",
