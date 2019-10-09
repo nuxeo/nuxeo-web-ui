@@ -16,6 +16,7 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
+import { IronValidatableBehavior } from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-progress/paper-progress.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
@@ -53,8 +54,20 @@ Polymer({
         background-color: var(--paper-input-container-focus-background-color, rgba(0, 102, 255, 0.1));
       }
 
+      :host([invalid]) #container {
+        border: 2px dashed var(--paper-input-container-invalid-color, red);
+      }
+
       label {
         margin-bottom: 8px;
+      }
+
+      label[required]::after {
+        display: inline-block;
+        content: '*';
+        margin-left: 4px;
+        color: var(--paper-input-container-invalid-color, red);
+        font-size: 1.2em;
       }
 
       a,
@@ -93,6 +106,10 @@ Polymer({
         margin-bottom: 8px;
       }
 
+      :host([invalid]) #details {
+        border: 2px solid var(--paper-input-container-invalid-color, red);
+      }
+
       .file {
         @apply --layout-horizontal;
         @apply --layout-center;
@@ -124,13 +141,18 @@ Polymer({
       .actions > * {
         margin-left: 8px;
       }
+
+      .error {
+        color: var(--paper-input-container-invalid-color, red);
+        margin-top: 8px;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-document id="doc" doc-id="[[document.uid]]" enrichers="[[enrichers]]"></nuxeo-document>
 
     <template is="dom-if" if="[[label]]">
-      <label id="label">[[label]]</label>
+      <label id="label" required$="[[required]]">[[label]]</label>
     </template>
 
     <input hidden id="input" type="file" on-change="_uploadInputFiles" />
@@ -175,10 +197,12 @@ Polymer({
         </div>
       </div>
     </div>
+
+    <span class="error" hidden$="[[!invalid]]">[[_errorMessage]]</span>
   `,
 
   is: 'nuxeo-dropzone',
-  behaviors: [UploaderBehavior, FormatBehavior],
+  behaviors: [UploaderBehavior, FormatBehavior, IronValidatableBehavior],
 
   properties: {
     /**
@@ -278,6 +302,17 @@ Polymer({
       value() {
         return this._computeEnrichers();
       },
+    },
+    _errorMessage: {
+      type: String,
+    },
+    /**
+     * Required.
+     */
+    required: {
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true,
     },
   },
 
@@ -383,6 +418,7 @@ Polymer({
     } else {
       this.fire('notify', { message: this.i18n(this.uploadedMessage) });
     }
+    this.invalid = false;
   },
 
   _deleteFile(e) {
@@ -490,5 +526,16 @@ Polymer({
 
   _showAbort(uploading) {
     return uploading && this.hasAbort();
+  },
+
+  _getValidity() {
+    if (this.uploading) {
+      this._errorMessage = this.i18n('dropzone.invalid.uploading');
+      return false;
+    }
+    if (!this.required) {
+      return true;
+    }
+    return this.files && this.files.length > 0;
   },
 });
