@@ -1,4 +1,4 @@
-FROM docker.packages.nuxeo.com/nuxeo/nginx-centos7:0.0.1
+ARG SERVER_IMAGE=nuxeo-web-ui/server
+FROM $SERVER_IMAGE
 
-COPY server/nginx.conf /etc/nginx/nginx.conf
 COPY dist/ ui/

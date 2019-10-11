@@ -7,18 +7,6 @@ build:
     envTemplate:
       template: "{{.DOCKER_REGISTRY}}/{{.ORG}}/{{.IMAGE_NAME}}:{{.VERSION}}"
   artifacts:
-    - image: nuxeo-web-ui/server
-      context: server
-      kaniko:
-        dockerfile: Dockerfile
-        buildArgs:
-          DOCKER_REGISTRY: ${DOCKER_REGISTRY}
-        buildContext:
-          localDir: {}
-        flags:
-          - --insecure
-          - --insecure-pull
-          - --insecure-registry=${DOCKER_REGISTRY}
     - image: nuxeo-web-ui/dev
       context: .
       kaniko:
@@ -31,6 +19,8 @@ build:
           - --insecure
           - --insecure-pull
           - --insecure-registry=${DOCKER_REGISTRY}
+        cache:
+          repo: ${DOCKER_REGISTRY}/${ORG}/nuxeo-web-ui/dev/cache
     - image: nuxeo-web-ui
       context: .
       kaniko:
@@ -44,5 +34,7 @@ build:
           - --insecure
           - --insecure-pull
           - --insecure-registry=${DOCKER_REGISTRY}
+        cache:
+          repo: ${DOCKER_REGISTRY}/${ORG}/nuxeo-web-ui/cache
   cluster:
     namespace: webui

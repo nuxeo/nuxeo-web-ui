@@ -30,6 +30,25 @@ void setGitHubBuildStatus(String context, String message, String state) {
   ])
 }
 
+// Replaces environment variables present in the given yaml file and then runs skaffold build on it.
+void skaffoldBuild(String yaml = 'skaffold.yaml') {
+  sh """
+    envsubst < ${yaml} > ${yaml}~gen
+    skaffold build -f ${yaml}~gen
+  """
+}
+
+void dockerPublish(String image) {
+  String src = "${DOCKER_REGISTRY}/${ORG}/${image}:${VERSION}"
+  String target = "${PUBLIC_DOCKER_REGISTRY}/${ORG}/${image}:${VERSION}"
+  echo "Pushing ${target}"
+  sh """
+    docker pull $src
+    docker tag $src $target
+    docker push $target
+  """
+}
+
 def WEBUI_VERSION
 
 pipeline {
@@ -108,9 +127,9 @@ pipeline {
         }
       }
     }
-    stage('Build and deploy Docker image') {
+    stage('Build and deploy Docker images') {
       steps {
-        setGitHubBuildStatus('docker', 'Build and deploy Docker image', 'PENDING')
+        setGitHubBuildStatus('docker', 'Build Docker images', 'PENDING')
         container('mavennodejs') {
           script {
             WEBUI_VERSION =  sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
@@ -120,22 +139,24 @@ pipeline {
           }
           withEnv(["VERSION=${WEBUI_VERSION}"]) {
             echo """
-            -----------------------------
-            Build and deploy Docker image
-            -----------------------------
+            ------------------------------
+            Build and deploy Docker images
+            ------------------------------
             Image tag: ${VERSION}
             """
-            sh 'envsubst < skaffold.yaml > skaffold.yaml~gen'
-            sh 'skaffold build -f skaffold.yaml~gen'
+            dir('server') {
+              skaffoldBuild()
+            }
+            skaffoldBuild()
           }
         }
       }
       post {
         success {
-          setGitHubBuildStatus('docker', 'Build and deploy Docker image', 'SUCCESS')
+          setGitHubBuildStatus('docker', 'Build Docker images', 'SUCCESS')
         }
         failure {
-          setGitHubBuildStatus('docker', 'Build and deploy Docker image', 'FAILURE')
+          setGitHubBuildStatus('docker', 'Build Docker images', 'FAILURE')
         }
       }
     }
@@ -146,6 +167,11 @@ pipeline {
       steps {
         container('mavennodejs') {
           withEnv(["PREVIEW_VERSION=$WEBUI_VERSION"]) {
+            echo """
+            -----------------
+            Deploying preview 
+            -----------------
+            """
             dir('charts/preview') {
               sh "make preview" // does some env subst before "jx step helm build"
               sh "jx preview"
@@ -154,29 +180,36 @@ pipeline {
         }
       }
     }
-  }
-  post {
-    success {
-      container('mavennodejs') {
-        script {
-          if (BRANCH_NAME == 'master') {
-            def src =  "\$DOCKER_REGISTRY/\$ORG/nuxeo-web-ui:$WEBUI_VERSION"
-            def target =  "\$PUBLIC_DOCKER_REGISTRY/\$ORG/nuxeo-web-ui:$WEBUI_VERSION"
+    stage('Publish Docker Images') {
+      when {
+        branch 'master'
+      }
+      steps {
+        setGitHubBuildStatus('publish', 'Publish Docker images', 'PENDING')
+        container('mavennodejs') {
+          withEnv(["VERSION=${WEBUI_VERSION}"]) {
             echo """
-              -----------------------
-              Publishing Docker image
-              -----------------------
-              $target
+            ---------------------
+            Publish Docker images
+            ---------------------
             """
-            sh """
-              docker pull $src
-              docker tag $src $target
-              docker push $target
-            """
+            dockerPublish("nuxeo-web-ui/server")
+            dockerPublish("nuxeo-web-ui")
+            dockerPublish("nuxeo-web-ui/dev")
           }
         }
       }
+      post {
+        success {
+          setGitHubBuildStatus('publish', 'Publish Docker images', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('publish', 'Publish Docker images', 'FAILURE')
+        }
+      }
     }
+  }
+  post {
     always {
       script {
         if (BRANCH_NAME == 'master') {
