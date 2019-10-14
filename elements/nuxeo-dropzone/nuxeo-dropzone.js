@@ -53,8 +53,20 @@ Polymer({
         background-color: var(--paper-input-container-focus-background-color, rgba(0, 102, 255, 0.1));
       }
 
+      :host([invalid]) #container {
+        border: 2px dashed var(--paper-input-container-invalid-color, red);
+      }
+
       label {
         margin-bottom: 8px;
+      }
+
+      label[required]::after {
+        display: inline-block;
+        content: '*';
+        margin-left: 4px;
+        color: var(--paper-input-container-invalid-color, red);
+        font-size: 1.2em;
       }
 
       a,
@@ -93,6 +105,10 @@ Polymer({
         margin-bottom: 8px;
       }
 
+      :host([invalid]) #details {
+        border: 2px solid var(--paper-input-container-invalid-color, red);
+      }
+
       .file {
         @apply --layout-horizontal;
         @apply --layout-center;
@@ -124,13 +140,18 @@ Polymer({
       .actions > * {
         margin-left: 8px;
       }
+
+      .error {
+        color: var(--paper-input-container-invalid-color, red);
+        margin-top: 8px;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-document id="doc" doc-id="[[document.uid]]" enrichers="[[enrichers]]"></nuxeo-document>
 
     <template is="dom-if" if="[[label]]">
-      <label id="label">[[label]]</label>
+      <label id="label" required$="[[required]]">[[label]]</label>
     </template>
 
     <input hidden id="input" type="file" on-change="_uploadInputFiles" />
@@ -175,6 +196,8 @@ Polymer({
         </div>
       </div>
     </div>
+
+    <label class="error" hidden$="[[!invalid]]">[[errorMessage]]</label>
   `,
 
   is: 'nuxeo-dropzone',
