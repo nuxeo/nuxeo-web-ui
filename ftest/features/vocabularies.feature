@@ -3,7 +3,8 @@ Feature: Vocabularies
   Vocabularies can be added, edit and removed.
 
   Background:
-    Given I login as "Administrator"
+    Given user "John" exists in group "powerusers"
+    And I login as "John"
 
   Scenario: Vocabularies menu on drawer
     When I click the "administration" button

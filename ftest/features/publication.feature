@@ -5,6 +5,7 @@ Feature: Internal Publication
       | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
       | Section    | section1         | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/sections        |                  |        |            |
       | Section    | section2         | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/sections        |                  |        |            |
+    And user "John" exists in group "members"
 
   Scenario: Publish Current Document Versions
     Given user "BJones" exists
@@ -50,7 +51,8 @@ Feature: Internal Publication
        | /default-domain/sections/section2/my_document | Thumbnail  | 1.1     |
 
   Scenario: Republish Current Document
-    Given I login as "Administrator"
+    Given I login as "John"
+    And I have permission ReadWrite for the document with path "/default-domain/sections/section1"
     And I have a File document
     When I browse to the document
     Then I can perform the following publications
@@ -73,12 +75,14 @@ Feature: Internal Publication
       | /default-domain/sections/section1/my_document |           | 0.2     |
 
   Scenario: Publish Multiple Documents
-    Given I login as "Administrator"
+    Given I login as "John"
     And I have the following documents
       | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
       | Workspace  | PublishTest      | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain                 |                  |        |            |
       | File       | PublishFile      | invoice | society/ecology         | europe/France        | JSmith  | /default-domain/PublishTest     |                  | urgent |            |
-      | Note       | PublishNote      | memo    | art/culture             | europe/France        | SJones  | /default-domain/PublishTest     |                  | urgent | sample.odt |
+      | Note       | PublishNote      | memo    | art/culture             | europe/France        | SJones  | /default-domain/PublishTest     |                  | urgent | sample.odt |  
+    And I have permission ReadWrite for the document with path "/default-domain/PublishTest"
+    And I have permission ReadWrite for the document with path "/default-domain/sections/section1"
     When I browse to the document with path "/default-domain/PublishTest"
     And I select the "PublishFile" document
     And I select the "PublishNote" document
@@ -92,15 +96,16 @@ Feature: Internal Publication
     And I can see the document has 1 children
 
   Scenario: Read Only Publications
-    Given user "John" exists in group "members"
-    And I login as "Administrator"
+    Given user "Susan" exists in group "members"
+    And I login as "John"  
+    And I have permission ReadWrite for the document with path "/default-domain/sections/section1"  
     And I have a File document
     When I browse to the document
     Then I can perform the following publications
       | target            | rendition | version | override |
       | section1          |           |         |          |
     When I logout
-    And I login as "John"
+    And I login as "Susan"
     When I browse to the document
     Then I can navigate to publication pill
     And I can see the document has 1 publications
