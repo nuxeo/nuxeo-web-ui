@@ -19,6 +19,7 @@ Feature: Multi-valued Properties Editing
       | name                  | value                                |
       | multiString           | [["toto"],["pouet"],["foo"],["bar"]] |
 
+  # NXP-28141 is preventing this test from passing with a non-Admin user
   Scenario: Create and Edit Document with a multi complex property having vocabulary, document and user suggestion widget
     When I click the Create Document button
     And I select MultiComplex from the Document Type menu

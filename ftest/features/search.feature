@@ -28,7 +28,8 @@ Feature: Search
       | File       | Test_File        | booklet | art/culture             | europe/France        | SJones  | /default-domain/Nuxeo_Workspace | My_Collection    | urgent | sample.png |
       | File       | My_File          | memo    | art/culture             | europe/France        | SJones  | /default-domain/My_Workspace    | Nuxeo_Collection | urgent | sample.png |
       | File       | Nuxeo_File       | invoice | art/culture             | europe/France        | BJones  | /default-domain/My_Workspace    | Test_Collection  | urgent | sample.mp4 |
-    And I login as "Administrator"
+    And user "John" exists in group "members"
+    And I login as "John"
 
   Scenario Outline: Default Search
     When I click the "defaultSearch" button

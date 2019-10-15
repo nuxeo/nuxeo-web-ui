@@ -7,7 +7,8 @@ Feature: Group
       | name           | label    |
       | managers       | Managers |
       | managers/webui |          |
-    Given I login as "Administrator"
+    Given user "John" exists in group "powerusers"
+    And I login as "John"    
     And I click the "administration" button
     And I can see the administration menu
     And I click "user-group-management" in the administration menu

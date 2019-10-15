@@ -7,9 +7,11 @@ Feature: Document Suggestion
       | doctype    | title | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
       | Workspace  | toto  | booklet | sciences/astronomy      | europe/Belgium       | BJones  | /default-domain                 |                  |        |            |
       | Workspace  | pouet | booklet | sciences/astronomy      | europe/Germany       | SJones  | /default-domain                 |                  |        |            |
-    And  I login as "Administrator"
-    And I click the "administration" button
+    And user "John" exists in group "members"
+    And I login as "John"    
     And I have a Workspace document
+    And I have permission ReadWrite for the document with path "/default-domain/toto"
+    And I have permission ReadWrite for the document with path "/default-domain/pouet"
     And I browse to the document
 
   Scenario: Create and Edit Document with document suggestion widget

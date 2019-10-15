@@ -3,7 +3,8 @@ Feature: Edit metadata
   I can edit metadata of a document
 
   Background:
-    Given I login as "Administrator"
+    Given user "John" exists in group "members"
+    And I login as "John"
     And I have a Workspace document
     And I have permission ReadWrite for this document
 
