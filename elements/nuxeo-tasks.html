@@ -82,10 +82,6 @@ limitations under the License.
         color: var(--nuxeo-warn-text);
       }
 
-      .document-view {
-        margin-left: 1.3rem;
-      }
-
       nuxeo-document-task,
       nuxeo-document-view {
         width: 100%;
@@ -108,6 +104,22 @@ limitations under the License.
         text-transform: none;
         padding-right: 64px;
       }
+
+      .task-view,
+      .document-view {
+        width: 100%;
+      }
+
+      @media (min-width: 1024px) {
+        .task-view {
+          flex: 1;
+        }
+        .document-view {
+          margin-left: 1.3rem;
+          flex: 2;
+          overflow: hidden;
+        }
+      }
     </style>
 
     <nuxeo-document id="currentTaskDoc"
@@ -129,13 +141,13 @@ limitations under the License.
       <div class="content">
         <template is="dom-if" if="[[_hasCurrent(current)]]">
           <div class="layout horizontal wrap">
-            <div class="flex task-view">
+            <div class="task-view">
               <nuxeo-card>
                 <nuxeo-document-task task="[[current]]"></nuxeo-document-task>
               </nuxeo-card>
             </div>
             <template is="dom-if" if="[[_docId(current)]]">
-              <div class="vertical layout flex-2 document-view">
+              <div class="vertical layout document-view">
                 <nuxeo-document-view document="[[currentTaskDocument]]"></nuxeo-document-view>
               </div>
             </template>
