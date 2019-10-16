@@ -315,7 +315,13 @@ Polymer({
   _getFilterCount() {
     if (this._params) {
       // subtract the number of original parameters (this._paramsCount)
-      return Object.keys(this._params).length - this._paramsCount - ('highlight' in this._params ? 1 : 0);
+      return (
+        Object.keys(this._params).filter(
+          (p) => this._params[p] && (!Array.isArray(this._params[p]) || this._params[p].length > 0),
+        ).length -
+        this._paramsCount -
+        ('highlight' in this._params ? 1 : 0)
+      );
     }
     return 0;
   },
