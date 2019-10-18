@@ -21,6 +21,8 @@ import './elements/admin-ai-export.js';
 import './elements/admin-ai-advanced-export.js';
 import './elements/nuxeo-ai-suggestions.js';
 import './elements/nuxeo-ai-export-progress.js';
+import './elements/actions/nuxeo-ai-bulk-add.js';
+import './elements/actions/nuxeo-ai-bulk-remove.js';
 import AISuggestionFormatters from './elements/nuxeo-ai-suggestion-formatters.js';
 import DocumentAISuggestionFormatter from './elements/formatters/nuxeo-document-ai-suggestion-formatter.js';
 import DirectoryAISuggestionFormatter from './elements/formatters/nuxeo-directory-ai-suggestion-formatter.js';
