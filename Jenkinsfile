@@ -163,6 +163,9 @@ pipeline {
     stage('Deploy Preview') {
       when {
         branch 'PR-*'
+        expression {
+          return pullRequest.labels.contains('preview')
+        }
       }
       steps {
         container('mavennodejs') {
