@@ -44,3 +44,13 @@ limitations under the License.
     <nuxeo-admin-ai-advanced-export name="advanced"></nuxeo-admin-ai-advanced-export>
   </template>
 </nuxeo-slot-content>
+<nuxeo-slot-content name="enrichmentRemoveAction" slot="RESULTS_ACTIONS" order="-90">
+  <template>
+    <nuxeo-ai-bulk-remove-button provider="[[nxProvider]]"></nuxeo-ai-bulk-remove-button>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="enrichmentAddAction" slot="RESULTS_ACTIONS" order="-95">
+  <template>
+    <nuxeo-ai-bulk-add-button provider="[[nxProvider]]"></nuxeo-ai-bulk-add-button>
+  </template>
+</nuxeo-slot-content>
