@@ -403,6 +403,8 @@ Polymer({
         z-index: 100;
         padding: 53px 0;
         overflow: auto;
+        display: flex;
+        flex-direction: column;
       }
 
       #logo:hover img {
@@ -415,24 +417,15 @@ Polymer({
         -webkit-filter: brightness(110%);
       }
 
-      #menu .profile-icon,
-      #menu .admin-icon {
-        position: fixed;
-        height: 48px;
-        bottom: 0;
-        left: 0;
+      #menu .settings:first-of-type {
+        margin-top: auto;
       }
 
-      #menu .admin-icon {
-        bottom: 48px;
+      #menu .settings {
+        order: 1;
       }
 
       @media (max-width: 1024px), (max-height: 700px) {
-        #menu .profile-icon,
-        #menu .admin-icon {
-          position: relative;
-          bottom: auto;
-        }
         #drawer .toggle {
           display: none;
         }
@@ -564,7 +557,7 @@ Polymer({
             name="administration"
             icon="nuxeo:admin"
             label="app.administration"
-            class="admin-icon"
+            class="settings"
             hidden$="[[!hasAdministrationPermissions(currentUser)]]"
           >
           </nuxeo-menu-icon>
@@ -573,7 +566,7 @@ Polymer({
             src="[[currentUser.contextParameters.userprofile.avatar.data]]"
             icon="nuxeo:user-settings"
             label="app.account"
-            class="profile-icon"
+            class="settings"
           >
           </nuxeo-menu-icon>
         </paper-listbox>
