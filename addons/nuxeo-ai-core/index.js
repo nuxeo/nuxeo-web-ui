@@ -115,13 +115,14 @@ const AISuggestionManager = (() => {
       }
       const aiModels = layout.document.contextParameters && layout.document.contextParameters.aiModels;
       const isModelInput = path && aiModels && aiModels.inputs.includes(path.replace('document.properties.', ''));
+      const noPropertyChanged = !path || 'document.properties'.startsWith(path);
 
       const model = _getBoundElements(layout, 'document.properties');
       const widget = _getSuggestionWidget(path && model[path], false);
       if (widget && Array.isArray(widget.suggestions) && widget.suggestions.length > 0) {
         widget._matchInput();
       }
-      if (!path || isModelInput) {
+      if (noPropertyChanged || isModelInput) {
         _updateDebouncer = Debouncer.debounce(_updateDebouncer, timeOut.after(500), () => {
           _getSuggestions(layout.document).then((response) => {
             _clearSuggestions(model);
