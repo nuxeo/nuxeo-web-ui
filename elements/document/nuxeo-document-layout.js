@@ -115,6 +115,10 @@ Polymer({
     });
   },
 
+  _getBoundElements(property) {
+    return this.$.layout._getBoundElements(property);
+  },
+
   _getFocusableElement(parent) {
     if (parent && parent.shadowRoot && !parent.shadowRoot.activeElement) {
       const nodes = Array.from(parent.shadowRoot.querySelectorAll('*')).filter((node) => {
