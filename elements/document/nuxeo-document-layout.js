@@ -29,6 +29,22 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 */
 Polymer({
   _template: html`
+    <style include="nuxeo-styles">
+      #error {
+        margin-bottom: 8px;
+      }
+
+      .error {
+        border-left: 4px solid var(--paper-input-container-invalid-color, red);
+        color: var(--paper-input-container-invalid-color, red);
+        padding-left: 8px;
+      }
+    </style>
+    <div id="error">
+      <template is="dom-repeat" items="[[_errorMessages]]">
+        <span class="error">[[item]]</span>
+      </template>
+    </div>
     <nuxeo-layout
       id="layout"
       href="[[_href]]"
@@ -60,6 +76,10 @@ Polymer({
       type: String,
       notify: true,
     },
+    _errorMessages: {
+      type: Array,
+      value: [],
+    },
   },
 
   observers: ['_loadLayout(document, layout)'],
@@ -80,6 +100,7 @@ Polymer({
   },
 
   _loadLayout(document, layout) {
+    this._resetValidationErrors();
     if (document) {
       if (!this.previousDocument || document.uid !== this.previousDocument.uid) {
         this._href = null; // force layout restamp
@@ -139,5 +160,50 @@ Polymer({
           }
         });
     }
+  },
+
+  reportValidation(validationReport) {
+    this._resetValidationErrors();
+    validationReport.violations.reverse().forEach((violation) => {
+      this.invalid = true;
+      if (violation.path) {
+        violation.path.forEach((p) => {
+          const widgets = this._getBoundElements(`document.properties.${p.field_name}`);
+          if (widgets) {
+            const msg = this.i18n(violation.messageKey, violation.invalid_value, p.field_name);
+            if (msg === violation.messageKey && violation.constraint && violation.constraint.name) {
+              this._addValidationError(
+                this.i18n(
+                  `label.schema.constraint.violation.${violation.constraint.name}`,
+                  violation.invalid_value,
+                  p.field_name,
+                  ...Object.values(violation.constraint.parameters),
+                ),
+              );
+            } else {
+              this._addValidationError(msg);
+            }
+            Object.values(widgets).forEach((widget) => {
+              // we can at least flag the widget `invalid`
+              widget.invalid = true;
+            });
+          } else {
+            this._addValidationError(this.i18n(violation.messageKey, violation.invalid_value, p.field_name));
+          }
+        });
+      } else {
+        this._addValidationError(this.i18n(violation.messageKey));
+      }
+    });
+  },
+
+  _addValidationError(message) {
+    this._errorMessages.push(message);
+    this.$.error.scrollIntoView();
+    this.$.error.focus();
+  },
+
+  _resetValidationErrors() {
+    this._errorMessages = [];
   },
 });

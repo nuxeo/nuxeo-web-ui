@@ -364,8 +364,12 @@ Polymer({
       })
       .catch((err) => {
         this.set('creating', false);
-        this.fire('notify', { message: this.i18n('documentCreationForm.createError') });
-        console.error(err);
+        if (err && err['entity-type'] === 'validation_report') {
+          this.$['document-create'].reportValidation(err);
+        } else {
+          this.fire('notify', { message: this.i18n('documentCreationForm.createError') });
+          console.error(err);
+        }
       });
   },
 
