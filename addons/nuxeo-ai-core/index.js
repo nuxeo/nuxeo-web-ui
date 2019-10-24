@@ -64,29 +64,6 @@ const AISuggestionManager = (() => {
     });
   }
 
-  function _getBoundElements(element, property) {
-    const model = {};
-    for (let i = 0; i < element.__templateInfo.nodeInfoList.length; i++) {
-      const nodeInfo = element.__templateInfo.nodeInfoList[i];
-      const node = element.__templateInfo.nodeList[i];
-      const field = node.hasAttribute('field') && node.getAttribute('field');
-      if (field && field.startsWith(property)) {
-        model[field] = node;
-      }
-      nodeInfo.bindings.forEach((binding) => {
-        if (binding.kind === 'property') {
-          binding.parts.forEach((part) => {
-            if (part.mode === '{' && !part.signature && part.source.startsWith(property)) {
-              model[part.source] = model[part.source] || [];
-              model[part.source] = node;
-            }
-          });
-        }
-      });
-    }
-    return model;
-  }
-
   function _getSuggestions(doc) {
     if (!op) {
       op = document.createElement('nuxeo-operation');
@@ -117,7 +94,7 @@ const AISuggestionManager = (() => {
       const isModelInput = path && aiModels && aiModels.inputs.includes(path.replace('document.properties.', ''));
       const noPropertyChanged = !path || 'document.properties'.startsWith(path);
 
-      const model = _getBoundElements(layout, 'document.properties');
+      const model = layout._getBoundElements('document.properties');
       const widget = _getSuggestionWidget(path && model[path], false);
       if (widget && Array.isArray(widget.suggestions) && widget.suggestions.length > 0) {
         widget._matchInput();
