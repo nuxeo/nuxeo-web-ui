@@ -132,8 +132,12 @@ Polymer({
       return;
     }
     this._doSave().then(this._refresh.bind(this), (err) => {
-      this.fire('notify', { message: this.i18n('document.saveError') });
-      console.error(err);
+      if (err && err['entity-type'] === 'validation_report') {
+        this.$.layout.reportValidation(err);
+      } else {
+        this.fire('notify', { message: this.i18n('documentEdit.saveError') });
+        console.error(err);
+      }
     });
   },
 
