@@ -16,6 +16,10 @@ export default class DocumentFormLayout extends BasePage {
     return new DocumentLayout(`nuxeo-${this._docType.toLowerCase()}-${this._layout}-layout`);
   }
 
+  get errorMessages() {
+    return this.el.elements('#error .error').value.map((errorElt) => errorElt.getText());
+  }
+
   save() {
     const button = this.el.element('.actions #save');
     button.waitForVisible();
