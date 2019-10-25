@@ -1,0 +1,30 @@
+<!--
+`nuxeo-validation-view-layout`
+@group Nuxeo UI
+@element nuxeo-validation-view-layout
+-->
+<dom-module id="nuxeo-validation-view-layout">
+  <template>
+    <style include="nuxeo-styles">
+      :host {
+        @apply --paper-card;
+      }
+    </style>
+    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-validation-view-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype validation
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>

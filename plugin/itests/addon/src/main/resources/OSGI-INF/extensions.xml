@@ -8,6 +8,7 @@
     <schema name="ftest2" prefix="ft2" override="true" src="data/schemas/ftest2.xsd"/>
     <schema name="ftest3" prefix="ft3" override="true" src="data/schemas/ftest3.xsd"/>
     <schema name="test_search_pp" prefix="test_search_pp" override="true" src="data/schemas/test_search_pp.xsd"/>
+    <schema name="validation" prefix="validation" override="true" src="data/schemas/validation.xsd"/>
   </extension>
   <extension target="org.nuxeo.ecm.core.schema.TypeService" point="doctype">
     <doctype name="DocSuggestion" extends="Document">
@@ -25,6 +26,22 @@
     <doctype name="Workspace" append="true">
       <subtypes>
         <type>DocSuggestion</type>
+      </subtypes>
+    </doctype>
+    <doctype name="Validation" extends="Document">
+      <schema name="validation"/>
+      <schema name="dublincore"/>
+      <schema name="common"/>
+      <schema name="uid"/>
+    </doctype>
+    <doctype name="Folder" append="true">
+      <subtypes>
+        <type>Validation</type>
+      </subtypes>
+    </doctype>
+    <doctype name="Workspace" append="true">
+      <subtypes>
+        <type>Validation</type>
       </subtypes>
     </doctype>
     <doctype name="MultiString" extends="Document">
@@ -69,11 +86,15 @@
     <types>
       <type name="MultiString">default</type>
     </types>
+    <types>
+      <type name="Validation">default</type>
+    </types>
   </extension>
   <extension target="org.nuxeo.ecm.platform.actions.ActionService" point="filters">
     <filter id="create" append="true">
       <rule grant="false">
         <type>DocSuggestion</type>
+        <type>Validation</type>
         <type>MultiComplex</type>
         <type>MultiString</type>
       </rule>
@@ -122,5 +143,12 @@
       <facet name="HiddenInNavigation"/>
       <schema name="test_search_pp"/>
     </doctype>
+  </extension>
+  <extension target="org.nuxeo.ecm.core.event.EventServiceComponent"
+    point="listener">
+    <listener name="dummyGlobalValidation" class="org.nuxeo.web.ui.itests.listeners.GlobalValidationListener">
+      <event>aboutToCreate</event>
+      <event>beforeDocumentModification</event>
+    </listener>
   </extension>
 </component>

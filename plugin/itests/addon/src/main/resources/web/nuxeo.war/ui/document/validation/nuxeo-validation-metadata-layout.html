@@ -1,0 +1,25 @@
+<!--
+`nuxeo-validation-metadata-layout`
+@group Nuxeo UI
+@element nuxeo-validation-metadata-layout
+-->
+<dom-module id="nuxeo-validation-metadata-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-validation-metadata-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype validation
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>

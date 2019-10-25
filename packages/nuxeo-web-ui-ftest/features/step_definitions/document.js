@@ -300,3 +300,23 @@ Then(/^I can unpublish the document$/, function() {
   unpublishConfirm.waitForVisible();
   unpublishConfirm.click();
 });
+
+Then('I can see {int} validation error(s) in the {string} edit form', function(nbErrors, docType) {
+  const { browser } = this.ui;
+  const form = browser.editForm(docType);
+  form.waitForVisible();
+  driver.waitUntil(
+    () => form.errorMessages.length === nbErrors,
+    `Expecting to get ${nbErrors} results but found ${form.errorMessages.length}`,
+  );
+});
+
+Then('I can see the {string} error message in the {string} edit form', function(message, docType) {
+  const { browser } = this.ui;
+  const form = browser.editForm(docType);
+  form.waitForVisible();
+  driver.waitUntil(
+    () => form.errorMessages.some((err) => err === message),
+    `Expecting to find '${message}' error message but not found`,
+  );
+});

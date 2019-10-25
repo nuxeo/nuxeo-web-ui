@@ -1,0 +1,72 @@
+<!--
+`nuxeo-validation-create-layout`
+@group Nuxeo UI
+@element nuxeo-validation-create-layout
+-->
+<dom-module id="nuxeo-validation-create-layout">
+  <template>
+    <style include="iron-flex iron-flex-alignment nuxeo-styles">
+      *[role='widget'] {
+        margin-bottom: 8px;
+      }
+    </style>
+
+    <nuxeo-input
+      id="title"
+      name="title"
+      role="widget"
+      value="{{document.properties.dc:title}}"
+      label="Title"
+      type="text"
+      required
+    >
+    </nuxeo-input>
+
+    <nuxeo-input
+      name="letterOnly"
+      role="widget"
+      value="{{document.properties.validation:letterOnly}}"
+      label="Letter Only"
+      type="text"
+    >
+    </nuxeo-input>
+
+    <nuxeo-card heading="Enter 2 numbers whose sum equals 10">
+      <div class="layout horizontal justified flex">
+        <nuxeo-input
+          name="firstNumber"
+          role="widget"
+          value="{{document.properties.validation:firstNumber}}"
+          label="First Number"
+          type="number"
+          required
+        >
+        </nuxeo-input>
+        <nuxeo-input
+          name="secondNumber"
+          role="widget"
+          value="{{document.properties.validation:secondNumber}}"
+          label="Second Number"
+          type="number"
+          required
+        >
+        </nuxeo-input>
+      </div>
+    </nuxeo-card>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-validation-create-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype validation
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>
