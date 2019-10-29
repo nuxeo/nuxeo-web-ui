@@ -22,7 +22,12 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-xvocabulary-edit-layout">
   <template>
-    <nuxeo-resource id="directory" path="/directory/[[parentDirectory]]" response="{{parentResponse}}"></nuxeo-resource>
+    <nuxeo-resource
+      id="directory"
+      path="/directory/[[parentDirectory]]"
+      params='{"pageSize": 0}'
+      response="{{parentResponse}}"
+    ></nuxeo-resource>
 
     <nuxeo-select
       role="widget"
