@@ -1,0 +1,3 @@
+"name","type","dc:title","dc:description","dc:format","dc:source","dc:language","dc:nature","dc:subjects"
+"my_folder","Folder","my_folder","This is the description of a folder that will hold some documents",,"Nuxeo CSV import",,,
+"my_folder/file1","File","file1","doc in folder",,"Nuxeo CSV Import","English","letter","daily life/gastronomy|society/company"
