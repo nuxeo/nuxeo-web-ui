@@ -312,16 +312,14 @@ Polymer({
     return `hardware:keyboard-arrow-${opened ? 'down' : 'right'}`;
   },
 
+  _countParams(params) {
+    return Object.keys(params).filter((p) => params[p] && (!Array.isArray(params[p]) || params[p].length > 0)).length;
+  },
+
   _getFilterCount() {
     if (this._params) {
       // subtract the number of original parameters (this._paramsCount)
-      return (
-        Object.keys(this._params).filter(
-          (p) => this._params[p] && (!Array.isArray(this._params[p]) || this._params[p].length > 0),
-        ).length -
-        this._paramsCount -
-        ('highlight' in this._params ? 1 : 0)
-      );
+      return this._countParams(this._params) - this._paramsCount - ('highlight' in this._params ? 1 : 0);
     }
     return 0;
   },
@@ -336,7 +334,7 @@ Polymer({
       // if the supplied params are a string, parse them; otherwise clone the object
       this._params = JSON.parse(typeof this.params === 'string' ? this.params : JSON.stringify(this.params));
       // cache the number of this.params to avoid having to parse json again if this.params is a string
-      this._paramsCount = Object.keys(this._params).length;
+      this._paramsCount = this._countParams(this._params);
     } else {
       this._params = {};
       this._paramsCount = 0;
