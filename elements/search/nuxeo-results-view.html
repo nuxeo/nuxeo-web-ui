@@ -312,7 +312,7 @@ limitations under the License.
           return (
             Object.keys(this._params).filter(function(p) {
               return this._params[p] && (!Array.isArray(this._params[p]) || this._params[p].length > 0);
-            }).length -
+            }.bind(this)).length -
             this._paramsCount -
             ('highlight' in this._params ? 1 : 0)
           );
