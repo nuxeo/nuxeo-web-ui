@@ -520,7 +520,6 @@
   "bulkDownload.tooltip": "Tout télécharger dans un zip",
   "driveDesktopPackages.install": "Archive à installer",
   "driveDesktopPackages.platform": "Plateforme",
-  "driveDesktopPackages.ubuntu.name": "Lire la documentation sur le client Linux",
   "driveEditButton.dialog.heading": "Télécharger le client Nuxeo Drive",
   "driveEditButton.tooltip": "Ouvrir avec Nuxeo Drive",
   "drivePage.heading": "Nuxeo Drive",

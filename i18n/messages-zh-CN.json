@@ -520,7 +520,6 @@
   "bulkDownload.tooltip": "以zip格式下载所有",
   "driveDesktopPackages.install": "安装包",
   "driveDesktopPackages.platform": "平台",
-  "driveDesktopPackages.ubuntu.name": "阅读关于Linux客户端的文档",
   "driveEditButton.dialog.heading": "下载NUXEO驱动客户端",
   "driveEditButton.tooltip": "使用Nuxeo驱动打开",
   "drivePage.heading": "Nuxeo 驱动器",
