@@ -42,39 +42,43 @@ Given(/^I have the following users$/, (table) =>
 
 Given(/^I have the following documents$/, (table) => {
   browser.pause(1000);
-  const tasks = table.rows().map((row) => () => {
-    const doc = fixtures.documents.init(row[0]);
-    // eslint-disable-next-line prefer-destructuring
-    doc.name = row[1];
-    doc.properties = {
-      'dc:title': row[1],
-      'dc:nature': row[2],
-      'dc:subjects': [row[3]],
-      'dc:coverage': row[4],
-    };
-    if (row[0] === 'Note') {
-      doc.properties = {
-        'dc:title': row[1],
-        'dc:nature': row[2],
-        'dc:subjects': [row[3]],
-        'dc:coverage': row[4],
-        'note:note': 'Lorem Ipsum',
-      };
-    }
-    // create the document
-    return fixtures.documents.createWithAuthor(row[6], doc, row[5]).then((docWithAuthor) => {
-      if (row[7].length > 0) {
-        return fixtures.collections.addToCollection(docWithAuthor, row[7]).then((docInCollection) => {
-          if (row[8].length > 0) {
-            return fixtures.documents.addTag(docInCollection, row[8]).then((docWithTag) => {
-              if (row[9].length > 0) {
-                return fixtures.documents.attach(docWithTag, fixtures.blobs.get(row[9]));
-              }
-            });
-          }
-        });
-      }
+  const tasks = table.hashes().map((row) => () => {
+    const { doctype, title, creator, nature, subjects, coverage, path, collections, tag, file } = row;
+
+    const doc = fixtures.documents.init(doctype, title);
+
+    // assign basic dc properties (unprefixed)
+    Object.assign(doc.properties, {
+      'dc:title': title,
+      'dc:creator': creator,
+      'dc:nature': nature,
+      'dc:subjects': Array.isArray(subjects) ? subjects : [subjects],
+      'dc:coverage': coverage,
     });
+
+    // fill in dummy note content
+    if (doctype === 'Note') {
+      doc.properties['note:note'] = 'Lorem Ipsum';
+    }
+
+    // fill in any other properties (prefixed)
+    Object.keys(row)
+      .filter((k) => k.indexOf(':') !== -1)
+      .forEach((k) => {
+        doc.properties[k] = row[k];
+      });
+
+    // create the document
+    return (
+      fixtures.documents
+        .create(path, doc)
+        // add to collection
+        .then((d) => (collections.length > 0 ? fixtures.collections.addToCollection(d, collections) : d))
+        // add tag
+        .then((d) => (tag.length > 0 ? fixtures.documents.addTag(d, tag) : d))
+        // attach files
+        .then((d) => (file.length > 0 ? fixtures.documents.attach(d, fixtures.blobs.get(file)) : d))
+    );
   });
   return tasks.reduce((current, next) => current.then(next), Promise.resolve([]));
 });
