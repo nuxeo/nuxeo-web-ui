@@ -21,7 +21,9 @@ nuxeo:
         fabric8.io/expose: "true"
         fabric8.io/ingress.path: /nuxeo/
         fabric8.io/ingress.name: preview
-        fabric8.io/ingress.annotations: "nginx.ingress.kubernetes.io/proxy-body-size: 0"
+        fabric8.io/ingress.annotations: |-
+          nginx.ingress.kubernetes.io/proxy-body-size: 0
+          nginx.ingress.kubernetes.io/enable-underscores-in-headers: true
   mongodb:
     deploy: false
   postgresql:
