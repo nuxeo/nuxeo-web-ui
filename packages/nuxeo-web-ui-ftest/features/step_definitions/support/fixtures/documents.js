@@ -27,21 +27,6 @@ fixtures.documents = {
         liveDocuments.push(doc.uid);
         return doc;
       }),
-  createWithAuthor: (parent, document, username) =>
-    nuxeo
-      .repository()
-      .create(parent, document)
-      .then((doc) => {
-        liveDocuments.push(doc.uid);
-        if (username) {
-          return doc
-            .set({
-              'dc:creator': username,
-            })
-            .save();
-        }
-        return doc;
-      }),
   addTag: (document, tag) =>
     nuxeo
       .operation('Services.TagDocument')
