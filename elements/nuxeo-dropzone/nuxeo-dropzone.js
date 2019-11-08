@@ -384,11 +384,20 @@ Polymer({
   },
 
   _reset(value) {
-    if (value === undefined) {
-      this.cancelBatch();
+    if (
+      value == null ||
+      (Array.isArray(value) &&
+        value.filter(
+          (file) => !Object.prototype.hasOwnProperty.call(this.valueKey ? file[this.valueKey] : file, 'data'),
+        ).length === 0) ||
+      Object.prototype.hasOwnProperty.call(value, 'data')
+    ) {
+      if (this.uploading) {
+        this.cancelBatch();
+      }
+      this.$.input.value = '';
+      this.files = [];
     }
-    this.$.input.value = '';
-    this.files = [];
   },
 
   _uploadInputFiles(e) {
