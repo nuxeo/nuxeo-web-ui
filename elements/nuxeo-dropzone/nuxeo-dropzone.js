@@ -375,7 +375,7 @@ Polymer({
 
   _deleteFile(e) {
     if (this.multiple && Array.isArray(this.value)) {
-      this.value.splice(e.model.itemsIndex, 1);
+      this.value.splice(this.value.length - this.files.length + e.model.itemsIndex, 1);
       this.splice('files', e.model.itemsIndex, 1);
     } else {
       this._reset();
