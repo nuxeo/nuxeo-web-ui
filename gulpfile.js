@@ -30,7 +30,6 @@ var mergeStream = require('merge-stream');
 var cssSlam = require('css-slam').gulp;
 var htmlMinifier = require('gulp-html-minifier');
 var polymer = require('polymer-build');
-var polyserve = require('polyserve');
 var log = require('fancy-log');
 
 var DIST = 'target/classes/web/nuxeo.war/ui';
@@ -178,6 +177,8 @@ gulp.task('build', ['clean'], function(cb) {
 
 // Watch files for changes & reload
 gulp.task('serve', ['lint', 'merge-message-files'], function() {
+
+  var polyserve = require('polyserve');
 
   var options = {
     hostname: '0.0.0.0',
