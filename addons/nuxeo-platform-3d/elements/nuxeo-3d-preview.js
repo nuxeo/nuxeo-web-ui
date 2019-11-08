@@ -17,6 +17,7 @@ Contributors:
 */
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import './nuxeo-3d-viewer.js';
 
@@ -55,6 +56,8 @@ Polymer({
         margin: auto;
       }
     </style>
+    
+    <nuxeo-document id="doc" doc-id="[[document.uid]]"></nuxeo-document>
 
     <template is="dom-if" if="{{document.properties.file:content}}">
       <template is="dom-if" if="{{_hasItems(document.properties.threed:transmissionFormats)}}">
@@ -66,7 +69,7 @@ Polymer({
       </template>
     </template>
     <template is="dom-if" if="{{!document.properties.file:content}}">
-      <nuxeo-dropzone document="{{document}}" xpath="{{file:content}}" update-document></nuxeo-dropzone>
+      <nuxeo-dropzone value="{{document.properties.file:content}}"></nuxeo-dropzone>
     </template>
     <div class="horizontal layout center">
       <template is="dom-if" if="[[document.properties.file:content]]">
@@ -98,6 +101,30 @@ Polymer({
   },
 
   behaviors: [I18nBehavior],
+
+  created() {
+    this._createMethodObserver('_valueChanged(document.properties.file:content)', true);
+  },
+
+  _valueChanged(e) {
+    if (!e || e.data) {
+      return;
+    }
+    const props = {};
+    props['file:content'] = this.document.properties['file:content'];
+    this.$.doc.data = {
+      'entity-type': 'document',
+      repository: this.document.repository,
+      uid: this.document.uid,
+      properties: props,
+    };
+
+    this.$.doc.put().then((response) => {
+      this.document = response;
+      this.fire('notify', { message: this.i18n(this.uploadedMessage) });
+      this.fire('document-updated');
+    });
+  },
 
   _hasItems(list) {
     return list.length > 0;
