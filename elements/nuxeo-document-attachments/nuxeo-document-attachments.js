@@ -16,8 +16,9 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
+import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '../nuxeo-document-blob/nuxeo-document-blob.js';
 import '../nuxeo-dropzone/nuxeo-dropzone.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -51,6 +52,8 @@ Polymer({
       }
     </style>
 
+    <nuxeo-document id="doc" doc-id="[[document.uid]]"></nuxeo-document>
+
     <template is="dom-if" if="[[_isAvailable(document, xpath)]]">
       <h3>[[i18n('documentAttachments.heading')]]</h3>
 
@@ -67,13 +70,12 @@ Polymer({
 
       <template is="dom-if" if="[[_hasWritePermission(document)]]">
         <nuxeo-dropzone
-          document="{{document}}"
-          xpath="[[xpath]]"
+          value="{{document.properties.files:files}}"
+          multiple
+          value-key="file"
           uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
           message="[[i18n('documentAttachments.upload.add')]]"
           drag-content-message="[[i18n('documentAttachments.upload.drop')]]"
-          blob-list
-          update-document
         >
         </nuxeo-dropzone>
       </template>
@@ -81,7 +83,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-attachments',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [FormatBehavior, FiltersBehavior],
 
   properties: {
     document: Object,
@@ -90,6 +92,32 @@ Polymer({
       type: String,
       value: 'files:files',
     },
+  },
+
+  created() {
+    this._createMethodObserver('_valueChanged(document.properties.files:files.splices)', true);
+  },
+
+  _valueChanged(e) {
+    if (!e) {
+      return;
+    }
+    const props = {};
+    const formattedXpath = this.formatPropertyXpath(this.xpath);
+    this._createNestedObjectRecursive(props, formattedXpath.split('.'));
+    this.set(formattedXpath, this.get(formattedXpath, this.document.properties), props);
+    this.$.doc.data = {
+      'entity-type': 'document',
+      repository: this.document.repository,
+      uid: this.document.uid,
+      properties: props,
+    };
+
+    this.$.doc.put().then((response) => {
+      this.document = response;
+      this.fire('notify', { message: this.i18n(this.uploadedMessage) });
+      this.fire('document-updated');
+    });
   },
 
   _hasFiles(doc) {
@@ -118,5 +146,28 @@ Polymer({
 
   _isAvailable(document, xpath) {
     return document && xpath && this.hasSchema(document, xpath.split(':')[0]);
+  },
+
+  /**
+   * Recursive method to create nested objects when they don't exist in a parent object.
+   * It does not change any other existing objects or inner objects, only the ones referred in 'path'.
+   * @param obj Parent Object where inner nested objects should be created.
+   * @param path Array containing the inner object keys.
+   * Usage Example:
+   *
+   *  - Creating document properties using xpath:
+   *
+   *    const xpath = 'my:custom/field/subfield/x'
+   *    _createNestedObjectRecursive(this.document.properties, xpath.split('/'));
+   *
+   */
+  _createNestedObjectRecursive(obj, path) {
+    if (path.length === 0) {
+      return;
+    }
+    if ((!Object.prototype.hasOwnProperty.call(obj, path[0]) && !obj[path[0]]) || typeof obj[path[0]] !== 'object') {
+      obj[path[0]] = {};
+    }
+    return this._createNestedObjectRecursive(obj[path[0]], path.slice(1));
   },
 });

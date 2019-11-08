@@ -20,7 +20,7 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../nuxeo-dropzone/nuxeo-dropzone.js';
@@ -54,12 +54,7 @@ Polymer({
 
     <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('replaceBlobButton.dialog.heading')]]</h2>
-      <nuxeo-dropzone
-        id="dropzone"
-        document="{{document}}"
-        xpath="[[xpath]]"
-        has-files="{{_canSubmit}}"
-      ></nuxeo-dropzone>
+      <nuxeo-dropzone id="dropzone" value="{{value}}" has-files="{{_canSubmit}}"></nuxeo-dropzone>
       <div class="buttons">
         <paper-button dialog-dismiss on-tap="_cancel">[[i18n('replaceBlobButton.dialog.cancel')]]</paper-button>
         <paper-button noink class="primary" dialog-confirm on-tap="_replaceBlob" disabled="[[!_canSubmit]]"
@@ -82,7 +77,7 @@ Polymer({
    */
   is: 'nuxeo-replace-blob-button',
 
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [FormatBehavior, FiltersBehavior],
 
   properties: {
     /**
@@ -180,6 +175,7 @@ Polymer({
     const dirtyProperties = {};
     this._createNestedObjectRecursive(dirtyProperties, rootProperty.split('.'));
     this.set(rootProperty, this.get(rootProperty, this.document.properties), dirtyProperties);
+    this.set(this.formatPropertyXpath(this.xpath), this.value, dirtyProperties);
 
     this.$.doc.data = {
       'entity-type': 'document',
@@ -187,6 +183,7 @@ Polymer({
       properties: dirtyProperties,
     };
     this.$.doc.put().then(() => {
+      this.value = null;
       this.fire('document-updated');
     });
   },
