@@ -535,6 +535,7 @@
   "driveSyncToggleButton.unsync": "No sincronizar",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "Añadir un archivo",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "Archivo subido",
   "dublincoreEdit.directorySuggestion.placeholder": "Seleccione un valor.",

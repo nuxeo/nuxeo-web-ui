@@ -535,6 +535,7 @@
   "driveSyncToggleButton.unsync": "异步",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "添加文件",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "文件已上传",
   "dublincoreEdit.directorySuggestion.placeholder": "选择一个值",

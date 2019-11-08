@@ -535,6 +535,7 @@
   "driveSyncToggleButton.unsync": "Desinkronizatu",
   "dropzone.abort": "Utzi fitxategiaren deskarga",
   "dropzone.add": "Igo fitxategi nagusia",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.dropFile": "Jaregin fitxategia",
   "dropzone.uploaded": "Fitxategia igota",
   "dublincoreEdit.directorySuggestion.placeholder": "Hautatu balio bat.",

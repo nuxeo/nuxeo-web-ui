@@ -535,6 +535,7 @@
   "driveSyncToggleButton.unsync": "Sluta synkronisera",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "Lägg till en fil",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "Fil uppladdad",
   "dublincoreEdit.directorySuggestion.placeholder": "Välj ett värde.",

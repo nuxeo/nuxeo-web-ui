@@ -535,6 +535,7 @@
   "driveSyncToggleButton.unsync": "同期を解除する",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "ファイルを追加",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "ファイルがアップロードされました",
   "dublincoreEdit.directorySuggestion.placeholder": "値を選択",
