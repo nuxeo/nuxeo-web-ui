@@ -19,10 +19,16 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/paper-item/paper-icon-item.js';
 import '@polymer/paper-input/paper-textarea.js';
+import '@polymer/paper-listbox/paper-listbox.js';
+import '@polymer/paper-menu-button/paper-menu-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 // eslint-disable-next-line import/no-cycle
 import './nuxeo-document-comment-thread.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -88,6 +94,13 @@ Polymer({
         opacity: 0.5;
       }
 
+      .reply-area {
+        margin: 5px 0;
+
+        @apply --layout-horizontal;
+        @apply --layout-end;
+      }
+
       .separator {
         margin: 0 5px;
       }
@@ -143,9 +156,25 @@ Polymer({
           background-color: transparent;
         }
       }
+
+      paper-textarea {
+        width: 100%;
+        --paper-input-container-input: {
+          font-size: 1em;
+          line-height: var(--nuxeo-comment-line-height, 20px);
+        }
+
+        --paper-input-container-color: var(--secondary-text-color, #939caa);
+
+        --iron-autogrow-textarea-placeholder: {
+          color: var(--secondary-text-color, #939caa);
+          font-size: 0.86em;
+        }
+      }
     </style>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
+    <nuxeo-resource id="commentRequest" path="/id/[[comment.parentId]]/@comment/[[comment.id]]"></nuxeo-resource>
 
     <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('comments.deletion.dialog.heading')]]</h2>
@@ -191,21 +220,47 @@ Polymer({
               </paper-menu-button>
             </template>
           </div>
-          <div class="text">
-            <span inner-h-t-m-l="[[_computeTextToDisplay(comment.text, maxChars, truncated)]]"></span>
-            <template is="dom-if" if="[[truncated]]">
-              <span class="smaller opaque link" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
-            </template>
-            <template is="dom-if" if="[[!truncated]]">
-              <iron-icon
-                name="reply"
-                class="main-option opaque"
-                icon="reply"
-                on-tap="_reply"
-                hidden$="[[!_isRootElement(level)]]"
-              ></iron-icon>
-            </template>
-          </div>
+          <template is="dom-if" if="[[!editing]]">
+            <div class="text">
+              <span inner-h-t-m-l="[[_computeTextToDisplay(comment.text, maxChars, truncated)]]"></span>
+              <template is="dom-if" if="[[truncated]]">
+                <span class="smaller opaque link" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
+              </template>
+              <template is="dom-if" if="[[!truncated]]">
+                <iron-icon
+                  name="reply"
+                  class="main-option opaque"
+                  icon="reply"
+                  on-tap="_reply"
+                  hidden$="[[!_isRootElement(level)]]"
+                ></iron-icon>
+              </template>
+            </div>
+          </template>
+          <template is="dom-if" if="[[editing]]">
+            <div class="reply-area">
+              <paper-textarea
+                id="replyContainer"
+                placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]"
+                value="{{text}}"
+                max-rows="[[_computeMaxRows()]]"
+                no-label-float
+                on-keydown="_checkForEnter"
+              >
+              </paper-textarea>
+              <template is="dom-if" if="[[!_isBlank(text)]]">
+                <iron-icon
+                  id="submit"
+                  name="submit"
+                  class="main-option opaque"
+                  icon="check"
+                  on-tap="_submitReply"
+                ></iron-icon>
+                <nuxeo-tooltip for="submit">[[i18n('comments.submit.tooltip')]]</nuxeo-tooltip>
+                <iron-icon name="clear" class="main-option opaque" icon="clear" on-tap="_clearReply"></iron-icon>
+              </template>
+            </div>
+          </template>
           <template is="dom-if" if="[[_isSummaryVisible(comment.expanded, comment.numberOfReplies)]]">
             <div id="summary" class="horizontal smaller">
               <span class="more-content link no-selection" on-tap="_expand"
@@ -248,14 +303,34 @@ Polymer({
       readOnly: true,
       value: 256,
     },
+
+    editing: {
+      type: Boolean,
+      readOnly: true,
+      value: false,
+    },
   },
 
   connectedCallback() {
     this.addEventListener('number-of-replies', this._handleRepliesChange);
+    this.text = this.comment && this.comment.text;
   },
 
   disconnectedCallback() {
     this.removeEventListener('number-of-replies', this._handleRepliesChange);
+  },
+
+  _checkForEnter(e) {
+    if (e.keyCode === 13 && e.ctrlKey) {
+      if (!this._isBlank(this.comment.text)) {
+        this._submitReply();
+      }
+    }
+  },
+
+  _clearReply() {
+    this._setEditing(false);
+    this.text = this.comment.text;
   },
 
   _deleteComment() {
@@ -263,7 +338,10 @@ Polymer({
   },
 
   _editComment() {
-    this.fire('edit-comment', { commentId: this.comment.id });
+    this._setEditing(true);
+    afterNextRender(this, function() {
+      this.$$('#replyContainer').focus();
+    });
   },
 
   _expand() {
@@ -290,6 +368,37 @@ Polymer({
     afterNextRender(this, function() {
       this.$$('#thread').focusInput();
     });
+  },
+
+  _submitReply(e) {
+    if (e) {
+      e.preventDefault();
+    }
+    this.$.commentRequest.data = {
+      'entity-type': 'comment',
+      parentId: this.comment.parentId,
+      text: this.$$('#replyContainer').value.trim(),
+    };
+
+    this.$.commentRequest
+      .put()
+      .then((response) => {
+        this.fire('edit-comment', {
+          commentId: this.comment.id,
+          modificationDate: response.modificationDate,
+          text: response.text,
+        });
+        this.text = response.text;
+        this._clearReply();
+      })
+      .catch((error) => {
+        if (error.status === 404) {
+          this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
+        } else {
+          this.fire('notify', { message: this._computeTextLabel(this.level, 'edition.error') });
+          throw error;
+        }
+      });
   },
 
   _toggleDeletionConfirmation() {
@@ -322,8 +431,20 @@ Polymer({
     }
   },
 
+  _computeMaxRows() {
+    const lineHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-line-height'));
+    const maxHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-max-height'));
+    return Math.round((Number.isNaN(maxHeight) ? 80 : maxHeight) / (Number.isNaN(lineHeight) ? 20 : lineHeight));
+  },
+
   _computeSubLevel(level) {
     return level + 1;
+  },
+
+  _computeTextLabel(level, option, placeholder) {
+    return level === 1
+      ? this.i18n(`comments.${option}.comment`, placeholder)
+      : this.i18n(`comments.${option}.reply`, placeholder);
   },
 
   _computeTextToDisplay(text, maxChars, truncated) {
@@ -342,6 +463,10 @@ Polymer({
 
   _areExtendedOptionsAvailable(author, currentUser) {
     return currentUser && (currentUser.properties.username === author || currentUser.isAdministrator);
+  },
+
+  _isBlank(reply) {
+    return !reply || typeof reply !== 'string' || reply.trim().length === 0;
   },
 
   _isRootElement(level) {

@@ -88,8 +88,6 @@ Polymer({
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
     <nuxeo-resource id="commentRequest"></nuxeo-resource>
 
-    <array-selector id="selector" items="{{comments}}" selected="{{selectedComment}}"></array-selector>
-
     <template is="dom-if" if="[[_moreAvailable(comments.length, total, allCommentsLoaded)]]">
       <span class="more-content" on-tap="_loadMore">[[_computeTextLabel(level, 'loadAll', total, i18n)]]</span>
     </template>
@@ -187,7 +185,6 @@ Polymer({
   },
 
   _clearReply() {
-    this.$.selector.clearSelection();
     this.set('reply', '');
   },
 
@@ -272,11 +269,8 @@ Polymer({
   _handleEditEvent(event) {
     const index = this._getCommentIndexById(event.detail.commentId);
     if (index !== -1) {
-      const comment = this.comments[index];
-      this.$.commentList.itemForElement(comment);
-      this.$.selector.select(comment);
-      this.set('reply', comment.text);
-      this.$$('#replyContainer').focus();
+      this.set(`comments.${index}.modificationDate`, event.detail.modificationDate);
+      this.set(`comments.${index}.text`, event.detail.text);
     }
     event.stopPropagation();
   },
@@ -295,50 +289,28 @@ Polymer({
       e.preventDefault();
     }
     this._clearRequest();
-    this.$.commentRequest.path = this._computeResourcePath(this.selectedComment ? this.selectedComment.id : null);
+    this.$.commentRequest.path = this._computeResourcePath();
     this.$.commentRequest.data = {
       'entity-type': 'comment',
       parentId: this.uid,
-      author: this.selectedComment ? this.selectedComment.author : this.currentUser.properties.username,
       text: this.reply.trim(),
     };
 
-    if (this.selectedComment) {
-      this.$.commentRequest
-        .put()
-        .then((response) => {
-          const index = this._getCommentIndexById(this.selectedComment.id);
-          if (index !== -1) {
-            this.set(`comments.${index}.modificationDate`, response.modificationDate);
-            this.set(`comments.${index}.text`, response.text);
-          }
-          this._clearReply();
-        })
-        .catch((error) => {
-          if (error.status === 404) {
-            this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
-          } else {
-            this.fire('notify', { message: this._computeTextLabel(this.level, 'edition.error') });
-            throw error;
-          }
-        });
-    } else {
-      this.$.commentRequest
-        .post()
-        .then((response) => {
-          this._clearReply();
-          this.push('comments', response);
-          this._setTotal(this.total + 1);
-        })
-        .catch((error) => {
-          if (error.status === 404) {
-            this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
-          } else {
-            this.fire('notify', { message: this._computeTextLabel(this.level, 'creation.error') });
-            throw error;
-          }
-        });
-    }
+    this.$.commentRequest
+      .post()
+      .then((response) => {
+        this._clearReply();
+        this.push('comments', response);
+        this._setTotal(this.total + 1);
+      })
+      .catch((error) => {
+        if (error.status === 404) {
+          this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
+        } else {
+          this.fire('notify', { message: this._computeTextLabel(this.level, 'creation.error') });
+          throw error;
+        }
+      });
   },
 
   _computeMaxRows() {
@@ -349,10 +321,6 @@ Polymer({
 
   _computeResourcePath(commentId) {
     return `/id/${this.uid}/@comment/${commentId || ''}`;
-  },
-
-  _computeSubLevel(level) {
-    return level + 1;
   },
 
   _computeTextLabel(level, option, placeholder) {
