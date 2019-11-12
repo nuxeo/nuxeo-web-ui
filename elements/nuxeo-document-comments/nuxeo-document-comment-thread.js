@@ -86,7 +86,7 @@ Polymer({
     </style>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
-    <nuxeo-resource id="commentRequest"></nuxeo-resource>
+    <nuxeo-resource id="commentRequest" path="/id/[[uid]]/@comment/"></nuxeo-resource>
 
     <template is="dom-if" if="[[_moreAvailable(comments.length, total, allCommentsLoaded)]]">
       <span class="more-content" on-tap="_loadMore">[[_computeTextLabel(level, 'loadAll', total, i18n)]]</span>
@@ -196,7 +196,6 @@ Polymer({
 
   _fetchComments(loadAll) {
     this._clearRequest();
-    this.$.commentRequest.path = this._computeResourcePath();
     this.$.commentRequest.params = {
       pageSize: loadAll ? 0 : this.pageSize,
       currentPageIndex: 0,
@@ -246,24 +245,10 @@ Polymer({
   _handleDeleteEvent(event) {
     const index = this._getCommentIndexById(event.detail.commentId);
     if (index !== -1) {
-      this._clearRequest();
-      this.$.commentRequest.path = this._computeResourcePath(this.comments[index].id);
-      this.$.commentRequest
-        .remove()
-        .then(() => {
-          this.splice('comments', index, 1);
-          this._setTotal(this.total - 1);
-        })
-        .catch((error) => {
-          if (error.status === 404) {
-            this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
-          } else {
-            this.fire('notify', { message: this._computeTextLabel(this.level, 'deletion.error') });
-            throw error;
-          }
-        });
-      event.stopPropagation();
+      this.splice('comments', index, 1);
+      this._setTotal(this.total - 1);
     }
+    event.stopPropagation();
   },
 
   _handleEditEvent(event) {
@@ -289,7 +274,6 @@ Polymer({
       e.preventDefault();
     }
     this._clearRequest();
-    this.$.commentRequest.path = this._computeResourcePath();
     this.$.commentRequest.data = {
       'entity-type': 'comment',
       parentId: this.uid,
@@ -317,10 +301,6 @@ Polymer({
     const lineHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-line-height'));
     const maxHeight = parseFloat(this.getComputedStyleValue('--nuxeo-comment-max-height'));
     return Math.round((Number.isNaN(maxHeight) ? 80 : maxHeight) / (Number.isNaN(lineHeight) ? 20 : lineHeight));
-  },
-
-  _computeResourcePath(commentId) {
-    return `/id/${this.uid}/@comment/${commentId || ''}`;
   },
 
   _computeTextLabel(level, option, placeholder) {

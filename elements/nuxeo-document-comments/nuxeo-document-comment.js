@@ -334,7 +334,20 @@ Polymer({
   },
 
   _deleteComment() {
-    this.fire('delete-comment', { commentId: this.comment.id });
+    this.$.commentRequest.data = {};
+    this.$.commentRequest
+      .remove()
+      .then(() => {
+        this.fire('delete-comment', { commentId: this.comment.id });
+      })
+      .catch((error) => {
+        if (error.status === 404) {
+          this.fire('notify', { message: this._computeTextLabel(this.level, 'notFound') });
+        } else {
+          this.fire('notify', { message: this._computeTextLabel(this.level, 'deletion.error') });
+          throw error;
+        }
+      });
   },
 
   _editComment() {
