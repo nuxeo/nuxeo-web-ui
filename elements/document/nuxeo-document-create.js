@@ -333,28 +333,35 @@ Polymer({
     this.fire('nx-creation-wizard-hide-tabs');
   },
 
-  _validate() {
-    const layout = this.$['document-create'];
-    const result =
-      this._doNativeValidation(this.$.form) && this.$.form.validate() && this._isValidType(this.selectedDocType);
-    if (result) {
-      return result;
-    }
-    const innerLayout = layout.$.layout;
-    const nodes = innerLayout._getValidatableElements(innerLayout.element.root);
-    const invalidField = nodes.find((node) => node.invalid);
-    invalidField.scrollIntoView();
-    invalidField.focus();
-  },
-
   _create() {
-    if (!this._validate() || !this.canCreate) {
+    if (!this._isValidType(this.selectedDocType) || !this.canCreate) {
       return;
     }
-    this.document.name = this.document.name || this._sanitizeName(this.document.properties['dc:title']);
+    const layout = this.$['document-create'];
+    const innerLayout = layout.$.layout;
+    const elementsToValidate = innerLayout._getValidatableElements(innerLayout.element.root);
+    elementsToValidate.push(innerLayout.element);
+    let valid = true;
+    const validations = [];
+    elementsToValidate.forEach((el) => {
+      if (el.validate) {
+        const elValidate = el.validate();
+        if (typeof elValidate.then === 'function') {
+          validations.push(elValidate);
+        } else {
+          valid = valid && elValidate;
+        }
+      }
+    });
+    if (!valid) {
+      return;
+    }
     this.set('creating', true);
-    this.$.docRequest
-      .post()
+    Promise.all(validations)
+      .then(() => {
+        this.document.name = this.document.name || this._sanitizeName(this.document.properties['dc:title']);
+        return this.$.docRequest.post();
+      })
       .then((response) => {
         this.$.creationStats.storeType(this.selectedDocType.id);
         this._clear();
@@ -411,18 +418,5 @@ Polymer({
 
   _canCreate() {
     return this.canCreate && !this.creating;
-  },
-
-  // trigger native browser invalid-form UI
-  _doNativeValidation(/* form */) {
-    const fakeSubmit = document.createElement('input');
-    fakeSubmit.setAttribute('type', 'submit');
-    fakeSubmit.style.display = 'none';
-    // TODO: this breaks fields bound to multivalued nuxeo-directory-suggestion
-    /* form._form.appendChild(fakeSubmit);
-    fakeSubmit.click();
-    form._form.removeChild(fakeSubmit);
-    return form._form.checkValidity(); */
-    return true;
   },
 });

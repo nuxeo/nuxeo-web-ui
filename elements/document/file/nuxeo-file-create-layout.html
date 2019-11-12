@@ -104,6 +104,16 @@ limitations under the License.
          */
         document: Object,
       },
+
+      validate() {
+        const promise = new Promise((resolve, reject) => {
+          setTimeout(() => {
+            //resolve('Everything looks good');
+            reject(new Error('There is something bad'));
+          }, 2000);
+        });
+        return promise;
+      },
     });
   </script>
 </dom-module>
