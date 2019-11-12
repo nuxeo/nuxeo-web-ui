@@ -153,8 +153,15 @@ Polymer({
           <div class="horizontal">
             <div class="options">
               <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
-                <paper-button noink dialog-confirm class="primary" name$="[[item.name]]" on-tap="_processTask"
-                  >[[i18n(item.label)]]</paper-button
+                <paper-button
+                  noink
+                  dialog-confirm
+                  class="primary"
+                  name$="[[item.name]]"
+                  on-tap="_processTask"
+                  disabled$="[[processing]]"
+                >
+                  [[i18n(item.label)]]</paper-button
                 >
               </template>
             </div>
@@ -188,6 +195,12 @@ Polymer({
       type: String,
       value: 'resolution',
     },
+
+    processing: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+    },
   },
 
   observers: ['_updateTaskLayout(task)'],
@@ -211,34 +224,44 @@ Polymer({
     return this.$.layout.validate();
   },
 
-  _processTask(e) {
+  async _processTask(e) {
     const { validate } = e.model.item;
-    if (!validate || this.validate()) {
-      this.action = e.model.item.name;
-      this.taskData = {
-        'entity-type': 'task',
-        id: this.$.layout.element.task.id,
-        variables: this.$.layout.element.task.variables,
-      };
-      this.$.taskRequest
-        .put()
-        .then((task) => {
-          this.fire('workflowTaskProcessed', { task });
-        })
-        .catch((error) => {
-          if (error.status === 409 || error.status === 403) {
-            this.fire('notify', {
-              message: this.i18n(`tasks.submit.error.${error.status === 409 ? 'alreadyFinished' : 'noPermissions'}`),
-              dismissible: true,
-              duration: 30000,
-            });
-            this.fire('workflowTaskProcessed');
-          } else {
-            this.fire('notify', { message: this.i18n('tasks.submit.error') });
-            throw error;
-          }
-        });
+    this._setProcessing(true);
+    if (validate && !(await this.validate())) {
+      const elementsToValidate = this.$.layout._getValidatableElements(this.$.layout.element.root);
+      const invalidField = elementsToValidate.find((node) => node.invalid);
+      if (invalidField) {
+        invalidField.scrollIntoView();
+        invalidField.focus();
+      }
+      this._setProcessing(false);
+      return;
     }
+    this.action = e.model.item.name;
+    this.taskData = {
+      'entity-type': 'task',
+      id: this.$.layout.element.task.id,
+      variables: this.$.layout.element.task.variables,
+    };
+    this.$.taskRequest
+      .put()
+      .then((task) => {
+        this.fire('workflowTaskProcessed', { task });
+      })
+      .catch((error) => {
+        if (error.status === 409 || error.status === 403) {
+          this.fire('notify', {
+            message: this.i18n(`tasks.submit.error.${error.status === 409 ? 'alreadyFinished' : 'noPermissions'}`),
+            dismissible: true,
+            duration: 30000,
+          });
+          this.fire('workflowTaskProcessed');
+        } else {
+          this.fire('notify', { message: this.i18n('tasks.submit.error') });
+          throw error;
+        }
+      })
+      .finally(() => this._setProcessing(false));
   },
 
   _toggleGraphDialog() {
