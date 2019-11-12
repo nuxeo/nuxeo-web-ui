@@ -28,6 +28,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-avatar.js';
 // eslint-disable-next-line import/no-cycle
 import './nuxeo-document-comment.js';
+import './nuxeo-document-comments-styles.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -38,67 +39,24 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-styles">
-      :host {
-        display: block;
-      }
-
-      .main-option {
-        height: 1.5em;
-        width: 1.5em;
-        cursor: pointer;
-        opacity: 0.5;
-      }
-
-      .more-content {
-        color: var(--nuxeo-secondary-color, #1f28bf);
-        cursor: pointer;
-        font-size: 0.86em;
-
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-      }
-
-      .reply-area {
-        margin: 5px 0;
-
-        @apply --layout-horizontal;
-        @apply --layout-end;
-      }
-
-      paper-textarea {
-        width: 100%;
-        --paper-input-container-input: {
-          font-size: 1em;
-          line-height: var(--nuxeo-comment-line-height, 20px);
-        }
-
-        --paper-input-container-color: var(--secondary-text-color, #939caa);
-
-        --iron-autogrow-textarea-placeholder: {
-          color: var(--secondary-text-color, #939caa);
-          font-size: 0.86em;
-        }
-      }
-    </style>
+    <style include="nuxeo-document-comments-styles"></style>
 
     <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
     <nuxeo-resource id="commentRequest" path="/id/[[uid]]/@comment/"></nuxeo-resource>
 
     <template is="dom-if" if="[[_moreAvailable(comments.length, total, allCommentsLoaded)]]">
-      <span class="more-content" on-tap="_loadMore">[[_computeTextLabel(level, 'loadAll', total, i18n)]]</span>
+      <span class="more-content no-selection pointer smaller" on-tap="_loadMore"
+        >[[_computeTextLabel(level, 'loadAll', total, i18n)]]</span
+      >
     </template>
     <template id="commentList" is="dom-repeat" items="[[comments]]" as="comment">
       <nuxeo-document-comment comment="{{comment}}" level="[[level]]"></nuxeo-document-comment>
     </template>
 
     <template is="dom-if" if="[[_allowReplies(level)]]">
-      <div class="reply-area">
+      <div class="input-area">
         <paper-textarea
-          id="replyContainer"
+          id="inputContainer"
           placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]"
           value="{{reply}}"
           max-rows="[[_computeMaxRows()]]"
@@ -107,9 +65,15 @@ Polymer({
         >
         </paper-textarea>
         <template is="dom-if" if="[[!_isBlank(reply)]]">
-          <iron-icon id="submit" name="submit" class="main-option" icon="check" on-tap="_submitReply"></iron-icon>
+          <iron-icon
+            id="submit"
+            name="submit"
+            class="main-option opaque"
+            icon="check"
+            on-tap="_submitReply"
+          ></iron-icon>
           <nuxeo-tooltip for="submit">[[i18n('comments.submit.tooltip')]]</nuxeo-tooltip>
-          <iron-icon name="clear" class="main-option" icon="clear" on-tap="_clearReply"></iron-icon>
+          <iron-icon name="clear" class="main-option opaque" icon="clear" on-tap="_clearReply"></iron-icon>
         </template>
       </div>
     </template>
@@ -173,7 +137,7 @@ Polymer({
   },
 
   focusInput() {
-    this.$$('#replyContainer').focus();
+    this.$$('#inputContainer').focus();
   },
 
   _checkForEnter(e) {
