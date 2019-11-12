@@ -53,6 +53,10 @@ Polymer({
         @apply --layout-justified;
       }
 
+      .saving-label {
+        margin-right: 8px;
+      }
+
       nuxeo-document-layout {
         margin-bottom: 24px;
       }
@@ -73,7 +77,15 @@ Polymer({
         </div>
         <div class="actions">
           <paper-button on-tap="cancel" noink>[[i18n('command.cancel')]]</paper-button>
-          <paper-button id="save" on-tap="save" noink class="primary">[[i18n('command.save')]]</paper-button>
+          <paper-button id="save" on-tap="_save" noink class="primary" disabled$="[[saving]]">
+            <template is="dom-if" if="[[!saving]]">
+              [[i18n('command.save')]]
+            </template>
+            <template is="dom-if" if="[[saving]]">
+              <span class="saving-label">[[i18n('command.save')]]</span>
+              <paper-spinner-lite active></paper-spinner-lite>
+            </template>
+          </paper-button>
         </div>
       </form>
     </iron-form>
@@ -96,49 +108,57 @@ Polymer({
     headers: {
       type: Object,
     },
+
+    saving: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+    },
   },
 
   observers: ['_documentChanged(document.*)'],
 
-  _validate() {
-    // run our custom validation function first to allow setting custom native validity
-    const result = this._doNativeValidation(this.$.form) && this.$.form.validate();
-    if (result) {
-      return result;
+  async _save() {
+    const innerLayout = this.$.layout.$.layout;
+    this._setSaving(true);
+    const valid = await innerLayout.validate();
+    if (!valid) {
+      const elementsToValidate = innerLayout._getValidatableElements(innerLayout.element.root);
+      const invalidField = elementsToValidate.find((node) => node.invalid);
+      if (invalidField) {
+        invalidField.scrollIntoView();
+        invalidField.focus();
+      }
+      this._setSaving(false);
+      return;
     }
-    const { layout } = this.$.layout.$;
-    const nodes = layout._getValidatableElements(layout.element.root);
-    const invalidField = nodes.find((node) => node.invalid);
-    invalidField.scrollIntoView();
-    invalidField.focus();
-  },
-
-  _doSave() {
+    let action;
     if (!this.document.uid) {
       // create
       this.$.doc.data = this.document;
-      return this.$.doc.post();
-    } // edit
-    this.$.doc.data = {
-      'entity-type': 'document',
-      uid: this.document.uid,
-      properties: this._dirtyProperties,
-    };
-    return this.$.doc.put();
-  },
-
-  save() {
-    if (!this._validate()) {
-      return;
+      action = this.$.doc.post();
+    } else {
+      // edit
+      this.$.doc.data = {
+        'entity-type': 'document',
+        uid: this.document.uid,
+        properties: this._dirtyProperties,
+      };
+      action = this.$.doc.put();
     }
-    this._doSave().then(this._refresh.bind(this), (err) => {
-      if (err && err['entity-type'] === 'validation_report') {
-        this.$.layout.reportValidation(err);
-      } else {
-        this.fire('notify', { message: this.i18n('documentEdit.saveError') });
-        console.error(err);
-      }
-    });
+    action
+      .then(() => {
+        this._refresh(this);
+      })
+      .catch((err) => {
+        if (err && err['entity-type'] === 'validation_report') {
+          this.$.layout.reportValidation(err);
+        } else {
+          this.fire('notify', { message: this.i18n('documentEdit.saveError') });
+          console.error(err);
+        }
+      })
+      .finally(() => this._setSaving(false));
   },
 
   cancel() {
@@ -161,17 +181,5 @@ Polymer({
         this._dirtyProperties[prop] = this.document.properties[prop];
       }
     }
-  },
-
-  // trigger native browser invalid-form UI
-  _doNativeValidation(/* form */) {
-    /* var fakeSubmit = document.createElement('input');
-    fakeSubmit.setAttribute('type', 'submit');
-    fakeSubmit.style.display = 'none';
-    form._form.appendChild(fakeSubmit);
-    fakeSubmit.click();
-    form._form.removeChild(fakeSubmit);
-    return form._form.checkValidity(); */
-    return true;
   },
 });
