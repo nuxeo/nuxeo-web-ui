@@ -18,7 +18,7 @@ export default class DocumentCommentThread extends BasePage {
   }
 
   get writingArea() {
-    return this.el.element('#replyContainer');
+    return this.el.element('#inputContainer');
   }
 
   getComment(text, user) {
@@ -37,7 +37,7 @@ export default class DocumentCommentThread extends BasePage {
     this.writingArea.scrollIntoView();
     this.writingArea.click();
     fixtures.layouts.setValue(this.writingArea, text);
-    this.el.element('.reply-area iron-icon[name="submit"]').waitForVisible();
-    this.el.element('.reply-area iron-icon[name="submit"]').click();
+    this.el.element('.input-area iron-icon[name="submit"]').waitForVisible();
+    this.el.element('.input-area iron-icon[name="submit"]').click();
   }
 }

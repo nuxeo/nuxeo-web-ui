@@ -31,6 +31,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 // eslint-disable-next-line import/no-cycle
 import './nuxeo-document-comment-thread.js';
+import './nuxeo-document-comments-styles.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
@@ -42,9 +43,8 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-styles">
+    <style include="nuxeo-document-comments-styles">
       :host {
-        display: block;
         margin-top: 5px;
       }
 
@@ -58,55 +58,14 @@ Polymer({
         margin-right: 5px;
       }
 
-      .horizontal {
-        @apply --layout-horizontal;
-      }
-
       .info {
         margin-left: 10px;
         @apply --layout-vertical;
         @apply --layout-flex;
       }
 
-      .link {
-        cursor: pointer;
-      }
-
-      .main-option {
-        height: 1.5em;
-        width: 1.5em;
-        cursor: pointer;
-      }
-
-      .more-content {
-        color: var(--nuxeo-secondary-color, #1f28bf);
-      }
-
-      .no-selection {
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-      }
-
-      .opaque {
-        opacity: 0.5;
-      }
-
-      .reply-area {
-        margin: 5px 0;
-
-        @apply --layout-horizontal;
-        @apply --layout-end;
-      }
-
       .separator {
         margin: 0 5px;
-      }
-
-      .smaller {
-        font-size: 0.86em;
       }
 
       .text {
@@ -154,21 +113,6 @@ Polymer({
 
         --paper-item-focused-before: {
           background-color: transparent;
-        }
-      }
-
-      paper-textarea {
-        width: 100%;
-        --paper-input-container-input: {
-          font-size: 1em;
-          line-height: var(--nuxeo-comment-line-height, 20px);
-        }
-
-        --paper-input-container-color: var(--secondary-text-color, #939caa);
-
-        --iron-autogrow-textarea-placeholder: {
-          color: var(--secondary-text-color, #939caa);
-          font-size: 0.86em;
         }
       }
     </style>
@@ -224,7 +168,7 @@ Polymer({
             <div class="text">
               <span inner-h-t-m-l="[[_computeTextToDisplay(comment.text, maxChars, truncated)]]"></span>
               <template is="dom-if" if="[[truncated]]">
-                <span class="smaller opaque link" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
+                <span class="smaller opaque pointer" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
               </template>
               <template is="dom-if" if="[[!truncated]]">
                 <iron-icon
@@ -238,9 +182,9 @@ Polymer({
             </div>
           </template>
           <template is="dom-if" if="[[editing]]">
-            <div class="reply-area">
+            <div class="input-area">
               <paper-textarea
-                id="replyContainer"
+                id="inputContainer"
                 placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]"
                 value="{{text}}"
                 max-rows="[[_computeMaxRows()]]"
@@ -263,7 +207,7 @@ Polymer({
           </template>
           <template is="dom-if" if="[[_isSummaryVisible(comment.expanded, comment.numberOfReplies)]]">
             <div id="summary" class="horizontal smaller">
-              <span class="more-content link no-selection" on-tap="_expand"
+              <span class="more-content pointer no-selection" on-tap="_expand"
                 >[[i18n('comments.numberOfReplies', comment.numberOfReplies)]]</span
               >
               <span class="separator opaque">•</span>
@@ -353,7 +297,7 @@ Polymer({
   _editComment() {
     this._setEditing(true);
     afterNextRender(this, function() {
-      this.$$('#replyContainer').focus();
+      this.$$('#inputContainer').focus();
     });
   },
 
@@ -390,7 +334,7 @@ Polymer({
     this.$.commentRequest.data = {
       'entity-type': 'comment',
       parentId: this.comment.parentId,
-      text: this.$$('#replyContainer').value.trim(),
+      text: this.$$('#inputContainer').value.trim(),
     };
 
     this.$.commentRequest
