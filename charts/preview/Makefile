@@ -15,5 +15,4 @@ else
 	echo "platfrom $(OS) not supported to release from"
 	exit -1
 endif
-	echo "  version: $(PREVIEW_VERSION)" >> requirements.yaml
 	jx step helm build
