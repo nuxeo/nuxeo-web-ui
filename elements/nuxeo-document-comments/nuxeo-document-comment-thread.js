@@ -58,22 +58,22 @@ Polymer({
         <paper-textarea
           id="inputContainer"
           placeholder="[[_computeTextLabel(level, 'writePlaceholder', null, i18n)]]"
-          value="{{reply}}"
+          value="{{text}}"
           max-rows="[[_computeMaxRows()]]"
           no-label-float
           on-keydown="_checkForEnter"
         >
         </paper-textarea>
-        <template is="dom-if" if="[[!_isBlank(reply)]]">
+        <template is="dom-if" if="[[!_isBlank(text)]]">
           <iron-icon
             id="submit"
             name="submit"
             class="main-option opaque"
             icon="check"
-            on-tap="_submitReply"
+            on-tap="_submitComment"
           ></iron-icon>
           <nuxeo-tooltip for="submit">[[i18n('comments.submit.tooltip')]]</nuxeo-tooltip>
-          <iron-icon name="clear" class="main-option opaque" icon="clear" on-tap="_clearReply"></iron-icon>
+          <iron-icon name="clear" class="main-option opaque" icon="clear" on-tap="_clearInput"></iron-icon>
         </template>
       </div>
     </template>
@@ -98,11 +98,6 @@ Polymer({
     level: {
       type: Number,
       value: 1,
-    },
-
-    reply: {
-      type: String,
-      value: '',
     },
 
     pageSize: {
@@ -142,14 +137,14 @@ Polymer({
 
   _checkForEnter(e) {
     if (e.keyCode === 13 && e.ctrlKey) {
-      if (!this._isBlank(this.reply)) {
-        this._submitReply();
+      if (!this._isBlank(this.text)) {
+        this._submitComment();
       }
     }
   },
 
-  _clearReply() {
-    this.set('reply', '');
+  _clearInput() {
+    this.text = '';
   },
 
   _clearRequest() {
@@ -233,7 +228,7 @@ Polymer({
     this._fetchComments(this.allCommentsLoaded);
   },
 
-  _submitReply(e) {
+  _submitComment(e) {
     if (e) {
       e.preventDefault();
     }
@@ -241,13 +236,13 @@ Polymer({
     this.$.commentRequest.data = {
       'entity-type': 'comment',
       parentId: this.uid,
-      text: this.reply.trim(),
+      text: this.text.trim(),
     };
 
     this.$.commentRequest
       .post()
       .then((response) => {
-        this._clearReply();
+        this._clearInput();
         this.push('comments', response);
         this._setTotal(this.total + 1);
       })
@@ -278,8 +273,8 @@ Polymer({
     return level <= 2;
   },
 
-  _isBlank(reply) {
-    return !reply || typeof reply !== 'string' || reply.trim().length === 0;
+  _isBlank(text) {
+    return !text || typeof text !== 'string' || text.trim().length === 0;
   },
 
   _moreAvailable(length, total, allCommentsLoaded) {
