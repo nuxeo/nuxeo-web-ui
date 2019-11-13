@@ -198,10 +198,10 @@ Polymer({
                   name="submit"
                   class="main-option opaque"
                   icon="check"
-                  on-tap="_submitReply"
+                  on-tap="_submitComment"
                 ></iron-icon>
                 <nuxeo-tooltip for="submit">[[i18n('comments.submit.tooltip')]]</nuxeo-tooltip>
-                <iron-icon name="clear" class="main-option opaque" icon="clear" on-tap="_clearReply"></iron-icon>
+                <iron-icon name="clear" class="main-option opaque" icon="clear" on-tap="_clearInput"></iron-icon>
               </template>
             </div>
           </template>
@@ -267,12 +267,12 @@ Polymer({
   _checkForEnter(e) {
     if (e.keyCode === 13 && e.ctrlKey) {
       if (!this._isBlank(this.comment.text)) {
-        this._submitReply();
+        this._submitComment();
       }
     }
   },
 
-  _clearReply() {
+  _clearInput() {
     this._setEditing(false);
     this.text = this.comment.text;
   },
@@ -314,10 +314,6 @@ Polymer({
     event.stopPropagation();
   },
 
-  _showFullComment() {
-    this.set('comment.showFull', true);
-  },
-
   _reply() {
     if (!this.comment.expanded) {
       this._expand();
@@ -327,7 +323,11 @@ Polymer({
     });
   },
 
-  _submitReply(e) {
+  _showFullComment() {
+    this.set('comment.showFull', true);
+  },
+
+  _submitComment(e) {
     if (e) {
       e.preventDefault();
     }
@@ -346,7 +346,7 @@ Polymer({
           text: response.text,
         });
         this.text = response.text;
-        this._clearReply();
+        this._clearInput();
       })
       .catch((error) => {
         if (error.status === 404) {
@@ -422,8 +422,8 @@ Polymer({
     return currentUser && (currentUser.properties.username === author || currentUser.isAdministrator);
   },
 
-  _isBlank(reply) {
-    return !reply || typeof reply !== 'string' || reply.trim().length === 0;
+  _isBlank(text) {
+    return !text || typeof text !== 'string' || text.trim().length === 0;
   },
 
   _isRootElement(level) {
