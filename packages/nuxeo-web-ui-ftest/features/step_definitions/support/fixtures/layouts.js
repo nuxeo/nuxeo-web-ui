@@ -211,7 +211,11 @@ global.fieldRegistry.register(
     });
   },
 );
-global.fieldRegistry.register('generic', (element) => element.getText(), (element, value) => element.setValue(value));
+global.fieldRegistry.register(
+  'generic',
+  (element) => element.getText(),
+  (element, value) => element.setValue(value),
+);
 
 fixtures.layouts = {
   getValue: (element) => {

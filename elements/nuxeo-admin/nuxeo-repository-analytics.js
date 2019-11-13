@@ -125,14 +125,10 @@ Polymer({
         <template is="dom-if" if="[[!_isEmpty(downloads)]]">
           <nuxeo-data-table items="[[downloadedDocs]]">
             <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file')]]">
-              <template
-                >[[item.title]]</template
-              >
+              <template>[[item.title]]</template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.downloads')]]">
-              <template
-                >[[_numberOfDownloads(item)]]</template
-              >
+              <template>[[_numberOfDownloads(item)]]</template>
             </nuxeo-data-table-column>
           </nuxeo-data-table>
         </template>

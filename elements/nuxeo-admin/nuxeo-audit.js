@@ -118,14 +118,10 @@ Polymer({
         <nuxeo-card>
           <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('audit.empty')]]">
             <nuxeo-data-table-column name="[[i18n('audit.performedAction')]]" sort-by="eventId">
-              <template
-                >[[_formati18n('eventType.', item.eventId)]]</template
-              >
+              <template>[[_formati18n('eventType.', item.eventId)]]</template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.date')]]" sort-by="eventDate">
-              <template
-                ><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date
-              ></template>
+              <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.username')]]" sort-by="principalName">
               <template>
@@ -133,19 +129,13 @@ Polymer({
               </template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.category')]]" sort-by="category">
-              <template
-                >[[_formati18n('eventCategory.', item.category)]]</template
-              >
+              <template>[[_formati18n('eventCategory.', item.category)]]</template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.document')]]">
-              <template
-                >[[_formatDocument(item)]]</template
-              >
+              <template>[[_formatDocument(item)]]</template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
-              <template
-                >[[item.comment]]</template
-              >
+              <template>[[item.comment]]</template>
             </nuxeo-data-table-column>
           </nuxeo-data-table>
         </nuxeo-card>

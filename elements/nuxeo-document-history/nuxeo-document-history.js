@@ -68,24 +68,16 @@ Polymer({
     <nuxeo-card>
       <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
         <nuxeo-data-table-column name="[[i18n('documentHistory.performedAction')]]" sort-by="eventId">
-          <template
-            >[[_formatActivity(item.eventId)]]</template
-          >
+          <template>[[_formatActivity(item.eventId)]]</template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]" sort-by="eventDate">
-          <template
-            ><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date
-          ></template>
+          <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]" sort-by="principalName">
-          <template
-            ><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag
-          ></template>
+          <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.category')]]" sort-by="category">
-          <template
-            >[[_formatActivity(item.category)]]</template
-          >
+          <template>[[_formatActivity(item.category)]]</template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
           <template>
@@ -93,9 +85,7 @@ Polymer({
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
-          <template
-            ><nuxeo-tag uppercase>[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template
-          >
+          <template><nuxeo-tag uppercase>[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template>
         </nuxeo-data-table-column>
       </nuxeo-data-table>
     </nuxeo-card>
