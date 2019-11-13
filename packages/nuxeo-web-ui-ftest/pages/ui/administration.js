@@ -7,6 +7,10 @@ export default class Administration extends BasePage {
     return this.el.element('nuxeo-analytics');
   }
 
+  get nxqlSearch() {
+    return this.el.element('nuxeo-search-page#nxql');
+  }
+
   get userAndGroupManagement() {
     return this.el.element('nuxeo-user-group-management');
   }

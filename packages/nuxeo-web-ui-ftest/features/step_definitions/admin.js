@@ -31,6 +31,10 @@ Then('I can see the audit page', function() {
   this.ui.administration.audit.waitForVisible().should.be.true;
 });
 
+Then('I can see the nxql search page', function() {
+  this.ui.administration.nxqlSearch.waitForVisible().should.be.true;
+});
+
 Then('I can see the cloud services page', function() {
   this.ui.administration.cloudServices.waitForVisible().should.be.true;
 });
