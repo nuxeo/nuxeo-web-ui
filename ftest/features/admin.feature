@@ -28,3 +28,11 @@ Feature: Admin center
     Given user "John" exists in group "members"
     And I login as "John"
     Then I cannot see the administration button
+
+  Scenario: NXQL Search
+    Given I login as "Administrator"
+    When I click the "administration" button
+    Then I can see the administration menu
+    When I click "nxql" in the administration menu
+    Then I can see the nxql search page
+    And I can see more than 1 search results
