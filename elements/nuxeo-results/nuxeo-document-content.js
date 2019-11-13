@@ -203,9 +203,7 @@ Polymer({
           field="currentLifeCycleState"
           hidden
         >
-          <template
-            ><span class="capitalize">[[formatLifecycleState(item.state)]]</span></template
-          >
+          <template><span class="capitalize">[[formatLifecycleState(item.state)]]</span></template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column
           name="[[i18n('documentContentView.datatable.header.version')]]"

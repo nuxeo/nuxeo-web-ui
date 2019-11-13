@@ -151,14 +151,10 @@ Polymer({
       <nuxeo-card heading="[[i18n('searchAnalytics.numberOfResults.heading')]]">
         <nuxeo-data-table items="[[callPerNumberOfResults]]">
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.range')]]">
-            <template
-              >[[item.key]]</template
-            >
+            <template>[[item.key]]</template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.calls')]]">
-            <template
-              >[[item.value]]</template
-            >
+            <template>[[item.value]]</template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>
@@ -177,14 +173,10 @@ Polymer({
       <nuxeo-card heading="[[i18n('searchAnalytics.mostPopularSearches.heading')]]">
         <nuxeo-data-table items="[[callsPerFT]]">
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.searchTerm')]]">
-            <template
-              >[[item.key]]</template
-            >
+            <template>[[item.key]]</template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfCalls')]]">
-            <template
-              >[[item.value]]</template
-            >
+            <template>[[item.value]]</template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>
@@ -207,16 +199,12 @@ Polymer({
       <nuxeo-card heading="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.heading')]]">
         <nuxeo-data-table items="[[callPerNumberOfPages]]">
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.range')]]">
-            <template
-              >[[item.key]]</template
-            >
+            <template>[[item.key]]</template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column
             name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.numberOfCalls')]]"
           >
-            <template
-              >[[item.value]]</template
-            >
+            <template>[[item.value]]</template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>
@@ -234,14 +222,10 @@ Polymer({
       <nuxeo-card heading="[[i18n('searchAnalytics.filtersUsed.heading')]]">
         <nuxeo-data-table items="[[callByFilters]]">
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfFilters')]]">
-            <template
-              >[[item.key]]</template
-            >
+            <template>[[item.key]]</template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfCalls')]]">
-            <template
-              >[[item.value]]</template
-            >
+            <template>[[item.value]]</template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>

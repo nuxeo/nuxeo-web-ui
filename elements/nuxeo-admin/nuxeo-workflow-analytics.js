@@ -186,14 +186,10 @@ Polymer({
       <nuxeo-card heading="[[i18n('workflowAnalytics.averageTaskDurationPerUser.heading')]]">
         <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
           <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.user')]]">
-            <template
-              >[[item.key]]</template
-            >
+            <template>[[item.key]]</template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.duration')]]">
-            <template
-              >[[item.value]]</template
-            >
+            <template>[[item.value]]</template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
       </nuxeo-card>
