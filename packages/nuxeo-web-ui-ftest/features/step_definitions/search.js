@@ -94,6 +94,10 @@ When(/^I perform a (.+) search for (.+) on (.+)$/, function(searchType, searchTe
 Then(/^I can see (\d+) search results$/, function(numberOfResults) {
   const { displayMode } = this.ui.results;
   if (numberOfResults === 0) {
+    driver.waitUntil(
+      () => this.ui.results.resultsCount(displayMode) === 0,
+      `Expecting to get ${numberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
+    );
     this.ui.results.noResults.waitForVisible().should.be.true;
   } else {
     this.ui.results.getResults(displayMode).waitForVisible();
@@ -106,15 +110,11 @@ Then(/^I can see (\d+) search results$/, function(numberOfResults) {
 
 Then(/^I can see more than (\d+) search results$/, function(minNumberOfResults) {
   const { displayMode } = this.ui.results;
-  if (minNumberOfResults === 0) {
-    this.ui.results.noResults.waitForVisible().should.be.true;
-  } else {
-    this.ui.results.getResults(displayMode).waitForVisible();
-    driver.waitUntil(
-      () => this.ui.results.resultsCount(displayMode) > minNumberOfResults,
-      `Expecting to get at least ${minNumberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
-    );
-  }
+  this.ui.results.getResults(displayMode).waitForVisible();
+  driver.waitUntil(
+    () => this.ui.results.resultsCount(displayMode) > minNumberOfResults,
+    `Expecting to get more than ${minNumberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
+  );
 });
 
 Then(/^I edit the results columns to show (.+)$/, function(heading) {

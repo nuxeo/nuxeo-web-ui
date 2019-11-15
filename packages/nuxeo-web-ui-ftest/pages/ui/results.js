@@ -2,7 +2,8 @@ import BasePage from '../base';
 
 export default class Results extends BasePage {
   get noResults() {
-    return this.el.element('div.emptyResult');
+    // XXX using a more specific selector to return the visible label
+    return this.el.element('div.emptyResult:not([style=""])');
   }
 
   get resultActions() {
