@@ -26,7 +26,7 @@ limitations under the License.
     <os family="windows"/>
   </condition>
 
-  <target name="clean" description="Clean npm and bower dependencies">
+  <target name="clean" description="Clean npm and bower dependencies" unless="skipClean">
     <delete dir="node_modules" />
   </target>
 
