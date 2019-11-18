@@ -417,11 +417,13 @@ Polymer({
         -webkit-filter: brightness(110%);
       }
 
-      #menu .settings:first-of-type {
+      /* Apply margin-top: auto to all settings and then reset them, except the first one */
+      #menu > .settings {
         margin-top: auto;
       }
 
-      #menu .settings {
+      #menu > .settings ~ .settings {
+        margin: 0;
         order: 1;
       }
 
