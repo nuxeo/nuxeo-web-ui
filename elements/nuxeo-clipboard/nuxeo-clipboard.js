@@ -52,6 +52,7 @@ Polymer({
         display: block;
         position: relative;
         height: 100%;
+        min-height: auto;
       }
 
       .list-item {
