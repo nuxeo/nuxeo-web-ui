@@ -16,6 +16,7 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
+import { createNestedObject } from '@nuxeo/nuxeo-elements/utils.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
@@ -104,7 +105,7 @@ Polymer({
     }
     const props = {};
     const formattedXpath = this.formatPropertyXpath(this.xpath);
-    this._createNestedObjectRecursive(props, formattedXpath.split('.'));
+    createNestedObject(props, formattedXpath.split('.'));
     this.set(formattedXpath, this.get(formattedXpath, this.document.properties), props);
     this.$.doc.data = {
       'entity-type': 'document',
@@ -146,28 +147,5 @@ Polymer({
 
   _isAvailable(document, xpath) {
     return document && xpath && this.hasSchema(document, xpath.split(':')[0]);
-  },
-
-  /**
-   * Recursive method to create nested objects when they don't exist in a parent object.
-   * It does not change any other existing objects or inner objects, only the ones referred in 'path'.
-   * @param obj Parent Object where inner nested objects should be created.
-   * @param path Array containing the inner object keys.
-   * Usage Example:
-   *
-   *  - Creating document properties using xpath:
-   *
-   *    const xpath = 'my:custom/field/subfield/x'
-   *    _createNestedObjectRecursive(this.document.properties, xpath.split('/'));
-   *
-   */
-  _createNestedObjectRecursive(obj, path) {
-    if (path.length === 0) {
-      return;
-    }
-    if ((!Object.prototype.hasOwnProperty.call(obj, path[0]) && !obj[path[0]]) || typeof obj[path[0]] !== 'object') {
-      obj[path[0]] = {};
-    }
-    return this._createNestedObjectRecursive(obj[path[0]], path.slice(1));
   },
 });

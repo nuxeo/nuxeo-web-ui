@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
+import { createNestedObject } from '@nuxeo/nuxeo-elements/utils.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
@@ -126,29 +127,6 @@ Polymer({
   },
 
   /**
-   * Recursive method to create nested objects when they don't exist in a parent object.
-   * It does not change any other existing objects or inner objects, only the ones referred in 'path'.
-   * @param obj Parent Object where inner nested objects should be created.
-   * @param path Array containing the inner object keys.
-   * Usage Example:
-   *
-   *  - Creating document properties using xpath:
-   *
-   *    const xpath = 'my:custom/field/subfield/x'
-   *    _createNestedObjectRecursive(this.document.properties, xpath.split('/'));
-   *
-   */
-  _createNestedObjectRecursive(obj, path) {
-    if (path.length === 0) {
-      return;
-    }
-    if ((!Object.prototype.hasOwnProperty.call(obj, path[0]) && !obj[path[0]]) || typeof obj[path[0]] !== 'object') {
-      obj[path[0]] = {};
-    }
-    return this._createNestedObjectRecursive(obj[path[0]], path.slice(1));
-  },
-
-  /**
    * Method to find which is the root property that should be sent to be updated in order to minimize the
    * possible issues due to concurrent changes, trying to avoid to change all the properties for a specific document.
    * Since there is still no way to update a specific array element, this method will assume that an array will
@@ -173,7 +151,7 @@ Polymer({
       ? this._getRootProperty(this.xpath.split('/'), this.document.properties)
       : this.xpath;
     const dirtyProperties = {};
-    this._createNestedObjectRecursive(dirtyProperties, rootProperty.split('.'));
+    createNestedObject(dirtyProperties, rootProperty.split('.'));
     this.set(rootProperty, this.get(rootProperty, this.document.properties), dirtyProperties);
     this.set(this.formatPropertyXpath(this.xpath), this.value, dirtyProperties);
 
