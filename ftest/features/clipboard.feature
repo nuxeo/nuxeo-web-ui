@@ -76,6 +76,7 @@ Feature: Clipboard
     Then I can edit the following properties in the File metadata:
       | name  | value    |
       | title | newTitle |
+    And I see the File page
     When I click the "clipboard" button
     Then I can see the clipboard has 1 item
     And I can see the clipboard has "newTitle" document
