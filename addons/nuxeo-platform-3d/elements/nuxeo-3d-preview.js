@@ -56,7 +56,7 @@ Polymer({
         margin: auto;
       }
     </style>
-    
+
     <nuxeo-document id="doc" doc-id="[[document.uid]]"></nuxeo-document>
 
     <template is="dom-if" if="{{document.properties.file:content}}">
