@@ -97,6 +97,16 @@ const template = html`
           @apply --nx-button-primary-hover;
           border-color: transparent;
         }
+        paper-button.secondary {
+          @apply --nx-button-secondary;
+        }
+        paper-button.secondary:hover,
+        paper-button.secondary:focus {
+          @apply --nx-button-secondary-hover;
+        }
+        paper-button.secondary[disabled] {
+          @apply --nx-button-secondary-disabled;
+        }
         paper-button[disabled] {
           @apply --nx-button-disabled;
         }
@@ -422,6 +432,24 @@ const template = html`
         --nx-button-primary-hover: {
           color: var(--nuxeo-button-primary-text);
           background-color: var(--nuxeo-button-primary-focus);
+        }
+
+        --nx-button-secondary: {
+          border: 1px solid var(--nuxeo-primary-color);
+          background-color: #ffffff;
+          color: var(--nuxeo-primary-color);
+          font-weight: 600;
+          box-shadow: 0px -8px 10px 0px rgba(255, 255, 255, 0.75);
+        }
+
+        --nx-button-secondary-hover: {
+          border: 1px solid var(--nuxeo-secondary-color);
+          color: var(--nuxeo-secondary-color);
+        }
+
+        --nx-button-secondary-disabled: {
+          border: 1px solid var(--disabled-text-color);
+          color: var(--secondary-text-color);
         }
 
         --nx-button-disabled: {
