@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <component name="org.nuxeo.web.ui.properties.contrib">
   <extension target="org.nuxeo.runtime.ConfigurationService" point="configuration">
+    <property name="org.nuxeo.web.ui.sessionTimeoutMinutes">${session.timeout:=30}</property>
+
     <!-- enrichers -->
     <property name="org.nuxeo.web.ui.enrichers.document" list="true">hasContent</property>
     <property name="org.nuxeo.web.ui.enrichers.document">firstAccessibleAncestor</property>
