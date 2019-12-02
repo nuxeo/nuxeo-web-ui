@@ -30,11 +30,14 @@ class S3Provider {
     this.files = [];
   }
 
-  _resource() {
+  _resource(path, data) {
     if (!_resource) {
       _resource = document.createElement('nuxeo-resource');
+      _resource.uncancelable = true;
       document.body.appendChild(_resource);
     }
+    _resource.path = path;
+    _resource.data = data;
     return _resource;
   }
 
@@ -46,6 +49,9 @@ class S3Provider {
         ContentType: file.type,
         Body: file,
       });
+      this._keepAlive = setInterval(() => {
+        this._resource(['upload', this.batchId].join('/')).get();
+      }, 60000);
       file.managedUpload
         .on('httpUploadProgress', (evt) => {
           if (typeof callback === 'function') {
@@ -53,23 +59,26 @@ class S3Provider {
           }
         })
         .send((error, data) => {
+          if (this._keepAlive) {
+            clearInterval(this._keepAlive);
+            this._keepAlive = null;
+          }
           if (error === null) {
             file.managedUpload = null;
-            const resource = this._resource();
-            resource.path = ['upload', this.batchId, file.index, 'complete'].join('/');
-            resource.data = {
+            this._resource(['upload', this.batchId, file.index, 'complete'].join('/'), {
               name: file.name,
               fileSize: file.size,
               key: data.Key,
               bucket: data.Bucket,
               etag: data.ETag,
-            };
-            resource.post().then(() => {
-              if (typeof callback === 'function') {
-                callback({ type: 'uploadCompleted', fileIdx: file.index });
-              }
-              resolve();
-            });
+            })
+              .post()
+              .then(() => {
+                if (typeof callback === 'function') {
+                  callback({ type: 'uploadCompleted', fileIdx: file.index });
+                }
+                resolve();
+              });
           } else {
             reject(error);
           }
@@ -96,19 +105,19 @@ class S3Provider {
   }
 
   _newBatch() {
-    const resource = this._resource();
-    resource.path = 'upload/new/s3';
-    return resource.post().then((response) => {
-      this.batchId = response.batchId;
-      this.extraInfo = response.extraInfo;
-      this._initCredentials(response.extraInfo);
-      this.uploader = new AWS.S3({
-        params: {
-          Bucket: this.extraInfo.bucket,
-        },
-        computeChecksums: true,
+    return this._resource('upload/new/s3')
+      .post()
+      .then((response) => {
+        this.batchId = response.batchId;
+        this.extraInfo = response.extraInfo;
+        this._initCredentials(response.extraInfo);
+        this.uploader = new AWS.S3({
+          params: {
+            Bucket: this.extraInfo.bucket,
+          },
+          computeChecksums: true,
+        });
       });
-    });
   }
 
   get accepts() {
