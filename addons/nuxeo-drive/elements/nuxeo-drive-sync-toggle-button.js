@@ -106,8 +106,8 @@ Polymer({
     }
     const excludedDoctypes = ['Domain', 'SectionRoot', 'TemplateRoot', 'WorkspaceRoot', 'Forum', 'Collections'];
     const isExcluded = excludedDoctypes.indexOf(this.document.type) !== -1;
-    const isFolder = this.document.facets.indexOf('Folderish') !== -1;
-    const isSyncRootCandidate = isFolder && !this.isTrashed(this.document);
+    const isContainer = this.hasFacet(this.document, 'Collection') || this.hasFacet(this.document, 'Folderish');
+    const isSyncRootCandidate = isContainer && !this.isTrashed(this.document);
     return !isExcluded && isSyncRootCandidate && !this.synchronizationRoot;
   },
 
