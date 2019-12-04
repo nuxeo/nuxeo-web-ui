@@ -1017,6 +1017,7 @@ Polymer({
     this._creating = false;
     this._importWithPropertiesError = '';
     this.$.uploadFiles.value = '';
+    this.selectedDocType = '';
   },
 
   _importWithProperties() {
