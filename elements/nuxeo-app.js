@@ -21,14 +21,9 @@ import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
-import { AggregationBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-aggregation/nuxeo-aggregation-behavior.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
-import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
-import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
 
@@ -78,8 +73,6 @@ import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
-import { ChartDataBehavior } from './nuxeo-admin/nuxeo-chart-data-behavior.js';
-import { DocumentContentBehavior } from './nuxeo-results/nuxeo-document-content-behavior.js';
 
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
@@ -91,23 +84,6 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Domain',
   'Root',
 ];
-
-// expose behaviors for compat
-Nuxeo.AggregationBehavior = AggregationBehavior;
-Nuxeo.I18nBehavior = I18nBehavior;
-Nuxeo.RoutingBehavior = RoutingBehavior;
-Nuxeo.LayoutBehavior = LayoutBehavior;
-Nuxeo.FiltersBehavior = FiltersBehavior;
-Nuxeo.PageProviderDisplayBehavior = PageProviderDisplayBehavior;
-Nuxeo.UploaderBehavior = UploaderBehavior;
-Nuxeo.FormatBehavior = FormatBehavior;
-Nuxeo.ChartDataBehavior = ChartDataBehavior;
-Nuxeo.DocumentContentBehavior = DocumentContentBehavior;
-
-// Export Polymer and PolymerElement for 1.x and 2.x compat
-window.Polymer = Polymer;
-window.PolymerElement = PolymerElement;
-window.importHref = importHref;
 
 // inspired by https://github.com/treosh/uxm
 export const Performance = {
