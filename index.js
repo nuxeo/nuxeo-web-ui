@@ -1,6 +1,9 @@
 // load app
 import './elements/nuxeo-app.js';
 
+// expose moment for compat
+import moment from 'moment';
+
 // expose Polymer and PolymerElement for 1.x and 2.x compat
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
@@ -27,6 +30,7 @@ import { ChartDataBehavior } from './elements/nuxeo-admin/nuxeo-chart-data-behav
 // load Web UI bundle
 import html from './elements/nuxeo-web-ui-bundle.html';
 
+window.moment = moment;
 window.Polymer = Polymer;
 window.PolymerElement = PolymerElement;
 window.importHref = importHref;
