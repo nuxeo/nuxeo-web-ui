@@ -86,7 +86,7 @@ Polymer({
       ? document.properties['picture:views'].map((view) => {
           return {
             name: view.description,
-            dimensions: `${view.width} x ${view.height}`,
+            dimensions: `${view.info.width} x ${view.info.height}`,
             size: this.formatSize(view.content.length),
             format: view.info.format,
             data: view.content.data,
