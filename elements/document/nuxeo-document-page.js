@@ -18,6 +18,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-comments/nuxeo-document-comment-thread.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
@@ -26,7 +27,6 @@ import '../nuxeo-document-info-bar/nuxeo-document-info-bar.js';
 import '../nuxeo-document-info/nuxeo-document-info.js';
 import '../nuxeo-collections/nuxeo-document-collections.js';
 import '../nuxeo-document-activity/nuxeo-document-activity.js';
-import '../nuxeo-document-comments/nuxeo-document-comment-thread.js';
 import './nuxeo-document-view.js';
 import './nuxeo-document-metadata.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';

@@ -93,6 +93,8 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-aggregation/nuxeo-dropdown-aggregation.js
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-grid/nuxeo-data-grid.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-comments/nuxeo-document-comment.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-comments/nuxeo-document-comment-thread.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-permissions/nuxeo-document-permissions.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-error.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-filter.js';
@@ -249,8 +251,6 @@ import './nuxeo-recent-documents/nuxeo-recent-documents.js';
 // Document metadata and process elements -->
 import './nuxeo-collections/nuxeo-document-collections.js';
 import './nuxeo-document-activity/nuxeo-document-activity.js';
-import './nuxeo-document-comments/nuxeo-document-comment.js';
-import './nuxeo-document-comments/nuxeo-document-comment-thread.js';
 import './nuxeo-workflow-graph/nuxeo-workflow-graph.js';
 
 // Actions -->
