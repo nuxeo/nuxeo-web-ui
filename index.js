@@ -6,7 +6,10 @@ import moment from 'moment';
 
 // expose Polymer and PolymerElement for 1.x and 2.x compat
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import * as Async from '@polymer/polymer/lib/utils/async.js';
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 
 // expose Polymer behaviors for compat
@@ -31,6 +34,8 @@ import { ChartDataBehavior } from './elements/nuxeo-admin/nuxeo-chart-data-behav
 import html from './elements/nuxeo-web-ui-bundle.html';
 
 window.moment = moment;
+// expose commonly used legacy helpers for compat
+Object.assign(Polymer, { dom, importHref, Debouncer, Async });
 window.Polymer = Polymer;
 window.PolymerElement = PolymerElement;
 window.importHref = importHref;
