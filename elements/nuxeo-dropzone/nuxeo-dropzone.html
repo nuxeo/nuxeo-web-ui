@@ -300,9 +300,13 @@ limitations under the License.
         this.fire('notify', {message: this.uploadedMessage});
         this.progress = false;
         this._hasFiles = false;
-        this.$.doc.get().then(function(response) {
-          this.set('document.properties.' + this._parsedXpath, this.get(this._parsedXpath, response.properties));
-        }.bind(this));
+        if (this.updateDocument) {
+          this.fire('document-updated');
+        } else {
+          this.$.doc.get().then(function(response) {
+            this.set('document.properties.' + this.xpath, response.properties[this.xpath]);
+          }.bind(this));
+        }
       },
 
       _deleteFile: function() {
