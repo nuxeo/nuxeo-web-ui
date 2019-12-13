@@ -95,11 +95,11 @@ limitations under the License.
     });
 
     page('/user/:id', function(data) {
-      page.redirect('/admin/user-group-management/user/' + data.params.id);
+      page.redirect('/admin/user-group-management/user/' + encodeURIComponent(data.params.id));
     });
 
     page('/group/:id(.*)', function(data) {
-      page.redirect('/admin/user-group-management/group/' + data.params.id);
+      page.redirect('/admin/user-group-management/group/' + encodeURIComponent(data.params.id));
     });
 
     page('/tasks/:repo?/:id/', function(data) {
@@ -163,11 +163,11 @@ limitations under the License.
       },
 
       user: function(name) {
-        return '/user/' + name;
+        return '/user/' + encodeURIComponent(name);
       },
 
       group: function(name) {
-        return '/group/' + name;
+        return '/group/' + encodeURIComponent(name);
       },
 
       diff: function(id1, id2) {
