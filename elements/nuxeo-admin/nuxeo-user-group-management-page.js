@@ -137,13 +137,13 @@ Polymer({
 
   _handleUGMmanageUser(e) {
     this.entity = { type: 'user', id: e.detail.user };
-    const url = `${'user-group-management'}/${this.entity.type}/${this.entity.id}`;
+    const url = `${'user-group-management'}/${this.entity.type}/${encodeURIComponent(this.entity.id)}`;
     this.navigateTo(this.route, url);
   },
 
   _handleUGMmanageGroup(e) {
     this.entity = { type: 'group', id: e.detail.group };
-    const url = `${'user-group-management'}/${this.entity.type}/${this.entity.id}`;
+    const url = `${'user-group-management'}/${this.entity.type}/${encodeURIComponent(this.entity.id)}`;
     this.navigateTo(this.route, url);
   },
 
