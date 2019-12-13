@@ -137,13 +137,13 @@ limitations under the License.
 
       _handleUGMmanageUser: function(e) {
         this.entity = {type: 'user', id: e.detail.user};
-        var url = 'user-group-management' + '/' + this.entity.type + '/' + this.entity.id;
+        var url = 'user-group-management' + '/' + this.entity.type + '/' + encodeURIComponent(this.entity.id);
         this.navigateTo(this.route, url);
       },
 
       _handleUGMmanageGroup: function(e) {
         this.entity = {type: 'group', id: e.detail.group};
-        var url = 'user-group-management' + '/' + this.entity.type + '/' + this.entity.id;
+        var url = 'user-group-management' + '/' + this.entity.type + '/' + encodeURIComponent(this.entity.id);
         this.navigateTo(this.route, url);
       },
 
