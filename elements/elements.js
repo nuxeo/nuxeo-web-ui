@@ -82,6 +82,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-search.js';
 import '@nuxeo/nuxeo-elements/nuxeo-audit-page-provider.js';
+import '@nuxeo/nuxeo-elements/nuxeo-task-page-provider.js';
 
 // Nuxeo UI Elements -->
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
