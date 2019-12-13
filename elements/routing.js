@@ -92,11 +92,11 @@ customElements.whenDefined('nuxeo-app').then(() => {
   });
 
   page('/user/:id', (data) => {
-    page.redirect(`/admin/user-group-management/user/${data.params.id}`);
+    page.redirect(`/admin/user-group-management/user/${encodeURIComponent(data.params.id)}`);
   });
 
   page('/group/:id(.*)', (data) => {
-    page.redirect(`/admin/user-group-management/group/${data.params.id}`);
+    page.redirect(`/admin/user-group-management/group/${encodeURIComponent(data.params.id)}`);
   });
 
   page('/tasks/:repo?/:id/', (data) => {
@@ -164,11 +164,11 @@ customElements.whenDefined('nuxeo-app').then(() => {
     },
 
     user(name) {
-      return `/user/${name}`;
+      return `/user/${encodeURIComponent(name)}`;
     },
 
     group(name) {
-      return `/group/${name}`;
+      return `/group/${encodeURIComponent(name)}`;
     },
 
     diff(id1, id2) {
