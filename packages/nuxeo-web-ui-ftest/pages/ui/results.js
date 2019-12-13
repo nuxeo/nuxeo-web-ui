@@ -73,6 +73,10 @@ export default class Results extends BasePage {
     return rows.value.filter((result) => result.getAttribute('hidden') === null).length;
   }
 
+  get resultsCountLabel() {
+    return this.el.element('div.resultActions .resultsCount');
+  }
+
   deleteDocuments() {
     const el = this.deleteDocumentsButton;
     el.waitForVisible();
