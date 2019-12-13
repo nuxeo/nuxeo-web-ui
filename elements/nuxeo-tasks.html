@@ -97,7 +97,19 @@ limitations under the License.
           overflow: hidden;
         }
       }
+
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        height: var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top)));
+      }
+
+      .task-item-wrapper {
+        margin: 0 0 20px 0;
+      }
     </style>
+
+    <nuxeo-connection id="nx"></nuxeo-connection>
 
     <nuxeo-document
       id="currentTaskDoc"
@@ -132,42 +144,56 @@ limitations under the License.
             </template>
           </div>
         </template>
-
-        <template is="dom-if" if="[[!_hasCurrent(current)]]">
-          <div class="task-list layout vertical">
-            <template is="dom-repeat" items="[[tasks]]" as="task">
-              <div class="task-item task-box layout horizontal" on-tap="_process">
-                <div class="layout horizontal flex-4">
-                  <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
-                  <div class="task-info layout vertical">
-                    <span class="task-name">[[i18n(task.name)]]</span>
-                    <span class="task-directive">[[i18n(task.directive)]]</span>
-                    <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
-                  </div>
-                </div>
-                <div class="layout vertical flex-4">
-                  <div>
-                    <div class="taskDoc">
-                      <span class="task-property">[[i18n('tasksList.on')]]</span>
-                      <span>[[task.targetDocumentIds.0.title]]</span>
+        <div class="task-list layout vertical" hidden$="[[_hasCurrent(current)]]">
+          <nuxeo-task-page-provider id="tasksProvider"></nuxeo-task-page-provider>
+          <nuxeo-data-list
+            nx-provider="tasksProvider"
+            id="tasksList"
+            as="task"
+            selected-item="{{_selection}}"
+            empty-label="[[i18n('tasksList.noTasks')]]"
+            selection-enabled
+            select-on-tap
+          >
+            <template>
+              <div class="task-item-wrapper">
+                <div class="task-item task-box" tabindex$="{{tabIndex}}">
+                  <div style="margin: 0 0.4em 0.8em;" class="layout horizontal">
+                    <div class="layout horizontal flex-4">
+                      <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
+                      <div class="task-info layout vertical">
+                        <span class="task-name">[[i18n(task.name)]]</span>
+                        <span class="task-directive">[[i18n(task.directive)]]</span>
+                        <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
+                      </div>
                     </div>
-                    <div class="taskPath">
-                      <span class="task-property">[[i18n('tasksList.in')]]</span>
-                      <span>[[_getPath(task.targetDocumentIds.0.path)]]</span>
+                    <div class="layout vertical flex-4">
+                      <div>
+                        <div class="taskDoc">
+                          <span class="task-property">[[i18n('tasksList.on')]]</span>
+                          <span>[[task.targetDocumentIds.0.title]]</span>
+                        </div>
+                        <div class="taskPath">
+                          <span class="task-property">[[i18n('tasksList.in')]]</span>
+                          <span>[[_getPath(task.targetDocumentIds.0.path)]]</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="layout vertical flex">
+                      <span class="task-property">[[i18n('tasksList.dueDate')]]</span>
+                      <span class="date">
+                        <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date>
+                      </span>
                     </div>
                   </div>
-                </div>
-                <div class="layout vertical flex">
-                  <span class="task-property">[[i18n('tasksList.dueDate')]]</span>
-                  <span class="date"><nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date></span>
                 </div>
               </div>
             </template>
-            <template is="dom-if" if="[[_empty(tasks)]]">
-              <div class="task-box">[[i18n('tasks.noTasks')]]</div>
-            </template>
-          </div>
-        </template>
+          </nuxeo-data-list>
+          <template is="dom-if" if="[[_empty(tasks)]]">
+            <div class="task-box">[[i18n('tasks.noTasks')]]</div>
+          </template>
+        </div>
       </div>
     </nuxeo-page>
   </template>
@@ -178,26 +204,35 @@ limitations under the License.
       is: 'nuxeo-tasks',
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
       properties: {
-        tasks: {
-          type: Array,
-        },
-
-        current: {
-          type: Object,
-          value: null,
-          observer: '_currentChanged',
-        },
+        current: Object,
 
         currentTaskDocument: Object,
+
+        visible: Boolean,
       },
 
-      _process(e) {
-        this.navigateTo('tasks', e.model.task.id);
+      observers: ['_currentChanged(current, visible)', '_process(_selection)'],
+
+      _process() {
+        this.fire('navigate', {
+          task: this._selection,
+          index: this.$.tasksList._selectedItemIndex(),
+          params: { offset: this.$.tasksProvider.offset, pageSize: this.$.tasksProvider.pageSize },
+        });
       },
 
       _currentChanged() {
-        if (this.current) {
-          this.$.currentTaskDoc.get();
+        if (this.visible) {
+          if (this.current) {
+            this.$.currentTaskDoc.get();
+          } else {
+            this.$.nx.connect().then((user) => {
+              this.$.tasksProvider.params = {
+                userId: user.id,
+              };
+              this.$.tasksList.fetch();
+            });
+          }
         }
       },
 
@@ -212,11 +247,15 @@ limitations under the License.
       },
 
       _getPath(path) {
-        return path.substr(0, path.lastIndexOf('/'));
+        if (path) {
+          return path.substr(0, path.lastIndexOf('/'));
+        }
       },
 
       _date(date) {
-        return moment(date).format('MMMM D, YYYY');
+        if (date) {
+          return moment(date).format('MMMM D, YYYY');
+        }
       },
 
       _count() {
@@ -235,7 +274,7 @@ limitations under the License.
         return tasks && tasks.length === 0;
       },
 
-      get currenIndex() {
+      get currentIndex() {
         if (this.tasks && this.current) {
           for (let i = 0; i < this.tasks.length; i++) {
             if (this.tasks[i].id === this.current.id) {

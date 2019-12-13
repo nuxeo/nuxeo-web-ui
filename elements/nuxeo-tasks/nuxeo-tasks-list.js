@@ -110,8 +110,11 @@ Polymer({
       }
     </style>
 
+    <nuxeo-connection id="nx"></nuxeo-connection>
+
+    <nuxeo-task-page-provider id="tasksProvider"></nuxeo-task-page-provider>
     <nuxeo-data-list
-      items="[[tasks]]"
+      nx-provider="tasksProvider"
       id="list"
       as="task"
       selected-item="{{_selection}}"
@@ -149,8 +152,6 @@ Polymer({
   behaviors: [RoutingBehavior, I18nBehavior],
 
   properties: {
-    tasks: Array,
-
     current: {
       type: Object,
       observer: '_currentChanged',
@@ -167,25 +168,54 @@ Polymer({
     noNavigation: Boolean,
   },
 
+  ready() {
+    this.$.nx.connect().then((user) => {
+      this.$.tasksProvider.params = {
+        userId: user.id,
+      };
+    });
+  },
+
   _selectionChanged() {
     if (this._selection && !this.noNavigation) {
       this.navigateTo('tasks', this._selection.id);
     }
   },
 
+  selectTask(index, task, { offset, pageSize }) {
+    let fetch;
+    const tasks = this.$.list.items;
+    if (tasks.find((item) => item.id === task.id)) {
+      fetch = Promise.resolve();
+    } else {
+      fetch = this.fetch(offset, pageSize);
+    }
+    fetch.then(() => {
+      if (tasks[index] && tasks[index].id !== task.id) {
+        index = tasks.findIndex((item) => item.id === task.id);
+      }
+      this.$.list.scrollToIndex(index);
+      this.$.list.selectIndex(index);
+    });
+  },
+
   _currentChanged(newVal, oldVal) {
-    if (newVal && oldVal && newVal.id === oldVal.id) {
+    if (
+      (newVal && oldVal && newVal.id === oldVal.id) ||
+      (this._selection && newVal && this._selection.id === newVal.id)
+    ) {
       return;
     }
-    if (newVal && this.tasks) {
-      for (let i = 0; i < this.tasks.length; i++) {
-        if (this.tasks[i].id === newVal.id) {
-          this.$.list.selectItem(this.tasks[i]);
+    const tasks = this.$.list.items;
+    if (newVal && tasks) {
+      for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].id === newVal.id) {
+          this.$.list.selectItem(tasks[i]);
           break;
         }
       }
     } else {
-      const _exists = this.tasks && this.tasks.indexOf(oldVal) > -1;
+      const _exists = tasks && tasks.indexOf(oldVal) > -1;
       // make sure this task still exists to avoid iron-list exceptions
       if (_exists) {
         this.$.list.deselectItem(oldVal);
@@ -199,5 +229,12 @@ Polymer({
       classes += ' selected';
     }
     return classes;
+  },
+
+  fetch(offset, pageSize = this.$.tasksProvider.pageSize) {
+    if (offset) {
+      return this.$.list._fetchRange(offset, offset + pageSize, false);
+    }
+    return this.$.list.fetch();
   },
 });

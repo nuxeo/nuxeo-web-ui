@@ -38,7 +38,7 @@ Polymer({
     </style>
 
     <div class="header">[[i18n('app.tasks')]]</div>
-    <nuxeo-tasks-list tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks-list>
+    <nuxeo-tasks-list id="tasks" current="[[currentTask]]"></nuxeo-tasks-list>
     <div class="tasks-dashboard">
       <a href$="[[urlFor('tasks')]]">[[i18n('app.viewTasksDashboard')]]</a>
     </div>
@@ -50,5 +50,14 @@ Polymer({
   properties: {
     tasks: Array,
     currentTask: Object,
+    visible: Boolean,
+  },
+
+  observers: ['_observeVisible(visible)'],
+
+  _observeVisible(visible) {
+    if (visible) {
+      this.$.tasks.fetch();
+    }
   },
 });

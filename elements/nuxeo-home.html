@@ -42,7 +42,7 @@ limitations under the License.
       }
 
       nuxeo-data-table,
-      nuxeo-tasks-list {
+      nuxeo-data-list {
         height: 350px;
       }
 
@@ -53,8 +53,74 @@ limitations under the License.
         display: block;
         width: calc(100% - 38px);
       }
+
+      .task-box {
+        line-height: 155%;
+      }
+
+      .task-box + .task-box {
+        border-top: 1px solid var(--divider-color);
+      }
+
+      .task-property {
+        opacity: 0.5;
+        margin-right: 0.5rem;
+      }
+
+      .taskDoc .doc-title,
+      .date {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 85%;
+        overflow: hidden;
+      }
+
+      .date {
+        color: var(--nuxeo-warn-text);
+      }
+
+      .list-item {
+        cursor: pointer;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
+      }
+
+      .list-item:hover {
+        @apply --nuxeo-block-hover;
+      }
+
+      .list-item:focus {
+        outline: 0;
+      }
+
+      nuxeo-data-list {
+        display: block;
+        position: relative;
+        min-height: auto;
+      }
+
+      /* fix IE11 tap selection not working for task list items (NXP-21833) */
+      .task-box {
+        pointer-events: none;
+        @apply --layout-vertical;
+      }
+      /* prevent previous fix from disabling the default nuxeo-user-tag click behavior (NXP-21833) */
+      .task-box nuxeo-date {
+        pointer-events: all;
+      }
+
+      .task-name {
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      .horizontal {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+      }
     </style>
 
+    <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-page>
       <div slot="header">[[i18n('home.dashboard')]]</div>
       <div>
@@ -102,7 +168,41 @@ limitations under the License.
 
           <!-- tasks -->
           <nuxeo-card icon="nuxeo:tasks" heading="[[i18n('home.tasks')]]">
-            <nuxeo-tasks-list id="taskLists" tasks="[[tasks]]"></nuxeo-tasks-list>
+            <nuxeo-task-page-provider id="tasksProvider" page-size="20"></nuxeo-task-page-provider>
+            <nuxeo-data-list
+              nx-provider="tasksProvider"
+              id="tasksList"
+              as="task"
+              max-items="15"
+              empty-label="[[i18n('tasksList.noTasks')]]"
+              select-on-tap
+              selection-enabled
+              selected-item="{{_selection}}"
+            >
+              <template>
+                <div tabindex$="{{tabIndex}}" class="list-item">
+                  <div class="task-box">
+                    <div class="horizontal layout center">
+                      <span class="task-name">[[i18n(task.name)]]</span>
+                    </div>
+                    <div class="task-detail">
+                      <div class="taskDoc horizontal">
+                        <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
+                      </div>
+                      <div class="horizontal">
+                        <span class="due-date task-property">[[i18n('tasksList.dueDate')]]</span>
+                        <span class="date">
+                          <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="horizontal">
+                      <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </nuxeo-data-list>
           </nuxeo-card>
 
           <!-- recently viewed -->
@@ -201,6 +301,18 @@ limitations under the License.
         },
       },
 
+      observers: ['_processTask(_selection)'],
+
+      _processTask() {
+        if (this._selection) {
+          this.fire('navigate', {
+            task: this._selection,
+            index: this.$.tasksList._selectedItemIndex(),
+            params: { offset: this.$.tasksProvider.offset, pageSize: this.$.tasksProvider.pageSize },
+          });
+        }
+      },
+
       _visibleChanged(visible) {
         if (visible) {
           this._refresh();
@@ -209,6 +321,12 @@ limitations under the License.
 
       _refresh() {
         this.$.latestEditedDocs.fetch();
+        this.$.nx.connect().then((user) => {
+          this.$.tasksProvider.params = {
+            userId: user.id,
+          };
+          this.$.tasksList.fetch();
+        });
         this.$.recentStorage.reload();
         this._fetchFavorite().then((favorite) => {
           if (!(favorite && favorite.uid)) {

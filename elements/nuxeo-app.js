@@ -51,6 +51,7 @@ import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
+import '@nuxeo/nuxeo-elements/nuxeo-task-page-provider.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
@@ -59,6 +60,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbna
 import './nuxeo-browser/nuxeo-breadcrumb.js';
 import './nuxeo-recent-documents/nuxeo-recent-documents.js';
 import './nuxeo-results/nuxeo-results.js';
+import './nuxeo-tasks/nuxeo-tasks-list.js';
 import '../i18n/i18n.js';
 import '../themes/base.js';
 import '../themes/loader.js';
@@ -279,7 +281,7 @@ Polymer({
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
     <nuxeo-operation id="moveDocumentsOp" sync-indexing></nuxeo-operation>
 
-    <nuxeo-resource id="tasks" path="/task" headers='{"fetch-task": "targetDocumentIds,actors"}'></nuxeo-resource>
+    <nuxeo-task-page-provider id="tasksProvider" page-size="1"></nuxeo-task-page-provider>
     <nuxeo-resource
       id="task"
       path="/task/[[currentTaskId]]"
@@ -367,7 +369,7 @@ Polymer({
         <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
           <nuxeo-slot name="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
-          <nuxeo-home name="home" tasks="[[tasks]]"></nuxeo-home>
+          <nuxeo-home name="home"></nuxeo-home>
 
           <nuxeo-browser
             name="browse"
@@ -385,7 +387,7 @@ Polymer({
             show-saved-search-actions
           ></nuxeo-search-page>
 
-          <nuxeo-tasks id="tasks-dashboard" name="tasks" tasks="[[tasks]]" current="[[currentTask]]"></nuxeo-tasks>
+          <nuxeo-tasks id="tasks-dashboard" name="tasks" current="[[currentTask]]"></nuxeo-tasks>
 
           <nuxeo-admin
             name="admin"
@@ -598,7 +600,7 @@ Polymer({
       }
     });
 
-    // NXP-25311: stop loading bar if an error occures
+    // NXP-25311: stop loading bar if an error occurs
     window.onerror = function() {
       this.loading = false;
     }.bind(this);
@@ -630,7 +632,7 @@ Polymer({
         })
         .catch((error) => {
           if (error.status === 403) {
-            this._fetchTasks();
+            this._fetchTaskCount();
             this.navigateTo('tasks');
             this.loading = false;
           }
@@ -828,6 +830,14 @@ Polymer({
         this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.index);
       }
     }
+    if (e.detail.task) {
+      const tasksDrawer = this.$$('nuxeo-tasks-drawer');
+      if (!tasksDrawer || !tasksDrawer.visible) {
+        this.navigateTo('tasks', e.detail.task.id);
+      } else {
+        tasksDrawer.$.tasks.selectTask(e.detail.index, e.detail.task, e.detail.params);
+      }
+    }
   },
 
   // lookup the search
@@ -888,18 +898,16 @@ Polymer({
     this.$.drawerPanel.closeDrawer();
   },
 
-  _fetchTasks() {
-    this.$.tasks.params = { userId: this.currentUser.id };
-    this.$.tasks.get().then((response) => {
-      this.tasks = response.entries;
-      this.taskCount = this.tasks.length;
+  _fetchTaskCount() {
+    this.$.tasksProvider.fetch().then(() => {
+      this.taskCount = this.$.tasksProvider.resultsCount;
     });
   },
 
   _refreshAndFetchTasks() {
     // let's refresh the current document since it might have been changed (ex: state and version)
     this.fire('document-updated');
-    this._fetchTasks();
+    this._fetchTaskCount();
   },
 
   _workflowTaskProcess(e) {
@@ -931,7 +939,10 @@ Polymer({
       this.$.userWorkspace.execute().then((response) => {
         this.userWorkspace = response.path;
       });
-      this._fetchTasks();
+      this.$.tasksProvider.params = {
+        userId: this.currentUser.id,
+      };
+      this._fetchTaskCount();
     }
   },
 
@@ -1037,7 +1048,7 @@ Polymer({
     } else {
       this._removeFromClipboard(e.detail.documents);
       this._removeFromRecentlyViewed(e.detail.documents);
-      this._fetchTasks();
+      this._fetchTaskCount();
       this._toast(this.i18n('app.documents.deleted.success'));
       this._refreshSearch();
     }
