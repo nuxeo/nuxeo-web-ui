@@ -17,6 +17,11 @@ Then(/^I can create a user with the following properties:$/, function(table) {
 Then(/^I can search for the user "([^"]*)"$/, function(username) {
   this.ui.user.searchFor(username);
   this.ui.user.searchResult(username).waitForVisible().should.be.true;
+  this.ui.user.waitForVisible('nuxeo-card[name="users"] .table nuxeo-user-tag');
+  this.ui.group.click('nuxeo-card[name="users"] .table nuxeo-user-tag');
+  this.ui.group.waitForVisible('nuxeo-user-management');
+  const user = this.ui.group.el.elementByTextContent('.user.heading', username);
+  user.waitForVisible().should.be.true;
 });
 
 Then(/^I can edit the user "([^"]*)" with the following properties:$/, function(username, table) {
