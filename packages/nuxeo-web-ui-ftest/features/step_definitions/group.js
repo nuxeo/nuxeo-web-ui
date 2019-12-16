@@ -24,8 +24,17 @@ Then(/^I can search for the following groups$/, function(table) {
 Then(/^I can edit the following groups$/, function(table) {
   table.rows().forEach((row) => {
     this.ui.group.searchFor(row[0]);
-    this.ui.group.searchResult(row[0]).waitForVisible();
-    this.ui.group.searchResult(row[0]).click();
+    driver.waitUntil(() => {
+      // XXX horrible temporary workaround for stale element when clicking the result (see NXP-27621)
+      try {
+        const result = this.ui.group.searchResult(row[0]);
+        result.waitForVisible();
+        result.click();
+        return true;
+      } catch (e) {
+        return false;
+      }
+    });
     this.ui.group.editGroupButton.waitForVisible();
     this.ui.group.editGroupButton.click();
     fixtures.layouts.setValue(this.ui.group.editGroupLabel, row[1]);
