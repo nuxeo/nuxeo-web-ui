@@ -8,6 +8,10 @@ export default class BasePage {
     return driver.element(this._selector);
   }
 
+  click(...args) {
+    return this.el.click(...args);
+  }
+
   isVisible(...args) {
     return this.el.isVisible(...args);
   }
