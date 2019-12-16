@@ -3,7 +3,7 @@ Feature: User
   As an Administrator I can create, edit, search for and delete users.
 
   Background:
-    Given user "jdoe" exists
+    Given user "j?doe" exists
     And user "John" exists in group "powerusers"
     And I login as "John"    
     And I click the "administration" button    
@@ -27,13 +27,13 @@ Feature: User
       | passwordConfirmation | test          |
 
   Scenario: Search for Users
-    Then I can search for the user "jdoe"
+    Then I can search for the user "j?doe"
 
   Scenario: Edit Users
-    Then I can edit the user "jdoe" with the following properties:
+    Then I can edit the user "j?doe" with the following properties:
       | name                 | value          |
       | firstname            | Jane           |
       | email                | test2@test.com |
 
   Scenario: Delete Users
-    Then I can delete the user "jdoe"
+    Then I can delete the user "j?doe"
