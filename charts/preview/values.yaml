@@ -3,9 +3,12 @@ expose:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
   config:
+    domain: webui.dev.nuxeo.com
     exposer: Ingress
     http: true
-    tlsacme: false
+    tlsacme: true
+    tlsSecretName: webui-cluster-https-tls
+    urltemplate: '"{{.Service}}-{{.Namespace}}.{{.Domain}}"'
 
 cleanup:
   Args:
