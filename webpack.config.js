@@ -1,4 +1,5 @@
 const { resolve, join } = require('path');
+const { existsSync } = require('fs');
 const merge = require('webpack-merge');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -82,23 +83,63 @@ const layouts = [
   },
 ];
 
-const addons = [
-  {
-    from: 'addons/**/*',
+// Prepare copy of addon resources
+const NUXEO_PACKAGES = (process.env.NUXEO_PACKAGES || '').split(/[\s,]+/).filter(Boolean);
+
+// strip addon folder, copy everything over
+const transformPath = (base = 'addons/([^/]*)') => (path) => {
+  path = path.replace(new RegExp(`^${base}/`), '');
+  // prepend elements/ when in dev mode (except images)
+  if (ENV === 'development' && !path.startsWith('images/')) {
+    path = `elements/${path}`;
+  }
+  return path;
+};
+
+const BUNDLES = NUXEO_PACKAGES.filter((p) => existsSync(`addons/${p}`));
+
+const addons = BUNDLES.map((p) => {
+  return {
+    from: `addons/${p}/**/*`,
     to: TARGET,
     ignore: ['*.js'],
-    // strip addon folder, copy everything over
-    transformPath: (path) => {
-      path = path.replace(/^addons\/([^/]*)\//, '');
-      // prepend elements/ when in dev mode (except images)
-      if (ENV === 'development' && !path.startsWith('images/')) {
-        path = `elements/${path}`;
-      }
-      return path;
-    },
+    transformPath: transformPath('addons/([^/]*)'),
     force: true,
-  },
-];
+  };
+});
+
+// Copy addon packages too
+const dependencies = Object.keys(require('./package.json').dependencies);
+
+NUXEO_PACKAGES.filter((p) => !BUNDLES.includes(p)).forEach((name) => {
+  const p = dependencies.includes(name) ? name : dependencies.find((d) => d.match(`@*/${name}`));
+  if (!p) {
+    console.error(`Package ${name} not found.`);
+    return;
+  }
+
+  // XXX - require.resolve(p) resolves symlinks which breaks the webpack copy
+  const path = `node_modules/${p}`;
+  if (!existsSync(path)) return;
+
+  // eslint-disable-next-line global-require, import/no-dynamic-require
+  const config = require(`./${path}/package.json`);
+  if (!config.nuxeo) return;
+
+  // copy over resources
+  addons.push({
+    from: `${path}/**/*`,
+    to: TARGET,
+    ignore: ['*.js', 'package*.*'],
+    transformPath: transformPath(path),
+    force: true,
+  });
+
+  // add bundle
+  if (config.nuxeo.bundle) {
+    BUNDLES.push(transformPath(path)(config.nuxeo.bundle));
+  }
+});
 
 const common = merge([
   {
@@ -145,7 +186,7 @@ const common = merge([
         title: 'Nuxeo',
         template: 'index.html',
         nuxeo: {
-          packages: JSON.stringify((process.env.NUXEO_PACKAGES || '').split(/[\s,]+/).filter(Boolean)),
+          bundles: JSON.stringify(BUNDLES),
           url: process.env.NUXEO_URL || '/nuxeo',
         },
       }),
