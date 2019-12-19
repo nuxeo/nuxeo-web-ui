@@ -145,7 +145,7 @@ Polymer({
 
   _close() {
     this.$.dialog.toggle();
-    this.nxProvider.fetch();
+    this.fire('document-updated');
   },
 
   _onLoad() {

@@ -601,14 +601,12 @@ Polymer({
   },
 
   refresh() {
-    if (this.visible) {
-      if (this.queue) {
-        this.$.list.fetch();
-      }
-      if (this.results) {
-        this.results.reset();
-        this._fetch(this.results);
-      }
+    if (this.queue) {
+      this.$.list.fetch();
+    }
+    if (this.results) {
+      this.results.reset();
+      this._fetch(this.results);
     }
   },
 
