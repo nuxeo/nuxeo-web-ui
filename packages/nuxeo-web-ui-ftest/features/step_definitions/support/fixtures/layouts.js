@@ -24,8 +24,13 @@ const suggestionSet = (element, value) => {
         element.waitForVisible('.selectivity-multiple-input');
         element.element('.selectivity-multiple-input').setValue(values[i]);
       } else {
+        const hasSelectedValue = element.element('.selectivity-single-selected-item').isExisting();
         dropdown.waitForVisible('.selectivity-search-input');
         dropdown.element('.selectivity-search-input').setValue(values[i]);
+        if (hasSelectedValue) {
+          dropdown.element('.selectivity-result-item').waitForVisible();
+          driver.keys('Down arrow');
+        }
       }
       driver.waitUntil(() => {
         if (dropdown.isVisible('.selectivity-result-item.highlight')) {
