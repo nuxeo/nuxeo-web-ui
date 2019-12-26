@@ -63,7 +63,7 @@ Polymer({
       </div>
     </template>
 
-    <nuxeo-dialog id="dialog" on-iron-overlay-closed="_resetPopup" with-backdrop>
+    <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
       <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
         <nuxeo-selectivity
@@ -91,7 +91,9 @@ Polymer({
       </paper-dialog-scrollable>
 
       <div class="buttons">
-        <paper-button noink dialog-dismiss>[[i18n('addToCollectionDocumentsButton.dialog.cancel')]]</paper-button>
+        <paper-button noink dialog-dismiss on-click="_resetPopup"
+          >[[i18n('addToCollectionDocumentsButton.dialog.cancel')]]</paper-button
+        >
         <paper-button name="add" noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
           [[i18n('addToCollectionDocumentsButton.dialog.add')]]
         </paper-button>
