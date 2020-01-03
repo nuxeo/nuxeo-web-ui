@@ -475,6 +475,10 @@ Polymer({
     window.addEventListener('added-to-collection', () => {
       if (this.visible) {
         this._refreshCollections();
+        if (this._isDisplayMembers) {
+          this.$.membersList.reset();
+          this.$.membersList.fetch();
+        }
       }
     });
     window.addEventListener('removed-from-collection', (e) => {
