@@ -460,6 +460,10 @@ limitations under the License.
         window.addEventListener('added-to-collection', function() {
           if (this.visible) {
             this._refreshCollections();
+            if (this._isDisplayMembers) {
+              this.$.membersList.reset();
+              this.$.membersList.fetch();
+            }
           }
         }.bind(this));
         window.addEventListener('removed-from-collection', function(e) {
