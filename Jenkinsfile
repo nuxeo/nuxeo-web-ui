@@ -180,6 +180,28 @@ pipeline {
         }
       }
     }
+    stage('Functional tests') {
+      steps {
+        setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'PENDING')
+        container('mavennodejs') {
+          echo """
+          --------------------------
+          Run Nuxeo Web UI Functional Tests
+          --------------------------"""
+          sh 'mvn -B -nsu -f plugin/itests/addon install'
+          sh 'mvn -B -nsu -f plugin/itests/marketplace install'
+          sh 'mvn -B -nsu -f ftest install'
+        }
+      }
+      post {
+        success {
+          setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'FAILURE')
+        }
+      }
+    }
     stage('Publish Docker Images') {
       when {
         branch 'master'
