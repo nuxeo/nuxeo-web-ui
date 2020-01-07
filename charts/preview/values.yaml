@@ -7,7 +7,7 @@ expose:
     exposer: Ingress
     http: true
     tlsacme: true
-    tlsSecretName: webui-cluster-https-tls
+    tlsSecretName: webui-tls
     urltemplate: '"{{.Service}}-{{.Namespace}}.{{.Domain}}"'
 
 cleanup:

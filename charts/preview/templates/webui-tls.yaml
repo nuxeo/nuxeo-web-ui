@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webui-tls
+  annotations:
+    replicator.v1.mittwald.de/replicate-from: webui/webui-tls
+data: {}
