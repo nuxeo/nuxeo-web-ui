@@ -64,6 +64,7 @@ pipeline {
   stages {
     stage('Install dependencies and run lint') {
       steps {
+        setGitHubBuildStatus('webui/install', 'Install dependencies and run lint', 'PENDING')
         container('mavennodejs') {
           echo """
           ---------------------------------
@@ -82,15 +83,16 @@ pipeline {
       }
       post {
         success {
-          setGitHubBuildStatus('install', 'Install dependencies and run lint', 'SUCCESS')
+          setGitHubBuildStatus('webui/install', 'Install dependencies and run lint', 'SUCCESS')
         }
         failure {
-          setGitHubBuildStatus('install', 'Install dependencies and run lint', 'FAILURE')
+          setGitHubBuildStatus('webui/install', 'Install dependencies and run lint', 'FAILURE')
         }
       }
     }
     stage('Webpack build') {
       steps {
+        setGitHubBuildStatus('webui/webpack', 'Webpack build', 'PENDING')
         container('mavennodejs') {
           echo """
           ------------
@@ -101,16 +103,16 @@ pipeline {
       }
       post {
         success {
-          setGitHubBuildStatus('webpack', 'Webpack build', 'SUCCESS')
+          setGitHubBuildStatus('webui/webpack', 'Webpack build', 'SUCCESS')
         }
         failure {
-          setGitHubBuildStatus('webpack', 'Webpack build', 'FAILURE')
+          setGitHubBuildStatus('webui/webpack', 'Webpack build', 'FAILURE')
         }
       }
     }
     stage('Run unit tests') {
       steps {
-        setGitHubBuildStatus('test', 'Unit tests', 'PENDING')
+        setGitHubBuildStatus('webui/test', 'Unit tests', 'PENDING')
         container('mavennodejs') {
           script {
             SAUCE_ACCESS_KEY = sh(script: 'jx step credential -s saucelabs-web-ui -k key', , returnStdout: true).trim()
@@ -126,15 +128,16 @@ pipeline {
       }
       post {
         success {
-          setGitHubBuildStatus('test', 'Unit tests', 'SUCCESS')
+          setGitHubBuildStatus('webui/test', 'Unit tests', 'SUCCESS')
         }
         failure {
-          setGitHubBuildStatus('test', 'Unit tests', 'FAILURE')
+          setGitHubBuildStatus('webui/test', 'Unit tests', 'FAILURE')
         }
       }
     }
     stage('Nuxeo package build') {
       steps {
+        setGitHubBuildStatus('webui/package', 'Nuxeo package build', 'SUCCESS')
         container('mavennodejs') {
           echo """
           --------------------------
@@ -145,16 +148,16 @@ pipeline {
       }
       post {
         success {
-          setGitHubBuildStatus('package', 'Nuxeo package build', 'SUCCESS')
+          setGitHubBuildStatus('webui/package', 'Nuxeo package build', 'SUCCESS')
         }
         failure {
-          setGitHubBuildStatus('package', 'Nuxeo package build', 'FAILURE')
+          setGitHubBuildStatus('webui/package', 'Nuxeo package build', 'FAILURE')
         }
       }
     }
     stage('Build and deploy Docker images') {
       steps {
-        setGitHubBuildStatus('docker', 'Build Docker images', 'PENDING')
+        setGitHubBuildStatus('webui/docker', 'Build Docker images', 'PENDING')
         container('mavennodejs') {
           script {
             WEBUI_VERSION =  sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
@@ -178,10 +181,10 @@ pipeline {
       }
       post {
         success {
-          setGitHubBuildStatus('docker', 'Build Docker images', 'SUCCESS')
+          setGitHubBuildStatus('webui/docker', 'Build Docker images', 'SUCCESS')
         }
         failure {
-          setGitHubBuildStatus('docker', 'Build Docker images', 'FAILURE')
+          setGitHubBuildStatus('webui/docker', 'Build Docker images', 'FAILURE')
         }
       }
     }
@@ -232,7 +235,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        setGitHubBuildStatus('publish', 'Publish Docker images', 'PENDING')
+        setGitHubBuildStatus('webui/publish', 'Publish Docker images', 'PENDING')
         container('mavennodejs') {
           withEnv(["VERSION=${WEBUI_VERSION}"]) {
             echo """
@@ -248,10 +251,10 @@ pipeline {
       }
       post {
         success {
-          setGitHubBuildStatus('publish', 'Publish Docker images', 'SUCCESS')
+          setGitHubBuildStatus('webui/publish', 'Publish Docker images', 'SUCCESS')
         }
         failure {
-          setGitHubBuildStatus('publish', 'Publish Docker images', 'FAILURE')
+          setGitHubBuildStatus('webui/publish', 'Publish Docker images', 'FAILURE')
         }
       }
     }
