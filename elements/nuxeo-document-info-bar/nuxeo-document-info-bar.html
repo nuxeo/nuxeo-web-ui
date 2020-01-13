@@ -124,7 +124,7 @@ limitations under the License.
           <template is="dom-if" if="[[document.retainUntil]]">
             <iron-icon icon="nuxeo:retain"></iron-icon>
             <template is="dom-if" if="[[!isRetentionDateIndeterminate(document)]]">
-              <span id="retention" hidden="[[document.hasLegalHold]]">[[_computeRetentionUntiLabel(document)]]</span>
+              <span id="retention" hidden="[[document.hasLegalHold]]">[[_computeRetentionUntiLabel(document, i18n)]]</span>
             </template>
             <template is="dom-if" if="[[isRetentionDateIndeterminate(document)]]">
               <span id="indeterminateRetention" hidden="[[document.hasLegalHold]]">[[i18n('documentPage.retainIndeterminate')]]</span>
@@ -190,7 +190,7 @@ limitations under the License.
         _wfTasks: Array
       },
 
-      _computeRetentionUntiLabel:function(doc) {
+      _computeRetentionUntiLabel: function(doc) {
         return this.i18n('documentPage.retainUntil', this.formatDateTime(doc.retainUntil));
       },
 

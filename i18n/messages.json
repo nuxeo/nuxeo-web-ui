@@ -860,7 +860,7 @@
   "retention.rule.label.ruleDescription": "Rule description",
   "retention.rule.label.ruleName": "Rule name",
   "retention.rule.label.applicationPolicy.auto": "Automatic",
-  "retention.rule.label.applicationPolicy.auto.description": "The retention policy will be automatically applied to the documents when created or modified according to the given expression.",
+  "retention.rule.label.applicationPolicy.auto.description": "The retention policy will be automatically applied to the documents when created or modified, according to the given expression.",
   "retention.rule.label.applicationPolicy.auto.description.short": "Expression",
   "retention.rule.label.applicationPolicy.description": "Define how to apply the retention policy to your documents",
   "retention.rule.label.applicationPolicy.heading": "Retention policy application",
