@@ -28,6 +28,7 @@ Feature: User
 
   Scenario: Search for Users
     Then I can search for the user "j?doe"
+    And I can see the user has the email "j?doe@test.com"
 
   Scenario: Edit Users
     Then I can edit the user "j?doe" with the following properties:
