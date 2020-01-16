@@ -24,6 +24,14 @@ Then(/^I can search for the user "([^"]*)"$/, function(username) {
   user.waitForVisible().should.be.true;
 });
 
+Then(/^I can see the user has the email "([^"]*)"$/, function(userEmail) {
+  const user = this.ui.user.el.element('nuxeo-view-user [name="email"]');
+  user
+    .element('span')
+    .getText()
+    .should.equal(userEmail);
+});
+
 Then(/^I can edit the user "([^"]*)" with the following properties:$/, function(username, table) {
   this.ui.user.searchFor(username);
   this.ui.user.searchResult(username).waitForVisible();
