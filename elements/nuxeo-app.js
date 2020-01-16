@@ -117,19 +117,16 @@ Polymer({
       }
 
       paper-drawer-panel {
+        top: var(--nuxeo-app-top);
+        height: calc(100% - var(--nuxeo-app-top));
+      }
+
+      paper-drawer-panel[narrow] {
         --paper-drawer-panel-left-drawer-container: {
           z-index: 100;
         }
         --paper-drawer-panel-scrim: {
           z-index: 2;
-        }
-        top: var(--nuxeo-app-top);
-        height: calc(100% - var(--nuxeo-app-top));
-      }
-
-      paper-header-panel {
-        --paper-header-panel-container: {
-          -webkit-overflow-scrolling: unset; /* NXP-24576: fix for selection toolbar on iOS */
         }
       }
 
