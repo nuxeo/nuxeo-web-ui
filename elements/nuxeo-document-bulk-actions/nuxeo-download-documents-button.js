@@ -87,10 +87,10 @@ Polymer({
   },
 
   _onPollStart() {
-    this.fire('notify', { message: this.i18n('bulkDownload.preparing') });
+    this.fire('notify', { message: this.i18n('bulkDownload.preparing'), duration: 0, dismissible: true });
   },
 
   _onResponse() {
-    this.fire('notify', { message: this.i18n('bulkDownload.completed') });
+    this.fire('notify', { message: this.i18n('bulkDownload.completed'), close: true });
   },
 });
