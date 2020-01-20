@@ -264,6 +264,13 @@ Polymer({
       nuxeo-document-create-button.admin {
         display: none;
       }
+
+      #toast {
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        justify-content: space-between;
+      }
     </style>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
