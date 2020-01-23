@@ -22,6 +22,16 @@ limitations under the License.
 
   (function() {
     var schemaFetcher = null;
+    var typeCache = {};
+
+    function initializeDoc(doc, properties) {
+      if (doc == null) {
+        return doc;
+      }
+      var newDoc = JSON.parse(JSON.stringify(doc));
+      Object.assign(newDoc.properties, properties);
+      return newDoc;
+    }
 
     /**
      * `Nuxeo.DocumentCreationBehavior`
@@ -89,6 +99,16 @@ limitations under the License.
           schemaFetcher = document.createElement('nuxeo-resource');
           this._attachDom(schemaFetcher);
         }
+
+        if (typeCache[this.selectedDocType.type]) {
+          var doc = typeCache[this.selectedDocType.type][this.targetPath];
+          if (doc) {
+            return Promise.resolve(initializeDoc(doc, properties));
+          }
+        } else {
+          typeCache[this.selectedDocType.type] = {}
+        }
+
         schemaFetcher.path = 'path/' + this.targetPath + '/@emptyWithDefault';
         schemaFetcher.params = { type: this.selectedDocType.type };
         schemaFetcher.headers = {
@@ -97,13 +117,9 @@ limitations under the License.
           'X-NXtranslate.directoryEntry': 'label'
         };
         return schemaFetcher.get().then(function(doc) {
-          if (properties) {
-            for (var prop in properties) {
-              doc.properties[prop] = properties[prop];
-            }
-          }
-          return doc;
-        });
+          typeCache[this.selectedDocType.type][this.targetPath] = doc;
+          return initializeDoc(doc, properties);
+        }.bind(this));
       },
 
       _parentChanged: function() {
