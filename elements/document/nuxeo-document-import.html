@@ -486,7 +486,7 @@ limitations under the License.
           <paper-dialog-scrollable id="sidePanel">
             <div id="blobList" class="flex">
               <template is="dom-repeat" items="[[localFiles]]" as="file">
-                <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx,_initializingDoc)]]" on-tap="_tapLocalDoc" disabled$="[[!_canTapDoc(canCreate, _initializingDoc)]]">
                   <div class="horizontal layout flex">
                     <div class="vertical layout flex">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
@@ -505,7 +505,7 @@ limitations under the License.
                 </paper-button>
               </template>
               <template is="dom-repeat" items="[[remoteFiles]]" as="file">
-                <paper-button noink class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]" on-tap="_tapLocalDoc">
+                <paper-button noink class$="file-overview horizontal layout [[_selectedRemoteDocStyle(index,docIdx,_initializingDoc)]]" on-tap="_tapRemoteDoc"  disabled$="[[!_canTapDoc(canCreate, _initializingDoc)]]">
                   <div class="horizontal layout flex">
                     <div class="vertical layout flex">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
@@ -533,12 +533,14 @@ limitations under the License.
 
           <paper-button noink
                         on-tap="_previousFile"
+                        disabled$="[[_initializingDoc]]"
                         hidden$=[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]>
                         &#x276e;&nbsp;[[i18n('documentImportForm.previousDocument')]]
                       </paper-button>
           <paper-button noink
                         class="primary"
                         on-tap="_nextFile"
+                        disabled$="[[_initializingDoc]]"
                         hidden$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.nextDocument')]]&nbsp;&#x276f;
                       </paper-button>
@@ -546,6 +548,7 @@ limitations under the License.
           <paper-button noink
                         class="primary"
                         on-tap="_applyToAll"
+                        disabled$="[[_initializingDoc]]"
                         hidden$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]">
                         [[i18n('documentImportForm.applyToAll')]]
                       </paper-button>
@@ -553,7 +556,7 @@ limitations under the License.
           <paper-button noink
                         class="primary"
                         on-tap="_importWithProperties"
-                        disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
+                        disabled$="[[!_canImportWithMetadata(_creating,_initializingDoc,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
                         <template is="dom-if" if="[[_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
                           [[i18n('command.create')]]
                         </template>
@@ -656,6 +659,11 @@ limitations under the License.
         },
 
         _creating: {
+          type: Boolean,
+          value: false
+        },
+
+        _initializingDoc: {
           type: Boolean,
           value: false
         },
@@ -874,7 +882,7 @@ limitations under the License.
           properties['dc:title'] = title;
         }
         this._docProperties = properties;
-        this._updateDocument();
+        return this._updateDocument();
       },
 
       _nextFile: function() {
@@ -909,18 +917,21 @@ limitations under the License.
           var previousFile = this._getCurrentFile();
           this.docIdx = index;
           var currentFile = this._getCurrentFile();
+          var loadP;
           if (currentFile.checked) {
             // load the file's own data
-            this._loadFile(currentFile.docData);
+            loadP = this._loadFile(currentFile.docData);
           } else if (previousFile) {
             // load the previous file's data
-            this._loadFile(previousFile.docData, currentFile.name);
+            loadP = this._loadFile(previousFile.docData, currentFile.name);
           } else {
-            this._loadFile({}, currentFile.name);
+            loadP = this._loadFile({}, currentFile.name);
           }
-          if (!('checked' in currentFile)) {
-            this._setFileProp(index, 'checked', true);
-          }
+          loadP.then(function() {
+            if (!('checked' in currentFile)) {
+              this._setFileProp(index, 'checked', true);
+            }
+          }.bind(this));
         }
       },
 
@@ -946,24 +957,24 @@ limitations under the License.
         }
       },
 
+      _canTapDoc: function() {
+        return this.canCreate && !this._initializingDoc;
+      },
+
       _tapLocalDoc: function(e) {
-        if (this.canCreate) {
-          this._selectDoc(e.model.index);
-        }
+        this._selectDoc(e.model.index);
       },
 
       _tapRemoteDoc: function(e) {
-        if (this.canCreate) {
-          this._selectDoc(e.model.index + this.localFiles.length);
-        }
+        this._selectDoc(e.model.index + this.localFiles.length);
       },
 
       _selectedLocalDocStyle: function(index) {
-        return index === this.docIdx ? 'selected' : '';
+        return index === this.docIdx && !this._initializingDoc ? 'selected' : '';
       },
 
       _selectedRemoteDocStyle: function(index) {
-        return (index + this.localFiles.length) === this.docIdx ? 'selected' : '';
+        return (index + this.localFiles.length) === this.docIdx && !this._initializingDoc ? 'selected' : '';
       },
 
       _cancel: function() {
@@ -989,6 +1000,7 @@ limitations under the License.
         this._doNotCreate = false;
         this._docProperties = {};
         this._creating = false;
+        this._initializingDoc = false;
         this._importWithPropertiesError = '';
         this.$.uploadFiles.value = '';
         this.selectedDocType = '';
@@ -1112,7 +1124,7 @@ limitations under the License.
         }
         Promise.all(promises).then(function(results) {
           var errorFree = results.filter(function(result) {
-            return !(result instanceof Error);
+            return !(result instanceof Error) && result['entity-type'] && result['entity-type'] !== 'exception';
           });
           this._handleSuccess(this._mergeResponses.apply(null, errorFree), !(errorFree.length < results.length));
           if (errorFree.length < results.length) {
@@ -1235,20 +1247,22 @@ limitations under the License.
       },
 
       /**
-       * Retrieves and creates the layout for the current document type
+       * Retrieves and creates the layout for the current document type.
        */
       _updateDocument: function() {
-
+        this._initializingDoc = true;
         if (!this._isValidType(this.selectedDocType) || !this.parent) {
           this.document = null;
           // prevent error message from being displayed the first time
           this.$.docTypeDropdown.invalid = false;
-          return;
+          this._initializingDoc = false;
+          return Promise.resolve();
         }
 
-        this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then(function(document) {
+        return this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then(function(document) {
           document.parentRef = this.parent.uid;
           this.document = document;
+          this._initializingDoc = false;
         }.bind(this));
       },
 
