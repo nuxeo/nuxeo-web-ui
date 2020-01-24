@@ -507,8 +507,9 @@ Polymer({
               <template is="dom-repeat" items="[[localFiles]]" as="file">
                 <paper-button
                   noink
-                  class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]"
+                  class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx,_initializingDoc)]]"
                   on-tap="_tapLocalDoc"
+                  disabled$="[[!_canTapDoc(canCreate, _initializingDoc)]]"
                 >
                   <div class="horizontal layout flex">
                     <div class="vertical layout flex">
@@ -532,8 +533,9 @@ Polymer({
               <template is="dom-repeat" items="[[remoteFiles]]" as="file">
                 <paper-button
                   noink
-                  class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx)]]"
-                  on-tap="_tapLocalDoc"
+                  class$="file-overview horizontal layout [[_selectedRemoteDocStyle(index,docIdx,_initializingDoc)]]"
+                  on-tap="_tapRemoteDoc"
+                  disabled$="[[!_canTapDoc(canCreate, _initializingDoc)]]"
                 >
                   <div class="horizontal layout flex">
                     <div class="vertical layout flex">
@@ -567,6 +569,7 @@ Polymer({
           <paper-button
             noink
             on-tap="_previousFile"
+            disabled$="[[_initializingDoc]]"
             hidden$="[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]"
           >
             ❮&nbsp;[[i18n('documentImportForm.previousDocument')]]
@@ -575,6 +578,7 @@ Polymer({
             noink
             class="primary"
             on-tap="_nextFile"
+            disabled$="[[_initializingDoc]]"
             hidden$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]"
           >
             [[i18n('documentImportForm.nextDocument')]]&nbsp;❯
@@ -584,6 +588,7 @@ Polymer({
             noink
             class="primary"
             on-tap="_applyToAll"
+            disabled$="[[_initializingDoc]]"
             hidden$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]"
           >
             [[i18n('documentImportForm.applyToAll')]]
@@ -593,7 +598,7 @@ Polymer({
             noink
             class="primary"
             on-tap="_importWithProperties"
-            disabled$="[[!_canImportWithMetadata(_creating,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]"
+            disabled$="[[!_canImportWithMetadata(_creating,_initializingDoc,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]"
           >
             <template is="dom-if" if="[[_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
               [[i18n('command.create')]]
@@ -694,6 +699,11 @@ Polymer({
     },
 
     _creating: {
+      type: Boolean,
+      value: false,
+    },
+
+    _initializingDoc: {
       type: Boolean,
       value: false,
     },
@@ -903,7 +913,7 @@ Polymer({
       properties['dc:title'] = title;
     }
     this._docProperties = properties;
-    this._updateDocument();
+    return this._updateDocument();
   },
 
   _nextFile() {
@@ -928,7 +938,7 @@ Polymer({
     return length > 1 && this.docIdx > 0 && this.canCreate && !this._creating;
   },
 
-  _selectDoc(index) {
+  async _selectDoc(index) {
     if (!this._isValidFileIndex(index)) {
       throw new Error(`invalid file index: ${index}`);
     } else if (this.docIdx !== index && (this.docIdx < 0 || this._validate())) {
@@ -940,12 +950,12 @@ Polymer({
       const currentFile = this._getCurrentFile();
       if (currentFile.checked) {
         // load the file's own data
-        this._loadFile(currentFile.docData);
+        await this._loadFile(currentFile.docData);
       } else if (previousFile) {
         // load the previous file's data
-        this._loadFile(previousFile.docData, currentFile.name);
+        await this._loadFile(previousFile.docData, currentFile.name);
       } else {
-        this._loadFile({}, currentFile.name);
+        await this._loadFile({}, currentFile.name);
       }
       if (!('checked' in currentFile)) {
         this._setFileProp(index, 'checked', true);
@@ -972,24 +982,24 @@ Polymer({
     }
   },
 
+  _canTapDoc() {
+    return this.canCreate && !this._initializingDoc;
+  },
+
   _tapLocalDoc(e) {
-    if (this.canCreate) {
-      this._selectDoc(e.model.index);
-    }
+    this._selectDoc(e.model.index);
   },
 
   _tapRemoteDoc(e) {
-    if (this.canCreate) {
-      this._selectDoc(e.model.index + this.localFiles.length);
-    }
+    this._selectDoc(e.model.index + this.localFiles.length);
   },
 
   _selectedLocalDocStyle(index) {
-    return index === this.docIdx ? 'selected' : '';
+    return index === this.docIdx && !this._initializingDoc ? 'selected' : '';
   },
 
   _selectedRemoteDocStyle(index) {
-    return index + this.localFiles.length === this.docIdx ? 'selected' : '';
+    return index + this.localFiles.length === this.docIdx && !this._initializingDoc ? 'selected' : '';
   },
 
   _cancel() {
@@ -1015,6 +1025,7 @@ Polymer({
     this._doNotCreate = false;
     this._docProperties = {};
     this._creating = false;
+    this._initializingDoc = false;
     this._importWithPropertiesError = '';
     this.$.uploadFiles.value = '';
     this.selectedDocType = '';
@@ -1135,7 +1146,9 @@ Polymer({
       );
     }
     Promise.all(promises).then((results) => {
-      const errorFree = results.filter((result) => !(result instanceof Error));
+      const errorFree = results.filter(
+        (result) => !(result instanceof Error) && result['entity-type'] && result['entity-type'] !== 'exception',
+      );
       this._handleSuccess(this._mergeResponses.apply(null, errorFree), !(errorFree.length < results.length));
       if (errorFree.length < results.length) {
         this.set('_creating', false);
@@ -1265,19 +1278,22 @@ Polymer({
   },
 
   /**
-   * Retrieves and creates the layout for the current document type
+   * Retrieves and creates the layout for the current document type.
    */
   _updateDocument() {
+    this._initializingDoc = true;
     if (!this._isValidType(this.selectedDocType) || !this.parent) {
       this.document = null;
       // prevent error message from being displayed the first time
       this.$.docTypeDropdown.invalid = false;
+      this._initializingDoc = false;
       return;
     }
 
-    this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then((document) => {
+    return this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then((document) => {
       document.parentRef = this.parent.uid;
       this.document = document;
+      this._initializingDoc = false;
     });
   },
 
