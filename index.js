@@ -2,7 +2,7 @@
 import './elements/nuxeo-app.js';
 
 // expose moment for compat
-import moment from 'moment';
+import moment from '@nuxeo/moment';
 
 // expose Polymer and PolymerElement for 1.x and 2.x compat
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';

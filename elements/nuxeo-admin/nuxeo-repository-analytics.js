@@ -28,7 +28,7 @@ import '@nuxeo/chart-elements/chart-pie.js';
 import '@nuxeo/chart-elements/chart-line.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import moment from 'moment';
+import moment from '@nuxeo/moment';
 import { mimeTypes } from './nuxeo-mime-types.js';
 import { ChartDataBehavior } from './nuxeo-chart-data-behavior.js';
 
