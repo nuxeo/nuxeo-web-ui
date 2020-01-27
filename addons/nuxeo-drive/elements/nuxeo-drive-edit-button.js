@@ -69,7 +69,9 @@ Polymer({
   },
 
   _isAvailable(doc, blob) {
-    return doc && blob && this.hasPermission(doc, 'Write') && (!blob.appLinks || blob.appLinks.length === 0);
+    return (
+      this.hasPermission(doc, 'Write') && !this.isProxy(doc) && blob && (!blob.appLinks || blob.appLinks.length === 0)
+    );
   },
 
   _go() {
