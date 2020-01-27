@@ -28,7 +28,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date-picker.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import moment from 'moment';
+import moment from '@nuxeo/moment';
 
 /**
 `nuxeo-document-history`
