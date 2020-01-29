@@ -1292,6 +1292,28 @@ Polymer({
 
     return this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then((document) => {
       document.parentRef = this.parent.uid;
+      // disable controls while the layout loads
+      if (
+        !this.document ||
+        (this.document.type !== document.type &&
+          !customElements.get(`nuxeo-${document.type.toLowerCase()}-import-layout`))
+      ) {
+        const promise = new Promise((resolve) => {
+          this._layout_changed = (e) => {
+            if (e.detail.element) {
+              this.removeEventListener('document-layout-changed', this._layout_changed);
+              resolve(e);
+            }
+          };
+          this.addEventListener('document-layout-changed', this._layout_changed);
+        });
+        this.document = document;
+        return promise.then((e) => {
+          if (e.detail.element) {
+            this._initializingDoc = false;
+          }
+        });
+      }
       this.document = document;
       this._initializingDoc = false;
     });
