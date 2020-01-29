@@ -489,8 +489,6 @@ Polymer({
       observer: '_updateSearch',
     },
 
-    tasks: Array,
-
     taskCount: Number,
 
     drawerWidth: {
@@ -527,7 +525,7 @@ Polymer({
     actionContext: {
       type: Object,
       computed:
-        '_actionContext(currentDocument, currentUser, tasks, currentTask, taskCount,' +
+        '_actionContext(currentDocument, currentUser, currentTask, taskCount,' +
         ' clipboard, clipboardDocCount, userWorkspace, routeParams)',
     },
 
@@ -784,7 +782,6 @@ Polymer({
       document: this.currentDocument,
       user: this.currentUser,
       taskCount: this.taskCount,
-      tasks: this.tasks,
       currentTask: this.currentTask,
       clipboardDocCount: this.clipboardDocCount,
       clipboard: this.clipboard,
@@ -899,8 +896,8 @@ Polymer({
   },
 
   _fetchTaskCount() {
-    this.$.tasksProvider.fetch().then(() => {
-      this.taskCount = this.$.tasksProvider.resultsCount;
+    this.$.tasksProvider.fetch().then((response) => {
+      this.taskCount = response.resultsCount;
     });
   },
 

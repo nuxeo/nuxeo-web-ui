@@ -46,7 +46,7 @@ Polymer({
         border-top: 1px solid var(--divider-color);
       }
 
-      .task-property {
+      .task-due-date {
         opacity: 0.5;
         margin-right: 0.5rem;
       }
@@ -89,16 +89,6 @@ Polymer({
         min-height: auto;
       }
 
-      /* fix IE11 tap selection not working for task list items (NXP-21833) */
-      .task-box {
-        pointer-events: none;
-        @apply --layout-vertical;
-      }
-      /* prevent previous fix from disabling the default nuxeo-user-tag click behavior (NXP-21833) */
-      .task-box nuxeo-date {
-        pointer-events: all;
-      }
-
       .task-name {
         font-weight: bold;
         text-transform: uppercase;
@@ -128,19 +118,19 @@ Polymer({
             <div class="horizontal layout center">
               <span class="task-name">[[i18n(task.name)]]</span>
             </div>
-            <div class="task-detail">
+            <div>
               <div class="taskDoc horizontal">
                 <span class="doc-title">[[task.targetDocumentIds.0.title]]</span>
               </div>
               <div class="horizontal">
-                <span class="due-date task-property">[[i18n('tasksList.dueDate')]]</span>
+                <span class="task-due-date">[[i18n('tasksList.dueDate')]]</span>
                 <span class="date">
                   <nuxeo-date datetime="[[task.dueDate]]" format="relative"></nuxeo-date>
                 </span>
               </div>
             </div>
             <div class="horizontal">
-              <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
+              <span>[[i18n(task.workflowModelName)]]</span>
             </div>
           </div>
         </div>

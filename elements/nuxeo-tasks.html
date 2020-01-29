@@ -30,17 +30,11 @@ limitations under the License.
 
       .task-item {
         cursor: pointer;
-        background: #fff;
-        margin-bottom: 1em;
+        border: 1px solid var(--nuxeo-border);
       }
 
       .task-item:hover {
         @apply --nuxeo-block-hover;
-      }
-
-      .task-box {
-        padding: 1em;
-        border: 1px solid var(--nuxeo-border);
       }
 
       .task-info {
@@ -103,10 +97,6 @@ limitations under the License.
         position: relative;
         height: var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top)));
       }
-
-      .task-item-wrapper {
-        margin: 0 0 20px 0;
-      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -156,27 +146,25 @@ limitations under the License.
             select-on-tap
           >
             <template>
-              <div class="task-item-wrapper">
-                <div class="task-item task-box" tabindex$="{{tabIndex}}">
-                  <div style="margin: 0 0.4em 0.8em;" class="layout horizontal">
+              <div>
+                <nuxeo-card class="task-item" tabindex$="{{tabIndex}}">
+                  <div class="layout horizontal">
                     <div class="layout horizontal flex-4">
                       <iron-icon icon="icons:content-paste" class="task-name-icon"></iron-icon>
                       <div class="task-info layout vertical">
                         <span class="task-name">[[i18n(task.name)]]</span>
-                        <span class="task-directive">[[i18n(task.directive)]]</span>
-                        <span class="workflow-name">[[i18n(task.workflowModelName)]]</span>
+                        <span>[[i18n(task.directive)]]</span>
+                        <span>[[i18n(task.workflowModelName)]]</span>
                       </div>
                     </div>
                     <div class="layout vertical flex-4">
                       <div>
-                        <div class="taskDoc">
-                          <span class="task-property">[[i18n('tasksList.on')]]</span>
-                          <span>[[task.targetDocumentIds.0.title]]</span>
-                        </div>
-                        <div class="taskPath">
-                          <span class="task-property">[[i18n('tasksList.in')]]</span>
-                          <span>[[_getPath(task.targetDocumentIds.0.path)]]</span>
-                        </div>
+                        <span class="task-property">[[i18n('tasksList.on')]]</span>
+                        <span>[[task.targetDocumentIds.0.title]]</span>
+                      </div>
+                      <div>
+                        <span class="task-property">[[i18n('tasksList.in')]]</span>
+                        <span>[[_getPath(task.targetDocumentIds.0.path)]]</span>
                       </div>
                     </div>
                     <div class="layout vertical flex">
@@ -186,20 +174,16 @@ limitations under the License.
                       </span>
                     </div>
                   </div>
-                </div>
+                </nuxeo-card>
               </div>
             </template>
           </nuxeo-data-list>
-          <template is="dom-if" if="[[_empty(tasks)]]">
-            <div class="task-box">[[i18n('tasks.noTasks')]]</div>
-          </template>
         </div>
       </div>
     </nuxeo-page>
   </template>
 
   <script>
-    /* global moment */
     Polymer({
       is: 'nuxeo-tasks',
       behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior],
@@ -240,27 +224,9 @@ limitations under the License.
         return !!this.current;
       },
 
-      _href(doc) {
-        if (doc) {
-          return this.urlFor('browse', doc.path);
-        }
-      },
-
       _getPath(path) {
         if (path) {
           return path.substr(0, path.lastIndexOf('/'));
-        }
-      },
-
-      _date(date) {
-        if (date) {
-          return moment(date).format('MMMM D, YYYY');
-        }
-      },
-
-      _count() {
-        if (this.tasks) {
-          return this.tasks.length;
         }
       },
 
@@ -268,10 +234,6 @@ limitations under the License.
         if (this.current && this.current.targetDocumentIds && this.current.targetDocumentIds[0]) {
           return this.current.targetDocumentIds[0].uid;
         }
-      },
-
-      _empty(tasks) {
-        return tasks && tasks.length === 0;
       },
 
       get currentIndex() {
