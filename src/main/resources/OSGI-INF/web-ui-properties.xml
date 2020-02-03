@@ -33,5 +33,8 @@
 
     <!-- Comments only on doc with 'Commentable' facet ? -->
     <property name="org.nuxeo.web.ui.enforceCommentable">false</property>
+
+    <!-- Is pagination on for tasks endpoint ? -->
+    <property name="org.nuxeo.web.ui.taskEndpoint.isPaginated">false</property>
   </extension>
 </component>
