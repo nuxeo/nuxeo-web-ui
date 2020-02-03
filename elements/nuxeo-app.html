@@ -18,6 +18,7 @@ limitations under the License.
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-document.html">
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../bower_components/nuxeo-elements/nuxeo-task-page-provider.html">
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
@@ -305,7 +306,7 @@ limitations under the License.
     <nuxeo-operation id="userWorkspace" op="User.GetUserWorkspace"></nuxeo-operation>
     <nuxeo-operation id="moveDocumentsOp" sync-indexing></nuxeo-operation>
 
-    <nuxeo-resource id="tasks" path="/task" headers='{"X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
+    <nuxeo-task-page-provider id="tasksProvider"></nuxeo-task-page-provider>
     <nuxeo-resource id="task" path="/task/[[currentTaskId]]" headers='{"X-NXfetch.document": "properties", "X-NXtranslate.directoryEntry": "label", "X-NXfetch-directoryEntry": "parent", "X-NXfetch.task": "targetDocumentIds,actors"}'></nuxeo-resource>
 
     <!-- app layout -->
@@ -313,7 +314,7 @@ limitations under the License.
       <div slot="drawer">
 
         <!-- logo -->
-        <a id="logo" href$="[[urlFor('home')]]">
+        <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
           <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]"/>
         </a>
 
@@ -601,6 +602,11 @@ limitations under the License.
         Nuxeo.Performance.mark('nuxeo-app.ready');
       },
 
+      _resetTaskSelection: function() {
+        this.currentTask = null;
+        this.currentTaskId = null;
+      },
+
       refresh: function() {
         if (this.page === 'search') {
           this._refreshSearch();
@@ -818,6 +824,14 @@ limitations under the License.
             this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.index);
           }
         }
+        if (e.detail.task) {
+          var tasksDrawer = this.$$('nuxeo-tasks-drawer');
+          if (!tasksDrawer || !tasksDrawer.visible) {
+            this.navigateTo('tasks', e.detail.task.id);
+          } else {
+            tasksDrawer.selectTask(e.detail.index, e.detail.task, e.detail.params.offset, e.detail.params.pageSize);
+          }
+        }
       },
 
       // lookup the search
@@ -881,10 +895,18 @@ limitations under the License.
       },
 
       _fetchTasks: function() {
-        this.$.tasks.params = {'userId': this.currentUser.id};
-        this.$.tasks.get().then(function(response) {
-          this.tasks = response.entries;
-          this.taskCount = this.tasks.length;
+        var isPaginated = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.taskEndpoint
+            && Nuxeo.UI.config.taskEndpoint.isPaginated) || false;
+        this.$.tasksProvider.params = {
+          userId: this.currentUser.id,
+          pageSize: isPaginated ? 1 : 0,
+          isPaginated: true,
+        };
+        this.$.tasksProvider.fetch().then(function(response) {
+          if (!isPaginated) {
+            this.tasks = response.entries;
+          }
+          this.taskCount = response.resultsCount;
         }.bind(this));
       },
 
@@ -892,6 +914,11 @@ limitations under the License.
         // let's refresh the current document since it might have been changed (ex: state and version)
         this.fire('document-updated');
         this._fetchTasks();
+        this._resetTaskSelection();
+        var tasksDrawer = this.$$('nuxeo-tasks-drawer');
+        if (tasksDrawer.visible) {
+          tasksDrawer.$.tasks.fetch();
+        }
       },
 
       _workflowTaskProcess: function(e) {
