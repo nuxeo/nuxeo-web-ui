@@ -3,7 +3,7 @@ import DocumentVersions from './document_versions';
 
 export default class PublicationDialog extends BasePage {
   publish(target, rendition, version, override) {
-    return driver.waitUntil(() => {
+    driver.waitUntil(() => {
       try {
         // set target
         const targetSelect = this.el.element('#target');
@@ -32,6 +32,7 @@ export default class PublicationDialog extends BasePage {
         return false;
       }
     }, 'Cannot publish');
+    return driver.waitForVisible('iron-overlay-backdrop', driver.options.waitForTimeout, true);
   }
 
   waitForVisible() {

@@ -16,6 +16,7 @@ When(/^I (\w+) the task for following actors:$/, function(option, table) {
 
   this.ui.browser.documentTaskView.confirmButton.waitForVisible();
   this.ui.browser.documentTaskView.confirmButton.click();
+  driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
 Then('I can see the list of tasks', function() {

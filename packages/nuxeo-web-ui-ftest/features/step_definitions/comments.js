@@ -76,7 +76,7 @@ When('I write a comment with the following text: {string}', function(comment) {
 
 Then('I can see the comment thread has {int} visible item(s)', function(nb) {
   this.ui.browser.documentPage().comments.waitForVisible();
-  this.ui.browser.documentPage().comments.nbItems.should.be.equals(nb);
+  driver.waitUntil(() => this.ui.browser.documentPage().comments.nbItems === nb);
 });
 
 Then('I can see the comment thread has a total of {int} item(s) to be loaded', function(total) {

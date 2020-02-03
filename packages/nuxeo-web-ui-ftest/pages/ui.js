@@ -22,6 +22,7 @@ export default class UI extends BasePage {
   }
 
   get activityFeed() {
+    browser.waitForVisible('nuxeo-document-page nuxeo-page-item[name="activity"]');
     browser.click('nuxeo-document-page nuxeo-page-item[name="activity"]');
     browser.waitForVisible('nuxeo-document-activity');
     return new ActivityFeed('nuxeo-document-activity');
