@@ -22,6 +22,7 @@ When('I create a document with the following properties:', function(table) {
   const title = this.ui.createDialog.documentCreate.layout(currentDocType).getFieldValue('title');
   this.ui.createDialog.createButton.waitForVisible();
   this.ui.createDialog.createButton.click();
+  this.ui.browser.waitForNotVisible('iron-overlay-backdrop');
   this.ui.browser.hasTitle(title).should.be.true;
   this.doc = { type: currentDocType, title };
 });

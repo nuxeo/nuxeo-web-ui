@@ -68,6 +68,7 @@ export default class DocumentVersions extends BasePage {
     if (this.toggle.getText().trim() === label) {
       return true;
     }
+    this.listItems.waitForVisible('div[name="version-item"] .title');
     const items = this.listItems.elements('div[name="version-item"]').value;
     const version = items.find((item) => {
       const foundLabel = item.getText('.title').trim();
