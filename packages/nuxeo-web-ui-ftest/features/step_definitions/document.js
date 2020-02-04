@@ -183,7 +183,6 @@ Then(/^I can edit the following properties in the (.+) metadata:$/, function(doc
   form.layout.waitForVisible();
   form.layout.fillMultipleValues(table);
   form.save();
-  driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
 Then(/^I can edit the (.*) Note$/, function(format) {
