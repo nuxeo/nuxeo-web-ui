@@ -21,25 +21,25 @@ limitations under the License.
 @element nuxeo-retentionrule-edit-layout
 -->
 <dom-module id="nuxeo-retentionrule-edit-layout">
-
   <template>
-    <style include="iron-flex iron-flex-alignment nuxeo-styles">
-      *[role=widget] {
-        margin-bottom: 8px;
-      }
-    </style>
+    <style include="iron-flex iron-flex-alignment nuxeo-styles"></style>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('retention.rule.label.ruleName')]]"
-                 name="title"
-                 value="{{document.properties.dc:title}}"
-                 autofocus required>
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('retention.rule.label.ruleName')]]"
+      name="title"
+      value="{{document.properties.dc:title}}"
+      autofocus
+      required
+    >
     </nuxeo-input>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('retention.rule.label.ruleDescription')]]"
-                 name="description"
-                 value="{{document.properties.dc:description}}">
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('retention.rule.label.ruleDescription')]]"
+      name="description"
+      value="{{document.properties.dc:description}}"
+    >
     </nuxeo-input>
 
     <paper-checkbox role="widget" name="disabled" checked="{{document.properties.retention_rule:enabled}}">
@@ -47,48 +47,60 @@ limitations under the License.
     </paper-checkbox>
 
     <nuxeo-card heading="[[i18n('retention.rule.label.applicationPolicy.heading')]]">
-      <nuxeo-select id="applicationPolicyDropdown" selected="{{document.properties.retention_rule:applicationPolicy}}"
+      <nuxeo-select
+        id="applicationPolicyDropdown"
+        selected="{{document.properties.retention_rule:applicationPolicy}}"
         attr-for-selected="key"
         role="widget"
         disabled
         placeholder="[[i18n('retention.rule.label.applicationPolicy.placehodler')]]"
-        label="[[i18n('retention.rule.label.applicationPolicy.description')]]" required>
+        label="[[i18n('retention.rule.label.applicationPolicy.description')]]"
+        required
+      >
         <paper-item key="auto">[[i18n('retention.rule.label.applicationPolicy.auto')]]</paper-item>
         <paper-item key="manual">[[i18n('retention.rule.label.applicationPolicy.manual')]]</paper-item>
       </nuxeo-select>
       <dom-if if="[[_isAuto(document.properties.retention_rule:applicationPolicy)]]" restamp>
         <template>
-          <nuxeo-input role="widget"
-                       label="[[i18n('retention.rule.label.applicationPolicy.auto.description')]]"
-                       placeholder="Document.getType() == 'File'"
-                       name="ruleExpression"
-                       required
-                       value="{{document.properties.retention_def:expression}}">
+          <nuxeo-input
+            role="widget"
+            label="[[i18n('retention.rule.label.applicationPolicy.auto.description')]]"
+            placeholder="Document.getType() == 'File'"
+            name="ruleExpression"
+            required
+            value="{{document.properties.retention_def:expression}}"
+          >
           </nuxeo-input>
         </template>
       </dom-if>
       <dom-if if="[[_isManual(document.properties.retention_rule:applicationPolicy)]]">
         <template>
           [[i18n('retention.rule.label.applicationPolicy.manual.description')]]
-          <nuxeo-selectivity data="[[docTypes]]"
-             min-chars="0"
-             role="widget"
-             multiple
-             label="[[i18n('retention.rule.label.applicationPolicy.docTypes')]]"
-             placeholder="[[i18n('retention.rule.label.applicationPolicy.docTypes.placeholder')]]"
-             value="{{document.properties.retention_rule:docTypes}}">
+          <nuxeo-selectivity
+            data="[[docTypes]]"
+            min-chars="0"
+            role="widget"
+            multiple
+            label="[[i18n('retention.rule.label.applicationPolicy.docTypes')]]"
+            placeholder="[[i18n('retention.rule.label.applicationPolicy.docTypes.placeholder')]]"
+            value="{{document.properties.retention_rule:docTypes}}"
+          >
           </nuxeo-selectivity>
         </template>
       </dom-if>
     </nuxeo-card>
 
     <nuxeo-card heading="[[i18n('retention.rule.label.startPolicy.heading')]]">
-      <nuxeo-select id="startPolicyDropdown" selected="{{document.properties.retention_def:startingPointPolicy}}"
+      <nuxeo-select
+        id="startPolicyDropdown"
+        selected="{{document.properties.retention_def:startingPointPolicy}}"
         attr-for-selected="key"
         name="startPolicy"
         role="widget"
         placeholder="[[i18n('retention.rule.label.startPolicy.placehodler')]]"
-        label="[[i18n('retention.rule.label.startPolicy.description')]]" required>
+        label="[[i18n('retention.rule.label.startPolicy.description')]]"
+        required
+      >
         <paper-item key="immediate">[[i18n('retention.rule.label.startPolicy.immediate')]]</paper-item>
         <paper-item key="event_based">[[i18n('retention.rule.label.startPolicy.event_based')]]</paper-item>
         <paper-item key="metadata_based">[[i18n('retention.rule.label.startPolicy.metadata_based')]]</paper-item>
@@ -106,34 +118,42 @@ limitations under the License.
       <dom-if if="[[_isEventBased(document.properties.retention_def:startingPointPolicy)]]" restamp>
         <template>
           [[i18n('retention.rule.label.startPolicy.eventBased.description')]]
-          <nuxeo-directory-suggestion name="event"
-             role="widget"
-             value="{{document.properties.retention_def:startingPointEvent}}"
-             label="[[i18n('retention.rule.label.startPolicy.eventBased.event.description')]]"
-             dbl10n
-             required
-             directory-name="RetentionEvent"
-             min-chars="0">
-           </nuxeo-directory-suggestion>
-           <nuxeo-input role="widget" name="eventInput"
-                        label="[[i18n('retention.rule.label.startPolicy.eventBased.expression.description')]]"
-                        placeholder="[[i18n('retention.rule.label.startPolicy.eventBased.expression.placeholder')]]"
-                        name="startingPointExpression"
-                        required
-                        value="{{document.properties.retention_def:startingPointExpression}}">
-           </nuxeo-input>
+          <nuxeo-directory-suggestion
+            name="event"
+            role="widget"
+            value="{{document.properties.retention_def:startingPointEvent}}"
+            label="[[i18n('retention.rule.label.startPolicy.eventBased.event.description')]]"
+            dbl10n
+            required
+            directory-name="RetentionEvent"
+            min-chars="0"
+          >
+          </nuxeo-directory-suggestion>
+          <nuxeo-input
+            role="widget"
+            name="eventInput"
+            label="[[i18n('retention.rule.label.startPolicy.eventBased.expression.description')]]"
+            placeholder="[[i18n('retention.rule.label.startPolicy.eventBased.expression.placeholder')]]"
+            name="startingPointExpression"
+            required
+            value="{{document.properties.retention_def:startingPointExpression}}"
+          >
+          </nuxeo-input>
         </template>
       </dom-if>
       <dom-if if="[[_isMetadataBased(document.properties.retention_def:startingPointPolicy)]]" restamp>
         <template>
           [[i18n('retention.rule.label.startPolicy.metadataBased.description')]]
-          <nuxeo-selectivity data="[[dateFields]]" name="xpath"
-             min-chars="0"
-             role="widget"
-             required
-             label="[[i18n('retention.rule.label.startPolicy.metadataBased.xpath')]]"
-             placeholder="[[i18n('retention.rule.label.startPolicy.metadataBased.xpath.placeholder')]]"
-             value="{{document.properties.retention_def:metadataXPath}}">
+          <nuxeo-selectivity
+            data="[[dateFields]]"
+            name="xpath"
+            min-chars="0"
+            role="widget"
+            required
+            label="[[i18n('retention.rule.label.startPolicy.metadataBased.xpath')]]"
+            placeholder="[[i18n('retention.rule.label.startPolicy.metadataBased.xpath.placeholder')]]"
+            value="{{document.properties.retention_def:metadataXPath}}"
+          >
           </nuxeo-selectivity>
         </template>
       </dom-if>
@@ -141,44 +161,53 @@ limitations under the License.
 
     <nuxeo-card heading="[[i18n('retention.rule.label.duration.heading')]]">
       <div class="layout horizontal flex">
-        <nuxeo-input role="widget" name="years"
+        <nuxeo-input
+          role="widget"
+          name="years"
           value="{{document.properties.retention_def:durationYears}}"
           label="[[i18n('retention.rule.label.duration.years')]]"
           min="0"
           required
-          type="number">
+          type="number"
+        >
         </nuxeo-input>
-        <nuxeo-input role="widget" name="months"
+        <nuxeo-input
+          role="widget"
+          name="months"
           value="{{document.properties.retention_def:durationMonths}}"
           label="[[i18n('retention.rule.label.duration.months')]]"
           min="0"
           required
-          type="number">
+          type="number"
+        >
         </nuxeo-input>
-        <nuxeo-input role="widget" name="days"
+        <nuxeo-input
+          role="widget"
+          name="days"
           value="{{document.properties.retention_def:durationDays}}"
           label="[[i18n('retention.rule.label.duration.days')]]"
           min="0"
           required
-          type="number">
+          type="number"
+        >
         </nuxeo-input>
       </div>
     </nuxeo-card>
 
     <nuxeo-card heading="[[i18n('retention.rule.label.actions.heading')]]">
       <div class="layout flex">
-         <nuxeo-directory-suggestion
-            role="widget"
-            value="{{document.properties.retention_def:endActions}}"
-            label="[[i18n('retention.rule.label.endactions.description')]]"
-            multiple="true"
-            dbl10n
-            directory-name="RetentionEnd"
-            min-chars="0">
-          </nuxeo-directory-suggestion>
+        <nuxeo-directory-suggestion
+          role="widget"
+          value="{{document.properties.retention_def:endActions}}"
+          label="[[i18n('retention.rule.label.endactions.description')]]"
+          multiple="true"
+          dbl10n
+          directory-name="RetentionEnd"
+          min-chars="0"
+        >
+        </nuxeo-directory-suggestion>
       </div>
     </nuxeo-card>
-
   </template>
 
   <script>
@@ -193,5 +222,4 @@ limitations under the License.
       },
     });
   </script>
-
 </dom-module>

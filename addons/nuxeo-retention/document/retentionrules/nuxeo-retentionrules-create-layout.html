@@ -21,56 +21,69 @@ limitations under the License.
 @element nuxeo-retentionrules-create-layout
 -->
 <dom-module id="nuxeo-retentionrules-create-layout">
-
   <template>
-    <style>
-      *[role=widget] {
-        margin-bottom: 8px;
-      }
-    </style>
+    <style include="nuxeo-styles"></style>
 
-    <nuxeo-input role="widget"
-                 label="[[i18n('title')]]"
-                 name="title"
-                 value="{{document.properties.dc:title}}"
-                 autofocus required>
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('title')]]"
+      name="title"
+      value="{{document.properties.dc:title}}"
+      autofocus
+      required
+    >
     </nuxeo-input>
 
-    <nuxeo-textarea role="widget"
-                    label="[[i18n('label.description')]]"
-                    name="description"
-                    value="{{document.properties.dc:description}}">
+    <nuxeo-textarea
+      role="widget"
+      label="[[i18n('label.description')]]"
+      name="description"
+      value="{{document.properties.dc:description}}"
+    >
     </nuxeo-textarea>
 
-    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.nature')]]"
-                                name="nature"
-                                directory-name="nature"
-                                value="{{document.properties.dc:nature}}"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
+    <nuxeo-directory-suggestion
+      role="widget"
+      label="[[i18n('label.dublincore.nature')]]"
+      name="nature"
+      directory-name="nature"
+      value="{{document.properties.dc:nature}}"
+      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+      min-chars="0"
+    >
     </nuxeo-directory-suggestion>
 
-    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.subjects')]]"
-                                directory-name="l10nsubjects"
-                                name="subjects"
-                                value="{{document.properties.dc:subjects}}"
-                                multiple="true"
-                                dbl10n="true"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
+    <nuxeo-directory-suggestion
+      role="widget"
+      label="[[i18n('label.dublincore.subjects')]]"
+      directory-name="l10nsubjects"
+      name="subjects"
+      value="{{document.properties.dc:subjects}}"
+      multiple="true"
+      dbl10n="true"
+      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+      min-chars="0"
+    >
     </nuxeo-directory-suggestion>
 
-    <nuxeo-directory-suggestion role="widget" label="[[i18n('label.dublincore.coverage')]]"
-                                directory-name="l10ncoverage"
-                                name="coverage"
-                                value="{{document.properties.dc:coverage}}"
-                                dbl10n="true"
-                                placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-                                min-chars="0">
+    <nuxeo-directory-suggestion
+      role="widget"
+      label="[[i18n('label.dublincore.coverage')]]"
+      directory-name="l10ncoverage"
+      name="coverage"
+      value="{{document.properties.dc:coverage}}"
+      dbl10n="true"
+      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+      min-chars="0"
+    >
     </nuxeo-directory-suggestion>
 
-    <nuxeo-date-picker role="widget" label="[[i18n('label.dublincore.expire')]]" name="expired"
-                       value="{{document.properties.dc:expired}}">
+    <nuxeo-date-picker
+      role="widget"
+      label="[[i18n('label.dublincore.expire')]]"
+      name="expired"
+      value="{{document.properties.dc:expired}}"
+    >
     </nuxeo-date-picker>
   </template>
 
@@ -82,9 +95,8 @@ limitations under the License.
         /**
          * @doctype RetentionRules
          */
-        document: Object
-      }
+        document: Object,
+      },
     });
   </script>
-
 </dom-module>
