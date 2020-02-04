@@ -17,6 +17,7 @@ Then('I can navigate to {word} pill', function(pill) {
   const el = this.ui.browser.el.element(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
   el.waitForVisible();
   el.click();
+  this.ui.browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
 });
 
 Then('I cannot see to {word} pill', function(pill) {
