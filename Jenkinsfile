@@ -130,6 +130,38 @@ pipeline {
         }
       }
     }
+    stage('Functional tests') {
+      steps {
+        setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'PENDING')
+        container('mavennodejs') {
+          script {
+            echo """
+            --------------------------
+            Run Nuxeo Web UI Functional Tests
+            --------------------------"""
+            sh 'mvn -B -nsu -f plugin/itests/addon install'
+            sh 'mvn -B -nsu -f plugin/itests/marketplace install'
+            try {
+              sh 'mvn -B -nsu -f ftest install'
+            } finally {
+              try {
+                archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
+              } catch (err) {
+                echo hudson.Functions.printThrowable(err)
+              }
+            }
+          }
+        }
+      }
+      post {
+        success {
+          setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'FAILURE')
+        }
+      }
+    }
     stage('Build and deploy Docker images') {
       steps {
         setGitHubBuildStatus('webui/docker', 'Build Docker images', 'PENDING')
@@ -180,38 +212,6 @@ pipeline {
               sh "jx preview"
             }
           }
-        }
-      }
-    }
-    stage('Functional tests') {
-      steps {
-        setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'PENDING')
-        container('mavennodejs') {
-          script {
-            echo """
-            --------------------------
-            Run Nuxeo Web UI Functional Tests
-            --------------------------"""
-            sh 'mvn -B -nsu -f plugin/itests/addon install'
-            sh 'mvn -B -nsu -f plugin/itests/marketplace install'
-            try {
-              sh 'mvn -B -nsu -f ftest install'
-            } finally {
-              try {
-                archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
-              } catch (err) {
-                echo hudson.Functions.printThrowable(err)
-              }
-            }
-          }
-        }
-      }
-      post {
-        success {
-          setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'SUCCESS')
-        }
-        failure {
-          setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'FAILURE')
         }
       }
     }
