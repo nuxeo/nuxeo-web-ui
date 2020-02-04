@@ -44,6 +44,7 @@ export default class DocumentTask extends BasePage {
   }
 
   performAction(name) {
+    this.taskLayout.waitForVisible();
     this.el.waitForVisible(`.options paper-button[name="${name}"]`);
     this.el.element(`.options paper-button[name="${name}"]`).click();
   }
