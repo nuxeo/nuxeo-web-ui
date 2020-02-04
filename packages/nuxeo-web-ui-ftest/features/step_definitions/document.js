@@ -196,7 +196,7 @@ Then(/^I can edit the (.*) Note$/, function(format) {
       page.view.noteEditor.waitForVisible();
       page.view.noteEditor.setContent(newContent);
       page.view.noteEditor.save();
-      page.view.noteEditor.hasContent(`<p>${newContent}</p>`);
+      driver.waitUntil(() => page.view.noteEditor.hasContent(`<p>${newContent}</p>`));
       break;
     case 'XML':
     case 'Markdown':
@@ -207,16 +207,15 @@ Then(/^I can edit the (.*) Note$/, function(format) {
       page.view.noteEditor.textarea.setValue(newContent);
       page.view.noteEditor.save();
       page.view.preview.waitForVisible();
-      if (format === 'XML') {
-        const xmlContent = page.view.preview.element('#xml');
-        xmlContent.waitForVisible();
-        xmlContent.getText().should.equal(newContent);
-      } else if (format === 'Markdown' || format === 'Text') {
-        page.view.preview.waitForVisible('marked-element #content');
-        const markedContent = page.view.preview.element('marked-element #content');
-        markedContent.waitForVisible();
-        markedContent.getText().should.equal(newContent);
-      }
+      driver.waitUntil(() => {
+        try {
+          const elContent =
+            format === 'XML' ? page.view.preview.element('#xml') : page.view.preview.element('marked-element #content');
+          return elContent.isVisible() && elContent.getText() === newContent;
+        } catch (e) {
+          return false;
+        }
+      });
       break;
     default:
     // do nothing
