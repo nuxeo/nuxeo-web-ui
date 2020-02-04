@@ -32,14 +32,16 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-results name="default"
-                   nx-provider="[[nxProvider]]"
-                   selected-items="{{selectedItems}}"
-                   display-mode="table"
-                   sort-options="[[sortOptions]]"
-                   display-sort display-quick-filters
-                   on-quick-filters-changed="_updateActions">
-
+    <nuxeo-results
+      name="default"
+      nx-provider="[[nxProvider]]"
+      selected-items="{{selectedItems}}"
+      display-mode="table"
+      sort-options="[[sortOptions]]"
+      display-sort
+      display-quick-filters
+      on-quick-filters-changed="_updateActions"
+    >
       <div slot="actions">
         <template is="dom-if" if="[[_isWithoutRule]]">
           <nuxeo-attach-rule-button provider="[[nxProvider]]"></nuxeo-attach-rule-button>
@@ -52,12 +54,14 @@ limitations under the License.
         </template>
       </div>
 
-      <nuxeo-data-table name="table" icon="nuxeo:view-list"
-                        settings-enabled
-                        empty-label="[[i18n('searchResults.noResults')]]"
-                        selection-enabled
-                        on-row-clicked="_navigate">
-
+      <nuxeo-data-table
+        name="table"
+        icon="nuxeo:view-list"
+        settings-enabled
+        empty-label="[[i18n('searchResults.noResults')]]"
+        selection-enabled
+        on-row-clicked="_navigate"
+      >
         <nuxeo-data-table-column name="[[i18n('label.dublincore.title')]]" field="dc:title" sort-by="dc:title">
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
@@ -71,7 +75,11 @@ limitations under the License.
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('retention.search.retainUntil')]]" field="ecm:retainUntil" sort-by="ecm:retainUntil">
+        <nuxeo-data-table-column
+          name="[[i18n('retention.search.retainUntil')]]"
+          field="ecm:retainUntil"
+          sort-by="ecm:retainUntil"
+        >
           <template>
             <dom-if if="[[!isRetentionDateIndeterminate(item)]]">
               <template>
@@ -85,9 +93,7 @@ limitations under the License.
             </dom-if>
           </template>
         </nuxeo-data-table-column>
-
       </nuxeo-data-table>
-
     </nuxeo-results>
   </template>
 
@@ -100,36 +106,35 @@ limitations under the License.
 
         sortOptions: {
           type: Array,
-          value: []
-        }
+          value: [],
+        },
       },
 
-      attached: function() {
+      attached() {
         this.sortOptions = [
-          {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
-          {field: 'dc:retainUntil', label: this.i18n('retention.search.retainUntil'), order: 'asc'},
+          { field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc' },
+          { field: 'dc:retainUntil', label: this.i18n('retention.search.retainUntil'), order: 'asc' },
         ];
       },
 
-      _navigate: function(e) {
-        this.fire('navigate', {doc: (e.model || e.detail).item, index: (e.model || e.detail).index});
+      _navigate(e) {
+        this.fire('navigate', { doc: (e.model || e.detail).item, index: (e.model || e.detail).index });
       },
 
-      _updateActions: function() {
+      _updateActions() {
         if (this.nxProvider && this.nxProvider.quickFilters) {
-          var rqf = this.nxProvider.quickFilters.find(function(el) { return el.name === 'withoutRule' });
-          var lhqf = this.nxProvider.quickFilters.find(function(el) { return el.name === 'hasLegalHold' });
-          var nlhqf = this.nxProvider.quickFilters.find(function(el) { return el.name === 'hasNotLegalHold' });
+          const rqf = this.nxProvider.quickFilters.find((el) => el.name === 'withoutRule');
+          const lhqf = this.nxProvider.quickFilters.find((el) => el.name === 'hasLegalHold');
+          const nlhqf = this.nxProvider.quickFilters.find((el) => el.name === 'hasNotLegalHold');
           this._isWithoutRule = rqf && rqf.active && !(lhqf && lhqf.active) && !(nlhqf && nlhqf.active);
           this._isHasLegalHold = lhqf && lhqf.active && !(rqf && rqf.active) && !(nlhqf && nlhqf.active);
-          this._isHasNotLegalHold = nlhqf && nlhqf.active  && !(rqf && rqf.active) && !(lhqf && lhqf.active);
+          this._isHasNotLegalHold = nlhqf && nlhqf.active && !(rqf && rqf.active) && !(lhqf && lhqf.active);
         } else {
           this._isWithoutRule = false;
           this._isHasLegalHold = false;
           this._isHasNotLegalHold = false;
         }
-      }
+      },
     });
   </script>
-
 </dom-module>

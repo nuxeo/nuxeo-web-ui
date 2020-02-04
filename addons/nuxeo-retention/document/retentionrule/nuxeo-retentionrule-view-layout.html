@@ -5,11 +5,7 @@
 -->
 <dom-module id="nuxeo-retentionrule-view-layout">
   <template>
-    <style include="iron-flex iron-flex-alignment nuxeo-styles">
-      *[role=widget] {
-        margin-bottom: 16px;
-      }
-    </style>
+    <style include="iron-flex iron-flex-alignment nuxeo-styles"></style>
 
     <retention-config-widget document="[[document]]"></retention-config-widget>
 
@@ -25,8 +21,12 @@
       </div>
 
       <div role="widget">
-        <label hidden$="[[!document.properties.retention_rule:enabled]]">[[i18n('retention.rule.label.enabled')]]</label>
-        <label hidden$="[[document.properties.retention_rule:enabled]]">[[i18n('retention.rule.label.disabled')]]</label>
+        <label hidden$="[[!document.properties.retention_rule:enabled]]"
+          >[[i18n('retention.rule.label.enabled')]]</label
+        >
+        <label hidden$="[[document.properties.retention_rule:enabled]]"
+          >[[i18n('retention.rule.label.disabled')]]</label
+        >
       </div>
     </nuxeo-card>
 
@@ -57,15 +57,17 @@
         </nuxeo-tag>
       </div>
       <div role="widget" hidden$="[[!_isEventBased(document)]]">
-        <nuxeo-directory-suggestion name="event"
-           role="widget"
-           value="{{document.properties.retention_def:startingPointEvent}}"
-           label="[[i18n('retention.rule.label.startPolicy.eventBased.event.description')]]"
-           dbl10n
-           readonly
-           directory-name="RetentionEvent">
+        <nuxeo-directory-suggestion
+          name="event"
+          role="widget"
+          value="{{document.properties.retention_def:startingPointEvent}}"
+          label="[[i18n('retention.rule.label.startPolicy.eventBased.event.description')]]"
+          dbl10n
+          readonly
+          directory-name="RetentionEvent"
+        >
         </nuxeo-directory-suggestion>
-        <nuxeo-tag  name="eventInput">
+        <nuxeo-tag name="eventInput">
           [[document.properties.retention_def:startingPointExpression]]
         </nuxeo-tag>
       </div>
@@ -95,18 +97,18 @@
 
     <nuxeo-card heading="[[i18n('retention.rule.label.actions.heading')]]">
       <div class="layout flex">
-         <nuxeo-directory-suggestion
-            role="widget"
-            value="{{document.properties.retention_def:endActions}}"
-            label="[[i18n('retention.rule.label.endactions.description')]]"
-            multiple="true"
-            dbl10n
-            directory-name="RetentionEnd"
-            readonly>
-          </nuxeo-directory-suggestion>
+        <nuxeo-directory-suggestion
+          role="widget"
+          value="{{document.properties.retention_def:endActions}}"
+          label="[[i18n('retention.rule.label.endactions.description')]]"
+          multiple="true"
+          dbl10n
+          directory-name="RetentionEnd"
+          readonly
+        >
+        </nuxeo-directory-suggestion>
       </div>
     </nuxeo-card>
-
   </template>
 
   <script>
@@ -119,9 +121,8 @@
          */
         document: {
           type: Object,
-        }
-      }
+        },
+      },
     });
-
   </script>
 </dom-module>
