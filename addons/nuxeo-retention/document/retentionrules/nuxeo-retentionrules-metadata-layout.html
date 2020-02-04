@@ -21,32 +21,8 @@ limitations under the License.
 @element nuxeo-retentionrules-metadata-layout
 -->
 <dom-module id="nuxeo-retentionrules-metadata-layout">
-
   <template>
-    <style>
-      *[role=widget] {
-        margin-bottom: 16px;
-      }
-
-      label {
-        @apply --nuxeo-label;
-      }
-
-      div.multiline {
-        white-space: pre-line;
-      }
-
-      div {
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        word-break: break-word;
-        -webkit-hyphens: auto;
-        -moz-hyphens: auto;
-        -ms-hyphens: auto;
-        -o-hyphens: auto;
-        hyphens: auto;
-      }
-    </style>
+    <style include="nuxeo-styles"></style>
 
     <div role="widget">
       <label>[[i18n('label.dublincore.title')]]</label>
@@ -63,15 +39,17 @@ limitations under the License.
       <div name="nature">[[formatDirectory(document.properties.dc:nature)]]</div>
     </div>
 
-    <nuxeo-directory-suggestion role="widget"
-                                label="[[i18n('label.dublincore.subjects')]]"
-                                directory-name="l10nsubjects"
-                                name="subjects"
-                                value="{{document.properties.dc:subjects}}"
-                                hidden$="[[!document.properties.dc:subjects.length]]"
-                                multiple="true"
-                                dbl10n="true"
-                                readonly>
+    <nuxeo-directory-suggestion
+      role="widget"
+      label="[[i18n('label.dublincore.subjects')]]"
+      directory-name="l10nsubjects"
+      name="subjects"
+      value="{{document.properties.dc:subjects}}"
+      hidden$="[[!document.properties.dc:subjects.length]]"
+      multiple="true"
+      dbl10n="true"
+      readonly
+    >
     </nuxeo-directory-suggestion>
 
     <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
@@ -93,9 +71,8 @@ limitations under the License.
         /**
          * @doctype RetentionRules
          */
-        document: Object
-      }
+        document: Object,
+      },
     });
   </script>
-
 </dom-module>

@@ -21,9 +21,7 @@ limitations under the License.
 @element nuxeo-retentionrules-view-layout
 -->
 <dom-module id="nuxeo-retentionrules-view-layout">
-
   <template>
-
     <style include="nuxeo-styles">
       :host {
         display: block;
@@ -57,73 +55,95 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-connection id="nxcon"></nuxeo-connection>
-
-    <nuxeo-page-provider id="nxProvider"
-                         provider="[[provider]]"
-                         page-size="[[pageSize]]"
-                         aggregations="{{aggregations}}"
-                         enrichers="[[enrichers]]"
-                         params="[[params]]"
-                         schemas="[[schemas]]"
-                         headers="[[headers]]"
-                         fetch-aggregates>
+    <nuxeo-page-provider
+      id="nxProvider"
+      provider="[[provider]]"
+      page-size="[[pageSize]]"
+      aggregations="{{aggregations}}"
+      enrichers="[[enrichers]]"
+      params="[[params]]"
+      schemas="[[schemas]]"
+      headers="[[headers]]"
+      fetch-aggregates
+    >
     </nuxeo-page-provider>
 
-    <nuxeo-results id="results"
-                   display-mode="table"
-                   name="[[document.uid]]"
-                   nx-provider="[[nxProvider]]"
-                   selected-items="{{selectedItems}}"
-                   document="[[document]]">
-
+    <nuxeo-results
+      id="results"
+      display-mode="table"
+      name="[[document.uid]]"
+      nx-provider="[[nxProvider]]"
+      selected-items="{{selectedItems}}"
+      document="[[document]]"
+    >
       <!-- Table view -->
-      <nuxeo-data-table name="table" icon="nuxeo:view-list"
-                        class="results"
-                        settings-enabled
-                        empty-label="[[i18n('retention.rule.emptyRules')]]"
-                        empty-label-when-filtered="[[i18n('retention.rule.emptyRules')]]"
-                        selection-enabled
-                        on-row-clicked="_navigate"
-                        draggable$="[[_hasWritePermission(document)]]" drop-target-filter="[[_dropTargetFilter]]">
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]"
-                                 field="dc:title" filter-by="title"  flex="100">
+      <nuxeo-data-table
+        name="table"
+        icon="nuxeo:view-list"
+        class="results"
+        settings-enabled
+        empty-label="[[i18n('retention.rule.emptyRules')]]"
+        empty-label-when-filtered="[[i18n('retention.rule.emptyRules')]]"
+        selection-enabled
+        on-row-clicked="_navigate"
+        draggable$="[[_hasWritePermission(document)]]"
+        drop-target-filter="[[_dropTargetFilter]]"
+      >
+        <nuxeo-data-table-column
+          name="[[i18n('documentContentView.datatable.header.title')]]"
+          field="dc:title"
+          filter-by="title"
+          flex="100"
+        >
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
             <a class="title ellipsis" href$="[[urlFor('browse', item.path)]]" on-tap="_navigate">[[item.title]]</a>
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]"
-                                 field="dc:modified"
-                                 hidden
-                                 filter-by="dc_modified_agg"
-                                 flex="50">
+        <nuxeo-data-table-column
+          name="[[i18n('documentContentView.datatable.header.modified')]]"
+          field="dc:modified"
+          hidden
+          filter-by="dc_modified_agg"
+          flex="50"
+        >
           <template is="header">
             <nuxeo-dropdown-aggregation
               placeholder="[[i18n('documentContentView.datatable.header.modified')]]"
               data="[[aggregations.dc_modified_agg]]"
-              value="{{column.filterValue}}" multiple>
+              value="{{column.filterValue}}"
+              multiple
+            >
             </nuxeo-dropdown-aggregation>
           </template>
           <template>
             <nuxeo-date datetime="[[item.properties.dc:modified]]"></nuxeo-date>
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.lastContributor')]]"
-                                 filter-by="dc_last_contributor_agg" field="dc:lastContributor" flex="50">
+        <nuxeo-data-table-column
+          name="[[i18n('documentContentView.datatable.header.lastContributor')]]"
+          filter-by="dc_last_contributor_agg"
+          field="dc:lastContributor"
+          flex="50"
+        >
           <template is="header">
             <nuxeo-dropdown-aggregation
               placeholder="[[i18n('documentContentView.datatable.header.lastContributor')]]"
               data="[[aggregations.dc_last_contributor_agg]]"
-              value="{{column.filterValue}}" multiple>
+              value="{{column.filterValue}}"
+              multiple
+            >
             </nuxeo-dropdown-aggregation>
           </template>
           <template>
             <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
           </template>
         </nuxeo-data-table-column>
-        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.version')]]"
-                                 field="versionLabel" hidden>
+        <nuxeo-data-table-column
+          name="[[i18n('documentContentView.datatable.header.version')]]"
+          field="versionLabel"
+          hidden
+        >
           <template>
             [[formatVersion(item)]]
           </template>
@@ -163,7 +183,6 @@ limitations under the License.
         </nuxeo-data-table-column>
       </nuxeo-data-table>
     </nuxeo-results>
-
   </template>
 
   <script>
@@ -179,21 +198,21 @@ limitations under the License.
          * The parameters to be passed on to `provider`.
          */
         params: {
-          type: Object
+          type: Object,
         },
         /**
          * The name of the page provider to be used.
          */
         provider: {
           type: String,
-          value: 'advanced_document_content'
+          value: 'advanced_document_content',
         },
         /**
          * The number of results per page.
          */
         pageSize: {
           type: Number,
-          value: 40
+          value: 40,
         },
         /**
          * List of comma separated values of the document schemas to be returned.
@@ -201,7 +220,7 @@ limitations under the License.
          */
         schemas: {
           type: String,
-          value: 'dublincore,common,retention_rule,retention_definition'
+          value: 'dublincore,common,retention_rule,retention_definition',
         },
         /**
          * List of content enrichers passed on to `provider`.
@@ -209,7 +228,7 @@ limitations under the License.
          */
         enrichers: {
           type: String,
-          value: 'thumbnail, permissions'
+          value: 'thumbnail, permissions',
         },
         /**
          * The headers passed on to `provider`.
@@ -217,25 +236,28 @@ limitations under the License.
          */
         headers: {
           type: String,
-          value: {'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label'}
+          value: { 'X-NXfetch.document': 'properties', 'X-NXtranslate.directoryEntry': 'label' },
         },
       },
 
-      _computeParams: function(document) {
+      _computeParams(document) {
         if (document) {
           this.$.nxProvider.set('sort', { 'ecm:pos': 'ASC' });
-          return { 'ecm_parentId': document.uid, 'ecm_trashed': this.isTrashed(document) }
+          return { ecm_parentId: document.uid, ecm_trashed: this.isTrashed(document) };
         }
         return {};
       },
 
-      formatDuration: function(document) {
-        return (document && document.properties) ? this.i18n('retention.rule.label.duration.pattern',
-          document.properties['retention_def:durationYears'],
-          document.properties['retention_def:durationMonths'],
-          document.properties['retention_def:durationDays']) : '';
-      }
+      formatDuration(document) {
+        return document && document.properties
+          ? this.i18n(
+              'retention.rule.label.duration.pattern',
+              document.properties['retention_def:durationYears'],
+              document.properties['retention_def:durationMonths'],
+              document.properties['retention_def:durationDays'],
+            )
+          : '';
+      },
     });
   </script>
-
 </dom-module>

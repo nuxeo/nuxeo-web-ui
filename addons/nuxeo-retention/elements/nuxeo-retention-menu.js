@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
@@ -13,15 +13,20 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
+*/
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 
-<!--
+/**
 `nuxeo-retention-menu`
 @group Nuxeo UI
 @element nuxeo-retention-menu
--->
-<dom-module id="nuxeo-retention-menu">
-  <template>
+*/
+Polymer({
+  _template: html`
     <style include="nuxeo-styles">
       nuxeo-menu-item:hover {
         @apply --nuxeo-block-hover;
@@ -42,17 +47,11 @@ limitations under the License.
       <div class="header">[[i18n('retention.menu')]]</div>
       <nuxeo-menu-item label="retention.rules" name="rules" link="[[urlFor('browse', '/RetentionRules')]]">
       </nuxeo-menu-item>
-      <nuxeo-menu-item label="retention.search" name="search" route="page:retentionSearch">
-      </nuxeo-menu-item>
-      <nuxeo-menu-item label="retention.events" name="events" route="page:retentionEvents">
-      </nuxeo-menu-item>
+      <nuxeo-menu-item label="retention.search" name="search" route="page:retentionSearch"> </nuxeo-menu-item>
+      <nuxeo-menu-item label="retention.events" name="events" route="page:retentionEvents"> </nuxeo-menu-item>
     </div>
-  </template>
-  <script>
-    Polymer({
-      is: 'nuxeo-retention-menu',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
-      properties: {}
-    });
-  </script>
-</dom-module>
+  `,
+
+  is: 'nuxeo-retention-menu',
+  behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
+});
