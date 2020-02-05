@@ -57,6 +57,9 @@ switch (capability.browserName) {
   // no default
 }
 
+const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 20000;
+console.warn(`TIMEOUT = ${TIMEOUT}`);
+
 // Allow overriding driver version
 const drivers = {};
 drivers[process.env.BROWSER] = {};
@@ -135,7 +138,7 @@ exports.config = {
   baseUrl: process.env.NUXEO_WEB_UI_URL || process.env.NUXEO_URL || 'http://localhost:8080/nuxeo/',
   //
   // Default timeout for all waitFor* commands.
-  waitforTimeout: 20000,
+  waitforTimeout: TIMEOUT,
 
   waitforInterval: 250,
   //
@@ -209,7 +212,7 @@ exports.config = {
     // <string> (expression) only execute the features or scenarios with tags matching the expression
     // Details can be found here: https://cucumber.io/docs/cucumber/api/#tag-expressions
     tagExpression: process.env.TAG_EXPRESSION,
-    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : 25000, // <number> timeout for step definitions
+    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : TIMEOUT + 5000, // <number> timeout for step definitions
     ignoreUndefinedDefinitions: false, // <boolean> Enable this config to treat undefined definitions as warnings.
   },
   //
