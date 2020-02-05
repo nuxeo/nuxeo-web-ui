@@ -31,6 +31,7 @@ When("I edit {word}('s) comment {string} with the following text: {string}", fun
     .comments.getComment(text, user === 'my' ? this.username : user)
     .edit();
   this.ui.browser.documentPage().comments.writeComment(newText);
+  this.ui.browser.documentPage().comments.waitForNotVisible('.input-area iron-icon[name="submit"]');
 });
 
 When("I expand the reply thread for {word}('s) comment {string}", function(user, text) {
