@@ -305,7 +305,7 @@ Polymer({
     >
       <div slot="drawer">
         <!-- logo -->
-        <a id="logo" href$="[[urlFor('home')]]">
+        <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
           <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
         </a>
 
@@ -615,6 +615,11 @@ Polymer({
     Performance.mark('nuxeo-app.ready');
   },
 
+  _resetTaskSelection() {
+    this.currentTask = null;
+    this.currentTaskId = null;
+  },
+
   refresh() {
     if (this.page === 'search') {
       this._refreshSearch();
@@ -912,6 +917,11 @@ Polymer({
     // let's refresh the current document since it might have been changed (ex: state and version)
     this.fire('document-updated');
     this._fetchTaskCount();
+    this._resetTaskSelection();
+    const tasksDrawer = this.$$('nuxeo-tasks-drawer');
+    if (tasksDrawer.visible) {
+      tasksDrawer.$.tasks.fetch();
+    }
   },
 
   _workflowTaskProcess(e) {
