@@ -204,11 +204,11 @@ Polymer({
           break;
         }
       }
-    } else {
-      const _exists = tasks && tasks.indexOf(oldVal) > -1;
+    } else if (oldVal) {
+      const task = tasks.find((item) => item.id === oldVal.id);
       // make sure this task still exists to avoid iron-list exceptions
-      if (_exists) {
-        this.$.list.deselectItem(oldVal);
+      if (task) {
+        this.$.list.deselectItem(task);
       }
     }
   },
