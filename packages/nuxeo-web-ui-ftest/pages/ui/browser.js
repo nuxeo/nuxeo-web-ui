@@ -246,14 +246,19 @@ export default class Browser extends BasePage {
   waitForNbChildren(nb) {
     this.currentPage.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
     driver.waitUntil(() => {
-      const { rows } = this;
       let count = 0;
-      rows.value.forEach((row) => {
-        if (row.isVisible() && row.isVisible('nuxeo-data-table-cell a.title')) {
-          count++;
-        }
-      });
-      return count === nb;
+      try {
+        const { rows } = this;
+        rows.value.forEach((row) => {
+          if (row.isVisible() && row.isVisible('nuxeo-data-table-cell a.title')) {
+            count++;
+          }
+        });
+        return count === nb;
+      } catch (e) {
+        // prevent stale row from breaking execution
+        return false;
+      }
     });
   }
 
