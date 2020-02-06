@@ -148,6 +148,7 @@ Feature: Trash Management
     When I login as "Administrator"
     And I browse to the document with path "/default-domain/ws"
     And I can trash current document
+    And I can see the "Domain" document
     And I can navigate to trash pill
     Then I can see the document has 1 children
     Then I navigate to "ws" child
