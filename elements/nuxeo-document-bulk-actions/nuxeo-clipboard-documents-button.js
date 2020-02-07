@@ -82,7 +82,8 @@ Polymer({
         (this.isCollectionMember(doc) || doc.facets.includes('Collection')) &&
         !this.isTrashed(doc) &&
         !this.hasType(doc, 'Favorites') &&
-        !doc.isVersion,
+        !doc.isVersion &&
+        !this.isProxy(doc),
     );
   },
 
