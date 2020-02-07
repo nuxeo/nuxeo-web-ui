@@ -22,7 +22,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
@@ -455,7 +455,7 @@ Polymer({
   `,
 
   is: 'nuxeo-app',
-  behaviors: [RoutingBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior],
   importMeta: import.meta,
   properties: {
     productName: {
@@ -1086,7 +1086,7 @@ Polymer({
   _handleDocumentCreated(e) {
     if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
       const doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
-      this._toast(this.i18n('app.createdDocument', `${doc.type.toLowerCase()} ${doc.title}`));
+      this._toast(this.i18n('app.createdDocument', `${this.formatDocType(doc.type)} ${doc.title}`));
     } else {
       this._toast(this.i18n('app.createdDocuments', e.detail.response.entries.length));
     }
