@@ -21,7 +21,7 @@ limitations under the License.
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-resource.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-layout.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
-<link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
 <link rel="import" href="../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
@@ -425,7 +425,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-app',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior, Nuxeo.FiltersBehavior],
       properties: {
 
         productName: {
@@ -1051,7 +1051,7 @@ limitations under the License.
       _handleDocumentCreated: function(e) {
         if (!e.detail.response.entries || e.detail.response.entries.length === 1) {
           var doc = e.detail.response.entries ? e.detail.response.entries[0] : e.detail.response;
-          this._toast(this.i18n('app.createdDocument', doc.type.toLowerCase() + ' ' + doc.title));
+          this._toast(this.i18n('app.createdDocument', this.formatDocType(doc.type) + ' ' + doc.title));
         } else {
           this._toast(this.i18n('app.createdDocuments', e.detail.response.entries.length));
         }
