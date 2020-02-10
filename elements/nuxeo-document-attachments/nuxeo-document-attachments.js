@@ -59,19 +59,19 @@ Polymer({
       <h3>[[i18n('documentAttachments.heading')]]</h3>
 
       <div class="vertical layout">
-        <template is="dom-repeat" items="[[_computeFiles(document.*, xpath)]]">
+        <template is="dom-repeat" items="[[_computeFiles(_attachments)]]">
           <nuxeo-document-blob document="[[document]]" xpath="[[_computeBlobXpath(xpath, index)]]">
           </nuxeo-document-blob>
         </template>
 
-        <template is="dom-if" if="[[!_hasFiles(document)]]">
+        <template is="dom-if" if="[[!_hasFiles(_attachments)]]">
           <div class="empty">[[i18n('documentAttachments.empty')]]</div>
         </template>
       </div>
 
       <template is="dom-if" if="[[_hasWritePermission(document)]]">
         <nuxeo-dropzone
-          value="{{document.properties.files:files}}"
+          value="{{_attachments}}"
           multiple
           value-key="file"
           uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
@@ -93,10 +93,19 @@ Polymer({
       type: String,
       value: 'files:files',
     },
+
+    _attachments: {
+      type: Object,
+      computed: '_computeValue(document, xpath)',
+    },
   },
 
-  created() {
-    this._createMethodObserver('_valueChanged(document.properties.files:files.splices)', true);
+  observers: ['_valueChanged(_attachments.splices)'],
+
+  _computeValue(document, xpath) {
+    if (document) {
+      return this.get(this.formatPropertyXpath(xpath), this.document.properties);
+    }
   },
 
   _valueChanged(e) {
@@ -106,7 +115,7 @@ Polymer({
     const props = {};
     const formattedXpath = this.formatPropertyXpath(this.xpath);
     createNestedObject(props, formattedXpath.split('.'));
-    this.set(formattedXpath, this.get(formattedXpath, this.document.properties), props);
+    this.set(formattedXpath, this._attachments, props);
     this.$.doc.data = {
       'entity-type': 'document',
       repository: this.document.repository,
@@ -121,8 +130,8 @@ Polymer({
     });
   },
 
-  _hasFiles(doc) {
-    return doc && doc.properties && doc.properties[this.xpath] && doc.properties[this.xpath].length > 0;
+  _hasFiles(attachments) {
+    return attachments && attachments.length > 0;
   },
 
   _hasWritePermission(doc) {
@@ -132,8 +141,8 @@ Polymer({
   },
 
   _computeFiles() {
-    if (this._hasFiles(this.document)) {
-      return this.document.properties[this.xpath];
+    if (this._hasFiles(this._attachments)) {
+      return this._attachments;
     }
     return [];
   },
