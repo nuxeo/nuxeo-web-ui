@@ -895,7 +895,7 @@ limitations under the License.
       },
 
       _fetchTasks: function() {
-        var isPaginated = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.taskEndpoint
+        var isPaginated = JSON.parse(Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.taskEndpoint
             && Nuxeo.UI.config.taskEndpoint.isPaginated) || false;
         this.$.tasksProvider.params = {
           userId: this.currentUser.id,
