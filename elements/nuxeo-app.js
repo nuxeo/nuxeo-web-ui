@@ -566,6 +566,7 @@ Polymer({
     workflowTaskProcessed: '_refreshAndFetchTasks',
     'added-to-clipboard': '_onAddedToClipboard',
     'add-to-clipboard': '_onAddToClipboard',
+    'clipboard-action-performed': '_onClipboardAction',
     'added-to-collection': '_documentAddedToCollection',
     'removed-from-clipboard': '_documentRemovedFromClipboard',
     'removed-from-collection': '_documentRemovedFromCollection',
@@ -946,6 +947,18 @@ Polymer({
     if (e.detail.documents && this.clipboard) {
       this.clipboard.add(e.detail.documents);
     }
+  },
+
+  _onClipboardAction(e) {
+    if (e && e.detail && e.detail.operation === 'Document.Move') {
+      const recents = this.$$('#recent');
+      if (recents) {
+        e.detail.documents.forEach((doc) => {
+          recents.update(doc);
+        });
+      }
+    }
+    this.fire('document-updated');
   },
 
   _observeCurrentUser() {
