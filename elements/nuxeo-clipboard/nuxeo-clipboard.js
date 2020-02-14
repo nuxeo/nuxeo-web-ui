@@ -265,10 +265,11 @@ Polymer({
   },
 
   execute(evt) {
-    this.$.op.op = evt.currentTarget.dataset.op;
-    this.$.op.execute().then(() => {
+    const operation = evt.currentTarget.dataset.op;
+    this.$.op.op = operation;
+    this.$.op.execute().then((response) => {
       this.documents = [];
-      this.fire('document-updated');
+      this.fire('clipboard-action-performed', { operation, documents: response && response.entries });
     });
   },
 
