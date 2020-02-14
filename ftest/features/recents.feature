@@ -1,5 +1,4 @@
 @cleanupLocalStorage
-@ignore
 Feature: Recents
 
   I can view recent documents
