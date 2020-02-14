@@ -250,7 +250,7 @@ limitations under the License.
       },
 
       _isCommentable: function(doc) {
-        if (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enforceCommentable) {
+        if (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enforceCommentable === 'true') {
           if (!this.hasFacet(doc, 'Commentable')) {
             return false;
           }
