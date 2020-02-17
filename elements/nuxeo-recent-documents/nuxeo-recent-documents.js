@@ -118,6 +118,10 @@ Polymer({
       observer: '_selectedRecentChanged',
       notify: true,
     },
+    currentDocument: {
+      type: Object,
+      observer: '_currentDocumentChanged',
+    },
   },
 
   add(doc) {
@@ -154,6 +158,21 @@ Polymer({
         this.navigateTo('document', doc.uid);
       } else {
         this.navigateTo('browse', doc.path);
+      }
+    }
+  },
+
+  async _currentDocumentChanged(doc) {
+    if (doc && !this.isTrashed(doc)) {
+      if (!this.documents) {
+        await new Promise((resolve) => {
+          this.addEventListener('iron-localstorage-load', (e) => resolve(e));
+        });
+      }
+      if (this.contains(doc)) {
+        this.update(doc);
+      } else {
+        this.add(doc);
       }
     }
   },

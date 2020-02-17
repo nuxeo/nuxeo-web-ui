@@ -671,14 +671,6 @@ Polymer({
           this.docId = '';
           this.docPath = doc.path;
         }
-        const recent = this.$$('#recent');
-        if (recent && !doc.isTrashed) {
-          if (recent.contains(doc)) {
-            recent.update(doc);
-          } else {
-            recent.add(doc);
-          }
-        }
         this.currentParent = this.hasFacet(doc, 'Folderish')
           ? doc
           : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];

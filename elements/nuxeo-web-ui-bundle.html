@@ -485,7 +485,12 @@
 </nuxeo-slot-content>
 <nuxeo-slot-content name="recentsDrawerPage" slot="DRAWER_PAGES">
   <template>
-    <nuxeo-recent-documents name="recents" max-size="10" id="recent"></nuxeo-recent-documents>
+    <nuxeo-recent-documents
+      name="recents"
+      max-size="10"
+      id="recent"
+      current-document="[[document]]"
+    ></nuxeo-recent-documents>
   </template>
 </nuxeo-slot-content>
 
