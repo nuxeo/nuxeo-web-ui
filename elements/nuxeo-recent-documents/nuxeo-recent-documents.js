@@ -118,6 +118,10 @@ Polymer({
       observer: '_selectedRecentChanged',
       notify: true,
     },
+    currentDocument: {
+      type: Object,
+      observer: '_currentDocumentChanged',
+    },
   },
 
   add(doc) {
@@ -155,6 +159,29 @@ Polymer({
       } else {
         this.navigateTo('browse', doc.path);
       }
+    }
+  },
+
+  _currentDocumentChanged(doc) {
+    if (doc && !this.isTrashed(doc)) {
+      if (!this.documents) {
+        if (!this._localStorageLoaded) {
+          this._localStorageLoaded = new Promise((resolve) => {
+            this.addEventListener('iron-localstorage-load', (e) => resolve(e));
+          });
+        }
+        this._localStorageLoaded.then(() => this._addOrUpdateStorage(doc));
+      } else {
+        this._addOrUpdateStorage(doc);
+      }
+    }
+  },
+
+  _addOrUpdateStorage(doc) {
+    if (this.contains(doc)) {
+      this.update(doc);
+    } else {
+      this.add(doc);
     }
   },
 });

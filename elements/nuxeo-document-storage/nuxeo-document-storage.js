@@ -37,8 +37,15 @@ Polymer({
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
 
-    <iron-localstorage id="storage" name="[[name]]" value="{{documents}}" on-iron-localstorage-load-empty="initialize">
-    </iron-localstorage>
+    <template is="dom-if" if="[[_storageName]]">
+      <iron-localstorage
+        id="storage"
+        name="[[_storageName]]"
+        value="{{documents}}"
+        on-iron-localstorage-load-empty="initialize"
+      >
+      </iron-localstorage>
+    </template>
   `,
 
   is: 'nuxeo-document-storage',
@@ -46,11 +53,14 @@ Polymer({
   properties: {
     name: {
       type: String,
-      value: 'nuxeo-document-storage',
     },
     documents: {
       type: Array,
       notify: true,
+    },
+    _storageName: {
+      type: String,
+      readOnly: true,
     },
   },
 
@@ -109,11 +119,13 @@ Polymer({
 
   ready() {
     this.$.nxcon.connect().then((res) => {
-      this.name = `${res.id}-${this.name}`;
+      this._set_storageName(`${res.id}-${this.name}`);
     });
   },
 
   reload() {
-    this.$.storage.reload();
+    if (this.$$('#storage')) {
+      this.$$('#storage').reload();
+    }
   },
 });
