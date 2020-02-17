@@ -58,9 +58,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
-import './nuxeo-recent-documents/nuxeo-recent-documents.js';
 import './nuxeo-results/nuxeo-results.js';
-import './nuxeo-tasks/nuxeo-tasks-list.js';
 import '../i18n/i18n.js';
 import '../themes/base.js';
 import '../themes/loader.js';
@@ -670,14 +668,6 @@ Polymer({
         if (this.docId && !doc.isVersion) {
           this.docId = '';
           this.docPath = doc.path;
-        }
-        const recent = this.$$('#recent');
-        if (recent && !doc.isTrashed) {
-          if (recent.contains(doc)) {
-            recent.update(doc);
-          } else {
-            recent.add(doc);
-          }
         }
         this.currentParent = this.hasFacet(doc, 'Folderish')
           ? doc
