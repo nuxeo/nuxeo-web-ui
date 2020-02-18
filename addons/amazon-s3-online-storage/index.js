@@ -115,6 +115,7 @@ class S3Provider {
           params: {
             Bucket: this.extraInfo.bucket,
           },
+          endpoint: this.extraInfo.endpoint,
           computeChecksums: true,
         });
       });
