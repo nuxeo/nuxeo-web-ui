@@ -17,7 +17,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
-import './nuxeo-document-layout.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -38,6 +38,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-metadata',
+  importMeta: import.meta,
 
   properties: {
     document: Object,

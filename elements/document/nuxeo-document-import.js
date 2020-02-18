@@ -36,8 +36,8 @@ import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploade
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-layout.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
-import './nuxeo-document-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { DocumentCreationBehavior } from '../nuxeo-document-creation/nuxeo-document-creation-behavior.js';
@@ -618,6 +618,7 @@ Polymer({
 
   is: 'nuxeo-document-import',
   behaviors: [IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior],
+  importMeta: import.meta,
 
   properties: {
     batchAppend: {
