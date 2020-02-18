@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "Empty Trash",
   "documentTrashContent.emptyTrash.success": "Trash emptied",
   "documentTrashContent.emptyTrash.error": "Error emptying trash ",
-  "documentView.layoutNotFound": "Failed to find view layout for {0}.",
   "documentVocabularyManagement.layoutNotFound": "Failed to find edit layout for {0}.",
   "bulkDownload.completed": "Zip export is ready.",
   "bulkDownload.error": "An error occurred while zipping files: {0}",

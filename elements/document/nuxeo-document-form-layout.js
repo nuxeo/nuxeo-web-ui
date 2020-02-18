@@ -17,9 +17,9 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-form/iron-form.js';
-import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@polymer/paper-button/paper-button.js';
-import './nuxeo-document-layout.js';
+import '@nuxeo/nuxeo-elements/nuxeo-document.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
@@ -93,6 +93,7 @@ Polymer({
 
   is: 'nuxeo-document-form-layout',
   behaviors: [IronResizableBehavior, I18nBehavior],
+  importMeta: import.meta,
 
   properties: {
     document: {

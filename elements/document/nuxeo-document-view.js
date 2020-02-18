@@ -17,9 +17,9 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-preview.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-document-layout.js';
 import '../nuxeo-document-blob/nuxeo-document-blob.js';
 import '../nuxeo-dropzone/nuxeo-dropzone.js';
-import './nuxeo-document-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -34,6 +34,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-view',
+  importMeta: import.meta,
 
   properties: {
     document: Object,
