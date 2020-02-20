@@ -276,6 +276,7 @@ Polymer({
      */
     quickFilters: {
       type: Array,
+      notify: true,
     },
     /**
      * If enabled, it allows to sort the results of the search results.
