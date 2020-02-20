@@ -175,7 +175,12 @@ Polymer({
   },
 
   _isAvailable(doc) {
-    return !this.isVersion(doc) && this.hasFacet(doc, 'Versionable') && this.hasPermission(doc, 'Write');
+    return (
+      !this.isVersion(doc) &&
+      !this.isRecord(doc) &&
+      this.hasFacet(doc, 'Versionable') &&
+      this.hasPermission(doc, 'Write')
+    );
   },
 
   _nextMinor(doc) {

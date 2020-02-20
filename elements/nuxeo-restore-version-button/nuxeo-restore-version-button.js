@@ -17,6 +17,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '../nuxeo-confirm-button/nuxeo-confirm-button.js';
@@ -66,7 +67,7 @@ Polymer({
   `,
 
   is: 'nuxeo-restore-version-button',
-  behaviors: [I18nBehavior, RoutingBehavior],
+  behaviors: [FiltersBehavior, I18nBehavior, RoutingBehavior],
 
   properties: {
     document: Object,
@@ -84,7 +85,7 @@ Polymer({
   },
 
   _isAvailable() {
-    if (this.document && this.latest) {
+    if (this.document && this.latest && !this.isRecord(this.latest)) {
       const v1 = `${this.document.properties['uid:major_version']}.${this.document.properties['uid:minor_version']}`;
       const v2 = `${this.latest.properties['uid:major_version']}.${this.latest.properties['uid:minor_version']}`;
       return v1 === v2 ? this.latest.isCheckedOut : true;
