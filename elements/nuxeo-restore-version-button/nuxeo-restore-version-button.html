@@ -17,6 +17,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
 <link rel="import" href="../nuxeo-confirm-button/nuxeo-confirm-button.html">
@@ -66,7 +67,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-restore-version-button',
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
+      behaviors: [Nuxeo.FiltersBehavior, Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
       properties: {
         document: Object,
         latest: Object
@@ -84,7 +85,7 @@ limitations under the License.
       },
 
       _isAvailable: function() {
-        if (this.document && this.latest) {
+        if (this.document && this.latest && !this.isRecord(this.latest)) {
           var v1 = this.document.properties['uid:major_version'] + '.' +
             this.document.properties['uid:minor_version'];
           var v2 = this.latest.properties['uid:major_version'] + '.' +
