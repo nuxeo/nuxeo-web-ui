@@ -106,7 +106,11 @@ Polymer({
 
   _hasWritePermission(doc) {
     return (
-      doc && this.hasPermission(doc, 'Write') && !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc)
+      !this.isUnderRetentionOrLegalHold(doc) &&
+      this.hasPermission(doc, 'Write') &&
+      !this.isImmutable(doc) &&
+      !this.hasType(doc, 'Root') &&
+      !this.isTrashed(doc)
     );
   },
 });

@@ -136,7 +136,12 @@ Polymer({
 
   _hasWritePermission(doc) {
     return (
-      doc && this.hasPermission(doc, 'Write') && !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc)
+      doc &&
+      !doc.isRecord &&
+      this.hasPermission(doc, 'Write') &&
+      !this.isImmutable(doc) &&
+      !this.hasType(doc, 'Root') &&
+      !this.isTrashed(doc)
     );
   },
 

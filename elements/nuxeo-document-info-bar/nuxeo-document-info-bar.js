@@ -55,6 +55,11 @@ Polymer({
         color: white;
       }
 
+      .bar.record {
+        background: black;
+        color: white;
+      }
+
       .item {
         @apply --layout-horizontal;
         @apply --layout-center;
@@ -109,6 +114,29 @@ Polymer({
           </span>
         </div>
         <paper-button class="primary" on-tap="_processTask" noink>[[i18n('documentPage.process.task')]]</paper-button>
+      </div>
+    </template>
+
+    <!-- Record -->
+    <template is="dom-if" if="[[isUnderRetentionOrLegalHold(document)]]">
+      <div id="retentionInfoBar" class="bar record">
+        <div class="layout horizontal center flex">
+          <template is="dom-if" if="[[document.hasLegalHold]]">
+            <iron-icon icon="nuxeo:hold"></iron-icon>
+            <span id="legalHold">[[i18n('documentPage.legalHold')]]</span>
+          </template>
+          <template is="dom-if" if="[[document.retainUntil]]">
+            <iron-icon icon="nuxeo:retain"></iron-icon>
+            <template is="dom-if" if="[[!isRetentionDateIndeterminate(document)]]">
+              <span id="retention" hidden="[[document.hasLegalHold]]">[[_computeRetentionUntiLabel(document)]]</span>
+            </template>
+            <template is="dom-if" if="[[isRetentionDateIndeterminate(document)]]">
+              <span id="indeterminateRetention" hidden="[[document.hasLegalHold]]">
+                [[i18n('documentPage.retainIndeterminate')]]
+              </span>
+            </template>
+          </template>
+        </div>
       </div>
     </template>
 
@@ -167,6 +195,10 @@ Polymer({
       computed: '_workflows(document)',
     },
     _wfTasks: Array,
+  },
+
+  _computeRetentionUntiLabel(doc) {
+    return this.i18n('documentPage.retainUntil', this.formatDateTime(doc.retainUntil));
   },
 
   _tasks(doc) {
