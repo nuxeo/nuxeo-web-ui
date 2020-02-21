@@ -149,6 +149,7 @@
     "d3": "^4.13.0",
     "dotenv": "^8.0.0",
     "es6-promise": "^4.0.0",
+    "expose-loader": "^0.7.5",
     "extend": "^3.0.2",
     "jquery": "^3.3.1",
     "jsondiffpatch": "^0.3.11",
