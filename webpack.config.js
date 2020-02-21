@@ -134,6 +134,15 @@ const common = merge([
           test: /\.css$/,
           use: ['style-loader', 'css-loader'],
         },
+        {
+          test: require.resolve('@nuxeo/quill/dist/quill.js'),
+          use: [
+            {
+              loader: 'expose-loader',
+              options: 'Quill',
+            },
+          ],
+        },
       ],
     },
     plugins: [
