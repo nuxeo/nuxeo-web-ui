@@ -98,6 +98,7 @@ class S3Provider {
     AWS.config.update({
       credentials: new AWS.Credentials(options.awsSecretKeyId, options.awsSecretAccessKey, options.awsSessionToken),
       region: options.region,
+      s3ForcePathStyle: options.usePathStyleAccess || false,
       useAccelerateEndpoint: options.useS3Accelerate || false,
     });
 
@@ -115,7 +116,7 @@ class S3Provider {
           params: {
             Bucket: this.extraInfo.bucket,
           },
-          endpoint: this.extraInfo.endpoint,
+          endpoint: this.extraInfo.endpoint || null,
           computeChecksums: true,
         });
       });
