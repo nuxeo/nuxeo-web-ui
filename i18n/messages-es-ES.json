@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "Vaciar papelera",
   "documentTrashContent.emptyTrash.success": "Papelera vaciada",
   "documentTrashContent.emptyTrash.error": "Error al vaciar la papelera ",
-  "documentView.layoutNotFound": "No pudo encontrar el diseño de la vista para {0}.",
   "documentVocabularyManagement.layoutNotFound": "No se pudo encontrar el diseño de edición para {0}.",
   "bulkDownload.completed": "La exportación comprimida está preparada.",
   "bulkDownload.error": "Se ha producido un error al comprimir archivos: {0}",

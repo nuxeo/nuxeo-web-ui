@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "Hustu zakarrontzia",
   "documentTrashContent.emptyTrash.success": "Zakarrontzia hustuta",
   "documentTrashContent.emptyTrash.error": "Errorea zakarrontzia hustean ",
-  "documentView.layoutNotFound": "Ez da bistaratzeko diseinurik aurkitu honentzat: {0}.",
   "documentVocabularyManagement.layoutNotFound": "Ez da editatzeko diseinurik aurkitu honentzat: {0}.",
   "bulkDownload.completed": "Zip esportazioa prest dago.",
   "bulkDownload.error": "Errore bat gertatu da fitxategiak ZIPera konprimatzean: {0}",

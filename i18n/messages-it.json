@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "Svuota cestino",
   "documentTrashContent.emptyTrash.success": "Cestino svuotato",
   "documentTrashContent.emptyTrash.error": "Errore durante lo svuotamento del cestino ",
-  "documentView.layoutNotFound": "Impossibile trovare disposizione vista per {0}.",
   "documentVocabularyManagement.layoutNotFound": "Impossibile trovare la disposizione per {0}.",
   "bulkDownload.completed": "Esportazione ZIP pronta.",
   "bulkDownload.error": "Si è verificato un errore durante la compressione dei file: {0}",

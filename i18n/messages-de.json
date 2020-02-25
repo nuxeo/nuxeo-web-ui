@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "Papierkorb leeren",
   "documentTrashContent.emptyTrash.success": "Papierkorb geleert",
   "documentTrashContent.emptyTrash.error": "Fehler beim Leeren des Papierkorbs ",
-  "documentView.layoutNotFound": "Anzeigelayout für {0} nicht gefunden.",
   "documentVocabularyManagement.layoutNotFound": "Bearbeitungslayout für {0} nicht gefunden.",
   "bulkDownload.completed": "Der ZIP-Export ist bereit.",
   "bulkDownload.error": "Beim Zippen von Dateien ist ein Fehler aufgetreten: {0}",

@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "清空垃圾箱",
   "documentTrashContent.emptyTrash.success": "回收站：空的",
   "documentTrashContent.emptyTrash.error": "清空垃圾桶时出错 ",
-  "documentView.layoutNotFound": "找不到 {0} 的视图布局。",
   "documentVocabularyManagement.layoutNotFound": "找不到 {0} 的视图布局。",
   "bulkDownload.completed": "Zip 导出已就绪。",
   "bulkDownload.error": "An error occurred while zipping files: {0}",

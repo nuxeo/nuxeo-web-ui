@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "Töm papperskorg",
   "documentTrashContent.emptyTrash.success": "Papperskorg tömd",
   "documentTrashContent.emptyTrash.error": "Fel vid tömning av papperskorg ",
-  "documentView.layoutNotFound": "Det gick inte att hitta vylayout för {0}.",
   "documentVocabularyManagement.layoutNotFound": "Det gick inte att hitta redigeringslayout för {0}.",
   "bulkDownload.completed": "Zip-exporten är färdig.",
   "bulkDownload.error": "Ett fel uppstod när du zippade filer: {0}",

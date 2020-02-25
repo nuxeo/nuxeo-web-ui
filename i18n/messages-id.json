@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "Bersihkan sampah",
   "documentTrashContent.emptyTrash.success": "Sampah dibersihkan",
   "documentTrashContent.emptyTrash.error": "Kesalahan saat membersihkan sampah ",
-  "documentView.layoutNotFound": "Gagal menemukan lihat tata letak untuk {0}.",
   "documentVocabularyManagement.layoutNotFound": "Gagal menemukan sunting tata letak untuk {0}.",
   "bulkDownload.completed": "Ekspor Zip sudah siap.",
   "bulkDownload.error": "Terjadi kesalahan saat zipping file: {0}",

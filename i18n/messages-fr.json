@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "Vider la corbeille",
   "documentTrashContent.emptyTrash.success": "Corbeille vidée",
   "documentTrashContent.emptyTrash.error": "Erreur en vidant la corbeille ",
-  "documentView.layoutNotFound": "Aucun formulaire de consultation pour {0}",
   "documentVocabularyManagement.layoutNotFound": "Aucun formulaire de modification pour {0}",
   "bulkDownload.completed": "Export zip prêt.",
   "bulkDownload.error": "Une erreur s’est produite lors de la compression des fichiers : {0}",

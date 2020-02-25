@@ -484,7 +484,6 @@
   "documentTrashContent.emptyTrash": "Prullenbak legen",
   "documentTrashContent.emptyTrash.success": "Prullenbak geleegd",
   "documentTrashContent.emptyTrash.error": "Fout bij het legen van de prullenbak ",
-  "documentView.layoutNotFound": "Kon Indeling weergave voor {0} niet vinden.",
   "documentVocabularyManagement.layoutNotFound": "Kon Indeling bewerken voor {0} niet vinden.",
   "bulkDownload.completed": "Zipexport is gereed.",
   "bulkDownload.error": "Er is een fout opgetreden tijdens het zippen van bestanden: {0}",
