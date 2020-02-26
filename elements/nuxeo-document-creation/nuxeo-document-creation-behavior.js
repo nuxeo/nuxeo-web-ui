@@ -112,6 +112,7 @@ export const DocumentCreationBehavior = [
         'fetch-document': 'properties',
         'translate-directoryEntry': 'label',
       };
+      schemaFetcher.enrichers = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers) || {};
       return schemaFetcher.get().then((doc) => {
         typeCache[this.selectedDocType.type][this.targetPath] = doc;
         return initializeDoc(doc, properties);
