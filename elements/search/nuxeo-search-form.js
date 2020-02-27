@@ -562,7 +562,10 @@ Polymer({
     /**
      * The `nuxeo-results` element bound to this form.
      */
-    results: Object,
+    results: {
+      type: Object,
+      notify: true,
+    },
 
     /**
      * If `true`, aggregagtes from page provider definition will not be computed.
@@ -728,6 +731,7 @@ Polymer({
       // if the view is not initialized yet, navigating to the search will trigger a search and display the results
       this.navigateTo('search', this.searchName);
     }
+    return Promise.resolve();
   },
 
   _reset() {
@@ -904,5 +908,28 @@ Polymer({
 
   _displayQuickFilters() {
     return this._quickFilters && this._quickFilters.length > 0;
+  },
+
+  _loadSavedSearch(id) {
+    if (!id) {
+      return;
+    }
+    const load = () =>
+      (!this.searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
+        this.selectedSearchIdx = this.searches.findIndex((s) => s.id === id) + 1;
+        // XXX rely on debouncer to update the results request with the saved search params
+        this._fetch(this.results);
+      });
+    if (this.results) {
+      load();
+    } else {
+      this._loadSavedSearchListener = () => {
+        if (this.results) {
+          load();
+          this.removeEventListener('results-changed', this._loadSavedSearchListener);
+        }
+      };
+      this.addEventListener('results-changed', this._loadSavedSearchListener);
+    }
   },
 });
