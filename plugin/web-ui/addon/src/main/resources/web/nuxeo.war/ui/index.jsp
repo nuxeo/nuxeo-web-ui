@@ -105,8 +105,6 @@ limitations under the License.
 
   <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
 
-  <script defer src="vendor/alloy/alloy-editor-all.js"></script>
-
   <script>
     var Nuxeo = Nuxeo || {};
     Nuxeo.UI = Nuxeo.UI || {};

@@ -43,18 +43,6 @@ const thirdparty = [
     to: join(TARGET, 'vendor/moment'),
   },
   {
-    from: 'node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js',
-    to: join(TARGET, 'vendor/alloy'),
-  },
-  {
-    from: 'node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/lang/alloy-editor',
-    to: join(TARGET, 'vendor/alloy/lang/alloy-editor'),
-  },
-  {
-    from: 'node_modules/@nuxeo/nuxeo-ui-elements/widgets/alloy/fonts',
-    to: join(TARGET, 'vendor/alloy/fonts'),
-  },
-  {
     from: 'node_modules/cropperjs/dist/cropper.css',
     to: join(TARGET, 'vendor/cropperjs/dist'),
   },

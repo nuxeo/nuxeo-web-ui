@@ -53,8 +53,6 @@
     "fix:ui_elements": "replace '/node_modules/@nuxeo/nuxeo-ui-elements/' '${window.location.pathname}/' dist/*.js",
     "fix:pdfjs": "replace 'pdfjs/web/viewer.html' '../vendor/pdfjs/web/viewer.html' dist/*.js",
     "fix:cropper": "replace '/node_modules/cropperjs/dist/cropper.css' 'vendor/cropperjs/dist/cropper.css' dist/*.js",
-    "fix:alloy": "replace 'alloy/lang/alloy-editor/' '../vendor/alloy/lang/alloy-editor/' dist/*.js",
-    "fix:alloyfonts": "replace 'fonts/alloyeditor-ocean\\.' 'vendor/alloy/fonts/alloyeditor-ocean.' dist/*.js",
     "fix:fonts": "replace '\\.\\./fonts' './fonts' dist/*.js",
     "build:analyze": "webpack --env production --analyze",
     "lint:polymer": "polymer lint -i elements/**/*.js addons/**/*.js",
