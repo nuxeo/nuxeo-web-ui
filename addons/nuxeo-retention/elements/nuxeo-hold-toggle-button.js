@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
@@ -22,116 +22,121 @@ import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.j
 /**
 `nuxeo-hold-toggle-button`
 @group Nuxeo UI
-@element nuxeo-attach-rule-button
+@element nuxeo-hold-toggle-button
 */
-Polymer({
-  _template: html`
-    <style include="nuxeo-styles nuxeo-action-button-styles">
-      :host([hold]) paper-icon-button {
-        color: var(--icon-toggle-outline-color, var(--nuxeo-action-color-activated));
-      }
-    </style>
+class RetentionHoldToggleButton extends mixinBehaviors([FiltersBehavior, FormatBehavior], Nuxeo.Element) {
+  static get template() {
+    return html`
+      <style include="nuxeo-styles nuxeo-action-button-styles">
+        :host([hold]) paper-icon-button {
+          color: var(--icon-toggle-outline-color, var(--nuxeo-action-color-activated));
+        }
+      </style>
 
-    <nuxeo-operation id="opHold" on-poll-start="_onHoldPollStart" on-response="_onHoldResponse"> </nuxeo-operation>
-    <nuxeo-operation id="opUnhold" on-poll-start="_onUnholdPollStart" on-response="_onUnholdResponse">
-    </nuxeo-operation>
+      <nuxeo-operation id="opHold" on-poll-start="_onHoldPollStart" on-response="_onHoldResponse"> </nuxeo-operation>
+      <nuxeo-operation id="opUnhold" on-poll-start="_onUnholdPollStart" on-response="_onUnholdResponse">
+      </nuxeo-operation>
 
-    <dom-if if="[[_isAvailable(provider, document)]]">
-      <template>
-        <div class="action" on-click="_toggle">
-          <paper-icon-button icon="[[icon]]" noink="" on-clock=""></paper-icon-button>
-          <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
-          <nuxeo-tooltip>[[tooltip]]</nuxeo-tooltip>
+      <dom-if if="[[_isAvailable(provider, document)]]">
+        <template>
+          <div class="action" on-click="_toggle">
+            <paper-icon-button icon="[[icon]]" noink="" on-clock=""></paper-icon-button>
+            <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+            <nuxeo-tooltip>[[tooltip]]</nuxeo-tooltip>
+          </div>
+        </template>
+      </dom-if>
+
+      <nuxeo-dialog id="dialog" with-backdrop="" on-iron-overlay-closed="_resetPopup" no-auto-focus="">
+        <h2>[[i18n('retention.holdToggleButton.label.heading')]]</h2>
+        <paper-dialog-scrollable>
+          <nuxeo-textarea
+            name="description"
+            label="[[i18n('retention.holdToggleButton.label.description')]]"
+            value="{{description}}"
+          ></nuxeo-textarea>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
+          <paper-button name="hold" class="primary" on-tap="_hold">
+            [[_label]]
+          </paper-button>
         </div>
-      </template>
-    </dom-if>
+      </nuxeo-dialog>
+    `;
+  }
 
-    <nuxeo-dialog id="dialog" with-backdrop="" on-iron-overlay-closed="_resetPopup" no-auto-focus="">
-      <h2>[[i18n('retention.holdToggleButton.label.heading')]]</h2>
-      <paper-dialog-scrollable>
-        <nuxeo-textarea
-          name="description"
-          label="[[i18n('retention.holdToggleButton.label.description')]]"
-          value="{{description}}"
-        ></nuxeo-textarea>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
-        <paper-button name="hold" class="primary" on-tap="_hold">
-          [[_label]]
-        </paper-button>
-      </div>
-    </nuxeo-dialog>
-  `,
+  static get is() {
+    return 'nuxeo-hold-toggle-button';
+  }
 
-  is: 'nuxeo-hold-toggle-button',
-  behaviors: [FiltersBehavior, FormatBehavior],
+  static get properties() {
+    return {
+      /**
+       * Input document.
+       */
+      document: {
+        type: Object,
+        observer: '_documentChanged',
+      },
 
-  properties: {
-    /**
-     * Input document.
-     */
-    document: {
-      type: Object,
-      observer: '_documentChanged',
-    },
+      /**
+       * Icon to use (iconset_name:icon_name).
+       */
+      icon: {
+        type: String,
+        computed: '_computeIcon(hold)',
+      },
 
-    /**
-     * Icon to use (iconset_name:icon_name).
-     */
-    icon: {
-      type: String,
-      computed: '_computeIcon(hold)',
-    },
+      /**
+       * Hold state.
+       */
+      hold: {
+        type: Boolean,
+        notify: true,
+        reflectToAttribute: true,
+        value: false,
+      },
 
-    /**
-     * Hold state.
-     */
-    hold: {
-      type: Boolean,
-      notify: true,
-      reflectToAttribute: true,
-      value: false,
-    },
+      /**
+       * The translated label to be displayed by the action.
+       */
+      tooltip: {
+        type: String,
+        notify: true,
+        computed: '_computeTooltip(hold, i18n)',
+      },
 
-    /**
-     * The translated label to be displayed by the action.
-     */
-    tooltip: {
-      type: String,
-      notify: true,
-      computed: '_computeTooltip(hold, i18n)',
-    },
+      /**
+       * `true` if the action should display the label, `false` otherwise.
+       */
+      showLabel: {
+        type: Boolean,
+        value: false,
+      },
 
-    /**
-     * `true` if the action should display the label, `false` otherwise.
-     */
-    showLabel: {
-      type: Boolean,
-      value: false,
-    },
+      _label: {
+        type: String,
+        computed: '_computeLabel(hold, i18n)',
+      },
 
-    _label: {
-      type: String,
-      computed: '_computeLabel(hold, i18n)',
-    },
+      /**
+       * Page provider from which results are to be attached.
+       */
+      provider: {
+        type: Object,
+      },
 
-    /**
-     * Page provider from which results are to be attached.
-     */
-    provider: {
-      type: Object,
-    },
-
-    /**
-     * Description to be set along with the hold.
-     */
-    description: String,
-  },
+      /**
+       * Description to be set along with the hold.
+       */
+      description: String,
+    };
+  }
 
   _isAvailable() {
     return this.provider || this.canSetLegalHold(this.document);
-  },
+  }
 
   _hold() {
     if (this.provider) {
@@ -160,7 +165,7 @@ Polymer({
         );
       });
     }
-  },
+  }
 
   _unhold() {
     if (this.provider) {
@@ -185,7 +190,7 @@ Polymer({
         );
       });
     }
-  },
+  }
 
   _toggle() {
     if (!this.hold) {
@@ -193,48 +198,83 @@ Polymer({
     } else {
       this._unhold();
     }
-  },
+  }
 
   _toggleDialog() {
     this._resetPopup();
     this.$.dialog.toggle();
-  },
+  }
 
   _resetPopup() {
     this.set('description', null);
-  },
+  }
 
   _computeTooltip(hold) {
     return this.i18n(`retention.holdToggleButton.tooltip.${hold ? 'unhold' : 'hold'}`);
-  },
+  }
 
   _computeLabel(hold) {
     return this.i18n(`retention.holdToggleButton.tooltip.${hold ? 'unhold' : 'hold'}`);
-  },
+  }
 
   _computeIcon(hold) {
     return hold ? 'nuxeo:hold' : 'nuxeo:unhold';
-  },
+  }
 
   _documentChanged() {
     this.hold = !!(this.document && this.document.hasLegalHold);
-  },
+  }
 
   _onHoldPollStart() {
-    this.fire('notify', { message: this.i18n('retention.holdToggleButton.bulk.hold.poll') });
-  },
+    this.dispatchEvent(
+      new CustomEvent('notify', {
+        composed: true,
+        bubbles: true,
+        detail: { message: this.i18n('retention.holdToggleButton.bulk.hold.poll') },
+      }),
+    );
+  }
 
   _onHoldResponse() {
-    this.fire('notify', { message: this.i18n('retention.holdToggleButton.bulk.hold') });
-    this.fire('refresh');
-  },
+    this.dispatchEvent(
+      new CustomEvent('notify', {
+        composed: true,
+        bubbles: true,
+        detail: { message: this.i18n('retention.holdToggleButton.bulk.hold') },
+      }),
+    );
+    this.dispatchEvent(
+      new CustomEvent('refresh', {
+        composed: true,
+        bubbles: true,
+      }),
+    );
+  }
 
   _onUnholdPollStart() {
-    this.fire('notify', { message: this.i18n('retention.holdToggleButton.bulk.unhold.poll') });
-  },
+    this.dispatchEvent(
+      new CustomEvent('notify', {
+        composed: true,
+        bubbles: true,
+        detail: { message: this.i18n('retention.holdToggleButton.bulk.unhold.poll') },
+      }),
+    );
+  }
 
   _onUnholdResponse() {
-    this.fire('notify', { message: this.i18n('retention.holdToggleButton.bulk.unhold') });
-    this.fire('refresh');
-  },
-});
+    this.dispatchEvent(
+      new CustomEvent('notify', {
+        composed: true,
+        bubbles: true,
+        detail: { message: this.i18n('retention.holdToggleButton.bulk.unhold') },
+      }),
+    );
+    this.dispatchEvent(
+      new CustomEvent('refresh', {
+        composed: true,
+        bubbles: true,
+      }),
+    );
+  }
+}
+customElements.define(RetentionHoldToggleButton.is, RetentionHoldToggleButton);
