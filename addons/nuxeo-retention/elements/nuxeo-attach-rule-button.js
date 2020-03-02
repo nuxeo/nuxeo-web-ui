@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
@@ -25,141 +25,145 @@ import { escapeHTML } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-selectivity.j
 @group Nuxeo UI
 @element nuxeo-attach-rule-button
 */
-Polymer({
-  _template: html`
-    <style include="nuxeo-styles nuxeo-action-button-styles">
-      /* Fix known stacking issue in iOS (NXP-24600)
-         https://github.com/PolymerElements/paper-dialog-scrollable/issues/72 */
-      paper-dialog-scrollable {
-        --paper-dialog-scrollable: {
-          -webkit-overflow-scrolling: auto;
+class RetentionAttachRuleButton extends mixinBehaviors([FiltersBehavior, FormatBehavior], Nuxeo.Element) {
+  static get template() {
+    return html`
+      <style include="nuxeo-styles nuxeo-action-button-styles">
+        /* Fix known stacking issue in iOS (NXP-24600)
+          https://github.com/PolymerElements/paper-dialog-scrollable/issues/72 */
+        paper-dialog-scrollable {
+          --paper-dialog-scrollable: {
+            -webkit-overflow-scrolling: auto;
+          }
         }
-      }
-    </style>
+      </style>
 
-    <nuxeo-operation id="attachRuleOp" on-poll-start="_onPollStart" on-response="_onResponse"> </nuxeo-operation>
+      <nuxeo-operation id="attachRuleOp" on-poll-start="_onPollStart" on-response="_onResponse"> </nuxeo-operation>
 
-    <dom-if if="[[_isAvailable(provider, document)]]">
-      <template>
-        <div class="action" on-click="_toggleDialog">
-          <paper-icon-button icon="[[icon]]" noink=""></paper-icon-button>
-          <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
-          <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
+      <dom-if if="[[_isAvailable(provider, document)]]">
+        <template>
+          <div class="action" on-click="_toggleDialog">
+            <paper-icon-button icon="[[icon]]" noink=""></paper-icon-button>
+            <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+            <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
+          </div>
+        </template>
+      </dom-if>
+
+      <nuxeo-dialog id="dialog" with-backdrop="" no-auto-focus="">
+        <h2>[[i18n('retention.rule.attachButton.label.heading')]]</h2>
+        <paper-dialog-scrollable>
+          <nuxeo-document-suggestion
+            id="select"
+            required=""
+            label="[[i18n('retention.rule.attachButton.label.select')]]"
+            placeholder="[[i18n('retention.rule.attachButton.label.placeholder')]]"
+            selected-item="{{rule}}"
+            min-chars="0"
+            query-results-filter="[[_filterRules]]"
+            result-formatter="[[ruleResultFormatter]]"
+            selection-formatter="[[ruleSelectionFormatter]]"
+            page-provider="manual_retention_rule_suggestion"
+            repository="[[document.repository]]"
+          >
+          </nuxeo-document-suggestion>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
+          <paper-button name="add" class="primary" on-tap="_attach" disabled$="[[!_isValid(provider, document, rule)]]">
+            [[i18n('retention.rule.attachButton.label')]]
+          </paper-button>
         </div>
-      </template>
-    </dom-if>
+      </nuxeo-dialog>
+    `;
+  }
 
-    <nuxeo-dialog id="dialog" with-backdrop="" no-auto-focus="">
-      <h2>[[i18n('retention.rule.attachButton.label.heading')]]</h2>
-      <paper-dialog-scrollable>
-        <!-- TODO Improve formatter -->
-        <nuxeo-document-suggestion
-          id="select"
-          required=""
-          label="[[i18n('retention.rule.attachButton.label.select')]]"
-          placeholder="[[i18n('retention.rule.attachButton.label.placeholder')]]"
-          selected-item="{{rule}}"
-          min-chars="0"
-          query-results-filter="[[_filterRules]]"
-          result-formatter="[[ruleResultFormatter]]"
-          selection-formatter="[[ruleSelectionFormatter]]"
-          page-provider="manual_retention_rule_suggestion"
-          repository="[[document.repository]]"
-        >
-        </nuxeo-document-suggestion>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
-        <paper-button name="add" class="primary" on-tap="_attach" disabled$="[[!_isValid(provider, document, rule)]]">
-          [[i18n('retention.rule.attachButton.label')]]
-        </paper-button>
-      </div>
-    </nuxeo-dialog>
-  `,
+  static get is() {
+    return 'nuxeo-attach-rule-button';
+  }
 
-  is: 'nuxeo-attach-rule-button',
-  behaviors: [FiltersBehavior, FormatBehavior],
+  static get properties() {
+    return {
+      /**
+       * Input document.
+       */
+      document: Object,
 
-  properties: {
-    /**
-     * Input document.
-     */
-    document: Object,
-
-    /**
-     * Icon to use (iconset_name:icon_name).
-     */
-    icon: {
-      type: String,
-      value: 'nuxeo:attach-rule',
-    },
-
-    /**
-     * `true` if the action should display the label, `false` otherwise.
-     */
-    showLabel: {
-      type: Boolean,
-      value: false,
-    },
-
-    _label: {
-      type: String,
-      computed: '_computeLabel(i18n)',
-    },
-
-    // Dirty post filtering but hey! It's not like we can do a OR in NXQL
-    _filterRules: {
-      type: Function,
-      value() {
-        return this._filterRules.bind(this);
+      /**
+       * Icon to use (iconset_name:icon_name).
+       */
+      icon: {
+        type: String,
+        value: 'nuxeo:attach-rule',
       },
-    },
 
-    /**
-     * Rule.
-     */
-    rule: Object,
-
-    /**
-     * Page provider from which results are to be attached.
-     */
-    provider: {
-      type: Object,
-    },
-
-    /**
-     * Formatter for a suggested rule.
-     */
-    ruleResultFormatter: {
-      type: Function,
-      value() {
-        return this._ruleResultFormatter.bind(this);
+      /**
+       * `true` if the action should display the label, `false` otherwise.
+       */
+      showLabel: {
+        type: Boolean,
+        value: false,
       },
-    },
 
-    /**
-     * Formatter for a selected rule.
-     */
-    ruleSelectionFormatter: {
-      type: Function,
-      value() {
-        return this._ruleSelectionFormatter.bind(this);
+      _label: {
+        type: String,
+        computed: '_computeLabel(i18n)',
       },
-    },
-  },
+
+      // Dirty post filtering but hey! It's not like we can do a OR in NXQL
+      _filterRules: {
+        type: Function,
+        value() {
+          return this._filterRules.bind(this);
+        },
+      },
+
+      /**
+       * Rule.
+       */
+      rule: Object,
+
+      /**
+       * Page provider from which results are to be attached.
+       */
+      provider: {
+        type: Object,
+      },
+
+      /**
+       * Formatter for a suggested rule.
+       */
+      ruleResultFormatter: {
+        type: Function,
+        value() {
+          return this._ruleResultFormatter.bind(this);
+        },
+      },
+
+      /**
+       * Formatter for a selected rule.
+       */
+      ruleSelectionFormatter: {
+        type: Function,
+        value() {
+          return this._ruleSelectionFormatter.bind(this);
+        },
+      },
+    };
+  }
 
   _isAvailable() {
     return this.provider || this.canSetRetention(this.document);
-  },
+  }
 
   _computeLabel() {
     return this.i18n('retention.rule.attachButton.label.heading');
-  },
+  }
 
   _toggleDialog() {
     this.set('rule', undefined);
     this.$.dialog.toggle();
-  },
+  }
 
   _attach() {
     if (this.provider) {
@@ -186,20 +190,37 @@ Polymer({
         this._toggleDialog();
       });
     }
-  },
+  }
 
   _onPollStart() {
-    this.fire('notify', { message: this.i18n('retention.rule.attachButton.bulk.poll') });
-  },
+    this.dispatchEvent(
+      new CustomEvent('notify', {
+        composed: true,
+        bubbles: true,
+        detail: { message: this.i18n('retention.rule.attachButton.bulk.poll') },
+      }),
+    );
+  }
 
   _onResponse() {
-    this.fire('notify', { message: this.i18n('retention.rule.attachButton.attached') });
-    this.fire('refresh');
-  },
+    this.dispatchEvent(
+      new CustomEvent('notify', {
+        composed: true,
+        bubbles: true,
+        detail: { message: this.i18n('retention.rule.attachButton.attached') },
+      }),
+    );
+    this.dispatchEvent(
+      new CustomEvent('refresh', {
+        composed: true,
+        bubbles: true,
+      }),
+    );
+  }
 
   _isValid() {
     return (this.document || this.provider) && this.rule;
-  },
+  }
 
   _filterRules(rule) {
     if (this.provider) {
@@ -210,7 +231,7 @@ Polymer({
       return true;
     }
     return acceptedTypes.indexOf(this.document.type) !== -1;
-  },
+  }
 
   _ruleResultFormatter(doc) {
     let result = escapeHTML(doc.title);
@@ -220,9 +241,10 @@ Polymer({
       )}</span>`;
     }
     return result;
-  },
+  }
 
   _ruleSelectionFormatter(doc) {
     return escapeHTML(doc.title);
-  },
-});
+  }
+}
+customElements.define(RetentionAttachRuleButton.is, RetentionAttachRuleButton);
