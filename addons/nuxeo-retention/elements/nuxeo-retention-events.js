@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import moment from '@nuxeo/moment';
@@ -24,116 +24,121 @@ import moment from '@nuxeo/moment';
 @group Nuxeo UI
 @element nuxeo-retention-events
 */
-Polymer({
-  _template: html`
-    <style include="nuxeo-styles">
-      #heading {
-        @apply --layout-horizontal;
-        @apply --layout-end-justified;
-      }
+class RetentionEvents extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
+  static get template() {
+    return html`
+      <style include="nuxeo-styles">
+        #heading {
+          @apply --layout-horizontal;
+          @apply --layout-end-justified;
+        }
 
-      #table {
-        height: 50vh;
-      }
+        #table {
+          height: 50vh;
+        }
 
-      nuxeo-date-picker {
-        padding: 0 16px;
-      }
-    </style>
-    <nuxeo-page>
-      <div slot="header">
-        <span class="flex">[[i18n('retention.events')]]</span>
-      </div>
-      <nuxeo-card heading="[[i18n('retention.events.fire')]]">
-        <nuxeo-operation id="op" op="Retention.FireEvent" loading="{{firingEvent}}"> </nuxeo-operation>
-        <nuxeo-directory-suggestion
-          name="event"
-          role="widget"
-          value="{{_event}}"
-          label="[[i18n('retention.rule.label.startPolicy.eventBased.event.description')]]"
-          dbl10n=""
-          required=""
-          query-results-filter="[[_filterEvents]]"
-          directory-name="RetentionEvent"
-          min-chars="0"
-        >
-        </nuxeo-directory-suggestion>
-        <nuxeo-input name="eventInput" value="{{_eventInput}}" label="[[i18n('retention.events.input')]]">
-        </nuxeo-input>
-        <div class="buttons">
-          <paper-button name="fire" class="primary" on-tap="_fire" disabled$="[[!_canFire(_event, firingEvent)]]">
-            [[i18n('retention.events.fire')]]
-          </paper-button>
+        nuxeo-date-picker {
+          padding: 0 16px;
+        }
+      </style>
+      <nuxeo-page>
+        <div slot="header">
+          <span class="flex">[[i18n('retention.events')]]</span>
         </div>
-      </nuxeo-card>
-
-      <nuxeo-card heading="[[i18n('retention.events.history')]]">
-        <nuxeo-audit-page-provider
-          id="provider"
-          page-size="40"
-          params='{"eventCategory":"Retention"}'
-        ></nuxeo-audit-page-provider>
-        <div id="heading">
-          <template is="dom-if" if="[[visible]]">
-            <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.after')]]" value="{{startDate}}">
-            </nuxeo-date-picker>
-            <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.before')]]" value="{{endDate}}">
-            </nuxeo-date-picker>
-          </template>
-        </div>
-
-        <nuxeo-data-table
-          id="table"
-          paginable=""
-          nx-provider="provider"
-          empty-label="[[i18n('retention.events.empty')]]"
-        >
-          <nuxeo-data-table-column
-            name="[[i18n('retention.rule.label.startPolicy.eventBased.event.description')]]"
-            sort-by="eventId"
+        <nuxeo-card heading="[[i18n('retention.events.fire')]]">
+          <nuxeo-operation id="op" op="Retention.FireEvent" loading="{{firingEvent}}"> </nuxeo-operation>
+          <nuxeo-directory-suggestion
+            name="event"
+            role="widget"
+            value="{{_event}}"
+            label="[[i18n('retention.rule.label.startPolicy.eventBased.event.description')]]"
+            dbl10n=""
+            required=""
+            query-results-filter="[[_filterEvents]]"
+            directory-name="RetentionEvent"
+            min-chars="0"
           >
-            <template>[[item.eventId]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]" sort-by="eventDate">
-            <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]" sort-by="principalName">
-            <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('retention.events.input')]]">
-            <template>
-              [[item.comment]]
+          </nuxeo-directory-suggestion>
+          <nuxeo-input name="eventInput" value="{{_eventInput}}" label="[[i18n('retention.events.input')]]">
+          </nuxeo-input>
+          <div class="buttons">
+            <paper-button name="fire" class="primary" on-tap="_fire" disabled$="[[!_canFire(_event, firingEvent)]]">
+              [[i18n('retention.events.fire')]]
+            </paper-button>
+          </div>
+        </nuxeo-card>
+
+        <nuxeo-card heading="[[i18n('retention.events.history')]]">
+          <nuxeo-audit-page-provider
+            id="provider"
+            page-size="40"
+            params='{"eventCategory":"Retention"}'
+          ></nuxeo-audit-page-provider>
+          <div id="heading">
+            <template is="dom-if" if="[[visible]]">
+              <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.after')]]" value="{{startDate}}">
+              </nuxeo-date-picker>
+              <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.before')]]" value="{{endDate}}">
+              </nuxeo-date-picker>
             </template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
-      </nuxeo-card>
-    </nuxeo-page>
-  `,
+          </div>
 
-  is: 'nuxeo-retention-events',
-  behaviors: [I18nBehavior],
+          <nuxeo-data-table
+            id="table"
+            paginable=""
+            nx-provider="provider"
+            empty-label="[[i18n('retention.events.empty')]]"
+          >
+            <nuxeo-data-table-column
+              name="[[i18n('retention.rule.label.startPolicy.eventBased.event.description')]]"
+              sort-by="eventId"
+            >
+              <template>[[item.eventId]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]" sort-by="eventDate">
+              <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]" sort-by="principalName">
+              <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('retention.events.input')]]">
+              <template>
+                [[item.comment]]
+              </template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+        </nuxeo-card>
+      </nuxeo-page>
+    `;
+  }
 
-  properties: {
-    visible: {
-      type: Boolean,
-      observer: '_refreshHistory',
-    },
-    _event: {
-      type: String,
-      value: '',
-    },
-    _eventInput: String,
-    startDate: {
-      type: String,
-      notify: true,
-      observer: '_observeStartDate',
-    },
-    endDate: {
-      type: String,
-      notify: true,
-      observer: '_observeEndDate',
-    },
-  },
+  static get is() {
+    return 'nuxeo-retention-events';
+  }
+
+  static get properties() {
+    return {
+      visible: {
+        type: Boolean,
+        observer: '_refreshHistory',
+      },
+      _event: {
+        type: String,
+        value: '',
+      },
+      _eventInput: String,
+      startDate: {
+        type: String,
+        notify: true,
+        observer: '_observeStartDate',
+      },
+      endDate: {
+        type: String,
+        notify: true,
+        observer: '_observeEndDate',
+      },
+    };
+  }
 
   _observeStartDate() {
     if (this.startDate && this.startDate.length > 0) {
@@ -152,7 +157,7 @@ Polymer({
       delete this.$.provider.params.startDate;
       this._refreshHistory();
     }
-  },
+  }
 
   _observeEndDate() {
     if (this.endDate && this.endDate.length > 0) {
@@ -171,7 +176,7 @@ Polymer({
       delete this.$.provider.params.endDate;
       this._refreshHistory();
     }
-  },
+  }
 
   _refreshHistory(delay) {
     if (this.visible) {
@@ -185,7 +190,7 @@ Polymer({
         });
       }, delay);
     }
-  },
+  }
 
   _fire() {
     this.$.op.params = { name: this._event };
@@ -197,13 +202,15 @@ Polymer({
       // Audit is async, let's give it a little time to index
       this._refreshHistory(1000);
     });
-  },
+  }
 
   _canFire() {
     return !this.firingEvent && !!this._event;
-  },
+  }
 
   _filterEvents(evt) {
     return evt && evt.id && evt.id.indexOf('Retention.') === 0;
-  },
-});
+  }
+}
+customElements.define(RetentionEvents.is, RetentionEvents);
+Nuxeo.RetentionEvents = RetentionEvents;
