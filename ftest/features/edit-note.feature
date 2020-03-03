@@ -16,7 +16,7 @@ Feature: Edit Note
 
   Examples:
   | format   |
-  | HTML     |
+#  | HTML     |
   | XML      |
   | Markdown |
   | Text     |
