@@ -140,9 +140,10 @@ Then(/^I can see (\d+) search results$/, function(numberOfResults) {
   } else {
     this.ui.results.getResults(displayMode).waitForVisible();
     this.ui.results.resultsCountLabel.waitForVisible();
-    parseInt(this.ui.results.resultsCountLabel.getText(), 10).should.equal(numberOfResults);
     driver.waitUntil(
-      () => this.ui.results.resultsCount(displayMode) === numberOfResults,
+      () =>
+        parseInt(this.ui.results.resultsCountLabel.getText(), 10) === numberOfResults &&
+        this.ui.results.resultsCount(displayMode) === numberOfResults,
       `Expecting to get ${numberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
     );
   }
