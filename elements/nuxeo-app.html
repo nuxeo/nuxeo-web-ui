@@ -539,6 +539,10 @@ limitations under the License.
         },
 
         routeParams: String,
+
+        _routedSearch: {
+          type: Object,
+        },
       },
 
       listeners: {
@@ -641,11 +645,44 @@ limitations under the License.
         this.show('tasks');
       },
 
+      _getSavedSearchForm: function() {
+        if (!this._routedSearch) {
+          return null;
+        }
+        return this.$$('nuxeo-search-form[provider="' + this._routedSearch.properties['saved:providerName'] + '"]');
+      },
+
+      _loadSavedSearch: function() {
+        var savedSearchForm = this._getSavedSearchForm(this._routedSearch);
+        if (savedSearchForm && savedSearchForm.getAttribute('search-name') === this.searchName) {
+          savedSearchForm._loadSavedSearch(this._routedSearch.uid);
+          this._routedSearch = null;
+        }
+      },
+
+      _redirectSavedSearch: function() {
+        var savedSearchForm = this._getSavedSearchForm();
+        if (savedSearchForm) {
+          var name = savedSearchForm.getAttribute('search-name');
+          if (!this._searchOnLoad) {
+            this.navigateTo('search', name);
+            this._loadSavedSearch();
+          }
+        }
+      },
+
       load: function(page, id, path, action) {
         this.loading = true;
         this.docId = id;
         this.docPath = path;
         this.$.doc.get().then(function(doc) {
+          if (this.docId && doc.facets.includes('SavedSearch')) {
+            this._routedSearch = doc;
+            this._redirectSavedSearch();
+            this.loading = false;
+            return;
+          }
+
           if (this.docId && !doc.isVersion) {
             this.docId = '';
             this.docPath = doc.path;
@@ -838,8 +875,12 @@ limitations under the License.
       _updateSearch: function() {
         this.searchForm = this.$$("[search-name='" + this.searchName + "']");
         if (this.searchForm && this._searchOnLoad) {
-          this.searchForm._search();
-          this._searchOnLoad = false;
+          this.searchForm._search().then(function() {
+            this._loadSavedSearch();
+            this._searchOnLoad = false;
+          }.bind(this));
+        } else {
+          this._redirectSavedSearch();
         }
       },
 

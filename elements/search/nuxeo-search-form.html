@@ -540,7 +540,10 @@ limitations under the License.
         /**
          * The `nuxeo-results` element bound to this form.
          */
-        results: Object,
+        results: {
+          type: Object,
+          notify: true,
+        },
 
         /**
          * If `true`, aggregagtes from page provider definition will not be computed.
@@ -707,6 +710,7 @@ limitations under the License.
           // if the view is not initialized yet, navigating to the search will trigger a search and display the results
           this.navigateTo('search', this.searchName);
         }
+        return Promise.resolve();
       },
 
       _reset: function() {
@@ -876,8 +880,33 @@ limitations under the License.
 
       _displayQuickFilters: function() {
         return this._quickFilters && this._quickFilters.length > 0;
-      }
+      },
 
+      _loadSavedSearch: function(id) {
+        if (!id) {
+          return;
+        }
+        var load = function() {
+          (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(function() {
+            this.selectedSearchIdx = this.searches.findIndex(function(s) {
+              return s.id === id;
+            }) + 1;
+            // XXX rely on debouncer to update the results request with the saved search params
+            this._fetch(this.results);
+          }.bind(this));
+        }.bind(this);
+        if (this.results) {
+          load();
+        } else {
+          this._loadSavedSearchListener = function() {
+            if (this.results) {
+              load();
+              this.removeEventListener('results-changed', this._loadSavedSearchListener);
+            }
+          }.bind(this);
+          this.addEventListener('results-changed', this._loadSavedSearchListener);
+        }
+      }
     });
   </script>
 </dom-module>
