@@ -57,6 +57,16 @@ Feature: Search
     And I click the "defaultSearch" button
     Then I can view my saved search "Local Search" on "defaultSearch"
 
+  Scenario: Navigate to Default Saved Search by ID
+    Given I have a saved search named "Portugal", for the "default_search" page provider, with the following parameters
+      | key             | value               |
+      | dc_coverage_agg | ["europe/Portugal"] |
+    And I have permission Read for this saved search
+    When I browse to the saved search
+    Then I can see 5 search results
+    When I click the "defaultSearch" button
+    Then I can see that my saved search "Portugal" on "defaultSearch" is selected
+
   Scenario Outline: Quick Search
     When I click the QuickSearch button
     And I perform a QuickSearch for <searchTerm>
