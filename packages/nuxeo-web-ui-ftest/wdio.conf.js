@@ -26,12 +26,23 @@ const capability = {
 switch (capability.browserName) {
   case 'chrome':
     capability.chromeOptions = {
-      args: ['--no-sandbox'],
+      args: [
+        '--no-sandbox',
+        '--disable-breakpad',
+        '--disable-dev-shm-usage',
+        '--disable-client-side-phishing-detection',
+        '--disable-default-apps',
+        '--disable-extensions',
+        '--disable-renderer-backgrounding',
+        '--disable-sync',
+        '--no-first-run',
+      ],
     };
     if (process.env.HEADLESS) {
       capability.chromeOptions.args.push('--window-size=1920,1080');
       capability.chromeOptions.args.push('--headless');
-      capability.chromeOptions.args.push('--disable-dev-shm-usage');
+      capability.chromeOptions.args.push('--hide-scrollbars');
+      capability.chromeOptions.args.push('--mute-audio');
     }
     if (process.env.BROWSER_BINARY) {
       capability.chromeOptions.binary = process.env.BROWSER_BINARY;
