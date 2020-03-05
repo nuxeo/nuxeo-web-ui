@@ -34,8 +34,8 @@ Feature: Edit metadata
     | doctype  |
     | Note     |
     | File     |
-    | Folder   |
-    | Workspace|
+    #| Folder   |
+    #| Workspace|
 
   Scenario: Clear selectivity widget
     Given I have a File document
