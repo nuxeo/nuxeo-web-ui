@@ -24,6 +24,8 @@
  *   --runAll: do not apply fail fast premise which means that a scenario failure won't trigger feature failure
  *   --bail:  amount of tests that can fail before stopping the runner
  *            by default set to 0, which means don't bail, run all tests
+ *   --browserLogsPath: path to to which the browser logs will be saved;
+ *                      by default set to ./target/browser-logs
  */
 
 const fs = require('fs');
@@ -58,6 +60,8 @@ if (argv.report) {
 if (argv.screenshots) {
   process.env.SCREENSHOTS_PATH = argv.screenshotPath ? argv.screenshotPath : './target/screenshots';
 }
+
+process.env.BROWSER_LOGS_PATH = argv.browserLogsPath || './target/browser/log';
 
 let def = '';
 if (argv.stepDefinitions) {
