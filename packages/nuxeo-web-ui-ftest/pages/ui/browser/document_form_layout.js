@@ -21,8 +21,7 @@ export default class DocumentFormLayout extends BasePage {
   }
 
   save() {
-    const button = this.el.element('.actions #save');
-    button.waitForVisible();
-    button.click();
+    this.el.waitForVisible('.actions #save');
+    this.el.click('.actions #save');
   }
 }
