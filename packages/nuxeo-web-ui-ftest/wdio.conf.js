@@ -30,9 +30,7 @@ switch (capability.browserName) {
     };
     if (process.env.HEADLESS) {
       capability.chromeOptions.args.push('--window-size=1920,1080');
-      capability.chromeOptions.args.push('--single-process');
       capability.chromeOptions.args.push('--headless');
-      capability.chromeOptions.args.push('--disable-gpu');
       capability.chromeOptions.args.push('--disable-dev-shm-usage');
     }
     if (process.env.BROWSER_BINARY) {
