@@ -250,13 +250,13 @@ Polymer({
         <nuxeo-search
           id="saved-searches"
           headers="[[headers]]"
-          searches="{{searches}}"
+          searches="{{_searches}}"
           params="[[_computeSavedSearchesParams(provider)]]"
         ></nuxeo-search>
         <template is="dom-if" if="[[!onlyQueue]]">
           <nuxeo-select id="actionsDropdown" selected="{{selectedSearchIdx}}">
             <paper-item>[[i18n('searchForm.searchFilters')]]</paper-item>
-            <template is="dom-repeat" items="[[searches]]" as="search">
+            <template is="dom-repeat" items="[[_searches]]" as="search">
               <paper-item>[[search.title]]</paper-item>
             </template>
           </nuxeo-select>
@@ -571,6 +571,8 @@ Polymer({
      * If `true`, aggregagtes from page provider definition will not be computed.
      */
     skipAggregates: Boolean,
+
+    _searches: Array,
   },
 
   observers: [
@@ -581,7 +583,7 @@ Polymer({
 
   _visibleChanged() {
     if (this.visible) {
-      if (!this.searches) {
+      if (!this._searches) {
         this.$['saved-searches'].get();
         if (this.form.params !== undefined) {
           this.params = this.form.params;
@@ -679,7 +681,7 @@ Polymer({
   _selectedSearchIdxChanged() {
     if (this._isSavedSearch()) {
       this.isSavedSearch = true;
-      this.selectedSearch = this.searches[this.selectedSearchIdx - 1];
+      this.selectedSearch = this._searches[this.selectedSearchIdx - 1];
       this.params = this._mutateParams(this.selectedSearch.params);
       this._navigateToResults();
     } else {
@@ -725,7 +727,7 @@ Polymer({
   _search() {
     if (this.results) {
       this.results.reset();
-      return this._fetch(this.results).then(this._navigateToResults.bind(this));
+      return this._fetch(this.results).then(this._navigateToResults);
     }
     if (this.visible) {
       // if the view is not initialized yet, navigating to the search will trigger a search and display the results
@@ -797,7 +799,7 @@ Polymer({
         this.$.saveDialog.close();
         this.selectedSearch = search;
         this.$['saved-searches'].get().then(() => {
-          this.selectedSearchIdx = this.searches.findIndex((s) => s.id === id) + 1;
+          this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
         });
       });
     } else {
@@ -814,7 +816,7 @@ Polymer({
         if (this._renaming) {
           this.$.renameDialog.close();
           this.$['saved-searches'].get().then(() => {
-            this.set(`searches.${this.selectedSearchIdx - 1}.title`, _el.data.title);
+            this.set(`_searches.${this.selectedSearchIdx - 1}.title`, _el.data.title);
             // hack required to update the paper-input inside the paper-dropdown-menu
             const idx = this.selectedSearchIdx;
             this.selectedSearchIdx = 0;
@@ -836,7 +838,7 @@ Polymer({
       this.$['saved-searches'].get().then(() => {
         // hack required to update the paper-input inside the paper-dropdown-menu
         this.selectedSearchIdx = 0;
-        this.selectedSearchIdx = this.searches.length;
+        this.selectedSearchIdx = this._searches.length;
       });
     });
   },
@@ -915,8 +917,8 @@ Polymer({
       return;
     }
     const load = () =>
-      (!this.searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
-        this.selectedSearchIdx = this.searches.findIndex((s) => s.id === id) + 1;
+      (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
+        this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
         // XXX rely on debouncer to update the results request with the saved search params
         this._fetch(this.results);
       });
