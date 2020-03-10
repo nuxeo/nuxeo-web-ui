@@ -146,6 +146,7 @@ pipeline {
             } finally {
               try {
                 archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
+                cucumber fileIncludePattern: '**/*.json', jsonReportDirectory: 'ftest/target/cucumber-reports/', sortingMethod: 'NATURAL'
               } catch (err) {
                 echo hudson.Functions.printThrowable(err)
               }
@@ -252,6 +253,8 @@ pipeline {
           step([$class: 'JiraIssueUpdater', issueSelector: [$class: 'DefaultIssueSelector'], scm: scm])
         }
       }
+
+      cucumber fileIncludePattern: 'ftest/target/cucumber-reports/*.json', sortingMethod: 'NATURAL'
     }
   }
 }
