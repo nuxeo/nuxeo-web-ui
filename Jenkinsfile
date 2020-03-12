@@ -74,7 +74,7 @@ pipeline {
             def nodeVersion = sh(script: 'node -v', returnStdout: true).trim()
             echo "node version: ${nodeVersion}"
           }
-          sh 'npm install --no-package-lock --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/'
+          sh 'npm install --no-package-lock'
           dir('packages/nuxeo-web-ui-ftest') {
             sh 'npm install --no-package-lock'
           }
