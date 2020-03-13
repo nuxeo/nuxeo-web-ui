@@ -6,7 +6,7 @@
   <require>org.nuxeo.ecm.core.schema.TypeService</require>
 
   <extension target="org.nuxeo.ecm.core.schema.TypeService" point="schema">
-    <schema name="files" src="schema/files.xsd"/>
+    <schema name="files" src="data/schemas/files.xsd"/>
     <schema name="ftest1" prefix="ft1" override="true" src="data/schemas/ftest1.xsd"/>
     <schema name="ftest2" prefix="ft2" override="true" src="data/schemas/ftest2.xsd"/>
     <schema name="ftest3" prefix="ft3" override="true" src="data/schemas/ftest3.xsd"/>
