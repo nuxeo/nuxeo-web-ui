@@ -200,6 +200,7 @@ Polymer({
                   class="docTypeButton"
                   on-tap="_selectType"
                   data-args$="[[type]]"
+                  disabled$="[[!_canCreate(canCreate, creating)]]"
                 >
                   <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
                   <div class="typeLabel">[[_getTypeLabel(type)]]</div>
