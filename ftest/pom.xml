@@ -61,6 +61,12 @@
       <type>zip</type>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.nuxeo.packages</groupId>
+      <artifactId>nuxeo-retention-package</artifactId>
+      <type>zip</type>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
