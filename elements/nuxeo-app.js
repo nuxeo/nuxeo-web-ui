@@ -221,7 +221,7 @@ Polymer({
       #drawer iron-pages {
         @apply --layout-vertical;
         color: var(--nuxeo-drawer-text);
-        width: 294px;
+        width: calc(100% - var(--nuxeo-sidebar-width));
         height: 100vh;
         margin-left: var(--nuxeo-sidebar-width);
         background-color: var(--nuxeo-drawer-background);

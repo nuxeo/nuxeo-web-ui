@@ -18,6 +18,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
+import { IronResizableBehavior } from '@polymer/iron-resizable-behavior';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-input/paper-input.js';
@@ -51,8 +52,9 @@ Polymer({
     <style include="nuxeo-styles iron-flex">
       :host {
         @apply --layout-vertical;
-        @apply --layout-flex;
         display: block;
+        height: calc(var(--vh, 1vh) * 100);
+        width: 100%;
       }
 
       [hidden] {
@@ -66,7 +68,13 @@ Polymer({
       .actions {
         @apply --layout-vertical;
         @apply --nx-actions;
-        padding: 0 1rem;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        margin: 0;
+        padding: 1rem;
+        background-color: var(--nuxeo-drawer-background);
       }
 
       .actions paper-button {
@@ -113,6 +121,7 @@ Polymer({
       }
 
       nuxeo-select {
+        width: 100%;
         margin-right: 56px;
       }
 
@@ -141,8 +150,8 @@ Polymer({
       .content {
         @apply --layout-flex;
         @apply --layout-vertical;
-        height: calc(100vh - 61px - var(--nuxeo-app-top));
-        width: 293px;
+        height: calc(100% - 68px - var(--nuxeo-app-top));
+        width: 100%;
       }
 
       .header {
@@ -150,6 +159,7 @@ Polymer({
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
         @apply --layout-horizontal;
         @apply --layout-center;
+        background-color: var(--nuxeo-drawer-background);
       }
 
       .header h1 {
@@ -224,6 +234,11 @@ Polymer({
 
       #checkbox.paper-checkbox {
         border: 1px solid;
+      }
+
+      #search-container {
+        height: 100%;
+        position: relative;
       }
     </style>
 
@@ -322,20 +337,20 @@ Polymer({
             </template>
           </nuxeo-data-list>
         </div>
+      </div>
 
-        <div class="actions" hidden$="{{queue}}">
-          <div class="auto-search" hidden$="[[!displayAutoControl]]">
-            <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
-            <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
-          </div>
-          <div class="action-buttons">
-            <paper-button noink class="reset" disabled$="[[!dirty]]" on-tap="_reset">
-              [[i18n('command.Reset')]]
-            </paper-button>
-            <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
-              [[i18n('command.search')]]
-            </paper-button>
-          </div>
+      <div class="actions" hidden$="{{queue}}">
+        <div class="auto-search" hidden$="[[!displayAutoControl]]">
+          <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
+          <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
+        </div>
+        <div class="action-buttons">
+          <paper-button noink class="reset" disabled$="[[!dirty]]" on-tap="_reset">
+            [[i18n('command.Reset')]]
+          </paper-button>
+          <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
+            [[i18n('command.search')]]
+          </paper-button>
         </div>
       </div>
     </div>
@@ -386,7 +401,7 @@ Polymer({
   `,
 
   is: 'nuxeo-search-form',
-  behaviors: [I18nBehavior, RoutingBehavior],
+  behaviors: [I18nBehavior, RoutingBehavior, IronResizableBehavior],
 
   properties: {
     /**
@@ -580,6 +595,10 @@ Polymer({
     '_paramsChanged(params.*)',
     '_visibleChanged(auto, visible)',
   ],
+
+  listeners: {
+    'iron-resize': '_calculateViewportHeight',
+  },
 
   _visibleChanged() {
     if (this.visible) {
@@ -933,5 +952,13 @@ Polymer({
       };
       this.addEventListener('results-changed', this._loadSavedSearchListener);
     }
+  },
+
+  // To fix NXP-27429 so action buttons can be displayed on mobile browsers
+  _calculateViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    this.updateStyles({
+      '--vh': `${vh}px`,
+    });
   },
 });
