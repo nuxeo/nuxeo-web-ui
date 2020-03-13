@@ -185,6 +185,9 @@ export const DocumentCreationBehavior = [
       ) {
         this.set('canCreate', false);
         this.set('errorMessage', this.i18n('documentCreationBehavior.error.invalidSubtype'));
+      } else if (this.parent.isTrashed) {
+        this.set('canCreate', false);
+        this.set('errorMessage', this.i18n('documentCreationBehavior.error.trashedParent'));
       } else {
         this.set('canCreate', true);
         this.set('errorMessage', '');
