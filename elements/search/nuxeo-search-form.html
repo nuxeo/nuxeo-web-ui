@@ -14,10 +14,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
@@ -46,8 +46,8 @@ limitations under the License.
     <style include="nuxeo-styles iron-flex">
       :host {
         @apply --layout-vertical;
-        @apply --layout-flex;
         display: block;
+        height: calc(var(--vh, 1vh) * 100);
       }
 
       [hidden] {
@@ -132,7 +132,7 @@ limitations under the License.
       .content {
         @apply --layout-flex;
         @apply --layout-vertical;
-        height: calc(100vh - 61px - var(--nuxeo-app-top));
+        height: calc(100% - 61px - var(--nuxeo-app-top));
         width: 293px;
       }
 
@@ -215,6 +215,10 @@ limitations under the License.
 
       #checkbox.paper-checkbox {
         border: 1px solid;
+      }
+
+      #search-container {
+        height: 100%;
       }
     </style>
 
@@ -360,7 +364,7 @@ limitations under the License.
     Polymer({
       is: 'nuxeo-search-form',
 
-      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior],
+      behaviors: [Nuxeo.I18nBehavior, Nuxeo.RoutingBehavior, Polymer.IronResizableBehavior],
 
       properties: {
         /**
@@ -534,6 +538,10 @@ limitations under the License.
         '_paramsChanged(params.*)',
         '_visibleChanged(auto, visible)'
       ],
+
+      listeners: {
+        'iron-resize': '_calculateViewportHeight',
+      },
 
       _visibleChanged: function() {
         if (this.visible) {
@@ -865,7 +873,15 @@ limitations under the License.
           }.bind(this);
           this.addEventListener('view-changed', this._loadSavedSearchListener);
         }
-      }
+      },
+
+      // To fix NXP-27429 so action buttons can be displayed on mobile browsers
+      _calculateViewportHeight: function() {
+        var vh = window.innerHeight * 0.01;
+        this.updateStyles({
+          '--vh': vh + 'px',
+        });
+      },
     });
   </script>
 </dom-module>
