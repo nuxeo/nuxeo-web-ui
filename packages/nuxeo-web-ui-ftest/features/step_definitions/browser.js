@@ -86,7 +86,7 @@ Then('I can move selection up', function() {
 
 Then('I can see the {string} child document is at position "{int}"', function(title, pos) {
   this.ui.browser.waitForVisible();
-  this.ui.browser.indexOfChild(title).should.equals(pos - 1);
+  driver.waitUntil(() => this.ui.browser.indexOfChild(title) === pos - 1);
 });
 
 When('I sort the content by {string} in {string} order', function(field, order) {
