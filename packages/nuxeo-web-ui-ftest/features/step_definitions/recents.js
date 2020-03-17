@@ -12,7 +12,7 @@ Then('I can see the list of recently viewed documents', function() {
 
 Then('I can see the list of recently viewed documents has {int} item(s)', function(nb) {
   this.ui.drawer.recents.waitForVisible();
-  this.ui.drawer.recents.nbItems.should.be.equals(nb);
+  driver.waitUntil(() => this.ui.drawer.recents.nbItems === nb);
 });
 
 Then('I can see the list of recently viewed documents has {string} document', function(title) {
