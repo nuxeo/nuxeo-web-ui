@@ -404,6 +404,7 @@
   "documentCreationBehavior.error.invalidSubtype": "U kunt dit type document niet op deze locatie aanmaken.",
   "documentCreationBehavior.error.noPermission": "U hebt geen toestemmingen om op deze locatie content aan te maken.",
   "documentCreationBehavior.error.noSubtypes": "Selecteer een andere container om uw content aan te maken.",
+  "documentCreationBehavior.error.trashedParent": "You cannot create content under a trashed document.",
   "documentCreationForm.createError": "Kon document niet aanmaken.",
   "documentCreationForm.location": "Locatie",
   "documentCreationForm.newDoc.heading": "Nieuw {0}",

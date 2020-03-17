@@ -404,6 +404,7 @@
   "documentCreationBehavior.error.invalidSubtype": "您不能在此位置创建此类型的文档。",
   "documentCreationBehavior.error.noPermission": "您没有权限在此创建资源。",
   "documentCreationBehavior.error.noSubtypes": "选择其他容器来创建内容。",
+  "documentCreationBehavior.error.trashedParent": "You cannot create content under a trashed document.",
   "documentCreationForm.createError": "无法创建文档",
   "documentCreationForm.location": "位置",
   "documentCreationForm.newDoc.heading": "新建 {0}",

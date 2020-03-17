@@ -404,6 +404,7 @@
   "documentCreationBehavior.error.invalidSubtype": "Ezin duzu mota honetako dokumenturik sortu kokaleku honetan.",
   "documentCreationBehavior.error.noPermission": "Ez duzu kokaleku honetan sortzeko baimenik.",
   "documentCreationBehavior.error.noSubtypes": "Hautatu beste edukitzaile bat zure edukia sortzeko.",
+  "documentCreationBehavior.error.trashedParent": "You cannot create content under a trashed document.",
   "documentCreationForm.createError": "Huts egin du dokumentua sortzean.",
   "documentCreationForm.location": "Kokalekua",
   "documentCreationForm.newDoc.heading": "Berria: {0}",

@@ -404,6 +404,7 @@
   "documentCreationBehavior.error.invalidSubtype": "この場所にこのタイプの文書を作成することはできません。",
   "documentCreationBehavior.error.noPermission": "あなたはこの場所に作成することが許可されていません",
   "documentCreationBehavior.error.noSubtypes": "この場所にコンテンツを作成することができません",
+  "documentCreationBehavior.error.trashedParent": "You cannot create content under a trashed document.",
   "documentCreationForm.createError": "文書を作成できませんでした。",
   "documentCreationForm.location": "場所",
   "documentCreationForm.newDoc.heading": "新規{0}",
