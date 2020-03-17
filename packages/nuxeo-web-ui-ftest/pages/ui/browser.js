@@ -244,7 +244,7 @@ export default class Browser extends BasePage {
    * Results might vary with the viewport size as only visible items are taken into account.
    */
   waitForNbChildren(nb) {
-    this.currentPage.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
+    this.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
     driver.waitUntil(() => {
       let count = 0;
       try {
