@@ -16,21 +16,21 @@ export default class DocumentPublications extends BasePage {
     const result = rows.value.find((row) => {
       if (row.isVisible('nuxeo-data-table-cell a.path')) {
         const foundPath = row.getText('nuxeo-data-table-cell a.path').toLowerCase();
+        if (foundPath.indexOf(path.trim().toLowerCase()) !== 0) {
+          return false;
+        }
         const foundRendition = row
           .getText('nuxeo-data-table-cell .rendition')
           .trim()
           .toLowerCase();
+        if (foundRendition !== rendition.toLowerCase()) {
+          return false;
+        }
         const foundVersion = row
           .getText('nuxeo-data-table-cell .version')
           .trim()
           .toLowerCase();
-        if (foundPath.indexOf(path.trim().toLowerCase()) !== 0) {
-          return false;
-        }
-        if (foundRendition !== rendition.toLowerCase()) {
-          return false;
-        }
-        if ((foundVersion || version) && foundVersion !== version.toLowerCase()) {
+        if (foundVersion && version != null && foundVersion !== version.toLowerCase()) {
           return false;
         }
         return true;
