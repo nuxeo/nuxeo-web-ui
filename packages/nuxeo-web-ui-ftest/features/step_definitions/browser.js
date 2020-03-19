@@ -117,8 +117,46 @@ Then(/^I can see the document has the following publication$/, function(table) {
 });
 
 Then(/^I can republish the following publication$/, function(table) {
-  table.rows().forEach((row) => {
-    this.ui.browser.publicationView.republish(row[0], row[1], row[2]);
+  table.hashes().forEach((row) => {
+    const { path, rendition, version } = row;
+    // XXX we need to store the current version of the publication to check against the updated version after republish
+    let previousVersion;
+    driver.waitUntil(() => {
+      const pubRow = this.ui.browser.publicationView.getPublicationRow(path, rendition);
+      if (!pubRow) {
+        return false;
+      }
+      previousVersion = parseFloat(
+        pubRow
+          .getText('nuxeo-data-table-cell .version')
+          .trim()
+          .toLowerCase(),
+      );
+      return !Number.isNaN(previousVersion);
+    });
+    this.ui.browser.publicationView.republish(path, rendition, version);
+    // XXX we need to wait for the new version to be greater than the previous one, otherwise we can have the steps
+    // executed after this one operating over an outdated list of publications
+    driver.waitUntil(() => {
+      try {
+        const pubRow = this.ui.browser.publicationView.getPublicationRow(path, rendition);
+        if (!pubRow) {
+          return false;
+        }
+        const newVersion = parseFloat(
+          pubRow
+            .getText('nuxeo-data-table-cell .version')
+            .trim()
+            .toLowerCase(),
+        );
+        if (Number.isNaN(newVersion)) {
+          return false;
+        }
+        return newVersion > previousVersion;
+      } catch (e) {
+        return false;
+      }
+    });
   });
 });
 
@@ -128,7 +166,36 @@ Then('I can publish selection to {string}', function(target) {
 });
 
 Then(/^I can perform the following publications$/, function(table) {
-  table.rows().forEach((row) => {
-    this.ui.browser.publishDialog.publish(row[0], row[1], row[2], row[3]);
+  let page = this.ui.browser.documentPage(this.doc.type);
+  page.waitForVisible();
+  let pubCount = page.publicationsCount;
+  pubCount.should.not.be.NaN;
+  table.hashes().forEach((row) => {
+    const { target, rendition, version, override } = row;
+    this.ui.browser.publishDialog.publish(target, rendition, version, override);
+    // XXX We need to wait for the document to be updated after publishing, but this might take a while. If we don't
+    // do it, the next step can ve triggered before the view is updated, which can lead to an unexpected state. A way
+    // to achieve this is to wait for the number of publications to be updated on the document info panel.
+    driver.waitUntil(() => {
+      try {
+        page = this.ui.browser.documentPage(this.doc.type);
+        const newCount = page.publicationsCount;
+        let check;
+        // XXX if we pick a version that's not the latest, we no longer see the number of publications, and the versions
+        // bar will be displayed instead
+        if (page.isVisible('#versionInfoBar')) {
+          check = newCount === 0;
+        } else {
+          // XXX the problem might not be solved if we're only overriding one publication
+          check = override ? newCount === 1 : newCount > pubCount;
+        }
+        if (check) {
+          pubCount = page.publicationsCount;
+          return true;
+        }
+      } catch (e) {
+        return false;
+      }
+    });
   });
 });

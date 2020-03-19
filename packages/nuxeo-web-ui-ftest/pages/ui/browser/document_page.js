@@ -63,4 +63,20 @@ export default class DocumentPage extends BasePage {
   get comments() {
     return new DocumentCommentThread('nuxeo-document-comment-thread[name="comments"]');
   }
+
+  get publicationsCount() {
+    this.el.waitForVisible('nuxeo-document-info .item label');
+    const items = this.el.elements('nuxeo-document-info .item').value;
+    const pub = items.find((i) => i.element('label').getText() === 'Publications');
+    if (pub) {
+      return parseInt(
+        pub
+          .element('div')
+          .getText()
+          .trim(),
+        10,
+      );
+    }
+    return 0;
+  }
 }
