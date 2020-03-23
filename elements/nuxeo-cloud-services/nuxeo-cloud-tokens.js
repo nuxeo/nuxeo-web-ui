@@ -20,8 +20,8 @@ import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
-import './nuxeo-oauth2-provided-tokens';
-import './nuxeo-oauth2-consumed-tokens';
+import './nuxeo-oauth2-provided-tokens.js';
+import './nuxeo-oauth2-consumed-tokens.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 /**
