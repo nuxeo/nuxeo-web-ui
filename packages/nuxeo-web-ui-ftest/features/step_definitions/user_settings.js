@@ -16,14 +16,16 @@ When(/^I am on user cloud services page$/, function() {
 
 Then(/^I can only see (\d+) provider token[s]? that belong[s]? to me$/, function(numberOfTokens) {
   this.ui.userCloudServices.waitForVisible();
-  const tokens = this.ui.userCloudServices.getTokens(this.username);
-  tokens.length.should.equal(numberOfTokens);
+  driver.waitUntil(() => this.ui.userCloudServices.getTokens(this.username).length === numberOfTokens);
 });
 
 Then(/^I can delete token for provider "(.+)" that belongs to me$/, function(provider) {
   this.ui.userCloudServices.waitForVisible();
-  const tokens = this.ui.userCloudServices.getTokens(this.username, provider);
-  tokens.length.should.equal(1);
+  let tokens;
+  driver.waitUntil(() => {
+    tokens = this.ui.userCloudServices.getTokens(this.username, provider);
+    return tokens.length === 1;
+  });
   const deleteButton = tokens[0].deleteButton();
   deleteButton.waitForVisible();
   deleteButton.click();
@@ -48,13 +50,15 @@ When(/^I am on user authorized applications page$/, function() {
 
 Then(/^I can see "(.+)" as an authorized application$/, function(application) {
   this.ui.userAuthorizedApps.waitForVisible();
-  const tokens = this.ui.userAuthorizedApps.getApps(application);
-  tokens.length.should.equal(1);
+  let tokens;
+  driver.waitUntil(() => {
+    tokens = this.ui.userAuthorizedApps.getApps(application);
+    return tokens.length === 1;
+  });
 });
 
 Then(/^I can only see (\d+) authorized application[s]?$/, function(numberOfApps) {
-  const apps = this.ui.userAuthorizedApps.getApps();
-  apps.length.should.equal(numberOfApps);
+  driver.waitUntil(() => this.ui.userAuthorizedApps.getApps().length === numberOfApps);
 });
 
 Then(/^I can revoke access for "(.+)" application$/, function(appName) {
