@@ -164,13 +164,9 @@ Polymer({
   },
 
   _parseComment(comment) {
-    if (comment) {
-      const split = comment.split(':');
-      if (split.length >= 2) {
-        // split[0] is repo name, split[1] is doc id
-        return this.urlFor('document', split[1]);
-      }
-      return null;
+    if (comment && /^(\w+):(\S+)$/.test(comment)) {
+      // repoName:docId
+      return this.urlFor('document', comment.split(':')[1]);
     }
     return null;
   },
