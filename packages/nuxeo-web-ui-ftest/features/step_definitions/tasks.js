@@ -55,12 +55,14 @@ Then(/^I can see that "([^"]*)" belongs to (\w+) actors$/, function(user, option
   documentTaskView.waitForVisible();
   documentTaskView.waitForVisible(`${option === 'delegated' ? '#delegatedActors' : '#assignedActors'} nuxeo-tags`);
 
-  const actorsElement = option === 'delegated' ? documentTaskView.delegatedActors : documentTaskView.assignedActors;
-  documentTaskView.actorExists(actorsElement, user).should.be.true;
+  driver.waitUntil(() => {
+    const actorsElement = option === 'delegated' ? documentTaskView.delegatedActors : documentTaskView.assignedActors;
+    return documentTaskView.actorExists(actorsElement, user);
+  });
 });
 Then('I can see the my task list has {int} item(s)', function(nb) {
   this.ui.drawer.tasks.waitForVisible();
-  this.ui.drawer.tasks.nbItems.should.be.equals(nb);
+  driver.waitUntil(() => this.ui.drawer.tasks.nbItems === nb);
 });
 Then('I can perform the {string} task action', function(name) {
   this.ui.browser.documentTaskView.performAction(name);
