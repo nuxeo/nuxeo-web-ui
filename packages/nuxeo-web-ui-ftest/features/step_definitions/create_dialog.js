@@ -28,5 +28,6 @@ When('I create a document with the following properties:', function(table) {
 });
 
 Then('I see the {word} page', function(docType) {
+  this.ui.browser.waitForNotVisible('iron-overlay-backdrop');
   this.ui.browser.documentPage(docType).view.waitForVisible();
 });
