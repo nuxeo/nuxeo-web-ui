@@ -81,7 +81,7 @@ Polymer({
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.comment')]]">
           <template>
-            <a href$="[[_parseComment(item.comment)]]">[[item.comment]]</a>
+            <a href$="[[_parseComment(item.comment)]]">[[_formatComment(item.comment)]]</a>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.state')]]">
@@ -163,11 +163,19 @@ Polymer({
     return this.i18n(`activity.${key}`);
   },
 
+  // XXX: Both parse and format methods shouldn't be needed after NXP-28820
   _parseComment(comment) {
-    if (comment && /^(\w+):(\S+)$/.test(comment)) {
+    if (comment && /^\w+:(?:\w+-){2,}(?:\w+)$/.test(comment)) {
       // repoName:docId
       return this.urlFor('document', comment.split(':')[1]);
     }
     return null;
+  },
+
+  _formatComment(comment) {
+    if (moment(comment, moment.ISO_8601).isValid()) {
+      return this.formatDateTime(comment);
+    }
+    return comment;
   },
 });
