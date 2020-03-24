@@ -4,6 +4,7 @@ When(/^I give (\w+) permission to "([^"]*)" on the document$/, function(permissi
   this.ui.browser.permissionsViewButton.waitForVisible();
   this.ui.browser.permissionsViewButton.click();
   this.ui.browser.permissionsView.waitForVisible();
+  this.ui.browser.permissionsView.newPermissionButton.waitForVisible();
   this.ui.browser.permissionsView.newPermissionButton.click();
   this.ui.browser.permissionsView.setPermissions(name, {
     permission,
@@ -19,6 +20,7 @@ When(/^I give (\w+) permission on the document to the following users:$/, functi
   this.ui.browser.permissionsViewButton.waitForVisible();
   this.ui.browser.permissionsViewButton.click();
   this.ui.browser.permissionsView.waitForVisible();
+  this.ui.browser.permissionsView.newPermissionButton.waitForVisible();
   this.ui.browser.permissionsView.newPermissionButton.click();
 
   table.rows().forEach((row) => {
