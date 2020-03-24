@@ -92,6 +92,7 @@ Then('I attach the {string} rule to the document', function(ruleName) {
   fixtures.layouts.setValue(select, ruleName);
   dialog.waitForEnabled('paper-button[name="add"]');
   dialog.click('paper-button[name = "add"]');
+  driver.waitForVisible('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
 Then('I see the document is under retention', function() {
