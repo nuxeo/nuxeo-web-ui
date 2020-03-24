@@ -1,4 +1,4 @@
-FROM node:lts
+FROM node:10
 
 RUN npm config set registry=https://packages.nuxeo.com/repository/npm-all/
 
