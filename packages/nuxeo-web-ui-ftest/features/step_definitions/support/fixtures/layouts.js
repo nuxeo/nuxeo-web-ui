@@ -20,7 +20,7 @@ const suggestionSet = (element, value) => {
     for (let i = 0; i < values.length; i++) {
       element.waitForVisible(isMulti ? 'input' : '#input');
       element.element(isMulti ? 'input' : '.selectivity-caret').click();
-      const dropdown = element.element('.selectivity-dropdown:last-child');
+      let dropdown = element.element('.selectivity-dropdown:last-child');
       if (isMulti) {
         element.waitForVisible('.selectivity-multiple-input');
         element.element('.selectivity-multiple-input').setValue(values[i]);
@@ -34,20 +34,26 @@ const suggestionSet = (element, value) => {
         }
       }
       driver.waitUntil(() => {
-        if (dropdown.isVisible('.selectivity-result-item.highlight')) {
-          try {
+        try {
+          dropdown = element.element('.selectivity-dropdown:last-child');
+          if (dropdown.isVisible('.selectivity-result-item.highlight')) {
             const highlight = dropdown.element('.selectivity-result-item.highlight');
-            return highlight
-              .getText()
-              .trim()
-              .includes(values[i]);
-          } catch (e) {
+            if (
+              highlight
+                .getText()
+                .trim()
+                .includes(values[i])
+            ) {
+              dropdown.click('.selectivity-result-item.highlight');
+              return true;
+            }
             return false;
           }
+          return false;
+        } catch (e) {
+          return false;
         }
-        return false;
       });
-      dropdown.click('.selectivity-result-item.highlight');
     }
     // it's a reset
   } else if (element.getAttribute('multiple')) {
