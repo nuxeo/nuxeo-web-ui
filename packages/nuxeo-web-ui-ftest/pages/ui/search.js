@@ -59,7 +59,11 @@ export default class Search extends Results {
   }
 
   setFieldValue(field, value) {
-    const fieldEl = this.getField(field);
+    let fieldEl;
+    driver.waitUntil(() => {
+      fieldEl = this.getField(field);
+      return !!fieldEl.value;
+    });
     fieldEl.waitForVisible();
     fieldEl.scrollIntoView();
     return fixtures.layouts.setValue(fieldEl, value);

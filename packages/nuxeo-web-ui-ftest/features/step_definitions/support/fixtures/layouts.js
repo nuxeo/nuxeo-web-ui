@@ -15,6 +15,7 @@ const suggestionSet = (element, value) => {
   const isMulti = element.getAttribute('multiple');
   if (value) {
     const values = isMulti ? value.split(',') : [value];
+    element.waitForExist('#input');
     element.scrollIntoView('#input');
     for (let i = 0; i < values.length; i++) {
       element.waitForVisible(isMulti ? 'input' : '#input');
