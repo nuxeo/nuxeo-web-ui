@@ -604,7 +604,7 @@ Polymer({
     if (this.visible) {
       if (!this._searches) {
         this.$['saved-searches'].get();
-        if (this.form.params !== undefined) {
+        if (this.form && this.form.params !== undefined) {
           this.params = this.form.params;
         }
       }
