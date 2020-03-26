@@ -139,6 +139,8 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-html-editor.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-video/nuxeo-video-conversions.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-video/nuxeo-video-info.js';
 
 // Nuxeo Dataviz elements -->
 import '@nuxeo/nuxeo-dataviz-elements/nuxeo-audit-data.js';
@@ -238,10 +240,6 @@ import './nuxeo-keys/nuxeo-keys.js';
 
 // Note -->
 import './nuxeo-note-editor/nuxeo-note-editor.js';
-
-// Video -->
-import './nuxeo-video/nuxeo-video-info.js';
-import './nuxeo-video/nuxeo-video-conversions.js';
 
 // Right panel elements -->
 import './nuxeo-clipboard/nuxeo-clipboard.js';
