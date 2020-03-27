@@ -60,6 +60,15 @@ Polymer({
         color: white;
       }
 
+      .bar.coldStorage {
+        background: black;
+        color: white;
+      }
+
+      .storedInColdStorage {
+        margin-right: 3px;
+      }
+
       .item {
         @apply --layout-horizontal;
         @apply --layout-center;
@@ -177,6 +186,17 @@ Polymer({
     <template is="dom-if" if="[[isPublication(document)]]">
       <nuxeo-publication-info-bar document="[[document]]"></nuxeo-publication-info-bar>
     </template>
+
+    <!-- cold storage -->
+    <template is="dom-if" if="[[_contentStoredInColdStorage(document)]]">
+      <div id="coldStorageInfoBar" class="bar coldStorage">
+        <div class="layout horizontal center flex">
+          <iron-icon noink icon="nuxeo:coldstorage"></iron-icon>
+          <span class="storedInColdStorage">[[i18n('documentPage.content.storedInColdStorage')]]</span>
+          <span>[[i18n('documentPage.content.lowResolutionPreview')]]</span>
+        </div>
+      </div>
+    </template>
   `,
 
   is: 'nuxeo-document-info-bar',
@@ -250,5 +270,9 @@ Polymer({
 
   _toggleGraphDialog(e) {
     this.$$(`#graph-${e.model.workflow.id}`).show();
+  },
+
+  _contentStoredInColdStorage(doc) {
+    return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
   },
 });
