@@ -14,8 +14,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<nuxeo-slot-content name="moveToColdStorageDocumentAction" slot="DOCUMENT_ACTIONS" order="120">
+<nuxeo-slot-content name="moveToColdStorageDocumentContentAction" slot="DOCUMENT_ACTIONS" order="120">
   <template>
     <nuxeo-move-content-to-coldstorage-button document="[[document]]"></nuxeo-move-content-to-coldstorage-button>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="moveSelectionContentToColdStorageAction" slot="RESULTS_SELECTION_ACTIONS" order="-50">
+  <template>
+    <nuxeo-move-contents-to-coldstorage-button
+      documents="[[selectedItems]]"
+    ></nuxeo-move-contents-to-coldstorage-button>
   </template>
 </nuxeo-slot-content>

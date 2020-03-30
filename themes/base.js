@@ -402,7 +402,7 @@ const template = html`
 
         --nuxeo-browser-actions-menu-max-width: 240px;
 
-        --nuxeo-results-selection-actions-menu-max-width: 240px;
+        --nuxeo-results-selection-actions-menu-max-width: 280px;
 
         --nuxeo-document-blob-actions-menu-max-width: 160px;
 

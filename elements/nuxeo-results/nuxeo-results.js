@@ -121,7 +121,7 @@ Polymer({
 
       nuxeo-actions-menu {
         height: 100%;
-        max-width: var(--nuxeo-results-selection-actions-menu-max-width, 240px);
+        max-width: var(--nuxeo-results-selection-actions-menu-max-width, 280px);
       }
 
       nuxeo-quick-filters {

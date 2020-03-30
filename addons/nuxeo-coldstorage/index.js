@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import './elements/nuxeo-move-content-to-coldstorage-button.js';
+import './elements/nuxeo-move-contents-to-coldstorage-button.js';
 
 import html from './nuxeo-coldstorage.html';
 
