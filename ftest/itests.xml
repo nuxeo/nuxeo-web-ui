@@ -30,8 +30,12 @@
       <arg value="install" />
     </exec>
     <exec executable="${cmd.npm}" dir="../" failonerror="true">
-      <env key="NUXEO_PACKAGES" value="nuxeo-csv, nuxeo-retention"/>
       <arg value="test" />
+    </exec>
+    <exec executable="${cmd.npm}" dir="../" failonerror="true">
+      <env key="NUXEO_PACKAGES" value="nuxeo-csv, nuxeo-retention"/>
+      <arg value="run" />
+      <arg value="ftest" />
     </exec>
   </target>
 

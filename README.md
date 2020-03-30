@@ -53,13 +53,18 @@ exposedHeaders="Accept-Ranges,Content-Range,Content-Encoding,Content-Length,Cont
 ```
 
 #### Run tests
+The following commands can be run in order to run tests against Web UI.
+
+##### Unit Tests
 
 ```sh
-cd ftest
-npm run test:dev
+npm run test
 ```
+##### Functional Tests
 
-This runs the functionnal tests.
+```sh
+npm run ftest
+```
 
 #### Build & Vulcanize
 
