@@ -30,7 +30,7 @@ The framework reads feature files, step definitions and resources by convention,
 ```
 .
 ├── package.json
-└── test
+└── ftest
     ├── features
     │   ├── myfeature1.feature
     │   ├── myfeature2.feature
@@ -50,11 +50,11 @@ We recommend adding the following script to your `package.json` file to run the 
 
 ```
 "scripts": {
-  "test": "nuxeo-web-ui-ftest --report --screenshots --headless"
+  "ftest": "nuxeo-web-ui-ftest --report --screenshots --headless"
 },
 ```
 
-With this in place, `npm run test` will run the functional tests against Web UI, which is expected to be hosted on a nuxeo server running on the 8080 port.
+With this in place, `npm run ftest` will run the functional tests against Web UI, which is expected to be hosted on a nuxeo server running on the 8080 port.
 
 ### Examples
 

@@ -78,5 +78,19 @@ module.exports = {
         'no-unused-expressions': 'off',
       },
     },
+    {
+      files: ['**/test/**/*.test.js'],
+      env: {
+        mocha: true,
+      },
+      rules: {
+        'no-unused-expressions': 'off',
+      },
+      globals: {
+        assert: 'readable',
+        expect: 'readable',
+        sinon: 'readable',
+      },
+    },
   ],
 };
