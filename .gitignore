@@ -13,3 +13,4 @@ npm-debug.log
 .idea
 .java-version
 .vscode
+coverage
