@@ -13,5 +13,3 @@ Then('I can see the video storyboard', function() {
   videoViewer.waitForVisible();
   videoViewer.element('#storyboard').waitForVisible().should.be.true;
 });
-
-
