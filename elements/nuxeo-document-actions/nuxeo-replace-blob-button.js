@@ -182,7 +182,8 @@ Polymer({
       !this.hasType(doc, 'Root') &&
       !this.isTrashed(doc) &&
       !(doc.isRecord && this.xpath !== 'file:content') &&
-      !(this.isUnderRetentionOrLegalHold(doc) && this.xpath === 'file:content')
+      !(this.isUnderRetentionOrLegalHold(doc) && this.xpath === 'file:content') &&
+      !(this.hasFacet(doc, 'ColdStorage') && this.hasContent(doc, 'coldstorage:coldContent'))
     );
   },
 });
