@@ -368,7 +368,28 @@
                                                    && document.facets.indexOf('Collection') === -1"
     >
       <template>
-        <nuxeo-document-page name="view" document="[[document]]" opened></nuxeo-document-page>
+        <nuxeo-document-page
+          name="view"
+          document="[[document]]"
+          opened
+          template-for-non-folderish
+        ></nuxeo-document-page>
+        <nuxeo-document-page
+          name="view"
+          document="[[document]]"
+          opened
+          template-for-non-folderish-2
+        ></nuxeo-document-page>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="documentViewPage1" slot="DOCUMENT_VIEWS_PAGES" order="10">
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-document-page name="view" document="[[document]]" opened template-with-user></nuxeo-document-page>
       </template>
     </nuxeo-filter>
   </template>
@@ -381,6 +402,19 @@
         <nuxeo-collapsible-document-page name="view" document="[[document]]"></nuxeo-collapsible-document-page>
       </template>
     </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="documentViewPage2" slot="DOCUMENT_VIEWS_PAGES" order="10">
+  <template>
+    <nuxeo-document-page name="view" document="[[document]]" no-filter-1.1></nuxeo-document-page>
+    <nuxeo-document-page name="view" document="[[document]]" no-filter-1.2></nuxeo-document-page>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="documentViewPage3" slot="DOCUMENT_VIEWS_PAGES" order="10">
+  <template>
+    <nuxeo-document-page name="view" document="[[document]]" no-filter-2></nuxeo-document-page>
   </template>
 </nuxeo-slot-content>
 
