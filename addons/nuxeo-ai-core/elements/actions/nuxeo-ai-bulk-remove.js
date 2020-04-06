@@ -39,7 +39,7 @@ class BulkRemoveButton extends mixinBehaviors([I18nBehavior, FiltersBehavior], N
         operation="Bulk.RunAction"
         input="[[provider]]"
         params="[[_params(modelId, xpaths)]]"
-        icon="icons:speaker-notes-off"
+        icon="nuxeo-ai:bots-off"
         label="ai.bulkRemoveButton.label"
         show-label$="[[showLabel]]"
         error-label="ai.bulkRemoveButton.action.error"

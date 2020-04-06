@@ -39,7 +39,7 @@ class BulkAddButton extends mixinBehaviors([I18nBehavior, FiltersBehavior], Nuxe
         operation="Bulk.RunAction"
         input="[[provider]]"
         params='{ action: "bulkEnrich", parameters: "{}" }'
-        icon="icons:speaker-notes"
+        icon="nuxeo-ai:bots-on"
         label="ai.bulkAddButton.label"
         show-label$="[[showLabel]]"
         error-label="ai.bulkAddButton.action.error"
