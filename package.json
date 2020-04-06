@@ -29,7 +29,7 @@
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
     "http-server": "^0.11.1",
-    "husky": "^1.0.0",
+    "husky": "^4.2.3",
     "karma": "^4.4.1",
     "karma-chrome-launcher": "^3.1.0",
     "karma-coverage-istanbul-reporter": "^2.1.1",
@@ -40,7 +40,7 @@
     "karma-sinon-chai": "^2.0.2",
     "karma-source-map-support": "^1.4.0",
     "karma-static": "^1.0.1",
-    "lint-staged": "^8.0.0",
+    "lint-staged": "^10.1.1",
     "lit-html": "^1.0.0",
     "minimist": "^1.2.0",
     "mocha": "^7.1.1",
@@ -184,8 +184,7 @@
   "lint-staged": {
     "*.{js,html}": [
       "prettier --write",
-      "eslint --fix",
-      "git add"
+      "eslint --fix"
     ]
   }
 }
