@@ -744,7 +744,7 @@
   "label.schema.constraint.violation.userManagerResolver.group": "'{0}' is not a valid group name.",
   "label.schema.constraint.violation.userManagerResolver.user": "'{0}' is not a valid username.",
   "label.schema.constraint.violation.directoryResolver": "'{0}' is not a valid {1} id.",
-  "label.schema.constraint.violation.documentResolver.id": "'{0}' is not a valid document id.",
+  "label.schema.constraint.violation.documentResolver.id": "document '{0}' not found.",
   "label.schema.constraint.violation.documentResolver.path": "'{0}' is not a valid document path.",
   "label.security.permission.addChildren": "Menambahkan anak-anak",
   "label.security.permission.browse": "Jelajahi",
