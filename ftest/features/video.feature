@@ -16,7 +16,7 @@ Feature: Create Video
       | name         | value              |
       | title        | my title           |
       | description  | my description     |
-      | content      | Park.mp4           |
+      | content      | sample.mp4           |
       | nature       | Booklet            |
       | subjects     | Ecology,Gardening  |
     Then I see the Video page
