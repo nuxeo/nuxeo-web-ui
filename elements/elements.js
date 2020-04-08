@@ -166,6 +166,7 @@ import './document/nuxeo-collapsible-document-page.js';
 import './document/nuxeo-document-view.js';
 import './document/nuxeo-document-edit.js';
 import './document/nuxeo-document-metadata.js';
+import './document/nuxeo-picture-document-page.js';
 
 // Directory layout elements -->
 import './directory/nuxeo-vocabulary-management.js';

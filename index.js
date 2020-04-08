@@ -59,10 +59,6 @@ tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);
 
 // load addons / bundles
-
-// default addons
-import('./addons/nuxeo-dam');
-
 // NXP-26977: await loading of addons
 Promise.all(
   Nuxeo.UI.bundles.map((url) => {

@@ -360,6 +360,16 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="pictureDocumentViewPage" slot="DOCUMENT_VIEWS_PAGES" order="5">
+  <template>
+    <nuxeo-filter document="[[document]]" facet="Picture">
+      <template>
+        <nuxeo-picture-document-page name="view" document="[[document]]"></nuxeo-picture-document-page>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+
 <nuxeo-slot-content name="documentViewPage" slot="DOCUMENT_VIEWS_PAGES" order="10">
   <template>
     <nuxeo-filter
@@ -525,6 +535,25 @@
       provider="expired_search"
       schemas="dublincore,common,uid"
       label="expiredSearch.expiredDocuments"
+    ></nuxeo-search-form>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="damSearchMenuButtons" slot="DRAWER_ITEMS" order="45">
+  <template>
+    <nuxeo-menu-icon id="assetsSearchButton" name="assetsSearch" icon="icons:perm-media" label="dam.assets.heading">
+    </nuxeo-menu-icon>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="damSearchMenuButtons" slot="DRAWER_PAGES">
+  <template>
+    <nuxeo-search-form
+      name="assetsSearch"
+      search-name="assets"
+      auto
+      display-auto-control
+      provider="assets_search"
+      schemas="dublincore,common,file,uid,thumbnail,picture"
     ></nuxeo-search-form>
   </template>
 </nuxeo-slot-content>
