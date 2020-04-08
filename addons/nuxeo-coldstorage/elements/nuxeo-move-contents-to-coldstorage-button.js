@@ -106,7 +106,7 @@ class BulkMoveToColdStorage extends mixinBehaviors([FiltersBehavior, FormatBehav
   }
 
   _isAvailable(documents) {
-    return documents.every((doc) => this._canMoveDocument(doc));
+    return documents.length > 0 && documents.every((doc) => this._canMoveDocument(doc));
   }
 
   _toggle() {
@@ -127,7 +127,7 @@ class BulkMoveToColdStorage extends mixinBehaviors([FiltersBehavior, FormatBehav
           new CustomEvent('notify', {
             composed: true,
             bubbles: true,
-            detail: { message: [[this.i18n('moveDocumentsContentsToColdStorage.success')]] },
+            detail: { message: this.i18n('moveDocumentsContentsToColdStorage.success') },
           }),
         );
       })
@@ -136,7 +136,7 @@ class BulkMoveToColdStorage extends mixinBehaviors([FiltersBehavior, FormatBehav
           new CustomEvent('notify', {
             composed: true,
             bubbles: true,
-            detail: { message: [[this.i18n('moveDocumentsContentsToColdStorage.error')]] },
+            detail: { message: this.i18n('moveDocumentsContentsToColdStorage.error') },
           }),
         );
         throw error;

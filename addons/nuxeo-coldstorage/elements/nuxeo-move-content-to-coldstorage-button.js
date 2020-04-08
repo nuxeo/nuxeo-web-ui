@@ -105,12 +105,11 @@ class MoveToColdStorage extends mixinBehaviors([FiltersBehavior, FormatBehavior]
   _toggle() {
     this.$.opMove
       .execute()
-      .then((doc) => {
+      .then(() => {
         this.dispatchEvent(
           new CustomEvent('document-updated', {
             composed: true,
             bubbles: true,
-            detail: { doc },
           }),
         );
 
@@ -118,7 +117,7 @@ class MoveToColdStorage extends mixinBehaviors([FiltersBehavior, FormatBehavior]
           new CustomEvent('notify', {
             composed: true,
             bubbles: true,
-            detail: { message: [[this.i18n('documentContentView.moveToColdStorage.success')]] },
+            detail: { message: this.i18n('documentContentView.moveToColdStorage.success') },
           }),
         );
       })
@@ -127,7 +126,7 @@ class MoveToColdStorage extends mixinBehaviors([FiltersBehavior, FormatBehavior]
           new CustomEvent('notify', {
             composed: true,
             bubbles: true,
-            detail: { message: [[this.i18n('documentContentView.moveToColdStorage.error')]] },
+            detail: { message: this.i18n('documentContentView.moveToColdStorage.error') },
           }),
         );
         throw error;
