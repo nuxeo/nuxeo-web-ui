@@ -188,14 +188,15 @@ class AdminAIExport extends mixinBehaviors([I18nBehavior], Nuxeo.Element, Layout
     const query =
       `SELECT * FROM Document WHERE ecm:isProxy = 0` +
       ` AND ecm:isVersion = 0 AND ecm:isTrashed = 0 AND ecm:primaryType = '${this.typeName}'`;
+    const trainInfo = props['ai_model:training_information'];
     this.$.aiExport.params = {
       query,
       inputs: input,
       outputs: output,
       model_id: this.currentDoc.uid,
       model_name: props['ai_model:name'],
-      model_start_date: props['ai_model:training_information'].start,
-      model_end_date: props['ai_model:training_information'].end,
+      model_start_date: trainInfo ? trainInfo.start : null,
+      model_end_date: trainInfo ? trainInfo.end : null,
     };
 
     this.$.aiExport

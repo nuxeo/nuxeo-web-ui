@@ -163,7 +163,7 @@ class AIExportProgress extends mixinBehaviors([I18nBehavior, IronFormElementBeha
 
   _statusUpdated(newVal) {
     this._id = newVal.id;
-    this._modelName = newVal.id;
+    this._modelName = newVal.name;
     this._state = newVal.state;
     this._setActionName(newVal.state);
     this._total = newVal.total;
