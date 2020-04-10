@@ -131,7 +131,7 @@ Polymer({
         </template>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+        <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
   `,

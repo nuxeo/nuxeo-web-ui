@@ -57,7 +57,9 @@ Polymer({
       <h2>[[i18n('replaceBlobButton.dialog.heading')]]</h2>
       <nuxeo-dropzone id="dropzone" value="{{value}}" has-files="{{_canSubmit}}"></nuxeo-dropzone>
       <div class="buttons">
-        <paper-button dialog-dismiss on-tap="_cancel">[[i18n('replaceBlobButton.dialog.cancel')]]</paper-button>
+        <paper-button dialog-dismiss on-tap="_cancel" class="secondary"
+          >[[i18n('replaceBlobButton.dialog.cancel')]]</paper-button
+        >
         <paper-button noink class="primary" dialog-confirm on-tap="_replaceBlob" disabled="[[!_canSubmit]]"
           >[[i18n('replaceBlobButton.dialog.replace')]]</paper-button
         >

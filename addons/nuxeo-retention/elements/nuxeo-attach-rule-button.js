@@ -69,7 +69,7 @@ class RetentionAttachRuleButton extends mixinBehaviors([FiltersBehavior, FormatB
           </nuxeo-document-suggestion>
         </paper-dialog-scrollable>
         <div class="buttons">
-          <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
+          <paper-button dialog-dismiss="" class="secondary">[[i18n('command.close')]]</paper-button>
           <paper-button name="add" class="primary" on-tap="_attach" disabled$="[[!_isValid(provider, document, rule)]]">
             [[i18n('retention.rule.attachButton.label')]]
           </paper-button>

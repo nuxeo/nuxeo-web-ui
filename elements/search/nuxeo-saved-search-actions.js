@@ -36,15 +36,13 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="iron-flex">
+    <style include="iron-flex nuxeo-styles">
       paper-item {
         @apply --layout-horizontal;
         @apply --layout-center;
         cursor: pointer;
       }
-      iron-icon {
-        margin-right: 16px;
-      }
+
       paper-menu-button[hidden] {
         display: none !important;
       }
@@ -52,10 +50,18 @@ Polymer({
 
     <nuxeo-document auto doc-id="[[searchId]]" enrichers="permissions" response="{{searchDoc}}"></nuxeo-document>
     <div class="horizontal layout center">
-      <paper-button on-tap="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, _dirty)]]">
+      <paper-button
+        on-tap="_saveSearchAs"
+        hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, _dirty)]]"
+        class="primary small"
+      >
         <iron-icon icon="nuxeo:filter-edit"></iron-icon>[[i18n('app.saveNewSearch')]]
       </paper-button>
-      <paper-button on-tap="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, _dirty)]]">
+      <paper-button
+        on-tap="_saveSearch"
+        hidden$="[[!_showSave(searchDoc, isSavedSearch, _dirty)]]"
+        class="secondary small"
+      >
         <iron-icon icon="nuxeo:filter-add"></iron-icon>[[i18n('app.savedSearch')]]
       </paper-button>
       <paper-menu-button

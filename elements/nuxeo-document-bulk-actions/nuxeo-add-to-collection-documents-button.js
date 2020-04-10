@@ -38,7 +38,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-action-button-styles">
+    <style include="nuxeo-action-button-styles nuxeo-styles">
       :host([hidden]) {
         display: none;
       }
@@ -91,7 +91,7 @@ Polymer({
       </paper-dialog-scrollable>
 
       <div class="buttons">
-        <paper-button noink dialog-dismiss on-click="_resetPopup"
+        <paper-button noink dialog-dismiss on-click="_resetPopup" class="secondary"
           >[[i18n('addToCollectionDocumentsButton.dialog.cancel')]]</paper-button
         >
         <paper-button name="add" noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">

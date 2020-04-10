@@ -120,7 +120,9 @@ Polymer({
       </div>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
-          <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+          <paper-button noink dialog-dismiss on-tap="_cancel" class="secondary"
+            >[[i18n('command.cancel')]]</paper-button
+          >
         </div>
         <paper-button
           id="publish"

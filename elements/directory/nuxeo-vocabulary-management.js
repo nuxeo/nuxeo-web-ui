@@ -42,7 +42,7 @@ const schemaDataCache = {};
 */
 Polymer({
   _template: html`
-    <style>
+    <style include="nuxeo-styles">
       :host {
         display: block;
       }
@@ -77,7 +77,6 @@ Polymer({
         @apply --layout-horizontal;
         @apply --layout-justified;
         margin-top: 16px;
-        background-color: var(--nuxeo-dialog-buttons-bar, white);
       }
     </style>
 
@@ -162,7 +161,7 @@ Polymer({
         </form>
       </iron-form>
       <div class="buttons">
-        <paper-button name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button name="cancel" noink class="secondary" dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
         <paper-button name="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>

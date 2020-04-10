@@ -68,7 +68,7 @@ Polymer({
     >
       <div class="title">[[dialogTitle]]</div>
       <div class="actions">
-        <paper-button noink dialog-dismiss>[[dialogDismiss]]</paper-button>
+        <paper-button noink dialog-dismiss class="secondary">[[dialogDismiss]]</paper-button>
         <paper-button noink dialog-confirm class="primary" on-tap="_confirm">[[dialogConfirm]]</paper-button>
       </div>
     </nuxeo-dialog>

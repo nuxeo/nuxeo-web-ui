@@ -180,7 +180,7 @@ Polymer({
         width: var(--nuxeo-document-creation-form-button-width, 128px);
         height: var(--nuxeo-document-creation-form-button-height, 128px);
         box-shadow: none;
-        background-color: var(--nuxeo-dialog-buttons-bar);
+        background-color: var(--input-background, rgba(0, 0, 0, 0.05));
       }
 
       nuxeo-document-highlights {

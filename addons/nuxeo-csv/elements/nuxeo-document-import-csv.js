@@ -46,7 +46,7 @@ Polymer({
       }
 
       .suggester {
-        background-color: var(--nuxeo-dialog-buttons-bar);
+        background-color: var(--input-background, rgba(0, 0, 0, 0.05));
         padding: 8px 16px;
         margin: 1rem 32px;
         z-index: 100;
@@ -333,7 +333,7 @@ Polymer({
 
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button dialog-dismiss on-tap="_cancel" disabled$="[[_creating]]"
+            <paper-button dialog-dismiss on-tap="_cancel" disabled$="[[_creating]]" class="secondary"
               >[[i18n('command.cancel')]]</paper-button
             >
           </div>

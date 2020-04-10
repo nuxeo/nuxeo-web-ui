@@ -345,7 +345,7 @@ Polymer({
           <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
         </div>
         <div class="action-buttons">
-          <paper-button noink class="reset" disabled$="[[!dirty]]" on-tap="_reset">
+          <paper-button noink class="reset secondary" disabled$="[[!dirty]]" on-tap="_reset">
             [[i18n('command.Reset')]]
           </paper-button>
           <paper-button noink class="primary search" on-tap="_search" hidden$="[[auto]]">
@@ -360,7 +360,7 @@ Polymer({
       <paper-input id="savedSearchTitle" label="[[i18n('searchForm.savePopup.label')]]" autofocus no-label-float>
       </paper-input>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button class="secondary">[[i18n('command.cancel')]]</paper-button>
         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
@@ -375,7 +375,7 @@ Polymer({
       >
       </paper-input>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+        <paper-button dialog-dismiss class="secondary">[[i18n('command.cancel')]]</paper-button>
         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
@@ -387,14 +387,14 @@ Polymer({
         visible="[[permissionsVisible]]"
       ></nuxeo-document-permissions>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+        <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
 
     <nuxeo-dialog id="deleteDialog" with-backdrop reparent>
       <h2>[[i18n('searchForm.delete.heading')]]</h2>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('label.no')]]</paper-button>
+        <paper-button dialog-dismiss class="secondary">[[i18n('label.no')]]</paper-button>
         <paper-button noink class="primary" on-tap="_deleteSearch">[[i18n('label.yes')]]</paper-button>
       </div>
     </nuxeo-dialog>
