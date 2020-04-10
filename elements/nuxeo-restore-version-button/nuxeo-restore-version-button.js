@@ -57,6 +57,7 @@ Polymer({
         dialog-dismiss="[[i18n('label.no')]]"
         dialog-confirm="[[i18n('label.yes')]]"
         on-confirm="_restore"
+        class="secondary"
       >
         [[i18n('versions.restore')]]
         <span class="version"

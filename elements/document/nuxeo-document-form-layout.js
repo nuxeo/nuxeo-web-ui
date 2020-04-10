@@ -76,7 +76,7 @@ Polymer({
           <nuxeo-document-layout id="layout" document="{{document}}" layout="[[layout]]"></nuxeo-document-layout>
         </div>
         <div class="actions">
-          <paper-button on-tap="cancel" noink>[[i18n('command.cancel')]]</paper-button>
+          <paper-button on-tap="cancel" noink class="secondary">[[i18n('command.cancel')]]</paper-button>
           <paper-button id="save" on-tap="_save" noink class="primary" disabled$="[[saving]]">
             <template is="dom-if" if="[[!saving]]">
               [[i18n('command.save')]]

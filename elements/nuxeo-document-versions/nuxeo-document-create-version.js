@@ -37,7 +37,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style>
+    <style include="nuxeo-styles">
       iron-icon:hover {
         fill: var(--nuxeo-link-hover-color);
       }
@@ -50,10 +50,12 @@ Polymer({
       nuxeo-tag {
         cursor: pointer;
         @apply --nx-button-primary;
+        min-height: auto;
       }
 
       nuxeo-tag:hover {
         @apply --nx-button-primary-hover;
+        min-height: auto;
       }
 
       nuxeo-tag[disabled] {
@@ -128,7 +130,7 @@ Polymer({
         </paper-radio-group>
       </div>
       <div class="buttons">
-        <paper-button noink dialog-dismiss>[[i18n('documentCreateVersion.dismiss')]]</paper-button>
+        <paper-button noink dialog-dismiss class="secondary">[[i18n('documentCreateVersion.dismiss')]]</paper-button>
         <paper-button noink dialog-confirm class="primary" on-tap="_create">
           [[i18n('documentCreateVersion.confirm')]]
         </paper-button>

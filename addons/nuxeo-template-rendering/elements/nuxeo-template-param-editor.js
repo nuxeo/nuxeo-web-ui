@@ -300,7 +300,9 @@ Polymer({
           </div>
           <div class="buttons">
             <div class="flex start-justified">
-              <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+              <paper-button noink dialog-dismiss on-tap="_cancel" class="secondary"
+                >[[i18n('command.cancel')]]</paper-button
+              >
             </div>
             <paper-button noink class="primary" on-tap="_save" disabled$="[[!_isValid(collection)]]">
               [[i18n('command.save')]]

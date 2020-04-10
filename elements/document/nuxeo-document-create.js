@@ -74,7 +74,7 @@ Polymer({
         border: none;
         text-align: center;
         box-shadow: none;
-        background-color: var(--nuxeo-dialog-buttons-bar);
+        background-color: var(--input-background, rgba(0, 0, 0, 0.05));
         @apply --layout-vertical;
         @apply --nuxeo-document-create-selection-button;
       }
@@ -145,7 +145,7 @@ Polymer({
       }
 
       .suggester {
-        background-color: var(--nuxeo-dialog-buttons-bar);
+        background-color: var(--input-background, rgba(0, 0, 0, 0.05));
         padding: 8px 16px;
         margin: 1rem 0;
         z-index: 100;
@@ -212,7 +212,9 @@ Polymer({
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button noink dialog-dismiss on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+            <paper-button noink dialog-dismiss on-tap="_cancel" class="secondary"
+              >[[i18n('command.cancel')]]</paper-button
+            >
           </div>
         </div>
       </div>
@@ -251,11 +253,13 @@ Polymer({
         </div>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
-            <paper-button noink dialog-dismiss on-tap="_cancel" disabled$="[[creating]]"
+            <paper-button class="secondary" noink dialog-dismiss on-tap="_cancel" disabled$="[[creating]]"
               >[[i18n('command.cancel')]]</paper-button
             >
           </div>
-          <paper-button noink on-tap="_back" disabled$="[[creating]]">[[i18n('command.back')]]</paper-button>
+          <paper-button class="secondary" noink on-tap="_back" disabled$="[[creating]]"
+            >[[i18n('command.back')]]</paper-button
+          >
           <paper-button
             id="create"
             noink

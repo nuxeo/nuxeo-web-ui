@@ -53,7 +53,7 @@ Polymer({
       </paper-dialog-scrollable>
       <div class="buttons horizontal end-justified layout">
         <div class="flex start-justified">
-          <paper-button noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+          <paper-button noink dialog-dismiss class="secondary">[[i18n('command.cancel')]]</paper-button>
         </div>
         <paper-button noink class="primary" on-tap="_delete">
           [[i18n('deleteTemplateButton.dialog.confirm')]]

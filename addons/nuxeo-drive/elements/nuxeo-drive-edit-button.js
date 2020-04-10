@@ -46,7 +46,7 @@ Polymer({
         <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
       </div>
       <div class="buttons">
-        <paper-button dialog-dismiss>[[i18n('command.close')]]</paper-button>
+        <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
   `,

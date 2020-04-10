@@ -131,7 +131,7 @@ Polymer({
             [[i18n('command.search')]]
           </paper-button>
           <div class="horizontal layout flex end-justified">
-            <paper-button noink class="clear" on-tap="_clear">
+            <paper-button noink class="clear secondary" on-tap="_clear">
               [[i18n('command.clear')]]
             </paper-button>
           </div>

@@ -57,7 +57,7 @@ class RetentionHoldToggleButton extends mixinBehaviors([FiltersBehavior, FormatB
           ></nuxeo-textarea>
         </paper-dialog-scrollable>
         <div class="buttons">
-          <paper-button dialog-dismiss="">[[i18n('command.close')]]</paper-button>
+          <paper-button dialog-dismiss="" class="secondary">[[i18n('command.close')]]</paper-button>
           <paper-button name="hold" class="primary" on-tap="_hold">
             [[_label]]
           </paper-button>

@@ -158,7 +158,7 @@ class CloudConsumers extends mixinBehaviors([FormatBehavior], Nuxeo.Element) {
           </form>
         </iron-form>
         <div class="buttons">
-          <paper-button id="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
+          <paper-button id="cancel" noink dialog-dismiss class="secondary">[[i18n('command.cancel')]]</paper-button>
           <paper-button id="save" noink class="primary" on-tap="_save">[[i18n('command.save')]]</paper-button>
         </div>
       </nuxeo-dialog>

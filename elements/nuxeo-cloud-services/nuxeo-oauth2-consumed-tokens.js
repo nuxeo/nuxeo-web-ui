@@ -154,10 +154,12 @@ class OAuth2ConsumedTokens extends mixinBehaviors([TokenBehavior, FormatBehavior
           </form>
         </iron-form>
         <div class="buttons">
-          <paper-button id="cancel" name="cancel" noink dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
-          <paper-button id="save" name="save" noink class="primary" on-tap="_save"
-            >[[i18n('command.save')]]</paper-button
-          >
+          <paper-button id="cancel" name="cancel" noink class="secondary" dialog-dismiss>
+            [[i18n('command.cancel')]]
+          </paper-button>
+          <paper-button id="save" name="save" noink class="primary" on-tap="_save">
+            [[i18n('command.save')]]
+          </paper-button>
         </div>
       </nuxeo-dialog>
     `;

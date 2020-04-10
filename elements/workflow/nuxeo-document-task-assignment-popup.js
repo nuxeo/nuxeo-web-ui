@@ -69,7 +69,7 @@ Polymer({
         </iron-form>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button id="cancel" noink dialog-dismiss>[[i18n('command.close')]]</paper-button>
+        <paper-button id="cancel" noink dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
         <paper-button id="confirm" noink class="primary" on-click="_processAssignment"
           >[[_getActionLabel(action, i18n)]]</paper-button
         >

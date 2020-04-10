@@ -110,7 +110,9 @@ Polymer({
           </div>
           <div class="buttons">
             <div class="horizontal layout start-justified">
-              <paper-button noink dialog-dismiss on-tap="_cancelEditConfig">[[i18n('command.cancel')]]</paper-button>
+              <paper-button noink dialog-dismiss on-tap="_cancelEditConfig" class="secondary"
+                >[[i18n('command.cancel')]]</paper-button
+              >
               <paper-button noink class="primary" on-tap="_saveEditConfig">[[i18n('command.save')]]</paper-button>
             </div>
           </div>
@@ -135,7 +137,9 @@ Polymer({
               <paper-button noink class="primary" on-tap="_editParams">[[i18n('command.edit')]]</paper-button>
             </div>
             <div name="edit">
-              <paper-button noink dialog-dismiss on-tap="_cancelEditParams">[[i18n('command.cancel')]]</paper-button>
+              <paper-button noink dialog-dismiss on-tap="_cancelEditParams" class="secondary"
+                >[[i18n('command.cancel')]]</paper-button
+              >
               <paper-button noink class="primary" on-tap="_saveEditParams">[[i18n('command.save')]]</paper-button>
             </div>
           </iron-pages>

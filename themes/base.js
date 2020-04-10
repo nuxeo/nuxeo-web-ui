@@ -16,12 +16,13 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-button-styles.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 const template = html`
   <dom-module id="nuxeo-styles">
     <template>
-      <style>
+      <style include="nuxeo-button-styles">
         [hidden] {
           display: none !important;
         }
@@ -81,35 +82,6 @@ const template = html`
           border-bottom: 1px dashed var(--nuxeo-text-default);
         }
 
-        /* paper-button */
-        paper-button {
-          min-width: 96px;
-        }
-        paper-button:hover {
-          @apply --nx-button-hover;
-        }
-        paper-button.primary {
-          @apply --nx-button-primary;
-          border-color: transparent;
-        }
-        paper-button.primary:hover,
-        paper-button.primary:focus {
-          @apply --nx-button-primary-hover;
-          border-color: transparent;
-        }
-        paper-button.secondary {
-          @apply --nx-button-secondary;
-        }
-        paper-button.secondary:hover,
-        paper-button.secondary:focus {
-          @apply --nx-button-secondary-hover;
-        }
-        paper-button.secondary[disabled] {
-          @apply --nx-button-secondary-disabled;
-        }
-        paper-button[disabled] {
-          @apply --nx-button-disabled;
-        }
         paper-button + paper-button {
           margin-left: 8px;
         }
@@ -424,43 +396,47 @@ const template = html`
           color: var(--nuxeo-link-hover-color);
         }
 
+        --nx-button-small: {
+          min-height: 32px;
+          padding: 4px 16px;
+        }
+
         --nx-button-primary: {
-          color: var(--nuxeo-button-primary-text);
-          font-weight: 700;
-          background-color: var(--nuxeo-button-primary);
+          color: var(--nuxeo-button-primary-text, #ffffff);
+          background-color: var(--nuxeo-button-primary, #0066ff);
+          border: 1px solid var(--nuxeo-primary-color, #0066ff);
         }
 
         --nx-button-primary-hover: {
-          color: var(--nuxeo-button-primary-text);
-          background-color: var(--nuxeo-button-primary-focus);
+          color: var(--nuxeo-button-primary-text, #ffffff);
+          background-color: var(--nuxeo-button-primary-focus, #1f28bf);
+          border: 1px solid var(--nuxeo-button-primary-focus, #1f28bf);
         }
 
         --nx-button-secondary: {
-          border: 1px solid var(--nuxeo-primary-color);
-          background-color: #ffffff;
-          color: var(--nuxeo-primary-color);
-          font-weight: 600;
-          box-shadow: 0px -8px 10px 0px rgba(255, 255, 255, 0.75);
+          border: 1px solid var(--nuxeo-button-secondary-text, #0066ff);
+          background-color: transparent;
+          color: var(--nuxeo-button-secondary-text, #0066ff);
         }
 
         --nx-button-secondary-hover: {
-          border: 1px solid var(--nuxeo-secondary-color);
-          color: var(--nuxeo-secondary-color);
+          border: 1px solid var(--nuxeo-secondary-color, #1f28bf);
+          color: var(--nuxeo-secondary-color, #1f28bf);
         }
 
         --nx-button-secondary-disabled: {
-          border: 1px solid var(--disabled-text-color);
-          color: var(--secondary-text-color);
+          border: 1px solid var(--disabled-text-color, #bdbdbd);
+          color: var(--secondary-text-color, #939caa);
+          background-color: transparent;
         }
 
         --nx-button-disabled: {
-          color: var(--nuxeo-button-disabled-text);
-          font-weight: normal;
-          background-color: var(--nuxeo-button-disabled);
+          color: var(--nuxeo-button-disabled-text, rgba(0, 0, 0, 0.1));
+          background-color: var(--nuxeo-button-disabled, rgba(0, 0, 0, 0.05));
+          border: none;
         }
 
         --buttons-bar: {
-          background-color: var(--nuxeo-dialog-buttons-bar);
           padding: 0.7em 1.8em;
         }
 
@@ -556,13 +532,20 @@ const template = html`
 
         --paper-button: {
           font-family: var(--nuxeo-app-font);
-          font-size: 0.8rem;
-          color: var(--nuxeo-link-color);
-          background-color: var(--nuxeo-button);
-          border: 1px solid var(--nuxeo-border);
+          font-weight: 600;
+          font-size: 1rem;
+          text-transform: capitalize;
+          min-height: 40px;
+          padding: 8px 16px;
+          min-width: 96px;
           border-radius: 0.1em;
-          padding: 0.8em 2em;
           margin: 0;
+        }
+
+        --nx-button-icon: {
+          margin-inline-end: var(--nuxeo-button-icon-margin-end, 4px);
+          width: 16px;
+          height: 16px;
         }
 
         --paper-button-ink-color: {

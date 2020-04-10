@@ -53,6 +53,7 @@ Polymer({
         dialog-dismiss="[[i18n('label.no')]]"
         dialog-confirm="[[i18n('label.yes')]]"
         on-confirm="_unpublish"
+        class="secondary"
       >
         <span class="label">[[i18n('publication.unpublish')]]</span>
       </nuxeo-confirm-button>
