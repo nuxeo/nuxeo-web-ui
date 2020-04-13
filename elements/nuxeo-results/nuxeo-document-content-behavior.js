@@ -29,7 +29,10 @@ export const DocumentContentBehavior = [
       /**
        * The document to be displayed.
        */
-      document: Object,
+      document: {
+        type: Object,
+        observer: '_documentChanged',
+      },
       /**
        * `true` if the current element is visible, `false` otherwise.
        */
@@ -44,10 +47,10 @@ export const DocumentContentBehavior = [
         type: Array,
         notify: true,
       },
-      params: {
-        type: Object,
-        computed: '_computeParams(document)',
-      },
+      /**
+       * The parameters to be passed on to the provider.
+       */
+      params: Object,
       /**
        * The sort options.
        */
@@ -189,15 +192,22 @@ export const DocumentContentBehavior = [
     },
 
     _computeParams(document) {
+      return { ecm_parentId: document.uid, ecm_trashed: this.isTrashed(document) };
+    },
+
+    _computeSort(document) {
+      return this.hasFacet(document, 'Orderable') ? { 'ecm:pos': 'ASC' } : {};
+    },
+
+    _documentChanged(document, oldDoc) {
       if (document) {
-        if (this.hasFacet(document, 'Orderable')) {
-          this.$.nxProvider.set('sort', { 'ecm:pos': 'ASC' });
-        } else {
-          this.$.nxProvider.set('sort', {});
+        // if different document set default params and sort
+        if (!oldDoc || document.uid !== oldDoc.uid) {
+          this.params = this._computeParams(document);
+          this.$.nxProvider.set('sort', this._computeSort(document));
         }
-        return { ecm_parentId: document.uid, ecm_trashed: this.isTrashed(document) };
+        this._refresh();
       }
-      return {};
     },
 
     _computeSortOptions() {
