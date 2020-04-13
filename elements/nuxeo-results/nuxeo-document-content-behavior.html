@@ -29,7 +29,10 @@ limitations under the License.
       /**
        * The document to be displayed.
        */
-      document: Object,
+      document: {
+        type: Object,
+        observer: '_documentChanged',
+      },
       /**
        * `true` if the current element is visible, `false` otherwise.
        */
@@ -44,10 +47,10 @@ limitations under the License.
         type: Array,
         notify: true
       },
-      params: {
-        type: Object,
-        computed: '_computeParams(document)'
-      },
+      /**
+       * The parameters to be passed on to the provider.
+       */
+      params: Object,
       /**
        * The sort options.
        */
@@ -191,7 +194,17 @@ limitations under the License.
     },
 
     _computeParams: function(document) {
-      return document ? { 'ecm_parentId': document.uid, 'ecm_trashed': this.isTrashed(document) } : {};
+      return { 'ecm_parentId': document.uid, 'ecm_trashed': this.isTrashed(document) };
+    },
+
+    _documentChanged: function(document, oldDoc) {
+      if (document) {
+        // if different document set default params and sort
+        if (!oldDoc || document.uid !== oldDoc.uid) {
+          this.params = this._computeParams(document);
+        }
+        this._refresh();
+      }
     },
 
     _computeSortOptions: function() {
