@@ -497,6 +497,7 @@ Polymer({
                     id="document-import"
                     layout="import"
                     document="[[document]]"
+                    href-base="[[importPath]]"
                   ></nuxeo-document-layout>
                 </template>
               </form>
