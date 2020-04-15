@@ -978,11 +978,8 @@ limitations under the License.
       },
 
       _cancel: function() {
-        if (this.batchId) {
-          this.cancelBatch();
-        }
+        this.cancelBatch();
         this._clear();
-        this.stage = 'upload';
         this.fire('nx-creation-wizard-show-tabs');
       },
 
