@@ -744,7 +744,7 @@
   "label.schema.constraint.violation.userManagerResolver.group": "'{0}' n'est pas un nom de groupe correct.",
   "label.schema.constraint.violation.userManagerResolver.user": "'{0}' n'est pas un nom d'utilisateur valide.",
   "label.schema.constraint.violation.directoryResolver": "'{0}' n'est pas un identifiant de {1} correct.",
-  "label.schema.constraint.violation.documentResolver.id": "'{0}' n'est pas un identifiant de document valide.",
+  "label.schema.constraint.violation.documentResolver.id": "document '{0}' introuvable.",
   "label.schema.constraint.violation.documentResolver.path": "'{0}' n'est pas un emplacement de document valide.",
   "label.security.permission.addChildren": "Ajouter des enfants",
   "label.security.permission.browse": "Parcourir",
