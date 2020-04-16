@@ -944,7 +944,7 @@
   "retention.menu": "Ritenzione",
   "retention.rules": "Regole di ritenzione",
   "retention.search": "Ricerca di ritenzione",
-  "retention.search.docTypes": "Tipo Documento",
+  "retention.search.docTypes": "Tipo di documento",
   "retention.search.futureRetainUntil": "Data di scadenza futura",
   "retention.search.pastRetainUntil": "Data di scadenza precedente",
   "retention.search.retainUntil": "Data di scadenza",
