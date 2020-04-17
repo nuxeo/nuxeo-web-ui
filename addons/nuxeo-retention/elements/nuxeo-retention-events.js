@@ -52,8 +52,8 @@ class RetentionEvents extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
             role="widget"
             value="{{_event}}"
             label="[[i18n('retention.rule.label.startPolicy.eventBased.event.description')]]"
-            dbl10n=""
-            required=""
+            dbl10n
+            required
             query-results-filter="[[_filterEvents]]"
             directory-name="RetentionEvent"
             min-chars="0"
@@ -85,7 +85,7 @@ class RetentionEvents extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
 
           <nuxeo-data-table
             id="table"
-            paginable=""
+            paginable
             nx-provider="provider"
             empty-label="[[i18n('retention.events.empty')]]"
           >
