@@ -1,6 +1,6 @@
 FROM node:lts
 
-RUN npm config set registry=http://nexus/repository/npmjs-all/
+RUN npm config set registry=https://packages.nuxeo.com/repository/npm-all/
 
 WORKDIR /ui
 
