@@ -60,7 +60,7 @@
   "admin.ai.stats.value": "Balioa",
   "admin.ai.model.selection": "Modeloaren hautaketa",
   "admin.ai.model.listing": "Egin klik hemen modeloen zerrenda ikusteko",
-  "admin.usersAndGroups.heading": "Erabiltzaile eta pasahitzak",
+  "admin.usersAndGroups.heading": "Erabiltzaileak eta taldeak",
   "ai.bulkAddButton.label": "Auto-aberastu",
   "ai.bulkAddButton.action.poll": "Auto-aberasketa hasita",
   "ai.bulkAddButton.action.completed": "Auto-aberasketa bukatuta",
