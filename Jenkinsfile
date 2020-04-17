@@ -108,6 +108,31 @@ pipeline {
         }
       }
     }
+    stage('Run unit tests') {
+      steps {
+        setGitHubBuildStatus('test', 'Unit tests', 'PENDING')
+        container('mavennodejs') {
+          script {
+            SAUCE_ACCESS_KEY = sh(script: 'jx step credential -s saucelabs-web-ui -k key', , returnStdout: true).trim()
+          }
+          withEnv(["SAUCE_USERNAME=nuxeo-web-ui", "SAUCE_ACCESS_KEY=$SAUCE_ACCESS_KEY"]) {
+            echo """
+            --------------
+            Run unit tests
+            --------------"""
+            sh 'npm run test'
+          }
+        }
+      }
+      post {
+        success {
+          setGitHubBuildStatus('test', 'Unit tests', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('test', 'Unit tests', 'FAILURE')
+        }
+      }
+    }
     stage('Nuxeo package build') {
       steps {
         container('mavennodejs') {
