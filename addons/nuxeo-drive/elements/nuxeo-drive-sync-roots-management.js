@@ -112,9 +112,7 @@ Polymer({
       </div>
     </template>
 
-    <paper-toast id="toast"
-      >[[i18n('driveSyncRootsManagement.roots.disabled')]]</paper-toast
-    >
+    <paper-toast id="toast">[[i18n('driveSyncRootsManagement.roots.disabled')]]</paper-toast>
   `,
 
   is: 'nuxeo-drive-sync-roots-management',
