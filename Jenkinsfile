@@ -58,6 +58,7 @@ pipeline {
   environment {
     ORG = 'nuxeo'
     APP_NAME = 'nuxeo-web-ui'
+    CONNECT_PREPROD_URL = 'https://nos-preprod-connect.nuxeocloud.com/nuxeo'
     // NXBT-2885: need "Pipeline Utility Steps"
     // WEBUI_VERSION = readJSON(file: 'package.json').version
   }
@@ -188,9 +189,35 @@ pipeline {
         }
       }
     }
-    stage('Build and deploy Docker images') {
+    stage('Publish Maven artifacts') {
+      when {
+       branch 'master'
+      }
       steps {
-        setGitHubBuildStatus('webui/docker', 'Build Docker images', 'PENDING')
+        setGitHubBuildStatus('webui/publish/maven', 'Deploy Maven artifacts', 'PENDING')
+        container('mavennodejs') {
+          echo """
+          ----------------------
+          Deploy Maven artifacts
+          ----------------------"""
+          sh "mvn -B -nsu -DskipTests deploy"
+        }
+      }
+      post {
+        success {
+          setGitHubBuildStatus('webui/publish/maven', 'Deploy Maven artifacts', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('webui/publish/maven', 'Deploy Maven artifacts', 'FAILURE')
+        }
+      }
+    }
+    stage('Publish Nuxeo Packages') {
+      when {
+       branch 'master'
+      }
+      steps {
+        setGitHubBuildStatus('webui/publish/packages', 'Upload Nuxeo Packages', 'PENDING')
         container('mavennodejs') {
           script {
             WEBUI_VERSION =  sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
@@ -198,6 +225,60 @@ pipeline {
               WEBUI_VERSION += "-${BRANCH_NAME}";
             }
           }
+          echo """
+          -------------------------------------------------
+          Upload Nuxeo Packages to ${CONNECT_PREPROD_URL}
+          -------------------------------------------------"""
+          withCredentials([usernameColonPassword(credentialsId: 'connect-preprod', variable: 'CONNECT_PASS')]) {
+            sh """
+              PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${WEBUI_VERSION}.zip"
+              curl -i -u "$CONNECT_PASS" -F package=@\$PACKAGE "$CONNECT_PREPROD_URL"/site/marketplace/upload?batch=true
+            """
+          }
+        }
+      }
+      post {
+        success {
+          setGitHubBuildStatus('webui/publish/packages', 'Upload Nuxeo Packages', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('webui/publish/packages', 'Upload Nuxeo Packages', 'FAILURE')
+        }
+      }
+    }
+    stage('Publish Web UI FTest Framework') {
+      when {
+       branch 'master'
+      }
+      steps {
+        setGitHubBuildStatus('webui/publish/ftest', 'Upload Nuxeo Packages', 'PENDING')
+        container('mavennodejs') {
+          echo """
+          -----------------
+          Publishing to npm
+          -----------------"""
+          script {
+            def token = sh(script: 'jx step credential -s public-npm-token -k token', returnStdout: true).trim()
+            sh "echo '//packages.nuxeo.com/repository/npm-public/:_authToken=${token}' >> ~/.npmrc"
+            dir('packages/nuxeo-web-ui-ftest') {
+              sh 'npm --registry=//packages.nuxeo.com/repository/npm-public publish --tag SNAPSHOT'
+            }
+          }
+        }
+      }
+      post {
+        success {
+          setGitHubBuildStatus('webui/publish/packages', 'Upload Nuxeo Packages', 'SUCCESS')
+        }
+        failure {
+          setGitHubBuildStatus('webui/publish/packages', 'Upload Nuxeo Packages', 'FAILURE')
+        }
+      }
+    }
+    stage('Build and deploy Docker images') {
+      steps {
+        setGitHubBuildStatus('webui/docker', 'Build Docker images', 'PENDING')
+        container('mavennodejs') {
           withEnv(["VERSION=${WEBUI_VERSION}"]) {
             echo """
             ------------------------------
