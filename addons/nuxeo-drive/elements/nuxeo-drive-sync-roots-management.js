@@ -84,15 +84,15 @@ Polymer({
 
     <template is="dom-if" if="[[_empty(roots)]]">
       <div class="emptyResult">
-        [[i18n('driveSyncRootsManagement.roots.empty',"You currently don't have any synchronization root.")]]
+        [[i18n('driveSyncRootsManagement.roots.empty')]]
       </div>
     </template>
 
     <template is="dom-if" if="[[!_empty(roots)]]">
       <div class="table">
         <div class="header">
-          <div class="cell flex-1">[[i18n('driveSyncRootsManagement.root.name', 'Name')]]</div>
-          <div class="cell flex-3">[[i18n('driveSyncRootsManagement.root.path', 'Path')]]</div>
+          <div class="cell flex-1">[[i18n('driveSyncRootsManagement.root.name')]]</div>
+          <div class="cell flex-3">[[i18n('driveSyncRootsManagement.root.path')]]</div>
           <div class="cell"></div>
         </div>
         <template is="dom-repeat" items="[[roots]]" as="doc">
@@ -102,7 +102,7 @@ Polymer({
             <div class="cell actions">
               <paper-icon-button
                 icon="icons:clear"
-                title="[[i18n('driveSyncRootsManagement.root.disable', 'Disable)]]"
+                title="[[i18n('driveSyncRootsManagement.root.disable')]]"
                 on-tap="_disable"
               >
               </paper-icon-button>
@@ -113,7 +113,7 @@ Polymer({
     </template>
 
     <paper-toast id="toast"
-      >[[i18n('driveSyncRootsManagement.roots.disabled', 'Synchronization root disabled')]]</paper-toast
+      >[[i18n('driveSyncRootsManagement.roots.disabled')]]</paper-toast
     >
   `,
 
