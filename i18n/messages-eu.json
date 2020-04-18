@@ -524,6 +524,7 @@
   "drivePage.packages": "Paketeak",
   "drivePage.roots": "Sinkronizazio-erroak",
   "drivePage.tokens": "Tokenak",
+  "driveSyncRootsManagement.root.disable": "Disable",
   "driveSyncRootsManagement.root.name": "Izenburua",
   "driveSyncRootsManagement.root.path": "Bide-izena",
   "driveSyncRootsManagement.roots.disabled": "Sinkronizazio-erroa desgaituta",

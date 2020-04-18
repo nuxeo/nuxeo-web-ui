@@ -524,6 +524,7 @@
   "drivePage.packages": "Paquetes",
   "drivePage.roots": "Origen de la sincronización",
   "drivePage.tokens": "Tokens",
+  "driveSyncRootsManagement.root.disable": "Disable",
   "driveSyncRootsManagement.root.name": "Título",
   "driveSyncRootsManagement.root.path": "Ruta",
   "driveSyncRootsManagement.roots.disabled": "Origen de la sincronización desactivado",

@@ -524,6 +524,7 @@
   "drivePage.packages": "パッケージ",
   "drivePage.roots": "同期のルート",
   "drivePage.tokens": "トークン",
+  "driveSyncRootsManagement.root.disable": "Disable",
   "driveSyncRootsManagement.root.name": "題名",
   "driveSyncRootsManagement.root.path": "パス",
   "driveSyncRootsManagement.roots.disabled": "同期のルートが無効になりました",

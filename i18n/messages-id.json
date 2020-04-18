@@ -524,6 +524,7 @@
   "drivePage.packages": "Paket",
   "drivePage.roots": "Akar Sinkronisasi",
   "drivePage.tokens": "Token",
+  "driveSyncRootsManagement.root.disable": "Disable",
   "driveSyncRootsManagement.root.name": "Judul",
   "driveSyncRootsManagement.root.path": "Path",
   "driveSyncRootsManagement.roots.disabled": "Akar sinkronisasi dinonaktifkan",

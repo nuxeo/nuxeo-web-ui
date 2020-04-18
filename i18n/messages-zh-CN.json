@@ -524,6 +524,7 @@
   "drivePage.packages": "包",
   "drivePage.roots": "同步根目录",
   "drivePage.tokens": "令牌",
+  "driveSyncRootsManagement.root.disable": "Disable",
   "driveSyncRootsManagement.root.name": "标题",
   "driveSyncRootsManagement.root.path": "路径",
   "driveSyncRootsManagement.roots.disabled": "已禁用同步根目录",

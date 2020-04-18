@@ -524,6 +524,7 @@
   "drivePage.packages": "Archives",
   "drivePage.roots": "Racines de synchronisation",
   "drivePage.tokens": "Jetons d'authentification",
+  "driveSyncRootsManagement.root.disable": "Disable",
   "driveSyncRootsManagement.root.name": "Titre",
   "driveSyncRootsManagement.root.path": "Chemin",
   "driveSyncRootsManagement.roots.disabled": "Racines de synchronisation désactivées",
