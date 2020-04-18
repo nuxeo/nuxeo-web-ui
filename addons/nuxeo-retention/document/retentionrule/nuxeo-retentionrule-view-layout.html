@@ -5,7 +5,11 @@
 -->
 <dom-module id="nuxeo-retentionrule-view-layout">
   <template>
-    <style include="iron-flex iron-flex-alignment nuxeo-styles"></style>
+    <style include="iron-flex iron-flex-alignment nuxeo-styles">
+      *[role='widget'] {
+        margin-right: 10px;
+      }
+    </style>
 
     <retention-config-widget document="[[document]]"></retention-config-widget>
 
