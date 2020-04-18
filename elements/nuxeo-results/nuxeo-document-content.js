@@ -269,6 +269,16 @@ Polymer({
             </template>
           </template>
         </nuxeo-data-table-column>
+        <nuxeo-data-table-column
+          name="[[i18n('documentContentView.datatable.header.isRecord')]]"
+          field="ecm:isRecord"
+          hidden
+          flex="60"
+        >
+          <template>
+            <paper-checkbox disabled checked="[[item.properties.ecm:isRecord]]"></paper-checkbox>
+          </template>
+        </nuxeo-data-table-column>
       </nuxeo-data-table>
     </nuxeo-results>
   `,

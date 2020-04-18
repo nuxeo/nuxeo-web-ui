@@ -387,6 +387,7 @@
   "documentContentView.datatable.header.author": "Autor",
   "documentContentView.datatable.header.coverage": "Cobertura",
   "documentContentView.datatable.header.created": "Creado",
+  "documentContentView.datatable.header.isRecord": "Es un Registro",
   "documentContentView.datatable.header.lastContributor": "Último colaborador",
   "documentContentView.datatable.header.modified": "Modificado",
   "documentContentView.datatable.header.nature": "Naturaleza",
