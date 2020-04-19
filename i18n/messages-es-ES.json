@@ -941,6 +941,7 @@
   "ui.label.quickFilters.mostRecent": "Más Reciente",
   "ui.label.quickFilters.noFolder": "Sin contenedores",
   "ui.label.quickFilters.onlyValidated": "Validado",
+  "ui.label.quickFilters.withRule": "Con regla de retención",
   "untrashDocumentsButton.confirm.untrashDocuments": "¿Sacar el/los documento/s seleccionado/s de la papelera?",
   "untrashDocumentsButton.tooltip": "Sacar elementos seleccionados de la papelera",
   "userCloudServices.heading": "Cuentas de servicios Cloud",
