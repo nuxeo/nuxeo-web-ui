@@ -1150,6 +1150,7 @@
   "ui.label.quickFilters.hasLegalHold": "Under legal hold",
   "ui.label.quickFilters.hasNotLegalHold": "Not under legal hold",
   "ui.label.quickFilters.withoutRule": "Sans règle jointe",
+  "ui.label.quickFilters.withRule": "Avec une règle  jointe",
   "untrashDocumentsButton.confirm.untrashDocuments": "Restaurer le(s) document(s) sélectionné(s) ?",
   "untrashDocumentsButton.tooltip": "Restaurer les documents sélectionnés",
   "userCloudServices.heading": "Comptes de services Cloud",
