@@ -1005,11 +1005,8 @@ Polymer({
   },
 
   _cancel() {
-    if (this.batchId) {
-      this.cancelBatch();
-    }
-    this._clear();
-    this.stage = 'upload';
+    this.cancelBatch();    
+    this._clear();    
     this.fire('nx-creation-wizard-show-tabs');
   },
 
