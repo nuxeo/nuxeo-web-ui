@@ -97,7 +97,7 @@ Polymer({
     <template is="dom-if" if="[[_empty(tokens)]]">
       <div class="table-row">
         <div class="emptyResult">
-          [[i18n('authenticationTokensManagement.empty', "You currently don't have any token.")]]
+          [[i18n('authenticationTokensManagement.empty')]]
         </div>
       </div>
     </template>
@@ -105,12 +105,12 @@ Polymer({
     <template is="dom-if" if="[[!_empty(tokens)]]">
       <div class="table">
         <div class="header">
-          <div class="flex-2">[[i18n('authenticationTokensManagement.token', 'Token')]]</div>
-          <div class="flex-1">[[i18n('authenticationTokensManagement.application', 'Application')]]</div>
-          <div class="flex">[[i18n('authenticationTokensManagement.deviceId', 'Device Identifier')]]</div>
-          <div class="flex">[[i18n('authenticationTokensManagement.deviceDescription', 'Device Description')]]</div>
-          <div class="flex">[[i18n('authenticationTokensManagement.permission', 'Permission')]]</div>
-          <div class="flex">[[i18n('authenticationTokensManagement.creationDate', 'Creation Date')]]</div>
+          <div class="flex-2">[[i18n('authenticationTokensManagement.token')]]</div>
+          <div class="flex-1">[[i18n('authenticationTokensManagement.application')]]</div>
+          <div class="flex">[[i18n('authenticationTokensManagement.deviceId')]]</div>
+          <div class="flex">[[i18n('authenticationTokensManagement.deviceDescription')]]</div>
+          <div class="flex">[[i18n('authenticationTokensManagement.permission')]]</div>
+          <div class="flex">[[i18n('authenticationTokensManagement.creationDate')]]</div>
           <div class="actions"></div>
         </div>
         <template is="dom-repeat" items="[[tokens]]" as="token">
@@ -124,7 +124,7 @@ Polymer({
             <div class="actions">
               <paper-icon-button
                 icon="icons:clear"
-                title="[[i18n('authenticationTokensManagement.revoke', 'Revoke)]]"
+                title="[[i18n('authenticationTokensManagement.revoke')]]"
                 on-tap="_revoke"
               >
               </paper-icon-button>
@@ -134,7 +134,7 @@ Polymer({
       </div>
     </template>
 
-    <paper-toast id="toast">[[i18n('authenticationTokensManagement.revoked', 'Token revoked')]]</paper-toast>
+    <paper-toast id="toast">[[i18n('authenticationTokensManagement.revoked')]]</paper-toast>
   `,
 
   is: 'nuxeo-authentication-tokens-management',
