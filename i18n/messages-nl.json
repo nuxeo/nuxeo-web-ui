@@ -398,7 +398,7 @@
   "documentContentView.datatable.header.version": "Versie",
   "documentContentView.drag.import": "Neerzetten om te importeren",
   "documentContentView.moveToColdStorage.ask.confirmation": "Send the document content to cold storage?",
-  "documentContentView.moveToColdStorage.cancel": "Cancel",
+  "documentContentView.moveToColdStorage.cancel": "Annuleren",
   "documentContentView.moveToColdStorage.confirm": "Confirm",
   "documentContentView.moveToColdStorage.error": "Error moving the document content to cold storage.",
   "documentContentView.moveToColdStorage.label": "Send to cold storage",
