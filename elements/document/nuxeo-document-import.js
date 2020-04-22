@@ -1005,8 +1005,8 @@ Polymer({
   },
 
   _cancel() {
-    this.cancelBatch();    
-    this._clear();    
+    this.cancelBatch();
+    this._clear();
     this.fire('nx-creation-wizard-show-tabs');
   },
 
