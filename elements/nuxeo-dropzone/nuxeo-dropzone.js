@@ -55,7 +55,7 @@ Polymer({
       }
 
       :host([invalid]) #container {
-        border: 2px dashed var(--paper-input-container-invalid-color, red);
+        border: 2px dashed var(--paper-input-container-invalid-color, #de350b);
       }
 
       label {
@@ -66,7 +66,7 @@ Polymer({
         display: inline-block;
         content: '*';
         margin-left: 4px;
-        color: var(--paper-input-container-invalid-color, red);
+        color: var(--paper-input-container-invalid-color, #de350b);
         font-size: 1.2em;
       }
 
@@ -107,7 +107,7 @@ Polymer({
       }
 
       :host([invalid]) #details {
-        border: 2px solid var(--paper-input-container-invalid-color, red);
+        border: 2px solid var(--paper-input-container-invalid-color, #de350b);
       }
 
       .file {
@@ -143,7 +143,7 @@ Polymer({
       }
 
       .error {
-        color: var(--paper-input-container-invalid-color, red);
+        color: var(--paper-input-container-invalid-color, #de350b);
         margin-top: 8px;
       }
     </style>
