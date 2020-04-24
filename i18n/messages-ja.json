@@ -1153,6 +1153,7 @@
   "ui.label.quickFilters.hasLegalHold": "Under legal hold",
   "ui.label.quickFilters.hasNotLegalHold": "Not under legal hold",
   "ui.label.quickFilters.withoutRule": "Without attached rule",
+  "ui.label.quickFilters.withRule": "With attached rule",
   "untrashDocumentsButton.confirm.untrashDocuments": "選択した文書をゴミ箱から復元しますか？",
   "untrashDocumentsButton.tooltip": "選択したアイテムをゴミ箱から復元",
   "userCloudServices.heading": "クラウドサービスのアカウント",

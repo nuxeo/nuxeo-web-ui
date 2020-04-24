@@ -1153,6 +1153,7 @@
   "ui.label.quickFilters.hasLegalHold": "Under legal hold",
   "ui.label.quickFilters.hasNotLegalHold": "Not under legal hold",
   "ui.label.quickFilters.withoutRule": "Without attached rule",
+  "ui.label.quickFilters.withRule": "With attached rule",
   "untrashDocumentsButton.confirm.untrashDocuments": "Membatalkan penghapusan dokumen dipilih(s)?",
   "untrashDocumentsButton.tooltip": "Batalkan penghapusan item terpilih",
   "userCloudServices.heading": "Akun Layanan Cloud",

@@ -1153,6 +1153,7 @@
   "ui.label.quickFilters.hasLegalHold": "Under legal hold",
   "ui.label.quickFilters.hasNotLegalHold": "Not under legal hold",
   "ui.label.quickFilters.withoutRule": "Without attached rule",
+  "ui.label.quickFilters.withRule": "With attached rule",
   "untrashDocumentsButton.confirm.untrashDocuments": "恢复所选择的文件？",
   "untrashDocumentsButton.tooltip": "恢复选中项",
   "userCloudServices.heading": "云服务帐户",
