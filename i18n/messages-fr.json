@@ -636,6 +636,7 @@
   "label.document.type.note": "Note",
   "label.document.type.orderedfolder": "Dossier ordonné",
   "label.document.type.picture": "Image",
+  "label.document.type.retentionrule": "Retention Rule",
   "label.document.type.section": "Section",
   "label.document.type.templatesource": "Modèle de fichier",
   "label.document.type.threed": "3D",

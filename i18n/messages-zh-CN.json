@@ -636,6 +636,7 @@
   "label.document.type.note": "笔记",
   "label.document.type.orderedfolder": "排序的文件夹",
   "label.document.type.picture": "图片",
+  "label.document.type.retentionrule": "Retention Rule",
   "label.document.type.section": "组",
   "label.document.type.templatesource": "文件模板",
   "label.document.type.threed": "三维",
