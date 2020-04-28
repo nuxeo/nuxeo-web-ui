@@ -19,6 +19,8 @@ limitations under the License.
     <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
       <template>
         <nuxeo-menu-item name="aicore" label="app.title.admin.aicore" route="administration:aicore"> </nuxeo-menu-item>
+        <nuxeo-menu-item name="aicloud" label="admin.ai.cloud.heading" route="administration:aicloud">
+        </nuxeo-menu-item>
       </template>
     </nuxeo-filter>
   </template>
@@ -28,6 +30,7 @@ limitations under the License.
     <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
       <template>
         <nuxeo-admin-ai name="aicore"></nuxeo-admin-ai>
+        <admin-ai-insight name="aicloud"></admin-ai-insight>
       </template>
     </nuxeo-filter>
   </template>
