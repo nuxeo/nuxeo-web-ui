@@ -3,6 +3,7 @@ expose:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
   config:
+    # add tls configuration
     domain: webui.dev.nuxeo.com
     exposer: Ingress
     http: true
@@ -18,28 +19,35 @@ cleanup:
     helm.sh/hook-delete-policy: hook-succeeded
 
 nuxeo:
+  fullnameOverride: preview
   nuxeo:
+    podLabels:
+      branch: "$BRANCH_NAME"
+      team: webui
+      resource: pod
+      usage: preview
     service:
       annotations:
         fabric8.io/expose: "true"
-        fabric8.io/ingress.path: /nuxeo/
-        fabric8.io/ingress.name: preview
-        fabric8.io/ingress.annotations: "nginx.ingress.kubernetes.io/proxy-body-size: 0"
+        fabric8.io/ingress.annotations: |-
+          nginx.ingress.kubernetes.io/proxy-body-size: 0
+          nginx.ingress.kubernetes.io/server-snippet: ignore_invalid_headers off;
+      labels:
+        branch: "$BRANCH_NAME"
+        team: webui
+        resource: service
+        usage: preview
+    image:
+      repository:
+      tag:
+      pullPolicy: Always
+    packages: nuxeo-web-ui-$PREVIEW_VERSION
+    clid: $NUXEO_CLID
+    customParams: |-
+      org.nuxeo.connect.url=https://nos-preprod-connect.nuxeocloud.com/nuxeo/site/
   mongodb:
     deploy: false
   postgresql:
     deploy: false
-
-preview:
-  nuxeo:
-    webui:
-      image:
-        repository:
-        tag:
-      fullnameOverride: preview
-      packages: nuxeo-dam
-      service:
-        annotations:
-          fabric8.io/expose: "true"
-          fabric8.io/ingress.path: /
-          fabric8.io/ingress.name: preview
+  elasticsearch:
+    deploy: false

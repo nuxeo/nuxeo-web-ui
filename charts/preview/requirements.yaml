@@ -7,14 +7,7 @@ dependencies:
   name: exposecontroller
   repository: http://chartmuseum.jenkins-x.io
   version: 2.3.111
-- name: nuxeo
-  version: 0.1.2
-  repository: http://jenkins-x-chartmuseum:8080
-  alias: nuxeo
-
-  # !! "alias: preview" must be last entry in dependencies array !!
-  # !! Place custom dependencies above !!
-- name: nuxeo-web-ui
-  version: 0.0.1
-  repository: http://jenkins-x-chartmuseum:8080
-  alias: preview
+- alias: nuxeo
+  name: nuxeo
+  version: ~1.0.0
+  repository: https://chartmuseum.platform.dev.nuxeo.com
