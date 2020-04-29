@@ -140,11 +140,11 @@ Polymer({
         on-refresh-display="_refreshDisplay"
         on-clear-selected-items="_clearSelectedItems"
       >
-        <nuxeo-actions-menu>
-          <slot name="selectionActions">
+        <slot name="selectionActions">
+          <nuxeo-actions-menu>
             <nuxeo-slot name="RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
-          </slot>
-        </nuxeo-actions-menu>
+          </nuxeo-actions-menu>
+        </slot>
       </nuxeo-selection-toolbar>
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">

@@ -34,9 +34,9 @@ limitations under the License.
       action-context="{{actionContext}}"
       sort-options="[[sortOptions]]"
     >
-      <div slot="selectionActions">
+      <nuxeo-actions-menu slot="selectionActions">
         <nuxeo-slot name="TRASH_RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
-      </div>
+      </nuxeo-actions-menu>
 
       <nuxeo-data-grid
         name="grid"
