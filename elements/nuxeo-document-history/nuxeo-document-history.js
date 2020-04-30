@@ -71,7 +71,7 @@ Polymer({
           <template>[[_formatActivity(item.eventId)]]</template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.date')]]" sort-by="eventDate">
-          <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
+          <template><nuxeo-date datetime="[[item.eventDate]]" format="LLL"></nuxeo-date></template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentHistory.username')]]" sort-by="principalName">
           <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>

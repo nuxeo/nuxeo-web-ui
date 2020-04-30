@@ -121,7 +121,7 @@ Polymer({
               <template>[[_formati18n('eventType.', item.eventId)]]</template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.date')]]" sort-by="eventDate">
-              <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
+              <template><nuxeo-date datetime="[[item.eventDate]]" format="LLL"></nuxeo-date></template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column name="[[i18n('audit.username')]]" sort-by="principalName">
               <template>
