@@ -100,7 +100,7 @@ limitations under the License.
 </head>
 
 <body>
-  <nuxeo-connection url="<%= context %>" repository-name="<%= rm.getDefaultRepositoryName() %>"></nuxeo-connection>
+  <nuxeo-connection url="<%= context %>" repository-name="<%= repository %>"></nuxeo-connection>
   <nuxeo-app base-url="<%= baseUrl %>"
     product-name="<%= Framework.getProperty(Environment.PRODUCT_NAME) %>" unresolved>
     <div id="sidebar">

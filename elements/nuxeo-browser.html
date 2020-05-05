@@ -60,6 +60,7 @@ limitations under the License.
     <!-- Main content -->
     <nuxeo-page class="main">
       <div slot="header">
+        <nuxeo-repositories></nuxeo-repositories>
         <nuxeo-breadcrumb document="[[document]]"></nuxeo-breadcrumb>
         <template is="dom-if" if="[[!isTrashed(document)]]">
           <div class="document-actions">
