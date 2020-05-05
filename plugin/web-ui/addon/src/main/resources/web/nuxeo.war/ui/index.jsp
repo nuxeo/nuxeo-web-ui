@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+<%@ page trimDirectiveWhitespaces="true" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.util.List"%>
 <%@ page import="java.lang.management.ManagementFactory"%>
@@ -26,17 +27,30 @@ limitations under the License.
 <%@ page import="org.nuxeo.ecm.web.resources.api.Resource"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.ResourceContextImpl"%>
 <%@ page import="org.nuxeo.ecm.web.resources.api.service.WebResourceManager"%>
+<%@ page import="org.nuxeo.ecm.core.api.repository.Repository"%>
 <%@ page import="org.nuxeo.ecm.core.api.repository.RepositoryManager"%>
 <%@ page import="org.nuxeo.common.utils.UserAgentMatcher"%>
 <%@ page import="org.nuxeo.connect.packages.PackageManager"%>
 <%@ page import="org.nuxeo.connect.update.PackageType"%>
 
-<% WebResourceManager wrm = Framework.getService(WebResourceManager.class); %>
-<% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>
-<% ConfigurationService cs = Framework.getService(ConfigurationService.class); %>
-<% PackageManager pm = Framework.getService(PackageManager.class); %>
-<% String ua = request.getHeader("user-agent"); %>
-<% String context = request.getContextPath(); %>
+<%
+  WebResourceManager wrm = Framework.getService(WebResourceManager.class);
+  ConfigurationService cs = Framework.getService(ConfigurationService.class);
+  PackageManager pm = Framework.getService(PackageManager.class);
+  String ua = request.getHeader("user-agent");
+  String context = request.getContextPath();
+  RepositoryManager rm = Framework.getService(RepositoryManager.class);
+  String defaultRepository = rm.getDefaultRepositoryName();
+  String repository = (String) request.getAttribute("NXREPOSITORY");
+  String baseUrl;
+
+  if (repository == null) {
+    repository = defaultRepository;
+    baseUrl = context + "/ui/";
+  } else {
+    baseUrl = context + "/repo/" + repository + "/ui/";
+  }
+%>
 
 <!DOCTYPE html>
 <html lang="">
@@ -87,7 +101,7 @@ limitations under the License.
 
 <body>
   <nuxeo-connection url="<%= context %>" repository-name="<%= rm.getDefaultRepositoryName() %>"></nuxeo-connection>
-  <nuxeo-app base-url="<%= request.getRequestURI() %>"
+  <nuxeo-app base-url="<%= baseUrl %>"
     product-name="<%= Framework.getProperty(Environment.PRODUCT_NAME) %>" unresolved>
     <div id="sidebar">
       <img src="themes/default/logo.png">
@@ -119,6 +133,16 @@ limitations under the License.
         <% } else if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".html"))) { %>
           '<%= context %><%= "/ui/" + pn + ".html" %>',
         <% } %>
+      <% } %>
+    ];
+    Nuxeo.UI.repositories = [
+      <% for (Repository repo : rm.getRepositories()) { %>
+        {
+          name: '<%= repo.getName() %>',
+          label: '<%= repo.getLabel() %>',
+          href: '<%= context + "/repo/" + repo.getName() + "/ui/" %>',
+          isDefault: <%= defaultRepository.equals(repo.getName())  %>,
+        },
       <% } %>
     ];
   </script>

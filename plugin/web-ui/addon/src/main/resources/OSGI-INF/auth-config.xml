@@ -33,6 +33,7 @@
     <startURLPattern>
       <patterns>
         <pattern>ui</pattern>
+        <pattern>repo</pattern>
       </patterns>
     </startURLPattern>
   </extension>
