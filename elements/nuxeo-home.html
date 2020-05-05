@@ -107,7 +107,10 @@ limitations under the License.
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-page>
-      <div slot="header">[[i18n('home.dashboard')]]</div>
+      <div slot="header">
+        <nuxeo-repositories></nuxeo-repositories>
+        [[i18n('home.dashboard')]]
+      </div>
       <div>
         <section name="dashboard" class="dashboard">
           <!-- recently edited -->

@@ -58,6 +58,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
+import './nuxeo-browser/nuxeo-repositories.js';
 import './nuxeo-document-storage/nuxeo-document-storage.js';
 import './nuxeo-results/nuxeo-results.js';
 import '../i18n/i18n.js';

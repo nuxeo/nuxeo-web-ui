@@ -196,6 +196,7 @@ import './nuxeo-cloud-services/nuxeo-cloud-services.js';
 import './nuxeo-cloud-services/nuxeo-cloud-providers.js';
 import './nuxeo-cloud-services/nuxeo-cloud-tokens.js';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
+import './nuxeo-browser/nuxeo-repositories.js';
 import './nuxeo-results/nuxeo-results.js';
 import './nuxeo-results/nuxeo-default-results.js';
 import './nuxeo-results/nuxeo-document-content.js';
