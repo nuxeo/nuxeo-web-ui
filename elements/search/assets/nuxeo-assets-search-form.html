@@ -39,53 +39,78 @@ limitations under the License.
 
     <!-- Asset type -->
     <div role="widget">
-      <label>[[i18n('assetsSearch.assetType')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.system_primaryType_agg]]"
         value="{{params.system_primaryType_agg}}"
+        label="[[i18n('assetsSearch.assetType')]]"
+        collapsible
       >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Asset format -->
     <div role="widget">
-      <label>[[i18n('assetsSearch.assetFormat')]]</label>
-      <nuxeo-checkbox-aggregation data="[[aggregations.system_mimetype_agg]]" value="{{params.system_mimetype_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.system_mimetype_agg]]"
+        value="{{params.system_mimetype_agg}}"
+        label="[[i18n('assetsSearch.assetFormat')]]"
+        collapsible
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Asset Width -->
     <div role="widget">
-      <label>[[i18n('assetsSearch.assetWidth')]]</label>
-      <nuxeo-checkbox-aggregation data="[[aggregations.asset_width_agg]]" value="{{params.asset_width_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.asset_width_agg]]"
+        value="{{params.asset_width_agg}}"
+        label="[[i18n('assetsSearch.assetWidth')]]"
+        collapsible
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Asset Height -->
     <div role="widget">
-      <label>[[i18n('assetsSearch.assetHeight')]]</label>
-      <nuxeo-checkbox-aggregation data="[[aggregations.asset_height_agg]]" value="{{params.asset_height_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.asset_height_agg]]"
+        value="{{params.asset_height_agg}}"
+        label="[[i18n('assetsSearch.assetHeight')]]"
+        collapsible
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Color Profile -->
     <div role="widget">
-      <label>[[i18n('assetsSearch.colorProfile')]]</label>
-      <nuxeo-checkbox-aggregation data="[[aggregations.color_profile_agg]]" value="{{params.color_profile_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.color_profile_agg]]"
+        value="{{params.color_profile_agg}}"
+        label="[[i18n('assetsSearch.colorProfile')]]"
+        collapsible
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Color Depth -->
     <div role="widget">
-      <label>[[i18n('assetsSearch.colorDepth')]]</label>
-      <nuxeo-checkbox-aggregation data="[[aggregations.color_depth_agg]]" value="{{params.color_depth_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.color_depth_agg]]"
+        value="{{params.color_depth_agg}}"
+        label="[[i18n('assetsSearch.colorDepth')]]"
+        collapsible
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <!-- Video Duration -->
     <div role="widget">
-      <label>[[i18n('assetsSearch.videoDuration')]]</label>
-      <nuxeo-checkbox-aggregation data="[[aggregations.video_duration_agg]]" value="{{params.video_duration_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.video_duration_agg]]"
+        value="{{params.video_duration_agg}}"
+        label="[[i18n('assetsSearch.videoDuration')]]"
+        collapsible
+      >
       </nuxeo-checkbox-aggregation>
     </div>
   </template>

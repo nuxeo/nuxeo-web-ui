@@ -37,8 +37,12 @@ limitations under the License.
     </nuxeo-input>
 
     <div role="widget">
-      <label>[[i18n('defaultSearch.modifiedDate')]]</label>
-      <nuxeo-checkbox-aggregation data="[[aggregations.dc_modified_agg]]" value="{{params.dc_modified_agg}}">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_modified_agg]]"
+        value="{{params.dc_modified_agg}}"
+        label="[[i18n('defaultSearch.modifiedDate')]]"
+        collapsible
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
@@ -80,37 +84,45 @@ limitations under the License.
     </div>
 
     <div role="widget">
-      <label>[[i18n('defaultSearch.nature')]]</label>
-      <nuxeo-checkbox-aggregation data="[[aggregations.dc_nature_agg]]" value="{{params.dc_nature_agg}}" name="nature">
+      <nuxeo-checkbox-aggregation
+        data="[[aggregations.dc_nature_agg]]"
+        value="{{params.dc_nature_agg}}"
+        name="nature"
+        label="[[i18n('defaultSearch.nature')]]"
+        collapsible
+      >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <div role="widget">
-      <label>[[i18n('defaultSearch.subject')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_subjects_agg]]"
         value="{{params.dc_subjects_agg}}"
         name="subject"
+        label="[[i18n('defaultSearch.subject')]]"
+        collapsible
       >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <div role="widget">
-      <label>[[i18n('defaultSearch.coverage')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_coverage_agg]]"
         value="{{params.dc_coverage_agg}}"
         name="coverage"
+        label="[[i18n('defaultSearch.coverage')]]"
+        collapsible
       >
       </nuxeo-checkbox-aggregation>
     </div>
 
     <div role="widget">
-      <label>[[i18n('defaultSearch.size')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
         value="{{params.common_size_agg}}"
         name="size"
+        label="[[i18n('defaultSearch.size')]]"
+        collapsible
       >
       </nuxeo-checkbox-aggregation>
     </div>

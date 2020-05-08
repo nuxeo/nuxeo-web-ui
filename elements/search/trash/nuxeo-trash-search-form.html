@@ -55,11 +55,12 @@ limitations under the License.
     </div>
 
     <div role="widget">
-      <label>[[i18n('defaultSearch.size')]]</label>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
         value="{{params.common_size_agg}}"
         name="size"
+        label="[[i18n('defaultSearch.size')]]"
+        collapsible
       >
       </nuxeo-checkbox-aggregation>
     </div>

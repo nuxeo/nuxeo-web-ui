@@ -70,20 +70,33 @@ limitations under the License.
 
     <div class="filters">
       <div class="section">
-        <label>[[i18n('retention.search.docTypes')]]</label>
-        <nuxeo-checkbox-aggregation data="[[aggregations.doc_type_agg]]" value="{{params.doc_type_agg}}" name="docType">
+        <nuxeo-checkbox-aggregation
+          data="[[aggregations.doc_type_agg]]"
+          value="{{params.doc_type_agg}}"
+          name="docType"
+          label="[[i18n('retention.search.docTypes')]]"
+          collapsible
+        >
         </nuxeo-checkbox-aggregation>
       </div>
 
       <div class="section">
-        <label>[[i18n('retention.search.pastRetainUntil')]]</label>
-        <nuxeo-checkbox-aggregation data="[[aggregations.record_retain_agg]]" value="{{params.record_retain_agg}}">
+        <nuxeo-checkbox-aggregation
+          data="[[aggregations.record_retain_agg]]"
+          value="{{params.record_retain_agg}}"
+          label="[[i18n('retention.search.pastRetainUntil')]]"
+          collapsible
+        >
         </nuxeo-checkbox-aggregation>
       </div>
 
       <div class="section">
-        <label>[[i18n('retention.search.futureRetainUntil')]]</label>
-        <nuxeo-checkbox-aggregation data="[[aggregations.ecm_retain_agg]]" value="{{params.ecm_retain_agg}}">
+        <nuxeo-checkbox-aggregation
+          data="[[aggregations.ecm_retain_agg]]"
+          value="{{params.ecm_retain_agg}}"
+          label="[[i18n('retention.search.futureRetainUntil')]]"
+          collapsible
+        >
         </nuxeo-checkbox-aggregation>
       </div>
     </div>
