@@ -259,9 +259,9 @@ pipeline {
           -----------------"""
           script {
             def token = sh(script: 'jx step credential -s public-npm-token -k token', returnStdout: true).trim()
-            sh "echo '//packages.nuxeo.com/repository/npm-public/:_authToken=${token}' >> ~/.npmrc"
+            sh "echo '//packages.nuxeo.com/repository/:_authToken=${token}' >> ~/.npmrc"
             dir('packages/nuxeo-web-ui-ftest') {
-              sh 'npm --registry=//packages.nuxeo.com/repository/npm-public publish --tag SNAPSHOT'
+              sh 'npm --registry=https://packages.nuxeo.com/repository/npm-public publish --tag SNAPSHOT'
             }
           }
         }
