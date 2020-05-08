@@ -334,6 +334,7 @@ const template = html`
           text-overflow: ellipsis;
           font-weight: 400 !important;
           letter-spacing: 0.005em !important;
+          font-family: var(--nuxeo-app-font);
         }
 
         --nuxeo-tag: {
