@@ -38,31 +38,61 @@ import moment from '@nuxeo/moment';
 Polymer({
   _template: html`
     <style>
-      #heading {
+      .row-container {
         @apply --layout-horizontal;
-        @apply --layout-end-justified;
+        @apply --layout-wrap;
+      }
+
+      .row-container * {
+        flex: 1 0 0;
+        margin-right: 8px;
       }
 
       #table {
         height: calc(100vh - 370px);
-      }
-
-      nuxeo-date-picker {
-        padding: 0 16px;
       }
     </style>
 
     <nuxeo-audit-page-provider id="provider" page-size="40"></nuxeo-audit-page-provider>
 
     <nuxeo-card>
-      <div id="heading">
-        <template is="dom-if" if="[[visible]]">
+      <template is="dom-if" if="[[visible]]">
+        <nuxeo-user-suggestion
+          value="{{principalName}}"
+          label="[[i18n('documentHistory.filter.username')]]"
+          placeholder="[[i18n('documentHistory.filter.usernamePlaceholder')]]"
+        ></nuxeo-user-suggestion>
+        <div class="row-container">
           <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.after')]]" value="{{startDate}}">
           </nuxeo-date-picker>
           <nuxeo-date-picker role="widget" label="[[i18n('documentHistory.filter.before')]]" value="{{endDate}}">
           </nuxeo-date-picker>
-        </template>
-      </div>
+        </div>
+        <div class="row-container">
+          <nuxeo-directory-suggestion
+            class="item"
+            role="widget"
+            label="[[i18n('documentHistory.filter.eventType')]]"
+            directory-name="eventTypes"
+            value="{{selectedEventTypes}}"
+            multiple="true"
+            placeholder="[[i18n('documentHistory.filter.selectEventTypes')]]"
+            min-chars="0"
+          >
+          </nuxeo-directory-suggestion>
+
+          <nuxeo-directory-suggestion
+            class="item"
+            role="widget"
+            label="[[i18n('documentHistory.filter.eventCategory')]]"
+            directory-name="eventCategories"
+            value="{{selectedEventCategory}}"
+            placeholder="[[i18n('documentHistory.filter.selectEventCategory')]]"
+            min-chars="0"
+          >
+          </nuxeo-directory-suggestion>
+        </div>
+      </template>
     </nuxeo-card>
 
     <nuxeo-card>
@@ -101,60 +131,70 @@ Polymer({
       value: false,
       observer: '_refresh',
     },
+    principalName: {
+      type: String,
+      value: '',
+    },
     startDate: {
       type: String,
       notify: true,
-      observer: '_observeStartDate',
     },
     endDate: {
       type: String,
       notify: true,
-      observer: '_observeEndDate',
+    },
+    selectedEventTypes: {
+      type: Array,
+      value: [],
+    },
+    selectedEventCategory: {
+      type: String,
+      value: '',
     },
   },
 
-  _observeStartDate() {
-    if (this.startDate && this.startDate.length > 0) {
-      this.$.provider.params.startDate = this.startDate;
-      if (this.endDate && this.endDate.length > 0) {
-        const start = Date.parse(this.startDate);
-        const end = Date.parse(this.endDate);
-        if (start > end) {
-          this.endDate = moment(start)
-            .add(7, 'day')
-            .format('YYYY-MM-DD');
-        }
-      }
-      this._refresh();
-    } else if (this.$.provider.params.startDate) {
-      delete this.$.provider.params.startDate;
-      this._refresh();
-    }
+  observers: ['_refresh(startDate, endDate, selectedEventTypes.*, selectedEventCategory, principalName)'],
+
+  _hasValidDate(dateAsString) {
+    return dateAsString && dateAsString.length > 0;
   },
 
-  _observeEndDate() {
-    if (this.endDate && this.endDate.length > 0) {
-      this.$.provider.params.endDate = this.endDate;
-      if (this.startDate && this.startDate.length > 0) {
-        const start = Date.parse(this.startDate);
-        const end = Date.parse(this.endDate);
-        if (start > end) {
-          this.startDate = moment(end)
-            .subtract(7, 'day')
-            .format('YYYY-MM-DD');
-        }
-      }
-      this._refresh();
-    } else if (this.$.provider.params.endDate) {
-      delete this.$.provider.params.endDate;
-      this._refresh();
+  _buildParams() {
+    const params = {
+      principalName: this.principalName,
+    };
+    if (this.selectedEventTypes && this.selectedEventTypes.length > 0) {
+      params.eventIds = this.selectedEventTypes;
     }
+    if (this.selectedEventCategory) {
+      params.eventCategory = this.selectedEventCategory;
+    }
+
+    if (this._hasValidDate(this.startDate) && this._hasValidDate(this.endDate)) {
+      const start = Date.parse(this.startDate);
+      const end = Date.parse(this.endDate);
+      if (start > end) {
+        this.startDate = moment(end)
+          .subtract(7, 'day')
+          .format('YYYY-MM-DD');
+      }
+    }
+
+    if (this._hasValidDate(this.startDate)) {
+      params.startDate = this.startDate;
+    }
+    if (this._hasValidDate(this.endDate)) {
+      params.endDate = this.endDate;
+    }
+
+    return params;
   },
 
   _refresh() {
     if (this.document && this.visible) {
       this.$.provider.page = 1;
       this.$.provider.docId = this.document.uid;
+      this.$.provider.params = this._buildParams();
       this.$.table.fetch();
     }
   },
