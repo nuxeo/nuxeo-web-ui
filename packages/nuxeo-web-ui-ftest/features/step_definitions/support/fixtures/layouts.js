@@ -171,15 +171,29 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-checkbox-aggregation',
-  (element) => element.element('paper-checkbox').getAttribute('aria-checked'),
+  (element) => {
+    let el = element;
+    if (el.getAttribute('collapsible')) {
+      el = el.element('iron-collapse');
+    }
+    el.element('paper-checkbox').getAttribute('aria-checked');
+  },
   (element, value) => {
-    element.waitForVisible('paper-checkbox');
-    const els = element.elements('paper-checkbox').value;
-    const el = els.find((e) => {
+    let el = element;
+    el.waitForVisible();
+    if (el.getAttribute('collapsible')) {
+      el = el.element('iron-collapse');
+      const button = element.element('button');
+      button.waitForVisible();
+      button.click();
+    }
+    el.waitForVisible('paper-checkbox');
+    const els = el.elements('paper-checkbox').value;
+    const checkbox = els.find((e) => {
       const text = e.getText();
       return typeof text === 'string' && text.trim().includes(value);
     });
-    el.click();
+    checkbox.click();
   },
 );
 global.fieldRegistry.register(
