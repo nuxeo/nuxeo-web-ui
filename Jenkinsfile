@@ -59,10 +59,24 @@ pipeline {
     ORG = 'nuxeo'
     APP_NAME = 'nuxeo-web-ui'
     CONNECT_PREPROD_URL = 'https://nos-preprod-connect.nuxeocloud.com/nuxeo'
-    // NXBT-2885: need "Pipeline Utility Steps"
-    // WEBUI_VERSION = readJSON(file: 'package.json').version
   }
   stages {
+    stage('Prepare') {
+      steps {
+        container('mavennodejs') {
+          script {
+            WEBUI_VERSION =  sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
+            if (BRANCH_NAME != 'master') {
+              WEBUI_VERSION += "-${BRANCH_NAME}";
+            }
+            echo """
+            -------------------------
+            Building ${WEBUI_VERSION}
+            -------------------------"""
+          }
+        }
+      }
+    }
     stage('Install dependencies and run lint') {
       steps {
         setGitHubBuildStatus('webui/install', 'Install dependencies and run lint', 'PENDING')
@@ -219,12 +233,6 @@ pipeline {
       steps {
         setGitHubBuildStatus('webui/publish/packages', 'Upload Nuxeo Packages', 'PENDING')
         container('mavennodejs') {
-          script {
-            WEBUI_VERSION =  sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
-            if (BRANCH_NAME != 'master') {
-              WEBUI_VERSION += "-${BRANCH_NAME}";
-            }
-          }
           echo """
           -------------------------------------------------
           Upload Nuxeo Packages to ${CONNECT_PREPROD_URL}
