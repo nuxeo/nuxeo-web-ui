@@ -59,7 +59,11 @@ limitations under the License.
   </head>
 
   <body>
-    <nuxeo-connection url="<%= htmlWebpackPlugin.options.nuxeo.url %>" method="form"></nuxeo-connection>
+    <nuxeo-connection
+      url="<%= htmlWebpackPlugin.options.nuxeo.url %>"
+      method="form"
+      repository-name="default"
+    ></nuxeo-connection>
 
     <nuxeo-app base-url="/" unresolved>
       <div id="sidebar">
