@@ -60,8 +60,9 @@ Polymer({
   },
 
   ready() {
-    this.$.nxcon.connect().then((res) => {
-      this.name = `${res.id}-document-creation-stats`;
+    this.$.nxcon.connect().then(({ id }) => {
+      const { repositoryName } = this.$.nxcon;
+      this.name = [id, ...(repositoryName ? [repositoryName] : []), 'document-creation-stats'].join('-');
     });
   },
 

@@ -118,8 +118,9 @@ Polymer({
   },
 
   ready() {
-    this.$.nxcon.connect().then((res) => {
-      this._set_storageName(`${res.id}-${this.name}`);
+    this.$.nxcon.connect().then(({ id }) => {
+      const { repositoryName } = this.$.nxcon;
+      this._set_storageName([id, ...(repositoryName ? [repositoryName] : []), this.name].join('-'));
     });
   },
 
