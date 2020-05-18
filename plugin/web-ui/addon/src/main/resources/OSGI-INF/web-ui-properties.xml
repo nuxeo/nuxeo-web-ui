@@ -36,5 +36,7 @@
 
     <!-- Max Results for Tables, Grids and Lists plugged on a Nuxeo Page Provider. Falls back on elasticsearch max result window by default. -->
     <property name="org.nuxeo.web.ui.listingMaxItems">${org.nuxeo.elasticsearch.provider.maxResultWindow:=10000}</property>
+
+    <property name="org.nuxeo.web.ui.pageprovider.method">POST</property>
   </extension>
 </component>
