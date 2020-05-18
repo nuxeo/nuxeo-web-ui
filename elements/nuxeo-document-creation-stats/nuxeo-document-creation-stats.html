@@ -62,7 +62,13 @@ limitations under the License.
 
       ready: function() {
         this.$.nxcon.connect().then(function(res) {
-          this.name =  res.id + '-document-creation-stats';
+          var parts = [res.id];
+          var repositoryName = this.$.nxcon.repositoryName;
+          if (repositoryName) {
+            parts.push(repositoryName);
+          }
+          parts.push('-document-creation-stats');
+          this.name = parts.join('-');
         }.bind(this));
       },
 
