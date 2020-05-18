@@ -29,31 +29,21 @@ Polymer({
       :host {
         display: block;
       }
-
-      label {
-        opacity: 0.5;
-        min-width: 30%;
-        display: inline-block;
+      .properties label {
+        min-width: 10rem;
+        margin-inline-end: 12px;
       }
 
-      .item {
+      .properties .item {
         @apply --layout-horizontal;
         @apply --layout-flex;
+        line-height: 2.2rem;
         @apply --layout-justified;
-        line-height: 1.5em;
-      }
-
-      iron-icon {
-        @apply --nuxeo-action;
-      }
-
-      iron-icon:hover {
-        @apply --nuxeo-action-hover;
       }
     </style>
 
     <h3>[[label]]</h3>
-    <div>
+    <div class="properties">
       <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
         <div class="item">
           <label>[[item.name]]</label>
