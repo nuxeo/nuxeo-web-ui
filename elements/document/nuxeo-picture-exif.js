@@ -28,12 +28,11 @@ Polymer({
   _template: html`
     <style>
       .properties label {
-        min-width: 10em;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        min-width: 10rem;
+        margin-inline-end: 12px;
       }
 
-      .item {
+      .properties .item {
         @apply --layout-horizontal;
         @apply --layout-flex;
         line-height: 2.2rem;
