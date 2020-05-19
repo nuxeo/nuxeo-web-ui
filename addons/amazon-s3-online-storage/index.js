@@ -95,14 +95,28 @@ class S3Provider {
   }
 
   _initCredentials(options) {
+    const credentials = new AWS.Credentials(
+      options.awsSecretKeyId,
+      options.awsSecretAccessKey,
+      options.awsSessionToken,
+    );
+    credentials.expireTime = new Date(options.expiration);
+    credentials.refresh = (cb) =>
+      this._resource(`upload/${this.batchId}/refreshToken`)
+        .post()
+        .then((response) => {
+          credentials.accessKeyId = response.awsSecretKeyId;
+          credentials.secretAccessKey = response.awsSecretAccessKey;
+          credentials.sessionToken = response.awsSessionToken;
+          credentials.expireTime = new Date(response.expiration);
+          cb();
+        });
     AWS.config.update({
-      credentials: new AWS.Credentials(options.awsSecretKeyId, options.awsSecretAccessKey, options.awsSessionToken),
+      credentials,
       region: options.region,
       s3ForcePathStyle: options.usePathStyleAccess || false,
       useAccelerateEndpoint: options.useS3Accelerate || false,
     });
-
-    AWS.config.credentials.expireTime = new Date(options.expiration);
   }
 
   _newBatch() {
