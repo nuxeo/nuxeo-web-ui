@@ -118,6 +118,10 @@ class S3Provider {
           },
           endpoint: this.extraInfo.endpoint || null,
           computeChecksums: true,
+          httpOptions: {
+            timeout:
+              Number(Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.s3 && Nuxeo.UI.config.s3.timeout) || 0,
+          },
         });
       });
   }
