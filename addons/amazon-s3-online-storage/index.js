@@ -232,5 +232,11 @@ if (
   Nuxeo.UI.config.s3 &&
   String(Nuxeo.UI.config.s3.useDirectUpload) === 'true'
 ) {
+  // https://github.com/aws/aws-sdk-js/issues/1895
+  AWS.util.update(AWS.S3.prototype, {
+    reqRegionForNetworkingError(req, done) {
+      return done();
+    },
+  });
   UploaderBehavior.defaultProvider = 's3';
 }
