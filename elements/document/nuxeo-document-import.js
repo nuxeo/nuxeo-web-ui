@@ -89,6 +89,10 @@ Polymer({
         position: relative;
       }
 
+      file-to-import:first-child {
+        overflow: hidden;
+      }
+
       paper-progress {
         width: 100%;
       }
@@ -129,6 +133,16 @@ Polymer({
 
       #blobList .error {
         margin: 8px;
+      }
+
+      #blobList .file-error {
+        display: block;
+        font-weight: normal;
+        font-size: 0.75rem;
+      }
+
+      #dropzone .file-error {
+        white-space: nowrap;
       }
 
       #sidePanel {
@@ -245,6 +259,10 @@ Polymer({
         margin-bottom: 3em;
       }
 
+      .file-to-import[error] {
+        border: 1px solid var(--paper-input-container-invalid-color);
+      }
+
       .disclaimer.checked,
       .disclaimer.hidden {
         visibility: hidden;
@@ -282,6 +300,13 @@ Polymer({
         border-left: 4px solid var(--nuxeo-warn-text);
         color: var(--primary-text-color);
         padding-left: 8px;
+      }
+
+      .file-error {
+        color: var(--paper-input-container-invalid-color, #de350b);
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .importing-label {
@@ -354,7 +379,7 @@ Polymer({
                   </span>
                   <template is="dom-repeat" items="[[localFiles]]" as="file">
                     <!-- local file -->
-                    <div class="file-to-import horizontal layout">
+                    <div class="file-to-import horizontal layout" error$="{{file.error}}">
                       <div class="vertical layout flex">
                         <div class="horizontal layout">
                           <div class="name">
@@ -369,11 +394,15 @@ Polymer({
                             [[file.providerName]]
                           </div>
                         </template>
-                        <template is="dom-if" if="[[!file.complete]]">
+                        <template is="dom-if" if="[[_displayProgressBar(file.*)]]">
                           <paper-progress indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
                         </template>
+                        <div class="horizontal layout flex" hidden$="[[!file.error]]">
+                          <span class="file-error">[[file.error]]</span>
+                          <nuxeo-tooltip>[[file.error]]</nuxeo-tooltip>
+                        </div>
                       </div>
-                      <div class="clear" hidden$="[[!file.complete]]">
+                      <div class="clear" hidden$="[[!_displayRemoveBlobBtn(file.*)]]">
                         <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
                         <nuxeo-tooltip>[[i18n('command.remove')]]</nuxeo-tooltip>
                       </div>
@@ -384,7 +413,7 @@ Polymer({
                   </span>
                   <template is="dom-repeat" items="[[remoteFiles]]" as="file">
                     <!-- remote file -->
-                    <div class="file-to-import horizontal layout">
+                    <div class="file-to-import horizontal layout" error$="{{file.error}}">
                       <div class="vertical layout flex">
                         <div class="horizontal layout center">
                           <div class="name">
@@ -519,9 +548,13 @@ Polymer({
                       <span class$="disclaimer [[_styleFileCheck(file.*)]]">
                         [[i18n('documentImportForm.unchecked.disclaimer')]]
                       </span>
-                      <template is="dom-if" if="[[!file.complete]]">
-                        <paper-progress indeterminate></paper-progress>
+                      <template is="dom-if" if="[[_displayProgressBar(file.*)]]">
+                        <paper-progress indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
                       </template>
+                      <div class="horizontal layout flex" hidden$="[[!file.error]]">
+                        <span class="file-error">[[file.error]]</span>
+                        <nuxeo-tooltip>[[file.error]]</nuxeo-tooltip>
+                      </div>
                     </div>
                     <iron-icon
                       icon="icons:check-circle"
@@ -601,10 +634,10 @@ Polymer({
             on-tap="_importWithProperties"
             disabled$="[[!_canImportWithMetadata(_creating,_initializingDoc,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]"
           >
-            <template is="dom-if" if="[[_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
+            <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
               [[i18n('command.create')]]
             </template>
-            <template is="dom-if" if="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
+            <template is="dom-if" if="[[_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
               <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
               <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
               <paper-spinner-lite active></paper-spinner-lite>
@@ -717,6 +750,8 @@ Polymer({
     batchFinished: '_batchReady',
     'nx-blob-picked': '_blobPicked',
     'nx-document-creation-parent-validated': '_parentValidated',
+    uploadInterrupted: '_handleError',
+    batchFailed: '_handleError',
   },
 
   observers: ['_observeFiles(files.*)', '_observeRemoteFiles(remoteFiles.splices)', '_visibleOnStage(visible,stage)'],
@@ -757,8 +792,17 @@ Polymer({
           const localFilesIdx = this.localFiles.indexOf(this.get(match[1]));
           // hack: refresh on the dom repeat
           this.notifyPath(['localFiles', localFilesIdx, match[2]].join('.'));
-          if (match[2] === 'complete') {
-            this.hasLocalFilesUploaded = this.hasLocalFiles && this.localFiles.every((file) => !file || file.complete);
+          if (match[2] === 'complete' || match[2] === 'error') {
+            this.hasLocalFilesUploaded =
+              this.hasLocalFiles && this.localFiles.every((file) => !file || file.complete || file.error);
+            // if we are already editing file properties, we need to uncheck those whose upload failed
+            if (this.hasLocalFilesUploaded) {
+              this._getAllFiles().forEach((f, index) => {
+                if (f.error) {
+                  this._setFileProp(index, 'checked', false);
+                }
+              });
+            }
           }
         }
       }
@@ -807,7 +851,9 @@ Polymer({
       this.customizing = true;
       this.set('selectedDocType', '');
       this.fire('nx-creation-wizard-hide-tabs');
-      this._selectDoc(0);
+      // let's select the first file that's not disabled
+      const toSelect = this._getAllFiles().findIndex((f) => !f.error);
+      this._selectDoc(toSelect < 0 ? 0 : toSelect);
     } else {
       this.stage = 'upload';
       this.customizing = false;
@@ -959,7 +1005,9 @@ Polymer({
       } else {
         await this._loadFile({}, currentFile.name);
       }
-      if (!('checked' in currentFile)) {
+      if (currentFile.error) {
+        this._setFileProp(index, 'checked', false);
+      } else if (!('checked' in currentFile)) {
         this._setFileProp(index, 'checked', true);
       }
     }
@@ -1089,7 +1137,8 @@ Polymer({
   _handleError(error) {
     this.set('_creating', false);
     this.set('errorMessage', this.i18n('documentImport.error.importFailed'));
-    this.fire('notify', { message: `${this.i18n('label.error').toUpperCase()}: ${error.message}` });
+    const message = error.message || (error.detail && error.detail.error);
+    this.fire('notify', { message: `${this.i18n('label.error').toUpperCase()}: ${message}` });
   },
 
   _mergeResponses(...args) {
@@ -1132,7 +1181,7 @@ Polymer({
       }
       promises.push(
         (function(indexesToRemove, idx) {
-          return (arr[idx].docData && arr[idx].checked
+          return (arr[idx].docData && arr[idx].checked && !arr[idx].error
             ? self._processFileWithMetadata(arr[idx])
             : Promise.resolve({ 'entity-type': 'Documents', entries: [] })
           )
@@ -1231,11 +1280,17 @@ Polymer({
 
   _checkTappedLocal(e) {
     e.stopPropagation();
+    if (e.model.file.error) {
+      return;
+    }
     this._setFilePropEx('localFiles', e.model.index, 'checked', !e.model.file.checked);
   },
 
   _checkTappedRemote(e) {
     e.stopPropagation();
+    if (e.model.file.error) {
+      return;
+    }
     this._setFilePropEx('remoteFiles', e.model.index, 'checked', !e.model.file.checked);
   },
 
@@ -1316,6 +1371,14 @@ Polymer({
       this.document = document;
       this._initializingDoc = false;
     });
+  },
+
+  _displayProgressBar(file) {
+    return file.base && !file.base.complete && !file.base.error;
+  },
+
+  _displayRemoveBlobBtn(file) {
+    return file.base && (file.base.complete || file.base.error);
   },
 
   _layoutUpdated(e) {
