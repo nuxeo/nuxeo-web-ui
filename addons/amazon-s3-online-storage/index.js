@@ -130,6 +130,7 @@ class S3Provider {
   upload(files, callback) {
     this._ensureBatch()
       .then(() => {
+        callback({ type: 'batchStart', batchId: this.batchId });
         if (new Date().getTime() >= this.extraInfo.expiration) {
           this._refreshBatchInfo();
         }
