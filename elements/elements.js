@@ -221,6 +221,7 @@ import './nuxeo-document-versions/nuxeo-document-versions.js';
 import './nuxeo-document-blob/nuxeo-document-blob.js';
 import './nuxeo-document-highlight/nuxeo-document-highlights.js';
 import './nuxeo-document-history/nuxeo-document-history.js';
+import './nuxeo-audit/nuxeo-audit-search.js';
 import './nuxeo-dropzone/nuxeo-dropzone.js';
 import './nuxeo-collections/nuxeo-collection-move-up-action.js';
 import './nuxeo-collections/nuxeo-collection-move-down-action.js';
