@@ -93,6 +93,7 @@ class S3Provider {
                 resolve();
               });
           } else {
+            callback({ type: 'uploadInterrupted', file, error });
             reject(error);
           }
         });
