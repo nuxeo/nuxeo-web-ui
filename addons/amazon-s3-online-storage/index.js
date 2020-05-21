@@ -41,6 +41,24 @@ class S3Provider {
     return _resource;
   }
 
+  _startKeepAlive() {
+    this._keepAlive = setInterval(() => {
+      const done = this.files.every((f) => f.complete || f.error);
+      if (done) {
+        this._stopKeepAlive();
+        return;
+      }
+      this._resource(['upload', this.batchId].join('/')).get();
+    }, 60000);
+  }
+
+  _stopKeepAlive() {
+    if (this._keepAlive) {
+      clearInterval(this._keepAlive);
+      this._keepAlive = null;
+    }
+  }
+
   _upload(file, callback) {
     return new Promise((resolve, reject) => {
       callback({ type: 'uploadStarted', file });
@@ -49,9 +67,7 @@ class S3Provider {
         ContentType: file.type,
         Body: file,
       });
-      this._keepAlive = setInterval(() => {
-        this._resource(['upload', this.batchId].join('/')).get();
-      }, 60000);
+      this._startKeepAlive();
       file.managedUpload
         .on('httpUploadProgress', (evt) => {
           if (typeof callback === 'function') {
@@ -59,10 +75,7 @@ class S3Provider {
           }
         })
         .send((error, data) => {
-          if (this._keepAlive) {
-            clearInterval(this._keepAlive);
-            this._keepAlive = null;
-          }
+          this._stopKeepAlive();
           if (error === null) {
             file.managedUpload = null;
             this._resource(['upload', this.batchId, file.index, 'complete'].join('/'), {
