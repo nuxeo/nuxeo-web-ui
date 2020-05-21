@@ -1188,16 +1188,35 @@ Polymer({
     return this.$.docRequest.post();
   },
 
+  _removeFile(index) {
+    this.splice('localFiles', index, 1);
+    this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
+    // clear error message if no more files with error
+    if (!this.localFiles.some((f) => f.error)) {
+      this.set('errorMessage', undefined);
+    }
+    this.$.uploadFiles.value = '';
+  },
+
   _removeBlob(e) {
-    if (e.model.file.providerId) {
-      this.splice('remoteFiles', e.model.index, 1);
+    const { file, index } = e.model;
+    if (file.providerId) {
+      this.splice('remoteFiles', index, 1);
     } else {
-      this.$.blobRemover.path = `upload/${this.batchId}/${e.model.file.index}`;
-      this.$.blobRemover.remove().then(() => {
-        this.splice('localFiles', e.model.index, 1);
-        this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
-        this.$.uploadFiles.value = '';
-      }, this._handleError.bind(this));
+      this.$.blobRemover.path = `upload/${this.batchId}/${file.index}`;
+      this.$.blobRemover.remove().then(
+        () => {
+          this._removeFile(index);
+        },
+        (reason) => {
+          // file was never created in the first place
+          if (reason.status === 404) {
+            this._removeFile(index);
+          } else {
+            this._handleError(reason);
+          }
+        },
+      );
     }
   },
 
