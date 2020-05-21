@@ -147,7 +147,7 @@ class S3Provider {
         });
       })
       .catch((error) => {
-        callback({ type: 'uploadInterrupted', error });
+        callback({ type: 'batchFailed', error, batchId: this.batchId });
       });
   }
 
