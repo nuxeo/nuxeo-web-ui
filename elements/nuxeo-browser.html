@@ -25,7 +25,8 @@ limitations under the License.
     <style include="nuxeo-styles">
       /* document actions */
       .document-actions {
-        overflow: auto;
+        /* To represent accurate clientWidth in Safari */
+        overflow-y: hidden;
         height: var(--nuxeo-drawer-header-height);
       }
 
