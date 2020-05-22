@@ -339,6 +339,7 @@ Polymer({
       data.stopPropagation();
     }
     const value = this._getFiles(data);
+    const failed = this.files.filter((f) => f.error);
     if (this.multiple) {
       if (!this.value || !Array.isArray(this.value)) {
         this.value = [];
@@ -347,8 +348,16 @@ Polymer({
     } else {
       this.set('value', value);
     }
-    this.fire('notify', { message: this.i18n(this.uploadedMessage) });
-    this.invalid = false;
+    if (failed.length > 0) {
+      this.fire('notify', {
+        message: this.i18n('dropzone.toast.error', failed.map((f) => f.name).join(', ')),
+        duration: 0,
+        dismissible: true,
+      });
+    } else {
+      this.fire('notify', { message: this.i18n(this.uploadedMessage), close: true });
+      this.invalid = false;
+    }
   },
 
   _getFiles(data) {
