@@ -10,11 +10,13 @@
   <artifactId>nuxeo-web-ui-marketplace</artifactId>
   <packaging>zip</packaging>
   <name>Nuxeo Web UI - Marketplace Package</name>
+  <version>3.0.0-NXP-29129-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
       <groupId>org.nuxeo.web.ui</groupId>
       <artifactId>nuxeo-web-ui</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 

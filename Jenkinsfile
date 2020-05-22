@@ -125,31 +125,31 @@ pipeline {
         }
       }
     }
-    stage('Run unit tests') {
-      steps {
-        setGitHubBuildStatus('webui/test', 'Unit tests', 'PENDING')
-        container('mavennodejs') {
-          script {
-            SAUCE_ACCESS_KEY = sh(script: 'jx step credential -s saucelabs-web-ui -k key', , returnStdout: true).trim()
-          }
-          withEnv(["SAUCE_USERNAME=nuxeo-web-ui", "SAUCE_ACCESS_KEY=$SAUCE_ACCESS_KEY"]) {
-            echo """
-            --------------
-            Run unit tests
-            --------------"""
-            sh 'npm run test'
-          }
-        }
-      }
-      post {
-        success {
-          setGitHubBuildStatus('webui/test', 'Unit tests', 'SUCCESS')
-        }
-        failure {
-          setGitHubBuildStatus('webui/test', 'Unit tests', 'FAILURE')
-        }
-      }
-    }
+    // stage('Run unit tests') {
+    //   steps {
+    //     setGitHubBuildStatus('webui/test', 'Unit tests', 'PENDING')
+    //     container('mavennodejs') {
+    //       script {
+    //         SAUCE_ACCESS_KEY = sh(script: 'jx step credential -s saucelabs-web-ui -k key', , returnStdout: true).trim()
+    //       }
+    //       withEnv(["SAUCE_USERNAME=nuxeo-web-ui", "SAUCE_ACCESS_KEY=$SAUCE_ACCESS_KEY"]) {
+    //         echo """
+    //         --------------
+    //         Run unit tests
+    //         --------------"""
+    //         sh 'npm run test'
+    //       }
+    //     }
+    //   }
+    //   post {
+    //     success {
+    //       setGitHubBuildStatus('webui/test', 'Unit tests', 'SUCCESS')
+    //     }
+    //     failure {
+    //       setGitHubBuildStatus('webui/test', 'Unit tests', 'FAILURE')
+    //     }
+    //   }
+    // }
     stage('Nuxeo package build') {
       steps {
         setGitHubBuildStatus('webui/package', 'Nuxeo package build', 'SUCCESS')
@@ -170,39 +170,39 @@ pipeline {
         }
       }
     }
-    stage('Functional tests') {
-      steps {
-        setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'PENDING')
-        container('mavennodejs') {
-          script {
-            echo """
-            --------------------------
-            Run Nuxeo Web UI Functional Tests
-            --------------------------"""
-            sh 'mvn -B -nsu -f plugin/itests/addon install'
-            sh 'mvn -B -nsu -f plugin/itests/marketplace install'
-            try {
-              sh 'mvn -B -nsu -f ftest install'
-            } finally {
-              try {
-                archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
-                cucumber fileIncludePattern: '**/*.json', jsonReportDirectory: 'ftest/target/cucumber-reports/', sortingMethod: 'NATURAL'
-              } catch (err) {
-                echo hudson.Functions.printThrowable(err)
-              }
-            }
-          }
-        }
-      }
-      post {
-        success {
-          setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'SUCCESS')
-        }
-        failure {
-          setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'FAILURE')
-        }
-      }
-    }
+    // stage('Functional tests') {
+    //   steps {
+    //     setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'PENDING')
+    //     container('mavennodejs') {
+    //       script {
+    //         echo """
+    //         --------------------------
+    //         Run Nuxeo Web UI Functional Tests
+    //         --------------------------"""
+    //         sh 'mvn -B -nsu -f plugin/itests/addon install'
+    //         sh 'mvn -B -nsu -f plugin/itests/marketplace install'
+    //         try {
+    //           sh 'mvn -B -nsu -f ftest install'
+    //         } finally {
+    //           try {
+    //             archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/*,**/log/*.log, **/target/cucumber-reports/*.json, **/nxserver/config/distribution.properties, **/failsafe-reports/*, **/target/results/*.html, **/target/screenshots/*.png, plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-*.zip, plugin/metrics/target/report/*'
+    //             cucumber fileIncludePattern: '**/*.json', jsonReportDirectory: 'ftest/target/cucumber-reports/', sortingMethod: 'NATURAL'
+    //           } catch (err) {
+    //             echo hudson.Functions.printThrowable(err)
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    //   post {
+    //     success {
+    //       setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'SUCCESS')
+    //     }
+    //     failure {
+    //       setGitHubBuildStatus('webui/ftests', 'Functional Tests', 'FAILURE')
+    //     }
+    //   }
+    // }
     stage('Publish Maven artifacts') {
       when {
        branch 'master'
@@ -227,9 +227,9 @@ pipeline {
       }
     }
     stage('Publish Nuxeo Packages') {
-      when {
-       branch 'master'
-      }
+      // when {
+      //  branch 'master'
+      // }
       steps {
         setGitHubBuildStatus('webui/publish/packages', 'Upload Nuxeo Packages', 'PENDING')
         container('mavennodejs') {
@@ -239,7 +239,7 @@ pipeline {
           -------------------------------------------------"""
           withCredentials([usernameColonPassword(credentialsId: 'connect-preprod', variable: 'CONNECT_PASS')]) {
             sh """
-              PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${WEBUI_VERSION}.zip"
+              PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-3.0.0-NXP-29129-SNAPSHOT.zip"
               curl -i -u "$CONNECT_PASS" -F package=@\$PACKAGE "$CONNECT_PREPROD_URL"/site/marketplace/upload?batch=true
             """
           }
