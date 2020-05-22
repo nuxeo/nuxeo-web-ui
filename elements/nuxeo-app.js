@@ -903,6 +903,13 @@ Polymer({
     }
   },
 
+  _refreshCollections() {
+    const form = this.$$('#collectionsForm');
+    if (form && form.visible) {
+      form._refreshCollections();
+    }
+  },
+
   _updateCollectionMenu(e) {
     this.$$('#collectionsForm').loadCollection(e.detail.collection);
   },
@@ -1085,6 +1092,9 @@ Polymer({
           }
         }
       }
+      if (this.hasFacet(e.detail.doc, 'Collection')) {
+        this._refreshCollections();
+      }
       this._refreshSearch();
     }
   },
@@ -1093,6 +1103,9 @@ Polymer({
     this._toast(this.i18n(`app.document.untrashed.${e.detail.error ? 'error' : 'success'}`));
     if (e.detail.doc && !e.detail.error) {
       this._navigate({ detail: { doc: e.detail.doc } });
+      if (this.hasFacet(e.detail.doc, 'Collection')) {
+        this._refreshCollections();
+      }
       this._refreshSearch();
     }
   },
@@ -1110,12 +1123,18 @@ Polymer({
       this._removeFromRecentlyViewed(e.detail.documents);
       this._fetchTaskCount();
       this._toast(this.i18n('app.documents.deleted.success'));
+      if (e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
+        this._refreshCollections();
+      }
       this._refreshSearch();
     }
   },
 
   _documentsUntrashed(e) {
     this._toast(this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`));
+    if (e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
+      this._refreshCollections();
+    }
     this._refreshSearch();
   },
 
