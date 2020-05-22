@@ -118,10 +118,13 @@ Polymer({
       .file .info {
         @apply --layout-vertical;
         @apply --layout-flex;
+        overflow: hidden;
       }
 
       .file .info .name {
         font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .file .info .size {
@@ -146,6 +149,19 @@ Polymer({
         color: var(--paper-input-container-invalid-color, #de350b);
         margin-top: 8px;
       }
+
+      .file-error {
+        @apply --layout-horizontal;
+        @apply --layout-flex;
+      }
+
+      .file-error span {
+        color: var(--paper-input-container-invalid-color, #de350b);
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -162,13 +178,17 @@ Polymer({
           <div class="info">
             <div class="name">[[file.name]]</div>
             <div class="size">[[formatSize(file.size)]]</div>
-            <template is="dom-if" if="[[uploading]]">
+            <template is="dom-if" if="[[_displayProgressBar(file.*)]]">
               <paper-progress
                 class="progress"
                 indeterminate="[[!hasProgress()]]"
                 value="[[file.progress]]"
               ></paper-progress>
             </template>
+            <div class="file-error" hidden$="[[!file.error]]">
+              <span>[[file.error]]</span>
+              <nuxeo-tooltip>[[file.error]]</nuxeo-tooltip>
+            </div>
           </div>
           <div class="actions">
             <paper-icon-button
@@ -292,6 +312,8 @@ Polymer({
   listeners: {
     batchFinished: 'importBatch',
     'nx-blob-picked': 'importBatch',
+    uploadInterrupted: '_uploadError',
+    batchFailed: 'importBatch',
   },
 
   observers: ['_reset(value)', '_filesChanged(files.splices)'],
@@ -333,28 +355,30 @@ Polymer({
     let uploadedFile;
     if (this.multiple) {
       const files = [];
-      this.files.forEach((file, index) => {
-        if (data.type === 'nx-blob-picked') {
-          uploadedFile = {
-            providerId: file.providerId,
-            user: file.user,
-            fileId: file.fileId,
-          };
-        } else {
-          uploadedFile = {
-            'upload-batch': data.detail.batchId,
-            'upload-fileId': index.toString(),
-          };
-        }
+      this.files
+        .filter((file) => !file.error)
+        .forEach((file) => {
+          if (data.type === 'nx-blob-picked') {
+            uploadedFile = {
+              providerId: file.providerId,
+              user: file.user,
+              fileId: file.fileId,
+            };
+          } else {
+            uploadedFile = {
+              'upload-batch': data.detail.batchId,
+              'upload-fileId': file.index.toString(),
+            };
+          }
 
-        if (this.valueKey) {
-          const wrappedFile = {};
-          wrappedFile[this.valueKey] = uploadedFile;
-          files.push(wrappedFile);
-        } else {
-          files.push(uploadedFile);
-        }
-      });
+          if (this.valueKey) {
+            const wrappedFile = {};
+            wrappedFile[this.valueKey] = uploadedFile;
+            files.push(wrappedFile);
+          } else {
+            files.push(uploadedFile);
+          }
+        });
       return files;
     }
     if (data.type === 'nx-blob-picked') {
@@ -380,6 +404,9 @@ Polymer({
     } else {
       this._reset();
       this.value = '';
+    }
+    if (!this.required) {
+      this.validate();
     }
   },
 
@@ -461,9 +488,17 @@ Polymer({
       this._errorMessage = this.i18n('dropzone.invalid.uploading');
       return false;
     }
+    if (this.files.some((file) => file.error)) {
+      this._errorMessage = this.i18n('dropzone.invalid.error');
+      return false;
+    }
     if (!this.required) {
       return true;
     }
     return this.files && this.files.length > 0;
+  },
+
+  _displayProgressBar(file) {
+    return file.base && !file.base.complete && !file.base.error;
   },
 });

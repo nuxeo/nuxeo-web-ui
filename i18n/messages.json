@@ -536,6 +536,7 @@
   "driveSyncToggleButton.unsync": "Unsynchronize",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "Upload main file",
+  "dropzone.invalid.error": "Invalid content",
   "dropzone.invalid.uploading": "File upload pending",
   "dropzone.dropFile": "Drop your file",
   "dropzone.uploaded": "File uploaded",
