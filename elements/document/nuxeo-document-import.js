@@ -97,10 +97,6 @@ Polymer({
         width: 100%;
       }
 
-      div[name='customize'] #blobEditor span {
-        width: 200px;
-      }
-
       #dropzone {
         padding: 1em;
         position: relative;
@@ -302,6 +298,21 @@ Polymer({
         padding-left: 8px;
       }
 
+      .upload-error {
+        color: var(--primary-text-color);
+        margin: 1em 2em;
+        padding-left: 8px;
+      }
+
+      .upload-error:not(:empty) {
+        border-left: 4px solid var(--nuxeo-warn-text);
+      }
+
+      .upload-error:empty::before {
+        content: '\\200b';
+        display: inline;
+      }
+
       .file-error {
         color: var(--paper-input-container-invalid-color, #de350b);
         font-size: 12px;
@@ -451,6 +462,7 @@ Polymer({
             </div>
           </template>
         </div>
+        <span class="upload-error">[[_importErrorMessage]]</span>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary"
@@ -488,50 +500,53 @@ Polymer({
       <!--Stage: allow the user to fill in properties for the uploaded files and create the respective documents-->
       <div name="customize" class="vertical layout flex">
         <div class="horizontal layout flex">
-          <paper-dialog-scrollable id="blobEditor">
-            <div class="suggester">
-              <nuxeo-path-suggestion
-                id="pathSuggesterCustomize"
-                label="[[i18n('documentImportForm.location')]]"
-                value="{{targetPath}}"
-                parent="{{suggesterParent}}"
-                children="{{suggesterChildren}}"
-                disabled
-                always-float-label
-              ></nuxeo-path-suggestion>
-              <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
-            </div>
-            <iron-form id="form">
-              <form class="form vertical layout flex">
-                <div class="horizontal layout center">
-                  <div class="flex">
-                    <nuxeo-select
-                      id="docTypeDropdown"
-                      selected="{{selectedDocType}}"
-                      attr-for-selected="key"
-                      label="[[i18n('documentImportForm.type.label')]]"
-                      placeholder="[[i18n('documentImportForm.type.placeholder')]]"
-                      error-message="[[i18n('documentImportForm.type.error')]]"
-                      required
-                    >
-                      <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
-                        <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
-                      </template>
-                    </nuxeo-select>
+          <div id="blobEditor" class="vertical layout flex">
+            <paper-dialog-scrollable>
+              <div class="suggester">
+                <nuxeo-path-suggestion
+                  id="pathSuggesterCustomize"
+                  label="[[i18n('documentImportForm.location')]]"
+                  value="{{targetPath}}"
+                  parent="{{suggesterParent}}"
+                  children="{{suggesterChildren}}"
+                  disabled
+                  always-float-label
+                ></nuxeo-path-suggestion>
+                <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
+              </div>
+              <iron-form id="form">
+                <form class="form vertical layout flex">
+                  <div class="horizontal layout center">
+                    <div class="flex">
+                      <nuxeo-select
+                        id="docTypeDropdown"
+                        selected="{{selectedDocType}}"
+                        attr-for-selected="key"
+                        label="[[i18n('documentImportForm.type.label')]]"
+                        placeholder="[[i18n('documentImportForm.type.placeholder')]]"
+                        error-message="[[i18n('documentImportForm.type.error')]]"
+                        required
+                      >
+                        <template is="dom-repeat" items="[[_importDocTypes]]" as="type">
+                          <paper-item key="[[type]]">[[_getTypeLabel(type)]]</paper-item>
+                        </template>
+                      </nuxeo-select>
+                    </div>
                   </div>
-                </div>
-                <!--restamp needed to prevent submit with hidden input fields, which will throw an error-->
-                <template is="dom-if" if="[[document]]" restamp>
-                  <nuxeo-document-layout
-                    id="document-import"
-                    layout="import"
-                    document="[[document]]"
-                    href-base="[[importPath]]"
-                  ></nuxeo-document-layout>
-                </template>
-              </form>
-            </iron-form>
-          </paper-dialog-scrollable>
+                  <!--restamp needed to prevent submit with hidden input fields, which will throw an error-->
+                  <template is="dom-if" if="[[document]]" restamp>
+                    <nuxeo-document-layout
+                      id="document-import"
+                      layout="import"
+                      document="[[document]]"
+                      href-base="[[importPath]]"
+                    ></nuxeo-document-layout>
+                  </template>
+                </form>
+              </iron-form>
+            </paper-dialog-scrollable>
+            <span class="upload-error">[[_importErrorMessage]]</span>
+          </div>
           <paper-dialog-scrollable id="sidePanel">
             <div id="blobList" class="flex">
               <template is="dom-repeat" items="[[localFiles]]" as="file">
@@ -743,6 +758,11 @@ Polymer({
       value: false,
     },
 
+    _importErrorMessage: {
+      type: String,
+      value: '',
+    },
+
     _importWithPropertiesError: String,
   },
 
@@ -772,6 +792,7 @@ Polymer({
       '_hasVisibleContributions',
       this.hasContributions && !!this.$$('.importActions > *:not([hidden]):not(nuxeo-slot)'),
     );
+    this._importErrorMessage = '';
   },
 
   _observeFiles(changeRecord) {
@@ -1074,6 +1095,7 @@ Polymer({
     this._creating = false;
     this._initializingDoc = false;
     this._importWithPropertiesError = '';
+    this._importErrorMessage = '';
     this.$.uploadFiles.value = '';
     this.selectedDocType = '';
   },
@@ -1136,7 +1158,7 @@ Polymer({
 
   _handleError(error) {
     this.set('_creating', false);
-    this.set('errorMessage', this.i18n('documentImport.error.importFailed'));
+    this.set('_importErrorMessage', this.i18n('documentImport.error.importFailed'));
     const message = error.message || (error.detail && error.detail.error);
     this.fire('notify', { message: `${this.i18n('label.error').toUpperCase()}: ${message}` });
   },
@@ -1245,6 +1267,9 @@ Polymer({
       this.$.blobRemover.remove().then(() => {
         this.splice('localFiles', e.model.index, 1);
         this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
+        if (this.localFiles.every((f) => !f.error)) {
+          this._importErrorMessage = '';
+        }
         this.$.uploadFiles.value = '';
       }, this._handleError.bind(this));
     }
