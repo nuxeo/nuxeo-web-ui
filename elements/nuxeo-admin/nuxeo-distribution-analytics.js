@@ -77,7 +77,7 @@ Polymer({
 
         <nuxeo-document-distribution-chart
           id="chart"
-          index="_all"
+          index="[[index]]"
           path="[[path]]"
           mode="count"
           include-version
