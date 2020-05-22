@@ -80,15 +80,14 @@ Polymer({
       if (this.documents && this.documents.length) {
         const uids = this.documents.map((doc) => doc.uid).join(',');
         this.$.operation.input = `docs:${uids}`;
-        const uidsArray = this.documents.map((doc) => doc.uid);
         this.$.operation.execute().then(
           () => {
-            this.fire('nuxeo-documents-untrashed', { documentIds: uidsArray });
+            this.fire('nuxeo-documents-untrashed', { documents: this.documents });
             this.documents = [];
             this.fire('refresh');
           },
           (error) => {
-            this.fire('nuxeo-documents-untrashed', { error, documents: uidsArray });
+            this.fire('nuxeo-documents-untrashed', { error, documents: this.documents });
           },
         );
       }
