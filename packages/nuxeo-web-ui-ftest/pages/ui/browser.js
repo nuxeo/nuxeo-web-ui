@@ -321,7 +321,8 @@ export default class Browser extends BasePage {
       // let's wait for the dropdown button to show up
       menu.waitForVisible('#dropdownButton');
     }
-    let action = menu.element(selector);
+    const action = menu.element(selector);
+    action.waitForExist();
     if (action.getAttribute('show-label') != null) {
       // if the element is inside the dropdown, we need to expand it
       menu.click('#dropdownButton');
@@ -329,8 +330,6 @@ export default class Browser extends BasePage {
       menu.waitForVisible('[slot="dropdown"] .label');
       menu.waitForEnabled('[slot="dropdown"] .label');
     }
-    menu.waitForVisible(selector);
-    action = menu.element(selector);
     action.waitForVisible('.action');
     action.waitForEnabled('.action');
     // let's make sure we're clicking on the div the has the click event handler
