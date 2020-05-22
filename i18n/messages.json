@@ -539,6 +539,7 @@
   "dropzone.invalid.error": "Invalid content",
   "dropzone.invalid.uploading": "File upload pending",
   "dropzone.dropFile": "Drop your file",
+  "dropzone.toast.error": "Upload failed: {0}",
   "dropzone.uploaded": "File uploaded",
   "dublincoreEdit.directorySuggestion.placeholder": "Select a value.",
   "easyshare.copy.label": "Internal Access link to {0}.",
