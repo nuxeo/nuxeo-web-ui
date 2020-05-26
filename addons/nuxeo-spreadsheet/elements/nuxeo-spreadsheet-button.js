@@ -137,7 +137,7 @@ Polymer({
       state.searchDocument = { properties };
     }
 
-    this.$.iframe.src = `${this.$.nxconn.url}/spreadsheet/?cv=${encodeURIComponent(
+    this.$.iframe.src = `${this.baseUrl}spreadsheet.popup.html?cv=${encodeURIComponent(
       b64EncodeUnicode(JSON.stringify(state)),
     )}`;
     this.$.dialog.toggle();
