@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "default-case": 0,
+    "guard-for-in": 0,
+    "no-case-declarations": 0,
+    "no-continue": 0,
+    "no-fallthrough": 0,
+    "no-restricted-syntax": 0,
+    "no-return-assign": 0,
+    "prefer-const": 0,
+    "prefer-destructuring": 0,
+    "prefer-rest-params": 0,
+    "vars-on-top": 0
+  },
+  "globals": {
+    "$": true,
+    "Handsontable": true,
+    "WalkontableCellRange": true
+  }
+}

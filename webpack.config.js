@@ -90,7 +90,9 @@ const addons = [
 
 const common = merge([
   {
-    entry: './index.js',
+    entry: {
+      main: './index.js',
+    },
     resolve: {
       extensions: ['.js', '.html'],
       // set absolute modules path to avoid duplicates
@@ -123,6 +125,10 @@ const common = merge([
           use: ['style-loader', 'css-loader'],
         },
         {
+          test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+          loader: 'url-loader',
+        },
+        {
           test: require.resolve('@nuxeo/quill/dist/quill.js'),
           use: [
             {
@@ -141,6 +147,7 @@ const common = merge([
       new HtmlWebpackPlugin({
         title: 'Nuxeo',
         template: 'index.html',
+        chunks: ['main'],
         nuxeo: {
           packages: JSON.stringify((process.env.NUXEO_PACKAGES || '').split(/[\s,]+/).filter(Boolean)),
           url: process.env.NUXEO_URL || '/nuxeo',
@@ -201,4 +208,6 @@ const production = merge([
   },
 ]);
 
-module.exports = (mode) => merge(common, mode === 'production' ? production : development, { mode });
+const spreadsheet = require('./addons/nuxeo-spreadsheet/webpack.config');
+
+module.exports = (mode) => merge(common, spreadsheet, mode === 'production' ? production : development, { mode });
