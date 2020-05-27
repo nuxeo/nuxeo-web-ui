@@ -140,7 +140,7 @@ limitations under the License.
       <!-- Actions per user -->
       <nuxeo-workflow-data workflow="[[workflow]]"
                            event="afterWorkflowTaskEnded"
-                           grouped-by="taskActor, action"
+                           grouped-by="taskActor, taskName"
                            start-date="[[startDate]]" end-date="[[_extendEndDate(endDate)]]"
                            data="{{numberOfActionsPerUser}}">
       </nuxeo-workflow-data>
@@ -204,8 +204,8 @@ limitations under the License.
         if (!data) { return []; }
         if (data.value) {
           return data.value.map(function(obj) {
-            return obj.key;
-          });
+            return this.i18n(obj.key);
+          }.bind(this));
         } else {
           return this._labels(data[0]);
         }
