@@ -184,6 +184,10 @@ Polymer({
         @apply --nuxeo-block-selected;
       }
 
+      .file-overview.selected .name {
+        color: var(--nuxeo-primary-color);
+      }
+
       .file-overview iron-icon {
         margin-top: 0.1em;
       }
@@ -191,6 +195,10 @@ Polymer({
       .name {
         font-weight: bold;
         word-break: break-all;
+      }
+
+      .file-overview .name:hover {
+        color: var(--nuxeo-primary-color);
       }
 
       .size {
