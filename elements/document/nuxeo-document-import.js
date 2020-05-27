@@ -580,7 +580,7 @@ Polymer({
                       </div>
                     </div>
                     <iron-icon
-                      icon="icons:check-circle"
+                      icon="[[_computedCheckItem(file.*)]]"
                       class$="blobCheck [[_styleFileCheck(file.*)]]"
                       on-tap="_checkTappedLocal"
                     ></iron-icon>
@@ -603,7 +603,7 @@ Polymer({
                       </span>
                     </div>
                     <iron-icon
-                      icon="icons:check-circle"
+                      icon="[[_computedCheckItem(file.*)]]"
                       class$="blobCheck [[_styleFileCheck(file.*)]]"
                       on-tap="_checkTappedRemote"
                     ></iron-icon>
@@ -1318,6 +1318,13 @@ Polymer({
 
   _getDocumentProperties() {
     return this._docProperties;
+  },
+
+  _computedCheckItem(e) {
+    if (e.base && e.base.checked) {
+      return 'icons:check-circle';
+    }
+    return 'icons:radio-button-unchecked';
   },
 
   _styleFileCheck(e) {
