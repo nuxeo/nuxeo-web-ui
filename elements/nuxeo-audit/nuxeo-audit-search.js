@@ -21,6 +21,7 @@ import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.j
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import moment from '@nuxeo/moment';
+import './nuxeo-audit-extended-info.js';
 
 /**
 `nuxeo-audit-search`
@@ -85,7 +86,13 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         </div>
       </nuxeo-card>
       <nuxeo-card>
-        <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
+        <nuxeo-data-table
+          id="table"
+          details-enabled
+          paginable
+          nx-provider="provider"
+          empty-label="[[i18n('documentHistory.empty')]]"
+        >
           <nuxeo-data-table-column name="[[i18n('audit.performedAction')]]" sort-by="eventId">
             <template>[[_formati18n('eventType.', item.eventId)]]</template>
           </nuxeo-data-table-column>
@@ -114,6 +121,9 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
             <nuxeo-data-table-column name="[[i18n('audit.state')]]">
               <template><nuxeo-tag uppercase>[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template>
             </nuxeo-data-table-column>
+          </template>
+          <template is="row-detail">
+            <nuxeo-audit-extended-info item="[[item]]"></nuxeo-audit-extended-info>
           </template>
         </nuxeo-data-table>
       </nuxeo-card>
