@@ -76,7 +76,7 @@ Polymer({
       .suggester {
         background-color: var(--input-background, rgba(0, 0, 0, 0.05));
         padding: 8px 16px;
-        margin: 1rem 32px;
+        margin: 12px 32px;
       }
 
       .file-to-import {
@@ -120,11 +120,9 @@ Polymer({
       }
 
       #blobList {
-        height: 100px;
-      }
-
-      #blobList .file-overview:first-of-type {
-        margin-top: 32px;
+        @apply --layout-vertical;
+        @apply --layout-flex;
+        padding-top: 4px;
       }
 
       #blobList .error {
@@ -137,11 +135,20 @@ Polymer({
         font-size: 0.75rem;
       }
 
+      #checkmarkNote {
+        color: var(--secondary-text-color);
+        font-size: 11px;
+        margin: 8px 8px 0 8px;
+        opacity: 0.75;
+        word-break: break-word;
+      }
+
       #dropzone .file-error {
         white-space: nowrap;
       }
 
       #sidePanel {
+        @apply --layout-vertical;
         @apply --layout-flex;
         background: var(--nuxeo-page-background);
         min-width: 200px;
@@ -243,13 +250,6 @@ Polymer({
         width: 100%;
       }
 
-      .disclaimer {
-        display: block;
-        font-weight: normal;
-        font-size: 0.75rem;
-        opacity: 0.3;
-      }
-
       .clear {
         width: 3em;
         text-align: right;
@@ -265,11 +265,6 @@ Polymer({
 
       .file-to-import[error] {
         border: 1px solid var(--paper-input-container-invalid-color);
-      }
-
-      .disclaimer.checked,
-      .disclaimer.hidden {
-        visibility: hidden;
       }
 
       .add-more {
@@ -557,6 +552,7 @@ Polymer({
           </div>
           <paper-dialog-scrollable id="sidePanel">
             <div id="blobList" class="flex">
+              <div id="checkmarkNote">[[i18n('documentImportForm.unchecked.disclaimer')]]</div>
               <template is="dom-repeat" items="[[localFiles]]" as="file">
                 <paper-button
                   noink
@@ -568,9 +564,6 @@ Polymer({
                     <div class="vertical layout flex">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
                       <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
-                      <span class$="disclaimer [[_styleFileCheck(file.*)]]">
-                        [[i18n('documentImportForm.unchecked.disclaimer')]]
-                      </span>
                       <template is="dom-if" if="[[_displayProgressBar(file.*)]]">
                         <paper-progress indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
                       </template>
@@ -598,9 +591,6 @@ Polymer({
                     <div class="vertical layout flex">
                       <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
                       <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
-                      <span class$="disclaimer [[_styleFileCheck(file.*)]]">
-                        [[i18n('documentImportForm.unchecked.disclaimer')]]
-                      </span>
                     </div>
                     <iron-icon
                       icon="[[_computedCheckItem(file.*)]]"
