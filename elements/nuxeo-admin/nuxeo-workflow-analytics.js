@@ -154,7 +154,7 @@ Polymer({
       <nuxeo-workflow-data
         workflow="[[workflow]]"
         event="afterWorkflowTaskEnded"
-        grouped-by="taskActor, action"
+        grouped-by="taskActor, taskName"
         start-date="[[startDate]]"
         end-date="[[_extendEndDate(endDate)]]"
         data="{{numberOfActionsPerUser}}"
@@ -226,7 +226,7 @@ Polymer({
       return [];
     }
     if (data.value) {
-      return data.value.map((obj) => obj.key);
+      return data.value.map((obj) => this.i18n(obj.key));
     }
     return this._labels(data[0]);
   },
