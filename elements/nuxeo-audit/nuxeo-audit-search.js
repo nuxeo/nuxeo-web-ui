@@ -100,7 +100,9 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
           </nuxeo-data-table-column>
           <template is="dom-if" if="[[!_isAvailable(document)]]">
             <nuxeo-data-table-column name="[[i18n('audit.document')]]">
-              <template>[[_formatDocument(item)]]</template>
+              <template>
+                <a href$="[[_getDocumentURL(item)]]">[[_formatDocument(item)]]</a>
+              </template>
             </nuxeo-data-table-column>
           </template>
           <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
@@ -223,13 +225,19 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
     return dateAsString && dateAsString.length > 0;
   }
 
+  // XXX: methods below (parsing and gettting url) shouldn't be needed after NXP-28820
   _formatDocument(item) {
     if (item) {
-      return (item.docUUID || '') + (item.docType ? ` (${item.docType}) ` : '') + (item.docPath || '');
+      return `${item.docType || ''}${item.docPath || ''}`;
     }
   }
 
-  // XXX: methods below (parsing and gettting url) shouldn't be needed after NXP-28820
+  _getDocumentURL(item) {
+    if (item && item.docUUID) {
+      return this.urlFor('document', item.docUUID);
+    }
+  }
+
   _parseComment(comment) {
     if (comment && /^\w+:(?:\w+-){2,}(?:\w+)$/.test(comment)) {
       // repoName:docId
