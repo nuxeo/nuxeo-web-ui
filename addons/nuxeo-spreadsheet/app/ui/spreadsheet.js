@@ -210,24 +210,17 @@ class Spreadsheet {
 
   save() {
     return Promise.all(
-      Object.keys(this._dirty).map(
-        (uid) =>
-          new Promise((resolve, reject) => {
-            try {
-              // TODO(nfgs) - Move request execution to the connection
-              this.connection.request(`/id/${uid}`).put({ body: this._dirty[uid] }, (error) => {
-                if (error !== null) {
-                  this._dirty[uid]._error = error;
-                  reject(Error(error));
-                  return;
-                }
-                delete this._dirty[uid];
-                resolve(uid);
-              });
-            } catch (e) {
-              this._dirty[uid]._error = e;
-              reject(Error(e));
-            }
+      Object.keys(this._dirty).map((uid) =>
+        this.connection
+          .request(`/id/${uid}`)
+          .put({ body: this._dirty[uid] })
+          .then(() => {
+            delete this._dirty[uid];
+            return uid;
+          })
+          .catch((error) => {
+            this._dirty[uid]._error = error;
+            throw new Error(error);
           }),
       ),
     )

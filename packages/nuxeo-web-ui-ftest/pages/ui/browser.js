@@ -69,7 +69,7 @@ export default class Browser extends BasePage {
   /**
    * Gets a Results page helper, assuming current visible page has a <nuxeo-results> in there.
    */
-  get currentPageResults() {
+  get results() {
     const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
     return new Results(`#nxContent [name='${pill.getAttribute('name')}']`);
   }

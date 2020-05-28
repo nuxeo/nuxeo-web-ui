@@ -13,5 +13,7 @@
  */
 
 export function i18n(key) {
-  return (window.nuxeo && window.nuxeo.I18n && window.nuxeo.i18n.translate && window.nuxeo.i18n.translate(key)) || key;
+  // XXX: cheating a bit and reusing top level i18n
+  const nuxeo = (window.parent || window).nuxeo;
+  return (nuxeo && nuxeo.I18n && nuxeo.I18n.translate && nuxeo.I18n.translate(`spreadsheet.${key}`)) || key;
 }

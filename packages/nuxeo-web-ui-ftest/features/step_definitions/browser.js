@@ -95,7 +95,7 @@ When('I sort the content by {string} in {string} order', function(field, order) 
 });
 
 Then('I can see {int} document(s)', function(numberOfResults) {
-  const results = this.ui.browser.currentPageResults;
+  const { results } = this.ui.browser;
   results.waitForVisible();
   const { displayMode } = results;
   results.getResults(displayMode).waitForVisible();

@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
 
+// read .env file and assign to process.env
+require('dotenv').config();
+
 const FTEST = path.join(__dirname, '../ftest');
 
 function runFunctionalTests(project, dir) {

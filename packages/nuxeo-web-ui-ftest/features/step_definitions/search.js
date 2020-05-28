@@ -73,11 +73,11 @@ Given(/^I have the following documents$/, (table) => {
       fixtures.documents
         .create(path, doc)
         // add to collection
-        .then((d) => (collections.length > 0 ? fixtures.collections.addToCollection(d, collections) : d))
+        .then((d) => (collections && collections.length > 0 ? fixtures.collections.addToCollection(d, collections) : d))
         // add tag
-        .then((d) => (tag.length > 0 ? fixtures.documents.addTag(d, tag) : d))
+        .then((d) => (tag && tag.length > 0 ? fixtures.documents.addTag(d, tag) : d))
         // attach files
-        .then((d) => (file.length > 0 ? fixtures.documents.attach(d, fixtures.blobs.get(file)) : d))
+        .then((d) => (file && file.length > 0 ? fixtures.documents.attach(d, fixtures.blobs.get(file)) : d))
     );
   });
   return tasks.reduce((current, next) => current.then(next), Promise.resolve([]));
@@ -158,9 +158,9 @@ Then(/^I can see more than (\d+) search results$/, function(minNumberOfResults) 
   );
 });
 
-Then(/^I edit the results columns to show (.+)$/, function(heading) {
-  this.ui.results.resultActions.waitForVisible();
-  if (this.ui.results.toggleTableView.isVisible()) {
+Then('I edit the results columns to show {string}', function(heading) {
+  this.ui.results.actions.waitForVisible();
+  if (this.ui.results.displayMode !== 'table' && this.ui.results.toggleTableView.isVisible()) {
     this.ui.results.toggleTableView.click();
   }
   this.ui.results.toggleColumnSettings.waitForVisible();

@@ -110,7 +110,8 @@ function run(baseURL = '/nuxeo') {
     }
 
     // Setup the SpreadSheet
-    sheet = new Spreadsheet(document.getElementById('grid'), nx, resultColumns, pageProviderName, language);
+    const el = document.getElementById('grid');
+    window.spreadsheet = sheet = new Spreadsheet(el, nx, resultColumns, pageProviderName, language);
 
     // Add query parameters
     if (cv.queryParameters) {

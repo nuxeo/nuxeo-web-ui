@@ -6,13 +6,17 @@ export default class Results extends BasePage {
     return this.el.element('div.emptyResult:not([style=""])');
   }
 
-  get resultActions() {
+  get actions() {
+    return this.el.elements('slot[name="actions"]');
+  }
+
+  get displayModes() {
     return this.el.elements('div.resultActions paper-icon-button.displayMode');
   }
 
   get displayMode() {
-    this.resultActions.waitForVisible();
-    const displayMode = this.resultActions.value.filter((result) => result.getAttribute('disabled') !== null);
+    this.actions.waitForVisible();
+    const displayMode = this.displayModes.value.filter((result) => result.getAttribute('disabled') !== null);
     return displayMode[0]
       .getAttribute('title')
       .replace('Switch to ', '')
@@ -21,7 +25,7 @@ export default class Results extends BasePage {
   }
 
   get toggleTableView() {
-    return this.resultActions.value.find((e) => e.getAttribute('title').includes('Table View'));
+    return this.displayModes.value.find((e) => e.getAttribute('title').includes('Table View'));
   }
 
   get toggleColumnSettings() {
