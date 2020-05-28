@@ -312,7 +312,6 @@ Polymer({
   listeners: {
     batchFinished: 'importBatch',
     'nx-blob-picked': 'importBatch',
-    uploadInterrupted: '_uploadError',
     batchFailed: 'importBatch',
   },
 
@@ -357,6 +356,10 @@ Polymer({
     } else {
       this.fire('notify', { message: this.i18n(this.uploadedMessage), close: true });
       this.invalid = false;
+    }
+    if (this.invalid) {
+      // if we're already displaying an error, we better update it, otherwise the user can be mislead
+      this.validate();
     }
   },
 
@@ -414,6 +417,7 @@ Polymer({
       this._reset();
       this.value = '';
     }
+    // if this is not a required field, trigger validation so the error message is updated
     if (!this.required) {
       this.validate();
     }
