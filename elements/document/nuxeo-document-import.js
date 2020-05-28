@@ -80,7 +80,7 @@ Polymer({
       }
 
       .file-to-import {
-        min-height: 3em;
+        height: 54px;
         margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
         padding: 0.8em 1em;
@@ -133,6 +133,8 @@ Polymer({
         display: block;
         font-weight: normal;
         font-size: 0.75rem;
+        line-height: 10px;
+        margin-top: 4px;
       }
 
       #checkmarkNote {
@@ -158,6 +160,7 @@ Polymer({
         display: block;
         width: 16px;
         height: 16px;
+        margin: 2px 0;
       }
 
       .blobCheck.checked {
@@ -173,6 +176,7 @@ Polymer({
       }
 
       .file-overview {
+        @apply --layout-vertical;
         border: 1px solid var(--divider-color);
         border-radius: 1px;
         background-color: var(--nuxeo-box);
@@ -181,6 +185,7 @@ Polymer({
         font-weight: bold;
         text-transform: none;
         color: var(--secondary-text-color);
+        height: 86px;
       }
 
       .file-overview:hover {
@@ -195,17 +200,18 @@ Polymer({
         color: var(--nuxeo-primary-color);
       }
 
-      .file-overview iron-icon {
-        margin-top: 0.1em;
+      .file-overview .name:hover {
+        color: var(--nuxeo-primary-color);
       }
 
       .name {
+        display: -webkit-box;
         font-weight: bold;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        height: 40px; /* XXX: 2 * line height, consider extracting variable at the base theme leve */
         word-break: break-all;
-      }
-
-      .file-overview .name:hover {
-        color: var(--nuxeo-primary-color);
+        overflow: hidden;
       }
 
       .size {
@@ -340,6 +346,10 @@ Polymer({
       div[name='upload'] {
         outline: none;
       }
+
+      paper-progress {
+        margin-top: 8px;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -400,7 +410,7 @@ Polymer({
                     <div class="file-to-import horizontal layout" error$="{{file.error}}">
                       <div class="vertical layout flex">
                         <div class="horizontal layout">
-                          <div class="name">
+                          <div class="name" title="[[file.name]]">
                             [[file.name]]
                           </div>
                           <span class="size">
@@ -437,7 +447,7 @@ Polymer({
                     <div class="file-to-import horizontal layout" error$="{{file.error}}">
                       <div class="vertical layout flex">
                         <div class="horizontal layout center">
-                          <div class="name">
+                          <div class="name" title="[[file.name]]">
                             [[file.name]]
                           </div>
                           <span class="size">
@@ -563,14 +573,14 @@ Polymer({
               <template is="dom-repeat" items="[[localFiles]]" as="file">
                 <paper-button
                   noink
-                  class$="file-overview horizontal layout [[_selectedLocalDocStyle(index,docIdx,_initializingDoc)]]"
+                  class$="file-overview [[_selectedLocalDocStyle(index,docIdx,_initializingDoc)]]"
                   on-tap="_tapLocalDoc"
                   disabled$="[[!_canTapDoc(canCreate, _initializingDoc)]]"
                 >
-                  <div class="horizontal layout flex">
+                  <div class="horizontal layout flex self-stretch">
                     <div class="vertical layout flex">
-                      <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
-                      <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
+                      <span class="name" hidden$="[[file.title]]" title="[[file.name]]">[[file.name]]</span>
+                      <span class="name" hidden$="[[!file.title]]" title="[[file.title]]">[[file.title]]</span>
                       <template is="dom-if" if="[[_displayProgressBar(file.*)]]">
                         <paper-progress indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
                       </template>
@@ -590,14 +600,14 @@ Polymer({
               <template is="dom-repeat" items="[[remoteFiles]]" as="file">
                 <paper-button
                   noink
-                  class$="file-overview horizontal layout [[_selectedRemoteDocStyle(index,docIdx,_initializingDoc)]]"
+                  class$="file-overview [[_selectedRemoteDocStyle(index,docIdx,_initializingDoc)]]"
                   on-tap="_tapRemoteDoc"
                   disabled$="[[!_canTapDoc(canCreate, _initializingDoc)]]"
                 >
-                  <div class="horizontal layout flex">
+                  <div class="horizontal layout flex self-stretch">
                     <div class="vertical layout flex">
-                      <span class="name flex" hidden$="[[file.title]]">[[file.name]]</span>
-                      <span class="name flex" hidden$="[[!file.title]]">[[file.title]]</span>
+                      <span class="name flex" hidden$="[[file.title]]" title="[[file.name]]">[[file.name]]</span>
+                      <span class="name flex" hidden$="[[!file.title]]" title="[[file.title]]">[[file.title]]</span>
                     </div>
                     <iron-icon
                       icon="[[_computedCheckItem(file.*)]]"
