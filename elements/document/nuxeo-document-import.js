@@ -267,6 +267,10 @@ Polymer({
         border: 1px solid var(--paper-input-container-invalid-color);
       }
 
+      .file-to-import > div:first-child {
+        overflow: hidden;
+      }
+
       .add-more {
         position: absolute;
         bottom: 0;
@@ -417,8 +421,11 @@ Polymer({
                         </div>
                       </div>
                       <div class="clear" hidden$="[[!_displayRemoveBlobBtn(file.*)]]">
-                        <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
-                        <nuxeo-tooltip>[[i18n('command.remove')]]</nuxeo-tooltip>
+                        <paper-icon-button
+                          icon="[[_computeRemoveIcon(file.*)]]"
+                          on-tap="_removeBlob"
+                        ></paper-icon-button>
+                        <nuxeo-tooltip>[[_computeRemoveLabel(file.*, i18n)]]</nuxeo-tooltip>
                       </div>
                     </div>
                   </template>
@@ -1267,6 +1274,9 @@ Polymer({
     const { file, index } = e.model;
     if (file.providerId) {
       this.splice('remoteFiles', index, 1);
+    } else if (!e.model.file.error && !e.model.file.complete && this.hasAbort()) {
+      this.abort(e.model.file);
+      this._removeFile(index);
     } else {
       this.$.blobRemover.path = `upload/${this.batchId}/${file.index}`;
       this.$.blobRemover.remove().then(
@@ -1311,6 +1321,30 @@ Polymer({
       return 'icons:check-circle';
     }
     return 'icons:radio-button-unchecked';
+  },
+
+  _computeRemoveIcon(file) {
+    if (file.base) {
+      if (file.base.complete || file.base.error) {
+        return 'nuxeo:remove';
+      }
+      if (this.hasAbort()) {
+        return 'icons:cancel';
+      }
+    }
+    return '';
+  },
+
+  _computeRemoveLabel(file) {
+    if (file.base) {
+      if (file.base.complete || file.base.error) {
+        return this.i18n('command.remove');
+      }
+      if (this.hasAbort()) {
+        return this.i18n('command.cancel');
+      }
+    }
+    return '';
   },
 
   _styleFileCheck(e) {
@@ -1420,7 +1454,7 @@ Polymer({
   },
 
   _displayRemoveBlobBtn(file) {
-    return file.base && (file.base.complete || file.base.error);
+    return file.base && (file.base.complete || file.base.error || this.hasAbort());
   },
 
   _layoutUpdated(e) {
