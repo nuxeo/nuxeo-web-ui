@@ -57,6 +57,9 @@ export default class UI extends BasePage {
   }
 
   get results() {
+    if (this.el.element('nuxeo-browser').isVisible()) {
+      return this.browser.results;
+    }
     return new Search('nuxeo-search-results-layout[id="results"]');
   }
 

@@ -49,7 +49,7 @@ Feature: Search
   Scenario: Default Saved Search
     When I click the "defaultSearch" button
     And I perform a coverage search for Europe/France on defaultSearch
-    Then I edit the results columns to show Subjects
+    Then I edit the results columns to show "Subjects"
     And I save my search as "Local Search"
     And I share my "defaultSearch" search with JSmith
     When I logout
