@@ -154,32 +154,37 @@ class S3Provider {
       });
   }
 
+  _handleUploadError(error, callback) {
+    if (this.files.every((file) => file.error)) {
+      callback({ type: 'batchFailed', error, batchId: this.batchId });
+    } else if (this.files.every((file) => file.error || file.complete)) {
+      callback({ type: 'batchFinished', batchId: this.batchId });
+    }
+    throw error;
+  }
+
   get accepts() {
     return UploaderBehavior.getProviders().default.prototype.accepts;
   }
 
   upload(files, callback) {
-    this._ensureBatch()
-      .then(() => {
-        callback({ type: 'batchStart', batchId: this.batchId });
-        if (new Date().getTime() >= this.extraInfo.expiration) {
-          this._refreshBatchInfo();
-        }
+    this._ensureBatch().then(() => {
+      callback({ type: 'batchStart', batchId: this.batchId });
+      if (new Date().getTime() >= this.extraInfo.expiration) {
+        this._refreshBatchInfo();
+      }
 
-        const promises = [];
-        for (let i = 0; i < files.length; ++i) {
-          const file = files[i];
-          file.index = this.files.length;
-          this.files.push(file);
-          promises.push(this._upload(file, callback));
-        }
-        return Promise.all(promises).then(() => {
-          callback({ type: 'batchFinished', batchId: this.batchId });
-        });
-      })
-      .catch((error) => {
-        callback({ type: 'batchFailed', error, batchId: this.batchId });
+      const promises = [];
+      for (let i = 0; i < files.length; ++i) {
+        const file = files[i];
+        file.index = this.files.length;
+        this.files.push(file);
+        promises.push(this._upload(file, callback).catch((error) => this._handleUploadError(error, callback)));
+      }
+      return Promise.all(promises).then(() => {
+        callback({ type: 'batchFinished', batchId: this.batchId });
       });
+    });
   }
 
   hasAbort() {
