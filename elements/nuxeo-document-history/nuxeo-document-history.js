@@ -25,11 +25,17 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 `nuxeo-document-history`
 @group Nuxeo UI
 @element nuxeo-document-history
+@deprecated since 3.0.0. Use `nuxeo-audit-search` instead.
 */
 Polymer({
   _template: html`
     <nuxeo-audit-search name="document-history" id="document-history" document="[[document]]"></nuxeo-audit-search>
   `,
+
+  /** @override */
+  ready() {
+    console.warn(`${this.is} is deprecated. Please use nuxeo-audit-search instead!`);
+  },
 
   is: 'nuxeo-document-history',
 
