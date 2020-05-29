@@ -1,0 +1,10 @@
+<component name="org.nuxeo.web.ui.s3.properties.contrib" version="1.0">
+
+  <require>org.nuxeo.ecm.core.storage.s3.config</require>
+
+  <extension target="org.nuxeo.runtime.ConfigurationService" point="configuration">
+    <!-- 100MB part size -->
+    <property name="nuxeo.s3.multipart.copy.part.size">104857600</property>
+  </extension>
+
+</component>
