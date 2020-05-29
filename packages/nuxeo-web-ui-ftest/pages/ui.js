@@ -29,7 +29,7 @@ export default class UI extends BasePage {
   }
 
   get historyTable() {
-    return new HistoryTable('nuxeo-document-history');
+    return new HistoryTable('nuxeo-audit-search');
   }
 
   get user() {
