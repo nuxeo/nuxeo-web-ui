@@ -184,6 +184,7 @@
   "audit.performedAction": "Ação realizada",
   "audit.selectEventCategory": "Selecione a categoria de evento",
   "audit.selectEventTypes": "Selecione as ações do evento",
+  "audit.state": "State",
   "audit.to": "Para",
   "audit.username": "Nome de usuário",
   "audit.usernamePlaceholder": "Filtrar por nome de usuário",

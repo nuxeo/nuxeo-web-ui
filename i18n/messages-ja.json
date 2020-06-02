@@ -184,6 +184,7 @@
   "audit.performedAction": "実行された動作",
   "audit.selectEventCategory": "イベント分類を選択",
   "audit.selectEventTypes": "イベントアクションを選択",
+  "audit.state": "State",
   "audit.to": "宛先",
   "audit.username": "ユーザ名",
   "audit.usernamePlaceholder": "ユーザ名でフィルタ",

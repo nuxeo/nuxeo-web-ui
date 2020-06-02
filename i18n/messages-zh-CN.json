@@ -184,6 +184,7 @@
   "audit.performedAction": "执行的操作",
   "audit.selectEventCategory": "选择事件类别",
   "audit.selectEventTypes": "选择事件操作",
+  "audit.state": "State",
   "audit.to": "至",
   "audit.username": "用户名",
   "audit.usernamePlaceholder": "按用户名筛选",

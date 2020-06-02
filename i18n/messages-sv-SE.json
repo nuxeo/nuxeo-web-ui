@@ -184,6 +184,7 @@
   "audit.performedAction": "Utförd åtgärd",
   "audit.selectEventCategory": "Välj händelsekategori",
   "audit.selectEventTypes": "Välj händelseåtgärder",
+  "audit.state": "State",
   "audit.to": "Till",
   "audit.username": "Användarnamn",
   "audit.usernamePlaceholder": "Filtrera efter användarnamn",

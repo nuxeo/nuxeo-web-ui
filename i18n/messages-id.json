@@ -184,6 +184,7 @@
   "audit.performedAction": "Tindakan yang Dilakukan",
   "audit.selectEventCategory": "Pilih kategori acara",
   "audit.selectEventTypes": "Pilih tindakan acara",
+  "audit.state": "State",
   "audit.to": "Untuk",
   "audit.username": "Nama Pengguna",
   "audit.usernamePlaceholder": "Menyaring menurut nama pengguna",
