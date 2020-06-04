@@ -746,7 +746,7 @@ Polymer({
   _search() {
     if (this.results) {
       this.results.reset();
-      return this._fetch(this.results).then(this._navigateToResults);
+      return this._fetch(this.results).then(this._navigateToResults.bind(this));
     }
     if (this.visible) {
       // if the view is not initialized yet, navigating to the search will trigger a search and display the results
