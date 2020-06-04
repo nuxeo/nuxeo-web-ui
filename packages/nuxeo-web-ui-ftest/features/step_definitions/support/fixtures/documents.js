@@ -128,16 +128,43 @@ Before(function() {
     });
 });
 
+const retry = (fn, retries = 3, interval = 100) =>
+  new Promise((resolve, reject) =>
+    fn()
+      .then(resolve)
+      .catch(
+        (error) =>
+          setTimeout(() => {
+            if (retries === 0) {
+              reject(error);
+              return;
+            }
+            retry(fn, interval, --retries).then(resolve, reject);
+          }),
+        interval,
+      ),
+  );
+
 After(() =>
   Promise.all(
     liveDocuments.map((docUid) =>
-      nuxeo
-        .repository()
-        .delete(docUid)
-        .catch(() => {}),
+      retry(() =>
+        nuxeo
+          .repository()
+          .delete(docUid)
+          .catch((e) => {
+            const { status, statusText, url } = e.response;
+            console.error(`${status} ${statusText} ${url}`);
+            // in case of a conflict
+            if (status === 409) {
+              throw e; // let's retry this
+            }
+          }),
+      ),
     ),
-  ) // eslint-disable-line arrow-body-style
+  )
     .then(() => {
       liveDocuments = [];
-    }),
+    })
+    .catch(console.error),
 );
