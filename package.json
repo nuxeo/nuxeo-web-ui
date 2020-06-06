@@ -175,7 +175,7 @@
     "jsondiffpatch": "^0.3.11",
     "jsplumb": "^2.9.0",
     "nuxeo": "^3.2.1",
-    "select2": "~3.5.1",
+    "select2": "~4.0.8",
     "three": "~0.81.0",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1"
