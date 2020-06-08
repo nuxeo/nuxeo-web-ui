@@ -80,7 +80,7 @@ Polymer({
       }
 
       .file-to-import {
-        height: 54px;
+        height: 58px;
         margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
         padding: 0.8em 1em;
