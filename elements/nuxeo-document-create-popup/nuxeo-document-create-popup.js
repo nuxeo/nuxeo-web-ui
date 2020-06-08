@@ -79,12 +79,6 @@ Polymer({
         @apply --layout-flex;
         @apply --layout-horizontal;
       }
-
-      /* IE11 fix (NXP-23550) */
-      *::-ms-backdrop,
-      iron-pages * {
-        height: 80vh;
-      }
     </style>
 
     <nuxeo-document id="defaultDoc" doc-path="[[parentPath]]" enrichers="permissions, subtypes" response="{{parent}}">

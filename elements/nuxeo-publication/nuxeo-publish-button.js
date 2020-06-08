@@ -71,12 +71,6 @@ Polymer({
         @apply --layout-flex;
         @apply --layout-horizontal;
       }
-
-      /* IE11 fix (NXP-23550) */
-      *::-ms-backdrop,
-      iron-pages * {
-        height: 80vh;
-      }
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document, documents.splices)]]">
