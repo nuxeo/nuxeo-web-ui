@@ -91,6 +91,12 @@ class S3Provider {
                   callback({ type: 'uploadCompleted', fileIdx: file.index });
                 }
                 resolve();
+              })
+              .catch((err) => {
+                if (typeof callback === 'function') {
+                  callback({ type: 'uploadInterrupted', file, error: err.message || err });
+                }
+                reject(err);
               });
           } else {
             callback({ type: 'uploadInterrupted', file, error });
