@@ -82,7 +82,7 @@ limitations under the License.
             return doc.uid;
           }).join(',');
           this.$.removeOp.input = 'docs:' + uids;
-          this.$.removeOp.params = {collection: this.collection};
+          this.$.removeOp.params = {collection: this.collection.uid};
           this.$.removeOp.execute().then(function() {
             this.members = [];
             this.fire('refresh');
