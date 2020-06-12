@@ -53,9 +53,11 @@ class Operation {
   execute() {
     return this.conn
       .operation(this.opId)
-      .headers(this._headers)
       .params(this._params)
-      .execute({ resolveWithFullResponse: true })
+      .execute({
+        headers: this._headers,
+        resolveWithFullResponse: true,
+      })
       .then((response) => response.text())
       .then((text) => {
         try {
