@@ -154,11 +154,13 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
       startDate: {
         type: String,
         notify: true,
+        observer: '_observeDates',
       },
 
       endDate: {
         type: String,
         notify: true,
+        observer: '_observeDates',
       },
 
       events: {
@@ -174,7 +176,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
   }
 
   static get observers() {
-    return ['_refresh(startDate, endDate, events.*, category, principalName, document)'];
+    return ['_refresh(events.*, category, principalName, document)'];
   }
 
   get documentId() {
@@ -204,16 +206,6 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
       params.eventCategory = this.category;
     }
 
-    if (this._hasValidDate(this.startDate) && this._hasValidDate(this.endDate)) {
-      const start = Date.parse(this.startDate);
-      const end = Date.parse(this.endDate);
-      if (start > end) {
-        this.startDate = moment(end)
-          .subtract(7, 'day')
-          .format('YYYY-MM-DD');
-      }
-    }
-
     if (this._hasValidDate(this.startDate)) {
       params.startDate = this.startDate;
     }
@@ -232,6 +224,21 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
 
   _hasValidDate(dateAsString) {
     return dateAsString && dateAsString.length > 0;
+  }
+
+  _observeDates() {
+    const start = this._hasValidDate(this.startDate) && Date.parse(this.startDate);
+    const end = this._hasValidDate(this.endDate) && Date.parse(this.endDate);
+    const refresh = !start || !end || start < end;
+    if (start && end && start > end) {
+      this.startDate = moment(end)
+        .subtract(7, 'day')
+        .format('YYYY-MM-DD');
+    }
+
+    if (refresh) {
+      this._refresh();
+    }
   }
 
   // XXX: methods below (parsing and gettting url) shouldn't be needed after NXP-28820
