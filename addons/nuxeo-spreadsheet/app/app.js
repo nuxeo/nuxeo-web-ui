@@ -16,9 +16,9 @@
  * Contributors:
  *     Nelson Silva <nsilva@nuxeo.com>
  */
-import 'handsontable/dist/handsontable.full.js';
+import './vendor/jquery.handsontable.full.js';
 import './lib/handsontable.patches.js';
-import 'handsontable/dist/handsontable.full.css';
+import './vendor/jquery.handsontable.full.css';
 import 'select2/select2.js';
 import 'select2/select2.css';
 import './styles/styles.css';
@@ -93,7 +93,7 @@ function run(baseURL = '/nuxeo') {
 
   return nx.connect().then(() => {
     // Setup the language
-    const language = navigator.language || 'en';
+    const language = (navigator.language && navigator.language.slice(0, 2)) || 'en';
 
     // Extract content view configuration
     let resultColumns = cv && cv.resultColumns;
@@ -110,8 +110,7 @@ function run(baseURL = '/nuxeo') {
     }
 
     // Setup the SpreadSheet
-    const el = document.getElementById('grid');
-    window.spreadsheet = sheet = new Spreadsheet(el, nx, resultColumns, pageProviderName, language);
+    window.spreadsheet = sheet = new Spreadsheet($('#grid'), nx, resultColumns, pageProviderName, language);
 
     // Add query parameters
     if (cv.queryParameters) {

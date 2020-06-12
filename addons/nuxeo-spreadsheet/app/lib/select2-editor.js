@@ -35,7 +35,7 @@ Select2Editor.prototype.createElements = function() {
 
   this.TEXTAREA_PARENT.appendChild(this.TEXTAREA);
 
-  this.instance.rootElement.appendChild(this.TEXTAREA_PARENT);
+  this.instance.rootElement[0].appendChild(this.TEXTAREA_PARENT);
 
   const that = this;
   Handsontable.hooks.add('afterRender', () => {
@@ -156,12 +156,12 @@ Select2Editor.prototype.beginEditing = function(...params) {
     return;
   }
 
-  Handsontable.editors.TextEditor.prototype.beginEditing.apply(this, ...params);
+  Handsontable.editors.TextEditor.prototype.beginEditing.apply(this, params);
 };
 
 Select2Editor.prototype.finishEditing = function(...params) {
   this.instance.listen();
-  return Handsontable.editors.TextEditor.prototype.finishEditing.apply(this, ...params);
+  return Handsontable.editors.TextEditor.prototype.finishEditing.apply(this, params);
 };
 
 Handsontable.editors.Select2Editor = Select2Editor;

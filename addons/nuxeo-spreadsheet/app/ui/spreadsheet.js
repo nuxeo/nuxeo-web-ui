@@ -27,8 +27,9 @@ class Spreadsheet {
   constructor(container, connection, columns, pageProvider, language) {
     this.container = container;
     this.connection = connection;
+    this._data = [];
     this.options = {
-      data: [],
+      data: this._data,
       autoColumnSize: false,
       colWidths: 200,
       stretchH: 'all',
@@ -129,15 +130,17 @@ class Spreadsheet {
       this.columns = cols.map((c) => new Column(connection, c.def, c.widget, this.dirtyRenderer.bind(this)));
     });
 
-    this.ht = Handsontable(this.container, this.options);
+    this.container.handsontable(this.options);
+    this.ht = this.container.data('handsontable');
   }
 
   get data() {
-    return this.ht.getSourceData();
+    return this._data;
   }
 
   set data(d) {
-    this.ht.loadData(d);
+    this._data = d;
+    this.ht.loadData(this._data);
   }
 
   // Returns source data

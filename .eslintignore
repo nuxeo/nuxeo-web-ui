@@ -6,3 +6,4 @@ dist/
 .tmp/
 index.html
 dist/
+vendor/

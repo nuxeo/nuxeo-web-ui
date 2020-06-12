@@ -58,7 +58,11 @@ class DirectoryEditor extends Select2Editor {
 
     let id;
     if (entity.properties.parent) {
-      id = `${entity.properties.parent.properties.id}/${entity.properties.id}`;
+      let parentId =
+        typeof entity.properties.parent === 'object'
+          ? entity.properties.parent.properties.id
+          : entity.properties.parent;
+      id = `${parentId}/${entity.properties.id}`;
     } else {
       // eslint-disable-next-line prefer-destructuring
       id = entity.properties.id;
