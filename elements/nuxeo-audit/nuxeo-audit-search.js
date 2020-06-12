@@ -189,7 +189,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
       principalName: this.principalName,
     };
     if (this.events && this.events.length > 0) {
-      params.eventIds = this.events;
+      params.eventIds = this.documentId ? this.events : this.events.join();
     }
     if (this.category) {
       params.eventCategory = this.category;
