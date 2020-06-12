@@ -14,6 +14,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+import '@nuxeo/nuxeo-elements/nuxeo-audit-page-provider.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date-picker.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-directory-suggestion.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-suggestion.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import '@nuxeo/nuxeo-elements/nuxeo-element.js';
