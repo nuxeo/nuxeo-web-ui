@@ -19,7 +19,6 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@polymer/iron-selector/iron-selector.js';
-import '@polymer/iron-image/iron-image.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-input/paper-input.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
@@ -275,8 +274,14 @@ Polymer({
             <template is="dom-repeat" items="{{items}}">
               <a class="item" href$="[[_getUrl(item, false, urlFor)]]" on-click="_itemClicked">
                 <div class="thumbnailContainer">
-                  <iron-image src="[[_getIcon(item)]]" sizing="cover" position="center" class="thumbnailContainer">
-                  </iron-image>
+                  <iron-icon
+                    src="[[_getThumbnail(item)]]"
+                    icon="[[_getIcon(item)]]"
+                    sizing="cover"
+                    position="center"
+                    class="thumbnailContainer"
+                  >
+                  </iron-icon>
                 </div>
                 <div class="details">
                   <div class="itemName">[[item.label]]</div>
@@ -377,13 +382,16 @@ Polymer({
   },
 
   _getIcon(item) {
+    return !this._getThumbnail(item) && `nuxeo:${item.type}`;
+  },
+
+  _getThumbnail(item) {
     if (item.command) {
       return item.icon;
     }
     if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
       return `${this.$.nxcon.url}/${item.thumbnailUrl}`;
     }
-    return this.$.nxcon.url + item.icon;
   },
 
   _getUrl(item, replaceHashbang) {
