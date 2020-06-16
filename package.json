@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
-    "@nuxeo/testing-helpers": "3.0.0-SNAPSHOT",
+    "@nuxeo/testing-helpers": "~3.0.0-rc || 3.0.0-SNAPSHOT",
     "@open-wc/eslint-config": "^0.3.0",
     "@open-wc/karma-esm": "^2.13.21",
     "@open-wc/prettier-config": "^0.1.0",
@@ -96,9 +96,9 @@
   "dependencies": {
     "@nuxeo/chart-elements": "^4.0.0-SNAPSHOT",
     "@nuxeo/moment": "^2.24.0",
-    "@nuxeo/nuxeo-dataviz-elements": "3.0.0-SNAPSHOT",
-    "@nuxeo/nuxeo-elements": "3.0.0-SNAPSHOT",
-    "@nuxeo/nuxeo-ui-elements": "3.0.0-SNAPSHOT",
+    "@nuxeo/nuxeo-dataviz-elements": "~3.0.0-rc || 3.0.0-SNAPSHOT",
+    "@nuxeo/nuxeo-elements": "~3.0.0-rc || 3.0.0-SNAPSHOT",
+    "@nuxeo/nuxeo-ui-elements": "~3.0.0-rc || 3.0.0-SNAPSHOT",
     "@nuxeo/page": "^1.11.4-SNAPSHOT",
     "@polymer/app-layout": "^3.0.0",
     "@polymer/iron-a11y-announcer": "^3.0.0",
