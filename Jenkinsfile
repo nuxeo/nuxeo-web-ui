@@ -22,12 +22,14 @@ properties([
 ])
 
 void setGitHubBuildStatus(String context, String message, String state) {
-  step([
-    $class: 'GitHubCommitStatusSetter',
-    reposSource: [$class: 'ManuallyEnteredRepositorySource', url: 'https://github.com/nuxeo/nuxeo-web-ui'],
-    contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: context],
-    statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'AnyBuildResult', message: message, state: state]]],
-  ])
+  if (env.DRY_RUN != "true") {
+    step([
+      $class: 'GitHubCommitStatusSetter',
+      reposSource: [$class: 'ManuallyEnteredRepositorySource', url: 'https://github.com/nuxeo/nuxeo-web-ui'],
+      contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: context],
+      statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'AnyBuildResult', message: message, state: state]]],
+    ])
+  }
 }
 
 // Replaces environment variables present in the given yaml file and then runs skaffold build on it.
@@ -49,7 +51,39 @@ void dockerPublish(String image) {
   """
 }
 
-def WEBUI_VERSION
+def isPullRequest() {
+  return BRANCH_NAME =~ /PR-.*/
+}
+
+def getPackageVersion() {
+  container('mavennodejs') {
+    return sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
+  }
+}
+
+def getReleaseVersion() {
+  def preid = 'rc'
+  def nextPromotion = getPackageVersion().replace("-SNAPSHOT", "")
+  def version = "${nextPromotion}-${preid}.0" // first version ever
+
+  // find the latest tag if any
+  sh "git fetch origin 'refs/tags/v${nextPromotion}*:refs/tags/v${nextPromotion}*'"
+  def tag = sh(returnStdout: true, script: "git tag --sort=taggerdate --list 'v${nextPromotion}*' | tail -1 | tr -d '\n'")
+  if (tag) {
+    container('mavennodejs') {
+      version = sh(returnStdout: true, script: "npx semver -i prerelease --preid ${preid} ${tag} | tr -d '\n'")
+    }
+  }
+  return version
+}
+
+def getPullRequestVersion() {
+  return getPackageVersion() + "-${BRANCH_NAME}"
+}
+
+def getVersion() {
+  return isPullRequest() ? getPullRequestVersion() : getReleaseVersion()
+}
 
 pipeline {
   agent {
@@ -58,21 +92,25 @@ pipeline {
   environment {
     ORG = 'nuxeo'
     APP_NAME = 'nuxeo-web-ui'
-    CONNECT_PREPROD_URL = 'https://nos-preprod-connect.nuxeocloud.com/nuxeo'
+    CONNECT_URL = 'https://nos-preprod-connect.nuxeocloud.com/nuxeo'
+    VERSION = getVersion()
   }
   stages {
-    stage('Prepare') {
+    stage('Update package version') {
       steps {
         container('mavennodejs') {
+          echo """
+          ---------------------------------
+          Update package version ${VERSION}
+          ---------------------------------
+          """
           script {
-            WEBUI_VERSION =  sh(script: 'npx -c \'echo "$npm_package_version"\'', returnStdout: true).trim()
-            if (BRANCH_NAME != 'master') {
-              WEBUI_VERSION += "-${BRANCH_NAME}";
-            }
-            echo """
-            -------------------------
-            Building ${WEBUI_VERSION}
-            -------------------------"""
+            def snapshotVersion = getPackageVersion()
+            sh "find . -type f -not -path './node_modules/*' -regex '.*\\.\\(yaml\\|sample\\|xml\\)' -exec sed -i 's/${snapshotVersion}/${VERSION}/g' {} \\;"
+          }
+          sh "npm version ${VERSION} --no-git-tag-version"
+          dir('packages/nuxeo-web-ui-ftest') {
+            sh "npm version ${VERSION} --no-git-tag-version"
           }
         }
       }
@@ -89,9 +127,9 @@ pipeline {
             def nodeVersion = sh(script: 'node -v', returnStdout: true).trim()
             echo "node version: ${nodeVersion}"
           }
-          sh 'npm install --no-package-lock'
+          sh 'npm install'
           dir('packages/nuxeo-web-ui-ftest') {
-            sh 'npm install --no-package-lock'
+            sh 'npm install'
           }
           sh 'npm run lint'
         }
@@ -203,9 +241,47 @@ pipeline {
         }
       }
     }
+    stage('Git commit, tag and push') {
+      when {
+        allOf {
+          not {
+            branch 'PR-*'
+          }
+          not {
+            environment name: 'DRY_RUN', value: 'true'
+          }
+        }
+      }
+      steps {
+        container('mavennodejs') {
+          echo """
+          --------
+          Git commit, tag and push
+          --------
+          """
+          sh """
+            #!/usr/bin/env bash -xe
+            # create the Git credentials
+            jx step git credentials
+            git config credential.helper store
+            git add package-lock.json packages/nuxeo-web-ui-ftest/package-lock.json
+            git commit -a -m "Release ${VERSION}"
+            git tag -a v${VERSION} -m "Release ${VERSION}"
+            git push origin v${VERSION}
+          """
+        }
+      }
+    }
     stage('Publish Maven artifacts') {
       when {
-       branch 'master'
+        allOf {
+          not {
+            branch 'PR-*'
+          }
+          not {
+            environment name: 'DRY_RUN', value: 'true'
+          }
+        }
       }
       steps {
         setGitHubBuildStatus('webui/publish/maven', 'Deploy Maven artifacts', 'PENDING')
@@ -228,19 +304,26 @@ pipeline {
     }
     stage('Publish Nuxeo Packages') {
       when {
-       branch 'master'
+        allOf {
+          not {
+            branch 'PR-*'
+          }
+          not {
+            environment name: 'DRY_RUN', value: 'true'
+          }
+        }
       }
       steps {
         setGitHubBuildStatus('webui/publish/packages', 'Upload Nuxeo Packages', 'PENDING')
         container('mavennodejs') {
           echo """
           -------------------------------------------------
-          Upload Nuxeo Packages to ${CONNECT_PREPROD_URL}
+          Upload Nuxeo Packages to ${CONNECT_URL}
           -------------------------------------------------"""
           withCredentials([usernameColonPassword(credentialsId: 'connect-preprod', variable: 'CONNECT_PASS')]) {
             sh """
-              PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${WEBUI_VERSION}.zip"
-              curl -i -u "$CONNECT_PASS" -F package=@\$PACKAGE "$CONNECT_PREPROD_URL"/site/marketplace/upload?batch=true
+              PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${VERSION}.zip"
+              curl -i -u "$CONNECT_PASS" -F package=@\$PACKAGE "$CONNECT_URL"/site/marketplace/upload?batch=true
             """
           }
         }
@@ -256,7 +339,14 @@ pipeline {
     }
     stage('Publish Web UI FTest Framework') {
       when {
-       branch 'master'
+        allOf {
+          not {
+            branch 'PR-*'
+          }
+          not {
+            environment name: 'DRY_RUN', value: 'true'
+          }
+        }
       }
       steps {
         setGitHubBuildStatus('webui/publish/ftest', 'Upload Nuxeo Packages', 'PENDING')
@@ -284,21 +374,24 @@ pipeline {
       }
     }
     stage('Build and deploy Docker images') {
+      when {
+        not {
+          environment name: 'DRY_RUN', value: 'true'
+        }
+      }
       steps {
         setGitHubBuildStatus('webui/docker', 'Build Docker images', 'PENDING')
         container('mavennodejs') {
-          withEnv(["VERSION=${WEBUI_VERSION}"]) {
-            echo """
-            ------------------------------
-            Build and deploy Docker images
-            ------------------------------
-            Image tag: ${VERSION}
-            """
-            dir('server') {
-              skaffoldBuild()
-            }
+          echo """
+          ------------------------------
+          Build and deploy Docker images
+          ------------------------------
+          Image tag: ${VERSION}
+          """
+          dir('server') {
             skaffoldBuild()
           }
+          skaffoldBuild()
         }
       }
       post {
@@ -312,11 +405,16 @@ pipeline {
     }
     stage('Deploy Preview') {
       when {
-        branch 'PR-*'
+        allOf {
+          branch 'PR-*'
+          not {
+            environment name: 'DRY_RUN', value: 'true'
+          }
+        }
       }
       steps {
         container('mavennodejs') {
-          withEnv(["PREVIEW_VERSION=$WEBUI_VERSION"]) {
+          withEnv(["PREVIEW_VERSION=$VERSION"]) {
             echo """
             -----------------
             Deploying preview 
@@ -332,12 +430,19 @@ pipeline {
     }
     stage('Publish Docker Images') {
       when {
-        branch 'master'
+        allOf {
+          not {
+            branch 'PR-*'
+          }
+          not {
+            environment name: 'DRY_RUN', value: 'true'
+          }
+        }
       }
       steps {
         setGitHubBuildStatus('webui/publish', 'Publish Docker images', 'PENDING')
         container('mavennodejs') {
-          withEnv(["VERSION=${WEBUI_VERSION}"]) {
+          withEnv(["VERSION=${VERSION}"]) {
             echo """
             ---------------------
             Publish Docker images
