@@ -2,8 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.nuxeo</groupId>
-    <artifactId>nuxeo-ecm</artifactId>
-    <version>11.2-SNAPSHOT</version>
+    <artifactId>nuxeo-parent</artifactId>
+    <version>11.1</version>
   </parent>
 
   <groupId>org.nuxeo.web.ui</groupId>
@@ -37,6 +37,36 @@
         <module>plugin/metrics</module>
       </modules>
     </profile>
+    <profile>
+      <!-- For use by Nuxeo internal QA -->
+      <id>qa</id>
+      <repositories>
+        <repository>
+          <id>maven-internal</id>
+          <url>https://packages.nuxeo.com/repository/maven-internal/</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>maven-internal</id>
+          <url>https://packages.nuxeo.com/repository/maven-internal/</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <updatePolicy>always</updatePolicy>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
   </profiles>
 
   <dependencyManagement>
@@ -68,13 +98,14 @@
 
   <repositories>
     <repository>
-      <id>public</id>
-      <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
+      <id>maven-public</id>
+      <url>https://packages.nuxeo.com/repository/maven-public/</url>
       <releases>
         <enabled>true</enabled>
       </releases>
       <snapshots>
-        <enabled>false</enabled>
+        <updatePolicy>always</updatePolicy>
+        <enabled>true</enabled>
       </snapshots>
     </repository>
     <repository>
