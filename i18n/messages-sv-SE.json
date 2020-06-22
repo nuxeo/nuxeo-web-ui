@@ -387,7 +387,7 @@
   "documentHistory.username": "Användarnamn",
   "documentImport.creating": "Skapar ...",
   "documentImport.error.cannotImport": "Välj en annan behållare för att importera ditt innehåll",
-  "documentImport.error.importFailed": "Dessa tillgångar kunde inte skapas, antingen eftersom servern inte kunde nås eller för att vissa tillgångar har problem. Du kan försöka skapa dem igen, avbryta eller försöka igen senare.",
+  "documentImport.error.importFailed": "Some of the assets could not be uploaded. Hitting \"Create\" or \"Add properties\" will ignore failed assets.",
   "documentImport.importing": "Importerar...",
   "documentImport.uploading": "Laddar upp ...",
   "documentImportForm.addMoreFiles": "Add more files",

@@ -387,7 +387,7 @@
   "documentHistory.username": "Benutzername",
   "documentImport.creating": "Erstelle ...",
   "documentImport.error.cannotImport": "Dokumente konnten nicht an diesem Ort importiert werden",
-  "documentImport.error.importFailed": "Diese Assets konnten nicht erstellt werden, entweder weil der Server nicht erreicht werden konnte oder es bei einigen Assets Probleme gibt. Sie können versuchen, diese nochmals zu erstellen, den Vorgang abzubrechen, oder es später erneut zu versuchen.",
+  "documentImport.error.importFailed": "Some of the assets could not be uploaded. Hitting \"Create\" or \"Add properties\" will ignore failed assets.",
   "documentImport.importing": "Wird importiert...",
   "documentImport.uploading": "Wird hochgeladen ...",
   "documentImportForm.addMoreFiles": "Add more files",

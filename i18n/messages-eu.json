@@ -387,7 +387,7 @@
   "documentHistory.username": "Erabiltzaile-izena",
   "documentImport.creating": "Sortzen...",
   "documentImport.error.cannotImport": "Hautatu beste edukitzaile bat zure edukia inportatzeko.",
-  "documentImport.error.importFailed": "Baliabide hauek ezin izan dira sortu, edo zerbitzaria ezin izan delako atzitu edo zenbait baliabidek arazoak dituztelako. Berriro sortzen saia zaitezke, utzi, edo geroago berriro saiatu.",
+  "documentImport.error.importFailed": "Some of the assets could not be uploaded. Hitting \"Create\" or \"Add properties\" will ignore failed assets.",
   "documentImport.importing": "Inportatzen...",
   "documentImport.uploading": "Igotzen...",
   "documentImportForm.addMoreFiles": "Add more files",

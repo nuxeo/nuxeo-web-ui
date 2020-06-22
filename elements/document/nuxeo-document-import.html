@@ -88,6 +88,10 @@ limitations under the License.
         position: relative;
       }
 
+      file-to-import:first-child {
+        overflow: hidden;
+      }
+
       paper-progress {
         width: 100%;
       }
@@ -128,6 +132,15 @@ limitations under the License.
 
       #blobList .error {
         margin: 8px;
+      }
+
+      #blobList .file-error {
+        display: block;
+        font-weight: normal;
+        font-size: 0.75rem;
+      }
+      #dropzone .file-error {
+        white-space: nowrap;
       }
 
       #sidePanel {
@@ -244,6 +257,10 @@ limitations under the License.
         margin-bottom: 3em;
       }
 
+      .file-to-import[error] {
+        border: 1px solid var(--paper-input-container-invalid-color);
+      }
+
       .disclaimer.checked,
       .disclaimer.hidden {
         visibility: hidden;
@@ -285,6 +302,13 @@ limitations under the License.
 
       .importing-label {
         margin-right: 8px;
+      }
+
+      .file-error {
+        color: var(--paper-input-container-invalid-color, #de350b);
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       iron-pages,
@@ -352,7 +376,7 @@ limitations under the License.
                   </span>
                   <template is="dom-repeat" items="[[localFiles]]" as="file">
                     <!-- local file -->
-                    <div class="file-to-import horizontal layout">
+                    <div class="file-to-import horizontal layout" error$="{{file.error}}">
                       <div class="vertical layout flex">
                         <div class="horizontal layout">
                           <div class="name">
@@ -367,11 +391,15 @@ limitations under the License.
                             [[file.providerName]]
                           </div>
                         </template>
-                        <template is="dom-if" if="[[!file.complete]]">
+                        <template is="dom-if" if="[[_displayProgressBar(file.*)]]">
                           <paper-progress indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
                         </template>
+                        <div class="horizontal layout flex" hidden$="[[!file.error]]">
+                          <span class="file-error">[[file.error]]</span>
+                          <nuxeo-tooltip>[[file.error]]</nuxeo-tooltip>
+                        </div>
                       </div>
-                      <div class="clear" hidden$="[[!file.complete]]">
+                      <div class="clear" hidden$="[[!_displayRemoveBlobBtn(file.*)]]">
                         <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
                         <nuxeo-tooltip>[[i18n('command.remove')]]</nuxeo-tooltip>
                       </div>
@@ -382,7 +410,7 @@ limitations under the License.
                   </span>
                   <template is="dom-repeat" items="[[remoteFiles]]" as="file">
                     <!-- remote file -->
-                    <div class="file-to-import horizontal layout">
+                    <div class="file-to-import horizontal layout" error$="{{file.error}}">
                       <div class="vertical layout flex">
                         <div class="horizontal layout center">
                           <div class="name">
@@ -494,9 +522,13 @@ limitations under the License.
                       <span class$="disclaimer [[_styleFileCheck(file.*)]]">
                         [[i18n('documentImportForm.unchecked.disclaimer')]]
                       </span>
-                      <template is="dom-if" if="[[!file.complete]]">
-                        <paper-progress indeterminate></paper-progress>
+                      <template is="dom-if" if="[[_displayProgressBar(file.*)]]">
+                        <paper-progress indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
                       </template>
+                      <div class="horizontal layout flex" hidden$="[[!file.error]]">
+                        <span class="file-error">[[file.error]]</span>
+                        <nuxeo-tooltip>[[file.error]]</nuxeo-tooltip>
+                      </div>
                     </div>
                     <iron-icon icon="icons:check-circle"
                               class$="blobCheck [[_styleFileCheck(file.*)]]"
@@ -557,10 +589,10 @@ limitations under the License.
                         class="primary"
                         on-tap="_importWithProperties"
                         disabled$="[[!_canImportWithMetadata(_creating,_initializingDoc,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]">
-                        <template is="dom-if" if="[[_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
+                        <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
                           [[i18n('command.create')]]
                         </template>
-                        <template is="dom-if" if="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]">
+                        <template is="dom-if" if="[[_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
                           <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
                           <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
                           <paper-spinner-lite active></paper-spinner-lite>
@@ -674,7 +706,9 @@ limitations under the License.
       listeners: {
         'batchFinished': '_batchReady',
         'nx-blob-picked': '_blobPicked',
-        'nx-document-creation-parent-validated': '_parentValidated'
+        'nx-document-creation-parent-validated': '_parentValidated',
+        uploadInterrupted: '_handleError',
+        batchFailed: '_handleError'
       },
       observers: [
         '_observeFiles(files.*)',
@@ -715,10 +749,16 @@ limitations under the License.
               var localFilesIdx = this.localFiles.indexOf(this.get(match[1]));
               // hack: refresh on the dom repeat
               this.notifyPath(['localFiles', localFilesIdx, match[2]].join('.'));
-              if (match[2] === 'complete') {
+              if (match[2] === 'complete' || match[2] === 'error') {
                 this.hasLocalFilesUploaded = this.hasLocalFiles && this.localFiles.every(function(file) {
-                  return !file || file.complete;
+                  return !file || file.complete || file.error;
                 });
+                // if we are already editing file properties, we need to uncheck those whose upload failed
+                if (this.hasLocalFilesUploaded) {
+                  this._getAllFiles().forEach(function(f, index) {
+                    return f.error && this._setFileProp(index, 'checked', false);
+                  }.bind(this));
+                }
               }
             }
           }
@@ -770,7 +810,11 @@ limitations under the License.
           this.customizing = true;
           this.set('selectedDocType', '');
           this.fire('nx-creation-wizard-hide-tabs');
-          this._selectDoc(0);
+          // let's select the first file that's not disabled
+          var toSelect = this._getAllFiles().findIndex(function(f) {
+            return !f.error;
+          });
+          this._selectDoc(toSelect < 0 ? 0 : toSelect);
         } else {
           this.stage = 'upload';
           this.customizing = false;
@@ -928,7 +972,9 @@ limitations under the License.
             loadP = this._loadFile({}, currentFile.name);
           }
           loadP.then(function() {
-            if (!('checked' in currentFile)) {
+            if (currentFile.error) {
+              this._setFileProp(index, 'checked', false);
+            } else if (!('checked' in currentFile)) {
               this._setFileProp(index, 'checked', true);
             }
           }.bind(this));
@@ -1065,7 +1111,8 @@ limitations under the License.
       _handleError: function(error) {
         this.set('_creating', false);
         this.set('errorMessage', this.i18n('documentImport.error.importFailed'));
-        this.fire('notify', {message: this.i18n('label.error').toUpperCase() + ': ' + error.message});
+        var message = error.message || (error.detail && error.detail.error);
+        this.fire('notify', { message: this.i18n('label.error').toUpperCase() + ': ' + message});
       },
 
       _mergeResponses: function() {
@@ -1109,7 +1156,7 @@ limitations under the License.
           }
           promises.push(
             (function(indexesToRemove, index){
-              return ((arr[index].docData && arr[index].checked) ?
+              return ((arr[index].docData && arr[index].checked && !arr[index].error) ?
                         self._processFileWithMetadata(arr[index]) :
                         Promise.resolve({'entity-type': 'Documents', 'entries': []})).then(function(result) {
                           indexesToRemove.push(index);
@@ -1214,11 +1261,17 @@ limitations under the License.
 
       _checkTappedLocal: function(e) {
         e.stopPropagation();
+        if (e.model.file.error) {
+          return;
+        }
         this._setFilePropEx('localFiles', e.model.index, 'checked', !e.model.file.checked);
       },
 
       _checkTappedRemote: function(e) {
         e.stopPropagation();
+        if (e.model.file.error) {
+          return;
+        }
         this._setFilePropEx('remoteFiles', e.model.index, 'checked', !e.model.file.checked);
       },
 
@@ -1300,6 +1353,14 @@ limitations under the License.
           this.document = document;
           this._initializingDoc = false;
         }.bind(this));
+      },
+
+      _displayProgressBar: function(file) {
+        return file.base && !file.base.complete && !file.base.error;
+      },
+
+      _displayRemoveBlobBtn: function(file) {
+        return file.base && (file.base.complete || file.base.error);
       },
 
       _layoutUpdated: function(e) {

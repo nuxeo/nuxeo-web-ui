@@ -387,7 +387,7 @@
   "documentHistory.username": "Gebruikersnaam",
   "documentImport.creating": "Bezig met aanmaken ...",
   "documentImport.error.cannotImport": "Selecteer een andere container om uw content te importeren.",
-  "documentImport.error.importFailed": "Deze assets konden niet worden aangemaakt, ofwel omdat de server niet kon worden bereikt of omdat sommige assets problemen hebben. U kunt proberen deze opnieuw aan te maken, te annuleren, of het later opnieuw te proberen.",
+  "documentImport.error.importFailed": "Some of the assets could not be uploaded. Hitting \"Create\" or \"Add properties\" will ignore failed assets.",
   "documentImport.importing": "Bezig met importeren ...",
   "documentImport.uploading": "Bezig met uploaden ...",
   "documentImportForm.addMoreFiles": "Add more files",

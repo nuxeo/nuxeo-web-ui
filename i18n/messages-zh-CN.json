@@ -387,7 +387,7 @@
   "documentHistory.username": "用户名",
   "documentImport.creating": "创建中",
   "documentImport.error.cannotImport": "选择其他容器以导入内容。",
-  "documentImport.error.importFailed": "无法创建这些资产, 这是因为无法访问服务器或某些资产存在问题。您可以尝试再次创建它们、取消或稍后重试。",
+  "documentImport.error.importFailed": "Some of the assets could not be uploaded. Hitting \"Create\" or \"Add properties\" will ignore failed assets.",
   "documentImport.importing": "正在导入...",
   "documentImport.uploading": "正在上传···",
   "documentImportForm.addMoreFiles": "Add more files",
