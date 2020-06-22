@@ -48,7 +48,7 @@ Polymer({
       <div class="action" on-tap="toggle">
         <paper-icon-button id="syncBut" icon="[[_icon(synchronized)]]"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
-        <paper-tooltip>[[_label]]</paper-tooltip>
+        <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
       </div>
     </template>
   `,

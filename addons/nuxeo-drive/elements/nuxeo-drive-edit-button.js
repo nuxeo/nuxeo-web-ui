@@ -36,7 +36,7 @@ Polymer({
       <div class="action" on-tap="_go">
         <paper-icon-button noink icon="icons:open-in-new" id="driveBtn"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[i18n('driveEditButton.tooltip')]]</span>
-        <paper-tooltip>[[i18n('driveEditButton.tooltip')]]</paper-tooltip>
+        <nuxeo-tooltip>[[i18n('driveEditButton.tooltip')]]</nuxeo-tooltip>
       </div>
     </template>
 
