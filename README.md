@@ -9,7 +9,7 @@ Nuxeo Web UI is a standard base web application for Nuxeo Platform. It is highly
 ### Install dependencies
 
 ```sh
-npm config set @nuxeo:registry https://packages.nuxeo.com/repository/npmjs-nuxeo
+npm config set @nuxeo:registry https://packages.nuxeo.com/repository/npm-public
 npm install
 ```
 
