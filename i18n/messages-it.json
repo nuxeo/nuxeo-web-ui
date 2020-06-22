@@ -387,7 +387,7 @@
   "documentHistory.username": "Nome utente",
   "documentImport.creating": "Creazione in corso...",
   "documentImport.error.cannotImport": "Selezionare un altro contenitore in cui importare il contenuto.",
-  "documentImport.error.importFailed": "Impossibile creare questi asset. Impossibile raggiungere il server o alcuni degli asset presentano errori. È possibile rieseguire subito l’importazione, annullarla o rimandarla a un secondo momento.",
+  "documentImport.error.importFailed": "Some of the assets could not be uploaded. Hitting \"Create\" or \"Add properties\" will ignore failed assets.",
   "documentImport.importing": "Importazione in corso...",
   "documentImport.uploading": "Caricamento in corso...",
   "documentImportForm.addMoreFiles": "Add more files",

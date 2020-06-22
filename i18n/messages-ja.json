@@ -387,7 +387,7 @@
   "documentHistory.username": "ユーザ名",
   "documentImport.creating": "作成中...",
   "documentImport.error.cannotImport": "この場所に文書をインポートすることができません",
-  "documentImport.error.importFailed": "サーバに接続できなかったか、一部のアセットに問題があるため、これらのアセットを作成できませんでした。アセットの作成をもう一度試すか、キャンセルするか、後で再試行することができます。",
+  "documentImport.error.importFailed": "Some of the assets could not be uploaded. Hitting \"Create\" or \"Add properties\" will ignore failed assets.",
   "documentImport.importing": "インポート中...",
   "documentImport.uploading": "アップロード中...",
   "documentImportForm.addMoreFiles": "Add more files",
