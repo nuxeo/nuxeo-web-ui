@@ -1157,16 +1157,33 @@ limitations under the License.
         return this.$.docRequest.post();
       },
 
+      _removeFile: function(index) {
+        this.splice('localFiles', index, 1);
+        this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
+        // clear error message if no more files with error
+        if (!this.localFiles.some(function(f) { return f.error; })) {
+          this.set('errorMessage', undefined);
+        }
+        this.$.uploadFiles.value = '';
+      },
+
       _removeBlob: function(e) {
-        if (e.model.file.providerId) {
+        var file = e.model.file;
+        var index = e.model.index;
+        if (file.providerId) {
           this.splice('remoteFiles', e.model.index, 1);
         } else {
-          this.$.blobRemover.path = 'upload/' + this.batchId + '/' + e.model.file.index;
+          this.$.blobRemover.path = 'upload/' + this.batchId + '/' + file.index;
           this.$.blobRemover.remove().then(function() {
-            this.splice('localFiles', e.model.index, 1);
-            this.hasLocalFiles = this.localFiles && this.localFiles.length > 0;
-            this.$.uploadFiles.value = '';
-          }.bind(this), this._handleError.bind(this));
+            this._removeFile(index);
+          }.bind(this), function(reason) {
+            // file was never created in the first place
+            if (reason.status === 404) {
+              this._removeFile(index);
+            } else {
+              this._handleError(reason);
+            }
+          }.bind(this));
         }
       },
 
