@@ -473,6 +473,7 @@
   "driveSyncRootsManagement.roots.empty": "Une honetan ez duzu sinkronizazio-errorik.",
   "driveSyncToggleButton.sync": "Sinkronizatu",
   "driveSyncToggleButton.unsync": "Desinkronizatu",
+  "dropzone.abort": "Abort file upload",
   "dropzone.add": "Gehitu fitxategia",
   "dropzone.uploaded": "Fitxategia igota",
   "dublincoreEdit.directorySuggestion.placeholder": "Hautatu balio bat.",

@@ -473,6 +473,7 @@
   "driveSyncRootsManagement.roots.empty": "Du har för närvarande inte någon synkroniseringsrot.",
   "driveSyncToggleButton.sync": "Synkronisera",
   "driveSyncToggleButton.unsync": "Sluta synkronisera",
+  "dropzone.abort": "Abort file upload",
   "dropzone.add": "Lägg till en fil",
   "dropzone.uploaded": "Fil uppladdad",
   "dublincoreEdit.directorySuggestion.placeholder": "Välj ett värde.",
