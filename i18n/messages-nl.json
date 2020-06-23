@@ -475,6 +475,8 @@
   "driveSyncToggleButton.unsync": "Synchronisatie ongedaan maken",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "Een bestand toevoegen",
+  "dropzone.invalid.error": "Invalid content",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.uploaded": "Bestand geüpload",
   "dublincoreEdit.directorySuggestion.placeholder": "Selecteer een waarde.",
   "easyshare.copy.label": "De link kopiëren en het document delen {0}.",

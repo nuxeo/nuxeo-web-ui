@@ -475,6 +475,8 @@
   "driveSyncToggleButton.unsync": "Desinkronizatu",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "Gehitu fitxategia",
+  "dropzone.invalid.error": "Invalid content",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.uploaded": "Fitxategia igota",
   "dublincoreEdit.directorySuggestion.placeholder": "Hautatu balio bat.",
   "easyshare.copy.label": "Kopiatu esteka eta partekatu {0} dokumentua.",

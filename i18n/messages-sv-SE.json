@@ -475,6 +475,8 @@
   "driveSyncToggleButton.unsync": "Sluta synkronisera",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "Lägg till en fil",
+  "dropzone.invalid.error": "Invalid content",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.uploaded": "Fil uppladdad",
   "dublincoreEdit.directorySuggestion.placeholder": "Välj ett värde.",
   "easyshare.copy.label": "Kopiera länken och dela dokumentet {0}.",
