@@ -477,6 +477,7 @@
   "dropzone.add": "Aggiungi un file",
   "dropzone.invalid.error": "Invalid content",
   "dropzone.invalid.uploading": "File upload pending",
+  "dropzone.toast.error": "Upload failed: {0}",
   "dropzone.uploaded": "File caricato",
   "dublincoreEdit.directorySuggestion.placeholder": "Selezionare un valore.",
   "easyshare.copy.label": "Copia il link e condividi il documento {0}.",
