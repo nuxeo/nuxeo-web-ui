@@ -266,6 +266,10 @@ limitations under the License.
         border: 1px solid var(--paper-input-container-invalid-color);
       }
 
+      .file-to-import > div:first-child {
+        overflow: hidden;
+      }
+
       .add-more {
         position: absolute;
         bottom: 0;
@@ -415,8 +419,11 @@ limitations under the License.
                         </div>
                       </div>
                       <div class="clear" hidden$="[[!_displayRemoveBlobBtn(file.*)]]">
-                        <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
-                        <nuxeo-tooltip>[[i18n('command.remove')]]</nuxeo-tooltip>
+                        <paper-icon-button
+                          icon="[[_computeRemoveIcon(file.*)]]"
+                          on-tap="_removeBlob"
+                        ></paper-icon-button>
+                        <nuxeo-tooltip>[[_computeRemoveLabel(file.*, i18n)]]</nuxeo-tooltip>
                       </div>
                     </div>
                   </template>
@@ -1239,6 +1246,9 @@ limitations under the License.
         var index = e.model.index;
         if (file.providerId) {
           this.splice('remoteFiles', e.model.index, 1);
+        } else if (!file.error && !file.complete && this.hasAbort()) {
+          this.abort(file);
+          this._removeFile(index);
         } else {
           this.$.blobRemover.path = 'upload/' + this.batchId + '/' + file.index;
           this.$.blobRemover.remove().then(function() {
@@ -1280,6 +1290,30 @@ limitations under the License.
           return 'icons:check-circle';
         }
         return 'icons:radio-button-unchecked';
+      },
+
+      _computeRemoveIcon: function(file) {
+        if (file.base) {
+          if (file.base.complete || file.base.error) {
+            return 'nuxeo:remove';
+          }
+          if (this.hasAbort()) {
+            return 'icons:cancel';
+          }
+        }
+        return '';
+      },
+
+      _computeRemoveLabel: function(file) {
+        if (file.base) {
+          if (file.base.complete || file.base.error) {
+            return this.i18n('command.remove');
+          }
+          if (this.hasAbort()) {
+            return this.i18n('command.cancel');
+          }
+        }
+        return '';
       },
 
       _styleFileCheck: function(e) {
@@ -1387,7 +1421,7 @@ limitations under the License.
       },
 
       _displayRemoveBlobBtn: function(file) {
-        return file.base && (file.base.complete || file.base.error);
+        return file.base && (file.base.complete || file.base.error || this.hasAbort());
       },
 
       _layoutUpdated: function(e) {
