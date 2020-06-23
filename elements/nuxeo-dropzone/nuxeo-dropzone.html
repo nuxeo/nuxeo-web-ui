@@ -310,7 +310,6 @@ limitations under the License.
       listeners: {
         'batchFinished': 'importBatch',
         'nx-blob-picked': '_blobPicked',
-        uploadInterrupted: '_uploadError',
         batchFailed: 'importBatch'
       },
 
@@ -393,6 +392,10 @@ limitations under the License.
       },
 
       _handleBlobUploaded: function() {
+        if (this.invalid) {
+          // if we're already displaying an error, we better update it, otherwise the user can be mislead
+          this.validate();
+        }
         var failed = this.files.filter(function(f) {
           return f.error;
         });
@@ -437,6 +440,7 @@ limitations under the License.
           this._reset();
           this.set('document.properties.' + this._parsedXpath, '');
         }
+        // if this is not a required field, trigger validation so the error message is updated
         if (!this.required) {
           this.validate();
         }
