@@ -393,6 +393,9 @@ limitations under the License.
       },
 
       _handleBlobUploaded: function() {
+        var failed = this.files.filter(function(f) {
+          return f.error;
+        });
         if (this.updateDocument) {
           var props = {};
           this._createNestedObjectRecursive(
@@ -407,13 +410,23 @@ limitations under the License.
           };
           this.$.doc.put().then(function(response) {
             this.document = response;
-            this.fire('notify', { message: this.i18n(this.uploadedMessage) });
+            if (failed.length === 0) {
+              this.fire('notify', { message: this.i18n(this.uploadedMessage), close: true });
+            }
             this.fire('document-updated');
           }.bind(this));
-        } else {
-          this.fire('notify', { message: this.i18n(this.uploadedMessage) });
+        } else if (failed.length === 0) {
+          this.fire('notify', { message: this.i18n(this.uploadedMessage), close: true });
         }
-        this.invalid = false;
+        if (failed.length > 0) {
+          this.fire('notify', {
+            message: this.i18n('dropzone.toast.error', failed.map(function(f) { return f.name; }).join(', ')),
+            duration: 0,
+            dismissible: true
+          });
+        } else {
+          this.invalid = false;
+        }
       },
 
       _deleteFile: function(e) {

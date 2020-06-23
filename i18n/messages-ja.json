@@ -477,6 +477,7 @@
   "dropzone.add": "ファイルを追加",
   "dropzone.invalid.error": "Invalid content",
   "dropzone.invalid.uploading": "File upload pending",
+  "dropzone.toast.error": "Upload failed: {0}",
   "dropzone.uploaded": "ファイルがアップロードされました",
   "dublincoreEdit.directorySuggestion.placeholder": "値を選択",
   "easyshare.copy.label": "リンクをコピーして、文書を共有する{0}",

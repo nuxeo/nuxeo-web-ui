@@ -477,6 +477,7 @@
   "dropzone.add": "Tambah sebuah berkas",
   "dropzone.invalid.error": "Invalid content",
   "dropzone.invalid.uploading": "File upload pending",
+  "dropzone.toast.error": "Upload failed: {0}",
   "dropzone.uploaded": "Berkas diunggah",
   "dublincoreEdit.directorySuggestion.placeholder": "Pilih sebuah nilai.",
   "easyshare.copy.label": "Copy the link and share the document {0}.",
