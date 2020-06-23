@@ -25,6 +25,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-icons.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-slots.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-format-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.html">
 
 <!--
@@ -109,10 +110,13 @@ limitations under the License.
       .file .info {
         @apply --layout-vertical;
         @apply --layout-flex;
+        overflow: hidden;
       }
 
       .file .info .name {
         font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .file .info .size {
@@ -137,6 +141,19 @@ limitations under the License.
         color: var(--paper-input-container-invalid-color, red);
         margin-top: 8px;
       }
+
+      .file-error {
+        @apply --layout-horizontal;
+        @apply --layout-flex;
+      }
+
+      .file-error span {
+        color: var(--paper-input-container-invalid-color, #de350b);
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -154,9 +171,13 @@ limitations under the License.
           <div class="info">
             <div class="name">[[file.name]]</div>
             <div class="size">[[formatSize(file.size)]]</div>
-            <template is="dom-if" if="[[uploading]]">
+            <template is="dom-if" if="[[_displayProgressBar(file.*)]]">
               <paper-progress class="progress" indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
             </template>
+            <div class="file-error" hidden$="[[!file.error]]">
+              <span>[[file.error]]</span>
+              <nuxeo-tooltip>[[file.error]]</nuxeo-tooltip>
+            </div>
           </div>
           <div class="actions">
             <paper-icon-button noink icon="nuxeo:delete" on-tap="_deleteFile"
@@ -288,7 +309,9 @@ limitations under the License.
 
       listeners: {
         'batchFinished': 'importBatch',
-        'nx-blob-picked': '_blobPicked'
+        'nx-blob-picked': '_blobPicked',
+        uploadInterrupted: '_uploadError',
+        batchFailed: 'importBatch'
       },
 
       observers: [
@@ -320,15 +343,19 @@ limitations under the License.
           if (!this.get('document.properties.' + this._parsedXpath)) {
             this.set('document.properties.' + this._parsedXpath, []);
           }
-          this.files.forEach(function(file, index) {
-            var uploadedFile = {
-              'upload-batch': data.detail.batchId,
-              'upload-fileId': index.toString()
-            };
-            this.push('document.properties.' + this._parsedXpath,
-              // Handle special case when using files:files
-              this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile);
-          }.bind(this));
+          this.files
+              .filter(function(file) {
+                return !file.error;
+              })
+              .forEach(function(file) {
+                var uploadedFile = {
+                  'upload-batch': data.detail.batchId,
+                  'upload-fileId': file.index.toString()
+                };
+                this.push('document.properties.' + this._parsedXpath,
+                  // Handle special case when using files:files
+                  this.xpath === 'files:files' ? { file: uploadedFile } : uploadedFile);
+              }.bind(this));
         } else {
           this.set('document.properties.' + this._parsedXpath, {
             'upload-batch': data.detail.batchId,
@@ -396,6 +423,9 @@ limitations under the License.
         } else {
           this._reset();
           this.set('document.properties.' + this._parsedXpath, '');
+        }
+        if (!this.required) {
+          this.validate();
         }
       },
 
@@ -498,10 +528,18 @@ limitations under the License.
           this._errorMessage = this.i18n('dropzone.invalid.uploading');
           return false;
         }
+        if (this.files.some(function(file) { return file.error; })) {
+          this._errorMessage = this.i18n('dropzone.invalid.error');
+          return false;
+        }
         if (!this.required) {
           return true;
         }
         return this.files && this.files.length > 0;
+      },
+
+      _displayProgressBar: function(file) {
+        return file.base && !file.base.complete && !file.base.error;
       }
     });
   </script>

@@ -478,6 +478,8 @@
   "driveSyncToggleButton.unsync": "No sincronizar",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "Añadir un archivo",
+  "dropzone.invalid.error": "Invalid content",
+  "dropzone.invalid.uploading": "File upload pending",
   "dropzone.uploaded": "Archivo subido",
   "dublincoreEdit.directorySuggestion.placeholder": "Seleccione un valor.",
   "easyshare.copy.label": "Copia el enlace y comparte el documento {0}.",
