@@ -553,7 +553,7 @@ limitations under the License.
                         <nuxeo-tooltip>[[file.error]]</nuxeo-tooltip>
                       </div>
                     </div>
-                    <iron-icon icon="icons:check-circle"
+                    <iron-icon icon="[[_computedCheckItem(file.*)]]"
                               class$="blobCheck [[_styleFileCheck(file.*)]]"
                               on-tap="_checkTappedLocal"></iron-icon>
                   </div>
@@ -569,7 +569,7 @@ limitations under the License.
                         [[i18n('documentImportForm.unchecked.disclaimer')]]
                       </span>
                     </div>
-                    <iron-icon icon="icons:check-circle"
+                    <iron-icon icon="[[_computedCheckItem(file.*)]]"
                               class$="blobCheck [[_styleFileCheck(file.*)]]"
                               on-tap="_checkTappedRemote"></iron-icon>
                   </div>
@@ -1282,6 +1282,13 @@ limitations under the License.
 
       _getDocumentProperties: function() {
         return this._docProperties;
+      },
+
+      _computedCheckItem: function(e) {
+        if (e.base && e.base.checked) {
+          return 'icons:check-circle';
+        }
+        return 'icons:radio-button-unchecked';
       },
 
       _styleFileCheck: function(e) {
