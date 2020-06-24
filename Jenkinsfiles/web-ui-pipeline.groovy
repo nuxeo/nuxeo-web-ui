@@ -112,7 +112,7 @@ timestamps {
                         if (webui || el || uiel || datavizel) {
                             echo 'Need to build nuxeo-web-ui'
                             dir('nuxeo-web-ui') {
-                                sh 'npm install --no-package-lock'
+                                sh 'npm install --no-package-lock --@nuxeo:registry="https://packages.nuxeo.com/repository/npm-public"'
                                 if (el) {
                                     sh "npm install --no-package-lock ../nuxeo-elements/core/${el}"
                                 }
