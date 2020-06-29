@@ -1460,7 +1460,7 @@ Polymer({
   },
 
   _displayProgressBar(file) {
-    return file.base && !file.base.complete && !file.base.error;
+    return file.base && !file.base.providerId && !file.base.complete && !file.base.error;
   },
 
   _displayRemoveBlobBtn(file) {
