@@ -7,7 +7,7 @@ module.exports = (argv) => {
   const args = minimist(argv.slice(2));
 
   const separator = args.specs.lastIndexOf('/');
-  const files = Finder.from(args.specs.substring(0, separator)).findFiles(args.specs.substring(separator));
+  const files = Finder.from(args.specs.substring(0, separator)).findFiles(args.specs.substring(separator + 1));
 
   if (args.cucumberOpts && args.cucumberOpts.tagExpression) {
     const expression = new TagExpressionParser().parse(args.cucumberOpts.tagExpression);
