@@ -556,7 +556,7 @@ limitations under the License.
       },
 
       _displayProgressBar: function(file) {
-        return file.base && !file.base.complete && !file.base.error;
+        return file.base && !file.base.providerId && !file.base.complete && !file.base.error;
       }
     });
   </script>
