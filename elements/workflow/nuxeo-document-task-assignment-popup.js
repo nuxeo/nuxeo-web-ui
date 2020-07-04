@@ -61,7 +61,7 @@ Polymer({
               id="commentText"
               label="[[i18n('tasks.assignment.comment')]]"
               placeholder="[[i18n('tasks.assignment.placeholder')]]"
-              value="[[comment]]"
+              value="{{comment}}"
               max-rows="4"
             >
             </nuxeo-textarea>
