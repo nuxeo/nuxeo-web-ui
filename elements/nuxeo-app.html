@@ -740,6 +740,13 @@ limitations under the License.
         }
       },
 
+      _refreshCollections: function() {
+        var form = this.$$('#collectionsForm');
+        if (form && form.visible) {
+          form._refreshCollections();
+        }
+      },
+
       _updateCollectionMenu: function(e) {
         if (e.detail.provider) {
           this.$$('#collectionsForm').loadCollection(e.detail.collection, e.detail.provider);
@@ -902,6 +909,9 @@ limitations under the License.
               }
             }
           }
+          if (this.hasFacet(e.detail.doc, 'Collection')) {
+            this._refreshCollections();
+          }
           this._refreshSearch();
         }
       },
@@ -910,6 +920,9 @@ limitations under the License.
         this._toast(this.i18n('app.document.untrashed.' + (e.detail.error ? 'error' : 'success') ));
         if (e.detail.doc && !e.detail.error) {
           this._navigate({'detail': {'doc': e.detail.doc}});
+          if (this.hasFacet(e.detail.doc, 'Collection')) {
+            this._refreshCollections();
+          }
           this._refreshSearch();
         }
       },
@@ -934,6 +947,9 @@ limitations under the License.
         } else {
           this._removeFromRecentlyViewed(e.detail.documents);
           this._fetchTasks();
+          if (e.detail.documents.some(function(doc) { return this.hasFacet(doc, 'Collection'); }.bind(this))) {
+            this._refreshCollections();
+          }
           this._toast(this.i18n('app.documents.deleted.success'));
           this._refreshSearch();
         }
@@ -941,6 +957,9 @@ limitations under the License.
 
       _documentsUntrashed: function(e) {
         this._toast(this.i18n('app.documents.untrashed.' + (e.detail.error ? 'error' : 'success') ));
+        if (e.detail.documents.some(function(doc) { return this.hasFacet(doc, 'Collection'); }.bind(this))) {
+          this._refreshCollections();
+        }
         this._refreshSearch();
       },
 
