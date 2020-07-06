@@ -114,13 +114,13 @@ timestamps {
                             dir('nuxeo-web-ui') {
                                 sh 'npm install --no-package-lock --@nuxeo:registry="https://packages.nuxeo.com/repository/npm-public"'
                                 if (el) {
-                                    sh "npm install --no-package-lock ../nuxeo-elements/core/${el}"
+                                    sh "npm install --no-package-lock --@nuxeo:registry=\"https://packages.nuxeo.com/repository/npm-public\" ../nuxeo-elements/core/${el}"
                                 }
                                 if (datavizel) {
-                                    sh "npm install --no-package-lock ../nuxeo-elements/dataviz/${datavizel}"
+                                    sh "npm install --no-package-lock --@nuxeo:registry=\"https://packages.nuxeo.com/repository/npm-public\" ../nuxeo-elements/dataviz/${datavizel}"
                                 }
                                 if (uiel) {
-                                    sh "npm install --no-package-lock ../nuxeo-elements/ui/${uiel}"
+                                    sh "npm install --no-package-lock --@nuxeo:registry=\"https://packages.nuxeo.com/repository/npm-public\" ../nuxeo-elements/ui/${uiel}"
                                 }
                                 try {
                                     withEnv(["NODE_OPTIONS=--max-old-space-size=4096"]) {
