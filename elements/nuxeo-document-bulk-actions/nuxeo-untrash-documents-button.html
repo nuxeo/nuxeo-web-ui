@@ -80,16 +80,13 @@ limitations under the License.
               return doc.uid;
             }).join(',');
             this.$.operation.input = 'docs:' + uids;
-            var uidsArray = this.documents.map(function(doc) {
-              return doc.uid;
-            });
             this.$.operation.execute().then(function() {
-              this.fire('nuxeo-documents-untrashed', {documentIds: uidsArray});
+              this.fire('nuxeo-documents-untrashed', {documents: this.documents});
               this.documents = [];
               this.fire('refresh');
             }.bind(this),
             function(error) {
-              this.fire('nuxeo-documents-untrashed', {error: error,  documents: uidsArray});
+              this.fire('nuxeo-documents-untrashed', {error: error,  documents: this.documents});
             }.bind(this));
           }
         }
