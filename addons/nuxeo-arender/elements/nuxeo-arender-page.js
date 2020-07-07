@@ -34,7 +34,7 @@ Polymer({
 
     <nuxeo-operation id="aRenderOp" op="Document.ARenderGetPreviewerUrl" input="[[document.uid]]"></nuxeo-operation>
 
-    <iframe src="[[aRenderUrl]]"></iframe>
+    <iframe src="[[aRenderUrl]]" onload="this.contentWindow.focus()"></iframe>
   `,
 
   is: 'nuxeo-arender-page',
