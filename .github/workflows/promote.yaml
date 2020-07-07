@@ -1,0 +1,107 @@
+name: Promote release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to promote'     
+        required: true
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10
+          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          scope: '@nuxeo'
+
+      - uses: actions/checkout@v2
+        with:
+          ref: v${{ github.event.inputs.version }}
+
+      - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
+
+      - run: echo "::set-env name=VERSION::$(echo '${{ github.event.inputs.version }}' | sed -e 's/-rc.[0-9]*//')"
+
+      - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm version $VERSION --no-git-tag-version
+          pushd packages/nuxeo-web-ui-ftest/
+          npm version $VERSION --no-git-tag-version
+          popd
+
+          OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
+          find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_VERSION"'/'"$VERSION"'/g' {} \;
+
+          # align on same promoted version of elements
+          npm i @nuxeo/nuxeo-elements@$VERSION --save-exact
+          npm i @nuxeo/nuxeo-dataviz-elements@$VERSION --save-exact
+          npm i @nuxeo/nuxeo-ui-elements@$VERSION --save-exact
+          npm i @nuxeo/testing-helpers@$VERSION --save-exact
+
+      - name: Perform git release of Nuxeo Web UI ${{ env.VERSION }}
+        if: ${{ false }}
+        run: |
+          git commit -a -m "Release $VERSION"
+          git tag -a v$VERSION -m "Release $VERSION"
+          git push origin v$VERSION
+
+      - name: Publish Nuxeo Web UI FTest ${{ env.VERSION }}
+        if: ${{ false }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          pushd packages/nuxeo-web-ui-ftest/
+          npm --registry=https://packages.nuxeo.com/repository/npm-public publish
+          popd
+
+          
+      - name: Promote Web UI ${{ github.event.inputs.version }} to ${{ env.VERSION }}
+        env:
+          PACKAGE: nuxeo-web-ui-${{ env.VERSION }} 
+          CONNECT_URL: https://connect.nuxeo.com/nuxeo
+          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+        run: |
+          curl -o $PACKAGE.zip -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=${{ github.event.inputs.version }}"
+          unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
+          pushd $PACKAGE
+          sed -i 's/-rc.[0-9]*//' package.xml
+          for f in install/bundles/*.jar; do mv $f $(echo $f | sed -e 's/-rc.[0-9]*//'); done
+          zip -r ../$PACKAGE.zip .
+          popd
+          curl -i -u "${{ secrets.CONNECT_AUTH }}" -F package=@\$PACKAGE.zip "$CONNECT_URL/site/marketplace/upload?batch=true"
+      
+      - uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - run: echo "::set-env name=NEW_VERSION::$(npx semver -i patch $VERSION)"
+
+      - name: Align master branch on next version ${{ env.NEW_VERSION }}-SNAPSHOT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # bump version to next SNAPSHOT and align on the corresponding Elements release candidate
+          OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')
+          NEW_SNAPSHOT=$NEW_VERSION-SNAPSHOT
+
+          npm version $NEW_SNAPSHOT --no-git-tag-version
+          pushd packages/nuxeo-web-ui-ftest/
+          npm version $NEW_SNAPSHOT --no-git-tag-version
+          popd
+
+          NEW_ELEMENTS_VERSION="~$NEW_VERSION-rc"
+          npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
+          npm i @nuxeo/nuxeo-dataviz-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
+          npm i @nuxeo/nuxeo-ui-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
+          npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="~"
+
+          find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_SNAPSHOT"'/'"$NEW_SNAPSHOT"'/g' {} \;
+
+          # commit and push
+          git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
+          git push origin master
