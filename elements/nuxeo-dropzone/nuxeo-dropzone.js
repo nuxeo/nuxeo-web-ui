@@ -24,6 +24,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
+import { createNestedObject } from '@nuxeo/nuxeo-elements/utils.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -165,6 +166,7 @@ Polymer({
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
+    <nuxeo-document id="doc" doc-id="[[document.uid]]" enrichers="[[enrichers]]"></nuxeo-document>
 
     <template is="dom-if" if="[[label]]">
       <label id="label" required$="[[required]]">[[label]]</label>
@@ -195,7 +197,7 @@ Polymer({
               noink
               icon="nuxeo:delete"
               on-tap="_deleteFile"
-              hidden$="[[!_areActionsVisible(hasFiles, uploading)]]"
+              hidden$="[[!_areActionsVisible(hasFiles, uploading, updateDocument)]]"
             ></paper-icon-button>
             <div hidden$="[[!_showAbort(uploading)]]">
               <paper-icon-button noink icon="icons:cancel" on-tap="_abortUpload"></paper-icon-button>
@@ -206,7 +208,7 @@ Polymer({
       </template>
     </div>
 
-    <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, multiple)]]">
+    <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, multiple, updateDocument, blobList)]]">
       <div id="container">
         <a href="javascript:undefined" on-tap="open"
           >[[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]</a
@@ -307,6 +309,74 @@ Polymer({
       value: false,
       reflectToAttribute: true,
     },
+    /**
+     * Input Document.
+     *
+     * @deprecated since 3.0.0. Use `value` instead.
+     *
+     * `value` should be bound the document property holding the blob or blob list.
+     */
+    document: {
+      type: Object,
+      notify: true,
+    },
+    /**
+     * This flag determines whether the dropzone allows multiple files or not.
+     *
+     * @deprecated since 3.0.0. Use `multiple` instead.
+     */
+    blobList: {
+      type: Boolean,
+      value: false,
+    },
+    /**
+     * Path to which the file(s) should be uploaded.
+     * For example `xpath="files:files"`.
+     * By default it will consider `file:content`.
+     *
+     * @deprecated since 3.0.0. Use `value` instead.
+     *
+     * `value` should be bound the document property holding the blob or blob list.
+     */
+    xpath: {
+      type: String,
+      value: 'file:content',
+    },
+    /**
+     * This flag determines whether the file should be immediately uploaded or not.
+     *
+     * @deprecated since 3.0.0. Add upload logic directly to your parent element.
+     *
+     * Please see
+     * [this commit]{@link https://github.com/nuxeo/nuxeo-web-ui/commit/67d7fb74eaa83544144411f18e75eacf18da310c} for
+     * a migration example.
+     */
+    updateDocument: {
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true,
+    },
+    /**
+     * Content enrichers to be passed on to `nuxeo-document` resource.
+     * Can be an object with entity type as keys or list or string (which defaults to `document` entity type).
+     *
+     * @deprecated since 3.0.0. Only required if `document` is set.
+     */
+    enrichers: {
+      type: Object,
+      value() {
+        return {
+          document: ['preview'],
+          blob: (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.blob) || [
+            'appLinks',
+          ],
+        };
+      },
+    },
+    _parsedXpath: {
+      type: String,
+      computed: 'formatPropertyXpath(xpath)',
+    },
   },
 
   listeners: {
@@ -315,7 +385,7 @@ Polymer({
     batchFailed: 'importBatch',
   },
 
-  observers: ['_reset(value)', '_filesChanged(files.splices)'],
+  observers: ['_reset(value)', '_filesChanged(files.splices)', '_legacyReset(document)'],
 
   attached() {
     this.connection = this.$.nx;
@@ -331,7 +401,7 @@ Polymer({
     this.$$('input').click();
   },
 
-  importBatch(data) {
+  async importBatch(data) {
     if (data.type === 'nx-blob-picked') {
       this.set('files', data.detail.blobs);
     } else {
@@ -347,6 +417,9 @@ Polymer({
     } else {
       this.set('value', value);
     }
+    if (this.document && this.xpath) {
+      this._legacyImportBatch(value);
+    }
     if (failed.length > 0) {
       this.fire('notify', {
         message: this.i18n('dropzone.toast.error', failed.map((f) => f.name).join(', ')),
@@ -354,6 +427,9 @@ Polymer({
         dismissible: true,
       });
     } else {
+      if (this.document && this.xpath) {
+        await this._legacyUpdateDocument();
+      }
       this.fire('notify', { message: this.i18n(this.uploadedMessage), close: true });
       this.invalid = false;
     }
@@ -365,7 +441,7 @@ Polymer({
 
   _getFiles(data) {
     let uploadedFile;
-    if (this.multiple) {
+    if (this.multiple || this.blobList) {
       const files = [];
       this.files
         .filter((file) => !file.error)
@@ -416,6 +492,9 @@ Polymer({
     } else {
       this._reset();
       this.value = '';
+    }
+    if (this.document && this.xpath) {
+      this._legacyDeleteFile(e);
     }
     // if this is not a required field, trigger validation so the error message is updated
     if (!this.required) {
@@ -478,11 +557,11 @@ Polymer({
     // Area to drop files should stay visible when the element is attached to a blob list property
     // and, e.g, when using the element on a form: creation or edition of documents.
     // This will allow the user to manage the list of files.
-    return this.multiple || !this.hasFiles;
+    return (this.multiple && !this.updateDocument) || !this.hasFiles;
   },
 
   _areActionsVisible() {
-    return this.hasFiles && !this.uploading;
+    return this.hasFiles && !this.uploading && !this.updateDocument;
   },
 
   _abortUpload(e) {
@@ -513,5 +592,65 @@ Polymer({
 
   _displayProgressBar(file) {
     return file.base && !file.base.providerId && !file.base.complete && !file.base.error;
+  },
+
+  /**
+   * Legacy code below, adding support for the legacy API removed by NXP-28263.
+   */
+  _legacyReset(document) {
+    if (document) {
+      this.cancelBatch();
+    }
+    this.$.input.value = '';
+    this.files = [];
+  },
+
+  _legacyDeleteFile(e) {
+    if (!this.updateDocument && this.blobList && Array.isArray(this.get(`document.properties.${this._parsedXpath}`))) {
+      this.splice(`document.properties.${this._parsedXpath}`, e.model.itemsIndex, 1);
+      this.splice('files', e.model.itemsIndex, 1);
+    } else {
+      this._legacyReset();
+      this.set(`document.properties.${this._parsedXpath}`, '');
+    }
+  },
+
+  _legacyImportBatch(value) {
+    if (!value || value.length === 0) {
+      return;
+    }
+    if (this.blobList) {
+      if (!this.get(`document.properties.${this._parsedXpath}`)) {
+        this.set(`document.properties.${this._parsedXpath}`, []);
+      }
+      value.forEach((file) =>
+        this.push(
+          `document.properties.${this._parsedXpath}`,
+          // Handle special case when using files:files
+          this.xpath === 'files:files' ? { file } : file,
+        ),
+      );
+    } else {
+      this.set(`document.properties.${this._parsedXpath}`, value);
+    }
+  },
+
+  async _legacyUpdateDocument() {
+    if (this.updateDocument) {
+      const props = {};
+      createNestedObject(props, this._parsedXpath.split('.'));
+      this.set(this._parsedXpath, this.get(`document.properties.${this._parsedXpath}`), props);
+      this.$.doc.data = {
+        'entity-type': 'document',
+        repository: this.document.repository,
+        uid: this.document.uid,
+        properties: props,
+      };
+      return this.$.doc.put().then((response) => {
+        this.document = response;
+        this.fire('document-updated');
+      });
+    }
+    return Promise.resolve();
   },
 });
