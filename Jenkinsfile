@@ -272,36 +272,6 @@ pipeline {
         }
       }
     }
-    stage('Publish Maven artifacts') {
-      when {
-        allOf {
-          not {
-            branch 'PR-*'
-          }
-          not {
-            environment name: 'DRY_RUN', value: 'true'
-          }
-        }
-      }
-      steps {
-        setGitHubBuildStatus('webui/publish/maven', 'Deploy Maven artifacts', 'PENDING')
-        container('mavennodejs') {
-          echo """
-          ----------------------
-          Deploy Maven artifacts
-          ----------------------"""
-          sh "mvn -B -nsu -DskipTests deploy"
-        }
-      }
-      post {
-        success {
-          setGitHubBuildStatus('webui/publish/maven', 'Deploy Maven artifacts', 'SUCCESS')
-        }
-        failure {
-          setGitHubBuildStatus('webui/publish/maven', 'Deploy Maven artifacts', 'FAILURE')
-        }
-      }
-    }
     stage('Publish Nuxeo Packages') {
       when {
         allOf {
