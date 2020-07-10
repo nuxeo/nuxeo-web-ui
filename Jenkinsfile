@@ -398,7 +398,7 @@ pipeline {
         }
       }
     }
-    stage('Publish Docker Images') {
+    /* stage('Publish Docker Images') {
       when {
         allOf {
           not {
@@ -432,7 +432,7 @@ pipeline {
           setGitHubBuildStatus('webui/publish', 'Publish Docker images', 'FAILURE')
         }
       }
-    }
+    } */
   }
   post {
     always {
