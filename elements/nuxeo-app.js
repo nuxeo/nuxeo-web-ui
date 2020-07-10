@@ -630,7 +630,8 @@ Polymer({
     if (this.page === 'search') {
       this._refreshSearch();
     } else if ((this.docPath && this.docPath.length > 0) || (this.docId && this.docId.length > 0)) {
-      this.load('browse', this.docId, this.docPath, this.docAction);
+      const id = this.docId || (this.currentDocument && this.currentDocument.uid);
+      this.load('browse', id, this.docPath, this.docAction);
     } else {
       this.navigateTo('home');
     }
