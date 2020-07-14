@@ -431,6 +431,19 @@ const template = html`
           background-color: transparent;
         }
 
+        --nx-button-text: {
+          color: var(--nuxeo-button-secondary-text, #0066ff);
+        }
+
+        --nx-button-text-hover: {
+          color: var(--nuxeo-secondary-color, #1f28bf);
+        }
+
+        --nx-button-text-disabled: {
+          color: var(--secondary-text-color, #939caa);
+          background-color: transparent;
+        }
+
         --nx-button-disabled: {
           color: var(--nuxeo-button-disabled-text, rgba(0, 0, 0, 0.1));
           background-color: var(--nuxeo-button-disabled, rgba(0, 0, 0, 0.05));
