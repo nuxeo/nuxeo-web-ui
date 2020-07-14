@@ -14,192 +14,251 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import '@polymer/polymer/polymer-legacy.js';
-
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@polymer/iron-icon/iron-icon.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class';
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import { microTask } from '@polymer/polymer/lib/utils/async.js';
 
-/**
-`nuxeo-breadcrumb`
-@group Nuxeo UI
-@element nuxeo-breadcrumb
-*/
-Polymer({
-  _template: html`
-    <style>
-      :host {
-        min-height: 3em;
-        @apply --layout-flex;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
+{
+  /**
+  `nuxeo-breadcrumb`
+  @group Nuxeo UI
+  @element nuxeo-breadcrumb
+  */
+  class Breadcrumb extends mixinBehaviors([RoutingBehavior, I18nBehavior, IronResizableBehavior], Nuxeo.Element) {
+    static get template() {
+      return html`
+        <style>
+          :host {
+            display: block;
+            @apply --layout-flex;
+            min-height: 3em;
+            overflow: hidden;
+            white-space: nowrap;
+          }
 
-      .breadcrumb {
-        margin: 0.5em 1em 0 0;
-        @apply --layout-horizontal;
-      }
+          .breadcrumb {
+            margin: 0.5em 1em 0 0;
+            @apply --layout-horizontal;
+          }
 
-      .ancestors {
-        display: block;
-        line-height: 2em;
-        font-size: 0.75rem;
-        margin-top: -3px;
-      }
+          .doc-path {
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+          }
 
-      .breadcrumb-item {
-        text-decoration: none;
-      }
+          .current {
+            font-weight: 400;
+            display: block;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            color: var(--nuxeo-app-header, #fff);
+            text-decoration: none;
+          }
 
-      .current {
-        font-weight: 400;
-        display: initial;
-        white-space: nowrap;
-        color: var(--nuxeo-app-header);
-      }
+          .current-icon iron-icon {
+            width: 1.6rem;
+            height: 1.5rem;
+            margin: 0.3rem 0.5rem 0 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 0.2em;
+            border-radius: 2px;
+          }
 
-      .current-icon iron-icon {
-        width: 1.6rem;
-        height: 1.5rem;
-        margin: 0.3em 0.5rem 0 0;
-        background-color: rgba(255, 255, 255, 0.7);
-        padding: 0.2em;
-        border-radius: 2px;
-      }
+          #ancestors {
+            max-width: 100%;
+            list-style-type: none;
+            margin: 0;
+            margin-top: -3px;
+            padding: 0;
+            font-size: 0.75rem;
+          }
 
-      .ancestors a,
-      .breadcrumb-divider {
-        opacity: 0.5;
-        font-weight: 300;
-      }
+          #ancestors li {
+            max-width: 100%;
+            display: inline-block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
 
-      .breadcrumb-divider {
-        vertical-align: middle;
-      }
+          #ancestors li + li::before {
+            content: ' > ';
+            white-space: pre;
+            opacity: 0.5;
+            font-weight: 300;
+          }
 
-      .ancestors a {
-        @apply --nuxeo-link;
-      }
+          #ancestors a,
+          #ellipsis {
+            @apply --nuxeo-link;
+            opacity: 0.5;
+            font-weight: 400;
+            letter-spacing: 0.02rem;
+            text-decoration: none;
+          }
 
-      a:hover {
-        color: var(--nuxeo-link-hover-color);
-        opacity: 1;
-      }
+          #ancestors a:hover {
+            color: var(--nuxeo-link-hover-color, #0066ff);
+            opacity: 1;
+          }
 
-      .doc-path,
-      .ancestors {
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
+          @media (max-width: 1024px) {
+            .current-icon {
+              display: none;
+            }
+          }
+        </style>
 
-      .ancestors span.breadcrumb-item:last-of-type .breadcrumb-divider {
-        display: none;
-      }
+        <nuxeo-connection id="nxcon" url="{{url}}"></nuxeo-connection>
 
-      a.breadcrumb-item-ancestor:nth-last-child(-n + 1),
-      a.breadcrumb-item-ancestor:nth-last-child(-n + 2) a.breadcrumb-item-ancestor:nth-last-child(-n + 3) {
-        display: inline-block;
-      }
-
-      .left-ellipsis {
-        direction: rtl;
-        text-align: left;
-      }
-
-      .right-ellipsis {
-        direction: ltr;
-        text-align: right;
-      }
-
-      @media (max-width: 1024px) {
-        .current-icon {
-          display: none;
-        }
-      }
-    </style>
-
-    <nuxeo-connection id="nxcon" url="{{url}}"></nuxeo-connection>
-
-    <div class="breadcrumb">
-      <div class="current-icon">
-        <iron-icon src="[[_icon(document, url)]]"></iron-icon>
-      </div>
-      <div class="doc-path">
-        <a href$="[[urlFor('browse', document.path)]]" class="current breadcrumb-item breadcrumb-item-current">
-          [[_title(document)]]
-        </a>
-        <div class$="ancestors [[_ellipsisDirection()]]">
-          <template is="dom-repeat" items="[[_breadcrumb(document)]]">
-            <span class$="breadcrumb-item [[_computeCssClass(index, document)]]">
-              <a href$="[[urlFor('browse', item.path)]]">
-                <span class="breadcrumb-item-title">[[item.title]]&lrm;</span>
-              </a>
-              <span class="breadcrumb-divider">&gt;</span>
-            </span>
-          </template>
+        <div class="breadcrumb">
+          <div class="current-icon">
+            <iron-icon src="[[_icon(document, url)]]"></iron-icon>
+          </div>
+          <div class="doc-path">
+            <a
+              href$="[[urlFor('browse', document.path)]]"
+              class="current breadcrumb-item breadcrumb-item-current"
+              aria-current="page"
+              title="[[_title(document)]]"
+            >
+              [[_title(document)]]
+            </a>
+            <nav aria-label="Breadcrumb">
+              <ol id="ancestors"></ol>
+            </nav>
+          </div>
         </div>
-      </div>
-    </div>
-  `,
-
-  is: 'nuxeo-breadcrumb',
-  behaviors: [RoutingBehavior, I18nBehavior],
-
-  properties: {
-    document: {
-      type: Object,
-    },
-  },
-
-  _breadcrumb() {
-    if (this._enrichers) {
-      return this._enrichers.breadcrumb.entries.slice(0, this._enrichers.breadcrumb.entries.length - 1);
+      `;
     }
-  },
 
-  _computeCssClass(index) {
-    if (this._enrichers) {
-      if (index === this._enrichers.breadcrumb.entries.length - 1) {
-        return 'breadcrumb-item-current';
+    static get is() {
+      return 'nuxeo-breadcrumb';
+    }
+
+    static get properties() {
+      return {
+        document: {
+          type: Object,
+          observer: '_setBreadcrumbElements',
+        },
+      };
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      this.addEventListener('iron-resize', this._resize);
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.removeEventListener('iron-resize', this._resize);
+    }
+
+    get _ancestors() {
+      return this.shadowRoot.getElementById('ancestors');
+    }
+
+    get _breadcrumbs() {
+      const breadcrumbEntries =
+        this.document &&
+        this.document.contextParameters &&
+        this.document.contextParameters.breadcrumb &&
+        this.document.contextParameters.breadcrumb.entries;
+      return breadcrumbEntries && breadcrumbEntries.slice(0, breadcrumbEntries.length - 1);
+    }
+
+    get _contentWidth() {
+      return Array.from(this._ancestors.children).reduce((sum, current) => sum + current.offsetWidth, 0);
+    }
+
+    _setBreadcrumbElements() {
+      const ancestors = this._ancestors;
+      this.deletedNodes = [];
+      if (ancestors) {
+        ancestors.innerHTML = '';
+        this._breadcrumbs.forEach((element) => {
+          const listItem = document.createElement('li');
+
+          const anchor = document.createElement('a');
+          anchor.textContent = element.title;
+          anchor.setAttribute('title', element.title);
+          anchor.setAttribute('href', this.urlFor('browse', element.path));
+
+          listItem.appendChild(anchor);
+          ancestors.appendChild(listItem);
+        });
       }
-      if (index === this._enrichers.breadcrumb.entries.length - 2) {
-        return 'breadcrumb-item-parent';
+      this._resize();
+    }
+
+    _resize() {
+      this.__resizeDebouncer = Debouncer.debounce(this.__resizeDebouncer, microTask, () => {
+        if (this.lastDeletedNodeWidth == null) {
+          this.lastDeletedNodeWidth = 0;
+        }
+        // keep removing the first breadcrumb item if it doesn't fit in the container;
+        // add ellipsis to the first child in order to show users the breadcrumb has been sliced
+        while (this._contentWidth > this._ancestors.offsetWidth && this._ancestors.childNodes.length > 2) {
+          const nodeToBeRemoved =
+            this._ancestors.firstChild.textContent === '...'
+              ? this._ancestors.childNodes[1]
+              : this._ancestors.firstChild;
+          this.deletedNodes.push(nodeToBeRemoved);
+          this.lastDeletedNodeWidth = nodeToBeRemoved.offsetWidth;
+          nodeToBeRemoved.remove();
+          if (this.deletedNodes.length === 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.setAttribute('id', 'ellipsis');
+            ellipsis.classList.add('breadcrumb-item');
+            ellipsis.textContent = '...';
+
+            const listItem = document.createElement('li');
+            listItem.appendChild(ellipsis);
+            this._ancestors.insertBefore(listItem, this._ancestors.firstChild);
+          }
+        }
+        // if the container has space to accommodate the last deleted node, insert it
+        // if there is no longer items removed, we will remove also the ellipsis
+        while (
+          this._contentWidth + this.lastDeletedNodeWidth < this._ancestors.offsetWidth &&
+          this.deletedNodes.length > 0
+        ) {
+          this._ancestors.insertBefore(this.deletedNodes[this.deletedNodes.length - 1], this._ancestors.childNodes[1]);
+          this.deletedNodes.pop();
+          if (this.deletedNodes.length === 0) {
+            const ellipsisListItem = this.shadowRoot.getElementById('ellipsis').parentElement;
+            if (ellipsisListItem) {
+              ellipsisListItem.remove();
+            }
+          }
+        }
+      });
+    }
+
+    _title(document) {
+      if (document) {
+        return document.type === 'Root' ? this.i18n('browse.root') : document.title;
       }
-      if (index === this._enrichers.breadcrumb.entries.length - 3) {
-        return 'breadcrumb-item-grand-parent';
+    }
+
+    _icon(document, url) {
+      if (document && document.properties && document.properties['common:icon']) {
+        return url ? url + document.properties['common:icon'] : '';
       }
-      return 'breadcrumb-item-ancestor';
+      return '';
     }
-  },
+  }
 
-  _title(document) {
-    if (document) {
-      return document.type === 'Root' ? this.i18n('browse.root') : document.title;
-    }
-  },
-
-  _icon(document, url) {
-    if (document && document.properties && document.properties['common:icon']) {
-      return url ? url + document.properties['common:icon'] : '';
-    }
-    return '';
-  },
-
-  _ellipsisDirection() {
-    if (document.dir !== 'rtl') {
-      return 'left-ellipsis';
-    }
-    return 'right-ellipsis';
-  },
-
-  get _enrichers() {
-    return this.document && this.document.contextParameters;
-  },
-});
+  customElements.define('nuxeo-breadcrumb', Breadcrumb);
+  Nuxeo.Breadcrumb = Breadcrumb;
+}
