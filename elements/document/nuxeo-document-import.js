@@ -623,40 +623,38 @@ Polymer({
             </div>
           </paper-dialog-scrollable>
         </div>
-        <div class="buttons horizontal end-justified layout">
-          <div class="flex start-justified">
-            <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary"
-              >[[i18n('command.cancel')]]</paper-button
+        <div class="buttons horizontal justified layout">
+          <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary">
+            [[i18n('command.cancel')]]
+          </paper-button>
+
+          <div>
+            <paper-button
+              noink
+              class="text"
+              on-tap="_previousFile"
+              disabled$="[[_disableEditPrevious(_initializingDoc,_creating,canCreate,customizing,docIdx)]]"
             >
+              ❮&nbsp;[[i18n('documentImportForm.previousDocument')]]
+            </paper-button>
+            <paper-button
+              noink
+              class="text"
+              on-tap="_nextFile"
+              disabled$="[[_disableEditNext(_initializingDoc,_creating,canCreate,customizing,docIdx)]]"
+            >
+              [[i18n('documentImportForm.nextDocument')]]&nbsp;❯
+            </paper-button>
+
+            <paper-button
+              noink
+              class="text"
+              on-tap="_applyToAll"
+              disabled$="[[_disableApplyToAll(_initializingDoc,_creating,canCreate,customizing,docIdx)]]"
+            >
+              [[i18n('documentImportForm.applyToAll')]]
+            </paper-button>
           </div>
-
-          <paper-button
-            noink
-            on-tap="_previousFile"
-            disabled$="[[_initializingDoc]]"
-            hidden$="[[!_hasPreviousFile(_creating,canCreate,customizing,docIdx)]]"
-          >
-            ❮&nbsp;[[i18n('documentImportForm.previousDocument')]]
-          </paper-button>
-          <paper-button
-            noink
-            class="primary"
-            on-tap="_nextFile"
-            disabled$="[[_initializingDoc]]"
-            hidden$="[[!_hasNextFile(_creating,canCreate,customizing,docIdx)]]"
-          >
-            [[i18n('documentImportForm.nextDocument')]]&nbsp;❯
-          </paper-button>
-
-          <paper-button
-            noink
-            class="primary"
-            on-tap="_applyToAll"
-            disabled$="[[_initializingDoc]]"
-            hidden$="[[!_canApplyToAll(_creating,canCreate,customizing,docIdx)]]"
-          >
-            [[i18n('documentImportForm.applyToAll')]]
-          </paper-button>
 
           <paper-button
             noink
@@ -1499,5 +1497,17 @@ Polymer({
     form._form.removeChild(fakeSubmit);
     return form._form.checkValidity(); */
     return true;
+  },
+
+  _disableEditPrevious() {
+    return this._initializingDoc || !this._hasPreviousFile();
+  },
+
+  _disableEditNext() {
+    return this._initializingDoc || !this._hasNextFile();
+  },
+
+  _disableApplyToAll() {
+    return this._initializingDoc || !this._canApplyToAll();
   },
 });
