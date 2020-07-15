@@ -948,6 +948,7 @@
   "ui.label.quickFilters.mostRecent": "Les plus récents",
   "ui.label.quickFilters.noFolder": "Pas de conteneurs",
   "ui.label.quickFilters.onlyValidated": "Validés",
+  "ui.label.quickFilters.includeTrashed": "Inclure les documents supprimés",
   "ui.label.quickFilters.withRule": "Avec une règle  attachée",
   "untrashDocumentsButton.confirm.untrashDocuments": "Restaurer le(s) document(s) sélectionné(s) ?",
   "untrashDocumentsButton.tooltip": "Restaurer les documents sélectionnés",

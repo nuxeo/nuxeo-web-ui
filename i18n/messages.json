@@ -1072,6 +1072,7 @@
   "ui.label.quickFilters.noFolder": "No Containers",
   "ui.label.quickFilters.onlyValidated": "Validated",
   "ui.label.quickFilters.exceptTrashed": "Exclude trashed document",
+  "ui.label.quickFilters.includeTrashed": "Include trashed document",
   "ui.label.quickFilters.hasLegalHold": "Under legal hold",
   "ui.label.quickFilters.hasNotLegalHold": "Not under legal hold",
   "ui.label.quickFilters.withoutRule": "Without attached rule",
