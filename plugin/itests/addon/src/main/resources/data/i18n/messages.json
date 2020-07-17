@@ -1,5 +1,6 @@
 {
   "label.document.type.docsuggestion": "DocSuggestion",
+  "label.document.type.legacyfile": "Legacy File",
   "label.document.type.multistring": "MultiString",
   "label.document.type.multicomplex": "MultiComplex",
   "label.document.type.validation": "Validation",
