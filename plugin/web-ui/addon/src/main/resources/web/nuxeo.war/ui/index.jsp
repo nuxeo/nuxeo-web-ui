@@ -137,12 +137,14 @@ limitations under the License.
     ];
     Nuxeo.UI.repositories = [
       <% for (Repository repo : rm.getRepositories()) { %>
-        {
-          name: '<%= repo.getName() %>',
-          label: '<%= repo.getLabel() %>',
-          href: '<%= context + "/repo/" + repo.getName() + "/ui/" %>',
-          isDefault: <%= defaultRepository.equals(repo.getName())  %>,
-        },
+        <% if (!repo.isHeadless()) { %>
+          {
+            name: '<%= repo.getName() %>',
+            label: '<%= repo.getLabel() %>',
+            href: '<%= context + "/repo/" + repo.getName() + "/ui/" %>',
+            isDefault: <%= defaultRepository.equals(repo.getName()) %>,
+          },
+        <%  } %>
       <% } %>
     ];
   </script>
