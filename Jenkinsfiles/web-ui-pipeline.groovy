@@ -97,6 +97,9 @@ timestamps {
                             dir('ui') {
                                 uiel = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
                             }
+                            dir('testing-helpers') {
+                                helpers = sh(script: 'npm pack 2>&1 | tail -1', returnStdout: true).trim()
+                            }
                         }
                     }
                 }
@@ -109,7 +112,7 @@ timestamps {
                 stage('nuxeo-web-ui') {
                     timeout(60) {
                         webui = cloneRebaseAndDir('nuxeo-web-ui')
-                        if (webui || el || uiel || datavizel) {
+                        if (webui || el || uiel || datavizel || helpers) {
                             echo 'Need to build nuxeo-web-ui'
                             dir('nuxeo-web-ui') {
                                 sh 'npm install --no-package-lock --@nuxeo:registry="https://packages.nuxeo.com/repository/npm-public"'
@@ -121,6 +124,9 @@ timestamps {
                                 }
                                 if (uiel) {
                                     sh "npm install --no-package-lock --@nuxeo:registry=\"https://packages.nuxeo.com/repository/npm-public\" ../nuxeo-elements/ui/${uiel}"
+                                }
+                                if (helpers) {
+                                    sh "npm install --no-package-lock --@nuxeo:registry=\"https://packages.nuxeo.com/repository/npm-public\" ../nuxeo-elements/testing-helpers/${helpers}"
                                 }
                                 try {
                                     withEnv(["NODE_OPTIONS=--max-old-space-size=4096"]) {
@@ -142,7 +148,7 @@ timestamps {
                 }
                 stage('post-build') {
                     if (params.CREATE_PR) {
-                        if (el || datavizel || uiel) {
+                        if (el || datavizel || uiel || helpers) {
                             createPullRequest('nuxeo-elements', BRANCH, ELEMENTS_BASE_BRANCH)
                         }
                         if (webui) {
