@@ -47,7 +47,7 @@ limitations under the License.
     });
 
     // /browse/<path>@<action>
-    page(/^\/browse\/(.*)?/, function(data) {
+    page(new RegExp(/^\/browse\/(.*)?/, 's'), function(data) {
       if (!data.state.contentView) {
         app.currentContentView = null;
       }
