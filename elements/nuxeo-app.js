@@ -690,32 +690,44 @@ Polymer({
     }
   },
 
-  load(page, id, path, action) {
+  /**
+   * Loads a document in the app. The document is loaded based on the `uid` or `path` passed in `docParams`.
+   * If the document is successfuly retrieved, it is retuned by the method, except if the document representes a saved
+   * search, in which case `undefined` is returned.
+   */
+  _loadDocument(docParam) {
     this.loading = true;
-    this.docId = id;
-    this.docPath = path;
+    this.docId = docParam.uid;
+    this.docPath = docParam.path;
     this.$.doc.headers = this._computeHeaders();
     this.$.doc.enrichers = this._computeEnrichers();
-    this.$.doc
-      .get()
-      .then((doc) => {
-        if (this.docId && doc.facets.includes('SavedSearch')) {
-          this._routedSearch = doc;
-          this._redirectSavedSearch();
-          this.loading = false;
-          return;
-        }
-        if (this.docId && !doc.isVersion) {
-          this.docId = '';
-          this.docPath = doc.path;
-        }
-        this.currentParent = this.hasFacet(doc, 'Folderish')
-          ? doc
-          : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
-        this.set('currentDocument', doc);
-        this.docAction = action;
+    return this.$.doc.get().then((doc) => {
+      if (this.docId && doc.facets.includes('SavedSearch')) {
+        this._routedSearch = doc;
+        this._redirectSavedSearch();
         this.loading = false;
-        this.show(page);
+        return;
+      }
+      if (this.docId && !doc.isVersion) {
+        this.docId = '';
+        this.docPath = doc.path;
+      }
+      this.currentParent = this.hasFacet(doc, 'Folderish')
+        ? doc
+        : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
+      this.set('currentDocument', doc);
+      this.loading = false;
+      return doc;
+    });
+  },
+
+  load(page, uid, path, action) {
+    this._loadDocument({ uid, path })
+      .then((doc) => {
+        if (doc) {
+          this.docAction = action;
+          this.show(page);
+        }
       })
       .catch((err) => {
         this.showError(err.status, this.i18n('browse.error'), err.message);
@@ -957,7 +969,20 @@ Polymer({
 
   _refreshAndFetchTasks() {
     // let's refresh the current document since it might have been changed (ex: state and version)
-    this.fire('document-updated');
+    if (this.currentDocument) {
+      this._loadDocument(this.currentDocument)
+        .then(() => {
+          this.show('browse');
+        })
+        .catch((err) => {
+          if (err['entity-type'] && err['entity-type'] === 'exception' && err.status === 403) {
+            this.loading = false;
+            this.navigateTo('tasks');
+          } else {
+            this.showError(err.status, this.i18n('browse.error'), err.message);
+          }
+        });
+    }
     this._fetchTaskCount();
     this._resetTaskSelection();
     const tasksDrawer = this.$$('nuxeo-tasks-drawer');
