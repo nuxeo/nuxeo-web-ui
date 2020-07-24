@@ -161,6 +161,8 @@
   "app.user.signOut": "Sign Out",
   "app.user.themes": "Themes",
   "app.viewTasksDashboard": "View Tasks Dashboard",
+  "arender.openDocuments": "Open several documents",
+  "arender.viewDocumentsError": "Could not open documents",
   "assetsSearch.assetFormat": "Asset Format",
   "assetsSearch.assetHeight": "Asset Height",
   "assetsSearch.assetType": "Asset Type",

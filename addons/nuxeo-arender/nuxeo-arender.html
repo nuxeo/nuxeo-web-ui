@@ -33,3 +33,12 @@ limitations under the License.
     </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
+
+<nuxeo-slot-content name="openSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="11">
+  <template>
+    <nuxeo-arender-view-documents-button
+      name="arender"
+      documents="[[selectedItems]]"
+    ></nuxeo-arender-view-documents-button>
+  </template>
+</nuxeo-slot-content>
