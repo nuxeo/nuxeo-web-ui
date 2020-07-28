@@ -29,12 +29,11 @@ limitations under the License.
 <%@ page import="org.nuxeo.common.utils.UserAgentMatcher"%>
 
 <%
-<% RepositoryManager rm = Framework.getService(RepositoryManager.class); %>	  WebResourceManager wrm = Framework.getService(WebResourceManager.class);
-<% ConfigurationService cs = Framework.getService(ConfigurationService.class); %>	  ConfigurationService cs = Framework.getService(ConfigurationService.class);
-<% PackageManager pm = Framework.getService(PackageManager.class); %>	  PackageManager pm = Framework.getService(PackageManager.class);
-<% String ua = request.getHeader("user-agent"); %>	  String ua = request.getHeader("user-agent");
-<% String context = request.getContextPath(); %>	  String context = request.getContextPath();
+  WebResourceManager wrm = Framework.getService(WebResourceManager.class);
   RepositoryManager rm = Framework.getService(RepositoryManager.class);
+  ConfigurationService cs = Framework.getService(ConfigurationService.class);
+  String ua = request.getHeader("user-agent");
+  String context = request.getContextPath();
   String defaultRepository = rm.getDefaultRepositoryName();
   String repository = (String) request.getAttribute("NXREPOSITORY");
   String baseUrl;
@@ -118,12 +117,14 @@ limitations under the License.
     Nuxeo.UI.config = <%= cs.getPropertiesAsJson("org.nuxeo.web.ui") %>;
     Nuxeo.UI.repositories = [
       <% for (Repository repo : rm.getRepositories()) { %>
-        {
-          name: '<%= repo.getName() %>',
-          label: '<%= repo.getLabel() %>',
-          href: '<%= context + "/repo/" + repo.getName() + "/ui/" %>',
-          isDefault: <%= defaultRepository.equals(repo.getName())  %>,
-        },
+        <% if (!repo.isHeadless()) { %>
+          {
+            name: '<%= repo.getName() %>',
+            label: '<%= repo.getLabel() %>',
+            href: '<%= context + "/repo/" + repo.getName() + "/ui/" %>',
+            isDefault: <%= defaultRepository.equals(repo.getName())  %>,
+          },
+        <%  } %>
       <% } %>
     ];
   </script>
