@@ -26,4 +26,10 @@
     </filter-mapping>
   </extension>
 
+  <extension target="rewrite#RULE">
+    # Request attributes set:
+    # NXREPOSITORY: repository name
+    # ORIGINAL_PATH: original request path (for login redirection)
+    RewriteRule ^/repo/(.*)/ui/(.*) /ui/$2 [E=NXREPOSITORY:$1,E=ORIGINAL_PATH:%{REQUEST_PATH}]
+  </extension>
 </fragment>
