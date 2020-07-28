@@ -68,10 +68,6 @@ Polymer({
         text-transform: capitalize;
       }
 
-      .uppercase {
-        text-transform: uppercase;
-      }
-
       .resultActions {
         display: block;
         @apply --layout-horizontal;

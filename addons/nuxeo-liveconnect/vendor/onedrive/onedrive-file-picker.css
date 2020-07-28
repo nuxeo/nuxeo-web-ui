@@ -144,7 +144,6 @@
   border: 0;
   width: 6.5em;
   margin: 0;
-  text-transform: uppercase;
   height: 30px;
   vertical-align: top;
 }
@@ -238,7 +237,6 @@
     opacity: .5;
     border: 0;
     color: #fff;
-    text-transform: uppercase;
 }
 .onedrive-file-picker .odfp-footer input[type="submit"].odfp-select.odfp-active {
   filter: alpha(opacity=100);

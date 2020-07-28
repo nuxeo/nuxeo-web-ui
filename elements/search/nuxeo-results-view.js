@@ -73,10 +73,6 @@ Polymer({
         margin-left: 1em;
       }
 
-      .filter {
-        text-transform: uppercase;
-      }
-
       .buttons {
         @apply --layout-horizontal;
       }
