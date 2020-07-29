@@ -908,6 +908,9 @@ Polymer({
   },
 
   _onError(e) {
+    if (e.detail.error && e.detail.error.name === 'AbortError') {
+      return;
+    }
     this.fire('notify', e.detail.error);
   },
 
