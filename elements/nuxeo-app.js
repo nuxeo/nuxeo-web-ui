@@ -730,6 +730,9 @@ Polymer({
         }
       })
       .catch((err) => {
+        if (err && err.name === 'AbortError') {
+          return;
+        }
         this.showError(err.status, this.i18n('browse.error'), err.message);
       });
   },
