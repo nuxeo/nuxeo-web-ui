@@ -672,11 +672,16 @@ limitations under the License.
         }
       },
 
-      load: function(page, id, path, action) {
+      /**
+       * Loads a document in the app. The document is loaded based on the `uid` or `path` passed in `docParams`.
+       * If the document is successfuly retrieved, it is retuned by the method, except if the document representes a
+       * saved search, in which case `undefined` is returned.
+       */
+      _loadDocument: function(docParam) {
         this.loading = true;
-        this.docId = id;
-        this.docPath = path;
-        this.$.doc.get().then(function(doc) {
+        this.docId = docParam.uid;
+        this.docPath = docParam.path;
+        return this.$.doc.get().then(function(doc) {
           if (this.docId && doc.facets.includes('SavedSearch')) {
             this._routedSearch = doc;
             this._redirectSavedSearch();
@@ -699,9 +704,17 @@ limitations under the License.
           this.currentParent = this.hasFacet(doc, 'Folderish') ? doc :
             doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
           this.set('currentDocument', doc);
-          this.docAction = action;
           this.loading = false;
-          this.show(page);
+          return doc;
+        }.bind(this));
+      },
+
+      load: function(page, id, path, action) {
+        this._loadDocument({ uid: id, path: path }).then(function(doc) {
+          if (doc) {
+            this.docAction = action;
+            this.show(page);
+          }
         }.bind(this)).catch(function(err) {
           this.showError(err.status, this.i18n('browse.error'), err.message)
         }.bind(this));
@@ -961,7 +974,18 @@ limitations under the License.
 
       _refreshAndFetchTasks: function() {
         // let's refresh the current document since it might have been changed (ex: state and version)
-        this.fire('document-updated');
+        if (this.currentDocument) {
+          this._loadDocument(this.currentDocument).then(function(){
+            this.show('browse');
+          }.bind(this)).catch(function(err) {
+            if (err['entity-type'] && err['entity-type'] === 'exception' && err.status === 403) {
+              this.loading = false;
+              this.navigateTo('tasks');
+            } else {
+              this.showError(err.status, this.i18n('browse.error'), err.message);
+            }
+          }.bind(this));
+        }
         this._fetchTasks();
         this._resetTaskSelection();
         var tasksDrawer = this.$$('nuxeo-tasks-drawer');
