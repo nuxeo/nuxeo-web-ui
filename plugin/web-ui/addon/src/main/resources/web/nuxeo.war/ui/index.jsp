@@ -147,6 +147,14 @@ limitations under the License.
         <%  } %>
       <% } %>
     ];
+    <% if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/routing.html"))) { %>
+      if (!Nuxeo.UI.config.router) {
+        Nuxeo.UI.config.router = {};
+      }
+      if (Nuxeo.UI.config.router.htmlImport === undefined) {
+        Nuxeo.UI.config.router.htmlImport = true;
+      }
+    <% } %>
   </script>
 
   <script src="main.bundle.js"></script>
