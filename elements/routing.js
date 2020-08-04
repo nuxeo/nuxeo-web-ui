@@ -16,169 +16,167 @@ limitations under the License.
 */
 import page from '@nuxeo/page/page.mjs';
 
-customElements.whenDefined('nuxeo-app').then(() => {
-  const app = document.querySelector('nuxeo-app');
+const { app } = Nuxeo.UI;
 
-  // strip final /
-  page.base(app.baseUrl.replace(/\/$/, ''));
+// strip final /
+page.base(app.baseUrl.replace(/\/$/, ''));
 
-  // Middleware
-  function scrollToTop(ctx, next) {
-    next();
-  }
+// Middleware
+function scrollToTop(ctx, next) {
+  next();
+}
 
-  // Routes
-  page('*', scrollToTop, (ctx, next) => {
-    next();
-  });
-
-  page('/', () => {
-    page.redirect('/home');
-  });
-
-  page('/home', () => {
-    app.show('home');
-  });
-
-  page('/browse', () => {
-    app.load('browse', '', '/', 'view');
-  });
-
-  // /browse/<path>@<action>
-  page(/\/browse\/(.*)?/s, (data) => {
-    if (!data.state.contentView) {
-      app.currentContentView = null;
-    }
-    const searchParams = new URLSearchParams(data.querystring);
-    app.load('browse', '', `/${data.params[0]}`, searchParams.get('p') || 'view');
-  });
-
-  page('/search/:searchName', (data) => {
-    // trigger search when navigating to it directly
-    if (page.len === 0) {
-      app._searchOnLoad = true;
-    }
-    app.searchName = data.params.searchName;
-    app.show('search');
-  });
-
-  page('/doc/:repo?/:id/', (data) => {
-    if (!data.state.contentView) {
-      app.currentContentView = null;
-    }
-    app.load('browse', data.params.id, '', 'view');
-  });
-
-  page('/admin/:tab?', (data) => {
-    // prevent currentUser from being undefined
-    app.$.nxcon.connect().then(() => {
-      // block access to admin center to non-admin/non-power users
-      const hasPermission =
-        app.currentUser.isAdministrator || app.currentUser.extendedGroups.find((grp) => grp.name === 'powerusers');
-      if (hasPermission) {
-        if (data.params.tab) {
-          app.selectedAdminTab = data.params.tab;
-        }
-        app.show('admin');
-      } else {
-        app.showError(404, '', data.path);
-      }
-    });
-  });
-
-  page('/admin/user-group-management/:type/:id(.*)', (data) => {
-    app.selectedAdminTab = 'user-group-management';
-    app.show('admin', [data.params.type, data.params.id]);
-  });
-
-  page('/user/:id', (data) => {
-    page.redirect(`/admin/user-group-management/user/${encodeURIComponent(data.params.id)}`);
-  });
-
-  page('/group/:id(.*)', (data) => {
-    page.redirect(`/admin/user-group-management/group/${encodeURIComponent(data.params.id)}`);
-  });
-
-  page('/tasks/:repo?/:id/', (data) => {
-    app.loadTask(data.params.id);
-  });
-
-  page('/tasks', () => {
-    app.loadTask();
-  });
-
-  page('/diff/:id1/:id2', (data) => {
-    app.showDiff(data.params.id1, data.params.id2);
-  });
-
-  // use two capture groups, a first one for the page name, and a second for the page route (optional)
-  page(/^\/([^/]*)(?:\/(.*))?/, (ctx) => {
-    app.show(ctx.params[0], ctx.params[1] && ctx.params[1].split('/'));
-  });
-
-  page('*', (ctx) => {
-    app.showError(404, '', ctx.path);
-  });
-
-  // add #! before urls
-  page({ hashbang: true, click: false, decodeURLComponents: false });
-
-  app.router = {
-    baseUrl: app.baseUrl,
-
-    useHashbang: true,
-
-    browse(path, subPage) {
-      return `/browse${
-        path
-          ? path
-              .split('/')
-              .map((n) => encodeURIComponent(n))
-              .join('/')
-          : ''
-      }${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
-    },
-
-    document(id) {
-      return `/doc/${id}`;
-    },
-
-    home() {
-      return '/home';
-    },
-
-    search(searchId) {
-      return `/search/${searchId}`;
-    },
-
-    queue(searchId) {
-      return `/queue/${searchId}`;
-    },
-
-    tasks(id) {
-      return `/tasks${typeof id === 'undefined' ? '' : `/${id}`}`;
-    },
-
-    administration(tab) {
-      return `/admin/${tab}`;
-    },
-
-    user(name) {
-      return `/user/${encodeURIComponent(name)}`;
-    },
-
-    group(name) {
-      return `/group/${encodeURIComponent(name)}`;
-    },
-
-    diff(id1, id2) {
-      return `/diff/${id1}/${id2}`;
-    },
-
-    page(name) {
-      return `/${name}`;
-    },
-
-    navigate: page,
-  };
+// Routes
+page('*', scrollToTop, (ctx, next) => {
+  next();
 });
+
+page('/', () => {
+  page.redirect('/home');
+});
+
+page('/home', () => {
+  app.show('home');
+});
+
+page('/browse', () => {
+  app.load('browse', '', '/', 'view');
+});
+
+// /browse/<path>@<action>
+page(/\/browse\/(.*)?/s, (data) => {
+  if (!data.state.contentView) {
+    app.currentContentView = null;
+  }
+  const searchParams = new URLSearchParams(data.querystring);
+  app.load('browse', '', `/${data.params[0]}`, searchParams.get('p') || 'view');
+});
+
+page('/search/:searchName', (data) => {
+  // trigger search when navigating to it directly
+  if (page.len === 0) {
+    app._searchOnLoad = true;
+  }
+  app.searchName = data.params.searchName;
+  app.show('search');
+});
+
+page('/doc/:repo?/:id/', (data) => {
+  if (!data.state.contentView) {
+    app.currentContentView = null;
+  }
+  app.load('browse', data.params.id, '', 'view');
+});
+
+page('/admin/:tab?', (data) => {
+  // prevent currentUser from being undefined
+  app.$.nxcon.connect().then(() => {
+    // block access to admin center to non-admin/non-power users
+    const hasPermission =
+      app.currentUser.isAdministrator || app.currentUser.extendedGroups.find((grp) => grp.name === 'powerusers');
+    if (hasPermission) {
+      if (data.params.tab) {
+        app.selectedAdminTab = data.params.tab;
+      }
+      app.show('admin');
+    } else {
+      app.showError(404, '', data.path);
+    }
+  });
+});
+
+page('/admin/user-group-management/:type/:id(.*)', (data) => {
+  app.selectedAdminTab = 'user-group-management';
+  app.show('admin', [data.params.type, data.params.id]);
+});
+
+page('/user/:id', (data) => {
+  page.redirect(`/admin/user-group-management/user/${encodeURIComponent(data.params.id)}`);
+});
+
+page('/group/:id(.*)', (data) => {
+  page.redirect(`/admin/user-group-management/group/${encodeURIComponent(data.params.id)}`);
+});
+
+page('/tasks/:repo?/:id/', (data) => {
+  app.loadTask(data.params.id);
+});
+
+page('/tasks', () => {
+  app.loadTask();
+});
+
+page('/diff/:id1/:id2', (data) => {
+  app.showDiff(data.params.id1, data.params.id2);
+});
+
+// use two capture groups, a first one for the page name, and a second for the page route (optional)
+page(/^\/([^/]*)(?:\/(.*))?/, (ctx) => {
+  app.show(ctx.params[0], ctx.params[1] && ctx.params[1].split('/'));
+});
+
+page('*', (ctx) => {
+  app.showError(404, '', ctx.path);
+});
+
+// add #! before urls
+page({ hashbang: true, click: false, decodeURLComponents: false });
+
+app.router = {
+  baseUrl: app.baseUrl,
+
+  useHashbang: true,
+
+  browse(path, subPage) {
+    return `/browse${
+      path
+        ? path
+            .split('/')
+            .map((n) => encodeURIComponent(n))
+            .join('/')
+        : ''
+    }${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
+  },
+
+  document(id) {
+    return `/doc/${id}`;
+  },
+
+  home() {
+    return '/home';
+  },
+
+  search(searchId) {
+    return `/search/${searchId}`;
+  },
+
+  queue(searchId) {
+    return `/queue/${searchId}`;
+  },
+
+  tasks(id) {
+    return `/tasks${typeof id === 'undefined' ? '' : `/${id}`}`;
+  },
+
+  administration(tab) {
+    return `/admin/${tab}`;
+  },
+
+  user(name) {
+    return `/user/${encodeURIComponent(name)}`;
+  },
+
+  group(name) {
+    return `/group/${encodeURIComponent(name)}`;
+  },
+
+  diff(id1, id2) {
+    return `/diff/${id1}/${id2}`;
+  },
+
+  page(name) {
+    return `/${name}`;
+  },
+
+  navigate: page,
+};
