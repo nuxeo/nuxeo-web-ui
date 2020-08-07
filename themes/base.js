@@ -557,7 +557,6 @@ const template = html`
         }
 
         --nx-button-icon: {
-          margin-inline-end: var(--nuxeo-button-icon-margin-end, 4px);
           width: 16px;
           height: 16px;
         }
