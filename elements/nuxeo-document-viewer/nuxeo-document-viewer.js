@@ -53,7 +53,7 @@ Polymer({
 
     <template is="dom-if" if="[[!document.properties.file:content.data]]">
       <iron-image position="center" sizing="contain" src="[[_thumbnail(document)]]"></iron-image>
-      <template is="dom-if" if="[[_hasWritePermission(document)]]">
+      <template is="dom-if" if="[[_isDropzoneAvailable(document)]]">
         <nuxeo-dropzone value="{{document.properties.file:content}}"></nuxeo-dropzone>
       </template>
     </template>
@@ -104,10 +104,10 @@ Polymer({
       : '';
   },
 
-  _hasWritePermission(doc) {
+  _isDropzoneAvailable(doc) {
     return (
       !this.isUnderRetentionOrLegalHold(doc) &&
-      this.hasPermission(doc, 'Write') &&
+      this.hasPermission(doc, 'WriteProperties') &&
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
       !this.isTrashed(doc)
