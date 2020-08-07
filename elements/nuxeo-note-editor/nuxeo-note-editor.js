@@ -196,7 +196,7 @@ Polymer({
   },
 
   _canEdit(document) {
-    return document.type !== 'Root' && this.hasPermission(document, 'Write') && this._isMutable(document);
+    return document.type !== 'Root' && this.hasPermission(document, 'WriteProperties') && this._isMutable(document);
   },
 
   _edit() {

@@ -69,7 +69,7 @@ Polymer({
         </template>
       </div>
 
-      <template is="dom-if" if="[[_hasWritePermission(document)]]">
+      <template is="dom-if" if="[[_isDropzoneAvailable(document)]]">
         <nuxeo-dropzone
           value="{{_attachments}}"
           multiple
@@ -134,11 +134,11 @@ Polymer({
     return attachments && attachments.length > 0;
   },
 
-  _hasWritePermission(doc) {
+  _isDropzoneAvailable(doc) {
     return (
       doc &&
       !doc.isRecord &&
-      this.hasPermission(doc, 'Write') &&
+      this.hasPermission(doc, 'WriteProperties') &&
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
       !this.isTrashed(doc)

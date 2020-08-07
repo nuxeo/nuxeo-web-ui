@@ -97,8 +97,8 @@ Polymer({
                 document="[[document]]"
                 allow-new-tags
                 placeholder="[[i18n('documentPage.tags.placeholder')]]"
-                readonly="[[!hasPermission(document, 'Write')]]"
-                >&gt;
+                readonly="[[!hasPermission(document, 'WriteProperties')]]"
+              >
               </nuxeo-tag-suggestion>
             </div>
           </template>

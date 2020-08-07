@@ -124,7 +124,7 @@ Polymer({
   },
 
   _isAvailable(doc) {
-    return doc && doc.type !== 'Root' && this.hasPermission(doc, 'Write') && this._isMutable(doc);
+    return doc && doc.type !== 'Root' && this.hasPermission(doc, 'WriteProperties') && this._isMutable(doc);
   },
 
   _isMutable(doc) {
