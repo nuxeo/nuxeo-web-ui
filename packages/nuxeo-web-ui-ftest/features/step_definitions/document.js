@@ -163,6 +163,10 @@ Then(/I can see (.+) metadata with the following properties:/, function(docType,
   });
 });
 
+Then(/^I can't edit the document metadata$/, function() {
+  this.ui.browser.editButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+});
+
 Then(/^I can edit the (.*) metadata$/, function(docType) {
   const { browser } = this.ui;
   browser.editButton.waitForVisible();
