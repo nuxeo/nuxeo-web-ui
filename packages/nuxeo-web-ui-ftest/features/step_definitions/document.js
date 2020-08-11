@@ -189,6 +189,13 @@ Then(/^I can edit the following properties in the (.+) metadata:$/, function(doc
   form.save();
 });
 
+Then(/^I can't edit the Note$/, function() {
+  const page = this.ui.browser.documentPage(this.doc.type);
+  page.view.waitForVisible();
+  page.view.noteEditor.waitForVisible();
+  page.view.noteEditor.editButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+});
+
 Then(/^I can edit the (.*) Note$/, function(format) {
   const page = this.ui.browser.documentPage(this.doc.type);
   page.view.waitForVisible();
