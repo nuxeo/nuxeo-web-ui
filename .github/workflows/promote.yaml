@@ -29,12 +29,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
           npm version $VERSION --no-git-tag-version
           pushd packages/nuxeo-web-ui-ftest/
           npm version $VERSION --no-git-tag-version
           popd
 
-          OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_VERSION"'/'"$VERSION"'/g' {} \;
 
           # align on same promoted version of elements
@@ -44,22 +44,19 @@ jobs:
           npm i @nuxeo/testing-helpers@$VERSION --save-exact
 
       - name: Perform git release of Nuxeo Web UI ${{ env.VERSION }}
-        if: ${{ false }}
         run: |
           git commit -a -m "Release $VERSION"
           git tag -a v$VERSION -m "Release $VERSION"
           git push origin v$VERSION
 
       - name: Publish Nuxeo Web UI FTest ${{ env.VERSION }}
-        if: ${{ false }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           pushd packages/nuxeo-web-ui-ftest/
-          npm --registry=https://packages.nuxeo.com/repository/npm-public publish
+          npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
           popd
 
-          
       - name: Promote Web UI ${{ github.event.inputs.version }} to ${{ env.VERSION }}
         env:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }} 
@@ -73,10 +70,11 @@ jobs:
           for f in install/bundles/*.jar; do mv $f $(echo $f | sed -e 's/-rc.[0-9]*//'); done
           zip -r ../$PACKAGE.zip .
           popd
-          curl -i -u "${{ secrets.CONNECT_AUTH }}" -F package=@\$PACKAGE.zip "$CONNECT_URL/site/marketplace/upload?batch=true"
+          curl -i -u "${{ secrets.CONNECT_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_URL/site/marketplace/upload?batch=true"
       
       - uses: actions/checkout@v2
         with:
+          token: ${{ secrets.GIT_ADMIN_TOKEN }}
           ref: master
 
       - run: echo "::set-env name=NEW_VERSION::$(npx semver -i patch $VERSION)"
@@ -101,6 +99,9 @@ jobs:
           npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="~"
 
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_SNAPSHOT"'/'"$NEW_SNAPSHOT"'/g' {} \;
+
+          # discard changes in package-lock.json
+          git checkout -- package-lock.json
 
           # commit and push
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
