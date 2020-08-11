@@ -6,9 +6,35 @@ Feature: Edit Note
     Given user "John" exists in group "members"
     And I login as "John"
     And I have a Workspace document
-    And I have permission ReadWrite for this document
+
+  Scenario Outline: Edit <format> Note with Read permission
+    Given I have permission Read for this document
+    And I have a <format> Note
+    When I browse to the document
+    Then I can't edit the Note
+
+  Examples:
+  | format   |
+#  | HTML     |
+  | XML      |
+  | Markdown |
+  | Text     |
+
+  Scenario Outline: Edit <format> Note with WriteProperties permission
+    Given I have permission WriteProperties for this document
+    And I have a <format> Note
+    When I browse to the document
+    Then I can edit the <format> Note
+
+  Examples:
+  | format   |
+#  | HTML     |
+  | XML      |
+  | Markdown |
+  | Text     |
 
   Scenario Outline: Edit <format> Note
+    And I have permission ReadWrite for this document
     Given I have a <format> Note
     When I browse to the document
     Then I can edit the Note metadata

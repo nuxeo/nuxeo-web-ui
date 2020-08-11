@@ -10,6 +10,10 @@ export default class NoteEditor extends BasePage {
     return this.el.element('#textarea');
   }
 
+  get editButton() {
+    return this.el.element('#editNote');
+  }
+
   hasContent(content) {
     const editor = this.el.element('#editor');
     editor.waitForVisible();
@@ -24,9 +28,8 @@ export default class NoteEditor extends BasePage {
   }
 
   edit() {
-    const button = this.el.element('#editNote');
-    button.waitForVisible();
-    button.click();
+    this.editButton.waitForVisible();
+    this.editButton.click();
   }
 
   save() {
