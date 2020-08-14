@@ -884,7 +884,7 @@
   "publication.internal.publish.error": "Błąd podczas publikowania dokumentu.",
   "publication.internal.publish.error.multiple": "Błąd podczas publikowania dokumentów.",
   "publication.button.tooltip": "Opublikuj dokument",
-  "publication.details": "Szczególy publikacji",
+  "publication.details": "Szczegóły publikacji",
   "publication.info": "Oglądasz publikację {0}",
   "publication.info.deleted": "Oglądasz publikację usuniętego dokumentu.",
   "publication.noPublications": "Brak publikacji",
