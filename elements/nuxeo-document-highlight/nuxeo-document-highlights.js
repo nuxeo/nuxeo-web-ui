@@ -30,7 +30,6 @@ Polymer({
     <style>
       .category {
         opacity: 0.7;
-        text-transform: uppercase;
         font-size: 0.75rem;
         padding-right: 0.5rem;
       }

@@ -91,7 +91,6 @@ Polymer({
 
       .task-name {
         font-weight: bold;
-        text-transform: uppercase;
       }
 
       .horizontal {

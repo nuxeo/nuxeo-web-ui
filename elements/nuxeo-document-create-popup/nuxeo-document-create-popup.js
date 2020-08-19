@@ -54,10 +54,6 @@ Polymer({
         border-bottom: 1px solid var(--divider-color);
       }
 
-      paper-tab {
-        text-transform: uppercase;
-      }
-
       paper-tabs,
       #holder {
         margin: 0;
