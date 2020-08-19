@@ -78,7 +78,6 @@ Polymer({
         line-height: 130%;
         margin: 0 0.2em 0.2em 0;
         padding: 0.06em 0.3em;
-        text-transform: uppercase;
         vertical-align: baseline;
         white-space: nowrap;
       }

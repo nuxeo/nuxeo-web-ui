@@ -123,7 +123,6 @@ Polymer({
       }
 
       .heading {
-        text-transform: uppercase;
         font-size: 1.1rem;
         padding: 1.7rem 2.5rem;
       }

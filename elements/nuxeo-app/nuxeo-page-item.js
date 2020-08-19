@@ -31,7 +31,6 @@ Polymer({
       :host {
         outline: none;
         user-select: none;
-        text-transform: uppercase;
         cursor: pointer;
         color: var(--disabled-text-color);
         margin: 0 0 0 16px;

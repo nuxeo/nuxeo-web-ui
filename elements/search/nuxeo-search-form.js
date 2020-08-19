@@ -168,11 +168,6 @@ Polymer({
         font-weight: 500;
       }
 
-      .header h1,
-      .header .input-content.paper-input-container input {
-        text-transform: uppercase;
-      }
-
       .row {
         box-sizing: border-box;
         margin-bottom: 1rem;

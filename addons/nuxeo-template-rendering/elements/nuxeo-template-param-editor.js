@@ -79,7 +79,6 @@ Polymer({
       }
 
       .heading {
-        text-transform: uppercase;
         font-size: 16px;
         color: var(--nuxeo-text-default);
         margin-top: 16px;
