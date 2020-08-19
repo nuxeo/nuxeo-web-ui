@@ -56,7 +56,7 @@ Polymer({
     <nuxeo-document id="doc" doc-id="[[document.uid]]"></nuxeo-document>
 
     <template is="dom-if" if="[[_isAvailable(document, xpath)]]">
-      <h3>[[i18n('documentAttachments.heading')]]</h3>
+      <h5>[[i18n('documentAttachments.heading')]]</h5>
 
       <div class="vertical layout">
         <template is="dom-repeat" items="[[_computeFiles(_attachments)]]">
