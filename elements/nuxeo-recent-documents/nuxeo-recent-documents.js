@@ -77,7 +77,9 @@ Polymer({
       documents="{{documents}}"
     ></nuxeo-document-storage>
 
-    <div class="header">[[i18n('app.recentlyViewed')]]</div>
+    <div class="header">
+      <h5>[[i18n('app.recentlyViewed')]]</h5>
+    </div>
     <div class="content">
       <nuxeo-data-list
         items="[[documents]]"

@@ -143,6 +143,10 @@ Polymer({
         text-align: center;
         font-size: 1.1rem;
       }
+
+      .header h5 {
+        margin: 0;
+      }
     </style>
 
     <nuxeo-document
@@ -160,7 +164,9 @@ Polymer({
     >
     </nuxeo-page-provider>
 
-    <div class="header" hidden$="[[!label]]">[[i18n(label)]]</div>
+    <div class="header" hidden$="[[!label]]">
+      <h5>[[i18n(label)]]</h5>
+    </div>
 
     <div class="content">
       <div class="parents" hidden$="[[_noPermission]]">

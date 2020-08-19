@@ -50,11 +50,12 @@ Polymer({
       }
 
       .header {
-        line-height: 4.2rem;
-        display: inline-block !important;
-        white-space: nowrap;
-        max-width: 70%;
-        overflow: hidden;
+        align-items: var(--layout-center_-_align-items);
+        font-size: 1rem;
+        height: 53px;
+        padding: 0 16px;
+        text-overflow: ellipsis;
+        color: var(--nuxeo-drawer-header);
       }
 
       nuxeo-data-list {
@@ -176,13 +177,13 @@ Polymer({
 
     <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isDisplayMembers]]">
-        [[selectedCollection.title]]
+        <h5>[[selectedCollection.title]]</h5>
         <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
         </paper-icon-button>
         <nuxeo-tooltip for="backToCollections">[[i18n('collections.backToCollections')]]</nuxeo-tooltip>
       </template>
       <template is="dom-if" if="[[!_isDisplayMembers]]">
-        [[i18n('collections.heading')]]
+        <h5>[[i18n('collections.heading')]]</h5>
       </template>
     </div>
 

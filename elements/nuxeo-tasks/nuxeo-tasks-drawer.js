@@ -37,7 +37,9 @@ Polymer({
       }
     </style>
 
-    <div class="header">[[i18n('app.tasks')]]</div>
+    <div class="header">
+      <h5>[[i18n('app.tasks')]]</h5>
+    </div>
     <nuxeo-tasks-list id="tasks" current="[[currentTask]]"></nuxeo-tasks-list>
     <div class="tasks-dashboard">
       <paper-button id="link" class="text small" on-click="_navigateToDashboard"

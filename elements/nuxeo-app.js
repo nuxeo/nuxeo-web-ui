@@ -350,7 +350,9 @@ Polymer({
 
             <template is="dom-if" if="[[hasAdministrationPermissions(currentUser)]]">
               <div name="administration">
-                <div class="header">[[i18n('app.administration')]]</div>
+                <div class="header">
+                  <h5>[[i18n('app.administration')]]</h5>
+                </div>
                 <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
                   <nuxeo-slot name="ADMINISTRATION_MENU" model="[[actionContext]]"></nuxeo-slot>
                 </iron-selector>
@@ -358,7 +360,9 @@ Polymer({
             </template>
 
             <div name="profile" class="layout vertical">
-              <div class="header">[[_displayUser(currentUser)]]</div>
+              <div class="header">
+                <h5>[[_displayUser(currentUser)]]</h5>
+              </div>
               <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
                 <nuxeo-slot name="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
                 <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout(url)]]"></nuxeo-menu-item>

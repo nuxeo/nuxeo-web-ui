@@ -119,7 +119,9 @@ Polymer({
     >
     </nuxeo-page-provider>
 
-    <div class="header">[[i18n('app.favorites')]]</div>
+    <div class="header">
+      <h5>[[i18n('app.favorites')]]</h5>
+    </div>
     <div class="content">
       <nuxeo-data-list
         nx-provider="favoritesProvider"

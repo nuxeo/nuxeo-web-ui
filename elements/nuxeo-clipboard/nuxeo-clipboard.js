@@ -134,7 +134,9 @@ Polymer({
       sync-indexing
     ></nuxeo-operation>
 
-    <div class="header">[[i18n('app.clipboard')]]</div>
+    <div class="header">
+      <h5>[[i18n('app.clipboard')]]</h5>
+    </div>
 
     <div class="content">
       <nuxeo-data-list
