@@ -27,22 +27,52 @@ const template = html`
           display: none !important;
         }
 
-        /* headings */
         h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
+        .headline-1 {
           font-weight: 400;
+          font-size: 2rem;
+          letter-spacing: 0;
+          line-height: 2.5rem;
         }
 
-        h3 {
+        h2,
+        .headline-2 {
+          font-weight: 400;
+          font-size: 1.75rem;
+          letter-spacing: 0;
+          line-height: 2.25rem;
+        }
+
+        h3,
+        .headline-3 {
+          font-weight: 400;
+          font-size: 1.25rem;
+          letter-spacing: 0;
+          line-height: 1.625rem;
+        }
+
+        h4,
+        .headline-4 {
+          font-weight: 600;
           font-size: 1rem;
+          letter-spacing: 0;
+          line-height: 1.375rem;
+        }
+
+        h5,
+        .headline-5 {
           font-weight: 700;
-          margin: 0 0 1em;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
+          font-size: 0.875rem;
+          letter-spacing: 0.24px;
+          line-height: 1.25rem;
+        }
+
+        h6,
+        .headline-6 {
+          font-weight: 600;
+          font-size: 0.875rem;
+          letter-spacing: 0.16px;
+          line-height: 1.25rem;
         }
 
         /* links */
@@ -106,7 +136,6 @@ const template = html`
           font-size: 1rem;
           height: 53px;
           padding: 0 16px;
-          text-transform: uppercase;
           text-overflow: ellipsis;
           color: var(--nuxeo-drawer-header);
         }
@@ -131,102 +160,38 @@ const template = html`
   </dom-module>
   <custom-style>
     <style include="nuxeo-styles">
-      /* open-sans-300 - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
       @font-face {
-        font-family: 'Open Sans';
-        font-style: normal;
-        font-weight: 300;
-        src: local('Open Sans Light'), local('OpenSans-Light'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-300.woff2')
-            format('woff2');
-      }
-      /* open-sans-300italic - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
-      @font-face {
-        font-family: 'Open Sans';
-        font-style: italic;
-        font-weight: 300;
-        src: local('Open Sans Light Italic'), local('OpenSans-LightItalic'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-300italic.woff2')
-            format('woff2');
-      }
-      /* open-sans-regular - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
-      @font-face {
-        font-family: 'Open Sans';
+        font-family: 'Inter';
         font-style: normal;
         font-weight: 400;
-        src: local('Open Sans Regular'), local('OpenSans-Regular'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-regular.woff2')
-            format('woff2');
+        font-display: swap;
+        src: url('../fonts/Inter-Regular.woff2?v=3.13') format('woff2'),
+          url('../fonts/Inter-Regular.woff?v=3.13') format('woff');
       }
-      /* open-sans-italic - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
+
       @font-face {
-        font-family: 'Open Sans';
-        font-style: italic;
-        font-weight: 400;
-        src: local('Open Sans Italic'), local('OpenSans-Italic'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-italic.woff2')
-            format('woff2');
-      }
-      /* open-sans-600 - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
-      @font-face {
-        font-family: 'Open Sans';
+        font-family: 'Inter';
         font-style: normal;
         font-weight: 600;
-        src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-600.woff2')
-            format('woff2');
+        font-display: swap;
+        src: url('../fonts/Inter-SemiBold.woff2?v=3.13') format('woff2'),
+          url('../fonts/Inter-SemiBold.woff?v=3.13') format('woff');
       }
-      /* open-sans-600italic - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
+
       @font-face {
-        font-family: 'Open Sans';
-        font-style: italic;
-        font-weight: 600;
-        src: local('Open Sans SemiBold Italic'), local('OpenSans-SemiBoldItalic'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-600italic.woff2')
-            format('woff2');
-      }
-      /* open-sans-700 - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
-      @font-face {
-        font-family: 'Open Sans';
+        font-family: 'Inter';
         font-style: normal;
         font-weight: 700;
-        src: local('Open Sans Bold'), local('OpenSans-Bold'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-700.woff2')
-            format('woff2');
-      }
-      /* open-sans-700italic - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
-      @font-face {
-        font-family: 'Open Sans';
-        font-style: italic;
-        font-weight: 700;
-        src: local('Open Sans Bold Italic'), local('OpenSans-BoldItalic'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-700italic.woff2')
-            format('woff2');
-      }
-      /* open-sans-800 - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
-      @font-face {
-        font-family: 'Open Sans';
-        font-style: normal;
-        font-weight: 800;
-        src: local('Open Sans ExtraBold'), local('OpenSans-ExtraBold'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-800.woff2')
-            format('woff2');
-      }
-      /* open-sans-800italic - greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext */
-      @font-face {
-        font-family: 'Open Sans';
-        font-style: italic;
-        font-weight: 800;
-        src: local('Open Sans ExtraBold Italic'), local('OpenSans-ExtraBoldItalic'),
-          url('../fonts/open-sans-v15-greek-ext_cyrillic-ext_cyrillic_greek_vietnamese_latin_latin-ext-800italic.woff2')
-            format('woff2');
+        font-display: swap;
+        src: url('../fonts/Inter-Bold.woff2?v=3.13') format('woff2'),
+          url('../fonts/Inter-Bold.woff?v=3.13') format('woff');
       }
 
       html {
-        -ms-text-size-adjust: 100%;
-        -webkit-text-size-adjust: 100%;
-        font-size: 13px;
-        line-height: 20px;
+        font-weight: 400;
+        font-size: 0.875rem;
+        letter-spacing: 0.16px;
+        line-height: 1.25rem;
       }
 
       html,
@@ -235,7 +200,6 @@ const template = html`
         min-height: 100%;
         color: var(--nuxeo-text-default);
         font-family: var(--nuxeo-app-font);
-        font-weight: 400;
       }
 
       /* scrollbars */
@@ -478,7 +442,6 @@ const template = html`
           font-size: 1rem;
           font-weight: 700;
           margin: 0 0 1em;
-          text-transform: uppercase;
           letter-spacing: 0.04em;
           color: var(--nuxeo-text-default);
         }
