@@ -193,14 +193,14 @@ Polymer({
 
           <!-- collections -->
           <div class="section" hidden$="[[!_hasCollections(document)]]">
-            <h3>[[i18n('documentPage.collections')]]</h3>
+            <h5>[[i18n('documentPage.collections')]]</h5>
             <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
           </div>
 
           <!-- tags -->
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
-              <h3>[[i18n('documentPage.tags')]]</h3>
+              <h5>[[i18n('documentPage.tags')]]</h5>
               <nuxeo-tag-suggestion
                 document="[[document]]"
                 allow-new-tags

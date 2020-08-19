@@ -30,6 +30,7 @@ Polymer({
         display: block;
       }
       .properties label {
+        @apply --nuxeo-label;
         min-width: 10rem;
         margin-inline-end: 12px;
       }
@@ -42,7 +43,7 @@ Polymer({
       }
     </style>
 
-    <h3>[[label]]</h3>
+    <h5>[[label]]</h5>
     <div class="properties">
       <template is="dom-repeat" items="[[_getAdditionalFormats(document)]]" as="item">
         <div class="item">

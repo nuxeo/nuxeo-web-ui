@@ -57,14 +57,15 @@ Polymer({
 
       .vertical {
         @apply --layout-vertical;
+        justify-content: center;
       }
 
       .horizontal {
         @apply --layout-horizontal;
       }
 
-      h3 {
-        margin-bottom: 0;
+      h5 {
+        margin: 0;
       }
 
       .options {
@@ -125,13 +126,10 @@ Polymer({
                 <span>[[i18n('tasks.alreadyProcessed')]]</span>
             </div>
           </template>
-          
+
           <div class="heading">
             <div class="vertical">
-              <h3>[[i18n(task.name)]]</h3>
-              <a href="javascript:undefined" on-tap="_toggleGraphDialog" class="view-graph"
-                >[[i18n('tasks.viewGraph')]]</a
-              >
+              <h5>[[i18n(task.name)]]</h5>
             </div>
 
             <template is="dom-if" if="[[!_isTaskInEndState(task)]]">
@@ -158,6 +156,7 @@ Polymer({
               </div>
             </template>
           </div>
+          <a href="javascript:undefined" on-tap="_toggleGraphDialog" class="view-graph">[[i18n('tasks.viewGraph')]]</a>
           <div class="horizontal spaced">
             <span>[[i18n(tasks.directive)]]</span>
           </div>

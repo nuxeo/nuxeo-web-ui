@@ -33,6 +33,7 @@ Polymer({
       }
 
       .properties label {
+        @apply --nuxeo-label;
         min-width: 10rem;
         margin-inline-end: 12px;
       }
