@@ -95,7 +95,7 @@ const AISuggestionManager = (() => {
       const isModelInput = path && aiModels && aiModels.inputs.includes(path.replace('document.properties.', ''));
       const noPropertyChanged = !path || 'document.properties'.startsWith(path);
 
-      const model = layout._getBoundElements('document.properties');
+      const model = layout.domHost._getBoundElements('document.properties');
       const widget = _getSuggestionWidget(path && model[path], false);
       if (widget && Array.isArray(widget.suggestions) && widget.suggestions.length > 0) {
         widget._matchInput();

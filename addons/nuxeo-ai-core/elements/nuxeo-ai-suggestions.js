@@ -152,7 +152,7 @@ class AISuggestions extends mixinBehaviors([IronFormElementBehavior], Nuxeo.Elem
   _selectSuggestion(event) {
     const suggestion = this.suggestions[event.model.index];
     const propertyPath = this._parsePropertyPath();
-    if (!this.get(propertyPath)) {
+    if (this.get(propertyPath) === undefined) {
       createNestedObject(this.document.properties, this.property.split('/'));
     }
     if (Array.isArray(this.get(propertyPath))) {
