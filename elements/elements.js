@@ -223,6 +223,7 @@ import './nuxeo-document-highlight/nuxeo-document-highlights.js';
 import './nuxeo-document-history/nuxeo-document-history.js';
 import './nuxeo-audit/nuxeo-audit-search.js';
 import './nuxeo-dropzone/nuxeo-dropzone.js';
+import './nuxeo-grid/nuxeo-grid.js';
 import './nuxeo-collections/nuxeo-collection-move-up-action.js';
 import './nuxeo-collections/nuxeo-collection-move-down-action.js';
 import './nuxeo-collections/nuxeo-collection-move-top-action.js';
