@@ -34,8 +34,8 @@ Feature: Edit Note
   | Text     |
 
   Scenario Outline: Edit <format> Note
-    And I have permission ReadWrite for this document
-    Given I have a <format> Note
+    Given I have permission ReadWrite for this document
+    And I have a <format> Note
     When I browse to the document
     Then I can edit the Note metadata
     And I can edit the <format> Note
