@@ -322,48 +322,6 @@ Then('I can see {int} validation error(s) in the {string} edit form', function(n
   );
 });
 
-Then('I can see the blob replace button', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.view.waitForVisible();
-  page.view.el.element('nuxeo-replace-blob-button').waitForVisible();
-});
-
-Then("I can't see the blob replace button", function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.view.waitForVisible();
-  page.view.el.element('nuxeo-replace-blob-button').waitForVisible(browser.options.waitforTimeout, true).should.be.true;
-});
-
-Then('I can see the option to add new attachments', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.metadata.waitForVisible();
-  page.metadata.el.element('nuxeo-dropzone').waitForVisible();
-});
-
-Then("I can't see the option to add new attachments", function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.metadata.waitForVisible();
-  page.metadata.el.element('nuxeo-dropzone').waitForVisible(browser.options.waitforTimeout, true).should.be.true;
-});
-
-Then('I can see the option to add a main blob', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.view.waitForVisible();
-  page.view.el.element('nuxeo-dropzone').waitForVisible();
-});
-
-Then("I can't see the option to add a main blob", function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.view.waitForVisible();
-  page.view.el.element('nuxeo-dropzone').waitForVisible(browser.options.waitforTimeout, true).should.be.true;
-});
-
 Then('I can see the {string} error message in the {string} edit form', function(message, docType) {
   const { browser } = this.ui;
   const form = browser.editForm(docType);
