@@ -29,12 +29,6 @@ import { Log } from './ui/log';
 import { Spreadsheet } from './ui/spreadsheet';
 import { i18n } from './ui/i18n';
 
-// Extract the parameters (content view state and page provider)
-const params = parseParams();
-const { pp } = params;
-// Parse the content view state
-const cv = params.cv && JSON.parse(b64DecodeUnicode(params.cv));
-
 // Our Spreadsheet instance
 let sheet;
 
@@ -84,7 +78,19 @@ function doQuery() {
   return sheet.update().catch((err) => log.error(err.message));
 }
 
-function run(baseURL = '/nuxeo') {
+// Extracts the parameters (content view state and page provider) either from the URL or from a message.
+const getParameters = () =>
+  new Promise((resolve) => {
+    if (window.location.search) {
+      const params = parseParams();
+      // Parse the content view state
+      resolve(JSON.parse(b64DecodeUnicode(params.cv)));
+    } else {
+      window.addEventListener('message', ({ data }) => resolve(data));
+    }
+  });
+
+function run({ baseURL = '/nuxeo', resultColumns, pageProviderName, queryParameters, searchDocument, sortInfos }) {
   // Setup our connection
   const nx = new Nuxeo({ baseURL });
   nx.schemas(['*']);
@@ -94,10 +100,6 @@ function run(baseURL = '/nuxeo') {
   return nx.connect().then(() => {
     // Setup the language
     const language = (navigator.language && navigator.language.slice(0, 2)) || 'en';
-
-    // Extract content view configuration
-    let resultColumns = cv && cv.resultColumns;
-    const pageProviderName = cv ? cv.pageProviderName : pp || 'spreadsheet_query';
 
     // default columns
     if (!resultColumns || resultColumns.length === 0) {
@@ -113,15 +115,15 @@ function run(baseURL = '/nuxeo') {
     window.spreadsheet = sheet = new Spreadsheet($('#grid'), nx, resultColumns, pageProviderName, language);
 
     // Add query parameters
-    if (cv.queryParameters) {
-      sheet.queryParameters = cv.queryParameters;
+    if (queryParameters) {
+      sheet.queryParameters = queryParameters;
     }
 
     // Add the search document
-    if (cv.searchDocument) {
+    if (searchDocument) {
       const namedParameters = {};
-      for (const k in cv.searchDocument.properties) {
-        const v = cv.searchDocument.properties[k];
+      for (const k in searchDocument.properties) {
+        const v = searchDocument.properties[k];
         // skip empty values
         if (typeof v.length !== 'undefined' && v.length === 0) {
           continue;
@@ -132,8 +134,8 @@ function run(baseURL = '/nuxeo') {
     }
 
     // Add sort infos
-    if (cv.sortInfos && cv.sortInfos.length > 0) {
-      sheet.sortInfos = cv.sortInfos;
+    if (sortInfos && sortInfos.length > 0) {
+      sheet.sortInfos = sortInfos;
     }
 
     // Run the query
@@ -141,4 +143,4 @@ function run(baseURL = '/nuxeo') {
   });
 }
 
-run();
+getParameters().then(run);
