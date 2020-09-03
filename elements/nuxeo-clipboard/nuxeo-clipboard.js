@@ -172,7 +172,7 @@ Polymer({
             id="paste"
             on-tap="execute"
             data-op="Document.Copy"
-            disabled="[[!canPaste(documents, targetDocument)]]"
+            disabled="[[!canPaste(documents, targetDocument, documents.splices)]]"
             noink
             class="primary clear"
           >
@@ -184,7 +184,7 @@ Polymer({
             id="move"
             on-tap="execute"
             data-op="Document.Move"
-            disabled="[[!canPaste(documents, targetDocument)]]"
+            disabled="[[!canPaste(documents, targetDocument, documents.splices)]]"
             noink
             class="primary clear"
           >
