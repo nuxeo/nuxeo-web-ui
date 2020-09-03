@@ -251,7 +251,8 @@ Polymer({
   },
 
   _labelCreate(doc) {
-    const permission = !this.isVersion(doc) && this.hasFacet(doc, 'Versionable') && this.hasPermission(doc, 'Write');
+    const permission =
+      !this.isVersion(doc) && this.hasFacet(doc, 'Versionable') && this.hasPermission(doc, 'WriteVersion');
     return this.i18n(permission ? 'versions.create' : 'versions.unversioned');
   },
 

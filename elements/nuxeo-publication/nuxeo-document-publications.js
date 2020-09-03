@@ -270,7 +270,7 @@ Polymer({
   },
 
   _canUnpublish(doc) {
-    return doc && this.hasPermission(doc, 'Write');
+    return doc && this.hasPermission(doc, 'WriteVersion');
   },
 
   _canRepublish(doc) {

@@ -68,7 +68,7 @@ Polymer({
   },
 
   _isAvailable() {
-    return this.document && this.document.isProxy && this.hasPermission(this.document, 'Write');
+    return this.document && this.document.isProxy && this.hasPermission(this.document, 'WriteVersion');
   },
 
   _unpublish() {

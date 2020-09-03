@@ -181,7 +181,7 @@ Polymer({
       !this.isVersion(doc) &&
       !this.isRecord(doc) &&
       this.hasFacet(doc, 'Versionable') &&
-      this.hasPermission(doc, 'Write')
+      this.hasPermission(doc, 'WriteVersion')
     );
   },
 
