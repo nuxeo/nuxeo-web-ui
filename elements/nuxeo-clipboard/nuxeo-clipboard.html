@@ -160,13 +160,13 @@ limitations under the License.
       <div class="toolbar">
         <div class="actions">
           <paper-button id="paste" on-tap="execute" data-op="Document.Copy"
-                        disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
+                        disabled="[[!canPaste(documents, targetDocument, documents.splices)]]" noink class="primary clear">
             <iron-icon icon="nuxeo:copy"></iron-icon>
             [[i18n('clipboard.copy')]]
           </paper-button>
           <nuxeo-tooltip for="paste">[[i18n('clipboard.copy')]]</nuxeo-tooltip>
           <paper-button id="move" on-tap="execute" data-op="Document.Move"
-                        disabled="[[!canPaste(documents, targetDocument)]]" noink class="primary clear">
+                        disabled="[[!canPaste(documents, targetDocument, documents.splices)]]" noink class="primary clear">
             <iron-icon icon="nuxeo:move"></iron-icon>
             [[i18n('clipboard.move')]]
           </paper-button>
