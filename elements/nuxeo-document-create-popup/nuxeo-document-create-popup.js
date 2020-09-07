@@ -185,6 +185,7 @@ Polymer({
       if (this._noPermission) {
         this.fire('notify', { message: this.i18n('documentCreationBehavior.error.noPermission') });
       } else {
+        this.$$('#simpleCreation').init();
         this.$$('#bulkCreation').init(files);
         this.$.createDocDialog.toggle();
       }
@@ -196,6 +197,7 @@ Polymer({
       if (this._noPermission) {
         this.fire('notify', { message: this.i18n('documentCreationBehavior.error.noPermission') });
       } else {
+        this.$$('#simpleCreation').init();
         this.$$('#bulkCreation').init();
         this.$.createDocDialog.toggle();
       }

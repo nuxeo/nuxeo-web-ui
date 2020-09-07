@@ -310,6 +310,7 @@ Polymer({
   },
 
   init(typeId) {
+    this._clear();
     if (typeId) {
       const typeObj = this.subtypes.find((type) => type.id === typeId);
       if (typeObj) {
