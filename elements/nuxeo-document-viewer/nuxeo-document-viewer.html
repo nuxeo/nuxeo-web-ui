@@ -47,7 +47,7 @@ limitations under the License.
 
     <template is="dom-if" if="[[!document.properties.file:content.data]]">
       <iron-image position="center" sizing="contain" src="[[_thumbnail(document)]]"></iron-image>
-      <template is="dom-if" if="[[_hasWritePermission(document)]]">
+      <template is="dom-if" if="[[_isDropzoneAvailable(document)]]">
         <nuxeo-dropzone document="[[document]]" update-document></nuxeo-dropzone>
       </template>
     </template>
@@ -73,8 +73,8 @@ limitations under the License.
       doc.contextParameters.thumbnail.url ? doc.contextParameters.thumbnail.url : '';
     },
 
-    _hasWritePermission: function (doc) {
-      return doc && !this.isUnderRetentionOrLegalHold(doc) && this.hasPermission(doc, 'Write') &&
+    _isDropzoneAvailable: function (doc) {
+      return doc && !this.isUnderRetentionOrLegalHold(doc) && this.hasPermission(doc, 'WriteProperties') &&
         !this.isImmutable(doc) && doc.type !== 'Root' && !this.isTrashed(doc);
     },
   });
