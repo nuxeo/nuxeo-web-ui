@@ -4714,8 +4714,12 @@ Handsontable.helper.toString = function (obj) {
    * @return {String}
    */
   Handsontable.DataMap.prototype.getCopyable = function (row, prop) {
+    // WEBUI-32
+    // based on https://github.com/handsontable/handsontable/pull/2103
+    // on newer versions we already have copy paste hooks
     if (copyableLookup.call(this.instance, row, this.propToCol(prop))) {
-      return this.get(row, prop);
+      var cellValue = this.get(row, prop);
+      return Handsontable.hooks.execute(this.instance, 'beforeCopy', cellValue, row, prop);
     }
     return '';
   };
@@ -7457,6 +7461,7 @@ Handsontable.PluginHookClass = (function () {
       // Hooks
       beforeInitWalkontable: [],
       beforeInit: [],
+      beforeCopy: [],
       beforeRender: [],
       beforeSetRangeEnd: [],
       beforeDrawBorders: [],

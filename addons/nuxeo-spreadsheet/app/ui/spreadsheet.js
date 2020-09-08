@@ -18,6 +18,7 @@ import { Column } from './column';
 import { Schemas } from '../nuxeo/rest/schemas';
 import { Query } from '../nuxeo/rpc/query';
 import { DirectoryEditor } from './editors/directory';
+import { Select2Editor } from './editors/select2';
 import { assign, hasProp } from '../utils';
 
 /**
@@ -41,6 +42,7 @@ class Spreadsheet {
       contextMenu: ['undo', 'redo'],
       afterChange: this.onChange.bind(this),
       beforeAutofill: this.beforeAutofill.bind(this),
+      beforeCopy: this.beforeCopy.bind(this),
       search: true,
       cells: this.createCell.bind(this),
       language,
@@ -314,6 +316,17 @@ class Spreadsheet {
         }
       }
     }
+  }
+
+  beforeCopy(value, row, prop) {
+    if (typeof value === 'object') {
+      const editorName = this.ht.getCellEditor(row, this.ht.propToCol(prop));
+      const editor = Handsontable.editors.getEditor(editorName, this.ht);
+      if (editor instanceof Select2Editor) {
+        value = Array.isArray(value) ? value.map(editor.getEntryId) : editor.getEntryId(value);
+      }
+    }
+    return value;
   }
 
   _getCornerCell(start, end, draggingDirection) {

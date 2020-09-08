@@ -27,7 +27,7 @@ function getEntryLabel(entry, lang = 'en') {
     label += entry.properties[`label_${lang}`] || entry.properties.label || entry.properties.id;
     return label;
   }
-  return entry;
+  return entry.text || entry;
 }
 
 class DirectoryEditor extends Select2Editor {
@@ -82,6 +82,7 @@ class DirectoryEditor extends Select2Editor {
           return {
             'entity-type': 'directoryEntry',
             directoryName: this.directoryName,
+            id,
             properties: {
               id,
             },
