@@ -275,6 +275,7 @@ limitations under the License.
       },
 
       init: function(typeId) {
+        this._clear();
         if (typeId) {
           var typeObj = this.subtypes.find(function(type) {
             return type.id === typeId;
