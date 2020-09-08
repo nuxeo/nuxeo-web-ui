@@ -30,6 +30,8 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-sort-select.js';
 import '../nuxeo-selection/nuxeo-selection-toolbar.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 
 /**
 An element to display results from a page provider.
@@ -395,20 +397,16 @@ Polymer({
 
   fetch() {
     return new Promise((resolve, error) => {
-      this.debounce(
-        'fetch',
-        () => {
-          if (this.view) {
-            this.view
-              .fetch()
-              .then(resolve)
-              .catch(error);
-          } else {
-            resolve();
-          }
-        },
-        100,
-      );
+      this._fetchDebouncer = Debouncer.debounce(this._fetchDebouncer, timeOut.after(100), () => {
+        if (this.view) {
+          this.view
+            .fetch()
+            .then(resolve)
+            .catch(error);
+        } else {
+          resolve();
+        }
+      });
     });
   },
 
