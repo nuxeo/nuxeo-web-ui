@@ -191,7 +191,7 @@ limitations under the License.
       },
 
       _isAvailable: function(doc) {
-        return doc && this.hasPermission(doc, 'Write') && !this.isImmutable(doc) &&
+        return doc && this.hasPermission(doc, 'WriteProperties') && !this.isImmutable(doc) &&
           !this.hasType(doc, 'Root') && !this.isTrashed(doc) &&
           !(doc.isRecord && this.xpath !== 'file:content') &&
           !(this.isUnderRetentionOrLegalHold(doc) && this.xpath === 'file:content');
