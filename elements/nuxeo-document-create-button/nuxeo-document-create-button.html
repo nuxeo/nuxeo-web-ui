@@ -150,11 +150,9 @@ limitations under the License.
 
       _canCreateIn: function(document) {
         if (document && document.contextParameters && document.contextParameters.permissions) {
-          return document.contextParameters.permissions.indexOf('Write') > -1 ||
-            document.contextParameters.permissions.indexOf('Everything') > -1;
-        } else {
-          return false;
+          return document.contextParameters.permissions.indexOf('AddChildren') > -1;
         }
+        return false;
       },
 
       _actionContext: function() {
