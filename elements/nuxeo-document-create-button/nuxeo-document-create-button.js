@@ -150,10 +150,7 @@ Polymer({
 
   _canCreateIn(document) {
     if (document && document.contextParameters && document.contextParameters.permissions) {
-      return (
-        document.contextParameters.permissions.indexOf('Write') > -1 ||
-        document.contextParameters.permissions.indexOf('Everything') > -1
-      );
+      return document.contextParameters.permissions.indexOf('AddChildren') > -1;
     }
     return false;
   },
