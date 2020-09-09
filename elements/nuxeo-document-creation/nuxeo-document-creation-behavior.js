@@ -211,12 +211,7 @@ export const DocumentCreationBehavior = [
 
     _canCreateIn(document) {
       if (document && document.contextParameters && document.contextParameters.permissions) {
-        // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return AddChildren,
-        // so we had to rely on Write.
-        return (
-          document.contextParameters.permissions.indexOf('Write') > -1 ||
-          document.contextParameters.permissions.indexOf('AddChildren') > -1
-        );
+        return document.contextParameters.permissions.indexOf('AddChildren') > -1;
       }
       return false;
     },
