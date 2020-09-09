@@ -64,7 +64,7 @@ timestamps {
             deleteDir()
             def VERSIONS_MAPPING = ['10.10': '2.4', '9.10': '2.2']
             def ELEMENTS_BASE_BRANCH = VERSIONS_MAPPING.containsKey(BASE_BRANCH) ? "maintenance-${VERSIONS_MAPPING.get(BASE_BRANCH)}.x" : BASE_BRANCH
-            def el, datavizel, uiel, webui, webuiitests, plugin
+            def el, datavizel, uiel, webui, webuiitests, plugin, helpers
             if (params.CLEAN) {
                 sh 'npm cache clean --force'
             }
