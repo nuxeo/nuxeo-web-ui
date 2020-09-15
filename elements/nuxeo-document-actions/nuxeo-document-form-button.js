@@ -107,6 +107,8 @@ Polymer({
     },
   },
 
+  observers: ['_cancelEdit(document)'],
+
   get dialog() {
     return this.root.getElementById(`${this.layout}-dialog`);
   },
@@ -129,6 +131,12 @@ Polymer({
 
   _isMutable(doc) {
     return doc && !this.hasFacet(doc, 'Immutable') && doc.type !== 'Root' && !this.isTrashed(doc);
+  },
+
+  _cancelEdit(doc) {
+    if (!this._isAvailable(doc)) {
+      this._closeDialog();
+    }
   },
 
   _openDialog() {
