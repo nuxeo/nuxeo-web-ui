@@ -27,6 +27,7 @@ switch (capability.browserName) {
   case 'chrome':
     capability.chromeOptions = {
       args: ['--no-sandbox'],
+      w3c: false,
     };
     if (process.env.HEADLESS) {
       capability.chromeOptions.args.push('--window-size=1920,1080');
