@@ -105,6 +105,8 @@ limitations under the License.
         },
       },
 
+      observers: ['_cancelEdit(document)'],
+
       connectedCallback: function() {
         this.addEventListener('iron-overlay-opened', this._formLayoutOpened);
       },
@@ -127,6 +129,12 @@ limitations under the License.
 
       _isMutable: function(doc) {
         return doc && !this.hasFacet(doc, 'Immutable') && doc.type !== 'Root' && !this.isTrashed(doc);
+      },
+
+      _cancelEdit: function(doc) {
+        if (!this._isAvailable(doc)) {
+          this._closeDialog();
+        }
       },
 
       _openDialog: function() {
