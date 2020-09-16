@@ -14,6 +14,7 @@ import * as Async from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
+import * as RenderStatus from '@polymer/polymer/lib/utils/render-status.js';
 
 // expose Polymer behaviors for compat
 import { IronOverlayBehavior } from '@polymer/iron-overlay-behavior/iron-overlay-behavior.js';
@@ -40,7 +41,7 @@ window.moment = moment;
 window.page = page;
 
 // expose commonly used legacy helpers for compat
-Object.assign(Polymer, { dom, importHref, mixinBehaviors, Debouncer, Async });
+Object.assign(Polymer, { dom, importHref, mixinBehaviors, Debouncer, Async, RenderStatus });
 window.Polymer = Polymer;
 window.PolymerElement = PolymerElement;
 window.importHref = importHref;
