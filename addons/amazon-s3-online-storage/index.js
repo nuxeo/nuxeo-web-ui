@@ -61,7 +61,6 @@ class S3Provider {
 
   _upload(file, callback) {
     return new Promise((resolve, reject) => {
-      callback({ type: 'uploadStarted', file });
       file.managedUpload = this.uploader.upload({
         Key: this.extraInfo.baseKey.replace(/^\/+/g, '').concat(uuid()),
         ContentType: file.type,
@@ -156,6 +155,7 @@ class S3Provider {
             timeout:
               Number(Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.s3 && Nuxeo.UI.config.s3.timeout) || 0,
           },
+          correctClockSkew: true,
         });
       });
   }
@@ -180,16 +180,32 @@ class S3Provider {
         this._refreshBatchInfo();
       }
 
-      const promises = [];
-      for (let i = 0; i < files.length; ++i) {
-        const file = files[i];
-        file.index = this.files.length;
-        this.files.push(file);
-        promises.push(this._upload(file, callback).catch((error) => this._handleUploadError(error, callback)));
-      }
-      return Promise.all(promises).then(() => {
-        callback({ type: 'batchFinished', batchId: this.batchId });
-      });
+      const uploadDonePromises = [];
+
+      // reduce upload started promises in sequence while building a list of upload done promisses
+      // goal is avoid creating more requests than the browser can have inflight and thus avoid clock skew
+      return Array.from(files)
+        .reduce((previousStartedPromise, file) => {
+          file.index = this.files.length;
+          this.files.push(file);
+          callback({ type: 'uploadStarted', file });
+          return previousStartedPromise.then(
+            () =>
+              new Promise((resolveStarted) => {
+                uploadDonePromises.push(
+                  this._upload(file, (event) => {
+                    // wait for upload progress to consider it as started
+                    if (event.type === 'uploadProgress') {
+                      resolveStarted(file);
+                    }
+                    callback(event);
+                  }).catch((error) => this._handleUploadError(error, callback)),
+                );
+              }),
+          );
+        }, Promise.resolve())
+        .then(() => Promise.all(uploadDonePromises))
+        .then(() => callback({ type: 'batchFinished', batchId: this.batchId }));
     });
   }
 
