@@ -16,6 +16,8 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/lib/utils/async.html">
+<link rel="import" href="../../bower_components/polymer/lib/utils/debounce.html">
 <link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -378,13 +380,17 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
       fetch: function() {
         return new Promise(function(resolve, error) {
-          this.debounce('fetch', function() {
-            if (this.view) {
-              this.view.fetch().then(resolve).catch(error);
-            } else {
-              resolve();
-            }
-          }.bind(this), 100);
+          this._fetchDebouncer =
+            Polymer.Debouncer.debounce(this._fetchDebouncer, Polymer.Async.timeOut.after(100), function() {
+              if (this.view) {
+                this.view
+                  .fetch()
+                  .then(resolve)
+                  .catch(error);
+              } else {
+                resolve();
+              }
+            }.bind(this));
         }.bind(this));
       },
 
