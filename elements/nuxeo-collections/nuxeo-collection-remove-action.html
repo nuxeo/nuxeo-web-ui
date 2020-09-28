@@ -40,7 +40,7 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-operation op="Collection.RemoveFromCollection" id="removeOp"></nuxeo-operation>
+    <nuxeo-operation op="Collection.RemoveFromCollection" id="removeOp" sync-indexing></nuxeo-operation>
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members, collection)]]">
       <paper-icon-button noink
