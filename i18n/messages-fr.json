@@ -429,7 +429,7 @@
   "documentCreationBehavior.error.trashedParent": "Vous ne pouvez pas créer de contenu sous un document mis à la corbeille.",
   "documentCreationForm.createError": "La création du document a échoué.",
   "documentCreationForm.location": "Emplacement",
-  "documentCreationForm.newDoc.heading": "Nouveau document {0}",
+  "documentCreationForm.newDoc.heading": "{0}",
   "documentDiffButton.tooltip": "Comparer",
   "documentDiffButton.blob.tooltip": "Comparer les fichiers",
   "documentEdit.layoutNotFound": "Aucun formulaire de modification pour {0}",
