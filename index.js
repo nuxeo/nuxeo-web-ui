@@ -21,6 +21,7 @@ import { IronOverlayBehavior } from '@polymer/iron-overlay-behavior/iron-overlay
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
 import { IronValidatableBehavior } from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
 import { IronValidatorBehavior } from '@polymer/iron-validator-behavior/iron-validator-behavior.js';
+import { Templatizer } from '@polymer/polymer/lib/legacy/templatizer-behavior.js';
 
 // expose behaviors for compat
 import { AggregationBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-aggregation/nuxeo-aggregation-behavior.js';
@@ -49,6 +50,7 @@ Polymer.IronOverlayBehavior = IronOverlayBehavior;
 Polymer.IronResizableBehavior = IronResizableBehavior;
 Polymer.IronValidatableBehavior = IronValidatableBehavior;
 Polymer.IronValidatorBehavior = IronValidatorBehavior;
+Polymer.Templatizer = Templatizer;
 Nuxeo.AggregationBehavior = AggregationBehavior;
 Nuxeo.ChartDataBehavior = ChartDataBehavior;
 Nuxeo.DocumentContentBehavior = DocumentContentBehavior;
