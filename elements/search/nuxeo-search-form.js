@@ -686,10 +686,24 @@ Polymer({
     }
   },
 
+  _validate() {
+    const innerLayout = this.$.layout.$.layout;
+    const valid = innerLayout.validate();
+    if (!valid) {
+      const elementsToValidate = innerLayout._getValidatableElements(innerLayout.element.root);
+      const invalidField = elementsToValidate.find((node) => node.invalid);
+      if (invalidField) {
+        invalidField.scrollIntoView();
+        invalidField.focus();
+      }
+    }
+    return valid;
+  },
+
   _paramsChanged() {
     this.$.provider.page = 1;
     this.dirty = true;
-    if (this.results && this.auto && this.visible) {
+    if (this.results && this.auto && this.visible && this._validate()) {
       this.__fetchDebouncer = Debouncer.debounce(this.__fetchDebouncer, timeOut.after(300), () => {
         this.results.reset();
         this._fetch(this.results);
@@ -744,7 +758,7 @@ Polymer({
   },
 
   _search() {
-    if (this.results) {
+    if (this.results && this._validate()) {
       this.results.reset();
       return this._fetch(this.results).then(this._navigateToResults.bind(this));
     }
