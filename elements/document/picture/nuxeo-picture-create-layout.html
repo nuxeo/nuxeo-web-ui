@@ -23,75 +23,133 @@ limitations under the License.
 <dom-module id="nuxeo-picture-create-layout">
   <template>
     <style include="nuxeo-styles"></style>
+    <nuxeo-grid gap="16px">
+      <!--
+        title    description
+        content  content
+        nature   subjects
+        coverage expired
+      -->
+      <nuxeo-grid-template>
+        <nuxeo-grid-area name="title" col="1" row="1"></nuxeo-grid-area>
+        <nuxeo-grid-area name="description" col="2" row="1"></nuxeo-grid-area>
+        <nuxeo-grid-area name="content" colspan="2" col="1" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="nature" col="1" row="3"></nuxeo-grid-area>
+        <nuxeo-grid-area name="subjects" col="2" row="3"></nuxeo-grid-area>
+        <nuxeo-grid-area name="coverage" col="1" row="4"></nuxeo-grid-area>
+        <nuxeo-grid-area name="expired" col="2" row="4"></nuxeo-grid-area>
+      </nuxeo-grid-template>
+      <!--
+        title
+        description
+        content
+        nature
+        subjects
+        coverage
+        expired
+      -->
+      <nuxeo-grid-template max-width="720px">
+        <nuxeo-grid-area name="title" col="1" row="1"></nuxeo-grid-area>
+        <nuxeo-grid-area name="description" col="1" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="content" col="1" row="3"></nuxeo-grid-area>
+        <nuxeo-grid-area name="nature" col="1" row="4"></nuxeo-grid-area>
+        <nuxeo-grid-area name="subjects" col="1" row="5"></nuxeo-grid-area>
+        <nuxeo-grid-area name="coverage" col="1" row="6"></nuxeo-grid-area>
+        <nuxeo-grid-area name="expired" col="1" row="7"></nuxeo-grid-area>
+      </nuxeo-grid-template>
 
-    <nuxeo-input
-      role="widget"
-      label="[[i18n('title')]]"
-      name="title"
-      value="{{document.properties.dc:title}}"
-      autofocus
-      required
-    >
-    </nuxeo-input>
+      <!--
+        title   decription description
+        content content    content
+        nature  subjects   coverage
+        expired
+      -->
+      <nuxeo-grid-template min-width="1480px">
+        <nuxeo-grid-area name="title" col="1" row="1"></nuxeo-grid-area>
+        <nuxeo-grid-area name="description" col="2" row="1" colspan="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="content" col="1" row="3" colspan="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="nature" col="1" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="subjects" col="2" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="coverage" col="3" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="expired" col="3" row="3"></nuxeo-grid-area>
+      </nuxeo-grid-template>
 
-    <nuxeo-textarea
-      role="widget"
-      label="[[i18n('label.description')]]"
-      name="description"
-      value="{{document.properties.dc:description}}"
-    >
-    </nuxeo-textarea>
+      <nuxeo-input
+        role="widget"
+        label="[[i18n('title')]]"
+        name="title"
+        value="{{document.properties.dc:title}}"
+        autofocus
+        required
+        nuxeo-grid-area="title"
+      >
+      </nuxeo-input>
 
-    <nuxeo-dropzone
-      role="widget"
-      label="[[i18n('file.content')]]"
-      name="content"
-      value="{{document.properties.file:content}}"
-    ></nuxeo-dropzone>
+      <nuxeo-textarea
+        role="widget"
+        label="[[i18n('label.description')]]"
+        name="description"
+        value="{{document.properties.dc:description}}"
+        nuxeo-grid-area="description"
+      >
+      </nuxeo-textarea>
 
-    <nuxeo-directory-suggestion
-      role="widget"
-      label="[[i18n('label.dublincore.nature')]]"
-      name="nature"
-      directory-name="nature"
-      value="{{document.properties.dc:nature}}"
-      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-      min-chars="0"
-    >
-    </nuxeo-directory-suggestion>
+      <nuxeo-dropzone
+        role="widget"
+        label="[[i18n('file.content')]]"
+        name="content"
+        value="{{document.properties.file:content}}"
+        nuxeo-grid-area="content"
+      ></nuxeo-dropzone>
 
-    <nuxeo-directory-suggestion
-      role="widget"
-      label="[[i18n('label.dublincore.subjects')]]"
-      directory-name="l10nsubjects"
-      name="subjects"
-      value="{{document.properties.dc:subjects}}"
-      multiple="true"
-      dbl10n="true"
-      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-      min-chars="0"
-    >
-    </nuxeo-directory-suggestion>
+      <nuxeo-directory-suggestion
+        role="widget"
+        label="[[i18n('label.dublincore.nature')]]"
+        name="nature"
+        directory-name="nature"
+        value="{{document.properties.dc:nature}}"
+        placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+        min-chars="0"
+        nuxeo-grid-area="nature"
+      >
+      </nuxeo-directory-suggestion>
 
-    <nuxeo-directory-suggestion
-      role="widget"
-      label="[[i18n('label.dublincore.coverage')]]"
-      directory-name="l10ncoverage"
-      name="coverage"
-      value="{{document.properties.dc:coverage}}"
-      dbl10n="true"
-      placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
-      min-chars="0"
-    >
-    </nuxeo-directory-suggestion>
+      <nuxeo-directory-suggestion
+        role="widget"
+        label="[[i18n('label.dublincore.subjects')]]"
+        directory-name="l10nsubjects"
+        name="subjects"
+        value="{{document.properties.dc:subjects}}"
+        multiple="true"
+        dbl10n="true"
+        placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+        min-chars="0"
+        nuxeo-grid-area="subjects"
+      >
+      </nuxeo-directory-suggestion>
 
-    <nuxeo-date-picker
-      role="widget"
-      label="[[i18n('label.dublincore.expire')]]"
-      name="expired"
-      value="{{document.properties.dc:expired}}"
-    >
-    </nuxeo-date-picker>
+      <nuxeo-directory-suggestion
+        role="widget"
+        label="[[i18n('label.dublincore.coverage')]]"
+        directory-name="l10ncoverage"
+        name="coverage"
+        value="{{document.properties.dc:coverage}}"
+        dbl10n="true"
+        placeholder="[[i18n('dublincoreEdit.directorySuggestion.placeholder')]]"
+        min-chars="0"
+        nuxeo-grid-area="coverage"
+      >
+      </nuxeo-directory-suggestion>
+
+      <nuxeo-date-picker
+        role="widget"
+        label="[[i18n('label.dublincore.expire')]]"
+        name="expired"
+        value="{{document.properties.dc:expired}}"
+        nuxeo-grid-area="expired"
+      >
+      </nuxeo-date-picker>
+    </nuxeo-grid>
   </template>
 
   <script>
