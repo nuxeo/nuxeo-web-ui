@@ -108,7 +108,7 @@ Polymer({
       sort-options="[[sortOptions]]"
     >
       <div slot="actions">
-        <template is="dom-if" if="[[hasPermission(document, 'Everything')]]">
+        <template is="dom-if" if="[[hasPermission(document, 'RemoveChildren')]]">
           <paper-button noink on-tap="_emptyTrash" class="primary small"
             >[[i18n('documentTrashContent.emptyTrash')]]</paper-button
           >
