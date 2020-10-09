@@ -136,13 +136,10 @@ Polymer({
   },
 
   /*
-   * Checks if a single given document has 'Everything' permission to delete or 'Remove' to trash
+   * Checks if a single given document has the 'Remove' permission to delete/trash
    */
   _docHasPermissions(document) {
-    return (
-      !this.isUnderRetentionOrLegalHold(document) &&
-      (this.hasPermission(document, 'Everything') || (!this.hard && this.hasPermission(document, 'Write')))
-    );
+    return !this.isUnderRetentionOrLegalHold(document) && this.hasPermission(document, 'Remove');
   },
 
   _computeIcon(hard) {
