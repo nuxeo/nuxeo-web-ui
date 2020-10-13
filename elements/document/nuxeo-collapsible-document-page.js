@@ -16,18 +16,14 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
-import '@polymer/paper-icon-button/paper-icon-button.js';
-import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '../nuxeo-document-info-bar/nuxeo-document-info-bar.js';
-import '../nuxeo-document-info/nuxeo-document-info.js';
-import '../nuxeo-collections/nuxeo-document-collections.js';
-import '../nuxeo-document-activity/nuxeo-document-activity.js';
 import './nuxeo-document-view.js';
-import './nuxeo-document-metadata.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+
+import '../nuxeo-grid/nuxeo-grid.js';
+import './nuxeo-document-collapsible-details.js';
+import './nuxeo-document-sidebar.js';
 
 /**
 `nuxeo-collapsible-document-page`
@@ -37,96 +33,27 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
-      .page {
-        @apply --layout-vertical;
-      }
-
-      .details {
-        @apply --layout-horizontal;
-        @apply --layout-wrap;
-        @apply --layout-justified;
-      }
-
-      .details .section {
-        @apply --layout-flex;
-        margin: 16px;
-        min-width: 256px;
-        max-width: 320px;
-      }
-
-      paper-icon-button {
-        @apply --nuxeo-action;
-      }
-
-      paper-icon-button:hover {
-        @apply --nuxeo-action-hover;
-      }
-
       nuxeo-document-view {
         --nuxeo-document-content-height: calc(100vh - 237px - var(--nuxeo-app-top));
       }
     </style>
 
-    <nuxeo-document-info-bar document="[[document]]"></nuxeo-document-info-bar>
-
-    <div class="page">
-      <nuxeo-card id="detailsCard" heading="[[i18n('documentPage.details')]]" collapsible>
-        <div class="details">
-          <div class="section">
-            <h3>[[i18n('documentPage.info')]]</h3>
-            <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
-          </div>
-
-          <!-- metadata -->
-          <div class="section">
-            <h3>[[i18n('documentPage.metadata')]]</h3>
-            <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
-          </div>
-
-          <!-- collections -->
-          <div class="section" hidden$="[[!_hasCollections(document)]]">
-            <h3>[[i18n('documentPage.collections')]]</h3>
-            <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
-          </div>
-
-          <!-- tags -->
-          <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
-            <div class="section">
-              <h3>[[i18n('documentPage.tags')]]</h3>
-              <nuxeo-tag-suggestion
-                document="[[document]]"
-                allow-new-tags
-                placeholder="[[i18n('documentPage.tags.placeholder')]]"
-                readonly="[[!hasPermission(document, 'WriteProperties')]]"
-              >
-              </nuxeo-tag-suggestion>
-            </div>
-          </template>
-
-          <!-- activity -->
-          <div class="section">
-            <h3>[[i18n('documentPage.activity')]]</h3>
-            <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
-          </div>
-        </div>
-      </nuxeo-card>
-
-      <div class="main">
-        <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
-      </div>
-    </div>
+    <nuxeo-grid cols="1" rows="3">
+      <nuxeo-document-info-bar document="[[document]]" nuxeo-grid-row="1" nuxeo-grid-col="1"></nuxeo-document-info-bar>
+      <nuxeo-document-collapsible-details
+        document="[[document]]"
+        nuxeo-grid-row="2"
+        nuxeo-grid-col="1"
+      ></nuxeo-document-collapsible-details>
+      <nuxeo-document-view document="[[document]]" nuxeo-grid-row="3" nuxeo-grid-col="1"></nuxeo-document-view>
+    </nuxeo-grid>
   `,
 
   is: 'nuxeo-collapsible-document-page',
-  behaviors: [LayoutBehavior],
 
   properties: {
     document: {
       type: Object,
     },
-  },
-
-  _hasCollections(doc) {
-    return this.hasCollections(doc);
   },
 });

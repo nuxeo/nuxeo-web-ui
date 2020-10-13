@@ -167,6 +167,10 @@ import './document/nuxeo-document-view.js';
 import './document/nuxeo-document-edit.js';
 import './document/nuxeo-document-metadata.js';
 import './document/nuxeo-picture-document-page.js';
+// import './document/nuxeo-picture-document-page-with-2-grids.js';
+// import './document/nuxeo-picture-document-page-without-composition.js';
+// import './document/nuxeo-picture-document-page-with-grid-areas.js';
+// import './document/nuxeo-picture-document-page-with-grid-areas-2.js';
 
 // Directory layout elements -->
 import './directory/nuxeo-vocabulary-management.js';

@@ -48,31 +48,50 @@ Polymer({
       nuxeo-document-view {
         --nuxeo-document-content-margin-bottom: var(--nuxeo-card-margin-bottom);
       }
-      /* XXX mixing content with cards and without cards will be messy, hence the column-gap */
+      /* mixing content with cards and without cards will be messy */
+      /* expanded-width is hacky too */
+      /* how to configure breakpoint on the grid */
+      /* side bar on document page now has a fixed with when expanded */
     </style>
 
-    <nuxeo-grid cols="2" rows="3" column-gap="16px">
-      <nuxeo-document-page
+    <nuxeo-grid template-columns="1fr 1fr auto" rows="4" column-gap="16px">
+      <nuxeo-document-info-bar
         document="[[document]]"
-        opened
         nuxeo-grid-row="1"
         nuxeo-grid-col="1"
-        nuxeo-grid-colspan="2"
-      ></nuxeo-document-page>
+        nuxeo-grid-colspan="3"
+      ></nuxeo-document-info-bar>
 
-      <nuxeo-card heading="[[i18n('pictureViewLayout.info')]]" nuxeo-grid-row="2" nuxeo-grid-col="1">
+      <nuxeo-document-view
+        document="[[document]]"
+        nuxeo-grid-row="2"
+        nuxeo-grid-col="1"
+        nuxeo-grid-colspan="2"
+      ></nuxeo-document-view>
+
+      <nuxeo-document-sidebar
+        document="[[document]]"
+        opened="{{opened}}"
+        nuxeo-grid-row="2"
+        nuxeo-grid-col="3"
+        nuxeo-grid-rowspan="3"
+        expanded-width="320px"
+      >
+      </nuxeo-document-sidebar>
+
+      <nuxeo-card heading="[[i18n('pictureViewLayout.info')]]" nuxeo-grid-row="3" nuxeo-grid-col="1">
         <nuxeo-picture-info role="widget" document="[[document]]"></nuxeo-picture-info>
       </nuxeo-card>
 
-      <nuxeo-card heading="[[i18n('pictureViewLayout.formats')]]" nuxeo-grid-row="2" nuxeo-grid-col="2">
+      <nuxeo-card heading="[[i18n('pictureViewLayout.formats')]]" nuxeo-grid-row="3" nuxeo-grid-col="2">
         <nuxeo-picture-formats role="widget" document="[[document]]"></nuxeo-picture-formats>
       </nuxeo-card>
 
-      <nuxeo-card heading="[[i18n('pictureViewLayout.exif')]]" nuxeo-grid-row="3" nuxeo-grid-col="1">
+      <nuxeo-card heading="[[i18n('pictureViewLayout.exif')]]" nuxeo-grid-row="4" nuxeo-grid-col="1">
         <nuxeo-picture-exif role="widget" document="[[document]]"></nuxeo-picture-exif>
       </nuxeo-card>
 
-      <nuxeo-card heading="[[i18n('pictureViewLayout.iptc')]]" nuxeo-grid-row="3" nuxeo-grid-col="2">
+      <nuxeo-card heading="[[i18n('pictureViewLayout.iptc')]]" nuxeo-grid-row="4" nuxeo-grid-col="2">
         <nuxeo-picture-iptc role="widget" document="[[document]]"></nuxeo-picture-iptc>
       </nuxeo-card>
     </nuxeo-grid>
