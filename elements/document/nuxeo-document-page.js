@@ -33,6 +33,8 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { animationFrame } from '@polymer/polymer/lib/utils/async.js';
 
+import '../nuxeo-grid/nuxeo-grid.js';
+
 /**
 `nuxeo-document-page`
 @group Nuxeo UI
@@ -170,7 +172,67 @@ Polymer({
 
     <nuxeo-document-info-bar document="[[document]]"></nuxeo-document-info-bar>
 
-    <div class="page">
+    <nuxeo-grid cols="1" gap="10px">
+      <div class="page" nuxeo-grid-col="1">
+        <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
+
+        <div class="side">
+          <div class="scrollerHeader">
+            <paper-icon-button id="details" noink icon="nuxeo:details" on-tap="_toggleOpened"></paper-icon-button>
+            <nuxeo-tooltip for="details">[[i18n('documentPage.details.opened')]]</nuxeo-tooltip>
+          </div>
+          <div class="scroller">
+            <!-- info -->
+            <div class="section">
+              <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
+            </div>
+
+            <!-- metadata -->
+            <div class="section">
+              <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
+            </div>
+
+            <!-- collections -->
+            <div class="section" hidden$="[[!_hasCollections(document)]]">
+              <h3>[[i18n('documentPage.collections')]]</h3>
+              <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
+            </div>
+
+            <!-- tags -->
+            <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
+              <div class="section">
+                <h3>[[i18n('documentPage.tags')]]</h3>
+                <nuxeo-tag-suggestion
+                  document="[[document]]"
+                  allow-new-tags
+                  placeholder="[[i18n('documentPage.tags.placeholder')]]"
+                  readonly="[[!isTaggable(document)]]"
+                >
+                </nuxeo-tag-suggestion>
+              </div>
+            </template>
+
+            <!-- activity -->
+            <div class="section">
+              <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
+                <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
+                  <nuxeo-page-item name="comments" label="[[i18n('documentPage.comments')]]"></nuxeo-page-item>
+                </template>
+                <nuxeo-page-item name="activity" label="[[i18n('documentPage.activity')]]"></nuxeo-page-item>
+              </paper-listbox>
+              <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
+                <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
+                  <nuxeo-document-comment-thread name="comments" uid="[[document.uid]]"></nuxeo-document-comment-thread>
+                </template>
+                <nuxeo-document-activity name="activity" document="[[document]]"></nuxeo-document-activity>
+              </iron-pages>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nuxeo-grid>
+
+    <!--<div class="page">
       <div class="main">
         <nuxeo-document-view document="[[document]]"></nuxeo-document-view>
       </div>
@@ -181,23 +243,23 @@ Polymer({
           <nuxeo-tooltip for="details">[[i18n('documentPage.details.opened')]]</nuxeo-tooltip>
         </div>
         <div class="scroller">
-          <!-- info -->
+          &lt;!&ndash; info &ndash;&gt;
           <div class="section">
             <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
           </div>
 
-          <!-- metadata -->
+          &lt;!&ndash; metadata &ndash;&gt;
           <div class="section">
             <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
           </div>
 
-          <!-- collections -->
+          &lt;!&ndash; collections &ndash;&gt;
           <div class="section" hidden$="[[!_hasCollections(document)]]">
             <h3>[[i18n('documentPage.collections')]]</h3>
             <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
           </div>
 
-          <!-- tags -->
+          &lt;!&ndash; tags &ndash;&gt;
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
               <h3>[[i18n('documentPage.tags')]]</h3>
@@ -211,7 +273,7 @@ Polymer({
             </div>
           </template>
 
-          <!-- activity -->
+          &lt;!&ndash; activity &ndash;&gt;
           <div class="section">
             <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
               <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
@@ -228,7 +290,7 @@ Polymer({
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
   `,
 
   is: 'nuxeo-document-page',
