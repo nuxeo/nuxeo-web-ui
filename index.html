@@ -55,6 +55,9 @@ limitations under the License.
     <!-- XXX: disable zoom on mobile (fix for NXP-26424) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 
+    <!-- Content security policy (needs Nuxeo.UI.config.expressions.eval = false) -->
+    <!-- meta http-equiv="Content-Security-Policy" content="img-src data: blob: *; default-src blob: *; script-src data: * 'nonce-dummy'; style-src 'unsafe-inline' *; font-src data: *" -->
+
     <link rel="stylesheet" type="text/css" href="index.css" />
   </head>
 
@@ -81,7 +84,7 @@ limitations under the License.
 
     <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
 
-    <script>
+    <script nonce="dummy">
       /* eslint-disable no-var, no-unused-vars */
       var Nuxeo = {
         UI: {
@@ -112,6 +115,7 @@ limitations under the License.
               ],
               blob: ['appLinks', 'preview'],
             },
+            // expressions: { eval: false },
             dateFormat: 'LL',
             dateTimeFormat: 'LLL',
             firstDayOfWeek: '',
