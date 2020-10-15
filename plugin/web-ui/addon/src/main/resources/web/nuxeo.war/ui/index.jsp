@@ -16,31 +16,15 @@ limitations under the License.
 -->
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="java.util.List"%>
-<%@ page import="java.lang.management.ManagementFactory"%>
-<%@ page import="java.nio.file.Files"%>
-<%@ page import="java.nio.file.Path"%>
-<%@ page import="java.nio.file.Paths"%>
 <%@ page import="org.nuxeo.common.Environment"%>
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
-<%@ page import="org.nuxeo.runtime.services.config.ConfigurationService"%>
-<%@ page import="org.nuxeo.ecm.web.resources.api.Resource"%>
-<%@ page import="org.nuxeo.ecm.web.resources.api.ResourceContextImpl"%>
-<%@ page import="org.nuxeo.ecm.web.resources.api.service.WebResourceManager"%>
-<%@ page import="org.nuxeo.ecm.core.api.repository.Repository"%>
 <%@ page import="org.nuxeo.ecm.core.api.repository.RepositoryManager"%>
 <%@ page import="org.nuxeo.common.utils.UserAgentMatcher"%>
-<%@ page import="org.nuxeo.connect.packages.PackageManager"%>
-<%@ page import="org.nuxeo.connect.update.PackageType"%>
 
 <%
-  WebResourceManager wrm = Framework.getService(WebResourceManager.class);
-  ConfigurationService cs = Framework.getService(ConfigurationService.class);
-  PackageManager pm = Framework.getService(PackageManager.class);
   String ua = request.getHeader("user-agent");
   String context = request.getContextPath();
-  RepositoryManager rm = Framework.getService(RepositoryManager.class);
-  String defaultRepository = rm.getDefaultRepositoryName();
+  String defaultRepository = Framework.getService(RepositoryManager.class).getDefaultRepositoryName();
   String repository = (String) request.getAttribute("NXREPOSITORY");
   String baseUrl;
 
@@ -119,55 +103,10 @@ limitations under the License.
 
   <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
 
-  <script>
-    var Nuxeo = Nuxeo || {};
-    Nuxeo.UI = Nuxeo.UI || {};
-    Nuxeo.UI.config = <%= cs.getPropertiesAsJson("org.nuxeo.web.ui") %>;
-    Nuxeo.UI.bundles = [
-      <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
-      '<%= context %><%= resource.getURI() %>',
-      <% } %>
-      <% for (String pn : pm.listInstalledPackagesNames(PackageType.ADDON)) {
-        if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".bundle.js"))) { %>
-          '<%= pn %>',
-        <% } else if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".html"))) { %>
-          '<%= context %><%= "/ui/" + pn + ".html" %>',
-        <% } %>
-      <% } %>
-    ];
-    Nuxeo.UI.repositories = [
-      <% for (Repository repo : rm.getRepositories()) { %>
-        <% if (!repo.isHeadless()) { %>
-          {
-            name: '<%= repo.getName() %>',
-            label: '<%= repo.getLabel() %>',
-            href: '<%= context + "/repo/" + repo.getName() + "/ui/" %>',
-            isDefault: <%= defaultRepository.equals(repo.getName()) %>,
-          },
-        <%  } %>
-      <% } %>
-    ];
-    <% if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/routing.html"))) { %>
-      if (!Nuxeo.UI.config.router) {
-        Nuxeo.UI.config.router = {};
-      }
-      if (Nuxeo.UI.config.router.htmlImport === undefined) {
-        Nuxeo.UI.config.router.htmlImport = true;
-      }
-    <% } %>
-  </script>
+  <script src="config.jsp"></script>
 
   <script src="main.bundle.js"></script>
 
-  <% if (!Framework.isDevModeSet()) { %>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js?ts=<%= ManagementFactory.getRuntimeMXBean().getStartTime() %>');
-      });
-    }
-  </script>
-  <% } %>
 </body>
 
 </html>
