@@ -55,6 +55,9 @@ limitations under the License.
   <!-- XXX: disable zoom on mobile (fix for NXP-26424) -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 
+  <!-- Content security policy (needs Nuxeo.UI.config.expressions.eval = false) -->
+  <!-- meta http-equiv="Content-Security-Policy" content="img-src data: blob: *; default-src blob: *; script-src data: * 'nonce-dummy'; style-src 'unsafe-inline' *; font-src data: *" -->
+
   <link rel="stylesheet" type="text/css" href="index.css">
 </head>
 
@@ -73,7 +76,7 @@ limitations under the License.
     </div>
   </nuxeo-app>
 
-  <script>
+  <script nonce="dummy">
     var Nuxeo = Nuxeo || {};
     Nuxeo.UI = Nuxeo.UI || {};
     Nuxeo.UI.config = Nuxeo.UI.config || {};
@@ -83,8 +86,7 @@ limitations under the License.
     Nuxeo.UI.config.dateTimeFormat = 'YYYY-MM-DD HH:mm';
     Nuxeo.UI.config.firstDayOfWeek = '';
     */
-  </script>
-  <script>
+    // Nuxeo.UI.config.expressions = {eval: false};
     // Force all polyfills on
     // window.ShadyDOM = { force: true };
     // window.ShadyCSS = { shimcssproperties: true};

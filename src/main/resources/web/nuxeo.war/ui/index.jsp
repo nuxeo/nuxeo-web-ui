@@ -31,7 +31,6 @@ limitations under the License.
 <%
   WebResourceManager wrm = Framework.getService(WebResourceManager.class);
   RepositoryManager rm = Framework.getService(RepositoryManager.class);
-  ConfigurationService cs = Framework.getService(ConfigurationService.class);
   String ua = request.getHeader("user-agent");
   String context = request.getContextPath();
   String defaultRepository = rm.getDefaultRepositoryName();
@@ -111,23 +110,7 @@ limitations under the License.
 
   <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
 
-  <script>
-    var Nuxeo = Nuxeo || {};
-    Nuxeo.UI = Nuxeo.UI || {};
-    Nuxeo.UI.config = <%= cs.getPropertiesAsJson("org.nuxeo.web.ui") %>;
-    Nuxeo.UI.repositories = [
-      <% for (Repository repo : rm.getRepositories()) { %>
-        <% if (!repo.isHeadless()) { %>
-          {
-            name: '<%= repo.getName() %>',
-            label: '<%= repo.getLabel() %>',
-            href: '<%= context + "/repo/" + repo.getName() + "/ui/" %>',
-            isDefault: <%= defaultRepository.equals(repo.getName())  %>,
-          },
-        <%  } %>
-      <% } %>
-    ];
-  </script>
+  <script src="config.jsp"></script>
 
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
   <link rel="import" href="<%= context %><%= resource.getURI() %>">
@@ -136,15 +119,6 @@ limitations under the License.
   <!-- routing -->
   <link rel="import" href="routing.html">
 
-  <% if (!Framework.isDevModeSet()) { %>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js?ts=<%= ManagementFactory.getRuntimeMXBean().getStartTime() %>');
-      });
-    }
-  </script>
-  <% } %>
 </body>
 
 </html>
