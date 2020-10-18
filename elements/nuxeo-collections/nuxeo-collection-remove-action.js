@@ -34,7 +34,7 @@ Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles"></style>
 
-    <nuxeo-operation op="Collection.RemoveFromCollection" id="removeOp"></nuxeo-operation>
+    <nuxeo-operation op="Collection.RemoveFromCollection" id="removeOp" sync-indexing></nuxeo-operation>
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members, collection)]]">
       <div class="action" on-tap="remove">
