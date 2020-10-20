@@ -224,7 +224,7 @@ Polymer({
                 attr-for-selected="name"
               >
                 <template is="dom-repeat" items="[[paramTypes]]">
-                  <paper-item name="[[item]]">[[item]]</paper-item>
+                  <paper-item name="[[item]]">[[_getParamTypeLabel(item)]]</paper-item>
                 </template>
               </paper-listbox>
             </paper-dropdown-menu>
