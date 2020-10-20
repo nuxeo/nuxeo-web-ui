@@ -280,7 +280,7 @@ Polymer({
             <template is="dom-if" if="[[_isSelectedParamType('content', selectedParamProperties.type)]]">
               <paper-dropdown-menu label="[[i18n('templateRenderingPage.parameters.source')]]" always-float-label>
                 <paper-listbox
-                  class="dropdown-content"
+                  slot="dropdown-content"
                   selected="{{selectedParamProperties.contentType}}"
                   attr-for-selected="name"
                 >
