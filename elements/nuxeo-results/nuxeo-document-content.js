@@ -81,15 +81,21 @@ Polymer({
     <nuxeo-page-provider
       id="nxProvider"
       provider="[[provider]]"
-      page-size="[[pageSize]]"
+      page-size="4"
       aggregations="{{aggregations}}"
       enrichers="[[enrichers]]"
       params="[[params]]"
       schemas="[[schemas]]"
       headers="[[headers]]"
       fetch-aggregates
+      current-page="{{items}}"
+      page="{{page}}"
+      number-of-pages="{{pages}}"
+      auto
     >
     </nuxeo-page-provider>
+
+    <nuxeo-pagination-controls page="{{page}}" number-of-pages="[[pages]]"> </nuxeo-pagination-controls>
 
     <nuxeo-results
       id="results"
@@ -139,6 +145,7 @@ Polymer({
         on-row-clicked="_navigate"
         draggable$="[[_hasWritePermission(document)]]"
         drop-target-filter="[[_dropTargetFilter]]"
+        items="[[items]]"
       >
         <nuxeo-data-table-column
           name="[[i18n('documentContentView.datatable.header.title')]]"
