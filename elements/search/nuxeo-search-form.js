@@ -896,12 +896,8 @@ Polymer({
     // setup data binding
     this.form.addEventListener('params-changed', (e) => {
       // e.detail.path is params.prop_name eg: params.ecm_fulltext
-      if (e.detail.path) {
-        const param = e.detail.path.split('.')[1];
-        this.set(`params.${param}`, e.detail.value);
-        if (this.auto && this.visible) {
-          this._navigateToResults();
-        }
+      if (e.detail.path && this.auto && this.visible) {
+        this._navigateToResults();
       }
     });
     this.skipAggregates = this.form.skipAggregates;
