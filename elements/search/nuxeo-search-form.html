@@ -846,7 +846,11 @@ limitations under the License.
           // e.detail.path is params.prop_name eg: params.ecm_fulltext
           if (e.detail.path) {
             var param = e.detail.path.split('.')[1];
-            this.set('params.' + param, e.detail.value);
+            if (!e.detail.path.match(/^params\.\w+\.(splices|length)$/)) {
+              // XXX (see WEBUI-23)
+              // when the param is an Array, splices and length events will be caught => skip setting the value
+              this.set('params.' + param, e.detail.value);
+            }
             if (this.auto && this.visible) {
               this._navigateToResults();
             }
