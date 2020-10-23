@@ -40,6 +40,8 @@ Polymer({
     <style include="nuxeo-styles">
       :host {
         display: block;
+        padding-bottom: 8px;
+        min-height: 96px;
       }
 
       :host([dragging-files]) label {
@@ -59,16 +61,11 @@ Polymer({
         border: 2px dashed var(--paper-input-container-invalid-color, #de350b);
       }
 
-      label {
-        margin-bottom: 8px;
-      }
-
       label[required]::after {
         display: inline-block;
         content: '*';
         margin-left: 4px;
         color: var(--paper-input-container-invalid-color, #de350b);
-        font-size: 1.2em;
       }
 
       a,
@@ -81,7 +78,6 @@ Polymer({
 
       #dropzone {
         overflow: auto;
-        height: 100%;
       }
 
       #container {
@@ -91,7 +87,7 @@ Polymer({
         @apply --layout-center-justified;
         border-radius: 2px;
         border: 1px dashed var(--paper-input-container-color);
-        min-height: 64px;
+        min-height: 82px;
         height: calc(100% - 2px);
       }
 
