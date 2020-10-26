@@ -86,6 +86,25 @@ Polymer({
         color: var(--nuxeo-primary-color, #0066ff);
         font-weight: bolder;
       }
+      
+      .info {
+        margin-bottom: 1rem;
+      }
+      
+      .info > iron-icon {
+        color: var(--nuxeo-validated, #42BE65);
+        margin-inline-end: 0.5rem;
+        min-width: 1.5rem;
+      }
+      
+      .info > span {
+        font-weight: 600;
+      }
+
+      .read-only {
+        pointer-events: none;
+        opacity: 0.6;
+      }
     </style>
 
     <nuxeo-resource id="taskRequest" path="/task/[[task.id]]/[[action]]" data="{{taskData}}"></nuxeo-resource>
@@ -100,6 +119,13 @@ Polymer({
             action="[[action]]"
           ></nuxeo-document-task-assignment-popup>
 
+          <template is="dom-if" if="[[_isTaskInEndState(task)]]">
+            <div class="info horizontal">
+                <iron-icon icon="icons:assignment-turned-in"></iron-icon>
+                <span>[[i18n('tasks.alreadyProcessed')]]</span>
+            </div>
+          </template>
+          
           <div class="heading">
             <div class="vertical">
               <h3>[[i18n(task.name)]]</h3>
@@ -107,20 +133,28 @@ Polymer({
                 >[[i18n('tasks.viewGraph')]]</a
               >
             </div>
-            <div class="options">
-              <paper-button
-                id="reassignBtn"
-                noink
-                dialog-confirm
-                on-tap="_toggleAssignmentDialog"
-                data-args="reassign"
-                hidden$="[[!task.taskInfo.allowTaskReassignment]]"
-                >[[i18n('tasks.reassign')]]</paper-button
-              >
-              <paper-button id="delegateBtn" noink dialog-confirm on-tap="_toggleAssignmentDialog" data-args="delegate"
-                >[[i18n('tasks.delegate')]]</paper-button
-              >
-            </div>
+
+            <template is="dom-if" if="[[!_isTaskInEndState(task)]]">
+              <div class="options">
+                <paper-button
+                  id="reassignBtn"
+                  noink
+                  dialog-confirm
+                  on-tap="_toggleAssignmentDialog"
+                  data-args="reassign"
+                  hidden$="[[!task.taskInfo.allowTaskReassignment]]"
+                  >[[i18n('tasks.reassign')]]</paper-button
+                >
+                <paper-button
+                  id="delegateBtn"
+                  noink
+                  dialog-confirm
+                  on-tap="_toggleAssignmentDialog"
+                  data-args="delegate"
+                  >[[i18n('tasks.delegate')]]</paper-button
+                >
+              </div>
+            </template>
           </div>
           <div class="horizontal spaced">
             <span>[[i18n(tasks.directive)]]</span>
@@ -142,30 +176,33 @@ Polymer({
             </div>
           </div>
 
-          <nuxeo-layout
-            id="layout"
-            href="[[_href]]"
-            model="[[_model]]"
-            error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"
-            on-element-changed="_elementChanged"
-          ></nuxeo-layout>
+          <div class$="[[_computeLayoutVisibility(task)]]">
+            <nuxeo-layout
+              id="layout"
+              href="[[_href]]"
+              model="[[_model]]"
+              error="[[i18n('documentView.layoutNotFound', task.nodeName)]]"
+              on-element-changed="_elementChanged"
+            ></nuxeo-layout>
+          </div>
 
           <div class="horizontal">
-            <div class="options">
-              <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
-                <paper-button
-                  noink
-                  dialog-confirm
-                  class="primary"
-                  name$="[[item.name]]"
-                  on-tap="_processTask"
-                  disabled$="[[processing]]"
-                >
-                  [[i18n(item.label)]]</paper-button
-                >
-              </template>
-            </div>
-          </div>
+            <template is="dom-if" if="[[!_isTaskInEndState(task)]]">
+              <div class="options">
+                <template is="dom-repeat" items="[[task.taskInfo.taskActions]]">
+                  <paper-button
+                    noink
+                    dialog-confirm
+                    class="primary"
+                    name$="[[item.name]]"
+                    on-tap="_processTask"
+                    disabled$="[[processing]]"
+                  >
+                    [[i18n(item.label)]]</paper-button
+                  >
+                </template>
+              </div>
+            </template>
         </div>
       </iron-pages>
     </div>
@@ -275,5 +312,13 @@ Polymer({
 
   _delegatedActorsExist(delegatedActors) {
     return !!delegatedActors && delegatedActors.length > 0;
+  },
+
+  _computeLayoutVisibility(task) {
+    return this._isTaskInEndState(task) ? 'read-only' : '';
+  },
+
+  _isTaskInEndState(task) {
+    return task && task.state === 'ended';
   },
 });
