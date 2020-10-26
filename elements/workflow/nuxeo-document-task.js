@@ -138,6 +138,7 @@ Polymer({
               <div class="options">
                 <paper-button
                   id="reassignBtn"
+                  class="text"
                   noink
                   dialog-confirm
                   on-tap="_toggleAssignmentDialog"
@@ -147,6 +148,7 @@ Polymer({
                 >
                 <paper-button
                   id="delegateBtn"
+                  class="text"
                   noink
                   dialog-confirm
                   on-tap="_toggleAssignmentDialog"
