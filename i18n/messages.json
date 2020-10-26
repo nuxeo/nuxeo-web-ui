@@ -992,6 +992,7 @@
   "tasks.viewGraph": "View Graph",
   "tasks.delegate": "Delegate",
   "tasks.reassign": "Reassign",
+  "tasks.alreadyProcessed": "The task you are trying to see has already been completed. Please check the correspondent document for current status.",
   "tasks.submit.error": "An error occurred while submitting the task.",
   "tasks.submit.error.alreadyFinished": "The task you tried to submit was already finished by another user.",
   "tasks.submit.error.noPermissions": "You don't have permissions to process this task.",
