@@ -51,15 +51,15 @@ Polymer({
         <div>[[document.properties.picture:info.width]] x [[document.properties.picture:info.height]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.format')]]</label>
+        <label>[[i18n('label.ui.schema.picture.info.format')]]</label>
         <div>[[document.properties.picture:info.format]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.colorSpace')]]</label>
+        <label>[[i18n('label.ui.schema.picture.info.colorSpace')]]</label>
         <div>[[document.properties.picture:info.colorSpace]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.depth')]]</label>
+        <label>[[i18n('label.ui.schema.picture.info.depth')]]</label>
         <div>[[document.properties.picture:info.depth]]</div>
       </div>
       <div class="item">

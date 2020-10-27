@@ -26,7 +26,7 @@ limitations under the License.
 
     <nuxeo-input
       role="widget"
-      label="[[i18n('title')]]"
+      label="[[i18n('label.ui.schema.dc.title')]]"
       name="title"
       value="{{document.properties.dc:title}}"
       autofocus
@@ -36,7 +36,7 @@ limitations under the License.
 
     <nuxeo-textarea
       role="widget"
-      label="[[i18n('label.description')]]"
+      label="[[i18n('label.ui.schema.dc.description')]]"
       name="description"
       value="{{document.properties.dc:description}}"
     >
@@ -44,7 +44,7 @@ limitations under the License.
 
     <nuxeo-directory-suggestion
       role="widget"
-      label="[[i18n('label.dublincore.nature')]]"
+      label="[[i18n('label.ui.schema.dc.nature')]]"
       name="nature"
       directory-name="nature"
       value="{{document.properties.dc:nature}}"
@@ -55,7 +55,7 @@ limitations under the License.
 
     <nuxeo-directory-suggestion
       role="widget"
-      label="[[i18n('label.dublincore.subjects')]]"
+      label="[[i18n('label.ui.schema.dc.subjects')]]"
       directory-name="l10nsubjects"
       name="subjects"
       value="{{document.properties.dc:subjects}}"
@@ -68,7 +68,7 @@ limitations under the License.
 
     <nuxeo-directory-suggestion
       role="widget"
-      label="[[i18n('label.dublincore.coverage')]]"
+      label="[[i18n('label.ui.schema.dc.coverage')]]"
       directory-name="l10ncoverage"
       name="subjects"
       value="{{document.properties.dc:coverage}}"
@@ -80,7 +80,7 @@ limitations under the License.
 
     <nuxeo-date-picker
       role="widget"
-      label="[[i18n('label.dublincore.expire')]]"
+      label="[[i18n('label.ui.schema.dc.expired')]]"
       name="expired"
       value="{{document.properties.dc:expired}}"
     >
