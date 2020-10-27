@@ -86,7 +86,7 @@ Polymer({
       <nuxeo-date datetime="[[document.properties.dc:modified]]"></nuxeo-date>
     </div>
     <div class="item">
-      <label>[[i18n('documentInfo.created')]]</label>
+      <label>[[i18n('label.ui.schema.dc.created')]]</label>
       <nuxeo-date datetime="[[document.properties.dc:created]]"></nuxeo-date>
     </div>
     <div class="item">
@@ -94,7 +94,7 @@ Polymer({
       <nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag>
     </div>
     <div class="item">
-      <label>[[i18n('documentInfo.contributors')]]</label>
+      <label>[[i18n('label.ui.schema.dc.contributors')]]</label>
       <nuxeo-tags type="user" items="[[document.properties.dc:contributors]]"></nuxeo-tags>
     </div>
   `,
