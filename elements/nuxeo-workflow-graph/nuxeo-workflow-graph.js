@@ -58,7 +58,7 @@ import 'jsplumb/dist/js/jsplumb.js'; /* global jsPlumb jsPlumbUtil */
 */
 Polymer({
   _template: html`
-    <style>
+    <style include="nuxeo-styles">
       :host {
         display: block;
       }
