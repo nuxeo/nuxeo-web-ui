@@ -1,6 +1,6 @@
 const { resolve, join } = require('path');
-const merge = require('webpack-merge');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { merge } = require('webpack-merge');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -74,7 +74,7 @@ const addons = [
   {
     from: 'addons/**/*',
     to: TARGET,
-    ignore: ['*.js'],
+    globOptions: { ignore: ['*.js'] },
     // strip addon folder, copy everything over
     transformPath: (path) => {
       path = path.replace(/^addons\/([^/]*)\//, '');
@@ -97,6 +97,11 @@ const common = merge([
       extensions: ['.js', '.html'],
       // set absolute modules path to avoid duplicates
       modules: [resolve(__dirname, 'node_modules')],
+      // resolve some required node modules
+      fallback: {
+        util: false,
+        vm: require.resolve('vm-browserify'),
+      },
     },
     output: {
       filename: '[name].bundle.js',
@@ -115,9 +120,6 @@ const common = merge([
           exclude: /index\.html$/,
           use: {
             loader: 'html-loader',
-            options: {
-              exportAsEs6Default: true,
-            },
           },
         },
         {
@@ -133,7 +135,9 @@ const common = merge([
           use: [
             {
               loader: 'expose-loader',
-              options: 'Quill',
+              options: {
+                exposes: 'Quill',
+              },
             },
           ],
         },
@@ -143,6 +147,7 @@ const common = merge([
       new ProvidePlugin({
         THREE: 'three',
         jQuery: 'jquery',
+        process: 'process',
       }),
       new HtmlWebpackPlugin({
         title: 'Nuxeo',
@@ -160,7 +165,7 @@ const common = merge([
 const development = merge([
   {
     devtool: 'cheap-module-source-map',
-    plugins: [new CopyWebpackPlugin([...tmp, ...polyfills, ...addons, ...thirdparty])],
+    plugins: [new CopyWebpackPlugin({ patterns: [...tmp, ...polyfills, ...addons, ...thirdparty] })],
     devServer: {
       contentBase: TARGET,
       compress: true,
@@ -183,26 +188,22 @@ const assets = ['images', 'fonts', 'themes'].map((p) => {
 
 const production = merge([
   {
-    optimization: {
-      splitChunks: {
-        chunks: 'all',
-        maxInitialRequests: 1, // avoid generating main vendors chunk
-      },
-    },
     plugins: [
-      new CleanWebpackPlugin([TARGET]),
-      new CopyWebpackPlugin([
-        ...tmp,
-        ...polyfills,
-        ...thirdparty,
-        ...layouts,
-        ...addons,
-        ...assets,
-        { from: 'manifest.json' },
-        { from: 'index.css' },
-        { from: 'favicon.ico' },
-        { from: 'sw.js' },
-      ]),
+      new CleanWebpackPlugin(),
+      new CopyWebpackPlugin({
+        patterns: [
+          ...tmp,
+          ...polyfills,
+          ...thirdparty,
+          ...layouts,
+          ...addons,
+          ...assets,
+          { from: 'manifest.json' },
+          { from: 'index.css' },
+          { from: 'favicon.ico' },
+          { from: 'sw.js' },
+        ],
+      }),
       ...analyzer,
     ],
   },
@@ -210,4 +211,4 @@ const production = merge([
 
 const spreadsheet = require('./addons/nuxeo-spreadsheet/webpack.config');
 
-module.exports = (mode) => merge(common, spreadsheet, mode === 'production' ? production : development, { mode });
+module.exports = merge(common, spreadsheet, ENV === 'production' ? production : development);
