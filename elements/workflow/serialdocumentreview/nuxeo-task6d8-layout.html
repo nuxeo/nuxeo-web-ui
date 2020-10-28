@@ -24,18 +24,18 @@ limitations under the License.
 <dom-module id="nuxeo-task6d8-layout">
   <template>
     <div role="widget">
-      <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
+      <label>[[i18n('label.ui.workflow.var_SerialDocumentReview.participants')]]</label>
       <nuxeo-tags type="user" items="[[task.variables.participants]]"></nuxeo-tags>
     </div>
 
     <div role="widget">
-      <label>[[i18n('wf.serialDocumentReview.initiatorComment')]]</label>
+      <label>[[i18n('label.ui.workflow.var_SerialDocumentReview.initiatorComment')]]</label>
       <div>[[task.variables.initiatorComment]]</div>
     </div>
 
     <nuxeo-textarea
       role="widget"
-      label="[[i18n('wf.serialDocumentReview.comment')]]"
+      label="[[i18n('label.ui.workflow.var_SerialDocumentReview.comment')]]"
       value="{{task.variables.comment}}"
       always-float-label
     >
