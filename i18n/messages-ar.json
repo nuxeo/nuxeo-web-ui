@@ -9,7 +9,7 @@
   "activity.Document validated": "validated the document",
   "activity.documentCheckedIn": "created a version",
   "activity.documentCreated": "created the document",
-  "activity.documentCreatedByCopy": "copied the document",
+  "activity.documentCreatedByCopy": "تم نسخ الوثيقة",
   "activity.documentLocked": "locked the document",
   "activity.documentModified": "modified the document",
   "activity.documentMoved": "moved the document",
