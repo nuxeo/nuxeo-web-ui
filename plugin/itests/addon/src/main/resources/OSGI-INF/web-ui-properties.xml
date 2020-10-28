@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<component name="org.nuxeo.web.ui.itests.properties.contrib">
-  <extension target="org.nuxeo.runtime.ConfigurationService" point="configuration">
-    <!-- enabled spreadsheet -->
-    <property name="org.nuxeo.web.ui.spreadsheet.enabled">true</property>
-  </extension>
-</component>

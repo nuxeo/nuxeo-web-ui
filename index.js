@@ -66,9 +66,7 @@ const tmpl = document.createElement('template');
 tmpl.innerHTML = html;
 document.head.appendChild(tmpl.content);
 
-const isEnabled = (flag) => Nuxeo.UI.config[flag] && String(Nuxeo.UI.config[flag].enabled) === 'true';
-
-const bundles = [...Nuxeo.UI.bundles, ...(isEnabled('spreadsheet') ? ['nuxeo-spreadsheet'] : [])];
+const bundles = [...Nuxeo.UI.bundles, 'nuxeo-spreadsheet'];
 
 // load addons / bundles
 // NXP-26977: await loading of addons

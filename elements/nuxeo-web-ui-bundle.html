@@ -810,3 +810,14 @@
     <nuxeo-csv-export-button provider="[[nxProvider]]"></nuxeo-csv-export-button>
   </template>
 </nuxeo-slot-content>
+
+<!-- SPREADSHEET-->
+<nuxeo-slot-content name="spreadsheetButton" slot="RESULTS_ACTIONS" order="-150" disabled>
+  <template>
+    <nuxeo-spreadsheet-button
+      nx-provider="[[nxProvider]]"
+      mode="[[displayMode]]"
+      columns="[[columns]]"
+    ></nuxeo-spreadsheet-button>
+  </template>
+</nuxeo-slot-content>
