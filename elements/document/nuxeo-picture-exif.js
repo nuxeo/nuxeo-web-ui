@@ -26,10 +26,11 @@ import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.j
 */
 Polymer({
   _template: html`
-    <style>
+    <style include="nuxeo-styles">
       .properties label {
         min-width: 10rem;
         margin-inline-end: 12px;
+        @apply --nuxeo-label;
       }
 
       .properties .item {

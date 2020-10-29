@@ -200,7 +200,7 @@ Polymer({
           <!-- tags -->
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
-              <h3>[[i18n('documentPage.tags')]]</h3>
+              <label>[[i18n('documentPage.tags')]]</label>
               <nuxeo-tag-suggestion
                 document="[[document]]"
                 allow-new-tags

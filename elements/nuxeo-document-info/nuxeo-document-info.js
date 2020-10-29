@@ -33,7 +33,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style>
+    <style include="nuxeo-styles">
       [hidden] {
         display: none !important;
       }
@@ -46,7 +46,7 @@ Polymer({
       .item label {
         width: 90px;
         min-width: 90px;
-        font-size: 12px;
+        @apply --nuxeo-label;
       }
     </style>
 

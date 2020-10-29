@@ -73,26 +73,26 @@ Polymer({
       <nuxeo-card id="detailsCard" heading="[[i18n('documentPage.details')]]" collapsible>
         <div class="details">
           <div class="section">
-            <h3>[[i18n('documentPage.info')]]</h3>
+            <h5>[[i18n('documentPage.info')]]</h5>
             <nuxeo-document-info document="[[document]]"></nuxeo-document-info>
           </div>
 
           <!-- metadata -->
           <div class="section">
-            <h3>[[i18n('documentPage.metadata')]]</h3>
+            <h5>[[i18n('documentPage.metadata')]]</h5>
             <nuxeo-document-metadata document="[[document]]"></nuxeo-document-metadata>
           </div>
 
           <!-- collections -->
           <div class="section" hidden$="[[!_hasCollections(document)]]">
-            <h3>[[i18n('documentPage.collections')]]</h3>
+            <h5>[[i18n('documentPage.collections')]]</h5>
             <nuxeo-document-collections document="[[document]]"></nuxeo-document-collections>
           </div>
 
           <!-- tags -->
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
-              <h3>[[i18n('documentPage.tags')]]</h3>
+              <h5>[[i18n('documentPage.tags')]]</h5>
               <nuxeo-tag-suggestion
                 document="[[document]]"
                 allow-new-tags
@@ -105,7 +105,7 @@ Polymer({
 
           <!-- activity -->
           <div class="section">
-            <h3>[[i18n('documentPage.activity')]]</h3>
+            <h5>[[i18n('documentPage.activity')]]</h5>
             <nuxeo-document-activity document="[[document]]"></nuxeo-document-activity>
           </div>
         </div>

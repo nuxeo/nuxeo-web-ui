@@ -30,49 +30,49 @@ const template = html`
         h1,
         .headline-1 {
           font-weight: 400;
-          font-size: 2rem;
+          font-size: 32px;
           letter-spacing: 0;
-          line-height: 2.5rem;
+          line-height: 40px;
         }
 
         h2,
         .headline-2 {
           font-weight: 400;
-          font-size: 1.75rem;
+          font-size: 28px;
           letter-spacing: 0;
-          line-height: 2.25rem;
+          line-height: 36px;
         }
 
         h3,
         .headline-3 {
           font-weight: 400;
-          font-size: 1.25rem;
+          font-size: 20px;
           letter-spacing: 0;
-          line-height: 1.625rem;
+          line-height: 26px;
         }
 
         h4,
         .headline-4 {
           font-weight: 600;
-          font-size: 1rem;
+          font-size: 16px;
           letter-spacing: 0;
-          line-height: 1.375rem;
+          line-height: 22px;
         }
 
         h5,
         .headline-5 {
           font-weight: 700;
-          font-size: 0.875rem;
+          font-size: 14px;
           letter-spacing: 0.24px;
-          line-height: 1.25rem;
+          line-height: 20px;
         }
 
         h6,
         .headline-6 {
           font-weight: 600;
-          font-size: 0.875rem;
+          font-size: 14px;
           letter-spacing: 0.16px;
-          line-height: 1.25rem;
+          line-height: 20px;
         }
 
         /* links */
@@ -95,7 +95,7 @@ const template = html`
         input,
         textarea {
           font-family: var(--nuxeo-app-font);
-          font-size: 1rem !important;
+          font-size: 14px !important;
         }
 
         paper-input[readonly] paper-input-container {
@@ -189,7 +189,7 @@ const template = html`
 
       html {
         font-weight: 400;
-        font-size: 0.875rem;
+        font-size: 16px;
         letter-spacing: 0.16px;
         line-height: 1.25rem;
       }
@@ -199,6 +199,9 @@ const template = html`
         margin: 0;
         min-height: 100%;
         color: var(--nuxeo-text-default);
+        letter-spacing: 0.16px;
+        line-height: 2rem;
+        font-size: 14px;
         font-family: var(--nuxeo-app-font);
       }
 
@@ -293,12 +296,14 @@ const template = html`
         --nuxeo-label: {
           display: block;
           opacity: 0.6;
+          color: #525252;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
           font-weight: 400 !important;
-          letter-spacing: 0.005em !important;
+          letter-spacing: 0.32px !important;
           font-family: var(--nuxeo-app-font);
+          font-size: 12px;
         }
 
         --nuxeo-tag: {
@@ -306,7 +311,7 @@ const template = html`
           background-color: var(--nuxeo-tag-background);
           padding: 0.2rem 0.5rem;
           color: var(--nuxeo-tag-text);
-          font-size: 0.8rem;
+          font-size: 12px;
           letter-spacing: 0.02em;
           line-height: 1rem;
           margin-bottom: 0.3em;
@@ -351,6 +356,7 @@ const template = html`
 
         --nuxeo-action-button-label: {
           padding-right: 8px;
+          font-size: 14px;
         }
 
         --nuxeo-actions-menu-dropdown: {

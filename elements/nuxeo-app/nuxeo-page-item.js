@@ -44,8 +44,9 @@ Polymer({
       }
 
       :host(.iron-selected) {
-        border-bottom: 2px solid var(--nuxeo-app-header-pill-active);
-        color: var(--nuxeo-app-header-pill-active);
+        border-bottom: 2px solid var(--nuxeo-app-header-pill-hover);
+        color: var(--nuxeo-app-header-pill-hover);
+        font-weight: 600;
       }
     </style>
 

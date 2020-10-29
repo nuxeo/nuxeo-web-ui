@@ -75,6 +75,10 @@ Polymer({
         @apply --layout-flex;
       }
 
+      .item label {
+        color: #525252;
+      }
+
       a.viewGraph {
         text-decoration: underline;
         margin-right: 1em;

@@ -38,25 +38,27 @@ Polymer({
       }
 
       nuxeo-dropzone {
-        margin-top: 8px;
+        margin-top: 4px;
       }
 
       nuxeo-document-blob {
         border-top: 1px solid var(--nuxeo-border);
-        padding: 8px 0;
+        padding: 4px 0;
       }
 
       .empty {
         opacity: 0.5;
         padding-bottom: 8px;
         font-size: 1.1em;
+        color: #a8a8a8;
+        padding-bottom: 4px;
       }
     </style>
 
     <nuxeo-document id="doc" doc-id="[[document.uid]]"></nuxeo-document>
 
     <template is="dom-if" if="[[_isAvailable(document, xpath)]]">
-      <h3>[[i18n('documentAttachments.heading')]]</h3>
+      <h3 class="headline-6">[[i18n('documentAttachments.heading')]]</h3>
 
       <div class="vertical layout">
         <template is="dom-repeat" items="[[_computeFiles(_attachments)]]">

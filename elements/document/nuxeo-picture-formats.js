@@ -25,13 +25,14 @@ import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.j
 */
 Polymer({
   _template: html`
-    <style>
+    <style include="nuxeo-styles">
       :host {
         display: block;
       }
       .properties label {
         min-width: 10rem;
         margin-inline-end: 12px;
+        @apply --nuxeo-label;
       }
 
       .properties .item {
