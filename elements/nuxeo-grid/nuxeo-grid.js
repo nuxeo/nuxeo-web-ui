@@ -55,6 +55,20 @@ const GridFormattingMixin = function(superClass) {
           type: String,
           value: 'stretch',
         },
+        /**
+         * The grid template columns.
+         */
+        templateColumns: {
+          type: String,
+          reflectToAttribute: true,
+        },
+        /**
+         * The grid template rows.
+         */
+        templateRows: {
+          type: String,
+          reflectToAttribute: true,
+        },
       };
     }
   };
@@ -330,14 +344,14 @@ class Grid extends GridFormattingMixin(Nuxeo.Element) {
   static get properties() {
     return {
       /**
-       * Number of columns.
+       * Number of columns. Will be ignored if templateColumns is defined.
        */
       cols: {
         type: Number,
         reflectToAttribute: true,
       },
       /**
-       * Number of rows.
+       * Number of rows. Will be ignored if templateRows is defined.
        */
       rows: {
         type: Number,
@@ -385,14 +399,18 @@ class Grid extends GridFormattingMixin(Nuxeo.Element) {
     const css = `
   :host {
     display: grid;
-    grid-template-columns: ${grid.cols && grid.cols > 1 ? '1fr '.repeat(grid.cols) : 'auto'};
-    grid-template-rows: ${grid.rows && grid.rows > 1 ? 'auto '.repeat(grid.rows) : 'auto'};
+    grid-template-columns: ${grid.templateColumns || (grid.cols && grid.cols > 1 ? '1fr '.repeat(grid.cols) : 'auto')};
+    grid-template-rows: ${grid.templateRows || (grid.rows && grid.rows > 1 ? 'auto '.repeat(grid.rows) : 'auto')};
     ${grid.templateAreas ? `grid-template-areas: ${grid.templateAreas};` : ''}
     ${grid.gap ? `grid-gap: ${grid.gap}` : ''};
     ${grid.columnGap ? `grid-column-gap: ${grid.columnGap};` : ''}
     ${grid.rowGap ? `grid-row-gap: ${grid.rowGap};` : ''}
     ${grid.alignItems ? `align-items: ${grid.alignItems};` : ''}
     ${grid.justifyItems ? `justify-items: ${grid.justifyItems};` : ''}
+  }
+
+  ::slotted(nuxeo-grid-template) {
+    display: none;
   }
     `;
     return this._wrapMediaQuery(css, mquery);
@@ -446,7 +464,7 @@ class Grid extends GridFormattingMixin(Nuxeo.Element) {
 
   _updateGrid() {
     let style = '';
-    const children = Array.from(this.querySelectorAll('*:not(nuxeo-grid-template):not(nuxeo-grid-area)')).map(
+    const children = Array.from(this.querySelectorAll(':scope > *:not(nuxeo-grid-template):not(nuxeo-grid-area)')).map(
       (child) => new Child(child),
     );
     children.forEach((child) => {
@@ -463,6 +481,8 @@ class Grid extends GridFormattingMixin(Nuxeo.Element) {
         const grid = {
           cols: processedAreaTemplate.cols,
           rows: processedAreaTemplate.rows,
+          templateColumns: gridTemplate.templateColumns,
+          templateRows: gridTemplate.templateRows,
           templateAreas,
           gap: gridTemplate.gap || this.gap,
           columnGap: gridTemplate.columnGap || this.columnGap,
@@ -480,6 +500,8 @@ class Grid extends GridFormattingMixin(Nuxeo.Element) {
       const grid = {
         cols: this.cols,
         rows: this.rows,
+        templateColumns: this.templateColumns,
+        templateRows: this.templateRows,
         gap: this.gap,
         columnGap: this.columnGap,
         rowGap: this.rowGap,
@@ -490,6 +512,15 @@ class Grid extends GridFormattingMixin(Nuxeo.Element) {
       children.forEach((child) => {
         style += this._buidChildStyle(child);
       });
+      // / RESPONSIVENESS
+      grid.templateColumns = `1fr`;
+      grid.templateRows = `auto`;
+      style += `${this._buildGridStyle(grid, '(max-width: 1024px)')}`;
+      children.forEach((child, index) => {
+        const { align, id, justify } = child;
+        style += `${this._buidChildStyle({ col: 1, row: index + 1, align, id, justify }, '(max-width: 1024px)')}`;
+      });
+      // / END OF RESPONSIVENESS
     }
     const styleEl = document.createElement('style');
     styleEl.textContent = style;

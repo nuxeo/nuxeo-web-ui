@@ -50,31 +50,48 @@ Polymer({
       nuxeo-document-view {
         --nuxeo-document-content-margin-bottom: var(--nuxeo-card-margin-bottom);
       }
-      /* XXX mixing content with cards and without cards will be messy, hence the column-gap */
     </style>
 
-    <nuxeo-grid cols="2" rows="3" column-gap="16px">
-      <nuxeo-document-page
-        document="[[document]]"
-        opened
-        nuxeo-grid-row="1"
-        nuxeo-grid-col="1"
-        nuxeo-grid-colspan="2"
-      ></nuxeo-document-page>
+    <nuxeo-grid>
+      <nuxeo-grid-template column-gap="16px">
+        <nuxeo-grid-area name="page" col="1" row="1" colspan="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="info" col="1" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="formats" col="2" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="exif" col="1" row="3"></nuxeo-grid-area>
+        <nuxeo-grid-area name="iptc" col="2" row="3"></nuxeo-grid-area>
+      </nuxeo-grid-template>
 
-      <nuxeo-card heading="[[i18n('pictureViewLayout.info')]]" nuxeo-grid-row="2" nuxeo-grid-col="1">
+      <nuxeo-grid-template min-width="1520px">
+        <nuxeo-grid-area name="page" col="1" row="1" colspan="4"></nuxeo-grid-area>
+        <nuxeo-grid-area name="info" col="1" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="formats" col="2" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="exif" col="3" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="iptc" col="4" row="2"></nuxeo-grid-area>
+      </nuxeo-grid-template>
+
+      <nuxeo-grid-template max-width="1024px">
+        <nuxeo-grid-area name="page" col="1" row="1"></nuxeo-grid-area>
+        <nuxeo-grid-area name="info" col="1" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="formats" col="1" row="3"></nuxeo-grid-area>
+        <nuxeo-grid-area name="exif" col="1" row="4"></nuxeo-grid-area>
+        <nuxeo-grid-area name="iptc" col="1" row="5"></nuxeo-grid-area>
+      </nuxeo-grid-template>
+
+      <nuxeo-document-page document="[[document]]" opened nuxeo-grid-area="page"></nuxeo-document-page>
+
+      <nuxeo-card heading="[[i18n('pictureViewLayout.info')]]" nuxeo-grid-area="info">
         <nuxeo-picture-info role="widget" document="[[document]]"></nuxeo-picture-info>
       </nuxeo-card>
 
-      <nuxeo-card heading="[[i18n('pictureViewLayout.formats')]]" nuxeo-grid-row="2" nuxeo-grid-col="2">
+      <nuxeo-card heading="[[i18n('pictureViewLayout.formats')]]" nuxeo-grid-area="formats">
         <nuxeo-picture-formats role="widget" document="[[document]]"></nuxeo-picture-formats>
       </nuxeo-card>
 
-      <nuxeo-card heading="[[i18n('pictureViewLayout.exif')]]" nuxeo-grid-row="3" nuxeo-grid-col="1">
+      <nuxeo-card heading="[[i18n('pictureViewLayout.exif')]]" nuxeo-grid-area="exif">
         <nuxeo-picture-exif role="widget" document="[[document]]"></nuxeo-picture-exif>
       </nuxeo-card>
 
-      <nuxeo-card heading="[[i18n('pictureViewLayout.iptc')]]" nuxeo-grid-row="3" nuxeo-grid-col="2">
+      <nuxeo-card heading="[[i18n('pictureViewLayout.iptc')]]" nuxeo-grid-area="iptc">
         <nuxeo-picture-iptc role="widget" document="[[document]]"></nuxeo-picture-iptc>
       </nuxeo-card>
     </nuxeo-grid>
