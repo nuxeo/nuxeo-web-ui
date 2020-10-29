@@ -512,6 +512,15 @@ class Grid extends GridFormattingMixin(Nuxeo.Element) {
       children.forEach((child) => {
         style += this._buidChildStyle(child);
       });
+      // / RESPONSIVENESS
+      grid.templateColumns = `1fr`;
+      grid.templateRows = `auto`;
+      style += `${this._buildGridStyle(grid, '(max-width: 1024px)')}`;
+      children.forEach((child, index) => {
+        const { align, id, justify } = child;
+        style += `${this._buidChildStyle({ col: 1, row: index + 1, align, id, justify }, '(max-width: 1024px)')}`;
+      });
+      // / END OF RESPONSIVENESS
     }
     const styleEl = document.createElement('style');
     styleEl.textContent = style;
