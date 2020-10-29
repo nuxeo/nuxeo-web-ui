@@ -24,56 +24,6 @@ limitations under the License.
   <template>
     <style include="nuxeo-styles"></style>
     <nuxeo-grid>
-      <!--
-        title    description
-        content  content
-        nature   subjects
-        coverage expired
-      -->
-      <nuxeo-grid-template gap="16px">
-        <nuxeo-grid-area name="title" col="1" row="1"></nuxeo-grid-area>
-        <nuxeo-grid-area name="description" col="2" row="1"></nuxeo-grid-area>
-        <nuxeo-grid-area name="content" colspan="2" col="1" row="2"></nuxeo-grid-area>
-        <nuxeo-grid-area name="nature" col="1" row="3"></nuxeo-grid-area>
-        <nuxeo-grid-area name="subjects" col="2" row="3"></nuxeo-grid-area>
-        <nuxeo-grid-area name="coverage" col="1" row="4"></nuxeo-grid-area>
-        <nuxeo-grid-area name="expired" col="2" row="4"></nuxeo-grid-area>
-      </nuxeo-grid-template>
-      <!--
-        title
-        description
-        content
-        nature
-        subjects
-        coverage
-        expired
-      -->
-      <nuxeo-grid-template max-width="720px">
-        <nuxeo-grid-area name="title" col="1" row="1"></nuxeo-grid-area>
-        <nuxeo-grid-area name="description" col="1" row="2"></nuxeo-grid-area>
-        <nuxeo-grid-area name="content" col="1" row="3"></nuxeo-grid-area>
-        <nuxeo-grid-area name="nature" col="1" row="4"></nuxeo-grid-area>
-        <nuxeo-grid-area name="subjects" col="1" row="5"></nuxeo-grid-area>
-        <nuxeo-grid-area name="coverage" col="1" row="6"></nuxeo-grid-area>
-        <nuxeo-grid-area name="expired" col="1" row="7"></nuxeo-grid-area>
-      </nuxeo-grid-template>
-
-      <!--
-        title   decription description
-        content content    content
-        nature  subjects   coverage
-        expired
-      -->
-      <nuxeo-grid-template min-width="1480px">
-        <nuxeo-grid-area name="title" col="1" row="1"></nuxeo-grid-area>
-        <nuxeo-grid-area name="description" col="2" row="1" colspan="2"></nuxeo-grid-area>
-        <nuxeo-grid-area name="content" col="1" row="3" colspan="2"></nuxeo-grid-area>
-        <nuxeo-grid-area name="nature" col="1" row="2"></nuxeo-grid-area>
-        <nuxeo-grid-area name="subjects" col="2" row="2"></nuxeo-grid-area>
-        <nuxeo-grid-area name="coverage" col="3" row="2"></nuxeo-grid-area>
-        <nuxeo-grid-area name="expired" col="3" row="3"></nuxeo-grid-area>
-      </nuxeo-grid-template>
-
       <nuxeo-input
         role="widget"
         label="[[i18n('title')]]"
@@ -149,6 +99,56 @@ limitations under the License.
         nuxeo-grid-area="expired"
       >
       </nuxeo-date-picker>
+
+      <!--
+        title    description
+        content  content
+        nature   subjects
+        coverage expired
+      -->
+      <nuxeo-grid-template gap="16px">
+        <nuxeo-grid-area name="title" col="1" row="1"></nuxeo-grid-area>
+        <nuxeo-grid-area name="description" col="2" row="1"></nuxeo-grid-area>
+        <nuxeo-grid-area name="content" colspan="2" col="1" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="nature" col="1" row="3"></nuxeo-grid-area>
+        <nuxeo-grid-area name="subjects" col="2" row="3"></nuxeo-grid-area>
+        <nuxeo-grid-area name="coverage" col="1" row="4"></nuxeo-grid-area>
+        <nuxeo-grid-area name="expired" col="2" row="4"></nuxeo-grid-area>
+      </nuxeo-grid-template>
+      <!--
+        title
+        description
+        content
+        nature
+        subjects
+        coverage
+        expired
+      -->
+      <nuxeo-grid-template max-width="720px">
+        <nuxeo-grid-area name="title" col="1" row="1"></nuxeo-grid-area>
+        <nuxeo-grid-area name="description" col="1" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="content" col="1" row="3"></nuxeo-grid-area>
+        <nuxeo-grid-area name="nature" col="1" row="4"></nuxeo-grid-area>
+        <nuxeo-grid-area name="subjects" col="1" row="5"></nuxeo-grid-area>
+        <nuxeo-grid-area name="coverage" col="1" row="6"></nuxeo-grid-area>
+        <nuxeo-grid-area name="expired" col="1" row="7"></nuxeo-grid-area>
+      </nuxeo-grid-template>
+
+      <!--
+        title   decription description
+        content content    content
+        nature  subjects   coverage
+        expired
+      -->
+      <nuxeo-grid-template min-width="1480px">
+        <nuxeo-grid-area name="title" col="1" row="1"></nuxeo-grid-area>
+        <nuxeo-grid-area name="description" col="2" row="1" colspan="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="content" col="1" row="3" colspan="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="nature" col="1" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="subjects" col="2" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="coverage" col="3" row="2"></nuxeo-grid-area>
+        <nuxeo-grid-area name="expired" col="3" row="3"></nuxeo-grid-area>
+      </nuxeo-grid-template>
     </nuxeo-grid>
   </template>
 
