@@ -73,6 +73,7 @@ Polymer({
       return;
     }
     const document = {
+      'entity-type': 'document',
       uid: doc.uid,
       title: doc.title,
       type: doc.type,
