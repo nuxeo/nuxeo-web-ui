@@ -144,14 +144,7 @@ app.router = {
     if (isId) {
       return `/doc/${idOrPath}${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
     }
-    return `/browse${
-      idOrPath
-        ? idOrPath
-            .split('/')
-            .map((n) => encodeURIComponent(n))
-            .join('/')
-        : ''
-    }${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
+    return app.router.browse(idOrPath, subPage);
   },
 
   home() {

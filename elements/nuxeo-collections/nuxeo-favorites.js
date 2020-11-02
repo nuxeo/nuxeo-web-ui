@@ -222,11 +222,7 @@ Polymer({
 
   _selectedFavoriteChanged(doc) {
     if (doc) {
-      if (doc.isVersion) {
-        this.navigateTo('document', doc.uid);
-      } else {
-        this.navigateTo('browse', doc.path);
-      }
+      this.navigateTo(doc);
     }
   },
 

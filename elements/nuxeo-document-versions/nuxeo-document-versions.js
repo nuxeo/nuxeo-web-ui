@@ -242,7 +242,7 @@ Polymer({
 
   _showLatest() {
     this._hideList();
-    this.navigateTo('browse', this.document.path);
+    this.navigateTo(this.document);
   },
 
   _showVersion(e) {

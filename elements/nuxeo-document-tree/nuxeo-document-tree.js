@@ -164,12 +164,12 @@ Polymer({
 
     <div class="content">
       <div class="parents" hidden$="[[_noPermission]]">
-        <a href$="[[urlFor('browse', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
+        <a href$="[[urlFor('document', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
           <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
           <span class="parent">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
-          <a href$="[[urlFor('browse', item.path)]]">
+          <a href$="[[urlFor(item)]]">
             <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
             <span class="parent">[[item.title]]</span>
           </a>
@@ -182,7 +182,7 @@ Polymer({
             <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]"></iron-icon>
           </template>
           <span class="node-name flex">
-            <a href$="[[urlFor('browse', item.path)]]">[[_title(item)]]</a>
+            <a href$="[[urlFor(item)]]">[[_title(item)]]</a>
           </span>
         </template>
       </nuxeo-tree>

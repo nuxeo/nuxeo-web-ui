@@ -1157,10 +1157,10 @@ Polymer({
       this.cancelBatch();
       this._clear();
       if (!response.entries || response.entries.length === 1) {
-        this.navigateTo('browse', (response.entries ? response.entries[0] : response).path);
+        this.navigateTo(response.entries ? response.entries[0] : response);
       } else {
         this.fire('document-updated');
-        this.navigateTo('browse', this.targetPath);
+        this.navigateTo('document', this.parent);
       }
     }
   },

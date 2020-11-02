@@ -65,7 +65,7 @@ limitations under the License.
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
             <template>
               <img class="queue-thumbnail" src="[[_thumbnail(item)]]" />
-              <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+              <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>
           <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
@@ -118,7 +118,7 @@ limitations under the License.
       },
 
       _navigate(e) {
-        window.location = this.urlFor('browse', e.detail.item.path);
+        window.location = this.urlFor(e.detail.item);
       },
     });
   </script>

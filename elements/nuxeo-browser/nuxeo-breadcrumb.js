@@ -126,7 +126,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
           </div>
           <div class="doc-path">
             <a
-              href$="[[urlFor('browse', document.path)]]"
+              href$="[[urlFor(document)]]"
               class="current breadcrumb-item breadcrumb-item-current"
               aria-current="page"
               title="[[_title(document)]]"
@@ -192,7 +192,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
           const anchor = document.createElement('a');
           anchor.textContent = element.title;
           anchor.setAttribute('title', element.title);
-          anchor.setAttribute('href', this.urlFor('browse', element.path));
+          anchor.setAttribute('href', this.urlFor(element));
 
           listItem.appendChild(anchor);
           ancestors.appendChild(listItem);

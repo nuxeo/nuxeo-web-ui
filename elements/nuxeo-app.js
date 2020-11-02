@@ -880,7 +880,7 @@ Polymer({
 
   _navigate(e) {
     if (e.detail.doc) {
-      this.navigateTo('browse', e.detail.doc.path, e.detail.docAction);
+      this.navigateTo(e.detail.doc, e.detail.docAction);
       if (e.detail.isFromCollection) {
         this.$$('#collectionsForm').displayMembers(e.detail.srcDoc, e.detail.index);
       }

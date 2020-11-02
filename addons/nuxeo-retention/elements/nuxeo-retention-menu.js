@@ -46,7 +46,7 @@ class RetentionMenu extends mixinBehaviors([FiltersBehavior, I18nBehavior, Routi
       </style>
       <div name="retention">
         <div class="header">[[i18n('retention.menu')]]</div>
-        <nuxeo-menu-item label="retention.rules" name="rules" link="[[urlFor('browse', '/RetentionRules')]]">
+        <nuxeo-menu-item label="retention.rules" name="rules" link="[[urlFor('document', '/RetentionRules')]]">
         </nuxeo-menu-item>
         <nuxeo-menu-item label="retention.search" name="search" route="page:retentionSearch"> </nuxeo-menu-item>
         <nuxeo-menu-item label="retention.events" name="events" route="page:retentionEvents"> </nuxeo-menu-item>
