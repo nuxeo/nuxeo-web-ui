@@ -195,7 +195,7 @@ Polymer({
         <img src="[[_thumbnail(doc)]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor('browse', doc.path)]]" on-tap="handleClick">
+        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick">
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>

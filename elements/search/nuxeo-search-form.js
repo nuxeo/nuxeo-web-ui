@@ -681,7 +681,7 @@ Polymer({
   _selectedDocChanged(doc, old) {
     if ((doc && doc.path && !old) || (doc && doc.path && old && old.path && doc.path !== old.path)) {
       this.__renderDebouncer = Debouncer.debounce(this.__renderDebouncer, timeOut.after(150), () => {
-        this.navigateTo('browse', doc.path);
+        this.navigateTo(doc);
       });
     }
   },

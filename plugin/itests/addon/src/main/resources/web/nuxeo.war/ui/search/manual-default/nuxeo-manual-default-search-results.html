@@ -54,7 +54,7 @@
         >
           <template>
             <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+            <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
           </template>
         </nuxeo-data-table-column>
 

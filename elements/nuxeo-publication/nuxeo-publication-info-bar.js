@@ -115,6 +115,6 @@ Polymer({
   },
 
   _srcUrl() {
-    return this._src ? this.urlFor('browse', this._src.path) : null;
+    return this._src ? this.urlFor(this._src) : null;
   },
 });

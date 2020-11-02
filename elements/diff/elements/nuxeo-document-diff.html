@@ -35,13 +35,13 @@ limitations under the License.
     <div class="value simple">
       <!-- no changes -->
       <template is="dom-if" if="[[_hasNoChanges(delta, originalValue)]]">
-        <a href$="[[urlFor('browse', originalValue.path)]]">[[originalValue.title]]</a>
+        <a href$="[[urlFor(originalValue)]]">[[originalValue.title]]</a>
       </template>
       <!-- additions -->
       <template is="dom-if" if="[[_hasAddition(delta, hideAdditions)]]">
         <template is="dom-if" if="[[_getAddition(delta)]]">
           <div class="addition">
-            <a href$="[[urlFor('browse', newValue.path)]]"><span class="added">[[newValue.title]]</span></a>
+            <a href$="[[urlFor(newValue)]]"><span class="added">[[newValue.title]]</span></a>
           </div>
         </template>
       </template>
@@ -51,9 +51,7 @@ limitations under the License.
           <!-- old value -->
           <template is="dom-if" if="[[_getModificationOldValue(delta)]]">
             <div class="deletion">
-              <a href$="[[urlFor('browse', originalValue.path)]]"
-                ><span class="deleted">[[originalValue.title]]</span></a
-              >
+              <a href$="[[urlFor(originalValue)]]"><span class="deleted">[[originalValue.title]]</span></a>
             </div>
           </template>
         </template>
@@ -61,7 +59,7 @@ limitations under the License.
           <!-- new value -->
           <template is="dom-if" if="[[_getModificationNewValue(delta)]]">
             <div class="addition">
-              <a href$="[[urlFor('browse', newValue.path)]]"><span class="added">[[newValue.title]]</span></a>
+              <a href$="[[urlFor(newValue)]]"><span class="added">[[newValue.title]]</span></a>
             </div>
           </template>
         </template>
@@ -70,7 +68,7 @@ limitations under the License.
       <template is="dom-if" if="[[_hasDeletion(delta, hideDeletions)]]">
         <template is="dom-if" if="[[_getDeletion(delta)]]">
           <div class="deletion">
-            <a href$="[[urlFor('browse', originalValue.path)]]"><span class="deleted">[[originalValue.title]]</span></a>
+            <a href$="[[urlFor(originalValue)]]"><span class="deleted">[[originalValue.title]]</span></a>
           </div>
         </template>
       </template>
@@ -78,12 +76,12 @@ limitations under the License.
       <template is="dom-if" if="[[_hasObjectInnerChanges(delta)]]">
         <template is="dom-if" if="[[!hideDeletions]]">
           <div class="deletion">
-            <a href$="[[urlFor('browse', originalValue.path)]]"><span class="deleted">[[originalValue.title]]</span></a>
+            <a href$="[[urlFor(originalValue)]]"><span class="deleted">[[originalValue.title]]</span></a>
           </div>
         </template>
         <template is="dom-if" if="[[!hideAdditions]]">
           <div class="addition">
-            <a href$="[[urlFor('browse', newValue.path)]]"><span class="added">[[newValue.title]]</span></a>
+            <a href$="[[urlFor(newValue)]]"><span class="added">[[newValue.title]]</span></a>
           </div>
         </template>
       </template>

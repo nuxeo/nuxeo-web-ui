@@ -135,7 +135,7 @@ limitations under the License.
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                  <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
@@ -209,7 +209,7 @@ limitations under the License.
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                  <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
@@ -247,7 +247,7 @@ limitations under the License.
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-                  <a class="ellipsis" href$="[[urlFor('browse', item.path)]]">[[item.title]]</a>
+                  <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
@@ -331,7 +331,7 @@ limitations under the License.
           detail = {
             doc: e.detail.item,
           };
-          this.navigateTo('browse', detail.doc.path);
+          this.navigateTo(detail.doc);
         } else {
           detail = {
             doc: e.model.item,
