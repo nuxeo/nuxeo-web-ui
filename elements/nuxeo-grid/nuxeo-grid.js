@@ -330,7 +330,7 @@ customElements.define(GridArea.is, GridArea);
  *
  * @memberof Nuxeo
  */
-class Grid extends GridFormattingMixin(Nuxeo.Element) {
+class Grid extends Nuxeo.Element {
   static get is() {
     return 'nuxeo-grid';
   }
@@ -355,6 +355,52 @@ class Grid extends GridFormattingMixin(Nuxeo.Element) {
        */
       rows: {
         type: Number,
+        reflectToAttribute: true,
+      },
+      /**
+       * Grid gap.
+       */
+      gap: {
+        type: String,
+      },
+      /**
+       * Grid row-gap.
+       */
+      rowGap: {
+        type: String,
+      },
+      /**
+       * Grid column-gap.
+       */
+      columnGap: {
+        type: String,
+      },
+      /**
+       * Grid align-items.
+       */
+      alignItems: {
+        type: String,
+        value: 'stretch',
+      },
+      /**
+       * Grid align-items.
+       */
+      justifyItems: {
+        type: String,
+        value: 'stretch',
+      },
+      /**
+       * The grid template columns.
+       */
+      templateColumns: {
+        type: String,
+        reflectToAttribute: true,
+      },
+      /**
+       * The grid template rows.
+       */
+      templateRows: {
+        type: String,
         reflectToAttribute: true,
       },
     };
