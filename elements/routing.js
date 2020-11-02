@@ -65,7 +65,8 @@ page('/doc/:repo?/:id/', (data) => {
   if (!data.state.contentView) {
     app.currentContentView = null;
   }
-  app.load('browse', data.params.id, '', 'view');
+  const searchParams = new URLSearchParams(data.querystring);
+  app.load('browse', data.params.id, '', searchParams.get('p') || 'view');
 });
 
 page('/admin/:tab?', (data) => {
@@ -138,8 +139,19 @@ app.router = {
     }${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
   },
 
-  document(id) {
-    return `/doc/${id}`;
+  document(idOrPath, subPage) {
+    const isId = idOrPath && !idOrPath.startsWith('/');
+    if (isId) {
+      return `/doc/${idOrPath}${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
+    }
+    return `/browse${
+      idOrPath
+        ? idOrPath
+            .split('/')
+            .map((n) => encodeURIComponent(n))
+            .join('/')
+        : ''
+    }${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
   },
 
   home() {
