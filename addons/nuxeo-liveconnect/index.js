@@ -15,15 +15,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import './elements/nuxeo-liveconnect-box-link.js';
-import './elements/nuxeo-liveconnect-dropbox-link.js';
 import './elements/nuxeo-liveconnect-google-drive-link.js';
-import './elements/nuxeo-liveconnect-onedrive-link.js';
 
 import boxHtml from './nuxeo-liveconnect-box.html';
-import dropboxHtml from './nuxeo-liveconnect-dropbox.html';
 import driveHtml from './nuxeo-liveconnect-google-drive.html';
-import onedriveHtml from './nuxeo-liveconnect-onedrive.html';
 
 const tmpl = document.createElement('template');
-tmpl.innerHTML = [boxHtml, dropboxHtml, driveHtml, onedriveHtml].join('');
+tmpl.innerHTML = [boxHtml, driveHtml].join('');
 document.head.appendChild(tmpl.content);
