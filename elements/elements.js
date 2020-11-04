@@ -292,4 +292,7 @@ import './diff/nuxeo-diff.js';
 // CSV Export -->
 import './nuxeo-csv-export/nuxeo-csv-export-button.js';
 
+// Nuxeo Grid
+import './nuxeo-grid/nuxeo-grid.js';
+
 import './nuxeo-sardine.js';
