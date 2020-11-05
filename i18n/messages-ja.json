@@ -567,7 +567,7 @@
   "eventType.annotationCreated": "注釈が作成されました",
   "eventType.annotationDeleted": "注釈が削除されました",
   "eventType.Cancelation event": "キャンセルイベント",
-  "eventType.documentCheckedIn": "文書がチェックインされました",
+  "eventType.documentCheckedIn": "バージョンを作成しました",
   "eventType.documentCheckedOut": "文書がチェックアウトされました",
   "eventType.documentCreated": "文書が作成されました",
   "eventType.documentCreatedByCopy": "文書がコピーによって作成されました",
