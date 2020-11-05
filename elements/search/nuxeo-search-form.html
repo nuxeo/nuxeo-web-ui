@@ -658,10 +658,26 @@ limitations under the License.
         }
       },
 
+      _validate: function() {
+        var innerLayout = this.$.layout.$.layout;
+        var valid = innerLayout.validate();
+        if (!valid) {
+          var elementsToValidate = innerLayout._getValidatableElements(innerLayout.element.root);
+          var invalidField = elementsToValidate.find(function(node) {
+            return node.invalid;
+          });
+          if (invalidField) {
+            invalidField.scrollIntoView();
+            invalidField.focus();
+          }
+        }
+        return valid;
+      },
+
       _paramsChanged: function() {
         this.$.provider.page = 1;
         this.dirty = true;
-        if (this.results && this.auto && this.visible) {
+        if (this.results && this.auto && this.visible && this._validate()) {
           this.__fetchDebouncer = Polymer.Debouncer.debounce(this.__fetchDebouncer, Polymer.Async.timeOut.after(300),
             function() {
               this.results.reset();
@@ -717,7 +733,7 @@ limitations under the License.
       },
 
       _search: function() {
-        if (this.results) {
+        if (this.results && this._validate()) {
           this.results.reset();
           return this._fetch(this.results).then(this._navigateToResults.bind(this));
         } else if (this.visible) {
