@@ -567,7 +567,7 @@
   "eventType.annotationCreated": "Anotasi dibuat",
   "eventType.annotationDeleted": "Anotasi dihapus",
   "eventType.Cancelation event": "Pembatalan acara",
-  "eventType.documentCheckedIn": "Dokumen diperiksa masuk",
+  "eventType.documentCheckedIn": "Membuat sebuah versi",
   "eventType.documentCheckedOut": "Dokumen diperiksa keluar",
   "eventType.documentCreated": "Dokumen dibuat",
   "eventType.documentCreatedByCopy": "Dokumen yang dibuat dengan cara disalin",

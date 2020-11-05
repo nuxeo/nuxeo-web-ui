@@ -567,7 +567,7 @@
   "eventType.annotationCreated": "Annotatie aangemaakt",
   "eventType.annotationDeleted": "Annotatie gewist",
   "eventType.Cancelation event": "Annuleringsgebeurtenis",
-  "eventType.documentCheckedIn": "Document ingecheckt",
+  "eventType.documentCheckedIn": "Heeft een versie aangemaakt",
   "eventType.documentCheckedOut": "Document uitgecheckt",
   "eventType.documentCreated": "Document aangemaakt",
   "eventType.documentCreatedByCopy": "Document aangemaakt per kopie",
