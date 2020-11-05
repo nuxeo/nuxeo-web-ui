@@ -567,7 +567,7 @@
   "eventType.annotationCreated": "Adnotacja utworzona",
   "eventType.annotationDeleted": "Adnotacja usunięta",
   "eventType.Cancelation event": "Zdarzenie anulowania",
-  "eventType.documentCheckedIn": "Dokument zaewidencjonowany",
+  "eventType.documentCheckedIn": "Utworzył wersję",
   "eventType.documentCheckedOut": "Dokument wyewidencjonowany",
   "eventType.documentCreated": "Dokument utworzony",
   "eventType.documentCreatedByCopy": "Dokument utworzony poprzez kopię",
