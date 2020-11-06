@@ -44,6 +44,8 @@ Polymer({
       }
 
       .item label {
+        @apply --nuxeo-label;
+        line-height: 2.2rem;
         width: 90px;
         min-width: 90px;
         font-size: 12px;
