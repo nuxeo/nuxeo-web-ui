@@ -90,6 +90,18 @@
         <type>LegacyFile</type>
       </subtypes>
     </doctype>
+    <doctype name="GridFile" extends="File">
+    </doctype>
+    <doctype name="Folder" append="true">
+      <subtypes>
+        <type>GridFile</type>
+      </subtypes>
+    </doctype>
+    <doctype name="Workspace" append="true">
+      <subtypes>
+        <type>GridFile</type>
+      </subtypes>
+    </doctype>
   </extension>
   <extension target="org.nuxeo.ecm.core.lifecycle.LifeCycleService" point="types">
     <types>
@@ -110,6 +122,7 @@
         <type>MultiComplex</type>
         <type>MultiString</type>
         <type>LegacyFile</type>
+        <type>GridFile</type>
       </rule>
     </filter>
   </extension>

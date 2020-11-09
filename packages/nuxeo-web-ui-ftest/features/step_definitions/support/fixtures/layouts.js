@@ -262,5 +262,6 @@ fixtures.layouts = {
     Folder: 'nuxeo-collapsible-document-page',
     Workspace: 'nuxeo-collapsible-document-page',
     Collection: 'nuxeo-collapsible-document-page',
+    GridFile: 'nuxeo-gridfile-document-page',
   },
 };
