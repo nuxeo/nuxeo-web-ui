@@ -9,6 +9,7 @@ import page from '@nuxeo/page/page.mjs';
 // expose Polymer and PolymerElement for 1.x and 2.x compat
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import * as Async from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
@@ -36,13 +37,13 @@ import { DocumentContentBehavior } from './elements/nuxeo-results/nuxeo-document
 import { ChartDataBehavior } from './elements/nuxeo-admin/nuxeo-chart-data-behavior.js';
 
 // load Web UI bundle
-import html from './elements/nuxeo-web-ui-bundle.html';
+import bundleHtml from './elements/nuxeo-web-ui-bundle.html';
 
 window.moment = moment;
 window.page = page;
 
 // expose commonly used legacy helpers for compat
-Object.assign(Polymer, { dom, importHref, mixinBehaviors, Debouncer, Async, RenderStatus });
+Object.assign(Polymer, { dom, html, importHref, mixinBehaviors, Debouncer, Async, RenderStatus });
 window.Polymer = Polymer;
 window.PolymerElement = PolymerElement;
 window.importHref = importHref;
@@ -63,7 +64,7 @@ Nuxeo.RoutingBehavior = RoutingBehavior;
 Nuxeo.UploaderBehavior = UploaderBehavior;
 
 const tmpl = document.createElement('template');
-tmpl.innerHTML = html;
+tmpl.innerHTML = bundleHtml;
 document.head.appendChild(tmpl.content);
 
 const bundles = [...Nuxeo.UI.bundles, 'nuxeo-spreadsheet'];
@@ -80,7 +81,7 @@ Promise.all(
       /* webpackInclude: /addons\/[^\/]+\/index.js$/ */
       // eslint-disable-next-line comma-dangle
       `./addons/${url}`
-    );
+    ).catch(() => import(/* webpackIgnore: true */ `./${url}.bundle.js`));
   }),
 )
   .then(() => customElements.whenDefined('nuxeo-app'))
