@@ -14,6 +14,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
+<link rel="import" href="nuxeo-gridfile-document-page.html" />
+
 <nuxeo-slot-content name="test_search" slot="DRAWER_ITEMS" order="34">
   <template>
     <nuxeo-menu-icon label="Test Search" name="test_search" icon="icons:bug-report"></nuxeo-menu-icon>
@@ -47,6 +50,16 @@ limitations under the License.
       provider="manual-default"
       schemas="dublincore,common,uid"
     ></nuxeo-search-form>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="gridDocumentViewPage" slot="DOCUMENT_VIEWS_PAGES" order="0">
+  <template>
+    <nuxeo-filter document="[[document]]" type="GridFile">
+      <template>
+        <nuxeo-gridfile-document-page name="view" document="[[document]]"></nuxeo-gridfile-document-page>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 
