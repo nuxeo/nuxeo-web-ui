@@ -109,7 +109,7 @@ Polymer({
     >
       <div slot="actions">
         <template is="dom-if" if="[[hasPermission(document, 'RemoveChildren')]]">
-          <paper-button noink on-tap="_emptyTrash" class="primary small"
+          <paper-button noink on-tap="_emptyTrash" class="text small"
             >[[i18n('documentTrashContent.emptyTrash')]]</paper-button
           >
         </template>

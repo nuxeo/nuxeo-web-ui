@@ -104,7 +104,7 @@ Polymer({
 
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
           <div class="top actions">
-            <paper-button id="addEntry" class="primary" on-tap="_createEntry">
+            <paper-button id="addEntry" class="text" on-tap="_createEntry">
               <span>+ [[i18n('vocabularyManagement.addEntry')]]</span>
             </paper-button>
           </div>

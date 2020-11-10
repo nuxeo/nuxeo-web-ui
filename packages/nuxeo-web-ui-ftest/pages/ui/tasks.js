@@ -13,6 +13,6 @@ export default class Tasks extends BasePage {
   }
 
   get dashboardLink() {
-    return this.el.element('.tasks-dashboard a');
+    return this.el.element('.tasks-dashboard #link');
   }
 }
