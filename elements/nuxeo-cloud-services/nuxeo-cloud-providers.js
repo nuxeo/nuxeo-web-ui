@@ -48,7 +48,7 @@ Polymer({
 
     <nuxeo-card heading="[[i18n('cloudProviders.OAuth2ServiceProviders')]]">
       <div class="layout horizontal center end-justified">
-        <paper-button id="addEntry" class="primary" on-tap="_addEntry">
+        <paper-button id="addEntry" class="text" on-tap="_addEntry">
           <span>[[i18n('cloudProviders.add')]]</span>
         </paper-button>
       </div>

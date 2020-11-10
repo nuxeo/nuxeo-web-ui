@@ -40,7 +40,9 @@ Polymer({
     <div class="header">[[i18n('app.tasks')]]</div>
     <nuxeo-tasks-list id="tasks" current="[[currentTask]]"></nuxeo-tasks-list>
     <div class="tasks-dashboard">
-      <a href$="[[urlFor('tasks')]]">[[i18n('app.viewTasksDashboard')]]</a>
+      <paper-button id="link" class="text small" on-click="_navigateToDashboard"
+        >[[i18n('app.viewTasksDashboard')]]</paper-button
+      >
     </div>
   `,
 
@@ -59,5 +61,9 @@ Polymer({
     if (visible) {
       this.$.tasks.fetch();
     }
+  },
+
+  _navigateToDashboard() {
+    this.navigateTo('tasks');
   },
 });
