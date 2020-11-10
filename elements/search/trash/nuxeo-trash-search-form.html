@@ -28,9 +28,9 @@ limitations under the License.
       role="widget"
       id="searchInput"
       type="search"
-      label="[[i18n('defaultSearch.fullText')]]"
+      label="[[i18n('label.ui.predicate.ecm_fulltext')]]"
       value="{{searchTerm}}"
-      placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
+      placeholder="[[i18n('label.ui.predicate.ecm_fulltext.placeholder')]]"
       autofocus
       on-keydown="_checkForEnter"
     >
@@ -38,14 +38,14 @@ limitations under the License.
 
     <nuxeo-path-suggestion
       value="{{_path}}"
-      label="[[i18n('defaultSearch.path')]]"
+      label="[[i18n('label.ui.predicate.ecm_path')]]"
       role="widget"
     ></nuxeo-path-suggestion>
 
     <div role="widget">
-      <label>[[i18n('defaultSearch.authors')]]</label>
+      <label>[[i18n('label.ui.aggregate.dc_creator_agg')]]</label>
       <nuxeo-dropdown-aggregation
-        placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
+        placeholder="[[i18n('label.ui.aggregate.dc_creator_agg.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
         multiple="true"
@@ -59,7 +59,7 @@ limitations under the License.
         data="[[aggregations.common_size_agg]]"
         value="{{params.common_size_agg}}"
         name="size"
-        label="[[i18n('defaultSearch.size')]]"
+        label="[[i18n('label.ui.aggregate.common_size_agg')]]"
         collapsible
       >
       </nuxeo-checkbox-aggregation>
