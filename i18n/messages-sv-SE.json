@@ -567,7 +567,7 @@
   "eventType.annotationCreated": "Anteckning skapades",
   "eventType.annotationDeleted": "Anteckning togs bort",
   "eventType.Cancelation event": "Avbrottshändelse",
-  "eventType.documentCheckedIn": "Skapade en version",
+  "eventType.documentCheckedIn": "Dokument checkades in",
   "eventType.documentCheckedOut": "Dokument checkades ut",
   "eventType.documentCreated": "Dokument skapades",
   "eventType.documentCreatedByCopy": "Dokument skapades genom kopiering",
