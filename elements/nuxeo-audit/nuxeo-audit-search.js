@@ -94,7 +94,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         </div>
       </nuxeo-card>
       <nuxeo-card>
-        <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('audit.empty')]]">
+        <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('documentHistory.empty')]]">
           <nuxeo-data-table-column name="[[i18n('audit.performedAction')]]" sort-by="eventId">
             <template>[[_formati18n('eventType.', item.eventId)]]</template>
           </nuxeo-data-table-column>
