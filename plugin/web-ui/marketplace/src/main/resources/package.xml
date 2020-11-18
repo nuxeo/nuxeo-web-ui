@@ -12,9 +12,7 @@
   <production-state>production_ready</production-state>
   <supported>true</supported>
   <platforms>
-    <platform>server-@NUXEO_PLATFORM_VERSION@</platform>
-    <platform>server-@NUXEO_PLATFORM_VERSION@-*</platform>
-    <platform>server-@NUXEO_TARGET_VERSION@</platform>
+    <platform>@DISTRIBUTION_NAME@-@NUXEO_TARGET_VERSION@</platform>
   </platforms>
   <license>Apache License, Version 2.0</license>
   <license-url>http://www.apache.org/licenses/LICENSE-2.0.html</license-url>

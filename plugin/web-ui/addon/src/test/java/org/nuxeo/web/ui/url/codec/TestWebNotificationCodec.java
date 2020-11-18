@@ -44,7 +44,8 @@ import org.nuxeo.runtime.test.runner.RuntimeFeature;
  */
 @RunWith(FeaturesRunner.class)
 @Features(RuntimeFeature.class)
-@Deploy({ "org.nuxeo.ecm.platform.url.core", "org.nuxeo.web.ui:OSGI-INF/url-codecs-web-contrib.xml" })
+@Deploy("org.nuxeo.ecm.platform.url")
+@Deploy("org.nuxeo.web.ui:OSGI-INF/url-codecs-web-contrib.xml")
 public class TestWebNotificationCodec {
 
     @Inject
