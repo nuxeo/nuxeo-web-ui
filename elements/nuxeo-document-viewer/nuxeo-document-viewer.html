@@ -17,6 +17,9 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-document-preview.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../nuxeo-dropzone/nuxeo-dropzone.html">
 <link rel="import" href="../nuxeo-document-blob/nuxeo-document-blob.html">
 
@@ -28,23 +31,26 @@ limitations under the License.
 <dom-module id="nuxeo-document-viewer">
   <template>
     <style include="nuxeo-styles">
-      nuxeo-dropzone {
-        height: calc(80vh - 100px);
+      :host {
         display: block;
       }
 
-      nuxeo-document-preview {
+      iron-image, nuxeo-document-preview {
         width: 100%;
         height: calc(80vh - 100px);
-        display: block;
       }
 
-      nuxeo-document-blob {
+      nuxeo-document-blob, nuxeo-dropzone {
         margin-top: 8px;
       }
     </style>
 
-    <nuxeo-dropzone document="{{document}}" hidden$="[[document.properties.file:content.data]]" update-document></nuxeo-dropzone>
+    <template is="dom-if" if="[[!document.properties.file:content.data]]">
+      <iron-image position="center" sizing="contain" src="[[_thumbnail(document)]]"></iron-image>
+      <template is="dom-if" if="[[_isDropzoneAvailable(document)]]">
+        <nuxeo-dropzone document="[[document]]" update-document></nuxeo-dropzone>
+      </template>
+    </template>
     <template is="dom-if" if="[[document.properties.file:content.data]]">
       <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
       <nuxeo-document-blob document="[[document]]"></nuxeo-document-blob>
@@ -57,9 +63,23 @@ limitations under the License.
 <script>
   Polymer({
     is: 'nuxeo-document-viewer',
-    behaviors: [Nuxeo.I18nBehavior],
+    behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
     properties: {
       document: Object
-    }
+    },
+
+    _thumbnail: function(doc) {
+      return (doc && doc.uid
+       && doc.contextParameters
+       && doc.contextParameters.thumbnail
+       && doc.contextParameters.thumbnail.url) || '';
+    },
+
+    _isDropzoneAvailable: function (doc) {
+      return this.hasPermission(doc, 'WriteProperties') &&
+       !this.isImmutable(doc) &&
+       !this.hasType(doc, 'Root') &&
+       !this.isTrashed(doc);
+    },
   });
 </script>
