@@ -567,7 +567,7 @@
   "eventType.annotationCreated": "Anotación creada",
   "eventType.annotationDeleted": "Anotación eliminada",
   "eventType.Cancelation event": "Evento de cancelación",
-  "eventType.documentCheckedIn": "Versión creada",
+  "eventType.documentCheckedIn": "Documento registrado",
   "eventType.documentCheckedOut": "Documento retirado",
   "eventType.documentCreated": "Documento creado",
   "eventType.documentCreatedByCopy": "Documento creado por copia",

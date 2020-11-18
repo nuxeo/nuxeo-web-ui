@@ -567,7 +567,7 @@
   "eventType.annotationCreated": "Autorizzazione creata",
   "eventType.annotationDeleted": "Annotazione eliminata",
   "eventType.Cancelation event": "Evento annullamento",
-  "eventType.documentCheckedIn": "Ha creato una versione",
+  "eventType.documentCheckedIn": "Documento caricato",
   "eventType.documentCheckedOut": "Documento scaricato",
   "eventType.documentCreated": "Documento creato",
   "eventType.documentCreatedByCopy": "Documento creato con copia",

@@ -567,7 +567,7 @@
   "eventType.annotationCreated": "Oharpena sortuta",
   "eventType.annotationDeleted": "Oharpena ezabatuta",
   "eventType.Cancelation event": "Ezeztatze-gertaera",
-  "eventType.documentCheckedIn": "Bertsioa sortu du",
+  "eventType.documentCheckedIn": "Dokumentuaren checkin-a eginda",
   "eventType.documentCheckedOut": "Dokumentuaren checkout-a eginda",
   "eventType.documentCreated": "Dokumentua sortuta",
   "eventType.documentCreatedByCopy": "Dokumentua kopia bidez sortuta",
