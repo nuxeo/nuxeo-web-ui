@@ -17,6 +17,7 @@ Feature: Tasks
   Scenario: I can delegate a task
     Given I login as "John"
     And I have a File document
+    And I have permission ReadWrite for this document
     And This document has a "SerialDocumentReview" workflow running
     When I browse to the document
     Then I can see a process is running in the document
@@ -41,6 +42,7 @@ Feature: Tasks
   Scenario: I cannot reassign a task
     Given I login as "John"
     And I have a File document
+    And I have permission ReadWrite for this document
     And This document has a "SerialDocumentReview" workflow running
     When I browse to the document
     Then I can see a process is running in the document
@@ -52,6 +54,7 @@ Feature: Tasks
   Scenario: I can reassign a task without Admin privileges
     Given I login as "Bob"
     And I have a File document
+    And I have permission ReadWrite for this document
     And This document has a "SerialDocumentReview" workflow running
     And The workflow running for this document will proceed with "start_review" action and the following variables:
       | name               | value      | type |
@@ -74,6 +77,7 @@ Feature: Tasks
   Scenario: I can reassign a task with Admin privileges
     Given I login as "Joe"
     And I have a File document
+    And I have permission ReadWrite for this document
     And This document has a "SerialDocumentReview" workflow running
     And The workflow running for this document will proceed with "start_review" action and the following variables:
       | name               | value      | type |
