@@ -22,6 +22,7 @@ Feature: Workflows
 
   Scenario: I can process a workflow and cancel
     Given I have a File document
+    And I have permission ReadWrite for this document
     And This document has a "SerialDocumentReview" workflow running
     When I browse to the document
     Then I can see a process is running in the document
@@ -33,6 +34,7 @@ Feature: Workflows
 
   Scenario: I can abandon a workflow
     Given I have a File document
+    And I have permission ReadWrite for this document
     And This document has a "SerialDocumentReview" workflow running
     When I browse to the document
     Then I can see a process is running in the document
