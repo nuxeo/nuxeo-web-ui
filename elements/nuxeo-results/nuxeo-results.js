@@ -63,6 +63,10 @@ Polymer({
         transition: opacity 300ms ease-in-out;
       }
 
+      [hidden] {
+        display: none !important;
+      }
+
       #views slot::slotted(*),
       #views::slotted(*) /* edge */ {
         display: block;
