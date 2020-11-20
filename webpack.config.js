@@ -1,4 +1,5 @@
 const { resolve, join } = require('path');
+const { existsSync } = require('fs');
 const { merge } = require('webpack-merge');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -70,11 +71,17 @@ const layouts = [
   },
 ];
 
-const addons = [
-  {
-    from: 'addons/**/*',
+const BUNDLES = (process.env.NUXEO_PACKAGES || '')
+  .split(/[\s,]+/)
+  .filter(Boolean)
+  .filter((p) => existsSync(`addons/${p}`));
+
+// Prepare copy of addon resources
+const addons = BUNDLES.map((p) => {
+  return {
+    from: `addons/${p}/**/*`,
     to: TARGET,
-    globOptions: { ignore: ['*.js'] },
+    globOptions: { ignore: ['*.js', '**/node_modules/**', 'package*.*'] },
     // strip addon folder, copy everything over
     transformPath: (path) => {
       path = path.replace(/^addons\/([^/]*)\//, '');
@@ -85,8 +92,8 @@ const addons = [
       return path;
     },
     force: true,
-  },
-];
+  };
+});
 
 const common = merge([
   {
@@ -154,7 +161,7 @@ const common = merge([
         template: 'index.html',
         chunks: ['main'],
         nuxeo: {
-          packages: JSON.stringify((process.env.NUXEO_PACKAGES || '').split(/[\s,]+/).filter(Boolean)),
+          bundles: JSON.stringify(BUNDLES),
           url: process.env.NUXEO_URL || '/nuxeo',
         },
       }),
