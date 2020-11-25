@@ -965,7 +965,7 @@
   "tags.removedFromDocument": "Le tag {0} a été retiré du document.",
   "tasks.actors.assigned": "Utilisateurs dans cette tâche :",
   "tasks.actors.delegated": "Utilisateurs délégués dans cette tâche :",
-  "tasks.alreadyProcessed": "The task you are trying to see has already been completed. Please check the correspondent document for current status.",
+  "tasks.alreadyProcessed": "La tâche que vous essayez de voir est déjà terminée. Veuillez vérifier l'état actuel du document correspondant.",
   "tasks.assignment.comment": "Insérer un commentaire",
   "tasks.assignment.placeholder": "Écrivez ici",
   "tasks.assignment.userOrGroup": "Choisir un utilisateur",
