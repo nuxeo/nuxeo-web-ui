@@ -184,7 +184,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
     _setBreadcrumbElements() {
       const ancestors = this._ancestors;
       this.deletedNodes = [];
-      if (ancestors) {
+      if (ancestors && this._breadcrumbs) {
         ancestors.innerHTML = '';
         this._breadcrumbs.forEach((element) => {
           const listItem = document.createElement('li');
