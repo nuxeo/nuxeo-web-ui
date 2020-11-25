@@ -965,7 +965,7 @@
   "tags.removedFromDocument": "L’etichetta {0} è stata rimossa dal documento.",
   "tasks.actors.assigned": "Attori in questo compito:",
   "tasks.actors.delegated": "Attori delegati in questo compito:",
-  "tasks.alreadyProcessed": "The task you are trying to see has already been completed. Please check the correspondent document for current status.",
+  "tasks.alreadyProcessed": "L'attività che stai cercando di vedere è già stata completata. Per favore controlla il documento corrispondente per lo stato attuale.",
   "tasks.assignment.comment": "Includi un commento",
   "tasks.assignment.placeholder": "Scrivi qui",
   "tasks.assignment.userOrGroup": "Seleziona utente",
