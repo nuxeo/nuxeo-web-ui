@@ -539,6 +539,11 @@ const template = html`
           transition: none;
         }
 
+        --paper-font-body1: {
+          font-size: 1rem;
+          line-height: 1.54rem;
+        }
+
         /* Suggester (Quick search) */
         --nuxeo-suggester-button: {
           top: var(--nuxeo-app-top);
