@@ -1,11 +1,13 @@
 const { resolve, join } = require('path');
-const { existsSync } = require('fs');
+const { existsSync, readdirSync } = require('fs');
 const { merge } = require('webpack-merge');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ProvidePlugin } = require('webpack');
+
+const log = require('webpack-log')({ name: 'WEBUI' });
 
 // read .env file and assign to process.env
 require('dotenv').config();
@@ -71,10 +73,20 @@ const layouts = [
   },
 ];
 
-const BUNDLES = (process.env.NUXEO_PACKAGES || '')
+const ALL_ADDONS = readdirSync('addons', { withFileTypes: true })
+  .filter((e) => e.isDirectory())
+  .map((e) => e.name)
+  .join(' ');
+
+// if NUXEO_PACKAGES is not set bundle all the addons
+const BUNDLES = ('NUXEO_PACKAGES' in process.env ? process.env.NUXEO_PACKAGES : ALL_ADDONS)
   .split(/[\s,]+/)
   .filter(Boolean)
   .filter((p) => existsSync(`addons/${p}`));
+
+if (BUNDLES.length) {
+  log.info(`Bundling addons:\n\t-${BUNDLES.join('\n\t-')}`);
+}
 
 // Prepare copy of addon resources
 const addons = BUNDLES.map((p) => {
