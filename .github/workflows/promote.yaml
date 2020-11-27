@@ -29,7 +29,7 @@ jobs:
 
       - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
 
-      - run: echo "::set-env name=VERSION::$(echo '${{ github.event.inputs.version }}' | sed -e 's/-rc.[0-9]*//')"
+      - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -e 's/-rc.[0-9]*//')" >> $GITHUB_ENV
 
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
         env:
@@ -98,10 +98,10 @@ jobs:
           ref: ${{ github.event.inputs.referenceBranch }}
 
       - if: ${{ github.event.inputs.referenceBranch == 'master' }}
-        run: echo "::set-env name=NEW_VERSION::$(npx semver -i minor $VERSION)"
+        run: echo "NEW_VERSION=$(npx semver -i minor $VERSION)" >> $GITHUB_ENV
 
       - if: ${{ github.event.inputs.referenceBranch != 'master' }}
-        run: echo "::set-env name=NEW_VERSION::$(npx semver -i patch $VERSION)"
+        run: echo "NEW_VERSION=$(npx semver -i patch $VERSION)" >> $GITHUB_ENV
 
       - name: Align ${{ github.event.inputs.referenceBranch }} branch on next version ${{ env.NEW_VERSION }}-SNAPSHOT
         env:
