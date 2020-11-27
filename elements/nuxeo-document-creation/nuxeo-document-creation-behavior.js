@@ -19,16 +19,6 @@ import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.j
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 
 let schemaFetcher = null;
-const typeCache = {};
-
-function initializeDoc(doc, properties) {
-  if (doc == null) {
-    return doc;
-  }
-  const newDoc = JSON.parse(JSON.stringify(doc));
-  Object.assign(newDoc.properties, properties);
-  return newDoc;
-}
 
 /**
  * `Nuxeo.DocumentCreationBehavior`
@@ -95,16 +85,6 @@ export const DocumentCreationBehavior = [
         schemaFetcher = document.createElement('nuxeo-resource');
         this.shadowRoot.appendChild(schemaFetcher);
       }
-
-      if (typeCache[this.selectedDocType.type]) {
-        const doc = typeCache[this.selectedDocType.type][this.targetPath];
-        if (doc) {
-          return Promise.resolve(initializeDoc(doc, properties));
-        }
-      } else {
-        typeCache[this.selectedDocType.type] = {};
-      }
-
       schemaFetcher.path = `path/${this.targetPath}/@emptyWithDefault`;
       schemaFetcher.params = { type: this.selectedDocType.type };
       schemaFetcher.headers = {
@@ -114,8 +94,12 @@ export const DocumentCreationBehavior = [
       };
       schemaFetcher.enrichers = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers) || {};
       return schemaFetcher.get().then((doc) => {
-        typeCache[this.selectedDocType.type][this.targetPath] = doc;
-        return initializeDoc(doc, properties);
+        if (properties) {
+          Object.keys(properties).forEach((prop) => {
+            doc.properties[prop] = properties[prop];
+          });
+        }
+        return doc;
       });
     },
 
