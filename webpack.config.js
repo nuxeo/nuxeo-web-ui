@@ -75,21 +75,21 @@ const layouts = [
 
 const ALL_ADDONS = readdirSync('addons', { withFileTypes: true })
   .filter((e) => e.isDirectory())
-  .map((e) => e.name)
-  .join(' ');
+  .map((e) => e.name);
 
-// if NUXEO_PACKAGES is not set bundle all the addons
-const BUNDLES = ('NUXEO_PACKAGES' in process.env ? process.env.NUXEO_PACKAGES : ALL_ADDONS)
+const BUNDLES = (process.env.NUXEO_PACKAGES || '')
   .split(/[\s,]+/)
   .filter(Boolean)
   .filter((p) => existsSync(`addons/${p}`));
 
 if (BUNDLES.length) {
   log.info(`Bundling addons:\n\t-${BUNDLES.join('\n\t-')}`);
+} else {
+  log.info(`Bundling all addons`);
 }
 
 // Prepare copy of addon resources
-const addons = BUNDLES.map((p) => {
+const addons = (BUNDLES.length ? BUNDLES : ALL_ADDONS).map((p) => {
   return {
     from: `addons/${p}/**/*`,
     to: TARGET,
