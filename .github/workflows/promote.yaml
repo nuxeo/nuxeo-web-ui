@@ -57,6 +57,15 @@ jobs:
       - if: ${{ !github.event.inputs.dryRun }}
         run: git push origin v$VERSION
 
+      - name: Create Github release v${{ env.VERSION }}
+        if: ${{ !github.event.inputs.dryRun }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: Release ${{ env.VERSION }}
+
       - name: Publish Nuxeo Web UI FTest ${{ env.VERSION }}
         if: ${{ !github.event.inputs.dryRun }}
         env:
