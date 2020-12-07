@@ -85,6 +85,16 @@ def getVersion() {
   return isPullRequest() ? getPullRequestVersion() : getReleaseVersion()
 }
 
+def padPrerelease(version) {
+  def count = sh(returnStdout: true, script: "echo ${version} | sed -r s/[0-9]+\\.[0-9]+\\.[0-9]+-rc\\.\\([0-9]+\\)/\\\\1/g")
+  def padded = sh(returnStdout: true, script: "printf '%03d' ${count}")
+  return sh(script: "echo ${version} | sed -E 's/([0-9]+\\.[0-9]+\\.[0-9]+-rc\\.)[0-9]+/\\1${padded}/g'", returnStdout: true).trim()
+}
+
+def getPaddedVersion() {
+  return !isPullRequest() ? padPrerelease(VERSION) : null
+}
+
 pipeline {
   agent {
     label "jenkins-maven-nodejs-nuxeo"
@@ -94,6 +104,7 @@ pipeline {
     APP_NAME = 'nuxeo-web-ui'
     CONNECT_URL = 'https://nos-preprod-connect.nuxeocloud.com/nuxeo'
     VERSION = getVersion()
+    PADDED_VERSION = getPaddedVersion()
   }
   stages {
     stage('Update package version') {
@@ -107,6 +118,10 @@ pipeline {
           script {
             def snapshotVersion = getPackageVersion()
             sh "find . -type f -not -path './node_modules/*' -regex '.*\\.\\(yaml\\|sample\\|xml\\)' -exec sed -i 's/${snapshotVersion}/${VERSION}/g' {} \\;"
+            if (!isPullRequest()) {
+              // XXX: pad the pre-release version with zeros, keeping 3 digits (see WEBUI-140)
+              sh "sed -i -e 's/\${project.version}/${PADDED_VERSION}/g' plugin/web-ui/marketplace/pom.xml"
+            }
           }
           sh "npm version ${VERSION} --no-git-tag-version"
           dir('packages/nuxeo-web-ui-ftest') {
@@ -292,7 +307,7 @@ pipeline {
           -------------------------------------------------"""
           withCredentials([usernameColonPassword(credentialsId: 'connect-preprod', variable: 'CONNECT_PASS')]) {
             sh """
-              PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${VERSION}.zip"
+              PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
               curl -i -u "$CONNECT_PASS" -F package=@\$PACKAGE "$CONNECT_URL"/site/marketplace/upload?batch=true
             """
           }
