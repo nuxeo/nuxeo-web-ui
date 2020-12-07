@@ -11,6 +11,10 @@
   <packaging>zip</packaging>
   <name>Nuxeo Web UI - Marketplace Package</name>
 
+  <properties>
+    <webui.package.version>${project.version}</webui.package.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.nuxeo.web.ui</groupId>

@@ -36,6 +36,8 @@ jobs:
           popd
 
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_VERSION"'/'"$VERSION"'/g' {} \;
+          # XXX: undo the padded lock (see WEBUI-140)
+          sed -i -e 's/<webui.package.version>.*<\/webui.package.version>/<webui.package.version>${project.version}<\/webui.package.version>/g' plugin/web-ui/marketplace/pom.xml
 
           # align on same promoted version of elements
           npm i @nuxeo/nuxeo-elements@$VERSION --save-exact
