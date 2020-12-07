@@ -11,7 +11,7 @@
     <copy todir="${outdir}/marketplace">
       <fileset dir="src/main/resources" />
       <filterset>
-        <filter token="VERSION" value="${maven.project.version}" />
+        <filter token="VERSION" value="${webui.package.version}" />
         <filter token="NUXEO_TARGET_VERSION" value="${nuxeo.target.version}" />
         <filter token="DISTRIBUTION_NAME" value="${nuxeo.distribution.name}" />
       </filterset>
@@ -25,9 +25,9 @@
       <fileset dir="${outdir}/marketplace/install/bundles"/>
     </nx:studioExtraction>
 
-    <zip destfile="${outdir}/${maven.project.artifactId}-${maven.project.version}.zip"
+    <zip destfile="${outdir}/${maven.project.artifactId}-${webui.package.version}.zip"
          basedir="${outdir}/marketplace" />
-    <artifact:attach file="${outdir}/${maven.project.artifactId}-${maven.project.version}.zip" type="zip" />
+    <artifact:attach file="${outdir}/${maven.project.artifactId}-${webui.package.version}.zip" type="zip" />
   </target>
 
 </project>
