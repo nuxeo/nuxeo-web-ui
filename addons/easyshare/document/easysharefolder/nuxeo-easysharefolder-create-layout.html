@@ -49,7 +49,10 @@ limitations under the License.
     >
     </nuxeo-date-picker>
 
-    <paper-checkbox noink name="notification" checked$="{{document.properties.eshare:hasNotification}}">
+    <paper-checkbox
+      noink
+      name="notification"
+      checked$="{{document.properties.eshare:hasNotification}}">
       [[i18n('easysharefolder.notification')]]
     </paper-checkbox>
 
@@ -61,6 +64,24 @@ limitations under the License.
       value="{{document.properties.eshare:contactEmail}}"
     >
     </nuxeo-input>
+
+    <paper-checkbox
+      noink
+      name="accessCodeRequired"
+      checked="{{document.properties.eshare:accessCodeRequired}}"
+      id="accessCodeRequired">
+      [[i18n('easysharefolder.accessCodeRequired')]]
+    </paper-checkbox>
+
+    <nuxeo-input
+      role="widget"
+      label="[[i18n('easysharefolder.accessCode')]]"
+      id="accessCode"
+      name="accessCode"
+      value="{{document.properties.eshare:accessCode}}"
+      required="[[document.properties.eshare:accessCodeRequired]]">
+    </nuxeo-input>
+
   </template>
   <script>
     Polymer({

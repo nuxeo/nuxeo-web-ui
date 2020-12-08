@@ -71,6 +71,18 @@ limitations under the License.
       <label>[[i18n('easysharefolder.contactEmail')]]</label>
       <div name="email">[[document.properties.eshare:contactEmail]]</div>
     </div>
+
+   <div role="widget" hidden$="[[!document.properties.eshare:accessCodeRequired]]">
+      <paper-checkbox name="accessCodeRequired" checked$="[[document.properties.eshare:accessCodeRequired]]"
+        noink disabled>
+        [[i18n('easysharefolder.accessCodeRequired')]]
+      </paper-checkbox>
+    </div>
+
+    <div role="widget" hidden$="[[!document.properties.eshare:accessCode]]">
+      <label>[[i18n('easysharefolder.accessCode')]]</label>
+      <div name="accessCode">[[document.properties.eshare:accessCode]]</div>
+    </div>    
   </template>
   <script>
     Polymer({

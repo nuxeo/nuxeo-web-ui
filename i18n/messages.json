@@ -533,6 +533,8 @@
   "easyshare.copy.label": "Internal Access link to {0}.",
   "easysharefolder.notification": "Active Notification",
   "easysharefolder.contactEmail": "Email",
+  "easysharefolder.accessCodeRequired": "Access code required ?",
+  "easysharefolder.accessCode": "Access code",
   "easysharefolder.share": "Public EasyShare link to {0}",
   "eventCategory.document_review_approbation": "Relation",
   "eventCategory.eventDocumentCategory": "Document",
