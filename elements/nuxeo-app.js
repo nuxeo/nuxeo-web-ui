@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-filter.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
@@ -1234,14 +1235,28 @@ Polymer({
     return `${this.$.nxcon.url}/logout`;
   },
 
-  _pageChanged(page, oldPage) {
+  async _pageChanged(page, oldPage) {
     if (page !== null) {
-      let el = this.$.pages.selectedItem;
-      // selectItem might be undefined
-      // https://github.com/PolymerElements/iron-pages/issues/52
-      if (!el) {
-        el = dom(this.$.pages).querySelector(`[name=${page}]`);
-      }
+      // wait for a while in case page is being contributed by an addon
+      const el = await new Promise((resolve) => {
+        let timeout;
+        let poll;
+        const done = (e) => {
+          clearInterval(poll);
+          clearTimeout(timeout);
+          resolve(e);
+        };
+        poll = setInterval(() => {
+          // selectItem might be undefined
+          // https://github.com/PolymerElements/iron-pages/issues/52
+          const e = this.$.pages.selectedItem || dom(this.$.pages).querySelector(`[name=${page}]`);
+          if (e) {
+            done(e);
+          }
+        }, 100);
+        timeout = setTimeout(() => done(), 1000);
+      });
+
       if (!el) {
         this.showError(404, '', page);
         return;
