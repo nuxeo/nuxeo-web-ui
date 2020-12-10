@@ -13,7 +13,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import * as Async from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
+import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import * as RenderStatus from '@polymer/polymer/lib/utils/render-status.js';
 
@@ -63,9 +63,8 @@ Nuxeo.PageProviderDisplayBehavior = PageProviderDisplayBehavior;
 Nuxeo.RoutingBehavior = RoutingBehavior;
 Nuxeo.UploaderBehavior = UploaderBehavior;
 
-const tmpl = document.createElement('template');
-tmpl.innerHTML = bundleHtml;
-document.head.appendChild(tmpl.content);
+// import the main bundle
+importHTML(bundleHtml);
 
 const bundles = [...Nuxeo.UI.bundles, 'nuxeo-spreadsheet'];
 
