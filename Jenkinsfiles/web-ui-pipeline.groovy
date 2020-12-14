@@ -2,7 +2,7 @@ properties([
     [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
             string(name: 'BRANCH', defaultValue: '', description: 'Branch to test, fall-backs on $BASE_BRANCH if not found.', trim: false),
-            choice(name: 'BASE_BRANCH', choices: ['master'], description: 'The branch to fallback on when $BRANCH is not found.'),
+            choice(name: 'BASE_BRANCH', choices: ['maintenance-3.0.x'], description: 'The branch to fallback on when $BRANCH is not found.'),
             string(name: 'SLAVE', defaultValue: 'SLAVE', description: 'Slave label to be used.', trim: false),
             booleanParam(name: 'CLEAN', defaultValue: false, description: 'Run npm cache clean?'),
             booleanParam(name: 'SAUCE_LAB', defaultValue: true, description: 'Should unit tests be run on Sauce Lab (or just Chrome on the slave)?'),
@@ -62,13 +62,11 @@ timestamps {
     node(SLAVE) {
         try {
             deleteDir()
-            def VERSIONS_MAPPING = ['10.10': '2.4', '9.10': '2.2']
-            def ELEMENTS_BASE_BRANCH = VERSIONS_MAPPING.containsKey(BASE_BRANCH) ? "maintenance-${VERSIONS_MAPPING.get(BASE_BRANCH)}.x" : BASE_BRANCH
             def el, datavizel, uiel, webui, webuiitests, plugin, helpers
             if (params.CLEAN) {
                 sh 'npm cache clean --force'
             }
-            if (cloneRebaseAndDir('nuxeo-elements', BRANCH, ELEMENTS_BASE_BRANCH)) {
+            if (cloneRebaseAndDir('nuxeo-elements')) {
                 echo 'Need to build nuxeo-elements'
                 stage('nuxeo-elements') {
                     withEnv(["FIREFOX_BIN=/opt/build/tools/firefox-63/firefox"]) {
@@ -149,7 +147,7 @@ timestamps {
                 stage('post-build') {
                     if (params.CREATE_PR) {
                         if (el || datavizel || uiel || helpers) {
-                            createPullRequest('nuxeo-elements', BRANCH, ELEMENTS_BASE_BRANCH)
+                            createPullRequest('nuxeo-elements')
                         }
                         if (webui) {
                             createPullRequest('nuxeo-web-ui')
