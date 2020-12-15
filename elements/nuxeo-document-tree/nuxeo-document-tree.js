@@ -78,7 +78,7 @@ Polymer({
       }
 
       a:hover {
-        @apply --nuxeo-link-hover;
+        @apply --nuxeo-link-hover-color;
       }
 
       #root a,
