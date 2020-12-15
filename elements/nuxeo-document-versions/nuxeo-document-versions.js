@@ -242,7 +242,17 @@ Polymer({
 
   _showLatest() {
     this._hideList();
-    this.navigateTo(this.document);
+    this.navigateTo(
+      'document',
+      (Nuxeo &&
+        Nuxeo.UI &&
+        Nuxeo.UI.config &&
+        Nuxeo.UI.config.router &&
+        Nuxeo.UI.config.router.key &&
+        Nuxeo.UI.config.router.key.document === 'uid' &&
+        this.document.versionableId) ||
+        this.document.path,
+    );
   },
 
   _showVersion(e) {
