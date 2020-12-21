@@ -142,4 +142,4 @@ jobs:
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
 
       - if: ${{ !github.event.inputs.dryRun }}
-        run: git push origin master
+        run: git push origin ${{ github.event.inputs.referenceBranch }}
