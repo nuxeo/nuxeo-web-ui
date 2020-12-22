@@ -78,7 +78,6 @@ jobs:
       - name: Promote Web UI ${{ github.event.inputs.version }} to ${{ env.VERSION }}
         env:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }} 
-          CONNECT_URL: https://connect.nuxeo.com/nuxeo
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
           curl -o $PACKAGE.zip -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=${{ github.event.inputs.version }}"
@@ -90,6 +89,9 @@ jobs:
           popd
 
       - if: ${{ !github.event.inputs.dryRun }}
+        env:
+          PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
+          CONNECT_URL: https://connect.nuxeo.com/nuxeo
         run: curl -i -u "${{ secrets.CONNECT_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_URL/site/marketplace/upload?batch=true"
 
       - uses: actions/checkout@v2
@@ -107,10 +109,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # bump version to next SNAPSHOT and align on the corresponding Elements release candidate
-          OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')
-          NEW_SNAPSHOT=$NEW_VERSION-SNAPSHOT
+          echo "OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
 
+          # bump version to next SNAPSHOT and align on the corresponding Elements release candidate
+          NEW_SNAPSHOT=$NEW_VERSION-SNAPSHOT
           npm version $NEW_SNAPSHOT --no-git-tag-version
           pushd packages/nuxeo-web-ui-ftest/
           npm version $NEW_SNAPSHOT --no-git-tag-version
@@ -137,6 +139,8 @@ jobs:
           npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="~"
 
       - run: |
+          NEW_SNAPSHOT="$NEW_VERSION-SNAPSHOT"
+
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_SNAPSHOT"'/'"$NEW_SNAPSHOT"'/g' {} \;
 
           # commit and push
