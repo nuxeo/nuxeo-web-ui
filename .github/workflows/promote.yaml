@@ -104,8 +104,6 @@ jobs:
         run: echo "NEW_VERSION=$(npx semver -i patch $VERSION)" >> $GITHUB_ENV
 
       - name: Align ${{ github.event.inputs.referenceBranch }} branch on next version ${{ env.NEW_VERSION }}-SNAPSHOT
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           # bump version to next SNAPSHOT and align on the corresponding Elements release candidate
           OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')
