@@ -117,6 +117,8 @@ jobs:
           popd
 
       - if: ${{ github.event.inputs.referenceBranch == 'master' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           NEW_ELEMENTS_VERSION="^$NEW_VERSION-rc"
           npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="^"
@@ -125,6 +127,8 @@ jobs:
           npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="^"
 
       - if: ${{ github.event.inputs.referenceBranch != 'master' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           NEW_ELEMENTS_VERSION="~$NEW_VERSION-rc"
           npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
@@ -134,9 +138,6 @@ jobs:
 
       - run: |
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_SNAPSHOT"'/'"$NEW_SNAPSHOT"'/g' {} \;
-
-          # discard changes in package-lock.json
-          git checkout -- package-lock.json
 
           # commit and push
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
