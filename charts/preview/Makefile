@@ -15,4 +15,7 @@ else
 	echo "platfrom $(OS) not supported to release from"
 	exit -1
 endif
+	helm init --client-only --stable-repo-url=https://charts.helm.sh/stable
+	helm repo add chartmuseum.jenkins-x.io https://storage.googleapis.com/chartmuseum.jenkins-x.io
+	helm repo add jenkins-x-chartmuseum http://jenkins-x-chartmuseum:8080
 	jx step helm build
