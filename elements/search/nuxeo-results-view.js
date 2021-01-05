@@ -377,9 +377,9 @@ Polymer({
       if (evt.detail.path) {
         const param = evt.detail.path.split('.')[1];
         this.notifyPath(`_params.${param}`, evt.detail.value);
-        if (this.visible && this.auto) {
-          this._search();
-        }
+      }
+      if (this.visible && this.auto) {
+        this._search();
       }
     });
     this.skipAggregates = form.skipAggregates;
