@@ -5,14 +5,19 @@
     "nuxeo-web-ui-ftest": "./bin/nuxeo-web-ui-ftest.js"
   },
   "scripts": {
+    "postinstall": "check-engine --ignore",
     "publish:snapshot": "npm --registry=https://mavenin.nuxeo.com/nexus/repository/npmjs-nuxeo/ publish --tag SNAPSHOT",
     "publish:release": "npm --registry=https://registry.npmjs.org/ publish"
   },
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=10.23.0 <11.0.0"
+  },
   "dependencies": {
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
     "chai": "^4.1.2",
+    "check-engine": "^1.10.0",
     "cucumber": "^4.1.0",
     "cucumber-junit": "^1.7.1",
     "cucumber-tag-expressions": "^1.1.1",
