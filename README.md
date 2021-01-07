@@ -10,6 +10,7 @@
 ```sh
 npm install -g gulp bower && npm install && bower install
 ```
+Note: This version of Nuxeo Web UI requires node version >=6.0.0.
 
 ### Development workflow
 
