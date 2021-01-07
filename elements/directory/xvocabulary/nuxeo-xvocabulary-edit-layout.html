@@ -38,7 +38,7 @@ limitations under the License.
       required$="[[_isParentRequired(parentDirectory, directory)]]"
     >
       <template is="dom-repeat" items="[[parentResponse.entries]]">
-        <paper-item name="[[item.properties.id]]">[[item.properties.id]]</paper-item>
+        <paper-item name="[[item.properties.id]]">[[_computeLabel(item, i18n)]]</paper-item>
       </template>
     </nuxeo-select>
 
@@ -118,6 +118,10 @@ limitations under the License.
 
       _isParentRequired() {
         return this.directory && this.parentDirectory && this.directory !== this.parentDirectory;
+      },
+
+      _computeLabel(item) {
+        return item && item.properties && item.properties.label && this.i18n(item.properties.label);
       },
     });
   </script>
