@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "vendor": "Nuxeo",
   "engines": {
-    "node": ">=10.12.0"
+    "node": ">=10.23.0"
   },
   "devDependencies": {
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
@@ -19,6 +19,7 @@
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "babel-preset-env": "^1.7.0",
     "chai": "^4.2.0",
+    "check-engine": "^1.10.0",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^6.2.1",
     "css-loader": "^5.0.0",
@@ -63,6 +64,7 @@
     "workbox-cli": "3.6.3"
   },
   "scripts": {
+    "postinstall": "check-engine --ignore",
     "prestart": "npm run prepare:i18n",
     "start": "webpack serve --env development",
     "start:build": "http-server dist -p 5000 -P http://localhost:8080 -o",
