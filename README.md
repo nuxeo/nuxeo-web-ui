@@ -11,6 +11,7 @@ Nuxeo Web UI is a standard base web application for Nuxeo Platform. It is highly
 ```sh
 npm install
 ```
+Note: This version of Nuxeo Web UI requires node version >=10.23.0.
 
 ### Development workflow
 
