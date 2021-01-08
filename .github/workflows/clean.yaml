@@ -1,0 +1,37 @@
+name: Cleanup
+
+on:
+  pull_request:
+    types: [closed, unlabeled]
+    branches:
+      - master
+      - maintenance-3.0.x
+
+env:
+  GKE_CLUSTER: jx-prod
+  GKE_ZONE: us-east1-b
+
+jobs:
+  cleanup:
+    name: Preview
+    if: (github.event.action == 'unlabeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview')
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Prepare environment
+      run: |
+        BRANCH_NAME=${GITHUB_HEAD_REF##*/}
+        echo "PREVIEW_NAMESPACE=nuxeo-web-ui-${BRANCH_NAME,,}" >> $GITHUB_ENV
+
+    - name: Get GKE credentials
+      uses: google-github-actions/get-gke-credentials@v0.2.1
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+        project_id: ${{ secrets.GKE_PROJECT }}
+        credentials: ${{ secrets.GKE_SA_KEY }}
+
+    - name: Cleanup preview namespace
+      continue-on-error: true
+      run: |
+        kubectl delete ns ${PREVIEW_NAMESPACE}
