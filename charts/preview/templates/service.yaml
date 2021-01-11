@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "nuxeo.webui.fullname" . }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.nuxeo.webui.service.annotations }}
+  annotations:
+{{ toYaml .Values.nuxeo.webui.service.annotations | indent 4 }}
+{{- end }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ .Values.nuxeo.webui.service.port }}
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: {{ template "nuxeo.webui.fullname" . }}
