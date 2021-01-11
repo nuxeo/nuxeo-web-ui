@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "nuxeo.webui.fullname" . }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  replicas: {{ .Values.nuxeo.webui.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "nuxeo.webui.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "nuxeo.webui.fullname" . }}
+{{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.nuxeo.webui.image.repository }}:{{ .Values.nuxeo.webui.image.tag }}"
+        imagePullPolicy: {{ .Values.nuxeo.webui.image.pullPolicy }}
+        ports:
+        - containerPort: 80

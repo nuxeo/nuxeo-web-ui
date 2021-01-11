@@ -8,13 +8,6 @@ dependencies:
   repository: http://chartmuseum.jenkins-x.io
   version: 2.3.111
 - name: nuxeo
-  version: 0.1.2
-  repository: http://jenkins-x-chartmuseum:8080
+  version: ~1.2.1
+  repository: https://chartmuseum.platform.dev.nuxeo.com
   alias: nuxeo
-
-  # !! "alias: preview" must be last entry in dependencies array !!
-  # !! Place custom dependencies above !!
-- name: nuxeo-web-ui
-  version: 0.0.1
-  repository: http://jenkins-x-chartmuseum:8080
-  alias: preview

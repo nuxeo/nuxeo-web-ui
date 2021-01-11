@@ -18,6 +18,7 @@ cleanup:
     helm.sh/hook-delete-policy: hook-succeeded
 
 nuxeo:
+
   nuxeo:
     service:
       annotations:
@@ -30,16 +31,15 @@ nuxeo:
   postgresql:
     deploy: false
 
-preview:
-  nuxeo:
-    webui:
-      image:
-        repository:
-        tag:
-      fullnameOverride: preview
-      packages: nuxeo-dam
-      service:
-        annotations:
-          fabric8.io/expose: "true"
-          fabric8.io/ingress.path: /
-          fabric8.io/ingress.name: preview
+  webui:
+    image:
+      repository: $DOCKER_REGISTRY/$DOCKER_IMAGE
+      tag: $VERSION
+      pullPolicy: Always
+    
+    service:
+      port: 80
+      annotations:
+        fabric8.io/expose: "true"
+        fabric8.io/ingress.path: /
+        fabric8.io/ingress.name: preview
