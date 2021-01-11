@@ -89,11 +89,21 @@ jobs:
         mvn -B -nsu -f ftest install
 
     - name: Archive cucumber reports
+      if: always()
       uses: actions/upload-artifact@v2
       with:
         name: cucumber-reports
         path: |
           ftest/target/cucumber-reports/
+
+    - name: Archive logs
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: logs
+        path: |
+          **/log/*.log
+          **/nxserver/config/distribution.properties
 
     - name: Archive packages
       uses: actions/upload-artifact@v2
@@ -102,14 +112,6 @@ jobs:
         path: |
           plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
           plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
-
-    - name: Archive logs
-      uses: actions/upload-artifact@v2
-      with:
-        name: logs
-        path: |
-          **/log/*.log
-          **/nxserver/config/distribution.properties
 
     - name: Tag
       if: github.event_name == 'push'
