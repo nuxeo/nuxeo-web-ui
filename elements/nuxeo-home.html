@@ -73,7 +73,7 @@ limitations under the License.
               schemas="dublincore,common,uid"
               enrichers="thumbnail"
               params='{"queryParams": "/"}'
-              headers='{"X-NXfetch.document": "properties"}'>
+              headers='{"fetch-document": "properties"}'>
             </nuxeo-page-provider>
             <nuxeo-data-table id="latestEditedDocs" max-items="15"
               nx-provider="latestQuery"
@@ -138,7 +138,7 @@ limitations under the License.
                provider="default_content_collection"
                page-size="20"
                schemas="dublincore,common,uid"
-               headers='{"X-NXfetch.document": "properties"}'
+               headers='{"fetch-document": "properties"}'
                enrichers="thumbnail">
             </nuxeo-page-provider>
             <nuxeo-data-table id="favoriteDocs" max-items="15"
