@@ -93,8 +93,8 @@ limitations under the License.
         schemaFetcher.params = { type: this.selectedDocType.type };
         schemaFetcher.headers = {
           properties: '*',
-          'X-NXfetch.document': 'properties',
-          'X-NXtranslate.directoryEntry': 'label'
+          'fetch-document': 'properties',
+          'translate-directoryEntry': 'label'
         };
         schemaFetcher.enrichers = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers) || {};
         return schemaFetcher.get().then(function(doc) {

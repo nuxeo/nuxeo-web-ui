@@ -1165,7 +1165,8 @@ limitations under the License.
       },
 
       _smartImportLocalFiles: function(params) {
-        return this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true', 'X-Batch-No-Drop': 'true'});
+        return this.batchExecute('FileManager.Import', params, {'nx_es_sync': 'true', 'nx-es-sync': 'true',
+          'X-Batch-No-Drop': 'true'});
       },
 
       _smartImportRemoteFiles: function(params) {
