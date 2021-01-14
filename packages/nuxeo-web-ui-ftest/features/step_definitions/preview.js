@@ -16,10 +16,11 @@ When('I click the preview button for the attachment', function() {
 
 Then(/^I can see the inline ([-\w]+) previewer$/, function(viewerType) {
   const page = this.ui.browser.documentPage(this.doc.type);
+  page.waitForVisible();
   page.view.waitForVisible();
   const { preview } = page.view;
   preview.waitForVisible();
-  preview.element(viewerType).waitForVisible();
+  preview.waitForVisible(viewerType);
 });
 
 Then(/^I can see a ([-\w]+) previewer$/, (viewerType) => {

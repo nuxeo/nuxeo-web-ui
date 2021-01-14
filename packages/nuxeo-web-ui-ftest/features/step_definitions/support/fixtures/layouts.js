@@ -259,6 +259,8 @@ fixtures.layouts = {
   page: {
     Note: 'nuxeo-document-page',
     File: 'nuxeo-document-page',
+    Picture: 'nuxeo-document-page',
+    Video: 'nuxeo-document-page',
     Folder: 'nuxeo-collapsible-document-page',
     Workspace: 'nuxeo-collapsible-document-page',
     Collection: 'nuxeo-collapsible-document-page',
