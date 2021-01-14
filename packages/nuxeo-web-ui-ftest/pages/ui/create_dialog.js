@@ -11,22 +11,38 @@ export default class CreateDialog extends BasePage {
     return this.el.element(`paper-tab[name="${name}"]`);
   }
 
-  get importCsvDialog() {
-    return this.el.element('#csvCreation');
+  get pages() {
+    return this.el.element('#holder iron-pages');
   }
 
-  setFileToImport(file) {
-    const field = this.importCsvDialog.element('#dropzone #uploadFiles');
+  importPage(name) {
+    const pageName = this.pages.element('.iron-selected').getAttribute('name');
+    if (pageName === name) {
+      return this.pages.element(`[name=${pageName}]`);
+    }
+    throw new Error(`The "${name}" element could not be located. Received "${pageName}" instead`);
+  }
+
+  setFileToImport(file, name) {
+    const field = this.importPage(name).element('#dropzone #uploadFiles');
     field.waitForExist();
     return field.chooseFile(path.resolve(fixtures.blobs.get(file)));
   }
 
-  get importCsvButton() {
-    return this.importCsvDialog.element('div[name="upload"] paper-button.primary');
+  get importCreateButton() {
+    return this.el.element('div[name="upload"] paper-button[id="create"]');
+  }
+
+  get importCSVButton() {
+    return this.el.element('div[name="upload"] paper-button.primary');
+  }
+
+  get selectedCSVToImport() {
+    return this.el.element('#dropzone div.complete');
   }
 
   get selectedFileToImport() {
-    return this.el.element('#dropzone div.complete');
+    return this.el.element('div.file-to-import');
   }
 
   get importCloseButton() {
