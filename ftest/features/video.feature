@@ -35,13 +35,12 @@ Feature: Create Video
       | nature       | Report                 |
       | subjects     | Fashion,Humanitarian   |
       | coverage     | Benin                  |
-    Then I see the Video page    
+    Then I see the Video page
     And I can see Video metadata with the following properties:
       | name         | value                                   |
       | title        | my edited title                         |
       | description  | my edited description                   |
       | nature       | Report                                  |
-      | subjects     | Daily life/Fashion,Society/Humanitarian |  
+      | subjects     | Daily life/Fashion,Society/Humanitarian |
       | coverage     | Africa/Benin                            |
-    And I can see the video storyboard    
-
+    And I can see the video storyboard
