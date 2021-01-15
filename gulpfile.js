@@ -98,7 +98,7 @@ gulp.task('polymer-build', function() {
       .pipe($.if(/\.js$/, babel({
         presets: babelPresetES2015,
         compact: false,
-        ignore: 'custom-elements-es5-adapter.js,webcomponents-*.js'})))
+        ignore: 'custom-elements-es5-adapter.js,webcomponents-*.js,pdf.worker.js'})))
       .pipe($.if(/\.css$/, cssSlam())) // Install css-slam to use
       .pipe($.if(/\.html$/, htmlMinifier())) // Install gulp-html-minifier to use
       .pipe(htmlSplitter.rejoin()) // Call rejoin when you're finished
