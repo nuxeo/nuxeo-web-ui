@@ -1,6 +1,29 @@
 /* eslint-disable max-len */
 const Select2Editor = Handsontable.editors.TextEditor.prototype.extend();
 
+const onEntryDelete = function(event) {
+  const instance = this;
+  const keyCodes = Handsontable.helper.keyCode;
+  if (event.keyCode === keyCodes.BACKSPACE || event.keyCode === keyCodes.DELETE) {
+    event.stopImmediatePropagation();
+    // XXX - kind of overrides the empty function
+    const selectedRange = instance.getSelectedRange();
+    let topLeft = selectedRange.getTopLeftCorner();
+    let bottomRight = selectedRange.getBottomRightCorner();
+    let r;
+      let c;
+      let changes = [];
+    for (r = topLeft.row; r <= bottomRight.row; r++) {
+      for (c = topLeft.col; c <= bottomRight.col; c++) {
+        if (!instance.getCellMeta(r, c).readOnly) {
+          changes.push([r, c, null]);
+        }
+      }
+    }
+    instance.setDataAtCell(changes);
+  }
+};
+
 Select2Editor.prototype.prepare = function(td, row, col, prop, value, cellProperties) {
   Handsontable.editors.TextEditor.prototype.prepare.apply(this, arguments);
 
@@ -48,6 +71,7 @@ Select2Editor.prototype.createElements = function() {
       0,
     );
   });
+  this.instance.addHook('beforeKeyDown', onEntryDelete);
 };
 
 const onSelect2Changed = function() {
@@ -162,6 +186,10 @@ Select2Editor.prototype.beginEditing = function(...params) {
 Select2Editor.prototype.finishEditing = function(...params) {
   this.instance.listen();
   return Handsontable.editors.TextEditor.prototype.finishEditing.apply(this, params);
+};
+
+Select2Editor.prototype.destroyElements = function() {
+  this.instance.removeHook(onEntryDelete);
 };
 
 Handsontable.editors.Select2Editor = Select2Editor;
