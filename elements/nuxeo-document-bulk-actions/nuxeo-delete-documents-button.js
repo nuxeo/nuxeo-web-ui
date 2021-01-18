@@ -39,7 +39,9 @@ Polymer({
 
     <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing></nuxeo-operation>
 
-    <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
+    <nuxeo-connection id="nx" user="{{currentUser}}"></nuxeo-connection>
+
+    <template is="dom-if" if="[[_isAvailable(documents.splices, currentUser)]]">
       <div class="action" on-tap="deleteDocuments">
         <paper-icon-button icon="[[_icon]]" id="deleteAllButton"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
@@ -131,15 +133,8 @@ Polymer({
   },
 
   _checkDocsPermissions() {
-    this.docsHavePermissions = this.documents && !this.documents.some((document) => !this._docHasPermissions(document));
+    this.docsHavePermissions = this.documents && !this.documents.some((doc) => !this.canDelete(doc, this.currentUser));
     return this.docsHavePermissions;
-  },
-
-  /*
-   * Checks if a single given document has the 'Remove' permission to delete/trash
-   */
-  _docHasPermissions(document) {
-    return !this.isUnderRetentionOrLegalHold(document) && this.hasPermission(document, 'Remove');
   },
 
   _computeIcon(hard) {
