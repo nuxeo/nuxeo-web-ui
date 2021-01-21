@@ -35,6 +35,7 @@
   "addToCollectionDocumentsButton.dialog.heading": "Ajouter à une collection",
   "addToCollectionDocumentsButton.dialog.select": "Sélectionnez une collection...",
   "addToCollectionDocumentsButton.tooltip": "Ajouter à une collection",
+  "admin.usersAndGroups.heading": "Utilisateurs & groupes",
   "analytics.after": "Après le",
   "analytics.before": "Avant le",
   "analytics.document.distribution": "Répartition des documents",

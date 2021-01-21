@@ -35,6 +35,7 @@
   "addToCollectionDocumentsButton.dialog.heading": "Lägg till i samlingen",
   "addToCollectionDocumentsButton.dialog.select": "Välj en samling...",
   "addToCollectionDocumentsButton.tooltip": "Lägg till i samlingen",
+  "admin.usersAndGroups.heading": "Användare & grupper",
   "analytics.after": "Efter",
   "analytics.before": "Före",
   "analytics.document.distribution": "Dokumentdistribution",
