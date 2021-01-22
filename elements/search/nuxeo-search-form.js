@@ -36,7 +36,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
-import './nuxeo-search-form-layout.js';
+import '@nuxeo/nuxeo-ui-elements/search/nuxeo-search-form-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
@@ -417,6 +417,7 @@ Polymer({
 
   is: 'nuxeo-search-form',
   behaviors: [I18nBehavior, RoutingBehavior, IronResizableBehavior],
+  importMeta: import.meta,
 
   properties: {
     /**
