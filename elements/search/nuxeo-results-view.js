@@ -18,11 +18,11 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@polymer/iron-collapse/iron-collapse.js';
-import './nuxeo-search-form-layout.js';
-import './nuxeo-search-results-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/search/nuxeo-search-form-layout.js';
+import '@nuxeo/nuxeo-ui-elements/search/nuxeo-search-results-layout.js';
 
 /**
 `nuxeo-results-view`
