@@ -114,6 +114,8 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-user-group-latest.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-justified-grid/nuxeo-justified-grid.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-justified-grid/nuxeo-justified-grid-item.js';
+import '@nuxeo/nuxeo-ui-elements/search/nuxeo-search-form-layout.js';
+import '@nuxeo/nuxeo-ui-elements/search/nuxeo-search-results-layout.js';
 import '@nuxeo/nuxeo-ui-elements/viewers/nuxeo-image-viewer.js';
 import '@nuxeo/nuxeo-ui-elements/viewers/nuxeo-pdf-viewer.js';
 import '@nuxeo/nuxeo-ui-elements/viewers/nuxeo-video-viewer.js';
@@ -173,7 +175,6 @@ import './directory/nuxeo-vocabulary-management.js';
 
 // Search layout elements -->
 import './search/nuxeo-saved-search-actions.js';
-import './search/nuxeo-search-results-layout.js';
 import './search/nuxeo-search-form.js';
 import './search/nuxeo-results-view.js';
 import './nuxeo-search-page.js';
