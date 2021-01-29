@@ -351,7 +351,7 @@ Polymer({
     </div>
 
     <nuxeo-dialog id="saveDialog" with-backdrop reparent>
-      <h2>[[i18n('searchForm.savePopup.heading')]]</h2>
+      <h3>[[i18n('searchForm.savePopup.heading')]]</h3>
       <paper-input id="savedSearchTitle" label="[[i18n('searchForm.savePopup.label')]]" autofocus no-label-float>
       </paper-input>
       <div class="buttons">

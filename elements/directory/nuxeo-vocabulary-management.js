@@ -72,12 +72,6 @@ Polymer({
           width: 90%;
         }
       }
-
-      nuxeo-dialog .buttons {
-        @apply --layout-horizontal;
-        @apply --layout-justified;
-        margin-top: 16px;
-      }
     </style>
 
     <nuxeo-resource id="directory" path="/directory" params='{"pageSize": 0}'></nuxeo-resource>
@@ -147,7 +141,7 @@ Polymer({
     </nuxeo-page>
 
     <nuxeo-dialog id="vocabularyEditDialog" with-backdrop>
-      <h2>[[i18n('vocabularyManagement.popup.editEntry')]]</h2>
+      <h3>[[i18n('vocabularyManagement.popup.editEntry')]]</h3>
       <iron-form id="form">
         <form>
           <nuxeo-layout
