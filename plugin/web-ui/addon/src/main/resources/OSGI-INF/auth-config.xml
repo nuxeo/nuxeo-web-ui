@@ -7,4 +7,10 @@
       </patterns>
     </startURLPattern>
   </extension>
+
+  <extension point="openUrl" target="org.nuxeo.ecm.platform.ui.web.auth.service.PluggableAuthenticationService">
+    <openUrl name="webuiImages">
+      <grantPattern>${org.nuxeo.ecm.contextPath}/ui/images/.*</grantPattern>
+    </openUrl>
+  </extension>
 </component>
