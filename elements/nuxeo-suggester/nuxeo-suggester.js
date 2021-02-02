@@ -124,7 +124,7 @@ Polymer({
       }
 
       #suggester {
-        top: 0;
+        top: var(--nuxeo-app-top, 0);
         left: 0;
         position: fixed;
         z-index: 1001;
