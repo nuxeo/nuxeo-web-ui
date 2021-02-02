@@ -232,7 +232,7 @@ Polymer({
       }
 
       #search-container {
-        height: 100%;
+        height: calc(100vh - var(--nuxeo-app-top, 0));
         position: relative;
       }
     </style>
