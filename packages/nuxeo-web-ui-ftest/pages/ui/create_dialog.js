@@ -26,6 +26,10 @@ export default class CreateDialog extends BasePage {
   setFileToImport(file, name) {
     const field = this.importPage(name).element('#dropzone #uploadFiles');
     field.waitForExist();
+    // XXX we need to reset the input value to prevent duplicate upload of files (when the method is called recursively)
+    browser.execute((el) => {
+      el.value = '';
+    }, field.value);
     return field.chooseFile(path.resolve(fixtures.blobs.get(file)));
   }
 
