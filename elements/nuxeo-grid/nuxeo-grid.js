@@ -262,14 +262,14 @@ class Grid extends Nuxeo.Element {
   static get properties() {
     return {
       /**
-       * Number of columns. Will be ignored if templateColumns is defined.
+       * Number of columns. Will be ignored if `templateColumns` is defined.
        */
       columns: {
         type: Number,
         reflectToAttribute: true,
       },
       /**
-       * Number of rows. Will be ignored if templateRows is defined.
+       * Number of rows. Will be ignored if `templateRows` is defined.
        */
       rows: {
         type: Number,
@@ -282,44 +282,52 @@ class Grid extends Nuxeo.Element {
         type: String,
       },
       /**
-       * Gap between rows, in pixels (e.g. 16px).
+       * Gap between rows, in pixels (e.g. 16px). Overrides the gap spacing for rows only. Use it for advanced control
+       * on spacing.
        */
       rowGap: {
         type: String,
       },
       /**
-       * Gap between columns, in pixels (e.g. 16px).
+       * Gap between columns, in pixels (e.g. 16px). Overrides the gap spacing for columns only. Use it for advanced
+       * control on spacing.
        */
       columnGap: {
         type: String,
       },
       /**
-       * Default item alignment on the block axis (typically vertical). Can be `stretch`, `center`, `start` and `end`.
+       * Default item alignment on the block axis (typically vertical). Valid values are `stretch`, `center`, `start`
+       * and `end`.
        */
       alignItems: {
         type: String,
         value: 'stretch',
       },
       /**
-       * Default alignment on the inline axis (typically horizontal). Can be `stretch`, `center`, `start` and `end`.
+       * Default alignment on the inline axis (typically horizontal). Valid values are `stretch`, `center`, `start`
+       * and `end`.
        */
       justifyItems: {
         type: String,
         value: 'stretch',
       },
       /**
-       * The grid template columns. This is a string containing a space separate list of values that denote how the
-       * columns behave. Each value corresponds to a column. Valid value formats are `auto` and `*fr` (e.g. 1fr, 2fr),
-       * where fr denotes a fraction of the available width of the table. Settings this property overrides `columns`.
+       * Used for advanced control on the width of the columns. It is a string containing a space-separated list of
+       * values, where each value corresponds to a column. Valid value formats are `auto` and `*fr` (e.g. `1fr, 2fr`),
+       * where `fr` denotes a fraction of the available width of the grid. E.g. using 2fr will make a column twice as
+       * big as one using 1fr. Using `auto` will use the remaining space available and adapt it to the element inside
+       * the column. Setting this property overrides the `columns` property.
        */
       templateColumns: {
         type: String,
         reflectToAttribute: true,
       },
       /**
-       * The grid template rows. This is a string containing a space separate list of values that denote how the
-       * rows behave. Each value corresponds to a row. Valid value formats are `auto` and `*fr` (e.g. 1fr, 2fr),
-       * where fr denotes a fraction of the available height of the table. Settings this property overrides `rows`.
+       * Used for advanced control on the height of the rows. It is a string containing a space-separated list of
+       * values, where each value corresponds to a row. Valid value formats are `auto` and `*fr` (e.g. `1fr, 2fr`),
+       * where `fr` denotes a fraction of the available height of the grid. E.g. using 2fr will make a row twice as
+       * big as one using 1fr. Using `auto` will use the remaining space available and adapt it to the element inside
+       * the row. Setting this property overrides the `rows` property.
        */
       templateRows: {
         type: String,
