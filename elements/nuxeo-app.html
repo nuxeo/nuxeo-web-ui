@@ -167,6 +167,8 @@ limitations under the License.
         z-index: 100;
         padding: 53px 0;
         overflow: auto;
+        display: flex;
+        flex-direction: column;
       }
 
       #logo:hover img {
@@ -179,24 +181,17 @@ limitations under the License.
         -webkit-filter: brightness(110%);
       }
 
-      #menu .profile-icon,
-      #menu .admin-icon {
-        position: fixed;
-        height: 48px;
-        bottom: 0;
-        left: 0;
+      /* Apply margin-top: auto to all settings and then reset them, except the first one */
+      #menu > .settings {
+        margin-top: auto;
       }
 
-      #menu .admin-icon {
-        bottom: 48px;
+      #menu > .settings ~ .settings {
+        margin: 0;
+        order: 1;
       }
 
       @media (max-width: 1024px), (max-height: 700px) {
-        #menu .profile-icon,
-        #menu .admin-icon {
-          position: relative;
-          bottom: auto;
-        }
         #drawer .toggle {
           display: none;
         }
@@ -319,13 +314,18 @@ limitations under the License.
         <!-- menu -->
         <paper-listbox id="menu" selected="{{selectedTab}}" attr-for-selected="name" selected-class="selected" on-iron-activate="_toggleDrawer">
           <nuxeo-slot slot="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-          <nuxeo-menu-icon name="administration" icon="nuxeo:admin" label="app.administration" class="admin-icon"
-                           hidden$="[[!_hasAdministrationPermissions(currentUser)]]">
+          <nuxeo-menu-icon
+            name="administration"
+            icon="nuxeo:admin"
+            label="app.administration"
+            class="settings"
+            hidden$="[[!_hasAdministrationPermissions(currentUser)]]">
           </nuxeo-menu-icon>
           <nuxeo-menu-icon name="profile"
             src="[[currentUser.contextParameters.userprofile.avatar.data]]"
             icon="nuxeo:user-settings"
-            label="app.account" class="profile-icon">
+            label="app.account"
+            class="settings">
           </nuxeo-menu-icon>
         </paper-listbox>
 
