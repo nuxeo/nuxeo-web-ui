@@ -128,6 +128,32 @@ limitations under the License.
             </template>
           </template>
         </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.flags')]]" flex="50" hidden>
+          <template>
+            <template is="dom-if" if="[[item.isRecord]]">
+              <iron-icon id="retainIcon" icon="nuxeo:retain"></iron-icon>
+              <nuxeo-tooltip for="retainIcon">[[i18n('documentContentView.datatable.flags.retention')]]</nuxeo-tooltip>
+            </template>
+            <template is="dom-if" if="[[item.hasLegalHold]]">
+              <iron-icon id="legalHoldIcon" icon="nuxeo:hold"></iron-icon>
+              <nuxeo-tooltip for="legalHoldIcon">
+                [[i18n('documentContentView.datatable.flags.legalHold')]]
+              </nuxeo-tooltip>
+            </template>
+            <template is="dom-if" if="[[isFavorite(item)]]">
+              <iron-icon id="favorite" icon="nuxeo:favorites"></iron-icon>
+              <nuxeo-tooltip for="favorite">
+                [[i18n('documentContentView.datatable.flags.favorite')]]
+              </nuxeo-tooltip>
+            </template>
+            <template is="dom-if" if="[[_contentStoredInColdStorage(item)]]">
+              <iron-icon id="coldStorage" icon="nuxeo:coldstorage"></iron-icon>
+              <nuxeo-tooltip for="coldStorage">
+                [[i18n('documentContentView.datatable.flags.coldStorage')]]
+              </nuxeo-tooltip>
+            </template>
+          </template>
+        </nuxeo-data-table-column>
       </nuxeo-data-table>
     </nuxeo-results>
   </template>
@@ -135,13 +161,17 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-assets-search-results',
-      behaviors: [Nuxeo.LayoutBehavior],
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.FilterBehavior],
       properties: {
         nxProvider: Object,
       },
 
       _navigate(e) {
         this.fire('navigate', { doc: (e.model || e.detail).item });
+      },
+
+      _contentStoredInColdStorage(doc) {
+        return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
       },
     });
   </script>
