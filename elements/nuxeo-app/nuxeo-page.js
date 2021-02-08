@@ -34,7 +34,7 @@ Polymer({
       }
 
       .page {
-        height: calc(100vh - var(--nuxeo-app-top));
+        height: calc(100vh - var(--nuxeo-app-top, 0));
         display: flex;
         flex-direction: column;
       }
