@@ -34,13 +34,12 @@ limitations under the License.
         height: var(--nuxeo-drawer-header-height);
         padding-left: 16px;
         position: fixed;
-        top: 0;
+        top: var(--nuxeo-app-top, 0px);
         left: 0;
         right: 0;
         z-index: 1000;
         visibility: hidden;
-        transform: translateY(-100%);
-        -webkit-transform: translateY(-100%);
+        transform: translateY(calc(- (100% + var(--nuxeo-app-top, 0))));
         transition-duration: .5s;
         transition-property: visibility, -webkit-transform, opacity;
         transition-property: visibility, transform, opacity;
