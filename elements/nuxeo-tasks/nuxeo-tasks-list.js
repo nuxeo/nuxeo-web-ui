@@ -35,7 +35,7 @@ Polymer({
       :host {
         display: block;
         position: relative;
-        height: calc(100vh - 7.7em);
+        height: calc(100vh - 7.7em - var(--nuxeo-app-top, 0));
       }
 
       .task-box {
