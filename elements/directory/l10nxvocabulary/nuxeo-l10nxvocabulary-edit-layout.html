@@ -167,7 +167,10 @@ limitations under the License.
       observers: ['_inputChanged(entry, entries)'],
 
       _entryChanged() {
-        this.entry.properties.obsolete = this.entry.properties.obsolete ? 1 : 0;
+        const { obsolete, parent } = this.entry.properties;
+        this.entry.properties.obsolete = obsolete ? 1 : 0;
+        // if the entry doesn't have a parent, then we set it as the root
+        this.entry.properties.parent = parent == null ? this._root.properties.id : parent;
       },
 
       _isObsolete(obsolete) {
