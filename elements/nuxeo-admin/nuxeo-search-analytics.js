@@ -103,12 +103,7 @@ Polymer({
       </nuxeo-search-data>
 
       <nuxeo-card heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]">
-        <chart-pie
-          values="[[_values(callsPerProvider)]]"
-          labels="[[_labels(callsPerProvider)]]"
-          options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
-        >
-        </chart-pie>
+        <chart-pie values="[[_values(callsPerProvider)]]" labels="[[_labels(callsPerProvider)]]"></chart-pie>
       </nuxeo-card>
 
       <!-- Number of calls per hour -->
