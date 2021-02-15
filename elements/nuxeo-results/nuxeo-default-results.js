@@ -27,6 +27,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
 /**
 `nuxeo-default-results`
@@ -212,12 +213,38 @@ Polymer({
             </template>
           </template>
         </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.flags')]]" flex="50" hidden>
+          <template>
+            <template is="dom-if" if="[[item.isRecord]]">
+              <iron-icon id="retainIcon" icon="nuxeo:retain"></iron-icon>
+              <nuxeo-tooltip for="retainIcon">[[i18n('documentContentView.datatable.flags.retention')]]</nuxeo-tooltip>
+            </template>
+            <template is="dom-if" if="[[item.hasLegalHold]]">
+              <iron-icon id="legalHoldIcon" icon="nuxeo:hold"></iron-icon>
+              <nuxeo-tooltip for="legalHoldIcon">
+                [[i18n('documentContentView.datatable.flags.legalHold')]]
+              </nuxeo-tooltip>
+            </template>
+            <template is="dom-if" if="[[isFavorite(item)]]">
+              <iron-icon id="favorite" icon="nuxeo:favorites"></iron-icon>
+              <nuxeo-tooltip for="favorite">
+                [[i18n('documentContentView.datatable.flags.favorite')]]
+              </nuxeo-tooltip>
+            </template>
+            <template is="dom-if" if="[[_contentStoredInColdStorage(item)]]">
+              <iron-icon id="coldStorage" icon="nuxeo:coldstorage"></iron-icon>
+              <nuxeo-tooltip for="coldStorage">
+                [[i18n('documentContentView.datatable.flags.coldStorage')]]
+              </nuxeo-tooltip>
+            </template>
+          </template>
+        </nuxeo-data-table-column>
       </nuxeo-data-table>
     </nuxeo-results>
   `,
 
   is: 'nuxeo-default-results',
-  behaviors: [RoutingBehavior, FormatBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior],
 
   properties: {
     nxProvider: Object,
@@ -252,5 +279,9 @@ Polymer({
   _navigateLink(e) {
     e.detail = { item: this.items[e.target.dataIndex], index: e.target.dataIndex };
     this._navigate(e);
+  },
+
+  _contentStoredInColdStorage(doc) {
+    return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
   },
 });

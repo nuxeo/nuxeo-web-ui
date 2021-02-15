@@ -22,7 +22,12 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-default-search-results">
   <template>
-    <style include="nuxeo-styles"></style>
+    <style include="nuxeo-styles">
+      iron-icon {
+        color: var(--nuxeo-primary-color);
+        cursor: default;
+      }
+    </style>
 
     <nuxeo-results
       name="default"
@@ -158,6 +163,32 @@ limitations under the License.
             </template>
           </template>
         </nuxeo-data-table-column>
+        <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.flags')]]" flex="50" hidden>
+          <template>
+            <template is="dom-if" if="[[item.isRecord]]">
+              <iron-icon id="retainIcon" icon="nuxeo:retain"></iron-icon>
+              <nuxeo-tooltip for="retainIcon">[[i18n('documentContentView.datatable.flags.retention')]]</nuxeo-tooltip>
+            </template>
+            <template is="dom-if" if="[[item.hasLegalHold]]">
+              <iron-icon id="legalHoldIcon" icon="nuxeo:hold"></iron-icon>
+              <nuxeo-tooltip for="legalHoldIcon">
+                [[i18n('documentContentView.datatable.flags.legalHold')]]
+              </nuxeo-tooltip>
+            </template>
+            <template is="dom-if" if="[[isFavorite(item)]]">
+              <iron-icon id="favorite" icon="nuxeo:favorites"></iron-icon>
+              <nuxeo-tooltip for="favorite">
+                [[i18n('documentContentView.datatable.flags.favorite')]]
+              </nuxeo-tooltip>
+            </template>
+            <template is="dom-if" if="[[_contentStoredInColdStorage(item)]]">
+              <iron-icon id="coldStorage" icon="nuxeo:coldstorage"></iron-icon>
+              <nuxeo-tooltip for="coldStorage">
+                [[i18n('documentContentView.datatable.flags.coldStorage')]]
+              </nuxeo-tooltip>
+            </template>
+          </template>
+        </nuxeo-data-table-column>
       </nuxeo-data-table>
 
       <nuxeo-data-list
@@ -185,7 +216,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-default-search-results',
-      behaviors: [Nuxeo.LayoutBehavior],
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.FiltersBehavior],
       properties: {
         nxProvider: Object,
 
@@ -209,6 +240,10 @@ limitations under the License.
 
       _navigate(e) {
         this.fire('navigate', { doc: (e.model || e.detail).item, index: (e.model || e.detail).index });
+      },
+
+      _contentStoredInColdStorage(doc) {
+        return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
       },
     });
   </script>
