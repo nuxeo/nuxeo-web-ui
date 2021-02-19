@@ -38,14 +38,11 @@ limitations under the License.
         @apply --nuxeo-action-hover;
       }
 
-      paper-listbox {
-        padding: 0;
-      }
-
-      /* document views items (pills) */
-      #documentViewsItems {
-        @apply --layout-horizontal;
-        --paper-listbox-background-color: transparent;
+      paper-tabs {
+        --paper-tabs-selection-bar-color: transparent;
+        height: auto;
+        font-size: inherit;
+        font-weight: 400;
       }
 
       nuxeo-breadcrumb {
@@ -72,9 +69,17 @@ limitations under the License.
         </template>
       </div>
       <div slot="tabs">
-        <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
+        <paper-tabs
+          autoselect
+          attr-for-selected="name"
+          id="documentViewsItems"
+          noink
+          no-slide
+          selected="{{selectedTab}}"
+          selectable="nuxeo-page-item"
+        >
           <nuxeo-slot name="DOCUMENT_VIEWS_ITEMS" model="[[viewsContext]]"></nuxeo-slot>
-        </paper-listbox>
+        </paper-tabs>
       </div>
       <div>
         <div id="nxContent">
