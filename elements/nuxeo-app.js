@@ -61,7 +61,6 @@ import './nuxeo-browser/nuxeo-breadcrumb.js';
 import './nuxeo-browser/nuxeo-repositories.js';
 import './nuxeo-document-storage/nuxeo-document-storage.js';
 import './nuxeo-results/nuxeo-results.js';
-import '../i18n/i18n.js';
 import '../themes/base.js';
 import '../themes/loader.js';
 import './nuxeo-search-page.js';
@@ -76,6 +75,7 @@ import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
+import { loadI18n } from '../i18n/i18n.js';
 
 import { Performance } from './performance.js';
 
@@ -603,6 +603,8 @@ Polymer({
   observers: ['_computeSharedActionContext(currentUser)', '_updateTitle(page, i18n)'],
 
   ready() {
+    loadI18n();
+
     this.$.drawerPanel.closeDrawer();
 
     this.$.drawerPanel.$.drawer.addEventListener('transitionend', () => {
@@ -1036,13 +1038,14 @@ Polymer({
     this.fire('document-updated');
   },
 
-  _observeCurrentUser() {
-    if (this.currentUser) {
+  _observeCurrentUser(user) {
+    loadI18n(user);
+    if (user) {
       this.$.userWorkspace.execute().then((response) => {
         this.userWorkspace = response.path;
       });
       this.$.tasksProvider.params = {
-        userId: this.currentUser.id,
+        userId: user.id,
       };
       this._fetchTaskCount();
     }
