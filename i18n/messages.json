@@ -1248,6 +1248,7 @@
   "retention.rule.label.disabled": "Rule is not active",
   "retention.rule.label.duration": "Retention duration",
   "retention.rule.label.duration.pattern": "{0} Years {1} Months {2} Days",
+  "retention.rule.label.duration.subHeading": "Select a duration",
   "retention.rule.label.heading": "Retention info",
   "retention.rule.label.ruleDescription": "Rule description",
   "retention.rule.label.ruleName": "Rule name",
