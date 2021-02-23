@@ -19,6 +19,7 @@ import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import '@nuxeo/nuxeo-ui-elements/search/nuxeo-results-view.js';
 
 /**
 `nuxeo-search-page`
