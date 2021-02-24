@@ -669,7 +669,7 @@
 
 <nuxeo-slot-content name="addToCollectionSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="10">
   <template>
-    <nuxeo-add-to-collection-documents-button documents="[[selectedItems]]"> </nuxeo-add-to-collection-documents-button>
+    <nuxeo-add-to-collection-documents-button documents="[[items]]" selected-documents="[[selectedItems]]" provider="[[nxProvider]]"></nuxeo-add-to-collection-documents-button>
   </template>
 </nuxeo-slot-content>
 
@@ -687,7 +687,7 @@
 
 <nuxeo-slot-content name="deleteSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="30">
   <template>
-    <nuxeo-delete-documents-button documents="[[selectedItems]]"> </nuxeo-delete-documents-button>
+    <nuxeo-delete-documents-button document="[[document]]" selected-documents="[[selectedItems]]" documents="[[items]]" provider="[[nxProvider]]"> </nuxeo-delete-documents-button>
   </template>
 </nuxeo-slot-content>
 

@@ -39,12 +39,30 @@ Polymer({
 
     <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing></nuxeo-operation>
 
-    <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
-      <div class="action" on-tap="deleteDocuments">
-        <paper-icon-button icon="[[_icon]]" id="deleteAllButton"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
-        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
-      </div>
+    <template is="dom-if" if="[[_isAvailable(documents.splices, selectedDocuments.splices)]]">
+      <!-- regular document delete -->
+      <template is="dom-if" if="[[!_isBulkAction(documents.splices, selectedDocuments.splices)]]">
+        <div class="action" on-tap="deleteDocuments">
+          <paper-icon-button icon="[[_icon]]" id="deleteAllButton"></paper-icon-button>
+          <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+          <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
+        </div>
+      </template>
+      
+      <!-- select all document delete -->
+      <template is="dom-if" if="[[_isBulkAction(documents.splices, selectedDocuments.splices)]]">
+        <nuxeo-operation-button
+          id="btn"
+          operation="Bulk.RunAction"
+          input="[[provider]]"
+          params="[[_params(provider, documents, selectedDocuments)]]"
+          icon="[[_icon]]"
+          label="[[_label]]"
+          show-label$="[[showLabel]]"
+          async
+        >
+        </nuxeo-operation-button>
+      </template>
     </template>
   `,
 
@@ -52,7 +70,18 @@ Polymer({
   behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
+    /**
+     * Page provider from which results are to be exported.
+     */
+    provider: {
+      type: Object,
+    },
     documents: {
+      type: Array,
+      notify: true,
+      value: [],
+    },
+    selectedDocuments: {
       type: Array,
       notify: true,
       value: [],
@@ -90,20 +119,53 @@ Polymer({
     },
   },
 
+  ready() {
+    this.addEventListener('operation-executed', this._onBulkDeleteDocument.bind(this));
+  },
+
+  _isBulkAction() {
+    return this.documents &&
+      this.selectedDocuments &&
+      Array.isArray(this.documents) &&
+      Array.isArray(this.selectedDocuments) &&
+      this.documents.length === this.selectedDocuments.length;
+  },
+
+  _onBulkDeleteDocument() {
+    this.fire('nuxeo-documents-deleted', { documents: this.documents });
+    this.selectedDocuments = [];
+    this.documents = [];
+    this.fire('refresh');
+  },
+
+  _params() {
+    const actionParams = {
+      operationId: 'Document.Delete',
+      parameters: {
+        properties: '',
+      },
+    };
+    return {
+      action: 'automation',
+      providerName: this.provider ? this.provider.provider : null,
+      parameters: JSON.stringify(actionParams),
+    };
+  },
+
   deleteDocuments() {
     if (this.docsHavePermissions && window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
-      if (this.documents && this.documents.length) {
-        const uids = this.documents.map((doc) => doc.uid).join(',');
+      if (this.selectedDocuments && this.selectedDocuments.length) {
+        const uids = this.selectedDocuments.map((doc) => doc.uid).join(',');
         const op = this.hard ? this.$.deleteOp : this.$.trashOp;
         op.input = `docs:${uids}`;
         op.execute().then(
           () => {
-            this.fire('nuxeo-documents-deleted', { documents: this.documents });
-            this.documents = [];
+            this.fire('nuxeo-documents-deleted', { documents: this.selectedDocuments });
+            this.selectedDocuments = [];
             this.fire('refresh');
           },
           (error) => {
-            this.fire('nuxeo-documents-deleted', { error, documents: this.documents });
+            this.fire('nuxeo-documents-deleted', { error, documents: this.selectedDocuments });
           },
         );
       }
@@ -116,8 +178,8 @@ Polymer({
    */
   _isAvailable() {
     return (
-      this.documents &&
-      this.documents.length > 0 &&
+      this.selectedDocuments &&
+      this.selectedDocuments.length > 0 &&
       this._checkDocsPermissions() &&
       (this.hard || !this._checkDocsAreTrashed())
     );
@@ -127,11 +189,11 @@ Polymer({
    * Checks if all selected documents are trashed.
    */
   _checkDocsAreTrashed() {
-    return this.documents.every((document) => this.isTrashed(document));
+    return this.selectedDocuments.every((document) => this.isTrashed(document));
   },
 
   _checkDocsPermissions() {
-    this.docsHavePermissions = this.documents && !this.documents.some((document) => !this._docHasPermissions(document));
+    this.docsHavePermissions = this.selectedDocuments && !this.selectedDocuments.some((document) => !this._docHasPermissions(document));
     return this.docsHavePermissions;
   },
 

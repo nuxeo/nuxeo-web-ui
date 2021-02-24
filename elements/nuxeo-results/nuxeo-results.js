@@ -140,6 +140,7 @@ Polymer({
     <div class="main">
       <nuxeo-selection-toolbar
         id="toolbar"
+        items="[[actionContext.items]]"
         selected-items="[[selectedItems]]"
         class="toolbar"
         on-refresh="_refreshAndFetch"
@@ -154,6 +155,12 @@ Polymer({
       </nuxeo-selection-toolbar>
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
+        <template is="dom-if" if="[[_displaySelectAll(displaySelectAll, view)]]">
+          <div>
+            <nuxeo-checkmark checked="{{_isSelectAllChecked}}" on-click="_selectAllChanged"></nuxeo-checkmark>
+            <span>Select All</span>
+          </div>
+        </template>
         <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
           <nuxeo-sort-select
             options="[[_sortOptions(view, sortOptions)]]"
@@ -292,6 +299,13 @@ Polymer({
       value: false,
     },
     /**
+     * If enabled, it allows to select all the results items.
+     */
+    displaySelectAll: {
+      type: Boolean,
+      value: false,
+    },
+    /**
      * Sort option selected by default (can retrieve the one configured in sort-options).
      */
     sortSelected: {
@@ -331,11 +345,17 @@ Polymer({
     _displayModes: Array,
 
     _localStorageName: String,
+
+    _isSelectAllChecked: {
+      type: Boolean,
+      value: false,
+      notify: true,
+    },
   },
 
   observers: [
     '_updateStorage(name)',
-    '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document)',
+    '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document)'
   ],
 
   listeners: {
@@ -373,6 +393,10 @@ Polymer({
     );
   },
 
+  _displaySelectAll() {
+    return this.view && !this.view.handlesSelectAll && (this.view.hasAttribute('select-all') || this.displaySelectAll);
+  },
+
   _displaySort() {
     // XXX check previous view properties for compatibility
     return this.view && !this.view.handlesSorting && (this.view.hasAttribute('display-sort') || this.displaySort);
@@ -397,6 +421,15 @@ Polymer({
     if (newSort && oldSort) {
       this._sortChanged();
     }
+  },
+
+  _selectAllChanged() {
+    if (this.view && !this._isSelectAllChecked) {
+      this.view.selectAll();
+    } else if (this.view && this._isSelectAllChecked) {
+      this.view.clearSelection();
+    }
+    this._isSelectAllChecked = !this._isSelectAllChecked;
   },
 
   fetch() {

@@ -107,9 +107,12 @@ Polymer({
       <div id="selectionToolbar" class="toolbar">
         <div class="selection">
           <span class="count">[[i18n('selectionToolbar.selected.items', selectedItems.length)]]</span>
-          <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
-            <span>[[i18n('selectionToolbar.display.selection')]]</span>
-          </a>
+          <!-- hide the display selection link -->
+          <template is="dom-if" if="[[!_isSelectAll(items.splices, selectedItems.splices)]]">
+            <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
+              <span>[[i18n('selectionToolbar.display.selection')]]</span>
+            </a>
+          </template>
           <a class="selectionLink" on-tap="clearSelection">
             <span>[[i18n('command.clear')]]</span>
           </a>
@@ -120,20 +123,22 @@ Polymer({
       </div>
     </div>
 
-    <nuxeo-dialog id="selectedItemsPopup" no-auto-focus with-backdrop>
-      <h2>[[i18n('selectionToolbar.dialog.heading')]]</h2>
-      <paper-dialog-scrollable>
-        <template is="dom-repeat" items="[[selectedItems]]">
-          <div class="layout horizontal center">
-            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <div>[[item.title]]</div>
-          </div>
-        </template>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
-      </div>
-    </nuxeo-dialog>
+    <template is="dom-if" if="[[!_isSelectAll(items.splices, selectedItems.splices)]]">
+      <nuxeo-dialog id="selectedItemsPopup" no-auto-focus with-backdrop>
+        <h2>[[i18n('selectionToolbar.dialog.heading')]]</h2>
+        <paper-dialog-scrollable>
+          <template is="dom-repeat" items="[[selectedItems]]">
+            <div class="layout horizontal center">
+              <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+              <div>[[item.title]]</div>
+            </div>
+          </template>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
+        </div>
+      </nuxeo-dialog>
+    </template>
   `,
 
   is: 'nuxeo-selection-toolbar',
@@ -144,6 +149,11 @@ Polymer({
       type: Boolean,
       value: false,
       reflectToAttribute: true,
+    },
+    items: {
+      type: Object,
+      value: [],
+      notify: true,
     },
     selectedItems: {
       type: Object,
@@ -160,6 +170,17 @@ Polymer({
 
   _observeSelectedItems() {
     this.hidden = !this.selectedItems || this.selectedItems.length === 0;
+  },
+
+  /*
+   * SELECTALL
+   */
+  _isSelectAll() {
+    return this.items &&
+      this.selectedItems &&
+      Array.isArray(this.items) &&
+      Array.isArray(this.selectedItems) &&
+      this.items.length === this.selectedItems.length;
   },
 
   toogleSelectedItemsPopup() {

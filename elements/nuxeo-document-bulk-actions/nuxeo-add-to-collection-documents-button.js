@@ -54,8 +54,22 @@ Polymer({
 
     <nuxeo-operation op="Document.AddToCollection" id="addToCollectionOp"></nuxeo-operation>
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
+    
+    <template is="dom-if" if="[[_isBulkAction(documents.splices, selectedDocuments.splices]]">
+      <nuxeo-operation-button
+        id="btn"
+        operation="Bulk.RunAction"
+        input="[[provider]]"
+        params="[[_params(collection, provider, documents, selectedDocuments)]]"
+        icon="[[_icon]]"
+        label="[[_label]]"
+        show-label$="[[showLabel]]"
+        hidden
+      >
+      </nuxeo-operation-button>
+    </template>
 
-    <template is="dom-if" if="[[_isAvailable(documents.*)]]">
+    <template is="dom-if" if="[[_isAvailable(selectedDocuments.*)]]">
       <div class="action" on-tap="_toggleDialog">
         <paper-icon-button noink icon="nuxeo:collections" id="addColBut"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
@@ -105,7 +119,18 @@ Polymer({
   behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
+    /**
+     * Page provider from which results are to be exported.
+     */
+    provider: {
+      type: Object,
+    },
     documents: {
+      type: Array,
+      notify: true,
+      value: [],
+    },
+    selectedDocuments: {
       type: Array,
       notify: true,
       value: [],
@@ -156,9 +181,41 @@ Polymer({
     },
   },
 
+  ready() {
+    this.addEventListener('operation-executed', this._onBulkAddToCollection.bind(this));
+  },
+
+  _isBulkAction() {
+    return this.documents &&
+      this.selectedDocuments &&
+      Array.isArray(this.documents) &&
+      Array.isArray(this.selectedDocuments) &&
+      this.documents.length === this.selectedDocuments.length;
+  },
+
+  _onBulkAddToCollection() {
+    this.fire('added-to-collection', { collectionId: this.collection });
+    this._resetPopup();
+    this._toggleDialog();
+  },
+
+  _params() {
+    const actionParams = {
+      operationId: 'Document.AddToCollection',
+      parameters: {
+        collection: this.collection,
+      },
+    };
+    return {
+      action: 'automation',
+      providerName: this.provider ? this.provider.provider : null,
+      parameters: JSON.stringify(actionParams),
+    };
+  },
+
   _isAvailable() {
-    if (this.documents && this.documents.length > 0) {
-      return this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
+    if (this.selectedDocuments && this.selectedDocuments.length > 0) {
+      return this.selectedDocuments.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
     }
     return false;
   },
@@ -185,18 +242,24 @@ Polymer({
   },
 
   _addToCollection() {
-    const op = this.$$('#addToCollectionOp');
-    op.params = {
-      collection: this.collection,
-    };
-    const uids = this.documents.map((doc) => doc.uid);
-    const uidsString = uids.join(',');
-    op.input = `docs:${uidsString}`;
-    return op.execute().then(() => {
-      this.fire('added-to-collection', { docIds: uids, collectionId: this.collection });
-      this._resetPopup();
-      this._toggleDialog();
-    });
+    if (this._isBulkAction()) {
+      // click the operation button to call the bulk action
+      this.shadowRoot.querySelector('nuxeo-operation-button')._execute();
+    } else {
+      // add selected documents to collection
+      const op = this.$$('#addToCollectionOp');
+      op.params = {
+        collection: this.collection,
+      };
+      const uids = this.selectedDocuments.map((doc) => doc.uid);
+      const uidsString = uids.join(',');
+      op.input = `docs:${uidsString}`;
+      return op.execute().then(() => {
+        this.fire('added-to-collection', { docIds: uids, collectionId: this.collection });
+        this._resetPopup();
+        this._toggleDialog();
+      });
+    }
   },
 
   _resultsFilter(entry) {
