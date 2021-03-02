@@ -146,6 +146,9 @@ pipeline {
           dir('packages/nuxeo-web-ui-ftest') {
             sh 'npm install'
           }
+          dir('plugin/a11y') {
+            sh 'npm install'
+          }
           sh 'npm run lint'
         }
       }
