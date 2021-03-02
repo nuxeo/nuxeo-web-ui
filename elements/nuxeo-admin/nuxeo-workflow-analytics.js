@@ -98,108 +98,115 @@ Polymer({
       }
     </style>
 
-    <nuxeo-resource auto path="workflowModel" on-response="_handleWorkflowModelResponse"></nuxeo-resource>
+    <template is="dom-if" if="[[visible]]">
+      <nuxeo-resource auto path="workflowModel" on-response="_handleWorkflowModelResponse"></nuxeo-resource>
 
-    <nuxeo-card class="dates">
-      <div class="horizontal flex end-justified layout center wrap">
-        <nuxeo-select
-          label="[[i18n('analytics.workflow')]]"
-          placeholder="[[i18n('analytics.workflow')]]"
-          selected="{{workflow}}"
-          options="[[workflows]]"
-        ></nuxeo-select>
-        <nuxeo-date-picker value="{{startDate::change}}" label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
-        <nuxeo-date-picker value="{{endDate::change}}" label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
+      <nuxeo-card class="dates">
+        <div class="horizontal flex end-justified layout center wrap">
+          <nuxeo-select
+            label="[[i18n('analytics.workflow')]]"
+            placeholder="[[i18n('analytics.workflow')]]"
+            selected="{{workflow}}"
+            options="[[workflows]]"
+          ></nuxeo-select>
+          <nuxeo-date-picker value="{{startDate::change}}" label="[[i18n('analytics.after')]]"></nuxeo-date-picker>
+          <nuxeo-date-picker value="{{endDate::change}}" label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
+        </div>
+      </nuxeo-card>
+
+      <div class="flex-layout">
+        <!-- Average wf duration -->
+        <nuxeo-workflow-data
+          workflow="[[workflow]]"
+          event="afterWorkflowFinish"
+          metrics="avg(timeSinceWfStarted)"
+          start-date="[[startDate]]"
+          end-date="[[_extendEndDate(endDate)]]"
+          data="{{avgWorkflowLength}}"
+        >
+        </nuxeo-workflow-data>
+
+        <nuxeo-card heading="[[i18n('workflowAnalytics.averageWorkflowDuration.heading')]]">
+          <iron-icon icon="image:timer"></iron-icon>
+          <h1>[[_asDuration(avgWorkflowLength)]]</h1>
+        </nuxeo-card>
+
+        <!-- Wf initiators -->
+        <nuxeo-workflow-data
+          workflow="[[workflow]]"
+          event="afterWorkflowStarted"
+          grouped-by="workflowInitiator"
+          start-date="[[startDate]]"
+          end-date="[[_extendEndDate(endDate)]]"
+          data="{{initiators}}"
+        >
+        </nuxeo-workflow-data>
+
+        <nuxeo-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading')]]">
+          <chart-pie
+            values="[[_values(initiators)]]"
+            labels="[[_series(initiators)]]"
+            options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
+          >
+          </chart-pie>
+        </nuxeo-card>
+
+        <!-- Actions per user -->
+        <nuxeo-workflow-data
+          workflow="[[workflow]]"
+          event="afterWorkflowTaskEnded"
+          grouped-by="taskActor, taskName"
+          start-date="[[startDate]]"
+          end-date="[[_extendEndDate(endDate)]]"
+          data="{{numberOfActionsPerUser}}"
+        >
+        </nuxeo-workflow-data>
+
+        <nuxeo-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading')]]">
+          <chart-bar
+            labels="[[_labels(numberOfActionsPerUser)]]"
+            series="[[_series(numberOfActionsPerUser)]]"
+            values="[[_values(numberOfActionsPerUser)]]"
+            options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
+          >
+          </chart-bar>
+        </nuxeo-card>
+
+        <!-- Average task duration per user -->
+        <nuxeo-workflow-data
+          workflow="[[workflow]]"
+          event="afterWorkflowTaskEnded"
+          grouped-by="taskActor"
+          metrics="avg(timeSinceTaskStarted)"
+          start-date="[[startDate]]"
+          end-date="[[_extendEndDate(endDate)]]"
+          data="{{avgTaskDurationPerUser}}"
+        >
+        </nuxeo-workflow-data>
+
+        <nuxeo-card heading="[[i18n('workflowAnalytics.averageTaskDurationPerUser.heading')]]">
+          <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
+            <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.user')]]">
+              <template>[[item.key]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.duration')]]">
+              <template>[[item.value]]</template>
+            </nuxeo-data-table-column>
+          </nuxeo-data-table>
+        </nuxeo-card>
       </div>
-    </nuxeo-card>
-
-    <div class="flex-layout">
-      <!-- Average wf duration -->
-      <nuxeo-workflow-data
-        workflow="[[workflow]]"
-        event="afterWorkflowFinish"
-        metrics="avg(timeSinceWfStarted)"
-        start-date="[[startDate]]"
-        end-date="[[_extendEndDate(endDate)]]"
-        data="{{avgWorkflowLength}}"
-      >
-      </nuxeo-workflow-data>
-
-      <nuxeo-card heading="[[i18n('workflowAnalytics.averageWorkflowDuration.heading')]]">
-        <iron-icon icon="image:timer"></iron-icon>
-        <h1>[[_asDuration(avgWorkflowLength)]]</h1>
-      </nuxeo-card>
-
-      <!-- Wf initiators -->
-      <nuxeo-workflow-data
-        workflow="[[workflow]]"
-        event="afterWorkflowStarted"
-        grouped-by="workflowInitiator"
-        start-date="[[startDate]]"
-        end-date="[[_extendEndDate(endDate)]]"
-        data="{{initiators}}"
-      >
-      </nuxeo-workflow-data>
-
-      <nuxeo-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading')]]">
-        <chart-pie
-          values="[[_values(initiators)]]"
-          labels="[[_series(initiators)]]"
-          options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
-        >
-        </chart-pie>
-      </nuxeo-card>
-
-      <!-- Actions per user -->
-      <nuxeo-workflow-data
-        workflow="[[workflow]]"
-        event="afterWorkflowTaskEnded"
-        grouped-by="taskActor, taskName"
-        start-date="[[startDate]]"
-        end-date="[[_extendEndDate(endDate)]]"
-        data="{{numberOfActionsPerUser}}"
-      >
-      </nuxeo-workflow-data>
-
-      <nuxeo-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading')]]">
-        <chart-bar
-          labels="[[_labels(numberOfActionsPerUser)]]"
-          series="[[_series(numberOfActionsPerUser)]]"
-          values="[[_values(numberOfActionsPerUser)]]"
-          options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
-        >
-        </chart-bar>
-      </nuxeo-card>
-
-      <!-- Average task duration per user -->
-      <nuxeo-workflow-data
-        workflow="[[workflow]]"
-        event="afterWorkflowTaskEnded"
-        grouped-by="taskActor"
-        metrics="avg(timeSinceTaskStarted)"
-        start-date="[[startDate]]"
-        end-date="[[_extendEndDate(endDate)]]"
-        data="{{avgTaskDurationPerUser}}"
-      >
-      </nuxeo-workflow-data>
-
-      <nuxeo-card heading="[[i18n('workflowAnalytics.averageTaskDurationPerUser.heading')]]">
-        <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
-          <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.user')]]">
-            <template>[[item.key]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.duration')]]">
-            <template>[[item.value]]</template>
-          </nuxeo-data-table-column>
-        </nuxeo-data-table>
-      </nuxeo-card>
-    </div>
+    </template>
   `,
 
   is: 'nuxeo-workflow-analytics',
   behaviors: [ChartDataBehavior, I18nBehavior],
 
   properties: {
+    visible: {
+      type: Boolean,
+      value: false,
+    },
+
     workflow: {
       type: String,
       value: 'ParallelDocumentReview',

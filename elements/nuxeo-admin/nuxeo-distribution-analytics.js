@@ -66,42 +66,49 @@ Polymer({
       }
     </style>
 
-    <div class="flex-layout">
-      <nuxeo-card>
-        <div class="suggestion-wrapper horizontal layout center">
-          <iron-icon icon="icons:folder"></iron-icon>
-          <div class="flex">
-            <nuxeo-path-suggestion id="pathSuggester" value="{{path}}"></nuxeo-path-suggestion>
+    <template is="dom-if" if="[[visible]]">
+      <div class="flex-layout">
+        <nuxeo-card>
+          <div class="suggestion-wrapper horizontal layout center">
+            <iron-icon icon="icons:folder"></iron-icon>
+            <div class="flex">
+              <nuxeo-path-suggestion id="pathSuggester" value="{{path}}"></nuxeo-path-suggestion>
+            </div>
           </div>
-        </div>
 
-        <nuxeo-document-distribution-chart
-          id="chart"
-          index="[[index]]"
-          path="[[path]]"
-          mode="count"
-          include-version
-          include-hidden
-          include-deleted
-        >
-        </nuxeo-document-distribution-chart>
+          <nuxeo-document-distribution-chart
+            id="chart"
+            index="[[index]]"
+            path="[[path]]"
+            mode="count"
+            include-version
+            include-hidden
+            include-deleted
+          >
+          </nuxeo-document-distribution-chart>
 
-        <div class="horizontal layout center">
-          <div>
-            <iron-icon icon="icons:track-changes"></iron-icon>
+          <div class="horizontal layout center">
+            <div>
+              <iron-icon icon="icons:track-changes"></iron-icon>
+            </div>
+            <div class="flex">
+              <paper-slider id="ratings" pin snaps max="20" max-markers="20" step="1" value="{{depth}}"></paper-slider>
+            </div>
           </div>
-          <div class="flex">
-            <paper-slider id="ratings" pin snaps max="20" max-markers="20" step="1" value="{{depth}}"></paper-slider>
-          </div>
-        </div>
-      </nuxeo-card>
-    </div>
+        </nuxeo-card>
+      </div>
+    </template>
   `,
 
   is: 'nuxeo-distribution-analytics',
   behaviors: [I18nBehavior],
 
   properties: {
+    visible: {
+      type: Boolean,
+      value: false,
+    },
+
     index: {
       type: String,
       value: '_all',
@@ -118,6 +125,10 @@ Polymer({
   observers: ['_observeDocPath(path, depth)'],
 
   _observeDocPath() {
+    if (!this.visible) {
+      return;
+    }
+
     if (
       this.path &&
       this.path.length &&
