@@ -942,12 +942,12 @@ Polymer({
   },
 
   _toggleDrawer(e) {
-    if (this._selected === e.detail.selected && this.drawerOpened) {
+    if (e.detail.selected && this._selected === e.detail.selected && this.drawerOpened) {
       this._closeDrawer();
     } else {
+      this._selected = this.selectedTab = e.detail.selected;
       this._openDrawer();
     }
-    this._selected = e.detail.selected;
   },
 
   _openDrawer() {
@@ -957,11 +957,13 @@ Polymer({
     if (drawerPanel.narrow) {
       drawerPanel.openDrawer();
     }
+    const drawer = this.$['drawer-pages'];
     if (!this.selectedTab) {
-      const drawer = this.$['drawer-pages'];
       drawer.selectIndex(0);
-      this.selectedTab = drawer.selected;
+    } else {
+      drawer.select(this.selectedTab);
     }
+    this.selectedTab = drawer.selected;
   },
 
   _closeDrawer() {
