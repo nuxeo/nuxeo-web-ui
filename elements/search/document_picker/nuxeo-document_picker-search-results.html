@@ -1,0 +1,47 @@
+<!--
+`nuxeo-document_picker-search-results`
+@group Nuxeo UI
+@element nuxeo-document_picker-search-results
+-->
+<dom-module id="nuxeo-document_picker-search-results">
+  <template>
+    <style include="nuxeo-styles">
+      nuxeo-data-grid {
+        /* required to override the min-height defined by default on <nuxeo-data-grid> */
+        min-height: 200px;
+      }
+    </style>
+    <nuxeo-results nx-provider="[[nxProvider]]" selected-items="{{selectedItems}}" display-quick-filters>
+      <!-- disable the default actions (eg. CSV export) -->
+      <div slot="actions"></div>
+      <!-- disable the actions that are displayed when results are selected -->
+      <div slot="selectionActions"></div>
+      <nuxeo-data-grid
+        name="grid"
+        icon="nuxeo:view-thumbnails"
+        class="results"
+        empty-label="[[i18n('searchResults.noResults')]]"
+        selection-enabled
+      >
+        <template>
+          <nuxeo-document-grid-thumbnail
+            tabindex$="{{tabIndex}}"
+            selected$="{{selected}}"
+            doc="[[item]]"
+            index="[[index]]"
+            selected-items="[[selectedItems]]"
+          ></nuxeo-document-grid-thumbnail>
+        </template>
+      </nuxeo-data-grid>
+    </nuxeo-results>
+  </template>
+  <script>
+    Polymer({
+      is: 'nuxeo-document_picker-search-results',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        nxProvider: Object,
+      },
+    });
+  </script>
+</dom-module>
