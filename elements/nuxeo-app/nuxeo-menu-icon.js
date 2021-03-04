@@ -23,6 +23,7 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { PaperItemBehavior } from '@polymer/paper-item/paper-item-behavior.js';
 
 /**
 `nuxeo-menu-icon`
@@ -74,7 +75,7 @@ Polymer({
   `,
 
   is: 'nuxeo-menu-icon',
-  behaviors: [I18nBehavior, RoutingBehavior],
+  behaviors: [I18nBehavior, RoutingBehavior, PaperItemBehavior],
 
   properties: {
     /**
