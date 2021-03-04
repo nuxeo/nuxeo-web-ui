@@ -1,0 +1,44 @@
+<!--
+`nuxeo-document_picker-search-form`
+@group Nuxeo UI
+@element nuxeo-document_picker-search-form
+-->
+<dom-module id="nuxeo-document_picker-search-form">
+  <template>
+    <style include="nuxeo-styles"></style>
+    <nuxeo-input
+      role="widget"
+      id="searchInput"
+      value="{{params.title}}"
+      label="[[i18n('pickerSearch.title')]]"
+      type="text"
+      autofocus
+      on-keydown="_checkForEnter"
+      aria-label$="[[i18n('pickerSearch.title')]]"
+    ></nuxeo-input>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-document_picker-search-form',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        params: {
+          type: Object,
+          value: {},
+          notify: true,
+        },
+        aggregations: {
+          type: Object,
+          value: {},
+          notify: true,
+        },
+      },
+      _checkForEnter(e) {
+        if (e.keyCode === 13) {
+          this.fire('trigger-search');
+        }
+      },
+    });
+  </script>
+</dom-module>
