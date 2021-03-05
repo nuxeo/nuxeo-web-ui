@@ -28,10 +28,10 @@ limitations under the License.
     <nuxeo-input
       role="widget"
       id="searchInput"
-      label="[[i18n('assetsSearch.fullText')]]"
+      label="[[i18n('label.ui.predicate.ecm_fulltext')]]"
       value="{{searchTerm}}"
       type="search"
-      placeholder="[[i18n('assetsSearch.fullText.placeholder')]]"
+      placeholder="[[i18n('label.ui.predicate.ecm_fulltext.placeholder')]]"
       autofocus
       on-keydown="_checkForEnter"
     >
@@ -42,7 +42,7 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.system_primaryType_agg]]"
         value="{{params.system_primaryType_agg}}"
-        label="[[i18n('assetsSearch.assetType')]]"
+        label="[[i18n('label.ui.aggregate.system_primaryType_agg')]]"
         collapsible
       >
       </nuxeo-checkbox-aggregation>
@@ -53,7 +53,7 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.system_mimetype_agg]]"
         value="{{params.system_mimetype_agg}}"
-        label="[[i18n('assetsSearch.assetFormat')]]"
+        label="[[i18n('label.ui.aggregate.system_mimetype_agg')]]"
         collapsible
       >
       </nuxeo-checkbox-aggregation>
@@ -64,7 +64,7 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.asset_width_agg]]"
         value="{{params.asset_width_agg}}"
-        label="[[i18n('assetsSearch.assetWidth')]]"
+        label="[[i18n('label.ui.aggregate.asset_width_agg')]]"
         collapsible
       >
       </nuxeo-checkbox-aggregation>
@@ -75,7 +75,7 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.asset_height_agg]]"
         value="{{params.asset_height_agg}}"
-        label="[[i18n('assetsSearch.assetHeight')]]"
+        label="[[i18n('label.ui.aggregate.asset_height_agg')]]"
         collapsible
       >
       </nuxeo-checkbox-aggregation>
@@ -86,7 +86,7 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.color_profile_agg]]"
         value="{{params.color_profile_agg}}"
-        label="[[i18n('assetsSearch.colorProfile')]]"
+        label="[[i18n('label.ui.aggregate.color_profile_agg')]]"
         collapsible
       >
       </nuxeo-checkbox-aggregation>
@@ -97,7 +97,7 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.color_depth_agg]]"
         value="{{params.color_depth_agg}}"
-        label="[[i18n('assetsSearch.colorDepth')]]"
+        label="[[i18n('label.ui.aggregate.color_depth_agg')]]"
         collapsible
       >
       </nuxeo-checkbox-aggregation>
@@ -108,7 +108,7 @@ limitations under the License.
       <nuxeo-checkbox-aggregation
         data="[[aggregations.video_duration_agg]]"
         value="{{params.video_duration_agg}}"
-        label="[[i18n('assetsSearch.videoDuration')]]"
+        label="[[i18n('label.ui.aggregate.video_duration_agg')]]"
         collapsible
       >
       </nuxeo-checkbox-aggregation>

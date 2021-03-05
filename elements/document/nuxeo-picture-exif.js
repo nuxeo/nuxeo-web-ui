@@ -42,30 +42,30 @@ Polymer({
 
     <div class="properties">
       <div class="item">
-        <label>[[i18n('pictureViewLayout.date')]]</label>
+        <label>[[i18n('label.ui.schema.imd.date_time_original')]]</label>
         <nuxeo-date
           datetime="[[document.properties.imd:date_time_original]]"
           hidden$="![[document.properties.imd:date_time_original]]"
         ></nuxeo-date>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.orientation')]]</label>
+        <label>[[i18n('label.ui.schema.imd.orientation')]]</label>
         <div>[[document.properties.imd:orientation]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.fnumber')]]</label>
+        <label>[[i18n('label.ui.schema.imd.fnumber')]]</label>
         <div>[[document.properties.imd:fnumber]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.exposure')]]</label>
+        <label>[[i18n('label.ui.schema.imd.exposure_time')]]</label>
         <div>[[document.properties.imd:exposure_time]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.iso')]]</label>
+        <label>[[i18n('label.ui.schema.imd.iso_speed_ratings')]]</label>
         <div>[[document.properties.imd:iso_speed_ratings]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.focalLength')]]</label>
+        <label>[[i18n('label.ui.schema.imd.focalLength')]]</label>
         <div>[[document.properties.imd:focalLength]]</div>
       </div>
     </div>

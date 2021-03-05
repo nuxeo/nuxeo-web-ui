@@ -25,7 +25,7 @@ limitations under the License.
   <template>
     <nuxeo-user-suggestion
       role="widget"
-      label="[[i18n('wf.parallelDocumentReview.participants')]]"
+      label="[[i18n('label.ui.workflow.var_ParallelDocumentReview.participants')]]"
       search-type="USER_GROUP_TYPE"
       multiple
       prefixed
@@ -36,7 +36,7 @@ limitations under the License.
 
     <nuxeo-textarea
       role="widget"
-      label="[[i18n('wf.parallelDocumentReview.comment')]]"
+      label="[[i18n('label.ui.workflow.var_ParallelDocumentReview.comment')]]"
       value="{{task.variables.comment}}"
       always-float-label
     >
@@ -44,7 +44,7 @@ limitations under the License.
 
     <nuxeo-date-picker
       role="widget"
-      label="[[i18n('wf.parallelDocumentReview.endDate')]]"
+      label="[[i18n('label.ui.workflow.var_ParallelDocumentReview.end_date')]]"
       value="{{task.variables.end_date}}"
       required
     >

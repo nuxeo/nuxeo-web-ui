@@ -25,23 +25,23 @@ limitations under the License.
     <style include="nuxeo-styles"></style>
 
     <div role="widget">
-      <label>[[i18n('label.dublincore.title')]]</label>
+      <label>[[i18n('label.ui.schema.dc.title')]]</label>
       <div name="title">[[document.properties.dc:title]]</div>
     </div>
 
     <div role="widget" hidden$="[[!document.properties.dc:description]]">
-      <label>[[i18n('label.dublincore.description')]]</label>
+      <label>[[i18n('label.ui.schema.dc.description')]]</label>
       <div name="description" class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
     <div role="widget" hidden$="[[!document.properties.dc:nature]]">
-      <label>[[i18n('label.dublincore.nature')]]</label>
+      <label>[[i18n('label.ui.schema.dc.nature')]]</label>
       <div name="nature">[[formatDirectory(document.properties.dc:nature)]]</div>
     </div>
 
     <nuxeo-directory-suggestion
       role="widget"
-      label="[[i18n('label.dublincore.subjects')]]"
+      label="[[i18n('label.ui.schema.dc.subjects')]]"
       directory-name="l10nsubjects"
       name="subjects"
       value="{{document.properties.dc:subjects}}"
@@ -53,12 +53,12 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
-      <label>[[i18n('label.dublincore.coverage')]]</label>
+      <label>[[i18n('label.ui.schema.dc.coverage')]]</label>
       <div name="coverage">[[formatDirectory(document.properties.dc:coverage)]]</div>
     </div>
 
     <div role="widget" hidden$="[[!document.properties.dc:expired]]">
-      <label>[[i18n('label.dublincore.expire')]]</label>
+      <label>[[i18n('label.ui.schema.dc.expired')]]</label>
       <div name="expired">[[formatDate(document.properties.dc:expired)]]</div>
     </div>
   </template>

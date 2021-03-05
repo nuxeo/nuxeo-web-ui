@@ -51,19 +51,19 @@ Polymer({
 
     <div class="properties">
       <div class="item">
-        <label>[[i18n('pictureViewLayout.copyright')]]</label>
+        <label>[[i18n('label.ui.schema.imd.copyright')]]</label>
         <div>[[document.properties.imd:copyright]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.rights')]]</label>
+        <label>[[i18n('label.ui.schema.dc.rights')]]</label>
         <div>[[document.properties.dc:rights]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.source')]]</label>
+        <label>[[i18n('label.ui.schema.dc.source')]]</label>
         <div>[[document.properties.dc:source]]</div>
       </div>
       <div class="item">
-        <label>[[i18n('pictureViewLayout.description')]]</label>
+        <label>[[i18n('label.ui.schema.imd.image_description')]]</label>
         <div class="text-area">[[document.properties.imd:image_description]]</div>
       </div>
     </div>

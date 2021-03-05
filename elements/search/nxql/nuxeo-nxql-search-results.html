@@ -67,7 +67,7 @@ limitations under the License.
         on-row-clicked="_navigate"
       >
         <nuxeo-data-table-column
-          name="[[i18n('label.dublincore.title')]]"
+          name="[[i18n('label.ui.schema.dc.title')]]"
           field="dc:title"
           sort-by="dc:title"
           flex="50"
@@ -105,7 +105,7 @@ limitations under the License.
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column
-          name="[[i18n('label.dublincore.modified')]]"
+          name="[[i18n('label.ui.schema.dc.modified')]]"
           field="dc:modified"
           sort-by="dc:modified"
           flex="50"
@@ -116,7 +116,7 @@ limitations under the License.
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column
-          name="[[i18n('label.dublincore.lastContributor')]]"
+          name="[[i18n('label.ui.schema.dc.lastContributor')]]"
           field="dc:lastContributor"
           sort-by="dc:lastContributor"
           flex="50"
@@ -139,7 +139,7 @@ limitations under the License.
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column
-          name="[[i18n('label.dublincore.created')]]"
+          name="[[i18n('label.ui.schema.dc.created')]]"
           field="dc:created"
           sort-by="dc:created"
           flex="50"
@@ -151,7 +151,7 @@ limitations under the License.
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column
-          name="[[i18n('label.dublincore.author')]]"
+          name="[[i18n('label.ui.schema.dc.creator')]]"
           field="dc:creator"
           sort-by="dc:creator"
           hidden
@@ -161,7 +161,7 @@ limitations under the License.
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.nature')]]" field="dc:nature" hidden>
+        <nuxeo-data-table-column name="[[i18n('label.ui.schema.dc.nature')]]" field="dc:nature" hidden>
           <template>
             <nuxeo-tag hidden$="[[!item.properties.dc:nature]]"
               >[[formatDirectory(item.properties.dc:nature)]]</nuxeo-tag
@@ -169,7 +169,7 @@ limitations under the License.
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.coverage')]]" field="dc:coverage" hidden>
+        <nuxeo-data-table-column name="[[i18n('label.ui.schema.dc.coverage')]]" field="dc:coverage" hidden>
           <template>
             <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]"
               >[[formatDirectory(item.properties.dc:coverage)]]</nuxeo-tag
@@ -177,7 +177,7 @@ limitations under the License.
           </template>
         </nuxeo-data-table-column>
 
-        <nuxeo-data-table-column name="[[i18n('label.dublincore.subjects')]]" field="dc:subjects" hidden flex="60">
+        <nuxeo-data-table-column name="[[i18n('label.ui.schema.dc.subjects')]]" field="dc:subjects" hidden flex="60">
           <template>
             <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
               <nuxeo-tag>[[formatDirectory(subject)]]</nuxeo-tag>

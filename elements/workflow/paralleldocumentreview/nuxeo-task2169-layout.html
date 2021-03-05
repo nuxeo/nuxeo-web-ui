@@ -24,7 +24,7 @@ limitations under the License.
 <dom-module id="nuxeo-task2169-layout">
   <template>
     <div role="widget">
-      <label>[[i18n('wf.parallelDocumentReview.consolidate.form.review_brief')]]</label>
+      <label>[[i18n('label.ui.workflow.var_ParallelDocumentReview.review_result')]]</label>
       <nuxeo-document-task-review-result
         class="review-result"
         result="[[task.variables.review_result]]"
@@ -32,7 +32,7 @@ limitations under the License.
     </div>
     <nuxeo-textarea
       role="widget"
-      label="[[i18n('wf.parallelDocumentReview.comment')]]"
+      label="[[i18n('label.ui.workflow.var_ParallelDocumentReview.comment')]]"
       value="{{task.variables.comment}}"
       always-float-label
     >
