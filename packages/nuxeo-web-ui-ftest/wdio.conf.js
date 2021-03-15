@@ -1,17 +1,20 @@
 const chai = require('chai');
 const path = require('path');
 const processor = require('./scripts/specs-processor.js');
+const CompatService = require('./wdio-compat-plugin');
+const ShadowService = require('./wdio-shadow-plugin');
 
 const reporters = ['spec'];
 if (process.env.JUNIT_REPORT_PATH) {
   reporters.push('junit');
 }
-if (process.env.CUCUMBER_REPORT_PATH) {
-  reporters.push('multiple-cucumber-html');
-}
+// if (process.env.CUCUMBER_REPORT_PATH) {
+//   reporters.push('multiple-cucumber-html');
+// }
 
 const plugins = {};
-plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
+// plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
+// plugins[path.join(__dirname, 'wdio-compat-plugin')] = {};
 
 const capability = {
   // maxInstances can get overwritten per capability. So if you have an in-house Selenium
@@ -19,36 +22,40 @@ const capability = {
   // 5 instance gets started at a time.
   maxInstances: 1,
   browserName: process.env.BROWSER,
-  javascriptEnabled: true,
-  acceptSslCerts: true,
+  // javascriptEnabled: true,
+  // acceptSslCerts: true,
+  acceptInsecureCerts: true,
 };
+
+const options = {};
 
 switch (capability.browserName) {
   case 'chrome':
-    capability.chromeOptions = {
-      args: ['--no-sandbox'],
-      w3c: false,
-    };
+    
+    options.args = ['--no-sandbox'];
+    options.w3c = false;
+    
     if (process.env.HEADLESS) {
-      capability.chromeOptions.args.push('--window-size=1920,1080');
-      capability.chromeOptions.args.push('--single-process');
-      capability.chromeOptions.args.push('--headless');
-      capability.chromeOptions.args.push('--disable-gpu');
-      capability.chromeOptions.args.push('--disable-dev-shm-usage');
+      options.args.push('--window-size=1920,1080');
+      options.args.push('--single-process');
+      options.args.push('--headless');
+      options.args.push('--disable-gpu');
+      options.args.push('--disable-dev-shm-usage');
     }
     if (process.env.BROWSER_BINARY) {
       capability.chromeOptions.binary = process.env.BROWSER_BINARY;
     }
+    capability['goog:chromeOptions'] = options;
     break;
   case 'firefox':
-    capability['moz:firefoxOptions'] = {
-      args: [
+    options.args = [
         // '-headless',
-      ],
-    };
+    ];
+    
     if (process.env.BROWSER_BINARY) {
-      capability['moz:firefoxOptions'].binary = process.env.BROWSER_BINARY;
+      options.binary = process.env.BROWSER_BINARY;
     }
+    capability['moz:firefoxOptions'] = options;
     break;
   case 'safari':
     capability['safari.options'] = {
@@ -72,7 +79,18 @@ require('babel-register')({
   ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/,
 });
 
+
 exports.config = {
+
+  //
+  // ====================
+  // Runner Configuration
+  // ====================
+  //
+  // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
+  // on a remote machine).
+  runner: 'local',
+
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],
@@ -85,7 +103,8 @@ exports.config = {
   // NPM script (see https://docs.npmjs.com/cli/run-script) then the current working
   // directory is where your package.json resides, so `wdio` will be called from there.
   //
-  specs: processor(process.argv),
+  
+  specs: ['./features/*.feature'], // processor(process.argv),
   // Patterns to exclude.
   exclude: [
     // 'path/to/excluded/files'
@@ -124,8 +143,8 @@ exports.config = {
   // e.g. using promises you can set the sync option to false.
   sync: true,
   //
-  // Level of logging verbosity: silent | verbose | command | data | result | error
-  logLevel: 'error',
+  // Level of logging verbosity: trace | debug | info | warn | error | silent
+  logLevel: 'trace',
   //
   // Enables colors for log output.
   coloredLogs: true,
@@ -164,11 +183,11 @@ exports.config = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: ['selenium-standalone'],
-
-  seleniumArgs: { drivers },
-
-  seleniumInstallArgs: { drivers },
+  services: [
+    'selenium-standalone',
+    [CompatService],
+    [ShadowService],
+  ],
 
   //
   // Framework you want to run your specs with.
@@ -199,21 +218,32 @@ exports.config = {
   cucumberOpts: {
     // <string[]> (file/dir) require files before executing features
     require: [path.join(__dirname, 'features/step_definitions/**/*.js')],
-    backtrace: true, // <boolean> show full backtrace for errors
+    // <boolean> show full backtrace for errors
+    backtrace: true,
     // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
-    // compiler: ['js:babel-register'],
-    dryRun: false, // <boolean> invoke formatters without executing steps
-    failFast: !process.env.RUN_ALL, // <boolean> abort the run on first failure
-    colors: true, // <boolean> disable colors in formatter output
-    snippets: true, // <boolean> hide step definition snippets for pending steps
-    source: false, // <boolean> hide source uris
-    profile: [], // <string[]> (name) specify the profile to use
-    strict: true, // <boolean> fail if there are any undefined or pending steps
+    requireModule: ['@babel/register'],
+    // <boolean> invoke formatters without executing steps
+    dryRun: false,
+    failAmbiguousDefinitions: true,
+    // <boolean> abort the run on first failure
+    failFast: !process.env.RUN_ALL,
+    // <string[]> (type[:path]) specify the output format, optionally supply PATH to redirect formatter output (repeatable)
+    format: ['pretty'],
+    // <boolean> hide step definition snippets for pending steps
+    snippets: true,
+    // <boolean> hide source uris
+    source: true,
+    // <string[]> (name) specify the profile to use
+    profile: [],
+    // <boolean> fail if there are any undefined or pending steps
+    strict: true,
     // <string> (expression) only execute the features or scenarios with tags matching the expression
-    // Details can be found here: https://cucumber.io/docs/cucumber/api/#tag-expressions
     tagExpression: process.env.TAG_EXPRESSION,
-    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : TIMEOUT + 5000, // <number> timeout for step definitions
-    ignoreUndefinedDefinitions: false, // <boolean> Enable this config to treat undefined definitions as warnings.
+    // <number> timeout for step definitions
+    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : TIMEOUT + 500,
+    // <boolean> Enable this config to treat undefined definitions as warnings.
+    ignoreUndefinedDefinitions: false,
+
   },
   //
   // =====
@@ -235,7 +265,7 @@ exports.config = {
      * Increase window size to avoid hidden buttons
      */
     try {
-      browser.windowHandleMaximize();
+      browser.maximizeWindow();
     } catch (e) {
       console.error('Failed to maximize.');
     }
@@ -247,6 +277,7 @@ exports.config = {
     global.assert = chai.assert;
     global.should = chai.should();
     global.driver = global.browser;
+
   },
   //
   // Hook that gets executed before the suite starts

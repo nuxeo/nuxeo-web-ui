@@ -66,7 +66,7 @@ export default class DocumentPage extends BasePage {
 
   get publicationsCount() {
     this.el.waitForVisible('nuxeo-document-info .item label');
-    const items = this.el.elements('nuxeo-document-info .item').value;
+    const items = this.el.elements('nuxeo-document-info .item');
     const pub = items.find((i) => i.element('label').getText() === 'Publications');
     if (pub) {
       return parseInt(

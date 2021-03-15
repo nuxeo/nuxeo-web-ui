@@ -6,7 +6,7 @@ const suggestionGet = (element) => {
   if (element.getAttribute('multiple') !== null) {
     return element
       .elements('.selectivity-multiple-selected-item')
-      .value.map((v) => v.getText())
+      .map((v) => v.getText())
       .join(',');
   }
   return element.element('.selectivity-single-selected-item').getText();
@@ -59,7 +59,7 @@ const suggestionSet = (element, value) => {
   } else if (element.getAttribute('multiple') !== null) {
     element
       .elements('.selectivity-multiple-selected-item')
-      .value.forEach((el) => el.element('.selectivity-multiple-selected-item-remove').click());
+      .forEach((el) => el.element('.selectivity-multiple-selected-item-remove').click());
   } else {
     const item = element.element('.selectivity-single-selected-item');
     if (item) {
@@ -82,8 +82,7 @@ global.fieldRegistry.register(
   (element, value) => {
     element.element('.input-element input').click();
     element.waitForExist('paper-item');
-    const item = element.elementByTextContent('paper-item', value);
-    item.waitForExist();
+    const item = element.elements('paper-item').find((e) => e.getText() === value);
     item.click();
   },
 );
@@ -129,7 +128,7 @@ global.fieldRegistry.register(
   (element, value) => {
     element.element('div ul li input').click();
     driver.element('div ul li input').setValue(value);
-    driver.waitForVisible(`//div[text()='${value}' and @class='select2-result-label']`);
+    $(`//div[text()='${value}' and @class='select2-result-label']`).waitForVisible();
     driver.element(`//div[text()='${value}' and @class='select2-result-label']`).click();
   },
 );
@@ -188,7 +187,7 @@ global.fieldRegistry.register(
       button.click();
     }
     el.waitForVisible('paper-checkbox');
-    const els = el.elements('paper-checkbox').value;
+    const els = el.elements('paper-checkbox');
     const checkbox = els.find((e) => {
       const text = e.getText();
       return typeof text === 'string' && text.trim().includes(value);
@@ -208,9 +207,9 @@ global.fieldRegistry.register(
   'nuxeo-data-table',
   (element) => {
     const result = [];
-    element.elements('nuxeo-data-table-row:not([header])').value.forEach((row) => {
+    element.elements('nuxeo-data-table-row:not([header])').forEach((row) => {
       const cellValue = [];
-      row.elements('nuxeo-data-table-cell:not([header])').value.forEach((cell) => {
+      row.elements('nuxeo-data-table-cell:not([header])').forEach((cell) => {
         const txt = cell.getText();
         if (txt) {
           cellValue.push(txt);

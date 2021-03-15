@@ -31,7 +31,7 @@ export default class CloudServices extends BasePage {
 
   editProvider(currentName, newDetails) {
     driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="serviceName"]');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
     const edited = rows.some((row) => {
       if (row.isVisible('[name="serviceName"]') && row.getText('[name="serviceName"]').trim() === currentName) {
         row.click('[name="edit"]');
@@ -49,7 +49,7 @@ export default class CloudServices extends BasePage {
 
   deleteProvider(serviceName) {
     driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="serviceName"]');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
     const deleted = rows.some((row) => {
       if (row.isVisible('[name="serviceName"]') && row.getText('[name="serviceName"]').trim() === serviceName) {
         row.click('[name="delete"]');
@@ -79,7 +79,7 @@ export default class CloudServices extends BasePage {
     const { el } = this;
     driver.waitUntil(
       () => {
-        const providers = el.elements('[name="serviceName"').value;
+        const providers = el.elements('[name="serviceName"');
         if (reverse) {
           return providers.every((provider) => provider.getText().trim() !== id);
         }
@@ -94,7 +94,7 @@ export default class CloudServices extends BasePage {
     const { el } = this;
     driver.waitUntil(
       () => {
-        const clients = el.elements('[name="id"').value;
+        const clients = el.elements('[name="id"');
         if (reverse) {
           return clients.every((client) => client.getText().trim() !== id);
         }
@@ -125,7 +125,7 @@ export default class CloudServices extends BasePage {
 
   editClient(currentClientId, newDetails) {
     driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="id"]');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
     const edited = rows.some((row) => {
       if (row.isVisible('[name="id"]') && row.getText('[name="id"]').trim() === currentClientId) {
         row.click('[name="edit"]');
@@ -143,7 +143,7 @@ export default class CloudServices extends BasePage {
 
   deleteClient(clientId) {
     driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="id"]');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row').value;
+    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
     const deleted = rows.some((row) => {
       if (row.isVisible('[name="id"]') && row.getText('[name="id"]').trim() === clientId) {
         row.click('[name="delete"]');

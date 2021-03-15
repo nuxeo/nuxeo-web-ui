@@ -21,7 +21,7 @@ Then(/^I can search for the following groups$/, function(table) {
     this.ui.group.waitForVisible('nuxeo-card[name="groups"] .table nuxeo-group-tag');
     this.ui.group.click('nuxeo-card[name="groups"] .table nuxeo-group-tag');
     this.ui.group.waitForVisible('nuxeo-group-management');
-    const group = this.ui.group.el.elementByTextContent('.header .groupname', row[0]);
+    const group = this.ui.group.el.elements('.header .groupname').find((e) => e.getText() === row[0]);
     group.waitForVisible().should.be.true;
   });
 });
