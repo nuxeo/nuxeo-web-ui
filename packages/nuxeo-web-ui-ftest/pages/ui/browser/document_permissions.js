@@ -23,12 +23,14 @@ export default class DocumentPermissions extends BasePage {
 
   permission(permission, name, timeFrame) {
     return driver.waitUntil(() => {
-      const rows = this.el.elements('div.acl-table-row').value;
+      const rows = this.el.elements('div.acl-table-row');
       return rows.find((row) => {
         const nameCheck = name ? row.isExisting(`span.user[title="${name} - ${name}@test.com"]`) : true;
-        const permissionCheck = permission ? !!row.hasElementByTextContent('span.label', permission) : true;
+        const permissionCheck = permission
+          ? !!row.elements('span.label').some((e) => e.getText() === permission)
+          : true;
         // XXX should rely on a class or column header name
-        const timeFrameCheck = timeFrame ? !!row.hasElementByTextContent('span', permission) : true;
+        const timeFrameCheck = timeFrame ? !!row.elements('span').some((e) => e.getText() === permission) : true;
         return nameCheck && permissionCheck && timeFrameCheck;
       });
     });

@@ -23,9 +23,9 @@ export default class UI extends BasePage {
   }
 
   get activityFeed() {
-    browser.waitForVisible('nuxeo-document-page nuxeo-page-item[name="activity"]');
+    $('nuxeo-document-page nuxeo-page-item[name="activity"]').waitForVisible();
     browser.click('nuxeo-document-page nuxeo-page-item[name="activity"]');
-    browser.waitForVisible('nuxeo-document-activity');
+    $('nuxeo-document-activity').waitForVisible();
     return new ActivityFeed('nuxeo-document-activity');
   }
 
@@ -89,11 +89,11 @@ export default class UI extends BasePage {
   static get() {
     url(process.env.NUXEO_URL ? '' : 'ui');
     if (!global.locale) {
-      browser.waitForVisible('nuxeo-app:not([unresolved])');
+      $('nuxeo-app:not([unresolved])').waitForVisible();
       /* global window */
       const locale = browser.execute(() => window.nuxeo.I18n.language || 'en');
-      if (locale.value) {
-        global.locale = locale.value;
+      if (locale) {
+        global.locale = locale;
         moment.locale(global.locale);
       }
     }
@@ -152,7 +152,7 @@ export default class UI extends BasePage {
 
   get isConnectionActive() {
     /* global document */
-    return driver.execute(() => document.querySelector('nuxeo-connection').active).value;
+    return driver.execute(() => document.querySelector('nuxeo-connection').active);
   }
 
   waitRequests() {
@@ -168,6 +168,6 @@ export default class UI extends BasePage {
   }
 
   waitForToastNotVisible() {
-    driver.waitUntil(() => driver.elements('paper-toast').value.every((toast) => !toast.isVisible()));
+    driver.waitUntil(() => driver.elements('paper-toast').every((toast) => !toast.isVisible()));
   }
 }

@@ -2,7 +2,7 @@ import BasePage from '../base';
 
 export default class Recents extends BasePage {
   get nbItems() {
-    const items = this.el.elements('#recentDocumentsList .list-item').value;
+    const items = this.el.elements('#recentDocumentsList .list-item');
     let count = 0;
     items.forEach((item) => {
       if (item.isVisible()) {
@@ -13,7 +13,7 @@ export default class Recents extends BasePage {
   }
 
   select(name) {
-    const entries = this.el.elements('#recentDocumentsList .list-item-title').value;
+    const entries = this.el.elements('#recentDocumentsList .list-item-title');
     const doc = entries.find((entry) => entry.getText().trim() === name);
     if (doc) {
       doc.click();
@@ -25,7 +25,7 @@ export default class Recents extends BasePage {
   waitForHasMember(title, reverse) {
     driver.waitUntil(
       () => {
-        const members = this.el.elements('#recentDocumentsList .list-item-title').value;
+        const members = this.el.elements('#recentDocumentsList .list-item-title');
         if (reverse) {
           return members.every((member) => member.getText().trim() !== title);
         }
