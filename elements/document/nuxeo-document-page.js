@@ -166,6 +166,16 @@ Polymer({
           display: block;
         }
       }
+
+      paper-tabs {
+        height: auto;
+        display: flex;
+        padding: 8px 0;
+        border-bottom: none transparent 0px;
+        font-size: inherit;
+        font-weight: 400;
+        --paper-tabs-selection-bar-color: transparent;
+      }
     </style>
 
     <nuxeo-document-info-bar document="[[document]]"></nuxeo-document-info-bar>
@@ -213,12 +223,20 @@ Polymer({
 
           <!-- activity -->
           <div class="section">
-            <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
+            <paper-tabs
+              autoselect
+              attr-for-selected="name"
+              id="documentViewsItems"
+              noink
+              no-slide
+              selected="{{selectedTab}}"
+              selectable="nuxeo-page-item"
+            >
               <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
                 <nuxeo-page-item name="comments" label="[[i18n('documentPage.comments')]]"></nuxeo-page-item>
               </template>
               <nuxeo-page-item name="activity" label="[[i18n('documentPage.activity')]]"></nuxeo-page-item>
-            </paper-listbox>
+            </paper-tabs>
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
               <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
                 <nuxeo-document-comment-thread name="comments" uid="[[document.uid]]"></nuxeo-document-comment-thread>
