@@ -5,7 +5,7 @@ export default class Collections extends BasePage {
     const { el } = this;
     driver.waitUntil(
       () => {
-        const collections = el.elements('span.collection-name').value;
+        const collections = el.elements('span.collection-name');
         if (reverse) {
           return collections.every((collection) => collection.getText().trim() !== name);
         }
@@ -30,14 +30,14 @@ export default class Collections extends BasePage {
   }
 
   get queueCount() {
-    return this.el.elements('#membersList div').value.length;
+    return this.el.elements('#membersList div').length;
   }
 
   waitForHasMember(doc, reverse) {
     const { el } = this;
     driver.waitUntil(
       () => {
-        const members = el.elements('#membersList .list-item-title').value;
+        const members = el.elements('#membersList .list-item-title');
         if (reverse) {
           return members.every((member) => member.getText().trim() !== doc.title);
         }
@@ -49,7 +49,7 @@ export default class Collections extends BasePage {
   }
 
   removeMember(doc) {
-    const members = this.el.elements('#membersList').value;
+    const members = this.el.elements('#membersList');
     return members.some((member) => {
       if (member.isVisible('span.list-item-title') && member.getText('span.list-item-title').trim() === doc.title) {
         member.click('iron-icon.remove');

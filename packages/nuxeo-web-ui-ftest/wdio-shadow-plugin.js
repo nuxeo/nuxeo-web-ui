@@ -1,3 +1,4 @@
+/* eslint-disable prefer-arrow-callback */
 /**
  * Inspired by:
  * - https://github.com/diego-fernandez-santos/wdio-shadow
@@ -101,115 +102,101 @@ function findDeep(selector, multiple, baseElement, filterBy) {
     if (Array.isArray(result)) {
       return result.filter(filter);
     }
-    return filterBy(result) ? result : null;
+    return filter(result) ? result : null;
   }
   return result;
 }
 
+function rebuildSelector(using, selector) {
+  switch (using) {
+    case 'id':
+      return `#${selector}`;
+    case 'tag name':
+      return selector;
+    case 'name':
+      return `[name="${selector}"]`;
+    default:
+      return selector;
+  }
+}
+
+const shadowElement = (selector, multiple, baseElement, filterBy) =>
+  browser.execute(findDeep, selector, multiple === true, baseElement, filterBy);
+
 // export init function for initialization
-exports.init = function(browser) {
-  if (!browser) {
-    throw new Error('A WebdriverIO instance is needed to initialise wdio-webcomponents');
+module.exports = class {
+  static get name() {
+    return 'ShadowDOM';
   }
 
-  function noSuchElement(result) {
-    return {
-      status: 7,
-      type: 'NoSuchElement',
-      message: 'An element could not be located on the page using the given search parameters.',
-      state: 'failure',
-      sessionId: result.sessionId,
-      value: null,
-      selector: result.selector,
-    };
-  }
-
-  function fixElement(element) {
-    if (!element.ELEMENT) {
-      const el = Object.keys(element).find((k) => k.startsWith('element-'));
-      element.ELEMENT = element[el];
+  before() {
+    if (!browser) {
+      throw new Error('A WebdriverIO instance is needed to initialise wdio-webcomponents');
     }
-    return element;
-  }
 
-  function fixResult(result) {
-    if (!result || !result.value) {
-      return;
-    }
-    if (Array.isArray(result.value)) {
-      result.value = result.value.map((r) => fixElement(r));
-    } else {
-      fixElement(result.value);
-    }
-  }
-
-  browser.addCommand('shadowElement', function(selector, multiple, filterBy) {
-    if (!selector) {
-      let res = Object.assign({}, this.lastResult);
-
-      /**
-       * if last result was an element result transform result into an array
-       */
-      if (multiple && !Array.isArray(res.value)) {
-        res.value = res.value !== null ? [res.value] : [];
-      } else if (!multiple && Array.isArray(res.value) && res.value.length > 0) {
-        [res] = res.value;
+    browser.addCommand('shadowExecute', function(arg1, arg2) {
+      if (typeof arg1 === 'function') {
+        const elem = this.shadowElement();
+        return this.execute(arg1, elem);
       }
-
-      return res;
-    }
-    let baseElement = this.lastResult && this.lastResult.value;
-    if (Array.isArray(baseElement) && baseElement.length > 0) {
-      [baseElement] = baseElement;
-    }
-    if (baseElement && !baseElement.ELEMENT) {
-      // with firefox, some results other then elements are stored and break when passed as a parameter to execute
-      baseElement = null;
-    }
-    return this.execute(findDeep, selector, multiple === true, baseElement, filterBy).then((result) => {
-      const myResult = Object.assign({}, result, { selector });
-      // make object compliant with protocol on safari
-      fixResult(myResult);
-      return myResult.value !== null ? myResult : noSuchElement(myResult);
+      return this.shadowElement(arg1).then((r) => this.execute(arg2, r.value));
     });
-  });
 
-  browser.addCommand('shadowExecute', function(arg1, arg2) {
-    if (typeof arg1 === 'function') {
-      const elem = this.shadowElement();
-      return this.execute(arg1, elem);
-    }
-    return this.shadowElement(arg1).then((r) => this.execute(arg2, r.value));
-  });
+    browser.overwriteCommand('findElement', (origFn, using, value) => shadowElement(rebuildSelector(using, value)));
 
-  browser.addCommand(
-    'element',
-    function(selector) {
-      return this.shadowElement(selector);
-    },
-    true,
-  );
-
-  browser.addCommand(
-    'elements',
-    function(selector) {
-      return this.shadowElement(selector, true);
-    },
-    true,
-  );
-
-  browser.addCommand('hasElementByTextContent', function(selector, textContent) {
-    return !!this.shadowElement(selector, true, `return element.textContent.trim() === "${textContent.trim()}";`);
-  });
-
-  browser.addCommand('elementByTextContent', function(selector, textContent) {
-    this.waitForVisible(selector);
-    return this.shadowElement(selector, true, `return element.textContent.trim() === "${textContent.trim()}";`);
-  });
-
-  browser.addCommand('scrollIntoView', function(selector) {
-    return this.shadowExecute(selector, (element) =>
-      (Array.isArray(element) && element.length > 0 ? element[0] : element).scrollIntoView(),
+    browser.overwriteCommand('findElements', (origFn, using, value) =>
+      shadowElement(rebuildSelector(using, value), true),
     );
-  });
+
+    browser.overwriteCommand(
+      'findElementFromElement',
+      async (origFn, el, using, value) => shadowElement(rebuildSelector(using, value), false, { ELEMENT: el }),
+      true,
+    );
+
+    browser.overwriteCommand(
+      'findElementsFromElement',
+      async (origFn, el, using, value) => shadowElement(rebuildSelector(using, value), true, { ELEMENT: el }),
+      true,
+    );
+
+    browser.addCommand('hasElementByTextContent', function(selector, textContent) {
+      return !!shadowElement(
+        selector,
+        true,
+        undefined,
+        `return element.textContent.trim() === "${textContent.trim()}";`,
+      );
+    });
+
+    browser.addCommand('elementByTextContent', function(selector, textContent) {
+      this.waitForVisible(selector);
+      return shadowElement(
+        selector,
+        true,
+        undefined,
+        `return element.textContent.trim() === "${textContent.trim()}";`,
+      )[0];
+    });
+
+    browser.addCommand(
+      'elementByTextContent',
+      function(selector, textContent) {
+        this.waitForVisible(selector);
+        return shadowElement(
+          selector,
+          true,
+          { ELEMENT: this.elementId },
+          `return element.textContent.trim() === "${textContent.trim()}";`,
+        )[0];
+      },
+      true,
+    );
+
+    browser.addCommand('scrollIntoView', function(selector) {
+      return this.shadowExecute(selector, (element) =>
+        (Array.isArray(element) && element.length > 0 ? element[0] : element).scrollIntoView(),
+      );
+    });
+  }
 };

@@ -30,13 +30,13 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 
-const wdioBin = require.resolve('webdriverio/bin/wdio');
+const wdioBin = require.resolve('@wdio/cli/bin/wdio');
 const argv = require('minimist')(process.argv.slice(2));
 
 const defaultDef = './features/step_definitions';
 
 const args = [argv.wdioConfig ? argv.wdioConfig : path.join(__dirname, '../wdio.conf.js')];
-args.push(`--specs=${argv.features || './features/*.feature'}`);
+// args.push(`--specs=${argv.features || './features/*.feature'}`);
 
 if (argv.url) {
   process.env.NUXEO_WEB_UI_URL = argv.url;

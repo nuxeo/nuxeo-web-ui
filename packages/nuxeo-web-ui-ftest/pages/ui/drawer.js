@@ -7,7 +7,7 @@ import Tasks from './tasks';
 
 export default class Drawer extends BasePage {
   get menu() {
-    return this.el.element('#menu');
+    return this.el.$('#menu');
   }
 
   get pages() {
@@ -60,10 +60,9 @@ export default class Drawer extends BasePage {
 
   open(name) {
     this.menu.waitForVisible();
-    this.menu.waitForVisible(`nuxeo-menu-icon[name='${name}']`);
     const section = this._section(name);
     if (!section.isVisible()) {
-      this.menu.click(`nuxeo-menu-icon[name='${name}']`);
+      this.menu.element(`nuxeo-menu-icon[name='${name}']`).click();
     }
     section.waitForVisible();
     return section;

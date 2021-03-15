@@ -20,7 +20,7 @@ Then(/^I can search for the user "([^"]*)"$/, function(username) {
   this.ui.user.waitForVisible('nuxeo-card[name="users"] .table nuxeo-user-tag');
   this.ui.group.click('nuxeo-card[name="users"] .table nuxeo-user-tag');
   this.ui.group.waitForVisible('nuxeo-user-management');
-  const user = this.ui.group.el.elementByTextContent('.user.heading', username);
+  const user = this.ui.group.el.elements('.user.heading').find((e) => e.getText() === username);
   user.waitForVisible().should.be.true;
 });
 
