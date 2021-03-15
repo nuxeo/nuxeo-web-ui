@@ -24,5 +24,5 @@ Then(/^I can see the inline ([-\w]+) previewer$/, function(viewerType) {
 });
 
 Then(/^I can see a ([-\w]+) previewer$/, (viewerType) => {
-  driver.waitForVisible(`#dialog ${viewerType}`);
+  $(`#dialog ${viewerType}`).waitForVisible();
 });

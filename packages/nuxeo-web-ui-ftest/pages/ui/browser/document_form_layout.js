@@ -17,7 +17,7 @@ export default class DocumentFormLayout extends BasePage {
   }
 
   get errorMessages() {
-    return this.el.elements('#error .error').value.map((errorElt) => errorElt.getText());
+    return this.el.elements('#error .error').map((errorElt) => errorElt.getText());
   }
 
   save() {

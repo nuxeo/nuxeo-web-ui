@@ -103,23 +103,23 @@ Then("I can see the reply thread for {word}('s) comment {string} has a total of 
   link.getText().should.be.equals(`View all ${total} replies`);
 });
 
-Then("I can see {word}('s) comment: {string}", function(user, text) {
+Then('I can see {word} comment: {string}', function(user, text) {
   return this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
 });
 
-Then("I can see {word}('s) comment {string} has {int} visible replies", function(user, text, nb) {
+Then('I can see {word} comment {string} has {int} visible replies', function(user, text, nb) {
   const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
   comment.thread.waitForVisible();
   comment.thread.nbItems.should.be.equals(nb);
 });
 
-Then("I can see {word}('s) comment {string} has a reply thread with {int} replies", function(user, text, nb) {
+Then('I can see {word} comment {string} has a reply thread with {int} replies', function(user, text, nb) {
   const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
   comment.summaryLink.waitForVisible();
   comment.summaryLink.getText().should.be.equals(`${nb} Replies`);
 });
 
-Then("I {word} see the extended options available for {word}('s) comment: {string}", function(option, user, text) {
+Then('I {word} see the extended options available for {word} comment: {string}', function(option, user, text) {
   option.should.to.be.oneOf(['can', 'cannot'], 'An unknown option was passed as argument');
   const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
   if (option === 'can') {

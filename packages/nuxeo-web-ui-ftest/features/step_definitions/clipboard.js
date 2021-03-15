@@ -23,7 +23,9 @@ When('I click the clipboard paste action', function() {
 
 Then('I can see the clipboard has {string} document', function(title) {
   this.ui.drawer.clipboard.waitForVisible();
-  driver.waitUntil(() => this.ui.drawer.clipboard.el.hasElementByTextContent('#list .list-item-title', title));
+  driver.waitUntil(() =>
+    this.ui.drawer.clipboard.el.elements('#list .list-item-title').some((e) => e.getText() === title),
+  );
 });
 Then('I can see the clipboard has {int} item(s)', function(nb) {
   this.ui.drawer.clipboard.waitForVisible();

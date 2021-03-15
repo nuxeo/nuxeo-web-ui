@@ -2,16 +2,18 @@ export default class Login {
   set username(username) {
     driver.waitForVisible('#username');
     driver.element('#username').setValue(username);
+    // $('#username').waitForDisplayed();
+    // $('#username').setValue(username);
   }
 
   set password(password) {
-    driver.waitForVisible('#password');
-    driver.element('#password').setValue(password);
+    $('#password').waitForDisplayed();
+    $('#password').setValue(password);
   }
 
   submit() {
-    driver.waitForVisible('[name="Submit"]');
-    return driver.click('[name="Submit"]');
+    $('[name="Submit"]').waitForDisplayed();
+    return $('[name="Submit"]').click();
   }
 
   static get() {

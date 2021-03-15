@@ -29,7 +29,7 @@ export default class Vocabulary extends BasePage {
     driver.waitForVisible('#table');
     driver.waitUntil(
       () => {
-        const cells = el.elements('#table nuxeo-data-table-cell').value;
+        const cells = el.elements('#table nuxeo-data-table-cell');
         if (reverse) {
           return cells.every((cell) => cell.getText().trim() !== id);
         }
@@ -62,8 +62,8 @@ export default class Vocabulary extends BasePage {
 
   get entryCount() {
     const res = this.el.elements('#table #items nuxeo-data-table-row');
-    if (res && res.value) {
-      return res.value.length;
+    if (res) {
+      return res.length;
     }
     return 0;
   }
@@ -75,7 +75,7 @@ export default class Vocabulary extends BasePage {
 
   get isVocabularyTableFilled() {
     this.el.waitForVisible('#table nuxeo-data-table-row');
-    return !this.el.elements('#table nuxeo-data-table-row').value.some((row) => row.getText().trim().length === 0);
+    return !this.el.elements('#table nuxeo-data-table-row').some((row) => row.getText().trim().length === 0);
   }
 
   get hasEditDialog() {
