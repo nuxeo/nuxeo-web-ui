@@ -1266,6 +1266,7 @@
   "searchForm.renamePopup.heading": "Rename Saved Search",
   "searchForm.renamePopup.label": "Enter a new name for your saved search.",
   "searchForm.savePopup.heading": "Save Search",
+  "searchForm.savePopup.error": "You cannot use the character '/' in the name",
   "searchForm.savePopup.label": "Enter a name for your saved search.",
   "searchForm.searchFilters": "Search Filters",
   "searchForm.shared.heading": "Share Saved Search",

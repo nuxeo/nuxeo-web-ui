@@ -352,10 +352,19 @@ Polymer({
 
     <nuxeo-dialog id="saveDialog" with-backdrop reparent>
       <h3>[[i18n('searchForm.savePopup.heading')]]</h3>
-      <paper-input id="savedSearchTitle" label="[[i18n('searchForm.savePopup.label')]]" autofocus no-label-float>
+      <paper-input
+        id="savedSearchTitle"
+        label="[[i18n('searchForm.savePopup.label')]]"
+        autofocus
+        no-label-float
+        auto-validate
+        error-message="[[i18n('searchForm.savePopup.error')]]"
+        pattern="^[^/]*$"
+        required
+      >
       </paper-input>
       <div class="buttons">
-        <paper-button class="secondary">[[i18n('command.cancel')]]</paper-button>
+        <paper-button dialog-dismiss class="secondary">[[i18n('command.cancel')]]</paper-button>
         <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
       </div>
     </nuxeo-dialog>
