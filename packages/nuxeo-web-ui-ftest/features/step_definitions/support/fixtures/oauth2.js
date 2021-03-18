@@ -1,7 +1,7 @@
 /**
  * Provisioning of OAuth2 providers, clients and tokens via oauth2/directory rest endpoint
  */
-import { After } from 'cucumber';
+import { After } from '@cucumber/cucumber';
 import nuxeo from '../services/client';
 import '../services/date';
 

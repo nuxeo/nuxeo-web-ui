@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 Then('I can see the {word} tree', function(tab) {
   this.ui.drawer._section(tab).waitForVisible().should.be.true;

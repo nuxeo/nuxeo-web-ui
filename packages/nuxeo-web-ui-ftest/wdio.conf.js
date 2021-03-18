@@ -1,10 +1,20 @@
 const chai = require('chai');
 const path = require('path');
-const processor = require('./scripts/specs-processor.js');
+// const processor = require('./scripts/specs-processor.js');
 const CompatService = require('./wdio-compat-plugin');
 const ShadowService = require('./wdio-shadow-plugin');
 
-const reporters = ['spec'];
+const reporters = [
+  'spec',
+  [
+    'allure',
+    {
+      outputDir: 'allure-results',
+      disableWebdriverStepsReporting: true,
+      disableWebdriverScreenshotsReporting: true,
+    },
+  ],
+];
 if (process.env.JUNIT_REPORT_PATH) {
   reporters.push('junit');
 }
@@ -31,10 +41,9 @@ const options = {};
 
 switch (capability.browserName) {
   case 'chrome':
-    
     options.args = ['--no-sandbox'];
     options.w3c = false;
-    
+
     if (process.env.HEADLESS) {
       options.args.push('--window-size=1920,1080');
       options.args.push('--single-process');
@@ -49,9 +58,9 @@ switch (capability.browserName) {
     break;
   case 'firefox':
     options.args = [
-        // '-headless',
+      // '-headless',
     ];
-    
+
     if (process.env.BROWSER_BINARY) {
       options.binary = process.env.BROWSER_BINARY;
     }
@@ -79,9 +88,7 @@ require('babel-register')({
   ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/,
 });
 
-
 exports.config = {
-
   //
   // ====================
   // Runner Configuration
@@ -103,7 +110,7 @@ exports.config = {
   // NPM script (see https://docs.npmjs.com/cli/run-script) then the current working
   // directory is where your package.json resides, so `wdio` will be called from there.
   //
-  
+
   specs: ['./features/*.feature'], // processor(process.argv),
   // Patterns to exclude.
   exclude: [
@@ -183,11 +190,7 @@ exports.config = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: [
-    'selenium-standalone',
-    [CompatService],
-    [ShadowService],
-  ],
+  services: ['selenium-standalone', [CompatService], [ShadowService]],
 
   //
   // Framework you want to run your specs with.
@@ -227,7 +230,8 @@ exports.config = {
     failAmbiguousDefinitions: true,
     // <boolean> abort the run on first failure
     failFast: !process.env.RUN_ALL,
-    // <string[]> (type[:path]) specify the output format, optionally supply PATH to redirect formatter output (repeatable)
+    // <string[]> (type[:path]) specify the output format, optionally supply PATH
+    // to redirect formatter output (repeatable)
     format: ['pretty'],
     // <boolean> hide step definition snippets for pending steps
     snippets: true,
@@ -243,7 +247,6 @@ exports.config = {
     timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : TIMEOUT + 500,
     // <boolean> Enable this config to treat undefined definitions as warnings.
     ignoreUndefinedDefinitions: false,
-
   },
   //
   // =====
@@ -277,7 +280,6 @@ exports.config = {
     global.assert = chai.assert;
     global.should = chai.should();
     global.driver = global.browser;
-
   },
   //
   // Hook that gets executed before the suite starts

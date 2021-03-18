@@ -1,4 +1,4 @@
-import { Given, Then, When } from 'cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 
 Given(/^I have the following trashed documents$/, (table) => {
   const tasks = table.rows().map((row) => () => {
