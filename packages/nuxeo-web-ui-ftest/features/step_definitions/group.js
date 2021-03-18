@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 When(/^I select group from the dropdown menu$/, function() {
   this.ui.group.dropdown.waitForVisible();

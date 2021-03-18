@@ -1,7 +1,7 @@
 const Finder = require('fs-finder');
 const fs = require('fs');
 const minimist = require('minimist');
-const { TagExpressionParser } = require('cucumber-tag-expressions');
+const { TagExpressionParser } = require('@cucumber/tag-expressions');
 
 module.exports = (argv) => {
   const args = minimist(argv.slice(2));

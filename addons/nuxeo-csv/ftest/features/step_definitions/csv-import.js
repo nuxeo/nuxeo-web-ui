@@ -1,4 +1,4 @@
-import { When } from 'cucumber';
+import { When } from '@cucumber/cucumber';
 
 /**
  * Import the csv file

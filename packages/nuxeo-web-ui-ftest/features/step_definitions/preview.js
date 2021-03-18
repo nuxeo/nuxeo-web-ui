@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 When('I click the preview button', function() {
   const page = this.ui.browser.documentPage(this.doc.type);

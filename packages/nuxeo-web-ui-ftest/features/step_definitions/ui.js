@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 When('I click the {string} button', function(button) {
   return this.ui.drawer.open(button);

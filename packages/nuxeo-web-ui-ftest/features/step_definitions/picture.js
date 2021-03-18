@@ -1,4 +1,4 @@
-import { Then } from 'cucumber';
+import { Then } from '@cucumber/cucumber';
 
 Then('I can see the picture formats panel', function() {
   const page = this.ui.browser.documentPage(this.doc.type);
