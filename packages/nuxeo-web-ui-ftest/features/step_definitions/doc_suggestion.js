@@ -1,4 +1,4 @@
-import { Then } from 'cucumber';
+import { Then } from '@cucumber/cucumber';
 
 Then('I can navigate to the document selected in the {string} single document suggestion widget', function(name) {
   this.ui.browser

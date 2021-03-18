@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 When('I can click on recently viewed documents item {string}', function(title) {
   this.ui.drawer.recents.waitForVisible();

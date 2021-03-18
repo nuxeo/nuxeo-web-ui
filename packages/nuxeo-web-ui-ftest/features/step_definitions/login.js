@@ -1,4 +1,4 @@
-import { Given, Then, When } from 'cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import Login from '../../pages/login';
 import UI from '../../pages/ui';
 import { url } from '../../pages/helpers';

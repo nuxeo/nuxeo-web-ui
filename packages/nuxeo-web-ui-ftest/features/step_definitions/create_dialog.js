@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 let currentDocType;
 let selectedTabName;
