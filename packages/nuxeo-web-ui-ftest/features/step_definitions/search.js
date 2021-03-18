@@ -1,4 +1,4 @@
-import { Given, Then, When } from 'cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
 Then('I can see the {string} search panel', function(name) {

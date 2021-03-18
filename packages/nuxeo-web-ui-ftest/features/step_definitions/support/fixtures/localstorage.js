@@ -1,4 +1,4 @@
-import { After } from 'cucumber';
+import { After } from '@cucumber/cucumber';
 
 /* global document, localStorage  */
 // cleans up local storage fo the current user

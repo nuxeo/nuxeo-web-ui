@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 When('I click the View Tasks Dashboard link', function() {
   this.ui.drawer.tasks.dashboardLink.click();
