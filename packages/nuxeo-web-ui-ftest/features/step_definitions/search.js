@@ -139,7 +139,6 @@ Then(/^I can see (\d+) search results$/, function(numberOfResults) {
     );
     this.ui.results.noResults.waitForVisible().should.be.true;
   } else {
-    this.ui.results.getResults(displayMode).waitForVisible();
     this.ui.results.resultsCountLabel.waitForVisible();
     driver.waitUntil(
       () =>
@@ -218,6 +217,5 @@ When(/^I perform a QuickSearch for (.+)/, function(searchTerm) {
 });
 
 Then(/^I can see (\d+) QuickSearch results$/, function(numberOfResults) {
-  this.ui.quickSearch.quickSearchResults.waitForVisible();
-  this.ui.quickSearch.quickSearchResultsCount().should.equal(numberOfResults);
+  driver.waitUntil(() => this.ui.quickSearch.quickSearchResultsCount() === numberOfResults);
 });

@@ -172,7 +172,8 @@ module.exports = class {
     browser.addCommand(
       'isVisible',
       async function(selector) {
-        return selector ? this.$(selector).isDisplayed() : this.isDisplayed();
+        const target = selector ? this.$(selector) : this;
+        return target.isExisting() && target.isDisplayed();
       },
       true,
     );

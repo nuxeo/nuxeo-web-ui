@@ -69,6 +69,7 @@ Then('I see the {word} page', function(docType) {
 Then(/^I can see that a document of the type (.+) and title (.+) is created$/, function(docType, title) {
   this.ui.browser.waitForNotVisible('iron-overlay-backdrop');
   this.ui.browser.documentPage(docType).view.waitForVisible();
+  currentDocType = docType;
   this.ui.browser.hasTitle(title).should.be.true;
   this.doc = { type: currentDocType, title };
 });

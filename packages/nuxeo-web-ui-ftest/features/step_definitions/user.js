@@ -16,7 +16,6 @@ Then(/^I can create a user with the following properties:$/, function(table) {
 
 Then(/^I can search for the user "([^"]*)"$/, function(username) {
   this.ui.user.searchFor(username);
-  this.ui.user.searchResult(username).waitForVisible().should.be.true;
   this.ui.user.waitForVisible('nuxeo-card[name="users"] .table nuxeo-user-tag');
   this.ui.group.click('nuxeo-card[name="users"] .table nuxeo-user-tag');
   this.ui.group.waitForVisible('nuxeo-user-management');
@@ -31,7 +30,6 @@ Then(/^I can see the user has the email "([^"]*)"$/, function(userEmail) {
 
 Then(/^I can edit the user "([^"]*)" with the following properties:$/, function(username, table) {
   this.ui.user.searchFor(username);
-  this.ui.user.searchResult(username).waitForVisible();
   this.ui.user.searchResult(username).click();
   this.ui.user.editUserButton.waitForVisible();
   this.ui.user.editUserButton.click();
@@ -41,7 +39,6 @@ Then(/^I can edit the user "([^"]*)" with the following properties:$/, function(
 
 Then(/^I can delete the user "([^"]*)"$/, function(username) {
   this.ui.user.searchFor(username);
-  this.ui.user.searchResult(username).waitForVisible();
   this.ui.user.searchResult(username).click();
   this.ui.user.deleteUserButton.waitForVisible();
   this.ui.user.deleteUserButton.click();

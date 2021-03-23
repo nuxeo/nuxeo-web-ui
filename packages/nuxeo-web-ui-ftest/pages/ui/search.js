@@ -3,7 +3,7 @@ import DocumentPermissions from './browser/document_permissions';
 
 export default class Search extends Results {
   get quickSearchResults() {
-    this.waitForVisible('#results #selector a');
+    this.waitForVisible('#results #selector');
     return this.el.elements('#results #selector a');
   }
 

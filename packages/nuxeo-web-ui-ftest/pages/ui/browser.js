@@ -250,7 +250,6 @@ export default class Browser extends BasePage {
    * Results might vary with the viewport size as only visible items are taken into account.
    */
   waitForNbChildren(nb) {
-    this.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
     driver.waitUntil(() => {
       let count = 0;
       try {
@@ -320,13 +319,6 @@ export default class Browser extends BasePage {
   clickDocumentActionMenu(selector) {
     const menu = this.el.element('nuxeo-actions-menu');
     menu.waitForExist(selector);
-    const children = menu.elements('nuxeo-actions-menu > *:not([show-label])');
-    const childrenWidth = children.map((child) => child.getElementSize('width')).reduce((a, b) => a + b, 0);
-    if (childrenWidth > menu.getElementSize('width')) {
-      // this means that the menu-actions-menu didn't update yet
-      // let's wait for the dropdown button to show up
-      menu.waitForVisible('#dropdownButton');
-    }
     const action = menu.element(selector);
     action.waitForExist();
     if (action.getAttribute('show-label') !== null) {
@@ -340,7 +332,7 @@ export default class Browser extends BasePage {
     action.waitForEnabled('.action');
     // let's make sure we're clicking on the div the has the click event handler
     // using shadowExecute because webdriver's click uses a position which may not be valid given the dropdown animation
-    action.shadowExecute('.action', (element) => element.click());
+    action.click('.action');
   }
 
   startWorkflow(workflow) {
