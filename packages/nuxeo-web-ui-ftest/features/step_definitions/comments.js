@@ -125,6 +125,6 @@ Then('I {word} see the extended options available for {word} comment: {string}',
   if (option === 'can') {
     comment.options.isVisible().should.be.true;
   } else {
-    comment.options.isVisible().should.be.false;
+    comment.options.isExisting().should.be.false;
   }
 });

@@ -50,7 +50,7 @@ export default class CreateDialog extends BasePage {
     // XXX we need to reset the input value to prevent duplicate upload of files (when the method is called recursively)
     browser.execute((el) => {
       el.value = '';
-    }, field.value);
+    }, field);
     return field.chooseFile(path.resolve(fixtures.blobs.get(file)));
   }
 
