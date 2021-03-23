@@ -1,18 +1,20 @@
 const chai = require('chai');
 const path = require('path');
-const minimist = require('minimist');
+const htmlReporter = require('multiple-cucumber-html-reporter');
+const { removeSync } = require('fs-extra');
 
 const CompatService = require('./wdio-compat-plugin');
 const ShadowService = require('./wdio-shadow-plugin');
 
 const reporters = [];
-// if (process.env.CUCUMBER_REPORT_PATH) {
-//   reporters.push('multiple-cucumber-html');
-// }
-
-const plugins = {};
-// plugins[path.join(__dirname, 'wdio-shadow-plugin')] = {};
-// plugins[path.join(__dirname, 'wdio-compat-plugin')] = {};
+if (process.env.CUCUMBER_REPORT_PATH) {
+  reporters.push([
+    'cucumberjs-json',
+    {
+      jsonFolder: process.env.CUCUMBER_REPORT_PATH,
+    },
+  ]);
+}
 
 const capability = {
   // maxInstances can get overwritten per capability. So if you have an in-house Selenium
@@ -71,9 +73,6 @@ if (process.env.DRIVER_VERSION) {
   drivers[process.env.BROWSER].version = process.env.DRIVER_VERSION;
 }
 
-const args = minimist(process.argv.slice(2));
-const specs = args.specs || ['./features/*.feature'];
-
 // transform nuxeo-web-ui-ftest requires
 require('babel-register')({
   ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/,
@@ -92,21 +91,7 @@ exports.config = {
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],
-  //
-  // ==================
-  // Specify Test Files
-  // ==================
-  // Define which test specs should run. The pattern is relative to the directory
-  // from which `wdio` was called. Notice that, if you are calling `wdio` from an
-  // NPM script (see https://docs.npmjs.com/cli/run-script) then the current working
-  // directory is where your package.json resides, so `wdio` will be called from there.
-  //
 
-  specs,
-  // Patterns to exclude.
-  exclude: [
-    // 'path/to/excluded/files'
-  ],
   //
   // ============
   // Capabilities
@@ -175,7 +160,7 @@ exports.config = {
   // WebdriverCSS: https://github.com/webdriverio/webdrivercss
   // WebdriverRTC: https://github.com/webdriverio/webdriverrtc
   // Browserevent: https://github.com/webdriverio/browserevent
-  plugins,
+  plugins: {},
   //
   // Test runner services
   // Services take over a specific job you don't want to take care of. They enhance
@@ -195,12 +180,6 @@ exports.config = {
   // Test reporter for stdout.
   reporters,
 
-  reporterOptions: {
-    htmlReporter: {
-      jsonFolder: process.env.CUCUMBER_REPORT_PATH,
-      reportFolder: `${process.env.CUCUMBER_REPORT_PATH}/html`,
-    },
-  },
   //
   // If you are using Cucumber you need to specify the location of your step definitions.
   cucumberOpts: {
@@ -243,8 +222,11 @@ exports.config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  // onPrepare: () => {
-  // },
+  onPrepare: () => {
+    if (process.env.CUCUMBER_REPORT_PATH) {
+      removeSync(process.env.CUCUMBER_REPORT_PATH);
+    }
+  },
   //
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
@@ -308,6 +290,17 @@ exports.config = {
   //
   // Gets executed after all workers got shut down and the process is about to exit. It is not
   // possible to defer the end of the process using a promise.
-  // onComplete: () => {
-  // },
+  onComplete: () => {
+    if (process.env.CUCUMBER_REPORT_PATH) {
+      // Generate the report when it all tests are done
+      htmlReporter.generate({
+        // Required
+        // This part needs to be the same path where you store the JSON files
+        // default = '.tmp/json/'
+        jsonDir: process.env.CUCUMBER_REPORT_PATH,
+        reportPath: `${process.env.CUCUMBER_REPORT_PATH}/html`,
+        // for more options see https://github.com/wswebcreation/multiple-cucumber-html-reporter#options
+      });
+    }
+  },
 };
