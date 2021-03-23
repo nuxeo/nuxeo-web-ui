@@ -192,7 +192,7 @@ Polymer({
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="thumbnailContainer" on-tap="handleClick">
-        <img src="[[_thumbnail(doc)]]" />
+        <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
         <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick">

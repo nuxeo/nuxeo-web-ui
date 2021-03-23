@@ -88,7 +88,7 @@ limitations under the License.
   <nuxeo-app base-url="<%= baseUrl %>"
     product-name="<%= Framework.getProperty(Environment.PRODUCT_NAME) %>" unresolved>
     <div id="sidebar">
-      <img src="themes/default/logo.png">
+      <img src="themes/default/logo.png" alt="logo" />
     </div>
     <div id="container">
       <div id="toolbar">

@@ -57,7 +57,7 @@ limitations under the License.
         >
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
             <template>
-              <img class="queue-thumbnail" src="[[_thumbnail(item)]]" />
+              <img class="queue-thumbnail" src="[[_thumbnail(item)]]" alt$="[[document.title]]" />
               <a href$="[[urlFor(item)]]">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>
