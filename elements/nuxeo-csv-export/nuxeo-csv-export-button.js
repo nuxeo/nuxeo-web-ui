@@ -113,7 +113,7 @@ Polymer({
   },
 
   _onPollStart() {
-    this.fire('notify', { message: this.i18n('csvExportButton.action.poll') });
+    this.fire('notify', { message: this.i18n('csvExportButton.action.poll'), abort: true });
   },
 
   _onResponse() {

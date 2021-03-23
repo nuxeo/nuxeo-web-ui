@@ -79,6 +79,8 @@ import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 
 import { Performance } from './performance.js';
 
+import '@material/mwc-snackbar';
+
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
 window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
@@ -274,6 +276,20 @@ Polymer({
         padding: 0 24px;
         justify-content: space-between;
       }
+
+      #snackbarToast {
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        justify-content: space-between;
+        position: fixed;
+        z-index: 100;
+
+        font-family: var(--paper-font-common-base_-_font-family);
+        -webkit-font-smoothing: var(--paper-font-common-base_-_-webkit-font-smoothing);
+        background-color: var(--paper-toast-background-color, #323232);
+        color: var(--paper-toast-color, #f1f1f1);
+      }
     </style>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
@@ -452,6 +468,12 @@ Polymer({
       <paper-icon-button icon="icons:close" on-tap="_dismissToast" hidden$="[[!_dismissible]]"></paper-icon-button>
     </paper-toast>
 
+    <!-- labelText="Can't send photo. Retry in 5 seconds." -->
+    <mwc-snackbar id="snackbarToast" leading>
+      <nuxeo-button slot="action">ABORT</nuxeo-button>
+      <paper-icon-button icon="icons:close" on-tap="_dismissToast" slot="dismiss"></paper-icon-button>
+    </mwc-snackbar>
+
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
     <nuxeo-keys keys="d" on-pressed="showHome"></nuxeo-keys>
     <nuxeo-keys keys="m" on-pressed="_focusMenu"></nuxeo-keys>
@@ -623,6 +645,8 @@ Polymer({
     this.removeAttribute('unresolved');
 
     Performance.mark('nuxeo-app.ready');
+
+    this.$.snackbarToast.addEventListener('MDCSnackbar:closing', this._abortAction);
   },
 
   _resetTaskSelection() {
@@ -1295,7 +1319,13 @@ Polymer({
     if (options.close) {
       this.$.toast.close();
     }
-    if (options.message) {
+    if (options.abort && options.message) {
+      this.$.snackbarToast.labelText = options.message;
+      this.$.snackbarToast.timeoutMs = options.duration !== undefined ? options.duration : 4000;
+      this.set('_dismissible', !!options.dismissible);
+      this.$.snackbarToast.show();
+    } else if (options.message) {
+      this.$.snackbarToast.close();
       this.$.toast.text = options.message;
       this.$.toast.duration = options.duration !== undefined ? options.duration : 3000;
       this.set('_dismissible', !!options.dismissible);
@@ -1305,6 +1335,12 @@ Polymer({
 
   _dismissToast() {
     this.$.toast.toggle();
+  },
+
+  _abortAction(e) {
+    if (e.detail && e.detail.reason === 'action') {
+      window.alert('The user aborted the action!');
+    }
   },
 
   _clipboardUpdated(e) {
