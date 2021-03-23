@@ -15,7 +15,7 @@ Feature: Import and Create Documents
     And I can see the import tab content
     And I upload the sample.png on the tab content page
     When I click the Create button to finish the import
-    And I can see that a document of the type Picture and title sample.png is created
+    Then I can see that a document of the type Picture and title sample.png is created
     And I can see the inline nuxeo-image-viewer previewer
     And I can see the picture formats panel
 
@@ -34,6 +34,6 @@ Feature: Import and Create Documents
     When I click the Create button to finish the import
     Then I can see 6 documents
     When I navigate to "sample.mp4" child
-    And I can see that a document of the type Video and title sample.mp4 is created
+    Then I can see that a document of the type Video and title sample.mp4 is created
     And I can see the inline nuxeo-video-viewer previewer
     And I can see the video conversions panel
