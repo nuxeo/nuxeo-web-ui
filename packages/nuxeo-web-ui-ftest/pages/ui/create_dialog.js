@@ -15,6 +15,15 @@ export default class CreateDialog extends BasePage {
     return this.el.element('#holder iron-pages');
   }
 
+  /**
+   * Specific csv import page element.
+   *
+   * @deprecated since 3.0.0. Please use method importPage instead.
+   * */
+  get importCsvDialog() {
+    return this.el.element('#csvCreation');
+  }
+
   importPage(name) {
     const pageName = this.pages.element('.iron-selected').getAttribute('name');
     if (pageName === name) {
@@ -23,7 +32,19 @@ export default class CreateDialog extends BasePage {
     throw new Error(`The "${name}" element could not be located. Received "${pageName}" instead`);
   }
 
-  setFileToImport(file, name) {
+  /**
+   * Upload a file on the csv import dialog.
+   *
+   * @deprecated since 3.0.0. Please use method upload instead.
+   * */
+  setFileToImport(file) {
+    const field = this.importCsvDialog.element('#dropzone #uploadFiles');
+    field.waitForExist();
+    return field.chooseFile(path.resolve(fixtures.blobs.get(file)));
+  }
+
+  upload(file, name) {
+    this.importPage(name).waitForVisible();
     const field = this.importPage(name).element('#dropzone #uploadFiles');
     field.waitForExist();
     // XXX we need to reset the input value to prevent duplicate upload of files (when the method is called recursively)
