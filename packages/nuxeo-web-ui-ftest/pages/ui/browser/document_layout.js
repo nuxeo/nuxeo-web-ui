@@ -4,7 +4,7 @@ export default class DocumentLayout extends BasePage {
   getField(field) {
     driver.waitForExist(this._selector);
     driver.waitForVisible(this._selector);
-    return this.el.element(`[name="${field}"]`);
+    return this.el.$(`[name="${field}"]`);
   }
 
   getFieldValue(field) {
