@@ -69,7 +69,7 @@ Polymer({
       <div class="render-views">
         <template is="dom-repeat" items="[[document.properties.threed:renderViews]]" as="renderView">
           <div class="item">
-            <img src="[[renderView.thumbnail.data]]" on-tap="_setCoords" />
+            <img src="[[renderView.thumbnail.data]]" on-tap="_setCoords" alt$="[[document.title]]" />
             <div>
               <label class="layout flex-2">[[renderView.title]]</label>
               <paper-icon-button icon="icons:file-download" on-tap="_downloadView" noink></paper-icon-button>
