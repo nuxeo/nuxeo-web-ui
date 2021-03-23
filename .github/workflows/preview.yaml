@@ -1,0 +1,123 @@
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches:
+      - master
+      - maintenance-3.0.x
+
+env:
+  DOCKER_REGISTRY: us-east1-docker.pkg.dev
+  DOCKER_IMAGE: ${{ secrets.GKE_PROJECT }}/webui/nuxeo-web-ui
+  GKE_CLUSTER: jx-prod
+  GKE_ZONE: us-east1-b
+
+jobs:
+  preview:
+    name: Setup
+    if: (github.event.action == 'labeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 10
+        registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+        scope: '@nuxeo'
+
+    - name: Prepare environment
+      run: |
+        BRANCH_NAME=${GITHUB_HEAD_REF##*/}
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+        echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME" >> $GITHUB_ENV
+        echo "PREVIEW_NAMESPACE=nuxeo-web-ui-${BRANCH_NAME,,}" >> $GITHUB_ENV
+
+    - name: Install
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      run: |
+        npm install
+
+    - name: Webpack build
+      run: |
+        npm run build
+
+    - name: Build and push server image
+      uses: docker/build-push-action@v1
+      with:
+        path: server
+        registry: ${{ env.DOCKER_REGISTRY }}
+        username: _json_key
+        password: ${{ secrets.GKE_SA_KEY }}
+        push: true
+        repository: ${{ secrets.GKE_PROJECT }}/webui/nuxeo-web-ui/server
+        tags: ${{ env.VERSION }}
+
+    - name: Build and push image
+      uses: docker/build-push-action@v1
+      with:
+        registry: ${{ env.DOCKER_REGISTRY }}
+        username: _json_key
+        password: ${{ secrets.GKE_SA_KEY }}
+        push: true
+        repository: ${{ env.DOCKER_IMAGE }}
+        tags: ${{ env.VERSION }}
+        build_args: SERVER_IMAGE=${{ env.DOCKER_REGISTRY }}/${{ secrets.GKE_PROJECT }}/webui/nuxeo-web-ui/server:${{ env.VERSION }}
+
+    - name: Get GKE credentials
+      uses: google-github-actions/get-gke-credentials@v0.2.1
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+        project_id: ${{ secrets.GKE_PROJECT }}
+        credentials: ${{ secrets.GKE_SA_KEY }}
+
+    - name: Check preview namespace
+      id: preview_ns
+      run: |
+        echo ::set-output name=exists::$(kubectl get namespace ${PREVIEW_NAMESPACE})
+
+    # Previous preview deployment needs to be scaled to 0 to be replaced correctly
+    # - name: Cleanup preview namespace
+    #   if: ${{ steps.preview_ns.outputs.exists }}
+    #   continue-on-error: true
+    #   run: |
+    #     kubectl -n ${PREVIEW_NAMESPACE} scale deployment preview --replicas=0
+
+    - name: Create preview namespace
+      if: ${{ !steps.preview_ns.outputs.exists }}
+      run: |
+        kubectl create namespace ${PREVIEW_NAMESPACE}
+
+    - name: Install preview
+      id: preview
+      working-directory: ./charts/preview
+      run: |
+        # install Helm
+        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash -
+        helm repo add chartmuseum.jenkins-x.io https://storage.googleapis.com/chartmuseum.jenkins-x.io
+
+        # substitute env variables in values.yaml
+        mv values.yaml values.yaml.tosubst
+        envsubst < values.yaml.tosubst > values.yaml
+
+        # update helm deps
+        helm dependency update
+
+        # install
+        helm upgrade --install --namespace ${PREVIEW_NAMESPACE} ${PREVIEW_NAMESPACE} .
+        
+        echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
+
+    - uses: actions/github-script@0.9.0
+      if: github.event_name == 'pull_request'
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `:star: PR built and available [here](${process.env.PREVIEW_URL})`
+          })
