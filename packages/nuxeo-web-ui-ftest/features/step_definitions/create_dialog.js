@@ -1,7 +1,7 @@
 import { Then, When } from 'cucumber';
 
 let currentDocType;
-let currentName;
+let selectedTabName;
 
 When('I click the Create Document button', function() {
   this.ui.createButton.waitForVisible();
@@ -24,20 +24,20 @@ Then(/^I can see the (.+) tab content$/, function(name) {
   const dialog = this.ui.createDialog;
   dialog.waitForVisible();
   dialog.importPage(name).waitForVisible();
-  currentName = name;
+  selectedTabName = name;
 });
 
 Then(/^I upload the (.+) on the tab content page$/, function(file) {
   const dialog = this.ui.createDialog;
   dialog.waitForVisible();
-  dialog.setFileToImport(file, currentName);
+  dialog.upload(file, selectedTabName);
   dialog.selectedFileToImport.waitForVisible();
 });
 
 Then('I upload the following files on the tab content page:', function(table) {
   const dialog = this.ui.createDialog;
   dialog.waitForVisible();
-  const docs = table.rows().map((row) => dialog.setFileToImport(row[0], currentName));
+  const docs = table.rows().map((row) => dialog.upload(row[0], selectedTabName));
   return docs.reduce((current, next) => current.then(next), Promise.resolve([]));
 });
 
