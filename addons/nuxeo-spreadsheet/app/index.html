@@ -11,8 +11,8 @@
 
     <div class="buttonsGadget">
       <label><input type="checkbox" name="autosave" autocomplete="off" /> Autosave</label>
-      <div style="display:inline-block;width:16px">
-        <img id="loading" style="display:none" src="images/ajax-loader.gif" />
+      <div style="display:inline-block;width:16px" aria-live="polite">
+        <img id="loading" style="display:none" src="images/ajax-loader.gif" aria-busy="true" alt="loading" />
       </div>
       <button id="save">Save</button>
       <button id="close" style="display:none">Close</button>

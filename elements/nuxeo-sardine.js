@@ -117,7 +117,7 @@ Polymer({
       <div id="wrapper">
         <span id="feeling">[[feeling]]</span>
         <template is="dom-if" if="[[!hidden]]">
-          <img src="images/sardine.png" />
+          <img src="images/sardine.png" alt="nuxeo sardine" />
         </template>
       </div>
     </div>
