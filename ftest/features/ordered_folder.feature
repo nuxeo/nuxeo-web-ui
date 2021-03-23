@@ -21,8 +21,8 @@ Feature: Ordered Folder
     And I select the "File4" document
     And I can move selection <direction>
     And I reload the page
-    Then I can see the "File2" child document is at position "<newPosFile2>"
-    And I can see the "File4" child document is at position "<newPosFile4>"
+    Then I can see the "File2" child document is at position <newPosFile2>
+    And I can see the "File4" child document is at position <newPosFile4>
 
     Examples:
       | direction | newPosFile2 | newPosFile4 |
@@ -52,5 +52,5 @@ Feature: Ordered Folder
     And I select the "Orange" document
     And I deselect the "Melon" document
     And I can move selection down
-    Then I can see the "Orange" child document is at position "8"
-    And I can see the "Pear" child document is at position "9"
+    Then I can see the "Orange" child document is at position 8
+    And I can see the "Pear" child document is at position 9

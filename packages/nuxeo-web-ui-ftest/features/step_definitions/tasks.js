@@ -11,7 +11,6 @@ When(/^I (\w+) the task for following actors:$/, function(option, table) {
   } else if (option === 'reassign') {
     this.ui.browser.documentTaskView.reassignOption.click();
   }
-  this.ui.browser.documentTaskView.assignmentDialog.waitForVisible();
   table.rows().map((row) => this.ui.browser.documentTaskView.setUserOrGroup(row[0]));
 
   this.ui.browser.documentTaskView.confirmButton.waitForVisible();

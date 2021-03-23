@@ -1,23 +1,11 @@
 const chai = require('chai');
 const path = require('path');
-// const processor = require('./scripts/specs-processor.js');
+const minimist = require('minimist');
+
 const CompatService = require('./wdio-compat-plugin');
 const ShadowService = require('./wdio-shadow-plugin');
 
-const reporters = [
-  'spec',
-  [
-    'allure',
-    {
-      outputDir: 'allure-results',
-      disableWebdriverStepsReporting: true,
-      disableWebdriverScreenshotsReporting: true,
-    },
-  ],
-];
-if (process.env.JUNIT_REPORT_PATH) {
-  reporters.push('junit');
-}
+const reporters = [];
 // if (process.env.CUCUMBER_REPORT_PATH) {
 //   reporters.push('multiple-cucumber-html');
 // }
@@ -83,6 +71,9 @@ if (process.env.DRIVER_VERSION) {
   drivers[process.env.BROWSER].version = process.env.DRIVER_VERSION;
 }
 
+const args = minimist(process.argv.slice(2));
+const specs = args.specs || ['./features/*.feature'];
+
 // transform nuxeo-web-ui-ftest requires
 require('babel-register')({
   ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/,
@@ -111,7 +102,7 @@ exports.config = {
   // directory is where your package.json resides, so `wdio` will be called from there.
   //
 
-  specs: ['./features/*.feature'], // processor(process.argv),
+  specs,
   // Patterns to exclude.
   exclude: [
     // 'path/to/excluded/files'
@@ -151,7 +142,7 @@ exports.config = {
   sync: true,
   //
   // Level of logging verbosity: trace | debug | info | warn | error | silent
-  logLevel: 'trace',
+  logLevel: 'error',
   //
   // Enables colors for log output.
   coloredLogs: true,
@@ -205,12 +196,6 @@ exports.config = {
   reporters,
 
   reporterOptions: {
-    junit: {
-      outputDir: process.env.JUNIT_REPORT_PATH,
-      outputFileFormat: {
-        single: () => 'TEST-report.xml',
-      },
-    },
     htmlReporter: {
       jsonFolder: process.env.CUCUMBER_REPORT_PATH,
       reportFolder: `${process.env.CUCUMBER_REPORT_PATH}/html`,

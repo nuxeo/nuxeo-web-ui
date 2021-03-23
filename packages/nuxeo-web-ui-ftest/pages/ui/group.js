@@ -64,7 +64,8 @@ export default class Group extends BasePage {
   }
 
   searchResult(searchTerm) {
-    this.el.waitForExist('nuxeo-card[name="groups"] .table [name="id"]');
-    return this.el.elements('nuxeo-card[name="groups"] .table [name="id"]').find((e) => e.getText() === searchTerm);
+    const match = (e) => e.getText() === searchTerm;
+    driver.waitUntil(() => this.el.elements('nuxeo-card[name="groups"] .table [name="id"]').some(match));
+    return this.el.elements('nuxeo-card[name="groups"] .table [name="id"]').find(match);
   }
 }
