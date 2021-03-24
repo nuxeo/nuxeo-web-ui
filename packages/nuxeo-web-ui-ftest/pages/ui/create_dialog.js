@@ -18,7 +18,7 @@ export default class CreateDialog extends BasePage {
   /**
    * Specific csv import page element.
    *
-   * @deprecated since 3.0.0. Please use method importPage instead.
+   * @deprecated since 3.0.3. Please use method importPage instead.
    * */
   get importCsvDialog() {
     return this.el.element('#csvCreation');
@@ -35,7 +35,7 @@ export default class CreateDialog extends BasePage {
   /**
    * Upload a file on the csv import dialog.
    *
-   * @deprecated since 3.0.0. Please use method upload instead.
+   * @deprecated since 3.0.3. Please use method upload instead.
    * */
   setFileToImport(file) {
     const field = this.importCsvDialog.element('#dropzone #uploadFiles');

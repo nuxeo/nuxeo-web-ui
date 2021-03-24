@@ -3,7 +3,7 @@ import { When } from 'cucumber';
 /**
  * Import the csv file
  *
- * @deprecated since 3.0.0. Please use "I upload the (.+) on the tab content page" located in create_dialog.js
+ * @deprecated since 3.0.3. Please use "I upload the (.+) on the tab content page" located in create_dialog.js
  * */
 When(/^I import the (.+) file$/, function(file) {
   const dialog = this.ui.createDialog;
