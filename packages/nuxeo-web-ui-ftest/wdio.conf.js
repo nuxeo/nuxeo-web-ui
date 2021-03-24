@@ -6,6 +6,11 @@ const { removeSync } = require('fs-extra');
 const CompatService = require('./wdio-compat-plugin');
 const ShadowService = require('./wdio-shadow-plugin');
 
+const cucumberRequires = [path.join(__dirname, 'features/step_definitions/**/*.js')];
+if (process.env.CUCUMBER_REQUIRES) {
+  cucumberRequires.push(process.env.CUCUMBER_REQUIRES);
+}
+
 const reporters = [];
 if (process.env.CUCUMBER_REPORT_PATH) {
   reporters.push([
@@ -184,7 +189,7 @@ exports.config = {
   // If you are using Cucumber you need to specify the location of your step definitions.
   cucumberOpts: {
     // <string[]> (file/dir) require files before executing features
-    require: [path.join(__dirname, 'features/step_definitions/**/*.js')],
+    require: cucumberRequires,
     // <boolean> show full backtrace for errors
     backtrace: true,
     // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)

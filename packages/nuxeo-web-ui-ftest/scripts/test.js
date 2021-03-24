@@ -63,7 +63,7 @@ if (argv.stepDefinitions) {
   def = defaultDef;
 }
 if (def) {
-  args.push(`--cucumberOpts.require=${def}/**/*.js`);
+  process.env.CUCUMBER_REQUIRES = `${def}/**/*.js`;
 }
 
 if (argv.watch) {
