@@ -113,10 +113,16 @@ Polymer({
   },
 
   _onPollStart() {
-    this.fire('notify', { message: this.i18n('csvExportButton.action.poll'), abort: true });
+    this.fire('notify', {
+      message: this.i18n('csvExportButton.action.poll'),
+      id: 'csvExport',
+      dismissible: true,
+      abort: true,
+      duration: 0,
+    });
   },
 
   _onResponse() {
-    this.fire('notify', { message: this.i18n('csvExportButton.action.completed') });
+    this.fire('notify', { message: this.i18n('csvExportButton.action.completed'), id: 'csvExport', dismissible: true });
   },
 });

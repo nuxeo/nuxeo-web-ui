@@ -290,6 +290,21 @@ Polymer({
         background-color: var(--paper-toast-background-color, #323232);
         color: var(--paper-toast-color, #f1f1f1);
       }
+
+      #snackbarPanel {
+        display: flex;
+        flex-direction: column;
+        bottom: 0;
+        position: absolute;
+      }
+
+      mwc-snackbar {
+        color: white;
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+        z-index: 103;
+      }
     </style>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
@@ -469,10 +484,12 @@ Polymer({
     </paper-toast>
 
     <!-- labelText="Can't send photo. Retry in 5 seconds." -->
-    <mwc-snackbar id="snackbarToast" leading>
+    <!--mwc-snackbar id="snackbarToast" leading>
       <nuxeo-button slot="action">ABORT</nuxeo-button>
       <paper-icon-button icon="icons:close" on-tap="_dismissToast" slot="dismiss"></paper-icon-button>
-    </mwc-snackbar>
+    </mwc-snackbar-->
+
+    <div id="snackbarPanel"></div>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
     <nuxeo-keys keys="d" on-pressed="showHome"></nuxeo-keys>
@@ -646,7 +663,7 @@ Polymer({
 
     Performance.mark('nuxeo-app.ready');
 
-    this.$.snackbarToast.addEventListener('MDCSnackbar:closing', this._abortAction);
+    // this.$.snackbarToast.addEventListener('MDCSnackbar:closing', this._abortAction);
   },
 
   _resetTaskSelection() {
@@ -1316,25 +1333,60 @@ Polymer({
 
   _notify(e) {
     const options = e.detail;
-    if (options.close) {
+    /* if (options.close) {
       this.$.toast.close();
-    }
-    if (options.abort && options.message) {
-      this.$.snackbarToast.labelText = options.message;
-      this.$.snackbarToast.timeoutMs = options.duration !== undefined ? options.duration : 4000;
-      this.set('_dismissible', !!options.dismissible);
-      this.$.snackbarToast.show();
-    } else if (options.message) {
-      this.$.snackbarToast.close();
-      this.$.toast.text = options.message;
+    } */
+    if (options.message) {
+      let toast = this.$.snackbarPanel.querySelector(`#${options.id}`);
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.innerHTML = `
+          <mwc-snackbar id="${options.id}" leading>
+            ${
+              options.abort
+                ? '<paper-button slot="action">Abort</paper-button><paper-button slot="action">Batatas</paper-button>'
+                : ''
+            }
+            ${
+              options.dismissible
+                ? '<paper-icon-button icon="icons:close" slot="action" on-tap="_dismissToast"></paper-icon-button>'
+                : ''
+            } 
+          </mwc-snackbar>
+        `;
+        toast = toast.querySelector('mwc-snackbar');
+        this.$.snackbarPanel.appendChild(toast);
+
+        // HACK - if we don't change the position to relative, there's not way we can stack the snackbars
+        const addStyle = () => {
+          const style = document.createElement('style');
+          style.innerHTML = '.mdc-snackbar { position: relative !important; }';
+          toast.shadowRoot.appendChild(style);
+        };
+        const deleteToast = (/* action */) => toast.parentNode.removeChild(toast);
+
+        toast.addEventListener('MDCSnackbar:opened', addStyle);
+        // toast.mdcRoot.style.position = 'relative';
+        toast.addEventListener('MDCSnackbar:closed', deleteToast);
+      }
+      toast.labelText = options.message;
+      toast.timeoutMs = -1; // options.duration !== undefined ? Math.max(4000, options.duration) : 4000;
+      if (toast.open) {
+        toast.close();
+      }
+      toast.show();
+      // toast.duration = -1;// options.duration !== undefined ? options.duration : 3000;
+      /* this.$.toast.text = options.message;
       this.$.toast.duration = options.duration !== undefined ? options.duration : 3000;
       this.set('_dismissible', !!options.dismissible);
-      this.$.toast.open();
+      this.$.toast.open(); */
     }
   },
 
-  _dismissToast() {
-    this.$.toast.toggle();
+  _dismissToast(e) {
+    // debugger;
+    // this.$.toast.toggle();
+    e.srcElement.parentElement.close();
   },
 
   _abortAction(e) {
