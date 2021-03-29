@@ -636,8 +636,6 @@ Polymer({
     } else if ((this.docPath && this.docPath.length > 0) || (this.docId && this.docId.length > 0)) {
       const id = this.docId || (this.currentDocument && this.currentDocument.uid);
       this.load('browse', id, this.docPath, this.docAction);
-    } else if (this.page === 'tasks') {
-      this.navigateTo('tasks');
     } else {
       this.navigateTo('home');
     }
