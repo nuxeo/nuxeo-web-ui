@@ -16,6 +16,7 @@ limitations under the License.
 */
 import './elements/nuxeo-liveconnect-box-link.js';
 import './elements/nuxeo-liveconnect-google-drive-link.js';
+import { LiveConnectBehavior } from './elements/nuxeo-liveconnect-behavior.js';
 
 import boxHtml from './nuxeo-liveconnect-box.html';
 import driveHtml from './nuxeo-liveconnect-google-drive.html';
@@ -23,3 +24,5 @@ import driveHtml from './nuxeo-liveconnect-google-drive.html';
 const tmpl = document.createElement('template');
 tmpl.innerHTML = [boxHtml, driveHtml].join('');
 document.head.appendChild(tmpl.content);
+
+Nuxeo.LiveConnectBehavior = LiveConnectBehavior;
