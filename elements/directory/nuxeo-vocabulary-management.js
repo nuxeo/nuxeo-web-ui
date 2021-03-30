@@ -98,8 +98,8 @@ Polymer({
 
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
           <div class="top actions">
-            <paper-button id="addEntry" class="text" on-tap="_createEntry">
-              <span>+ [[i18n('vocabularyManagement.addEntry')]]</span>
+            <paper-button id="addEntry" class="text" on-tap="_createEntry" aria-labelledby="addEntryLabel">
+              <span id="addEntryLabel">+ [[i18n('vocabularyManagement.addEntry')]]</span>
             </paper-button>
           </div>
           <nuxeo-data-table
@@ -118,8 +118,9 @@ Polymer({
                       id="edit-button-[[index]]"
                       icon="nuxeo:edit"
                       on-tap="_editEntry"
+                      aria-labelledby="editButtonTooltip"
                     ></paper-icon-button>
-                    <nuxeo-tooltip for="edit-button-[[index]]"
+                    <nuxeo-tooltip for="edit-button-[[index]]" id="editButtonTooltip"
                       >[[i18n('vocabularyManagement.editEntry')]]</nuxeo-tooltip
                     >
                     <paper-icon-button
@@ -127,8 +128,9 @@ Polymer({
                       name="delete"
                       icon="nuxeo:delete"
                       on-tap="_deleteEntry"
+                      aria-labelledby="deleteButtonTooltip"
                     ></paper-icon-button>
-                    <nuxeo-tooltip for="delete-button-[[index]]"
+                    <nuxeo-tooltip for="delete-button-[[index]]" id="deleteButtonTooltip"
                       >[[i18n('vocabularyManagement.deleteEntry')]]</nuxeo-tooltip
                     >
                   </template>

@@ -271,9 +271,17 @@ Polymer({
             </template>
           </nuxeo-select>
           <template is="dom-if" if="[[queue]]">
-            <paper-icon-button class="switch" icon="nuxeo:filter" id="toogleFilter" on-tap="_displayFiltersTapped">
+            <paper-icon-button
+              class="switch"
+              icon="nuxeo:filter"
+              id="toogleFilter"
+              on-tap="_displayFiltersTapped"
+              aria-labelledby="toogleFilterTooltip"
+            >
             </paper-icon-button>
-            <nuxeo-tooltip for="toogleFilter">[[i18n('searchForm.displayFilterView')]]</nuxeo-tooltip>
+            <nuxeo-tooltip for="toogleFilter" id="toogleFilterTooltip"
+              >[[i18n('searchForm.displayFilterView')]]</nuxeo-tooltip
+            >
           </template>
           <template is="dom-if" if="[[!queue]]">
             <paper-icon-button
@@ -281,9 +289,12 @@ Polymer({
               icon="nuxeo:view-list"
               id="toogleQueue"
               on-tap="displayQueueAndNavigateToFirst"
+              aria-labelledby="toogleQueueTooltip"
             >
             </paper-icon-button>
-            <nuxeo-tooltip for="toogleQueue">[[i18n('searchForm.displayQueueView')]]</nuxeo-tooltip>
+            <nuxeo-tooltip for="toogleQueue" id="toogleQueueTooltip"
+              >[[i18n('searchForm.displayQueueView')]]</nuxeo-tooltip
+            >
           </template>
         </template>
         <template is="dom-if" if="[[onlyQueue]]">

@@ -39,8 +39,12 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <div class="action" on-tap="untrashDocuments">
-        <paper-icon-button icon="nuxeo:restore-deleted" id="untrashAllButton"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <paper-icon-button
+          icon="nuxeo:restore-deleted"
+          id="untrashAllButton"
+          aria-labelledby="label"
+        ></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
         <nuxeo-tooltip position="[[tooltipPosition]]">[[i18n(_label)]]</nuxeo-tooltip>
       </div>
     </template>

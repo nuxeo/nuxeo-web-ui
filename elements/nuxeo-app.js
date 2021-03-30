@@ -430,6 +430,7 @@ Polymer({
           icon="menu"
           on-tap="_openDrawer"
           hidden$="[[!isNarrow]]"
+          aria-label$="[[i18n('command.menu')]]"
         ></paper-icon-button>
         <nuxeo-suggester id="suggester"></nuxeo-suggester>
       </paper-header-panel>
@@ -449,7 +450,12 @@ Polymer({
     <nuxeo-progress-indicator visible="[[loading]]"></nuxeo-progress-indicator>
 
     <paper-toast id="toast">
-      <paper-icon-button icon="icons:close" on-tap="_dismissToast" hidden$="[[!_dismissible]]"></paper-icon-button>
+      <paper-icon-button
+        icon="icons:close"
+        on-tap="_dismissToast"
+        hidden$="[[!_dismissible]]"
+        aria-label$="[[i18n('command.close')]]"
+      ></paper-icon-button>
     </paper-toast>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>

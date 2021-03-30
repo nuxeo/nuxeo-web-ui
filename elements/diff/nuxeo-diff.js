@@ -171,8 +171,11 @@ Polymer({
               id="switchSidesButtonH"
               icon="nuxeo:switch-sides"
               on-tap="_switchSides"
+              aria-labelledby="switchSidesButtonHTooltip"
             ></paper-icon-button>
-            <nuxeo-tooltip for="switchSidesButtonH">[[i18n('diff.controls.switchSides.tooltip')]]</nuxeo-tooltip>
+            <nuxeo-tooltip for="switchSidesButtonH" id="switchSidesButtonHTooltip"
+              >[[i18n('diff.controls.switchSides.tooltip')]]</nuxeo-tooltip
+            >
           </div>
           <div class="diffPicker">
             <nuxeo-select selected="{{rightUid}}" attr-for-selected="uid">
@@ -187,8 +190,11 @@ Polymer({
             id="switchSidesButtonV"
             icon="nuxeo:switch-sides"
             on-tap="_switchSides"
+            aria-labelledby="switchSidesButtonVTooltip"
           ></paper-icon-button>
-          <nuxeo-tooltip for="switchSidesButtonV">[[i18n('diff.controls.switchSides.tooltip')]]</nuxeo-tooltip>
+          <nuxeo-tooltip for="switchSidesButtonV" id="switchSidesButtonVTooltip"
+            >[[i18n('diff.controls.switchSides.tooltip')]]</nuxeo-tooltip
+          >
         </div>
       </div>
       <div id="diffPane">

@@ -54,7 +54,7 @@ Polymer({
       }
     </style>
 
-    <paper-button noink id="button" class="primary" on-tap="_toggleDialog">
+    <paper-button noink id="button" class="primary" on-tap="_toggleDialog" aria-label$="[[i18n('command.confirm')]]">
       <slot></slot>
     </paper-button>
 

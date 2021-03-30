@@ -66,8 +66,10 @@ Polymer({
     </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
-      <paper-icon-button noink id="button" name$="[[name]]"></paper-icon-button>
-      <nuxeo-tooltip for="button" position="right" offset="0" animation-delay="0">[[i18n(label)]]</nuxeo-tooltip>
+      <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip"></paper-icon-button>
+      <nuxeo-tooltip for="button" position="right" offset="0" animation-delay="0" id="tooltip"
+        >[[i18n(label)]]</nuxeo-tooltip
+      >
       <template is="dom-if" if="[[badge]]">
         <paper-badge label="[[badge]]" for="button"></paper-badge>
       </template>

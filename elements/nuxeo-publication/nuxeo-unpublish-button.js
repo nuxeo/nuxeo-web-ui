@@ -54,8 +54,9 @@ Polymer({
         dialog-confirm="[[i18n('label.yes')]]"
         on-confirm="_unpublish"
         class="secondary"
+        aria-labelledby="label"
       >
-        <span class="label">[[i18n('publication.unpublish')]]</span>
+        <span class="label" id="label">[[i18n('publication.unpublish')]]</span>
       </nuxeo-confirm-button>
     </template>
   `,

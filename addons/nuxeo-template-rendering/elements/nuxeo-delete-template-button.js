@@ -39,8 +39,8 @@ Polymer({
     <nuxeo-operation id="deleteTemplatesOp" op="TemplateProcessor.Detach"></nuxeo-operation>
     <nuxeo-document id="template" doc-path="[[document.path]]"></nuxeo-document>
     <div id="delete" class="action" on-tap="_toggleDialog">
-      <paper-icon-button icon="icons:delete-sweep" noink></paper-icon-button>
-      <span class="label" hidden$="[[!showLabel]]">[[i18n('deleteTemplateButton.tooltip')]]</span>
+      <paper-icon-button icon="icons:delete-sweep" noink aria-labelledby="label"></paper-icon-button>
+      <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('deleteTemplateButton.tooltip')]]</span>
       <paper-tooltip>[[i18n('deleteTemplateButton.tooltip')]]</paper-tooltip>
     </div>
 
