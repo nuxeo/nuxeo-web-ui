@@ -194,10 +194,16 @@ Polymer({
               icon="nuxeo:delete"
               on-tap="_deleteFile"
               hidden$="[[!_areActionsVisible(hasFiles, uploading, updateDocument)]]"
+              aria-label$="[[i18n('command.delete')]]"
             ></paper-icon-button>
             <div hidden$="[[!_showAbort(uploading)]]">
-              <paper-icon-button noink icon="icons:cancel" on-tap="_abortUpload"></paper-icon-button>
-              <nuxeo-tooltip>[[i18n('dropzone.abort')]]</nuxeo-tooltip>
+              <paper-icon-button
+                noink
+                icon="icons:cancel"
+                on-tap="_abortUpload"
+                aria-labelledby="abortTooltip"
+              ></paper-icon-button>
+              <nuxeo-tooltip id="abortTooltip">[[i18n('dropzone.abort')]]</nuxeo-tooltip>
             </div>
           </div>
         </div>

@@ -294,7 +294,14 @@ Polymer({
         </div>
       </div>
     </div>
-    <paper-icon-button noink id="searchButton" icon="nuxeo:search" name="browser" on-tap="toggle"></paper-icon-button>
+    <paper-icon-button
+      noink
+      id="searchButton"
+      icon="nuxeo:search"
+      name="browser"
+      on-tap="toggle"
+      aria-label$="[[i18n('command.search')]]"
+    ></paper-icon-button>
 
     <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>

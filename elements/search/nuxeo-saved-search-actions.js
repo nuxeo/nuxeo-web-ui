@@ -70,7 +70,11 @@ Polymer({
         vertical-offset="40"
         hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty)]]"
       >
-        <paper-icon-button icon="icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
+        <paper-icon-button
+          icon="icons:more-vert"
+          slot="dropdown-trigger"
+          aria-label$="[[i18n('command.menu')]]"
+        ></paper-icon-button>
         <paper-listbox slot="dropdown-content">
           <paper-item on-tap="_renameSearch">
             <iron-icon icon="nuxeo:edit"></iron-icon>[[i18n('app.renameSearch')]]

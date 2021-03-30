@@ -48,8 +48,8 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(nxProvider, columns)]]">
       <div class="action" on-click="_show">
-        <paper-icon-button id="button" icon="nuxeo:spreadsheet"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <paper-icon-button id="button" icon="nuxeo:spreadsheet" aria-labelledby="label"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
         <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
       </div>
     </template>

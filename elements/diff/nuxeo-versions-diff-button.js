@@ -37,8 +37,8 @@ Polymer({
     <template is="dom-if" if="[[hasVersions(document)]]">
       <nuxeo-operation id="opGetVersions" op="Document.GetVersions" input="[[document.uid]]"></nuxeo-operation>
       <div class="action" on-tap="_doDiff">
-        <paper-icon-button noink id="diff" icon="nuxeo:compare"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <paper-icon-button noink id="diff" icon="nuxeo:compare" aria-labelledby="label"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
         <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
       </div>
     </template>

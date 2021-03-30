@@ -46,8 +46,8 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(document, synchronizationRoot)]]">
       <div class="action" on-tap="toggle">
-        <paper-icon-button id="syncBut" icon="[[_icon(synchronized)]]"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <paper-icon-button id="syncBut" icon="[[_icon(synchronized)]]" aria-labelledby="label"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
         <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
       </div>
     </template>

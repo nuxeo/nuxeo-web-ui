@@ -176,8 +176,9 @@ Polymer({
                 icon="icons:create"
                 on-tap="_editParam"
                 disabled="[[!_canEdit(param, params)]]"
+                aria-labelledby="editTooltip"
               ></paper-icon-button>
-              <paper-tooltip for="[[_computeBtnId(param, 'edit')]]"
+              <paper-tooltip for="[[_computeBtnId(param, 'edit')]]" id="editTooltip"
                 >[[i18n('templateRenderingPage.parameters.edit.tooltip')]]</paper-tooltip
               >
               <div hidden$="[[!allowDelete]]">
@@ -186,8 +187,9 @@ Polymer({
                   icon="icons:delete"
                   on-tap="_deleteParam"
                   disabled="[[!_canEdit(param, params)]]"
+                  aria-labelledby="removeTooltip"
                 ></paper-icon-button>
-                <paper-tooltip for="[[_computeBtnId(param, 'remove')]]"
+                <paper-tooltip for="[[_computeBtnId(param, 'remove')]]" id="removeTooltip"
                   >[[i18n('templateRenderingPage.parameters.remove.tooltip')]]</paper-tooltip
                 >
               </div>
@@ -195,8 +197,15 @@ Polymer({
           </div>
         </template>
         <div class="horizontal-layout end-justified signatureFooter" hidden$="[[!allowCreate]]">
-          <paper-icon-button id="addParamBtn" icon="icons:add-circle" on-tap="_addParam"></paper-icon-button>
-          <paper-tooltip for="addParamBtn">[[i18n('templateRenderingPage.parameters.add.tooltip')]]</paper-tooltip>
+          <paper-icon-button
+            id="addParamBtn"
+            icon="icons:add-circle"
+            on-tap="_addParam"
+            aria-labelledby="addParametersTooltip"
+          ></paper-icon-button>
+          <paper-tooltip for="addParamBtn" id="addParametersTooltip"
+            >[[i18n('templateRenderingPage.parameters.add.tooltip')]]</paper-tooltip
+          >
         </div>
       </div>
     </iron-pages>

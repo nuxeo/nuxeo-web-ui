@@ -39,8 +39,8 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <div class="action" on-tap="toggle">
-        <paper-icon-button icon="[[icon]]" active="[[inClipboard]]" noink></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <paper-icon-button icon="[[icon]]" active="[[inClipboard]]" noink aria-labelledby="label"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
         <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
       </div>
     </template>

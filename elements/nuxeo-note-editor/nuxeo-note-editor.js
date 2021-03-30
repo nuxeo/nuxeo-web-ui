@@ -93,8 +93,11 @@ Polymer({
             icon="[[_computeHtmlEditIcon(_viewMode)]]"
             on-tap="_toggleHtmlSource"
             hidden$="[[!_canEdit(document)]]"
+            aria-labelledby="editHtmlTooltip"
           ></paper-icon-button>
-          <paper-tooltip for="editHtml" position="right">[[_computeHtmlEditLabel(_viewMode, i18n)]]</paper-tooltip>
+          <paper-tooltip for="editHtml" position="right" id="editHtmlTooltip"
+            >[[_computeHtmlEditLabel(_viewMode, i18n)]]</paper-tooltip
+          >
           <template is="dom-if" if="[[_viewMode]]">
             <nuxeo-html-editor value="{{_value}}" read-only="[[!_canEdit(document)]]"></nuxeo-html-editor>
           </template>
@@ -121,8 +124,9 @@ Polymer({
             icon="nuxeo:edit"
             on-tap="_edit"
             hidden$="[[!_canEdit(document)]]"
+            aria-labelledby="editNoteTooltip"
           ></paper-icon-button>
-          <paper-tooltip for="editNote" position="bottom">[[i18n('command.edit')]]</paper-tooltip>
+          <paper-tooltip for="editNote" position="bottom" id="editNoteTooltip">[[i18n('command.edit')]]</paper-tooltip>
           <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
         </template>
         <template is="dom-if" if="[[!_viewMode]]">

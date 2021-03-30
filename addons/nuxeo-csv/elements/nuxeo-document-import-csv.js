@@ -308,8 +308,12 @@ Polymer({
                       </template>
                     </div>
                     <div class="clear">
-                      <paper-icon-button icon="icons:clear" on-tap="_removeBlob"></paper-icon-button>
-                      <paper-tooltip>[[i18n('command.remove')]]</paper-tooltip>
+                      <paper-icon-button
+                        icon="icons:clear"
+                        on-tap="_removeBlob"
+                        aria-labelledby="removeTooltip"
+                      ></paper-icon-button>
+                      <paper-tooltip id="removeTooltip">[[i18n('command.remove')]]</paper-tooltip>
                     </div>
                   </div>
                 </div>
