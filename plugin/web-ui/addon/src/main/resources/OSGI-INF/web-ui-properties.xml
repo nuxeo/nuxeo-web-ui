@@ -19,7 +19,7 @@
     <property name="org.nuxeo.web.ui.enrichers.document">subtypes</property>
     <property name="org.nuxeo.web.ui.enrichers.document">tags</property>
     <property name="org.nuxeo.web.ui.enrichers.document">publications</property>
-    
+
     <property name="org.nuxeo.web.ui.enrichers.blob" list="true">appLinks</property>
     <property name="org.nuxeo.web.ui.enrichers.blob">preview</property>
 
@@ -38,5 +38,8 @@
 
     <!-- Max Results for Tables, Grids and Lists plugged on a Nuxeo Page Provider. Falls back on elasticsearch max result window by default. -->
     <property name="org.nuxeo.web.ui.listingMaxItems">${org.nuxeo.elasticsearch.provider.maxResultWindow:=10000}</property>
+
+    <!-- Control the enablement of document distribution analytics -->
+    <property name="org.nuxeo.web.ui.analytics.documentDistribution.disableThreshold">${nuxeo.analytics.documentDistribution.disableThreshold}</property>
   </extension>
 </component>

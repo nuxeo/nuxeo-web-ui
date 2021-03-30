@@ -24,6 +24,7 @@ import '@nuxeo/nuxeo-ui-elements/dataviz/nuxeo-document-distribution-chart.js';
 import './nuxeo-mime-types.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { animationFrame } from '@polymer/polymer/lib/utils/async.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
 /**
@@ -64,7 +65,25 @@ Polymer({
           display: none;
         }
       }
+
+      .error {
+        border-left: 4px solid var(--nuxeo-warn-text);
+        color: var(--nuxeo-text-default);
+        padding-left: 8px;
+      }
     </style>
+
+    <!-- use nxql page provider to limit the use of the distribution analytics chart -->
+    <nuxeo-page-provider
+      id="provider"
+      provider="nxql_search"
+      page-size="1"
+      schemas="dublincore,uid"
+      headers="[[_headers()]]"
+      skip-aggregates
+      on-error="_onError"
+    >
+    </nuxeo-page-provider>
 
     <template is="dom-if" if="[[visible]]">
       <div class="flex-layout">
@@ -76,17 +95,38 @@ Polymer({
             </div>
           </div>
 
-          <nuxeo-document-distribution-chart id="chart" index="[[index]]" path="[[path]]" mode="count">
-          </nuxeo-document-distribution-chart>
+          <template is="dom-if" if="[[_enabled]]">
+            <nuxeo-document-distribution-chart
+              id="chart"
+              index="[[index]]"
+              path="[[path]]"
+              max-depth="[[depth]]"
+              mode="count"
+            >
+            </nuxeo-document-distribution-chart>
 
-          <div class="horizontal layout center">
-            <div>
-              <iron-icon icon="icons:track-changes"></iron-icon>
+            <div class="horizontal layout center">
+              <div>
+                <iron-icon icon="icons:track-changes"></iron-icon>
+              </div>
+              <div class="flex">
+                <paper-slider
+                  id="ratings"
+                  pin
+                  snaps
+                  max="20"
+                  max-markers="20"
+                  step="1"
+                  value="{{depth}}"
+                ></paper-slider>
+              </div>
             </div>
-            <div class="flex">
-              <paper-slider id="ratings" pin snaps max="20" max-markers="20" step="1" value="{{depth}}"></paper-slider>
-            </div>
-          </div>
+          </template>
+
+          <p class="error" hidden$="[[_enabled]]">
+            Distribution analytics is disabled because current query would impact quality of the service. <br />
+            Please select another path.
+          </p>
         </nuxeo-card>
       </div>
     </template>
@@ -111,25 +151,62 @@ Polymer({
       type: Number,
       value: 1,
     },
+    disableThreshold: {
+      type: Number,
+      value:
+        Nuxeo &&
+        Nuxeo.UI &&
+        Nuxeo.UI.config &&
+        Nuxeo.UI.config.analytics &&
+        Nuxeo.UI.config.analytics.documentDistribution &&
+        Number(Nuxeo.UI.config.analytics.documentDistribution.disableThreshold),
+    },
+    _enabled: {
+      type: Boolean,
+    },
+    _loading: {
+      type: Boolean,
+    },
   },
 
-  observers: ['_observeDocPath(path, depth)'],
+  observers: ['_observeDocPath(path, depth, visible)'],
+
+  _params() {
+    return {
+      queryParams:
+        'SELECT * FROM Document ' +
+        "WHERE ecm:mixinType != 'HiddenInNavigation' " +
+        'AND ecm:isProxy = 0 AND ' +
+        'ecm:isVersion = 0 AND ' +
+        'ecm:isTrashed = 0 AND ' +
+        `ecm:path STARTSWITH '${this.path}'`,
+    };
+  },
+
+  _headers() {
+    return {
+      'Content-Type': 'application/json',
+      accept: 'text/plain,application/json',
+      'fetch-document': 'properties',
+    };
+  },
 
   _observeDocPath() {
-    if (!this.visible) {
+    if (!this.visible || !this.path || !this.path.length || !this.path.endsWith('/')) {
       return;
     }
 
-    const chart = this.$$('#chart');
-    if (
-      this.path &&
-      this.path.length &&
-      this.path.endsWith('/') &&
-      (this.path !== chart.path || this.depth !== chart.maxDepth)
-    ) {
-      chart.maxDepth = this.depth;
-      chart.path = this.path;
-      chart.execute();
+    if (this.disableThreshold) {
+      this.$.provider.params = this._params();
+      this.$.provider.fetch().then((result) => {
+        this._enabled = result && result.resultsCount < this.disableThreshold;
+        if (this._enabled) {
+          animationFrame.run(() => this.$$('#chart').execute());
+        }
+      });
+    } else {
+      this._enabled = true;
+      animationFrame.run(() => this.$$('#chart').execute());
     }
   },
 });
