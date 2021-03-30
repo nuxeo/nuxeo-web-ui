@@ -42,8 +42,8 @@ Polymer({
     <nuxeo-operation id="getTemplatesOp" op="[[filterOp]]"></nuxeo-operation>
     <nuxeo-operation id="renderTemplateOp" op="[[renderOp]]"></nuxeo-operation>
     <div id="render" class="action" on-tap="_toggleDialog">
-      <paper-icon-button noink icon="[[icon]]" src="[[iconSrc]]"></paper-icon-button>
-      <span class="label" hidden$="[[!showLabel]]">[[i18n(label)]]</span>
+      <paper-icon-button noink icon="[[icon]]" src="[[iconSrc]]" aria-labelledby="label"></paper-icon-button>
+      <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n(label)]]</span>
       <paper-tooltip>[[i18n(tooltip)]]</paper-tooltip>
     </div>
 

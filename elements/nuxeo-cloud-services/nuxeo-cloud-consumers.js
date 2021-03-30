@@ -50,8 +50,8 @@ class CloudConsumers extends mixinBehaviors([FormatBehavior], Nuxeo.Element) {
       <nuxeo-card heading="[[i18n('cloudConsumers.OAuth2Consumers')]]">
         <nuxeo-resource id="oauth" response="{{consumers}}"></nuxeo-resource>
         <div class="layout horizontal center end-justified">
-          <paper-button id="addClient" class="text" on-tap="_addEntry">
-            <span>[[i18n('cloudConsumers.add')]]</span>
+          <paper-button id="addClient" class="text" on-tap="_addEntry" aria-labelledby="addClientLabel">
+            <span id="addClientLabel">[[i18n('cloudConsumers.add')]]</span>
           </paper-button>
         </div>
 

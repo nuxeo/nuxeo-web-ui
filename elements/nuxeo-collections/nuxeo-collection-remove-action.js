@@ -38,8 +38,8 @@ Polymer({
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members, collection)]]">
       <div class="action" on-tap="remove">
-        <paper-icon-button noink id="removeButton" icon="nuxeo:remove"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <paper-icon-button noink id="removeButton" icon="nuxeo:remove" aria-labelledby="label"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
         <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
       </div>
     </template>

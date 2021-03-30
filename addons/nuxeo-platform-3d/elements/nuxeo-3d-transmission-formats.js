@@ -124,12 +124,26 @@ Polymer({
             </div>
             <div class="format-buttons">
               <div>
-                <paper-icon-button icon="icons:visibility" on-tap="_loadFormat" noink></paper-icon-button>
-                <paper-tooltip>[[i18n('threeDViewLayout.transmissionFormats.preview')]]</paper-tooltip>
+                <paper-icon-button
+                  icon="icons:visibility"
+                  on-tap="_loadFormat"
+                  noink
+                  aria-labelledby="previewTooltip"
+                ></paper-icon-button>
+                <paper-tooltip id="previewTooltip"
+                  >[[i18n('threeDViewLayout.transmissionFormats.preview')]]</paper-tooltip
+                >
               </div>
               <div>
-                <paper-icon-button icon="icons:file-download" on-tap="_downloadFormat" noink></paper-icon-button>
-                <paper-tooltip>[[i18n('threeDViewLayout.transmissionFormats.download')]]</paper-tooltip>
+                <paper-icon-button
+                  icon="icons:file-download"
+                  on-tap="_downloadFormat"
+                  noink
+                  aria-labelledby="downloadTooltip"
+                ></paper-icon-button>
+                <paper-tooltip id="downloadTooltip"
+                  >[[i18n('threeDViewLayout.transmissionFormats.download')]]</paper-tooltip
+                >
               </div>
             </div>
           </div>

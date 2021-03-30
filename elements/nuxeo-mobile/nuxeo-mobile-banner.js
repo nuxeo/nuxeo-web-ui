@@ -56,7 +56,11 @@ Polymer({
 
     <template is="dom-if" if="[[_displayBanner(document, dismiss)]]">
       <div id="mobileBanner">
-        <paper-icon-button icon="icons:close" on-tap="_dismiss"></paper-icon-button>
+        <paper-icon-button
+          icon="icons:close"
+          on-tap="_dismiss"
+          aria-label$="[[i18n('command.close')]]"
+        ></paper-icon-button>
         <div class="mobileAppLinkContainer">
           <template is="dom-if" if="[[isAndroid]]">
             <a class="mobileAppLink" href$="[[_computeUrl(document)]]">[[i18n('label.mobile.openInApp')]]</a>

@@ -187,8 +187,14 @@ Polymer({
 
       <div class="side">
         <div class="scrollerHeader">
-          <paper-icon-button id="details" noink icon="nuxeo:details" on-tap="_toggleOpened"></paper-icon-button>
-          <nuxeo-tooltip for="details">[[i18n('documentPage.details.opened')]]</nuxeo-tooltip>
+          <paper-icon-button
+            id="details"
+            noink
+            icon="nuxeo:details"
+            on-tap="_toggleOpened"
+            aria-labelledby="detailsTooltip"
+          ></paper-icon-button>
+          <nuxeo-tooltip for="details" id="detailsTooltip">[[i18n('documentPage.details.opened')]]</nuxeo-tooltip>
         </div>
         <div class="scroller">
           <!-- info -->

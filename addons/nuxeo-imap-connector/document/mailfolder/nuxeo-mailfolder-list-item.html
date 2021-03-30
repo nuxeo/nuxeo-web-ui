@@ -141,7 +141,12 @@ limitations under the License.
 
     <div class="list-item" selection-mode$="[[selectionMode]]">
       <div class="select">
-        <paper-icon-button noink icon="icons:check" title="select" on-tap="_onCheckBoxTap"></paper-icon-button>
+        <paper-icon-button
+          noink
+          icon="icons:check"
+          on-tap="_onCheckBoxTap"
+          aria-label$="[[i18n('command.select')]]"
+        ></paper-icon-button>
       </div>
       <div class="layout horizontal center" on-tap="handleClick">
         <div class="details">

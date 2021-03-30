@@ -178,9 +178,17 @@ Polymer({
     <div class="header ellipsis search-header">
       <template is="dom-if" if="[[_isDisplayMembers]]">
         <h5>[[selectedCollection.title]]</h5>
-        <paper-icon-button class="switch" icon="icons:arrow-back" id="backToCollections" on-tap="displayCollections">
+        <paper-icon-button
+          class="switch"
+          icon="icons:arrow-back"
+          id="backToCollections"
+          on-tap="displayCollections"
+          aria-labelledby="backToCollectionsTooltip"
+        >
         </paper-icon-button>
-        <nuxeo-tooltip for="backToCollections">[[i18n('collections.backToCollections')]]</nuxeo-tooltip>
+        <nuxeo-tooltip for="backToCollections" id="backToCollectionsTooltip"
+          >[[i18n('collections.backToCollections')]]</nuxeo-tooltip
+        >
       </template>
       <template is="dom-if" if="[[!_isDisplayMembers]]">
         <h5>[[i18n('collections.heading')]]</h5>
