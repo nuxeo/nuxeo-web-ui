@@ -434,8 +434,9 @@ Polymer({
                         <paper-icon-button
                           icon="[[_computeRemoveIcon(file.*)]]"
                           on-tap="_removeBlob"
+                          aria-labelledby="removeBlobTooltip"
                         ></paper-icon-button>
-                        <nuxeo-tooltip>[[_computeRemoveLabel(file.*, i18n)]]</nuxeo-tooltip>
+                        <nuxeo-tooltip id="removeBlobTooltip">[[_computeRemoveLabel(file.*, i18n)]]</nuxeo-tooltip>
                       </div>
                     </div>
                   </template>
@@ -459,8 +460,12 @@ Polymer({
                         </div>
                       </div>
                       <div class="horizontal layout center">
-                        <paper-icon-button icon="nuxeo:remove" on-tap="_removeBlob"></paper-icon-button>
-                        <nuxeo-tooltip>[[i18n('command.remove')]]</nuxeo-tooltip>
+                        <paper-icon-button
+                          icon="nuxeo:remove"
+                          on-tap="_removeBlob"
+                          aria-labelledby="removeTooltip"
+                        ></paper-icon-button>
+                        <nuxeo-tooltip id="removeTooltip">[[i18n('command.remove')]]</nuxeo-tooltip>
                       </div>
                     </div>
                   </template>
@@ -504,6 +509,7 @@ Polymer({
             class="primary"
             on-tap="_import"
             disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]"
+            aria-label$="[[i18n('command.create')]]"
           >
             <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
               [[i18n('command.create')]]
@@ -576,6 +582,7 @@ Polymer({
                   class$="file-overview [[_selectedLocalDocStyle(index,docIdx,_initializingDoc)]]"
                   on-tap="_tapLocalDoc"
                   disabled$="[[!_canTapDoc(canCreate, _initializingDoc)]]"
+                  aria-label$="[[file.error]]"
                 >
                   <div class="horizontal layout flex self-stretch">
                     <div class="vertical layout flex">
@@ -603,6 +610,7 @@ Polymer({
                   class$="file-overview [[_selectedRemoteDocStyle(index,docIdx,_initializingDoc)]]"
                   on-tap="_tapRemoteDoc"
                   disabled$="[[!_canTapDoc(canCreate, _initializingDoc)]]"
+                  aria-label$="[[i18n('command.select')]]"
                 >
                   <div class="horizontal layout flex self-stretch">
                     <div class="vertical layout flex">
@@ -661,6 +669,7 @@ Polymer({
             class="primary"
             on-tap="_importWithProperties"
             disabled$="[[!_canImportWithMetadata(_creating,_initializingDoc,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]"
+            aria-label$="[[i18n('command.create')]]"
           >
             <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
               [[i18n('command.create')]]

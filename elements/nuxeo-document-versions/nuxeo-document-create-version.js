@@ -119,13 +119,13 @@ Polymer({
       </h2>
       <div class="content">
         <paper-radio-group selected="{{versionType}}">
-          <paper-radio-button name="minor">
+          <paper-radio-button name="minor" aria-labelledby="labelMinor">
             <span id="nextMinor" class="version">[[_nextMinor(document)]]</span>
-            <span>[[i18n('documentCreateVersion.minor')]]</span>
+            <span id="labelMinor">[[i18n('documentCreateVersion.minor')]]</span>
           </paper-radio-button>
-          <paper-radio-button name="major">
+          <paper-radio-button name="major" aria-labelledby="labelMajor">
             <span id="nextMajor" class="version">[[_nextMajor(document)]]</span>
-            <span>[[i18n('documentCreateVersion.major')]]</span>
+            <span id="labelMajor">[[i18n('documentCreateVersion.major')]]</span>
           </paper-radio-button>
         </paper-radio-group>
       </div>

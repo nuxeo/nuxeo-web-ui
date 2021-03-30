@@ -200,6 +200,7 @@ Polymer({
                   on-tap="_selectType"
                   data-args$="[[type]]"
                   disabled$="[[!_canCreate(canCreate, creating)]]"
+                  aria-label$="[[_getTypeLabel(type)]]"
                 >
                   <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
                   <div class="typeLabel">[[_getTypeLabel(type)]]</div>
@@ -265,6 +266,7 @@ Polymer({
             class="primary"
             on-tap="_create"
             disabled$="[[!_canCreate(canCreate,creating)]]"
+            aria-label$="[[i18n('command.create')]]"
           >
             <template is="dom-if" if="[[!creating]]">
               [[i18n('command.create')]]

@@ -35,8 +35,13 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <div class="action" on-tap="addToClipBoard">
-        <paper-icon-button noink id="clipboardButton" icon="icons:content-paste"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]">[[_label]]</span>
+        <paper-icon-button
+          noink
+          id="clipboardButton"
+          icon="icons:content-paste"
+          aria-labelledby="label"
+        ></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
         <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
       </div>
     </template>
