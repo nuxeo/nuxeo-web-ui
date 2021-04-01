@@ -36,5 +36,8 @@
 
     <!-- Is pagination on for tasks endpoint ? -->
     <property name="org.nuxeo.web.ui.taskEndpoint.isPaginated">false</property>
+
+    <!-- HTML editor to use (alloy or quill) -->
+    <property name="org.nuxeo.web.ui.html.editor">alloy</property>
   </extension>
 </component>
