@@ -29,6 +29,7 @@ limitations under the License.
 <%@ page import="org.nuxeo.common.utils.UserAgentMatcher"%>
 
 <%
+  ConfigurationService cs = Framework.getService(ConfigurationService.class);
   WebResourceManager wrm = Framework.getService(WebResourceManager.class);
   RepositoryManager rm = Framework.getService(RepositoryManager.class);
   String ua = request.getHeader("user-agent");
@@ -108,7 +109,11 @@ limitations under the License.
 
   <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
+  <% if ("quill".equals(cs.getProperty("org.nuxeo.web.ui.html.editor", "alloy"))) { %>
+  <script defer src="bower_components/nuxeo-ui-elements/widgets/quill/quill.min.js"></script>
+  <% } else { %>
   <script defer src="bower_components/nuxeo-ui-elements/widgets/alloy/alloy-editor-all.js"></script>
+  <% } %>
 
   <script src="config.jsp"></script>
 
