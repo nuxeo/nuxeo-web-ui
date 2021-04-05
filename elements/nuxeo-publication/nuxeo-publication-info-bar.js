@@ -115,6 +115,18 @@ Polymer({
   },
 
   _srcUrl() {
-    return this._src ? this.urlFor(this._src) : null;
+    return this._src
+      ? this.urlFor(
+          'document',
+          (Nuxeo &&
+            Nuxeo.UI &&
+            Nuxeo.UI.config &&
+            Nuxeo.UI.config.router &&
+            Nuxeo.UI.config.router.key &&
+            Nuxeo.UI.config.router.key.document === 'uid' &&
+            this._src.versionableId) ||
+            this._src.path,
+        )
+      : null;
   },
 });
