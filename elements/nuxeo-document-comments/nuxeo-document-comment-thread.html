@@ -164,13 +164,13 @@ limitations under the License.
         },
       },
 
-      connectedCallback : function() {
+      attached: function() {
         this.addEventListener('delete-comment', this._handleDeleteEvent);
         this.addEventListener('edit-comment', this._handleEditEvent);
         this.addEventListener('comments-changed', this._handleCommentsChange);
       },
 
-      disconnectedCallback: function() {
+      detached: function() {
         this.removeEventListener('delete-comment', this._handleDeleteEvent);
         this.removeEventListener('edit-comment', this._handleEditEvent);
         this.removeEventListener('comments-changed', this._handleCommentsChange);
