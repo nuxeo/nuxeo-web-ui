@@ -166,9 +166,9 @@ exports.config = {
   // commands. Instead, they hook themselves up into the test process.
   services: ['selenium-standalone'],
 
-  seleniumArgs: { drivers },
+  seleniumArgs: { chrome: { version: '89.0.4389.114' } },
 
-  seleniumInstallArgs: { drivers },
+  seleniumInstallArgs: { chrome: { version: '89.0.4389.114' } },
 
   //
   // Framework you want to run your specs with.
