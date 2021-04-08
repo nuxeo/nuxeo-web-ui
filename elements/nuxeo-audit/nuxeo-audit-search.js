@@ -59,73 +59,75 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         }
       </style>
 
-      <nuxeo-audit-page-provider id="provider" page-size="40"></nuxeo-audit-page-provider>
+      <template is="dom-if" if="[[visible]]">
+        <nuxeo-audit-page-provider id="provider" page-size="40"></nuxeo-audit-page-provider>
 
-      <nuxeo-card>
-        <nuxeo-user-suggestion
-          value="{{principalName}}"
-          label="[[i18n('audit.username')]]"
-          placeholder="[[i18n('audit.usernamePlaceholder')]]"
-        ></nuxeo-user-suggestion>
-        <div class="row-container">
-          <nuxeo-date-picker role="widget" label="[[i18n('audit.from')]]" value="{{startDate}}"> </nuxeo-date-picker>
-          <nuxeo-date-picker role="widget" label="[[i18n('audit.to')]]" value="{{endDate}}"> </nuxeo-date-picker>
-        </div>
-        <div class="row-container">
-          <nuxeo-directory-suggestion
-            role="widget"
-            label="[[i18n('audit.eventTypes')]]"
-            directory-name="eventTypes"
-            value="{{events}}"
-            multiple="true"
-            placeholder="[[i18n('audit.selectEventTypes')]]"
-            min-chars="0"
-          >
-          </nuxeo-directory-suggestion>
-          <nuxeo-directory-suggestion
-            role="widget"
-            label="[[i18n('audit.eventCategory')]]"
-            directory-name="eventCategories"
-            value="{{category}}"
-            placeholder="[[i18n('audit.selectEventCategory')]]"
-            min-chars="0"
-          >
-          </nuxeo-directory-suggestion>
-        </div>
-      </nuxeo-card>
-      <nuxeo-card>
-        <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('audit.empty')]]">
-          <nuxeo-data-table-column name="[[i18n('audit.performedAction')]]" sort-by="eventId">
-            <template>[[_formati18n('eventType.', item.eventId)]]</template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('audit.date')]]" sort-by="eventDate">
-            <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('audit.username')]]" sort-by="principalName">
-            <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
-          </nuxeo-data-table-column>
-          <nuxeo-data-table-column name="[[i18n('audit.category')]]" sort-by="category">
-            <template>[[_formati18n('eventCategory.', item.category)]]</template>
-          </nuxeo-data-table-column>
-          <template is="dom-if" if="[[!_isAvailable(document)]]">
-            <nuxeo-data-table-column name="[[i18n('audit.document')]]">
+        <nuxeo-card>
+          <nuxeo-user-suggestion
+            value="{{principalName}}"
+            label="[[i18n('audit.username')]]"
+            placeholder="[[i18n('audit.usernamePlaceholder')]]"
+          ></nuxeo-user-suggestion>
+          <div class="row-container">
+            <nuxeo-date-picker role="widget" label="[[i18n('audit.from')]]" value="{{startDate}}"> </nuxeo-date-picker>
+            <nuxeo-date-picker role="widget" label="[[i18n('audit.to')]]" value="{{endDate}}"> </nuxeo-date-picker>
+          </div>
+          <div class="row-container">
+            <nuxeo-directory-suggestion
+              role="widget"
+              label="[[i18n('audit.eventTypes')]]"
+              directory-name="eventTypes"
+              value="{{events}}"
+              multiple="true"
+              placeholder="[[i18n('audit.selectEventTypes')]]"
+              min-chars="0"
+            >
+            </nuxeo-directory-suggestion>
+            <nuxeo-directory-suggestion
+              role="widget"
+              label="[[i18n('audit.eventCategory')]]"
+              directory-name="eventCategories"
+              value="{{category}}"
+              placeholder="[[i18n('audit.selectEventCategory')]]"
+              min-chars="0"
+            >
+            </nuxeo-directory-suggestion>
+          </div>
+        </nuxeo-card>
+        <nuxeo-card>
+          <nuxeo-data-table id="table" paginable nx-provider="provider" empty-label="[[i18n('audit.empty')]]">
+            <nuxeo-data-table-column name="[[i18n('audit.performedAction')]]" sort-by="eventId">
+              <template>[[_formati18n('eventType.', item.eventId)]]</template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('audit.date')]]" sort-by="eventDate">
+              <template><nuxeo-date datetime="[[item.eventDate]]"></nuxeo-date></template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('audit.username')]]" sort-by="principalName">
+              <template><nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag></template>
+            </nuxeo-data-table-column>
+            <nuxeo-data-table-column name="[[i18n('audit.category')]]" sort-by="category">
+              <template>[[_formati18n('eventCategory.', item.category)]]</template>
+            </nuxeo-data-table-column>
+            <template is="dom-if" if="[[!_isAvailable(document)]]">
+              <nuxeo-data-table-column name="[[i18n('audit.document')]]">
+                <template>
+                  <a href$="[[_getDocumentURL(item)]]">[[_formatDocument(item)]]</a>
+                </template>
+              </nuxeo-data-table-column>
+            </template>
+            <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
               <template>
-                <a href$="[[_getDocumentURL(item)]]">[[_formatDocument(item)]]</a>
+                <a href$="[[_parseComment(item.comment)]]">[[_formatComment(item.comment)]]</a>
               </template>
             </nuxeo-data-table-column>
-          </template>
-          <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
-            <template>
-              <a href$="[[_parseComment(item.comment)]]">[[_formatComment(item.comment)]]</a>
+            <template is="dom-if" if="[[_isAvailable(document)]]">
+              <nuxeo-data-table-column name="[[i18n('audit.state')]]">
+                <template><nuxeo-tag uppercase>[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template>
+              </nuxeo-data-table-column>
             </template>
-          </nuxeo-data-table-column>
-          <template is="dom-if" if="[[_isAvailable(document)]]">
-            <nuxeo-data-table-column name="[[i18n('audit.state')]]">
-              <template><nuxeo-tag uppercase>[[formatLifecycleState(item.docLifeCycle)]]</nuxeo-tag></template>
-            </nuxeo-data-table-column>
-          </template>
-        </nuxeo-data-table>
-      </nuxeo-card>
+          </nuxeo-data-table>
+        </nuxeo-card>
+      </template>
     `;
   }
 
@@ -217,6 +219,9 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
   }
 
   _refresh() {
+    if (!this.visible) {
+      return;
+    }
     this.$.provider.docId = this.documentId;
     this.$.provider.params = this._buildParams();
     this.table.fetch();
