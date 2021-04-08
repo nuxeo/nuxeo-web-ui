@@ -76,15 +76,7 @@ Polymer({
             </div>
           </div>
 
-          <nuxeo-document-distribution-chart
-            id="chart"
-            index="[[index]]"
-            path="[[path]]"
-            mode="count"
-            include-version
-            include-hidden
-            include-deleted
-          >
+          <nuxeo-document-distribution-chart id="chart" index="[[index]]" path="[[path]]" mode="count">
           </nuxeo-document-distribution-chart>
 
           <div class="horizontal layout center">
@@ -117,7 +109,7 @@ Polymer({
     },
     depth: {
       type: Number,
-      value: 7,
+      value: 1,
     },
   },
 

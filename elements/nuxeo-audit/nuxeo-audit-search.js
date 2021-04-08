@@ -61,7 +61,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
 
       <template is="dom-if" if="[[visible]]">
         <nuxeo-audit-page-provider id="provider" page-size="40"></nuxeo-audit-page-provider>
-  
+
         <nuxeo-card>
           <nuxeo-user-suggestion
             value="{{principalName}}"

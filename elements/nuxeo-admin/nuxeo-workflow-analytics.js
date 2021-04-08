@@ -100,7 +100,7 @@ Polymer({
 
     <template is="dom-if" if="[[visible]]">
       <nuxeo-resource auto path="workflowModel" on-response="_handleWorkflowModelResponse"></nuxeo-resource>
-  
+
       <nuxeo-card class="dates">
         <div class="horizontal flex end-justified layout center wrap">
           <nuxeo-select
@@ -113,7 +113,7 @@ Polymer({
           <nuxeo-date-picker value="{{endDate::change}}" label="[[i18n('analytics.before')]]"></nuxeo-date-picker>
         </div>
       </nuxeo-card>
-  
+
       <div class="flex-layout">
         <!-- Average wf duration -->
         <nuxeo-workflow-data
@@ -125,12 +125,12 @@ Polymer({
           data="{{avgWorkflowLength}}"
         >
         </nuxeo-workflow-data>
-  
+
         <nuxeo-card heading="[[i18n('workflowAnalytics.averageWorkflowDuration.heading')]]">
           <iron-icon icon="image:timer"></iron-icon>
           <h1>[[_asDuration(avgWorkflowLength)]]</h1>
         </nuxeo-card>
-  
+
         <!-- Wf initiators -->
         <nuxeo-workflow-data
           workflow="[[workflow]]"
@@ -141,11 +141,11 @@ Polymer({
           data="{{initiators}}"
         >
         </nuxeo-workflow-data>
-  
+
         <nuxeo-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading')]]">
           <chart-pie values="[[_values(initiators)]]" labels="[[_series(initiators)]]"></chart-pie>
         </nuxeo-card>
-  
+
         <!-- Actions per user -->
         <nuxeo-workflow-data
           workflow="[[workflow]]"
@@ -156,7 +156,7 @@ Polymer({
           data="{{numberOfActionsPerUser}}"
         >
         </nuxeo-workflow-data>
-  
+
         <nuxeo-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading')]]">
           <chart-bar
             labels="[[_labels(numberOfActionsPerUser)]]"
@@ -166,7 +166,7 @@ Polymer({
           >
           </chart-bar>
         </nuxeo-card>
-  
+
         <!-- Average task duration per user -->
         <nuxeo-workflow-data
           workflow="[[workflow]]"
@@ -178,7 +178,7 @@ Polymer({
           data="{{avgTaskDurationPerUser}}"
         >
         </nuxeo-workflow-data>
-  
+
         <nuxeo-card heading="[[i18n('workflowAnalytics.averageTaskDurationPerUser.heading')]]">
           <nuxeo-data-table items="[[_table(avgTaskDurationPerUser)]]">
             <nuxeo-data-table-column name="[[i18n('workflowAnalytics.averageTaskDurationPerUser.user')]]">

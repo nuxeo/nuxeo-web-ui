@@ -102,11 +102,11 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-search-data>
-  
+
         <nuxeo-card heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]">
           <chart-pie values="[[_values(callsPerProvider)]]" labels="[[_labels(callsPerProvider)]]"></chart-pie>
         </nuxeo-card>
-  
+
         <!-- Number of calls per hour -->
         <nuxeo-search-data
           start-date="[[startDate]]"
@@ -118,7 +118,7 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-search-data>
-  
+
         <nuxeo-card heading="[[i18n('searchAnalytics.callsPerHour.heading')]]">
           <chart-bar
             labels="[[_range(0,23)]]"
@@ -128,7 +128,7 @@ Polymer({
           >
           </chart-bar>
         </nuxeo-card>
-  
+
         <!-- Result ranges -->
         <nuxeo-search-data
           start-date="[[startDate]]"
@@ -143,7 +143,7 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-search-data>
-  
+
         <nuxeo-card heading="[[i18n('searchAnalytics.numberOfResults.heading')]]">
           <nuxeo-data-table items="[[callPerNumberOfResults]]">
             <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.range')]]">
@@ -154,7 +154,7 @@ Polymer({
             </nuxeo-data-table-column>
           </nuxeo-data-table>
         </nuxeo-card>
-  
+
         <!-- Most used expressions for full text search  -->
         <nuxeo-search-data
           start-date="[[startDate]]"
@@ -165,7 +165,7 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-search-data>
-  
+
         <nuxeo-card heading="[[i18n('searchAnalytics.mostPopularSearches.heading')]]">
           <nuxeo-data-table items="[[callsPerFT]]">
             <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.searchTerm')]]">
@@ -176,7 +176,7 @@ Polymer({
             </nuxeo-data-table-column>
           </nuxeo-data-table>
         </nuxeo-card>
-  
+
         <!-- Searches by number of pages displayed -->
         <nuxeo-search-data
           start-date="[[startDate]]"
@@ -191,10 +191,12 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-search-data>
-  
+
         <nuxeo-card heading="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.heading')]]">
           <nuxeo-data-table items="[[callPerNumberOfPages]]">
-            <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.range')]]">
+            <nuxeo-data-table-column
+              name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.range')]]"
+            >
               <template>[[item.key]]</template>
             </nuxeo-data-table-column>
             <nuxeo-data-table-column
@@ -204,7 +206,7 @@ Polymer({
             </nuxeo-data-table-column>
           </nuxeo-data-table>
         </nuxeo-card>
-  
+
         <!-- Searches by filters used -->
         <nuxeo-search-data
           start-date="[[startDate]]"
@@ -214,7 +216,7 @@ Polymer({
           data="{{callByFilters}}"
         >
         </nuxeo-search-data>
-  
+
         <nuxeo-card heading="[[i18n('searchAnalytics.filtersUsed.heading')]]">
           <nuxeo-data-table items="[[callByFilters]]">
             <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfFilters')]]">
