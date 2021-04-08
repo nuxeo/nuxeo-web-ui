@@ -112,7 +112,7 @@ Polymer({
           data="{{downloads}}"
         >
         </nuxeo-audit-data>
-  
+
         <nuxeo-page-provider
           auto
           page-size="10"
@@ -121,7 +121,7 @@ Polymer({
           current-page="{{downloadedDocs}}"
         >
         </nuxeo-page-provider>
-  
+
         <nuxeo-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]">
           <template is="dom-if" if="[[!_isEmpty(downloads)]]">
             <nuxeo-data-table items="[[downloadedDocs]]">
@@ -137,7 +137,7 @@ Polymer({
             <div class="message">[[i18n('repositoryAnalytics.noResults')]]</div>
           </template>
         </nuxeo-card>
-  
+
         <!-- Number of documents -->
         <nuxeo-repository-data
           start-date="[[startDate]]"
@@ -147,12 +147,12 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-repository-data>
-  
+
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documents.heading')]]">
           <iron-icon icon="icons:description"></iron-icon>
           <h1>[[totalCount]]</h1>
         </nuxeo-card>
-  
+
         <!-- Document count per type -->
         <nuxeo-repository-data
           start-date="[[startDate]]"
@@ -163,11 +163,11 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-repository-data>
-  
+
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
           <chart-pie values="[[_values(typeCount)]]" labels="[[_labels(typeCount)]]"></chart-pie>
         </nuxeo-card>
-  
+
         <!-- Top 10 creators -->
         <nuxeo-repository-data
           start-date="[[startDate]]"
@@ -178,11 +178,11 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-repository-data>
-  
+
         <nuxeo-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
           <chart-pie values="[[_values(topCreators)]]" labels="[[_labels(topCreators)]]"></chart-pie>
         </nuxeo-card>
-  
+
         <!-- Documents created per week -->
         <nuxeo-repository-data
           start-date="[[_formatDate(startDate)]]"
@@ -193,7 +193,7 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-repository-data>
-  
+
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading')]]">
           <chart-line
             labels="[[_labels(docsCreatedPerWeek)]]"
@@ -202,7 +202,7 @@ Polymer({
           >
           </chart-line>
         </nuxeo-card>
-  
+
         <!-- Documents modified per week -->
         <nuxeo-repository-data
           start-date="[[_formatDate(startDate)]]"
@@ -213,7 +213,7 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-repository-data>
-  
+
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading')]]">
           <chart-line
             labels="[[_labels(docsModifiedPerWeek)]]"
@@ -222,7 +222,7 @@ Polymer({
           >
           </chart-line>
         </nuxeo-card>
-  
+
         <!-- Files by mime-type -->
         <nuxeo-repository-data
           start-date="[[startDate]]"
@@ -232,7 +232,7 @@ Polymer({
           index="[[index]]"
         >
         </nuxeo-repository-data>
-  
+
         <nuxeo-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
           <chart-pie values="[[_values(filesByMimeType)]]" labels="[[_types(filesByMimeType)]]"></chart-pie>
         </nuxeo-card>
