@@ -92,7 +92,7 @@ def padPrerelease(version) {
 }
 
 def getPaddedVersion() {
-  return !isPullRequest() ? padPrerelease(VERSION) : null
+  return !isPullRequest() ? padPrerelease(getVersion()) : null
 }
 
 pipeline {
