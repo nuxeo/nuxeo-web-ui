@@ -150,7 +150,7 @@ const common = merge([
           loader: 'url-loader',
         },
         {
-          test: require.resolve('@nuxeo/quill/dist/quill.min.js'),
+          test: require.resolve('@nuxeo/quill/dist/quill.js'),
           use: [
             {
               loader: 'expose-loader',
