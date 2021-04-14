@@ -317,6 +317,7 @@ Polymer({
           attr-for-selected="name"
           selected-class="selected"
           on-iron-activate="_toggleDrawer"
+          aria-label$="[[i18n('app.drawer')]]"
         >
           <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
           <nuxeo-menu-icon
