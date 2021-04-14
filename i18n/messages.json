@@ -51,6 +51,7 @@
   "app.createdDocument": "Created {0}.",
   "app.createdDocuments": "Created {0} documents.",
   "app.deleteSearch": "Delete",
+  "app.drawer": "Drawer",
   "app.document.addedToClipboard": "Document added to clipboard",
   "app.document.addedToCollection": "Document added to collection",
   "app.document.addedToFavorites": "Document added to favorites",
