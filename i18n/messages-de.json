@@ -442,6 +442,7 @@
   "documentPage.activity": "Aktivität",
   "documentPage.collections": "Sammlungen",
   "documentPage.comments": "Kommentare",
+  "documentPage.content.storedInColdStorage": "Die Master-Datei wurde im kalten Speicher abgelegt.",
   "documentPage.details": "Details",
   "documentPage.legalHold": "Das Dokument ist unter Gesetzliche Aufbewahrung",
   "documentPage.process.running": "Prozess läuft",

@@ -442,6 +442,7 @@
   "documentPage.activity": "アクティビティ",
   "documentPage.collections": "コレクション",
   "documentPage.comments": "コメント",
+  "documentPage.content.storedInColdStorage": "マスターファイルはコールドストレージに保存されます。",
   "documentPage.details": "詳細",
   "documentPage.legalHold": "文書は法的に保留されています",
   "documentPage.process.running": "処理実行中",

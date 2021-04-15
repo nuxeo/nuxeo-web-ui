@@ -24,6 +24,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-delete-document-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/actions/nuxeo-untrash-document-button.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-layout-behavior.html">
+<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-date.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-user-tag.html">
 <link rel="import" href="../nuxeo-publication/nuxeo-publication-info-bar.html">
@@ -68,6 +69,15 @@ limitations under the License.
       a.viewGraph {
         text-decoration: underline;
         margin-right: 1em;
+      }
+
+      .bar.coldStorage {
+        background: black;
+        color: white;
+      }
+
+      .storedInColdStorage {
+        margin-right: 3px;
       }
 
       iron-icon {
@@ -169,12 +179,23 @@ limitations under the License.
       <nuxeo-publication-info-bar document="[[document]]"></nuxeo-publication-info-bar>
     </template>
 
+    <!-- cold storage -->
+    <template is="dom-if" if="[[_contentStoredInColdStorage(document)]]">
+      <div id="coldStorageInfoBar" class="bar coldStorage">
+        <div class="layout horizontal center flex">
+          <iron-icon noink icon="nuxeo:coldstorage"></iron-icon>
+          <span class="storedInColdStorage">[[i18n('documentPage.content.storedInColdStorage')]]</span>
+          <span>[[i18n('documentPage.content.lowResolutionPreview')]]</span>
+        </div>
+      </div>
+    </template>
+
   </template>
 
   <script>
     Polymer({
       is: 'nuxeo-document-info-bar',
-      behaviors: [Nuxeo.LayoutBehavior],
+      behaviors: [Nuxeo.LayoutBehavior, Nuxeo.FilterBehavior],
       properties: {
         document: {
           type: Object
@@ -244,6 +265,10 @@ limitations under the License.
 
       _toggleGraphDialog: function(e) {
         this.$$('#graph-' + e.model.workflow.id).show();
+      },
+
+      _contentStoredInColdStorage: function(doc) {
+        return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
       }
 
     });
