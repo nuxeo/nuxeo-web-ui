@@ -441,6 +441,7 @@
   "documentPage.activity": "Actividad",
   "documentPage.collections": "Colecciones",
   "documentPage.comments": "Comentarios",
+  "documentPage.content.storedInColdStorage": "El archivo principal se almacena en frío.",
   "documentPage.details": "Detalles",
   "documentPage.legalHold": "El documento está en retención legal",
   "documentPage.process.running": "Procesos en ejecución",

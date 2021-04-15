@@ -442,6 +442,7 @@
   "documentPage.activity": "Attività",
   "documentPage.collections": "Raccolte",
   "documentPage.comments": "Commenti",
+  "documentPage.content.storedInColdStorage": "Il file principale viene immagazzinato al cold storage.",
   "documentPage.details": "Dettagli",
   "documentPage.legalHold": "Il documento è in sospensione legale",
   "documentPage.process.running": "Processo in esecuzione",

@@ -442,6 +442,7 @@
   "documentPage.activity": "Activity",
   "documentPage.collections": "Collections",
   "documentPage.comments": "Comments",
+  "documentPage.content.storedInColdStorage": "The master file is stored in cold storage.",
   "documentPage.details": "Details",
   "documentPage.legalHold": "The document is under legal hold",
   "documentPage.process.running": "Process Running",

@@ -442,6 +442,7 @@
   "documentPage.activity": "活动",
   "documentPage.collections": "集合",
   "documentPage.comments": "Comments",
+  "documentPage.content.storedInColdStorage": "The master file is stored in cold storage.",
   "documentPage.details": "详细信息",
   "documentPage.legalHold": "The document is under legal hold",
   "documentPage.process.running": "进程运行",
