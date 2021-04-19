@@ -121,7 +121,8 @@ Polymer({
 
       paper-drawer-panel {
         top: var(--nuxeo-app-top, 0);
-        height: calc(100% - var(--nuxeo-app-top, 0));
+        bottom: var(--nuxeo-app-bottom, 0);
+        height: calc(100% - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom)));
       }
 
       paper-drawer-panel[narrow] {
@@ -156,9 +157,9 @@ Polymer({
         @apply --nuxeo-sidebar;
         position: fixed;
         width: var(--nuxeo-sidebar-width);
-        height: calc(100vh - 54px - var(--nuxeo-app-top, 0));
+        height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         z-index: 100;
-        padding: 53px 0;
+        padding: 53px 0 0 0;
         overflow: auto;
         display: flex;
         flex-direction: column;
@@ -224,7 +225,7 @@ Polymer({
         @apply --layout-vertical;
         color: var(--nuxeo-drawer-text);
         width: calc(100% - var(--nuxeo-sidebar-width));
-        height: calc(100vh - var(--nuxeo-app-top, 0));
+        height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom)));
         margin-left: var(--nuxeo-sidebar-width);
         background-color: var(--nuxeo-drawer-background);
       }

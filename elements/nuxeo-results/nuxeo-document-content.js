@@ -51,7 +51,10 @@ Polymer({
         /* keep compat with deprecated --nuxeo-document-content-min-height css variable */
         --nuxeo-results-view-height: var(
           --nuxeo-document-content-height,
-          var(--nuxeo-document-content-min-height, calc(100vh - 216px - var(--nuxeo-app-top)))
+          var(
+            --nuxeo-document-content-min-height,
+            calc(100vh - 216px - (var(--nuxeo-app-top) + var(--nuxeo-app-bottom, 0)))
+          )
         );
         margin-bottom: var(--nuxeo-document-content-margin-bottom, 0);
       }
