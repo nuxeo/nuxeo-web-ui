@@ -69,5 +69,23 @@ Polymer({
     label: {
       type: String,
     },
+
+    /**
+     * Specifies the role attribute, for accessibility.
+     */
+    role: {
+      type: String,
+      value: 'tab',
+      reflectToAttribute: true,
+      observer: '_roleChanged',
+    },
+  },
+
+  _roleChanged(newValue, oldValue) {
+    const role = this.getAttribute('role');
+    // Don't stomp over a user-set role
+    if (!role || oldValue === role) {
+      this.setAttribute('role', newValue);
+    }
   },
 });
