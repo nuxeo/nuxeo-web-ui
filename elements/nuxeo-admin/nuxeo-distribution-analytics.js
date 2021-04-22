@@ -120,15 +120,16 @@ Polymer({
       return;
     }
 
+    const chart = this.$$('#chart');
     if (
       this.path &&
       this.path.length &&
       this.path.endsWith('/') &&
-      (this.path !== this.$.chart.path || this.depth !== this.$.chart.maxDepth)
+      (this.path !== chart.path || this.depth !== chart.maxDepth)
     ) {
-      this.$.chart.maxDepth = this.depth;
-      this.$.chart.path = this.path;
-      this.$.chart.execute();
+      chart.maxDepth = this.depth;
+      chart.path = this.path;
+      chart.execute();
     }
   },
 });
