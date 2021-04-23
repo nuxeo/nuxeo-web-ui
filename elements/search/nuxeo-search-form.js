@@ -347,7 +347,9 @@ Polymer({
 
       <div class="actions" hidden$="{{queue}}">
         <div class="auto-search" hidden$="[[!displayAutoControl]]">
-          <paper-toggle-button checked="{{auto}}">[[i18n('searchForm.auto')]]</paper-toggle-button>
+          <paper-toggle-button checked="{{auto}}" aria-label$="[[i18n('searchForm.auto')]]"
+            >[[i18n('searchForm.auto')]]</paper-toggle-button
+          >
           <nuxeo-tooltip>[[i18n('searchForm.auto.description')]]</nuxeo-tooltip>
         </div>
         <div class="action-buttons">
