@@ -33,6 +33,7 @@ limitations under the License.
       placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
       autofocus
       on-keydown="_checkForEnter"
+      aria-label$="[[i18n('defaultSearch.fullText')]]"
     >
     </nuxeo-input>
 
@@ -54,6 +55,7 @@ limitations under the License.
         value="{{params.dc_creator_agg}}"
         multiple="true"
         name="authors"
+        aria-label$="[[i18n('defaultSearch.authors')]]"
       >
       </nuxeo-dropdown-aggregation>
     </div>
@@ -67,6 +69,7 @@ limitations under the License.
         value="{{params.ecm_collections}}"
         multiple="true"
         name="collections"
+        aria-label$="[[i18n('defaultSearch.collections')]]"
       >
       </nuxeo-selectivity>
     </div>
@@ -79,6 +82,7 @@ limitations under the License.
         value="{{params.ecm_tags}}"
         multiple="true"
         name="tags"
+        aria-label$="[[i18n('defaultSearch.tags')]]"
       >
       </nuxeo-tag-suggestion>
     </div>
