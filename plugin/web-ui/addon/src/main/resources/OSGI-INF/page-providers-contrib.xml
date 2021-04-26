@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<component name="org.nuxeo.ecm.platform.picture.pageproviders">
+<component name="org.nuxeo.web.ui.picture.pageproviders">
 
   <extension target="org.nuxeo.ecm.platform.query.api.PageProviderService" point="providers">
 
