@@ -121,7 +121,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
         <nuxeo-connection id="nxcon" url="{{url}}"></nuxeo-connection>
 
         <div class="breadcrumb">
-          <div class="current-icon">
+          <div class="current-icon" aria-hidden="true">
             <iron-icon src="[[_icon(document, url)]]"></iron-icon>
           </div>
           <div class="doc-path">
