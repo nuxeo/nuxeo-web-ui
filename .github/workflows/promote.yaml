@@ -82,7 +82,7 @@ jobs:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }} 
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
-          curl -o $PACKAGE.zip -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=${{ github.event.inputs.version }}"
+          curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=${{ github.event.inputs.version }}"
           unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
           pushd $PACKAGE
           sed -i 's/-rc.[0-9]*//' package.xml
