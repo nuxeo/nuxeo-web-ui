@@ -443,8 +443,6 @@
   "documentPage.activity": "Activiteit",
   "documentPage.collections": "Collecties",
   "documentPage.comments": "Opmerkingen",
-  "documentPage.content.storedInColdStorage": "Het hoofdbestand is opgeslagen in cold-opslag.",
-  "documentPage.content.lowResolutionPreview": "Dit is een lage resolutie preview.",
   "documentPage.details": "Details",
   "documentPage.legalHold": "Het document staat onder juridisch vasthouden",
   "documentPage.process.running": "Uitvoering proces bezig",
