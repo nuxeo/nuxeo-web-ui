@@ -443,8 +443,6 @@
   "documentPage.activity": "Aktivitet",
   "documentPage.collections": "Samlingar",
   "documentPage.comments": "Kommentarer",
-  "documentPage.content.storedInColdStorage": "Masterfilen förvaras i kallagring.",
-  "documentPage.content.lowResolutionPreview": "Detta är en förhandsgranskning med låg upplösning.",
   "documentPage.details": "Detaljer",
   "documentPage.legalHold": "Dokumentet är under arkiveringsskyldighet",
   "documentPage.process.running": "Process som körs",

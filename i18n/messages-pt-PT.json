@@ -443,8 +443,6 @@
   "documentPage.activity": "Atividade",
   "documentPage.collections": "Coleções",
   "documentPage.comments": "Comments",
-  "documentPage.content.storedInColdStorage": "The master file is stored in cold storage.",
-  "documentPage.content.lowResolutionPreview": "This is a low resolution preview.",
   "documentPage.details": "Detalhes",
   "documentPage.legalHold": "The document is under legal hold",
   "documentPage.process.running": "Processo em execução",
