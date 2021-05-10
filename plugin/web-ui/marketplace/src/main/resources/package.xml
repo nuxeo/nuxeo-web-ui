@@ -11,9 +11,10 @@
   <nuxeo-validation>nuxeo_certified</nuxeo-validation>
   <production-state>production_ready</production-state>
   <supported>true</supported>
-  <platforms>
-    <platform>@DISTRIBUTION_NAME@-@NUXEO_TARGET_VERSION@</platform>
-  </platforms>
+  <target-platform>
+    <name>@DISTRIBUTION_NAME@</name>
+    <version>[2021.2,)</version>
+  </target-platform>
   <license>Apache License, Version 2.0</license>
   <license-url>http://www.apache.org/licenses/LICENSE-2.0.html</license-url>
   <visibility>PUBLIC</visibility>
