@@ -443,8 +443,6 @@
   "documentPage.activity": "Aktivitas",
   "documentPage.collections": "Koleksi",
   "documentPage.comments": "Komentar",
-  "documentPage.content.storedInColdStorage": "The master file is stored in cold storage.",
-  "documentPage.content.lowResolutionPreview": "This is a low resolution preview.",
   "documentPage.details": "Rincian",
   "documentPage.legalHold": "The document is under legal hold",
   "documentPage.process.running": "Proses berjalan",

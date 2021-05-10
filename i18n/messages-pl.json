@@ -443,8 +443,6 @@
   "documentPage.activity": "Aktywność",
   "documentPage.collections": "Kolekcje",
   "documentPage.comments": "Komentarze",
-  "documentPage.content.storedInColdStorage": "Plik główny jest przechowywany w \"cold storage\".",
-  "documentPage.content.lowResolutionPreview": "Jest to podgląd niskiej rozdzielczości.",
   "documentPage.details": "Szczegóły",
   "documentPage.legalHold": "Dokument podlega blokadzie prawnej przed usunięciem",
   "documentPage.process.running": "Process Running",
