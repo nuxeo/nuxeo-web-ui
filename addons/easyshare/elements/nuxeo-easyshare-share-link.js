@@ -16,6 +16,7 @@ limitations under the License.
 */
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
@@ -104,7 +105,7 @@ Polymer({
   `,
 
   is: 'nuxeo-easyshare-share-link',
-  behaviors: [I18nBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior],
 
   properties: {
     /**
@@ -192,6 +193,6 @@ Polymer({
 
     shareButton.set('icon', 'check');
     shareButton.classList.add('selected');
-    this.fire('notify', { message: this.i18n('shareButton.operation.copied'), duration: 2000 });
+    this.notify({ message: this.i18n('shareButton.operation.copied'), duration: 2000 });
   },
 });

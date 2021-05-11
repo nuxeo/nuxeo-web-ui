@@ -18,6 +18,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import { createNestedObject } from '@nuxeo/nuxeo-elements/utils.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '../nuxeo-document-blob/nuxeo-document-blob.js';
@@ -84,7 +85,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-attachments',
-  behaviors: [FormatBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, FormatBehavior, FiltersBehavior],
 
   properties: {
     document: Object,
@@ -125,7 +126,7 @@ Polymer({
 
     this.$.doc.put().then((response) => {
       this.document = response;
-      this.fire('notify', { message: this.i18n(this.uploadedMessage) });
+      this.notify({ message: this.i18n(this.uploadedMessage) });
       this.fire('document-updated');
     });
   },

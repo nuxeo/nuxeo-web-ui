@@ -22,6 +22,7 @@ import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/iron-pages/iron-pages.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
@@ -107,7 +108,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-create-popup',
-  behaviors: [I18nBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior],
 
   properties: {
     parent: {
@@ -166,7 +167,7 @@ Polymer({
     this._showTabs = false;
     this._fetchParent().then(() => {
       if (this._noPermission) {
-        this.fire('notify', { message: this.i18n('documentCreationBehavior.error.noPermission') });
+        this.notify({ message: this.i18n('documentCreationBehavior.error.noPermission') });
       } else {
         this.$$('#simpleCreation').init(type);
         this.$$('#bulkCreation').init();
@@ -179,7 +180,7 @@ Polymer({
     this.selectedTab = 'import';
     this._fetchParent().then(() => {
       if (this._noPermission) {
-        this.fire('notify', { message: this.i18n('documentCreationBehavior.error.noPermission') });
+        this.notify({ message: this.i18n('documentCreationBehavior.error.noPermission') });
       } else {
         this.$$('#simpleCreation').init();
         this.$$('#bulkCreation').init(files);
@@ -191,7 +192,7 @@ Polymer({
   toggleDialog() {
     this._fetchParent().then(() => {
       if (this._noPermission) {
-        this.fire('notify', { message: this.i18n('documentCreationBehavior.error.noPermission') });
+        this.notify({ message: this.i18n('documentCreationBehavior.error.noPermission') });
       } else {
         this.$$('#simpleCreation').init();
         this.$$('#bulkCreation').init();

@@ -18,6 +18,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
@@ -165,7 +166,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-publications',
-  behaviors: [LayoutBehavior],
+  behaviors: [NotifyBehavior, LayoutBehavior],
 
   properties: {
     document: Object,
@@ -224,11 +225,11 @@ Polymer({
       this.$.unpublishOp
         .execute()
         .then(() => {
-          this.fire('notify', { message: this.i18n('publication.unpublish.success') });
+          this.notify({ message: this.i18n('publication.unpublish.success') });
           this._fetchPublications();
         })
         .catch(() => {
-          this.fire('notify', { message: this.i18n('publication.unpublish.error') });
+          this.notify({ message: this.i18n('publication.unpublish.error') });
         });
     }
   },
@@ -248,14 +249,14 @@ Polymer({
       this.$.publishOp
         .execute()
         .then(() => {
-          this.fire('notify', {
+          this.notify({
             message: this.i18n('publication.internal.publish.success'),
           });
           this.fire('document-updated');
           this.fire('nx-publish-success');
         })
         .catch((err) => {
-          this.fire('notify', {
+          this.notify({
             message: this.i18n('publication.internal.publish.error'),
           });
           throw err;
@@ -294,11 +295,11 @@ Polymer({
     this.$.unpublishAllOp
       .execute()
       .then(() => {
-        this.fire('notify', { message: this.i18n('publication.unpublish.all.success') });
+        this.notify({ message: this.i18n('publication.unpublish.all.success') });
         this._fetchPublications();
       })
       .catch(function() {
-        this.fire('notify', { message: this.i18n('publication.unpublish.all.error') });
+        this.notify({ message: this.i18n('publication.unpublish.all.error') });
       });
   },
 

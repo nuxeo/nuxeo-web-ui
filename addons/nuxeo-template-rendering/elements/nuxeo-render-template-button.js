@@ -15,6 +15,7 @@ limitations under the License.
 */
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import './nuxeo-template-param-editor.js';
 
@@ -104,7 +105,7 @@ Polymer({
   `,
 
   is: 'nuxeo-render-template-button',
-  behaviors: [I18nBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior],
 
   properties: {
     /**
@@ -255,7 +256,7 @@ Polymer({
   },
 
   _toast(msg, duration) {
-    this.fire('notify', {
+    this.notify({
       message: msg,
       close: true,
       duration,

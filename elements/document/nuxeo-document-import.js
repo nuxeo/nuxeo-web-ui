@@ -31,6 +31,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
@@ -688,7 +689,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-import',
-  behaviors: [IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior],
+  behaviors: [NotifyBehavior, IronResizableBehavior, UploaderBehavior, DocumentCreationBehavior],
   importMeta: import.meta,
 
   properties: {
@@ -1178,7 +1179,7 @@ Polymer({
     this.set('_creating', false);
     this.set('_importErrorMessage', this.i18n('documentImport.error.importFailed'));
     const message = error.message || (error.detail && error.detail.error);
-    this.fire('notify', { message: `${this.i18n('label.error').toUpperCase()}: ${message}` });
+    this.notify({ message: `${this.i18n('label.error').toUpperCase()}: ${message}` });
   },
 
   _mergeResponses(...args) {
