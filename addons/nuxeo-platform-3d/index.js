@@ -18,3 +18,8 @@ import './elements/nuxeo-3d-viewer.js';
 import './elements/nuxeo-3d-preview.js';
 import './elements/nuxeo-3d-render-views.js';
 import './elements/nuxeo-3d-transmission-formats.js';
+import './loaders/gltf/glTFLoader.js';
+import './loaders/gltf/glTFAnimation.js';
+import './loaders/gltf/glTFLoaderUtils.js';
+import './loaders/gltf/glTFShaders.js';
+import './loaders/GLTFLoader.js';

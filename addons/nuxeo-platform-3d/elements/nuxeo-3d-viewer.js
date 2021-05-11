@@ -23,12 +23,12 @@ import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-res
 
 import * as THREE from 'three';
 import 'three/examples/js/controls/OrbitControls.js';
-import 'three/examples/js/loaders/GLTFLoader.js';
-import 'three/examples/js/loaders/gltf/glTF-parser.js';
-import 'three/examples/js/loaders/gltf/glTFLoader.js';
-import 'three/examples/js/loaders/gltf/glTFLoaderUtils.js';
-import 'three/examples/js/loaders/gltf/glTFAnimation.js';
-import 'three/examples/js/loaders/gltf/glTFShaders.js';
+import '../loaders/GLTFLoader.js';
+import '../loaders/gltf/glTF-parser.js';
+import '../loaders/gltf/glTFLoader.js';
+import '../loaders/gltf/glTFLoaderUtils.js';
+import '../loaders/gltf/glTFAnimation.js';
+import '../loaders/gltf/glTFShaders.js';
 
 /**
 `nuxeo-3d-viewer` allows viewing 3D content in glTF format.
