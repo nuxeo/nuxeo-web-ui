@@ -29,6 +29,7 @@ import '@polymer/iron-a11y-keys/iron-a11y-keys.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-layout.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -284,7 +285,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-create',
-  behaviors: [IronResizableBehavior, DocumentCreationBehavior],
+  behaviors: [NotifyBehavior, IronResizableBehavior, DocumentCreationBehavior],
   importMeta: import.meta,
 
   properties: {
@@ -372,7 +373,7 @@ Polymer({
         if (err && err['entity-type'] === 'validation_report') {
           this.$['document-create'].reportValidation(err);
         } else {
-          this.fire('notify', { message: this.i18n('documentCreationForm.createError') });
+          this.notify({ message: this.i18n('documentCreationForm.createError') });
           console.error(err);
         }
       })

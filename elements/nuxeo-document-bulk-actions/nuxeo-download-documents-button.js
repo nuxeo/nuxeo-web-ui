@@ -16,6 +16,7 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-operation-button.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
@@ -45,7 +46,7 @@ Polymer({
   `,
 
   is: 'nuxeo-download-documents-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -87,10 +88,10 @@ Polymer({
   },
 
   _onPollStart() {
-    this.fire('notify', { message: this.i18n('bulkDownload.preparing'), duration: 0, dismissible: true });
+    this.notify({ message: this.i18n('bulkDownload.preparing'), duration: 0, dismissible: true });
   },
 
   _onResponse() {
-    this.fire('notify', { message: this.i18n('bulkDownload.completed'), close: true });
+    this.notify({ message: this.i18n('bulkDownload.completed'), close: true });
   },
 });

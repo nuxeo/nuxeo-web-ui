@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
-
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 
 /**
@@ -23,6 +23,7 @@ import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.j
  */
 export const DocumentContentBehavior = [
   IronResizableBehavior,
+  NotifyBehavior,
   LayoutBehavior,
   {
     properties: {
@@ -150,18 +151,18 @@ export const DocumentContentBehavior = [
 
     _dragoverImport(e) {
       e.preventDefault();
-      this.fire('notify', { message: this.i18n('documentContentView.drag.import'), duration: 0 });
+      this.notify({ message: this.i18n('documentContentView.drag.import'), duration: 0 });
       this._toggleDragging(true);
     },
 
     _dragleaveImport() {
-      this.fire('notify', { close: true });
+      this.notify({ close: true });
       this._toggleDragging(false);
     },
 
     _dropImport(e) {
       e.preventDefault();
-      this.fire('notify', { close: true });
+      this.notify({ close: true });
       this._toggleDragging(false);
       this.fire('create-document', { files: e.dataTransfer.files });
     },

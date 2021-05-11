@@ -17,6 +17,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
@@ -62,7 +63,7 @@ Polymer({
   `,
 
   is: 'nuxeo-unpublish-button',
-  behaviors: [I18nBehavior, RoutingBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, RoutingBehavior, FiltersBehavior],
 
   properties: {
     document: Object,
@@ -76,11 +77,11 @@ Polymer({
     this.$.unpublishOp
       .execute()
       .then(() => {
-        this.fire('notify', { message: this.i18n('publication.unpublish.success') });
+        this.notify({ message: this.i18n('publication.unpublish.success') });
         this.fire('nx-unpublish-success');
       })
       .catch(() => {
-        this.fire('notify', { message: this.i18n('publication.unpublish.error') });
+        this.notify({ message: this.i18n('publication.unpublish.error') });
       });
   },
 });

@@ -20,6 +20,7 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
@@ -38,7 +39,7 @@ const OAUTH2_CONSUMERS_BASE_PATH = '/oauth2/client/';
  *
  * @memberof Nuxeo
  */
-class CloudConsumers extends mixinBehaviors([FormatBehavior], Nuxeo.Element) {
+class CloudConsumers extends mixinBehaviors([NotifyBehavior, FormatBehavior], Nuxeo.Element) {
   static get template() {
     return html`
       <style include="nuxeo-styles iron-flex iron-flex-alignment">
@@ -239,10 +240,10 @@ class CloudConsumers extends mixinBehaviors([FormatBehavior], Nuxeo.Element) {
       () => {
         this.refresh();
         this.$.dialog.toggle();
-        this.fire('notify', { message: this.i18n('cloudConsumers.successfullyCreated') });
+        this.notify({ message: this.i18n('cloudConsumers.successfullyCreated') });
       },
       (err) => {
-        this.fire('notify', {
+        this.notify({
           message: `${this.i18n('label.error').toUpperCase()}: ${
             err.message && err.message.length > 0 ? err.message : this.i18n('cloudConsumers.errorCreating')
           }`,
@@ -257,11 +258,11 @@ class CloudConsumers extends mixinBehaviors([FormatBehavior], Nuxeo.Element) {
     this.$.oauth.put().then(
       () => {
         this.$.dialog.toggle();
-        this.fire('notify', { message: this.i18n('cloudConsumers.successfullyEdited') });
+        this.notify({ message: this.i18n('cloudConsumers.successfullyEdited') });
         this.refresh();
       },
       (err) => {
-        this.fire('notify', {
+        this.notify({
           message: `${this.i18n('label.error').toUpperCase()}: ${
             err.message && err.message.length > 0 ? err.message : this.i18n('cloudConsumers.errorEditing')
           }`,
@@ -277,10 +278,10 @@ class CloudConsumers extends mixinBehaviors([FormatBehavior], Nuxeo.Element) {
       this.$.oauth.remove().then(
         () => {
           this.refresh();
-          this.fire('notify', { message: this.i18n('cloudConsumers.successfullyDeleted') });
+          this.notify({ message: this.i18n('cloudConsumers.successfullyDeleted') });
         },
         () => {
-          this.fire('notify', {
+          this.notify({
             message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n('cloudConsumers.errorDeleting')}`,
           });
         },

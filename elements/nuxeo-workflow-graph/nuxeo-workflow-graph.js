@@ -20,6 +20,7 @@ import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-res
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-dialog-scrollable/paper-dialog-scrollable.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -179,7 +180,7 @@ Polymer({
   `,
 
   is: 'nuxeo-workflow-graph',
-  behaviors: [I18nBehavior, IronResizableBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, IronResizableBehavior],
 
   properties: {
     workflowId: {
@@ -251,7 +252,7 @@ Polymer({
         this.$.graphDialog.toggle();
       })
       .catch((error) => {
-        this.fire('notify', { message: this.i18n('documentPage.route.view.graph.error') });
+        this.notify({ message: this.i18n('documentPage.route.view.graph.error') });
         throw error;
       });
   },

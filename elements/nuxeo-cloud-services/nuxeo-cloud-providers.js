@@ -21,6 +21,7 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
@@ -172,7 +173,7 @@ Polymer({
   `,
 
   is: 'nuxeo-cloud-providers',
-  behaviors: [FormatBehavior],
+  behaviors: [NotifyBehavior, FormatBehavior],
 
   properties: {
     _selectedEntry: {
@@ -243,10 +244,10 @@ Polymer({
       () => {
         this.refresh();
         this.$.dialog.toggle();
-        this.fire('notify', { message: this.i18n('cloudProviders.successfullyCreated') });
+        this.notify({ message: this.i18n('cloudProviders.successfullyCreated') });
       },
       (err) => {
-        this.fire('notify', {
+        this.notify({
           message: `${this.i18n('label.error').toUpperCase()}: ${
             err.message && err.message.length > 0 ? err.message : this.i18n('cloudProviders.errorCreating')
           }`,
@@ -261,11 +262,11 @@ Polymer({
     this.$.oauth.put().then(
       () => {
         this.$.dialog.toggle();
-        this.fire('notify', { message: this.i18n('cloudProviders.successfullyEdited') });
+        this.notify({ message: this.i18n('cloudProviders.successfullyEdited') });
         this.refresh();
       },
       (err) => {
-        this.fire('notify', {
+        this.notify({
           message: `${this.i18n('label.error').toUpperCase()}: ${
             err.message && err.message.length > 0 ? err.message : this.i18n('cloudProviders.errorEditing')
           }`,
@@ -281,10 +282,10 @@ Polymer({
       this.$.oauth.remove().then(
         () => {
           this.refresh();
-          this.fire('notify', { message: this.i18n('cloudProviders.successfullyDeleted') });
+          this.notify({ message: this.i18n('cloudProviders.successfullyDeleted') });
         },
         () => {
-          this.fire('notify', {
+          this.notify({
             message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n('cloudProviders.errorDeleting')}`,
           });
         },
