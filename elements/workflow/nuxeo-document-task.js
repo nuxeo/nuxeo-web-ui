@@ -21,6 +21,7 @@ import '@polymer/iron-form/iron-form.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-button/paper-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
@@ -210,7 +211,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-task',
-  behaviors: [RoutingBehavior, FormatBehavior],
+  behaviors: [NotifyBehavior, RoutingBehavior, FormatBehavior],
   importMeta: import.meta,
   properties: {
     task: {
@@ -288,14 +289,14 @@ Polymer({
       })
       .catch((error) => {
         if (error.status === 409 || error.status === 403) {
-          this.fire('notify', {
+          this.notify({
             message: this.i18n(`tasks.submit.error.${error.status === 409 ? 'alreadyFinished' : 'noPermissions'}`),
             dismissible: true,
             duration: 30000,
           });
           this.fire('workflowTaskProcessed');
         } else {
-          this.fire('notify', { message: this.i18n('tasks.submit.error') });
+          this.notify({ message: this.i18n('tasks.submit.error') });
           throw error;
         }
       })

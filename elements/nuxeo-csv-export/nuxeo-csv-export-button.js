@@ -16,6 +16,7 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-operation-button.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
@@ -46,7 +47,7 @@ Polymer({
   `,
 
   is: 'nuxeo-csv-export-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     /**
@@ -113,10 +114,10 @@ Polymer({
   },
 
   _onPollStart() {
-    this.fire('notify', { message: this.i18n('csvExportButton.action.poll') });
+    this.notify({ message: this.i18n('csvExportButton.action.poll') });
   },
 
   _onResponse() {
-    this.fire('notify', { message: this.i18n('csvExportButton.action.completed') });
+    this.notify({ message: this.i18n('csvExportButton.action.completed') });
   },
 });

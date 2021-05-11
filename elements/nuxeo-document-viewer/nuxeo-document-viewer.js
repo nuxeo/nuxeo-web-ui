@@ -17,6 +17,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-image/iron-image.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-preview.js';
@@ -64,7 +65,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-viewer',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     document: Object,
@@ -89,7 +90,7 @@ Polymer({
 
     this.$.doc.put().then((response) => {
       this.document = response;
-      this.fire('notify', { message: this.i18n(this.uploadedMessage) });
+      this.notify({ message: this.i18n(this.uploadedMessage) });
       this.fire('document-updated');
     });
   },

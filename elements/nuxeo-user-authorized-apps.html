@@ -74,7 +74,7 @@ limitations under the License.
 
     Polymer({
       is: 'nuxeo-user-authorized-apps',
-      behaviors: [Nuxeo.I18nBehavior],
+      behaviors: [Nuxeo.NotifyBehavior, Nuxeo.I18nBehavior],
       properties: {
         visible: {
           type: Boolean,
@@ -131,13 +131,13 @@ limitations under the License.
             () => {
               this.refresh();
               this.fire('authorized-app-revoked');
-              this.fire('notify', {
+              this.notify({
                 message: this.i18n('authorizedApps.successfullyRevoked', client.name),
               });
             },
             () => {
               this.refresh();
-              this.fire('notify', {
+              this.notify({
                 message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n(
                   'authorizedApps.errorRevoking',
                   client.name,

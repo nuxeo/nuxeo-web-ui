@@ -20,6 +20,7 @@ import '@polymer/paper-button/paper-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
@@ -287,7 +288,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-trash-content',
-  behaviors: [DocumentContentBehavior],
+  behaviors: [NotifyBehavior, DocumentContentBehavior],
 
   properties: {
     /**
@@ -342,11 +343,11 @@ Polymer({
     this.$.opEmptyTrash
       .execute()
       .then(() => {
-        this.fire('notify', { message: this.i18n('documentTrashContent.emptyTrash.success') });
+        this.notify({ message: this.i18n('documentTrashContent.emptyTrash.success') });
         this._refresh();
       })
       .catch((error) => {
-        this.fire('notify', { message: this.i18n('documentTrashContent.emptyTrash.error') });
+        this.notify({ message: this.i18n('documentTrashContent.emptyTrash.error') });
         if (error.status !== 404) {
           throw error;
         }

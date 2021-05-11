@@ -18,6 +18,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
@@ -45,7 +46,7 @@ Polymer({
   `,
 
   is: 'nuxeo-versions-diff-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     document: {
@@ -91,7 +92,7 @@ Polymer({
         }
         // check if there is at least two versions to be compared
         if (versions.length < 2) {
-          this.fire('notify', { message: this.i18n('versionsDiffButton.nothingToCompare') });
+          this.notify({ message: this.i18n('versionsDiffButton.nothingToCompare') });
           return;
         }
         this.fire('nuxeo-diff-documents', {

@@ -22,9 +22,10 @@ import '@polymer/paper-progress/paper-progress.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
+import { createNestedObject } from '@nuxeo/nuxeo-elements/utils.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
-import { createNestedObject } from '@nuxeo/nuxeo-elements/utils.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -225,7 +226,7 @@ Polymer({
   `,
 
   is: 'nuxeo-dropzone',
-  behaviors: [UploaderBehavior, FormatBehavior, IronValidatableBehavior],
+  behaviors: [NotifyBehavior, UploaderBehavior, FormatBehavior, IronValidatableBehavior],
 
   properties: {
     /**
@@ -423,7 +424,7 @@ Polymer({
       this._legacyImportBatch(value);
     }
     if (failed.length > 0) {
-      this.fire('notify', {
+      this.notify({
         message: this.i18n('dropzone.toast.error', failed.map((f) => f.name).join(', ')),
         duration: 0,
         dismissible: true,
@@ -432,7 +433,7 @@ Polymer({
       if (this.document && this.xpath) {
         await this._legacyUpdateDocument();
       }
-      this.fire('notify', { message: this.i18n(this.uploadedMessage), close: true });
+      this.notify({ message: this.i18n(this.uploadedMessage), close: true });
       this.invalid = false;
     }
     if (this.invalid) {
