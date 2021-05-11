@@ -25,6 +25,7 @@ import '@polymer/paper-checkbox/paper-checkbox.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/polymer/lib/elements/dom-if.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
@@ -138,7 +139,7 @@ Polymer({
   `,
 
   is: 'nuxeo-internal-publish',
-  behaviors: [I18nBehavior, LayoutBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, LayoutBehavior],
 
   properties: {
     /**
@@ -205,7 +206,7 @@ Polymer({
     this.$.op
       .execute()
       .then(() => {
-        this.fire('notify', {
+        this.notify({
           message: this.i18n(`publication.internal.publish.success${this._isMultiple ? '.multiple' : ''}`),
         });
         if (this._isMultiple) {
@@ -216,7 +217,7 @@ Polymer({
         this.fire('nx-publish-success');
       })
       .catch((err) => {
-        this.fire('notify', {
+        this.notify({
           message: this.i18n(`publication.internal.publish.error${this._isMultiple ? '.multiple' : ''}`),
         });
         throw err;

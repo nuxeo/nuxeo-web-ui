@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/iron-form/iron-form.js';
 import '@polymer/paper-button/paper-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-layout.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -99,7 +100,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-form-layout',
-  behaviors: [IronResizableBehavior, I18nBehavior],
+  behaviors: [NotifyBehavior, IronResizableBehavior, I18nBehavior],
   importMeta: import.meta,
 
   properties: {
@@ -162,7 +163,7 @@ Polymer({
         if (err && err['entity-type'] === 'validation_report') {
           this.$.layout.reportValidation(err);
         } else {
-          this.fire('notify', { message: this.i18n('documentEdit.saveError') });
+          this.notify({ message: this.i18n('documentEdit.saveError') });
           console.error(err);
         }
       })

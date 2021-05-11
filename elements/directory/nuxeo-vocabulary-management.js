@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@polymer/iron-form/iron-form.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
@@ -170,7 +171,7 @@ Polymer({
   `,
 
   is: 'nuxeo-vocabulary-management',
-  behaviors: [I18nBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior],
   importMeta: import.meta,
   properties: {
     vocabularies: Array,
@@ -316,17 +317,17 @@ Polymer({
       this.$.directory.remove().then(
         () => {
           this._refresh();
-          this.fire('notify', { message: this.i18n('vocabularyManagement.successfullyDeleted') });
+          this.notify({ message: this.i18n('vocabularyManagement.successfullyDeleted') });
         },
         (err) => {
           if (err.status === 409) {
-            this.fire('notify', {
+            this.notify({
               message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n(
                 'vocabularyManagement.cannotDelete.referencedEntry',
               )}`,
             });
           } else {
-            this.fire('notify', {
+            this.notify({
               message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n(
                 'vocabularyManagement.cannotDelete.error',
               )}`,
@@ -359,11 +360,11 @@ Polymer({
       this.$.directory.post().then(
         () => {
           this.$.vocabularyEditDialog.toggle();
-          this.fire('notify', { message: this.i18n('vocabularyManagement.successfullyCreated') });
+          this.notify({ message: this.i18n('vocabularyManagement.successfullyCreated') });
           this._refresh();
         },
         (err) => {
-          this.fire('notify', {
+          this.notify({
             message: `${this.i18n('label.error').toUpperCase()}: ${
               err.message && err.message.length > 0 ? err.message : this.i18n('vocabularyManagement.cannotCreate')
             }`,
@@ -375,11 +376,11 @@ Polymer({
       this.$.directory.put().then(
         () => {
           this.$.vocabularyEditDialog.toggle();
-          this.fire('notify', { message: this.i18n('vocabularyManagement.successfullyEdited') });
+          this.notify({ message: this.i18n('vocabularyManagement.successfullyEdited') });
           this._refresh();
         },
         (err) => {
-          this.fire('notify', {
+          this.notify({
             message: `${this.i18n('label.error').toUpperCase()}: ${
               err.message && err.message.length > 0 ? err.message : this.i18n('vocabularyManagement.cannotEdit')
             }`,
@@ -429,7 +430,7 @@ Polymer({
         return fields;
       })
       .catch(function(error) {
-        this.fire('notify', { message: this.i18n('vocabularyManagement.cannotGetSchema') });
+        this.notify({ message: this.i18n('vocabularyManagement.cannotGetSchema') });
         if (error.status !== 404) {
           throw error;
         }

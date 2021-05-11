@@ -20,6 +20,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-input/paper-textarea.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-preview.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
@@ -147,7 +148,7 @@ Polymer({
   `,
 
   is: 'nuxeo-note-editor',
-  behaviors: [LayoutBehavior],
+  behaviors: [NotifyBehavior, LayoutBehavior],
 
   properties: {
     document: {
@@ -189,7 +190,7 @@ Polymer({
       },
     };
     this.$.note.put().then(() => {
-      this.fire('notify', { message: this.i18n('noteViewLayout.note.saved') });
+      this.notify({ message: this.i18n('noteViewLayout.note.saved') });
       this._viewMode = true;
       this.fire('document-updated');
     });

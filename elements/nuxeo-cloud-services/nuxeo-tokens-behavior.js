@@ -14,6 +14,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  */
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 
 /**
  * `Nuxeo.TokenBehavior` allows the management of oAuth2 token.
@@ -21,6 +22,7 @@
  * @polymerBehavior
  */
 export const TokenBehavior = [
+  NotifyBehavior,
   {
     properties: {
       tokens: {
@@ -76,10 +78,10 @@ export const TokenBehavior = [
         this.resource.remove().then(
           () => {
             this.refresh();
-            this.fire('notify', { message: this.i18n('cloudTokens.successfullyDeleted') });
+            this.notify({ message: this.i18n('cloudTokens.successfullyDeleted') });
           },
           () => {
-            this.fire('notify', {
+            this.notify({
               message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n('cloudTokens.errorDeleting')}`,
             });
           },
@@ -97,10 +99,10 @@ export const TokenBehavior = [
           () => {
             this.$.dialog.toggle();
             this.refresh();
-            this.fire('notify', { message: this.i18n('cloudTokens.successfullyEdited') });
+            this.notify({ message: this.i18n('cloudTokens.successfullyEdited') });
           },
           (err) => {
-            this.fire('notify', {
+            this.notify({
               message: `${this.i18n('label.error').toUpperCase()}: ${
                 err.message && err.message.length > 0 ? err.message : this.i18n('cloudTokens.errorEditing')
               }`,

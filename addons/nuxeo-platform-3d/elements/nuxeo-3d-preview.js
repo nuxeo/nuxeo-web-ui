@@ -18,6 +18,7 @@ Contributors:
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import './nuxeo-3d-viewer.js';
 
@@ -100,7 +101,7 @@ Polymer({
     },
   },
 
-  behaviors: [I18nBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior],
 
   created() {
     this._createMethodObserver('_valueChanged(document.properties.file:content)', true);
@@ -121,7 +122,7 @@ Polymer({
 
     this.$.doc.put().then((response) => {
       this.document = response;
-      this.fire('notify', { message: this.i18n(this.uploadedMessage) });
+      this.notify({ message: this.i18n(this.uploadedMessage) });
       this.fire('document-updated');
     });
   },

@@ -26,6 +26,7 @@ import '@polymer/paper-spinner/paper-spinner-lite.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-search.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
@@ -418,7 +419,7 @@ Polymer({
   `,
 
   is: 'nuxeo-search-form',
-  behaviors: [I18nBehavior, RoutingBehavior, IronResizableBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, RoutingBehavior, IronResizableBehavior],
   importMeta: import.meta,
 
   properties: {
@@ -939,7 +940,7 @@ Polymer({
     if (e.detail.error && e.detail.error.name === 'AbortError') {
       return;
     }
-    this.fire('notify', e.detail.error);
+    this.notify(e.detail.error);
   },
 
   /**
