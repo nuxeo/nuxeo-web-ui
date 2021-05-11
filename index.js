@@ -25,6 +25,7 @@ import { IronValidatorBehavior } from '@polymer/iron-validator-behavior/iron-val
 import { Templatizer } from '@polymer/polymer/lib/legacy/templatizer-behavior.js';
 
 // expose behaviors for compat
+import { NotifyBehavior, setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { AggregationBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-aggregation/nuxeo-aggregation-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
@@ -52,6 +53,7 @@ Polymer.IronResizableBehavior = IronResizableBehavior;
 Polymer.IronValidatableBehavior = IronValidatableBehavior;
 Polymer.IronValidatorBehavior = IronValidatorBehavior;
 Polymer.Templatizer = Templatizer;
+Nuxeo.NotifyBehavior = NotifyBehavior;
 Nuxeo.AggregationBehavior = AggregationBehavior;
 Nuxeo.ChartDataBehavior = ChartDataBehavior;
 Nuxeo.DocumentContentBehavior = DocumentContentBehavior;
@@ -89,6 +91,7 @@ Promise.all(
     if (!Nuxeo.UI.app) {
       console.error('could not find nuxeo-app');
     }
+    setFallbackNotificationTarget(Nuxeo.UI.app);
   })
   .then(async () => {
     if (Nuxeo.UI.config.router && Nuxeo.UI.config.router.htmlImport) {
