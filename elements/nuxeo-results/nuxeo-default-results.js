@@ -71,6 +71,7 @@ Polymer({
       nx-provider="[[nxProvider]]"
       selected-items="{{selectedItems}}"
       display-quick-filters
+      display-select-all
     >
       <slot name="selectionActions" slot="selectionActions"></slot>
 
@@ -80,6 +81,7 @@ Polymer({
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
+        select-all-enabled
       >
         <template>
           <nuxeo-document-grid-thumbnail
@@ -102,6 +104,7 @@ Polymer({
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
+        select-all-enabled
         on-row-clicked="_navigate"
       >
         <nuxeo-data-table-column
