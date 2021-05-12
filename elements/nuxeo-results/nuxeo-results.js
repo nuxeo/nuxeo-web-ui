@@ -144,6 +144,7 @@ Polymer({
       <nuxeo-selection-toolbar
         id="toolbar"
         selected-items="[[selectedItems]]"
+        select-all-active="[[selectAllActive]]"
         class="toolbar"
         on-refresh="_refreshAndFetch"
         on-refresh-display="_refreshDisplay"
@@ -157,6 +158,12 @@ Polymer({
       </nuxeo-selection-toolbar>
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
+        <template is="dom-if" if="[[_displaySelectAll(displaySelectAll, view)]]">
+          <div>
+            <nuxeo-checkmark checked="{{selectAllActive}}" on-click="_selectAllChanged"></nuxeo-checkmark>
+            <span>Select All</span>
+          </div>
+        </template>
         <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
           <nuxeo-sort-select
             options="[[_sortOptions(view, sortOptions)]]"
@@ -316,6 +323,14 @@ Polymer({
       value: [],
     },
 
+    /**
+     * If enabled, it allows to select all the results items.
+     */
+    displaySelectAll: {
+      type: Boolean,
+      value: false,
+    },
+
     resultsCount: {
       type: Number,
     },
@@ -332,6 +347,12 @@ Polymer({
     },
 
     _displayModes: Array,
+
+    selectAllActive: {
+      type: Boolean,
+      value: false,
+      notify: true,
+    },
 
     _localStorageName: String,
   },
@@ -376,6 +397,10 @@ Polymer({
     );
   },
 
+  _displaySelectAll() {
+    return this.view && !this.view.handlesSelectAll && (this.view.hasAttribute('select-all') || this.displaySelectAll);
+  },
+
   _displaySort() {
     // XXX check previous view properties for compatibility
     return this.view && !this.view.handlesSorting && (this.view.hasAttribute('display-sort') || this.displaySort);
@@ -399,6 +424,18 @@ Polymer({
     // do not trigger fetch results when sort options are being initialized
     if (newSort && oldSort) {
       this._sortChanged();
+    }
+  },
+
+  _selectAllChanged() {
+    if (!this.view) {
+      return;
+    }
+
+    if (this.view.selectAllActive) {
+      this.clearSelection();
+    } else {
+      this.selectAll();
     }
   },
 
@@ -552,6 +589,7 @@ Polymer({
   _selectedItemsChanged() {
     this.selectedItems = [];
     this.set('selectedItems', this.view.selectedItems);
+    this.selectAllActive = this.view.selectAllActive;
   },
 
   _refreshDisplay(e) {
@@ -573,8 +611,14 @@ Polymer({
     return this.view.size;
   },
 
+  selectAll() {
+    this.view.selectAll();
+    this.selectAllActive = this.view.selectAllActive;
+  },
+
   clearSelection() {
     this.view.clearSelection();
+    this.selectAllActive = this.view.selectAllActive;
   },
 
   selectItems(items) {

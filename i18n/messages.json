@@ -1294,6 +1294,7 @@
   "selectionToolbar.dialog.heading": "Selected Items",
   "selectionToolbar.display.selection": "Display selection",
   "selectionToolbar.selected.items": "{0} item(s) selected",
+  "selectionToolbar.selected.all": "All {0} items(s) selected",
   "SerialDocumentReview": "Serial Document Review",
   "spreadsheetButton.tooltip": "Spreadsheet Editor",
   "spreadsheet.saving": "Saving...",

@@ -106,10 +106,18 @@ Polymer({
     <div class="horizontal center layout" id="content">
       <div id="selectionToolbar" class="toolbar">
         <div class="selection">
-          <span class="count">[[i18n('selectionToolbar.selected.items', selectedItems.length)]]</span>
-          <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
-            <span>[[i18n('selectionToolbar.display.selection')]]</span>
-          </a>
+          <!-- if some elements are selected -->
+          <template is="dom-if" if="[[!selectAllActive]]">
+            <span class="count">[[i18n('selectionToolbar.selected.items', selectedItems.length)]]</span>
+            <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
+              <span>[[i18n('selectionToolbar.display.selection')]]</span>
+            </a>
+          </template>
+          
+          <!-- else if all the elements are selected -->
+          <template is="dom-if" if="[[selectAllActive]]">
+            <span class="count">[[i18n('selectionToolbar.selected.all', selectedItems.length)]]</span>  
+          </template>
           <a class="selectionLink" on-tap="clearSelection">
             <span>[[i18n('command.clear')]]</span>
           </a>
@@ -120,20 +128,22 @@ Polymer({
       </div>
     </div>
 
-    <nuxeo-dialog id="selectedItemsPopup" no-auto-focus with-backdrop>
-      <h2>[[i18n('selectionToolbar.dialog.heading')]]</h2>
-      <paper-dialog-scrollable>
-        <template is="dom-repeat" items="[[selectedItems]]">
-          <div class="layout horizontal center">
-            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <div>[[item.title]]</div>
-          </div>
-        </template>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
-      </div>
-    </nuxeo-dialog>
+    <template is="dom-if" if="[[!selectAllActive]]">
+      <nuxeo-dialog id="selectedItemsPopup" no-auto-focus with-backdrop>
+        <h2>[[i18n('selectionToolbar.dialog.heading')]]</h2>
+        <paper-dialog-scrollable>
+          <template is="dom-repeat" items="[[selectedItems]]">
+            <div class="layout horizontal center">
+              <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+              <div>[[item.title]]</div>
+            </div>
+          </template>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
+        </div>
+      </nuxeo-dialog>
+    </template>
   `,
 
   is: 'nuxeo-selection-toolbar',
@@ -144,6 +154,11 @@ Polymer({
       type: Boolean,
       value: false,
       reflectToAttribute: true,
+    },
+    selectAllActive: {
+      type: Boolean,
+      value: false,
+      notify: true,
     },
     selectedItems: {
       type: Object,
