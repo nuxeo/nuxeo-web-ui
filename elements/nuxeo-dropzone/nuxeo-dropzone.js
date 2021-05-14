@@ -24,6 +24,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import { createNestedObject } from '@nuxeo/nuxeo-elements/utils.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
@@ -370,9 +371,7 @@ Polymer({
       value() {
         return {
           document: ['preview'],
-          blob: (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers && Nuxeo.UI.config.enrichers.blob) || [
-            'appLinks',
-          ],
+          blob: config.get('enrichers.blob', ['appLinks']),
         };
       },
     },

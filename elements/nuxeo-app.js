@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
@@ -1339,7 +1340,7 @@ Polymer({
   },
 
   _computeEnrichers() {
-    return Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers;
+    return config.get('enrichers');
   },
 
   _computeHeaders() {
@@ -1347,7 +1348,7 @@ Polymer({
       'translate-directoryEntry': 'label',
     };
 
-    const fetch = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.fetch) || {};
+    const fetch = config.get('fetch', {});
 
     // add required fetchers
     const required = { document: ['lock'], directoryEntry: ['parent'], task: ['actors'] };

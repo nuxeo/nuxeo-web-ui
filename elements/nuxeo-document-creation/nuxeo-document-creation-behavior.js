@@ -14,8 +14,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 
+import { config } from '@nuxeo/nuxeo-elements';
+import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 
 let schemaFetcher = null;
@@ -92,7 +93,7 @@ export const DocumentCreationBehavior = [
         'fetch-document': 'properties',
         'translate-directoryEntry': 'label',
       };
-      schemaFetcher.enrichers = (Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.enrichers) || {};
+      schemaFetcher.enrichers = config.get('enrichers', {});
       return schemaFetcher.get().then((doc) => {
         if (properties) {
           Object.keys(properties).forEach((prop) => {
