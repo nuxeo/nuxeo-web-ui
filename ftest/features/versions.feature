@@ -67,3 +67,26 @@ Feature: Versioning
     And I can restore version
     And The document version is 1.0+
     And Versions count is 2
+
+  @config('router.key.document','uid')
+  Scenario: Restore and list versions (navigation by UID)
+    Given I have a File document
+    And I have permission ReadWrite for this document
+    And This document has a minor version
+    And I browse to the document
+    And The document version is 0.1
+    Then I can edit the Note metadata
+    And The document version is 0.1+
+    Then I click the versions list
+    And I click the Create Version button in versions list
+    Then The create version dialog appears
+    And Version options 0.2 and 1.0 are presented
+    Then I create a major version
+    And The document version is 1.0
+    Then I click the versions list
+    And Versions item index at 0 is 1.0
+    And Versions item index at 1 is 0.1
+    Then I click the versions list at index 1
+    And I can restore version
+    And The document version is 1.0+
+    And Versions count is 2

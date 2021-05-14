@@ -1,6 +1,7 @@
 import BasePage from '../base';
 import Vocabulary from './admin/vocabulary';
 import CloudServices from './admin/cloudServices';
+import { url } from '../helpers';
 
 export default class Administration extends BasePage {
   get analytics() {
@@ -21,14 +22,14 @@ export default class Administration extends BasePage {
 
   get vocabularyManagement() {
     if (!browser.getUrl().endsWith('vocabulary-management')) {
-      driver.url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
+      url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
     }
     return new Vocabulary('nuxeo-vocabulary-management');
   }
 
   goToVocabularyManagement() {
     if (!browser.getUrl().endsWith('vocabulary-management')) {
-      driver.url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
+      url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
     }
     return this.vocabularyManagement;
   }
@@ -43,7 +44,7 @@ export default class Administration extends BasePage {
 
   goToCloudServices() {
     if (!browser.getUrl().endsWith('cloud-services')) {
-      driver.url(process.env.NUXEO_URL ? '#!/admin/cloud-services' : 'ui/#!/admin/cloud-services');
+      url(process.env.NUXEO_URL ? '#!/admin/cloud-services' : 'ui/#!/admin/cloud-services');
     }
     return this.cloudServices;
   }

@@ -9,6 +9,7 @@ import DocumentTask from './browser/document_task';
 import DocumentFormLayout from './browser/document_form_layout';
 import Selection from './selection';
 import Results from './results';
+import { url } from '../helpers';
 
 export default class Browser extends BasePage {
   documentPage(docType) {
@@ -20,7 +21,7 @@ export default class Browser extends BasePage {
   }
 
   browseTo(path) {
-    driver.url(`#!/browse${path}`);
+    url(`#!/browse${path}`);
     this.waitForVisible();
     this.breadcrumb.waitForVisible();
     this.currentPage.waitForVisible();
