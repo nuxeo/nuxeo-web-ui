@@ -11,6 +11,7 @@ import Group from './ui/group';
 import Search from './ui/search';
 import UserAuthorizedApps from './ui/oauth2/user_authorized_apps';
 import UserCloudServices from './ui/oauth2/user_cloud_services';
+import { refresh, url } from './helpers';
 
 export default class UI extends BasePage {
   goHome() {
@@ -18,7 +19,7 @@ export default class UI extends BasePage {
   }
 
   reload() {
-    driver.refresh();
+    refresh();
   }
 
   get activityFeed() {
@@ -86,7 +87,7 @@ export default class UI extends BasePage {
   }
 
   static get() {
-    driver.url(process.env.NUXEO_URL ? '' : 'ui');
+    url(process.env.NUXEO_URL ? '' : 'ui');
     if (!global.locale) {
       browser.waitForVisible('nuxeo-app:not([unresolved])');
       /* global window */
@@ -129,7 +130,7 @@ export default class UI extends BasePage {
 
   goToUserCloudServices() {
     if (!browser.getUrl().endsWith('user-cloud-services')) {
-      driver.url(process.env.NUXEO_URL ? '#!/user-cloud-services' : 'ui/#!/user-cloud-services');
+      url(process.env.NUXEO_URL ? '#!/user-cloud-services' : 'ui/#!/user-cloud-services');
     }
     return this.userCloudServices;
   }
@@ -140,7 +141,7 @@ export default class UI extends BasePage {
 
   goToUserAuthorizedApps() {
     if (!browser.getUrl().endsWith('user-authorized-apps')) {
-      driver.url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
+      url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
     }
     return this.userAuthorizedApps;
   }
