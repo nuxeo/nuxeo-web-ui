@@ -160,39 +160,6 @@ module.exports = class {
       true,
     );
 
-    browser.addCommand('hasElementByTextContent', function(selector, textContent) {
-      return !!shadowElement(
-        selector,
-        true,
-        undefined,
-        `return element.textContent.trim() === "${textContent.trim()}";`,
-      );
-    });
-
-    browser.addCommand('elementByTextContent', function(selector, textContent) {
-      this.waitForVisible(selector);
-      return shadowElement(
-        selector,
-        true,
-        undefined,
-        `return element.textContent.trim() === "${textContent.trim()}";`,
-      )[0];
-    });
-
-    browser.addCommand(
-      'elementByTextContent',
-      function(selector, textContent) {
-        this.waitForVisible(selector);
-        return shadowElement(
-          selector,
-          true,
-          { ELEMENT: this.elementId },
-          `return element.textContent.trim() === "${textContent.trim()}";`,
-        )[0];
-      },
-      true,
-    );
-
     browser.addCommand('scrollIntoView', function(selector) {
       return this.shadowExecute(selector, (element) =>
         (Array.isArray(element) && element.length > 0 ? element[0] : element).scrollIntoView(),

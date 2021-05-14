@@ -1,9 +1,7 @@
 export default class Login {
   set username(username) {
-    driver.waitForVisible('#username');
-    driver.element('#username').setValue(username);
-    // $('#username').waitForDisplayed();
-    // $('#username').setValue(username);
+    $('#username').waitForDisplayed();
+    $('#username').setValue(username);
   }
 
   set password(password) {

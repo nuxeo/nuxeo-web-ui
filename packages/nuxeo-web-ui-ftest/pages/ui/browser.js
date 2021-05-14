@@ -331,7 +331,6 @@ export default class Browser extends BasePage {
     action.waitForVisible('.action');
     action.waitForEnabled('.action');
     // let's make sure we're clicking on the div the has the click event handler
-    // using shadowExecute because webdriver's click uses a position which may not be valid given the dropdown animation
     action.click('.action');
   }
 
