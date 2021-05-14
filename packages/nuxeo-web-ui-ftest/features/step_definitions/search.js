@@ -1,4 +1,5 @@
 import { Given, Then, When } from 'cucumber';
+import { url } from '../../pages/helpers';
 
 Then('I can see the {string} search panel', function(name) {
   this.ui.drawer._search(name).waitForVisible();
@@ -107,7 +108,7 @@ Given('I have permission {word} for this saved search', function(permission) {
 });
 
 When('I browse to the saved search', function() {
-  driver.url(`#!/doc/${this.savedSearch.id}`);
+  url(`#!/doc/${this.savedSearch.id}`);
 });
 
 Then('I can see that my saved search "{word}" on "{word}" is selected', function(savedSearchName, searchName) {

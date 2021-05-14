@@ -1,6 +1,7 @@
 import { Given, Then, When } from 'cucumber';
 import Login from '../../pages/login';
 import UI from '../../pages/ui';
+import { url } from '../../pages/helpers';
 
 Given('user {string} exists in group {string}', (username, group) =>
   fixtures.users.create({
@@ -37,7 +38,7 @@ When('I login as {string}', function(username) {
   driver.waitForVisible('nuxeo-page');
 });
 
-When(/^I visit (.*)$/, (url) => driver.url(url));
+When(/^I visit (.*)$/, (path) => url(path));
 
 When('I logout', () => Login.get());
 
