@@ -20,6 +20,7 @@ import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icons/social-icons.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
@@ -118,14 +119,7 @@ Polymer({
     return this._src
       ? this.urlFor(
           'document',
-          (Nuxeo &&
-            Nuxeo.UI &&
-            Nuxeo.UI.config &&
-            Nuxeo.UI.config.router &&
-            Nuxeo.UI.config.router.key &&
-            Nuxeo.UI.config.router.key.document === 'uid' &&
-            this._src.versionableId) ||
-            this._src.path,
+          (config.get('router.key.document') === 'uid' && this._src.versionableId) || this._src.path,
         )
       : null;
   },

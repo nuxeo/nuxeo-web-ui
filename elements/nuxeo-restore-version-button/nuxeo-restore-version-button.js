@@ -17,6 +17,7 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
@@ -101,14 +102,7 @@ Polymer({
       this.$.opRestoreVersion.execute().then(() => {
         this.navigateTo(
           'document',
-          (Nuxeo &&
-            Nuxeo.UI &&
-            Nuxeo.UI.config &&
-            Nuxeo.UI.config.router &&
-            Nuxeo.UI.config.router.key &&
-            Nuxeo.UI.config.router.key.document === 'uid' &&
-            this.document.versionableId) ||
-            this.document.path,
+          (config.get('router.key.document') === 'uid' && this.document.versionableId) || this.document.path,
         );
       });
     }
