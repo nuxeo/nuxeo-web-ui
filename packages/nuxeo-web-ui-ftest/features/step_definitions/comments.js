@@ -11,7 +11,7 @@ Given('I have the following comment thread:', function(table) {
   return comments.reduce((current, next) => current.then(next), Promise.resolve([]));
 });
 
-Given("{word}'s comment {string} has the following replies:", (user, text, table) => {
+Given(/([^\s']+)(?:'s)? comment "(.*)" has the following replies:/, (user, text, table) => {
   /*
    * Since we faced some issues with timestamps created server side when fire requests, we decided to fire them
    * sequentially. After correcting bug reported by NXP-26202 this method should be changed to:
@@ -25,7 +25,7 @@ Given("{word}'s comment {string} has the following replies:", (user, text, table
   return comments.reduce((current, next) => current.then(next), Promise.resolve([]));
 });
 
-When("I edit {word}('s) comment {string} with the following text: {string}", function(user, text, newText) {
+When(/I edit ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, function(user, text, newText) {
   this.ui.browser
     .documentPage()
     .comments.getComment(text, user === 'my' ? this.username : user)
@@ -34,7 +34,7 @@ When("I edit {word}('s) comment {string} with the following text: {string}", fun
   this.ui.browser.documentPage().comments.waitForNotVisible('.input-area iron-icon[name="submit"]');
 });
 
-When("I expand the reply thread for {word}('s) comment {string}", function(user, text) {
+When(/I expand the reply thread for ([^\s']+)(?:'s)? comment "(.*)"/, function(user, text) {
   const link = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user)
     .summaryLink;
   link.waitForVisible();
@@ -49,7 +49,7 @@ When('I load all comments', function() {
   link.click();
 });
 
-When("I load all replies for {word}('s) comment {string}", function(user, text) {
+When(/I load all replies for ([^\s']+)(?:'s)? comment "(.*)"/, function(user, text) {
   const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
   const link = comment.thread.loadMoreCommentsLink;
   link.waitForVisible();
@@ -57,14 +57,14 @@ When("I load all replies for {word}('s) comment {string}", function(user, text) 
   link.click();
 });
 
-When("I remove {word}('s) comment {string}", function(user, text) {
+When(/I remove ([^\s']+)(?:'s)? comment "(.*)"/, function(user, text) {
   return this.ui.browser
     .documentPage()
     .comments.getComment(text, user === 'my' ? this.username : user)
     .remove();
 });
 
-When("I reply to {word}('s) comment {string} with the following text: {string}", function(user, text, reply) {
+When(/I reply to ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, function(user, text, reply) {
   return this.ui.browser
     .documentPage()
     .comments.getComment(text, user === 'my' ? this.username : user)
@@ -91,7 +91,7 @@ Then("I can see document's comment thread", function() {
   this.ui.browser.documentPage().comments.waitForVisible().should.be.true;
 });
 
-Then("I can see the reply thread for {word}('s) comment {string} has a total of {int} items to be loaded", function(
+Then(/I can see the reply thread for ([^\s']+)(?:'s)? comment "(.*)" has a total of (\d+) items to be loaded/, function(
   user,
   text,
   total,
@@ -103,23 +103,27 @@ Then("I can see the reply thread for {word}('s) comment {string} has a total of 
   link.getText().should.be.equals(`View all ${total} replies`);
 });
 
-Then('I can see {word} comment: {string}', function(user, text) {
+Then(/I can see ([^\s']+)(?:'s)? comment: "(.*)"/, function(user, text) {
   return this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
 });
 
-Then('I can see {word} comment {string} has {int} visible replies', function(user, text, nb) {
+Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has (\d+) visible replies/, function(user, text, nb) {
   const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
   comment.thread.waitForVisible();
   comment.thread.nbItems.should.be.equals(nb);
 });
 
-Then('I can see {word} comment {string} has a reply thread with {int} replies', function(user, text, nb) {
+Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has a reply thread with (\d+) replies/, function(user, text, nb) {
   const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
   comment.summaryLink.waitForVisible();
   comment.summaryLink.getText().should.be.equals(`${nb} Replies`);
 });
 
-Then('I {word} see the extended options available for {word} comment: {string}', function(option, user, text) {
+Then(/I (can|cannot) see the extended options available for ([^\s']+)(?:'s)? comment: "(.*)"/, function(
+  option,
+  user,
+  text,
+) {
   option.should.to.be.oneOf(['can', 'cannot'], 'An unknown option was passed as argument');
   const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
   if (option === 'can') {
