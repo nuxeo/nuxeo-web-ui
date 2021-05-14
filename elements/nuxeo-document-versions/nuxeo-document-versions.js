@@ -21,6 +21,7 @@ import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-scroll-threshold/iron-scroll-threshold.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
@@ -244,14 +245,7 @@ Polymer({
     this._hideList();
     this.navigateTo(
       'document',
-      (Nuxeo &&
-        Nuxeo.UI &&
-        Nuxeo.UI.config &&
-        Nuxeo.UI.config.router &&
-        Nuxeo.UI.config.router.key &&
-        Nuxeo.UI.config.router.key.document === 'uid' &&
-        this.document.versionableId) ||
-        this.document.path,
+      (config.get('router.key.document') === 'uid' && this.document.versionableId) || this.document.path,
     );
   },
 
