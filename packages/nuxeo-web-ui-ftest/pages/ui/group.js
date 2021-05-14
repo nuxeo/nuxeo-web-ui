@@ -2,7 +2,6 @@ import BasePage from '../base';
 
 export default class Group extends BasePage {
   getField(field) {
-    driver.waitForExist(this._selector);
     $(this._selector).waitForVisible();
     return this.el.element(`[id="${field}"]`);
   }
