@@ -27,8 +27,6 @@ const capability = {
   // 5 instance gets started at a time.
   maxInstances: 1,
   browserName: process.env.BROWSER,
-  // javascriptEnabled: true,
-  // acceptSslCerts: true,
   acceptInsecureCerts: true,
 };
 

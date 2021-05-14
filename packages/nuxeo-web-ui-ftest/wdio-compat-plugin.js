@@ -237,6 +237,14 @@ module.exports = class {
       true,
     );
 
+    browser.addCommand(
+      'hasElementByTextContent',
+      function(selector, textContent) {
+        return this.elements(selector).some((e) => e.getText() === textContent);
+      },
+      true,
+    );
+
     // overwrite element comands that previously took a selector as optional argument
     ['getText', 'click'].forEach((name) => {
       browser.overwriteCommand(

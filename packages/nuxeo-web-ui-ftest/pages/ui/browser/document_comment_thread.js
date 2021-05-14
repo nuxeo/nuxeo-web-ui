@@ -34,7 +34,7 @@ export default class DocumentCommentThread extends BasePage {
     if (match) {
       return new DocumentComment(match);
     }
-    throw new Error(`No comment authored by "${user}" with the following text: "${text}" found`);
+    throw new Error(`No comment authored by "${user}" with the text "${text}" was found`);
   }
 
   writeComment(text) {

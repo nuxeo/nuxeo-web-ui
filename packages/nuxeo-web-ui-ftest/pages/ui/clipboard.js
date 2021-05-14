@@ -2,7 +2,7 @@ import BasePage from '../base';
 
 export default class Clipboard extends BasePage {
   get nbItems() {
-    const items = this.el.elements('#list .list-item');
+    const items = this.el.$$('#list .list-item');
     let count = 0;
     items.forEach((item) => {
       if (item.isVisible()) {
@@ -13,11 +13,11 @@ export default class Clipboard extends BasePage {
   }
 
   get moveButton() {
-    return this.el.element('#move');
+    return this.el.$('#move');
   }
 
   get pasteButton() {
-    return this.el.element('#paste');
+    return this.el.$('#paste');
   }
 
   move() {
@@ -35,7 +35,7 @@ export default class Clipboard extends BasePage {
   }
 
   removeItem(title) {
-    const items = this.el.elements('nuxeo-data-list#list .list-item');
+    const items = this.el.$$('nuxeo-data-list#list .list-item');
     return items.some((item) => {
       if (item.isVisible() && item.getText('.list-item-title').trim() === title) {
         item.click('iron-icon.remove');
