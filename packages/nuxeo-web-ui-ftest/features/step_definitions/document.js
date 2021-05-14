@@ -1,4 +1,5 @@
 import { Given, When, Then } from 'cucumber';
+import { url } from '../../pages/helpers';
 
 Given('I have a {word} document', function(docType) {
   docType = docType || 'File';
@@ -126,7 +127,7 @@ When(/^I click the process button$/, function() {
 });
 
 Then(/^I can't view the document$/, function() {
-  driver.url(`#!/browse${this.doc.path}`);
+  url(`#!/browse${this.doc.path}`);
   this.ui.browser.breadcrumb.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
 });
 
