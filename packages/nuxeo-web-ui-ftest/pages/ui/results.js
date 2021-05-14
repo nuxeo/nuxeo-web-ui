@@ -74,10 +74,7 @@ export default class Results extends BasePage {
 
   resultsCount(displayMode) {
     const rows = this.getResults(displayMode);
-    if (!rows) {
-      return 0;
-    }
-    return rows.filter((result) => result.getAttribute('hidden') === null).length;
+    return rows ? rows.filter((result) => result.getAttribute('hidden') === null).length : 0;
   }
 
   get resultsCountLabel() {

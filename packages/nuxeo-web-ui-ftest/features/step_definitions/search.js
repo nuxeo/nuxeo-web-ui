@@ -151,7 +151,6 @@ Then(/^I can see (\d+) search results$/, function(numberOfResults) {
 
 Then(/^I can see more than (\d+) search results$/, function(minNumberOfResults) {
   const { displayMode } = this.ui.results;
-  // this.ui.results.getResults(displayMode).waitForVisible();
   driver.waitUntil(
     () => this.ui.results.resultsCount(displayMode) > minNumberOfResults,
     `Expecting to get more than ${minNumberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
