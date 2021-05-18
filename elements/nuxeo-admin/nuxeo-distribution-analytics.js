@@ -123,10 +123,7 @@ Polymer({
             </div>
           </template>
 
-          <p class="error" hidden$="[[_enabled]]">
-            Distribution analytics is disabled because current query would impact quality of the service. <br />
-            Please select another path.
-          </p>
+          <p class="error" hidden$="[[_enabled]]">[[i18n('distributionAnalytics.disabled.message')]]</p>
         </nuxeo-card>
       </div>
     </template>
