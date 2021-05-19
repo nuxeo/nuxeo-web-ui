@@ -24,12 +24,14 @@ import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import { escapeHTML } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-selectivity.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-textarea.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-add-to-collection-documents-button`
@@ -54,6 +56,15 @@ Polymer({
 
     <nuxeo-operation op="Document.AddToCollection" id="addToCollectionOp"></nuxeo-operation>
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
+
+    <nuxeo-operation-button
+      id="bulkOpBtn" 
+      operation="Bulk.RunAction"
+      poll-interval="[[pollInterval]]" 
+      async 
+      hidden
+    >
+    </nuxeo-operation-button>
 
     <template is="dom-if" if="[[_isAvailable(documents.*)]]">
       <div class="action" on-tap="_toggleDialog">
@@ -102,7 +113,7 @@ Polymer({
   `,
 
   is: 'nuxeo-add-to-collection-documents-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -156,9 +167,28 @@ Polymer({
     },
   },
 
+  _onPollStart() {
+    this.notify({ message: 'Add documents to collection started' /* this.i18n('csvExportButton.action.poll') */});
+    this._resetPopup();
+    this._toggleDialog();
+  },
+
+  _onResponse() {
+    this.fire('added-to-collection', { collectionId: this.collection });
+  },
+
+  _params() {
+    return {
+      operationId: 'Document.AddToCollection',
+      parameters: {
+        collection: this.collection,
+      },
+    };
+  },
+
   _isAvailable() {
     if (this.documents && this.documents.length > 0) {
-      return this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
+      return this._isSelectAllActive() || this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
     }
     return false;
   },
@@ -185,18 +215,23 @@ Polymer({
   },
 
   _addToCollection() {
-    const op = this.$$('#addToCollectionOp');
-    op.params = {
-      collection: this.collection,
-    };
-    const uids = this.documents.map((doc) => doc.uid);
-    const uidsString = uids.join(',');
-    op.input = `docs:${uidsString}`;
-    return op.execute().then(() => {
-      this.fire('added-to-collection', { docIds: uids, collectionId: this.collection });
-      this._resetPopup();
-      this._toggleDialog();
-    });
+    if (this._isSelectAllActive()) {
+      this._executeSelectAll();
+    } else {
+      // add selected documents to collection
+      const op = this.$$('#addToCollectionOp');
+      op.params = {
+        collection: this.collection,
+      };
+      const uids = this.documents.map((doc) => doc.uid);
+      const uidsString = uids.join(',');
+      op.input = `docs:${uidsString}`;
+      return op.execute().then(() => {
+        this.fire('added-to-collection', { docIds: uids, collectionId: this.collection });
+        this._resetPopup();
+        this._toggleDialog();
+      });
+    }
   },
 
   _resultsFilter(entry) {

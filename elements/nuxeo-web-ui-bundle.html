@@ -206,20 +206,25 @@
 
 <nuxeo-slot-content name="removeCollectionAction" slot="COLLECTION_ACTIONS" order="10">
   <template>
-    <nuxeo-collection-remove-action members="[[selectedItems]]" all-members="[[items]]" collection="[[collection]]">
+    <nuxeo-collection-remove-action
+      members="[[selectedItems]]"
+      all-members="[[items]]"
+      collection="[[collection]]"
+      view="[[view]]"
+    >
     </nuxeo-collection-remove-action>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="downloadSelectionAction" slot="COLLECTION_ACTIONS" order="15">
   <template>
-    <nuxeo-download-documents-button documents="[[selectedItems]]"> </nuxeo-download-documents-button>
+    <nuxeo-download-documents-button documents="[[selectedItems]]" view="[[view]]"> </nuxeo-download-documents-button>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="addToClipboardSelectionAction" slot="COLLECTION_ACTIONS" order="20">
   <template>
-    <nuxeo-clipboard-documents-button documents="[[selectedItems]]"> </nuxeo-clipboard-documents-button>
+    <nuxeo-clipboard-documents-button documents="[[selectedItems]]" view="[[view]]"> </nuxeo-clipboard-documents-button>
   </template>
 </nuxeo-slot-content>
 
@@ -663,31 +668,32 @@
 
 <nuxeo-slot-content name="downloadSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="5">
   <template>
-    <nuxeo-download-documents-button documents="[[selectedItems]]"> </nuxeo-download-documents-button>
+    <nuxeo-download-documents-button documents="[[selectedItems]]" view="[[view]]"> </nuxeo-download-documents-button>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="addToCollectionSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="10">
   <template>
-    <nuxeo-add-to-collection-documents-button documents="[[selectedItems]]"> </nuxeo-add-to-collection-documents-button>
+    <nuxeo-add-to-collection-documents-button documents="[[selectedItems]]" view="[[view]]">
+    </nuxeo-add-to-collection-documents-button>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="addToClipboardSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="20">
   <template>
-    <nuxeo-clipboard-documents-button documents="[[selectedItems]]"> </nuxeo-clipboard-documents-button>
+    <nuxeo-clipboard-documents-button documents="[[selectedItems]]" view="[[view]]"> </nuxeo-clipboard-documents-button>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="publishSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="25">
   <template>
-    <nuxeo-publish-button documents="[[selectedItems]]"></nuxeo-publish-button>
+    <nuxeo-publish-button documents="[[selectedItems]]" view="[[view]]"></nuxeo-publish-button>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="deleteSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="30">
   <template>
-    <nuxeo-delete-documents-button documents="[[selectedItems]]"> </nuxeo-delete-documents-button>
+    <nuxeo-delete-documents-button documents="[[selectedItems]]" view="[[view]]"> </nuxeo-delete-documents-button>
   </template>
 </nuxeo-slot-content>
 
@@ -695,13 +701,13 @@
 
 <nuxeo-slot-content name="untrashSelectionAction" slot="TRASH_RESULTS_SELECTION_ACTIONS" order="10">
   <template>
-    <nuxeo-untrash-documents-button documents="[[selectedItems]]"></nuxeo-untrash-documents-button>
+    <nuxeo-untrash-documents-button documents="[[selectedItems]]" view="[[view]]"></nuxeo-untrash-documents-button>
   </template>
 </nuxeo-slot-content>
 
 <nuxeo-slot-content name="hardDeleteSelectionAction" slot="TRASH_RESULTS_SELECTION_ACTIONS" order="20">
   <template>
-    <nuxeo-delete-documents-button documents="[[selectedItems]]" hard></nuxeo-delete-documents-button>
+    <nuxeo-delete-documents-button documents="[[selectedItems]]" view="[[view]]" hard></nuxeo-delete-documents-button>
   </template>
 </nuxeo-slot-content>
 
@@ -779,7 +785,7 @@
 
 <nuxeo-slot-content name="diffDocumentAction" slot="RESULTS_SELECTION_ACTIONS" order="10">
   <template>
-    <nuxeo-document-diff-button selected-documents="[[selectedItems]]"></nuxeo-document-diff-button>
+    <nuxeo-document-diff-button selected-documents="[[selectedItems]]" view="[[view]]"></nuxeo-document-diff-button>
   </template>
 </nuxeo-slot-content>
 
@@ -798,7 +804,13 @@
 
 <nuxeo-slot-content name="internalPublishPage" slot="PUBLISH_PAGES" order="10">
   <template>
-    <nuxeo-internal-publish id="internalPublish" name="internal" document="[[document]]" documents="[[documents]]">
+    <nuxeo-internal-publish
+      id="internalPublish"
+      name="internal"
+      document="[[document]]"
+      documents="[[documents]]"
+      view="[[view]]"
+    >
     </nuxeo-internal-publish>
   </template>
 </nuxeo-slot-content>

@@ -23,6 +23,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-clipboard-documents-button`
@@ -31,7 +32,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-action-button-styles"></style>
+    <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <div class="action" on-tap="addToClipBoard">
@@ -48,7 +49,7 @@ Polymer({
   `,
 
   is: 'nuxeo-clipboard-documents-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -82,7 +83,8 @@ Polymer({
   },
 
   _isAvailable() {
-    return this.documents.every(
+    // the clipboard is not available if select all is active
+    return !this._isSelectAllActive() && this.documents.every(
       (doc) =>
         (this.isCollectionMember(doc) || doc.facets.includes('Collection')) &&
         !this.isTrashed(doc) &&

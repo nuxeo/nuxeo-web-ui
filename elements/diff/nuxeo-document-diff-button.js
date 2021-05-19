@@ -50,6 +50,7 @@ Polymer({
       type: Array,
       value: [],
     },
+
     tooltipPosition: {
       type: String,
       value: 'bottom',
@@ -69,7 +70,11 @@ Polymer({
   },
 
   _isAvailable() {
-    return this.selectedDocuments && this.selectedDocuments.length > 1;
+    return (
+      (!this.view || (this.view && !this.view.selectAllActive)) &&
+      this.selectedDocuments &&
+      this.selectedDocuments.length > 1
+    );
   },
 
   _doDiff() {
