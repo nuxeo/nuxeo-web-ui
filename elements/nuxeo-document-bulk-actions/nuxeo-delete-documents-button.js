@@ -22,9 +22,11 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-delete-documents-actions`
@@ -33,11 +35,20 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-action-button-styles"></style>
+    <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
     <nuxeo-operation id="deleteOp" op="Document.Delete" sync-indexing></nuxeo-operation>
 
     <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing></nuxeo-operation>
+
+    <nuxeo-operation-button 
+      id="bulkOpBtn" 
+      operation="Bulk.RunAction"
+      poll-interval="[[pollInterval]]" 
+      async 
+      hidden
+    >
+    </nuxeo-operation-button>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <div class="action" on-tap="deleteDocuments">
@@ -49,7 +60,7 @@ Polymer({
   `,
 
   is: 'nuxeo-delete-documents-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -91,8 +102,11 @@ Polymer({
   },
 
   deleteDocuments() {
-    if (this.docsHavePermissions && window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
-      if (this.documents && this.documents.length) {
+    if ((this._isSelectAllActive() || this.docsHavePermissions)
+      && window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
+      if (this._isSelectAllActive()) {
+        this._executeSelectAll();
+      } else if (this.documents && this.documents.length) {
         const uids = this.documents.map((doc) => doc.uid).join(',');
         const op = this.hard ? this.$.deleteOp : this.$.trashOp;
         op.input = `docs:${uids}`;
@@ -110,12 +124,31 @@ Polymer({
     }
   },
 
+  _onPollStart() {
+    this.notify({ message: 'Delete documents has started' /* this.i18n('csvExportButton.action.poll') */});
+  },
+
+  _onResponse() {
+    this.fire('nuxeo-documents-deleted', { documents: this.documents });
+    this.documents = [];
+    this.fire('refresh');
+  },
+
+  _params() {
+    return {
+      operationId: this.hard ? 'Document.Delete' : 'Document.Trash',
+      parameters: {
+        properties: '',
+      },
+    };
+  },
+
   /**
    * Action is available if all selected items are not trashed and `hard` is not active OR if all selected items
-   * are trashed and `hard` is active.
+   * are trashed and `hard` is active OR if select all is active.
    */
   _isAvailable() {
-    return (
+    return this._isSelectAllActive() || (
       this.documents &&
       this.documents.length > 0 &&
       this._checkDocsPermissions() &&

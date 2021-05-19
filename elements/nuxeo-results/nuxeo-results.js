@@ -248,6 +248,7 @@ Polymer({
 
     view: {
       type: Object,
+      notify: true,
       observer: '_viewChanged',
     },
 
@@ -554,6 +555,7 @@ Polymer({
       items: this.items,
       columns: this.columns,
       document: this.document,
+      view: this.view,
     };
   },
 

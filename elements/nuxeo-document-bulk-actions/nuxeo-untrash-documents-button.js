@@ -22,9 +22,11 @@ import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-untrash-documents-actions`
@@ -33,9 +35,12 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-action-button-styles"></style>
+    <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
     <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing></nuxeo-operation>
+
+    <nuxeo-operation-button id="bulkOpBtn" operation="Bulk.RunAction" poll-interval="[[pollInterval]]" async hidden>
+    </nuxeo-operation-button>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <div class="action" on-tap="untrashDocuments">
@@ -51,7 +56,7 @@ Polymer({
   `,
 
   is: 'nuxeo-untrash-documents-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -80,8 +85,13 @@ Polymer({
   },
 
   untrashDocuments() {
-    if (this.docsHavePermissions && window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))) {
-      if (this.documents && this.documents.length) {
+    if (
+      (this._isSelectAllActive() || this.docsHavePermissions) &&
+      window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))
+    ) {
+      if (this._isSelectAllActive()) {
+        this._executeSelectAll();
+      } else if (this.documents && this.documents.length) {
         const uids = this.documents.map((doc) => doc.uid).join(',');
         this.$.operation.input = `docs:${uids}`;
         this.$.operation.execute().then(
@@ -98,8 +108,30 @@ Polymer({
     }
   },
 
+  _onPollStart() {
+    this.notify({ message: 'Untrash documents has started' /* this.i18n('csvExportButton.action.poll') */ });
+  },
+
+  _onResponse() {
+    this.fire('nuxeo-documents-untrashed', { documents: this.documents });
+    this.documents = [];
+    this.fire('refresh');
+  },
+
+  _params() {
+    return {
+      operationId: 'Document.Untrash',
+      parameters: {
+        properties: '',
+      },
+    };
+  },
+
   _isAvailable() {
-    return this.documents && this.documents.length > 0 && this._checkDocsPermissions() && this._checkDocsAreTrashed();
+    return (
+      this._isSelectAllActive() ||
+      (this.documents && this.documents.length > 0 && this._checkDocsPermissions() && this._checkDocsAreTrashed())
+    );
   },
 
   _checkDocsAreTrashed() {
