@@ -20,10 +20,12 @@ import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-collection-remove-action`
@@ -32,9 +34,18 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-action-button-styles"></style>
+    <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
     <nuxeo-operation op="Collection.RemoveFromCollection" id="removeOp" sync-indexing></nuxeo-operation>
+    
+    <nuxeo-operation-button 
+      id="bulkOpBtn" 
+      operation="Bulk.RunAction"
+      poll-interval="[[pollInterval]]"
+      async 
+      hidden
+    >
+    </nuxeo-operation-button>
 
     <template id="availability" is="dom-if" if="[[_isAvailable(members, collection)]]">
       <div class="action" on-tap="remove">
@@ -46,7 +57,7 @@ Polymer({
   `,
 
   is: 'nuxeo-collection-remove-action',
-  behaviors: [I18nBehavior],
+  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior],
 
   properties: {
     members: {
@@ -75,8 +86,30 @@ Polymer({
     },
   },
 
+  _onPollStart() {
+    this.notify({ message: 'Remove documents from collection started' /* this.i18n('csvExportButton.action.poll') */});
+  },
+
+  _onResponse() {
+    this.notify({ message: 'Documents removed from collection' /* this.i18n('csvExportButton.action.poll') */});
+    this.members = [];
+    this.fire('refresh');
+  },
+
+  _params() {
+    return {
+      operationId: 'Collection.RemoveFromCollection',
+      parameters: {
+        collection: this.collection.uid,
+      },
+    };
+  },
+
   remove() {
-    if (this.members && this.members.length > 0) {
+    if (this._isSelectAllActive()) {
+      // click the operation button to call the bulk action
+      this._executeSelectAll();
+    } else if (this.members && this.members.length > 0) {
       const uids = this.members.map((doc) => doc.uid).join(',');
       this.$.removeOp.input = `docs:${uids}`;
       this.$.removeOp.params = { collection: this.collection.uid };

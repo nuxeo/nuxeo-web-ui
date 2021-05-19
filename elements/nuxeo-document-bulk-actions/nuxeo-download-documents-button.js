@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-operation-button.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
+import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -31,6 +32,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
+    <style include="nuxeo-action-button-styles nuxeo-styles"></style>
     <nuxeo-operation-button
       id="btn"
       operation="Blob.BulkDownload"
@@ -42,6 +44,7 @@ Polymer({
       error-label="bulkDownload.error"
       async
       download
+      hidden$="[[_isSelectAllActive(documents.splices, view)]]"
     ></nuxeo-operation-button>
   `,
 
@@ -59,6 +62,8 @@ Polymer({
       type: Object,
     },
 
+    view: Object,
+
     /**
      * `true` if the action should display the label, `false` otherwise.
      */
@@ -71,6 +76,10 @@ Polymer({
   ready() {
     this.$.btn.addEventListener('poll-start', this._onPollStart.bind(this));
     this.$.btn.addEventListener('response', this._onResponse.bind(this));
+  },
+
+  _isSelectAllActive() {
+    return this.view && this.view.selectAllActive;
   },
 
   _params() {
