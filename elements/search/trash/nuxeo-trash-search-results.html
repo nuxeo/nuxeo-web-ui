@@ -31,6 +31,7 @@ limitations under the License.
       display-mode="list"
       display-quick-filters
       display-sort
+      display-select-all
       action-context="{{actionContext}}"
       sort-options="[[sortOptions]]"
     >
@@ -43,6 +44,7 @@ limitations under the License.
         icon="nuxeo:view-thumbnails"
         empty-label="[[i18n('searchResults.noResults')]]"
         selection-enabled
+        select-all-enabled
       >
         <template>
           <nuxeo-document-grid-thumbnail
@@ -63,6 +65,7 @@ limitations under the License.
         settings-enabled
         empty-label="[[i18n('searchResults.noResults')]]"
         selection-enabled
+        select-all-enabled
         on-row-clicked="_navigate"
       >
         <nuxeo-data-table-column
@@ -206,6 +209,7 @@ limitations under the License.
         multi-selection
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
+        select-all-enabled
       >
         <template>
           <nuxeo-document-list-item

@@ -80,7 +80,12 @@ limitations under the License.
       },
 
       _actionContext() {
-        return { collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items };
+        return {
+          collection: this.document,
+          selectedItems: this.selectedItems,
+          items: this.$.results.items,
+          view: this.$.provider.view,
+        };
       },
     });
   </script>
