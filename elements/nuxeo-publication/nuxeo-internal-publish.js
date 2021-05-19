@@ -37,10 +37,11 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../nuxeo-document-versions/nuxeo-document-versions.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 Polymer({
   _template: html`
-    <style include="iron-flex iron-flex-alignment iron-flex-factors nuxeo-styles">
+    <style include="iron-flex iron-flex-alignment iron-flex-factors nuxeo-action-button-styles nuxeo-styles">
       :host {
         display: block;
         @apply --layout-flex;
@@ -73,6 +74,15 @@ Polymer({
     </style>
 
     <nuxeo-operation id="op" op="Document.PublishToSection" sync-indexing></nuxeo-operation>
+    
+    <nuxeo-operation-button 
+      id="bulkOpBtn" 
+      operation="Bulk.RunAction"
+      poll-interval="[[pollInterval]]" 
+      async 
+      hidden
+    >
+    </nuxeo-operation-button>
 
     <nuxeo-document id="srcDoc"></nuxeo-document>
 
@@ -139,7 +149,7 @@ Polymer({
   `,
 
   is: 'nuxeo-internal-publish',
-  behaviors: [NotifyBehavior, I18nBehavior, LayoutBehavior],
+  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, LayoutBehavior],
 
   properties: {
     /**
@@ -189,39 +199,75 @@ Polymer({
     return options;
   },
 
-  _publish() {
-    this.$.op.params = {
-      target: this.publishSpace.uid,
-      override: this.override,
-      renditionName: null,
-    };
-    if (this.selectedRendition) {
-      if (this.selectedRendition === 'default') {
-        this.$.op.params.defaultRendition = true;
-      } else if (this.selectedRendition !== 'none') {
-        this.$.op.params.renditionName = this.selectedRendition;
-      }
+  _onPollStart() {
+    this.notify({ message: 'Publish documents has started' /* this.i18n('csvExportButton.action.poll') */});
+    this.fire('nx-publish-success');
+  },
+
+  _onResponse() {
+    this.fire('notify', {
+      message: this.i18n(`publication.internal.publish.success${this._isMultiple ? '.multiple' : ''}`),
+    });
+    if (this._isMultiple) {
+      this.fire('navigate', { doc: this.publishSpace });
+    } else {
+      this.fire('document-updated');
     }
-    this.$.op.input = this._isMultiple ? `docs:${this.documents.map((doc) => doc.uid).join(',')}` : this.document.uid;
-    this.$.op
-      .execute()
-      .then(() => {
-        this.notify({
-          message: this.i18n(`publication.internal.publish.success${this._isMultiple ? '.multiple' : ''}`),
-        });
-        if (this._isMultiple) {
-          this.fire('navigate', { doc: this.publishSpace });
-        } else {
-          this.fire('document-updated');
+  },
+
+  _params() {
+    const actionParams = {
+      operationId: 'Document.PublishToSection',
+      parameters: {
+        target: this.publishSpace.uid,
+        override: this.override,
+      },
+    };
+    if (this.selectedRendition === 'default') {
+      actionParams.parameters.defaultRendition = true;
+    } else if (this.selectedRendition !== 'none') {
+      actionParams.parameters.renditionName = this.selectedRendition;
+    }
+    return actionParams;
+  },
+
+  _publish() {
+    if (this._isSelectAllActive()) {
+      this._executeSelectAll();
+    } else {
+      this.$.op.params = {
+        target: this.publishSpace.uid,
+        override: this.override,
+        renditionName: null,
+      };
+      if (this.selectedRendition) {
+        if (this.selectedRendition === 'default') {
+          this.$.op.params.defaultRendition = true;
+        } else if (this.selectedRendition !== 'none') {
+          this.$.op.params.renditionName = this.selectedRendition;
         }
-        this.fire('nx-publish-success');
-      })
-      .catch((err) => {
-        this.notify({
-          message: this.i18n(`publication.internal.publish.error${this._isMultiple ? '.multiple' : ''}`),
+      }
+      this.$.op.input = this._isMultiple ? `docs:${this.documents.map((doc) => doc.uid).join(',')}` : this.document.uid;
+      this.$.op
+        .execute()
+        .then(() => {
+          this.notify({
+            message: this.i18n(`publication.internal.publish.success${this._isMultiple ? '.multiple' : ''}`),
+          });
+          if (this._isMultiple) {
+            this.fire('navigate', { doc: this.publishSpace });
+          } else {
+            this.fire('document-updated');
+          }
+          this.fire('nx-publish-success');
+        })
+        .catch((err) => {
+          this.notify({
+            message: this.i18n(`publication.internal.publish.error${this._isMultiple ? '.multiple' : ''}`),
+          });
+          throw err;
         });
-        throw err;
-      });
+    }
   },
 
   _canPublish() {

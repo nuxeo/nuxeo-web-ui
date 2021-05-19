@@ -70,6 +70,7 @@ Polymer({
       name="[[name]]"
       nx-provider="[[nxProvider]]"
       selected-items="{{selectedItems}}"
+      view="{{view}}"
       display-quick-filters
       display-select-all
     >
@@ -256,6 +257,11 @@ Polymer({
 
     selectedItems: {
       type: Array,
+      notify: true,
+    },
+
+    view: {
+      type: Object,
       notify: true,
     },
 
