@@ -60,7 +60,9 @@ Polymer({
     <nuxeo-operation-button
       id="bulkOpBtn" 
       operation="Bulk.RunAction"
-      poll-interval="[[pollInterval]]" 
+      input="[[view]]"
+      params="[[_params(collection)]]"
+      poll-interval="[[pollInterval]]"
       async 
       hidden
     >
@@ -168,7 +170,7 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: 'Add documents to collection started' /* this.i18n('csvExportButton.action.poll') */});
+    this.notify({ message: this.i18n('addToCollectionDocumentsButton.bulkOperation.poll.start') });
     this._resetPopup();
     this._toggleDialog();
   },
@@ -216,7 +218,7 @@ Polymer({
 
   _addToCollection() {
     if (this._isSelectAllActive()) {
-      this._executeSelectAll();
+      this.$.bulkOpBtn._execute();
     } else {
       // add selected documents to collection
       const op = this.$$('#addToCollectionOp');

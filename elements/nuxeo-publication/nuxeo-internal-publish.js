@@ -78,6 +78,7 @@ Polymer({
     <nuxeo-operation-button 
       id="bulkOpBtn" 
       operation="Bulk.RunAction"
+      input="[[view]]"
       poll-interval="[[pollInterval]]" 
       async 
       hidden
@@ -233,7 +234,9 @@ Polymer({
 
   _publish() {
     if (this._isSelectAllActive()) {
-      this._executeSelectAll();
+      const op = this.$.bulkOpBtn;
+      op.params = this._params();
+      op._execute();
     } else {
       this.$.op.params = {
         target: this.publishSpace.uid,
