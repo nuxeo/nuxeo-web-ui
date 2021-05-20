@@ -44,7 +44,9 @@ Polymer({
     <nuxeo-operation-button 
       id="bulkOpBtn" 
       operation="Bulk.RunAction"
-      poll-interval="[[pollInterval]]" 
+      input="[[view]]"
+      params="[[_params(hard)]]"
+      poll-interval="[[pollInterval]]"
       async 
       hidden
     >
@@ -105,7 +107,7 @@ Polymer({
     if ((this._isSelectAllActive() || this.docsHavePermissions)
       && window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
       if (this._isSelectAllActive()) {
-        this._executeSelectAll();
+        this.$.bulkOpBtn._execute();
       } else if (this.documents && this.documents.length) {
         const uids = this.documents.map((doc) => doc.uid).join(',');
         const op = this.hard ? this.$.deleteOp : this.$.trashOp;
@@ -125,7 +127,7 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: 'Delete documents has started' /* this.i18n('csvExportButton.action.poll') */});
+    this.notify({ message: this.i18n('deleteDocumentsButton.bulkOperation.poll.start') });
   },
 
   _onResponse() {

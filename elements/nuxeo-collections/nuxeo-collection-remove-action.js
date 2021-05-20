@@ -41,6 +41,7 @@ Polymer({
     <nuxeo-operation-button 
       id="bulkOpBtn" 
       operation="Bulk.RunAction"
+      input="[[view]]"
       poll-interval="[[pollInterval]]"
       async 
       hidden
@@ -87,11 +88,11 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: 'Remove documents from collection started' /* this.i18n('csvExportButton.action.poll') */});
+    this.notify({ message: this.i18n('removeFromCollectionAction.bulkOperation.poll.start') });
   },
 
   _onResponse() {
-    this.notify({ message: 'Documents removed from collection' /* this.i18n('csvExportButton.action.poll') */});
+    this.notify({ message: this.i18n('removeFromCollectionAction.bulkOperation.poll.end') });
     this.members = [];
     this.fire('refresh');
   },
@@ -108,7 +109,9 @@ Polymer({
   remove() {
     if (this._isSelectAllActive()) {
       // click the operation button to call the bulk action
-      this._executeSelectAll();
+      const op = this.$.bulkOpBtn;
+      op.params = this._params();
+      op._execute();
     } else if (this.members && this.members.length > 0) {
       const uids = this.members.map((doc) => doc.uid).join(',');
       this.$.removeOp.input = `docs:${uids}`;
