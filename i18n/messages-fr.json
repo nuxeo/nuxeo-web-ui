@@ -442,7 +442,6 @@
   "documentPage.activity": "Activité",
   "documentPage.collections": "Collections",
   "documentPage.comments": "Commentaires",
-  "documentPage.content.storedInColdStorage": "Le fichier principal est stocké en stockage à froid.",
   "documentPage.details": "Détails",
   "documentPage.legalHold": "Le document est sous conservation légale",
   "documentPage.process.running": "Workflow en cours",
