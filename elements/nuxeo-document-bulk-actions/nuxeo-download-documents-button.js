@@ -24,6 +24,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-download-documents-button`
@@ -49,7 +50,7 @@ Polymer({
   `,
 
   is: 'nuxeo-download-documents-button',
-  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -61,8 +62,6 @@ Polymer({
     document: {
       type: Object,
     },
-
-    view: Object,
 
     /**
      * `true` if the action should display the label, `false` otherwise.
@@ -76,10 +75,6 @@ Polymer({
   ready() {
     this.$.btn.addEventListener('poll-start', this._onPollStart.bind(this));
     this.$.btn.addEventListener('response', this._onResponse.bind(this));
-  },
-
-  _isSelectAllActive() {
-    return this.view && this.view.selectAllActive;
   },
 
   _params() {

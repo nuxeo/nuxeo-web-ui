@@ -39,7 +39,15 @@ Polymer({
 
     <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing></nuxeo-operation>
 
-    <nuxeo-operation-button id="bulkOpBtn" operation="Bulk.RunAction" poll-interval="[[pollInterval]]" async hidden>
+    <nuxeo-operation-button 
+      id="bulkOpBtn" 
+      operation="Bulk.RunAction"
+      input="[[view]]"
+      params="[[_params()]]"
+      poll-interval="[[pollInterval]]" 
+      async 
+      hidden
+      >
     </nuxeo-operation-button>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
@@ -90,7 +98,7 @@ Polymer({
       window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))
     ) {
       if (this._isSelectAllActive()) {
-        this._executeSelectAll();
+        this.$.bulkOpBtn._execute();
       } else if (this.documents && this.documents.length) {
         const uids = this.documents.map((doc) => doc.uid).join(',');
         this.$.operation.input = `docs:${uids}`;
@@ -109,7 +117,7 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: 'Untrash documents has started' /* this.i18n('csvExportButton.action.poll') */ });
+    this.notify({ message: this.i18n('untrashDocumentsButton.bulkOperation.poll.start')  });
   },
 
   _onResponse() {
