@@ -2,7 +2,7 @@
  * @author Tony Parisi / http://www.tonyparisi.com/
  */
 
-THREE.GLTFLoaderUtils = Object.create(Object, {
+let GLTFLoaderUtils = Object.create(Object, {
   // errors
   MISSING_DESCRIPTION: { value: 'MISSING_DESCRIPTION' },
   INVALID_PATH: { value: 'INVALID_PATH' },
@@ -119,12 +119,12 @@ THREE.GLTFLoaderUtils = Object.create(Object, {
       var self = this;
 
       if (!type) {
-        delegate.handleError(THREE.GLTFLoaderUtils.INVALID_TYPE, null);
+        delegate.handleError(GLTFLoaderUtils.INVALID_TYPE, null);
         return;
       }
 
       if (!path) {
-        delegate.handleError(THREE.GLTFLoaderUtils.INVALID_PATH);
+        delegate.handleError(GLTFLoaderUtils.INVALID_PATH);
         return;
       }
 
@@ -138,7 +138,7 @@ THREE.GLTFLoaderUtils = Object.create(Object, {
         if (xhr.status == 200 || xhr.status == 206) {
           delegate.streamAvailable(path, xhr.response);
         } else {
-          delegate.handleError(THREE.GLTFLoaderUtils.XMLHTTPREQUEST_STATUS_ERROR, this.status);
+          delegate.handleError(GLTFLoaderUtils.XMLHTTPREQUEST_STATUS_ERROR, this.status);
         }
       };
       xhr.send(null);
@@ -287,3 +287,5 @@ THREE.GLTFLoaderUtils = Object.create(Object, {
     },
   },
 });
+
+export { GLTFLoaderUtils };

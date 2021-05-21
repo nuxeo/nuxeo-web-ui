@@ -2,17 +2,17 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-THREE.GLTFLoader = function(manager) {
+let GLTFLoader = function(manager) {
   this.manager = manager !== undefined ? manager : THREE.DefaultLoadingManager;
 };
 
-THREE.GLTFLoader.prototype = {
-  constructor: THREE.GLTFLoader,
+GLTFLoader.prototype = {
+  constructor: GLTFLoader,
 
   load: function(url, onLoad, onProgress, onError) {
     var scope = this;
 
-    var loader = new THREE.XHRLoader(scope.manager);
+    var loader = new THREE.FileLoader(scope.manager);
     loader.load(
       url,
       function(text) {
@@ -217,15 +217,15 @@ THREE.GLTFLoader.prototype = {
 
           switch (attributeId) {
             case 'POSITION':
-              geometry.addAttribute('position', bufferAttribute);
+              geometry.setAttribute('position', bufferAttribute);
               break;
 
             case 'NORMAL':
-              geometry.addAttribute('normal', bufferAttribute);
+              geometry.setAttribute('normal', bufferAttribute);
               break;
 
             case 'TEXCOORD_0':
-              geometry.addAttribute('uv', bufferAttribute);
+              geometry.setAttribute('uv', bufferAttribute);
               break;
           }
         }
@@ -311,3 +311,5 @@ THREE.GLTFLoader.prototype = {
     };
   },
 };
+
+export { GLTFLoader };

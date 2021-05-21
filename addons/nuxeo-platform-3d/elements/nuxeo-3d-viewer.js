@@ -22,13 +22,11 @@ import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
 
 import * as THREE from 'three';
-import 'three/examples/js/controls/OrbitControls.js';
-import '../loaders/GLTFLoader.js';
-import '../loaders/gltf/glTF-parser.js';
-import '../loaders/gltf/glTFLoader.js';
-import '../loaders/gltf/glTFLoaderUtils.js';
-import '../loaders/gltf/glTFAnimation.js';
-import '../loaders/gltf/glTFShaders.js';
+import { OrbitControls } from '../controls/OrbitControls.js';
+import { GLTFLoader } from '../loaders/GLTFLoader.js';
+import { glTFLoader } from '../loaders/gltf/glTFLoader.js';
+import { glTFAnimator } from '../loaders/gltf/glTFAnimation.js';
+import { glTFShaders } from '../loaders/gltf/glTFShaders.js';
 
 /**
 `nuxeo-3d-viewer` allows viewing 3D content in glTF format.
@@ -183,9 +181,9 @@ Polymer({
 
   _loaderChanged() {
     if (this.loader === 'complete') {
-      this.gltfLoader = new THREE.glTFLoader(); // eslint-disable-line new-cap
+      this.gltfLoader = new glTFLoader(); // eslint-disable-line new-cap
     } else {
-      this.gltfLoader = new THREE.GLTFLoader();
+      this.gltfLoader = new GLTFLoader();
     }
   },
 
@@ -261,7 +259,7 @@ Polymer({
   },
 
   _setupControls() {
-    this.controls = new THREE.OrbitControls(this.camera, this.$.threed);
+    this.controls = new OrbitControls(this.camera, this.$.threed);
     this.controls.addEventListener('change', this._controlsUpdated.bind(this));
     this._sphericalCoordsChanged();
   },
@@ -289,7 +287,7 @@ Polymer({
 
   _render() {
     if (this.loader === 'complete') {
-      THREE.glTFShaders.update(this.scene, this.camera);
+      glTFShaders.update(this.scene, this.camera);
     }
     this.renderer.render(this.root, this.camera);
   },
@@ -313,8 +311,8 @@ Polymer({
 
   _animate() {
     window.requestAnimationFrame(this._animate.bind(this));
-    THREE.glTFAnimator.update();
-    THREE.glTFShaders.update(this.scene, this.camera);
+    glTFAnimator.update();
+    glTFShaders.update(this.scene, this.camera);
     this.controls.update();
     this._render();
   },
@@ -357,11 +355,11 @@ Polymer({
     const dists = new THREE.Vector3().copy(box3.max).sub(box3.min);
     const maxSize = Math.max.apply(null, [dists.x, dists.y, dists.z]);
     const scale = 1 / maxSize;
-    const center = new THREE.Vector3().sub(box3.getCenter());
+    const center = new THREE.Vector3().sub(box3.getCenter(new THREE.Vector3()));
     const matrix = new THREE.Matrix4().identity();
     matrix.makeTranslation(center.x, center.y, center.z);
     matrix.multiplyScalar(scale);
-    object.applyMatrix(matrix);
+    object.applyMatrix4(matrix);
 
     const prepare = function(obj, hasShadow) {
       if (obj.geometry) {

@@ -2,7 +2,7 @@
  * @author Tony Parisi / http://www.tonyparisi.com/
  */
 
-THREE.glTFShaders = (function() {
+let glTFShaders = (function() {
   var shaders = [];
 
   return {
@@ -24,13 +24,13 @@ THREE.glTFShaders = (function() {
     },
 
     bindShaderParameters: function(scene) {
-      for (i = 0; i < shaders.length; i++) {
+      for (var i = 0; i < shaders.length; i++) {
         shaders[i].bindParameters(scene);
       }
     },
 
     update: function(scene, camera) {
-      for (i = 0; i < shaders.length; i++) {
+      for (var i = 0; i < shaders.length; i++) {
         shaders[i].update(scene, camera);
       }
     },
@@ -38,7 +38,7 @@ THREE.glTFShaders = (function() {
 })();
 
 // Construction/initialization
-THREE.glTFShader = function(material, params, object, scene) {
+let glTFShader = function(material, params, object, scene) {
   this.material = material;
   this.parameters = params.technique.parameters;
   this.uniforms = params.technique.uniforms;
@@ -49,7 +49,7 @@ THREE.glTFShader = function(material, params, object, scene) {
 };
 
 // bindParameters - connect the uniform values to their source parameters
-THREE.glTFShader.prototype.bindParameters = function(scene) {
+glTFShader.prototype.bindParameters = function(scene) {
   function findObject(o, p) {
     if (o.glTFID == param.node) {
       p.sourceObject = o;
@@ -79,14 +79,15 @@ THREE.glTFShader.prototype.bindParameters = function(scene) {
 };
 
 // Update - update all the uniform values
-THREE.glTFShader.prototype.update = function(scene, camera) {
+glTFShader.prototype.update = function(scene, camera) {
   // update scene graph
 
   scene.updateMatrixWorld();
 
   // update camera matrices and frustum
   camera.updateMatrixWorld();
-  camera.matrixWorldInverse.getInverse(camera.matrixWorld);
+  // camera.matrixWorldInverse.getInverse(camera.matrixWorld);
+  camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
 
   for (var sname in this.semantics) {
     var semantic = this.semantics[sname];
@@ -131,3 +132,5 @@ THREE.glTFShader.prototype.update = function(scene, camera) {
     }
   }
 };
+
+export { glTFShader, glTFShaders };
