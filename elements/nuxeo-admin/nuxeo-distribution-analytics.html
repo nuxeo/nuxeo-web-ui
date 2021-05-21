@@ -122,8 +122,7 @@ limitations under the License.
           </template>
 
           <p class="error" hidden$="[[_isDisabled(_enabled, _loading)]]">
-            Distribution analytics is disabled because current query would impact quality of the service. <br />
-            Please select another path.
+            [[i18n('distributionAnalytics.disabled.message')]]
           </p>
         </nuxeo-card>
 
