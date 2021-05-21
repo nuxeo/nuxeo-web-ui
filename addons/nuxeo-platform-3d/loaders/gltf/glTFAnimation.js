@@ -2,7 +2,7 @@
  * @author Tony Parisi / http://www.tonyparisi.com/
  */
 
-THREE.glTFAnimator = (function() {
+let glTFAnimator = (function() {
   var animators = [];
 
   return {
@@ -19,7 +19,7 @@ THREE.glTFAnimator = (function() {
     },
 
     update: function() {
-      for (i = 0; i < animators.length; i++) {
+      for (var i = 0; i < animators.length; i++) {
         animators[i].update();
       }
     },
@@ -27,7 +27,7 @@ THREE.glTFAnimator = (function() {
 })();
 
 // Construction/initialization
-THREE.glTFAnimation = function(interps) {
+let glTFAnimation = function(interps) {
   this.running = false;
   this.loop = false;
   this.duration = 0;
@@ -39,32 +39,32 @@ THREE.glTFAnimation = function(interps) {
   }
 };
 
-THREE.glTFAnimation.prototype.createInterpolators = function(interps) {
+glTFAnimation.prototype.createInterpolators = function(interps) {
   var i,
     len = interps.length;
   for (i = 0; i < len; i++) {
-    var interp = new THREE.glTFInterpolator(interps[i]);
+    var interp = new glTFInterpolator(interps[i]);
     this.interps.push(interp);
     this.duration = Math.max(this.duration, interp.duration);
   }
 };
 
 // Start/stop
-THREE.glTFAnimation.prototype.play = function() {
+glTFAnimation.prototype.play = function() {
   if (this.running) return;
 
   this.startTime = Date.now();
   this.running = true;
-  THREE.glTFAnimator.add(this);
+  glTFAnimator.add(this);
 };
 
-THREE.glTFAnimation.prototype.stop = function() {
+glTFAnimation.prototype.stop = function() {
   this.running = false;
-  THREE.glTFAnimator.remove(this);
+  glTFAnimator.remove(this);
 };
 
 // Update - drive key frame evaluation
-THREE.glTFAnimation.prototype.update = function() {
+glTFAnimation.prototype.update = function() {
   if (!this.running) return;
 
   var now = Date.now();
@@ -92,7 +92,7 @@ THREE.glTFAnimation.prototype.update = function() {
 
 //Interpolator class
 //Construction/initialization
-THREE.glTFInterpolator = function(param) {
+let glTFInterpolator = function(param) {
   this.keys = param.keys;
   this.values = param.values;
   this.count = param.count;
@@ -132,7 +132,7 @@ THREE.glTFInterpolator = function(param) {
 };
 
 //Interpolation and tweening methods
-THREE.glTFInterpolator.prototype.interp = function(t) {
+glTFInterpolator.prototype.interp = function(t) {
   var i, j;
   if (t == this.keys[0]) {
     if (this.isRot) {
@@ -196,10 +196,12 @@ THREE.glTFInterpolator.prototype.interp = function(t) {
   }
 };
 
-THREE.glTFInterpolator.prototype.copyValue = function(target) {
+glTFInterpolator.prototype.copyValue = function(target) {
   if (this.isRot) {
     target.copy(this.quat3);
   } else {
     target.copy(this.vec3);
   }
 };
+
+export { glTFAnimation, glTFAnimator, glTFInterpolator };
