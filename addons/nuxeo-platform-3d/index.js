@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+import './controls/OrbitControls.js';
 import './elements/nuxeo-3d-viewer.js';
 import './elements/nuxeo-3d-preview.js';
 import './elements/nuxeo-3d-render-views.js';
