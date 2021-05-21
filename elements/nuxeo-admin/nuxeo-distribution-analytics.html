@@ -16,6 +16,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/lib/utils/async.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/paper-slider/paper-slider.html">
 <link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-card.html">
@@ -62,35 +63,72 @@ limitations under the License.
          };
       }
 
+      .error {
+        border-left: 4px solid var(--nuxeo-warn-text);
+        color: var(--nuxeo-text-default);
+        padding-left: 8px;
+      }
+
     </style>
 
-    <div class="flex-layout">
+    <!-- use nxql page provider to limit the use of the distribution analytics chart -->
+    <nuxeo-page-provider
+      id="provider"
+      provider="nxql_search"
+      page-size="1"
+      schemas="dublincore,uid"
+      headers="[[_headers()]]"
+      skip-aggregates
+      on-error="_onError"
+    >
+    </nuxeo-page-provider>
 
-      <nuxeo-card>
-        <div class="suggestion-wrapper horizontal layout center">
-          <iron-icon icon="icons:folder"></iron-icon>
-          <div class="flex">
-            <nuxeo-path-suggestion id="pathSuggester" value="{{path}}"></nuxeo-path-suggestion>
+    <template is="dom-if" if="[[visible]]">
+      <div class="flex-layout">
+
+        <nuxeo-card>
+          <div class="suggestion-wrapper horizontal layout center">
+            <iron-icon icon="icons:folder"></iron-icon>
+            <div class="flex">
+              <nuxeo-path-suggestion id="pathSuggester" value="{{path}}"></nuxeo-path-suggestion>
+            </div>
           </div>
-        </div>
 
-        <nuxeo-document-distribution-chart id="chart" index="_all"
-         path="[[path]]" mode="count"
-         include-version include-hidden
-         include-deleted>
-        </nuxeo-document-distribution-chart>
+          <template is="dom-if" if="[[_isEnabled(_enabled, _loading)]]">
+            <nuxeo-document-distribution-chart
+              id="chart"
+              index="[[index]]"
+              path="[[path]]"
+              max-depth="[[depth]]"
+              mode="count"
+            >
+            </nuxeo-document-distribution-chart>
+            <div class="horizontal layout center">
+              <div>
+                <iron-icon icon="icons:track-changes"></iron-icon>
+              </div>
+              <div class="flex">
+                <paper-slider
+                  id="ratings"
+                  pin
+                  snaps
+                  max="20"
+                  max-markers="20"
+                  step="1"
+                  value="{{depth}}"
+                ></paper-slider>
+              </div>
+            </div>
+          </template>
 
-        <div class="horizontal layout center">
-          <div>
-            <iron-icon icon="icons:track-changes"></iron-icon>
-          </div>
-          <div class="flex">
-            <paper-slider id="ratings" pin snaps max="20" max-markers="20" step="1" value="{{depth}}"></paper-slider>
-          </div>
-        </div>
-      </nuxeo-card>
+          <p class="error" hidden$="[[_isDisabled(_enabled, _loading)]]">
+            Distribution analytics is disabled because current query would impact quality of the service. <br />
+            Please select another path.
+          </p>
+        </nuxeo-card>
 
-    </div>
+      </div>
+    </template>
 
   </template>
   <script>
@@ -98,6 +136,10 @@ limitations under the License.
       is: 'nuxeo-distribution-analytics',
       behaviors: [Nuxeo.I18nBehavior],
       properties: {
+        visible: {
+          type: Boolean,
+          value: false,
+        },
         index: {
           type: String,
           value: '_all'
@@ -108,21 +150,83 @@ limitations under the License.
         depth: {
           type: Number,
           value: 7
-        }
+        },
+        disableThreshold: {
+          type: Number,
+          value:
+            Nuxeo &&
+            Nuxeo.UI &&
+            Nuxeo.UI.config &&
+            Nuxeo.UI.config.analytics &&
+            Nuxeo.UI.config.analytics.documentDistribution &&
+            Number(Nuxeo.UI.config.analytics.documentDistribution.disableThreshold),
+        },
+        _enabled: {
+          type: Boolean,
+          value: false,
+        },
+        _loading: {
+          type: Boolean,
+          value: true,
+        },
       },
 
       observers: [
-        '_observeDocPath(path, depth)'
+        '_observeDocPath(path, depth, visible)'
       ],
 
+      _params: function() {
+        return {
+          queryParams:
+            'SELECT * FROM Document ' +
+            "WHERE ecm:mixinType != 'HiddenInNavigation' " +
+            'AND ecm:isProxy = 0 AND ' +
+            'ecm:isVersion = 0 AND ' +
+            'ecm:isTrashed = 0 AND ' +
+            'ecm:path STARTSWITH \'' + this.path + '\''
+        };
+      },
+
+      _headers: function() {
+        return {
+          'Content-Type': 'application/json',
+          accept: 'text/plain,application/json',
+          'fetch-document': 'properties',
+        };
+      },
+
+      _isEnabled: function() {
+        return !this._loading && this._enabled;
+      },
+
+      _isDisabled: function() {
+        return (!this._loading && this._enabled) || (this._loading && !this._enabled);
+      },
+
       _observeDocPath: function() {
-        if (this.path && this.path.length && this.path.endsWith('/') &&
-          (this.path !== this.$.chart.path || this.depth !== this.$.chart.maxDepth)) {
-          this.$.chart.maxDepth = this.depth;
-          this.$.chart.path = this.path;
-          this.$.chart.execute();
+        if (!this.visible || !this.path || !this.path.length || !this.path.endsWith('/')) {
+          return;
         }
-      }
+
+        if (this.disableThreshold) {
+          this.$.provider.params = this._params();
+          this.$.provider.fetch().then(function(result) {
+            this._enabled = result && result.resultsCount < this.disableThreshold;
+            this._loading = false;
+            if (this._enabled) {
+              Polymer.Async.animationFrame.run(function() {
+                this.$$('#chart').execute();
+              }.bind(this));
+            }
+          }.bind(this));
+        } else {
+          this._enabled = true;
+          this._loading = false;
+          Polymer.Async.animationFrame.run(function() {
+            this.$$('#chart').execute();
+          }.bind(this));
+        }
+      },
     });
   </script>
 </dom-module>
