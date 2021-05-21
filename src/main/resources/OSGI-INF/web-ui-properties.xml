@@ -39,5 +39,8 @@
 
     <!-- HTML editor to use (alloy or quill) -->
     <property name="org.nuxeo.web.ui.html.editor">alloy</property>
+
+    <!-- Control the enablement of document distribution analytics -->
+    <property name="org.nuxeo.web.ui.analytics.documentDistribution.disableThreshold">${nuxeo.analytics.documentDistribution.disableThreshold}</property>
   </extension>
 </component>
