@@ -352,6 +352,7 @@
   "diff.controls.unifiedView": "Unifierad Vy",
   "diffPage.noDocuments": "Inga dokument har valts för jämförelse.",
   "diffPage.versus": "Kontra.",
+  "distributionAnalytics.disabled.message": "Distribution analytics is disabled because the current query would impact the quality of the service. Please select another path.",
   "documentAttachments.empty": "Det finns inga bilagor",
   "documentAttachments.heading": "Bilagor",
   "documentAttachments.upload.add": "Ladda upp bilaga",

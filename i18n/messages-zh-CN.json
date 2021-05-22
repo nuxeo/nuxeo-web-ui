@@ -352,6 +352,7 @@
   "diff.controls.unifiedView": "合并视图",
   "diffPage.noDocuments": "未选择要进行比较的文档。",
   "diffPage.versus": "Vs.",
+  "distributionAnalytics.disabled.message": "Distribution analytics is disabled because the current query would impact the quality of the service. Please select another path.",
   "documentAttachments.empty": "沒有附件",
   "documentAttachments.heading": "附件",
   "documentAttachments.upload.add": "添加附件",
