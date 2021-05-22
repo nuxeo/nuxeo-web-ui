@@ -352,6 +352,7 @@
   "diff.controls.unifiedView": "Ikuspegi bateratua",
   "diffPage.noDocuments": "Ez da alderatzeko dokumenturik hautatu.",
   "diffPage.versus": "Vs.",
+  "distributionAnalytics.disabled.message": "Distribution analytics is disabled because the current query would impact the quality of the service. Please select another path.",
   "documentAttachments.empty": "Ez dago eranskinik",
   "documentAttachments.heading": "Eranskinak",
   "documentAttachments.upload.add": "Gehitu eranskina",
