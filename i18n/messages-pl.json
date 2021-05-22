@@ -351,6 +351,7 @@
   "diff.controls.unifiedView": "Widok jednolity",
   "diffPage.noDocuments": "Nie wybrano żadnych dokumentów do porównania.",
   "diffPage.versus": "Vs.",
+  "distributionAnalytics.disabled.message": "Distribution analytics is disabled because the current query would impact the quality of the service. Please select another path.",
   "documentAttachments.empty": "Brak załączników",
   "documentAttachments.heading": "Załączniki",
   "documentAttachments.upload.add": "Prześlij załącznik",

@@ -351,6 +351,7 @@
   "diff.controls.unifiedView": "Eenvormige weergave",
   "diffPage.noDocuments": "Er zijn geen documenten geselecteerd voor vergelijking.",
   "diffPage.versus": "Vs.",
+  "distributionAnalytics.disabled.message": "Distribution analytics is disabled because the current query would impact the quality of the service. Please select another path.",
   "documentAttachments.empty": "Er zijn geen bijlagen",
   "documentAttachments.heading": "Bijlagen",
   "documentAttachments.upload.add": "Bijlage uploaden",
