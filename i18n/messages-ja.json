@@ -351,6 +351,7 @@
   "diff.controls.unifiedView": "統合ビュー",
   "diffPage.noDocuments": "比較する文書が選択されませんでした。",
   "diffPage.versus": "対",
+  "distributionAnalytics.disabled.message": "Distribution analytics is disabled because the current query would impact the quality of the service. Please select another path.",
   "documentAttachments.empty": "添付ファイルがありません。",
   "documentAttachments.heading": "添付ファイル",
   "documentAttachments.upload.add": "添付ファイルをアップロード",
