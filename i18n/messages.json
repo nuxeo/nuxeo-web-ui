@@ -1183,6 +1183,7 @@
   "pictureViewLayout.uploaded.message": "Picture uploaded",
   "pictureViewLayout.weight": "Weight",
   "profile.heading": "Profile",
+  "publication.bulkOperation.poll.start": "Publish documents has started",
   "publication.dialog.cancel": "Cancel",
   "publication.internal.title": "Internal Publication",
   "publication.internal.location": "Location",

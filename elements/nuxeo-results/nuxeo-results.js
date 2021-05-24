@@ -160,7 +160,7 @@ Polymer({
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
         <template is="dom-if" if="[[_displaySelectAll(displaySelectAll, view)]]">
           <div>
-            <nuxeo-checkmark checked="{{selectAllActive}}" on-click="_selectAllChanged"></nuxeo-checkmark>
+            <nuxeo-checkmark checked="{{selectAllActive}}" on-click="_toggleSelectAll"></nuxeo-checkmark>
             <span>Select All</span>
           </div>
         </template>
@@ -428,7 +428,7 @@ Polymer({
     }
   },
 
-  _selectAllChanged() {
+  _toggleSelectAll() {
     if (!this.view) {
       return;
     }
@@ -468,6 +468,7 @@ Polymer({
       this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
       this.unlisten(oldView, 'items-changed', '_itemsChanged');
       this.unlisten(oldView, 'quick-filters-changed', '_quickFiltersChanged');
+      this.unlisten(view, 'select-all-active-changed', '_selectAllActiveChanged');
     }
     if (view) {
       // initialize columns
@@ -491,12 +492,17 @@ Polymer({
       this.listen(view, 'settings-changed', '_saveViewSettings');
       this.listen(view, 'items-changed', '_itemsChanged');
       this.listen(view, 'quick-filters-changed', '_quickFiltersChanged');
+      this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
       view.nxProvider = this.nxProvider;
       // update view
       this.reset();
       this.fetch();
       this.fire('search-results-view', { view, name: this.name });
     }
+  },
+
+  _selectAllActiveChanged() {
+    this.selectAllActive = this.view.selectAllActive;
   },
 
   _updateViews() {
