@@ -77,6 +77,14 @@ Polymer({
         );
       }
 
+      /* because some views can delegate actions into the resultActions panel */
+      #views slot::slotted(:not([handles-select-all])),
+      #views slot::slotted(:not([handles-sorting])),
+      #views::slotted(:not([handles-select-all])) /* edge */,
+      #views::slotted(:not([handles-sorting])) /* edge */ {
+        height: calc(var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top))) - 66px);
+      }
+
       .displayMode {
         @apply --nuxeo-action;
       }
@@ -89,14 +97,20 @@ Polymer({
         @apply --layout-vertical;
       }
 
-      .resultActions,
+      .resultActions {
+        @apply --layout-vertical;
+      }
+
+      .commonActions,
+      .delegatedActions,
       .viewModes,
       .rightHand {
         @apply --layout-horizontal;
         @apply --layout-center;
       }
 
-      .resultActions,
+      .commonActions,
+      .delegatedActions .resultActions,
       .rightHand {
         @apply --layout-wrap;
       }
@@ -104,6 +118,24 @@ Polymer({
       .rightHand {
         @apply --layout-flex;
         @apply --layout-end-justified;
+      }
+
+      .commonActions,
+      .delegatedActions {
+        @apply --layout-flex;
+      }
+
+      .delegatedActions {
+        background: white;
+        box-shadow: 0 1px 0 rgb(0 0 0 / 10%);
+        border-bottom: var(--iron-data-table-header_-_border-bottom);
+        height: 51px;
+        margin-top: 13px;
+        padding: 11px 22px;
+      }
+
+      .delegatedActions > *:not(:last-child) {
+        margin-right: 45px;
       }
 
       .resultActions {
@@ -158,44 +190,50 @@ Polymer({
       </nuxeo-selection-toolbar>
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
-        <template is="dom-if" if="[[_displaySelectAll(displaySelectAll, view)]]">
-          <div>
-            <nuxeo-checkmark checked="{{selectAllActive}}" on-click="_toggleSelectAll"></nuxeo-checkmark>
-            <span>Select All</span>
-          </div>
-        </template>
-        <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
-          <nuxeo-sort-select
-            options="[[_sortOptions(view, sortOptions)]]"
-            selected="{{sortSelected}}"
-            on-sort-order-changed="_sortChanged"
-          ></nuxeo-sort-select>
-        </template>
-        <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
-          <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="fetch"></nuxeo-quick-filters>
-        </template>
-        <span class="resultsCount" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]"
-          >[[i18n('results.heading.count', resultsCount)]]</span
-        >
+        <div class="commonActions">
+          <span class="resultsCount" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]"
+            >[[i18n('results.heading.count', resultsCount)]]</span
+          >
+          <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
+            <nuxeo-quick-filters
+              quick-filters="{{quickFilters}}"
+              on-quick-filters-changed="fetch"
+            ></nuxeo-quick-filters>
+          </template>
 
-        <div class="rightHand">
-          <slot name="actions">
-            <nuxeo-slot name="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
-          </slot>
+          <div class="rightHand">
+            <slot name="actions">
+              <nuxeo-slot name="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
+            </slot>
 
-          <div class="viewModes">
-            <template is="dom-repeat" items="[[_displayModes]]">
-              <paper-icon-button
-                class="displayMode"
-                icon="[[item.icon]]"
-                title$="[[_displayModeTitle(item, i18n)]]"
-                selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
-                disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
-                on-tap="_toggleDisplayMode"
-              >
-              </paper-icon-button>
-            </template>
+            <div class="viewModes">
+              <template is="dom-repeat" items="[[_displayModes]]">
+                <paper-icon-button
+                  class="displayMode"
+                  icon="[[item.icon]]"
+                  title$="[[_displayModeTitle(item, i18n)]]"
+                  selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                  disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
+                  on-tap="_toggleDisplayMode"
+                >
+                </paper-icon-button>
+              </template>
+            </div>
           </div>
+        </div>
+        <div class="delegatedActions" hidden="[[!_displayDelegatedAction(displaySelectAll, displaySort, view)]]">
+          <template is="dom-if" if="[[_displaySelectAll(displaySelectAll, view)]]">
+            <div>
+              <nuxeo-checkmark checked="{{selectAllActive}}" on-click="_toggleSelectAll"></nuxeo-checkmark>
+            </div>
+          </template>
+          <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
+            <nuxeo-sort-select
+              options="[[_sortOptions(view, sortOptions)]]"
+              selected="{{sortSelected}}"
+              on-sort-order-changed="_sortChanged"
+            ></nuxeo-sort-select>
+          </template>
         </div>
       </div>
 
@@ -396,6 +434,10 @@ Polymer({
       !this.view.handlesFiltering &&
       (this.view.hasAttribute('display-quick-filters') || this.displayQuickFilters)
     );
+  },
+
+  _displayDelegatedAction() {
+    return this._displaySelectAll() || this._displaySort();
   },
 
   _displaySelectAll() {
