@@ -271,7 +271,7 @@ Polymer({
         </div>
 
         <div id="dropzone" class="vertical layout flex step" hidden="[[!canCreate]]">
-          <input hidden id="uploadFiles" type="file" on-change="_fileChanged" accept=".csv" />
+          <input hidden id="uploadFiles" type="file" on-change="_fileChanged" accept="[[accept]]" />
           <template is="dom-if" if="[[!hasFile]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
