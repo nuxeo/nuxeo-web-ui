@@ -201,7 +201,7 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: 'Publish documents has started' /* this.i18n('csvExportButton.action.poll') */});
+    this.notify({ message: this.i18n('publication.bulkOperation.poll.start') });
     this.fire('nx-publish-success');
   },
 
