@@ -352,7 +352,7 @@
   "diff.controls.unifiedView": "Vereinheitlichte Ansicht",
   "diffPage.noDocuments": "Es wurden keine Dokumente zum Vergleich ausgewählt.",
   "diffPage.versus": "Ggü.",
-  "distributionAnalytics.disabled.message": "Distribution analytics is disabled because the current query would impact the quality of the service. Please select another path.",
+  "distributionAnalytics.disabled.message": "Verteilungsanalytik ist deaktiviert, da die aktuelle Abfrage die Qualität des Dienstes beeinträchtigen würde. Bitte wählen Sie einen anderen Pfad.",
   "documentAttachments.empty": "Es sind keine Anhänge vorhanden",
   "documentAttachments.heading": "Anhänge",
   "documentAttachments.upload.add": "Anhang hochladen",
