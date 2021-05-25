@@ -351,7 +351,7 @@
   "diff.controls.unifiedView": "Vue unifiée",
   "diffPage.noDocuments": "Aucun document à comparer.",
   "diffPage.versus": "Vs.",
-  "distributionAnalytics.disabled.message": "Distribution analytics is disabled because the current query would impact the quality of the service. Please select another path.",
+  "distributionAnalytics.disabled.message": "L'analyse de distribution est désactivée car la requête actuelle affecterait la qualité du service. Veuillez sélectionner un autre chemin.",
   "documentAttachments.empty": "Il n'y a pas de fichiers complémentaires",
   "documentAttachments.heading": "Fichiers complémentaires",
   "documentAttachments.upload.add": "Ajouter un fichier complémentaire",
