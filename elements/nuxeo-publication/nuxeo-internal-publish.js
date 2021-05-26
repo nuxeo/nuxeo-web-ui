@@ -201,13 +201,18 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: this.i18n('publication.bulkOperation.poll.start') });
-    this.fire('nx-publish-success');
+    this.notify({
+      message: this.i18n('publication.bulkOperation.poll.start'),
+      abort: true,
+      dismissible: true,
+    });
+    this.fire('nx-publish-success', { dismissible: true });
   },
 
   _onResponse() {
     this.fire('notify', {
       message: this.i18n(`publication.internal.publish.success${this._isMultiple ? '.multiple' : ''}`),
+      dismissible: true,
     });
     if (this._isMultiple) {
       this.fire('navigate', { doc: this.publishSpace });

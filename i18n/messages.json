@@ -29,6 +29,7 @@
   "activity.workflowTaskCompleted": "completed a review task",
   "accessibility.logo": "Application Logo",
   "addToCollectionDocumentsButton.bulkOperation.poll.start": "Add documents to collection started",
+  "addToCollectionDocumentsButton.bulkOperation.poll.stop": "Documents added to collection",
   "addToCollectionDocumentsButton.dialog.add": "Add to Collection",
   "addToCollectionDocumentsButton.dialog.cancel": "Cancel",
   "addToCollectionDocumentsButton.dialog.collections": "Collections",
