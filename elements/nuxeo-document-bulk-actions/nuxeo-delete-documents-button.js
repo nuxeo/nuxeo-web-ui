@@ -129,11 +129,18 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: this.i18n('deleteDocumentsButton.bulkOperation.poll.start') });
+    this.notify({
+      message: this.i18n('deleteDocumentsButton.bulkOperation.poll.start'),
+      abort: true,
+      dismissible: true,
+    });
   },
 
   _onResponse() {
-    this.fire('nuxeo-documents-deleted', { documents: this.documents });
+    this.fire('nuxeo-documents-deleted', {
+      documents: this.documents,
+      dismissible: true,
+    });
     this.documents = [];
     this.fire('refresh');
   },

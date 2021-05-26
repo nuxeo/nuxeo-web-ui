@@ -58,6 +58,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
+import '@material/mwc-snackbar';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
 import './nuxeo-browser/nuxeo-repositories.js';
 import './nuxeo-document-storage/nuxeo-document-storage.js';
@@ -271,11 +272,26 @@ Polymer({
         display: none;
       }
 
-      #toast {
+      #snackbarPanel {
         display: flex;
+        flex-direction: column-reverse;
+        bottom: 0;
+        position: absolute;
+      }
+
+      mwc-snackbar {
+        /* from #toast */
         align-items: center;
-        padding: 0 24px;
+        display: flex;
         justify-content: space-between;
+        padding: 0 24px;
+
+        color: white;
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+        z-index: 103;
+        --mdc-typography-body2-font-size: 14px;
       }
     </style>
 
@@ -453,14 +469,19 @@ Polymer({
 
     <nuxeo-progress-indicator visible="[[loading]]"></nuxeo-progress-indicator>
 
-    <paper-toast id="toast">
-      <paper-icon-button
-        icon="icons:close"
-        on-tap="_dismissToast"
-        hidden$="[[!_dismissible]]"
-        aria-label$="[[i18n('command.close')]]"
-      ></paper-icon-button>
-    </paper-toast>
+    <!-- vertical panel to display multiple notifications -->
+    <div id="snackbarPanel">
+      <mwc-snackbar id="toast" leading>
+        <paper-icon-button id="abort" slot="action" hidden></paper-icon-button>
+        <paper-icon-button
+          id="dismiss"
+          slot="dismiss"
+          icon="icons:close"
+          hidden$="[[!_dismissible]]"
+          aria-label$="[[i18n('command.close')]]"
+        ></paper-icon-button>
+      </mwc-snackbar>
+    </div>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
     <nuxeo-keys keys="d" on-pressed="showHome"></nuxeo-keys>
@@ -1082,7 +1103,10 @@ Polymer({
   },
 
   _documentAddedToCollection(e) {
-    this._toast(this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection'));
+    e.detail.message = this.i18n(
+      e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection',
+    );
+    this._notify(e);
   },
 
   _documentRemovedFromCollection() {
@@ -1162,12 +1186,14 @@ Polymer({
       if (e.detail.error.response.status === 403) {
         msg = `${msg} ${this.i18n('error.403')}`;
       }
-      this._toast(msg);
+      e.detail.message = msg;
+      this._notify(e);
     } else {
       this._removeFromClipboard(e.detail.documents);
       this._removeFromRecentlyViewed(e.detail.documents);
       this._fetchTaskCount();
-      this._toast(this.i18n('app.documents.deleted.success'));
+      e.detail.message = this.i18n('app.documents.deleted.success');
+      this._notify(e);
       if (e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
         this._refreshCollections();
       }
@@ -1176,7 +1202,8 @@ Polymer({
   },
 
   _documentsUntrashed(e) {
-    this._toast(this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`));
+    e.detail.message = this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`);
+    this._notify(e);
     if (e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
       this._refreshCollections();
     }
@@ -1300,21 +1327,73 @@ Polymer({
     });
   },
 
-  _notify(e) {
-    const options = e.detail;
-    if (options.close) {
-      this.$.toast.close();
+  _getToastFor(source, data) {
+    let {toast} = this.$;
+    const { callback, dismissible } = data;
+    if (!source) {
+      // toast = this.$.toast;
+      toast.addEventListener('MDCSnackbar:opening', () => {
+        // HACK - to position the snackbar and style the internal label
+        toast.mdcRoot.style.position = 'relative';
+        toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
+      });
+      this.set('_dismissible', !!dismissible);
+    } else {
+      const id = source.tagName.toLowerCase();
+      toast = this.$.snackbarPanel.querySelector(`#${id}`);
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.innerHTML = `
+          <mwc-snackbar id="${id}" leading>
+            <paper-button id="abort" slot="action">Abort</paper-button>'
+            <paper-icon-button id="dismiss" icon="icons:close" slot="dismiss"></paper-icon-button>
+          </mwc-snackbar>
+        `;
+        toast = toast.querySelector('mwc-snackbar');
+
+        // HACK - by changing the position to relative, we can stack snackbars (and font smooth)
+        toast.addEventListener('MDCSnackbar:opening', () => {
+          // HACK - to position the snackbar and style the internal label
+          toast.mdcRoot.style.position = 'relative';
+          toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
+        });
+        // listen to the closed event to track dismiss and custom action
+        toast.addEventListener('MDCSnackbar:closed', (e) => {
+          if (e.detail.reason === 'action' && callback) {
+            callback();
+          }
+          // other than that we just need to dismiss the toast
+          toast.parentNode.removeChild(toast);
+        });
+        this.$.snackbarPanel.appendChild(toast);
+      }
     }
-    if (options.message) {
-      this.$.toast.text = options.message;
-      this.$.toast.duration = options.duration !== undefined ? options.duration : 3000;
-      this.set('_dismissible', !!options.dismissible);
-      this.$.toast.open();
-    }
+    return toast;
   },
 
-  _dismissToast() {
-    this.$.toast.toggle();
+  _notify(e) {
+    const source = e.composedPath ? e.composedPath()[0] : null;
+    const toast = this._getToastFor(source, e.detail);
+    const { abort, close, dismissible, duration, message } = e.detail;
+
+    if (close) {
+      toast.close();
+    }
+    if (message) {
+      // update the snackbar properties
+      toast.querySelector('#abort').hidden = !abort;
+      toast.querySelector('#dismiss').hidden = !dismissible;
+      toast.labelText = message;
+      toast.timeoutMs = -1;
+      if (!abort) {
+        // if it can't be aborted, we just treat it like a regular toast
+        toast.timeoutMs = duration !== undefined ? Math.max(4000, duration) : 4000;
+      }
+      if (toast.open) {
+        toast.close();
+      }
+      toast.show();
+    }
   },
 
   _clipboardUpdated(e) {

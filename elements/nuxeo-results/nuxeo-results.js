@@ -126,16 +126,12 @@ Polymer({
       }
 
       .delegatedActions {
-        background: white;
-        box-shadow: 0 1px 0 rgb(0 0 0 / 10%);
-        border-bottom: var(--iron-data-table-header_-_border-bottom);
-        height: 51px;
+        @apply --iron-data-table-header;
         margin-top: 13px;
-        padding: 11px 22px;
       }
 
       .delegatedActions > *:not(:last-child) {
-        margin-right: 45px;
+        margin: 0 22px;
       }
 
       .resultActions {
