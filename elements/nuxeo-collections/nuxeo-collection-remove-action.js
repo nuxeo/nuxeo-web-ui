@@ -37,13 +37,14 @@ Polymer({
     <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
     <nuxeo-operation op="Collection.RemoveFromCollection" id="removeOp" sync-indexing></nuxeo-operation>
-    
-    <nuxeo-operation-button 
-      id="bulkOpBtn" 
+
+    <nuxeo-operation-button
+      id="bulkOpBtn"
       operation="Bulk.RunAction"
       input="[[view]]"
+      params="[[_params(collection)]]"
       poll-interval="[[pollInterval]]"
-      async 
+      async
       hidden
     >
     </nuxeo-operation-button>
@@ -88,11 +89,18 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: this.i18n('removeFromCollectionAction.bulkOperation.poll.start') });
+    this.notify({
+      message: this.i18n('removeFromCollectionAction.bulkOperation.poll.start'),
+      abort: true,
+      dismissible: true,
+    });
   },
 
   _onResponse() {
-    this.notify({ message: this.i18n('removeFromCollectionAction.bulkOperation.poll.end') });
+    this.notify({
+      message: this.i18n('removeFromCollectionAction.bulkOperation.poll.end'),
+      dismissible: true,
+    });
     this.members = [];
     this.fire('refresh');
   },

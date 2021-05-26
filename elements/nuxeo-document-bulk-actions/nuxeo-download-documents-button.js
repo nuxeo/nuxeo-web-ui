@@ -24,7 +24,6 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-download-documents-button`
@@ -45,12 +44,12 @@ Polymer({
       error-label="bulkDownload.error"
       async
       download
-      hidden$="[[_isSelectAllActive(documents.splices, view)]]"
+      hidden$="[[!_isAvailable(documents.splices, view)]]"
     ></nuxeo-operation-button>
   `,
 
   is: 'nuxeo-download-documents-button',
-  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -58,6 +57,8 @@ Polymer({
       notify: true,
       value: [],
     },
+
+    view: Object,
 
     document: {
       type: Object,
@@ -75,6 +76,10 @@ Polymer({
   ready() {
     this.$.btn.addEventListener('poll-start', this._onPollStart.bind(this));
     this.$.btn.addEventListener('response', this._onResponse.bind(this));
+  },
+
+  _isAvailable() {
+    return !(this.view && this.view.selectAllActive);
   },
 
   _params() {

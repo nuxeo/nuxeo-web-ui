@@ -22,21 +22,27 @@ export const SelectAllBehavior = {
   },
 
   ready() {
-    if (this.$.bulkOpBtn) {
-      this.$.bulkOpBtn.addEventListener('response', this._onResponse.bind(this));
-      this.$.bulkOpBtn.addEventListener('poll-start', this._onPollStart.bind(this));
+    const {bulkOpBtn} = this;
+    if (bulkOpBtn) {
+      bulkOpBtn.addEventListener('response', this._onResponse.bind(this));
+      bulkOpBtn.addEventListener('poll-start', this._onPollStart.bind(this));
+      bulkOpBtn.addEventListener('poll-update', this._onPollUpdate.bind(this));
     }
+  },
+
+  get bulkOpBtn() {
+    return this.$.bulkOpBtn;
   },
 
   _isSelectAllActive() {
     return this.view && this.view.selectAllActive;
   },
 
-  _params() {
+  _onPollStart() {
     // todo
   },
 
-  _onPollStart() {
+  _onPollUpdate() {
     // todo
   },
 
