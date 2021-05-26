@@ -74,13 +74,13 @@ Polymer({
     </style>
 
     <nuxeo-operation id="op" op="Document.PublishToSection" sync-indexing></nuxeo-operation>
-    
-    <nuxeo-operation-button 
-      id="bulkOpBtn" 
+
+    <nuxeo-operation-button
+      id="bulkOpBtn"
       operation="Bulk.RunAction"
       input="[[view]]"
-      poll-interval="[[pollInterval]]" 
-      async 
+      poll-interval="[[pollInterval]]"
+      async
       hidden
     >
     </nuxeo-operation-button>

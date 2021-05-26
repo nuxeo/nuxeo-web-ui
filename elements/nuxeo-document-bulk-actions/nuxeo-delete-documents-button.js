@@ -41,13 +41,13 @@ Polymer({
 
     <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing></nuxeo-operation>
 
-    <nuxeo-operation-button 
-      id="bulkOpBtn" 
+    <nuxeo-operation-button
+      id="bulkOpBtn"
       operation="Bulk.RunAction"
       input="[[view]]"
       params="[[_params(hard)]]"
       poll-interval="[[pollInterval]]"
-      async 
+      async
       hidden
     >
     </nuxeo-operation-button>
@@ -104,8 +104,10 @@ Polymer({
   },
 
   deleteDocuments() {
-    if ((this._isSelectAllActive() || this.docsHavePermissions)
-      && window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
+    if (
+      (this._isSelectAllActive() || this.docsHavePermissions) &&
+      window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))
+    ) {
       if (this._isSelectAllActive()) {
         this.$.bulkOpBtn._execute();
       } else if (this.documents && this.documents.length) {
@@ -150,11 +152,12 @@ Polymer({
    * are trashed and `hard` is active OR if select all is active.
    */
   _isAvailable() {
-    return this._isSelectAllActive() || (
-      this.documents &&
-      this.documents.length > 0 &&
-      this._checkDocsPermissions() &&
-      (this.hard || !this._checkDocsAreTrashed())
+    return (
+      this._isSelectAllActive() ||
+      (this.documents &&
+        this.documents.length > 0 &&
+        this._checkDocsPermissions() &&
+        (this.hard || !this._checkDocsAreTrashed()))
     );
   },
 

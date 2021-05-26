@@ -105,7 +105,7 @@ Polymer({
       selected-items="{{selectedItems}}"
       document="[[document]]"
       display-quick-filters
-      display-select-all
+      select-all-enabled
       display-sort="[[_canSort(document, sortOptions)]]"
       sort-options="[[sortOptions]]"
     >
@@ -117,7 +117,6 @@ Polymer({
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
-        select-all-enabled
         draggable$="[[_hasWritePermission(document)]]"
         drop-target-filter="[[_dropTargetFilter]]"
       >
@@ -144,7 +143,6 @@ Polymer({
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
-        select-all-enabled
         on-row-clicked="_navigate"
         draggable$="[[_hasWritePermission(document)]]"
         drop-target-filter="[[_dropTargetFilter]]"
