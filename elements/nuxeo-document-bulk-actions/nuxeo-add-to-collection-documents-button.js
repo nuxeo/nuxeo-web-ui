@@ -58,12 +58,12 @@ Polymer({
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
 
     <nuxeo-operation-button
-      id="bulkOpBtn" 
+      id="bulkOpBtn"
       operation="Bulk.RunAction"
       input="[[view]]"
       params="[[_params(collection)]]"
       poll-interval="[[pollInterval]]"
-      async 
+      async
       hidden
     >
     </nuxeo-operation-button>
@@ -170,13 +170,24 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: this.i18n('addToCollectionDocumentsButton.bulkOperation.poll.start') });
+    this.notify({
+      message: this.i18n('addToCollectionDocumentsButton.bulkOperation.poll.start'),
+      abort: true,
+      dismissible: true,
+      callback() {
+        window.alert('Aborting add to collection');
+      },
+    });
     this._resetPopup();
     this._toggleDialog();
   },
 
   _onResponse() {
-    this.fire('added-to-collection', { collectionId: this.collection });
+    this.fire('added-to-collection', {
+      collectionId: this.collection,
+      docIds: [], // hack just to inform nuxeo-app that we dealing with multiple documents
+      dismissible: true,
+    });
   },
 
   _params() {
