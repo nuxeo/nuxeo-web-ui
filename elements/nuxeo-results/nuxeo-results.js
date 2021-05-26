@@ -221,8 +221,8 @@ Polymer({
             </div>
           </div>
         </div>
-        <div class="delegatedActions" hidden="[[!_displayDelegatedAction(displaySelectAll, displaySort, view)]]">
-          <template is="dom-if" if="[[_displaySelectAll(displaySelectAll, view)]]">
+        <div class="delegatedActions" hidden="[[!_displayDelegatedAction(selectAllEnabled, displaySort, view)]]">
+          <template is="dom-if" if="[[_displaySelectAll(selectAllEnabled, view)]]">
             <div>
               <nuxeo-checkmark checked="{{selectAllActive}}" on-click="_toggleSelectAll"></nuxeo-checkmark>
             </div>
@@ -365,7 +365,7 @@ Polymer({
     /**
      * If enabled, it allows to select all the results items.
      */
-    displaySelectAll: {
+    selectAllEnabled: {
       type: Boolean,
       value: false,
     },
@@ -397,8 +397,9 @@ Polymer({
   },
 
   observers: [
+    '_selectAllChanged(selectAllEnabled, view)',
     '_updateStorage(name)',
-    '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document)',
+    '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view)',
   ],
 
   listeners: {
@@ -441,7 +442,11 @@ Polymer({
   },
 
   _displaySelectAll() {
-    return this.view && !this.view.handlesSelectAll && (this.view.hasAttribute('select-all') || this.displaySelectAll);
+    return (
+      this.view &&
+      !this.view.handlesSelectAll &&
+      (this.view.hasAttribute('select-all-enabled') || this.selectAllEnabled)
+    );
   },
 
   _displaySort() {
@@ -540,6 +545,12 @@ Polymer({
       this.reset();
       this.fetch();
       this.fire('search-results-view', { view, name: this.name });
+    }
+  },
+
+  _selectAllChanged() {
+    if (this.view) {
+      this.view.selectAllEnabled = this.selectAllEnabled;
     }
   },
 
@@ -663,12 +674,10 @@ Polymer({
 
   selectAll() {
     this.view.selectAll();
-    this.selectAllActive = this.view.selectAllActive;
   },
 
   clearSelection() {
     this.view.clearSelection();
-    this.selectAllActive = this.view.selectAllActive;
   },
 
   selectItems(items) {

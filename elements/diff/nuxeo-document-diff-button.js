@@ -51,6 +51,8 @@ Polymer({
       value: [],
     },
 
+    view: Object,
+
     tooltipPosition: {
       type: String,
       value: 'bottom',

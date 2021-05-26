@@ -113,10 +113,10 @@ Polymer({
               <span>[[i18n('selectionToolbar.display.selection')]]</span>
             </a>
           </template>
-          
+
           <!-- else if all the elements are selected -->
           <template is="dom-if" if="[[selectAllActive]]">
-            <span class="count">[[i18n('selectionToolbar.selected.all', selectedItems.length)]]</span>  
+            <span class="count">[[i18n('selectionToolbar.selected.all', selectedItems.length)]]</span>
           </template>
           <a class="selectionLink" on-tap="clearSelection">
             <span>[[i18n('command.clear')]]</span>

@@ -37,13 +37,14 @@ Polymer({
     <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
     <nuxeo-operation op="Collection.RemoveFromCollection" id="removeOp" sync-indexing></nuxeo-operation>
-    
-    <nuxeo-operation-button 
-      id="bulkOpBtn" 
+
+    <nuxeo-operation-button
+      id="bulkOpBtn"
       operation="Bulk.RunAction"
       input="[[view]]"
+      params="[[_params(collection)]]"
       poll-interval="[[pollInterval]]"
-      async 
+      async
       hidden
     >
     </nuxeo-operation-button>
