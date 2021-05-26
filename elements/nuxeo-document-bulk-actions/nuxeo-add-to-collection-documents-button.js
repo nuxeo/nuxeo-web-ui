@@ -58,12 +58,12 @@ Polymer({
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
 
     <nuxeo-operation-button
-      id="bulkOpBtn" 
+      id="bulkOpBtn"
       operation="Bulk.RunAction"
       input="[[view]]"
       params="[[_params(collection)]]"
       poll-interval="[[pollInterval]]"
-      async 
+      async
       hidden
     >
     </nuxeo-operation-button>

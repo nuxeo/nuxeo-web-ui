@@ -39,15 +39,15 @@ Polymer({
 
     <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing></nuxeo-operation>
 
-    <nuxeo-operation-button 
-      id="bulkOpBtn" 
+    <nuxeo-operation-button
+      id="bulkOpBtn"
       operation="Bulk.RunAction"
       input="[[view]]"
       params="[[_params()]]"
-      poll-interval="[[pollInterval]]" 
-      async 
+      poll-interval="[[pollInterval]]"
+      async
       hidden
-      >
+    >
     </nuxeo-operation-button>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
@@ -117,7 +117,7 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: this.i18n('untrashDocumentsButton.bulkOperation.poll.start')  });
+    this.notify({ message: this.i18n('untrashDocumentsButton.bulkOperation.poll.start') });
   },
 
   _onResponse() {
