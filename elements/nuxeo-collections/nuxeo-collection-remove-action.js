@@ -89,11 +89,18 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({ message: this.i18n('removeFromCollectionAction.bulkOperation.poll.start') });
+    this.notify({
+      message: this.i18n('removeFromCollectionAction.bulkOperation.poll.start'),
+      abort: true,
+      dismissible: true,
+    });
   },
 
   _onResponse() {
-    this.notify({ message: this.i18n('removeFromCollectionAction.bulkOperation.poll.end') });
+    this.notify({
+      message: this.i18n('removeFromCollectionAction.bulkOperation.poll.end'),
+      dismissible: true,
+    });
     this.members = [];
     this.fire('refresh');
   },
