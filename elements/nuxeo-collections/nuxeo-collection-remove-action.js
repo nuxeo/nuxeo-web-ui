@@ -34,28 +34,22 @@ import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-action-button-styles nuxeo-styles"></style>
-
-    <nuxeo-operation op="Collection.RemoveFromCollection" id="removeOp" sync-indexing></nuxeo-operation>
+    <style include="nuxeo-action-button-styles"></style>
 
     <nuxeo-operation-button
       id="bulkOpBtn"
-      operation="Bulk.RunAction"
-      input="[[view]]"
-      params="[[_params(collection)]]"
+      icon="nuxeo:remove" 
+      label="[[_label]]"
       poll-interval="[[pollInterval]]"
+      show-label="[[showLabel]]"
+      tooltip-position="[[tooltipPosition]]"
+      on-poll-start="_onPollStart"
+      on-response="_onResponse"
       async
-      hidden
+      sync-indexing
+      hidden="[[!_isAvailable(members, collection)]]"
     >
     </nuxeo-operation-button>
-
-    <template id="availability" is="dom-if" if="[[_isAvailable(members, collection)]]">
-      <div class="action" on-tap="remove">
-        <paper-icon-button noink id="removeButton" icon="nuxeo:remove" aria-labelledby="label"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
-        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
-      </div>
-    </template>
   `,
 
   is: 'nuxeo-collection-remove-action',
@@ -88,47 +82,63 @@ Polymer({
     },
   },
 
+  attached() {
+    // capture the click event on the capture phase to set the nuxeo-operation-button properties
+    this.$.bulkOpBtn.addEventListener('click', this.remove.bind(this), { capture: true });
+  },
+
+  detached() {
+    this.$.bulkOpBtn.removeEventListener('click', this.remove.bind(this));
+  },
+
   _onPollStart() {
     this.notify({
       message: this.i18n('removeFromCollectionAction.bulkOperation.poll.start'),
-      abort: true,
-      dismissible: true,
+      abort: this._isSelectAllActive(),
+      dismissible: this._isSelectAllActive(),
     });
   },
 
   _onResponse() {
     this.notify({
       message: this.i18n('removeFromCollectionAction.bulkOperation.poll.end'),
-      dismissible: true,
+      dismissible: this._isSelectAllActive(),
     });
     this.members = [];
     this.fire('refresh');
   },
 
+  _input() {
+    if (this._isSelectAllActive()) {
+      return this.view;
+    } else if (this.members && this.members.length > 0) {
+      const uids = this.members.map((doc) => doc.uid).join(',');
+      return `docs:${uids}`;
+    }
+  },
+
+  _operation() {
+    return this._isSelectAllActive() ? 'Bulk.RunAction' : 'Collection.RemoveFromCollection';
+  },
+
   _params() {
-    return {
-      operationId: 'Collection.RemoveFromCollection',
-      parameters: {
-        collection: this.collection.uid,
-      },
+    const parameters = {
+      collection: this.collection.uid
     };
+    if (this._isSelectAllActive()) {
+      return {
+        operationId: 'Collection.RemoveFromCollection',
+        parameters: parameters,
+      };
+    }
+    return parameters;
   },
 
   remove() {
-    if (this._isSelectAllActive()) {
-      // click the operation button to call the bulk action
-      const op = this.$.bulkOpBtn;
-      op.params = this._params();
-      op._execute();
-    } else if (this.members && this.members.length > 0) {
-      const uids = this.members.map((doc) => doc.uid).join(',');
-      this.$.removeOp.input = `docs:${uids}`;
-      this.$.removeOp.params = { collection: this.collection.uid };
-      this.$.removeOp.execute().then(() => {
-        this.members = [];
-        this.fire('refresh');
-      });
-    }
+    const opBtn = this.bulkOpBtn;
+    opBtn.input = this._input();
+    opBtn.operation = this._operation();
+    opBtn.params = this._params();
   },
 
   _isAvailable(members, collection) {

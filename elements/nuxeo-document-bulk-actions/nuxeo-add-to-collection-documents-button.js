@@ -54,27 +54,21 @@ Polymer({
       }
     </style>
 
-    <nuxeo-operation op="Document.AddToCollection" id="addToCollectionOp"></nuxeo-operation>
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
 
     <nuxeo-operation-button
       id="bulkOpBtn"
-      operation="Bulk.RunAction"
-      input="[[view]]"
-      params="[[_params(collection)]]"
+      icon="nuxeo:collections"
+      label="[[_label]]"
       poll-interval="[[pollInterval]]"
+      show-label="[[showLabel]]"
+      tooltip-position="[[tooltipPosition]]"
+      on-poll-start="_onPollStart"
+      on-response="_onResponse"
       async
-      hidden
+      hidden="[[!_isAvailable(documents.*)]]"
     >
     </nuxeo-operation-button>
-
-    <template is="dom-if" if="[[_isAvailable(documents.*)]]">
-      <div class="action" on-tap="_toggleDialog">
-        <paper-icon-button noink icon="nuxeo:collections" id="addColBut" aria-labelledby="label"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
-        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
-      </div>
-    </template>
 
     <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
       <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
@@ -169,11 +163,20 @@ Polymer({
     },
   },
 
+  attached() {
+    // capture the click event on the capture phase to trigger the popup
+    this.$.bulkOpBtn.addEventListener('click', this._onCollectionAdd.bind(this), { capture: true });
+  },
+
+  detached() {
+    this.$.bulkOpBtn.removeEventListener('click', this._onCollectionAdd.bind(this));
+  },
+
   _onPollStart() {
     this.notify({
       message: this.i18n('addToCollectionDocumentsButton.bulkOperation.poll.start'),
-      abort: true,
-      dismissible: true,
+      abort: this._isSelectAllActive(),
+      dismissible: this._isSelectAllActive(),
       callback() {
         window.alert('Aborting add to collection');
       },
@@ -186,17 +189,35 @@ Polymer({
     this.fire('added-to-collection', {
       collectionId: this.collection,
       docIds: [], // hack just to inform nuxeo-app that we dealing with multiple documents
-      dismissible: true,
+      dismissible: this._isSelectAllActive(),
     });
   },
 
+  _input() {
+    if (this._isSelectAllActive()) {
+      return this.view;
+    } else {
+      const uids = this.documents.map((doc) => doc.uid);
+      const uidsString = uids.join(',');
+      return `docs:${uidsString}`;
+    }
+  },
+
+  _operation() {
+    return this._isSelectAllActive() ? 'Bulk.RunAction' : 'Document.AddToCollection';
+  },
+
   _params() {
-    return {
-      operationId: 'Document.AddToCollection',
-      parameters: {
-        collection: this.collection,
-      },
+    const parameters = {
+      collection: this.collection,
     };
+    if (this._isSelectAllActive()) {
+      return {
+        operationId: 'Document.AddToCollection',
+        parameters: parameters,
+      };
+    }
+    return parameters;
   },
 
   _isAvailable() {
@@ -204,6 +225,12 @@ Polymer({
       return this._isSelectAllActive() || this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
     }
     return false;
+  },
+
+  _onCollectionAdd(e) {
+    this._toggleDialog();
+    e.preventDefault();
+    e.stopPropagation();
   },
 
   _toggleDialog() {
@@ -228,23 +255,11 @@ Polymer({
   },
 
   _addToCollection() {
-    if (this._isSelectAllActive()) {
-      this.$.bulkOpBtn._execute();
-    } else {
-      // add selected documents to collection
-      const op = this.$$('#addToCollectionOp');
-      op.params = {
-        collection: this.collection,
-      };
-      const uids = this.documents.map((doc) => doc.uid);
-      const uidsString = uids.join(',');
-      op.input = `docs:${uidsString}`;
-      return op.execute().then(() => {
-        this.fire('added-to-collection', { docIds: uids, collectionId: this.collection });
-        this._resetPopup();
-        this._toggleDialog();
-      });
-    }
+    const opBtn = this.bulkOpBtn;
+    opBtn.input = this._input();
+    opBtn.operation = this._operation();
+    opBtn.params = this._params();
+    opBtn._execute();
   },
 
   _resultsFilter(entry) {
