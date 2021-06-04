@@ -37,30 +37,20 @@ Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
-    <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing></nuxeo-operation>
-
     <nuxeo-operation-button
       id="bulkOpBtn"
-      operation="Bulk.RunAction"
-      input="[[view]]"
-      params="[[_params()]]"
+      icon="nuxeo:restore-deleted"
+      label="[[_label]]"
       poll-interval="[[pollInterval]]"
+      show-label="[[showLabel]]"
+      tooltip-position="[[tooltipPosition]]"
+      on-poll-start="_onPollStart"
+      on-response="_onResponse"
       async
-      hidden
+      sync-indexing
+      hidden="[[!_isAvailable(documents.splices)]]"
     >
     </nuxeo-operation-button>
-
-    <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
-      <div class="action" on-tap="untrashDocuments">
-        <paper-icon-button
-          icon="nuxeo:restore-deleted"
-          id="untrashAllButton"
-          aria-labelledby="label"
-        ></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
-        <nuxeo-tooltip position="[[tooltipPosition]]">[[i18n(_label)]]</nuxeo-tooltip>
-      </div>
-    </template>
   `,
 
   is: 'nuxeo-untrash-documents-button',
@@ -92,48 +82,68 @@ Polymer({
     },
   },
 
+  attached() {
+    // capture the click event on the capture phase to set nuxeo-operation-buttons properties
+    this.$.bulkOpBtn.addEventListener('click', this._untrashDocuments.bind(this), { capture: true });
+  },
+
+  detached() {
+    this.$.bulkOpBtn.removeEventListener('click', this._untrashDocuments.bind(this));
+  },
+
   untrashDocuments() {
     if (
       (this._isSelectAllActive() || this.docsHavePermissions) &&
       window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))
     ) {
-      if (this._isSelectAllActive()) {
-        this.$.bulkOpBtn._execute();
-      } else if (this.documents && this.documents.length) {
-        const uids = this.documents.map((doc) => doc.uid).join(',');
-        this.$.operation.input = `docs:${uids}`;
-        this.$.operation.execute().then(
-          () => {
-            this.fire('nuxeo-documents-untrashed', { documents: this.documents });
-            this.documents = [];
-            this.fire('refresh');
-          },
-          (error) => {
-            this.fire('nuxeo-documents-untrashed', { error, documents: this.documents });
-          },
-        );
-      }
+      const opBtn = this.bulkOpBtn;
+      opBtn.input = this._input();
+      opBtn.operation = this._operation();
+      opBtn.params = this._params();
+      opBtn._execute();
     }
+  },
+
+  _untrashDocuments(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.untrashDocuments();
   },
 
   _onPollStart() {
     this.notify({
       message: this.i18n('untrashDocumentsButton.bulkOperation.poll.start'),
-      abort: true,
-      dismissible: true,
+      abort: this._isSelectAllActive(),
+      dismissible: this._isSelectAllActive(),
     });
   },
 
   _onResponse() {
     this.fire('nuxeo-documents-untrashed', {
       documents: this.documents,
-      dismissible: true,
+      dismissible: this._isSelectAllActive(),
     });
     this.documents = [];
     this.fire('refresh');
   },
 
+  _input() {
+    if (this._isSelectAllActive()) {
+      return this.view;
+    } else if (this.documents && this.documents.length) {
+      const uids = this.documents.map((doc) => doc.uid).join(',');
+      return `docs:${uids}`;
+    }
+  },
+
+  _operation() {
+    return this._isSelectAllActive() ? 'Bulk.RunAction' : 'Document.Trash';
+  },
+
   _params() {
+    if (!this._isSelectAllActive()) {
+      return {};
+    }
     return {
       operationId: 'Document.Untrash',
       parameters: {

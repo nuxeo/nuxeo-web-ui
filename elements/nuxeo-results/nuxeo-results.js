@@ -395,7 +395,7 @@ Polymer({
   observers: [
     '_selectAllChanged(selectAllEnabled, view)',
     '_updateStorage(name)',
-    '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view)',
+    '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
   ],
 
   listeners: {
