@@ -70,7 +70,7 @@ Polymer({
       }
     </style>
 
-    <template is="dom-if" if="[[_isAvailable(document, documents.splices)]]">
+    <template is="dom-if" if="[[_isAvailable(document, documents.splices, view)]]">
       <div class="action" on-tap="_toggleDialog">
         <paper-icon-button id="publishButton" icon="[[icon]]" noink aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
