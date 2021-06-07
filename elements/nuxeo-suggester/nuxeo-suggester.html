@@ -19,7 +19,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="../../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-connection.html">
@@ -247,8 +246,14 @@ limitations under the License.
             <template is="dom-repeat" items="{{items}}">
               <a class="item" href$="[[_getUrl(item, false, urlFor)]]" on-click="_itemClicked">
                 <div class="thumbnailContainer">
-                  <iron-image src="[[_getIcon(item)]]" sizing="cover" position="center" class="thumbnailContainer">
-                  </iron-image>
+                  <iron-icon
+                    src="[[_getThumbnail(item)]]"
+                    icon="[[_getIcon(item)]]"
+                    sizing="cover"
+                    position="center"
+                    class="thumbnailContainer"
+                  >
+                  </iron-icon>
                 </div>
                 <div class="details">
                   <div class="itemName">[[item.label]]</div>
@@ -371,13 +376,15 @@ limitations under the License.
         },
 
         _getIcon: function(item) {
+          return !this._getThumbnail(item) && `nuxeo:${item.type}`;
+        },
+
+        _getThumbnail(item) {
           if (item.command) {
             return item.icon;
           } else if (item.thumbnailUrl && item.thumbnailUrl.length > 0) {
             return this.$.nxcon.url + '/' + item.thumbnailUrl;
-          } else {
-            return this.$.nxcon.url + item.icon;
-          }
+          } 
         },
 
         _getUrl: function(item, replaceHashbang) {
