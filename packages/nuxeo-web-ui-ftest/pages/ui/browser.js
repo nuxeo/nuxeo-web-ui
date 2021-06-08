@@ -228,9 +228,8 @@ export default class Browser extends BasePage {
     driver.waitUntil(() => {
       this.waitForChildren();
       const idx = this.currentPage
-        .shadowExecute('nuxeo-data-table', (table) =>
-          Array.from(table.querySelectorAll('nuxeo-data-table-column')).map((c) => c.sortBy),
-        )
+        .elements('nuxeo-data-table nuxeo-data-table-column')
+        .map((col) => col.getAttribute('sort-by'))
         .findIndex((colSortByField) => colSortByField && colSortByField.toLowerCase() === field.toLowerCase());
       if (idx === -1) {
         throw new Error('Field not found');
