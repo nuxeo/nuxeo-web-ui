@@ -22,7 +22,7 @@ export default class CollapsibleDocumentPage extends DocumentPage {
 
   expandDetailsCard() {
     this.detailsCard.waitForVisible();
-    if (this.detailsCard.getAttribute('opened') === 'false') {
+    if (this.detailsCard.getAttribute('opened') === null) {
       this.detailsCard.waitForVisible('h5.header');
       this.detailsCard.click('h5.header');
     }
@@ -30,7 +30,7 @@ export default class CollapsibleDocumentPage extends DocumentPage {
 
   collapseDetailsCard() {
     this.detailsCard.waitForVisible();
-    if (this.detailsCard.getAttribute('opened')) {
+    if (this.detailsCard.getAttribute('opened') !== null) {
       this.detailsCard.waitForVisible('h5.header');
       this.detailsCard.click('h5.header');
     }

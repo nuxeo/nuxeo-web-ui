@@ -35,9 +35,9 @@ Then('I can see clipboard actions disabled', function() {
   }
   const { moveButton } = this.ui.drawer.clipboard;
   moveButton.waitForVisible();
-  driver.waitUntil(() => moveButton.getAttribute('disabled') === 'true');
+  driver.waitUntil(() => moveButton.getAttribute('disabled') !== null);
 
   const { pasteButton } = this.ui.drawer.clipboard;
   pasteButton.waitForVisible();
-  driver.waitUntil(() => pasteButton.getAttribute('disabled') === 'true');
+  driver.waitUntil(() => pasteButton.getAttribute('disabled') !== null);
 });
