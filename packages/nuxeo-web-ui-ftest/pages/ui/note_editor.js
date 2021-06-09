@@ -19,7 +19,7 @@ export default class NoteEditor extends BasePage {
     editor.waitForVisible();
     driver.waitUntil(() => {
       try {
-        return editor.getAttribute('innerHTML') === content;
+        return editor.getHTML(false) === content;
       } catch (e) {
         return false;
       }
