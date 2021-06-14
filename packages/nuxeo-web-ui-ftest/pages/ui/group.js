@@ -2,8 +2,7 @@ import BasePage from '../base';
 
 export default class Group extends BasePage {
   getField(field) {
-    driver.waitForExist(this._selector);
-    driver.waitForVisible(this._selector);
+    $(this._selector).waitForVisible();
     return this.el.element(`[id="${field}"]`);
   }
 
@@ -64,7 +63,8 @@ export default class Group extends BasePage {
   }
 
   searchResult(searchTerm) {
-    this.el.waitForExist('nuxeo-card[name="groups"] .table [name="id"]');
-    return this.el.elementByTextContent('nuxeo-card[name="groups"] .table [name="id"]', searchTerm);
+    const match = (e) => e.getText() === searchTerm;
+    driver.waitUntil(() => this.el.elements('nuxeo-card[name="groups"] .table [name="id"]').some(match));
+    return this.el.elements('nuxeo-card[name="groups"] .table [name="id"]').find(match);
   }
 }

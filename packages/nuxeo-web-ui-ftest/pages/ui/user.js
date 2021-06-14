@@ -78,7 +78,9 @@ export default class User extends BasePage {
   }
 
   searchResult(searchTerm) {
-    this.el.waitForExist('nuxeo-card[name="users"] .table [name="id"]');
-    return this.el.elementByTextContent('nuxeo-card[name="users"] .table [name="id"]', searchTerm);
+    const match = () =>
+      this.el.elements('nuxeo-card[name="users"] .table [name="id"]').find((e) => e.getText() === searchTerm);
+    driver.waitUntil(match);
+    return match();
   }
 }

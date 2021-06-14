@@ -7,15 +7,15 @@ import Tasks from './tasks';
 
 export default class Drawer extends BasePage {
   get menu() {
-    return this.el.element('#menu');
+    return this.el.$('#menu');
   }
 
   get pages() {
-    return this.el.element('iron-pages');
+    return this.el.$('iron-pages');
   }
 
   get logo() {
-    return this.el.element('#logo');
+    return this.el.$('#logo');
   }
 
   get browser() {
@@ -60,20 +60,19 @@ export default class Drawer extends BasePage {
 
   open(name) {
     this.menu.waitForVisible();
-    this.menu.waitForVisible(`nuxeo-menu-icon[name='${name}']`);
     const section = this._section(name);
     if (!section.isVisible()) {
-      this.menu.click(`nuxeo-menu-icon[name='${name}']`);
+      this.menu.$(`nuxeo-menu-icon[name='${name}']`).click();
     }
     section.waitForVisible();
     return section;
   }
 
   _section(name) {
-    return this.pages.element(`[name='${name}']`);
+    return this.pages.$(`[name='${name}']`);
   }
 
   _search(name) {
-    return this.pages.element(`[search-name='${name}']`);
+    return this.pages.$(`[search-name='${name}']`);
   }
 }

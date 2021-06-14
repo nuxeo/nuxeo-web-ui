@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 When('I click the preview button', function() {
   const page = this.ui.browser.documentPage(this.doc.type);
@@ -24,5 +24,5 @@ Then(/^I can see the inline ([-\w]+) previewer$/, function(viewerType) {
 });
 
 Then(/^I can see a ([-\w]+) previewer$/, (viewerType) => {
-  driver.waitForVisible(`#dialog ${viewerType}`);
+  $(`#dialog ${viewerType}`).waitForVisible();
 });

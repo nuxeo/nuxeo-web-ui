@@ -1,4 +1,4 @@
-import { Given, Then, When } from 'cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import Login from '../../pages/login';
 import UI from '../../pages/ui';
 
@@ -44,7 +44,8 @@ When('I logout', () => Login.get());
 Then('I am logged in as {string}', function(username) {
   const currentUser = this.ui.drawer
     .open('profile')
-    .getText('.header')
+    .element('.header')
+    .getText()
     .toLowerCase();
   currentUser.should.be.equal(username.toLowerCase());
 });

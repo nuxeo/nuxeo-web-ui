@@ -1,4 +1,4 @@
-import { Given, When, Then } from 'cucumber';
+import { Given, When, Then } from '@cucumber/cucumber';
 
 Given('I have a {word} document', function(docType) {
   docType = docType || 'File';

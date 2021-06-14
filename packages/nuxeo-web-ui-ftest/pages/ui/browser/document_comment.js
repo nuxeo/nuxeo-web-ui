@@ -14,7 +14,7 @@ export default class DocumentComment {
   }
 
   get options() {
-    return this._el.element('.horizontal #options');
+    return this._el.$('.horizontal #options');
   }
 
   get replyButton() {

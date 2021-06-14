@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 Then('I can see the {word} tree', function(tab) {
   this.ui.drawer._section(tab).waitForVisible().should.be.true;
@@ -6,10 +6,12 @@ Then('I can see the {word} tree', function(tab) {
 
 Then('I can see the {string} {word} tree node', function(title, tab) {
   this.ui.drawer._section(tab).waitForVisible();
-  this.ui.drawer
-    ._section(tab)
-    .elementByTextContent('.content a', title)
-    .waitForVisible();
+  driver.waitUntil(() =>
+    this.ui.drawer
+      ._section(tab)
+      .elements('.content a')
+      .some((e) => e.getText() === title),
+  );
 });
 
 Then('I can navigate to {word} pill', function(pill) {
@@ -33,8 +35,8 @@ Then('I am on the {word} pill', function(pill) {
 When('I click {string} in the {word} tree', function(title, tab) {
   const section = this.ui.drawer._section(tab);
   section.waitForVisible();
-  section.waitForVisible('.content a');
-  const el = section.elementByTextContent('.content a', title);
+  driver.waitUntil(() => section.elements('.content a').some((e) => e.getText() === title));
+  const el = section.elements('.content a').find((e) => e.getText() === title);
   el.waitForVisible();
   el.click();
 });
@@ -84,7 +86,7 @@ Then('I can move selection up', function() {
   this.ui.browser.selectionToolbar.moveUp();
 });
 
-Then('I can see the {string} child document is at position "{int}"', function(title, pos) {
+Then('I can see the {string} child document is at position {int}', function(title, pos) {
   this.ui.browser.waitForVisible();
   driver.waitUntil(() => this.ui.browser.indexOfChild(title) === pos - 1);
 });
@@ -100,7 +102,6 @@ Then('I can see {int} document(s)', function(numberOfResults) {
   // XXX temporary fix for visual issue while importing more than 1 document; will be fixed when NXP-28642 is tackled
   driver.refresh();
   const { displayMode } = results;
-  results.getResults(displayMode).waitForVisible();
   results.resultsCount(displayMode).should.equal(numberOfResults);
 });
 

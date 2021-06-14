@@ -1,4 +1,4 @@
-import { When } from 'cucumber';
+import { When } from '@cucumber/cucumber';
 
 /**
  * Import the csv file
@@ -12,7 +12,6 @@ When(/^I import the (.+) file$/, function(file) {
   dialog.selectedFileToImport.waitForVisible().should.be.true;
   dialog.importCSVButton.click();
   dialog.importSuccess.waitForVisible();
-  dialog.importError.isVisible().should.be.false;
   dialog.importCloseButton.waitForVisible();
   dialog.importCloseButton.click();
 });

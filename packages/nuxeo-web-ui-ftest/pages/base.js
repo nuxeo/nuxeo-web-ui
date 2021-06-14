@@ -4,8 +4,7 @@ export default class BasePage {
   }
 
   get el() {
-    driver.waitForExist(this._selector);
-    return driver.element(this._selector);
+    return $(this._selector);
   }
 
   click(...args) {

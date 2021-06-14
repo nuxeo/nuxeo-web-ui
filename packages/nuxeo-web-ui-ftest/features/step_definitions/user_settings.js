@@ -1,4 +1,4 @@
-import { Given, Then, When } from 'cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 
 /* Cloud Services */
 

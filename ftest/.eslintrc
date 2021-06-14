@@ -39,5 +39,6 @@
     'users': true,
     'groups': true,
     'browser': true,
+    '$': true,
   }
 }

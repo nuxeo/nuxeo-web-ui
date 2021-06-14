@@ -1,4 +1,4 @@
-import { Given, Then, When } from 'cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 
 Then('I can see the {string} search panel', function(name) {
   this.ui.drawer._search(name).waitForVisible();
@@ -138,7 +138,6 @@ Then(/^I can see (\d+) search results$/, function(numberOfResults) {
     );
     this.ui.results.noResults.waitForVisible().should.be.true;
   } else {
-    this.ui.results.getResults(displayMode).waitForVisible();
     this.ui.results.resultsCountLabel.waitForVisible();
     driver.waitUntil(
       () =>
@@ -151,7 +150,6 @@ Then(/^I can see (\d+) search results$/, function(numberOfResults) {
 
 Then(/^I can see more than (\d+) search results$/, function(minNumberOfResults) {
   const { displayMode } = this.ui.results;
-  this.ui.results.getResults(displayMode).waitForVisible();
   driver.waitUntil(
     () => this.ui.results.resultsCount(displayMode) > minNumberOfResults,
     `Expecting to get more than ${minNumberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
@@ -217,6 +215,5 @@ When(/^I perform a QuickSearch for (.+)/, function(searchTerm) {
 });
 
 Then(/^I can see (\d+) QuickSearch results$/, function(numberOfResults) {
-  this.ui.quickSearch.quickSearchResults.waitForVisible();
-  this.ui.quickSearch.quickSearchResultsCount().should.equal(numberOfResults);
+  driver.waitUntil(() => this.ui.quickSearch.quickSearchResultsCount() === numberOfResults);
 });

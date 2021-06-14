@@ -6,11 +6,11 @@ class Token {
   }
 
   get userId() {
-    return this.el.elements('nuxeo-data-table-cell').value[1].getText();
+    return this.el.elements('nuxeo-data-table-cell')[1].getText();
   }
 
   get providerId() {
-    return this.el.elements('nuxeo-data-table-cell').value[0].getText();
+    return this.el.elements('nuxeo-data-table-cell')[0].getText();
   }
 
   deleteButton() {
@@ -23,7 +23,7 @@ export default class UserCloudServices extends BasePage {
     this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
     let tokens = this.el
       .elements('nuxeo-data-table nuxeo-data-table-row')
-      .value.splice(1) // skip the header
+      .splice(1) // skip the header
       .map((el) => new Token(el)); // and map every element to a wrapper we can work with
     tokens = tokens.filter(
       (token) => (user ? token.userId === user : true) && (provider ? token.providerId === provider : true),

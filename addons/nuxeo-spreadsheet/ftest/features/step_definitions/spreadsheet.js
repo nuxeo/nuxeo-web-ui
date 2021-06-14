@@ -1,4 +1,4 @@
-import { Then, When } from 'cucumber';
+import { Then, When } from '@cucumber/cucumber';
 import Spreadsheet from '../../pages/spreadsheet';
 
 When('I open the spreadsheet', function() {

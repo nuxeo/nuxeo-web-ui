@@ -1,4 +1,4 @@
-import { After } from 'cucumber';
+import { After } from '@cucumber/cucumber';
 import nuxeo from '../services/client';
 
 const endPoint = '/oauth2/provider/';

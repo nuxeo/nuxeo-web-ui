@@ -1,4 +1,4 @@
-import { Then } from 'cucumber';
+import { Then } from '@cucumber/cucumber';
 
 Then('I can see the {string} collection', function(name) {
   this.ui.drawer.collections.waitForHasCollection(name).should.be.true;

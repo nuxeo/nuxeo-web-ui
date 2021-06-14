@@ -1,4 +1,4 @@
-import { After } from 'cucumber';
+import { After } from '@cucumber/cucumber';
 import Nuxeo from 'nuxeo';
 import nuxeo from '../services/client';
 

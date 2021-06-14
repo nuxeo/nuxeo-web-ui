@@ -1,4 +1,4 @@
-import { Given, Then, When } from 'cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 
 When(/^I give (\w+) permission to "([^"]*)" on the document$/, function(permission, name) {
   this.ui.browser.permissionsViewButton.waitForVisible();

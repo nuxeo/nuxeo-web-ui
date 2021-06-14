@@ -1,4 +1,4 @@
-import { Given, Then, When } from 'cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 
 Given('I am on vocabulary page', function() {
   return this.ui.administration.goToVocabularyManagement();

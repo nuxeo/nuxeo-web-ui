@@ -7,7 +7,7 @@ export default class DocumentCommentThread extends BasePage {
   }
 
   get nbItems() {
-    const items = this.el.elements('nuxeo-document-comment').value;
+    const items = this.el.elements('nuxeo-document-comment');
     let count = 0;
     items.forEach((item) => {
       if (item.isVisible()) {
@@ -22,7 +22,7 @@ export default class DocumentCommentThread extends BasePage {
   }
 
   getComment(text, user) {
-    const comments = this.el.elements('nuxeo-document-comment').value;
+    const comments = this.el.elements('nuxeo-document-comment');
     const match = comments.find((item) => {
       const comment = new DocumentComment(item);
       return comment.author.getText() === user && comment.text.getText() === text;
@@ -30,7 +30,7 @@ export default class DocumentCommentThread extends BasePage {
     if (match) {
       return new DocumentComment(match);
     }
-    throw new Error(`Not found any comment authored by "${user}" with the following text: "${text}"`);
+    throw new Error(`No comment authored by "${user}" with the text "${text}" was found`);
   }
 
   writeComment(text) {

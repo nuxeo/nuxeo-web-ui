@@ -49,7 +49,7 @@ export default class DocumentVersions extends BasePage {
   }
 
   get listCount() {
-    return this.list.elements('div[name="version-item"]').value.length;
+    return this.list.elements('div[name="version-item"]').length;
   }
 
   get listItems() {
@@ -69,7 +69,7 @@ export default class DocumentVersions extends BasePage {
       return true;
     }
     this.listItems.waitForVisible('div[name="version-item"] .title');
-    const items = this.listItems.elements('div[name="version-item"]').value;
+    const items = this.listItems.elements('div[name="version-item"]');
     const version = items.find((item) => {
       const foundLabel = item.getText('.title').trim();
       return foundLabel === label;
