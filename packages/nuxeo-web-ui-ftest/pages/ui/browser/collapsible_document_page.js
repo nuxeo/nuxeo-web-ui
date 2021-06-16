@@ -22,7 +22,8 @@ export default class CollapsibleDocumentPage extends DocumentPage {
 
   expandDetailsCard() {
     this.detailsCard.waitForVisible();
-    if (this.detailsCard.getAttribute('opened') === null) {
+    // XXX: getAttribute('opened') returns 'false' instead of null when the attribute is set to false, not sure why
+    if (this.detailsCard.getAttribute('opened') === 'false') {
       this.detailsCard.waitForVisible('h5.header');
       this.detailsCard.click('h5.header');
     }
@@ -30,7 +31,8 @@ export default class CollapsibleDocumentPage extends DocumentPage {
 
   collapseDetailsCard() {
     this.detailsCard.waitForVisible();
-    if (this.detailsCard.getAttribute('opened') !== null) {
+    // XXX: getAttribute('opened') returns 'false' instead of null when the attribute is set to false, not sure why
+    if (this.detailsCard.getAttribute('opened') !== 'false') {
       this.detailsCard.waitForVisible('h5.header');
       this.detailsCard.click('h5.header');
     }
