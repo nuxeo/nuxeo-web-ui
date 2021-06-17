@@ -55,17 +55,16 @@ Polymer({
     </style>
 
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
-
+    
     <nuxeo-operation-button
       id="bulkOpBtn"
       icon="nuxeo:collections"
+      input="[[view]]"
       label="[[_label]]"
-      poll-interval="[[pollInterval]]"
+      operation="Document.AddToCollection"
+      params="[[_params(collection)]]"
       show-label="[[showLabel]]"
       tooltip-position="[[tooltipPosition]]"
-      on-poll-start="_onPollStart"
-      on-response="_onResponse"
-      async
       hidden="[[!_isAvailable(documents.*)]]"
     >
     </nuxeo-operation-button>
@@ -172,52 +171,10 @@ Polymer({
     this.$.bulkOpBtn.removeEventListener('click', this._onCollectionAdd.bind(this));
   },
 
-  _onPollStart() {
-    this.notify({
-      message: this.i18n('addToCollectionDocumentsButton.bulkOperation.poll.start'),
-      abort: this._isSelectAllActive(),
-      dismissible: this._isSelectAllActive(),
-      callback() {
-        window.alert('Aborting add to collection');
-      },
-    });
-    this._resetPopup();
-    this._toggleDialog();
-  },
-
-  _onResponse() {
-    this.fire('added-to-collection', {
-      collectionId: this.collection,
-      docIds: [], // hack just to inform nuxeo-app that we dealing with multiple documents
-      dismissible: this._isSelectAllActive(),
-    });
-  },
-
-  _input() {
-    if (this._isSelectAllActive()) {
-      return this.view;
-    } else {
-      const uids = this.documents.map((doc) => doc.uid);
-      const uidsString = uids.join(',');
-      return `docs:${uidsString}`;
-    }
-  },
-
-  _operation() {
-    return this._isSelectAllActive() ? 'Bulk.RunAction' : 'Document.AddToCollection';
-  },
-
   _params() {
-    const parameters = {
+    return {
       collection: this.collection,
     };
-    if (this._isSelectAllActive()) {
-      return {
-        operationId: 'Document.AddToCollection',
-        parameters: parameters,
-      };
-    }
-    return parameters;
   },
 
   _isAvailable() {
@@ -255,11 +212,25 @@ Polymer({
   },
 
   _addToCollection() {
-    const opBtn = this.bulkOpBtn;
-    opBtn.input = this._input();
-    opBtn.operation = this._operation();
-    opBtn.params = this._params();
-    opBtn._execute();
+    const isSelectAllActive = this._isSelectAllActive();
+    let detail = {};
+    if (!isSelectAllActive) {
+      const uids = this.documents.map((doc) => doc.uid);
+      detail = { docIds: uids, collectionId: this.collection };
+    }
+
+    this.bulkOpBtn._execute().then(() => {
+      this.fire('added-to-collection', detail);
+      if (!isSelectAllActive) {
+        this._resetPopup();
+        this._toggleDialog();
+      }
+    });
+    // when select all is active we can immediatly close the dialog and reset the popup
+    if (isSelectAllActive) {
+      this._resetPopup();
+      this._toggleDialog();
+    }
   },
 
   _resultsFilter(entry) {

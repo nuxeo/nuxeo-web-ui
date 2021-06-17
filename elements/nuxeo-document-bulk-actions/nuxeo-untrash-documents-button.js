@@ -40,13 +40,12 @@ Polymer({
     <nuxeo-operation-button
       id="bulkOpBtn"
       icon="nuxeo:restore-deleted"
+      input="[[view]]"
       label="[[_label]]"
-      poll-interval="[[pollInterval]]"
+      operation="Document.Untrash"
+      params="[[_params()]]"
       show-label="[[showLabel]]"
       tooltip-position="[[tooltipPosition]]"
-      on-poll-start="_onPollStart"
-      on-response="_onResponse"
-      async
       sync-indexing
       hidden="[[!_isAvailable(documents.splices)]]"
     >
@@ -96,11 +95,22 @@ Polymer({
       (this._isSelectAllActive() || this.docsHavePermissions) &&
       window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))
     ) {
-      const opBtn = this.bulkOpBtn;
-      opBtn.input = this._input();
-      opBtn.operation = this._operation();
-      opBtn.params = this._params();
-      opBtn._execute();
+      const documents = this.documents;
+      const isSelectAllActive = this._isSelectAllActive();
+      // if select all is active, then we don't pass the documents (we untrash all of them)
+      const detail = isSelectAllActive ? {} : { documents };
+      this.bulkOpBtn._execute()
+        .then(() => {
+          this.fire('nuxeo-documents-untrashed', detail);
+          this.documents = [];
+          // TO DISCUSS - this refresh can be problematic if we no longer are in the same document, needs discussion
+          this.fire('refresh');
+        })
+        .catch((error) => {
+          if (!isSelectAllActive) {
+            this.fire('nuxeo-documents-untrashed', { error, documents });
+          }
+        });
     }
   },
 
@@ -110,46 +120,8 @@ Polymer({
     this.untrashDocuments();
   },
 
-  _onPollStart() {
-    this.notify({
-      message: this.i18n('untrashDocumentsButton.bulkOperation.poll.start'),
-      abort: this._isSelectAllActive(),
-      dismissible: this._isSelectAllActive(),
-    });
-  },
-
-  _onResponse() {
-    this.fire('nuxeo-documents-untrashed', {
-      documents: this.documents,
-      dismissible: this._isSelectAllActive(),
-    });
-    this.documents = [];
-    this.fire('refresh');
-  },
-
-  _input() {
-    if (this._isSelectAllActive()) {
-      return this.view;
-    } else if (this.documents && this.documents.length) {
-      const uids = this.documents.map((doc) => doc.uid).join(',');
-      return `docs:${uids}`;
-    }
-  },
-
-  _operation() {
-    return this._isSelectAllActive() ? 'Bulk.RunAction' : 'Document.Trash';
-  },
-
   _params() {
-    if (!this._isSelectAllActive()) {
-      return {};
-    }
-    return {
-      operationId: 'Document.Untrash',
-      parameters: {
-        properties: '',
-      },
-    };
+    return {};
   },
 
   _isAvailable() {

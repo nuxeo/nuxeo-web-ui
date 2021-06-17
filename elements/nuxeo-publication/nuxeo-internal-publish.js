@@ -75,10 +75,11 @@ Polymer({
 
     <nuxeo-operation-button
       id="bulkOpBtn"
-      poll-interval="[[pollInterval]]"
+      input="[[view]]"
+      label="[[i18n('publication.internal.title')]]"
+      operation="Document.PublishToSection"
       on-poll-start="_onPollStart"
-      on-response="_onResponse"
-      async
+      params="[[_params(publishSpace.uid, override, selectedRendition)]]"
       sync-indexing
       hidden
     >
@@ -200,40 +201,13 @@ Polymer({
   },
 
   _onPollStart() {
-    this.notify({
-      message: this.i18n('publication.bulkOperation.poll.start'),
-      abort: this._isSelectAllActive(),
-      dismissible: this._isSelectAllActive(),
-    });
+    // we need to fire the `nx-publish-success` to close the publish popup
     this.fire('nx-publish-success', { dismissible: true });
-  },
-
-  _onResponse() {
-    this.fire('notify', {
-      message: this.i18n(`publication.internal.publish.success${this._isMultiple ? '.multiple' : ''}`),
-      dismissible: this._isSelectAllActive(),
-    });
-    if (this._isMultiple) {
-      this.fire('navigate', { doc: this.publishSpace });
-    } else {
-      this.fire('document-updated');
-    }
-  },
-
-  _input() {
-    if (this._isSelectAllActive()) {
-      return this.view;
-    }
-    return this._isMultiple ? `docs:${this.documents.map((doc) => doc.uid).join(',')}` : this.document.uid;
-  },
-
-  _operation() {
-    return this._isSelectAllActive() ? 'Bulk.RunAction' : 'Document.PublishToSection';
   },
 
   _params() {
     const parameters = {
-      target: this.publishSpace.uid,
+      target: this.publishSpace ? this.publishSpace.uid : null,
       override: this.override,
     };
     if (this.selectedRendition === 'default') {
@@ -241,22 +215,29 @@ Polymer({
     } else if (this.selectedRendition !== 'none') {
       parameters.renditionName = this.selectedRendition;
     }
-
-    if (this._isSelectAllActive()) {
-      return {
-        operationId: 'Document.PublishToSection',
-        parameters: parameters,
-      };
-    }
     return parameters;
   },
 
   _publish() {
-    const opBtn = this.bulkOpBtn;
-    opBtn.input = this._input();
-    opBtn.operation = this._operation();
-    opBtn.params = this._params();
-    opBtn._execute();
+    const isSelectAllActive = this.view.selectAllActive;
+    const isMultiple = this._isMultiple;
+    const publishSpace = this.publishSpace;
+    this.bulkOpBtn._execute()
+      .then(() => {
+        if (isMultiple) {
+          this.fire('navigate', { doc: publishSpace });
+        } else {
+          this.fire('document-updated');
+        }
+      })
+      .catch((error) => {
+        if (!isSelectAllActive) {
+          this.notify({
+            message: this.i18n(`publication.internal.publish.error${isMultiple ? '.multiple' : ''}`),
+          });
+          throw error;
+        }
+      });
   },
 
   _canPublish() {
