@@ -38,14 +38,14 @@ Polymer({
 
     <nuxeo-operation-button
       id="bulkOpBtn"
-      icon="nuxeo:remove" 
+      icon="nuxeo:remove"
+      input="[[view]]"
+      event="refresh"
       label="[[_label]]"
-      poll-interval="[[pollInterval]]"
+      operation="Collection.RemoveFromCollection"
+      params="[[_params(collection.*)]]"
       show-label="[[showLabel]]"
       tooltip-position="[[tooltipPosition]]"
-      on-poll-start="_onPollStart"
-      on-response="_onResponse"
-      async
       sync-indexing
       hidden="[[!_isAvailable(members, collection)]]"
     >
@@ -84,61 +84,27 @@ Polymer({
 
   attached() {
     // capture the click event on the capture phase to set the nuxeo-operation-button properties
-    this.$.bulkOpBtn.addEventListener('click', this.remove.bind(this), { capture: true });
+    this.$.bulkOpBtn.addEventListener('click', this._remove.bind(this), { capture: true });
   },
 
   detached() {
-    this.$.bulkOpBtn.removeEventListener('click', this.remove.bind(this));
-  },
-
-  _onPollStart() {
-    this.notify({
-      message: this.i18n('removeFromCollectionAction.bulkOperation.poll.start'),
-      abort: this._isSelectAllActive(),
-      dismissible: this._isSelectAllActive(),
-    });
-  },
-
-  _onResponse() {
-    this.notify({
-      message: this.i18n('removeFromCollectionAction.bulkOperation.poll.end'),
-      dismissible: this._isSelectAllActive(),
-    });
-    this.members = [];
-    this.fire('refresh');
-  },
-
-  _input() {
-    if (this._isSelectAllActive()) {
-      return this.view;
-    } else if (this.members && this.members.length > 0) {
-      const uids = this.members.map((doc) => doc.uid).join(',');
-      return `docs:${uids}`;
-    }
-  },
-
-  _operation() {
-    return this._isSelectAllActive() ? 'Bulk.RunAction' : 'Collection.RemoveFromCollection';
+    this.$.bulkOpBtn.removeEventListener('click', this._remove.bind(this));
   },
 
   _params() {
-    const parameters = {
-      collection: this.collection.uid
+    return {
+      collection: this.collection.uid,
     };
-    if (this._isSelectAllActive()) {
-      return {
-        operationId: 'Collection.RemoveFromCollection',
-        parameters: parameters,
-      };
-    }
-    return parameters;
+  },
+
+  _remove(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.remove();
   },
 
   remove() {
-    const opBtn = this.bulkOpBtn;
-    opBtn.input = this._input();
-    opBtn.operation = this._operation();
-    opBtn.params = this._params();
+    this.bulkOpBtn._execute().then(() => { this.members = []; });
   },
 
   _isAvailable(members, collection) {

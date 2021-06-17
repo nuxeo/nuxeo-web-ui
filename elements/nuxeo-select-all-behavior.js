@@ -1,5 +1,5 @@
 /**
- * `Nuxeo.I18nBehavior` provides a `i18n` helper function for translations.
+ * `Nuxeo.SelectAllBehavior` provides a set of select all helper methods.
  *
  * @polymerBehavior
  */
@@ -12,13 +12,6 @@ export const SelectAllBehavior = {
     view: {
       type: Object,
     },
-    /**
-     * The interval to poll for the result, in milliseconds.
-     */
-    pollInterval: {
-      type: Number,
-      value: 1000,
-    },
   },
 
   get bulkOpBtn() {
@@ -27,17 +20,5 @@ export const SelectAllBehavior = {
 
   _isSelectAllActive() {
     return this.view && this.view.selectAllActive;
-  },
-
-  _onPollStart() {
-    // todo
-  },
-
-  _onPollUpdate() {
-    // todo
-  },
-
-  _onResponse() {
-    // todo
   },
 };
