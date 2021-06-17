@@ -244,7 +244,12 @@ Polymer({
 
   ready() {
     window.addEventListener('nuxeo-documents-deleted', (e) => {
-      this.removeDocuments(e.detail.documents);
+      if (e.detail.documents) {
+        this.removeDocuments(e.detail.documents);
+        return;
+      }
+      // when in select all mode we don't have a list of documents in the event detail
+      this._fetchDocument();
     });
 
     window.addEventListener('refresh-display', () => {
