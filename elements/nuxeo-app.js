@@ -1104,10 +1104,9 @@ Polymer({
   },
 
   _documentAddedToCollection(e) {
-    e.detail.message = this.i18n(
-      e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection',
-    );
-    this._notify(e);
+    if (!this._isEmpty(e.detail)) {
+      this._toast(this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection'));
+    }
   },
 
   _documentRemovedFromCollection() {
@@ -1189,13 +1188,18 @@ Polymer({
       }
       e.detail.message = msg;
       this._notify(e);
+    } else if (this._isEmpty(e.detail)) {
+      this._fetchTaskCount();
+      this._refreshCollections();
+      this._refreshSearch();
+      // because we don't have a list of documents we can't call _removeFromClipboard and _removeFromRecentlyViewed
     } else {
       this._removeFromClipboard(e.detail.documents);
       this._removeFromRecentlyViewed(e.detail.documents);
       this._fetchTaskCount();
       e.detail.message = this.i18n('app.documents.deleted.success');
       this._notify(e);
-      if (e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
+      if (e.detail.documents && e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
         this._refreshCollections();
       }
       this._refreshSearch();
@@ -1203,12 +1207,16 @@ Polymer({
   },
 
   _documentsUntrashed(e) {
-    e.detail.message = this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`);
-    this._notify(e);
-    if (e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
+    if (this._isEmpty(e.detail)) {
       this._refreshCollections();
+      this._refreshSearch();
+    } else {
+      this._toast(this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`));
+      if (e.detail.documents && e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
+        this._refreshCollections();
+      }
+      this._refreshSearch();
     }
-    this._refreshSearch();
   },
 
   _documentFileDeleted() {
@@ -1346,7 +1354,6 @@ Polymer({
     let { toast } = this.$;
     const { callback, dismissible } = data;
     if (!source) {
-      // toast = this.$.toast;
       toast.addEventListener('MDCSnackbar:opening', () => {
         // HACK - to position the snackbar and style the internal label
         toast.mdcRoot.style.position = 'relative';
@@ -1354,7 +1361,8 @@ Polymer({
       });
       this.set('_dismissible', !!dismissible);
     } else {
-      const id = source.tagName.toLowerCase();
+      // use the source (commandId) to identify the snack (in order to update it later)
+      const id = `snack_${source.replaceAll('-', '')}`;
       toast = this.$.snackbarPanel.querySelector(`#${id}`);
       if (!toast) {
         toast = document.createElement('div');
@@ -1387,8 +1395,8 @@ Polymer({
   },
 
   _notify(e) {
-    const source = e.composedPath ? e.composedPath()[0] : null;
-    const toast = this._getToastFor(source, e.detail);
+    const { commandId } = e.detail;
+    const toast = this._getToastFor(commandId, e.detail);
     const { abort, close, dismissible, duration, message } = e.detail;
 
     if (close) {
@@ -1464,5 +1472,12 @@ Polymer({
     });
 
     return headers;
+  },
+
+  /**
+   * Checks if an object doesn't have properties
+   */
+  _isEmpty(obj) {
+    return Object.keys(obj).length === 0;
   },
 });
