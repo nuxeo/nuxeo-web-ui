@@ -72,7 +72,6 @@ Polymer({
       selected-items="{{selectedItems}}"
       view="{{view}}"
       display-quick-filters
-      select-all-enabled
     >
       <slot name="selectionActions" slot="selectionActions"></slot>
 
