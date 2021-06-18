@@ -21,6 +21,7 @@ import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
@@ -32,6 +33,8 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+
+const hasSelectAllEnabled = config.get('selectAllEnabled', false);
 
 /**
 An element to display results from a page provider.
@@ -217,8 +220,8 @@ Polymer({
             </div>
           </div>
         </div>
-        <div class="delegatedActions" hidden="[[!_displayDelegatedAction(selectAllEnabled, displaySort, view)]]">
-          <template is="dom-if" if="[[_displaySelectAll(selectAllEnabled, view)]]">
+        <div class="delegatedActions" hidden="[[!_displayDelegatedAction(displaySort, view)]]">
+          <template is="dom-if" if="[[_displaySelectAll(view)]]">
             <div>
               <nuxeo-checkmark checked="{{selectAllActive}}" on-click="_toggleSelectAll"></nuxeo-checkmark>
             </div>
@@ -363,7 +366,7 @@ Polymer({
      */
     selectAllEnabled: {
       type: Boolean,
-      value: false,
+      value: config.get('selectAllEnabled', false),
     },
 
     resultsCount: {
@@ -439,9 +442,7 @@ Polymer({
 
   _displaySelectAll() {
     return (
-      this.view &&
-      !this.view.handlesSelectAll &&
-      (this.view.hasAttribute('select-all-enabled') || this.selectAllEnabled)
+      this.view && !this.view.handlesSelectAll && (this.view.hasAttribute('select-all-enabled') || hasSelectAllEnabled)
     );
   },
 
@@ -546,7 +547,7 @@ Polymer({
 
   _selectAllChanged() {
     if (this.view) {
-      this.view.selectAllEnabled = this.selectAllEnabled;
+      this.view.selectAllEnabled = hasSelectAllEnabled;
     }
   },
 

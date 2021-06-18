@@ -105,7 +105,6 @@ Polymer({
       selected-items="{{selectedItems}}"
       document="[[document]]"
       display-quick-filters
-      select-all-enabled
       display-sort="[[_canSort(document, sortOptions)]]"
       sort-options="[[sortOptions]]"
     >
