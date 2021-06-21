@@ -1337,7 +1337,7 @@ Polymer({
 
   _getToastFor(source, data) {
     let { toast } = this.$;
-    const { callback, dismissible } = data;
+    const { abort, dismissible } = data;
     if (!source) {
       toast.addEventListener('MDCSnackbar:opening', () => {
         // HACK - to position the snackbar and style the internal label
@@ -1367,10 +1367,10 @@ Polymer({
         });
         // listen to the closed event to track dismiss and custom action
         toast.addEventListener('MDCSnackbar:closed', (e) => {
-          if (e.detail.reason === 'action' && callback) {
-            callback();
-            localStorage.setItem(id, JSON.stringify({ dismissed: false }));
-          } else if (e.detail.reason === 'dismiss') {
+          if (e.detail.reason === 'action' && abort) {
+            localStorage.setItem(id, JSON.stringify({ dismissed: false, aborted: true }));
+            abort();
+          } else if (e.detail.reason === 'dismiss') {
             const state = JSON.parse(localStorage.getItem(id));
             if (state && state.ended) {
               localStorage.removeItem(id);
@@ -1398,13 +1398,16 @@ Polymer({
     if (message) {
       // if the toast was dismissed, then we shouldn't display it until the action ends
       const state = JSON.parse(localStorage.getItem(toast.id));
-      if (state && state.dismissed && abort) {
+      if (state && (state.dismissed || state.aborted) && abort) {
         return;
       }
       if (state && !abort) {
-        localStorage.setItem(toast.id, JSON.stringify({
-          ended: true,
-        }));
+        localStorage.setItem(
+          toast.id,
+          JSON.stringify({
+            ended: true,
+          }),
+        );
       }
 
       // update the snackbar properties
