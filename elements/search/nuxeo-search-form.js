@@ -54,7 +54,7 @@ Polymer({
       :host {
         @apply --layout-vertical;
         display: block;
-        height: calc(var(--vh, 1vh) * 100);
+        height: calc(var(--vh, 1vh) * 100 - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         width: 100%;
       }
 
@@ -92,16 +92,13 @@ Polymer({
 
       nuxeo-data-list {
         height: calc(100vh - 61px - var(--nuxeo-app-top));
-      }
-
-      nuxeo-data-list {
         display: block;
         position: relative;
       }
 
       .filters {
         padding: 8px 16px;
-        height: calc(100vh - 61px - var(--nuxeo-app-top));
+        height: 100%;
         overflow: auto;
       }
 
@@ -151,8 +148,14 @@ Polymer({
       .content {
         @apply --layout-flex;
         @apply --layout-vertical;
-        height: calc(100% - 68px - var(--nuxeo-app-top));
+        /* subtract the height of .header and .actions */
+        height: calc(100% - 68px - 53px);
         width: 100%;
+      }
+
+      /* subtract the height of .header and .actions if displayAutoControl is true */
+      .display-auto-control {
+        height: calc(100% - 101px - 53px);
       }
 
       .header {
@@ -233,7 +236,7 @@ Polymer({
       }
 
       #search-container {
-        height: calc(100vh - var(--nuxeo-app-top, 0));
+        height: 100%;
         position: relative;
       }
     </style>
@@ -303,7 +306,7 @@ Polymer({
         </template>
       </div>
 
-      <div class="content">
+      <div class$="content [[_computeDisplayAutoControl(displayAutoControl)]]">
         <div id="filters" class="filters loadable" hidden$="{{queue}}">
           <nuxeo-search-form-layout
             id="layout"
@@ -992,5 +995,11 @@ Polymer({
     this.updateStyles({
       '--vh': `${vh}px`,
     });
+  },
+
+  _computeDisplayAutoControl() {
+    if (this.displayAutoControl) {
+      return 'display-auto-control';
+    }
   },
 });

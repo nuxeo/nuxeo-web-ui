@@ -52,7 +52,7 @@ Polymer({
 
       #tray {
         position: absolute;
-        bottom: 32px;
+        bottom: calc(32px + var(--nuxeo-app-bottom, 0));
         right: 32px;
         z-index: 10;
       }

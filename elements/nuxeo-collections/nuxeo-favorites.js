@@ -44,7 +44,7 @@ Polymer({
       nuxeo-data-list {
         display: block;
         position: relative;
-        min-height: calc(100vh - 61px - var(--nuxeo-app-top));
+        min-height: calc(100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
       }
 
       .list-item {

@@ -62,7 +62,7 @@ Polymer({
       .content {
         padding: 5px 0;
         overflow: auto;
-        height: calc(100vh - 72px - var(--nuxeo-app-top));
+        height: calc(100vh - 72px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
       }
 
       .node-name {
