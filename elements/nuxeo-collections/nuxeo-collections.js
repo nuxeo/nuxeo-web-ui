@@ -59,7 +59,7 @@ Polymer({
       }
 
       nuxeo-data-list {
-        height: calc(100vh - 61px - var(--nuxeo-app-top));
+        height: calc(100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
       }
 
       nuxeo-data-list {
@@ -68,7 +68,7 @@ Polymer({
       }
 
       .collections {
-        height: calc(100vh - 61px - var(--nuxeo-app-top));
+        height: calc(100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         overflow: auto;
       }
 
@@ -95,7 +95,7 @@ Polymer({
       .content {
         @apply --layout-flex;
         @apply --layout-vertical;
-        height: calc(100vh - 61px - var(--nuxeo-app-top));
+        height: calc(100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         width: 293px;
       }
 

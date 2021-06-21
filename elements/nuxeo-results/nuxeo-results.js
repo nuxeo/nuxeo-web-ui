@@ -71,7 +71,10 @@ Polymer({
       #views::slotted(*) /* edge */ {
         display: block;
         position: relative;
-        height: var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top)));
+        height: var(
+          --nuxeo-results-view-height,
+          calc(100vh - 130px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)))
+        );
       }
 
       .displayMode {
