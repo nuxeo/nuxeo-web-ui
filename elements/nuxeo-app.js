@@ -1369,6 +1369,14 @@ Polymer({
         toast.addEventListener('MDCSnackbar:closed', (e) => {
           if (e.detail.reason === 'action' && callback) {
             callback();
+            localStorage.setItem(id, JSON.stringify({ dismissed: false }));
+          } else if (e.detail.reason === 'dismiss') {
+            const state = JSON.parse(localStorage.getItem(id));
+            if (state && state.ended) {
+              localStorage.removeItem(id);
+            } else {
+              localStorage.setItem(id, JSON.stringify({ dismissed: true }));
+            }
           }
           // other than that we just need to dismiss the toast
           toast.parentNode.removeChild(toast);
@@ -1388,6 +1396,17 @@ Polymer({
       toast.close();
     }
     if (message) {
+      // if the toast was dismissed, then we shouldn't display it until the action ends
+      const state = JSON.parse(localStorage.getItem(toast.id));
+      if (state && state.dismissed && abort) {
+        return;
+      }
+      if (state && !abort) {
+        localStorage.setItem(toast.id, JSON.stringify({
+          ended: true,
+        }));
+      }
+
       // update the snackbar properties
       toast.querySelector('#abort').hidden = !abort;
       toast.querySelector('#dismiss').hidden = !dismissible;
