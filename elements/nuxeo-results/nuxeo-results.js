@@ -60,7 +60,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 */
 Polymer({
   _template: html`
-    <style>
+    <style include="nuxeo-styles">
       :host([loading]) .resultsCount {
         opacity: 0.1;
         transition: opacity 300ms ease-in-out;
