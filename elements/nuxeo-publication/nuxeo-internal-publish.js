@@ -221,9 +221,13 @@ Polymer({
   _publish() {
     const isSelectAllActive = this.view.selectAllActive;
     const isMultiple = this._isMultiple;
-    const publishSpace = this.publishSpace;
-    this.bulkOpBtn._execute()
-      .then(() => {
+    const {publishSpace} = this;
+    this.bulkOpBtn
+      ._execute()
+      .then((e) => {
+        if (e.state === 'ABORTED') {
+          return;
+        }
         if (isMultiple) {
           this.fire('navigate', { doc: publishSpace });
         } else {
