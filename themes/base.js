@@ -221,6 +221,7 @@ const template = html`
         --nuxeo-sidebar-width: 52px;
 
         --nuxeo-app-top: 0px;
+        --nuxeo-app-bottom: 0px;
         --nuxeo-app-header-box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0, 0, 0, 0.1);
 
         --nuxeo-link: {
@@ -567,7 +568,7 @@ const template = html`
         --nuxeo-document-content-margin-bottom: 0;
         --nuxeo-document-trash-content-margin-bottom: 0;
 
-        --nuxeo-results-view-height: calc(100vh - 130px - var(--nuxeo-app-top));
+        --nuxeo-results-view-height: calc(100vh - 130px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
 
         /* layout rules */
         --nuxeo-widget: {
