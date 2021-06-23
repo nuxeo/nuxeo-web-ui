@@ -48,7 +48,7 @@ limitations under the License.
       :host {
         @apply --layout-vertical;
         display: block;
-        height: calc(var(--vh, 1vh) * 100);
+        height: calc(var(--vh, 1vh) * 100 - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
       }
 
       [hidden] {
@@ -74,10 +74,7 @@ limitations under the License.
       }
 
       nuxeo-data-list {
-        height: calc(100vh - 61px - var(--nuxeo-app-top));
-      }
-
-      nuxeo-data-list {
+        height: calc(100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         display: block;
         position: relative;
       }
@@ -133,7 +130,7 @@ limitations under the License.
       .content {
         @apply --layout-flex;
         @apply --layout-vertical;
-        height: calc(100% - 61px - var(--nuxeo-app-top));
+        height: calc(100% - 61px);
         width: 293px;
       }
 
@@ -219,7 +216,7 @@ limitations under the License.
       }
 
       #search-container {
-        height: calc(100vh - var(--nuxeo-app-top, 0));
+        height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
       }
     </style>
 
