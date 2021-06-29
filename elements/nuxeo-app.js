@@ -33,7 +33,6 @@ import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import '@polymer/paper-drawer-panel/paper-drawer-panel.js';
 import '@polymer/paper-header-panel/paper-header-panel.js';
 import '@polymer/paper-listbox/paper-listbox.js';
-import '@polymer/paper-toast/paper-toast.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icon/iron-icon.js';
@@ -91,6 +90,7 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Domain',
   'Root',
 ];
+const MAX_TOASTS = 2;
 
 setPassiveTouchGestures(true);
 
@@ -277,14 +277,14 @@ Polymer({
         flex-direction: column-reverse;
         bottom: 0;
         position: absolute;
+        left: 0px;
+        margin-left: 50px;
       }
 
       mwc-snackbar {
-        /* from #toast */
         align-items: center;
         display: flex;
         justify-content: space-between;
-        padding: 0 24px;
 
         color: white;
         position: relative !important;
@@ -1343,6 +1343,8 @@ Polymer({
         // HACK - to position the snackbar and style the internal label
         toast.mdcRoot.style.position = 'relative';
         toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
+        // HACK - hardcode the fixed width for the internal panel
+        toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
       });
       this.set('_dismissible', !!dismissible);
     } else {
@@ -1364,6 +1366,8 @@ Polymer({
           // HACK - to position the snackbar and style the internal label
           toast.mdcRoot.style.position = 'relative';
           toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
+          // HACK - hardcode the fixed width for the internal panel
+          toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
         });
         // listen to the closed event to track dismiss and custom action
         toast.addEventListener('MDCSnackbar:closed', (e) => {
@@ -1388,6 +1392,13 @@ Polymer({
   },
 
   _notify(e) {
+    // if the size of the panel is higher than the max value, we need to dismiss the oldest
+    const snackbars = this.$.snackbarPanel.querySelectorAll('mwc-snackbar:not(#toast)');
+    if (snackbars.length > MAX_TOASTS) {
+      const snackbar = snackbars[0];
+      snackbar.close('dismiss');
+    }
+
     const { commandId } = e.detail;
     const toast = this._getToastFor(commandId, e.detail);
     const { abort, close, dismissible, duration, message } = e.detail;
