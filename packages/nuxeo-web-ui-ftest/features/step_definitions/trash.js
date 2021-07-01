@@ -34,7 +34,7 @@ Then('I can trash selected documents', function() {
 
 Then('I cannot trash selected documents', function() {
   this.ui.browser.selectionToolbar.waitForVisible();
-  this.ui.browser.selectionToolbar.trashDocumentsButton.isExisting().should.be.false;
+  this.ui.browser.selectionToolbar.trashDocumentsButton.isVisible().should.be.false;
 });
 
 Then('I can permanently delete selected documents', function() {
@@ -46,7 +46,7 @@ Then('I can permanently delete selected documents', function() {
 
 Then('I cannot permanently delete selected documents', function() {
   this.ui.browser.selectionToolbar.waitForVisible();
-  this.ui.browser.results.deleteDocumentsButton.isExisting().should.be.false;
+  this.ui.browser.results.deleteDocumentsButton.isVisible().should.be.false;
 });
 
 Then('I can untrash selected documents', function() {
@@ -58,7 +58,7 @@ Then('I can untrash selected documents', function() {
 
 Then('I cannot untrash selected documents', function() {
   this.ui.browser.selectionToolbar.waitForVisible();
-  this.ui.browser.results.untrashDocumentsButton.isExisting().should.be.false;
+  this.ui.browser.results.untrashDocumentsButton.isVisible().should.be.false;
 });
 
 Then('I can trash current document', function() {
@@ -69,7 +69,7 @@ Then('I can trash current document', function() {
 });
 
 Then('I cannot trash current document', function() {
-  this.ui.browser.trashDocumentButton.isExisting().should.be.false;
+  this.ui.browser.trashDocumentButton.isVisible().should.be.false;
 });
 
 Then('I can untrash current document', function() {
@@ -93,7 +93,7 @@ Then('I can permanently delete current document', function() {
 });
 
 Then('I cannot permanently delete current document', function() {
-  this.ui.browser.deleteDocumentButton.isExisting().should.be.false;
+  this.ui.browser.deleteDocumentButton.isVisible().should.be.false;
 });
 
 When(/^I perform a Trash Search for (.+)/, function(searchTerm) {
