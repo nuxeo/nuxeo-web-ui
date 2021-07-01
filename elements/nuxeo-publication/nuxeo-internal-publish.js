@@ -75,7 +75,7 @@ Polymer({
 
     <nuxeo-operation-button
       id="bulkOpBtn"
-      input="[[view]]"
+      input="[[_input(document, view)]]"
       label="[[i18n('publication.internal.title')]]"
       operation="Document.PublishToSection"
       on-poll-start="_onPollStart"
@@ -205,6 +205,13 @@ Polymer({
     this.fire('nx-publish-success', { dismissible: true });
   },
 
+  _input() {
+    if (this.view) {
+      return this.view;
+    }
+    return this._isMultiple ? `docs:${this.documents.map((doc) => doc.uid).join(',')}` : this.document.uid;
+  },
+
   _params() {
     const parameters = {
       target: this.publishSpace ? this.publishSpace.uid : null,
@@ -219,20 +226,18 @@ Polymer({
   },
 
   _publish() {
-    const isSelectAllActive = this.view.selectAllActive;
+    const isSelectAllActive = this._isSelectAllActive();
     const isMultiple = this._isMultiple;
     const {publishSpace} = this;
     this.bulkOpBtn
       ._execute()
-      .then((e) => {
-        if (e.state === 'ABORTED') {
-          return;
-        }
+      .then(() => {
         if (isMultiple) {
           this.fire('navigate', { doc: publishSpace });
         } else {
           this.fire('document-updated');
         }
+        this.fire('nx-publish-success');
       })
       .catch((error) => {
         if (!isSelectAllActive) {

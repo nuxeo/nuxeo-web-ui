@@ -49,6 +49,11 @@ Then('I select all child documents', function() {
   this.ui.browser.selectAllChildDocuments();
 });
 
+Then('I select all the documents', function() {
+  this.ui.browser.waitForVisible();
+  this.ui.browser.selectAllDocuments();
+});
+
 Then('I deselect the {string} document', function(title) {
   this.ui.browser.waitForVisible();
   this.ui.browser.deselectChildDocument(title);
@@ -101,8 +106,16 @@ Then('I can see {int} document(s)', function(numberOfResults) {
   this.ui.reload();
 
   const { displayMode } = results;
-  results.getResults(displayMode).waitForVisible();
-  results.resultsCount(displayMode).should.equal(numberOfResults);
+  if (numberOfResults === 0) {
+    driver.waitUntil(
+      () => this.ui.results.resultsCount(displayMode) === 0,
+      `Expecting to get ${numberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
+    );
+    results.noResults.waitForVisible().should.be.true;
+  } else {
+    results.getResults(displayMode).waitForVisible();
+    results.resultsCount(displayMode).should.equal(numberOfResults);
+  }
 });
 
 Then(/^I can see the permissions page$/, function() {
@@ -166,6 +179,8 @@ Then(/^I can republish the following publication$/, function(table) {
 Then('I can publish selection to {string}', function(target) {
   this.ui.browser.waitForVisible();
   this.ui.browser.selectionToolbar.publishDialog.publish(target);
+  // HACK because publishing all documents is asynchronous
+  driver.pause(1000);
 });
 
 Then(/^I can perform the following publications$/, function(table) {
@@ -201,4 +216,10 @@ Then(/^I can perform the following publications$/, function(table) {
       }
     });
   });
+});
+
+Then('I can delete all the documents from the {string} collection', function(name) {
+  this.ui.browser.removeSelectionFromCollection(name);
+  // HACK - because the delete all is async
+  driver.pause(1000);
 });

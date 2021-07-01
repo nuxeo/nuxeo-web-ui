@@ -37,3 +37,39 @@ Feature: Collections
     Then I can see the document belongs to the "New Collection" collection
     When I browse to the document with path "/default-domain/ws/File2"
     Then I can see the document belongs to the "New Collection" collection
+
+  Scenario: Add all documents to a collection
+    Given user "Administrator" exists in group "members"
+    And I login as "Administrator"
+    And I have the following documents
+      | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
+      | Workspace     | ws               | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                   |                  |        |            |
+      | File          | File1            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                |                  |        |            |
+      | File          | File2            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                |                  |        |            |
+    And I browse to the document with path "/default-domain/ws"
+    And I select all the documents
+    Then I can see the selection toolbar
+    And I can add selection to the "New_Collection" collection
+    When I click the "collections" button
+    Then I can see the "New_Collection" collection
+    And I can click on the "New_Collection" collection
+    Then I can see 2 documents
+
+  Scenario: Remove all documents from a collection
+    Given user "Administrator" exists in group "members"
+    And I login as "Administrator"
+    Given I have the following documents
+      | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections        | tag    | file       |
+      | Workspace     | ws               | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                   |                    |        |            |
+      | Collection    | New_Collection   | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                   |                    |        |            |
+      | File          | File1            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                | New_Collection     |        |            |
+      | File          | File2            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                | New_Collection     |        |            |
+      | File          | File3            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                | New_Collection     |        |            |
+    And I click the "collections" button
+    Then I can see the "New_Collection" collection
+    And I can click on the "New_Collection" collection
+    And I can see 3 documents
+    When I select all the documents
+    Then I can see the selection toolbar
+    And I can delete all the documents from the "New_Collection" collection
+    And I can see 0 documents

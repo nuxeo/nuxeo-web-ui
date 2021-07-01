@@ -38,7 +38,7 @@ Polymer({
     <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
     <nuxeo-operation-button
-      id="bulkOpBtn"
+      id="untrashAllButton"
       icon="nuxeo:restore-deleted"
       input="[[view]]"
       label="[[_label]]"
@@ -83,11 +83,11 @@ Polymer({
 
   attached() {
     // capture the click event on the capture phase to set nuxeo-operation-buttons properties
-    this.$.bulkOpBtn.addEventListener('click', this._untrashDocuments.bind(this), { capture: true });
+    this.$.untrashAllButton.addEventListener('click', this._untrashDocuments.bind(this), { capture: true });
   },
 
   detached() {
-    this.$.bulkOpBtn.removeEventListener('click', this._untrashDocuments.bind(this));
+    this.$.untrashAllButton.removeEventListener('click', this._untrashDocuments.bind(this));
   },
 
   untrashDocuments() {
@@ -99,7 +99,7 @@ Polymer({
       const isSelectAllActive = this._isSelectAllActive();
       // if select all is active, then we don't pass the documents (we untrash all of them)
       const detail = isSelectAllActive ? {} : { documents };
-      this.bulkOpBtn._execute()
+      this.$.untrashAllButton._execute()
         .then(() => {
           this.fire('nuxeo-documents-untrashed', detail);
           this.documents = [];

@@ -38,7 +38,7 @@ Polymer({
     <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
     <nuxeo-operation-button
-      id="bulkOpBtn"
+      id="deleteAllButton"
       icon="[[_icon]]"
       input="[[view]]"
       label="[[_label]]"
@@ -96,11 +96,11 @@ Polymer({
 
   attached() {
     // capture the click event on the capture phase to set the necessary nuxeo-operation-button properties
-    this.$.bulkOpBtn.addEventListener('click', this._deleteDocuments.bind(this), { capture: true });
+    this.$.deleteAllButton.addEventListener('click', this._deleteDocuments.bind(this), { capture: true });
   },
 
   detached() {
-    this.$.bulkOpBtn.removeEventListener('click', this._deleteDocuments.bind(this));
+    this.$.deleteAllButton.removeEventListener('click', this._deleteDocuments.bind(this));
   },
 
   deleteDocuments() {
@@ -112,7 +112,7 @@ Polymer({
       const isSelectAllActive = this._isSelectAllActive();
       // if select all is active, then we don't pass the documents (we delete/trash all of them)
       const detail = isSelectAllActive ? {} : { documents };
-      this.bulkOpBtn._execute()
+      this.$.deleteAllButton._execute()
         .then(() => {
           this.fire('nuxeo-documents-deleted', detail);
           this.documents = [];
