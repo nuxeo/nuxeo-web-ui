@@ -95,8 +95,12 @@ export default class Browser extends BasePage {
     return new DocumentFormLayout('#edit-dialog nuxeo-document-form-layout', docType, 'edit');
   }
 
+  get header() {
+    return this.currentPage.elements('nuxeo-data-table nuxeo-data-table-row[header]');
+  }
+
   get rows() {
-    return this.currentPage.elements('nuxeo-data-table nuxeo-data-table-row');
+    return this.currentPage.elements('nuxeo-data-table nuxeo-data-table-row:not([header])');
   }
 
   waitForChildren() {
@@ -163,6 +167,12 @@ export default class Browser extends BasePage {
     });
   }
 
+  removeSelectionFromCollection() {
+    const button = this.el.element('nuxeo-collection-remove-action');
+    button.waitForVisible();
+    button.click();
+  }
+
   get isFavorite() {
     this.el.waitForExist('nuxeo-favorites-toggle-button[favorite]');
     return true;
@@ -217,8 +227,7 @@ export default class Browser extends BasePage {
           .getText()
           .trim() === title
       ) {
-        // minus 1 because of the table header
-        return i - 1;
+        return i;
       }
     }
     return -1;
@@ -273,6 +282,14 @@ export default class Browser extends BasePage {
         row.element('nuxeo-data-table-checkbox').click();
       }
     });
+  }
+
+  selectAllDocuments() {
+    this.waitForChildren();
+    const { header } = this;
+    if (header.isVisible('nuxeo-data-table-checkbox')) {
+      header.element('nuxeo-data-table-checkbox').click();
+    }
   }
 
   selectChildDocument(title) {
@@ -345,7 +362,6 @@ export default class Browser extends BasePage {
   }
 
   _selectChildDocument(title, deselect) {
-    this.waitForChildren();
     const found = this.rows.some((row) => {
       if (
         (deselect
