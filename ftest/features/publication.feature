@@ -80,7 +80,7 @@ Feature: Internal Publication
       | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
       | Workspace  | PublishTest      | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain                 |                  |        |            |
       | File       | PublishFile      | invoice | society/ecology         | europe/France        | JSmith  | /default-domain/PublishTest     |                  | urgent |            |
-      | Note       | PublishNote      | memo    | art/culture             | europe/France        | SJones  | /default-domain/PublishTest     |                  | urgent | sample.odt |  
+      | Note       | PublishNote      | memo    | art/culture             | europe/France        | SJones  | /default-domain/PublishTest     |                  | urgent | sample.odt |
     And I have permission ReadWrite for the document with path "/default-domain/PublishTest"
     And I have permission ReadWrite for the document with path "/default-domain/sections/section1"
     When I browse to the document with path "/default-domain/PublishTest"
@@ -95,10 +95,30 @@ Feature: Internal Publication
     And I can unpublish the document
     And I can see the document has 1 children
 
+  Scenario: Publish All Documents
+    Given I login as "John"
+    And I have the following documents
+      | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
+      | Workspace  | PublishTest      | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain                 |                  |        |            |
+      | File       | PublishFile      | invoice | society/ecology         | europe/France        | JSmith  | /default-domain/PublishTest     |                  | urgent |            |
+      | Note       | PublishNote      | memo    | art/culture             | europe/France        | SJones  | /default-domain/PublishTest     |                  | urgent | sample.odt |
+    And I have permission ReadWrite for the document with path "/default-domain/PublishTest"
+    And I have permission ReadWrite for the document with path "/default-domain/sections/section1"
+    When I browse to the document with path "/default-domain/PublishTest"
+    And I select all the documents
+    Then I can publish selection to "section1"
+    When I browse to the document with path "/default-domain/sections/section1"
+    Then I can see the document has 2 children
+    When I navigate to "PublishFile" child
+    Then I can see the document is a publication
+    And I cannot see to publication pill
+    And I can unpublish the document
+    And I can see the document has 1 children
+
   Scenario: Read Only Publications
     Given user "Susan" exists in group "members"
-    And I login as "John"  
-    And I have permission ReadWrite for the document with path "/default-domain/sections/section1"  
+    And I login as "John"
+    And I have permission ReadWrite for the document with path "/default-domain/sections/section1"
     And I have a File document
     When I browse to the document
     Then I can perform the following publications
