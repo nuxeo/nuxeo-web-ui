@@ -34,7 +34,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 
-const hasSelectAllEnabled = config.get('selectAllEnabled', false);
+const hasSelectAllEnabled = config.get('selection.selectAllEnabled', false);
 
 /**
 An element to display results from a page provider.
