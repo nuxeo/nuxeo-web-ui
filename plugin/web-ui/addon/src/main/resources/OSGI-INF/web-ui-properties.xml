@@ -41,5 +41,8 @@
 
     <!-- Control the enablement of document distribution analytics -->
     <property name="org.nuxeo.web.ui.analytics.documentDistribution.disableThreshold">${nuxeo.analytics.documentDistribution.disableThreshold}</property>
+
+    <!-- Control the enablement of select all -->
+    <property name="org.nuxeo.web.ui.selection.selectAllEnabled">${nuxeo.selection.selectAllEnabled:=false}</property>
   </extension>
 </component>
