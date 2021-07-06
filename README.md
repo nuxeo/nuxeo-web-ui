@@ -39,17 +39,10 @@ NUXEO_VERSION | Docker compose | Version of Nuxeo server to launch
 npm run start
 ```
 
-This makes the Web UI available on http://0.0.0.0:5000/ to locally test. A nuxeo platform is expected to run on http://0.0.0.0:8080/ with the following `cors-config.xml`:
+This makes the Web UI available on `http://0.0.0.0:5000/` to locally test. A nuxeo platform is expected to run on `http://0.0.0.0:8080/`. To configure CORS, we need to add the following line to `nuxeo.conf` file in our Nuxeo Server:
 
-```xml
-<component name="org.nuxeo.corsi.demo">
-  <extension target="org.nuxeo.ecm.platform.web.common.requestcontroller.service.RequestControllerService" point="corsConfig">
-    <corsConfig name="foobar" supportedMethods="GET,POST,HEAD,OPTIONS,DELETE,PUT" 
-exposedHeaders="Accept-Ranges,Content-Range,Content-Encoding,Content-Length,Content-Disposition">
-      <pattern>/nuxeo/.*</pattern>
-    </corsConfig>
-  </extension>
-</component>
+```
+  nuxeo.cors.urls=*
 ```
 
 #### Run tests
