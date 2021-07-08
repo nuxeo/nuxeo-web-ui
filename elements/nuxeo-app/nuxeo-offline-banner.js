@@ -55,7 +55,7 @@ Polymer({
       }
     </style>
 
-    <span>[[message]]</span>
+    <span aria-live="assertive">[[message]]</span>
   `,
 
   is: 'nuxeo-offline-banner',
