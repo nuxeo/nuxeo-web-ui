@@ -1401,7 +1401,7 @@ Polymer({
 
     const { commandId } = e.detail;
     const toast = this._getToastFor(commandId, e.detail);
-    const { abort, close, dismissible, duration, message } = e.detail;
+    const { abort, close, dismissible, duration, message, sticky } = e.detail;
 
     if (close) {
       toast.close();
@@ -1426,8 +1426,8 @@ Polymer({
       toast.querySelector('#dismiss').hidden = !dismissible;
       toast.labelText = message;
       toast.timeoutMs = -1;
-      if (!abort) {
-        // if it can't be aborted, we just treat it like a regular toast
+      if (!sticky) {
+        // if it is not sticky, we treat it just like any other toast
         toast.timeoutMs = duration !== undefined ? Math.max(4000, duration) : 4000;
       }
       if (toast.open) {
