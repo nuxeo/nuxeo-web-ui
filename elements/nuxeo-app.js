@@ -90,7 +90,7 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Domain',
   'Root',
 ];
-const MAX_TOASTS = 2;
+const MAX_TOASTS = 2; // max number of toasts that can be displayed simultaneously besides the default one
 
 setPassiveTouchGestures(true);
 
@@ -273,24 +273,23 @@ Polymer({
       }
 
       #snackbarPanel {
+        position: absolute;
+        bottom: 0;
+        left: 0px;
         display: flex;
         flex-direction: column-reverse;
-        bottom: 0;
-        position: absolute;
-        left: 0px;
         margin-left: 50px;
       }
 
       mwc-snackbar {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-
-        color: white;
         position: relative !important;
         left: 0 !important;
         top: 0 !important;
         z-index: 103;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
         --mdc-typography-body2-font-size: 14px;
       }
     </style>
@@ -638,6 +637,15 @@ Polymer({
 
     this.$.drawerPanel.$.drawer.addEventListener('transitionend', () => {
       this.$.drawerPanel.notifyResize();
+    });
+
+    const {toast} = this.$;
+    // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
+    // HACK - hardcode the fixed width for the internal panel
+    toast.addEventListener('MDCSnackbar:opening', () => {
+      toast.mdcRoot.style.position = 'relative';
+      toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
+      toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
     });
 
     window.addEventListener('unhandledrejection', (e) => {
@@ -1103,6 +1111,7 @@ Polymer({
   },
 
   _documentAddedToCollection(e) {
+    // details object might be empty if the event was triggered by a bulk add to collection
     if (!this._isEmpty(e.detail)) {
       this._toast(this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection'));
     }
@@ -1188,10 +1197,11 @@ Polymer({
       e.detail.message = msg;
       this._notify(e);
     } else if (this._isEmpty(e.detail)) {
+      // details object is empty if this was triggered by a bulk delete action
       this._fetchTaskCount();
       this._refreshCollections();
       this._refreshSearch();
-      // because we don't have a list of documents we can't call _removeFromClipboard and _removeFromRecentlyViewed
+      // Note: we don't have a list of documents so we can't call _removeFromClipboard() and _removeFromRecentlyViewed()
     } else {
       this._removeFromClipboard(e.detail.documents);
       this._removeFromRecentlyViewed(e.detail.documents);
@@ -1206,6 +1216,7 @@ Polymer({
   },
 
   _documentsUntrashed(e) {
+    // details object might be empty if the event was triggered by a bulk untrash action
     if (this._isEmpty(e.detail)) {
       this._refreshCollections();
       this._refreshSearch();
@@ -1335,56 +1346,57 @@ Polymer({
     });
   },
 
+  /**
+   * Setup a new toast with the necessary listeners (and styling hacks).
+   */
+  _newToast(id, callback) {
+    let toast = document.createElement('div');
+    toast.innerHTML = `
+          <mwc-snackbar id="${id}" leading>
+            <paper-button id="abort" slot="action">Abort</paper-button>'
+            <paper-icon-button id="dismiss" icon="icons:close" slot="dismiss"></paper-icon-button>
+          </mwc-snackbar>
+        `;
+    toast = toast.querySelector('mwc-snackbar');
+
+    // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
+    // HACK - hardcode the fixed width for the internal panel
+    toast.addEventListener('MDCSnackbar:opening', () => {
+      toast.mdcRoot.style.position = 'relative';
+      toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
+      toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
+    });
+
+    // listen to the closed event to track dismiss and custom action
+    toast.addEventListener('MDCSnackbar:closed', (e) => {
+      if (e.detail.reason === 'action' && callback) {
+        localStorage.setItem(id, JSON.stringify({ dismissed: false, aborted: true }));
+        callback();
+      } else if (e.detail.reason === 'dismiss') {
+        const state = JSON.parse(localStorage.getItem(id));
+        if (state && state.ended) {
+          localStorage.removeItem(id);
+        } else {
+          localStorage.setItem(id, JSON.stringify({ dismissed: true }));
+        }
+      }
+      // other than that we just need to dismiss the toast
+      toast.parentNode.removeChild(toast);
+    });
+    return toast;
+  },
+
   _getToastFor(source, data) {
     let { toast } = this.$;
     const { abort, dismissible } = data;
     if (!source) {
-      toast.addEventListener('MDCSnackbar:opening', () => {
-        // HACK - to position the snackbar and style the internal label
-        toast.mdcRoot.style.position = 'relative';
-        toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
-        // HACK - hardcode the fixed width for the internal panel
-        toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
-      });
       this.set('_dismissible', !!dismissible);
     } else {
       // use the source (commandId) to identify the snack (in order to update it later)
       const id = `snack_${source.replaceAll('-', '')}`;
       toast = this.$.snackbarPanel.querySelector(`#${id}`);
       if (!toast) {
-        toast = document.createElement('div');
-        toast.innerHTML = `
-          <mwc-snackbar id="${id}" leading>
-            <paper-button id="abort" slot="action">Abort</paper-button>'
-            <paper-icon-button id="dismiss" icon="icons:close" slot="dismiss"></paper-icon-button>
-          </mwc-snackbar>
-        `;
-        toast = toast.querySelector('mwc-snackbar');
-
-        // HACK - by changing the position to relative, we can stack snackbars (and font smooth)
-        toast.addEventListener('MDCSnackbar:opening', () => {
-          // HACK - to position the snackbar and style the internal label
-          toast.mdcRoot.style.position = 'relative';
-          toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
-          // HACK - hardcode the fixed width for the internal panel
-          toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
-        });
-        // listen to the closed event to track dismiss and custom action
-        toast.addEventListener('MDCSnackbar:closed', (e) => {
-          if (e.detail.reason === 'action' && abort) {
-            localStorage.setItem(id, JSON.stringify({ dismissed: false, aborted: true }));
-            abort();
-          } else if (e.detail.reason === 'dismiss') {
-            const state = JSON.parse(localStorage.getItem(id));
-            if (state && state.ended) {
-              localStorage.removeItem(id);
-            } else {
-              localStorage.setItem(id, JSON.stringify({ dismissed: true }));
-            }
-          }
-          // other than that we just need to dismiss the toast
-          toast.parentNode.removeChild(toast);
-        });
+        toast = this._newToast(id, abort);
         this.$.snackbarPanel.appendChild(toast);
       }
     }

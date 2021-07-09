@@ -84,11 +84,12 @@ Polymer({
 
   attached() {
     // capture the click event on the capture phase to set the nuxeo-operation-button properties
-    this.$.bulkOpBtn.addEventListener('click', this._remove.bind(this), { capture: true });
+    this._removeListener = this._remove.bind(this);
+    this.$.bulkOpBtn.addEventListener('click', this._removeListener, { capture: true });
   },
 
   detached() {
-    this.$.bulkOpBtn.removeEventListener('click', this._remove.bind(this));
+    this.$.bulkOpBtn.removeEventListener('click', this._removeListener);
   },
 
   _params() {
@@ -104,7 +105,9 @@ Polymer({
   },
 
   remove() {
-    this.bulkOpBtn._execute().then(() => { this.members = []; });
+    this.bulkOpBtn._execute().then(() => {
+      this.members = [];
+    });
   },
 
   _isAvailable(members, collection) {

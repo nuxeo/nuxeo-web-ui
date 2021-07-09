@@ -24,7 +24,6 @@ import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import { escapeHTML } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-selectivity.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-textarea.js';
@@ -55,7 +54,7 @@ Polymer({
     </style>
 
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
-    
+
     <nuxeo-operation-button
       id="bulkOpBtn"
       icon="nuxeo:collections"
@@ -108,7 +107,7 @@ Polymer({
   `,
 
   is: 'nuxeo-add-to-collection-documents-button',
-  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -164,11 +163,12 @@ Polymer({
 
   attached() {
     // capture the click event on the capture phase to trigger the popup
-    this.$.bulkOpBtn.addEventListener('click', this._onCollectionAdd.bind(this), { capture: true });
+    this._addToCollectionListener = this._onCollectionAdd.bind(this);
+    this.$.bulkOpBtn.addEventListener('click', this._addToCollectionListener, { capture: true });
   },
 
   detached() {
-    this.$.bulkOpBtn.removeEventListener('click', this._onCollectionAdd.bind(this));
+    this.$.bulkOpBtn.removeEventListener('click', this._addToCollectionListener);
   },
 
   _params() {
@@ -185,6 +185,7 @@ Polymer({
   },
 
   _onCollectionAdd(e) {
+    // we cannot trigger the nuxeo-operation-button directly, because we need the user to input the collection first
     this._toggleDialog();
     e.preventDefault();
     e.stopPropagation();

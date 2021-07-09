@@ -222,9 +222,7 @@ Polymer({
         </div>
         <div class="delegatedActions" hidden="[[!_displayDelegatedAction(displaySort, view)]]">
           <template is="dom-if" if="[[_displaySelectAll(view)]]">
-            <div>
-              <nuxeo-checkmark checked="{{selectAllActive}}" on-click="_toggleSelectAll"></nuxeo-checkmark>
-            </div>
+            <nuxeo-checkmark checked="[[selectAllActive]]" on-click="_toggleSelectAll"></nuxeo-checkmark>
           </template>
           <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
             <nuxeo-sort-select
@@ -388,8 +386,8 @@ Polymer({
 
     selectAllActive: {
       type: Boolean,
-      value: false,
       notify: true,
+      value: false,
     },
 
     _localStorageName: String,
@@ -647,7 +645,6 @@ Polymer({
   _selectedItemsChanged() {
     this.selectedItems = [];
     this.set('selectedItems', this.view.selectedItems);
-    this.selectAllActive = this.view.selectAllActive;
   },
 
   _refreshDisplay(e) {
