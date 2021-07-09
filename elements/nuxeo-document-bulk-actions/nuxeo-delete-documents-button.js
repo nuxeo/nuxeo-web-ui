@@ -22,7 +22,6 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -53,7 +52,7 @@ Polymer({
   `,
 
   is: 'nuxeo-delete-documents-button',
-  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -96,11 +95,12 @@ Polymer({
 
   attached() {
     // capture the click event on the capture phase to set the necessary nuxeo-operation-button properties
-    this.$.deleteAllButton.addEventListener('click', this._deleteDocuments.bind(this), { capture: true });
+    this._deleteDocumentsListener = this._deleteDocuments.bind(this);
+    this.$.deleteAllButton.addEventListener('click', this._deleteDocumentsListener, { capture: true });
   },
 
   detached() {
-    this.$.deleteAllButton.removeEventListener('click', this._deleteDocuments.bind(this));
+    this.$.deleteAllButton.removeEventListener('click', this._deleteDocumentsListener);
   },
 
   deleteDocuments() {
@@ -108,15 +108,15 @@ Polymer({
       (this._isSelectAllActive() || this.docsHavePermissions) &&
       window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))
     ) {
-      const documents = this.documents;
+      const {documents} = this;
       const isSelectAllActive = this._isSelectAllActive();
       // if select all is active, then we don't pass the documents (we delete/trash all of them)
-      const detail = isSelectAllActive ? {} : { documents };
-      this.$.deleteAllButton._execute()
+      const detail = isSelectAllActive ? {} : { documents };
+      this.$.deleteAllButton
+        ._execute()
         .then(() => {
           this.fire('nuxeo-documents-deleted', detail);
           this.documents = [];
-          // TO DISCUSS - this refresh can be problematic if we no longer are in the same document, needs discussion
           this.fire('refresh');
         })
         .catch((error) => {
