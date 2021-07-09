@@ -23,7 +23,11 @@ Note: This version of Nuxeo Web UI requires node version >=10.23.0.
 gulp serve
 ```
 
-This outputs an IP address you can use to locally test and another that can be used on devices connected to your network.
+This makes the Web UI available on `http://0.0.0.0:5000/` to locally test. A nuxeo platform is expected to run on `http://0.0.0.0:8080/`. To configure CORS, we need to add the following line to `nuxeo.conf` file in our Nuxeo Server:
+
+```
+    nuxeo.cors.urls=*
+```
 
 #### Run tests
 
