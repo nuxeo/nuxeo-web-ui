@@ -201,8 +201,7 @@ Polymer({
   },
 
   _onPollStart() {
-    // we need to fire the `nx-publish-success` to close the publish popup
-    this.fire('nx-publish-success', { dismissible: true });
+    this.fire('nuxeo-action-started', { dismissible: true });
   },
 
   _input() {
@@ -228,7 +227,7 @@ Polymer({
   _publish() {
     const isSelectAllActive = this._isSelectAllActive();
     const isMultiple = this._isMultiple;
-    const {publishSpace} = this;
+    const { publishSpace } = this;
     this.bulkOpBtn
       ._execute()
       .then(() => {

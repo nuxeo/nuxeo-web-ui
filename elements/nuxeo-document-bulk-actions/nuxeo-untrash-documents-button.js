@@ -22,7 +22,6 @@ import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -53,7 +52,7 @@ Polymer({
   `,
 
   is: 'nuxeo-untrash-documents-button',
-  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -83,11 +82,12 @@ Polymer({
 
   attached() {
     // capture the click event on the capture phase to set nuxeo-operation-buttons properties
-    this.$.untrashAllButton.addEventListener('click', this._untrashDocuments.bind(this), { capture: true });
+    this._untrashDocumentsListener = this._untrashDocuments.bind(this);
+    this.$.untrashAllButton.addEventListener('click', this._untrashDocumentsListener, { capture: true });
   },
 
   detached() {
-    this.$.untrashAllButton.removeEventListener('click', this._untrashDocuments.bind(this));
+    this.$.untrashAllButton.removeEventListener('click', this._untrashDocumentsListener);
   },
 
   untrashDocuments() {
@@ -95,19 +95,19 @@ Polymer({
       (this._isSelectAllActive() || this.docsHavePermissions) &&
       window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))
     ) {
-      const documents = this.documents;
+      const {documents} = this;
       const isSelectAllActive = this._isSelectAllActive();
       // if select all is active, then we don't pass the documents (we untrash all of them)
-      const detail = isSelectAllActive ? {} : { documents };
-      this.$.untrashAllButton._execute()
+      const detail = isSelectAllActive ? {} : { documents };
+      this.$.untrashAllButton
+        ._execute()
         .then(() => {
           this.fire('nuxeo-documents-untrashed', detail);
           this.documents = [];
-          // TO DISCUSS - this refresh can be problematic if we no longer are in the same document, needs discussion
           this.fire('refresh');
         })
         .catch((error) => {
-          if (!isSelectAllActive) {
+          if (!isSelectAllActive) {
             this.fire('nuxeo-documents-untrashed', { error, documents });
           }
         });
@@ -115,6 +115,7 @@ Polymer({
   },
 
   _untrashDocuments(e) {
+    // we cannot trigger the nuxeo-operation-button directly, because we need the user confirmation first
     e.preventDefault();
     e.stopPropagation();
     this.untrashDocuments();

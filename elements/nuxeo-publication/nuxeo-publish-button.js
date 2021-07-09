@@ -134,6 +134,7 @@ Polymer({
   },
 
   listeners: {
+    'nuxeo-action-started': '_close',
     'nx-publish-success': '_close',
     cancel: '_close',
   },
