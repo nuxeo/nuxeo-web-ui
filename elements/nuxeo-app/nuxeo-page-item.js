@@ -34,7 +34,7 @@ Polymer({
         cursor: pointer;
         color: var(--disabled-text-color);
         margin: 0 0 0 16px;
-        padding: 12px 6px 8px 6px;
+        padding: 12px 6px 12px 6px;
         border-bottom: 2px solid transparent;
       }
 
