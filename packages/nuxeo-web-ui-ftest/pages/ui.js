@@ -168,6 +168,6 @@ export default class UI extends BasePage {
   }
 
   waitForToastNotVisible() {
-    driver.waitUntil(() => driver.elements('paper-toast').value.every((toast) => !toast.isVisible()));
+    driver.waitUntil(() => driver.elements('mwc-snackbar').value.every((toast) => !toast.getAttribute('open')));
   }
 }

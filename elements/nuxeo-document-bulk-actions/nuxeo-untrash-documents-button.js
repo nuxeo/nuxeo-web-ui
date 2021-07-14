@@ -25,6 +25,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-untrash-documents-actions`
@@ -33,25 +34,25 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-action-button-styles"></style>
+    <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
-    <nuxeo-operation id="operation" op="Document.Untrash" sync-indexing></nuxeo-operation>
-
-    <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
-      <div class="action" on-tap="untrashDocuments">
-        <paper-icon-button
-          icon="nuxeo:restore-deleted"
-          id="untrashAllButton"
-          aria-labelledby="label"
-        ></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
-        <nuxeo-tooltip position="[[tooltipPosition]]">[[i18n(_label)]]</nuxeo-tooltip>
-      </div>
-    </template>
+    <nuxeo-operation-button
+      id="untrashAllButton"
+      icon="nuxeo:restore-deleted"
+      input="[[view]]"
+      label="[[_label]]"
+      operation="Document.Untrash"
+      params="[[_params()]]"
+      show-label="[[showLabel]]"
+      tooltip-position="[[tooltipPosition]]"
+      sync-indexing
+      hidden="[[!_isAvailable(documents.splices)]]"
+    >
+    </nuxeo-operation-button>
   `,
 
   is: 'nuxeo-untrash-documents-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -79,27 +80,56 @@ Polymer({
     },
   },
 
+  attached() {
+    // capture the click event on the capture phase to set nuxeo-operation-buttons properties
+    this._untrashDocumentsListener = this._untrashDocuments.bind(this);
+    this.$.untrashAllButton.addEventListener('click', this._untrashDocumentsListener, { capture: true });
+  },
+
+  detached() {
+    this.$.untrashAllButton.removeEventListener('click', this._untrashDocumentsListener);
+  },
+
   untrashDocuments() {
-    if (this.docsHavePermissions && window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))) {
-      if (this.documents && this.documents.length) {
-        const uids = this.documents.map((doc) => doc.uid).join(',');
-        this.$.operation.input = `docs:${uids}`;
-        this.$.operation.execute().then(
-          () => {
-            this.fire('nuxeo-documents-untrashed', { documents: this.documents });
-            this.documents = [];
-            this.fire('refresh');
-          },
-          (error) => {
-            this.fire('nuxeo-documents-untrashed', { error, documents: this.documents });
-          },
-        );
-      }
+    if (
+      (this._isSelectAllActive() || this.docsHavePermissions) &&
+      window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))
+    ) {
+      const {documents} = this;
+      const isSelectAllActive = this._isSelectAllActive();
+      // if select all is active, then we don't pass the documents (we untrash all of them)
+      const detail = isSelectAllActive ? {} : { documents };
+      this.$.untrashAllButton
+        ._execute()
+        .then(() => {
+          this.fire('nuxeo-documents-untrashed', detail);
+          this.documents = [];
+          this.fire('refresh');
+        })
+        .catch((error) => {
+          if (!isSelectAllActive) {
+            this.fire('nuxeo-documents-untrashed', { error, documents });
+          }
+        });
     }
   },
 
+  _untrashDocuments(e) {
+    // we cannot trigger the nuxeo-operation-button directly, because we need the user confirmation first
+    e.preventDefault();
+    e.stopPropagation();
+    this.untrashDocuments();
+  },
+
+  _params() {
+    return {};
+  },
+
   _isAvailable() {
-    return this.documents && this.documents.length > 0 && this._checkDocsPermissions() && this._checkDocsAreTrashed();
+    return (
+      this._isSelectAllActive() ||
+      (this.documents && this.documents.length > 0 && this._checkDocsPermissions() && this._checkDocsAreTrashed())
+    );
   },
 
   _checkDocsAreTrashed() {

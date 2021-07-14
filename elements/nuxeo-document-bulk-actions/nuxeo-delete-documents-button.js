@@ -25,6 +25,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-delete-documents-actions`
@@ -33,23 +34,25 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-action-button-styles"></style>
+    <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
-    <nuxeo-operation id="deleteOp" op="Document.Delete" sync-indexing></nuxeo-operation>
-
-    <nuxeo-operation id="trashOp" op="Document.Trash" sync-indexing></nuxeo-operation>
-
-    <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
-      <div class="action" on-tap="deleteDocuments">
-        <paper-icon-button icon="[[_icon]]" id="deleteAllButton" aria-labelledby="label"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
-        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
-      </div>
-    </template>
+    <nuxeo-operation-button
+      id="deleteAllButton"
+      icon="[[_icon]]"
+      input="[[view]]"
+      label="[[_label]]"
+      operation="[[_operation(hard)]]"
+      params="[[_params()]]"
+      show-label="[[showLabel]]"
+      tooltip-position="[[tooltipPosition]]"
+      sync-indexing
+      hidden="[[!_isAvailable(documents.splices)]]"
+    >
+    </nuxeo-operation-button>
   `,
 
   is: 'nuxeo-delete-documents-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -90,36 +93,66 @@ Polymer({
     },
   },
 
+  attached() {
+    // capture the click event on the capture phase to set the necessary nuxeo-operation-button properties
+    this._deleteDocumentsListener = this._deleteDocuments.bind(this);
+    this.$.deleteAllButton.addEventListener('click', this._deleteDocumentsListener, { capture: true });
+  },
+
+  detached() {
+    this.$.deleteAllButton.removeEventListener('click', this._deleteDocumentsListener);
+  },
+
   deleteDocuments() {
-    if (this.docsHavePermissions && window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))) {
-      if (this.documents && this.documents.length) {
-        const uids = this.documents.map((doc) => doc.uid).join(',');
-        const op = this.hard ? this.$.deleteOp : this.$.trashOp;
-        op.input = `docs:${uids}`;
-        op.execute().then(
-          () => {
-            this.fire('nuxeo-documents-deleted', { documents: this.documents });
-            this.documents = [];
-            this.fire('refresh');
-          },
-          (error) => {
-            this.fire('nuxeo-documents-deleted', { error, documents: this.documents });
-          },
-        );
-      }
+    if (
+      (this._isSelectAllActive() || this.docsHavePermissions) &&
+      window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))
+    ) {
+      const {documents} = this;
+      const isSelectAllActive = this._isSelectAllActive();
+      // if select all is active, then we don't pass the documents (we delete/trash all of them)
+      const detail = isSelectAllActive ? {} : { documents };
+      this.$.deleteAllButton
+        ._execute()
+        .then(() => {
+          this.fire('nuxeo-documents-deleted', detail);
+          this.documents = [];
+          this.fire('refresh');
+        })
+        .catch((error) => {
+          if (!isSelectAllActive) {
+            this.fire('nuxeo-documents-deleted', { error, documents });
+          }
+        });
     }
+  },
+
+  _deleteDocuments(e) {
+    // prevent the nuxeo-operation-button click, so we can set the necessary properties before
+    e.preventDefault();
+    e.stopPropagation();
+    this.deleteDocuments();
+  },
+
+  _operation() {
+    return this.hard ? 'Document.Delete' : 'Document.Trash';
+  },
+
+  _params() {
+    return {};
   },
 
   /**
    * Action is available if all selected items are not trashed and `hard` is not active OR if all selected items
-   * are trashed and `hard` is active.
+   * are trashed and `hard` is active OR if select all is active.
    */
   _isAvailable() {
     return (
-      this.documents &&
-      this.documents.length > 0 &&
-      this._checkDocsPermissions() &&
-      (this.hard || !this._checkDocsAreTrashed())
+      this._isSelectAllActive() ||
+      (this.documents &&
+        this.documents.length > 0 &&
+        this._checkDocsPermissions() &&
+        (this.hard || !this._checkDocsAreTrashed()))
     );
   },
 

@@ -70,6 +70,7 @@ Polymer({
       name="[[name]]"
       nx-provider="[[nxProvider]]"
       selected-items="{{selectedItems}}"
+      view="{{view}}"
       display-quick-filters
     >
       <slot name="selectionActions" slot="selectionActions"></slot>
@@ -254,6 +255,11 @@ Polymer({
 
     selectedItems: {
       type: Array,
+      notify: true,
+    },
+
+    view: {
+      type: Object,
       notify: true,
     },
 

@@ -30,6 +30,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-textarea.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-add-to-collection-documents-button`
@@ -52,16 +53,20 @@ Polymer({
       }
     </style>
 
-    <nuxeo-operation op="Document.AddToCollection" id="addToCollectionOp"></nuxeo-operation>
     <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
 
-    <template is="dom-if" if="[[_isAvailable(documents.*)]]">
-      <div class="action" on-tap="_toggleDialog">
-        <paper-icon-button noink icon="nuxeo:collections" id="addColBut" aria-labelledby="label"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
-        <nuxeo-tooltip position="[[tooltipPosition]]">[[_label]]</nuxeo-tooltip>
-      </div>
-    </template>
+    <nuxeo-operation-button
+      id="bulkOpBtn"
+      icon="nuxeo:collections"
+      input="[[view]]"
+      label="[[_label]]"
+      operation="Document.AddToCollection"
+      params="[[_params(collection)]]"
+      show-label="[[showLabel]]"
+      tooltip-position="[[tooltipPosition]]"
+      hidden="[[!_isAvailable(documents.*)]]"
+    >
+    </nuxeo-operation-button>
 
     <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
       <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
@@ -102,7 +107,7 @@ Polymer({
   `,
 
   is: 'nuxeo-add-to-collection-documents-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -156,11 +161,34 @@ Polymer({
     },
   },
 
+  attached() {
+    // capture the click event on the capture phase to trigger the popup
+    this._addToCollectionListener = this._onCollectionAdd.bind(this);
+    this.$.bulkOpBtn.addEventListener('click', this._addToCollectionListener, { capture: true });
+  },
+
+  detached() {
+    this.$.bulkOpBtn.removeEventListener('click', this._addToCollectionListener);
+  },
+
+  _params() {
+    return {
+      collection: this.collection,
+    };
+  },
+
   _isAvailable() {
     if (this.documents && this.documents.length > 0) {
-      return this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
+      return this._isSelectAllActive() || this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
     }
     return false;
+  },
+
+  _onCollectionAdd(e) {
+    // we cannot trigger the nuxeo-operation-button directly, because we need the user to input the collection first
+    this._toggleDialog();
+    e.preventDefault();
+    e.stopPropagation();
   },
 
   _toggleDialog() {
@@ -185,18 +213,25 @@ Polymer({
   },
 
   _addToCollection() {
-    const op = this.$$('#addToCollectionOp');
-    op.params = {
-      collection: this.collection,
-    };
-    const uids = this.documents.map((doc) => doc.uid);
-    const uidsString = uids.join(',');
-    op.input = `docs:${uidsString}`;
-    return op.execute().then(() => {
-      this.fire('added-to-collection', { docIds: uids, collectionId: this.collection });
+    const isSelectAllActive = this._isSelectAllActive();
+    let detail = {};
+    if (!isSelectAllActive) {
+      const uids = this.documents.map((doc) => doc.uid);
+      detail = { docIds: uids, collectionId: this.collection };
+    }
+
+    this.bulkOpBtn._execute().then(() => {
+      this.fire('added-to-collection', detail);
+      if (!isSelectAllActive) {
+        this._resetPopup();
+        this._toggleDialog();
+      }
+    });
+    // when select all is active we can immediatly close the dialog and reset the popup
+    if (isSelectAllActive) {
       this._resetPopup();
       this._toggleDialog();
-    });
+    }
   },
 
   _resultsFilter(entry) {

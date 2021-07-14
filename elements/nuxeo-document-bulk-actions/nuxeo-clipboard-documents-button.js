@@ -31,7 +31,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-action-button-styles"></style>
+    <style include="nuxeo-action-button-styles nuxeo-styles"></style>
 
     <template is="dom-if" if="[[_isAvailable(documents.splices)]]">
       <div class="action" on-tap="addToClipBoard">
@@ -56,6 +56,8 @@ Polymer({
       notify: true,
       value: [],
     },
+
+    view: Object,
 
     tooltipPosition: {
       type: String,
@@ -82,13 +84,17 @@ Polymer({
   },
 
   _isAvailable() {
-    return this.documents.every(
-      (doc) =>
-        (this.isCollectionMember(doc) || doc.facets.includes('Collection')) &&
-        !this.isTrashed(doc) &&
-        !this.hasType(doc, 'Favorites') &&
-        !this.isVersion(doc) &&
-        !this.isProxy(doc),
+    // the clipboard is not available if select all is active
+    return (
+      !(this.view && this.view.selectAllActive) &&
+      this.documents.every(
+        (doc) =>
+          (this.isCollectionMember(doc) || doc.facets.includes('Collection')) &&
+          !this.isTrashed(doc) &&
+          !this.hasType(doc, 'Favorites') &&
+          !this.isVersion(doc) &&
+          !this.isProxy(doc),
+      )
     );
   },
 

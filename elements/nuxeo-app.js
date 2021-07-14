@@ -33,7 +33,6 @@ import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import '@polymer/paper-drawer-panel/paper-drawer-panel.js';
 import '@polymer/paper-header-panel/paper-header-panel.js';
 import '@polymer/paper-listbox/paper-listbox.js';
-import '@polymer/paper-toast/paper-toast.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icon/iron-icon.js';
@@ -58,6 +57,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
+import '@material/mwc-snackbar';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
 import './nuxeo-browser/nuxeo-repositories.js';
 import './nuxeo-document-storage/nuxeo-document-storage.js';
@@ -90,6 +90,7 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Domain',
   'Root',
 ];
+const MAX_TOASTS = 2; // max number of toasts that can be displayed simultaneously besides the default one
 
 setPassiveTouchGestures(true);
 
@@ -271,11 +272,25 @@ Polymer({
         display: none;
       }
 
-      #toast {
+      #snackbarPanel {
+        position: absolute;
+        bottom: 0;
+        left: 0px;
+        display: flex;
+        flex-direction: column-reverse;
+        margin-left: 50px;
+      }
+
+      mwc-snackbar {
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+        z-index: 103;
         display: flex;
         align-items: center;
-        padding: 0 24px;
         justify-content: space-between;
+        color: white;
+        --mdc-typography-body2-font-size: 14px;
       }
     </style>
 
@@ -453,14 +468,19 @@ Polymer({
 
     <nuxeo-progress-indicator visible="[[loading]]"></nuxeo-progress-indicator>
 
-    <paper-toast id="toast">
-      <paper-icon-button
-        icon="icons:close"
-        on-tap="_dismissToast"
-        hidden$="[[!_dismissible]]"
-        aria-label$="[[i18n('command.close')]]"
-      ></paper-icon-button>
-    </paper-toast>
+    <!-- vertical panel to display multiple notifications -->
+    <div id="snackbarPanel">
+      <mwc-snackbar id="toast" leading>
+        <paper-icon-button id="abort" slot="action" hidden></paper-icon-button>
+        <paper-icon-button
+          id="dismiss"
+          slot="dismiss"
+          icon="icons:close"
+          hidden$="[[!_dismissible]]"
+          aria-label$="[[i18n('command.close')]]"
+        ></paper-icon-button>
+      </mwc-snackbar>
+    </div>
 
     <nuxeo-keys keys="/ ctrl+space s" on-pressed="_showSuggester"></nuxeo-keys>
     <nuxeo-keys keys="d" on-pressed="showHome"></nuxeo-keys>
@@ -617,6 +637,15 @@ Polymer({
 
     this.$.drawerPanel.$.drawer.addEventListener('transitionend', () => {
       this.$.drawerPanel.notifyResize();
+    });
+
+    const {toast} = this.$;
+    // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
+    // HACK - hardcode the fixed width for the internal panel
+    toast.addEventListener('MDCSnackbar:opening', () => {
+      toast.mdcRoot.style.position = 'relative';
+      toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
+      toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
     });
 
     window.addEventListener('unhandledrejection', (e) => {
@@ -1082,7 +1111,10 @@ Polymer({
   },
 
   _documentAddedToCollection(e) {
-    this._toast(this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection'));
+    // details object might be empty if the event was triggered by a bulk add to collection
+    if (!this._isEmpty(e.detail)) {
+      this._toast(this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection'));
+    }
   },
 
   _documentRemovedFromCollection() {
@@ -1162,13 +1194,21 @@ Polymer({
       if (e.detail.error.response.status === 403) {
         msg = `${msg} ${this.i18n('error.403')}`;
       }
-      this._toast(msg);
+      e.detail.message = msg;
+      this._notify(e);
+    } else if (this._isEmpty(e.detail)) {
+      // details object is empty if this was triggered by a bulk delete action
+      this._fetchTaskCount();
+      this._refreshCollections();
+      this._refreshSearch();
+      // Note: we don't have a list of documents so we can't call _removeFromClipboard() and _removeFromRecentlyViewed()
     } else {
       this._removeFromClipboard(e.detail.documents);
       this._removeFromRecentlyViewed(e.detail.documents);
       this._fetchTaskCount();
-      this._toast(this.i18n('app.documents.deleted.success'));
-      if (e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
+      e.detail.message = this.i18n('app.documents.deleted.success');
+      this._notify(e);
+      if (e.detail.documents && e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
         this._refreshCollections();
       }
       this._refreshSearch();
@@ -1176,11 +1216,17 @@ Polymer({
   },
 
   _documentsUntrashed(e) {
-    this._toast(this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`));
-    if (e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
+    // details object might be empty if the event was triggered by a bulk untrash action
+    if (this._isEmpty(e.detail)) {
       this._refreshCollections();
+      this._refreshSearch();
+    } else {
+      this._toast(this.i18n(`app.documents.untrashed.${e.detail.error ? 'error' : 'success'}`));
+      if (e.detail.documents && e.detail.documents.some((doc) => this.hasFacet(doc, 'Collection'))) {
+        this._refreshCollections();
+      }
+      this._refreshSearch();
     }
-    this._refreshSearch();
   },
 
   _documentFileDeleted() {
@@ -1300,21 +1346,107 @@ Polymer({
     });
   },
 
-  _notify(e) {
-    const options = e.detail;
-    if (options.close) {
-      this.$.toast.close();
-    }
-    if (options.message) {
-      this.$.toast.text = options.message;
-      this.$.toast.duration = options.duration !== undefined ? options.duration : 3000;
-      this.set('_dismissible', !!options.dismissible);
-      this.$.toast.open();
-    }
+  /**
+   * Setup a new toast with the necessary listeners (and styling hacks).
+   */
+  _newToast(id, callback) {
+    let toast = document.createElement('div');
+    toast.innerHTML = `
+          <mwc-snackbar id="${id}" leading>
+            <paper-button id="abort" slot="action">Abort</paper-button>'
+            <paper-icon-button id="dismiss" icon="icons:close" slot="dismiss"></paper-icon-button>
+          </mwc-snackbar>
+        `;
+    toast = toast.querySelector('mwc-snackbar');
+
+    // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
+    // HACK - hardcode the fixed width for the internal panel
+    toast.addEventListener('MDCSnackbar:opening', () => {
+      toast.mdcRoot.style.position = 'relative';
+      toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
+      toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
+    });
+
+    // listen to the closed event to track dismiss and custom action
+    toast.addEventListener('MDCSnackbar:closed', (e) => {
+      if (e.detail.reason === 'action' && callback) {
+        localStorage.setItem(id, JSON.stringify({ dismissed: false, aborted: true }));
+        callback();
+      } else if (e.detail.reason === 'dismiss') {
+        const state = JSON.parse(localStorage.getItem(id));
+        if (state && state.ended) {
+          localStorage.removeItem(id);
+        } else {
+          localStorage.setItem(id, JSON.stringify({ dismissed: true }));
+        }
+      }
+      // other than that we just need to dismiss the toast
+      toast.parentNode.removeChild(toast);
+    });
+    return toast;
   },
 
-  _dismissToast() {
-    this.$.toast.toggle();
+  _getToastFor(source, data) {
+    let { toast } = this.$;
+    const { abort, dismissible } = data;
+    if (!source) {
+      this.set('_dismissible', !!dismissible);
+    } else {
+      // use the source (commandId) to identify the snack (in order to update it later)
+      const id = `snack_${source.replaceAll('-', '')}`;
+      toast = this.$.snackbarPanel.querySelector(`#${id}`);
+      if (!toast) {
+        toast = this._newToast(id, abort);
+        this.$.snackbarPanel.appendChild(toast);
+      }
+    }
+    return toast;
+  },
+
+  _notify(e) {
+    // if the size of the panel is higher than the max value, we need to dismiss the oldest
+    const snackbars = this.$.snackbarPanel.querySelectorAll('mwc-snackbar:not(#toast)');
+    if (snackbars.length > MAX_TOASTS) {
+      const snackbar = snackbars[0];
+      snackbar.close('dismiss');
+    }
+
+    const { commandId } = e.detail;
+    const toast = this._getToastFor(commandId, e.detail);
+    const { abort, close, dismissible, duration, message, sticky } = e.detail;
+
+    if (close) {
+      toast.close();
+    }
+    if (message) {
+      // if the toast was dismissed, then we shouldn't display it until the action ends
+      const state = JSON.parse(localStorage.getItem(toast.id));
+      if (state && (state.dismissed || state.aborted) && abort) {
+        return;
+      }
+      if (state && !abort) {
+        localStorage.setItem(
+          toast.id,
+          JSON.stringify({
+            ended: true,
+          }),
+        );
+      }
+
+      // update the snackbar properties
+      toast.querySelector('#abort').hidden = !abort;
+      toast.querySelector('#dismiss').hidden = !dismissible;
+      toast.labelText = message;
+      toast.timeoutMs = -1;
+      if (!sticky) {
+        // if it is not sticky, we treat it just like any other toast
+        toast.timeoutMs = duration !== undefined ? Math.max(4000, duration) : 4000;
+      }
+      if (toast.open) {
+        toast.close();
+      }
+      toast.show();
+    }
   },
 
   _clipboardUpdated(e) {
@@ -1370,5 +1502,12 @@ Polymer({
     });
 
     return headers;
+  },
+
+  /**
+   * Checks if an object doesn't have properties
+   */
+  _isEmpty(obj) {
+    return Object.keys(obj).length === 0;
   },
 });

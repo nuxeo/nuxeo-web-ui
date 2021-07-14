@@ -24,6 +24,19 @@ Feature: Trash Management
     And I can navigate to trash pill
     And I can see 2 documents
 
+  Scenario: I can trash all documents
+    Given I have the following documents
+      | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
+      | Workspace     | ws               | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                   |                  |        |            |
+      | File          | File1            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                |                  |        |            |
+      | File          | File2            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                |                  |        |            |
+    When I login as "Administrator"
+    And I browse to the document with path "/default-domain/ws"
+    And I select all the documents
+    Then I can trash selected documents
+    And I can navigate to trash pill
+    And I can see 2 documents
+
   Scenario: I cannot trash documents
     Given I have the following documents
       | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
@@ -77,6 +90,20 @@ Feature: Trash Management
     And I browse to the document with path "/default-domain/ws"
     Then I can navigate to trash pill
     When I select the "TrashedFile1" document
+    Then I can permanently delete selected documents
+
+  Scenario: I can permanently delete all documents
+    Given I have the following documents
+      | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
+      | Workspace     | ws               | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                   |                  |        |            |
+    And I have the following trashed documents
+      | doctype       | title            | path                      |
+      | File          | TrashedFile1     | /default-domain/ws        |
+      | File          | TrashedFile2     | /default-domain/ws        |
+    When I login as "Administrator"
+    And I browse to the document with path "/default-domain/ws"
+    Then I can navigate to trash pill
+    When I select all the documents
     Then I can permanently delete selected documents
 
   Scenario: I cannot permanently delete documents
