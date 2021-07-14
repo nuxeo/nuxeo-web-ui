@@ -37,6 +37,12 @@
         <module>plugin/metrics</module>
       </modules>
     </profile>
+    <profile>
+      <id>a11y</id>
+      <modules>
+        <module>plugin/a11y</module>
+      </modules>
+    </profile>
   </profiles>
 
   <dependencyManagement>
