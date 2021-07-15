@@ -24,6 +24,7 @@ Feature: Trash Management
     And I can navigate to trash pill
     And I can see 2 documents
 
+  @config('selection.selectAllEnabled',true)
   Scenario: I can trash all documents
     Given I have the following documents
       | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
@@ -92,6 +93,7 @@ Feature: Trash Management
     When I select the "TrashedFile1" document
     Then I can permanently delete selected documents
 
+  @config('selection.selectAllEnabled',true)
   Scenario: I can permanently delete all documents
     Given I have the following documents
       | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |

@@ -359,14 +359,6 @@ Polymer({
       value: [],
     },
 
-    /**
-     * If enabled, it allows to select all the results items.
-     */
-    selectAllEnabled: {
-      type: Boolean,
-      value: config.get('selectAllEnabled', false),
-    },
-
     resultsCount: {
       type: Number,
     },
@@ -394,7 +386,7 @@ Polymer({
   },
 
   observers: [
-    '_selectAllChanged(selectAllEnabled, view)',
+    '_selectAllChanged(view)',
     '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
   ],
@@ -610,6 +602,7 @@ Polymer({
       columns: this.columns,
       document: this.document,
       view: this.view,
+      input: this.view && this.view.selectAllActive ? this.view : this.selectedItems,
     };
   },
 
