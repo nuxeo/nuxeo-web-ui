@@ -95,6 +95,7 @@ Feature: Internal Publication
     And I can unpublish the document
     And I can see the document has 1 children
 
+  @config('selection.selectAllEnabled',true)
   Scenario: Publish All Documents
     Given I login as "John"
     And I have the following documents

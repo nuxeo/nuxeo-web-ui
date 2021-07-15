@@ -640,7 +640,7 @@ Polymer({
       this.$.drawerPanel.notifyResize();
     });
 
-    const {toast} = this.$;
+    const { toast } = this.$;
     // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
     // HACK - hardcode the fixed width for the internal panel
     toast.addEventListener('MDCSnackbar:opening', () => {
@@ -1365,14 +1365,12 @@ Polymer({
    * Setup a new toast with the necessary listeners (and styling hacks).
    */
   _newToast(id, callback) {
-    let toast = document.createElement('div');
+    const toast = document.createElement('mwc-snackbar');
+    toast.setAttribute('id', id);
+    toast.setAttribute('leading', true);
     toast.innerHTML = `
-          <mwc-snackbar id="${id}" leading>
-            <paper-button id="abort" slot="action">Abort</paper-button>'
-            <paper-icon-button id="dismiss" icon="icons:close" slot="dismiss"></paper-icon-button>
-          </mwc-snackbar>
-        `;
-    toast = toast.querySelector('mwc-snackbar');
+      <paper-button id="abort" slot="action">Abort</paper-button>'
+      <paper-icon-button id="dismiss" icon="icons:close" slot="dismiss"></paper-icon-button>`;
 
     // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
     // HACK - hardcode the fixed width for the internal panel
@@ -1428,7 +1426,7 @@ Polymer({
 
     const { commandId } = e.detail;
     const toast = this._getToastFor(commandId, e.detail);
-    const { abort, close, dismissible, duration, message, sticky } = e.detail;
+    const { abort, close, dismissible, duration, message } = e.detail;
 
     if (close) {
       toast.close();
@@ -1453,10 +1451,16 @@ Polymer({
       toast.querySelector('#dismiss').hidden = !dismissible;
       toast.labelText = message;
       toast.timeoutMs = -1;
-      if (!sticky) {
-        // if it is not sticky, we treat it just like any other toast
-        toast.timeoutMs = duration !== undefined ? Math.max(4000, duration) : 4000;
+
+      // if it is not sticky, we treat it just like any other toast
+      if (duration !== undefined && duration === 0) {
+        toast.timeoutMs = -1;
+      } else if (duration !== undefined && duration > 0) {
+        toast.timeoutMs = Math.max(4000, duration);
+      } else {
+        toast.timeoutMs = 4000;
       }
+
       if (toast.open) {
         toast.close();
       }
