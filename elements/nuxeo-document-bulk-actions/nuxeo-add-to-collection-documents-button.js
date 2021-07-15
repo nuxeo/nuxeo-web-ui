@@ -1,199 +1,171 @@
 /**
-@license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+ @license
+ (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-import '@polymer/polymer/polymer-legacy.js';
-
-import '@polymer/paper-button/paper-button.js';
-import '@polymer/paper-dialog/paper-dialog.js';
-import '@polymer/paper-dialog-scrollable/paper-dialog-scrollable.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { escapeHTML } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-selectivity.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
-import { escapeHTML } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-selectivity.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-textarea.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-textarea.js';
 
 /**
-`nuxeo-add-to-collection-documents-button`
-@group Nuxeo UI
-@element nuxeo-add-to-collection-documents-button
-*/
-Polymer({
-  _template: html`
-    <style include="nuxeo-action-button-styles nuxeo-styles">
-      :host([hidden]) {
-        display: none;
-      }
-
-      /* Fix known stacking issue in iOS (NXP-24600)
-         https://github.com/PolymerElements/paper-dialog-scrollable/issues/72 */
-      paper-dialog-scrollable {
-        --paper-dialog-scrollable: {
-          -webkit-overflow-scrolling: auto;
+ `nuxeo-add-to-collection-documents-button`
+ @group Nuxeo UI
+ @element nuxeo-add-to-collection-documents-button
+ */
+class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
+  [SelectAllBehavior, I18nBehavior, FiltersBehavior],
+  Nuxeo.OperationButton,
+) {
+  static get template() {
+    return html`
+      <style include="nuxeo-action-button-styles nuxeo-styles">
+        :host([hidden]) {
+          display: none;
         }
-      }
-    </style>
 
-    <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
+        /* Fix known stacking issue in iOS (NXP-24600)
+           https://github.com/PolymerElements/paper-dialog-scrollable/issues/72 */
+        paper-dialog-scrollable {
+          --paper-dialog-scrollable: {
+            -webkit-overflow-scrolling: auto;
+          }
+        }
+      </style>
 
-    <nuxeo-operation-button
-      id="bulkOpBtn"
-      icon="nuxeo:collections"
-      input="[[view]]"
-      label="[[_label]]"
-      operation="Document.AddToCollection"
-      params="[[_params(collection)]]"
-      show-label="[[showLabel]]"
-      tooltip-position="[[tooltipPosition]]"
-      hidden="[[!_isAvailable(documents.*)]]"
-    >
-    </nuxeo-operation-button>
+      ${super.template}
 
-    <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
-      <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
-      <paper-dialog-scrollable>
-        <nuxeo-selectivity
-          id="nxSelect"
-          label="[[i18n('addToCollectionDocumentsButton.dialog.collections')]]"
-          operation="Collection.Suggestion"
-          min-chars="0"
-          placeholder="[[i18n('addToCollectionDocumentsButton.dialog.select')]]"
-          value="{{collection}}"
-          tagging="true"
-          query-results-filter="[[resultsFilter]]"
-          result-formatter="[[resultAndSelectionFormatter]]"
-          selection-formatter="[[resultAndSelectionFormatter]]"
-          new-entry-formatter="[[newEntryFormatter]]"
-          required
-        >
-        </nuxeo-selectivity>
-        <nuxeo-textarea
-          label="[[i18n('addToCollectionDocumentsButton.dialog.description')]]"
-          value="{{description::input}}"
-          hidden$="[[!_isNew(collection)]]"
-          always-float-label
-        >
-        </nuxeo-textarea>
-      </paper-dialog-scrollable>
+      <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
 
-      <div class="buttons">
-        <paper-button noink dialog-dismiss on-click="_resetPopup" class="secondary"
-          >[[i18n('addToCollectionDocumentsButton.dialog.cancel')]]</paper-button
-        >
-        <paper-button name="add" noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
-          [[i18n('addToCollectionDocumentsButton.dialog.add')]]
-        </paper-button>
-      </div>
-    </nuxeo-dialog>
-  `,
+      <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
+        <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
+        <paper-dialog-scrollable>
+          <nuxeo-selectivity
+            id="nxSelect"
+            label="[[i18n('addToCollectionDocumentsButton.dialog.collections')]]"
+            operation="Collection.Suggestion"
+            min-chars="0"
+            placeholder="[[i18n('addToCollectionDocumentsButton.dialog.select')]]"
+            value="{{collection}}"
+            tagging="true"
+            query-results-filter="[[resultsFilter]]"
+            result-formatter="[[resultAndSelectionFormatter]]"
+            selection-formatter="[[resultAndSelectionFormatter]]"
+            new-entry-formatter="[[newEntryFormatter]]"
+            required
+          >
+          </nuxeo-selectivity>
+          <nuxeo-textarea
+            label="[[i18n('addToCollectionDocumentsButton.dialog.description')]]"
+            value="{{description::input}}"
+            hidden$="[[!_isNew(collection)]]"
+            always-float-label
+          >
+          </nuxeo-textarea>
+        </paper-dialog-scrollable>
 
-  is: 'nuxeo-add-to-collection-documents-button',
-  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
+        <div class="buttons">
+          <paper-button noink dialog-dismiss on-click="_resetPopup" class="secondary"
+            >[[i18n('addToCollectionDocumentsButton.dialog.cancel')]]</paper-button
+          >
+          <paper-button name="add" noink class="primary" on-tap="add" disabled$="[[!_isValid(collection)]]">
+            [[i18n('addToCollectionDocumentsButton.dialog.add')]]
+          </paper-button>
+        </div>
+      </nuxeo-dialog>
+    `;
+  }
 
-  properties: {
-    documents: {
-      type: Array,
-      notify: true,
-      value: [],
-    },
+  static get is() {
+    return 'nuxeo-add-to-collection-documents-button';
+  }
 
-    collection: {
-      type: String,
-      value: '',
-    },
-
-    resultsFilter: {
-      type: Function,
-      value() {
-        return this._resultsFilter.bind(this);
+  static get properties() {
+    return {
+      documents: {
+        type: Array,
+        notify: true,
+        value: [],
       },
-    },
 
-    resultAndSelectionFormatter: {
-      type: Function,
-      value() {
-        return this._resultAndSelectionFormatter.bind(this);
+      collection: {
+        type: String,
+        value: '',
       },
-    },
 
-    newEntryFormatter: {
-      type: Function,
-      value() {
-        return this._newEntryFormatter.bind(this);
+      icon: {
+        type: String,
+        value: 'nuxeo:collections',
       },
-    },
 
-    tooltipPosition: {
-      type: String,
-      value: 'bottom',
-    },
+      resultsFilter: {
+        type: Function,
+        value() {
+          return this._resultsFilter.bind(this);
+        },
+      },
 
-    /**
-     * `true` if the action should display the label, `false` otherwise.
-     */
-    showLabel: {
-      type: Boolean,
-      value: false,
-    },
+      resultAndSelectionFormatter: {
+        type: Function,
+        value() {
+          return this._resultAndSelectionFormatter.bind(this);
+        },
+      },
 
-    _label: {
-      type: String,
-      computed: '_computeLabel(i18n)',
-    },
-  },
+      newEntryFormatter: {
+        type: Function,
+        value() {
+          return this._newEntryFormatter.bind(this);
+        },
+      },
+    };
+  }
 
-  attached() {
-    // capture the click event on the capture phase to trigger the popup
-    this._addToCollectionListener = this._onCollectionAdd.bind(this);
-    this.$.bulkOpBtn.addEventListener('click', this._addToCollectionListener, { capture: true });
-  },
+  static get observers() {
+    return ['_isVisible(documents.splices)', '_updateLabel(i18n)'];
+  }
 
-  detached() {
-    this.$.bulkOpBtn.removeEventListener('click', this._addToCollectionListener);
-  },
+  _execute() {
+    this.$.dialog.toggle();
+  }
 
   _params() {
     return {
       collection: this.collection,
     };
-  },
+  }
+
+  _isVisible() {
+    this.hidden = !this._isAvailable();
+  }
 
   _isAvailable() {
     if (this.documents && this.documents.length > 0) {
       return this._isSelectAllActive() || this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
     }
     return false;
-  },
-
-  _onCollectionAdd(e) {
-    // we cannot trigger the nuxeo-operation-button directly, because we need the user to input the collection first
-    this._toggleDialog();
-    e.preventDefault();
-    e.stopPropagation();
-  },
+  }
 
   _toggleDialog() {
     this.$.dialog.toggle();
-  },
+  }
 
   add() {
     if (this._isNew()) {
@@ -210,7 +182,7 @@ Polymer({
       });
     }
     this._addToCollection();
-  },
+  }
 
   _addToCollection() {
     const isSelectAllActive = this._isSelectAllActive();
@@ -220,7 +192,10 @@ Polymer({
       detail = { docIds: uids, collectionId: this.collection };
     }
 
-    this.bulkOpBtn._execute().then(() => {
+    this.input = this.view;
+    this.operation = 'Document.AddToCollection';
+    this.params = this._params();
+    super._execute().then(() => {
       this.fire('added-to-collection', detail);
       if (!isSelectAllActive) {
         this._resetPopup();
@@ -232,37 +207,39 @@ Polymer({
       this._resetPopup();
       this._toggleDialog();
     }
-  },
+  }
 
   _resultsFilter(entry) {
     return entry.id && entry.id.indexOf('-999999') === -1;
-  },
+  }
 
   _resultAndSelectionFormatter(item) {
     const label = item.displayLabel || item.title;
     // if we are adding a new entry with the _newEntryFormatter
     // we don't want to escape the HTML
     return item.id === -1 ? label : escapeHTML(label);
-  },
+  }
 
   _newEntryFormatter(term) {
     return { id: -1, displayLabel: term };
-  },
+  }
 
   _isValid() {
     return this.collection !== '';
-  },
+  }
 
   _isNew() {
     return this.collection === -1;
-  },
+  }
 
   _resetPopup() {
     this.set('collection', null);
     this.description = '';
-  },
+  }
 
-  _computeLabel() {
-    return this.i18n('addToCollectionDocumentsButton.tooltip');
-  },
-});
+  _updateLabel() {
+    this.label = this.i18n('addToCollectionDocumentsButton.tooltip');
+  }
+}
+
+window.customElements.define(NuxeoAddToCollectionDocumentsButton.is, NuxeoAddToCollectionDocumentsButton);
