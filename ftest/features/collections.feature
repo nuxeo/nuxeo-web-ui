@@ -38,6 +38,7 @@ Feature: Collections
     When I browse to the document with path "/default-domain/ws/File2"
     Then I can see the document belongs to the "New Collection" collection
 
+  @config('selection.selectAllEnabled',true)
   Scenario: Add all documents to a collection
     Given user "Administrator" exists in group "members"
     And I login as "Administrator"
@@ -55,6 +56,7 @@ Feature: Collections
     And I can click on the "New_Collection" collection
     Then I can see 2 documents
 
+  @config('selection.selectAllEnabled',true)
   Scenario: Remove all documents from a collection
     Given user "Administrator" exists in group "members"
     And I login as "Administrator"
