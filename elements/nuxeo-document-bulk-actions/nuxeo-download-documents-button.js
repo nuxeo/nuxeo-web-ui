@@ -24,6 +24,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-download-documents-button`
@@ -49,7 +50,7 @@ Polymer({
   `,
 
   is: 'nuxeo-download-documents-button',
-  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -57,8 +58,6 @@ Polymer({
       notify: true,
       value: [],
     },
-
-    view: Object,
 
     document: {
       type: Object,
@@ -79,7 +78,7 @@ Polymer({
   },
 
   _isAvailable() {
-    return !(this.view && this.view.selectAllActive);
+    return !this._isPageProviderDisplayBehavior(this.documents);
   },
 
   _params() {
@@ -93,7 +92,9 @@ Polymer({
   },
 
   _input() {
-    return `docs:${(this.document ? [this.document] : this.documents).map((doc) => doc.uid).join(',')}`;
+    if (this._isAvailable()) {
+      return `docs:${(this.document ? [this.document] : this.documents).map((doc) => doc.uid).join(',')}`;
+    }
   },
 
   _onPollStart() {

@@ -90,7 +90,7 @@ limitations under the License.
           collection: this.document,
           selectedItems: this.selectedItems,
           items: this.$.results.items,
-          view: this.$.results.view,
+          input: this.$.results.view && this.$.results.view.selectAllActive ? this.$.results.view : this.selectedItems,
         };
       },
 

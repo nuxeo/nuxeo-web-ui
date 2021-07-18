@@ -1,20 +1,20 @@
 /**
-@license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+ @license
+ (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-import '@polymer/polymer/polymer-legacy.js';
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
@@ -23,103 +23,78 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
-`nuxeo-collection-remove-action`
-@group Nuxeo UI
-@element nuxeo-collection-remove-action
-*/
-Polymer({
-  _template: html`
-    <style include="nuxeo-action-button-styles"></style>
+ `nuxeo-collection-remove-action`
+ @group Nuxeo UI
+ @element nuxeo-collection-remove-action
+ */
+class NuxeoCollectionRemoveAction extends mixinBehaviors(
+  [SelectAllBehavior, NotifyBehavior, I18nBehavior],
+  Nuxeo.OperationButton,
+) {
 
-    <nuxeo-operation-button
-      id="bulkOpBtn"
-      icon="nuxeo:remove"
-      input="[[view]]"
-      event="refresh"
-      label="[[_label]]"
-      operation="Collection.RemoveFromCollection"
-      params="[[_params(collection.*)]]"
-      show-label="[[showLabel]]"
-      tooltip-position="[[tooltipPosition]]"
-      sync-indexing
-      hidden="[[!_isAvailable(members, collection)]]"
-    >
-    </nuxeo-operation-button>
-  `,
+  static get is() {
+    return 'nuxeo-collection-remove-action';
+  }
 
-  is: 'nuxeo-collection-remove-action',
-  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior],
+  static get properties() {
+    return {
+      members: {
+        type: Object,
+      },
+      collection: {
+        type: Object,
+      },
+      hidden: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+        computed: '_isHidden(members, collection)'
+      },
+    };
+  }
 
-  properties: {
-    members: {
-      type: Object,
-    },
-    collection: {
-      type: Object,
-    },
+  constructor() {
+    super();
+    this.icon= 'nuxeo:remove';
+    this.label = 'collections.remove';
+    this.event = 'refresh';
+    this.operation = 'Collection.RemoveFromCollection';
+    this.syncIndexing = true;
+  }
 
-    tooltipPosition: {
-      type: String,
-      value: 'bottom',
-    },
-
-    /**
-     * `true` if the action should display the label, `false` otherwise.
-     */
-    showLabel: {
-      type: Boolean,
-      value: false,
-    },
-
-    _label: {
-      type: String,
-      computed: '_computeLabel(i18n)',
-    },
-  },
-
-  attached() {
-    // capture the click event on the capture phase to set the nuxeo-operation-button properties
-    this._removeListener = this._remove.bind(this);
-    this.$.bulkOpBtn.addEventListener('click', this._removeListener, { capture: true });
-  },
-
-  detached() {
-    this.$.bulkOpBtn.removeEventListener('click', this._removeListener);
-  },
+  _execute() {
+    this.remove();
+  }
 
   _params() {
     return {
       collection: this.collection.uid,
     };
-  },
+  }
 
-  _remove(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.remove();
-  },
-
+  /**
+   * Keeping the method to keep the API compatibility (it might be called from somewhere else since it's public API).
+   */
   remove() {
-    this.bulkOpBtn._execute().then(() => {
+    this.input = this.members;
+    this.params = this._params();
+    super._execute().then(() => {
       this.members = [];
     });
-  },
+  }
 
-  _isAvailable(members, collection) {
+  _isHidden(members, collection) {
     if (collection && collection.contextParameters && collection.contextParameters.permissions) {
       // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
       // Action will therefore not be available
-      return collection.contextParameters.permissions.indexOf('WriteProperties') > -1;
+      return collection.contextParameters.permissions.indexOf('WriteProperties') < 0;
     }
-    return false;
-  },
+    return true;
+  }
 
-  _computeLabel() {
-    return this.i18n('collections.remove');
-  },
-});
+}
+
+window.customElements.define(NuxeoCollectionRemoveAction.is, NuxeoCollectionRemoveAction);
