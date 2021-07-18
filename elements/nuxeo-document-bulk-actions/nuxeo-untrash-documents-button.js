@@ -22,7 +22,6 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class';
 import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
@@ -35,12 +34,6 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors(
   [SelectAllBehavior, I18nBehavior, FiltersBehavior],
   Nuxeo.OperationButton,
 ) {
-  static get template() {
-    return html`
-      <style include="nuxeo-action-button-styles nuxeo-styles"></style>
-      ${super.template}
-    `;
-  }
 
   static get is() {
     return 'nuxeo-untrash-documents-button';
@@ -49,43 +42,46 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors(
   static get properties() {
     return {
       documents: {
-        type: Array,
+        type: Object,
         notify: true,
-        value: [],
+        value: {},
       },
-
-      icon: {
-        type: String,
-        value: 'nuxeo:restore-deleted',
+      hidden: {
+        type: Boolean,
+        value: false,
+        computed: '_isHidden(documents.splices)'
       },
     };
   }
 
-  static get observers() {
-    return ['_isVisible(documents.splices)', '_updateLabel(i18n)'];
+  constructor() {
+    super();
+    this.icon = 'nuxeo:restore-deleted';
+    this.label = 'untrashDocumentsButton.tooltip';
+    this.operation = 'Document.Untrash';
+    this.syncIndexing = true;
   }
 
   _execute() {
     this.untrashDocuments();
   }
 
+  /**
+   * Keeping the method to keep the API compatibility (it might be called from somewhere else since it's public API).
+   */
   untrashDocuments() {
     if (
-      (this._isSelectAllActive() || this.docsHavePermissions) &&
+      (this._isPageProviderDisplayBehavior(this.documents) || this.docsHavePermissions) &&
       window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))
     ) {
       const { documents } = this;
-      const isSelectAllActive = this._isSelectAllActive();
+      const isSelectAllActive = this._isPageProviderDisplayBehavior(this.documents);
       // if select all is active, then we don't pass the documents (we untrash all of them)
       const detail = isSelectAllActive ? {} : { documents };
 
-      this.input = this.view;
-      this.operation = 'Document.Untrash';
-      this.params = this._params();
-      this.syncIndexing = true;
-
-      super
-        ._execute()
+      this.input = this.documents;
+      this.params = {};
+      super._execute()
         .then(() => {
           this.fire('nuxeo-documents-untrashed', detail);
           this.documents = [];
@@ -99,17 +95,9 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors(
     }
   }
 
-  _params() {
-    return {};
-  }
-
-  _isVisible() {
-    this.hidden = !this._isAvailable();
-  }
-
-  _isAvailable() {
-    return (
-      this._isSelectAllActive() ||
+  _isHidden() {
+    return !(
+      this._isPageProviderDisplayBehavior(this.documents) ||
       (this.documents && this.documents.length > 0 && this._checkDocsPermissions() && this._checkDocsAreTrashed())
     );
   }
@@ -128,10 +116,6 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors(
    */
   _docHasPermissions(document) {
     return this.hasPermission(document, 'Write');
-  }
-
-  _updateLabel() {
-    this.label = this.i18n('untrashDocumentsButton.tooltip');
   }
 }
 
