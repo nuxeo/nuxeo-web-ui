@@ -14,7 +14,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  */
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-operation-button.js';
@@ -32,12 +31,6 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors(
   [SelectAllBehavior, I18nBehavior, FiltersBehavior],
   Nuxeo.OperationButton,
 ) {
-  static get template() {
-    return html`
-      <style include="nuxeo-action-button-styles nuxeo-styles"></style>
-      ${super.template}
-    `;
-  }
 
   static get is() {
     return 'nuxeo-delete-documents-button';
@@ -46,9 +39,9 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors(
   static get properties() {
     return {
       documents: {
-        type: Array,
+        type: Object,
         notify: true,
-        value: [],
+        value: {},
       },
 
       /**
@@ -58,28 +51,39 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors(
         type: Boolean,
         value: false,
       },
+      hidden: {
+        type: Boolean,
+        value: false,
+        computed: '_isHidden(documents.splices)'
+      },
     };
   }
 
   static get observers() {
-    return ['_isVisible(documents.splices)', '_updateIcon(hard)', '_updateLabel(hard, i18n)'];
+    return [
+      '_updateIcon(hard)',
+      '_updateLabel(hard)'
+    ];
   }
 
   _execute() {
     this.deleteDocuments();
   }
 
+  /**
+   * Keeping the method to keep the API compatibility (it might be called from somwhere else since it's public API).
+   */
   deleteDocuments() {
     if (
-      (this._isSelectAllActive() || this.docsHavePermissions) &&
+      (this._isPageProviderDisplayBehavior(this.documents) || this.docsHavePermissions) &&
       window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))
     ) {
-      this.input = this.view;
+      this.input = this.documents;
       this.operation = this._operation();
       this.params = {};
 
       const { documents } = this;
-      const isSelectAllActive = this._isSelectAllActive();
+      const isSelectAllActive = this._isPageProviderDisplayBehavior(this.documents);
       // if select all is active, then we don't pass the documents (we delete/trash all of them)
       const detail = isSelectAllActive ? {} : { documents };
       super
@@ -101,17 +105,13 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors(
     return this.hard ? 'Document.Delete' : 'Document.Trash';
   }
 
-  _isVisible() {
-    this.hidden = !this._isAvailable();
-  }
-
   /**
    * Action is available if all selected items are not trashed and `hard` is not active OR if all selected items
    * are trashed and `hard` is active OR if select all is active.
    */
-  _isAvailable() {
-    return (
-      this._isSelectAllActive() ||
+  _isHidden() {
+    return !(
+      this._isPageProviderDisplayBehavior(this.documents) ||
       (this.documents &&
         this.documents.length > 0 &&
         this._checkDocsPermissions() &&
@@ -143,7 +143,7 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors(
   }
 
   _updateLabel(hard) {
-    this.label = this.i18n(hard ? 'deleteDocumentsButton.tooltip.permanently' : 'deleteDocumentsButton.tooltip');
+    this.label = hard ? 'deleteDocumentsButton.tooltip.permanently' : 'deleteDocumentsButton.tooltip';
   }
 }
 

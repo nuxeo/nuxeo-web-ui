@@ -50,6 +50,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
         }
       </style>
 
+      <!-- inherit nuxeo-operation-button template -->
       ${super.template}
 
       <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
@@ -110,11 +111,6 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
         value: '',
       },
 
-      icon: {
-        type: String,
-        value: 'nuxeo:collections',
-      },
-
       resultsFilter: {
         type: Function,
         value() {
@@ -135,11 +131,20 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
           return this._newEntryFormatter.bind(this);
         },
       },
+
+      hidden: {
+        type: Boolean,
+        value: false,
+        computed: '_isHidden(documents.splices)'
+      },
     };
   }
 
-  static get observers() {
-    return ['_isVisible(documents.splices)', '_updateLabel(i18n)'];
+  constructor() {
+    super();
+    this.icon = 'nuxeo:collections';
+    this.label = 'addToCollectionDocumentsButton.tooltip';
+    this.operation = 'Document.AddToCollection';
   }
 
   _execute() {
@@ -152,15 +157,13 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
     };
   }
 
-  _isVisible() {
-    this.hidden = !this._isAvailable();
-  }
-
-  _isAvailable() {
-    if (this.documents && this.documents.length > 0) {
-      return this._isSelectAllActive() || this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'));
-    }
-    return false;
+  /**
+   * Control the visibility of the button.
+   */
+  _isHidden() {
+    return !(this._isPageProviderDisplayBehavior(this.documents) ||
+      (this.documents && this.documents.length > 0 &&
+        this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'))));
   }
 
   _toggleDialog() {
@@ -185,15 +188,14 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
   }
 
   _addToCollection() {
-    const isSelectAllActive = this._isSelectAllActive();
+    const isSelectAllActive = this._isPageProviderDisplayBehavior(this.documents);
     let detail = {};
     if (!isSelectAllActive) {
       const uids = this.documents.map((doc) => doc.uid);
       detail = { docIds: uids, collectionId: this.collection };
     }
 
-    this.input = this.view;
-    this.operation = 'Document.AddToCollection';
+    this.input = this.documents;
     this.params = this._params();
     super._execute().then(() => {
       this.fire('added-to-collection', detail);
@@ -202,7 +204,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
         this._toggleDialog();
       }
     });
-    // when select all is active we can immediatly close the dialog and reset the popup
+    // when select all is active we can immediately close the dialog and reset the popup
     if (isSelectAllActive) {
       this._resetPopup();
       this._toggleDialog();
@@ -235,10 +237,6 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
   _resetPopup() {
     this.set('collection', null);
     this.description = '';
-  }
-
-  _updateLabel() {
-    this.label = this.i18n('addToCollectionDocumentsButton.tooltip');
   }
 }
 
