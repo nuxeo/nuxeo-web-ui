@@ -75,7 +75,7 @@ Polymer({
 
     <nuxeo-operation-button
       id="bulkOpBtn"
-      input="[[_input(document, view)]]"
+      input="[[_input(document, documents.splices)]]"
       label="[[i18n('publication.internal.title')]]"
       operation="Document.PublishToSection"
       on-poll-start="_onPollStart"
@@ -205,8 +205,8 @@ Polymer({
   },
 
   _input() {
-    if (this.view) {
-      return this.view;
+    if (this._isPageProviderDisplayBehavior(this.documents)) {
+      return this.documents;
     }
     return this._isMultiple ? `docs:${this.documents.map((doc) => doc.uid).join(',')}` : this.document.uid;
   },
@@ -225,10 +225,10 @@ Polymer({
   },
 
   _publish() {
-    const isSelectAllActive = this._isSelectAllActive();
+    const isSelectAllActive = this._isPageProviderDisplayBehavior(this.documents);
     const isMultiple = this._isMultiple;
     const { publishSpace } = this;
-    this.bulkOpBtn
+    this.$.bulkOpBtn
       ._execute()
       .then(() => {
         if (isMultiple) {

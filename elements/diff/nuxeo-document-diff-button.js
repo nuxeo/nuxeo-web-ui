@@ -23,6 +23,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
 `nuxeo-document-diff-button`
@@ -33,7 +34,7 @@ Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles"></style>
 
-    <template is="dom-if" if="[[_isAvailable(selectedDocuments, view)]]">
+    <template is="dom-if" if="[[_isAvailable(selectedDocuments)]]">
       <div class="action" on-tap="_doDiff">
         <paper-icon-button noink id="diff" icon="nuxeo:compare" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
@@ -43,15 +44,13 @@ Polymer({
   `,
 
   is: 'nuxeo-document-diff-button',
-  behaviors: [I18nBehavior, FiltersBehavior],
+  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     selectedDocuments: {
       type: Array,
       value: [],
     },
-
-    view: Object,
 
     tooltipPosition: {
       type: String,
@@ -73,7 +72,7 @@ Polymer({
 
   _isAvailable() {
     return (
-      (!this.view || (this.view && !this.view.selectAllActive)) &&
+      !this._isPageProviderDisplayBehavior(this.selectedDocuments) &&
       this.selectedDocuments &&
       this.selectedDocuments.length > 1
     );

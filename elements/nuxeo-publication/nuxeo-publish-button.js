@@ -70,7 +70,7 @@ Polymer({
       }
     </style>
 
-    <template is="dom-if" if="[[_isAvailable(document, documents.splices, view)]]">
+    <template is="dom-if" if="[[_isAvailable(document, documents.splices)]]">
       <div class="action" on-tap="_toggleDialog">
         <paper-icon-button id="publishButton" icon="[[icon]]" noink aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[_label]]</span>
@@ -148,7 +148,12 @@ Polymer({
   },
 
   _publishContext() {
-    return this.opened ? { document: this.document, documents: this.documents, i18n: this.i18n, view: this.view } : {};
+    return this.opened ? {
+      document: this.document,
+      documents: this.documents,
+      i18n: this.i18n,
+      input: this.documents,
+    } : {};
   },
 
   _computeLabel() {
@@ -157,7 +162,7 @@ Polymer({
 
   _isAvailable() {
     return (
-      this._isSelectAllActive() ||
+      this._isPageProviderDisplayBehavior(this.documents) ||
       (this.document && this.isPublishable(this.document)) ||
       (this.documents && this.documents.every((doc) => this.isPublishable(doc)))
     );

@@ -4,21 +4,14 @@
  * @polymerBehavior
  */
 export const SelectAllBehavior = {
-  properties: {
-    /**
-     * An instance of a view (table, grid, list) that implements the `nuxeo-page-provider-display-behavior` and
-     * supports select all mode.
-     */
-    view: {
-      type: Object,
-    },
-  },
 
-  get bulkOpBtn() {
-    return this.$$('#bulkOpBtn');
-  },
-
-  _isSelectAllActive() {
-    return this.view && this.view.selectAllActive;
-  },
+  _isPageProviderDisplayBehavior(input) {
+    return (
+      input &&
+      input.behaviors &&
+      Nuxeo.PageProviderDisplayBehavior &&
+      Nuxeo.PageProviderDisplayBehavior.every((p) => input.behaviors.includes(p)) &&
+      input.selectAllActive
+    );
+  }
 };
