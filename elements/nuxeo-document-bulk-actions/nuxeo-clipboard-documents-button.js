@@ -85,7 +85,7 @@ Polymer({
   _isAvailable() {
     // the clipboard is not available if select all is active
     return (
-      !(isPageProviderDisplayBehavior(this.documents)) &&
+      !isPageProviderDisplayBehavior(this.documents) &&
       this.documents.every(
         (doc) =>
           (this.isCollectionMember(doc) || doc.facets.includes('Collection')) &&

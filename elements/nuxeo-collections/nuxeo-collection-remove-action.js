@@ -29,11 +29,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
  @group Nuxeo UI
  @element nuxeo-collection-remove-action
  */
-class NuxeoCollectionRemoveAction extends mixinBehaviors(
-  [NotifyBehavior, I18nBehavior],
-  Nuxeo.OperationButton,
-) {
-
+class NuxeoCollectionRemoveAction extends mixinBehaviors([NotifyBehavior, I18nBehavior], Nuxeo.OperationButton) {
   static get is() {
     return 'nuxeo-collection-remove-action';
   }
@@ -50,14 +46,14 @@ class NuxeoCollectionRemoveAction extends mixinBehaviors(
         type: Boolean,
         value: false,
         reflectToAttribute: true,
-        computed: '_isHidden(members, collection)'
+        computed: '_isHidden(members, collection)',
       },
     };
   }
 
   constructor() {
     super();
-    this.icon= 'nuxeo:remove';
+    this.icon = 'nuxeo:remove';
     this.label = 'collections.remove';
     this.event = 'refresh';
     this.operation = 'Collection.RemoveFromCollection';
@@ -93,7 +89,6 @@ class NuxeoCollectionRemoveAction extends mixinBehaviors(
     }
     return true;
   }
-
 }
 
 window.customElements.define(NuxeoCollectionRemoveAction.is, NuxeoCollectionRemoveAction);
