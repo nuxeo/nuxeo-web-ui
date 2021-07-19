@@ -20,7 +20,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-operation-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
+import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 
 /**
  `nuxeo-delete-documents-actions`
@@ -28,7 +28,7 @@ import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
  @element nuxeo-delete-documents-actions
  */
 class NuxeoDeleteDocumentsButton extends mixinBehaviors(
-  [SelectAllBehavior, I18nBehavior, FiltersBehavior],
+  [I18nBehavior, FiltersBehavior],
   Nuxeo.OperationButton,
 ) {
 
@@ -75,7 +75,7 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors(
    */
   deleteDocuments() {
     if (
-      (this._isPageProviderDisplayBehavior(this.documents) || this.docsHavePermissions) &&
+      (isPageProviderDisplayBehavior(this.documents) || this.docsHavePermissions) &&
       window.confirm(this.i18n('deleteDocumentsButton.confirm.deleteDocuments'))
     ) {
       this.input = this.documents;
@@ -83,7 +83,7 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors(
       this.params = {};
 
       const { documents } = this;
-      const isSelectAllActive = this._isPageProviderDisplayBehavior(this.documents);
+      const isSelectAllActive = isPageProviderDisplayBehavior(this.documents);
       // if select all is active, then we don't pass the documents (we delete/trash all of them)
       const detail = isSelectAllActive ? {} : { documents };
       super
@@ -111,7 +111,7 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors(
    */
   _isHidden() {
     return !(
-      this._isPageProviderDisplayBehavior(this.documents) ||
+      isPageProviderDisplayBehavior(this.documents) ||
       (this.documents &&
         this.documents.length > 0 &&
         this._checkDocsPermissions() &&
