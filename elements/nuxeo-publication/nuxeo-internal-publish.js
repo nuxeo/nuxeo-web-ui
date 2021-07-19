@@ -37,7 +37,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../nuxeo-document-versions/nuxeo-document-versions.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
+import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 
 Polymer({
   _template: html`
@@ -150,7 +150,7 @@ Polymer({
   `,
 
   is: 'nuxeo-internal-publish',
-  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, LayoutBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, LayoutBehavior],
 
   properties: {
     /**
@@ -205,7 +205,7 @@ Polymer({
   },
 
   _input() {
-    if (this._isPageProviderDisplayBehavior(this.documents)) {
+    if (isPageProviderDisplayBehavior(this.documents)) {
       return this.documents;
     }
     return this._isMultiple ? `docs:${this.documents.map((doc) => doc.uid).join(',')}` : this.document.uid;
@@ -225,7 +225,7 @@ Polymer({
   },
 
   _publish() {
-    const isSelectAllActive = this._isPageProviderDisplayBehavior(this.documents);
+    const isSelectAllActive = isPageProviderDisplayBehavior(this.documents);
     const isMultiple = this._isMultiple;
     const { publishSpace } = this;
     this.$.bulkOpBtn

@@ -21,7 +21,7 @@ import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
+import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-textarea.js';
 
@@ -31,7 +31,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-textarea.js';
  @element nuxeo-add-to-collection-documents-button
  */
 class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
-  [SelectAllBehavior, I18nBehavior, FiltersBehavior],
+  [I18nBehavior, FiltersBehavior],
   Nuxeo.OperationButton,
 ) {
   static get template() {
@@ -161,7 +161,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
    * Control the visibility of the button.
    */
   _isHidden() {
-    return !(this._isPageProviderDisplayBehavior(this.documents) ||
+    return !(isPageProviderDisplayBehavior(this.documents) ||
       (this.documents && this.documents.length > 0 &&
         this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'))));
   }
@@ -188,7 +188,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
   }
 
   _addToCollection() {
-    const isSelectAllActive = this._isPageProviderDisplayBehavior(this.documents);
+    const isSelectAllActive = isPageProviderDisplayBehavior(this.documents);
     let detail = {};
     if (!isSelectAllActive) {
       const uids = this.documents.map((doc) => doc.uid);
