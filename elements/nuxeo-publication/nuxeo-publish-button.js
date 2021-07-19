@@ -33,7 +33,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
+import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 
 Polymer({
   _template: html`
@@ -91,7 +91,7 @@ Polymer({
   `,
 
   is: 'nuxeo-publish-button',
-  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
     /**
@@ -162,7 +162,7 @@ Polymer({
 
   _isAvailable() {
     return (
-      this._isPageProviderDisplayBehavior(this.documents) ||
+      isPageProviderDisplayBehavior(this.documents) ||
       (this.document && this.isPublishable(this.document)) ||
       (this.documents && this.documents.every((doc) => this.isPublishable(doc)))
     );

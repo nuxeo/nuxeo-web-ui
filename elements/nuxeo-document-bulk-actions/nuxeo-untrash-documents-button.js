@@ -23,7 +23,7 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
+import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 
 /**
  `nuxeo-untrash-documents-actions`
@@ -31,7 +31,7 @@ import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
  @element nuxeo-untrash-documents-actions
  */
 class NuxeoUntrashDocumentsButton extends mixinBehaviors(
-  [SelectAllBehavior, I18nBehavior, FiltersBehavior],
+  [I18nBehavior, FiltersBehavior],
   Nuxeo.OperationButton,
 ) {
 
@@ -71,11 +71,11 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors(
    */
   untrashDocuments() {
     if (
-      (this._isPageProviderDisplayBehavior(this.documents) || this.docsHavePermissions) &&
+      (isPageProviderDisplayBehavior(this.documents) || this.docsHavePermissions) &&
       window.confirm(this.i18n('untrashDocumentsButton.confirm.untrashDocuments'))
     ) {
       const { documents } = this;
-      const isSelectAllActive = this._isPageProviderDisplayBehavior(this.documents);
+      const isSelectAllActive = isPageProviderDisplayBehavior(this.documents);
       // if select all is active, then we don't pass the documents (we untrash all of them)
       const detail = isSelectAllActive ? {} : { documents };
 
@@ -97,7 +97,7 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors(
 
   _isHidden() {
     return !(
-      this._isPageProviderDisplayBehavior(this.documents) ||
+      isPageProviderDisplayBehavior(this.documents) ||
       (this.documents && this.documents.length > 0 && this._checkDocsPermissions() && this._checkDocsAreTrashed())
     );
   }

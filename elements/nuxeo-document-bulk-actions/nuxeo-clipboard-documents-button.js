@@ -23,7 +23,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
+import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 
 /**
 `nuxeo-clipboard-documents-button`
@@ -49,7 +49,7 @@ Polymer({
   `,
 
   is: 'nuxeo-clipboard-documents-button',
-  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -85,7 +85,7 @@ Polymer({
   _isAvailable() {
     // the clipboard is not available if select all is active
     return (
-      !(this._isPageProviderDisplayBehavior(this.documents)) &&
+      !(isPageProviderDisplayBehavior(this.documents)) &&
       this.documents.every(
         (doc) =>
           (this.isCollectionMember(doc) || doc.facets.includes('Collection')) &&
