@@ -1383,14 +1383,14 @@ Polymer({
     // listen to the closed event to track dismiss and custom action
     toast.addEventListener('MDCSnackbar:closed', (e) => {
       if (e.detail.reason === 'action' && callback) {
-        localStorage.setItem(id, JSON.stringify({ dismissed: false, aborted: true }));
+        toast.__state = { dismissed: false, aborted: true };
         callback();
       } else if (e.detail.reason === 'dismiss') {
-        const state = JSON.parse(localStorage.getItem(id));
+        const state = toast.__state;
         if (state && state.ended) {
-          localStorage.removeItem(id);
+          toast.__state = null;
         } else {
-          localStorage.setItem(id, JSON.stringify({ dismissed: true }));
+          toast.__state.dismissed = true;
         }
       }
       // other than that we just need to dismiss the toast
@@ -1433,17 +1433,12 @@ Polymer({
     }
     if (message) {
       // if the toast was dismissed, then we shouldn't display it until the action ends
-      const state = JSON.parse(localStorage.getItem(toast.id));
+      const state = toast.__state;
       if (state && (state.dismissed || state.aborted) && abort) {
         return;
       }
       if (state && !abort) {
-        localStorage.setItem(
-          toast.id,
-          JSON.stringify({
-            ended: true,
-          }),
-        );
+        toast.__state.ended = true;
       }
 
       // update the snackbar properties
