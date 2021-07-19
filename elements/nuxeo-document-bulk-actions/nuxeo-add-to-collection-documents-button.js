@@ -135,7 +135,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
       hidden: {
         type: Boolean,
         value: false,
-        computed: '_isHidden(documents.splices)'
+        computed: '_isHidden(documents.splices)',
       },
     };
   }
@@ -161,9 +161,12 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
    * Control the visibility of the button.
    */
   _isHidden() {
-    return !(isPageProviderDisplayBehavior(this.documents) ||
-      (this.documents && this.documents.length > 0 &&
-        this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember'))));
+    return !(
+      isPageProviderDisplayBehavior(this.documents) ||
+      (this.documents &&
+        this.documents.length > 0 &&
+        this.documents.every((doc) => !this.hasFacet(doc, 'NotCollectionMember')))
+    );
   }
 
   _toggleDialog() {

@@ -148,12 +148,14 @@ Polymer({
   },
 
   _publishContext() {
-    return this.opened ? {
-      document: this.document,
-      documents: this.documents,
-      i18n: this.i18n,
-      input: this.documents,
-    } : {};
+    return this.opened
+      ? {
+          document: this.document,
+          documents: this.documents,
+          i18n: this.i18n,
+          input: this.documents,
+        }
+      : {};
   },
 
   _computeLabel() {
