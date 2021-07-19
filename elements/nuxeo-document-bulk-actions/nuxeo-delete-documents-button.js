@@ -27,11 +27,7 @@ import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
  @group Nuxeo UI
  @element nuxeo-delete-documents-actions
  */
-class NuxeoDeleteDocumentsButton extends mixinBehaviors(
-  [I18nBehavior, FiltersBehavior],
-  Nuxeo.OperationButton,
-) {
-
+class NuxeoDeleteDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBehavior], Nuxeo.OperationButton) {
   static get is() {
     return 'nuxeo-delete-documents-button';
   }
@@ -54,16 +50,13 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors(
       hidden: {
         type: Boolean,
         value: false,
-        computed: '_isHidden(documents.splices)'
+        computed: '_isHidden(documents.splices)',
       },
     };
   }
 
   static get observers() {
-    return [
-      '_updateIcon(hard)',
-      '_updateLabel(hard)'
-    ];
+    return ['_updateIcon(hard)', '_updateLabel(hard)'];
   }
 
   _execute() {

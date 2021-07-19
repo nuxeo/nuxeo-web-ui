@@ -206,11 +206,7 @@
 
 <nuxeo-slot-content name="removeCollectionAction" slot="COLLECTION_ACTIONS" order="10">
   <template>
-    <nuxeo-collection-remove-action
-      members="[[input]]"
-      all-members="[[items]]"
-      collection="[[collection]]"
-    >
+    <nuxeo-collection-remove-action members="[[input]]" all-members="[[items]]" collection="[[collection]]">
     </nuxeo-collection-remove-action>
   </template>
 </nuxeo-slot-content>
@@ -673,8 +669,7 @@
 
 <nuxeo-slot-content name="addToCollectionSelectionAction" slot="RESULTS_SELECTION_ACTIONS" order="10">
   <template>
-    <nuxeo-add-to-collection-documents-button documents="[[input]]">
-    </nuxeo-add-to-collection-documents-button>
+    <nuxeo-add-to-collection-documents-button documents="[[input]]"> </nuxeo-add-to-collection-documents-button>
   </template>
 </nuxeo-slot-content>
 
@@ -803,12 +798,7 @@
 
 <nuxeo-slot-content name="internalPublishPage" slot="PUBLISH_PAGES" order="10">
   <template>
-    <nuxeo-internal-publish
-      id="internalPublish"
-      name="internal"
-      document="[[document]]"
-      documents="[[input]]"
-    >
+    <nuxeo-internal-publish id="internalPublish" name="internal" document="[[document]]" documents="[[input]]">
     </nuxeo-internal-publish>
   </template>
 </nuxeo-slot-content>

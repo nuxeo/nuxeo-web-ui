@@ -30,11 +30,7 @@ import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
  @group Nuxeo UI
  @element nuxeo-untrash-documents-actions
  */
-class NuxeoUntrashDocumentsButton extends mixinBehaviors(
-  [I18nBehavior, FiltersBehavior],
-  Nuxeo.OperationButton,
-) {
-
+class NuxeoUntrashDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBehavior], Nuxeo.OperationButton) {
   static get is() {
     return 'nuxeo-untrash-documents-button';
   }
@@ -49,7 +45,7 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors(
       hidden: {
         type: Boolean,
         value: false,
-        computed: '_isHidden(documents.splices)'
+        computed: '_isHidden(documents.splices)',
       },
     };
   }
@@ -81,7 +77,8 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors(
 
       this.input = this.documents;
       this.params = {};
-      super._execute()
+      super
+        ._execute()
         .then(() => {
           this.fire('nuxeo-documents-untrashed', detail);
           this.documents = [];
