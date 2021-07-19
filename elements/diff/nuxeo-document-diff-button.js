@@ -23,7 +23,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
+import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 
 /**
 `nuxeo-document-diff-button`
@@ -44,7 +44,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-diff-button',
-  behaviors: [SelectAllBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
     selectedDocuments: {
@@ -72,7 +72,7 @@ Polymer({
 
   _isAvailable() {
     return (
-      !this._isPageProviderDisplayBehavior(this.selectedDocuments) &&
+      !isPageProviderDisplayBehavior(this.selectedDocuments) &&
       this.selectedDocuments &&
       this.selectedDocuments.length > 1
     );

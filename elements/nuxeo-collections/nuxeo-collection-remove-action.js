@@ -23,7 +23,6 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
 
 /**
  `nuxeo-collection-remove-action`
@@ -31,7 +30,7 @@ import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
  @element nuxeo-collection-remove-action
  */
 class NuxeoCollectionRemoveAction extends mixinBehaviors(
-  [SelectAllBehavior, NotifyBehavior, I18nBehavior],
+  [NotifyBehavior, I18nBehavior],
   Nuxeo.OperationButton,
 ) {
 

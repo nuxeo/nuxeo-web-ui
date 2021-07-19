@@ -24,7 +24,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { SelectAllBehavior } from '../nuxeo-select-all-behavior.js';
+import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 
 /**
 `nuxeo-download-documents-button`
@@ -50,7 +50,7 @@ Polymer({
   `,
 
   is: 'nuxeo-download-documents-button',
-  behaviors: [SelectAllBehavior, NotifyBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior],
 
   properties: {
     documents: {
@@ -78,7 +78,7 @@ Polymer({
   },
 
   _isAvailable() {
-    return !this._isPageProviderDisplayBehavior(this.documents);
+    return !isPageProviderDisplayBehavior(this.documents);
   },
 
   _params() {
