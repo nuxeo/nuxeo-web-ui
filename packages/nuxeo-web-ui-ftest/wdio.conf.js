@@ -45,7 +45,7 @@ switch (capability.browserName) {
       options.args.push('--disable-dev-shm-usage');
     }
     if (process.env.BROWSER_BINARY) {
-      capability.chromeOptions.binary = process.env.BROWSER_BINARY;
+      options.binary = process.env.BROWSER_BINARY;
     }
     capability['goog:chromeOptions'] = options;
     break;

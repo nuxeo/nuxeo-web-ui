@@ -1,4 +1,4 @@
-import { Before } from 'cucumber';
+import { Before } from '@cucumber/cucumber';
 
 Before((e) => {
   const { tags } = e.pickle;
