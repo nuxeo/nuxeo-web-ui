@@ -11,7 +11,10 @@ When('I click the Create Document button', function() {
 Then('I click the Create button to finish the import', function() {
   const importButton = this.ui.createDialog.importCreateButton;
   importButton.waitForVisible();
+  importButton.waitForEnabled();
   importButton.click();
+  driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
+  driver.pause(3000); // XXX just give it some time to the server to do the conversions
 });
 
 Then(/^I go to the (.+) tab$/, function(name) {
