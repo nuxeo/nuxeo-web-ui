@@ -29,6 +29,9 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const chromeLauncher = require('chrome-launcher');
+const { execSync } = require('child_process');
+const fetch = require('node-fetch');
 
 const wdioBin = require.resolve('@wdio/cli/bin/wdio');
 const argv = require('minimist')(process.argv.slice(2));
@@ -95,11 +98,52 @@ process.env.BROWSER = argv.browser || process.env.BROWSER || 'chrome';
 
 process.env.FORCE_COLOR = true;
 
-const wdio = spawn('node', [wdioBin, ...args], { env: process.env, stdio: ['inherit', 'pipe', 'pipe'] });
+let done = Promise.resolve();
 
-wdio.stdout.pipe(process.stdout);
-wdio.stderr.pipe(process.stderr);
+if (process.env.DRIVER_VERSION == null) {
+  const chromePath = chromeLauncher.Launcher.getFirstInstallation();
+  let version;
+  try {
+    version = execSync(`"${chromePath}" --version`)
+      .toString()
+      .trim();
+  } catch (e) {
+    console.error('unable to get Chrome version: ', e);
+  }
+  // eslint-disable-next-line no-console
+  console.log(`${version} detected.`);
+  const match = version && version.match(/([0-9]+)\./);
+  if (match) {
+    const checkVersion = match[1];
+    try {
+      done = fetch(`https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${checkVersion}`).then((response) => {
+        if (response.ok) {
+          return response
+            .text()
+            .then((newDriverVersion) => {
+              // eslint-disable-next-line no-console
+              console.log(`ChromeDriver ${newDriverVersion} needed.`);
+              process.env.DRIVER_VERSION = newDriverVersion;
+            })
+            .catch((e) => {
+              console.error('unable to parse ChromeDriver version: ', e);
+            });
+        }
+        console.error('unable to fetch ChromeDriver version: ', response);
+      });
+    } catch (e) {
+      console.error('unable to fetch ChromeDriver version: ', e);
+    }
+  }
+}
 
-wdio.on('close', (code) => {
-  process.exit(code);
+done.finally(() => {
+  const wdio = spawn('node', [wdioBin, ...args], { env: process.env, stdio: ['inherit', 'pipe', 'pipe'] });
+
+  wdio.stdout.pipe(process.stdout);
+  wdio.stderr.pipe(process.stderr);
+
+  wdio.on('close', (code) => {
+    process.exit(code);
+  });
 });
