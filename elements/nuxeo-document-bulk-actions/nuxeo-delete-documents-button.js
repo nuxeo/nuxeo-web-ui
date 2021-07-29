@@ -131,15 +131,9 @@ Polymer({
   },
 
   _checkDocsPermissions() {
-    this.docsHavePermissions = this.documents && !this.documents.some((document) => !this._docHasPermissions(document));
+    this.docsHavePermissions =
+      this.documents && !this.documents.some((document) => !this.hasPermission(document, 'Remove'));
     return this.docsHavePermissions;
-  },
-
-  /*
-   * Checks if a single given document has the 'Remove' permission to delete/trash
-   */
-  _docHasPermissions(document) {
-    return !this.isUnderRetentionOrLegalHold(document) && this.hasPermission(document, 'Remove');
   },
 
   _computeIcon(hard) {
