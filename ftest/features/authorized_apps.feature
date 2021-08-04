@@ -1,4 +1,3 @@
-@ignore
 Feature: Authorized Applications
 
   Users can manage their authorized applications.
