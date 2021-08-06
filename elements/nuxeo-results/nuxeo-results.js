@@ -601,7 +601,7 @@ Polymer({
       items: this.items,
       columns: this.columns,
       document: this.document,
-      input: this.view && this.view.selectAllActive ? this.view : this.selectedItems,
+      selection: this.view && this.view.selectAllActive ? this.view : this.selectedItems,
     };
   },
 
