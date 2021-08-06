@@ -108,16 +108,7 @@ Then('I can see {int} document(s)', function(numberOfResults) {
   this.ui.reload();
 
   const { displayMode } = results;
-  if (numberOfResults === 0) {
-    driver.waitUntil(
-      () => this.ui.results.resultsCount(displayMode) === 0,
-      `Expecting to get ${numberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
-    );
-    results.noResults.waitForVisible().should.be.true;
-  } else {
-    results.getResults(displayMode).waitForVisible();
-    results.resultsCount(displayMode).should.equal(numberOfResults);
-  }
+  results.resultsCount(displayMode).should.equal(numberOfResults);
 });
 
 Then(/^I can see the permissions page$/, function() {

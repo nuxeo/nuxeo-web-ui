@@ -96,7 +96,7 @@ export default class Browser extends BasePage {
   }
 
   get header() {
-    return this.currentPage.elements('nuxeo-data-table nuxeo-data-table-row[header]');
+    return this.currentPage.element('nuxeo-data-table nuxeo-data-table-row[header]');
   }
 
   get rows() {
@@ -220,7 +220,7 @@ export default class Browser extends BasePage {
     this.waitForChildren();
     const { rows } = this;
     let i;
-    for (i = 1; i < rows.length; i++) {
+    for (i = 0; i < rows.length; i++) {
       if (
         rows[i]
           .element('nuxeo-data-table-cell a.title')
