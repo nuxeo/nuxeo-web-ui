@@ -153,7 +153,7 @@ Polymer({
           document: this.document,
           documents: this.documents,
           i18n: this.i18n,
-          input: this.documents,
+          selection: this.documents,
         }
       : {};
   },
