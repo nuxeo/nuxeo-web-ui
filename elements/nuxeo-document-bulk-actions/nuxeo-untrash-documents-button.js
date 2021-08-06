@@ -45,6 +45,7 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersB
       hidden: {
         type: Boolean,
         value: false,
+        reflectToAttribute: true,
         computed: '_isHidden(documents.splices)',
       },
     };
