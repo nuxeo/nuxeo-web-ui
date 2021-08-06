@@ -15,7 +15,7 @@ export default class Results extends BasePage {
   }
 
   get displayMode() {
-    this.actions.waitForVisible();
+    driver.waitUntil(() => this.displayModes.some((displayMode) => displayMode.isVisible()));
     const displayMode = this.displayModes.filter((result) => result.getAttribute('disabled') !== null);
     return displayMode[0]
       .getAttribute('title')
@@ -94,12 +94,10 @@ export default class Results extends BasePage {
   }
 
   get deleteDocumentsButton() {
-    // XXX: using a more specific selector here to ensure we can check for isExisting()
-    return this.el.element('nuxeo-delete-documents-button[hard] #deleteAllButton');
+    return this.el.element('nuxeo-delete-documents-button[hard]');
   }
 
   get untrashDocumentsButton() {
-    // XXX: using a more specific selector here to ensure we can check for isExisting()
-    return this.el.element('nuxeo-untrash-documents-button #untrashAllButton');
+    return this.el.element('nuxeo-untrash-documents-button');
   }
 }

@@ -135,6 +135,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
       hidden: {
         type: Boolean,
         value: false,
+        reflectToAttribute: true,
         computed: '_isHidden(documents.splices)',
       },
     };

@@ -49,7 +49,8 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBe
       hidden: {
         type: Boolean,
         value: false,
-        computed: '_isHidden(documents.splices)',
+        reflectToAttribute: true,
+        computed: '_isHidden(documents.splices, hard)',
       },
     };
   }
