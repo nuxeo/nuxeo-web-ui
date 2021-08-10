@@ -89,6 +89,7 @@ require('@babel/register')({
     ],
   ],
   ignore: [/node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/],
+  plugins: [['transform-rename-import', { original: '^cucumber$', replacement: '@cucumber/cucumber' }]],
 });
 
 exports.config = {
