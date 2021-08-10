@@ -77,8 +77,18 @@ if (process.env.DRIVER_VERSION) {
 }
 
 // transform nuxeo-web-ui-ftest requires
-require('babel-register')({
-  ignore: /node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/,
+require('@babel/register')({
+  presets: [
+    [
+      '@babel/env',
+      {
+        targets: {
+          node: 'current',
+        },
+      },
+    ],
+  ],
+  ignore: [/node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/],
 });
 
 exports.config = {
