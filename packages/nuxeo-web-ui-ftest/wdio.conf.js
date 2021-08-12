@@ -11,7 +11,7 @@ if (process.env.CUCUMBER_REQUIRES) {
   cucumberRequires.push(process.env.CUCUMBER_REQUIRES);
 }
 
-const reporters = [];
+const reporters = ['spec'];
 if (process.env.CUCUMBER_REPORT_PATH) {
   reporters.push([
     'cucumberjs-json',
