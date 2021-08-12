@@ -31,7 +31,12 @@ module.exports = class {
     });
 
     browser.addCommand('elements', async function(selector) {
-      return this.$$(selector);
+      const res = this.$$(selector);
+      // XXX keep compat with v4 format
+      if (!res.value) {
+        res.value = res;
+      }
+      return res;
     });
 
     browser.addCommand('getAttribute', async function(selector, attributeName) {
@@ -164,7 +169,12 @@ module.exports = class {
     browser.addCommand(
       'elements',
       async function(selector) {
-        return this.$$(selector);
+        const res = this.$$(selector);
+        // XXX keep compat with v4 format
+        if (!res.value) {
+          res.value = res;
+        }
+        return res;
       },
       true,
     );
