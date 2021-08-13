@@ -1293,6 +1293,7 @@
   "searchResults.sort.field.title": "Tytuł",
   "selectionToolbar.dialog.heading": "Wybrane elementy",
   "selectionToolbar.display.selection": "Wyświetl zaznaczenie",
+  "selectionToolbar.selected.all": "All {0} items(s) selected",
   "selectionToolbar.selected.items": "{0} zaznaczonych elementów",
   "SerialDocumentReview": "Liniowy przegląd dokumentu",
   "spreadsheetButton.tooltip": "Edytor arkusza kalkulacyjnego",

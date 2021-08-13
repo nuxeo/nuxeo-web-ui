@@ -1293,6 +1293,7 @@
   "searchResults.sort.field.title": "Titre",
   "selectionToolbar.dialog.heading": "Eléments sélectionnés",
   "selectionToolbar.display.selection": "Afficher la sélection",
+  "selectionToolbar.selected.all": "All {0} items(s) selected",
   "selectionToolbar.selected.items": "{0} élément(s) sélectionnés",
   "SerialDocumentReview": "Revue en série",
   "spreadsheetButton.tooltip": "Editeur Nuxeo Spreadsheet",

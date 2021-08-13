@@ -1293,6 +1293,7 @@
   "searchResults.sort.field.title": "Izenburua",
   "selectionToolbar.dialog.heading": "Hautatutako elementuak",
   "selectionToolbar.display.selection": "Erakutsi hautapena",
+  "selectionToolbar.selected.all": "All {0} items(s) selected",
   "selectionToolbar.selected.items": "{0} elementu hautatuta",
   "SerialDocumentReview": "Ikuskatu dokumentua seriean",
   "spreadsheetButton.tooltip": "Kalkulu-orrien editorea",

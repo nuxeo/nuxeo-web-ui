@@ -1293,6 +1293,7 @@
   "searchResults.sort.field.title": "Titolo",
   "selectionToolbar.dialog.heading": "Voci selezionate",
   "selectionToolbar.display.selection": "Visualizza selezione",
+  "selectionToolbar.selected.all": "All {0} items(s) selected",
   "selectionToolbar.selected.items": "{0} voci selezionate",
   "SerialDocumentReview": "Revisione documenti in serie",
   "spreadsheetButton.tooltip": "Editor foglio di lavoro",
