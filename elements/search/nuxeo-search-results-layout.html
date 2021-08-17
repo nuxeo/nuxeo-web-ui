@@ -92,7 +92,9 @@ limitations under the License.
       },
 
       _formChanged: function (e) {
-        this.results = e.detail.value && this._grabResults([e.detail.value]);
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          this.results = e.detail.value && this._grabResults([e.detail.value]);
+        }.bind(this));
       },
 
       _grabResults: function(els) {

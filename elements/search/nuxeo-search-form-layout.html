@@ -124,14 +124,16 @@ limitations under the License.
       },
 
       _formChanged: function (e) {
-        this.fire('search-form-layout-changed', e.detail);
-        // forward params change events
-        this.element.addEventListener('params-changed', function(e) {
-          this.notifyPath(e.detail.path || 'params', e.detail.value);
-        }.bind(this));
-        this.skipAggregates = this.element.skipAggregates;
-        this.element.addEventListener('skip-aggregates-changed', function(e) {
-          this.notifyPath(e.detail.path || 'skipAggregates', e.detail.value);
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          this.fire('search-form-layout-changed', e.detail);
+          // forward params change events
+          this.element.addEventListener('params-changed', function(e) {
+            this.notifyPath(e.detail.path || 'params', e.detail.value);
+          }.bind(this));
+          this.skipAggregates = this.element.skipAggregates;
+          this.element.addEventListener('skip-aggregates-changed', function(e) {
+            this.notifyPath(e.detail.path || 'skipAggregates', e.detail.value);
+          }.bind(this));
         }.bind(this));
       }
 
