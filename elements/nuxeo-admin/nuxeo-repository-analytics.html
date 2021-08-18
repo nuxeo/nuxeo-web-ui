@@ -231,8 +231,8 @@ limitations under the License.
       },
 
       ready: function() {
-        this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
-        this.endDate = moment().format('YYYY-MM-DD');
+        this.startDate = moment().subtract(1, 'month').toISOString().substring(0, 10);
+        this.endDate = moment().toISOString().substring(0, 10);
       },
 
       _types: function(data) {
