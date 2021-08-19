@@ -1469,11 +1469,13 @@ Polymer({
   },
 
   _removeFromClipboard(docs) {
-    if (Array.isArray(docs)) {
-      docs.forEach((doc) => {
-        this.clipboard.remove(doc);
-      });
-    }
+    if (this.clipboard) {
+      if (Array.isArray(docs)) {
+        docs.forEach((doc) => {
+          this.clipboard.remove(doc);
+        });
+      }
+    }    
   },
 
   _removeFromRecentlyViewed(docs) {
