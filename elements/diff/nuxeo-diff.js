@@ -33,7 +33,7 @@ import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import * as jsondiffpatch from 'jsondiffpatch/dist/jsondiffpatch.esm.js';
 
 let _customLoadPromise;
-const typeDataCache = {};
+let schemasCache;
 
 /**
 `nuxeo-diff`
@@ -468,28 +468,28 @@ Polymer({
     }
   },
 
-  _fetchSchemas(document) {
-    const { type } = document;
-    if (typeDataCache[type]) {
-      return Promise.resolve(typeDataCache[type]);
+  _fetchSchemas() {
+    if (schemasCache) {
+      return Promise.resolve(schemasCache);
     }
-    this.$.schema.path = `config/types/${type}`;
+    this.$.schema.path = 'config/schemas';
     return this.$.schema.get().then((response) => {
-      typeDataCache[response.name] = response; // cache response
-      return response;
+      schemasCache = response;
+      return schemasCache;
     });
   },
 
   _fetchCommonSchemas(left, right) {
-    // if both have the same type, only do a single fetch
-    if (left && right && left.type === right.type) {
-      return this._fetchSchemas(left).then((response) => response.schemas);
-    }
-    return this._fetchSchemas(left).then((response1) =>
-      this._fetchSchemas(right).then((response2) =>
-        response1.schemas.filter((schema1) => !!response2.schemas.find((schema2) => schema1.name === schema2.name)),
-      ),
+    const commonSchemas = left.schemas.filter(
+      (schema1) => !!right.schemas.find((schema2) => schema1.name === schema2.name),
     );
+    return this._fetchSchemas().then((schemas) => {
+      // populate the common schemas with the fields information
+      commonSchemas.forEach((commonSchema) => {
+        commonSchema.fields = schemas.find((schema) => schema.name === commonSchema.name).fields;
+      });
+      return commonSchemas;
+    });
   },
 
   _getCommonProperties(left, right, schema, delta) {
