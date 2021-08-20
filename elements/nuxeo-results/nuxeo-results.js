@@ -221,7 +221,7 @@ Polymer({
           </div>
         </div>
         <div class="delegatedActions" hidden="[[!_displayDelegatedAction(displaySort, view)]]">
-          <template is="dom-if" if="[[_displaySelectAll(view)]]">
+          <template is="dom-if" if="[[_displaySelectAll(view, view.selectAllEnabled)]]">
             <nuxeo-checkmark checked="[[selectAllActive]]" on-click="_toggleSelectAll"></nuxeo-checkmark>
           </template>
           <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
@@ -432,7 +432,7 @@ Polymer({
 
   _displaySelectAll() {
     return (
-      this.view && !this.view.handlesSelectAll && (this.view.hasAttribute('select-all-enabled') || hasSelectAllEnabled)
+      this.view && !this.view.handlesSelectAll && this.view.hasAttribute('selection-enabled')
     );
   },
 
@@ -541,7 +541,7 @@ Polymer({
   },
 
   _selectAllChanged() {
-    if (this.view) {
+    if (this.view && this.view.selectionEnabled) {
       this.view.selectAllEnabled = hasSelectAllEnabled;
     }
   },

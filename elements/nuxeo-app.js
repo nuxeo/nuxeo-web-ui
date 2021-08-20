@@ -1116,6 +1116,7 @@ Polymer({
     if (!this._isEmpty(e.detail)) {
       this._toast(this.i18n(e.detail.docIds ? 'app.documents.addedToCollection' : 'app.document.addedToCollection'));
     }
+    this.fire('document-updated');
   },
 
   _documentRemovedFromCollection() {
