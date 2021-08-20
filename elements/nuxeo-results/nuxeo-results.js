@@ -502,7 +502,12 @@ Polymer({
       this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
       this.unlisten(oldView, 'items-changed', '_itemsChanged');
       this.unlisten(oldView, 'quick-filters-changed', '_quickFiltersChanged');
-      this.unlisten(view, 'select-all-active-changed', '_selectAllActiveChanged');
+      this.unlisten(oldView, 'select-all-active-changed', '_selectAllActiveChanged');
+      // we need to clear the selected items and selection (removes selection synchronization)
+      if (this.selectedItems) {
+        this.selectedItems = [];
+      }
+      this.selectAllActive = false;
     }
     if (view) {
       // initialize columns
