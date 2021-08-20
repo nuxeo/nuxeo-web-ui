@@ -91,7 +91,7 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Domain',
   'Root',
 ];
-const MAX_TOASTS = 2; // max number of toasts that can be displayed simultaneously besides the default one
+const MAX_TOASTS = 3; // max number of toasts that can be displayed simultaneously besides the default one
 
 setPassiveTouchGestures(true);
 
@@ -1379,6 +1379,8 @@ Polymer({
       toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
       toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
     });
+    // set the initial state of the snackbar
+    toast.__state = {};
 
     // listen to the closed event to track dismiss and custom action
     toast.addEventListener('MDCSnackbar:closed', (e) => {
@@ -1417,16 +1419,16 @@ Polymer({
   },
 
   _notify(e) {
+    const { commandId } = e.detail;
+    const toast = this._getToastFor(commandId, e.detail);
+    const { abort, close, dismissible, duration, message } = e.detail;
+
     // if the size of the panel is higher than the max value, we need to dismiss the oldest
-    const snackbars = this.$.snackbarPanel.querySelectorAll('mwc-snackbar:not(#toast)');
+    const snackbars = this.$.snackbarPanel.querySelectorAll('mwc-snackbar[open]');
     if (snackbars.length > MAX_TOASTS) {
       const snackbar = snackbars[0];
       snackbar.close('dismiss');
     }
-
-    const { commandId } = e.detail;
-    const toast = this._getToastFor(commandId, e.detail);
-    const { abort, close, dismissible, duration, message } = e.detail;
 
     if (close) {
       toast.close();
