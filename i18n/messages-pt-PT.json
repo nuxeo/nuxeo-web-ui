@@ -1293,6 +1293,7 @@
   "searchResults.sort.field.title": "Título",
   "selectionToolbar.dialog.heading": "Itens selecionados",
   "selectionToolbar.display.selection": "Exibir seleção",
+  "selectionToolbar.selected.all": "All {0} items(s) selected",
   "selectionToolbar.selected.items": "{0} Item (ns) selecionado(s)",
   "SerialDocumentReview": "Revisão Serial de Documento",
   "spreadsheetButton.tooltip": "Edição em modo de planilha",

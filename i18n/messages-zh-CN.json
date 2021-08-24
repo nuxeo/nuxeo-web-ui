@@ -1293,6 +1293,7 @@
   "searchResults.sort.field.title": "标题",
   "selectionToolbar.dialog.heading": "已选定的项目",
   "selectionToolbar.display.selection": "显示选择",
+  "selectionToolbar.selected.all": "All {0} items(s) selected",
   "selectionToolbar.selected.items": "{0}项被选择。",
   "SerialDocumentReview": "串行文档审阅",
   "spreadsheetButton.tooltip": "电子表格编辑器",

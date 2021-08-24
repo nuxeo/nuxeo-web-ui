@@ -1293,6 +1293,7 @@
   "searchResults.sort.field.title": "Titel",
   "selectionToolbar.dialog.heading": "Ausgewählte Elemente",
   "selectionToolbar.display.selection": "Auswahl anzeigen",
+  "selectionToolbar.selected.all": "Alle {0} Elemente(n) ausgewählt",
   "selectionToolbar.selected.items": "{0} Element(e) ausgewählt",
   "SerialDocumentReview": "Aufeinanderfolgende Überprüfung von Dokumenten",
   "spreadsheetButton.tooltip": "Bearbeitungsprogramm für Tabellenkalkulationen",
