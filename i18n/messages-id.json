@@ -1293,6 +1293,7 @@
   "searchResults.sort.field.title": "Judul",
   "selectionToolbar.dialog.heading": "Item yang Dipilih",
   "selectionToolbar.display.selection": "Pilihan tampilan",
+  "selectionToolbar.selected.all": "All {0} items(s) selected",
   "selectionToolbar.selected.items": "{0} item(s) yang dipilih",
   "SerialDocumentReview": "Ulasan Dokumen Serial",
   "spreadsheetButton.tooltip": "Editor Spreadsheet",
