@@ -1,4 +1,4 @@
-const { resolve, join } = require('path');
+const { resolve, join, sep } = require('path');
 const { existsSync, readdirSync } = require('fs');
 const { merge } = require('webpack-merge');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -17,7 +17,7 @@ const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production
 // we can copy things to 'src' in dev mode since if uses a mem fs
 const TARGET = ENV === 'production' ? resolve('dist') : resolve('.');
 
-const tmp = [{ from: `.tmp`, to: join(TARGET) }];
+const tmp = [{ from: `.tmp`, to: join(TARGET, sep) }];
 
 const polyfills = [
   {
