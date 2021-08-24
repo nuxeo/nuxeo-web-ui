@@ -1293,7 +1293,7 @@
   "searchResults.sort.field.title": "Titel",
   "selectionToolbar.dialog.heading": "Valda objekt",
   "selectionToolbar.display.selection": "Visa urval",
-  "selectionToolbar.selected.all": "All {0} items(s) selected",
+  "selectionToolbar.selected.all": "Alla {0} objekt valda",
   "selectionToolbar.selected.items": "{0} objekt valt/valda",
   "SerialDocumentReview": "Seriell dokumentgranskning",
   "spreadsheetButton.tooltip": "Kalkylbladsredigerare",
