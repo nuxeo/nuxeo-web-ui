@@ -1293,7 +1293,7 @@
   "searchResults.sort.field.title": "Titel",
   "selectionToolbar.dialog.heading": "Geselecteerde items",
   "selectionToolbar.display.selection": "Selectie weergeven",
-  "selectionToolbar.selected.all": "All {0} items(s) selected",
+  "selectionToolbar.selected.all": "Alle {0} item(s) geselecteerd",
   "selectionToolbar.selected.items": "{0} item(s) geselecteerd",
   "SerialDocumentReview": "Seriële documentreview",
   "spreadsheetButton.tooltip": "Spreadsheeteditor",
