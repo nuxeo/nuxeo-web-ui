@@ -230,7 +230,7 @@ limitations under the License.
   <script>
     (function() {
       var _customLoadPromise;
-      var typeDataCache = {};
+      var schemasCache;
       Polymer({
         is: 'nuxeo-diff',
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Polymer.IronResizableBehavior],
@@ -436,34 +436,32 @@ limitations under the License.
           }
         },
 
-        _fetchSchemas: function(document) {
-          var type = document.type;
-          if (typeDataCache[type]) {
-            return Promise.resolve(typeDataCache[type]);
+        _fetchSchemas: function() {
+          if (schemasCache) {
+            return Promise.resolve(schemasCache);
           }
-          this.$.schema.path = 'config/types/' + type;
+          this.$.schema.path = 'config/schemas';
           return this.$.schema.get().then(function(response) {
-            typeDataCache[response.name] = response; // cache response
-            return response;
+            schemasCache = response;
+            return schemasCache;
           });
         },
 
         _fetchCommonSchemas: function(left, right) {
-          // if both have the same type, only do a single fetch
-          if (left && right && left.type === right.type) {
-            return this._fetchSchemas(left).then(function(response) {
-              return response.schemas;
+          var commonSchemas = left.schemas.filter(function(schema1) {
+            return !!right.schemas.find(function(schema2) {
+              return schema1.name === schema2.name;
             });
-          }
-          return this._fetchSchemas(left).then(function(response1) {
-            return this._fetchSchemas(right).then(function(response2) {
-              return response1.schemas.filter(function(schema1) {
-                return !!response2.schemas.find(function(schema2) {
-                  return schema1.name === schema2.name;
-                });
-              });
+          });
+          return this._fetchSchemas().then(function(schemas) {
+            // populate the common schemas with the fields information
+            commonSchemas.forEach(function(commonSchema) {
+              commonSchema.fields = schemas.find(function(schema) {
+                return schema.name === commonSchema.name;
+              }).fields;
             });
-          }.bind(this));
+            return commonSchemas;
+          });
         },
 
         _getCommonProperties: function(left, right, schema, delta) {
