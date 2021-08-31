@@ -647,7 +647,8 @@ Polymer({
   _refreshDisplay(e) {
     this.refresh();
 
-    if (this.selectedItems && this.selectedItems.length > 0) {
+    // keep compatibility with previous behavior, as we don't need it for select all
+    if (this.selectedItems && this.selectedItems.length > 0 && !this.selectAllActive) {
       const tmp = this.selectedItems.slice();
       this.selectedItems = [];
       if (e.detail.focusIndex || e.detail.focusIndex === 0) {
