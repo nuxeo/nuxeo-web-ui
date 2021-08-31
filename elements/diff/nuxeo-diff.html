@@ -231,6 +231,7 @@ limitations under the License.
     (function() {
       var _customLoadPromise;
       var schemasCache;
+      var typesCache = {};
       Polymer({
         is: 'nuxeo-diff',
         behaviors: [Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Polymer.IronResizableBehavior],
@@ -436,6 +437,10 @@ limitations under the License.
           }
         },
 
+        /**
+         * Returns a list of all the available schemas and fields.
+         * After the first fetch, the list is cached.
+         */
         _fetchSchemas: function() {
           if (schemasCache) {
             return Promise.resolve(schemasCache);
@@ -447,12 +452,61 @@ limitations under the License.
           });
         },
 
+        /**
+         * Returns a list of all the schemas and fields for a particular document type.
+         * After the first fetch, the list is cached by document type.
+         * Note: Does NOT take into account dynamic facets.
+         */
+        _fetchSchemasForType: function(type) {
+          if (typesCache[type]) {
+            return Promise.resolve(typesCache[type]);
+          }
+          this.$.schema.path = 'config/types/' + type;
+          return this.$.schema.get().then(function(response) {
+            typesCache[response.name] = response;
+            return response;
+          });
+        },
+
         _fetchCommonSchemas: function(left, right) {
-          var commonSchemas = left.schemas.filter(function(schema1) {
-            return !!right.schemas.find(function(schema2) {
+          if (!left.schemas || !right.schemas) {
+            // XXX: the schemas objects might be undefined when using a (forked) writer pre HF14 (see NXP-27995)
+            console.warn('Missing schemas object(s): Some schema fields might be missing. (see WEBUI-261)');
+            return this._fetchCommonSchemasFromTypes(left, right);
+          }
+          return this._fetchCommonSchemasFromInstances(left, right);
+        },
+
+        /**
+         * Given two lists of schemas, returns a list of the ones existing on both sides (based on the name).
+         */
+        _computeCommonSchemas: function(schemasList1, schemasList2) {
+          return schemasList1.filter(function(schema1) {
+            return !!schemasList2.find(function(schema2) {
               return schema1.name === schema2.name;
             });
           });
+        },
+
+        /**
+         * Returns the list of the common schemas between two document objects, based on the schemas of their types.
+         * Note: Does NOT take into account dynamic facets.
+         */
+        _fetchCommonSchemasFromTypes: function(left, right) {
+          return this._fetchSchemasForType(left.type).then(function(response1) {
+            return this._fetchSchemasForType(right.type).then(function(response2) {
+              return this._computeCommonSchemas(response1.schemas, response2.schemas);
+            }.bind(this));
+          }.bind(this));
+        },
+
+        /**
+         * Returns the list of the common schemas between two document objects, based on the schemas of these particular
+         * document instances.
+         * Note: Relies on the existence of the `schemas` property.
+         */
+        _fetchCommonSchemasFromInstances: function(left, right) {
+          var commonSchemas = this._computeCommonSchemas(left.schemas, right.schemas);
           return this._fetchSchemas().then(function(schemas) {
             // populate the common schemas with the fields information
             commonSchemas.forEach(function(commonSchema) {
