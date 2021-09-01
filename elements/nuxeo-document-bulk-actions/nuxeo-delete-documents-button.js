@@ -128,7 +128,7 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBe
    * Checks if a single given document has the 'Remove' permission to delete/trash
    */
   _docHasPermissions(document) {
-    return !this.isUnderRetentionOrLegalHold(document) && this.hasPermission(document, 'Remove');
+    return this.hasPermission(document, 'Remove');
   }
 
   _updateIcon(hard) {
