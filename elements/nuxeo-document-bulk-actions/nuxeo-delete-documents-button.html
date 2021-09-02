@@ -136,10 +136,10 @@ limitations under the License.
       },
 
       /*
-       * Checks if a single given document has 'Everything' permission to delete or 'Write' to trash
+       * Checks if a single given document has the 'Remove' permission to delete/trash
        */
       _docHasPermissions: function(document) {
-        return !this.isUnderRetentionOrLegalHold(document) && this.hasPermission(document, 'Remove');
+        return this.hasPermission(document, 'Remove');
       },
 
       _computeIcon: function(hard) {
