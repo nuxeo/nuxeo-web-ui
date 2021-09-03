@@ -165,12 +165,7 @@ Polymer({
         </nuxeo-repository-data>
 
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
-          <chart-pie
-            values="[[_values(typeCount)]]"
-            labels="[[_labels(typeCount)]]"
-            options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
-          >
-          </chart-pie>
+          <chart-pie values="[[_values(typeCount)]]" labels="[[_labels(typeCount)]]"> </chart-pie>
         </nuxeo-card>
 
         <!-- Top 10 creators -->
@@ -185,12 +180,7 @@ Polymer({
         </nuxeo-repository-data>
 
         <nuxeo-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
-          <chart-pie
-            values="[[_values(topCreators)]]"
-            labels="[[_labels(topCreators)]]"
-            options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
-          >
-          </chart-pie>
+          <chart-pie values="[[_values(topCreators)]]" labels="[[_labels(topCreators)]]"> </chart-pie>
         </nuxeo-card>
 
         <!-- Documents created per week -->
@@ -244,12 +234,7 @@ Polymer({
         </nuxeo-repository-data>
 
         <nuxeo-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
-          <chart-pie
-            values="[[_values(filesByMimeType)]]"
-            labels="[[_types(filesByMimeType)]]"
-            options='{ "legend": { "display": true, "position": "bottom", "labels": { "boxWidth": 12 } }, "animation": false }'
-          >
-          </chart-pie>
+          <chart-pie values="[[_values(filesByMimeType)]]" labels="[[_types(filesByMimeType)]]"> </chart-pie>
         </nuxeo-card>
       </div>
     </template>
