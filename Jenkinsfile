@@ -452,7 +452,7 @@ pipeline {
   post {
     always {
       script {
-        if (BRANCH_NAME == 'master') {
+        if (BRANCH_NAME == 'maintenance-3.0.x') {
           // update JIRA issue
           step([$class: 'JiraIssueUpdater', issueSelector: [$class: 'DefaultIssueSelector'], scm: scm])
         }
