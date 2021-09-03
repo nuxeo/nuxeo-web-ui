@@ -4,8 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to promote'     
+        description: 'Version to promote (e.g.: 3.0.6-rc.6)'
         required: true
+      referenceBranch:
+        description: 'Branch to be updated after the promotion'
+        required: true
+        default: 'master'
+      dryRun:
+        description: 'Runs the workflow without pushing code or publishing artifacts. If empty, Dry Run is disabled.'
 
 jobs:
   promote:
@@ -23,7 +29,7 @@ jobs:
 
       - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
 
-      - run: echo "::set-env name=VERSION::$(echo '${{ github.event.inputs.version }}' | sed -e 's/-rc.[0-9]*//')"
+      - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -e 's/-rc.[0-9]*//')" >> $GITHUB_ENV
 
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
         env:
@@ -49,9 +55,21 @@ jobs:
         run: |
           git commit -a -m "Release $VERSION"
           git tag -a v$VERSION -m "Release $VERSION"
-          git push origin v$VERSION
+
+      - if: ${{ !github.event.inputs.dryRun }}
+        run: git push origin v$VERSION
+
+      - name: Create Github release v${{ env.VERSION }}
+        if: ${{ !github.event.inputs.dryRun }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: Release ${{ env.VERSION }}
 
       - name: Publish Nuxeo Web UI FTest ${{ env.VERSION }}
+        if: ${{ !github.event.inputs.dryRun }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -62,49 +80,75 @@ jobs:
       - name: Promote Web UI ${{ github.event.inputs.version }} to ${{ env.VERSION }}
         env:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }} 
-          CONNECT_URL: https://connect.nuxeo.com/nuxeo
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
-          curl -o $PACKAGE.zip -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=${{ github.event.inputs.version }}"
+          PADDED=$(printf '%03d' $(echo ${{ github.event.inputs.version }} | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
+          PADDED_VERSION=$(echo ${{ github.event.inputs.version }} | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
+          curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=$PADDED_VERSION"
           unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
           pushd $PACKAGE
           sed -i 's/-rc.[0-9]*//' package.xml
           for f in install/bundles/*.jar; do mv $f $(echo $f | sed -e 's/-rc.[0-9]*//'); done
           zip -r ../$PACKAGE.zip .
           popd
-          curl -i -u "${{ secrets.CONNECT_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_URL/site/marketplace/upload?batch=true"
-      
+
+      - if: ${{ !github.event.inputs.dryRun }}
+        env:
+          PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
+          CONNECT_URL: https://connect.nuxeo.com/nuxeo
+        run: curl -i -u "${{ secrets.CONNECT_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_URL/site/marketplace/upload?batch=true"
+
       - uses: actions/checkout@v2
         with:
           token: ${{ secrets.GIT_ADMIN_TOKEN }}
-          ref: master
+          ref: ${{ github.event.inputs.referenceBranch }}
 
-      - run: echo "::set-env name=NEW_VERSION::$(npx semver -i patch $VERSION)"
+      - if: ${{ github.event.inputs.referenceBranch == 'master' }}
+        run: echo "NEW_VERSION=$(npx semver -i minor $VERSION)" >> $GITHUB_ENV
 
-      - name: Align master branch on next version ${{ env.NEW_VERSION }}-SNAPSHOT
+      - if: ${{ github.event.inputs.referenceBranch != 'master' }}
+        run: echo "NEW_VERSION=$(npx semver -i patch $VERSION)" >> $GITHUB_ENV
+
+      - name: Align ${{ github.event.inputs.referenceBranch }} branch on next version ${{ env.NEW_VERSION }}-SNAPSHOT
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # bump version to next SNAPSHOT and align on the corresponding Elements release candidate
-          OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')
-          NEW_SNAPSHOT=$NEW_VERSION-SNAPSHOT
+          echo "OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
 
+          # bump version to next SNAPSHOT and align on the corresponding Elements release candidate
+          NEW_SNAPSHOT=$NEW_VERSION-SNAPSHOT
           npm version $NEW_SNAPSHOT --no-git-tag-version
           pushd packages/nuxeo-web-ui-ftest/
           npm version $NEW_SNAPSHOT --no-git-tag-version
           popd
 
+      - if: ${{ github.event.inputs.referenceBranch == 'master' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          NEW_ELEMENTS_VERSION="^$NEW_VERSION-rc"
+          npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="^"
+          npm i @nuxeo/nuxeo-dataviz-elements@$NEW_ELEMENTS_VERSION --save-prefix="^"
+          npm i @nuxeo/nuxeo-ui-elements@$NEW_ELEMENTS_VERSION --save-prefix="^"
+          npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="^"
+
+      - if: ${{ github.event.inputs.referenceBranch != 'master' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
           NEW_ELEMENTS_VERSION="~$NEW_VERSION-rc"
           npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
           npm i @nuxeo/nuxeo-dataviz-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
           npm i @nuxeo/nuxeo-ui-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
           npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="~"
 
-          find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_SNAPSHOT"'/'"$NEW_SNAPSHOT"'/g' {} \;
+      - run: |
+          NEW_SNAPSHOT="$NEW_VERSION-SNAPSHOT"
 
-          # discard changes in package-lock.json
-          git checkout -- package-lock.json
+          find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_SNAPSHOT"'/'"$NEW_SNAPSHOT"'/g' {} \;
 
           # commit and push
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
-          git push origin master
+
+      - if: ${{ !github.event.inputs.dryRun }}
+        run: git push origin ${{ github.event.inputs.referenceBranch }}
