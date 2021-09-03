@@ -9,7 +9,7 @@ on:
       referenceBranch:
         description: 'Branch to be updated after the promotion'
         required: true
-        default: 'master'
+        default: 'maintenance-3.0.x'
       dryRun:
         description: 'Runs the workflow without pushing code or publishing artifacts. If empty, Dry Run is disabled.'
 
