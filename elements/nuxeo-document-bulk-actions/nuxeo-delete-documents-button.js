@@ -59,6 +59,11 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBe
     return ['_updateIcon(hard)', '_updateLabel(hard)'];
   }
 
+  constructor() {
+    super();
+    this.syncIndexing = true;
+  }
+
   _execute() {
     this.deleteDocuments();
   }
