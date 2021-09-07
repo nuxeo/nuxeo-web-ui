@@ -1,5 +1,6 @@
-[![Build Status](https://jenkins.webui.dev.nuxeo.com/buildStatus/icon?job=nuxeo%2Fnuxeo-web-ui%2Fmaster)](https://jenkins.webui.dev.nuxeo.com/job/nuxeo/job/nuxeo-web-ui/job/master/)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5d8cd2a3c56745ecaae7e7f92a683ea7)](https://www.codacy.com/app/Nuxeo/nuxeo-web-ui)
+# 🚨 Deprecated 🚨
+
+This branch is not maintained anymore. Please refer to the repository's default branch.
 
 ## Nuxeo Web UI
 
