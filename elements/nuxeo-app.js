@@ -1401,16 +1401,19 @@ Polymer({
       if (e.detail.reason === 'action' && callback) {
         toast.__state = { dismissed: false, aborted: true };
         callback();
+        // remove the toast if the action was aborted
+        toast.parentNode.removeChild(toast);
       } else if (e.detail.reason === 'dismiss') {
         const state = toast.__state;
         if (state && state.ended) {
           toast.__state = null;
+          // remove the toast if the action has ended
+          toast.parentNode.removeChild(toast);
         } else {
+          // do not remove the toast, otherwise it will show up before the end of the task
           toast.__state.dismissed = true;
         }
       }
-      // other than that we just need to dismiss the toast
-      toast.parentNode.removeChild(toast);
     });
     return toast;
   },
