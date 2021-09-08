@@ -43,7 +43,7 @@ export default class Results extends BasePage {
   getResults(displayMode) {
     switch (displayMode) {
       case 'grid':
-        return this.el.elements('nuxeo-document-grid-thumbnail');
+        return this.el.elements('nuxeo-document-grid-thumbnail, nuxeo-justified-grid-item');
       case 'list':
         return this.el.elements('nuxeo-document-list-item');
       default:
