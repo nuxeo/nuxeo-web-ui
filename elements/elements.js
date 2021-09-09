@@ -280,6 +280,7 @@ import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-workflow-button.js';
 
 // Documents bulk actions -->
 import './nuxeo-document-bulk-actions/nuxeo-add-to-collection-documents-button.js';
+import './nuxeo-document-bulk-actions/nuxeo-bulk-widget.js';
 import './nuxeo-document-bulk-actions/nuxeo-clipboard-documents-button.js';
 import './nuxeo-document-bulk-actions/nuxeo-delete-documents-button.js';
 import './nuxeo-document-bulk-actions/nuxeo-download-documents-button.js';
