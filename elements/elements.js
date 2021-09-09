@@ -285,6 +285,9 @@ import './nuxeo-document-bulk-actions/nuxeo-delete-documents-button.js';
 import './nuxeo-document-bulk-actions/nuxeo-download-documents-button.js';
 import './nuxeo-document-bulk-actions/nuxeo-untrash-documents-button.js';
 
+// Nuxeo Bulk Edit -->
+import './bulk/nuxeo-bulk-widget.js';
+
 // Nuxeo Diff -->
 import './diff/nuxeo-document-diff-button.js';
 import './diff/nuxeo-versions-diff-button.js';
