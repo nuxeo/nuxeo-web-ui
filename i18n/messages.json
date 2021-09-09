@@ -404,6 +404,7 @@
   "documentEdit.layoutNotFound": "Failed to find edit layout for {0}.",
   "documentEdit.saveError": "Failed to save.",
   "documentEditAction.tooltip": "Edit document",
+  "documentEditBulkAction.tooltip": "Bulk Edit documents",
   "documentHistory.category": "Category",
   "documentHistory.comment": "Comment",
   "documentHistory.date": "Date",

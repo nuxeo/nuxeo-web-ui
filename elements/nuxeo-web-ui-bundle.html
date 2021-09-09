@@ -790,6 +790,7 @@
 </nuxeo-slot-content>
 
 <!-- PUBLISHING -->
+
 <nuxeo-slot-content name="internalPublishItem" slot="PUBLISH_ITEMS" order="10">
   <template>
     <paper-tab name="internal">[[i18n('publication.internal.title')]]</paper-tab>
@@ -812,8 +813,21 @@
 </nuxeo-slot-content>
 
 <!-- SPREADSHEET-->
+
 <nuxeo-slot-content name="spreadsheetButton" slot="RESULTS_ACTIONS" order="-150" disabled>
   <template>
     <nuxeo-spreadsheet-button nx-provider="[[nxProvider]]" columns="[[columns]]"></nuxeo-spreadsheet-button>
+  </template>
+</nuxeo-slot-content>
+
+<!-- BULK EDIT -->
+
+<nuxeo-slot-content name="bulkEditResultsAction" slot="RESULTS_SELECTION_ACTIONS" order="10">
+  <template>
+    <nuxeo-filter document="[[document]]" permission="WriteProperties" user="[[user]]">
+      <template>
+        <nuxeo-edit-documents-button documents="[[selection]]"></nuxeo-edit-documents-button>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
