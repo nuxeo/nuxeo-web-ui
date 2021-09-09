@@ -705,6 +705,14 @@
   </template>
 </nuxeo-slot-content>
 
+<!-- BULK EDIT -->
+
+<nuxeo-slot-content name="bulkEditResultsAction" slot="RESULTS_SELECTION_ACTIONS" order="10">
+  <template>
+    <nuxeo-edit-documents-button documents="[[selection]]"></nuxeo-edit-documents-button>
+  </template>
+</nuxeo-slot-content>
+
 <!-- THEMES -->
 
 <nuxeo-slot-content name="defaultTheme" slot="THEMES" order="10">
@@ -790,6 +798,7 @@
 </nuxeo-slot-content>
 
 <!-- PUBLISHING -->
+
 <nuxeo-slot-content name="internalPublishItem" slot="PUBLISH_ITEMS" order="10">
   <template>
     <paper-tab name="internal">[[i18n('publication.internal.title')]]</paper-tab>
@@ -812,6 +821,7 @@
 </nuxeo-slot-content>
 
 <!-- SPREADSHEET-->
+
 <nuxeo-slot-content name="spreadsheetButton" slot="RESULTS_ACTIONS" order="-150" disabled>
   <template>
     <nuxeo-spreadsheet-button nx-provider="[[nxProvider]]" columns="[[columns]]"></nuxeo-spreadsheet-button>
