@@ -287,6 +287,7 @@ import './nuxeo-document-bulk-actions/nuxeo-untrash-documents-button.js';
 
 // Nuxeo Bulk Edit -->
 import './bulk/nuxeo-bulk-widget.js';
+import './bulk/nuxeo-edit-documents-button.js';
 
 // Nuxeo Diff -->
 import './diff/nuxeo-document-diff-button.js';
