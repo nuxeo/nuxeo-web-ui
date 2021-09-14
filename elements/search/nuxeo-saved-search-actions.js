@@ -52,14 +52,14 @@ Polymer({
     <div class="horizontal layout center">
       <paper-button
         on-tap="_saveSearchAs"
-        hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, _dirty)]]"
+        hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, _dirty, _isSearchFormVisible)]]"
         class="primary small"
       >
         <iron-icon icon="nuxeo:filter-edit"></iron-icon>[[i18n('app.saveNewSearch')]]
       </paper-button>
       <paper-button
         on-tap="_saveSearch"
-        hidden$="[[!_showSave(searchDoc, isSavedSearch, _dirty)]]"
+        hidden$="[[!_showSave(searchDoc, isSavedSearch, _dirty, _isSearchFormVisible)]]"
         class="secondary small"
       >
         <iron-icon icon="nuxeo:filter-add"></iron-icon>[[i18n('app.savedSearch')]]
@@ -68,7 +68,7 @@ Polymer({
         no-animations
         horizontal-align="right"
         vertical-offset="40"
-        hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty)]]"
+        hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty, _isSearchFormVisible)]]"
       >
         <paper-icon-button
           icon="icons:more-vert"
@@ -101,9 +101,16 @@ Polymer({
       observer: '_searchFormChanged',
     },
     _dirty: Boolean,
+    _isSearchFormVisible: Boolean,
   },
 
-  _searchFormChanged() {
+  ready() {
+    this._searchFormVisibilityChanged = (event) => {
+      this._isSearchFormVisible = event.target.visible;
+    };
+  },
+
+  _searchFormChanged(form, oldForm) {
     this._dirty = this.searchForm && this.searchForm.dirty;
     if (this.searchForm) {
       this.searchForm.addEventListener('dirty-changed', () => {
@@ -116,6 +123,13 @@ Polymer({
         }
       });
 
+      if (oldForm) {
+        oldForm.removeEventListener('visible-changed', this._searchFormVisibilityChanged);
+      }
+      if (form) {
+        form.addEventListener('visible-changed', this._searchFormVisibilityChanged);
+        this._isSearchFormVisible = form.visible;
+      }
       if (this.searchForm.selectedSearch) {
         this.searchId = this.searchForm.selectedSearch.id;
       }
@@ -144,15 +158,15 @@ Polymer({
   },
 
   _showSaveAs() {
-    return this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this._dirty);
+    return this._isSearchFormVisible && (this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this._dirty));
   },
 
   _showSave() {
-    return this.isSavedSearch && this._dirty && this._hasPermissions();
+    return this._isSearchFormVisible && this.isSavedSearch && this._dirty && this._hasPermissions();
   },
 
   _showOtherSearchActions() {
-    return this.isSavedSearch && this._hasPermissions();
+    return this._isSearchFormVisible && this.isSavedSearch && this._hasPermissions();
   },
 
   _hasPermissions() {
