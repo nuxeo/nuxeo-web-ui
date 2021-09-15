@@ -1369,15 +1369,28 @@ Polymer({
     toast.setAttribute('id', id);
     toast.setAttribute('leading', true);
     toast.innerHTML = `
-      <paper-button id="abort" slot="action">Abort</paper-button>'
+      <paper-button id="abort" slot="action">${this.i18n('app.snackbar.abortButton')}</paper-button>
+      <paper-icon-button id="copy" icon="icons:content-copy" slot="action"></paper-icon-button>
+      <nuxeo-tooltip for="copy" position="top">${this.i18n('app.snackbar.copyButton.tooltip')}</nuxeo-tooltip>
       <paper-icon-button id="dismiss" icon="icons:close" slot="dismiss"></paper-icon-button>`;
 
     // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
     // HACK - hardcode the fixed width for the internal panel
+    // HACK - intercept the call to the action handler, to prevent closing/opening the snackbar when clicking
+    // the copy button
     toast.addEventListener('MDCSnackbar:opening', () => {
       toast.mdcRoot.style.position = 'relative';
       toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
       toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
+
+      const defaultAction = toast.mdcFoundation.handleActionButtonClick.bind(toast);
+      toast.mdcFoundation.handleActionButtonClick = () => {
+        if (toast.__state.errorDetails) {
+          navigator.clipboard.writeText(toast.__state.errorDetails);
+          return;
+        }
+        defaultAction();
+      };
     });
     // set the initial state of the snackbar
     toast.__state = {};
@@ -1421,7 +1434,7 @@ Polymer({
   _notify(e) {
     const { commandId } = e.detail;
     const toast = this._getToastFor(commandId, e.detail);
-    const { abort, close, dismissible, duration, message } = e.detail;
+    const { abort, close, dismissible, duration, errorDetails, message } = e.detail;
 
     // if the size of the panel is higher than the max value, we need to dismiss the oldest
     const snackbars = this.$.snackbarPanel.querySelectorAll('mwc-snackbar[open]');
@@ -1442,10 +1455,14 @@ Polymer({
       if (state && !abort) {
         toast.__state.ended = true;
       }
+      if (state && errorDetails) {
+        toast.__state.errorDetails = errorDetails;
+      }
 
       // update the snackbar properties
       toast.querySelector('#abort').hidden = !abort;
       toast.querySelector('#dismiss').hidden = !dismissible;
+      toast.querySelector('#copy').hidden = !errorDetails;
       toast.labelText = message;
       toast.timeoutMs = -1;
 
