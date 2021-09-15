@@ -9,6 +9,8 @@ expose:
     tlsacme: true
     tlsSecretName: webui-cluster-https-tls
     urltemplate: '"{{.Service}}-{{.Namespace}}.{{.Domain}}"'
+  Image: "ghcr.io/jenkins-x/exposecontroller"
+  ImageTag: "2.3.118"
 
 cleanup:
   Args:
