@@ -104,8 +104,6 @@ When('I sort the content by {string} in {string} order', function(field, order) 
 Then('I can see {int} document(s)', function(numberOfResults) {
   const { results } = this.ui.browser;
   results.waitForVisible();
-  // XXX temporary fix for visual issue while importing more than 1 document; will be fixed when NXP-28642 is tackled
-  this.ui.reload();
 
   const { displayMode } = results;
   results.resultsCount(displayMode).should.equal(numberOfResults);
