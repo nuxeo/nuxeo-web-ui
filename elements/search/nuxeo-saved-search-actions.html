@@ -51,14 +51,14 @@ limitations under the License.
 
     <nuxeo-document auto doc-id="[[searchId]]" enrichers="permissions" response="{{searchDoc}}"></nuxeo-document>
     <div class="horizontal layout center">
-      <paper-button on-tap="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, _dirty)]]">
+      <paper-button on-tap="_saveSearchAs" hidden$="[[!_showSaveAs(searchDoc, isSavedSearch, _dirty, _isSearchFormVisible)]]">
         <iron-icon icon="nuxeo:filter-edit"></iron-icon>[[i18n('app.saveNewSearch')]]
       </paper-button>
-      <paper-button on-tap="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, _dirty)]]">
+      <paper-button on-tap="_saveSearch" hidden$="[[!_showSave(searchDoc, isSavedSearch, _dirty, _isSearchFormVisible)]]">
         <iron-icon icon="nuxeo:filter-add"></iron-icon>[[i18n('app.savedSearch')]]
       </paper-button>
       <paper-menu-button no-animations horizontal-align="right" vertical-offset="40"
-                         hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty)]]">
+                         hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty, _isSearchFormVisible)]]">
         <paper-icon-button icon="icons:more-vert" slot="dropdown-trigger" alt="menu"></paper-icon-button>
         <paper-listbox slot="dropdown-content">
           <paper-item on-tap="_renameSearch">
@@ -86,10 +86,17 @@ limitations under the License.
           type: Object,
           observer: '_searchFormChanged'
         },
-        _dirty: Boolean
+        _dirty: Boolean,
+        _isSearchFormVisible: Boolean
       },
 
-      _searchFormChanged: function() {
+      created: function() {
+        this._searchFormVisibilityChanged = function(event) {
+          this._isSearchFormVisible = event.target.visible;
+        }.bind(this);
+      },
+      
+      _searchFormChanged: function(form, oldForm) {
         this._dirty = this.searchForm && this.searchForm.dirty;
         if (this.searchForm) {
           this.searchForm.addEventListener('dirty-changed', function() {
@@ -101,6 +108,14 @@ limitations under the License.
               this.isSavedSearch = !!this.searchId;
             }
           }.bind(this));
+
+          if (oldForm) {
+            oldForm.removeEventListener('visible-changed', this._searchFormVisibilityChanged);
+          }
+          if (form) {
+            form.addEventListener('visible-changed', this._searchFormVisibilityChanged);
+            this._isSearchFormVisible = form.visible;
+          }
 
           if (this.searchForm.selectedSearch) {
             this.searchId = this.searchForm.selectedSearch.id;
@@ -131,15 +146,15 @@ limitations under the License.
       },
 
       _showSaveAs: function() {
-        return this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this._dirty);
+        return this._isSearchFormVisible && (this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this._dirty));
       },
 
       _showSave: function() {
-        return this.isSavedSearch && this._dirty && this._hasPermissions();
+        return this._isSearchFormVisible && this.isSavedSearch && this._dirty && this._hasPermissions();
       },
 
       _showOtherSearchActions: function() {
-        return this.isSavedSearch && this._hasPermissions();
+        return this._isSearchFormVisible && this.isSavedSearch && this._hasPermissions();
       },
 
       _hasPermissions: function() {
