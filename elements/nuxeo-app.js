@@ -473,6 +473,7 @@ Polymer({
     <div id="snackbarPanel">
       <mwc-snackbar id="toast" leading>
         <paper-icon-button id="abort" slot="action" hidden></paper-icon-button>
+        <paper-icon-button id="copy" icon="icons:content-copy" slot="action" hidden></paper-icon-button>
         <paper-icon-button
           id="dismiss"
           slot="dismiss"
