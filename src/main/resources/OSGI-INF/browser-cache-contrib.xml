@@ -12,7 +12,7 @@
     <filterConfig name="ui_static" cached="true" cacheTime="86400">
       <!-- For other web ui resources: trade off between agressive caching and HF applying within 24 hours -->
       <!-- Exclude JS and HTML files due to: https://jira.nuxeo.com/browse/NXP-25595 -->
-      <pattern>${org.nuxeo.ecm.contextPath}/ui/.*\.(?!(html|js)$).*</pattern>
+      <pattern>${org.nuxeo.ecm.contextPath}/ui/.*\.(?!(html|js|jsp)$).*</pattern>
     </filterConfig>
   </extension>
 
