@@ -88,6 +88,8 @@
   "app.savedSearch": "保存",
   "app.saveNewSearch": "另存为",
   "app.search": "搜索",
+  "app.snackbar.abortButton": "Abort",
+  "app.snackbar.copyButton.tooltip": "Copy errors details to clipboard",
   "app.shareSearch": "共享",
   "app.tasks": "任务",
   "app.themes.heading": "主题",

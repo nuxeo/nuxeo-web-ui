@@ -88,6 +88,8 @@
   "app.savedSearch": "Save",
   "app.saveNewSearch": "Save As",
   "app.search": "Search",
+  "app.snackbar.abortButton": "Abort",
+  "app.snackbar.copyButton.tooltip": "Copy errors details to clipboard",
   "app.shareSearch": "Share",
   "app.tasks": "Tasks",
   "app.themes.heading": "Themes",

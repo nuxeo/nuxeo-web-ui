@@ -88,6 +88,8 @@
   "app.savedSearch": "Simpan",
   "app.saveNewSearch": "Simpan Sebagai",
   "app.search": "Pencarian",
+  "app.snackbar.abortButton": "Abort",
+  "app.snackbar.copyButton.tooltip": "Copy errors details to clipboard",
   "app.shareSearch": "Bagikan",
   "app.tasks": "Tugas",
   "app.themes.heading": "Tema",

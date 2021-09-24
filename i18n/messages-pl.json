@@ -88,6 +88,8 @@
   "app.savedSearch": "Zapisz",
   "app.saveNewSearch": "Zapisz jako",
   "app.search": "Szukaj",
+  "app.snackbar.abortButton": "Abort",
+  "app.snackbar.copyButton.tooltip": "Copy errors details to clipboard",
   "app.shareSearch": "Udostępnij",
   "app.tasks": "Zadania",
   "app.themes.heading": "Motywy",

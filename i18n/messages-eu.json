@@ -88,6 +88,8 @@
   "app.savedSearch": "Gorde",
   "app.saveNewSearch": "Gorde honela",
   "app.search": "Bilatu",
+  "app.snackbar.abortButton": "Abort",
+  "app.snackbar.copyButton.tooltip": "Copy errors details to clipboard",
   "app.shareSearch": "Partekatu",
   "app.tasks": "Zereginak",
   "app.themes.heading": "Gaiak",

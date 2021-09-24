@@ -88,6 +88,8 @@
   "app.savedSearch": "保存",
   "app.saveNewSearch": "名前を付けて保存",
   "app.search": "検索",
+  "app.snackbar.abortButton": "Abort",
+  "app.snackbar.copyButton.tooltip": "Copy errors details to clipboard",
   "app.shareSearch": "共有",
   "app.tasks": "タスク",
   "app.themes.heading": "テーマ",
