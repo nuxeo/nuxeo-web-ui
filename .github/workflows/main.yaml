@@ -79,6 +79,11 @@ jobs:
         SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       run: npm run test
 
+    - name: 'Create settings.xml'
+      uses: whelk-io/maven-settings-xml-action@v4
+      with:
+        servers: '[{"id": "maven-internal", "username": "${{ secrets.PACKAGES_AUTH_USER }}", "password": "${{ secrets.PACKAGES_AUTH_TOKEN }}"}]'
+
     - name: Nuxeo package build
       run: mvn install -DskipInstall
 
