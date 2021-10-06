@@ -31,7 +31,7 @@ jobs:
         BRANCH_NAME=${GITHUB_HEAD_REF##*/}
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
         echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME" >> $GITHUB_ENV
-        echo "PREVIEW_NAMESPACE=nuxeo-web-ui-${BRANCH_NAME,,}" >> $GITHUB_ENV
+        echo "PREVIEW_NAMESPACE=nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
     - name: Install
       env:
