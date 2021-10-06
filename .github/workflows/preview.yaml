@@ -96,14 +96,14 @@ jobs:
       run: |
         # install Helm
         curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash -
-        helm repo add chartmuseum.jenkins-x.io https://storage.googleapis.com/chartmuseum.jenkins-x.io
+        helm repo add jx https://jenkins-x-charts.github.io/v2/
 
         # substitute env variables in values.yaml
         mv values.yaml values.yaml.tosubst
         envsubst < values.yaml.tosubst > values.yaml
 
         # update helm deps
-        helm dependency update
+        helm dependency update .
 
         # install
         helm upgrade --install --namespace ${PREVIEW_NAMESPACE} ${PREVIEW_NAMESPACE} .
