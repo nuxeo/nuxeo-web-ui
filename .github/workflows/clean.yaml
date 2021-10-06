@@ -21,7 +21,7 @@ jobs:
     - name: Prepare environment
       run: |
         BRANCH_NAME=${GITHUB_HEAD_REF##*/}
-        echo "PREVIEW_NAMESPACE=nuxeo-web-ui-${BRANCH_NAME,,}" >> $GITHUB_ENV
+        echo "PREVIEW_NAMESPACE=nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
     - name: Get GKE credentials
       uses: google-github-actions/get-gke-credentials@v0.2.1
