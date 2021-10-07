@@ -2,6 +2,7 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
+const { removeSync } = require('fs-extra');
 
 // read .env file and assign to process.env
 require('dotenv').config();
@@ -20,6 +21,10 @@ function runFunctionalTests(project, dir) {
     console.error(`An error was returned by the process running the Functional Tests for "${project}".`);
     process.exit(run.status);
   }
+}
+
+if (fs.existsSync(path.join(FTEST, 'target/cucumber-reports'))) {
+  removeSync(process.env.CUCUMBER_REPORT_PATH);
 }
 
 if (!args.skipWebUi) {
