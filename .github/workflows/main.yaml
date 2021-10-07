@@ -3,12 +3,11 @@ name: Build
 on:
   push:
     branches:
-      - master
       - maintenance-3.0.x
   pull_request:
 
 env:
-  CONNECT_URL: https://connect.nuxeo.com/nuxeo
+  CONNECT_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
 
 jobs:
   build:
@@ -79,10 +78,9 @@ jobs:
         SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       run: npm run test
 
-    - name: 'Create settings.xml'
-      uses: whelk-io/maven-settings-xml-action@v4
-      with:
-        servers: '[{"id": "maven-internal", "username": "${{ secrets.PACKAGES_AUTH_USER }}", "password": "${{ secrets.PACKAGES_AUTH_TOKEN }}"}]'
+    - name: 'Update settings.xml with server configuration'
+      run: |
+        echo '<settings><servers><server><id>maven-internal</id><username>${{ secrets.PACKAGES_AUTH_USER }}</username><password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password></server></servers></settings>' > ~/.m2/settings.xml
 
     - name: Nuxeo package build
       run: mvn install -DskipInstall
