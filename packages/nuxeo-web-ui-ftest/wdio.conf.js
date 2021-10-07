@@ -1,7 +1,6 @@
 const chai = require('chai');
 const path = require('path');
 const htmlReporter = require('multiple-cucumber-html-reporter');
-const { removeSync } = require('fs-extra');
 
 const CompatService = require('./wdio-compat-plugin');
 const ShadowService = require('./wdio-shadow-plugin');
@@ -246,11 +245,7 @@ exports.config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  onPrepare: () => {
-    if (process.env.CUCUMBER_REPORT_PATH) {
-      removeSync(process.env.CUCUMBER_REPORT_PATH);
-    }
-  },
+  // onPrepare: () => {},
   //
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
