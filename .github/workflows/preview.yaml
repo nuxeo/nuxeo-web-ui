@@ -4,7 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-      - master
       - maintenance-3.0.x
 
 env:
