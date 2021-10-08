@@ -33,10 +33,16 @@ Polymer({
       <div slot="header">
         <span class="flex">[[i18n('audit.heading')]]</span>
       </div>
-      <nuxeo-audit-search name="audit" id="audit"> </nuxeo-audit-search>
+      <nuxeo-audit-search name="audit" id="audit" visible="[[visible]]"> </nuxeo-audit-search>
     </nuxeo-page>
   `,
 
   is: 'nuxeo-audit',
   behaviors: [I18nBehavior],
+  properties: {
+    visible: {
+      type: Boolean,
+      value: false,
+    },
+  },
 });
