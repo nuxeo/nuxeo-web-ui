@@ -9,7 +9,7 @@ on:
       - maintenance-3.0.x
 
 env:
-  CONNECT_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+  CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
 
 jobs:
   build:
@@ -123,7 +123,7 @@ jobs:
       if: github.event_name == 'push'
       run: |
         PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${VERSION}.zip"
-        curl -i -u "${{ secrets.CONNECT_AUTH }}" -F package=@$PACKAGE "$CONNECT_URL/site/marketplace/upload?batch=true"
+        curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
 
     - name: Publish Web UI FTest framework
       if: github.event_name == 'push'
