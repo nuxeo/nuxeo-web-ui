@@ -93,8 +93,7 @@ jobs:
       id: preview
       working-directory: ./charts/preview
       run: |
-        # install Helm
-        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash -
+        # add helm jx repo
         helm repo add jx https://jenkins-x-charts.github.io/v2/
 
         # substitute env variables in values.yaml
