@@ -50,6 +50,7 @@ limitations under the License.
   <target name="bowerInstall" description="Install npm depedencies" unless="skipInstall">
     <exec executable="${cmd.bower}" failonerror="true">
       <arg value="install" />
+      <arg value="--allow-root" />
     </exec>
   </target>
 

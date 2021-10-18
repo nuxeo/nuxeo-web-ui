@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - 10.10
+  pull_request:
+    branches:
+      - 10.10
+
+jobs:
+  build:
+    name: Packages
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Checkout plugin-nuxeo-web-ui repo
+      uses: actions/checkout@v2
+      with:
+        repository: nuxeo/plugin-nuxeo-web-ui
+        ref: gh-actions-web-ui-10.10
+        path: plugin-nuxeo-web-ui
+
+    # - name: Test pom.xml
+      #run: |
+       # pushd plugin-nuxeo-web-ui
+        # sed -i 's/10.10-HF54-SNAPSHOT/10.10-HF53/g' pom.xml
+        # sed -i 's/2.4.54-SNAPSHOT/2.4.53/g' pom.xml
+        #cat pom.xml
+        #popd
+
+    - uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '8'
+
+    - uses: actions/setup-node@v1
+      with:
+        registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+        scope: '@nuxeo'
+
+    - name: 'Update settings.xml with server configuration'
+      run: |
+        echo '<settings><servers><server><id>maven-internal</id><username>${{ secrets.PACKAGES_AUTH_USER }}</username><password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password></server></servers></settings>' > ~/.m2/settings.xml
+
+    - name: Nuxeo package build
+      run: mvn install
+
+    - name: Run Functional tests
+      run: |
+        pushd plugin-nuxeo-web-ui
+        mvn install -Pftest
+        popd
