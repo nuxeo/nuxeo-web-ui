@@ -38,7 +38,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     sl_latest_safari: {
       base: 'SauceLabs',
       browserName: 'safari',
-      platform: 'macOS 10.13',
+      platform: 'macOS 11.00',
       version: 'latest',
     },
   };
