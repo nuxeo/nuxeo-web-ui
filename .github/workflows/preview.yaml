@@ -32,10 +32,34 @@ jobs:
         echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME" >> $GITHUB_ENV
         echo "PREVIEW_NAMESPACE=nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
+    - name: Determine nuxeo-elements branch to use
+      id: pick_nuxeo_elements_branch
+      shell: bash
+      run: |
+        BRANCH=${GITHUB_REF#refs/heads/}
+        if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${BRANCH}; then
+          echo "::set-output name=branch::${BRANCH}"
+        else
+          echo "::set-output name=success::maintenance-3.0.x"
+        fi
+
+    - name: Checkout the nuxeo-elements repo
+      uses: actions/checkout@v2
+      with:
+        repository: nuxeo/nuxeo-elements
+        path: nuxeo-elements
+        fetch-depth: 1
+        ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+
     - name: Install
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       run: |
+        npm install nuxeo-elements/core
+        npm ls @nuxeo/nuxeo-elements
+        npm install nuxeo-elements/ui
+        npm ls @nuxeo/nuxeo-ui-elements
+        npm install nuxeo-elements/dataviz
         npm install
 
     - name: Webpack build
