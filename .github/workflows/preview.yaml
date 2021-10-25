@@ -97,13 +97,6 @@ jobs:
       run: |
         echo ::set-output name=exists::$(kubectl get namespace ${PREVIEW_NAMESPACE})
 
-    # Previous preview deployment needs to be scaled to 0 to be replaced correctly
-    # - name: Cleanup preview namespace
-    #   if: ${{ steps.preview_ns.outputs.exists }}
-    #   continue-on-error: true
-    #   run: |
-    #     kubectl -n ${PREVIEW_NAMESPACE} scale deployment preview --replicas=0
-
     - name: Create preview namespace
       if: ${{ !steps.preview_ns.outputs.exists }}
       run: |
@@ -125,6 +118,9 @@ jobs:
 
         # install
         helm upgrade --install --namespace ${PREVIEW_NAMESPACE} ${PREVIEW_NAMESPACE} .
+
+        # ensure the deployment is restarted to pull the new preview image
+        kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
         
         echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
 
