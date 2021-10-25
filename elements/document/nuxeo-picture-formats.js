@@ -52,7 +52,11 @@ Polymer({
           <span>[[item.size]]</span>
           <span>[[item.format]]</span>
           <a id="download-[[index]]" href="[[item.data]]">
-            <iron-icon icon="nuxeo:download"></iron-icon>
+            <iron-icon
+              icon="nuxeo:download"
+              aria-label="[[i18n('pictureViewLayout.download.tooltip')]] [[item.name]] [[item.dimensions]]"
+            >
+            </iron-icon>
           </a>
           <paper-tooltip for="download-[[index]]">[[i18n('pictureViewLayout.download.tooltip')]]</paper-tooltip>
         </div>
