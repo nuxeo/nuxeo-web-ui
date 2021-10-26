@@ -8,9 +8,6 @@ on:
     branches:
       - maintenance-3.0.x
 
-env:
-  CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
-
 jobs:
   build:
     name: Packages
@@ -22,11 +19,6 @@ jobs:
       with:
         registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
         scope: '@nuxeo'
-
-    - uses: actions/setup-java@v2
-      with:
-        java-version: '11'
-        distribution: 'adopt'
 
     - name: Prepare environment
       run: |
@@ -74,7 +66,15 @@ jobs:
 
     - name: 'Update settings.xml with server configuration'
       run: |
-        echo '<settings><servers><server><id>maven-internal</id><username>${{ secrets.PACKAGES_AUTH_USER }}</username><password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password></server></servers></settings>' > ~/.m2/settings.xml
+        echo '<settings>
+            <servers>
+              <server>
+                <id>maven-internal</id>
+                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+              </server>
+            </servers>
+            </settings>' > ~/.m2/settings.xml
 
     - name: Nuxeo package build
       run: mvn install -DskipInstall
@@ -118,6 +118,8 @@ jobs:
 
     - name: Publish Nuxeo packages
       if: github.event_name == 'push'
+      env:
+        CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
       run: |
         PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${VERSION}.zip"
         curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
