@@ -152,7 +152,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
           <nuxeo-quick-filters quick-filters="{{quickFilters}}" on-quick-filters-changed="fetch">
           </nuxeo-quick-filters>
         </template>
-        <span class="resultsCount" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]">[[i18n('results.heading.count', resultsCount)]]</span>
+        <span class="resultsCount" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]">[[_resultsCountLabel]]</span>
 
         <div class="rightHand">
           <slot name="actions"></slot>
@@ -299,6 +299,10 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 
         resultsCount: {
           type: Number,
+        },
+
+        _resultsCountLabel: {
+          type: String,
         },
 
         /**
@@ -592,7 +596,15 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       _showResultsCount: function() {
-        return this.nxProvider && this.resultsCount;
+        if (this.nxProvider && this.resultsCount) {
+          if (this.resultsCount < 0) {
+            this._resultsCountLabel = this.i18n('results.heading.count.unknonw');
+          } else {
+            this._resultsCountLabel = this.i18n('results.heading.count', this.resultsCount);
+          }
+          return true;
+        }
+        return false;
       },
 
       _itemsChanged: function(e) {

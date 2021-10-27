@@ -1215,6 +1215,7 @@
   "repositoryAnalytics.topDownloads.heading": "Top Downloads",
   "repositoryAnalytics.topNCreators.heading": "Top {0} Creators",
   "results.heading.count": "{0} result(s)",
+  "results.heading.count.unknonw": "Many results",
   "resultsView.filters.heading": "Filters",
   "retention.action.dialog.heading": "Extend retention period",
   "retention.action.retain": "Extend retention",
