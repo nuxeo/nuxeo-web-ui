@@ -100,7 +100,11 @@ Polymer({
             >[[_computeHtmlEditLabel(_viewMode, i18n)]]</paper-tooltip
           >
           <template is="dom-if" if="[[_viewMode]]">
-            <nuxeo-html-editor value="{{_value}}" read-only="[[!_canEdit(document)]]"></nuxeo-html-editor>
+            <nuxeo-html-editor
+              value="{{_value}}"
+              read-only="[[!_canEdit(document)]]"
+              href-base="[[_computeHrefBase()]]"
+            ></nuxeo-html-editor>
           </template>
           <template is="dom-if" if="[[!_viewMode]]">
             <paper-textarea
@@ -149,6 +153,7 @@ Polymer({
 
   is: 'nuxeo-note-editor',
   behaviors: [NotifyBehavior, LayoutBehavior],
+  importMeta: import.meta,
 
   properties: {
     document: {
@@ -216,5 +221,9 @@ Polymer({
 
   _toggleHtmlSource() {
     this._viewMode = !this._viewMode;
+  },
+
+  _computeHrefBase() {
+    return `${this.importPath}../search/`;
   },
 });
