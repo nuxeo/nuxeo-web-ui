@@ -46,44 +46,53 @@ jobs:
         npm version ${VERSION} --no-git-tag-version
         popd
 
-    - name: Install
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      run: |
-        npm install
-        pushd packages/nuxeo-web-ui-ftest
-        npm install
-        popd
+    # - name: Install
+    #   env:
+    #     NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+    #   run: |
+    #     npm install
+    #     pushd packages/nuxeo-web-ui-ftest
+    #     npm install
+    #     popd
 
-    - name: Lint
-      run: npm run lint
+    # - name: Lint
+    #   run: npm run lint
 
-    - name: Unit tests
-      env:
-        SAUCE_USERNAME: nuxeo-web-ui
+    # - name: Unit tests
+    #   env:
+    #     SAUCE_USERNAME: nuxeo-web-ui
+    #     SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+    #   run: npm run test
+
+    # - name: 'Update settings.xml with server configuration'
+    #   run: |
+    #     echo '<settings>
+    #         <servers>
+    #           <server>
+    #             <id>maven-internal</id>
+    #             <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+    #             <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+    #           </server>
+    #         </servers>
+    #         </settings>' > ~/.m2/settings.xml
+
+    # - name: Nuxeo package build
+    #   run: mvn install -DskipInstall
+
+    # - name: Functional tests
+    #   run: |
+    #     mvn -B -nsu -f plugin/itests/addon install
+    #     mvn -B -nsu -f plugin/itests/marketplace install
+    #     mvn -B -nsu -f ftest install
+
+    - uses: nuxeo/nuxeo-web-ui/.github/workflows/build-template.yml@test-workflow-composite-action
+      with: 
+        branch_name: ${{ env.BRANCH_NAME }}
+      secrets: 
+        NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
+        PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
         SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-      run: npm run test
-
-    - name: 'Update settings.xml with server configuration'
-      run: |
-        echo '<settings>
-            <servers>
-              <server>
-                <id>maven-internal</id>
-                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-              </server>
-            </servers>
-            </settings>' > ~/.m2/settings.xml
-
-    - name: Nuxeo package build
-      run: mvn install -DskipInstall
-
-    - name: Functional tests
-      run: |
-        mvn -B -nsu -f plugin/itests/addon install
-        mvn -B -nsu -f plugin/itests/marketplace install
-        mvn -B -nsu -f ftest install
 
     - name: Archive cucumber reports
       uses: actions/upload-artifact@v2

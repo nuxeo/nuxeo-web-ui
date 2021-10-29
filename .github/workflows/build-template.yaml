@@ -1,0 +1,84 @@
+name: Build template
+
+on:
+  workflow_call:
+    inputs:
+      branch_name:
+        description: 'The name of the branch to build'
+        default: 'maintenance-3.0.x'
+        required: true
+        type: string
+    secrets:
+      NPM_PACKAGES_TOKEN:
+        required: true
+      PACKAGES_AUTH_USER:
+        required: true
+      PACKAGES_AUTH_TOKEN:
+        required: true
+      SAUCE_ACCESS_KEY:
+        required: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: [ self-hosted, master ]
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          scope: '@nuxeo'
+
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Checkout the nuxeo-elements repo
+        uses: actions/checkout@v2
+        with:
+          repository: nuxeo/nuxeo-elements
+          path: nuxeo-elements
+          fetch-depth: 1
+          ref: ${{ inputs.branch_name }}
+
+      - name: Install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install nuxeo-elements/core
+          npm install nuxeo-elements/ui
+          npm install nuxeo-elements/dataviz
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        env:
+          SAUCE_USERNAME: nuxeo-web-ui
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        run: npm run test
+
+      - name: 'Update settings.xml with server configuration'
+        run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
+
+      - name: Nuxeo package build
+        run: mvn install -DskipInstall
+
+      - name: Functional tests
+        run: |
+          mvn -B -nsu -f plugin/itests/addon install
+          mvn -B -nsu -f plugin/itests/marketplace install
+          mvn -B -nsu -f ftest install
