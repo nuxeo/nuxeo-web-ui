@@ -66,6 +66,7 @@ Polymer({
           show-filters="[[showFilters]]"
           opened="[[opened]]"
           search-form="[[searchForm]]"
+          href-base="[[_computeHrefBase()]]"
         ></nuxeo-results-view>
       </div>
     </nuxeo-page>
@@ -73,6 +74,7 @@ Polymer({
 
   is: 'nuxeo-search-page',
   behaviors: [I18nBehavior],
+  importMeta: import.meta,
 
   properties: {
     showSavedSearchActions: {
@@ -165,5 +167,9 @@ Polymer({
      * `loading`, `aggregations`, `quickFilters` and `auto`.
      */
     searchForm: Object,
+  },
+
+  _computeHrefBase() {
+    return `${this.importPath}search/`;
   },
 });
