@@ -40,7 +40,7 @@ jobs:
     - name: Update versions
       if: github.event_name == 'push'
       run: |
-        find . -type f -not -path './node_modules/*' -regex '.*\\.\\(yaml\\|sample\\|xml\\)' -exec sed -i 's/${PACKAGE_VERSION}/${VERSION}/g' {} \\;
+        find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$PACKAGE_VERSION"'/'"$VERSION"'/g' {} \;
         npm version ${VERSION} --no-git-tag-version
         pushd packages/nuxeo-web-ui-ftest
         npm version ${VERSION} --no-git-tag-version
