@@ -379,9 +379,9 @@ limitations under the License.
         // setup data binding
         form.addEventListener('params-changed', function(e) {
           // e.detail.path is params.prop_name eg: params.ecm_fulltext
-          if (e.detail.path) {
-            var param = e.detail.path.split('.')[1];
-            this.notifyPath('_params.' + param, e.detail.value);
+          // checking for the presence of a 'value' key in case we are clearing the form params
+          if (e.detail.path || 'value' in e.detail) {
+            this.notifyPath(e.detail.path ? '_params.' + e.detail.path.split('.')[1] : '_params', e.detail.value);
             if (this.visible && this.auto) {
               this._search();
             }
