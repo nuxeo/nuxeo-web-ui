@@ -48,6 +48,16 @@ jobs:
         npm version ${VERSION} --no-git-tag-version
         popd
 
+    - name: Publish Web UI FTest framework
+      # if: github.event_name == 'push'
+      # working-directory: packages/nuxeo-web-ui-ftest
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: |
+        pushd packages/nuxeo-web-ui-ftest/
+        npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag SNAPSHOT
+        popd
+
     - name: Install
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -125,11 +135,3 @@ jobs:
       run: |
         PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${VERSION}.zip"
         curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
-
-    - name: Publish Web UI FTest framework
-      if: github.event_name == 'push'
-      working-directory: packages/nuxeo-web-ui-ftest
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: |
-        npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public --tag SNAPSHOT
