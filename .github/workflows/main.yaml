@@ -128,8 +128,9 @@ jobs:
 
     - name: Publish Web UI FTest framework
       if: github.event_name == 'push'
-      working-directory: packages/nuxeo-web-ui-ftest
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
-        npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public --tag SNAPSHOT
+        pushd packages/nuxeo-web-ui-ftest/
+        npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag SNAPSHOT
+        popd
