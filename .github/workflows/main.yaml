@@ -27,22 +27,29 @@ jobs:
         echo "BRANCH_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
         echo "PACKAGE_VERSION=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
 
-    - name: Get pull request version
-      if: github.event_name == 'pull_request'
-      run: |
-        echo "VERSION=$PACKAGE_VERSION-$BRANCH_NAME" >> $GITHUB_ENV
+    # - name: Get pull request version
+    #  if: github.event_name == 'pull_request'
+    #  run: |
+    #    echo "VERSION=$PACKAGE_VERSION-$BRANCH_NAME" >> $GITHUB_ENV
 
     - name: Get prerelease version
-      if: github.event_name == 'push'
+      # if: github.event_name == 'push'
       run: |
         git fetch origin --tags
         RC_VERSION=$(git tag --sort=taggerdate --list "v${PACKAGE_VERSION/-SNAPSHOT}*" | tail -1 | tr -d '\n')
         echo "VERSION=$(npx semver -i prerelease --preid rc ${RC_VERSION:-$PACKAGE_VERSION}  | tr -d '\n')" >> $GITHUB_ENV
 
     - name: Update versions
-      if: github.event_name == 'push'
+      # if: github.event_name == 'push'
       run: |
         find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$PACKAGE_VERSION"'/'"$VERSION"'/g' {} \;
+
+        PADDED=$(printf '%03d' $(echo $VERSION | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
+        PADDED_VERSION=$(echo $VERSION | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
+        echo "$PADDED_VERSION" >> $GITHUB_ENV
+
+        sed -i -e 's/\$VERSION/$PADDED_VERSION/g' plugin/web-ui/marketplace/pom.xml
+
         npm version ${VERSION} --no-git-tag-version
         pushd packages/nuxeo-web-ui-ftest
         npm version ${VERSION} --no-git-tag-version
@@ -81,11 +88,11 @@ jobs:
     - name: Nuxeo package build
       run: mvn install -DskipInstall
 
-    - name: Functional tests
-      run: |
-        mvn -B -nsu -f plugin/itests/addon install
-        mvn -B -nsu -f plugin/itests/marketplace install
-        mvn -B -nsu -f ftest install
+    # - name: Functional tests
+     # run: |
+     #   mvn -B -nsu -f plugin/itests/addon install
+     #   mvn -B -nsu -f plugin/itests/marketplace install
+     #   mvn -B -nsu -f ftest install
 
     - name: Archive cucumber reports
       uses: actions/upload-artifact@v2
@@ -110,27 +117,27 @@ jobs:
           plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
           plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
 
-    - name: Tag
-      if: github.event_name == 'push'
-      run: |
-        git add package-lock.json packages/nuxeo-web-ui-ftest/package-lock.json
-        git commit -a -m "Release ${VERSION}"
-        git tag -a v${VERSION} -m "Release ${VERSION}"
-        git push origin v${VERSION}
+    #- name: Tag
+    #  if: github.event_name == 'push'
+    #  run: |
+    #    git add package-lock.json packages/nuxeo-web-ui-ftest/package-lock.json
+    #    git commit -a -m "Release ${VERSION}"
+    #    git tag -a v${VERSION} -m "Release ${VERSION}"
+    #    git push origin v${VERSION}
 
     - name: Publish Nuxeo packages
-      if: github.event_name == 'push'
+      # if: github.event_name == 'push'
       env:
         CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
       run: |
-        PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${VERSION}.zip"
+        PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
         curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
 
-    - name: Publish Web UI FTest framework
-      if: github.event_name == 'push'
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: |
-        pushd packages/nuxeo-web-ui-ftest/
-        npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag SNAPSHOT
-        popd
+    #- name: Publish Web UI FTest framework
+    #  if: github.event_name == 'push'
+    #  env:
+    #    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    #  run: |
+    #    pushd packages/nuxeo-web-ui-ftest/
+    #    npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag SNAPSHOT
+    #    popd
