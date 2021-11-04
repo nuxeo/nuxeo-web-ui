@@ -123,7 +123,9 @@ jobs:
       env:
         CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
       run: |
-        PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${VERSION}.zip"
+        PADDED=$(printf '%03d' $(echo $VERSION | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
+        PADDED_VERSION=$(echo $VERSION | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
+        PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
         curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
 
     - name: Publish Web UI FTest framework
