@@ -44,12 +44,11 @@ jobs:
       run: |
         find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$PACKAGE_VERSION"'/'"$VERSION"'/g' {} \;
 
+        # set padded version to build package for connect preprod
         PADDED=$(printf '%03d' $(echo $VERSION | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
-        echo "PADDED_VERSION=$(echo $VERSION | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")" >> $GITHUB_ENV
-        # echo "PADDED_VERSION=$PADDED_VERSION" >> $GITHUB_ENV
-
+        PADDED_VERSION=$(echo $VERSION | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
+        echo "PADDED_VERSION=$PADDED_VERSION" >> $GITHUB_ENV
         sed -i -e 's/\${project.version}/'"$PADDED_VERSION"'/g' plugin/web-ui/marketplace/pom.xml
-        cat plugin/web-ui/marketplace/pom.xml
 
         npm version ${VERSION} --no-git-tag-version
         pushd packages/nuxeo-web-ui-ftest
