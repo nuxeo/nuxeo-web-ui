@@ -123,20 +123,10 @@ jobs:
       env:
         CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
       run: |
-        # we need to push a padded version to connect preprod
         PADDED=$(printf '%03d' $(echo $VERSION | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
         PADDED_VERSION=$(echo $VERSION | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
-        PACKAGE_NAME="nuxeo-web-ui-marketplace-$VERSION"
-        PACKAGE="plugin/web-ui/marketplace/target/$PACKAGE_NAME"
-
-        unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
-        pushd $PACKAGE
-        sed -i 's/'"$VERSION"'/'"$PADDED_VERSION"'/g' package.xml
-        for f in install/bundles/*.jar; do mv $f $(echo $f | sed 's/'"$VERSION"'/'"$PADDED_VERSION"'/g'); done
-        zip -r ../$PACKAGE_NAME.zip .
-        popd
-
-        curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
+        PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
+        curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
 
     - name: Publish Web UI FTest framework
       if: github.event_name == 'push'
