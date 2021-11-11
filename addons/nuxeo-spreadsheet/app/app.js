@@ -19,8 +19,8 @@
 import './vendor/jquery.handsontable.full.js';
 import './lib/handsontable.patches.js';
 import './vendor/jquery.handsontable.full.css';
-import 'select2/select2.js';
-import 'select2/select2.css';
+import 'select2/dist/js/select2.js';
+import 'select2/dist/css/select2.css';
 import './styles/styles.css';
 
 import 'nuxeo/nuxeo.js';
