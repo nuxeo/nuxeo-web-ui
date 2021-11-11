@@ -9,6 +9,7 @@ import HistoryTable from './ui/history_table';
 import User from './ui/user';
 import Group from './ui/group';
 import Search from './ui/search';
+import BulkEdit from './ui/bulk_edit';
 import UserAuthorizedApps from './ui/oauth2/user_authorized_apps';
 import UserCloudServices from './ui/oauth2/user_cloud_services';
 import { refresh, url } from './helpers';
@@ -169,5 +170,27 @@ export default class UI extends BasePage {
 
   waitForToastNotVisible() {
     driver.waitUntil(() => driver.elements('mwc-snackbar').every((toast) => !toast.getAttribute('open')));
+  }
+
+  get toastNotification() {
+    return this.el.element('#snackbarPanel mwc-snackbar[open]');
+  }
+
+  // get toastNotificationMessage() {
+  //   this.toastNotification.waitForVisible();
+  //   const snackBarMessage = this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar .mdc-snackbar__label');
+  //   snackBarMessage.waitForVisible();
+  //   console.log('snackBarMessage:', snackBarMessage)
+  //   return snackBarMessage.innerText;
+  // }
+
+  closeToastNotification() {
+    this.toastNotification.waitForVisible();
+    const snackBarCloseButton = this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
+    snackBarCloseButton.click();
+  }
+
+  get bulkEdit() {
+    return new BulkEdit('nuxeo-edit-documents-button');
   }
 }
