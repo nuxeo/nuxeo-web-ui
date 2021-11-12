@@ -99,37 +99,6 @@ Polymer({
         cursor: pointer;
       }
 
-      .parents {
-        line-height: 1.5em;
-      }
-
-      .parents + nuxeo-tree {
-        padding: 6px 5px;
-      }
-
-      .parents > nuxeo-tree {
-        padding: 4px 5px;
-      }
-
-      .parents a {
-        @apply --layout-horizontal;
-        padding: 0.35em;
-        color: var(--nuxeo-drawer-text);
-        border-bottom: 1px solid var(--nuxeo-border);
-      }
-
-      .parents span {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        display: block;
-        min-width: 1.3em;
-      }
-
-      .parent {
-        padding: 0.12em 0 0;
-      }
-
       paper-spinner {
         height: 1.1rem;
         width: 1.1rem;
@@ -169,18 +138,6 @@ Polymer({
     </div>
 
     <div class="content">
-      <div class="parents" hidden$="[[_noPermission]]">
-        <a href$="[[urlFor('document', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
-          <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
-          <span class="parent">[[i18n('browse.root')]]</span>
-        </a>
-        <template is="dom-repeat" items="[[parents]]" as="item">
-          <a href$="[[urlFor(item)]]">
-            <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
-            <span class="parent">[[item.title]]</span>
-          </a>
-        </template>
-      </div>
       <nuxeo-tree id="tree" data="[[document]]" controller="[[controller]]" node-key="uid">
         <template class="horizontal layout">
           <template class="flex" is="dom-if" if="[[!isLeaf]]">
@@ -222,10 +179,6 @@ Polymer({
       type: Object,
       observer: '_currentDocumentChanged',
     },
-    parents: {
-      type: Array,
-      value: [],
-    },
     label: String,
     visible: {
       type: Boolean,
@@ -263,6 +216,8 @@ Polymer({
         this.$.children.params = [node.uid];
         this.$.children.page = page;
         return this.$.children.fetch().then((data) => {
+          // expand current document when its children are updated
+          this._expandCurrentDocument();
           return {
             items: data.entries,
             isNextAvailable: this.$.children.isNextPageAvailable,
@@ -304,26 +259,27 @@ Polymer({
         this.$.doc.get();
       }
 
-      if (this.docPath !== doc.path && !this.hasFacet(doc, 'HiddenInNavigation')) {
-        this.$.tree.style.display = 'none';
-        this.parents = [];
-
-        if (doc.type === 'Root') {
-          this.docPath = doc.path;
-          return;
-        }
-
-        const { entries } = doc.contextParameters.breadcrumb;
-        this.docPath = entries[entries.length - 1].path;
-
-        for (let i = 0; i < entries.length - 1; i++) {
-          const entry = entries[i];
-          if (!this.hasFacet(entry, 'HiddenInNavigation') && entry.path.startsWith(this.rootDocPath)) {
-            this.push('parents', entry);
-          }
-        }
-      }
+      // expand current document when it changes
+      this._expandCurrentDocument();
     }
+  },
+
+  _expandCurrentDocument() {
+    this.__expandDebouncer = Debouncer.debounce(this.__expandDebouncer, timeOut.after(100), () => {
+      if (
+        !this.currentDocument ||
+        !this.currentDocument.contextParameters ||
+        !this.currentDocument.contextParameters.breadcrumb ||
+        !this.currentDocument.contextParameters.breadcrumb.entries
+      ) {
+        return;
+      }
+      const uids = [
+        ...this.currentDocument.contextParameters.breadcrumb.entries.map((doc) => doc.uid),
+        this.currentDocument.uid,
+      ];
+      this.$.tree.open(...uids);
+    });
   },
 
   _documentChanged() {
