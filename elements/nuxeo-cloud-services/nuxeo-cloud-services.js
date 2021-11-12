@@ -42,8 +42,14 @@ Polymer({
         --paper-listbox-background-color: transparent;
       }
 
-      paper-listbox {
+      paper-tabs {
+        height: auto;
+        display: flex;
         padding: 0;
+        border-bottom: none transparent 0px;
+        font-size: inherit;
+        font-weight: 400;
+        --paper-tabs-selection-bar-color: transparent;
       }
 
       @media (max-width: 1024px) {
@@ -57,11 +63,19 @@ Polymer({
         <span class="flex">[[i18n('cloudServices.heading')]]</span>
       </div>
       <div slot="tabs">
-        <paper-listbox id="documentViewsItems" selected="{{selectedTab}}" attr-for-selected="name">
+        <paper-tabs
+          autoselect
+          attr-for-selected="name"
+          id="documentViewsItems"
+          noink
+          no-slide
+          selected="{{selectedTab}}"
+          selectable="nuxeo-page-item"
+        >
           <nuxeo-page-item name="providers" label="cloudServices.providers"></nuxeo-page-item>
           <nuxeo-page-item name="tokens" label="cloudServices.tokens"></nuxeo-page-item>
           <nuxeo-page-item name="consumers" label="cloudServices.consumers"></nuxeo-page-item>
-        </paper-listbox>
+        </paper-tabs>
       </div>
       <div>
         <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
