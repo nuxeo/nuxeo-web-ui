@@ -18,6 +18,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-slider/paper-slider.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/dataviz/nuxeo-document-distribution-chart.js';
@@ -150,13 +151,7 @@ Polymer({
     },
     disableThreshold: {
       type: Number,
-      value:
-        Nuxeo &&
-        Nuxeo.UI &&
-        Nuxeo.UI.config &&
-        Nuxeo.UI.config.analytics &&
-        Nuxeo.UI.config.analytics.documentDistribution &&
-        Number(Nuxeo.UI.config.analytics.documentDistribution.disableThreshold),
+      value: config.get('analytics.documentDistribution.disableThreshold'),
     },
     _enabled: {
       type: Boolean,
