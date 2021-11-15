@@ -9,17 +9,32 @@ on:
         required: true
       sauce_labs:
         description: 'Should unit tests be run on Sauce Labs?'
-        default: 'true'
+        default: true
+        type: boolean
         required: false
       skip_ftests:
         description: 'Should the functional tests be skipped?'
+        type: boolean
         required: false
       skip_unit_tests:
         description: 'Should the unit tests be skipped?'
+        type: boolean
         required: false
       generate_metrics:
         description: 'Should the metrics report be generated?'
+        type: boolean
         required: false
+      run_all:
+        description: 'Should fail fast premise be skipped?'
+        type: boolean
+        required: false
+      bail:
+        description: 'Number of failed features to stop test runner (default value 0 means not applicable).'
+        default: 0
+        required: false
+
+env:
+  REFERENCE_BRANCH: maintenance-3.0.x
 
 jobs:
   build:
@@ -37,7 +52,7 @@ jobs:
           if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-web-ui ${{ github.event.inputs.branch_name }}; then
             echo ::set-output name=branch::${{ github.event.inputs.branch_name }}
           else
-            echo ::set-output name=branch::maintenance-3.0.x
+            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
           fi
 
       - name: Checkout nuxeo-web-ui repo
@@ -51,7 +66,7 @@ jobs:
           if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ github.event.inputs.branch_name }}; then
             echo ::set-output name=branch::${{ github.event.inputs.branch_name }}
           else
-            echo ::set-output name=branch::maintenance-3.0.x
+            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
           fi
 
       - name: Checkout the nuxeo-elements repo
@@ -78,11 +93,11 @@ jobs:
         run: npm run lint
 
       - name: Unit tests
-        if: ${{ !github.event.inputs.skip_unit_tests && github.event.inputs.sauce_labs == 'false' }}
+        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
         run: npm run test
 
       - name: Unit tests (Sauce Labs)
-        if: ${{ !github.event.inputs.skip_unit_tests && github.event.inputs.sauce_labs == 'true' }}
+        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
         env:
           SAUCE_USERNAME: nuxeo-web-ui
           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -101,13 +116,16 @@ jobs:
               </settings>' > ~/.m2/settings.xml
 
       - name: Nuxeo package build and Ftests
+        env:
+          RUN_ALL: ${{ github.event.inputs.run_all }}
+          BAIL: ${{ github.event.inputs.bail }}
         run: | 
           profiles=()
-          if [ "${{ github.event.inputs.skip_ftests }}" != 'true' ]
-          then
+          if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
+          then 
             profiles+=('ftest') 
           fi
-          if [ ${{ github.event.inputs.generate_metrics }} ] 
+          if ${{ github.event.inputs.generate_metrics }}
           then 
             profiles+=('metrics') 
           fi
