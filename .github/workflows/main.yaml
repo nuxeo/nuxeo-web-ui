@@ -94,6 +94,10 @@ jobs:
         mvn -B -nsu -f plugin/itests/marketplace install
         mvn -B -nsu -f ftest install
 
+    - name: A11y checks
+      run: |
+        mvn -B -nsu -f plugin/a11y install
+
     - name: Archive cucumber reports
       uses: actions/upload-artifact@v2
       with:

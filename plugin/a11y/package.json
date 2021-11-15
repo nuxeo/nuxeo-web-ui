@@ -1,0 +1,29 @@
+{
+  "name": "@nuxeo/nuxeo-web-ui-a11y",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=10.23.0"
+  },
+  "scripts": {
+    "start": "npm run test",
+    "test": "HEADLESS=true wdio wdio.conf.js",
+    "test:dev": "NUXEO_WEB_UI_URL=http://localhost:5000/ NUXEO_URL=http://localhost:8080/nuxeo/ wdio wdio.conf.js"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/register": "^7.14.5",
+    "@nuxeo/nuxeo-web-ui-ftest": "file:../../packages/nuxeo-web-ui-ftest",
+    "@wdio/cli": "7.5.3",
+    "@wdio/local-runner": "^7.2.0",
+    "@wdio/mocha-framework": "^7.2.0",
+    "@wdio/selenium-standalone-service": "^7.2.0",
+    "@wdio/spec-reporter": "^7.2.0",
+    "@wdio/sync": "^7.2.0",
+    "axe-core": "^4.1.2",
+    "chrome-launcher": "^0.14.0",
+    "node-fetch": "^2.6.1",
+    "wdio-chromedriver-service": "^7.0.0"
+  }
+}
