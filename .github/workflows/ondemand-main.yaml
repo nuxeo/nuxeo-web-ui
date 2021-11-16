@@ -35,6 +35,7 @@ on:
 
 env:
   REFERENCE_BRANCH: maintenance-3.0.x
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
   build:
@@ -43,7 +44,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v1
         with:
-          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          registry-url: ${{ env.NPM_REPOSITORY }}
           scope: '@nuxeo'
 
       - name: Determine nuxeo-web-ui branch to use
@@ -105,22 +106,52 @@ jobs:
           popd
 
       - name: Elements Unit tests
+        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
+        env:
+          SAUCE_USERNAME: nuxeo-web-ui
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
         run: |
           pushd nuxeo-elements
           npm run test
           popd
 
+      - name: Elements Unit tests (Sauce Labs)
+        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
+        env:
+          SAUCE_USERNAME: nuxeo-web-ui
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        run: |
+          pushd nuxeo-elements
+          npm run test
+          popd
+      
+      - name: Pack Elements modules
+        run: |
+          pushd nuxeo-elements
+          pushd core
+          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+
+          pushd ui
+          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+
+          push dataviz
+          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          popd
+
       - name: Link elements to Web UI
         run: |
-          npm install nuxeo-elements/core
-          npm install nuxeo-elements/ui
-          npm install nuxeo-elements/dataviz
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_UI}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_DATAVIZ}
 
-      - name: Unit tests
+      - name: Web UI Unit tests
         if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
         run: npm run test
 
-      - name: Unit tests (Sauce Labs)
+      - name: Web UI Unit tests (Sauce Labs)
         if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
         env:
           SAUCE_USERNAME: nuxeo-web-ui
