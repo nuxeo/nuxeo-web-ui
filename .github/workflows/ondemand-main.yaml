@@ -55,11 +55,6 @@ jobs:
             echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
           fi
 
-      - name: Checkout nuxeo-web-ui repo
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
-
       - name: Determine nuxeo-elements branch to use
         id: pick_nuxeo_elements_branch
         run: |
@@ -69,6 +64,23 @@ jobs:
             echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
           fi
 
+      - name: Checkout nuxeo-web-ui repo
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
+
+      - name: Install Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+
+      - name: Lint Web UI
+        run: npm run lint
+
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2
         with:
@@ -77,20 +89,32 @@ jobs:
           fetch-depth: 1
           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
 
-      - name: Install
+      - name: Install Elements
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          pushd nuxeo-elements
+          npm install
+          npm run bootstrap
+          popd
+      
+      - name: Lint Elements
+        run: |
+          pushd nuxeo-elements
+          npm run lint
+          popd
+
+      - name: Elements Unit tests
+        run: |
+          pushd nuxeo-elements
+          npm run test
+          popd
+
+      - name: Link elements to Web UI
         run: |
           npm install nuxeo-elements/core
           npm install nuxeo-elements/ui
           npm install nuxeo-elements/dataviz
-          npm install
-          pushd packages/nuxeo-web-ui-ftest
-          npm install
-          popd
-
-      - name: Lint
-        run: npm run lint
 
       - name: Unit tests
         if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
