@@ -1,6 +1,6 @@
 import '../imports';
-import Login from '@nuxeo/nuxeo-web-ui-ftest/pages/login';
 import UI from '@nuxeo/nuxeo-web-ui-ftest/pages/ui';
+import login from '../helpers/login';
 import { reportA11y } from '../a11y-reporter.js';
 
 const EXPECTED_VIOLATIONS = {
@@ -24,10 +24,7 @@ const EXPECTED_INCOMPLETE_VIOLATIONS = {
 describe('Home Page', () => {
 describe('Nuxeo Home', () => {
   reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, () => {
-    const login = Login.get();
-    login.username = 'Administrator';
-    login.password = 'Administrator';
-    login.submit();
+    login();
     const ui = UI.get();
     ui.home.el.$('nuxeo-card[icon="nuxeo:edit"]').waitForDisplayed();
   });
