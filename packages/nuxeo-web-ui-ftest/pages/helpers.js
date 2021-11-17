@@ -2,7 +2,7 @@ const _flushProperties = () => {
   driver.execute((conf) => {
     conf.forEach(({ key, value }) => Nuxeo.UI.config.set(key, value));
     document.dispatchEvent(new CustomEvent('automation-ready'));
-  }, global.config);
+  }, global.config || []);
 };
 
 const refresh = () => {
