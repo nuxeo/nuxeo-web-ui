@@ -109,7 +109,7 @@ Polymer({
           <!-- if some elements are selected -->
           <template is="dom-if" if="[[!selectAllActive]]">
             <span class="count">[[i18n('selectionToolbar.selected.items', selectedItems.length)]]</span>
-            <a class="selectionLink" on-tap="toogleSelectedItemsPopup">
+            <a class="selectionLink" on-tap="toogleSelectedItemsPopup" href="javascript:void(0)">
               <span>[[i18n('selectionToolbar.display.selection')]]</span>
             </a>
           </template>
@@ -118,7 +118,7 @@ Polymer({
           <template is="dom-if" if="[[selectAllActive]]">
             <span class="count">[[i18n('selectionToolbar.selected.all', selectedItems.length)]]</span>
           </template>
-          <a class="selectionLink" on-tap="clearSelection">
+          <a class="selectionLink" on-tap="clearSelection" href="javascript:void(0)">
             <span>[[i18n('command.clear')]]</span>
           </a>
         </div>
