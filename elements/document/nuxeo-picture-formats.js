@@ -41,6 +41,10 @@ Polymer({
         line-height: 2.2rem;
         @apply --layout-justified;
       }
+
+      iron-icon {
+        fill: var(--nuxeo-text-default, #3a3a54);
+      }
     </style>
 
     <h5>[[label]]</h5>
