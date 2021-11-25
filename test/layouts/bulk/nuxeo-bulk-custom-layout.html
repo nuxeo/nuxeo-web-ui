@@ -29,6 +29,22 @@ limitations under the License.
       <paper-checkbox checked="{{document.properties.custom:bool}}" aria-labelledby="boolField" name="bool">
       </paper-checkbox>
     </div>
+
+    <div role="widget">
+      <label id="blobField">Custom Blob</label>
+      <nuxeo-dropzone value="{{document.properties.custom:blob}}" aria-labelledby="blobField" name="blob">
+      </nuxeo-dropzone>
+    </div>
+
+    <div role="widget">
+      <label id="blobRequiredField">Custom Blob (required)</label>
+      <nuxeo-dropzone
+        value="{{document.properties.custom:blobRequired}}"
+        aria-labelledby="blobRequiredField"
+        name="blobRequired"
+        required
+      ></nuxeo-dropzone>
+    </div>
   </template>
 
   <script>
