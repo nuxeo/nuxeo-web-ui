@@ -21,6 +21,7 @@ import { fixture, html, flush, waitForEvent, waitForAttrMutation, isElementVisib
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date-picker.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-directory-suggestion.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-input.js';
 import '../elements/bulk/nuxeo-edit-documents-button.js';
 import '../elements/nuxeo-dropzone/nuxeo-dropzone.js';
 
@@ -362,6 +363,38 @@ suite('nuxeo-edit-documents-button', () => {
       expect(blobBulkWidget._message).to.be.equals('This field requires a non empty value');
       // check that remove update mode is disabled
       expect(blobBulkWidget.$$('paper-item#remove').disabled).to.be.true;
+    });
+
+    test('Should handle widgets bound to string subfields', async () => {
+      button = await buildButton('custom');
+      const substringWidget = getWidget('custom:complex.substring');
+      const substringBulkWidget = getBulkWidget(substringWidget);
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      // check that string is unset
+      expect(substringWidget.value).to.be.null;
+      // check that update mode is set to keep
+      expect(substringBulkWidget.updateMode).to.be.equals('keep');
+      // set a substring value
+      substringWidget.value = 'String value';
+      // check that update mode is set to replace
+      expect(substringBulkWidget.updateMode).to.be.equals('replace');
+    });
+
+    test('Should handle required widgets bound to string subfields', async () => {
+      button = await buildButton('custom');
+      const substringWidget = getWidget('custom:complex.substringRequired');
+      const substringBulkWidget = getBulkWidget(substringWidget);
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      // check that widget is not marked as required
+      expect(substringWidget.required).to.be.null;
+      // check that bulk widget is tagged as required
+      expect(substringBulkWidget._required).to.be.true;
+      // check that message is shown
+      expect(substringBulkWidget._message).to.be.equals('This field requires a non empty value');
+      // check that remove update mode is disabled
+      expect(substringBulkWidget.$$('paper-item#remove').disabled).to.be.true;
     });
   });
 });
