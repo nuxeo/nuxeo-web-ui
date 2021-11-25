@@ -16,6 +16,7 @@ limitations under the License.
 */
 import '@webcomponents/html-imports/html-imports.min.js';
 import { Polymer } from '@polymer/polymer/polymer-legacy.js';
+import '@polymer/paper-checkbox/paper-checkbox.js';
 import { fixture, html, flush, waitForEvent, waitForAttrMutation, isElementVisible } from '@nuxeo/testing-helpers';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date-picker.js';
@@ -30,6 +31,7 @@ window.nuxeo.I18n.en['bulkWidget.error.replaceWithEmpty'] = 'Please enter the va
 window.nuxeo.I18n.en['bulkWidget.mode.keep'] = "Don't change value(s)";
 window.nuxeo.I18n.en['bulkWidget.mode.remove'] = 'Remove value(s)';
 window.nuxeo.I18n.en['bulkWidget.mode.replace'] = 'Replace with';
+window.nuxeo.I18n.en['bulkWidget.warning.bool'] = 'This field will be unchecked for all selected documents';
 window.nuxeo.I18n.en['bulkWidget.warning.remove'] = 'This field will be emptied for all selected documents';
 window.nuxeo.I18n.en['command.cancel'] = 'Cancel';
 window.nuxeo.I18n.en['command.save'] = 'Save';
@@ -74,11 +76,12 @@ const baseUrl = `${base}/layouts/bulk/`;
 suite('nuxeo-edit-documents-button', () => {
   let button;
 
-  const buildButton = async () => {
+  const buildButton = async (layoutId = 'default') => {
     const documents = ['the content of this array is irrelevant'];
     const actionButton = await fixture(
       html`
-        <nuxeo-edit-documents-button href-base="${baseUrl}" .documents="${documents}"></nuxeo-edit-documents-button>
+        <nuxeo-edit-documents-button href-base="${baseUrl}" layout="${layoutId}" .documents="${documents}">
+        </nuxeo-edit-documents-button>
       `,
     );
     const bulkLayout = actionButton.$$('nuxeo-layout');
@@ -289,6 +292,38 @@ suite('nuxeo-edit-documents-button', () => {
       await waitForDialogClose(dialog);
       // check that dialog is closed
       expect(isElementVisible(dialog)).to.be.false;
+    });
+  });
+
+  suite('Custom Layout', () => {
+    test('Should handle widgets for boolean properties', async () => {
+      button = await buildButton('custom');
+      const boolWidget = getWidget('custom:bool');
+      const boolBulkWidget = getBulkWidget(boolWidget);
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      // check that bool is unset
+      expect(boolWidget.checked).to.be.null;
+      // check that update mode is set to keep
+      expect(boolBulkWidget.updateMode).to.be.equals('keep');
+      // check that message is empty
+      expect(boolBulkWidget._message).to.be.undefined;
+      // click the widget to check the bool property
+      boolWidget.click();
+      // check that bool is true
+      expect(boolWidget.checked).to.be.true;
+      // check that  update mode is set to replace
+      expect(boolBulkWidget.updateMode).to.be.equals('replace');
+      // check that message is empty
+      expect(boolBulkWidget._message).to.be.undefined;
+      // click the widget to uncheck the bool property
+      boolWidget.click();
+      // check that bool is false
+      expect(boolWidget.checked).to.be.false;
+      // check that update mode is set to replace
+      expect(boolBulkWidget.updateMode).to.be.equals('replace');
+      // check that message is shown
+      expect(boolBulkWidget._message).to.be.equals('This field will be unchecked for all selected documents');
     });
   });
 });
