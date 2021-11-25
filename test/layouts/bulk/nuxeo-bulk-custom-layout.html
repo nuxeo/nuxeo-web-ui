@@ -62,6 +62,46 @@ limitations under the License.
       role="widget"
       required
     ></nuxeo-input>
+
+    <nuxeo-data-table
+      role="widget"
+      items="{{document.properties.custom:strings}}"
+      orderable="true"
+      editable="true"
+      name="strings"
+    >
+      <nuxeo-data-table-column name="Strings">
+        <template>
+          [[item]]
+        </template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-form>
+        <template>
+          <nuxeo-input value="{{item}}" label="Custom Strings" type="text" name="strings"></nuxeo-input>
+        </template>
+      </nuxeo-data-table-form>
+    </nuxeo-data-table>
+
+    <nuxeo-data-table
+      role="widget"
+      items="{{document.properties.custom:stringsRequired}}"
+      orderable="true"
+      editable="true"
+      name="stringsRequired"
+      required
+    >
+      <nuxeo-data-table-column name="Strings">
+        <template>
+          [[item]]
+        </template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-form>
+        <template>
+          <nuxeo-input value="{{item}}" label="Custom Strings (Required)" type="text" name="stringsRequired">
+          </nuxeo-input>
+        </template>
+      </nuxeo-data-table-form>
+    </nuxeo-data-table>
   </template>
 
   <script>

@@ -19,6 +19,7 @@ import { Polymer } from '@polymer/polymer/polymer-legacy.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
 import { fixture, html, flush, waitForEvent, waitForAttrMutation, isElementVisible } from '@nuxeo/testing-helpers';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date-picker.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-directory-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-input.js';
@@ -36,6 +37,7 @@ window.nuxeo.I18n.en['bulkWidget.mode.replace'] = 'Replace with';
 window.nuxeo.I18n.en['bulkWidget.warning.bool'] = 'This field will be unchecked for all selected documents';
 window.nuxeo.I18n.en['bulkWidget.warning.remove'] = 'This field will be emptied for all selected documents';
 window.nuxeo.I18n.en['bulkWidget.warning.required'] = 'This field requires a non empty value';
+window.nuxeo.I18n.en['command.add'] = 'Add';
 window.nuxeo.I18n.en['command.cancel'] = 'Cancel';
 window.nuxeo.I18n.en['command.save'] = 'Save';
 window.nuxeo.I18n.en['dropzone.add'] = 'Upload main file';
@@ -395,6 +397,38 @@ suite('nuxeo-edit-documents-button', () => {
       expect(substringBulkWidget._message).to.be.equals('This field requires a non empty value');
       // check that remove update mode is disabled
       expect(substringBulkWidget.$$('paper-item#remove').disabled).to.be.true;
+    });
+
+    test('Should handle widgets for multivalued properties', async () => {
+      button = await buildButton('custom');
+      const stringsWidget = getWidget('custom:strings');
+      const stringsBulkWidget = getBulkWidget(stringsWidget);
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      // check that strings is unset
+      expect(stringsWidget.items).to.be.null;
+      // check that update mode is set to keep
+      expect(stringsBulkWidget.updateMode).to.be.equals('keep');
+      // set a strings value
+      stringsWidget.items = ['Entry'];
+      // check that update mode is set to replace
+      expect(stringsBulkWidget.updateMode).to.be.equals('replace');
+    });
+
+    test('Should handle required widgets for multivalued properties', async () => {
+      button = await buildButton('custom');
+      const stringsWidget = getWidget('custom:stringsRequired');
+      const stringsBulkWidget = getBulkWidget(stringsWidget);
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      // check that widget is not marked as required
+      expect(stringsWidget.required).to.be.null;
+      // check that bulk widget is tagged as required
+      expect(stringsBulkWidget._required).to.be.true;
+      // check that message is shown
+      expect(stringsBulkWidget._message).to.be.equals('This field requires a non empty value');
+      // check that remove update mode is disabled
+      expect(stringsBulkWidget.$$('paper-item#remove').disabled).to.be.true;
     });
   });
 });
