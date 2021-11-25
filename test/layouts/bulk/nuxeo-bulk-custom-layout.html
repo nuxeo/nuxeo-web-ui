@@ -45,6 +45,23 @@ limitations under the License.
         required
       ></nuxeo-dropzone>
     </div>
+
+    <nuxeo-input
+      value="{{document.properties.custom:complex.substring}}"
+      label="Custom Substring"
+      type="text"
+      name="complex.substring"
+      role="widget"
+    ></nuxeo-input>
+
+    <nuxeo-input
+      value="{{document.properties.custom:complex.substringRequired}}"
+      label="Custom Substring (Required)"
+      type="text"
+      name="complex.substringRequired"
+      role="widget"
+      required
+    ></nuxeo-input>
   </template>
 
   <script>
