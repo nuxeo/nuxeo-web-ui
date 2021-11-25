@@ -22,6 +22,7 @@ import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.j
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date-picker.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-directory-suggestion.js';
 import '../elements/bulk/nuxeo-edit-documents-button.js';
+import '../elements/nuxeo-dropzone/nuxeo-dropzone.js';
 
 // Export Polymer and PolymerElement for 1.x and 2.x compat
 window.Polymer = Polymer;
@@ -33,8 +34,10 @@ window.nuxeo.I18n.en['bulkWidget.mode.remove'] = 'Remove value(s)';
 window.nuxeo.I18n.en['bulkWidget.mode.replace'] = 'Replace with';
 window.nuxeo.I18n.en['bulkWidget.warning.bool'] = 'This field will be unchecked for all selected documents';
 window.nuxeo.I18n.en['bulkWidget.warning.remove'] = 'This field will be emptied for all selected documents';
+window.nuxeo.I18n.en['bulkWidget.warning.required'] = 'This field requires a non empty value';
 window.nuxeo.I18n.en['command.cancel'] = 'Cancel';
 window.nuxeo.I18n.en['command.save'] = 'Save';
+window.nuxeo.I18n.en['dropzone.add'] = 'Upload main file';
 window.nuxeo.I18n.en['dublincoreEdit.directorySuggestion.placeholder'] = 'Select a value.';
 window.nuxeo.I18n.en['label.dublincore.coverage'] = 'Coverage';
 window.nuxeo.I18n.en['label.dublincore.expire'] = 'Expires';
@@ -324,6 +327,41 @@ suite('nuxeo-edit-documents-button', () => {
       expect(boolBulkWidget.updateMode).to.be.equals('replace');
       // check that message is shown
       expect(boolBulkWidget._message).to.be.equals('This field will be unchecked for all selected documents');
+    });
+
+    test('Should handle widgets for blob properties', async () => {
+      button = await buildButton('custom');
+      const blobWidget = getWidget('custom:blob');
+      const blobBulkWidget = getBulkWidget(blobWidget);
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      // check that blob is unset
+      expect(blobWidget.value).to.be.null;
+      // check that update mode is set to keep
+      expect(blobBulkWidget.updateMode).to.be.equals('keep');
+      // simulate the upload of a blob
+      blobWidget.value = {
+        'upload-batch': 'batchId-random-hash',
+        'upload-fileId': '0',
+      };
+      // check that update mode is set to replace
+      expect(blobBulkWidget.updateMode).to.be.equals('replace');
+    });
+
+    test('Should handle required widgets for blob properties', async () => {
+      button = await buildButton('custom');
+      const blobWidget = getWidget('custom:blobRequired');
+      const blobBulkWidget = getBulkWidget(blobWidget);
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      // check that widget is not marked as required
+      expect(blobWidget.required).to.be.null;
+      // check that bulk widget is tagged as required
+      expect(blobBulkWidget._required).to.be.true;
+      // check that message is shown
+      expect(blobBulkWidget._message).to.be.equals('This field requires a non empty value');
+      // check that remove update mode is disabled
+      expect(blobBulkWidget.$$('paper-item#remove').disabled).to.be.true;
     });
   });
 });
