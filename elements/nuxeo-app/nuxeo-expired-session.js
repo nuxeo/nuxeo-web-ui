@@ -54,20 +54,24 @@ Polymer({
         -webkit-transform: translateY(0);
       }
 
-      a,
-      a:active,
-      a:visited,
-      a:focus {
+      button.link {
+        color: var(--nuxeo-link-color, #3a3a54)
+        padding: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font: inherit;
         @apply --nuxeo-expired-session-link;
       }
-      a:hover {
+      button.link:hover {
         text-decoration: underline;
         color: unset;
+        font: inherit;
         @apply --nuxeo-expired-session-link-hover;
       }
     </style>
 
-    <a href="javascript:window.location.reload();">[[message]]</a>
+    <button class="link" on-click="_reload">[[message]]</button>
   `,
 
   is: 'nuxeo-expired-session',
@@ -89,5 +93,9 @@ Polymer({
     document.addEventListener('unauthorized-request', () => {
       this.open = true;
     });
+  },
+
+  _reload() {
+    window.location.reload();
   },
 });
