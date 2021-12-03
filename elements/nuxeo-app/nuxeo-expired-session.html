@@ -62,7 +62,7 @@ limitations under the License.
       }
     </style>
 
-    <a href="javascript:window.location.reload();">[[message]]</a>
+    <a on-click="_reload">[[message]]</a>
   </template>
 </dom-module>
 
@@ -86,6 +86,10 @@ limitations under the License.
       document.addEventListener('unauthorized-request', function() {
         this.open = true;
       }.bind(this));
+    },
+
+    _reload: function() {
+      window.location.reload();
     }
   });
 </script>
