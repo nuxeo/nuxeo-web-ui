@@ -351,6 +351,20 @@ Polymer({
       paper-progress {
         margin-top: 8px;
       }
+
+      button.link {
+        color: var(--nuxeo-link-color, #3a3a54);
+        padding: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      button.link:hover {
+        color: var(--nuxeo-link-hover-color, #0066ff);
+        font: inherit;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -389,9 +403,9 @@ Polymer({
           <template is="dom-if" if="[[!hasFiles]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
-                <a href="javascript:undefined" on-tap="_showUploadDialog">
-                  [[i18n('documentImportForm.clickOrDrop')]]</a
-                >
+                <button class="link" on-click="_showUploadDialog">
+                  [[i18n('documentImportForm.clickOrDrop')]]
+                </button>
               </div>
               <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom')]]</span>
               <div class="importActions horizontal layout wrap">
@@ -475,9 +489,7 @@ Polymer({
             </paper-dialog-scrollable>
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
               <div class="add-more horizontal layout center">
-                <a href="javascript:undefined" on-tap="_showUploadDialog"
-                  >[[i18n('documentImportForm.addMoreFiles')]]</a
-                >
+                <button class="link" on-click="_showUploadDialog">[[i18n('documentImportForm.addMoreFiles')]]</button>
                 <span hidden$="[[!_hasVisibleContributions]]"
                   >&nbsp;[[i18n('documentImportForm.linkFilesFrom')]]&nbsp;</span
                 >
