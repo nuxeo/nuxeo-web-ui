@@ -70,12 +70,19 @@ Polymer({
         color: var(--paper-input-container-invalid-color, #de350b);
       }
 
-      a,
-      a:active,
-      a:visited,
-      a:focus {
+      button.link {
         color: var(--nuxeo-secondary-color, #0066ff);
         text-decoration: underline;
+        padding: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      button.link:hover {
+        color: var(--nuxeo-link-hover-color, #0066ff);
+        font: inherit;
       }
 
       #dropzone {
@@ -214,9 +221,9 @@ Polymer({
 
     <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, multiple, updateDocument, blobList)]]">
       <div id="container">
-        <a href="javascript:undefined" on-tap="open"
-          >[[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]</a
-        >
+        <button class="link" on-click="open">
+          [[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]
+        </button>
         <div class="actions">
           <nuxeo-slot name="FILE_UPLOAD_ACTIONS"></nuxeo-slot>
         </div>
