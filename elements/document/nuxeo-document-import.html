@@ -386,7 +386,7 @@ limitations under the License.
           <template is="dom-if" if="[[!hasFiles]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
-                <a href="javascript:undefined" on-tap="_showUploadDialog">
+                <a on-tap="_showUploadDialog">
                   [[i18n('documentImportForm.clickOrDrop')]]</a>
               </div>
               <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom')]]</span>
@@ -466,7 +466,7 @@ limitations under the License.
             </paper-dialog-scrollable>
             <div class="horizontal layout center end-justified" hidden$="!hasFiles">
               <div class="add-more horizontal layout center">
-                <a href="javascript:undefined" on-tap="_showUploadDialog">[[i18n('documentImportForm.addMoreFiles')]]</a>
+                <a on-tap="_showUploadDialog">[[i18n('documentImportForm.addMoreFiles')]]</a>
                 <span hidden$="[[!_hasVisibleContributions]]">&nbsp;[[i18n('documentImportForm.linkFilesFrom')]]&nbsp;</span>
                 <div class="importActions horizontal layout wrap">
                   <nuxeo-slot slot="FILE_UPLOAD_ACTIONS" empty={{!hasContributions}}></nuxeo-slot>
