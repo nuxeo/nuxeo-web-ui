@@ -1,6 +1,9 @@
 /* eslint-disable no-restricted-globals, no-return-await */
 /* global importScripts, workbox */
 importScripts('workbox/workbox-sw.js');
+workbox.setConfig({
+  modulePathPrefix: 'workbox/',
+});
 workbox.loadModule('workbox-strategies');
 
 const params = new URL(self.location.href).searchParams;
