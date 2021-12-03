@@ -1,4 +1,7 @@
 importScripts('workbox/workbox-sw.js');
+workbox.setConfig({
+  modulePathPrefix: 'workbox/',
+});
 workbox.loadModule('workbox-strategies');
 
 const params = new URL(self.location.href).searchParams;
