@@ -710,6 +710,11 @@ Polymer({
   _itemsChanged(e) {
     if (this.nxProvider && e.detail.value) {
       this.resultsCount = this.nxProvider.resultsCount;
+      /**
+       * XXX - set the resultsCount to be used when selectAll is active, because paginable views don't know the total
+       * number of results, only the ones in the loaded pages
+       */
+      this.$.toolbar._resultsCount = this.resultsCount;
     }
   },
 
