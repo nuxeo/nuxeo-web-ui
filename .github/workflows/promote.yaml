@@ -11,7 +11,9 @@ on:
         required: true
         default: 'maintenance-3.0.x'
       dryRun:
-        description: 'Runs the workflow without pushing code or publishing artifacts. If empty, Dry Run is disabled.'
+        description: 'Run the workflow without pushing code or publishing artifacts'
+        type: boolean
+        required: false
 
 jobs:
   promote:
