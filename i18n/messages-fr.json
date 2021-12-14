@@ -185,7 +185,7 @@
   "bulkWidget.error.replaceWithEmpty": "Please enter the value to replace this field with",
   "bulkWidget.mode.keep": "Don't change value(s)",
   "bulkWidget.mode.remove": "Remove value(s)",
-  "bulkWidget.mode.replace": "Replace with",
+  "bulkWidget.mode.replace": "Remplacer par",
   "bulkWidget.warning.bool": "This field will be unchecked (set as false) for all selected documents",
   "bulkWidget.warning.remove": "This field will be emptied for all selected documents",
   "bulkWidget.warning.required": "This field requires a non empty value",
