@@ -58,11 +58,11 @@ jobs:
           git commit -a -m "Release $VERSION"
           git tag -a v$VERSION -m "Release $VERSION"
 
-      - if: ${{ !github.event.inputs.dryRun }}
+      - if: ${{ github.event.inputs.dryRun == 'false' }}
         run: git push origin v$VERSION
 
       - name: Create Github release v${{ env.VERSION }}
-        if: ${{ !github.event.inputs.dryRun }}
+        if: ${{ github.event.inputs.dryRun == 'false' }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,7 +71,7 @@ jobs:
           release_name: Release ${{ env.VERSION }}
 
       - name: Publish Nuxeo Web UI FTest ${{ env.VERSION }}
-        if: ${{ !github.event.inputs.dryRun }}
+        if: ${{ github.event.inputs.dryRun == 'false' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -95,14 +95,14 @@ jobs:
           popd
 
       - name: Push promoted Web UI to Connect PREPROD
-        if: ${{ !github.event.inputs.dryRun }}
+        if: ${{ github.event.inputs.dryRun == 'false' }}
         env:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
 
       - name: Push promoted Web UI to Connect PROD
-        if: ${{ !github.event.inputs.dryRun }}
+        if: ${{ github.event.inputs.dryRun == 'false' }}
         env:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
           CONNECT_URL: https://connect.nuxeo.com/nuxeo
@@ -160,5 +160,5 @@ jobs:
           # commit and push
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
 
-      - if: ${{ !github.event.inputs.dryRun }}
+      - if: ${{ github.event.inputs.dryRun == 'false' }}
         run: git push origin ${{ github.event.inputs.referenceBranch }}
