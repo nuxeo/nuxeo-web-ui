@@ -9,6 +9,7 @@
     <schema name="ftest3" prefix="ft3" override="true" src="data/schemas/ftest3.xsd"/>
     <schema name="test_search_pp" prefix="test_search_pp" override="true" src="data/schemas/test_search_pp.xsd"/>
     <schema name="validation" prefix="validation" override="true" src="data/schemas/validation.xsd"/>
+    <schema name="bke" prefix="bke" override="true" src="data/schemas/bke.xsd"/>
   </extension>
   <extension target="org.nuxeo.ecm.core.schema.TypeService" point="doctype">
     <doctype name="DocSuggestion" extends="Document">
@@ -102,6 +103,23 @@
         <type>GridFile</type>
       </subtypes>
     </doctype>
+    <doctype name="bulkedit" extends="Document">
+      <schema name="bulkedit"/>
+      <schema name="dublincore"/>
+      <schema name="common"/>
+      <schema name="uid"/>
+      <schema name="bke"/>
+    </doctype>
+    <doctype name="Folder" append="true">
+      <subtypes>
+        <type>bulkedit</type>
+      </subtypes>
+    </doctype>
+    <doctype name="Workspace" append="true">
+      <subtypes>
+        <type>bulkedit</type>
+      </subtypes>
+    </doctype>
   </extension>
   <extension target="org.nuxeo.ecm.core.lifecycle.LifeCycleService" point="types">
     <types>
@@ -113,6 +131,9 @@
     <types>
       <type name="Validation">default</type>
     </types>
+    <types>
+      <type name="bulkedit">default</type>
+    </types>
   </extension>
   <extension target="org.nuxeo.ecm.platform.actions.ActionService" point="filters">
     <filter id="create" append="true">
@@ -123,6 +144,7 @@
         <type>MultiString</type>
         <type>LegacyFile</type>
         <type>GridFile</type>
+        <type>bulkedit</type>
       </rule>
     </filter>
   </extension>
@@ -176,5 +198,10 @@
       <event>aboutToCreate</event>
       <event>beforeDocumentModification</event>
     </listener>
+  </extension>
+  <extension target="org.nuxeo.ecm.platform.types.TypeService" point="types">
+    <type id="bulkedit">
+      <label>bulkedit</label>
+    </type>
   </extension>
 </component>

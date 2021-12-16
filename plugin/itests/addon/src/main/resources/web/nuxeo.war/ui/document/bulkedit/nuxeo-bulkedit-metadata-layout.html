@@ -1,0 +1,88 @@
+<!--
+`nuxeo-bulkedit-metadata-layout`
+@group Nuxeo UI
+@element nuxeo-bulkedit-metadata-layout
+-->
+<dom-module id="nuxeo-bulkedit-metadata-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+    <div role="widget">
+      <label>Title</label>
+      <div>[[document.properties.dc:title]]</div>
+    </div>
+
+    <div role="widget">
+      <label>Boolean</label>
+      <paper-checkbox
+        checked="{{document.properties.bke:boolean}}"
+        aria-labelledby="Boolean"
+        name="boolean"
+      ></paper-checkbox>
+    </div>
+
+    <div role="widget">
+      <label>Complex first string</label>
+      <div name="complexFirstString">[[document.properties.bke:complex.first]]</div>
+    </div>
+
+    <div role="widget">
+      <label>Complex second string</label>
+      <div name="complexSecondString">[[document.properties.bke:complex.second]]</div>
+    </div>
+
+    <div role="widget">
+      <nuxeo-document-blob
+        role="widget"
+        label="Blob"
+        document="[[document]]"
+        xpath="bke:blob"
+        name="blob"
+      ></nuxeo-document-blob>
+    </div>
+
+    <nuxeo-data-table
+      role="widget"
+      items="{{document.properties.bke:complexList}}"
+      name="complexTable"
+      orderable="true"
+      editable="true"
+      label="Complex Table"
+    >
+      <nuxeo-data-table-column name="First String">
+        <template>
+          [[item.first]]
+        </template>
+      </nuxeo-data-table-column>
+
+      <nuxeo-data-table-column name="Second String">
+        <template>
+          [[item.second]]
+        </template>
+      </nuxeo-data-table-column>
+
+      <nuxeo-data-table-form>
+        <template>
+          <nuxeo-input name="complexTableFirstString" value="{{item.first}}" label="First String" type="text">
+          </nuxeo-input>
+          <nuxeo-input name="complexTableSecondString" value="{{item.second}}" label="Second String" type="text">
+          </nuxeo-input>
+        </template>
+      </nuxeo-data-table-form>
+    </nuxeo-data-table>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-bulkedit-metadata-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype bulkedit
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>
