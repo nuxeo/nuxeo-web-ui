@@ -68,3 +68,14 @@ limitations under the License.
 
 <!-- BULKEDIT -->
 <nuxeo-slot-content name="bulkEditResultsAction" slot="RESULTS_SELECTION_ACTIONS"></nuxeo-slot-content>
+
+<nuxeo-slot-content name="bulkEditButton" slot="RESULTS_SELECTION_ACTIONS">
+  <template>
+    <nuxeo-edit-documents-button
+      icon="nuxeo:view-array"
+      label="Bulk Edit Assets"
+      documents="[[selection]]"
+      layout="bulkedit"
+    ></nuxeo-edit-documents-button>
+  </template>
+</nuxeo-slot-content>
