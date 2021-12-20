@@ -183,5 +183,15 @@ app.router = {
     return `/${name}`;
   },
 
-  navigate: page,
+  navigate: (path) => {
+    if (path == null) {
+      return;
+    }
+    const isFullpath = /^http(s)?:\/\//.test(path);
+    if (isFullpath) {
+      window.location = path;
+    } else {
+      page(path);
+    }
+  },
 };
