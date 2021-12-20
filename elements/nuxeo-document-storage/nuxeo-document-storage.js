@@ -74,11 +74,12 @@ Polymer({
     }
     const document = {
       'entity-type': 'document',
-      uid: doc.uid,
+      lastViewed: new Date(),
+      path: doc.path,
+      repository: doc.repository,
       title: doc.title,
       type: doc.type,
-      path: doc.path,
-      lastViewed: new Date(),
+      uid: doc.uid,
     };
     if (doc.contextParameters && doc.contextParameters.thumbnail && doc.contextParameters.thumbnail.url) {
       document.contextParameters = { thumbnail: { url: doc.contextParameters.thumbnail.url } };
