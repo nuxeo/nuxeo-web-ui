@@ -7,6 +7,10 @@ on:
         description: 'The name of the branch to build.'
         default: '10.10'
         required: true
+      hf_version:
+        description: 'HF Version to replace in pom file (HACK)'
+        default: '56'
+        required: false
       sauce_labs:
         description: 'Run unit tests on Sauce Labs?'
         default: true
@@ -200,6 +204,7 @@ jobs:
     - name: Nuxeo package build
       run: |
         pushd nuxeo-web-ui
+        sed -i 's/10.10-HF[0-9]\{2\}-SNAPSHOT/10.10-HF${{ github.event.inputs.hf_version }}/g' pom.xml
         mvn install -DskipInstall
         popd
 
@@ -209,6 +214,12 @@ jobs:
         repository: nuxeo/nuxeo-web-ui-itests
         path: nuxeo-web-ui-itests
         ref:  ${{ steps.pick_plugin_nuxeo_web_ui_itests_branch.outputs.branch }}
+
+    - name: Update nuxeo-web-ui-itests SNAPSHOT version with sed
+      run: |
+        pushd nuxeo-web-ui-itests
+        grep -rl '10.10-HF[0-9]\{2\}-SNAPSHOT' . --exclude-dir={.git,node_modules,bower_components} | xargs sed -i 's/10.10-HF[0-9]\{2\}-SNAPSHOT/10.10-HF${{ github.event.inputs.hf_version }}/g'
+        popd
 
     - name: Build nuxeo-web-ui-itests package
       run: |
@@ -223,6 +234,13 @@ jobs:
         fetch-depth: 1
         ref: ${{ steps.pick_plugin_nuxeo_web_ui_branch.outputs.branch }}
         path: plugin-nuxeo-web-ui
+
+    - name: Update plugin-nuxeo-web-ui SNAPSHOT version with sed
+      run: |
+        pushd plugin-nuxeo-web-ui
+        grep -rl '10.10-HF[0-9]\{2\}-SNAPSHOT' . --exclude-dir={.git,node_modules,bower_components} | xargs sed -i 's/10.10-HF[0-9]\{2\}-SNAPSHOT/10.10-HF${{ github.event.inputs.hf_version }}/g'
+        grep -rl '2.4.[0-9]\{2\}-SNAPSHOT' . --exclude-dir={.git,node_modules,bower_components} | xargs sed -i 's/2.4.[0-9]\{2\}-SNAPSHOT/2.4.${{ github.event.inputs.hf_version }}/g'
+        popd
 
     - name: Run Functional tests
       run: |
@@ -272,5 +290,7 @@ jobs:
       with:
         name: packages
         path: |
-          plugin-nuxeo-web-ui/marketplace/target/nuxeo-web-ui-marketplace-*-SNAPSHOT.zip
+          # HACK - removed the SNAPSHOT because of sed
+          # plugin-nuxeo-web-ui/marketplace/target/nuxeo-web-ui-marketplace-*-SNAPSHOT.zip
+          plugin-nuxeo-web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
           plugin-nuxeo-web-ui/marketplace-itests/target/nuxeo-web-ui-marketplace-itests-*.zip
