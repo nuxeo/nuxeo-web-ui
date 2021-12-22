@@ -150,26 +150,25 @@ jobs:
         npm run test
         popd
 
-    # - name: Elements Unit tests (Sauce Labs)
-    #   if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
-    #   env:
-    #     SAUCE_USERNAME: nuxeo-elements
-    #     SAUCE_ACCESS_KEY: ${{ secrets.ELEMENTS_SAUCE_ACCESS_KEY }}
-    #   run: |
-    #     pushd nuxeo-elements
-    #     /node_modules/.bin/polymer test -l chrome --plugin sauce --job-name nuxeo-elements-pipeline-${{ steps.pick_nuxeo_elements_branch.outputs.branch }} --build-number $BUILD_NUMBER
-    #     popd
+    - name: Elements Unit tests (Sauce Labs)
+      if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
+      env:
+        SAUCE_USERNAME: nuxeo-elements
+        SAUCE_ACCESS_KEY: ${{ secrets.ELEMENTS_SAUCE_ACCESS_KEY }}
+      run: |
+        pushd nuxeo-elements
+        ./node_modules/.bin/polymer test -l chrome --plugin sauce --job-name nuxeo-elements-pipeline-${{ steps.pick_nuxeo_elements_branch.outputs.branch }} --build-number ${{ github.run_number }}
+        popd
 
-    # - name: UI Elements Unit tests (Sauce Labs)
-    #   if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
-    #   env:
-    #     SAUCE_USERNAME: nuxeo-ui-elements
-    #     # SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_UI_ELEMENTS_ACCESS_KEY }}
-    #     SAUCE_ACCESS_KEY: ${{ secrets.ELEMENTS_SAUCE_ACCESS_KEY }}
-    #   run: |
-    #     pushd nuxeo-ui-elements
-    #     /node_modules/.bin/polymer test -l chrome --plugin sauce --job-name nuxeo-ui-elements-pipeline-${{ steps.pick_nuxeo_ui_elements_branch.outputs.branch }} --build-number $BUILD_NUMBER
-    #     popd
+    - name: UI Elements Unit tests (Sauce Labs)
+      if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
+      env:
+        SAUCE_USERNAME: nuxeo-ui-elements
+        SAUCE_ACCESS_KEY: ${{ secrets.UI_ELEMENTS_SAUCE_ACCESS_KEY }}
+      run: |
+        pushd nuxeo-ui-elements
+        ./node_modules/.bin/polymer test -l chrome --plugin sauce --job-name nuxeo-ui-elements-pipeline-${{ steps.pick_nuxeo_ui_elements_branch.outputs.branch }} --build-number ${{ github.run_number }}
+        popd
 
     - name: Checkout nuxeo-web-ui repo
       uses: actions/checkout@v2
