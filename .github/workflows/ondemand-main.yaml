@@ -61,50 +61,48 @@ jobs:
             </servers>
             </settings>' > ~/.m2/settings.xml
 
+    - name: Check out repository
+      uses: actions/checkout@v2
+
     - name: Determine nuxeo-web-ui branch to use
       id: pick_nuxeo_web_ui_branch
-      run: |
-        if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-web-ui ${{ github.event.inputs.branch_name }}; then
-          echo ::set-output name=branch::${{ github.event.inputs.branch_name }}
-        else
-          echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
-        fi
+      uses: ./.github/actions/get-branch
+      with:
+        repository: nuxeo/nuxeo-web-ui
+        branch: ${{ github.event.inputs.branch_name }}
+        default-branch: ${{ env.REFERENCE_BRANCH }}
 
     - name: Determine nuxeo-elements branch to use
       id: pick_nuxeo_elements_branch
-      run: |
-        if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ github.event.inputs.branch_name }}; then
-          echo ::set-output name=branch::${{ github.event.inputs.branch_name }}
-        else
-          echo ::set-output name=branch::${{ env.ELEMENTS_REFERENCE_BRANCH }}
-        fi
+      uses: ./.github/actions/get-branch
+      with:
+        repository: nuxeo/nuxeo-elements
+        branch: ${{ github.event.inputs.branch_name }}
+        default-branch: ${{ env.ELEMENTS_REFERENCE_BRANCH }}
 
     - name: Determine nuxeo-ui-elements branch to use
       id: pick_nuxeo_ui_elements_branch
-      run: |
-        if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-ui-elements ${{ github.event.inputs.branch_name }}; then
-          echo ::set-output name=branch::${{ github.event.inputs.branch_name }}
-        else
-          echo ::set-output name=branch::${{ env.ELEMENTS_REFERENCE_BRANCH }}
-        fi
+      uses: ./.github/actions/get-branch
+      with:
+        repository: nuxeo/nuxeo-ui-elements
+        branch: ${{ github.event.inputs.branch_name }}
+        default-branch: ${{ env.ELEMENTS_REFERENCE_BRANCH }}
 
     - name: Determine plugin-nuxeo-web-ui branch to use
       id: pick_plugin_nuxeo_web_ui_branch
-      run: |
-        if git ls-remote --exit-code --heads https://github.com/nuxeo/plugin-nuxeo-web-ui ${{ github.event.inputs.branch_name }}; then
-          echo ::set-output name=branch::${{ github.event.inputs.branch_name }}
-        else
-          echo ::set-output name=branch::'2.4_10.10'
-        fi
+      uses: ./.github/actions/get-branch
+      with:
+        repository: nuxeo/plugin-nuxeo-web-ui
+        branch: ${{ github.event.inputs.branch_name }}
+        default-branch: '2.4_10.10'
 
     - name: Determine nuxeo-web-ui-itests branch to use
       id: pick_plugin_nuxeo_web_ui_itests_branch
-      run: |
-        if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-web-ui-itests ${{ github.event.inputs.branch_name }}; then
-          echo ::set-output name=branch::${{ github.event.inputs.branch_name }}
-        else
-          echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
-        fi
+      uses: ./.github/actions/get-branch
+      with:
+        repository: nuxeo/nuxeo-web-ui-itests
+        branch: ${{ github.event.inputs.branch_name }}
+        default-branch: ${{ env.REFERENCE_BRANCH }}
 
     - name: Checkout the nuxeo-elements repo
       uses: actions/checkout@v2
