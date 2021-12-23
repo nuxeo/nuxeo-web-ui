@@ -153,7 +153,7 @@ Polymer({
         <template is="dom-if" if="[[hasPermission(document, 'Write')]]">
           <nuxeo-untrash-document-button document="[[document]]"></nuxeo-untrash-document-button>
         </template>
-        <template is="dom-if" if="[[hasPermission(document, 'Everything')]]">
+        <template is="dom-if" if="[[hasPermission(document, 'Remove')]]">
           <nuxeo-delete-document-button document="[[document]]" hard></nuxeo-delete-document-button>
         </template>
       </div>
