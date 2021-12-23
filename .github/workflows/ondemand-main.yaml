@@ -127,8 +127,11 @@ jobs:
         pushd nuxeo-elements
         npm install && bower install
         popd
+
         pushd nuxeo-ui-elements
         npm install && bower install
+        rm -rf bower_components/nuxeo-elements
+        rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-elements bower_components
         popd
 
     - name: Lint Elements
