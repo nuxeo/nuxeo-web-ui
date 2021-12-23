@@ -204,10 +204,16 @@ jobs:
         rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-ui-elements bower_components
         popd
 
-    - name: Nuxeo package build
+    # HACK - this is a workaround that will be removed. Necessary because SNAPSHOT version might not be published yet
+    - name: Update nuxeo-web-ui SNAPSHOT version with sed
       run: |
         pushd nuxeo-web-ui
         sed -i 's/10.10-HF[0-9]\{2\}-SNAPSHOT/10.10-HF${{ github.event.inputs.hf_version }}/g' pom.xml
+        popd
+
+    - name: Nuxeo package build
+      run: |
+        pushd nuxeo-web-ui
         mvn install -DskipInstall
         popd
 
@@ -218,6 +224,7 @@ jobs:
         path: nuxeo-web-ui-itests
         ref:  ${{ steps.pick_plugin_nuxeo_web_ui_itests_branch.outputs.branch }}
 
+    # HACK - this is a workaround that will be removed. Necessary because SNAPSHOT version might not be published yet
     - name: Update nuxeo-web-ui-itests SNAPSHOT version with sed
       run: |
         pushd nuxeo-web-ui-itests
@@ -238,6 +245,7 @@ jobs:
         ref: ${{ steps.pick_plugin_nuxeo_web_ui_branch.outputs.branch }}
         path: plugin-nuxeo-web-ui
 
+    # HACK - this is a workaround that will be removed. Necessary because SNAPSHOT version might not be published yet
     - name: Update plugin-nuxeo-web-ui SNAPSHOT version with sed
       run: |
         pushd plugin-nuxeo-web-ui
