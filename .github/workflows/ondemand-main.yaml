@@ -39,6 +39,9 @@ jobs:
     name: Packages
     runs-on: [ self-hosted, master ]
     steps:
+    - name: Build parameters
+      run: echo "${{ toJSON(github.event.inputs) }}"
+
     - uses: actions/setup-node@v1
       with:
         registry-url: ${{ env.NPM_REPOSITORY }}
