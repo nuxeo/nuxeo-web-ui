@@ -12,10 +12,10 @@ inputs:
     required: true
 outputs:
   branch:
-    description: "The name of the branch to checkout"
+    description: 'The name of the branch to checkout'
     value: ${{ steps.pick_branch_to_checkout.outputs.branch }}
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - id: pick_branch_to_checkout
       shell: bash
