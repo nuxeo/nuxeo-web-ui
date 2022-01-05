@@ -161,9 +161,10 @@ global.fieldRegistry.register(
   (element) => element.getAttribute('checked') !== null,
   (element, value) => {
     if (
-      (value === false && element.getAttribute('checked') !== null) ||
-      (value === true && element.getAttribute('checked') === null)
+      ((value === false || value === 'false') && element.getAttribute('checked') !== null) ||
+      ((value === true || value === 'true') && element.getAttribute('checked') === null)
     ) {
+      element.scrollIntoView();
       element.click();
     }
   },
@@ -206,6 +207,7 @@ global.fieldRegistry.register(
 global.fieldRegistry.register(
   'nuxeo-data-table',
   (element) => {
+    element.scrollIntoView();
     const result = [];
     element.elements('nuxeo-data-table-row:not([header])').forEach((row) => {
       const cellValue = [];
@@ -220,6 +222,7 @@ global.fieldRegistry.register(
     return JSON.stringify(result);
   },
   (element, values) => {
+    element.scrollIntoView();
     const jValues = JSON.parse(values);
     jValues.forEach((value) => {
       element.element('#addEntry').click();
@@ -236,6 +239,10 @@ global.fieldRegistry.register(
     });
   },
 );
+global.fieldRegistry.register('nuxeo-document-blob', (element) => {
+  element.scrollIntoView();
+  return element.element('a').getAttribute('title');
+});
 global.fieldRegistry.register(
   'generic',
   (element) => element.getText(),
