@@ -5,10 +5,6 @@ export default class BulkEdit extends BasePage {
     return this.el;
   }
 
-  get bulkDefaultLayout() {
-    return this.el.element('#dialog nuxeo-bulk-default-layout');
-  }
-
   get dialog() {
     return this.el.element('#dialog');
   }
