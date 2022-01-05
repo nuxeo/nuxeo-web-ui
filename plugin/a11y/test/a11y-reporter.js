@@ -7,7 +7,7 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
     if (_report) {
       return _report;
     }
-    browser.setTimeout({ script: 120000 });
+    browser.setTimeout({ script: 240000 });
 
     setup();
 
