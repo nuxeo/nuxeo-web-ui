@@ -4,6 +4,7 @@ const ShadowService = require('@nuxeo/nuxeo-web-ui-ftest/wdio-shadow-plugin');
 
 const debug = process.env.DEBUG;
 const debugTimeout = 24 * 60 * 60 * 1000;
+const timeout = 240000;
 
 require('@babel/register')({
   presets: [
@@ -139,7 +140,7 @@ exports.config = {
   //
   // Default timeout in milliseconds for request
   // if browser driver or grid doesn't send response
-  connectionRetryTimeout: debug ? debugTimeout : 120000,
+  connectionRetryTimeout: debug ? debugTimeout : timeout,
   //
   // Default request retries count
   connectionRetryCount: 3,
@@ -187,7 +188,7 @@ exports.config = {
   // See the full list at http://mochajs.org/
   mochaOpts: {
     ui: 'bdd',
-    timeout: debug ? debugTimeout : 120000,
+    timeout: debug ? debugTimeout : timeout,
   },
   //
   // =====
