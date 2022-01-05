@@ -29,11 +29,11 @@ export default class Results extends BasePage {
   }
 
   get toggleColumnSettings() {
-    return this.el.element('#toggleColSettings');
+    return this.el.element('nuxeo-data-table[name="table"] #toggleColSettings');
   }
 
   get columnsSettingsPopup() {
-    return this.el.element('#columnsSettingsPopup');
+    return this.el.element('nuxeo-data-table[name="table"] #columnsSettingsPopup');
   }
 
   get columnsCloseButton() {
@@ -47,13 +47,15 @@ export default class Results extends BasePage {
       case 'list':
         return this.el.elements('nuxeo-document-list-item');
       default:
-        return this.el.elements('nuxeo-data-table div.item');
+        return this.el.elements('nuxeo-data-table[name="table"] div.item');
     }
   }
 
   getColumnCheckbox(heading) {
-    this.el.waitForVisible('nuxeo-dialog[id="columnsSettingsPopup"]');
-    const tr = this.el.elements('nuxeo-dialog[id="columnsSettingsPopup"] tr').find((e) => e.getText() === heading);
+    this.el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-dialog[id="columnsSettingsPopup"]');
+    const tr = this.el
+      .elements('nuxeo-data-table[name="table"] nuxeo-dialog[id="columnsSettingsPopup"] tr')
+      .find((e) => e.getText() === heading);
     tr.waitForVisible('paper-checkbox');
     return tr.element('paper-checkbox');
   }
@@ -66,8 +68,8 @@ export default class Results extends BasePage {
   }
 
   getResultsColumn(heading) {
-    this.el.waitForVisible('nuxeo-data-table-row[header]');
-    const row = this.el.element('nuxeo-data-table-row[header]');
+    this.el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    const row = this.el.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
     row.waitForVisible('nuxeo-data-table-cell:not([hidden])');
     return row.elements('nuxeo-data-table-cell:not([hidden])').find((e) => e.getText() === heading);
   }

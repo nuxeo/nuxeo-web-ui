@@ -2,7 +2,7 @@ import BasePage from '../../base';
 
 export default class DocumentPublications extends BasePage {
   get count() {
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row:not([header])');
+    const rows = this.el.elements('nuxeo-data-table#table nuxeo-data-table-row:not([header])');
     return rows.filter((result) => result.getAttribute('hidden') === null).length;
   }
 
@@ -11,8 +11,8 @@ export default class DocumentPublications extends BasePage {
   }
 
   getPublicationRow(path, rendition, version) {
-    this.waitForVisible('nuxeo-data-table nuxeo-data-table-row:not([header])');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row:not([header])');
+    this.waitForVisible('nuxeo-data-table#table nuxeo-data-table-row:not([header])');
+    const rows = this.el.elements('nuxeo-data-table#table nuxeo-data-table-row:not([header])');
     const result = rows.find((row) => {
       if (row.isVisible('nuxeo-data-table-cell a.path')) {
         const foundPath = row.getText('nuxeo-data-table-cell a.path').toLowerCase();

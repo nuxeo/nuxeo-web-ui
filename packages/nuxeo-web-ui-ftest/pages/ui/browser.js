@@ -96,15 +96,15 @@ export default class Browser extends BasePage {
   }
 
   get header() {
-    return this.currentPage.element('nuxeo-data-table nuxeo-data-table-row[header]');
+    return this.currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
   }
 
   get rows() {
-    return this.currentPage.elements('nuxeo-data-table nuxeo-data-table-row:not([header])');
+    return this.currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
   }
 
   waitForChildren() {
-    this.currentPage.waitForExist('nuxeo-data-table nuxeo-data-table-row nuxeo-data-table-checkbox');
+    this.currentPage.waitForExist('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
   }
 
   addToCollection(name) {
@@ -197,8 +197,8 @@ export default class Browser extends BasePage {
 
   waitForHasChild(doc) {
     const { el } = this;
-    el.waitForVisible('nuxeo-data-table nuxeo-data-table-row a.title');
-    const titles = el.elements('nuxeo-data-table nuxeo-data-table-row a.title');
+    el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
+    const titles = el.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
     return titles.some((title) => title.getText().trim() === doc.title);
   }
 
@@ -236,14 +236,14 @@ export default class Browser extends BasePage {
   sortContent(field, order) {
     driver.waitUntil(() => {
       this.waitForChildren();
-      const columns = this.currentPage.elements('nuxeo-data-table nuxeo-data-table-column');
+      const columns = this.currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-column');
       const idx = columns
         .map((col) => browser.execute((el) => el.sortBy, col))
         .findIndex((colSortByField) => colSortByField && colSortByField.toLowerCase() === field.toLowerCase());
       if (idx === -1) {
         throw new Error('Field not found');
       }
-      const header = this.currentPage.element('nuxeo-data-table nuxeo-data-table-row[header]');
+      const header = this.currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
       const sortElt = header.element(`nuxeo-data-table-cell:nth-of-type(${idx + 1}) nuxeo-data-table-column-sort`);
       const currentSorting = sortElt.element('paper-icon-button').getAttribute('direction');
       if (currentSorting && order.toLowerCase() === currentSorting.toLowerCase()) {
