@@ -158,7 +158,8 @@ Then(/I can see (.+) metadata with the following properties:/, function(docType,
           this.ui.browser
             .documentPage(docType)
             .metadata.layout()
-            .getFieldValue(row[0]) === row[1],
+            .getFieldValue(row[0])
+            .toString() === row[1],
       );
     }
   });
