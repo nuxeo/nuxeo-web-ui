@@ -186,7 +186,7 @@ export default class UI extends BasePage {
     return snackBar.getText();
   }
 
-  get bulkEdit() {
-    return new BulkEdit('nuxeo-edit-documents-button');
+  bulkEdit(selector) {
+    return new BulkEdit(selector);
   }
 }
