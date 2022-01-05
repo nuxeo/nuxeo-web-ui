@@ -1,15 +1,13 @@
 Feature: Bulk Edit
 
-  I can select all documents and edit all of them
-
   Background:
     Given I have the following documents
-      | doctype    | title            | nature  | subjects                | coverage             | creator | path                                        | collections      | tag    | file       |
-      | Workspace  | Test_Workspace   | booklet | art/culture             | europe/Portugal      | JSmith  | /default-domain                             |                  |        |            |
-      | Folder     | Test_Folder      | booklet | art/culture             | europe/Portugal      | JSmith  | /default-domain/Test_Workspace/             |                  |        |            |
-      | File       | First_File       | booklet | art/culture             | europe/Portugal      | JSmith  | /default-domain/Test_Workspace/Test_Folder/ |                  |        | sample.png |
-      | File       | Second_File      | booklet | art/culture             | europe/Portugal      | JSmith  | /default-domain/Test_Workspace/Test_Folder/ |                  |        | sample.png |
-      | File       | Third_File       | booklet | art/culture             | europe/Portugal      | JSmith  | /default-domain/Test_Workspace/Test_Folder/ |                  |        | sample.png |
+      | doctype    | title              | nature  | subjects    | coverage        | creator | path                                               | collections | tag    | file       |
+      | Workspace  | Test_Workspace     | booklet | art/culture | europe/Portugal | JSmith  | /default-domain                                    |             |        |            |
+      | Folder     | Test_Folder        | booklet | art/culture | europe/Portugal | JSmith  | /default-domain/Test_Workspace/                    |             |        |            |
+      | File       | First_File         | booklet | art/culture | europe/Portugal | JSmith  | /default-domain/Test_Workspace/Test_Folder/        |             |        | sample.png |
+      | File       | Second_File        | booklet | art/culture | europe/Portugal | JSmith  | /default-domain/Test_Workspace/Test_Folder/        |             |        | sample.png |
+      | File       | Third_File         | booklet | art/culture | europe/Portugal | JSmith  | /default-domain/Test_Workspace/Test_Folder/        |             |        | sample.png |
     And I login as "Administrator"
 
   @config('selection.selectAllEnabled','true')
@@ -18,8 +16,8 @@ Feature: Bulk Edit
     And I can see the "Test_Folder" document
     Then I select all the documents
     And I can see the selection toolbar
-    When I click the bulk edit button
-    Then I can bulk edit multiple properties:
+    When I click the bulk edit button with "default" layout
+    Then I can bulk edit multiple properties in "default" layout:
       | name         | value                | action    |
       | nature       |                      | remove    |
       | subjects     | Medicine             | replace   |
@@ -40,8 +38,8 @@ Feature: Bulk Edit
     Then I select the "First_File" document
     And I select the "Second_File" document
     And I can see the selection toolbar
-    When I click the bulk edit button
-    Then I can bulk edit multiple properties:
+    When I click the bulk edit button with "default" layout
+    Then I can bulk edit multiple properties in "default" layout:
       | name         | value                | action    |
       | nature       |                      | remove    |
       | subjects     | Medicine             | replace   |
