@@ -326,6 +326,19 @@ limitations under the License.
           if (!this.$.layout.validate()) {
             return;
           }
+          // XXX convert ordering from string to number, as this is required after NXP-30680.
+          // See WEBUI-638 for more information.
+          if (
+            this._selectedEntry &&
+            this._selectedEntry.properties &&
+            ![null, undefined, ''].includes(this._selectedEntry.properties.ordering)
+          ) {
+            try {
+              this._selectedEntry.properties.ordering = Number(this._selectedEntry.properties.ordering);
+            } catch (_) {
+              console.warn('unable to convert ' + this._selectedEntry.properties.ordering + ' to a number');
+            }
+          }
           this.$.directory.data = this._selectedEntry;
           if (this._new) {
             this.$.directory.path = '/directory/' + this._selectedEntry.directoryName;
