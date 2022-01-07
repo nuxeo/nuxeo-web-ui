@@ -217,7 +217,8 @@ jobs:
     name: Web UI functional tests
     # needs: [ setup, build-webui ]
     needs: setup
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: [ self-hosted, master ]
     steps:
       - uses: actions/setup-node@v2
         with:
