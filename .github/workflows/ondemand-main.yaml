@@ -100,122 +100,123 @@ jobs:
           branch: ${{ github.event.inputs.branch_name }}
           default-branch: ${{ env.REFERENCE_BRANCH }}
 
-  build-webui:
-    name: Build Web UI
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout nuxeo-web-ui repo
-        uses: actions/checkout@v2
-        with:
-          path: nuxeo-web-ui
-          ref: ${{ needs.setup.outputs.webui_branch }}
+  # build-webui:
+  #   name: Build Web UI
+  #   needs: setup
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout nuxeo-web-ui repo
+  #       uses: actions/checkout@v2
+  #       with:
+  #         path: nuxeo-web-ui
+  #         ref: ${{ needs.setup.outputs.webui_branch }}
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '10'
+  #     - uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '10'
 
-      - run: npm install -g bower
+  #     - run: npm install -g bower
 
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '8'
+  #     - uses: actions/setup-java@v2
+  #       with:
+  #         distribution: 'adopt'
+  #         java-version: '8'
 
-      - name: 'Update settings.xml with server configuration'
-        run: |
-          echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
+  #     - name: 'Update settings.xml with server configuration'
+  #       run: |
+  #         echo '<settings>
+  #             <servers>
+  #               <server>
+  #                 <id>maven-internal</id>
+  #                 <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+  #                 <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+  #               </server>
+  #             </servers>
+  #             </settings>' > ~/.m2/settings.xml
 
-      - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-elements
-          path: nuxeo-elements
-          fetch-depth: 1
-          ref: ${{ needs.setup.outputs.elements_branch }}
+  #     - name: Checkout the nuxeo-elements repo
+  #       uses: actions/checkout@v2
+  #       with:
+  #         repository: nuxeo/nuxeo-elements
+  #         path: nuxeo-elements
+  #         fetch-depth: 1
+  #         ref: ${{ needs.setup.outputs.elements_branch }}
 
-      - name: Checkout the nuxeo-ui-elements repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-ui-elements
-          path: nuxeo-ui-elements
-          fetch-depth: 1
-          ref: ${{ needs.setup.outputs.ui_elements_branch }}
+  #     - name: Checkout the nuxeo-ui-elements repo
+  #       uses: actions/checkout@v2
+  #       with:
+  #         repository: nuxeo/nuxeo-ui-elements
+  #         path: nuxeo-ui-elements
+  #         fetch-depth: 1
+  #         ref: ${{ needs.setup.outputs.ui_elements_branch }}
 
-      - name: Checkout the nuxeo-dataviz-elements repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-dataviz-elements
-          path: nuxeo-dataviz-elements
-          fetch-depth: 1
-          ref: ${{ needs.setup.outputs.dataviz_elements_branch }}
+  #     - name: Checkout the nuxeo-dataviz-elements repo
+  #       uses: actions/checkout@v2
+  #       with:
+  #         repository: nuxeo/nuxeo-dataviz-elements
+  #         path: nuxeo-dataviz-elements
+  #         fetch-depth: 1
+  #         ref: ${{ needs.setup.outputs.dataviz_elements_branch }}
 
-      - name: Install Elements
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          pushd nuxeo-elements
-          npm install && bower install
-          popd
-          pushd nuxeo-ui-elements
-          npm install && bower install
-          rm -rf bower_components/nuxeo-elements
-          rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-elements bower_components
-          popd
-          pushd nuxeo-dataviz-elements
-          npm install && bower install
-          rm -rf bower_components/nuxeo-elements
-          rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-elements bower_components
-          popd
+  #     - name: Install Elements
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+  #       run: |
+  #         pushd nuxeo-elements
+  #         npm install && bower install
+  #         popd
+  #         pushd nuxeo-ui-elements
+  #         npm install && bower install
+  #         rm -rf bower_components/nuxeo-elements
+  #         rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-elements bower_components
+  #         popd
+  #         pushd nuxeo-dataviz-elements
+  #         npm install && bower install
+  #         rm -rf bower_components/nuxeo-elements
+  #         rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-elements bower_components
+  #         popd
 
-      - name: Install Web UI
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          pushd nuxeo-web-ui
-          bower install && npm install
-          popd
+  #     - name: Install Web UI
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+  #       run: |
+  #         pushd nuxeo-web-ui
+  #         bower install && npm install
+  #         popd
 
-      - name: Lint Web UI
-        run: |
-          pushd nuxeo-web-ui
-          npm run lint
-          popd
+  #     - name: Lint Web UI
+  #       run: |
+  #         pushd nuxeo-web-ui
+  #         npm run lint
+  #         popd
 
-      - name: Link elements to Web UI
-        run: |
-          pushd nuxeo-web-ui
-          rm -rf bower_components/nuxeo-elements bower_components/nuxeo-ui-elements bower_components/nuxeo-dataviz-elements
-          rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-elements bower_components
-          rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-ui-elements bower_components
-          rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-dataviz-elements bower_components
-          popd
+  #     - name: Link elements to Web UI
+  #       run: |
+  #         pushd nuxeo-web-ui
+  #         rm -rf bower_components/nuxeo-elements bower_components/nuxeo-ui-elements bower_components/nuxeo-dataviz-elements
+  #         rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-elements bower_components
+  #         rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-ui-elements bower_components
+  #         rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-dataviz-elements bower_components
+  #         popd
 
-      - name: Nuxeo package build
-        run: |
-          pushd nuxeo-web-ui
-          sed -i 's/10.10-HF[0-9]\{2\}-SNAPSHOT/10.10-HF${{ github.event.inputs.hf_version }}/g' pom.xml
-          mvn install -DskipInstall
-          popd
+  #     - name: Nuxeo package build
+  #       run: |
+  #         pushd nuxeo-web-ui
+  #         sed -i 's/10.10-HF[0-9]\{2\}-SNAPSHOT/10.10-HF${{ github.event.inputs.hf_version }}/g' pom.xml
+  #         mvn install -DskipInstall
+  #         popd
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: webui-build
-          path: |
-            nuxeo-web-ui/pom.xml
-            nuxeo-web-ui/target/nuxeo-web-ui-*.jar
+  #     - uses: actions/upload-artifact@v2
+  #       with:
+  #         name: webui-build
+  #         path: |
+  #           nuxeo-web-ui/pom.xml
+  #           nuxeo-web-ui/target/nuxeo-web-ui-*.jar
 
   functional-tests:
     name: Web UI functional tests
-    needs: [ setup, build-webui ]
+    # needs: [ setup, build-webui ]
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-node@v2
@@ -241,35 +242,35 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
-      - uses: actions/download-artifact@v2
-        with:
-          name: webui-build
-          path: nuxeo-web-ui
+      # - uses: actions/download-artifact@v2
+      #   with:
+      #     name: webui-build
+      #     path: nuxeo-web-ui
 
-      - name: Install Web UI package
-        run: |
-          pushd nuxeo-web-ui
-          mvn install:install-file -Dfile=target/$(ls target | grep nuxeo-web-ui-10.10) -DpomFile=pom.xml
-          popd
+      # - name: Install Web UI package
+      #   run: |
+      #     pushd nuxeo-web-ui
+      #     mvn install:install-file -Dfile=target/$(ls target | grep nuxeo-web-ui-10.10) -DpomFile=pom.xml
+      #     popd
 
-      - name: Checkout nuxeo-web-ui-itests repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-web-ui-itests
-          path: nuxeo-web-ui-itests
-          ref: ${{ needs.setup.outputs.itests_branch }}
+      # - name: Checkout nuxeo-web-ui-itests repo
+      #   uses: actions/checkout@v2
+      #   with:
+      #     repository: nuxeo/nuxeo-web-ui-itests
+      #     path: nuxeo-web-ui-itests
+      #     ref: ${{ needs.setup.outputs.itests_branch }}
 
-      - name: Update nuxeo-web-ui-itests SNAPSHOT version with sed
-        run: |
-          pushd nuxeo-web-ui-itests
-          grep -rl '10.10-HF[0-9]\{2\}-SNAPSHOT' . --exclude-dir={.git,node_modules,bower_components} --include=pom.xml | xargs sed -i 's/10.10-HF[0-9]\{2\}-SNAPSHOT/10.10-HF${{ github.event.inputs.hf_version }}/g'
-          popd
+      # - name: Update nuxeo-web-ui-itests SNAPSHOT version with sed
+      #   run: |
+      #     pushd nuxeo-web-ui-itests
+      #     grep -rl '10.10-HF[0-9]\{2\}-SNAPSHOT' . --exclude-dir={.git,node_modules,bower_components} --include=pom.xml | xargs sed -i 's/10.10-HF[0-9]\{2\}-SNAPSHOT/10.10-HF${{ github.event.inputs.hf_version }}/g'
+      #     popd
 
-      - name: Build nuxeo-web-ui-itests package
-        run: |
-          pushd nuxeo-web-ui-itests
-          mvn clean install
-          popd
+      # - name: Build nuxeo-web-ui-itests package
+      #   run: |
+      #     pushd nuxeo-web-ui-itests
+      #     mvn clean install
+      #     popd
 
       - name: Checkout plugin-nuxeo-web-ui repo
         uses: actions/checkout@v2
@@ -278,6 +279,13 @@ jobs:
           fetch-depth: 1
           ref: ${{ needs.setup.outputs.plugin_branch }}
           path: plugin-nuxeo-web-ui
+
+      - run: |
+          pushd plugin-nuxeo-web-ui/ftest/web-ui/webdriver
+          echo '${{ secrets.FTEST_INSTANCE_CLID }}' > instance.clid
+          pwd
+          ls -la
+          popd
 
       - name: Update plugin-nuxeo-web-ui SNAPSHOT version with sed
         run: |
