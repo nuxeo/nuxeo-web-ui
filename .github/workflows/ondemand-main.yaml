@@ -321,7 +321,7 @@ jobs:
         with:
           name: reports
           path: |
-            plugin-nuxeo-web-ui/**/target/cucumber-reports/*.json
+            plugin-nuxeo-web-ui/**/target/cucumber-reports/**/*.*
             plugin-nuxeo-web-ui/**/reports/*
             plugin-nuxeo-web-ui/**/failsafe-reports/*
             plugin-nuxeo-web-ui/metrics/target/report/*
