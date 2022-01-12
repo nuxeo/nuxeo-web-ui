@@ -1257,6 +1257,7 @@
   "repositoryAnalytics.topDownloads.heading": "Flest nedladdningar",
   "repositoryAnalytics.topNCreators.heading": "Översta {0} skapare",
   "results.heading.count": "{0} resultat",
+  "results.heading.count.unknown": "Many results",
   "searchAnalytics.callsPerHour.heading": "Anrop per timme",
   "searchAnalytics.callsPerPageProvider.heading": "Anrop per sidleverantör",
   "searchAnalytics.filtersUsed.heading": "Filter som används",

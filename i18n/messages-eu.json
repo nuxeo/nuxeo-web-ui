@@ -1257,6 +1257,7 @@
   "repositoryAnalytics.topDownloads.heading": "Deskargatuenak",
   "repositoryAnalytics.topNCreators.heading": "{0} sortzaile nabarmenduak",
   "results.heading.count": "{0} emaitza",
+  "results.heading.count.unknown": "Many results",
   "searchAnalytics.callsPerHour.heading": "Deiak orduko",
   "searchAnalytics.callsPerPageProvider.heading": "Deiak PageProvider-eko",
   "searchAnalytics.filtersUsed.heading": "Erabilitako iragazkiak",

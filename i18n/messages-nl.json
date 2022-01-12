@@ -1257,6 +1257,7 @@
   "repositoryAnalytics.topDownloads.heading": "Populairste downloads",
   "repositoryAnalytics.topNCreators.heading": "Productiefste {0} auteurs",
   "results.heading.count": "{0} resultaat (resultaten)",
+  "results.heading.count.unknown": "Many results",
   "searchAnalytics.callsPerHour.heading": "Oproepen per uur",
   "searchAnalytics.callsPerPageProvider.heading": "Oproepen per PageProvider",
   "searchAnalytics.filtersUsed.heading": "Gebruikte filters",

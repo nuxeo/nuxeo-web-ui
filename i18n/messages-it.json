@@ -1257,6 +1257,7 @@
   "repositoryAnalytics.topDownloads.heading": "Più scaricato",
   "repositoryAnalytics.topNCreators.heading": "Primi {0} autori",
   "results.heading.count": "{0} risultati",
+  "results.heading.count.unknown": "Many results",
   "searchAnalytics.callsPerHour.heading": "Chiamate all’ora",
   "searchAnalytics.callsPerPageProvider.heading": "Chiamate per fornitore pagina",
   "searchAnalytics.filtersUsed.heading": "Filtri usati",

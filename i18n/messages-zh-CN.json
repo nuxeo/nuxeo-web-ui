@@ -1257,6 +1257,7 @@
   "repositoryAnalytics.topDownloads.heading": "热门下载",
   "repositoryAnalytics.topNCreators.heading": "前 {0} 创建者",
   "results.heading.count": "{0} result(s)",
+  "results.heading.count.unknown": "Many results",
   "searchAnalytics.callsPerHour.heading": "每小时呼叫",
   "searchAnalytics.callsPerPageProvider.heading": "每个 PageProvider 的调用",
   "searchAnalytics.filtersUsed.heading": "使用的筛选器",

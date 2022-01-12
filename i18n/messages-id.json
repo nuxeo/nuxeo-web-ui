@@ -1257,6 +1257,7 @@
   "repositoryAnalytics.topDownloads.heading": "Unduhan Teratas",
   "repositoryAnalytics.topNCreators.heading": "Teratas {0} Pembuat",
   "results.heading.count": "{0} hasil",
+  "results.heading.count.unknown": "Many results",
   "searchAnalytics.callsPerHour.heading": "Panggilan per Jam",
   "searchAnalytics.callsPerPageProvider.heading": "Panggilan per Penyedia Halaman",
   "searchAnalytics.filtersUsed.heading": "Filter yang Digunakan",
