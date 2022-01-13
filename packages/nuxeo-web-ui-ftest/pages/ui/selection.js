@@ -1,6 +1,7 @@
 import BasePage from '../base';
 import AddToCollectionDialog from './browser/add_to_collection_dialog';
 import PublicationDialog from './browser/publication_dialog';
+import { clickActionMenu } from '../helpers';
 
 export default class Selection extends BasePage {
   addToClipboard() {
@@ -34,9 +35,7 @@ export default class Selection extends BasePage {
   }
 
   trashDocuments() {
-    const el = this.trashDocumentsButton;
-    el.waitForVisible();
-    el.click();
+    this.clickResultsActionMenu('nuxeo-delete-documents-button');
   }
 
   get trashDocumentsButton() {
@@ -49,12 +48,14 @@ export default class Selection extends BasePage {
 
   get publishDialog() {
     if (!this.el.isExisting('#publishDialog') || !this.el.isVisible('#publishDialog')) {
-      const button = this.publishDocumentsButton;
-      button.waitForVisible();
-      button.click();
+      this.clickResultsActionMenu('nuxeo-publish-button');
     }
     const publishDialog = new PublicationDialog(`${this._selector} #publishDialog`);
     publishDialog.waitForVisible();
     return publishDialog;
+  }
+
+  clickResultsActionMenu(selector) {
+    clickActionMenu(this.el, selector);
   }
 }
