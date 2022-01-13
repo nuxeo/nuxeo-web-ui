@@ -9,7 +9,7 @@ import DocumentTask from './browser/document_task';
 import DocumentFormLayout from './browser/document_form_layout';
 import Selection from './selection';
 import Results from './results';
-import { url } from '../helpers';
+import { clickActionMenu, url } from '../helpers';
 
 export default class Browser extends BasePage {
   documentPage(docType) {
@@ -333,26 +333,12 @@ export default class Browser extends BasePage {
   }
 
   clickDocumentActionMenu(selector) {
-    const menu = this.el.element('nuxeo-actions-menu');
-    menu.waitForExist(selector);
-    const action = menu.element(selector);
-    action.waitForExist();
-    if (action.getAttribute('show-label') !== null) {
-      // if the element is inside the dropdown, we need to expand it
-      menu.click('#dropdownButton');
-      menu.waitForVisible('paper-listbox');
-      menu.waitForVisible('[slot="dropdown"] .label');
-      menu.waitForEnabled('[slot="dropdown"] .label');
-    }
-    action.waitForVisible('.action');
-    action.waitForEnabled('.action');
-    // let's make sure we're clicking on the div the has the click event handler
-    action.click('.action');
+    clickActionMenu(this.el.element('nuxeo-actions-menu'), selector);
   }
 
   startWorkflow(workflow) {
     // click the action to trigger the dialog
-    this.clickDocumentActionMenu('nuxeo-workflow-button');
+    clickActionMenu(this.el, 'nuxeo-workflow-button');
     // select the workflow
     const workflowSelect = this.el.element('.document-actions nuxeo-workflow-button nuxeo-select');
     workflowSelect.waitForVisible();
@@ -380,7 +366,7 @@ export default class Browser extends BasePage {
   }
 
   get publishDialog() {
-    this.clickDocumentActionMenu('nuxeo-publish-button');
+    clickActionMenu(this.el, 'nuxeo-publish-button');
     const publishDialog = new PublicationDialog('#publishDialog');
     publishDialog.waitForVisible();
     return publishDialog;

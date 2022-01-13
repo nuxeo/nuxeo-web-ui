@@ -15,4 +15,21 @@ const url = (...args) => {
   _flushProperties();
 };
 
-export { refresh, url };
+const clickActionMenu = (menu, selector) => {
+  menu.waitForExist(selector);
+  const action = menu.element(selector);
+  action.waitForExist();
+  if (action.getAttribute('show-label') !== null) {
+    // if the element is inside the dropdown, we need to expand it
+    menu.click('#dropdownButton');
+    menu.waitForVisible('paper-listbox');
+    menu.waitForVisible('[slot="dropdown"] .label');
+    menu.waitForEnabled('[slot="dropdown"] .label');
+  }
+  action.waitForVisible('.action');
+  action.waitForEnabled('.action');
+  // let's make sure we're clicking on the div the has the click event handler
+  action.click('.action');
+};
+
+export { clickActionMenu, refresh, url };
