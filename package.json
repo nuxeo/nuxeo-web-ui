@@ -104,7 +104,7 @@
     "test:watch": "karma start --auto-watch=true --single-run=false"
   },
   "dependencies": {
-    "@material/mwc-snackbar": "^0.21.0",
+    "@material/mwc-snackbar": "^0.26.1",
     "@nuxeo/chart-elements": "^4.0.0-nx.1",
     "@nuxeo/moment": "^2.24.0-nx.0",
     "@nuxeo/nuxeo-dataviz-elements": "~3.0.13-rc.0",
