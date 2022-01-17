@@ -112,6 +112,7 @@ jobs:
       - name: Checkout nuxeo-web-ui repo
         uses: actions/checkout@v2
         with:
+          repository: nuxeo/nuxeo-web-ui
           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
       - name: Install Web UI
