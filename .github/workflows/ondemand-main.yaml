@@ -36,6 +36,11 @@ on:
         description: 'Number of failed features to stop test runner (0 means not applicable).'
         default: 0
         required: false
+      id:
+        description: 'run identifier'
+        default: 'maintenance-3.0.x'
+        type: string
+        required: false
   workflow_call:
     inputs:
       branch_name:
@@ -79,17 +84,38 @@ env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
+  id:
+    name: Workflow ID ${{ github.event.inputs.id }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ${{ github.event.inputs.id }}
+        run: echo run identifier ${{ github.event.inputs.id }}
   build:
     name: Build
+    needs: id
     runs-on: [ self-hosted, master ]
     steps:
       - name: Build parameters
-        run: echo '${{ toJSON(github.event.inputs) }}'
+        run: |
+          echo '${{ toJSON(github.event.inputs) }}'
+          echo '${{ toJSON(github.event.inputs) }}' > parameters.json
+
+      - name: Archive parameters
+        uses: actions/upload-artifact@v2
+        with:
+          name: parameters
+          path: |
+            parameters.json
 
       - uses: actions/setup-node@v1
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           scope: '@nuxeo'
+      
+      - uses: actions/setup-java@v2
+        with: 
+          distribution: 'zulu'
+          java-version: '11'
 
       - name: Determine nuxeo-web-ui branch to use
         id: pick_nuxeo_web_ui_branch
