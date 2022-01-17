@@ -36,6 +36,43 @@ on:
         description: 'Number of failed features to stop test runner (0 means not applicable).'
         default: 0
         required: false
+  workflow_call:
+    inputs:
+      branch_name:
+        description: 'The name of the branch to build.'
+        default: 'maintenance-3.0.x'
+        type: string
+        required: true
+      sauce_labs:
+        description: 'Run unit tests on Sauce Labs?'
+        default: true
+        type: boolean
+        required: false
+      skip_ftests:
+        description: 'Skip functional tests?'
+        type: boolean
+        required: false
+      skip_a11y:
+        description: 'Skip accessibility tests?'
+        type: boolean
+        required: false
+      skip_unit_tests:
+        description: 'Skip unit tests?'
+        type: boolean
+        required: false
+      generate_metrics:
+        description: 'Generate metrics report?'
+        type: boolean
+        required: false
+      run_all:
+        description: 'Skip fail fast premise?'
+        type: boolean
+        required: false
+      bail:
+        description: 'Number of failed features to stop test runner (0 means not applicable).'
+        type: number
+        default: 0
+        required: false
 
 env:
   REFERENCE_BRANCH: maintenance-3.0.x
@@ -82,6 +119,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm install
+          echo 'The branch checked out is ${{ github.event.inputs.branch_name }}'
+          ls
           pushd packages/nuxeo-web-ui-ftest
           npm install
           popd
