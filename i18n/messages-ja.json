@@ -1257,7 +1257,7 @@
   "repositoryAnalytics.topDownloads.heading": "トップダウンロード",
   "repositoryAnalytics.topNCreators.heading": "トップ{0}クリエーター",
   "results.heading.count": "{0} の結果",
-  "results.heading.count.unknown": "Many results",
+  "results.heading.count.unknown": "結果の数",
   "searchAnalytics.callsPerHour.heading": "時間ごとの呼出",
   "searchAnalytics.callsPerPageProvider.heading": "ページプロバイダごとの呼出",
   "searchAnalytics.filtersUsed.heading": "使用されているフィルタ",
