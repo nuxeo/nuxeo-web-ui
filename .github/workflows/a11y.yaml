@@ -1,0 +1,45 @@
+name: A11y
+
+on:
+  push:
+    branches:
+      - maintenance-3.0.x
+  pull_request:
+    branches:
+      - maintenance-3.0.x
+
+jobs:
+  a11y:
+    name: A11y checks
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
+
+    - uses: actions/setup-node@v1
+      with:
+        registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+        node-version: '12'
+        scope: '@nuxeo'
+
+    - uses: actions/setup-java@v2
+      with: 
+        distribution: 'zulu'
+        java-version: '11'
+      
+    - name: 'Update settings.xml with server configuration'
+      run: |
+        echo '<settings>
+            <servers>
+              <server>
+                <id>maven-internal</id>
+                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+              </server>
+            </servers>
+            </settings>' > ~/.m2/settings.xml
+
+    - name: A11y checks
+      run: |
+        mvn -B -nsu -f plugin/a11y install

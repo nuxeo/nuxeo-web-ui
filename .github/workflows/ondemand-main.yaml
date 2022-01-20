@@ -36,47 +36,15 @@ on:
         description: 'Number of failed features to stop test runner (0 means not applicable).'
         default: 0
         required: false
+      skip_cross_repo_check:
+        description: 'Skip cross repo check'
+        default: 'false'
+        type: boolean
+        required: false
       id:
         description: 'run identifier'
         default: 'maintenance-3.0.x'
         type: string
-        required: false
-  workflow_call:
-    inputs:
-      branch_name:
-        description: 'The name of the branch to build.'
-        default: 'maintenance-3.0.x'
-        type: string
-        required: true
-      sauce_labs:
-        description: 'Run unit tests on Sauce Labs?'
-        default: true
-        type: boolean
-        required: false
-      skip_ftests:
-        description: 'Skip functional tests?'
-        type: boolean
-        required: false
-      skip_a11y:
-        description: 'Skip accessibility tests?'
-        type: boolean
-        required: false
-      skip_unit_tests:
-        description: 'Skip unit tests?'
-        type: boolean
-        required: false
-      generate_metrics:
-        description: 'Generate metrics report?'
-        type: boolean
-        required: false
-      run_all:
-        description: 'Skip fail fast premise?'
-        type: boolean
-        required: false
-      bail:
-        description: 'Number of failed features to stop test runner (0 means not applicable).'
-        type: number
-        default: 0
         required: false
 
 env:
@@ -99,13 +67,6 @@ jobs:
         run: |
           echo '${{ toJSON(github.event.inputs) }}'
           echo '${{ toJSON(github.event.inputs) }}' > parameters.json
-
-      - name: Archive parameters
-        uses: actions/upload-artifact@v2
-        with:
-          name: parameters
-          path: |
-            parameters.json
 
       - uses: actions/setup-node@v1
         with:
@@ -146,14 +107,25 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm install
-          echo 'The branch checked out is ${{ github.event.inputs.branch_name }}'
-          ls
           pushd packages/nuxeo-web-ui-ftest
           npm install
           popd
 
       - name: Lint Web UI
         run: npm run lint
+
+      - name: Nuxeo elements cross repo check
+        if: ${{ github.event.inputs.skip_cross_repo_check == 'false' }}
+        uses: nuxeo/nuxeo-elements/.github/actions/trigger-workflow-js@test-reusable-wf
+        with:
+          owner: nuxeo
+          repo: nuxeo-elements
+          workflow-id: main.yaml
+          access-token: ${{ secrets.ELEMENTS_ACCESS_TOKEN_PERSONAL }} # TODO - we need to get a token for this
+          branch-name: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+          inputs: |
+            branch_name: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+            skip_cross_repo_check: true
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2
@@ -162,38 +134,6 @@ jobs:
           path: nuxeo-elements
           fetch-depth: 1
           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
-
-      - name: Install Elements
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          pushd nuxeo-elements
-          npm install
-          npm run bootstrap
-          popd
-      
-      - name: Lint Elements
-        run: |
-          pushd nuxeo-elements
-          npm run lint
-          popd
-
-      - name: Elements Unit tests
-        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
-        run: |
-          pushd nuxeo-elements
-          npm run test
-          popd
-
-      - name: Elements Unit tests (Sauce Labs)
-        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
-        env:
-          SAUCE_USERNAME: nuxeo-elements
-          SAUCE_ACCESS_KEY: ${{ secrets.ELEMENTS_SAUCE_ACCESS_KEY }}
-        run: |
-          pushd nuxeo-elements
-          npm run test
-          popd
       
       - name: Pack Elements modules
         run: |

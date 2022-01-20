@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - maintenance-3.0.x
+  pull_request:
+    branches:
+      - maintenance-3.0.x
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
+
+    - uses: actions/setup-node@v1
+      with:
+        registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+        node-version: '12'
+        scope: '@nuxeo'
+
+    - name: Install
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: |
+        npm install
+        pushd packages/nuxeo-web-ui-ftest
+        npm install
+        popd
+
+    - name: Lint
+      run: npm run lint

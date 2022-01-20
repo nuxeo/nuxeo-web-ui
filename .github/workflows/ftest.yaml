@@ -1,0 +1,67 @@
+name: Functional tests
+
+on:
+  push:
+    branches:
+      - maintenance-3.0.x
+  pull_request:
+    branches:
+      - maintenance-3.0.x
+
+jobs:
+  ftests:
+    name: Tests
+    runs-on: [ self-hosted, master ]
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
+
+    - uses: actions/setup-node@v1
+      with:
+        registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+        scope: '@nuxeo'
+
+    - uses: actions/setup-java@v2
+      with: 
+        distribution: 'zulu'
+        java-version: '11'
+      
+    - name: 'Update settings.xml with server configuration'
+      run: |
+        echo '<settings>
+            <servers>
+              <server>
+                <id>maven-internal</id>
+                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+              </server>
+            </servers>
+            </settings>' > ~/.m2/settings.xml
+
+    - name: Nuxeo package build and Ftests
+      run: | 
+        mvn install -Pftest
+
+    - name: Archive cucumber reports
+      uses: actions/upload-artifact@v2
+      with:
+        name: cucumber-reports
+        path: |
+          ftest/target/cucumber-reports/
+
+    - name: Archive logs
+      uses: actions/upload-artifact@v2
+      with:
+        name: logs
+        path: |
+          **/log/*.log
+          **/nxserver/config/distribution.properties
+
+    - name: Archive packages
+      uses: actions/upload-artifact@v2
+      with:
+        name: packages
+        path: |
+          plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+          plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
