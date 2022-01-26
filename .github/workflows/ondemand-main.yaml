@@ -54,7 +54,7 @@ jobs:
 
       - name: Determine nuxeo-web-ui branch to use
         id: pick_nuxeo_web_ui_branch
-        uses: ./.github/actions/get-branch
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-web-ui
           branch: ${{ github.event.inputs.branch_name }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Determine nuxeo-elements branch to use
         id: pick_nuxeo_elements_branch
-        uses: ./.github/actions/get-branch
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-elements
           branch: ${{ github.event.inputs.branch_name }}
@@ -70,7 +70,7 @@ jobs:
 
       - name: Determine nuxeo-ui-elements branch to use
         id: pick_nuxeo_ui_elements_branch
-        uses: ./.github/actions/get-branch
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-ui-elements
           branch: ${{ github.event.inputs.branch_name }}
@@ -78,7 +78,7 @@ jobs:
 
       - name: Determine nuxeo-dataviz-elements branch to use
         id: pick_nuxeo_dataviz_elements_branch
-        uses: ./.github/actions/get-branch
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-dataviz-elements
           branch: ${{ github.event.inputs.branch_name }}
@@ -86,7 +86,7 @@ jobs:
 
       - name: Determine plugin-nuxeo-web-ui branch to use
         id: pick_plugin_nuxeo_web_ui_branch
-        uses: ./.github/actions/get-branch
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/plugin-nuxeo-web-ui
           branch: ${{ github.event.inputs.branch_name }}
@@ -94,7 +94,7 @@ jobs:
 
       - name: Determine nuxeo-web-ui-itests branch to use
         id: pick_plugin_nuxeo_web_ui_itests_branch
-        uses: ./.github/actions/get-branch
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-web-ui-itests
           branch: ${{ github.event.inputs.branch_name }}
