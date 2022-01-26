@@ -56,21 +56,19 @@ jobs:
 
       - name: Determine nuxeo-web-ui branch to use
         id: pick_nuxeo_web_ui_branch
-        run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-web-ui ${{ github.event.inputs.branch_name }}; then
-            echo ::set-output name=branch::${{ github.event.inputs.branch_name }}
-          else
-            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
-          fi
+        uses: nuxeo/ui-team-gh-actions/get-branch@main
+        with:
+          repository: nuxeo/nuxeo-web-ui
+          branch: ${{ github.event.inputs.branch_name }}
+          default-branch: ${{ env.REFERENCE_BRANCH }}
 
       - name: Determine nuxeo-elements branch to use
         id: pick_nuxeo_elements_branch
-        run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ github.event.inputs.branch_name }}; then
-            echo ::set-output name=branch::${{ github.event.inputs.branch_name }}
-          else
-            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
-          fi
+        uses: nuxeo/ui-team-gh-actions/get-branch@main
+        with:
+          repository: nuxeo/nuxeo-elements
+          branch: ${{ github.event.inputs.branch_name }}
+          default-branch: ${{ env.ELEMENTS_REFERENCE_BRANCH }}
 
       - name: Checkout nuxeo-web-ui repo
         uses: actions/checkout@v2
