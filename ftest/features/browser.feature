@@ -38,3 +38,13 @@ Feature: Browser
     Given I have a File document
     When I browse to the "permissions" document page
     Then I can see the permissions page
+
+  Scenario: Document title update
+    When I click the "browser" button
+    And I can see the browser tree
+    And I can see the "Domain" browser tree node
+    Then I click "Domain" in the browser tree
+    And I can see the browser title as "Domain - Nuxeo Platform"
+    And I can see the "Workspaces" browser tree node
+    When I click "Workspaces" in the browser tree
+    Then I can see the browser title as "Workspaces - Nuxeo Platform"
