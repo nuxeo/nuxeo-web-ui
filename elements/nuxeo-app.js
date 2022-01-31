@@ -632,7 +632,10 @@ Polymer({
     'nuxeo-diff-documents': '_diffDocuments',
   },
 
-  observers: ['_computeSharedActionContext(currentUser)', '_updateTitle(page, i18n)'],
+  observers: [
+    '_computeSharedActionContext(currentUser)',
+    '_updateTitle(page, i18n, currentDocument, searchForm, currentTask, selectedAdminTab)',
+  ],
 
   ready() {
     this.$.drawerPanel.closeDrawer();
