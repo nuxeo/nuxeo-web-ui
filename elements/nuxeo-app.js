@@ -632,7 +632,7 @@ Polymer({
     'nuxeo-diff-documents': '_diffDocuments',
   },
 
-  observers: ['_computeSharedActionContext(currentUser)', '_updateTitle(page, i18n)'],
+  observers: ['_computeSharedActionContext(currentUser)', '_updateTitle(i18n)'],
 
   ready() {
     this.$.drawerPanel.closeDrawer();
@@ -794,6 +794,7 @@ Polymer({
   show(page, route) {
     this.page = page;
     this.routeParams = route;
+    this._updateTitle();
   },
 
   showDiff(id1, id2) {
