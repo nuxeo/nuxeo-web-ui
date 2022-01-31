@@ -214,3 +214,7 @@ Then('I can delete all the documents from the {string} collection', function(nam
   // HACK - because the delete all is async
   driver.pause(1000);
 });
+
+Then('I can see the browser title as {string}', (title) => {
+  driver.waitUntil(() => title === browser.getTitle());
+});
