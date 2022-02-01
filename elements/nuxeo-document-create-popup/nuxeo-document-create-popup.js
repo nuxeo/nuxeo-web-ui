@@ -49,6 +49,7 @@ Polymer({
         height: var(--nuxeo-document-create-popup-height, 80vh);
         width: var(--nuxeo-document-create-popup-width, 65vw);
         margin: 0;
+        z-index: 200;
       }
 
       paper-tabs {
