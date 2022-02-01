@@ -95,6 +95,9 @@ class NuxeoBulkWidget extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
           <paper-item id="replace" label="[[i18n('bulkWidget.mode.replace')]]">
             [[i18n('bulkWidget.mode.replace')]]
           </paper-item>
+          <paper-item id="addValues" label="[[i18n('bulkWidget.mode.addValues')]]" disabled$="[[_isMultivalued]]">
+            [[i18n('bulkWidget.mode.addValues')]]
+          </paper-item>
           <paper-item id="remove" label="[[i18n('bulkWidget.mode.remove')]]" disabled$="[[_required]]">
             [[i18n('bulkWidget.mode.remove')]]
           </paper-item>
@@ -140,6 +143,8 @@ class NuxeoBulkWidget extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
        * submitted if the `keep` mode is selected and the wrapped widget is empty.
        */
       _required: Boolean,
+
+      _isMultivalued: Boolean,
     };
   }
 

@@ -186,6 +186,7 @@
   "bulkWidget.mode.keep": "Don't change value(s)",
   "bulkWidget.mode.remove": "Remove value(s)",
   "bulkWidget.mode.replace": "Replace with",
+  "bulkWidget.mode.addValues": "Add value(s)",
   "bulkWidget.warning.bool": "This field will be unchecked (set as false) for all selected documents",
   "bulkWidget.warning.remove": "This field will be emptied for all selected documents",
   "bulkWidget.warning.required": "This field requires a non empty value",

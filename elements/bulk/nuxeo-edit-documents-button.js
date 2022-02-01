@@ -30,6 +30,8 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 import './nuxeo-bulk-widget.js';
 
+let schemasCache;
+
 /**
 `nuxeo-edit-documents-button`
 @group Nuxeo UI
@@ -91,6 +93,7 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       <!-- inherit nuxeo-operation-button template -->
       ${super.template}
 
+      <nuxeo-resource id="schema"></nuxeo-resource>
       <nuxeo-dialog id="dialog" no-auto-focus with-backdrop modal>
         <iron-form id="form">
           <form>
@@ -203,6 +206,11 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     this.addEventListener('update-mode-changed', (e) => this._updateBulkWidget(e.detail.bulkWidget));
   }
 
+  ready() {
+    super.ready();
+    this._fetchSchemas();
+  }
+
   /**
    * Control the visibility of the button.
    */
@@ -283,6 +291,7 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     const bulkLayout = this.$$('nuxeo-layout').element;
     const flattenedProperties = this._flattenProperties(bulkLayout.document.properties, 'document.properties');
     let properties = '';
+    let propertiesBehaviors;
     // go through each of the property paths that exist in the document of the layout
     Object.keys(flattenedProperties).forEach((boundPath) => {
       // get the element bound to the property
@@ -300,12 +309,19 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
           value = JSON.stringify(value);
         }
         properties = `${properties}${path}=${value}\n`;
+      } else if (bulkWidget.updateMode === 'addValues') {
+        let value = bulkLayout.get(boundPath);
+        if (this._shouldStringifyValue(value)) {
+          value = JSON.stringify(value);
+        }
+        properties = `${properties}${path}=${value}\n`;
+        propertiesBehaviors = `${properties}${path}=append_excluding_duplicates`;
       } else if (bulkWidget.updateMode === 'remove') {
         properties = `${properties}${path}=\n`;
       }
     });
     this.input = this.documents;
-    this.params = { properties };
+    this.params = { properties, propertiesBehaviors };
     super._execute().finally(() => this.fire('refresh'));
     this.$.dialog.toggle();
     this._setSaving(false);
@@ -428,6 +444,11 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       const bulkWidget = this._getBulkWidget(boundElement);
       // tag the bulk widget with the path to be able trace the property value from bulk widget
       bulkWidget.boundPath = boundPath;
+
+      if (!this._isArrayProperty(boundPath)) {
+        bulkWidget._isMultivalued = true;
+      }
+
       // flip modes according to the value update
       if (['keep', 'remove'].includes(bulkWidget.updateMode) && !this._isValueEmpty(value)) {
         // flip mode to replace if mode is keep/remove and value is not empty
@@ -584,6 +605,8 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       this._setWidgetDisabled(bulkWidget.element, true);
     } else if (bulkWidget.updateMode === 'replace') {
       this._setWidgetDisabled(bulkWidget.element, false);
+    } else if (bulkWidget.updateMode === 'addValues') {
+      this._setWidgetDisabled(bulkWidget.element, false);
     }
     const bulkLayout = this.$$('nuxeo-layout').element;
     // XXX Edge case for boolean properties to clearly indicate the difference between `null` and `false` values
@@ -601,6 +624,35 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
   _updateSaveButton() {
     const bulkWidgets = Array.from(this.$$('nuxeo-layout').element.shadowRoot.querySelectorAll('nuxeo-bulk-widget'));
     this.$.save.disabled = bulkWidgets.every((bulkWidget) => bulkWidget.updateMode === 'keep');
+  }
+
+  _isArrayProperty(boundPath) {
+    if (boundPath.startsWith('document.properties.')) {
+      boundPath = boundPath.replace(/^(document\.properties\.)/, '');
+    }
+    const [schemaId, fieldPath] = boundPath.split(':');
+    const mySchema = schemasCache.find((schema) => schema['@prefix'] === schemaId);
+    return this._isArrayPropertyPath(mySchema, fieldPath);
+  }
+
+  _isArrayPropertyPath(model, fieldPath) {
+    if (fieldPath.includes('.')) {
+      const [fieldId, ...remainingPath] = fieldPath.split('.');
+      return this._isArrayPropertyPath(model.fields[fieldId], remainingPath.join('.'));
+    }
+    const type = model.fields[fieldPath];
+    return (type.type || type).endsWith('[]');
+  }
+
+  _fetchSchemas() {
+    if (schemasCache) {
+      return Promise.resolve(schemasCache);
+    }
+    this.$.schema.path = 'config/schemas';
+    return this.$.schema.get().then((response) => {
+      schemasCache = response;
+      return schemasCache;
+    });
   }
 }
 window.customElements.define(NuxeoEditDocumentsButton.is, NuxeoEditDocumentsButton);
