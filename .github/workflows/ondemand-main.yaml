@@ -375,6 +375,12 @@ jobs:
           ref: ${{ needs.setup.outputs.plugin_branch }}
           path: plugin-nuxeo-web-ui
 
+      - name: Update instance.clid
+        run: |
+          pushd plugin-nuxeo-web-ui/ftest/web-ui/webdriver
+          echo '${{ secrets.FTEST_INSTANCE_CLID }}' > instance.clid
+          popd
+
       - name: Update plugin-nuxeo-web-ui SNAPSHOT version with sed
         run: |
           pushd plugin-nuxeo-web-ui
