@@ -16,7 +16,7 @@ class DocumentHelper {
                 reject(error);
                 return;
               }
-              this._retry(fn, interval, --retries).then(resolve, reject);
+              this._retry(fn, --retries, interval).then(resolve, reject);
             }),
           interval,
         ),
