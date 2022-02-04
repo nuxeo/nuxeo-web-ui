@@ -1,10 +1,9 @@
 name: Lint
 
 on:
-  push:
+  pull_request:
     branches:
       - maintenance-3.0.x
-  pull_request:
   workflow_call:
     inputs:
       branch:
