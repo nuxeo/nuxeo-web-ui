@@ -168,12 +168,12 @@ jobs:
           then
             active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
           fi
-          mvn install $active_profiles -DskipInstall
+          mvn install -ntp $active_profiles -DskipInstall
 
       - name: A11y checks
         if: ${{ !github.event.inputs.skip_a11y }}
         run: |
-          mvn -B -nsu -f plugin/a11y install
+          mvn -B -nsu -f plugin/a11y -ntp install
 
       - name: Archive cucumber reports
         uses: actions/upload-artifact@v2
