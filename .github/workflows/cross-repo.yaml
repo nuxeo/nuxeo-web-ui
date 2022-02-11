@@ -1,4 +1,4 @@
-name: Ondemand build
+name: Cross repo check
 
 on:
   workflow_dispatch:
