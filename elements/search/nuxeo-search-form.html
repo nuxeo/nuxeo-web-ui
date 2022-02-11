@@ -327,12 +327,14 @@ limitations under the License.
         auto-validate
         error-message="[[i18n('searchForm.savePopup.error')]]"
         pattern="^[^/]*$"
-        required
+        value="{{_savedSearchTitle}}"
       >
       </paper-input>
       <div class="buttons">
         <paper-button dialog-dismiss>[[i18n('command.cancel')]]</paper-button>
-        <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_saveSearch" disabled$="[[!_savedSearchTitle]]"
+          >[[i18n('command.save')]]</paper-button
+        >
       </div>
     </nuxeo-dialog>
 
@@ -565,6 +567,8 @@ limitations under the License.
          * If `true`, aggregagtes from page provider definition will not be computed.
          */
         skipAggregates: Boolean,
+
+        _savedSearchTitle: String,
       },
 
       observers: [
@@ -762,7 +766,7 @@ limitations under the License.
 
       saveAs: function() {
         this.$$('#actionsDropdown').close();
-        this.$.savedSearchTitle.value = '';
+        this._savedSearchTitle = '';
         this.$.saveDialog.open();
         this._saveAs = true;
       },
@@ -801,7 +805,7 @@ limitations under the License.
             'entity-type': 'savedSearch',
             'pageProviderName': this.provider,
             'params': this.params,
-            'title': this.$.savedSearchTitle.value
+            'title': this._savedSearchTitle
           };
           _el.post().then(function(search) {
             var id = search.id;
