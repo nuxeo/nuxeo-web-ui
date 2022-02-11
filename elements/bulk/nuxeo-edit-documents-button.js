@@ -29,6 +29,9 @@ import { pathFromUrl } from '@polymer/polymer/lib/utils/resolve-url.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 import './nuxeo-bulk-widget.js';
+import { _fetchSchemas } from '../fetch-schemas.js';
+
+let schemas;
 
 /**
 `nuxeo-edit-documents-button`
@@ -91,6 +94,7 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       <!-- inherit nuxeo-operation-button template -->
       ${super.template}
 
+      <nuxeo-resource id="schema"></nuxeo-resource>
       <nuxeo-dialog id="dialog" no-auto-focus with-backdrop modal>
         <iron-form id="form">
           <form>
@@ -187,6 +191,13 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
         type: String,
         readOnly: true,
       },
+
+      _fetchSchemas: {
+        type: Function,
+        value() {
+          return () => _fetchSchemas(this.$.schema);
+        },
+      },
     };
   }
 
@@ -201,6 +212,13 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     this.operation = 'Document.Update';
     // set up a listener to act on changes of the update modes of the bulk widget wrappers in the layout
     this.addEventListener('update-mode-changed', (e) => this._updateBulkWidget(e.detail.bulkWidget));
+  }
+
+  ready() {
+    super.ready();
+    this._fetchSchemas().then((response) => {
+      schemas = response;
+    });
   }
 
   /**
@@ -601,6 +619,28 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
   _updateSaveButton() {
     const bulkWidgets = Array.from(this.$$('nuxeo-layout').element.shadowRoot.querySelectorAll('nuxeo-bulk-widget'));
     this.$.save.disabled = bulkWidgets.every((bulkWidget) => bulkWidget.updateMode === 'keep');
+  }
+
+  _isArrayProperty(boundPath) {
+    if (boundPath.startsWith('document.properties.')) {
+      boundPath = boundPath.replace(/^(document\.properties\.)/, '');
+    }
+    const [schemaId, fieldPath] = boundPath.split(':');
+    return this._isArrayPropertyPath(this._findSchema(schemaId), fieldPath);
+  }
+
+  _isArrayPropertyPath(model, fieldPath) {
+    if (fieldPath.includes('.')) {
+      const [fieldId, ...remainingPath] = fieldPath.split('.');
+      return this._isArrayPropertyPath(model.fields[fieldId], remainingPath.join('.'));
+    }
+    const type = model.fields[fieldPath];
+    // Complex fields will have nested types, so we need to check them
+    return (type.type || type).endsWith('[]');
+  }
+
+  _findSchema(schemaId) {
+    return schemas.find((schema) => schema['@prefix'] === schemaId);
   }
 }
 window.customElements.define(NuxeoEditDocumentsButton.is, NuxeoEditDocumentsButton);
