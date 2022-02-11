@@ -1,4 +1,6 @@
-name: Ondemand build
+# This workflow is not intended to be triggered manually from the Web UI repository,
+# but to be called from the Elements repository cross repo check instead.
+name: Cross repo check
 
 on:
   workflow_dispatch:
