@@ -377,12 +377,14 @@ Polymer({
         auto-validate
         error-message="[[i18n('searchForm.savePopup.error')]]"
         pattern="^[^/]*$"
-        required
+        value="{{_savedSearchTitle}}"
       >
       </paper-input>
       <div class="buttons">
         <paper-button dialog-dismiss class="secondary">[[i18n('command.cancel')]]</paper-button>
-        <paper-button noink class="primary" on-tap="_saveSearch">[[i18n('command.save')]]</paper-button>
+        <paper-button noink class="primary" on-tap="_saveSearch" disabled$="[[!_savedSearchTitle]]"
+          >[[i18n('command.save')]]</paper-button
+        >
       </div>
     </nuxeo-dialog>
 
@@ -610,6 +612,8 @@ Polymer({
     skipAggregates: Boolean,
 
     _searches: Array,
+
+    _savedSearchTitle: String,
   },
 
   observers: [
@@ -808,7 +812,7 @@ Polymer({
 
   saveAs() {
     this.$$('#actionsDropdown').close();
-    this.$.savedSearchTitle.value = '';
+    this._savedSearchTitle = '';
     this.$.saveDialog.open();
     this._saveAs = true;
   },
@@ -847,7 +851,7 @@ Polymer({
         'entity-type': 'savedSearch',
         pageProviderName: this.provider,
         params: this.params,
-        title: this.$.savedSearchTitle.value,
+        title: this._savedSearchTitle,
       };
       _el.post().then((search) => {
         const { id } = search;
