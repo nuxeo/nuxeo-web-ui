@@ -31,9 +31,9 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import * as jsondiffpatch from 'jsondiffpatch/dist/jsondiffpatch.esm.js';
+import { _fetchSchemas } from '../fetch-schemas.js';
 
 let _customLoadPromise;
-let schemasCache;
 
 /**
 `nuxeo-diff`
@@ -468,22 +468,11 @@ Polymer({
     }
   },
 
-  _fetchSchemas() {
-    if (schemasCache) {
-      return Promise.resolve(schemasCache);
-    }
-    this.$.schema.path = 'config/schemas';
-    return this.$.schema.get().then((response) => {
-      schemasCache = response;
-      return schemasCache;
-    });
-  },
-
   _fetchCommonSchemas(left, right) {
     const commonSchemas = left.schemas.filter(
       (schema1) => !!right.schemas.find((schema2) => schema1.name === schema2.name),
     );
-    return this._fetchSchemas().then((schemas) => {
+    return _fetchSchemas(this.$.schema).then((schemas) => {
       // populate the common schemas with the fields information
       commonSchemas.forEach((commonSchema) => {
         commonSchema.fields = schemas.find((schema) => schema.name === commonSchema.name).fields;
