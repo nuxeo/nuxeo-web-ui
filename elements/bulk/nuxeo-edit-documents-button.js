@@ -244,9 +244,12 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
           // if the bulk widget is not tagged with a `boundPath`, it's safe to assume it has no value
           const value = el.boundPath ? bulkLayout.get(el.boundPath) : null;
           // check if trying to replace with empty value
-          const replacingWithEmptyValue = el.updateMode === 'replace' && this._isValueEmpty(value);
+          const replacingWithEmptyValue =
+            (el.updateMode === 'replace' || el.updateMode === 'addValues') && this._isValueEmpty(value);
           if (replacingWithEmptyValue) {
-            el._setError(this.i18n('bulkWidget.error.replaceWithEmpty'));
+            el._setError(
+              this.i18n(`bulkWidget.error.${el.updateMode === 'replace' ? 'replaceWithEmpty' : 'addValuesWithEmpty'}`),
+            );
           }
           valid = valid && !replacingWithEmptyValue;
         } else {
@@ -446,6 +449,10 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       const bulkWidget = this._getBulkWidget(boundElement);
       // tag the bulk widget with the path to be able trace the property value from bulk widget
       bulkWidget.boundPath = boundPath;
+      // if field is multivalued, enable it in the bulk-widget
+      if (this._isArrayProperty(boundPath)) {
+        bulkWidget._isMultivalued = true;
+      }
       // flip modes according to the value update
       if (['keep', 'remove'].includes(bulkWidget.updateMode) && !this._isValueEmpty(value)) {
         // flip mode to replace if mode is keep/remove and value is not empty
@@ -600,7 +607,7 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     } else if (bulkWidget.updateMode === 'remove') {
       this._clearValue(bulkWidget.boundPath);
       this._setWidgetDisabled(bulkWidget.element, true);
-    } else if (bulkWidget.updateMode === 'replace') {
+    } else if (bulkWidget.updateMode === 'replace' || bulkWidget.updateMode === 'addValues') {
       this._setWidgetDisabled(bulkWidget.element, false);
     }
     const bulkLayout = this.$$('nuxeo-layout').element;
