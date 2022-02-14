@@ -304,6 +304,7 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     const bulkLayout = this.$$('nuxeo-layout').element;
     const flattenedProperties = this._flattenProperties(bulkLayout.document.properties, 'document.properties');
     let properties = '';
+    let propertiesBehaviors;
     // go through each of the property paths that exist in the document of the layout
     Object.keys(flattenedProperties).forEach((boundPath) => {
       // get the element bound to the property
@@ -321,12 +322,19 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
           value = JSON.stringify(value);
         }
         properties = `${properties}${path}=${value}\n`;
+      } else if (bulkWidget.updateMode === 'addValues') {
+        let value = bulkLayout.get(boundPath);
+        if (this._shouldStringifyValue(value)) {
+          value = JSON.stringify(value);
+        }
+        properties = `${properties}${path}=${value}\n`;
+        propertiesBehaviors = `${properties}${path}=append_excluding_duplicates`;
       } else if (bulkWidget.updateMode === 'remove') {
         properties = `${properties}${path}=\n`;
       }
     });
     this.input = this.documents;
-    this.params = { properties };
+    this.params = { properties, propertiesBehaviors };
     super._execute().finally(() => this.fire('refresh'));
     this.$.dialog.toggle();
     this._setSaving(false);
