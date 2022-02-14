@@ -578,9 +578,8 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     }
     const bulkLayout = this.$$('nuxeo-layout').element;
     const value = bulkLayout.get(boundPath);
-    // XXX If we knew the data types for each property type we wouldn't need to infer it.
     if (Array.isArray(value)) {
-      if (value.length !== 0) {
+      if (value.length !== 0 && this._isArrayProperty(boundPath)) {
         bulkLayout.set(boundPath, []);
       }
     } else {
@@ -637,6 +636,9 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
   }
 
   _isArrayProperty(boundPath) {
+    if (!boundPath) {
+      return;
+    }
     if (boundPath.startsWith('document.properties.')) {
       boundPath = boundPath.replace(/^(document\.properties\.)/, '');
     }
