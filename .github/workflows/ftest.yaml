@@ -117,12 +117,14 @@ jobs:
         run: mvn install -Pftest -DskipInstall
 
       - name: Archive cucumber reports
+        if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: cucumber-reports
           path: ftest/target/cucumber-reports/
 
       - name: Archive logs
+        if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: logs
@@ -131,6 +133,7 @@ jobs:
             **/nxserver/config/distribution.properties
 
       - name: Archive packages
+        if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: packages
