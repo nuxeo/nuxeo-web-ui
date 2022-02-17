@@ -28,6 +28,11 @@ on:
         description: 'Generate metrics report?'
         type: boolean
         required: false
+      caller_id:
+        description: 'run identifier'
+        default: 'maintenance-3.0.x'
+        type: string
+        required: false
 
 env:
   REFERENCE_BRANCH: '10.10'
@@ -35,8 +40,15 @@ env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
+  id:
+    name: Remote Caller ID ${{ github.event.inputs.caller_id }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ${{ github.event.inputs.id }}
+        run: echo run identifier ${{ github.event.inputs.id }}
   setup:
     name: Setup
+    needs: id
     runs-on: ubuntu-latest
     outputs:
       webui_branch: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
