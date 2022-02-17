@@ -273,15 +273,18 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
    * parameter can also be passed so that the entries are added to it incrementally.
    */
   _flattenProperties(data, currentPath, flattenedProperties = {}) {
-    // XXX Avoid flattening batch upload blob values (for blob properties). Could possibly be avoided if we were aware
-    // of the data types of each property.
-    if (data['upload-batch'] && data['upload-fileId']) {
+    const key = currentPath.split('.').pop();
+    const [schemaId, fieldPath] = key.split(':');
+    const currentSchema = this._findSchema(schemaId);
+    // Due to blob's data structure, we don't want to flat it
+    if (currentSchema && currentSchema.fields && currentSchema.fields[fieldPath] === 'blob') {
       flattenedProperties[currentPath] = data;
       return flattenedProperties;
     }
-    Object.keys(data).forEach((key) => {
-      const value = data[key];
-      const propertyPath = currentPath ? `${currentPath}.${key}` : key;
+
+    Object.keys(data).forEach((k) => {
+      const value = data[k];
+      const propertyPath = currentPath ? `${currentPath}.${k}` : k;
       if (value instanceof Object && !Array.isArray(value)) {
         this._flattenProperties(value, propertyPath, flattenedProperties);
       } else {
