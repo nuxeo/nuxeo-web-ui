@@ -679,6 +679,10 @@ Polymer({
       this._refreshSearch();
     } else if ((this.docPath && this.docPath.length > 0) || (this.docId && this.docId.length > 0)) {
       const id = this.docId || (this.currentDocument && this.currentDocument.uid);
+      // XXX make sure that if there are any nuxeo-results-view on the browser, that they will be updated
+      Array.from(this.$.browser.$.nxContent.querySelectorAll('nuxeo-results-view[visible]')).forEach((r) =>
+        r._search(),
+      );
       this.load('browse', id, this.docPath, this.docAction);
     } else {
       this.navigateTo('home');
