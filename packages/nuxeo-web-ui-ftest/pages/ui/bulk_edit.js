@@ -37,9 +37,14 @@ export default class BulkEdit extends BasePage {
       const [fieldName, fieldValue, action] = row;
       const fieldEl = this.getField(fieldName);
       fieldEl.waitForVisible();
+      this.getBulkEditOptions(fieldName).scrollIntoView();
       if (action === 'remove') {
         this.getBulkEditOptions(fieldName).click();
-        this.bulkEditOptionsList('Remove value(s)').click();
+        this.bulkEditOptionsList(fieldName, 'Remove value(s)').click();
+      } else if (action === 'addValues') {
+        this.getBulkEditOptions(fieldName).click();
+        this.bulkEditOptionsList(fieldName, 'Add value(s)').click();
+        fixtures.layouts.setValue(fieldEl, fieldValue);
       } else if (action === 'replace') {
         fixtures.layouts.setValue(fieldEl, fieldValue);
       }
@@ -47,15 +52,24 @@ export default class BulkEdit extends BasePage {
   }
 
   getBulkEditOptions(field) {
-    const bulkWidget = this.el.element(`nuxeo-directory-suggestion[name="${field}"]`).parentElement();
+    let bulkWidget = this.el.element(`[name="${field}"]`).parentElement();
+    // some elements generated in Studio are wrapped in divs
+    if (bulkWidget.getTagName() !== 'nuxeo-bulk-widget') {
+      bulkWidget = bulkWidget.parentElement();
+    }
     return bulkWidget.$('nuxeo-select');
   }
 
-  bulkEditOptionsList(editOption) {
+  bulkEditOptionsList(fieldName, editOption) {
     driver.waitUntil(() => {
       const els = driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
       return els.length > 1;
     });
-    return this.el.elements('nuxeo-bulk-widget nuxeo-select paper-item').find((e) => e.getText() === editOption);
+
+    const listItems = this.el
+      .element(`[name="${fieldName}"]`)
+      .parentElement()
+      .elements('nuxeo-select paper-item');
+    return listItems.find((e) => e.getText() === editOption);
   }
 }
