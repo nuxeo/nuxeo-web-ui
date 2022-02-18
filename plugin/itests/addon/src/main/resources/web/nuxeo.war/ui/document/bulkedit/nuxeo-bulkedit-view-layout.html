@@ -1,0 +1,28 @@
+<!--
+`nuxeo-bulkedit-view-layout`
+@group Nuxeo UI
+@element nuxeo-bulkedit-view-layout
+-->
+<dom-module id="nuxeo-bulkedit-view-layout">
+  <template>
+    <style include="nuxeo-styles">
+      :host {
+        @apply --paper-card;
+      }
+    </style>
+    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-bulkedit-view-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype bulkedit
+         */
+        document: Object,
+      },
+    });
+  </script>
+</dom-module>
