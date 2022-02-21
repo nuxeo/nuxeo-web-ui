@@ -512,6 +512,8 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       restoreSettings: function() {
+        // XXX _isRestoring is a control flag to prevent restoring from triggering a save (see WEBUI-581)
+        this._isRestoring = true;
         if (this._settings && this.name) {
           if (this._settings.displayMode && this._settings.displayMode.length > 0) {
             this.displayMode = this._settings.displayMode;
@@ -520,6 +522,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
             this.view.settings = this._settings[this.displayMode];
           }
         }
+        this._isRestoring = false;
       },
 
       saveSettings: function() {
@@ -571,7 +574,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
       },
 
       _saveViewSettings: function() {
-        if (this.view.settings) {
+        if (this.view.settings && !this._isRestoring) {
           this.set('_settings.' + this.displayMode, this.view.settings);
           this.saveSettings();
         }
