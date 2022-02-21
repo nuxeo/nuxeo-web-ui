@@ -630,6 +630,8 @@ Polymer({
   },
 
   restoreSettings() {
+    // XXX _isRestoring is a control flag to prevent restoring from triggering a save (see WEBUI-581)
+    this._isRestoring = true;
     if (this._settings && this.name) {
       if (this._settings.displayMode && this._settings.displayMode.length > 0) {
         this.displayMode = this._settings.displayMode;
@@ -638,6 +640,7 @@ Polymer({
         this.view.settings = this._settings[this.displayMode];
       }
     }
+    this._isRestoring = false;
   },
 
   saveSettings() {
@@ -694,7 +697,7 @@ Polymer({
   },
 
   _saveViewSettings() {
-    if (this.view.settings) {
+    if (this.view.settings && !this._isRestoring) {
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
     }
