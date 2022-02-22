@@ -102,6 +102,31 @@ limitations under the License.
         </template>
       </nuxeo-data-table-form>
     </nuxeo-data-table>
+
+    <nuxeo-data-table
+      role="widget"
+      items="{{document.properties.custom:complexList}}"
+      orderable="true"
+      editable="true"
+      name="complexList"
+    >
+      <nuxeo-data-table-column name="firstColumn">
+        <template>
+          [[item.first]]
+        </template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-column name="secondColumn">
+        <template>
+          [[item.second]]
+        </template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-form>
+        <template>
+          <nuxeo-input value="{{item.first}}" label="First" type="text" name="first"> </nuxeo-input>
+          <nuxeo-input value="{{item.second}}" label="Second" type="text" name="second"> </nuxeo-input>
+        </template>
+      </nuxeo-data-table-form>
+    </nuxeo-data-table>
   </template>
 
   <script>
