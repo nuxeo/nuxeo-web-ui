@@ -30,6 +30,7 @@ import '../elements/nuxeo-dropzone/nuxeo-dropzone.js';
 window.Polymer = Polymer;
 window.nuxeo.I18n.language = 'en';
 window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
+window.nuxeo.I18n.en['bulkWidget.error.addValuesWithEmpty'] = 'Please enter the value(s) to add';
 window.nuxeo.I18n.en['bulkWidget.error.replaceWithEmpty'] = 'Please enter the value to replace this field with';
 window.nuxeo.I18n.en['bulkWidget.mode.keep'] = "Don't change value(s)";
 window.nuxeo.I18n.en['bulkWidget.mode.remove'] = 'Remove value(s)';
@@ -79,6 +80,59 @@ const { url } = import.meta;
 const base = url.substring(0, url.lastIndexOf('/'));
 const baseUrl = `${base}/layouts/bulk/`;
 
+const schemas = () =>
+  Promise.resolve([
+    {
+      name: 'dublincore',
+      '@prefix': 'dc',
+      fields: {
+        description: 'string',
+        language: 'string',
+        coverage: 'string',
+        valid: 'date',
+        creator: 'string',
+        modified: 'date',
+        lastContributor: 'string',
+        rights: 'string',
+        expired: 'date',
+        format: 'string',
+        created: 'date',
+        title: 'string',
+        issued: 'date',
+        nature: 'string',
+        subjects: 'string[]',
+        contributors: 'string[]',
+        source: 'string',
+        publisher: 'string',
+      },
+    },
+    {
+      name: 'custom',
+      '@prefix': 'custom',
+      fields: {
+        bool: 'boolean',
+        blob: 'blob',
+        blobRequired: 'blob',
+        strings: 'string',
+        stringsRequired: 'string',
+        complex: {
+          fields: {
+            substring: 'string',
+            substringRequired: 'string',
+          },
+          type: 'complex',
+        },
+        complexList: {
+          fields: {
+            first: 'string',
+            second: 'string',
+          },
+          type: 'complex[]',
+        },
+      },
+    },
+  ]);
+
 suite('nuxeo-edit-documents-button', () => {
   let button;
 
@@ -86,7 +140,12 @@ suite('nuxeo-edit-documents-button', () => {
     const documents = ['the content of this array is irrelevant'];
     const actionButton = await fixture(
       html`
-        <nuxeo-edit-documents-button href-base="${baseUrl}" layout="${layoutId}" .documents="${documents}">
+        <nuxeo-edit-documents-button
+          href-base="${baseUrl}"
+          layout="${layoutId}"
+          .documents="${documents}"
+          ._fetchSchemas="${schemas}"
+        >
         </nuxeo-edit-documents-button>
       `,
     );
@@ -280,6 +339,32 @@ suite('nuxeo-edit-documents-button', () => {
       expect(expiredBulkWidget._message).to.be.undefined;
     });
 
+    test('Should show a warning on submission when trying to add a property without a value', async () => {
+      button = await buildButton();
+      const { dialog, save } = button.$;
+      const subjectsWidget = getWidget('dc:subjects');
+      const subjectsBulkWidget = getBulkWidget(subjectsWidget);
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      await waitForDialogOpen(dialog);
+      // check that message is empty
+      expect(subjectsBulkWidget._message).to.be.undefined;
+      // set update mode to addValues
+      subjectsBulkWidget.updateMode = 'addValues';
+      // check that message is empty
+      expect(subjectsBulkWidget._message).to.be.undefined;
+      // click the save button
+      save.click();
+      // check that dialog is still open
+      expect(isElementVisible(dialog)).to.be.true;
+      // check that message is shown
+      expect(subjectsBulkWidget._message).to.be.equals('Please enter the value(s) to add');
+      // set a subject value
+      subjectsWidget.value = ['art/architecture'];
+      // check that message is empty
+      expect(subjectsBulkWidget._message).to.be.undefined;
+    });
+
     test('Should submit form when properties are modified correctly', async () => {
       button = await buildButton();
       const { dialog, save } = button.$;
@@ -298,6 +383,22 @@ suite('nuxeo-edit-documents-button', () => {
       await waitForDialogClose(dialog);
       // check that dialog is closed
       expect(isElementVisible(dialog)).to.be.false;
+    });
+
+    test('Should show the append option only if the field is multivalued', async () => {
+      button = await buildButton();
+      const { dialog } = button.$;
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      await waitForDialogOpen(dialog);
+      const natureWidget = getWidget('dc:nature');
+      const natureBulkWidget = getBulkWidget(natureWidget);
+      const natureAddValues = natureBulkWidget.shadowRoot.getElementById('addValues');
+      expect(natureAddValues.disabled).to.be.true;
+      const subjectsWidget = getWidget('dc:subjects');
+      const subjectsBulkWidget = getBulkWidget(subjectsWidget);
+      const subjectsAddValues = subjectsBulkWidget.shadowRoot.getElementById('addValues');
+      expect(subjectsAddValues.disabled).to.be.false;
     });
   });
 
@@ -415,20 +516,18 @@ suite('nuxeo-edit-documents-button', () => {
       expect(stringsBulkWidget.updateMode).to.be.equals('replace');
     });
 
-    test('Should handle required widgets for multivalued properties', async () => {
+    test('Should handle widgets for complex list properties', async () => {
       button = await buildButton('custom');
-      const stringsWidget = getWidget('custom:stringsRequired');
-      const stringsBulkWidget = getBulkWidget(stringsWidget);
       // open the bulk edit dialog
       button.$$('.action').click();
-      // check that widget is not marked as required
-      expect(stringsWidget.required).to.be.null;
-      // check that bulk widget is tagged as required
-      expect(stringsBulkWidget._required).to.be.true;
-      // check that message is shown
-      expect(stringsBulkWidget._message).to.be.equals('This field requires a non empty value');
-      // check that remove update mode is disabled
-      expect(stringsBulkWidget.$$('paper-item#remove').disabled).to.be.true;
+      const stringsWidget = getWidget('custom:strings');
+      const stringsBulkWidget = getBulkWidget(stringsWidget);
+      const stringsAddValues = stringsBulkWidget.shadowRoot.getElementById('addValues');
+      expect(stringsAddValues.disabled).to.be.true;
+      const complexListWidget = getWidget('custom:complexList');
+      const complexListBulkWidget = getBulkWidget(complexListWidget);
+      const complexListAddValues = complexListBulkWidget.shadowRoot.getElementById('addValues');
+      expect(complexListAddValues.disabled).to.be.false;
     });
   });
 });
