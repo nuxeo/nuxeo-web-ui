@@ -1495,7 +1495,7 @@ Polymer({
   },
 
   _removeFromClipboard(docs) {
-    if (Array.isArray(docs)) {
+    if (this.clipboard && Array.isArray(docs)) {
       docs.forEach((doc) => {
         this.clipboard.remove(doc);
       });
