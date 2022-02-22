@@ -1293,7 +1293,7 @@ limitations under the License.
       },
 
       _removeFromClipboard: function(docs) {
-        if (Array.isArray(docs)) {
+        if (this.clipboard && Array.isArray(docs)) {
           docs.forEach(function(doc) {
             this.clipboard.remove(doc);
           }.bind(this));
