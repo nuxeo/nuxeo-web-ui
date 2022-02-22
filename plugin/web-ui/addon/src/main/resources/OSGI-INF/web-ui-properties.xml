@@ -44,5 +44,8 @@
 
     <!-- Control the enablement of select all -->
     <property name="org.nuxeo.web.ui.selection.selectAllEnabled">${nuxeo.selection.selectAllEnabled:=false}</property>
+
+    <!-- Properties to be fetched when loading the user object in user management, default is empty -->
+    <property name="org.nuxeo.web.ui.user.management.fetch.document" list="true"></property>
   </extension>
 </component>
