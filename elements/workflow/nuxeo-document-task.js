@@ -163,12 +163,22 @@ Polymer({
           </div>
           <div id="assignedActors" class="vertical spaced">
             <span>[[i18n('tasks.actors.assigned')]]</span>
-            <nuxeo-tags type="user" items="[[task.actors]]"></nuxeo-tags>
+            <template is="dom-if" if="[[_hasActorType(task.actors, 'group')]]">
+              <nuxeo-tags type="group" items="[[_getActorsByType(task.actors, 'group')]]"></nuxeo-tags>  
+            </template>
+            <template is="dom-if" if="[[_hasActorType(task.actors, 'user')]]">
+              <nuxeo-tags type="user" items="[[_getActorsByType(task.actors, 'user')]]"></nuxeo-tags>
+            </template>
           </div>
           <template is="dom-if" if="[[_delegatedActorsExist(task.delegatedActors)]]">
             <div id="delegatedActors" class="vertical spaced">
               <span>[[i18n('tasks.actors.delegated')]]</span>
-              <nuxeo-tags type="user" items="[[task.delegatedActors]]"></nuxeo-tags>
+              <template is="dom-if" if="[[_hasActorType(task.delegatedActors, 'group')]]">
+                <nuxeo-tags type="user" items="[[_getActorsByType(task.delegatedActors, 'group')]]"></nuxeo-tags>
+              </template>
+              <template is="dom-if" if="[[_hasActorType(task.delegatedActors,'user')]]">
+                <nuxeo-tags type="user" items="[[_getActorsByType(task.delegatedActors, 'user')]]"></nuxeo-tags>
+              </template>
             </div>
           </template>
           <div class="vertical spaced">
@@ -322,5 +332,13 @@ Polymer({
 
   _isTaskInEndState(task) {
     return task && task.state === 'ended';
+  },
+
+  _hasActorType(actors, type) {
+    return actors && Array.isArray(actors) && actors.findIndex((actor) => actor['entity-type'] === type) >= 0;
+  },
+
+  _getActorsByType(actors, type) {
+    return actors && Array.isArray(actors) && actors.filter((actor) => actor['entity-type'] === type);
   },
 });
