@@ -181,10 +181,10 @@ limitations under the License.
           principalName: this.principalName
         };
         if (this.startDate) {
-          params.startDate = this.startDate.moment().toISOString().substring(0, 10);
+          params.startDate = moment(this.startDate).toISOString().substring(0, 10);
         }
         if (this.endDate) {
-          params.endDate = this.endDate.moment().toISOString().substring(0, 10);
+          params.endDate = moment(this.endDate).toISOString().substring(0, 10);
         }
         if (this.selectedEventTypes && this.selectedEventTypes.length > 0) {
           params.eventIds = this.selectedEventTypes.join();
