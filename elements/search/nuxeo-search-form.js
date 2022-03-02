@@ -752,10 +752,8 @@ Polymer({
   _selectedSearchChanged() {
     if (this.selectedSearch) {
       this.params = this._mutateParams(this.selectedSearch.params);
-      if (this.params && this.params.ecm_fulltext) {
-        this.searchTerm = this.params.ecm_fulltext.replace('*', '');
-        this.form.searchTerm = this.searchTerm;
-      }
+      this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
+      this.form.searchTerm = this.searchTerm;
       this._fetch(this.$.provider);
     }
   },
