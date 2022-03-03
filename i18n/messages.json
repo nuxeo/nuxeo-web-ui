@@ -1440,6 +1440,7 @@
   "vocabularyManagement.confirmDelete": "Delete vocabulary entry?",
   "vocabularyManagement.deleteEntry": "Delete Entry",
   "vocabularyManagement.edit.actions": "Actions",
+  "vocabularyManagement.edit.error": "ID cannot be empty",
   "vocabularyManagement.edit.id": "ID",
   "vocabularyManagement.edit.label_en": "English Label",
   "vocabularyManagement.edit.label_fr": "French Label",

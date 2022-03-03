@@ -31,6 +31,8 @@ limitations under the License.
       value="{{entry.properties.id::change}}"
       required
       readonly$="[[!new]]"
+      pattern=".*\S.*"
+      error-message="[[i18n('vocabularyManagement.edit.error')]]"
     >
     </nuxeo-input>
 
