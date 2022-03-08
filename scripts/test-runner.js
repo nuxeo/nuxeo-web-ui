@@ -23,7 +23,7 @@ function runFunctionalTests(project, dir) {
   }
 }
 
-if (fs.existsSync(path.join(FTEST, 'target/cucumber-reports'))) {
+if (fs.existsSync(path.join(FTEST, 'target/cucumber-reports')) && process.env.CUCUMBER_REPORT_PATH) {
   removeSync(process.env.CUCUMBER_REPORT_PATH);
 }
 
