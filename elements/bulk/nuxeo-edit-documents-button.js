@@ -390,7 +390,6 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
                 const sourceParts = part.source.split('.');
                 sourceParts.pop();
                 // create the path for each bound property (necessary for complex properties)
-                // XXX If we had the information about the property data type, we could plug it here.
                 createNestedObject(bulkLayout, sourceParts);
                 bulkLayout.set(part.source, null);
               });
