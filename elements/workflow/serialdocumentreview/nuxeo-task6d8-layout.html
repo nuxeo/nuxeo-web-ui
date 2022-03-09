@@ -24,9 +24,19 @@ limitations under the License.
 <dom-module id="nuxeo-task6d8-layout">
 
   <template>
-    <div role="widget">
+    <style>
+      .participants {
+        display: flex;
+      }
+    </style>
+    <div role="widget" class="participants">
       <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
-      <nuxeo-tags type="user" items="[[task.variables.participants]]"></nuxeo-tags>
+      <template is="dom-if" if="[[_hasActorType(task.variables.participants, 'group')]]">
+        <nuxeo-tags type="group" items="[[_getActorsByType(task.variables.participants, 'group')]]"></nuxeo-tags>
+      </template>
+      <template is="dom-if" if="[[_hasActorType(task.variables.participants, 'user')]]">
+        <nuxeo-tags type="user" items="[[_getActorsByType(task.variables.participants, 'user')]]"></nuxeo-tags>
+      </template>
     </div>
 
     <div role="widget">
@@ -53,7 +63,17 @@ limitations under the License.
          * @task var_task6d8
          */
         task: Object
-      }
+      },
+
+      _hasActorType: function (actors, type) {
+        return actors && Array.isArray(actors) && 
+          actors.findIndex(function(actor) { return actor.startsWith(type); }) >= 0;
+      },
+
+      _getActorsByType: function(actors, type) {
+        return actors && Array.isArray(actors) && 
+          actors.filter(function(actor) { return actor.startsWith(type); });
+      },
     });
   </script>
 
