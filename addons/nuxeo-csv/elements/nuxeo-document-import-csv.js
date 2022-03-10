@@ -688,7 +688,7 @@ Polymer({
   _close() {
     if (this.stage === 'progress' && this._count > 0) {
       this.fire('document-updated');
-      this.navigateTo('document', this.parent);
+      this.navigateTo(this.parent);
     }
     if (this._waitProgressId) {
       clearTimeout(this._waitProgressId);
