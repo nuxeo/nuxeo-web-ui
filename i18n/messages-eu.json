@@ -1440,6 +1440,7 @@
   "vocabularyManagement.confirmDelete": "Ezabatu hiztegiko sarrera?",
   "vocabularyManagement.deleteEntry": "Ezabatu sarrera",
   "vocabularyManagement.edit.actions": "Ekintzak",
+  "vocabularyManagement.edit.error": "ID cannot be empty",
   "vocabularyManagement.edit.id": "IDa",
   "vocabularyManagement.edit.label_en": "Ingelesezko etiketa",
   "vocabularyManagement.edit.label_fr": "Frantsesezko etiketa",

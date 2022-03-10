@@ -1440,6 +1440,7 @@
   "vocabularyManagement.confirmDelete": "語彙エントリを削除しますか？",
   "vocabularyManagement.deleteEntry": "エントリを削除",
   "vocabularyManagement.edit.actions": "操作",
+  "vocabularyManagement.edit.error": "ID cannot be empty",
   "vocabularyManagement.edit.id": "ID",
   "vocabularyManagement.edit.label_en": "英語ラベル",
   "vocabularyManagement.edit.label_fr": "フランス語ラベル",

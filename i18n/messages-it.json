@@ -1440,6 +1440,7 @@
   "vocabularyManagement.confirmDelete": "Eliminare la voce di vocabolario?",
   "vocabularyManagement.deleteEntry": "Elimina voce",
   "vocabularyManagement.edit.actions": "Azioni",
+  "vocabularyManagement.edit.error": "ID cannot be empty",
   "vocabularyManagement.edit.id": "ID",
   "vocabularyManagement.edit.label_en": "Etichetta inglese",
   "vocabularyManagement.edit.label_fr": "Etichetta francese",
