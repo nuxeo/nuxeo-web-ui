@@ -1182,7 +1182,7 @@ Polymer({
         this.navigateTo(response.entries ? response.entries[0] : response);
       } else {
         this.fire('document-updated');
-        this.navigateTo('document', this.parent);
+        this.navigateTo(this.parent);
       }
     }
   },
