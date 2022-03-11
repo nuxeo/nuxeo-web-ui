@@ -1471,6 +1471,7 @@
   "vocabularyManagement.confirmDelete": "Eintrag im Vokabular löschen?",
   "vocabularyManagement.deleteEntry": "Eintrag löschen",
   "vocabularyManagement.edit.actions": "Aktionen",
+  "vocabularyManagement.edit.error": "ID darf nicht leer sein.",
   "vocabularyManagement.edit.id": "Kennung",
   "vocabularyManagement.edit.label_en": "Englische Beschriftung",
   "vocabularyManagement.edit.label_fr": "Französische Beschriftung",
