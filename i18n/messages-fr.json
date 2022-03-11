@@ -1471,6 +1471,7 @@
   "vocabularyManagement.confirmDelete": "Supprimer l'entrée de vocabulaire ?",
   "vocabularyManagement.deleteEntry": "Supprimer l'entrée",
   "vocabularyManagement.edit.actions": "Actions",
+  "vocabularyManagement.edit.error": "L'identifiant ne peut être vide",
   "vocabularyManagement.edit.id": "Identifiant",
   "vocabularyManagement.edit.label_en": "Libellé anglais",
   "vocabularyManagement.edit.label_fr": "Libellé français",

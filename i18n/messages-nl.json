@@ -1471,6 +1471,7 @@
   "vocabularyManagement.confirmDelete": "Woordenboeklemma wissen?",
   "vocabularyManagement.deleteEntry": "Lemma wissen",
   "vocabularyManagement.edit.actions": "Acties",
+  "vocabularyManagement.edit.error": "ID mag niet leeg zijn",
   "vocabularyManagement.edit.id": "ID",
   "vocabularyManagement.edit.label_en": "Engels label",
   "vocabularyManagement.edit.label_fr": "Frans label",
