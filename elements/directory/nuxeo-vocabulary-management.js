@@ -79,6 +79,12 @@ Polymer({
         @apply --layout-justified;
         margin-top: 16px;
       }
+
+      paper-item span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     </style>
 
     <nuxeo-resource id="directory" path="/directory" params='{"pageSize": 0}'></nuxeo-resource>
@@ -98,7 +104,9 @@ Polymer({
             attr-for-selected="name"
           >
             <template is="dom-repeat" items="[[vocabularies]]" as="vocabulary">
-              <paper-item name$="[[vocabulary.name]]">[[vocabulary.name]]</paper-item>
+              <paper-item name$="[[vocabulary.name]]"
+                ><span title="[[vocabulary.name]]">[[vocabulary.name]]</span></paper-item
+              >
             </template>
           </nuxeo-select>
         </nuxeo-card>
