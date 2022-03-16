@@ -185,6 +185,12 @@ limitations under the License.
 
         _visibleChanged: function() {
           if (this.visible && !this.vocabularies) {
+            Polymer.RenderStatus.afterNextRender(this, function() {
+              // XXX workaround for ELEMENTS-1470
+              Array.from(this.shadowRoot.querySelectorAll('nuxeo-select')).forEach(function(s) {
+                s._resize();
+              });
+            }.bind(this));
             this.$.directory.get().then(function(response) {
               this.vocabularies = response.entries.sort(function(a, b) {
                 return a.name.localeCompare(b.name);
