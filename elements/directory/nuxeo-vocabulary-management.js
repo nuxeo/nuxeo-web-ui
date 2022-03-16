@@ -59,10 +59,6 @@ Polymer({
         margin: 1em 0 1em 0;
       }
 
-      nuxeo-select {
-        max-width: 223px;
-      }
-
       nuxeo-dialog {
         min-width: 480px;
       }
