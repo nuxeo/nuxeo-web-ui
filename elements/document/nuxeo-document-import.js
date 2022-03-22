@@ -1248,7 +1248,11 @@ Polymer({
     }
     Promise.all(promises).then((results) => {
       const errorFree = results.filter(
-        (result) => !(result instanceof Error) && result['entity-type'] && result['entity-type'] !== 'exception',
+        (result) =>
+          !(result instanceof Error) &&
+          result['entity-type'] &&
+          result['entity-type'] !== 'exception' &&
+          result['entity-type'] !== 'validation_report',
       );
       this._handleSuccess(this._mergeResponses.apply(null, errorFree), !(errorFree.length < results.length));
       if (errorFree.length < results.length) {
