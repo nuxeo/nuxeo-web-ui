@@ -1063,6 +1063,11 @@ Polymer({
         this._setFileProp(index, 'checked', true);
       }
     }
+    const currentFile = this._getCurrentFile();
+    if (currentFile && currentFile._validationReport) {
+      const layout = this.$$('#document-import');
+      layout.reportValidation(currentFile._validationReport);
+    }
   },
 
   _validate() {
@@ -1242,7 +1247,13 @@ Polymer({
               indexesToRemove.push(idx);
               return result;
             })
-            .catch((error) => error);
+            .catch((error) => {
+              // save the validation_report for later display by the nuxeo-document-layout
+              if (!(error instanceof Error) && error['entity-type'] && error['entity-type'] === 'validation_report') {
+                arr[idx]._validationReport = error;
+              }
+              return error;
+            });
         })(i >= self.localFiles.length ? remoteIndexes : localIndexes, index),
       );
     }
