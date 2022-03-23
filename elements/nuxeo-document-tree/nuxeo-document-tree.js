@@ -147,22 +147,40 @@ Polymer({
       .header h5 {
         margin: 0;
       }
+
+      .item.compoundChild {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-left: 0.35em;
+      }
+
+      .item.compoundChild {
+        padding-top: 8px;
+      }
+
+      .item.compoundChild .node-name {
+        margin-left: 8px;
+      }
+
+      .item.compound.selected .node-name,
+      .item.compoundChild.selected .node-name {
+        border-bottom: 1px solid var(--nuxeo-primary-color);
+      }
+
+      img {
+        height: 24px;
+      }
     </style>
 
     <nuxeo-document
       id="doc"
       doc-path="[[docPath]]"
       response="{{document}}"
-      enrichers="hasFolderishChild"
+      enrichers="hasFolderishChild, hasContent, thumbnail"
     ></nuxeo-document>
 
-    <nuxeo-page-provider
-      id="children"
-      provider="tree_children"
-      enrichers="hasFolderishChild"
-      schemas="dublincore,common"
-    >
-    </nuxeo-page-provider>
+    <nuxeo-page-provider id="children"> </nuxeo-page-provider>
 
     <div class="header" hidden$="[[!label]]">
       <h5>[[i18n(label)]]</h5>
@@ -183,12 +201,17 @@ Polymer({
       </div>
       <nuxeo-tree id="tree" data="[[document]]" controller="[[controller]]" node-key="uid">
         <template class="horizontal layout">
-          <template class="flex" is="dom-if" if="[[!isLeaf]]">
-            <paper-spinner active$="[[loading]]"></paper-spinner>
-            <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]"></iron-icon>
-          </template>
-          <span class="node-name flex">
-            <a href$="[[urlFor(item)]]">[[_title(item)]]</a>
+          <span class$="[[_computeItemClass(item)]]">
+            <template class="flex" is="dom-if" if="[[!isLeaf]]">
+              <paper-spinner active$="[[loading]]"></paper-spinner>
+              <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]"></iron-icon>
+            </template>
+            <template class="flex" is="dom-if" if="[[_isCompoundChild(item)]]">
+              <img src="[[_thumbnail(item)]]" alt$="[[item.title]]" />
+            </template>
+            <span class="node-name">
+              <a href$="[[urlFor(item)]]">[[_title(item)]]</a>
+            </span>
           </span>
         </template>
       </nuxeo-tree>
@@ -260,9 +283,18 @@ Polymer({
 
     this.controller = {
       getChildren: function(node, page) {
-        this.$.children.params = [node.uid];
+        if (this._isCompound(node)) {
+          this.$.children.provider = 'advanced_document_content';
+          this.$.children.enrichers = 'hasFolderishChild, hasContent, thumbnail';
+          this.$.children.params = { ecm_parentId: node.uid, ecm_trashed: false };
+        } else {
+          this.$.children.provider = 'tree_children';
+          this.$.children.enrichers = 'hasFolderishChild, hasContent';
+          this.$.children.params = [node.uid];
+        }
         this.$.children.page = page;
         return this.$.children.fetch().then((data) => {
+          this._expandCurrentDocument();
           return {
             items: data.entries,
             isNextAvailable: this.$.children.isNextPageAvailable,
@@ -270,10 +302,12 @@ Polymer({
         });
       }.bind(this),
 
-      isLeaf(node) {
-        const hasFolderishChild = node.contextParameters && node.contextParameters.hasFolderishChild;
-        return !hasFolderishChild;
-      },
+      isLeaf: function(node) {
+        const hasChildren = this._isCompound(node)
+          ? node.contextParameters && node.contextParameters.hasContent
+          : node.contextParameters && node.contextParameters.hasFolderishChild;
+        return !hasChildren;
+      }.bind(this),
     };
   },
 
@@ -314,16 +348,50 @@ Polymer({
         }
 
         const { entries } = doc.contextParameters.breadcrumb;
-        this.docPath = entries[entries.length - 1].path;
 
-        for (let i = 0; i < entries.length - 1; i++) {
+        let stopIdx = entries.findIndex((e) => this._isCompound(e));
+        if (stopIdx === -1) {
+          stopIdx = entries.length - 1;
+        }
+
+        if (this.docPath !== entries[stopIdx].path) {
+          this.docPath = entries[stopIdx].path;
+        } else {
+          // XXX the document won't be updated, so we'll just call the method to change visibility
+          this._documentChanged();
+        }
+
+        for (let i = 0; i < stopIdx; i++) {
           const entry = entries[i];
           if (!this.hasFacet(entry, 'HiddenInNavigation') && entry.path.startsWith(this.rootDocPath)) {
             this.push('parents', entry);
           }
         }
+        this._expandCurrentDocument();
+      } else if (this._isCompound(doc)) {
+        // XXX force the styles inside the tree to update
+        this._updateTreeStyles();
       }
     }
+  },
+
+  _expandCurrentDocument() {
+    this.__expandDebouncer = Debouncer.debounce(this.__expandDebouncer, timeOut.after(100), () => {
+      let parents =
+        this.currentDocument &&
+        this.currentDocument.contextParameters &&
+        this.currentDocument.contextParameters.breadcrumb &&
+        this.currentDocument.contextParameters.breadcrumb.entries;
+      if (!parents) {
+        return; // if we are missing parent information, do nothing
+      }
+      parents = this.currentDocument.contextParameters.breadcrumb.entries.filter(
+        (d) => !this.parents.find((a) => a.uid === d.uid),
+      );
+      const uids = [...parents.map((doc) => doc.uid)];
+      this.$.tree.open(...uids);
+      this._updateTreeStyles();
+    });
   },
 
   _documentChanged() {
@@ -351,5 +419,48 @@ Polymer({
   removeDocuments(documents) {
     const uids = documents.map((doc) => doc.uid);
     this.$.tree.removeNodes(uids);
+  },
+
+  _thumbnail(doc) {
+    return doc &&
+      doc.uid &&
+      doc.contextParameters &&
+      doc.contextParameters.thumbnail &&
+      doc.contextParameters.thumbnail.url
+      ? doc.contextParameters.thumbnail.url
+      : '';
+  },
+
+  _isCompound(doc) {
+    return this.hasFacet(doc, 'CompoundDocument');
+  },
+
+  _isCompoundChild(doc) {
+    // TODO improve this
+    return !this.hasFacet(doc, 'Folderish') && !!this._thumbnail(doc);
+  },
+
+  _computeItemClass(item) {
+    let c = 'item';
+    if (this._isCompound(item)) {
+      c += ' compound';
+    }
+    if (this._isCompoundChild(item)) {
+      c += ' compoundChild';
+    }
+    return c;
+  },
+
+  _updateTreeStyles() {
+    // this.$.tree._update(); // XXX this causes the three to flicker, when we just want to update the styles
+    Array.from(this.$.tree.querySelectorAll('nuxeo-tree-node')).forEach((node) => {
+      const item = node.querySelector('#content .item');
+      const uid = node.getAttribute('data-uid');
+      if (uid === this.currentDocument.uid && !item.classList.contains('selected')) {
+        item.classList.add('selected');
+      } else if (uid !== this.currentDocument.uid && item.classList.contains('selected')) {
+        item.classList.remove('selected');
+      }
+    });
   },
 });
