@@ -40,7 +40,7 @@ export default class BulkEdit extends BasePage {
       this.getBulkEditOptions(fieldName).scrollIntoView();
       if (action === 'remove') {
         this.getBulkEditOptions(fieldName).click();
-        this.bulkEditOptionsList(fieldName, 'Remove value(s)').click();
+        this.bulkEditOptionsList(fieldName, 'Empty value(s)').click();
       } else if (action === 'addValues') {
         this.getBulkEditOptions(fieldName).click();
         this.bulkEditOptionsList(fieldName, 'Add value(s)').click();
