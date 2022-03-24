@@ -372,8 +372,6 @@ Polymer({
     <nuxeo-operation id="fileManagerImport" op="FileManager.Import" sync-indexing></nuxeo-operation>
     <nuxeo-document
       id="docRequest"
-      doc-path="[[targetPath]]"
-      data="[[document]]"
       sync-indexing
       headers='{"X-Batch-No-Drop": "true"}'
       response="{{createResponse}}"
@@ -1281,18 +1279,22 @@ Polymer({
           .forEach((index) => {
             this.splice('remoteFiles', index, 1);
           });
+        /*
+         * XXX Prevent this._selectDoc(0) from storing the previously selected file,
+         * in case it was saved and removed from localFiles.
+         */
+        this.docIdx = -1;
         this._selectDoc(0);
       }
     });
   },
 
   _processFileWithMetadata(file) {
-    this.document = file.docData.document;
-    this.targetPath = file.docData.parent;
-    this.document.name = file.sanitizedName || file.name;
+    const { document, parent: docPath } = file.docData;
+    document.name = file.sanitizedName || file.name;
     const blobProperty = this.documentBlobProperties[file.docData.type.id] || this.documentBlobProperties.default;
     // XXX if fileData.type == Note, then the file's contents should be passed instead
-    this.document.properties[blobProperty] = file.providerId
+    document.properties[blobProperty] = file.providerId
       ? {
           providerId: file.providerId,
           user: file.user,
@@ -1302,6 +1304,8 @@ Polymer({
           'upload-batch': this.batchId,
           'upload-fileId': String(file.index),
         };
+    this.$.docRequest.data = document;
+    this.$.docRequest.docPath = docPath;
     return this.$.docRequest.post();
   },
 
