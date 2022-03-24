@@ -58,7 +58,8 @@ jobs:
   build:
     name: Build
     needs: id
-    runs-on: [ self-hosted, master ]
+    # runs-on: [ self-hosted, master ]
+    runs-on: ubuntu-latest
     steps:
       - name: Build parameters
         run: echo '${{ toJSON(github.event.inputs) }}'

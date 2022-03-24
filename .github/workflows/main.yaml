@@ -39,7 +39,8 @@ jobs:
 
   build:
     needs: [ lint, test, a11y, ftest ]
-    runs-on: [ self-hosted, master ]
+    # runs-on: [ self-hosted, master ]
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
 
