@@ -43,6 +43,15 @@ on:
         default: 'maintenance-3.0.x'
         type: string
         required: false
+      runner_type:
+        description: 'Runner type: self-hosted or gh'
+        default: 'self-hosted'
+        type: choice
+        options:
+        - 'self-hosted'
+        - ubuntu-latest
+        required: true
+
 
 env:
   REFERENCE_BRANCH: maintenance-3.0.x
@@ -59,7 +68,7 @@ jobs:
     name: Build
     needs: id
     # runs-on: [ self-hosted, master ]
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_type }}
     steps:
       - name: Build parameters
         run: echo '${{ toJSON(github.event.inputs) }}'
