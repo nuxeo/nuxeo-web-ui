@@ -49,7 +49,7 @@ on:
         type: choice
         options:
         - 'self-hosted'
-        - ubuntu-latest
+        - 'ubuntu-latest'
         required: true
 
 
