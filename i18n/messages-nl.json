@@ -185,7 +185,7 @@
   "bulkWidget.error.addValuesWithEmpty": "Voer de toe te voegen waarde(s) in",
   "bulkWidget.error.replaceWithEmpty": "Voer de waarde in waarmee u dit veld wilt vervangen",
   "bulkWidget.mode.keep": "Waarde(n) niet wijzigen",
-  "bulkWidget.mode.remove": "Verwijder waarde(n)",
+  "bulkWidget.mode.remove": "Leeg waarde(n)",
   "bulkWidget.mode.replace": "Vervangen door",
   "bulkWidget.mode.addValues": "Waarde(n) toevoegen",
   "bulkWidget.warning.bool": "Dit veld wordt uitgevinkt (ingesteld als onwaar) voor alle geselecteerde documenten",

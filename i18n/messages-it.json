@@ -185,7 +185,7 @@
   "bulkWidget.error.addValuesWithEmpty": "Inserisci il valore o i valori da aggiungere",
   "bulkWidget.error.replaceWithEmpty": "Inserisci il valore con cui sostituire questo campo",
   "bulkWidget.mode.keep": "Non cambiare valore(i)",
-  "bulkWidget.mode.remove": "Rimuovi valore(i)",
+  "bulkWidget.mode.remove": "Svuota il valore(i)",
   "bulkWidget.mode.replace": "Sostituisci con",
   "bulkWidget.mode.addValues": "Aggiungi valore(i)",
   "bulkWidget.warning.bool": "Questo campo sarà deselezionato (impostato come falso) per tutti i documenti selezionati",
