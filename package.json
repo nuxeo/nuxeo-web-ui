@@ -77,6 +77,7 @@
     "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v$npm_package_devDependencies_workbox_cli .tmp/workbox",
     "build": "webpack --env production",
     "postbuild": "npm-run-all fix:*",
+    "fix:preview": "replace 'elements/' '${window.location.pathname}/' dist/index.html",
     "fix:elements": "replace '/elements/' '${window.location.pathname}/' dist/*.js",
     "fix:ui_elements": "replace '/node_modules/@nuxeo/nuxeo-ui-elements/' '${window.location.pathname}/' dist/*.js",
     "fix:pdfjs": "replace 'pdfjs/web/viewer.html' '../vendor/pdfjs/web/viewer.html' dist/*.js",
