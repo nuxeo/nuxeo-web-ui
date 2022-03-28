@@ -1205,7 +1205,10 @@ limitations under the License.
         }
         Promise.all(promises).then(function(results) {
           var errorFree = results.filter(function(result) {
-            return !(result instanceof Error) && result['entity-type'] && result['entity-type'] !== 'exception';
+            return !(result instanceof Error) &&
+              result['entity-type'] &&
+              result['entity-type'] !== 'exception' &&
+              result['entity-type'] !== 'validation_report';
           });
           this._handleSuccess(this._mergeResponses.apply(null, errorFree), !(errorFree.length < results.length));
           if (errorFree.length < results.length) {
