@@ -28,6 +28,11 @@ on:
         description: 'Generate metrics report?'
         type: boolean
         required: false
+      caller_id:
+        description: 'run identifier'
+        default: '10.10'
+        type: string
+        required: false
 
 env:
   REFERENCE_BRANCH: '10.10'
@@ -35,7 +40,14 @@ env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
+  id:
+    name: Remote Caller ID ${{ github.event.inputs.caller_id }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ${{ github.event.inputs.id }}
+        run: echo run identifier ${{ github.event.inputs.id }}
   setup:
+    needs: id
     name: Setup
     runs-on: ubuntu-latest
     outputs:
@@ -100,111 +112,9 @@ jobs:
           branch: ${{ github.event.inputs.branch_name }}
           default-branch: ${{ env.REFERENCE_BRANCH }}
 
-  build-elements:
-    name: Build Elements
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '10'
-
-      - run: npm install -g bower
-
-      - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-elements
-          path: nuxeo-elements
-          fetch-depth: 1
-          ref: ${{ needs.setup.outputs.elements_branch }}
-
-      - name: Checkout the nuxeo-ui-elements repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-ui-elements
-          path: nuxeo-ui-elements
-          fetch-depth: 1
-          ref: ${{ needs.setup.outputs.ui_elements_branch }}
-
-      - name: Checkout the nuxeo-dataviz-elements repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-dataviz-elements
-          path: nuxeo-dataviz-elements
-          fetch-depth: 1
-          ref: ${{ needs.setup.outputs.dataviz_elements_branch }}
-
-      - name: Install Elements
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          pushd nuxeo-elements
-          npm install && bower install
-          popd
-          pushd nuxeo-ui-elements
-          npm install && bower install
-          rm -rf bower_components/nuxeo-elements
-          rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-elements bower_components
-          popd
-          pushd nuxeo-dataviz-elements
-          npm install && bower install
-          rm -rf bower_components/nuxeo-elements
-          rsync -av --exclude='node_modules' --exclude='.git' --exclude='bower_components' ../nuxeo-elements bower_components
-          popd
-
-      - name: Lint Elements
-        run: |
-          pushd nuxeo-elements
-          npm run lint
-          popd
-          pushd nuxeo-ui-elements
-          npm run lint
-          popd
-          pushd nuxeo-dataviz-elements
-          npm run lint
-          popd    
-
-      - name: Elements Unit tests
-        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
-        run: |
-          pushd nuxeo-elements
-          npm run test
-          popd
-          pushd nuxeo-ui-elements
-          npm run test
-          popd
-
-      - name: Elements Unit tests (Sauce Labs)
-        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
-        env:
-          SAUCE_USERNAME: nuxeo-elements
-          SAUCE_ACCESS_KEY: ${{ secrets.ELEMENTS_SAUCE_ACCESS_KEY }}
-        run: |
-          pushd nuxeo-elements
-          ./node_modules/.bin/polymer test -l chrome --plugin sauce --job-name nuxeo-elements-pipeline-${{ steps.pick_nuxeo_elements_branch.outputs.branch }} --build-number ${{ github.run_number }}
-          popd
-
-      - name: UI Elements Unit tests (Sauce Labs)
-        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
-        env:
-          SAUCE_USERNAME: nuxeo-ui-elements
-          SAUCE_ACCESS_KEY: ${{ secrets.UI_ELEMENTS_SAUCE_ACCESS_KEY }}
-        run: |
-          pushd nuxeo-ui-elements
-          ./node_modules/.bin/polymer test -l chrome --plugin sauce --job-name nuxeo-ui-elements-pipeline-${{ steps.pick_nuxeo_ui_elements_branch.outputs.branch }} --build-number ${{ github.run_number }}
-          popd
-
-      - name: Dataviz Elements Unit tests
-        if: ${{ github.event.inputs.skip_unit_tests == 'false' }}
-        run: |
-          pushd nuxeo-dataviz-elements
-          npm run test
-          popd
-
   build-webui:
     name: Build Web UI
-    needs: [ setup, build-elements ]
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout nuxeo-web-ui repo
