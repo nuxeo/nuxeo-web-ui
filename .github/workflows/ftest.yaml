@@ -3,16 +3,19 @@ name: Functional tests
 on:
   push:
     branches:
-      - '10.10'
+      - 10.10
   pull_request:
     branches:
-      - '10.10'
+      - 10.10
 
 env:
   REFERENCE_BRANCH: '10.10'
   ELEMENTS_REFERENCE_BRANCH: 'maintenance-2.4.x'
   NPM_REPOSITORY: 'https://packages.nuxeo.com/repository/npm-public/'
   HF_VERSION: '56'
+  ELEMENTS_BRANCH: ${{ github.head_ref || 'maintenance-2.4.x' }}
+  WEBUI_BRANCH: ${{ github.head_ref || '10.10' }}
+  PLUGIN_BRANCH: ${{ github.head_ref || '2.4_10.10' }}
 
 jobs:
   setup:
@@ -37,7 +40,7 @@ jobs:
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-web-ui
-          branch: ${{ github.event.inputs.branch_name }}
+          branch: ${{ env.WEBUI_BRANCH }}
           default-branch: ${{ env.REFERENCE_BRANCH }}
 
       - name: Determine nuxeo-elements branch to use
@@ -45,7 +48,7 @@ jobs:
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-elements
-          branch: ${{ github.event.inputs.branch_name }}
+          branch: ${{ env.ELEMENTS_BRANCH }}
           default-branch: ${{ env.ELEMENTS_REFERENCE_BRANCH }}
 
       - name: Determine nuxeo-ui-elements branch to use
@@ -53,7 +56,7 @@ jobs:
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-ui-elements
-          branch: ${{ github.event.inputs.branch_name }}
+          branch: ${{ env.ELEMENTS_BRANCH }}
           default-branch: ${{ env.ELEMENTS_REFERENCE_BRANCH }}
 
       - name: Determine nuxeo-dataviz-elements branch to use
@@ -61,7 +64,7 @@ jobs:
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-dataviz-elements
-          branch: ${{ github.event.inputs.branch_name }}
+          branch: ${{ env.ELEMENTS_BRANCH }}
           default-branch: ${{ env.ELEMENTS_REFERENCE_BRANCH }}
 
       - name: Determine plugin-nuxeo-web-ui branch to use
@@ -69,7 +72,7 @@ jobs:
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/plugin-nuxeo-web-ui
-          branch: ${{ github.event.inputs.branch_name }}
+          branch: ${{ env.PLUGIN_BRANCH }}
           default-branch: '2.4_10.10'
 
       - name: Determine nuxeo-web-ui-itests branch to use
@@ -77,7 +80,7 @@ jobs:
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-web-ui-itests
-          branch: ${{ github.event.inputs.branch_name }}
+          branch: ${{ env.WEBUI_BRANCH }}
           default-branch: ${{ env.REFERENCE_BRANCH }}
 
   build-webui:
@@ -268,22 +271,8 @@ jobs:
 
       - name: Run Functional tests
         run: |
-          profiles=()
-          if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
-          then 
-            profiles+=('ftest') 
-          fi
-          if ${{ github.event.inputs.generate_metrics }}
-          then 
-            profiles+=('metrics') 
-          fi
-          active_profiles=""
-          if [ ${#profiles[@]} -gt 0 ] 
-          then
-            active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
-          fi
           pushd plugin-nuxeo-web-ui
-          mvn install -ntp $active_profiles -DskipInstall
+          mvn install -ntp -Pftest -DskipInstall
           popd
 
       - name: Archive reports
