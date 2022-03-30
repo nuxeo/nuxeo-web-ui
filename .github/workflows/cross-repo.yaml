@@ -44,8 +44,8 @@ jobs:
     name: Remote Caller ID ${{ github.event.inputs.caller_id }}
     runs-on: ubuntu-latest
     steps:
-      - name: ${{ github.event.inputs.id }}
-        run: echo run identifier ${{ github.event.inputs.id }}
+      - name: ${{ github.event.inputs.caller_id }}
+        run: echo run identifier ${{ github.event.inputs.caller_id }}
   setup:
     needs: id
     name: Setup
@@ -215,7 +215,7 @@ jobs:
         run: |
           pushd nuxeo-web-ui
           sed -i 's/10.10-HF[0-9]\{2\}-SNAPSHOT/10.10-HF${{ github.event.inputs.hf_version }}/g' pom.xml
-          mvn install -DskipInstall
+          mvn install -ntp -DskipInstall
           popd
 
       - uses: actions/upload-artifact@v2
@@ -274,7 +274,7 @@ jobs:
       - name: Build nuxeo-web-ui-itests package
         run: |
           pushd nuxeo-web-ui-itests
-          mvn clean install
+          mvn clean install -ntp
           popd
 
       - name: Checkout plugin-nuxeo-web-ui repo
@@ -315,7 +315,7 @@ jobs:
             active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
           fi
           pushd plugin-nuxeo-web-ui
-          mvn install $active_profiles -DskipInstall
+          mvn install $active_profiles -ntp -DskipInstall
           popd
 
       - name: Archive reports
