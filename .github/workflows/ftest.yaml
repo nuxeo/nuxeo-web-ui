@@ -3,16 +3,16 @@ name: Functional tests
 on:
   push:
     branches:
-      - 10.10
+      - '10.10'
   pull_request:
     branches:
-      - 10.10
+      - '10.10'
 
 env:
-  REFERENCE_BRANCH: 10.10
-  ELEMENTS_REFERENCE_BRANCH: maintenance-2.4.x
-  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  HF_VERSION: 56
+  REFERENCE_BRANCH: '10.10'
+  ELEMENTS_REFERENCE_BRANCH: 'maintenance-2.4.x'
+  NPM_REPOSITORY: 'https://packages.nuxeo.com/repository/npm-public/'
+  HF_VERSION: '56'
 
 jobs:
   setup:

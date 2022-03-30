@@ -32,7 +32,7 @@ on:
 env:
   REFERENCE_BRANCH: '10.10'
   ELEMENTS_REFERENCE_BRANCH: 'maintenance-2.4.x'
-  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  NPM_REPOSITORY: 'https://packages.nuxeo.com/repository/npm-public/'
 
 jobs:
   setup:
