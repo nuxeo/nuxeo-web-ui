@@ -123,7 +123,14 @@ jobs:
         CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
       run: |
         PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
-        curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
+        STATUS_CODE=`curl -i --silent --output publish-req.output -w "%{http_code}" -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"``
+        cat publish-req.output
+        if [[ "$STATUS_CODE" != "200" ]]
+        then
+          exit 1
+        else
+          exit 0
+        fi
 
     - name: Publish Web UI FTest framework
       env:
