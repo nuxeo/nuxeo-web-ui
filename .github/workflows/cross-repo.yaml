@@ -315,6 +315,7 @@ jobs:
             active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
           fi
           pushd plugin-nuxeo-web-ui
+          export UV_THREADPOOL_SIZE=128
           mvn install $active_profiles -ntp -DskipInstall
           popd
 
