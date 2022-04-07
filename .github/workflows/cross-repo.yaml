@@ -9,7 +9,7 @@ on:
         required: true
       hf_version:
         description: 'HF Version to replace in pom file (HACK)'
-        default: '56'
+        default: '59'
         required: false
       sauce_labs:
         description: 'Run unit tests on Sauce Labs?'
