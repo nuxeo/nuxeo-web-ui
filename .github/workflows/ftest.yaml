@@ -12,7 +12,7 @@ env:
   REFERENCE_BRANCH: '10.10'
   ELEMENTS_REFERENCE_BRANCH: 'maintenance-2.4.x'
   NPM_REPOSITORY: 'https://packages.nuxeo.com/repository/npm-public/'
-  HF_VERSION: '56'
+  HF_VERSION: '59'
   ELEMENTS_BRANCH: ${{ github.head_ref || 'maintenance-2.4.x' }}
   WEBUI_BRANCH: ${{ github.head_ref || '10.10' }}
   PLUGIN_BRANCH: ${{ github.head_ref || '2.4_10.10' }}
