@@ -106,7 +106,7 @@ Then('I can see {int} document(s)', function(numberOfResults) {
   results.waitForVisible();
 
   const { displayMode } = results;
-  results.resultsCount(displayMode).should.equal(numberOfResults);
+  driver.waitUntil(() => results.resultsCount(displayMode) === numberOfResults);
 });
 
 Then(/^I can see the permissions page$/, function() {
