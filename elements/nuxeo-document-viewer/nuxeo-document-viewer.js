@@ -111,7 +111,8 @@ Polymer({
       this.hasPermission(doc, 'WriteProperties') &&
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
-      !this.isTrashed(doc)
+      !this.isTrashed(doc) &&
+      this.hasSchema(doc, 'file')
     );
   },
 });
