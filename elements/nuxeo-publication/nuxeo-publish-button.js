@@ -78,7 +78,7 @@ Polymer({
       </div>
     </template>
 
-    <nuxeo-dialog id="publishDialog" modal opened="{{opened}}" no-auto-focus>
+    <nuxeo-dialog id="publishDialog" modal opened="{{opened}}">
       <paper-tabs selected="{{selectedTab}}" attr-for-selected="name" noink>
         <nuxeo-slot name="PUBLISH_ITEMS" model="[[publishContext]]"></nuxeo-slot>
       </paper-tabs>

@@ -44,7 +44,7 @@ Polymer({
       <paper-tooltip>[[i18n('deleteTemplateButton.tooltip')]]</paper-tooltip>
     </div>
 
-    <nuxeo-dialog id="dialog" modal no-auto-focus>
+    <nuxeo-dialog id="dialog" modal>
       <h2>[[i18n('deleteTemplateButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
         <div class="container horizontal layout">

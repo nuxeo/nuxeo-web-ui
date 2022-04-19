@@ -48,7 +48,7 @@ Polymer({
       <paper-tooltip>[[i18n(tooltip)]]</paper-tooltip>
     </div>
 
-    <nuxeo-dialog id="dialog" modal no-auto-focus>
+    <nuxeo-dialog id="dialog" modal>
       <h2>[[i18n('renderTemplateButton.dialog.heading')]]</h2>
       <paper-dialog-scrollable>
         <div class="container layout vertical">
@@ -81,7 +81,7 @@ Polymer({
       </div>
     </nuxeo-dialog>
 
-    <nuxeo-dialog id="editParamsDialog" modal no-auto-focus>
+    <nuxeo-dialog id="editParamsDialog" modal>
       <h2>[[i18n('renderTemplateButton.editParamsDialog.heading', selectedTemplate.properties.dc:title)]]</h2>
       <paper-dialog-scrollable>
         <div class="container layout vertical">

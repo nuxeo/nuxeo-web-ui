@@ -129,7 +129,7 @@ Polymer({
     </div>
 
     <template is="dom-if" if="[[!selectAllActive]]">
-      <nuxeo-dialog id="selectedItemsPopup" no-auto-focus with-backdrop>
+      <nuxeo-dialog id="selectedItemsPopup" with-backdrop>
         <h2>[[i18n('selectionToolbar.dialog.heading')]]</h2>
         <paper-dialog-scrollable>
           <template is="dom-repeat" items="[[selectedItems]]">
