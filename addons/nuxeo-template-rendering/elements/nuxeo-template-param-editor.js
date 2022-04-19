@@ -210,7 +210,7 @@ Polymer({
       </div>
     </iron-pages>
 
-    <nuxeo-dialog id="editParamDialog" modal no-auto-focus>
+    <nuxeo-dialog id="editParamDialog" modal>
       <iron-form id="form" on-iron-form-submit="_submitSaveParam">
         <form class="vertical flex">
           <div class="container vertical">

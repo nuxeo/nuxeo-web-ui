@@ -58,7 +58,7 @@ Polymer({
       </div>
     </template>
 
-    <nuxeo-dialog id="[[layout]]-dialog" no-auto-focus with-backdrop modal>
+    <nuxeo-dialog id="[[layout]]-dialog" with-backdrop modal>
       <div class="container">
         <nuxeo-document-form-layout
           id="layout"

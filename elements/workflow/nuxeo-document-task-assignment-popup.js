@@ -43,7 +43,7 @@ Polymer({
 
     <nuxeo-resource id="taskAssignment" path="/task/[[task.id]]/[[action]]" params="[[params]]"></nuxeo-resource>
 
-    <nuxeo-dialog id="assignmentDialog" with-backdrop no-auto-focus>
+    <nuxeo-dialog id="assignmentDialog" with-backdrop>
       <h2>[[i18n(task.name)]]</h2>
       <paper-dialog-scrollable>
         <iron-form id="assignmentForm">

@@ -98,7 +98,7 @@ Polymer({
       </nuxeo-data-table>
     </nuxeo-card>
 
-    <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
+    <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('cloudProviders.popup.editEntry')]]</h2>
       <iron-form id="form">
         <form>

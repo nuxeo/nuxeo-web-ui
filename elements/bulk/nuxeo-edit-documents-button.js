@@ -95,7 +95,7 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       ${super.template}
 
       <nuxeo-resource id="schema"></nuxeo-resource>
-      <nuxeo-dialog id="dialog" no-auto-focus with-backdrop modal>
+      <nuxeo-dialog id="dialog" with-backdrop modal>
         <iron-form id="form">
           <form>
             <div class="scrollable">

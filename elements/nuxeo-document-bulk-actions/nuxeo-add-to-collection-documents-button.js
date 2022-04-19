@@ -55,7 +55,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
 
       <nuxeo-operation op="Collection.Create" id="createCollectionOp"></nuxeo-operation>
 
-      <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
+      <nuxeo-dialog id="dialog" with-backdrop>
         <h2>[[i18n('addToCollectionDocumentsButton.dialog.heading')]]</h2>
         <paper-dialog-scrollable>
           <nuxeo-selectivity
