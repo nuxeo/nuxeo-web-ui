@@ -168,10 +168,10 @@ Polymer({
       <h5>[[i18n(label)]]</h5>
     </div>
 
-    <div class="content">
+    <div class="content" role="tree">
       <div class="parents" hidden$="[[_noPermission]]">
         <a href$="[[urlFor('document', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
-          <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
+          <span aria-hidden="true"><iron-icon icon="icons:chevron-left"></iron-icon></span>
           <span class="parent">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
@@ -183,13 +183,15 @@ Polymer({
       </div>
       <nuxeo-tree id="tree" data="[[document]]" controller="[[controller]]" node-key="uid">
         <template class="horizontal layout">
-          <template class="flex" is="dom-if" if="[[!isLeaf]]">
-            <paper-spinner active$="[[loading]]"></paper-spinner>
-            <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]"></iron-icon>
-          </template>
-          <span class="node-name flex">
-            <a href$="[[urlFor(item)]]">[[_title(item)]]</a>
-          </span>
+          <div role="treeitem" aria-expanded="[[opened]]">
+            <template class="flex" is="dom-if" if="[[!isLeaf]]">
+              <paper-spinner active$="[[loading]]" aria-hidden="true"></paper-spinner>
+              <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]" aria-hidden="true"></iron-icon>
+            </template>
+            <span class="node-name flex">
+              <a href$="[[urlFor(item)]]">[[_title(item)]]</a>
+            </span>
+          </div>
         </template>
       </nuxeo-tree>
       <div class="noPermission" hidden$="[[!_noPermission]]">[[i18n('browse.tree.noDocument')]]</div>
