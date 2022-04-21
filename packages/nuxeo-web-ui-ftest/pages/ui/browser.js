@@ -9,7 +9,7 @@ import DocumentTask from './browser/document_task';
 import DocumentFormLayout from './browser/document_form_layout';
 import Selection from './selection';
 import Results from './results';
-import { clickActionMenu, url } from '../helpers';
+import { clickActionMenu, refresh, url } from '../helpers';
 
 export default class Browser extends BasePage {
   documentPage(docType) {
@@ -127,9 +127,19 @@ export default class Browser extends BasePage {
       }
       try {
         const collections = page.elements('nuxeo-document-collections nuxeo-tag');
-        return collections.every((collection) => collection.getText().trim() !== name);
+        return collections.every((collection) => {
+          try {
+            if (!collection.isExisting()) {
+              return true;
+            }
+            collection.waitForDisplayed({ timeout: 20000 });
+            return collection.getText().trim() !== name;
+          } catch (e) {
+            return true;
+          }
+        });
       } catch (e) {
-        return false;
+        return true;
       }
     }, 'The document does belong to the collection');
     return true;
@@ -143,6 +153,10 @@ export default class Browser extends BasePage {
       }
       try {
         const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
+        if (collections.length === 0) {
+          refresh();
+          return false;
+        }
         return collections.some((collection) => collection.getText().trim() === name);
       } catch (e) {
         return false;
