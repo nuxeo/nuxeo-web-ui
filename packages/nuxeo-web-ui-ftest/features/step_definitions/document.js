@@ -240,7 +240,7 @@ Then('I add the document to the {string} collection', function(name) {
 });
 
 Then('I can see the document belongs to the {string} collection', function(name) {
-  driver.waitUntil(() => this.ui.browser.hasCollection(name).should.be.true);
+  this.ui.browser.hasCollection(name).should.be.true;
 });
 
 Then('I can delete the document from the {string} collection', function(name) {
