@@ -121,8 +121,8 @@ export default class Browser extends BasePage {
 
   doesNotHaveCollection(name) {
     const page = this.el;
-    driver.manage().setTimeouts({ implicit: 20000, pageLoad: 10000 });
     driver.waitUntil(() => {
+      driver.pause(1000);
       if (!driver.isExisting('nuxeo-document-collections')) {
         return true;
       }
@@ -138,8 +138,8 @@ export default class Browser extends BasePage {
 
   hasCollection(name) {
     const page = this.el;
-    driver.manage().setTimeouts({ implicit: 20000, pageLoad: 10000 });
     driver.waitUntil(() => {
+      driver.pause(1000);
       if (!driver.isExisting('nuxeo-document-collections')) {
         return false;
       }
