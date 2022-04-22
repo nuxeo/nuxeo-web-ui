@@ -121,35 +121,41 @@ export default class Browser extends BasePage {
 
   doesNotHaveCollection(name) {
     const page = this.el;
-    driver.waitUntil(() => {
-      driver.pause(5000);
-      if (!driver.isExisting('nuxeo-document-collections')) {
-        return true;
-      }
-      try {
-        const collections = page.elements('nuxeo-document-collections nuxeo-tag');
-        return collections.every((collection) => collection.getText().trim() !== name);
-      } catch (e) {
-        return false;
-      }
-    }, 'The document does belong to the collection');
+    driver.waitUntil(
+      () => {
+        if (!driver.isExisting('nuxeo-document-collections')) {
+          return true;
+        }
+        try {
+          const collections = page.elements('nuxeo-document-collections nuxeo-tag');
+          return collections.every((collection) => collection.getText().trim() !== name);
+        } catch (e) {
+          return false;
+        }
+      },
+      3000,
+      'The document does belong to the collection',
+    );
     return true;
   }
 
   hasCollection(name) {
     const page = this.el;
-    driver.waitUntil(() => {
-      driver.pause(5000);
-      if (!driver.isExisting('nuxeo-document-collections')) {
-        return false;
-      }
-      try {
-        const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
-        return collections.some((collection) => collection.getText().trim() === name);
-      } catch (e) {
-        return false;
-      }
-    }, 'The document does not belong to the collection');
+    driver.waitUntil(
+      () => {
+        if (!driver.isExisting('nuxeo-document-collections')) {
+          return false;
+        }
+        try {
+          const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
+          return collections.some((collection) => collection.getText().trim() === name);
+        } catch (e) {
+          return false;
+        }
+      },
+      3000,
+      'The document does not belong to the collection',
+    );
     return true;
   }
 
