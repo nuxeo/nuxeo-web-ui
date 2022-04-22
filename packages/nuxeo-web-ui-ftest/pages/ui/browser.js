@@ -133,8 +133,8 @@ export default class Browser extends BasePage {
           return false;
         }
       },
-      3000,
       'The document does belong to the collection',
+      60000,
     );
     return true;
   }
@@ -153,8 +153,8 @@ export default class Browser extends BasePage {
           return false;
         }
       },
-      3000,
       'The document does not belong to the collection',
+      60000,
     );
     return true;
   }
