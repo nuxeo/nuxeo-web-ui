@@ -128,8 +128,14 @@ export default class Browser extends BasePage {
         }
         try {
           const collections = page.elements('nuxeo-document-collections nuxeo-tag');
+          /* eslint-disable no-console */
+          console.log(collections);
+          /* eslint-enable no-console */
           return collections.every((collection) => collection.getText().trim() !== name);
         } catch (e) {
+          /* eslint-disable no-console */
+          console.log(e);
+          /* eslint-enable no-console */
           return false;
         }
       },
