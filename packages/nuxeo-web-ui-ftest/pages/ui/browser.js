@@ -151,7 +151,12 @@ export default class Browser extends BasePage {
       }
       try {
         const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
-        return collections.some((collection) => collection.getText().trim() === name);
+        return collections.some((collection) => {
+          if (!collection.isExisting()) {
+            return false;
+          }
+          return collection.getText().trim() === name;
+        });
       } catch (e) {
         return false;
       }
