@@ -131,7 +131,14 @@ export default class Browser extends BasePage {
           if (!collection.isExisting()) {
             return true;
           }
-          return collection.getText().trim() !== name;
+          try {
+            return collection.getText().trim() !== name;
+          } catch (e) {
+            /* eslint-disable no-console */
+            console.log(e);
+            /* eslint-enable no-console */
+            return true;
+          }
         });
       } catch (e) {
         /* eslint-disable no-console */
@@ -155,7 +162,14 @@ export default class Browser extends BasePage {
           if (!collection.isExisting()) {
             return false;
           }
-          return collection.getText().trim() === name;
+          try {
+            return collection.getText().trim() === name;
+          } catch (e) {
+            /* eslint-disable no-console */
+            console.log(e);
+            /* eslint-enable no-console */
+            return false;
+          }
         });
       } catch (e) {
         return false;
