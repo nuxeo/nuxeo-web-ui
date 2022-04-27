@@ -128,7 +128,7 @@ export default class Browser extends BasePage {
       try {
         const collections = page.elements('nuxeo-document-collections nuxeo-tag');
         return collections.every((collection) => {
-          if (!driver.isExisting(collection._selector)) {
+          if (!collection.isExisting()) {
             return true;
           }
           return collection.getText().trim() !== name;
