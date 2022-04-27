@@ -121,47 +121,45 @@ export default class Browser extends BasePage {
 
   doesNotHaveCollection(name) {
     const page = this.el;
-    driver.waitUntil(
-      () => {
-        if (!driver.isExisting('nuxeo-document-collections')) {
-          return true;
-        }
-        try {
-          const collections = page.elements('nuxeo-document-collections nuxeo-tag');
-          /* eslint-disable no-console */
-          console.log(collections);
-          /* eslint-enable no-console */
-          return collections.every((collection) => collection.getText().trim() !== name);
-        } catch (e) {
-          /* eslint-disable no-console */
-          console.log(e);
-          /* eslint-enable no-console */
-          return false;
-        }
-      },
-      'The document does belong to the collection',
-      60000,
-    );
+    driver.waitUntil(() => {
+      if (!driver.isExisting('nuxeo-document-collections')) {
+        return true;
+      }
+      try {
+        const collections = page.elements('nuxeo-document-collections nuxeo-tag');
+        /* eslint-disable no-console */
+        console.log(collections);
+        /* eslint-enable no-console */
+        return collections.every((collection) => collection.getText().trim() !== name);
+      } catch (e) {
+        /* eslint-disable no-console */
+        console.log(e);
+        /* eslint-enable no-console */
+        return false;
+      }
+    }, 'The document does belong to the collection');
     return true;
   }
 
   hasCollection(name) {
     const page = this.el;
-    driver.waitUntil(
-      () => {
-        if (!driver.isExisting('nuxeo-document-collections')) {
-          return false;
-        }
-        try {
-          const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
-          return collections.some((collection) => collection.getText().trim() === name);
-        } catch (e) {
-          return false;
-        }
-      },
-      'The document does not belong to the collection',
-      60000,
-    );
+    driver.waitUntil(() => {
+      if (!driver.isExisting('nuxeo-document-collections')) {
+        return false;
+      }
+      try {
+        const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
+        /* eslint-disable no-console */
+        console.log(collections);
+        /* eslint-enable no-console */
+        return collections.some((collection) => collection.getText().trim() === name);
+      } catch (e) {
+        /* eslint-disable no-console */
+        console.log(e);
+        /* eslint-enable no-console */
+        return false;
+      }
+    }, 'The document does not belong to the collection');
     return true;
   }
 
