@@ -187,6 +187,14 @@ exports.config = {
         args: { drivers },
       },
     ],
+    // [
+    //   'chromedriver',
+    //   {
+    //     // logFileName: 'wdio-chromedriver.log', // default
+    //     // outputDir: 'driver-logs', // overwrites the config.outputDir
+    //     // args: [ drivers ],
+    //   },
+    // ],
     [CompatService],
     [ShadowService],
   ],
