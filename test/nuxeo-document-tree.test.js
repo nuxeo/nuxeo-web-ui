@@ -29,6 +29,14 @@ import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icons/hardware-icons.js';
 import '../elements/nuxeo-document-tree/nuxeo-document-tree.js';
 
+let rootDocument;
+let levelOneDocuments;
+let levelTwoDocuments;
+let levelThreeDocuments;
+let levelOneDocument;
+let levelTwoDocument;
+let uidCounter;
+
 // mock the label for the document tree root
 window.nuxeo.I18n.language = 'en';
 window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
@@ -37,7 +45,8 @@ window.nuxeo.I18n.en['browse.root'] = 'Root';
 const jsonHeader = { 'Content-Type': 'application/json' };
 
 // generate a document for the tree
-const generateDocument = ({ uid, type, parentRef, parentPath, isFolderish }) => {
+const generateDocument = ({ type, parentRef, parentPath, isFolderish }) => {
+  const uid = uidCounter++;
   const doc = {
     'entity-type': 'document',
     repository: 'default',
@@ -85,25 +94,20 @@ const generatePageProviderResponse = (entries = []) => {
     isNextPageAvailable: false,
     isLastPageAvailable: false,
     isSortable: true,
-    totalSize: entries,
+    totalSize: entries.length,
     pageIndex: 0,
     pageCount: 1,
     entries,
   };
 };
 
-let rootDocument;
-let levelOneDocuments;
-let levelTwoDocuments;
-let levelThreeDocuments;
-
 /**
  * Mock router.
  * calling a global javascript function to prevent URL redirect.
  */
 const router = {
-  browse: (path) => `javascript:setLocationHref("${path.substring(1)}");`,
-  document: (path) => `javascript:setLocationHref("${path}");`,
+  browse: (path) => path.substring(1),
+  document: (path) => path,
 };
 
 const getTreeRoot = (el) => el.$$('nuxeo-tree-node#root');
@@ -118,7 +122,6 @@ const waitForTreeNodeLoading = async (tree, node = null) => {
   if (rootNode.loading) {
     await waitForAttrMutation(spinner, 'active', null);
   }
-  expect(isElementVisible(rootNode)).to.be.true;
   expect(rootNode.loading).to.be.false;
 };
 
@@ -127,14 +130,11 @@ const getDocumentByPath = (path) => {
   const parts = path.split('/');
   if (parts.length > 1) {
     document = levelOneDocuments.find((doc) => doc.title === parts[1]);
-    expect(document).to.be.not.null;
     if (parts.length > 2) {
       document = levelTwoDocuments.find((doc) => doc.title === parts[2]);
-      expect(document).to.be.not.null;
     }
     if (parts.length > 3) {
       document = levelThreeDocuments.find((doc) => doc.title === parts[3]);
-      expect(document).to.be.not.null;
     }
   } else {
     document = rootDocument;
@@ -147,37 +147,42 @@ suite('nuxeo-document-tree', () => {
   let documentTree;
 
   function setupDocuments() {
+    uidCounter = 1;
     // set up test documents
-    rootDocument = generateDocument({ uid: 1, type: 'Root', parentRef: '/', parentPath: '', isFolderish: true });
+    rootDocument = generateDocument({ type: 'Root', parentRef: '/', parentPath: '', isFolderish: true });
 
     // document definition for: root -> documents
     levelOneDocuments = [
-      generateDocument({ uid: '2', type: 'Folder', parentRef: '1', parentPath: '/', isFolderish: false }),
-      generateDocument({ uid: '3', type: 'Note', parentRef: '1', parentPath: '/', isFolderish: false }),
-      generateDocument({ uid: '4', type: 'Folder', parentRef: '1', parentPath: '/', isFolderish: true }),
+      generateDocument({ type: 'Folder', parentRef: '1', parentPath: '/', isFolderish: false }),
+      generateDocument({ type: 'Note', parentRef: '1', parentPath: '/', isFolderish: false }),
+      generateDocument({ type: 'Folder', parentRef: '1', parentPath: '/', isFolderish: true }),
     ];
+    // eslint-disable-next-line prefer-destructuring
+    levelOneDocument = levelOneDocuments[2];
 
     // document definition for: root -> documents -> documents
     levelTwoDocuments = [
-      generateDocument({ uid: '5', type: 'File', parentRef: '4', parentPath: '/Folder4', isFolderish: false }),
-      generateDocument({ uid: '6', type: 'Folder', parentRef: '4', parentPath: '/Folder4', isFolderish: true }),
+      generateDocument({ type: 'File', parentRef: '4', parentPath: '/Folder4', isFolderish: false }),
+      generateDocument({ type: 'Folder', parentRef: '4', parentPath: '/Folder4', isFolderish: true }),
     ];
+    // eslint-disable-next-line prefer-destructuring
+    levelTwoDocument = levelTwoDocuments[1];
 
     // document definition for: root -> documents -> documents -> documents
     levelThreeDocuments = [
-      generateDocument({ uid: '7', type: 'File', parentRef: '6', parentPath: '/Folder6/Folder7', isFolderish: false }),
-      generateDocument({ uid: '8', type: 'File', parentRef: '6', parentPath: '/Folder6/Folder8', isFolderish: false }),
+      generateDocument({ type: 'File', parentRef: '6', parentPath: '/Folder6/Folder7', isFolderish: false }),
+      generateDocument({ type: 'File', parentRef: '6', parentPath: '/Folder6/Folder8', isFolderish: false }),
     ];
 
     // set the breadcrumb for some documents
-    levelTwoDocuments[1].contextParameters.breadcrumb = {
+    levelTwoDocument.contextParameters.breadcrumb = {
       'entity-type': 'documents',
-      entries: [levelOneDocuments[2]],
+      entries: [levelOneDocument],
     };
 
     levelThreeDocuments[0].contextParameters.breadcrumb = {
       'entity-type': 'documents',
-      entries: [levelOneDocuments[2], levelTwoDocuments[1]],
+      entries: [levelOneDocument, levelTwoDocument],
     };
   }
 
@@ -208,8 +213,8 @@ suite('nuxeo-document-tree', () => {
       '/api/v1/search/pp/tree_children/execute?currentPageIndex=0&offset=0&pageSize=40&queryParams=6',
       [200, jsonHeader, JSON.stringify(generatePageProviderResponse(levelThreeDocuments))],
     );
-    server.respondWith('GET', '/api/v1/path/Folder4', [200, jsonHeader, JSON.stringify(levelOneDocuments[2])]);
-    server.respondWith('GET', '/api/v1/path/Folder4/Folder6', [200, jsonHeader, JSON.stringify(levelTwoDocuments[1])]);
+    server.respondWith('GET', '/api/v1/path/Folder4', [200, jsonHeader, JSON.stringify(levelOneDocument)]);
+    server.respondWith('GET', '/api/v1/path/Folder4/Folder6', [200, jsonHeader, JSON.stringify(levelTwoDocument)]);
   }
 
   setup(async () => {
@@ -228,13 +233,6 @@ suite('nuxeo-document-tree', () => {
     await flush();
     // wait for the tree to finish loading
     await waitForTreeNodeLoading(documentTree);
-
-    // assert that the nodes have been rendered
-    const nodes = getTreeNodes(documentTree);
-    assert.equal(nodes.length, 4, 'Tree nodes not loaded yet.');
-    nodes.forEach((node) => {
-      expect(isElementVisible(node)).to.be.true;
-    });
   });
 
   teardown(() => {
@@ -244,7 +242,7 @@ suite('nuxeo-document-tree', () => {
   suite('Interaction with the tree', () => {
     test('Should expand a Folderish document with children', async () => {
       // get the node
-      const node = getTreeNodeByUid(documentTree, '4');
+      const node = getTreeNodeByUid(documentTree, 4);
       // check the node is not expanded
       expect(node.opened).to.be.false;
       // assert the node is folderish and we can open it, because the icon is visible
@@ -259,7 +257,7 @@ suite('nuxeo-document-tree', () => {
 
       // assert that the node was opened and we have two new tree nodes
       const nodes = node.querySelectorAll('nuxeo-tree-node');
-      assert.equal(nodes.length, 2);
+      expect(nodes).to.have.length(2);
     });
 
     test('Cannot expand a document without children', async () => {
@@ -274,11 +272,12 @@ suite('nuxeo-document-tree', () => {
 
     test('Icons should be updated due to tree node expansion', async () => {
       // get the node
-      const node = getTreeNodeByUid(documentTree, '4');
+      const node = getTreeNodeByUid(documentTree, 4);
       // assert the node is folderish and we can open it
       const icon = node.querySelector('iron-icon');
-      const iconName = icon.icon;
+      let iconName = icon.icon;
       expect(isElementVisible(icon)).to.be.true;
+      expect(iconName).to.be.equal('hardware:keyboard-arrow-right');
       // check it is not expanded
       expect(node.opened).to.be.false;
       // icon name should not be empty
@@ -289,8 +288,9 @@ suite('nuxeo-document-tree', () => {
       expect(node.opened).to.be.true;
       // icon should have been updated to something different
       const openedIcon = node.querySelector('iron-icon');
-      expect(openedIcon.icon).to.be.not.empty;
-      expect(iconName).to.be.not.equal(openedIcon.icon);
+      iconName = openedIcon.icon;
+      expect(iconName).to.be.not.empty;
+      expect(iconName).to.be.equal('hardware:keyboard-arrow-down');
     });
 
     test('Tree breadcrumb is present', async () => {
@@ -304,50 +304,48 @@ suite('nuxeo-document-tree', () => {
       // check that there are only three nodes (two children and the ancestor)
       const nodes = getTreeNodes(documentTree);
       expect(nodes).to.be.not.null;
-      assert.equal(nodes.length, 3, 'Tree should have 3 nodes.');
-      [...levelThreeDocuments, levelTwoDocuments[1]].forEach((document) => {
+      expect(nodes).to.have.length(3);
+      [...levelThreeDocuments, levelTwoDocument].forEach((document) => {
         const node = getTreeNodeByUid(documentTree, document.uid);
         expect(node).to.be.not.null;
         expect(isElementVisible(node)).to.be.true;
       });
       // assert that we have one parent only and it is visible
       expect(documentTree.parents).to.be.not.empty;
-      assert.equal(documentTree.parents.length, 1);
-      assert.equal(documentTree.parents[0].uid, '4');
-      isElementVisible(documentTree.$$('.parents'));
+      expect(documentTree.parents).to.have.length(1);
+      expect(documentTree.parents[0].uid).to.be.equal(4);
+      isElementVisible(documentTree.shadowRoot.querySelector('.parents'));
     });
 
     test('Tree should collapse when clicking on a document', async () => {
-      // XXX - add a function to call when clicking on a document and prevent browser redirect
-      window.setLocationHref = (path) => {
-        documentTree.currentDocument = getDocumentByPath(path);
-      };
-
       // expand the nodes to reach the leaf (expanding two levels)
-      let node = getTreeNodeByUid(documentTree, '4');
+      let node = getTreeNodeByUid(documentTree, 4);
       tap(node.querySelector('iron-icon'));
       // node should now be opened
       expect(node.opened).to.be.true;
       await flush();
       await waitForTreeNodeLoading(documentTree, node);
-      node = getTreeNodeByUid(documentTree, '6');
+      node = getTreeNodeByUid(documentTree, 6);
       tap(node.querySelector('iron-icon'));
       expect(node.opened).to.be.true;
       await flush();
       await waitForTreeNodeLoading(documentTree, node);
 
-      // XXX - update the href to prevent redirect
+      // add an event listener to intercept the click event and prevent url redirect
       let nodes = getTreeNodes(documentTree);
       expect(nodes).to.be.not.null;
-      assert.equal(nodes.length, 8, 'There are nodes missing in the tree.');
+      expect(nodes).to.have.length(8);
       nodes.forEach((n) => {
         const anchor = n.querySelector('.node-name a');
-        anchor.setAttribute('href', anchor.href.substring(anchor.href.indexOf('javascript'), anchor.href.length));
+        anchor.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          documentTree.currentDocument = getDocumentByPath(new URL(ev.target.href).pathname);
+        });
       });
-      const nodeToClick = getTreeNodeByUid(documentTree, '7');
+      const nodeToClick = getTreeNodeByUid(documentTree, 7);
       expect(nodeToClick).to.be.not.null;
       // click the anchor
-      nodeToClick.querySelector('a').click();
+      tap(nodeToClick.querySelector('a'));
 
       await flush();
       await waitForChildListMutation(documentTree.$.tree);
@@ -356,17 +354,17 @@ suite('nuxeo-document-tree', () => {
       // check that there are only three nodes (two children and the ancestor)
       nodes = getTreeNodes(documentTree);
       expect(nodes).to.be.not.null;
-      assert.equal(nodes.length, 3, 'Tree should have 3 nodes.');
-      [...levelThreeDocuments, levelTwoDocuments[1]].forEach((document) => {
+      expect(nodes).to.have.length(3);
+      [...levelThreeDocuments, levelTwoDocument].forEach((document) => {
         const n = getTreeNodeByUid(documentTree, document.uid);
         expect(n).to.be.not.null;
         expect(isElementVisible(n)).to.be.true;
       });
       // assert that we have one parent only and it is visible
       expect(documentTree.parents).to.be.not.empty;
-      assert.equal(documentTree.parents.length, 1);
-      assert.equal(documentTree.parents[0].uid, '4');
-      isElementVisible(documentTree.$$('.parents'));
+      expect(documentTree.parents).to.have.length(1);
+      expect(documentTree.parents[0].uid).to.be.equal(4);
+      isElementVisible(documentTree.shadowRoot.querySelector('.parents'));
     });
   });
 
@@ -386,7 +384,7 @@ suite('nuxeo-document-tree', () => {
 
       // assert that the nodes were correctly removed
       const nodes = getTreeNodes(documentTree);
-      assert.equal(nodes.length, 2, 'Nodes were not removed from the tree.');
+      expect(nodes).to.have.length(2);
       documentsToDelete.forEach((document) => {
         const nonExistentNode = getTreeNodeByUid(documentTree, document.uid);
         expect(nonExistentNode).to.be.null;
@@ -420,7 +418,7 @@ suite('nuxeo-document-tree', () => {
 
       // assert that we have an extra node in the tree and it is the correct one
       const nodes = getTreeNodes(documentTree);
-      assert.equal(nodes.length, 5, 'Nodes were not correctly added to the tree.');
+      expect(nodes).to.have.length(5);
       const node = getTreeNodeByUid(documentTree, document.uid);
       expect(node).to.be.not.null;
       expect(isElementVisible(node)).to.be.true;
@@ -446,11 +444,11 @@ suite('nuxeo-document-tree', () => {
 
       // check we still have all the tree nodes
       const nodes = getTreeNodes(documentTree);
-      assert.equal(nodes.length, 4, 'There are missing nodes in the tree.');
+      expect(nodes).to.have.length(4);
       // assert the node has the updated title
       const node = Array.from(nodes).find((n) => n.data.title === title);
       expect(node).to.be.not.null;
-      assert.equal(node.querySelector('.node-name').textContent.trim(), title);
+      expect(node.querySelector('.node-name').textContent.trim()).to.be.equal(title);
     });
   });
 });
