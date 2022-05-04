@@ -129,10 +129,16 @@ export default class Browser extends BasePage {
         const collections = page.elements('nuxeo-document-collections nuxeo-tag');
         return collections.every((collection) => {
           try {
-            if (!collection.isExisting() || !collection.isVisible()) {
+            if (!collection.isExisting()) {
+              /* eslint-disable no-console */
+              console.log('doesnt exist');
+              /* eslint-enable no-console */
               return true;
             }
             collection.waitForDisplayed({ timeout: 20000 });
+            /* eslint-disable no-console */
+            console.log('is displayed');
+            /* eslint-enable no-console */
             return collection.getText().trim() !== name;
           } catch (e) {
             /* eslint-disable no-console */
@@ -161,10 +167,16 @@ export default class Browser extends BasePage {
         const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
         return collections.some((collection) => {
           try {
-            if (!collection.isExisting() || !collection.isVisible()) {
+            if (!collection.isExisting()) {
+              /* eslint-disable no-console */
+              console.log('doesnt exist');
+              /* eslint-enable no-console */
               return false;
             }
             collection.waitForDisplayed({ timeout: 20000 });
+            /* eslint-disable no-console */
+            console.log('is displayed');
+            /* eslint-enable no-console */
             return collection.getText().trim() === name;
           } catch (e) {
             /* eslint-disable no-console */
