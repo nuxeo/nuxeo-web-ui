@@ -7,6 +7,7 @@ Feature: Collections
     And I browse to the document
     And I add the document to the "MyCollection" collection
 
+  @watch
   Scenario: From browser, add document to a collection and remove it
     Then I can see the document belongs to the "MyCollection" collection
     And I can delete the document from the "MyCollection" collection
@@ -23,6 +24,7 @@ Feature: Collections
     And I can remove the document from the collection queue
     And I can see the collection queue does not have the document
 
+  @watch
   Scenario: Add documents to a collection
     Given I have the following documents
       | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
