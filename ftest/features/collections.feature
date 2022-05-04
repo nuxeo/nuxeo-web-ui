@@ -23,6 +23,7 @@ Feature: Collections
     And I can remove the document from the collection queue
     And I can see the collection queue does not have the document
 
+  @watch
   Scenario: Add documents to a collection
     Given I have the following documents
       | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
