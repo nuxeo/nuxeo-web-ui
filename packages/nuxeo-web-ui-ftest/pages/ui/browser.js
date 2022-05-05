@@ -163,8 +163,13 @@ export default class Browser extends BasePage {
             refresh();
             return false;
           }
-          collection.waitForDisplayed({ timeout: 20000 });
-          return collections.some((collection) => collection.getText().trim() === name);
+          return collections.some((collection) => {
+            if (!collection.isExisting()) {
+              return false;
+            }
+            collection.waitForDisplayed({ timeout: 20000 });
+            return collection.getText().trim() === name;
+          });
         } catch (e) {
           return false;
         }
