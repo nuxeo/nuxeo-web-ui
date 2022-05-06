@@ -34,6 +34,8 @@ jobs:
   preview:
     needs: id
     name: Setup
+    outputs:
+      url: ${{ steps.preview.outputs.url }}
     if: (github.event.action == 'labeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -159,6 +161,8 @@ jobs:
         
         echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
 
+        echo ::set-output name=url::"https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com"
+
     - uses: actions/github-script@0.9.0
       if: github.event_name == 'pull_request'
       with:
@@ -176,6 +180,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - name: "Result: ${process.env.PREVIEW_URL}"
+      - name: "Result: ${{ needs.preview.outputs.url }}"
         run: |
-          echo ${process.env.PREVIEW_URL}
+          echo ${{ needs.preview.outputs.url }}

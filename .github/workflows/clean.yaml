@@ -1,6 +1,11 @@
 name: Cleanup
 
 on:
+  pull_request:
+    types: [closed, unlabeled]
+    branches:
+      - maintenance-3.0.x
+
   workflow_dispatch:
     inputs:
       branch_name:
@@ -18,15 +23,29 @@ env:
   GKE_ZONE: us-east1-b
 
 jobs:
+  id:
+    name: Remote Caller ID ${{ github.event.inputs.caller_id }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ${{ github.event.inputs.id }}
+        run: echo run identifier ${{ github.event.inputs.id }}
   cleanup:
+    needs: id
     name: Preview
-    if: (github.event.action == 'unlabeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview')
+    if: (github.event.action == 'unlabeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
 
-    - name: Prepare environment
+    - name: Prepare environment (pull_request)
+      if: github.event_name == 'pull_request'
       run: |
         BRANCH_NAME=${GITHUB_HEAD_REF##*/}
+        echo "PREVIEW_NAMESPACE=nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+    - name: Prepare environment (workflow_dispatch)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        BRANCH_NAME=${{ github.event.inputs.branch_name }}
         echo "PREVIEW_NAMESPACE=nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
     - name: Get GKE credentials
