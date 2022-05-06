@@ -1,22 +1,17 @@
-name: Preview
+name: Provision preview environment
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled]
-    branches:
-      - maintenance-3.0.x
-
-  workflow_dispatch:
+  workflow_call:
     inputs:
       branch_name:
-        description: 'The name of the branch to preview.'
+        description: 'The branch to provision a preview'
         default: 'maintenance-3.0.x'
         required: true
-      caller_id:
-        description: 'run identifier'
-        default: 'maintenance-3.0.x'
         type: string
-        required: false
+    outputs:
+      url:
+        description: 'The preview url'
+        value: ${{ jobs.preview.outputs.url }}
 
 env:
   DOCKER_REGISTRY: us-east1-docker.pkg.dev
@@ -25,17 +20,11 @@ env:
   GKE_ZONE: us-east1-b
 
 jobs:
-  id:
-    name: Remote Caller ID ${{ github.event.inputs.caller_id }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: ${{ github.event.inputs.id }}
-        run: echo run identifier ${{ github.event.inputs.id }}
   preview:
-    needs: id
     name: Setup
-    if: (github.event.action == 'labeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.preview.outputs.url }}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
@@ -44,30 +33,22 @@ jobs:
         registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
         scope: '@nuxeo'
 
-    - name: Setup branch name (pull_request)
-      if: github.event_name == 'pull_request'
-      run: |
-        BRANCH_NAME=${GITHUB_HEAD_REF##*/}
-        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-
-    - name: Setup branch name (workflow_dispatch)
-      if: github.event_name == 'workflow_dispatch'
-      run: |
-        BRANCH_NAME=${{ github.event.inputs.branch_name }}
-        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-
     - name: Prepare environment
       run: |
+        BRANCH_NAME=${{ inputs.branch_name }}
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
         echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME" >> $GITHUB_ENV
         echo "PREVIEW_NAMESPACE=nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
+    # TODO - replace this with get-branch
     - name: Determine nuxeo-elements branch to use
       id: pick_nuxeo_elements_branch
-      uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
-      with:
-        repository: nuxeo/nuxeo-elements
-        branch: $BRANCH_NAME
-        default-branch: maintenance-3.0.x
+      run: |
+        if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ inputs.branch_name }}; then
+          echo ::set-output name=branch::${{ inputs.branch_name }}
+        else
+          echo ::set-output name=branch::maintenance-3.0.x
+        fi
 
     - name: Checkout the nuxeo-elements repo
       uses: actions/checkout@v2
@@ -159,23 +140,4 @@ jobs:
         
         echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
 
-    - uses: actions/github-script@0.9.0
-      if: github.event_name == 'pull_request'
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: `:star: PR built and available [here](${process.env.PREVIEW_URL})`
-          })
-
-  result:
-    needs: preview
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - name: "Result: ${process.env.PREVIEW_URL}"
-        run: |
-          echo ${process.env.PREVIEW_URL}
+        echo ::set-output name=url::"https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com"
