@@ -118,7 +118,7 @@ class CloudConsumers extends mixinBehaviors([NotifyBehavior, FormatBehavior], Nu
         </nuxeo-data-table>
       </nuxeo-card>
 
-      <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
+      <nuxeo-dialog id="dialog" with-backdrop>
         <h2>[[i18n('cloudConsumersEdit.popup.editEntry')]]</h2>
         <iron-form id="form">
           <form>

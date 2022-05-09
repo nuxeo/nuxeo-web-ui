@@ -92,7 +92,7 @@ class OAuth2ProvidedTokens extends mixinBehaviors([TokenBehavior, FormatBehavior
       </nuxeo-data-table-column>
     </nuxeo-data-table>
 
-    <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
+    <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('cloudTokens.popup.editEntry')]]</h2>
         <iron-form id="form">
           <form>

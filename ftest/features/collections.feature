@@ -7,6 +7,7 @@ Feature: Collections
     And I browse to the document
     And I add the document to the "MyCollection" collection
 
+  @watch
   Scenario: From browser, add document to a collection and remove it
     Then I can see the document belongs to the "MyCollection" collection
     And I can delete the document from the "MyCollection" collection

@@ -9,7 +9,7 @@ import DocumentTask from './browser/document_task';
 import DocumentFormLayout from './browser/document_form_layout';
 import Selection from './selection';
 import Results from './results';
-import { clickActionMenu, url } from '../helpers';
+import { clickActionMenu, refresh, url } from '../helpers';
 
 export default class Browser extends BasePage {
   documentPage(docType) {
@@ -121,77 +121,63 @@ export default class Browser extends BasePage {
 
   doesNotHaveCollection(name) {
     const page = this.el;
-    driver.waitUntil(() => {
-      if (!driver.isExisting('nuxeo-document-collections')) {
-        return true;
-      }
-      try {
-        const collections = page.elements('nuxeo-document-collections nuxeo-tag');
-        return collections.every((collection) => {
-          try {
-            if (!collection.isExisting()) {
-              /* eslint-disable no-console */
-              console.log('doesnt exist');
-              /* eslint-enable no-console */
+    driver.waitUntil(
+      () => {
+        if (!driver.isExisting('nuxeo-document-collections')) {
+          return true;
+        }
+        try {
+          const collections = page.elements('nuxeo-document-collections nuxeo-tag');
+          return collections.every((collection) => {
+            try {
+              if (!collection.isExisting()) {
+                return true;
+              }
+              collection.waitForDisplayed({ timeout: 20000 });
+              return collection.getText().trim() !== name;
+            } catch (e) {
               return true;
             }
-            collection.waitForDisplayed({ timeout: 20000 });
-            /* eslint-disable no-console */
-            console.log('is displayed');
-            /* eslint-enable no-console */
-            return collection.getText().trim() !== name;
-          } catch (e) {
-            /* eslint-disable no-console */
-            console.log(e);
-            /* eslint-enable no-console */
-            return true;
-          }
-        });
-      } catch (e) {
-        /* eslint-disable no-console */
-        console.log(e);
-        /* eslint-enable no-console */
-        return true;
-      }
-    }, 'The document does belong to the collection');
+          });
+        } catch (e) {
+          return true;
+        }
+      },
+      {
+        timeoutMsg: 'The document does belong to the collection',
+      },
+    );
     return true;
   }
 
   hasCollection(name) {
     const page = this.el;
-    driver.waitUntil(() => {
-      if (!driver.isExisting('nuxeo-document-collections')) {
-        return false;
-      }
-      try {
-        const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
-        return collections.some((collection) => {
-          try {
+    driver.waitUntil(
+      () => {
+        if (!driver.isExisting('nuxeo-document-collections')) {
+          return false;
+        }
+        try {
+          const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
+          if (collections.length === 0) {
+            refresh();
+            return false;
+          }
+          return collections.some((collection) => {
             if (!collection.isExisting()) {
-              /* eslint-disable no-console */
-              console.log('doesnt exist');
-              /* eslint-enable no-console */
               return false;
             }
             collection.waitForDisplayed({ timeout: 20000 });
-            /* eslint-disable no-console */
-            console.log('is displayed');
-            /* eslint-enable no-console */
             return collection.getText().trim() === name;
-          } catch (e) {
-            /* eslint-disable no-console */
-            console.log(e);
-            /* eslint-enable no-console */
-            return false;
-          }
-        });
-      } catch (e) {
-        /* eslint-disable no-console */
-        console.log(e);
-        /* eslint-enable no-console */
-        return false;
-      }
-    }, 'The document does not belong to the collection');
+          });
+        } catch (e) {
+          return false;
+        }
+      },
+      {
+        timeoutMsg: 'The document does not belong to the collection',
+      },
+    );
     return true;
   }
 
