@@ -10,6 +10,7 @@ Feature: Collections
   Scenario: From browser, add document to a collection and remove it
     Then I can see the document belongs to the "MyCollection" collection
     And I can delete the document from the "MyCollection" collection
+    And I see a toast notification with the following message "Documents removed from collection"
     And I can see the document does not belong to the "MyCollection" collection
 
   Scenario: Browse collections
@@ -33,6 +34,7 @@ Feature: Collections
     And I select the "File1" document
     And I select the "File2" document
     Then I can add selection to the "New Collection" collection
+    And I see a toast notification with the following message "Documents added to collection"
     When I browse to the document with path "/default-domain/ws/File1"
     Then I can see the document belongs to the "New Collection" collection
     When I browse to the document with path "/default-domain/ws/File2"
