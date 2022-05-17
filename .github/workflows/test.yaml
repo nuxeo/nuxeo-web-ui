@@ -1,9 +1,9 @@
 name: Test
 
 on:
-  pull_request:
-    branches:
-      - maintenance-3.0.x
+  # pull_request:
+  #   branches:
+  #     - maintenance-3.0.x
   workflow_call:
     inputs:
       branch:
