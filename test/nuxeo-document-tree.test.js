@@ -217,11 +217,7 @@ suite('nuxeo-document-tree', () => {
     server.respondWith('GET', '/api/v1/path/Folder4/Folder6', [200, jsonHeader, JSON.stringify(levelTwoDocument)]);
   }
 
-  setup(async () => {
-    server = await login();
-    setupDocuments();
-    setupServerResponses();
-
+  async function setupFixture() {
     // create the document tree
     documentTree = await fixture(
       html`
@@ -233,6 +229,12 @@ suite('nuxeo-document-tree', () => {
     await flush();
     // wait for the tree to finish loading
     await waitForTreeNodeLoading(documentTree);
+  }
+
+  setup(async () => {
+    server = await login();
+    setupDocuments();
+    setupServerResponses();
   });
 
   teardown(() => {
@@ -240,6 +242,8 @@ suite('nuxeo-document-tree', () => {
   });
 
   suite('Interaction with the tree', () => {
+    setup(async () => setupFixture());
+
     test('Should expand a Folderish document with children', async () => {
       // get the node
       const node = getTreeNodeByUid(documentTree, 4);
@@ -369,6 +373,8 @@ suite('nuxeo-document-tree', () => {
   });
 
   suite('Updating the tree', () => {
+    setup(async () => setupFixture());
+
     test('Should update the tree when a document is removed', async () => {
       // fire the event to remove the documents from the tree
       const documentsToDelete = levelOneDocuments.slice(0, 2);
