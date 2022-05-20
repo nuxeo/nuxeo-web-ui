@@ -14,16 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import {
-  fixture,
-  flush,
-  html,
-  isElementVisible,
-  login,
-  tap,
-  waitForAttrMutation,
-  waitForChildListMutation,
-} from '@nuxeo/testing-helpers';
+import { fixture, flush, html, isElementVisible, login, tap, waitForChildListMutation } from '@nuxeo/testing-helpers';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icons/hardware-icons.js';
@@ -118,11 +109,9 @@ const getTreeNodeByUid = (el, uid) => el.shadowRoot.querySelector(`nuxeo-tree-no
 const waitForTreeNodeLoading = async (tree, node = null) => {
   const rootNode = node || getTreeRoot(tree);
   const spinner = getNodeLoadingSpinner(rootNode);
-  expect(isElementVisible(rootNode)).to.be.true;
-  if (rootNode.loading) {
-    await waitForAttrMutation(spinner, 'active', null);
+  if (isElementVisible(rootNode) && rootNode.loading && !spinner.getAttribute('active')) {
+    await waitForChildListMutation(rootNode.querySelector('#children'));
   }
-  expect(rootNode.loading).to.be.false;
 };
 
 const getDocumentByPath = (path) => {
