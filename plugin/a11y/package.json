@@ -23,6 +23,8 @@
     "@wdio/sync": "^7.2.0",
     "axe-core": "^4.1.2",
     "chrome-launcher": "^0.14.0",
+    "expect": "27.5.1",
+    "expect-webdriverio": "3.3.1",
     "node-fetch": "^2.6.1",
     "wdio-chromedriver-service": "^7.0.0"
   }
