@@ -1395,6 +1395,9 @@ Polymer({
         }
         defaultAction();
       };
+      // XXX: needs refactoring, just copes with API changes
+      // for some reason, the dismiss callback is invoked with this being the slot and not the toast; might be a bug
+      toast.mdcRoot.querySelector('slot[name="dismiss"]').mdcFoundation = toast.mdcFoundation;
     });
     // set the initial state of the snackbar
     toast.__state = {};
