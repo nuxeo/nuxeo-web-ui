@@ -26,7 +26,7 @@ Feature: Content Preview
   Scenario: Previewer for Note document
     When I have a Text Note
     And I browse to the document
-    Then I can see the inline marked-element previewer
+    Then I can see the inline plain previewer
 
   Scenario Outline: Previewer for File document with different types of blobs as content
     When I have a File document

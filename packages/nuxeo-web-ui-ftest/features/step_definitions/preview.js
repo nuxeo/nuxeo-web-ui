@@ -20,6 +20,10 @@ Then(/^I can see the inline ([-\w]+) previewer$/, function(viewerType) {
   page.view.waitForVisible();
   const { preview } = page.view;
   preview.waitForVisible();
+  if (viewerType === 'plain') {
+    preview.waitForVisible(`#${viewerType}`);
+    return;
+  }
   preview.waitForVisible(viewerType);
 });
 
