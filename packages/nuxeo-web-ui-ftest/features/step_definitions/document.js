@@ -222,8 +222,14 @@ Then(/^I can edit the (.*) Note$/, function(format) {
       page.view.preview.waitForVisible();
       driver.waitUntil(() => {
         try {
-          const elContent =
-            format === 'XML' ? page.view.preview.element('#xml') : page.view.preview.element('marked-element #content');
+          let elContent;
+          if (format === 'XML') {
+            elContent = page.view.preview.element('#xml');
+          } else if (format === 'Text') {
+            elContent = page.view.preview.element('#plain');
+          } else {
+            elContent = page.view.preview.element('marked-element #content');
+          }
           return elContent.isVisible() && elContent.getText() === newContent;
         } catch (e) {
           return false;
