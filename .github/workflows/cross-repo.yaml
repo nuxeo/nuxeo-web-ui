@@ -66,6 +66,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: '12'
           scope: '@nuxeo'
       
       - uses: actions/setup-java@v2
