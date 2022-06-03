@@ -63,9 +63,10 @@ jobs:
       - name: Build parameters
         run: echo '${{ toJSON(github.event.inputs) }}'
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: 14
           scope: '@nuxeo'
       
       - uses: actions/setup-java@v2
