@@ -1,3 +1,4 @@
+
 Feature: Create Document
 
   I can create a Document
@@ -15,6 +16,7 @@ Feature: Create Document
     And I create a document with the following properties:
       | name         | value             |
       | title        | my title          |
+      | source       | my source         |
       | description  | my description    |
       | nature       | Application       |
       | subjects     | Gastronomy,Comics |
@@ -24,6 +26,7 @@ Feature: Create Document
     And I can see <doctype> metadata with the following properties:
       | name         | value                            |
       | title        | my title                         |
+      | source       | my source                        |  
       | description  | my description                   |
       | nature       | Application                      |
       | subjects     | Daily life/Gastronomy,Art/Comics |
