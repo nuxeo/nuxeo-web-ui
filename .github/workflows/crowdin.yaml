@@ -37,10 +37,9 @@ jobs:
           translation: 'i18n/messages-%two_letters_code%.json'
           # translation: 'i18n/messages-%locale%.json'
           skip_untranslated_files: true
-          export_only_approved: true
 
           # Auto-approve reference sentences we are pushing (english)
-          # auto_approve_imported: true
+          auto_approve_imported: true
 
           # Name of the branch to create for the PR
           localization_branch_name: crowdin-translations-update
