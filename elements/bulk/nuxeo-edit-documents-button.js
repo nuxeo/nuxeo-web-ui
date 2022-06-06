@@ -202,7 +202,7 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
   }
 
   static get observers() {
-    return ['_loadLayout(layout, hrefFunction, hrefBase)'];
+    return ['_loadLayout(layout, hrefFunction, hrefBase, documents)'];
   }
 
   constructor() {
@@ -430,14 +430,10 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
    * Loads the bulk edit layout.
    */
   _loadLayout(layout, hrefFunction, hrefBase) {
-    const { href } = this.$$('nuxeo-layout');
+    this._set_href(null);
     const base = hrefBase || pathFromUrl(this.__dataHost.importPath || this.importPath);
     const path = [base, hrefFunction(layout)].join(base.slice(-1) !== '/' ? '/' : '');
-    if (href !== path) {
-      // force layout restamp
-      this._set_href(null);
-      this._set_href(path);
-    }
+    this._set_href(path);
   }
 
   /**
