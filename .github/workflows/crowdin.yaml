@@ -36,7 +36,7 @@ jobs:
           # https://support.crowdin.com/configuration-file/#placeholders
           translation: 'i18n/messages-%two_letters_code%.json'
           # translation: 'i18n/messages-%locale%.json'
-          skip_untranslated_files: true
+          # skip_untranslated_files: true
           export_only_approved: true
 
           # Auto-approve reference sentences we are pushing (english)
