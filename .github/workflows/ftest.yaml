@@ -123,6 +123,13 @@ jobs:
           name: cucumber-reports
           path: ftest/target/cucumber-reports/
 
+      - name: Archive screenshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: screenshots
+          path: ftest/target/screenshots/
+
       - name: Archive logs
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
