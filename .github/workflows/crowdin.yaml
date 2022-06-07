@@ -34,8 +34,8 @@ jobs:
 
           source: 'i18n/messages.json'
           # https://support.crowdin.com/configuration-file/#placeholders
-          translation: 'i18n/messages-%two_letters_code%.json'
-          # translation: 'i18n/messages-%locale%.json'
+          # translation: 'i18n/messages-%two_letters_code%.json'
+          translation: 'i18n/messages-%locale%.json'
           # skip_untranslated_files: true
 
           # Auto-approve reference sentences we are pushing (english)
