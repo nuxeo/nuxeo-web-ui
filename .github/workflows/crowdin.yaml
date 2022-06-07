@@ -1,0 +1,64 @@
+name: Crowdin
+
+on:
+  # Check for updates every day
+  # schedule:
+  #   - cron: '0 0 * * *'
+
+  # Sync when a commit is done on maintenance-3.0.x
+  push:
+    branches:
+      - maintenance-3.0.x
+    paths:
+      - 'i18n/messages.json'
+
+  # XXX for testing only
+  pull_request:
+    branches:
+      - maintenance-3.0.x
+
+jobs:
+  crowdin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Crowdin Action
+        uses: crowdin/github-action@1.4.9
+        with:
+          # Tokens
+          project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
+          token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+          source: 'i18n/messages.json'
+          # https://support.crowdin.com/configuration-file/#placeholders
+          # translation: 'i18n/messages-%two_letters_code%.json'
+          translation: 'i18n/messages-%locale%.json'
+          # skip_untranslated_files: true
+
+          # Auto-approve reference sentences we are pushing (english)
+          auto_approve_imported: true
+
+          # Name of the branch to create for the PR
+          localization_branch_name: crowdin-translations-update
+
+          commit_message: 'Automatic update of translations from Crowdin'
+
+          # Create a branch and a PR on any changes
+          pull_request_base_branch_name: WEBUI-33-crowdin-gh-actions
+          download_translations: true
+          create_pull_request: true
+
+          # Set PR labels
+          pull_request_labels: 'translations'
+
+          # User properties
+          github_user_name: nuxeo-web-ui-jx-bot
+          github_user_email: ui+jx-bot@nuxeo.com
+
+          # For testing purposes
+          # dryrun_action: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
