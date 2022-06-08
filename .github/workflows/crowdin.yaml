@@ -1,0 +1,120 @@
+name: Crowdin
+
+on:
+  # Check for updates every day
+  # schedule:
+  #   - cron: '0 0 * * *'
+
+  # Sync when a commit is done on maintenance-3.0.x
+  push:
+    branches:
+      - maintenance-3.0.x
+    paths:
+      - 'i18n/messages.json'
+
+  # XXX for testing only
+  pull_request:
+    branches:
+      - maintenance-3.0.x
+
+jobs:
+  # sync:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout Nuxeo Web UI
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: nuxeo/nuxeo-web-ui
+  #         path: nuxeo-web-ui
+
+  #     - name: Checkout Nuxeo Crowdin Sync
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: nuxeo/tools-nuxeo-crowdin
+  #         path: tools-nuxeo-crowdin
+
+  #     - uses: actions/setup-python@v3
+  #       with:
+  #         python-version: '2.x' 
+
+  #     - name: Crowdin Sync
+        # shell: bash
+        # env:
+        #   CROWDIN_API_KEY: ${{ secrets.CROWDIN_API_KEY }}
+        #   CROWDIN_USER: ${{ secrets.CROWDIN_USER }}
+        #   PROJECT: nuxeo-web-ui
+        #   PROJECT_PATH: ./nuxeo-web-ui
+        #   INPUT_FILE: ./nuxeo-web-ui/i18n/messages.json
+        #   OUTPUT_FOLDER: ./nuxeo-web-ui/i18n
+        #   FORMAT: json
+        #   BRANCH: maintenance-3.0.x
+        #   # The branch to commit changes to (will use $BRANCH if empty). The branch should not already exist.
+        #   COMMIT_BRANCH: WEBUI-33-crowdin-gh-actions-auto-translations
+        #   # If checked, the reference file messages.json will be sent to Crowdin.
+        #   # UPDATE_CROWDIN_FROM_NUXEO: true
+        #   # If checked, external translations managed in Crowdin will be commited to the Nuxeo Web UI code.
+        #   UPDATE_NUXEO_FROM_CROWDIN: true
+        #   DRYRUN: false
+        # run: |
+          # pushd tools-nuxeo-crowdin
+          # git config --global user.name "nuxeo-web-ui-jx-bot" && git config --global user.email "ui+jx-bot@nuxeo.com"
+          # popd
+
+          # # changes for https://jira.nuxeo.com/browse/WEBUI-277
+          # #python -m easy_install --upgrade --user pip
+          # #python -m easy_install --upgrade --user pyopenssl
+          # #python -m pip install --user -r tools-nuxeo-crowdin/requirements.txt
+          # pip install --user -r tools-nuxeo-crowdin/requirements.txt
+
+          # chmod +x tools-nuxeo-crowdin/jenkins/*.sh
+
+          # echo "Start synchronization"
+          # bash -xe tools-nuxeo-crowdin/jenkins/sync_nuxeo_web_ui_crowdin.sh
+
+  crowdin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Crowdin Action
+        uses: crowdin/github-action@1.4.9
+        with:
+          # Tokens
+          project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
+          token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          config: crowdin-conf.yml
+
+          # source: 'i18n/messages.json'
+          # https://support.crowdin.com/configuration-file/#placeholders
+          # translation: 'i18n/messages-%original_path%.json'
+          # translation: 'i18n/messages-%two_letters_code%.json'
+          # translation: 'i18n/messages-%locale%.json'
+          # skip_untranslated_files: true
+
+          # Auto-approve reference sentences we are pushing (english)
+          auto_approve_imported: true
+
+          # Name of the branch to create for the PR
+          localization_branch_name: crowdin-translations-update
+
+          commit_message: 'Automatic update of translations from Crowdin'
+
+          # Create a branch and a PR on any changes
+          pull_request_base_branch_name: WEBUI-33-crowdin-gh-actions
+          download_translations: true
+          create_pull_request: true
+
+          # Set PR labels
+          pull_request_labels: 'translations'
+
+          # User properties
+          github_user_name: nuxeo-web-ui-jx-bot
+          github_user_email: ui+jx-bot@nuxeo.com
+
+          # For testing purposes
+          # dryrun_action: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
