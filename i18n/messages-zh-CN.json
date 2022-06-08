@@ -535,7 +535,7 @@
   "eventType.annotationCreated": "注释已创建",
   "eventType.annotationDeleted": "注释已删除",
   "eventType.Cancelation event": "取消事件",
-  "eventType.documentCheckedIn": "签入的文档",
+  "eventType.documentCheckedIn": "Created a version",
   "eventType.documentCheckedOut": "文档已签出",
   "eventType.documentCreated": "文档已创建",
   "eventType.documentCreatedByCopy": "由副本创建的文档",
