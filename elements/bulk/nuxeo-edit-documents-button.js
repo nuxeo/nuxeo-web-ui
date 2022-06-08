@@ -486,53 +486,56 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
    */
   _elementChanged() {
     const layout = this.$$('nuxeo-layout');
-    if (!layout || !layout.element || !layout.element.shadowRoot) {
-      return;
+    if (layout && layout.element) {
+      // the element's DOM might not be yet be initialized. If that is the case, we should wait for it.
+      customElements.whenDefined(layout.element.is).then(() => {
+        const bulkLayout = layout.element;
+        // initialize document if need be
+        if (!bulkLayout.document) {
+          bulkLayout.document = {
+            properties: {},
+          };
+        }
+        // inject a properties observer callback function in the layout
+        bulkLayout._propertiesObserver = this._propertiesObserver.bind(this);
+        // set the observer in the layout so that when a property gets updated, the callback is executed
+        bulkLayout._createMethodObserver('_propertiesObserver(document.properties.*)', true);
+        // replace all the widgets in the layout with bulk widget wrappers
+        // a widget is a node identified with the `role="widget"` attribute, it can be something as simple
+        // an input element bound to a property, or a complex DOM structure with an element somewhere inside
+        // bound to a property, example:
+        // <div role="widget"> (<- widget)
+        //   <label>Description</label>
+        //   <nuxeo-input value="{{document.properties.dc:description}}"></nuxeo-input> (<- bound element)
+        // </div>
+        // XXX The data table selector is needed because it sets `role="table"` on itself (see ELEMENTS-1346)
+        const selector = '[role="widget"], nuxeo-data-table[role="table"]';
+        const widgets = Array.from(bulkLayout.shadowRoot.querySelectorAll(selector));
+        widgets.forEach((widget) => {
+          const { parentNode } = widget;
+          const bulkWidget = document.createElement('nuxeo-bulk-widget');
+          parentNode.replaceChild(bulkWidget, widget);
+          bulkWidget.appendChild(widget);
+          // get the element that is bound to a property
+          const boundElement = this._getBoundElement(widget, bulkLayout.__templateInfo);
+          // keep a reference of this element in the bulk widget
+          bulkWidget.element = boundElement;
+          // move the `role="widget"` to the bulk widget
+          widget.removeAttribute('role');
+          bulkWidget.setAttribute('role', 'widget');
+          // move the `label` to the bulk widget
+          if (boundElement.label) {
+            bulkWidget.label = boundElement.label;
+            boundElement.label = null;
+          }
+          // move the `required` to the bulk widget
+          if (boundElement.required) {
+            bulkWidget._required = true;
+            boundElement.required = null;
+          }
+        });
+      });
     }
-    const bulkLayout = layout.element;
-    // initialize document if need be
-    if (!bulkLayout.document) {
-      bulkLayout.document = {
-        properties: {},
-      };
-    }
-    // inject a properties observer callback function in the layout
-    bulkLayout._propertiesObserver = this._propertiesObserver.bind(this);
-    // set the observer in the layout so that when a property gets updated, the callback is executed
-    bulkLayout._createMethodObserver('_propertiesObserver(document.properties.*)', true);
-    // replace all the widgets in the layout with bulk widget wrappers
-    // a widget is a node identified with the `role="widget"` attribute, it can be something as simple an input element
-    // bound to a property, or a complex DOM structure with an element somewhere inside bound to a property, example:
-    // <div role="widget"> (<- widget)
-    //   <label>Description</label>
-    //   <nuxeo-input value="{{document.properties.dc:description}}"></nuxeo-input> (<- bound element)
-    // </div>
-    // XXX The data table selector is needed because it sets `role="table"` on itself (see ELEMENTS-1346)
-    const selector = '[role="widget"], nuxeo-data-table[role="table"]';
-    const widgets = Array.from(bulkLayout.shadowRoot.querySelectorAll(selector));
-    widgets.forEach((widget) => {
-      const { parentNode } = widget;
-      const bulkWidget = document.createElement('nuxeo-bulk-widget');
-      parentNode.replaceChild(bulkWidget, widget);
-      bulkWidget.appendChild(widget);
-      // get the element that is bound to a property
-      const boundElement = this._getBoundElement(widget, bulkLayout.__templateInfo);
-      // keep a reference of this element in the bulk widget
-      bulkWidget.element = boundElement;
-      // move the `role="widget"` to the bulk widget
-      widget.removeAttribute('role');
-      bulkWidget.setAttribute('role', 'widget');
-      // move the `label` to the bulk widget
-      if (boundElement.label) {
-        bulkWidget.label = boundElement.label;
-        boundElement.label = null;
-      }
-      // move the `required` to the bulk widget
-      if (boundElement.required) {
-        bulkWidget._required = true;
-        boundElement.required = null;
-      }
-    });
   }
 
   /**
