@@ -85,6 +85,7 @@ jobs:
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          config: crowdin.yml
 
           source: 'i18n/messages.json'
           # https://support.crowdin.com/configuration-file/#placeholders
