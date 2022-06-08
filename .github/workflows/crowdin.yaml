@@ -85,11 +85,12 @@ jobs:
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          config: crowdin-conf.yml
 
-          source: 'i18n/messages.json'
+          # source: 'i18n/messages.json'
           # https://support.crowdin.com/configuration-file/#placeholders
           # translation: 'i18n/messages-%original_path%.json'
-          translation: 'i18n/messages-%two_letters_code%.json'
+          # translation: 'i18n/messages-%two_letters_code%.json'
           # translation: 'i18n/messages-%locale%.json'
           # skip_untranslated_files: true
 

@@ -1,0 +1,12 @@
+"files": [
+  {
+    "source": "/i18n/messages.json",
+    "translation": "/i18n/messages-%two_letters_code%.json",
+    "translation_replace": {
+      "-es": "-es-ES",
+      "-pt": "-pt-PT",
+      "-sv": "-sv-SE",
+      "-zh": "-zh-CN",
+    }
+  }
+]
