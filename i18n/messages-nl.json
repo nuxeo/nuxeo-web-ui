@@ -983,6 +983,7 @@
   "label.dublincore.state": "Status",
   "label.dublincore.subjects": "Onderwerpen",
   "label.dublincore.title": "Titel",
+  "label.dublincore.source": "Bron",
   "label.error": "Fout",
   "label.mail.folder.email": "E-mail",
   "label.mail.folder.emails_limit": "Limiet aan nieuw opgehaalde e-mails",

@@ -29,8 +29,8 @@ limitations under the License.
       <div name="title">[[document.properties.dc:title]]</div>
     </div>
 
-    <div role="widget">
-      <label>[[i18n('source')]]</label>
+    <div role="widget" hidden$="[[!document.properties.dc:source]]">
+      <label>[[i18n('label.dublincore.source')]]</label>
       <div name="source">[[document.properties.dc:source]]</div>
     </div>
 

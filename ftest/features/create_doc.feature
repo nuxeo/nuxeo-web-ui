@@ -1,4 +1,4 @@
-
+@watch
 Feature: Create Document
 
   I can create a Document
