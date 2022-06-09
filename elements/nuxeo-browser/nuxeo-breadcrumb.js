@@ -129,11 +129,12 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
               href$="[[urlFor(document)]]"
               class="current breadcrumb-item breadcrumb-item-current"
               aria-current="page"
-              title="[[_title(document)]]"
+              title="[[_title(document)]] [[_documentUID(document)]]"
             >
-              [[_title(document)]]
+              [[_title(document)]] [[_documentUID(document)]]
             </a>
             <nav aria-label="Breadcrumb">
+              d
               <ol id="ancestors"></ol>
             </nav>
           </div>
@@ -248,6 +249,12 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
     _title(document) {
       if (document) {
         return document.type === 'Root' ? this.i18n('browse.root') : document.title;
+      }
+    }
+
+    _documentUID(document) {
+      if (document) {
+        return document.uid.substring(document.uid.lastIndexOf('-') + 1, document.uid.length);
       }
     }
 
