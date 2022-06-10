@@ -8,7 +8,7 @@ Feature: Create Document
     And I have a Workspace document
     And I have permission ReadWrite for this document
     And I browse to the document
-  @watch
+
   Scenario Outline: Create <doctype>
     When I click the Create Document button
     And I select <doctype> from the Document Type menu
@@ -57,3 +57,4 @@ Feature: Create Document
       | nature       | Booklet                              |
       | subjects     | Society/Ecology,Daily life/Gardening |
     And I can see the inline nuxeo-video-viewer previewer
+    
