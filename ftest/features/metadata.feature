@@ -73,4 +73,3 @@ Feature: Edit metadata
       | name         | value |
       | nature       |       |
       | subjects     |       |
-      

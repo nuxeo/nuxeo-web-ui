@@ -57,4 +57,3 @@ Feature: Create Document
       | nature       | Booklet                              |
       | subjects     | Society/Ecology,Daily life/Gardening |
     And I can see the inline nuxeo-video-viewer previewer
-    

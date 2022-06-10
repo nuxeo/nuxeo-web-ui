@@ -72,4 +72,3 @@ Feature: Clipboard
     When I click the "clipboard" button
     Then I can see the clipboard has 1 item
     And I can see the clipboard has "newTitle" document
-    
