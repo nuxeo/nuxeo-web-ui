@@ -53,11 +53,6 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             white-space: nowrap;
             overflow: hidden;
           }
-          .trash-icon {
-            height: 30px;
-            width: 30px;
-            color: var(--nuxeo-warn-text, #ff0000);
-          }
 
           .current {
             font-weight: 400;
@@ -134,12 +129,9 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
               href$="[[urlFor(document)]]"
               class="current breadcrumb-item breadcrumb-item-current"
               aria-current="page"
-              title="[[_title(document)]] [[_documentUID(document)]]"
+              title="[[_title(document)]]"
             >
-              [[_title(document)]] [[_documentUID(document)]]
-              <span hidden$="[[!_isTrashed(document)]]">
-                <paper-icon-button icon="[[icon]]" noink class="trash-icon" aria-labelledby="label"></paper-icon-button>
-              </span>
+              [[_title(document)]]
             </a>
             <nav aria-label="Breadcrumb">
               <ol id="ancestors"></ol>
@@ -158,10 +150,6 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
         document: {
           type: Object,
           observer: '_setBreadcrumbElements',
-        },
-        icon: {
-          type: String,
-          value: 'nuxeo:delete',
         },
       };
     }
@@ -260,18 +248,6 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
     _title(document) {
       if (document) {
         return document.type === 'Root' ? this.i18n('browse.root') : document.title;
-      }
-    }
-
-    _documentUID(document) {
-      if (document) {
-        return `(${document.uid.substring(document.uid.lastIndexOf('-') + 1, document.uid.length)})`;
-      }
-    }
-
-    _isTrashed(document) {
-      if (document) {
-        return document.isTrashed;
       }
     }
 
