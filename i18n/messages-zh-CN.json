@@ -983,6 +983,7 @@
   "label.dublincore.state": "状态",
   "label.dublincore.subjects": "主题",
   "label.dublincore.title": "标题",
+  "label.dublincore.source": "资源",
   "label.error": "错误",
   "label.mail.folder.email": "电子邮件",
   "label.mail.folder.emails_limit": "新获取电子邮件的限制",

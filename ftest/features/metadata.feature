@@ -25,6 +25,7 @@ Feature: Edit metadata
     When I browse to the document
     Then I can edit the following properties in the <doctype> metadata:
       | name         | value                |
+      | source       | my source            |
       | title        | my title             |
       | description  | my description       |
       | nature       | Internship report    |
@@ -35,6 +36,7 @@ Feature: Edit metadata
     Then I see the <doctype> page
     And I can see <doctype> metadata with the following properties:
       | name         | value                                   |
+      | source       | my source                               |
       | title        | my title                                |
       | description  | my description                          |
       | nature       | Internship report                       |
