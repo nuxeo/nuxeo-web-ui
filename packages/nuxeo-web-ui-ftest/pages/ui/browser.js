@@ -180,6 +180,7 @@ export default class Browser extends BasePage {
 
   addToFavorites() {
     this.el.click('nuxeo-favorites-toggle-button');
+    driver.alertAccept();
     return this.isFavorite;
   }
 
