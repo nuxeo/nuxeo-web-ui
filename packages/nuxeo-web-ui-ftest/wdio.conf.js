@@ -66,7 +66,7 @@ switch (capability.browserName) {
   // no default
 }
 
-const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 20000;
+const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 40000;
 
 // Allow overriding driver version
 const drivers = {};
@@ -231,7 +231,7 @@ exports.config = {
     // <string> (expression) only execute the features or scenarios with tags matching the expression
     tagExpression: process.env.TAG_EXPRESSION,
     // <number> timeout for step definitions
-    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : TIMEOUT + 500,
+    timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : TIMEOUT + 1000,
     // <boolean> Enable this config to treat undefined definitions as warnings.
     ignoreUndefinedDefinitions: false,
   },

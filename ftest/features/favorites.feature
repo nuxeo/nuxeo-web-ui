@@ -1,3 +1,4 @@
+@watch
 Feature: Favorites
 
   Background:
