@@ -983,6 +983,7 @@
   "label.dublincore.state": "Stato",
   "label.dublincore.subjects": "Oggetti",
   "label.dublincore.title": "Titolo",
+  "label.dublincore.source": "Fonte",
   "label.error": "Errore",
   "label.mail.folder.email": "E-mail",
   "label.mail.folder.emails_limit": "Limite di nuove e-mail scaricate",
