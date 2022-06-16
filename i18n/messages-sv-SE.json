@@ -983,6 +983,7 @@
   "label.dublincore.state": "Tillstånd",
   "label.dublincore.subjects": "Ämnen",
   "label.dublincore.title": "Titel",
+  "label.dublincore.source": "Källa",
   "label.error": "Fel",
   "label.mail.folder.email": "E-post",
   "label.mail.folder.emails_limit": "Gräns för nya hämtade e-postmeddelanden",

@@ -14,6 +14,7 @@ Feature: Create Document
     And I select <doctype> from the Document Type menu
     And I create a document with the following properties:
       | name         | value             |
+      | source       | my source         |
       | title        | my title          |
       | description  | my description    |
       | nature       | Application       |
@@ -23,6 +24,7 @@ Feature: Create Document
     Then I see the <doctype> page
     And I can see <doctype> metadata with the following properties:
       | name         | value                            |
+      | source       | my source                        |
       | title        | my title                         |
       | description  | my description                   |
       | nature       | Application                      |
