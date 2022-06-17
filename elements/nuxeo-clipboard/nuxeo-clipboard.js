@@ -261,7 +261,7 @@ Polymer({
     if (!documents || documents.length === 0 || !this.hasFacet(doc, 'Folderish')) {
       return false;
     }
-   return true;
+    return true;
   },
 
   execute(evt) {
