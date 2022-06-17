@@ -1,9 +1,8 @@
 @cleanupLocalStorage
 Feature: Clipboard
-
   I can add, remove, move and copy items from/to the clipboard
 
-  Background:
+  Background: 
     Given I have the following documents
       | doctype   | title | nature  | subjects           | coverage        | creator | path                | collections | tag | file |
       | Workspace | Src   | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain     |             |     |      |
@@ -50,12 +49,10 @@ Feature: Clipboard
     When I browse to the document with path "/default-domain/Src"
     Then I can see the document has <srcNbDocs> children
 
-   Examples:
-     | action | srcNbDocs |
-     | move   | 0         |
-     | paste  | 3         |
-
- 
+    Examples: 
+      | action | srcNbDocs |
+      | move   |         0 |
+      | paste  |         3 |
 
   Scenario: Clipboard is updated when document's title changes
     Given I have permission ReadWrite for the document with path "/default-domain/Src/File1"
