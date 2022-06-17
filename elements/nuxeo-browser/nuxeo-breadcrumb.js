@@ -142,7 +142,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
               aria-current="page"
               title="[[_title(document)]] [[_documentUID(document)]]"
             >
-              [[_title(document)]] [[_documentUID(document)]]
+              [[_title(document)]]
               <span hidden$="[[!document.isTrashed]]" class="trash-icon-parent">
                 <paper-icon-button icon="[[icon]]" noink class="trash-icon" aria-labelledby="label"></paper-icon-button>
               </span>
@@ -265,13 +265,9 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
 
     _title(document) {
       if (document) {
-        return document.type === 'Root' ? this.i18n('browse.root') : document.title;
-      }
-    }
-
-    _documentUID(document) {
-      if (document) {
-        return `(${document.uid.substring(document.uid.lastIndexOf('-') + 1, document.uid.length)})`;
+        return document.type === 'Root'
+          ? this.i18n('browse.root')
+          : `${document.title} (${document.uid.substring(document.uid.lastIndexOf('-') + 1, document.uid.length)})`;
       }
     }
 
