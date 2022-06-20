@@ -52,7 +52,7 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-audit-page-provider id="provider" page-size="40"></nuxeo-audit-page-provider>
+    <nuxeo-audit-page-provider id="provider" doc-id="[[document.uid]]" page-size="40"></nuxeo-audit-page-provider>
 
     <nuxeo-card>
       <template is="dom-if" if="[[visible]]">
@@ -204,7 +204,6 @@ limitations under the License.
       _refresh: function() {
         if (this.document && this.visible) {
           this.$.provider.page = 1;
-          this.$.provider.docId = this.document.uid;
           this.$.provider.params = this._buildParams();
           this.$.table.fetch();
         }
