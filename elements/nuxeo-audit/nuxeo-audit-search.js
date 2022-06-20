@@ -59,7 +59,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         }
       </style>
 
-      <nuxeo-audit-page-provider id="provider" page-size="40"></nuxeo-audit-page-provider>
+      <nuxeo-audit-page-provider id="provider" doc-id="[[document.uid]]" page-size="40"></nuxeo-audit-page-provider>
 
       <nuxeo-card>
         <nuxeo-user-suggestion
@@ -220,7 +220,6 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
     if (!this.visible) {
       return;
     }
-    this.$.provider.docId = this.documentId;
     this.$.provider.params = this._buildParams();
     this.table.fetch();
   }
