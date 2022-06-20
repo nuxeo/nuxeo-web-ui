@@ -85,7 +85,13 @@ limitations under the License.
       },
 
       _actionContext() {
-        return { collection: this.document, selectedItems: this.selectedItems, items: this.$.results.items };
+        return {
+          collection: this.document,
+          selectedItems: this.selectedItems,
+          items: this.$.results.items,
+          selection:
+            this.$.results.view && this.$.results.view.selectAllActive ? this.$.results.view : this.selectedItems,
+        };
       },
 
       _navigate(e) {
