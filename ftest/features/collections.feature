@@ -10,7 +10,7 @@ Feature: Collections
   Scenario: From browser, add document to a collection and remove it
     Then I can see the document belongs to the "MyCollection" collection
     And I can delete the document from the "MyCollection" collection
-    And I see a toast notification with the following message "Documents removed from collection"
+    And I see a toast notification with the following message "Document removed from collection"
     And I can see the document does not belong to the "MyCollection" collection
 
   Scenario: Browse collections
