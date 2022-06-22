@@ -99,11 +99,16 @@ suite('nuxeo-breadcrumb', () => {
     test('Should display the document title when a document is set and has a title', async () => {
       const title = breadcrumb.shadowRoot.querySelector('.current');
       expect(isElementVisible(title)).to.be.true;
-      expect(title.innerText).to.equal('my file (874fghd)');
+      expect(title.innerText).to.equal('my file');
+    });
+
+    test('Should display the document uid when a document is set and has a title and has a UID', async () => {
+      const uid = breadcrumb.shadowRoot.querySelector('.doc-uid');
+      expect(isElementVisible(uid)).to.be.true;
+      expect(uid.innerText).to.equal('(874fghd)');
     });
 
     test('Should display trash icon beside the document title when a document is trashed', async () => {
-      const trashIcon = breadcrumb.shadowRoot.querySelector('.trash-icon-parent');
       const trashDocument = {
         'entity-type': 'document',
         contextParameters: {
@@ -162,6 +167,8 @@ suite('nuxeo-breadcrumb', () => {
       };
       breadcrumb.set('document', trashDocument);
       await flush();
+      const trashIcon = breadcrumb.shadowRoot.querySelector('.trash-icon-parent');
+
       expect(isElementVisible(trashIcon)).to.be.true;
     });
 
