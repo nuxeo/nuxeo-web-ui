@@ -57,6 +57,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             height: 30px;
             width: 30px;
             color: var(--nuxeo-warn-text, #ff0000);
+            display: inline-block;
           }
 
           .current {
@@ -67,12 +68,6 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             overflow: hidden;
             color: var(--nuxeo-app-header, #fff);
             text-decoration: none;
-          }
-
-          .trash-icon-parent {
-            display: inline-block;
-            height: 30px;
-            width: 30px;
           }
 
           .current-icon iron-icon {
@@ -127,6 +122,24 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
               display: none;
             }
           }
+          
+          .trash-icon-parent,
+          .doc-title-uid-trash
+           {
+            height: 30px;
+            width: 30px;
+            display: inline-block;
+           }
+
+           .doc-title-uid-trash {
+              display: inline-flex;
+              width: auto;
+          }
+
+          .doc-title-uid {
+            padding-top: 5px;
+            display: inline-flex;
+          }
         </style>
 
         <nuxeo-connection id="nxcon" url="{{url}}"></nuxeo-connection>
@@ -136,17 +149,28 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             <iron-icon src="[[_icon(document, url)]]"></iron-icon>
           </div>
           <div class="doc-path">
-            <a
-              href$="[[urlFor(document)]]"
-              class="current breadcrumb-item breadcrumb-item-current"
-              aria-current="page"
-              title="[[_title(document)]] [[_documentUID(document)]]"
-            >
-              [[_title(document)]] [[_documentUID(document)]]
-              <span hidden$="[[!document.isTrashed]]" class="trash-icon-parent">
-                <paper-icon-button icon="[[icon]]" noink class="trash-icon" aria-labelledby="label"></paper-icon-button>
-              </span>
-            </a>
+            <div class="doc-title-uid-trash">
+                <div class="doc-title-uid">
+                    <a
+                      href$="[[urlFor(document)]]"
+                      class="current breadcrumb-item breadcrumb-item-current"
+                      aria-current="page"
+                      title="[[_title(document)]]"
+                    >
+                      [[_title(document)]]
+                    </a>
+                  
+                        <span class="doc-uid">
+                        [[_documentUID(document)]]
+                      </span>
+                </div>
+                <template is="dom-if" if="[[_isTrashed(document)]]">
+                  <span class="trash-icon-parent">
+                  <paper-icon-button icon="nuxeo:delete" 
+                  noink class="trash-icon" aria-labelledby="label"></paper-icon-button>
+                  <span>
+                </template>
+            </div>
             <nav aria-label="Breadcrumb">
               <ol id="ancestors"></ol>
             </nav>
@@ -164,10 +188,6 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
         document: {
           type: Object,
           observer: '_setBreadcrumbElements',
-        },
-        icon: {
-          type: String,
-          value: 'nuxeo:delete',
         },
       };
     }
@@ -265,13 +285,13 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
 
     _title(document) {
       if (document) {
-        return document.type === 'Root' ? this.i18n('browse.root') : document.title;
+        return document.type === 'Root' ? this.i18n('browse.root') : `${document.title}`;
       }
     }
 
     _documentUID(document) {
       if (document) {
-        return `(${document.uid.substring(document.uid.lastIndexOf('-') + 1, document.uid.length)})`;
+        return `(${document.uid.substring(document.uid.lastIndexOf('-') + 1, document.uid.length)})`.trim();
       }
     }
 
