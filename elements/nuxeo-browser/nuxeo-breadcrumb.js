@@ -166,7 +166,10 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
                 </div>
                 <template is="dom-if" if="[[_isTrashed(document)]]">
                   <span class="trash-icon-parent">
-                    <paper-icon-button icon="[[icon]]" noink class="trash-icon" aria-labelledby="label"></paper-icon-button>
+                   <paper-icon-button icon="nuxeo:delete" 
+                   noink class="trash-icon" 
+                   aria-labelledby="label">
+                   </paper-icon-button>
                   <span>
                 </template>
             </div>
@@ -187,10 +190,6 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
         document: {
           type: Object,
           observer: '_setBreadcrumbElements',
-        },
-        icon: {
-          type: String,
-          value: 'nuxeo:delete',
         },
       };
     }
