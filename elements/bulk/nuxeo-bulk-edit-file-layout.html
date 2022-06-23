@@ -1,0 +1,74 @@
+<!--
+`nuxeo-bulk-edit-file-layout`
+@group Nuxeo UI
+@element nuxeo-bulk-edit-file-layout
+-->
+<dom-module id="nuxeo-bulk-edit-file-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:title}}"
+      label="Title"
+      type="text"
+      required="true"
+      name="title"
+    ></nuxeo-input>
+
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:description}}"
+      label="Description"
+      type="text"
+      name="description"
+    ></nuxeo-input>
+
+    <nuxeo-directory-suggestion
+      value="{{document.properties.dc:coverage}}"
+      label="Coverage"
+      min-chars="0"
+      directory-name="l10ncoverage"
+      name="coverage"
+      role="widget"
+    ></nuxeo-directory-suggestion>
+
+    <nuxeo-directory-suggestion
+      value="{{document.properties.dc:nature}}"
+      label="Nature"
+      min-chars="0"
+      directory-name="nature"
+      name="nature"
+      role="widget"
+    ></nuxeo-directory-suggestion>
+
+    <nuxeo-input
+      value="{{document.properties.dc:format}}"
+      label="Format"
+      type="text"
+      name="format"
+      role="widget"
+    ></nuxeo-input>
+
+    <nuxeo-date-picker
+      value="{{document.properties.dc:valid}}"
+      label="Valid"
+      name="valid"
+      role="widget"
+    ></nuxeo-date-picker>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-bulk-edit-file-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype File
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>
