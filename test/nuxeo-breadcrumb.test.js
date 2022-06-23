@@ -172,6 +172,69 @@ suite('nuxeo-breadcrumb', () => {
       expect(isElementVisible(trashIcon)).to.be.true;
     });
 
+    test('Should display trash icon beside the document title when a document is not trashed', async () => {
+      const trashDocument = {
+        'entity-type': 'document',
+        contextParameters: {
+          breadcrumb: {
+            entries: [
+              {
+                path: '/default-domain',
+                title: 'Domain',
+                type: 'Domain',
+                uid: '1',
+              },
+              {
+                path: '/default-domain/workspaces',
+                title: 'Workspaces',
+                type: 'WorkspaceRoot',
+                uid: '2',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace',
+                title: 'my workspace',
+                type: 'Workspace',
+                uid: '3',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace/folder 1',
+                title: 'folder 1',
+                type: 'Folder',
+                uid: '4',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace/folder 1/folder 2',
+                title: 'folder 2',
+                type: 'Folder',
+                uid: '5',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3',
+                title: 'folder 3',
+                type: 'Folder',
+                uid: '6',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
+                title: 'my file',
+                type: 'File',
+                uid: '7',
+              },
+            ],
+          },
+        },
+        path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
+        title: 'my file',
+        type: 'File',
+        uid: '7ertyyy-hdjkdks-874fghd',
+      };
+      breadcrumb.set('document', trashDocument);
+      await flush();
+      const trashIcon = breadcrumb.shadowRoot.querySelector('.trash-icon-parent');
+
+      expect(isElementVisible(trashIcon)).to.be.false;
+    });
+
     test('Should display a breadcrumb when a document is set', async () => {
       expect(isElementVisible(breadcrumb)).to.be.true;
     });
