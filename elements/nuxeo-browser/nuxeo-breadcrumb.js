@@ -159,10 +159,9 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
                     >
                       [[_title(document)]]
                     </a>
-                  
-                        <span class="doc-uid">
+                       <span class="doc-uid">
                         [[_documentUID(document)]]
-                      </span>
+                        </span>
                 </div>
                 <template is="dom-if" if="[[_isTrashed(document)]]">
                   <span class="trash-icon-parent">
@@ -287,7 +286,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
 
     _title(document) {
       if (document) {
-        return document.type === 'Root' ? this.i18n('browse.root') : `${document.title}`;
+        return document.type === 'Root' ? this.i18n('browse.root') : document.title;
       }
     }
 
@@ -298,9 +297,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
     }
 
     _isTrashed(document) {
-      if (document) {
-        return document.isTrashed;
-      }
+      return document && document.isTrashed;
     }
 
     _icon(document, url) {
