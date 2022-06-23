@@ -1,0 +1,33 @@
+<!--
+`nuxeo-bulk-edit-file-simple-layout`
+@group Nuxeo UI
+@element nuxeo-bulk-edit-file-simple-layout
+-->
+<dom-module id="nuxeo-bulk-edit-file-simple-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:title}}"
+      label="Title"
+      type="text"
+      required="true"
+      name="title"
+    ></nuxeo-input>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-bulk-edit-file-simple-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype File
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>
