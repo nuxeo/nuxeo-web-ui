@@ -2,6 +2,10 @@ import { config } from '@nuxeo/nuxeo-elements';
 import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 
+// To fix WEBUI-833 and to disable the Roboto font request
+const disableRobotoFont = () => {
+  window.polymerSkipLoadingFontRoboto = true;
+};
 const loadApp = () => import(/* webpackMode: "eager" */ './elements/nuxeo-app.js');
 const loadLegacy = () => import(/* webpackMode: "eager" */ './legacy.js');
 const loadBundle = () =>
@@ -48,6 +52,7 @@ const ready =
       });
 
 ready
+  .then(disableRobotoFont)
   .then(loadApp)
   .then(loadLegacy)
   .then(loadBundle)
