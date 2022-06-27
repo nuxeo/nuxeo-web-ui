@@ -348,8 +348,9 @@ suite('nuxeo-document-tree', () => {
       await waitForTreeNodeLoading(documentTree);
       await waitForChildListMutation(documentTree.$.tree);
       node = getTreeNodeByUid(documentTree, 6);
+      expect(node).to.be.not.null;
+      expect(node.opened).to.be.true;
       await waitForTreeNodeLoading(documentTree, node);
-      await flush();
 
       // check that there are only three nodes (two children and the ancestor)
       nodes = getTreeNodes(documentTree);
