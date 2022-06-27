@@ -231,6 +231,12 @@
 
 <!-- DOCUMENT ACTIONS -->
 
+<nuxeo-slot-content name="editDocumentAction1" slot="DOCUMENT_ACTIONS" order="10">
+  <template>
+    <nuxeo-document-parent-inspector-button document="[[document]]"></nuxeo-document-parent-inspector-button>
+  </template>
+</nuxeo-slot-content>
+
 <nuxeo-slot-content name="editDocumentAction" slot="DOCUMENT_ACTIONS" order="10">
   <template>
     <nuxeo-document-edit-button document="[[document]]"></nuxeo-document-edit-button>
