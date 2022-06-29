@@ -37,9 +37,6 @@ import '@polymer/paper-button/paper-button.js';
 Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles">
-      :host([in-clipboard]) {
-        color: var(--icon-toggle-pressed-color, var(--nuxeo-action-color-activated));
-      }
       nuxeo-dialog {
         height: 100%;
         max-height: var(--nuxeo-document-form-popup-max-height, 60vh);
@@ -109,10 +106,11 @@ Polymer({
       }
     </style>
 
+    <nuxeo-connection id="nxcon" user="{{currentUser}}"></nuxeo-connection>
+
     <template is="dom-if" if="[[_isAvailable(document)]]">
       <div class="action" on-tap="_openDialog">
-        <paper-icon-button icon="[[icon]]" active="[[inClipboard]]" noink aria-labelledby="label"></paper-icon-button>
-        <span class="label" id="label">[[_label]]</span>
+        <paper-icon-button icon="[[icon]]" noink aria-labelledby="label"></paper-icon-button>
         <nuxeo-tooltip>[[_label]]</nuxeo-tooltip>
       </div>
     </template>
@@ -127,17 +125,19 @@ Polymer({
                 <p>This is the parent inspector. It displays information about the parent of this document.</p>
                 <table class="table">
                   <tr>
-                    <td>Tile:</td>
+                    <td>Title:</td>
                     <td>[[document.title]]</td>
                   </tr>
                   <tr>
                     <td>Path:</td>
                     <td>[[document.path]]</td>
                   </tr>
-                  <tr>
-                    <td>UID:</td>
-                    <td>[[document.uid]]</td>
-                  </tr>
+                  <template is="dom-if" if="[[currentUser.isAdministrator]]">
+                    <tr>
+                      <td>UID:</td>
+                      <td>[[document.uid]]</td>
+                    </tr>
+                  </template>
                 </table>
               </div>
             </div>
@@ -150,14 +150,16 @@ Polymer({
               </div>
             </div>
 
-            <div>
-              <h1>Schemas:</h1>
-              <div class="schemas">
-                <template is="dom-repeat" items="[[schemas]]" as="schemas">
-                  <div class="show-items">[[schemas.prefix]]:[[schemas.name]]</div>
-                </template>
+            <template is="dom-if" if="[[currentUser.isAdministrator]]">
+              <div>
+                <h1>Schemas:</h1>
+                <div class="schemas">
+                  <template is="dom-repeat" items="[[schemas]]" as="schemas">
+                    <div class="show-items">[[schemas.prefix]]:[[schemas.name]]</div>
+                  </template>
+                </div>
               </div>
-            </div>
+            </template>
           </div>
           <div class="actions">
             <paper-button
@@ -202,9 +204,19 @@ Polymer({
       type: Array,
       value: [],
     },
+    _label: {
+      type: String,
+      computed: '_computeLabel(i18n)',
+    },
   },
 
-  _isAvailable(doc) {
+  ready() {
+    this.$.nxcon.connect().then((user) => {
+      this.currentUser = user;
+    });
+  },
+
+  _isAvailable() {
     return true;
   },
 
@@ -220,5 +232,10 @@ Polymer({
 
   _closeDialog() {
     this.dialog.close();
+  },
+
+  _computeLabel() {
+    const x = this.i18n('parentInspectorButton.tooltip');
+    return x;
   },
 });

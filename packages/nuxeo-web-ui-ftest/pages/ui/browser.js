@@ -91,6 +91,38 @@ export default class Browser extends BasePage {
     return this.el.element('#edit-button');
   }
 
+  get parentInspectorButton() {
+    return this.el.element('nuxeo-document-parent-inspector-button');
+  }
+
+  get parentInspectorDialog() {
+    return this.el.element('#parent-inspector-dialog');
+  }
+
+  get parentInspectorDataTitle() {
+    return this.el.element('.scrollable div:nth-child(1) div table tbody tr:nth-child(1) td:nth-child(1)');
+  }
+
+  get parentInspectorDataPath() {
+    return this.el.element('.scrollable div:nth-child(1) div table tbody tr:nth-child(2) td:nth-child(1)');
+  }
+
+  get parentInspectorDataUID() {
+    return this.el.element('.scrollable div:nth-child(1) div table tbody tr:nth-child(3) td:nth-child(1)');
+  }
+
+  get parentInspectorDataFacets() {
+    return this.el.element('.scrollable div:nth-child(2) h1');
+  }
+
+  get parentInspectorDataSchema() {
+    return this.el.element('.scrollable div:nth-child(3) h1');
+  }
+
+  get parentInspectorClose() {
+    return this.el.element('.actions paper-button');
+  }
+
   editForm(docType) {
     return new DocumentFormLayout('#edit-dialog nuxeo-document-form-layout', docType, 'edit');
   }
