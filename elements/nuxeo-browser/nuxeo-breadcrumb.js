@@ -54,10 +54,11 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             overflow: hidden;
           }
           .trash-icon {
-            height: 30px;
-            width: 30px;
+            height: 16px;
+            width: 16px;
             color: var(--nuxeo-warn-text, #ff0000);
             display: inline-block;
+            margin-top: 5px;
           }
 
           .current {
@@ -159,16 +160,13 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
                     >
                       [[_title(document)]]
                     </a>
-                       <span class="doc-uid">
-                        [[_documentUID(document)]]
-                        </span>
+                    <span class="doc-uid">
+                      [[_documentUID(document)]]
+                    </span>
                 </div>
                 <template is="dom-if" if="[[_isTrashed(document)]]">
                   <span class="trash-icon-parent">
-                   <paper-icon-button icon="nuxeo:delete" 
-                   noink class="trash-icon" 
-                   aria-labelledby="label">
-                   </paper-icon-button>
+                   <iron-icon class="trash-icon" id="trashIcon" name="trashIcon" icon="delete" ></iron-icon>
                   <span>
                 </template>
             </div>
