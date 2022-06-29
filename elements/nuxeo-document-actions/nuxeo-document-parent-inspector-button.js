@@ -224,8 +224,8 @@ Polymer({
     });
   },
 
-  _isAvailable() {
-    return true;
+  _isAvailable(doc) {
+    return !!doc;
   },
 
   get dialog() {
