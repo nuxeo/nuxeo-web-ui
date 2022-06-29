@@ -231,9 +231,13 @@
 
 <!-- DOCUMENT ACTIONS -->
 
-<nuxeo-slot-content name="editDocumentAction1" slot="DOCUMENT_ACTIONS" order="10">
+<nuxeo-slot-content name="parentInspectorDocumentAction" slot="DOCUMENT_ACTIONS" order="5">
   <template>
-    <nuxeo-document-parent-inspector-button document="[[document]]"></nuxeo-document-parent-inspector-button>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator || this.isMember(user, 'powerusers')">
+      <template>
+        <nuxeo-document-parent-inspector-button document="[[document]]"></nuxeo-document-parent-inspector-button>
+      </template>
+    </nuxeo-filter>
   </template>
 </nuxeo-slot-content>
 
