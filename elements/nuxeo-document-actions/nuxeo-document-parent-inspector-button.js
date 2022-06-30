@@ -115,7 +115,7 @@ Polymer({
       </div>
     </template>
 
-    <nuxeo-dialog id="parent-inspector-dialog" with-backdrop modal>
+    <nuxeo-dialog id="dialog" with-backdrop modal>
       <div class="container">
         <div class="parentscroll">
           <div class="scrollable">
@@ -141,7 +141,7 @@ Polymer({
                 </table>
               </div>
             </div>
-            <div>
+            <div class="facetscontainer">
               <h1>Facets:</h1>
               <div class="facets">
                 <template is="dom-repeat" items="[[facets]]" as="facets">
@@ -151,7 +151,7 @@ Polymer({
             </div>
 
             <template is="dom-if" if="[[currentUser.isAdministrator]]">
-              <div>
+              <div class="schemascontainer">
                 <h1>Schemas:</h1>
                 <div class="schemas">
                   <template is="dom-repeat" items="[[schemas]]" as="schemas">
@@ -169,9 +169,6 @@ Polymer({
               on-tap="_closeDialog"
               role="button"
               tabindex="0"
-              animated=""
-              elevation="0"
-              aria-disabled="false"
               >[[i18n('command.close')]]</paper-button
             >
           </div>
@@ -192,15 +189,11 @@ Polymer({
       type: String,
       value: 'icons:info',
     },
-    layout: {
-      type: String,
-      value: 'parent-inspector',
-    },
-    facets: {
+    _facets: {
       type: Array,
       value: [],
     },
-    schemas: {
+    _schemas: {
       type: Array,
       value: [],
     },
@@ -216,15 +209,15 @@ Polymer({
     });
   },
 
-  _isAvailable() {
-    return true;
+  _isAvailable(doc) {
+    return doc && true;
   },
 
   get dialog() {
     this.facets = this.document.facets;
     this.schemas = this.document.schemas;
-    return this.root.getElementById(`${this.layout}-dialog`);
-  },
+    return this.root.getElementById('dialog');
+   },
 
   _openDialog() {
     this.dialog.open();
@@ -235,7 +228,6 @@ Polymer({
   },
 
   _computeLabel() {
-    const x = this.i18n('parentInspectorButton.tooltip');
-    return x;
+    return this.i18n('parentInspectorButton.tooltip');
   },
 });
