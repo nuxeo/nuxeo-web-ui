@@ -32,8 +32,6 @@
     "check-engine": "^1.10.0",
     "chrome-launcher": "^0.14.0",
     "cucumber-junit": "^1.7.1",
-    "expect": "27.5.1",
-    "expect-webdriverio": "3.3.1",
     "fs-extra": "^9.1.0",
     "fs-finder": "^1.8.1",
     "minimist": "^1.2.0",
