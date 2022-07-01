@@ -27,9 +27,10 @@ jobs:
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          node-version: 14
           scope: '@nuxeo'
 
       - name: Install
