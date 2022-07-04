@@ -11,7 +11,7 @@ Feature: Parent Inspector
     When I login as "Administrator"
     And I browse to the document with path "/default-domain/ws"
     Then I can see parent inspector icon and click on it
-    And I can see parent inspector dialog opened with parent inspector information
+    And I can see parent inspector dialog opened
     And I can close the parent inspector dialog box
 
   Scenario: I cannot see parent inspector information for trashed items

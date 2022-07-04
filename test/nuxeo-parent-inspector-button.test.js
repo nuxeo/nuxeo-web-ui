@@ -1,4 +1,3 @@
-
 /**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
@@ -36,11 +35,9 @@ const waitForDialogClose = async (dialog) => {
 suite('nuxeo-document-parent-inspector-button', () => {
   let button;
   let actionButton;
-  let server;
-
   const buildButton = async () => {
     const documents = ['the content of this array is irrelevant'];
-    server = await login();
+
     actionButton = await fixture(
       html`
         <nuxeo-document-parent-inspector-button .document="${documents}"> </nuxeo-document-parent-inspector-button>
@@ -51,27 +48,31 @@ suite('nuxeo-document-parent-inspector-button', () => {
     return actionButton;
   };
   suite('Parent Inspector', () => {
-    let doc = {
+    const doc = {
       'entity-type': 'document',
-      uid: '1',
-      title: 'File 1',
-      Path: '/default-domain/Workspaces/File 1',
-      contextParameters: {},
-      facets: ['facet1', 'facet2'],
-      schemas: [
-        {
-          prefix: 'pre',
-          name: 'schema1',
+      contextParameters: {
+        firstAccessibleAncestor: {
+          uid: '1',
+          title: 'File 1',
+          Path: '/default-domain/Workspaces/File 1',
+
+          facets: ['facet1', 'facet2'],
+          schemas: [
+            {
+              prefix: 'pre',
+              name: 'schema1',
+            },
+            {
+              prefix: 'pre',
+              name: 'schema2',
+            },
+          ],
         },
-        {
-          prefix: 'pre',
-          name: 'schema2',
-        },
-      ],
+        type: 'File',
+      },
       user: {
         isAdministrator: true,
       },
-      type: 'File',
     };
 
     test('Should open the parent inspector dialog', async () => {
@@ -85,6 +86,7 @@ suite('nuxeo-document-parent-inspector-button', () => {
       expect(isElementVisible(dialog)).to.be.true;
       expect(isElementVisible(closeButton)).to.be.true;
     });
+
     test('Should close the parent inspector dialog', async () => {
       button = await buildButton();
       const actionBtn = button.$$('.action');
@@ -118,6 +120,7 @@ suite('nuxeo-document-parent-inspector-button', () => {
       const actionBtn = button.$$('.action');
       expect(isElementVisible(actionBtn)).to.be.false;
     });
+    
     test('Should not display parent inspector icon when user is not a Administrator/poweruser', async () => {
       const trashDocument = {
         'entity-type': 'document',
@@ -137,30 +140,32 @@ suite('nuxeo-document-parent-inspector-button', () => {
       expect(isElementVisible(actionBtn)).to.be.false;
     });
 
-    test('Should display title UID, path, schemas and facets inside the parent inspector dialog if user is administrator', async () => {
+    test('Should display title, UID, path, schemas and facets in parent inspector dialog if user is administrator', async () => {
       const document = {
         'entity-type': 'document',
         contextParameters: {
           actionButton: {},
+          firstAccessibleAncestor: {
+            path: '/default-domain/Workspaces/File 1',
+            title: 'my file',
+            type: 'File',
+            uid: '7ertyyy-hdjkdks-874fghd',
+            facets: ['facet1', 'facet2'],
+            schemas: [
+              {
+                prefix: 'pre',
+                name: 'schema1',
+              },
+              {
+                prefix: 'pre',
+                name: 'schema2',
+              },
+            ],
+          },
         },
         user: {
           isAdministrator: true,
         },
-        path: '/default-domain/Workspaces/File 1',
-        title: 'my file',
-        type: 'File',
-        uid: '7ertyyy-hdjkdks-874fghd',
-        facets: ['facet1', 'facet2'],
-        schemas: [
-          {
-            prefix: 'pre',
-            name: 'schema1',
-          },
-          {
-            prefix: 'pre',
-            name: 'schema2',
-          },
-        ],
       };
       button = await buildButton();
       button.document = document;
@@ -191,30 +196,33 @@ suite('nuxeo-document-parent-inspector-button', () => {
       expect(schema2.innerHTML).to.equals('pre:schema2');
     });
 
-    test('Should display title, path and facets and hide uid and schemas inside the parent inspector dialog if user is not administrator', async () => {
+    test('Should display title, path and facets and hide uid and schemas \
+     in parent inspector dialog if user is not administrator', async () => {
       const document = {
         'entity-type': 'document',
         contextParameters: {
           actionButton: {},
+          firstAccessibleAncestor: {
+            path: '/default-domain/Workspaces/File 1',
+            title: 'my file',
+            type: 'File',
+            uid: '7ertyyy-hdjkdks-874fghd',
+            facets: ['facet1', 'facet2'],
+            schemas: [
+              {
+                prefix: 'pre',
+                name: 'schema1',
+              },
+              {
+                prefix: 'pre',
+                name: 'schema2',
+              },
+            ],
+          },
         },
         user: {
           isAdministrator: false,
         },
-        path: '/default-domain/Workspaces/File 1',
-        title: 'my file',
-        type: 'File',
-        uid: '7ertyyy-hdjkdks-874fghd',
-        facets: ['facet1', 'facet2'],
-        schemas: [
-          {
-            prefix: 'pre',
-            name: 'schema1',
-          },
-          {
-            prefix: 'pre',
-            name: 'schema2',
-          },
-        ],
       };
       button = await buildButton();
       button.document = document;

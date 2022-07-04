@@ -91,10 +91,6 @@ export default class Browser extends BasePage {
   get editButton() {
     return this.el.element('#edit-button');
   }
-  get documentTaskView() {
-    return new DocumentTask('nuxeo-document-task');
-  }
-
 
   get parentInspector() {
     return new ParentInspector('nuxeo-document-parent-inspector-button');
