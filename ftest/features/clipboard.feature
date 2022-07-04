@@ -2,7 +2,7 @@
 Feature: Clipboard
   I can add, remove, move and copy items from/to the clipboard
 
-  Background: 
+  Background:
     Given I have the following documents
       | doctype   | title | nature  | subjects           | coverage        | creator | path                | collections | tag | file |
       | Workspace | Src   | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain     |             |     |      |
