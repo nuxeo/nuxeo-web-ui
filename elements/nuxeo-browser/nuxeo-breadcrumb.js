@@ -123,15 +123,6 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
               display: none;
             }
           }
-          
-          .trash-icon-parent,
-          .doc-title-uid-trash
-           {
-            height: 30px;
-            width: 30px;
-            display: inline-block;
-           }
-
            .doc-title-uid-trash {
               display: inline-flex;
               width: auto;
