@@ -233,7 +233,7 @@
 
 <nuxeo-slot-content name="parentInspectorDocumentAction" slot="DOCUMENT_ACTIONS" order="10">
   <template>
-    <nuxeo-filter user="[[user]]" expression="user.isAdministrator || this.isMember(user, 'powerusers')">
+    <nuxeo-filter user="[[user]]" group="administrators, powerusers">
       <template>
         <nuxeo-document-parent-inspector-button document="[[document]]"></nuxeo-document-parent-inspector-button>
       </template>
