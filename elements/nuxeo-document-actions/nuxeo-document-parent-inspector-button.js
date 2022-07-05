@@ -135,7 +135,7 @@ class NuxeoDocumentParentInspectorButton extends mixinBehaviors([I18nBehavior, F
               <div class="facetscontainer">
                 <h1>Facets:</h1>
                 <div class="facets">
-                  <template is="dom-repeat" items="[[facets]]" as="facets">
+                  <template is="dom-repeat" items="[[_facets]]" as="facets">
                     <div class="show-items">[[facets]]</div>
                   </template>
                 </div>
@@ -145,7 +145,7 @@ class NuxeoDocumentParentInspectorButton extends mixinBehaviors([I18nBehavior, F
                 <div class="schemascontainer">
                   <h1>Schemas:</h1>
                   <div class="schemas">
-                    <template is="dom-repeat" items="[[schemas]]" as="schemas">
+                    <template is="dom-repeat" items="[[_schemas]]" as="schemas">
                       <div class="show-items">[[schemas.prefix]]:[[schemas.name]]</div>
                     </template>
                   </div>
@@ -193,9 +193,21 @@ class NuxeoDocumentParentInspectorButton extends mixinBehaviors([I18nBehavior, F
   }
 
   get dialog() {
-    this.facets = this.document?.contextParameters?.firstAccessibleAncestor?.facets;
-    this.schemas = this.document?.contextParameters?.firstAccessibleAncestor?.schemas;
-    return this.$['dialog'];
+    this._facets =
+      this.document &&
+      this.document.contextParameters &&
+      this.document.contextParameters.firstAccessibleAncestor.facets &&
+      this.document.contextParameters.firstAccessibleAncestor.facets
+        ? this.document.contextParameters.firstAccessibleAncestor.facets
+        : [];
+    this._schemas =
+      this.document &&
+      this.document.contextParameters &&
+      this.document.contextParameters.firstAccessibleAncestor.schemas &&
+      this.document.contextParameters.firstAccessibleAncestor.schemas
+        ? this.document.contextParameters.firstAccessibleAncestor.schemas
+        : [];
+    return this.$.dialog;
   }
 
   _openDialog() {
