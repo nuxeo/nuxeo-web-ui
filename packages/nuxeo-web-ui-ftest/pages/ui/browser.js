@@ -95,7 +95,7 @@ export default class Browser extends BasePage {
   get parentInspector() {
     return new ParentInspector('nuxeo-document-parent-inspector-button');
   }
-  
+
   get parentInspectorButton() {
     return this.el.element('nuxeo-document-parent-inspector-button');
   }
