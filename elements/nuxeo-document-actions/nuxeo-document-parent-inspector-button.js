@@ -207,7 +207,7 @@ class NuxeoDocumentParentInspectorButton extends mixinBehaviors([I18nBehavior, F
       this.document.contextParameters.firstAccessibleAncestor.schemas
         ? this.document.contextParameters.firstAccessibleAncestor.schemas
         : [];
-    return this.$['dialog'];
+    return this.$.dialog;
   }
 
   _openDialog() {

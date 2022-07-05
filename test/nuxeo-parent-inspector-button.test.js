@@ -16,7 +16,7 @@ limitations under the License.
 */
 import '@webcomponents/html-imports/html-imports.min.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
-import { fixture, html, flush, waitForEvent, isElementVisible, login } from '@nuxeo/testing-helpers';
+import { fixture, html, flush, waitForEvent, isElementVisible } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-document-actions/nuxeo-document-parent-inspector-button.js';
 
 const waitForDialogOpen = async (dialog) => {
@@ -117,7 +117,7 @@ suite('nuxeo-document-parent-inspector-button', () => {
       expect(isElementVisible(actionBtn)).to.be.false;
     });
 
-    test('Should display title, UID, path, schemas and facets in parent inspector dialog if user is administrator', async () => {
+    test('Should display title, UID, path, schemas and facets in parent inspector dialog', async () => {
       button = await buildButton();
       button.document = document;
       button.currentUser = {
