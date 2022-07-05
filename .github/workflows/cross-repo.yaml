@@ -123,9 +123,11 @@ jobs:
           path: nuxeo-web-ui
           ref: ${{ needs.setup.outputs.webui_branch }}
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: '10'
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: 10
+          scope: '@nuxeo'
 
       - run: npm install -g bower
 
@@ -234,6 +236,12 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '8'
+
+      - uses: actions/setup-node@v3
+        with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: 10
+          scope: '@nuxeo'
 
       - name: 'Update settings.xml with server configuration'
         run: |
