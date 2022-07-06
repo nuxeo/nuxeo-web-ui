@@ -2,7 +2,7 @@ Feature: Parent Inspector
 
   Background: 
     Given user "John" exists in group "members"
-    And user "Susan" exists in groups "members" and "powerusers"        
+    And user "Susan" exists in groups "members,powerusers"     
     And I have the following documents
       | doctype   | title | nature  | subjects           | coverage        | creator | path            | collections | tag | file |
       | Workspace | ws    | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain |             |     |      |
