@@ -102,7 +102,6 @@ suite('nuxeo-document-parent-inspector-button', () => {
         contextParameters: {
           actionButton: {},
           firstAccessibleAncestor: {
-            user: 'Administrator',
             path: '/default-domain/Workspaces/File 1',
             title: 'my file',
             type: 'File',
@@ -119,7 +118,6 @@ suite('nuxeo-document-parent-inspector-button', () => {
 
     test('Should display title, UID, path, schemas and facets in parent inspector dialog', async () => {
       button = await buildButton();
-      button.document = document;
       button.currentUser = {
         properties: {
           username: 'John',
@@ -145,6 +143,31 @@ suite('nuxeo-document-parent-inspector-button', () => {
       expect(facet2.innerHTML).to.equals('facet2');
       expect(schema1.innerHTML).to.equals('pre:schema1');
       expect(schema2.innerHTML).to.equals('pre:schema2');
+    });
+
+    test('Should hide uid and schemas in parent inspector dialog if user is not administrator', async () => {
+      button = await buildButton();
+      button.currentUser = {
+        properties: {
+          username: 'Mary',
+        },
+        isAdministrator: false,
+      };
+      await flush();
+      const actionBtn = button.$$('.action');
+      const { dialog } = button.$;
+      actionBtn.click();
+      await waitForDialogOpen(dialog);
+      const title = button.$$('.table tr:nth-child(1) td:nth-child(2)');
+      const path = button.$$('.table tr:nth-child(2) td:nth-child(2)');
+      const uid = button.$$('.table tr:nth-child(3) td:nth-child(2)');
+      const facets = button.$$('.facetscontainer .facets > .show-items');
+      const schemas = button.$$('.schemascontainer .schemas > .show-items');
+      expect(title.innerHTML).to.contains('my file');
+      expect(path.innerHTML).to.contains('/default-domain/Workspaces/File 1');
+      expect(isElementVisible(uid)).to.be.false;
+      expect(isElementVisible(facets)).to.be.true;
+      expect(isElementVisible(schemas)).to.be.false;
     });
   });
 });

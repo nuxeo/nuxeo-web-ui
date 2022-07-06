@@ -189,7 +189,7 @@ class NuxeoDocumentParentInspectorButton extends mixinBehaviors([I18nBehavior, F
   }
 
   _isAvailable(docs) {
-    return docs && true;
+    return !!docs;
   }
 
   get dialog() {
