@@ -16,7 +16,7 @@ Given('user {string} exists in group {string}', (username, group) =>
   }),
 );
 
-Given('user {string} exists in groups {string} and {string}', (username, group1, group2) =>
+Given('user {string} exists in groups {string}', (username, group) =>
   fixtures.users.create({
     'entity-type': 'user',
     properties: {
@@ -24,7 +24,7 @@ Given('user {string} exists in groups {string} and {string}', (username, group1,
       firstName: username,
       email: `${username}@test.com`,
       password: fixtures.users.DEFAULT_PASSWORD,
-      groups: [group1, group2],
+      groups: group.split(','),
     },
   }),
 );
