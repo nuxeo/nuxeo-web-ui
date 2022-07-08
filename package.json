@@ -96,7 +96,7 @@
     "win-lint": "npm run win-lint:polymer && npm run lint:eslint && npm run lint:prettier",
     "format": "npm run format:polymer && npm run format:prettier && npm run format:eslint",
     "win-format": "npm run win-format:polymer && npm run format:prettier && npm run format:eslint",
-    "preinstall": "cd ./packages/nuxeo-web-ui-ftest && npm install && cd ../../plugin/a11y && npm install",
+    "preinstall": "cd ./packages/nuxeo-web-ui-ftest && npm install && cd ../nuxeo-designer-catalog && npm install && cd ../../plugin/a11y && npm install",
     "ftest": "node scripts/test-runner.js --report --screenshots --headless --tags='not @ignore'",
     "ftest:dev": "node scripts/test-runner.js --nuxeoUrl=http://localhost:8080/nuxeo --url=http://localhost:5000/",
     "ftest:watch": "node scripts/test-runner.js --nuxeoUrl=http://localhost:8080/nuxeo  --url=http://localhost:5000/ --tags='@watch' --debug",

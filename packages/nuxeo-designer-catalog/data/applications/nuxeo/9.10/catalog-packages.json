@@ -1,0 +1,61 @@
+{
+  "packages": [
+    {
+      "name":"iron-elements",
+      "title":"Iron Elements",
+      "color":"#81c784",
+      "symbol": "Fe",
+      "tagline":"Polymer core elements",
+      "isLibrary": true
+    },
+    {
+      "name":"paper-elements",
+      "title":"Paper Elements",
+      "color":"#ffffff",
+      "symbol": "Md",
+      "tagline":"Material design elements",
+      "isLibrary": true
+    },
+    {
+      "name":"nuxeo-elements",
+      "title":"Core Elements",
+      "version":"1.0",
+      "symbol":"NX",
+      "color":"#00adff",
+      "tagline":"Nuxeo core elements",
+      "description":"Nuxeo elements are a set of non-visual utility elements."
+    },
+    {
+      "name":"nuxeo-ui-elements",
+      "title":"UI Elements",
+      "symbol":"UI",
+      "color":"#ffb74d",
+      "version":"1.0",
+      "tagline":"UI elements",
+      "description":"Nuxeo elements providing UI and common utility components for building custom applications."
+    },
+    {
+      "name":"nuxeo-dataviz-elements",
+      "title":"Dataviz Elements",
+      "symbol":"VZ",
+      "color":"#81c784",
+      "version":"1.0",
+      "tagline":"Nuxeo data visualization elements",
+      "description":"Nuxeo elements for building custom data visualization applications and dashboards"
+    },
+    {
+      "name":"nuxeo-web-ui",
+      "title":"Web UI Elements",
+      "symbol":"WUI",
+      "color":"#81c784",
+      "version":"master",
+      "tagline":"Web UI elements",
+      "description":"Nuxeo Web UI default elements",
+      "isApplication": true,
+      "base": "nuxeo-web-ui",
+      "sourcePaths": [
+        "elements/elements.html"
+      ]
+    }
+  ]
+}
