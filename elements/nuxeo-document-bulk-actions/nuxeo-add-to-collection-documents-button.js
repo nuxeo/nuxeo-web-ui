@@ -231,7 +231,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
   }
 
   _isValid() {
-    return this.collection !== '';
+    return this.collection;
   }
 
   _isNew() {
