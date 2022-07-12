@@ -154,7 +154,7 @@ Polymer({
     </nuxeo-page>
 
     <nuxeo-dialog id="vocabularyEditDialog" with-backdrop>
-      <h2>[[i18n('vocabularyManagement.popup.editEntry')]]</h2>
+      <h2>[[_computeDialogHeading(_new)]]</h2>
       <iron-form id="form">
         <form>
           <nuxeo-layout
@@ -452,5 +452,9 @@ Polymer({
           throw error;
         }
       });
+  },
+
+  _computeDialogHeading(_new) {
+    return this.i18n(_new ? 'vocabularyManagement.popup.addEntry' : 'vocabularyManagement.popup.editEntry');
   },
 });
