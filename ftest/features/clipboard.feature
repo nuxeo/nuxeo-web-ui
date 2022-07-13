@@ -55,7 +55,7 @@ Feature: Clipboard
      | move   | 0         |
      | paste  | 3         |
 
-  Scenario: Clipboard is updated when document's title changes
+   Scenario: Clipboard is updated when document's title changes
     Given I have permission ReadWrite for the document with path "/default-domain/Src/File1"
     And I browse to the document with path "/default-domain/Src"
     And I select the "File1" document
