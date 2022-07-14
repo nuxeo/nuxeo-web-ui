@@ -405,10 +405,12 @@ Polymer({
 
     <nuxeo-dialog id="shareDialog" with-backdrop reparent opened="{{permissionsVisible}}">
       <h2>[[i18n('searchForm.shared.heading')]]</h2>
-      <nuxeo-document-permissions
-        doc-id="[[selectedSearch.id]]"
-        visible="[[permissionsVisible]]"
-      ></nuxeo-document-permissions>
+      <paper-dialog-scrollable>
+        <nuxeo-document-permissions
+          doc-id="[[selectedSearch.id]]"
+          visible="[[permissionsVisible]]"
+        ></nuxeo-document-permissions>
+      </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
