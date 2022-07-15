@@ -1,0 +1,80 @@
+# This workflow generates a new version of the catalog used by Nuxeo Studio Designer.
+name: Designer Catalog Generator
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_platform:
+        description: 'The Nuxeo server target platform to build the catalog for.'
+        default: '11.3'
+        required: true
+      branch_name:
+        description: 'The name of the Nuxeo Web UI branch to generate the catalog for.'
+        default: 'maintenance-3.0.x'
+        required: true
+      classifier:
+        description: 'Classifier to generate a custom catalog version for testing purposes.'
+        default: ''
+        required: false
+
+  push:
+    branches:
+      - maintenance-3.0.x
+    paths:
+      - 'elements/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 10
+
+      - name: Install dependencies
+        working-directory: packages/nuxeo-designer-catalog
+        run: | 
+          npm install
+          npm install -g gulp
+
+      - name: Setup parameters (push)
+        if: github.event_name == 'push'
+        run: |
+          BRANCH_NAME=maintenance-3.0.x
+          TARGET_PLATFORM=11.3
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Setup parameters (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          BRANCH_NAME=${{ github.event.inputs.branch_name }}
+          TARGET_PLATFORM=${{ github.event.inputs.target_platform }}
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "TARGET_PLATFORM=$TARGET_PLATFORM" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME"
+          echo "TARGET_PLATFORM=$TARGET_PLATFORM"
+
+      - name: Generate catalog
+        working-directory: packages/nuxeo-designer-catalog
+        run: |
+          gulp catalog --tp $TARGET_PLATFORM --webui-branch $BRANCH_NAME
+          gulp hints --tp $TARGET_PLATFORM
+
+      - name: Bundle the catalog
+        working-directory: packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
+        run: |
+          zip -r catalog.zip nuxeo-web-ui data hints catalog.json
+
+      - name: Archive catalog
+        uses: actions/upload-artifact@v3
+        with:
+          name: catalog
+          path: packages/nuxeo-designer-catalog/data/applications/nuxeo/$TARGET_PLATFORM/catalog.zip
+
+      - name: Upload catalog
+        working-directory: packages/nuxeo-designer-catalog
+        run: |
+          CATALOG_VERSION=$(mvn help:evaluate -Dexpression=project.version -f data/applications/nuxeo/$TARGET_PLATFORM/nuxeo-web-ui/pom.xml)
+          ./scripts/maven-deploy.sh data/applications/nuxeo/TARGET_PLATFORM $CATALOG_VERSION${{ github.event.inputs.classifier }}
