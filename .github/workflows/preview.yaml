@@ -72,7 +72,7 @@ jobs:
       - name: Prepare environment
         run: |
           echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME" >> $GITHUB_ENV
-          echo "PREVIEW_NAMESPACE=nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
 
       - name: Determine nuxeo-elements branch to use
         id: pick_nuxeo_elements_branch

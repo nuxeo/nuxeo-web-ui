@@ -40,13 +40,13 @@ jobs:
       if: github.event_name == 'pull_request'
       run: |
         BRANCH_NAME=${GITHUB_HEAD_REF##*/}
-        echo "PREVIEW_NAMESPACE=nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
 
     - name: Prepare environment (workflow_dispatch)
       if: github.event_name == 'workflow_dispatch'
       run: |
         BRANCH_NAME=${{ github.event.inputs.branch_name }}
-        echo "PREVIEW_NAMESPACE=nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
 
     - name: Get GKE credentials
       uses: google-github-actions/get-gke-credentials@v0.2.1
