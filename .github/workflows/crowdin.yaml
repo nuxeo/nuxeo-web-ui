@@ -9,9 +9,7 @@ on:
   # Sync when a commit is done on maintenance-3.0.x
   push:
     branches:
-      - maintenance-3.0.x
-    paths:
-      - 'i18n/messages.json'
+      - fix-WEBUI-849-translations-wf
 
 jobs:
   crowdin:
