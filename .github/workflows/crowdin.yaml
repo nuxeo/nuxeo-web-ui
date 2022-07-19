@@ -37,7 +37,10 @@ jobs:
           auto_approve_imported: true
 
           # Name of the branch where to merge the translations
-          localization_branch_name: maintenance-3.0.x
+          localization_branch_name: crowdin-translations-update
+          create_pull_request: true
+          pull_request_title: 'New Crowdin translations'
+          pull_request_body: 'New Crowdin pull request with translations'
 
           # The commit message
           commit_message: 'Automatic update of translations from Crowdin'
