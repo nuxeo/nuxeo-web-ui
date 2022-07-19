@@ -243,6 +243,7 @@
   "cloudProviders.errorDeleting": "删除提供商时出错。",
   "cloudProviders.errorEditing": "编辑提供商时出错。",
   "cloudProviders.OAuth2ServiceProviders": "OAuth 2 服务提供商",
+  "cloudProviders.popup.addEntry": "Add Provider Entry",
   "cloudProviders.popup.editEntry": "编辑提供商",
   "cloudProviders.serviceName": "服务名称",
   "cloudProviders.successfullyCreated": "创建提供商",

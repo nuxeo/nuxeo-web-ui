@@ -243,6 +243,7 @@
   "cloudProviders.errorDeleting": "An error occurred while deleting the provider.",
   "cloudProviders.errorEditing": "An error occurred while editing the provider.",
   "cloudProviders.OAuth2ServiceProviders": "OAuth 2 Service Providers",
+  "cloudProviders.popup.addEntry": "Add Provider Entry",
   "cloudProviders.popup.editEntry": "Edit Provider Entry",
   "cloudProviders.serviceName": "Service Name",
   "cloudProviders.successfullyCreated": "Provider created",

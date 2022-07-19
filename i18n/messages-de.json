@@ -243,6 +243,7 @@
   "cloudProviders.errorDeleting": "Bei der Löschung des Anbieters ist ein Fehler aufgetreten",
   "cloudProviders.errorEditing": "Bei der Bearbeitung des Anbieters ist ein Fehler aufgetreten",
   "cloudProviders.OAuth2ServiceProviders": "OAuth 2 Serviceanbieter",
+  "cloudProviders.popup.addEntry": "Add Provider Entry",
   "cloudProviders.popup.editEntry": "Eintrag des Anbieters bearbeiten",
   "cloudProviders.serviceName": "Dienstname",
   "cloudProviders.successfullyCreated": "Anbieter erstellt",

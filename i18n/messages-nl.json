@@ -243,6 +243,7 @@
   "cloudProviders.errorDeleting": "Er is een fout opgetreden tijdens het wissen van de provider.",
   "cloudProviders.errorEditing": "Er is een fout opgetreden tijdens het bewerken van de provider.",
   "cloudProviders.OAuth2ServiceProviders": "OAuth 2 serviceproviders",
+  "cloudProviders.popup.addEntry": "Add Provider Entry",
   "cloudProviders.popup.editEntry": "Invoer provider bewerken",
   "cloudProviders.serviceName": "Naam service",
   "cloudProviders.successfullyCreated": "Provider aangemaakt",
