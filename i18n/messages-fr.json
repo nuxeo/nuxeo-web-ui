@@ -243,6 +243,7 @@
   "cloudProviders.errorDeleting": "Une erreur s'est produite lors de la suppression du fournisseur.",
   "cloudProviders.errorEditing": "Une erreur s'est produite lors de la modification du fournisseur.",
   "cloudProviders.OAuth2ServiceProviders": "Fournisseurs de service OAuth 2",
+  "cloudProviders.popup.addEntry": "Ajouter le fournisseur",
   "cloudProviders.popup.editEntry": "Modifier le fournisseur",
   "cloudProviders.serviceName": "Nom du service",
   "cloudProviders.successfullyCreated": "Fournisseur créé",

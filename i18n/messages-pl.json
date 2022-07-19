@@ -243,6 +243,7 @@
   "cloudProviders.errorDeleting": "Wystąpił błąd podczas usuwania dostawcy.",
   "cloudProviders.errorEditing": "Wystąpił błąd podczas edycji dostawcy.",
   "cloudProviders.OAuth2ServiceProviders": "Usługodawcy OAuth2 ",
+  "cloudProviders.popup.addEntry": "Add Provider Entry",
   "cloudProviders.popup.editEntry": "Edycja wpisu dostawcy",
   "cloudProviders.serviceName": "Nazwa usługi",
   "cloudProviders.successfullyCreated": "Utworzono dostawcę",

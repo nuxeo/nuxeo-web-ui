@@ -243,6 +243,7 @@
   "cloudProviders.errorDeleting": "Ett fel inträffade när leverantören skulle tas bort.",
   "cloudProviders.errorEditing": "Ett fel inträffade när leverantören skulle redigeras.",
   "cloudProviders.OAuth2ServiceProviders": "OAuth 2 serviceleverantörer",
+  "cloudProviders.popup.addEntry": "Add Provider Entry",
   "cloudProviders.popup.editEntry": "Redigera leverantörspost",
   "cloudProviders.serviceName": "Tjänstnamn",
   "cloudProviders.successfullyCreated": "Leverantören har skapats",
