@@ -53,7 +53,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             white-space: nowrap;
             overflow: hidden;
           }
-
+          
           .current {
             font-weight: 400;
             display: block;
@@ -64,6 +64,22 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             text-decoration: none;
           }
 
+          .doc-name-lastuid-trash
+           {
+            display:flex;
+           }
+
+           .doc-name-lastuid {
+            padding-top: 6px;
+            display:inline-flex;
+          }
+
+          .trash-icon{
+            height:30px;
+            width:30px;
+            color: var(--nuxeo-warn-text);
+          }
+        
           .current-icon iron-icon {
             width: 1.6rem;
             height: 1.5rem;
@@ -72,6 +88,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             padding: 0.2em;
             border-radius: 2px;
           }
+          
 
           #ancestors {
             max-width: 100%;
@@ -125,14 +142,34 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             <iron-icon src="[[_icon(document, url)]]"></iron-icon>
           </div>
           <div class="doc-path">
-            <a
-              href$="[[urlFor(document)]]"
-              class="current breadcrumb-item breadcrumb-item-current"
-              aria-current="page"
-              title="[[_title(document)]]"
-            >
-              [[_title(document)]]
-            </a>
+         
+            <div class="doc-name-lastuid-trash">
+                <div class="doc-name-lastuid">
+                    <a
+                      href$="[[urlFor(document)]]"
+                      class="current breadcrumb-item breadcrumb-item-current"
+                      aria-current="page"
+                      title="[[_title(document)]]"
+                    >
+                      [[_title(document)]]
+                    </a>
+                  
+                      <span class="doc-uid">
+                        [[_documentUID(document)]]
+                      </span>
+
+                </div>
+                
+                  <span class="trash-icon-parent">
+                    <paper-icon-button 
+                    icon="nuxeo:delete" 
+                    noink class="trash-icon"
+                    hidden$="[[!document.isTrashed]]">
+                    </paper-icon-button>
+                  <span>
+                
+            </div>
+            
             <nav aria-label="Breadcrumb">
               <ol id="ancestors"></ol>
             </nav>
@@ -247,7 +284,13 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
 
     _title(document) {
       if (document) {
-        return document.type === 'Root' ? this.i18n('browse.root') : document.title;
+        return document.type === 'Root' ? this.i18n('browse.root') : `${document.title}`;
+      }
+    }
+
+    _documentUID(document) {
+      if (document) {
+        return `(${document.uid.substring(document.uid.lastIndexOf('-') + 1, document.uid.length)})`.trim();
       }
     }
 

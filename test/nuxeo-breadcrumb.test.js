@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, isElementVisible, login } from '@nuxeo/testing-helpers';
+import { fixture, html, isElementVisible, login, flush } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-browser/nuxeo-breadcrumb.js';
 
 const document = {
@@ -70,7 +70,7 @@ const document = {
   path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
   title: 'my file',
   type: 'File',
-  uid: '7',
+  uid: '7ertyyy-hdjkdks-874fghd',
 };
 
 // Mock router
@@ -102,65 +102,135 @@ suite('nuxeo-breadcrumb', () => {
       expect(title.innerText).to.equal('my file');
     });
 
-    test('Should display a breadcrumb when a document is set', async () => {
-      expect(isElementVisible(breadcrumb)).to.be.true;
+    test('Should display the document uid when a document is set and has a title and has a UID', async () => {
+      const uid = breadcrumb.shadowRoot.querySelector('.doc-uid');
+      expect(isElementVisible(uid)).to.be.true;
+      expect(uid.innerText).to.equal('(874fghd)');
     });
-  });
 
-  suite('Breadcrumb composition', () => {
-    test('Should display all the ancestors except the last one when document has breadcrumb entries', async () => {
-      const ancestors = breadcrumb.shadowRoot.querySelector('#ancestors');
-      expect(isElementVisible(ancestors)).to.be.true;
-      expect(ancestors.childElementCount).to.equal(6);
-      ancestors.childNodes.forEach((ancestor, index) => {
-        expect(ancestor.firstChild.innerText).to.equal(document.contextParameters.breadcrumb.entries[index].title);
+    test('Should display trash icon beside the document title when a document is trashed', async () => {
+      const trashIcon = breadcrumb.shadowRoot.querySelector('.trash-icon-parent');
+      const trashDocument = {
+        'entity-type': 'document',
+        contextParameters: {
+          breadcrumb: {
+            entries: [
+              {
+                path: '/default-domain',
+                title: 'Domain',
+                type: 'Domain',
+                uid: '1',
+              },
+              {
+                path: '/default-domain/workspaces',
+                title: 'Workspaces',
+                type: 'WorkspaceRoot',
+                uid: '2',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace',
+                title: 'my workspace',
+                type: 'Workspace',
+                uid: '3',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace/folder 1',
+                title: 'folder 1',
+                type: 'Folder',
+                uid: '4',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace/folder 1/folder 2',
+                title: 'folder 2',
+                type: 'Folder',
+                uid: '5',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3',
+                title: 'folder 3',
+                type: 'Folder',
+                uid: '6',
+              },
+              {
+                path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
+                title: 'my file',
+                type: 'File',
+                uid: '7',
+              },
+            ],
+          },
+        },
+        path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
+        title: 'my file',
+        type: 'File',
+        uid: '7ertyyy-hdjkdks-874fghd',
+        isTrashed: true,
+      };
+
+      breadcrumb.set('document', trashDocument);
+      await flush();
+      expect(isElementVisible(trashIcon)).to.be.true;
+
+      test('Should display a breadcrumb when a document is set', async () => {
+        expect(isElementVisible(breadcrumb)).to.be.true;
       });
     });
 
-    test('Should display separators after first ancestor when document has breadcrumb entries', async () => {
-      const ancestors = breadcrumb.shadowRoot.querySelector('#ancestors');
-      let separators = 0;
-      for (let index = 1; index < ancestors.childNodes.length; index++) {
-        const separator = window.getComputedStyle(ancestors.childNodes[index], ':before').getPropertyValue('content');
-        separators++;
-        expect(separator).to.equal('" > "');
-      }
-      expect(separators).to.equal(5);
-    });
+    suite('Breadcrumb composition', () => {
+      test('Should display all the ancestors except the last one when document has breadcrumb entries', async () => {
+        const ancestors = breadcrumb.shadowRoot.querySelector('#ancestors');
+        expect(isElementVisible(ancestors)).to.be.true;
+        expect(ancestors.childElementCount).to.equal(6);
+        ancestors.childNodes.forEach((ancestor, index) => {
+          expect(ancestor.firstChild.innerText).to.equal(document.contextParameters.breadcrumb.entries[index].title);
+        });
+      });
 
-    test('Should set links in ancestors when document has breadcrumb entries', async () => {
-      const ancestors = breadcrumb.shadowRoot.querySelector('#ancestors');
-      ancestors.childNodes.forEach((ancestor, index) => {
-        const breadcrumbEntries = document.contextParameters.breadcrumb.entries[index].path;
-        expect(ancestor.firstChild.getAttribute('href')).to.equal(breadcrumbEntries);
+      test('Should display separators after first ancestor when document has breadcrumb entries', async () => {
+        const ancestors = breadcrumb.shadowRoot.querySelector('#ancestors');
+        let separators = 0;
+        for (let index = 1; index < ancestors.childNodes.length; index++) {
+          const separator = window.getComputedStyle(ancestors.childNodes[index], ':before').getPropertyValue('content');
+          separators++;
+          expect(separator).to.equal('" > "');
+        }
+        expect(separators).to.equal(5);
+      });
+
+      test('Should set links in ancestors when document has breadcrumb entries', async () => {
+        const ancestors = breadcrumb.shadowRoot.querySelector('#ancestors');
+        ancestors.childNodes.forEach((ancestor, index) => {
+          const breadcrumbEntries = document.contextParameters.breadcrumb.entries[index].path;
+          expect(ancestor.firstChild.getAttribute('href')).to.equal(breadcrumbEntries);
+        });
       });
     });
-  });
 
-  suite('Space adjustment', () => {
-    setup(async () => {
-      breadcrumb = await fixture(
-        html`
-          <div id="container" style="max-width: 200px">
-            <nuxeo-breadcrumb .document=${document} .router=${router}></nuxeo-breadcrumb>
-          </div>
-        `,
-      );
-    });
+    suite('Space adjustment', () => {
+      setup(async () => {
+        breadcrumb = await fixture(
+          html`
+            <div id="container" style="max-width: 200px">
+              <nuxeo-breadcrumb .document=${document} .router=${router}></nuxeo-breadcrumb>
+            </div>
+          `,
+        );
+      });
 
-    test('Should add ellipsis to ancestors when parent is smaller than nuxeo-breadcrumb', async () => {
-      const nuxeoBreadcrumb = breadcrumb.querySelector('nuxeo-breadcrumb');
-      expect(isElementVisible(nuxeoBreadcrumb)).to.be.true;
-      const ancestors = nuxeoBreadcrumb.shadowRoot.querySelector('#ancestors');
-      const ellipsis = ancestors.firstElementChild.querySelector('#ellipsis').innerText;
-      expect(ellipsis).to.equal('...');
-    });
+      test('Should add ellipsis to ancestors when parent is smaller than nuxeo-breadcrumb', async () => {
+        const nuxeoBreadcrumb = breadcrumb.querySelector('nuxeo-breadcrumb');
+        expect(isElementVisible(nuxeoBreadcrumb)).to.be.true;
+        const ancestors = nuxeoBreadcrumb.shadowRoot.querySelector('#ancestors');
+        const ellipsis = ancestors.firstElementChild.querySelector('#ellipsis').innerText;
+        expect(ellipsis).to.equal('...');
+      });
 
-    test('Should remove ancestors when parent size is smaller than nuxeo-breadcrumb', async () => {
-      const nuxeoBreadcrumb = breadcrumb.querySelector('nuxeo-breadcrumb');
-      expect(isElementVisible(nuxeoBreadcrumb)).to.be.true;
-      const ancestors = nuxeoBreadcrumb.shadowRoot.querySelector('#ancestors');
-      expect(ancestors.childElementCount).to.be.below(6);
+      test('Should remove ancestors when parent size is smaller than nuxeo-breadcrumb', async () => {
+        const nuxeoBreadcrumb = breadcrumb.querySelector('nuxeo-breadcrumb');
+        expect(isElementVisible(nuxeoBreadcrumb)).to.be.true;
+        const ancestors = nuxeoBreadcrumb.shadowRoot.querySelector('#ancestors');
+        expect(ancestors.childElementCount).to.be.below(6);
+      });
     });
   });
 });
