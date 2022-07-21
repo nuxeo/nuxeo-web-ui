@@ -488,8 +488,21 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     const layout = this.$$('nuxeo-layout');
     if (layout && layout.element) {
       // the element's DOM might not be yet be initialized. If that is the case, we should wait for it.
-      customElements.whenDefined(layout.element.is).then(() => {
+      customElements.whenDefined(layout.element.is).then(async () => {
         const bulkLayout = layout.element;
+        // XXX wait for the shadow root to be attached, affects Safari, see WEBUI-842
+        // we are setting a time limit to prevent infinite wait
+        let shadowChecks = 0;
+        const timeLimit = 3000;
+        const interval = 50;
+        while (!bulkLayout.shadowRoot && shadowChecks * interval <= timeLimit) {
+          shadowChecks++;
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((r) => setTimeout(r, 50));
+        }
+        if (shadowChecks * interval > timeLimit) {
+          console.warn(`bulk edit layout "${this.layout}" shadow root not found`);
+        }
         // initialize document if need be
         if (!bulkLayout.document) {
           bulkLayout.document = {
