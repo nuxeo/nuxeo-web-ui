@@ -71,6 +71,10 @@ Then('I can see the selection toolbar', function() {
   this.ui.browser.selectionToolbar.waitForVisible();
 });
 
+When('I cannot see the display selection link', function() {
+  this.ui.browser.selectionToolbar.waitForNotVisible('.selectionLink').should.be.true;
+});
+
 Then('I can add selection to the {string} collection', function(collectionName) {
   this.ui.browser.waitForVisible();
   this.ui.browser.selectionToolbar.addToCollectionDialog.addToCollection(collectionName);
