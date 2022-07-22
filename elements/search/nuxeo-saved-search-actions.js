@@ -117,9 +117,9 @@ Polymer({
         this._dirty = this.searchForm.dirty;
       });
       this.searchForm.addEventListener('selected-search-changed', () => {
+        this.isSavedSearch = this.searchForm.isSavedSearch;
         if (this.searchForm.selectedSearch) {
           this.searchId = this.searchForm.selectedSearch.id;
-          this.isSavedSearch = !!this.searchId;
         }
       });
 
