@@ -103,9 +103,9 @@ limitations under the License.
             this._dirty = this.searchForm.dirty;
           }.bind(this));
           this.searchForm.addEventListener('selected-search-changed', function() {
+            this.isSavedSearch = this.searchForm.isSavedSearch;
             if (this.searchForm.selectedSearch) {
               this.searchId = this.searchForm.selectedSearch.id;
-              this.isSavedSearch = !!this.searchId;
             }
           }.bind(this));
 
