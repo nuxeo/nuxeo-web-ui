@@ -111,6 +111,26 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             opacity: 1;
           }
 
+          .breadcrumb-title {
+            display: inline-flex;
+          }
+
+          .breadcrumb-uid {
+            display: inline-flex;
+          }
+
+          .trash-icon {
+            margin-left: 2px;
+          }
+
+          iron-icon {
+            --iron-icon-height: 16px;
+            --iron-icon-width: 16px;
+            margin-bottom: 3px;
+            color: var(--nuxeo-warn-text, #ff0000);
+            display: inline-flex;
+          }
+
           @media (max-width: 1024px) {
             .current-icon {
               display: none;
@@ -127,12 +147,21 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
           <div class="doc-path">
             <a
               href$="[[urlFor(document)]]"
-              class="current breadcrumb-item breadcrumb-item-current"
+              class="current breadcrumb-item breadcrumb-item-current breadcrumb-title"
               aria-current="page"
               title="[[_title(document)]]"
             >
               [[_title(document)]]
             </a>
+            <div class="breadcrumb-uid">
+              <span>[[_uid(document)]]</span>
+              <template is="dom-if" if="[[_isTrashed(document)]]">
+                <span class="trash-icon">
+                  <iron-icon icon="nuxeo:delete"></iron-icon>
+                </span>
+              </template>
+            </div>
+
             <nav aria-label="Breadcrumb">
               <ol id="ancestors"></ol>
             </nav>
@@ -248,6 +277,18 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
     _title(document) {
       if (document) {
         return document.type === 'Root' ? this.i18n('browse.root') : document.title;
+      }
+    }
+
+    _uid(document) {
+      if (document) {
+        return document.uid.split('-').splice(-1);
+      }
+    }
+
+    _isTrashed(document) {
+      if (document) {
+        return document.isTrashed;
       }
     }
 
