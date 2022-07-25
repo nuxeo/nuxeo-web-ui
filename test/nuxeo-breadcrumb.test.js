@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, isElementVisible, login } from '@nuxeo/testing-helpers';
+import { fixture, html, isElementVisible, login, flush } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-browser/nuxeo-breadcrumb.js';
 
 const document = {
@@ -70,7 +70,64 @@ const document = {
   path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
   title: 'my file',
   type: 'File',
-  uid: '7',
+  uid: 'a57e5207f1a7',
+};
+
+const trashDocument = {
+  'entity-type': 'document',
+  contextParameters: {
+    breadcrumb: {
+      entries: [
+        {
+          path: '/default-domain',
+          title: 'Domain',
+          type: 'Domain',
+          uid: '1',
+        },
+        {
+          path: '/default-domain/workspaces',
+          title: 'Workspaces',
+          type: 'WorkspaceRoot',
+          uid: '2',
+        },
+        {
+          path: '/default-domain/workspaces/my workspace',
+          title: 'my workspace',
+          type: 'Workspace',
+          uid: '3',
+        },
+        {
+          path: '/default-domain/workspaces/my workspace/folder 1',
+          title: 'folder 1',
+          type: 'Folder',
+          uid: '4',
+        },
+        {
+          path: '/default-domain/workspaces/my workspace/folder 1/folder 2',
+          title: 'folder 2',
+          type: 'Folder',
+          uid: '5',
+        },
+        {
+          path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3',
+          title: 'folder 3',
+          type: 'Folder',
+          uid: '6',
+        },
+        {
+          path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
+          title: 'my file',
+          type: 'File',
+          uid: '7',
+        },
+      ],
+    },
+  },
+  path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
+  title: 'my file',
+  type: 'File',
+  uid: 'a57e5207f1a7',
+  isTrashed: true,
 };
 
 // Mock router
@@ -104,6 +161,34 @@ suite('nuxeo-breadcrumb', () => {
 
     test('Should display a breadcrumb when a document is set', async () => {
       expect(isElementVisible(breadcrumb)).to.be.true;
+    });
+
+    test('Should display the document UID when a document is set', async () => {
+      const breadcrumbUID = breadcrumb.shadowRoot.querySelector('.breadcrumb-uid');
+      expect(isElementVisible(breadcrumbUID)).to.be.true;
+      breadcrumbUID.childNodes.forEach((node) => {
+        if (node.nodeName === 'SPAN') {
+          expect(node.innerText).to.equal(document.uid);
+        }
+      });
+    });
+  });
+
+  suite('Visibility of trash icon ', () => {
+    test('Should display trash icon when trash property is true', async () => {
+      breadcrumb.set('document', trashDocument);
+      await flush();
+      const trashIcon = breadcrumb.shadowRoot.querySelector('.trash-icon');
+
+      expect(isElementVisible(trashIcon)).to.be.true;
+    });
+
+    test('Should not display Trash icon when trash property is false', async () => {
+      (trashDocument.isTrashed = false), breadcrumb.set('document', trashDocument);
+      await flush();
+      const trashIcon = breadcrumb.shadowRoot.querySelector('.trash-icon');
+
+      expect(isElementVisible(trashIcon)).to.be.false;
     });
   });
 
