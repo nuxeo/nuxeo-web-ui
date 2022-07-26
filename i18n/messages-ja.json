@@ -214,6 +214,7 @@
   "cloudProviders.errorDeleting": "プロバイダの削除中にエラーが発生しました",
   "cloudProviders.errorEditing": "プロバイダの編集中にエラーが発生しました",
   "cloudProviders.OAuth2ServiceProviders": "OAuth 2サービスプロバイダ",
+  "cloudProviders.popup.addEntry": "プロバイダーのエントリを追加",
   "cloudProviders.popup.editEntry": "プロバイダエントリを編集",
   "cloudProviders.serviceName": "サービス名",
   "cloudProviders.successfullyCreated": "プロバイダが作成されました",

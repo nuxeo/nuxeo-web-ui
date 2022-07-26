@@ -214,6 +214,7 @@
   "cloudProviders.errorDeleting": "Errorea gertatu da hornitzailea ezabatzean.",
   "cloudProviders.errorEditing": "Errorea gertatu da hornitzailea editatzean.",
   "cloudProviders.OAuth2ServiceProviders": "OAuth 2 zerbitzu-hornitzaileak",
+  "cloudProviders.popup.addEntry": "Add Provider Entry",
   "cloudProviders.popup.editEntry": "Editatu hornitzaile-sarrera",
   "cloudProviders.serviceName": "Zerbitzu-izena",
   "cloudProviders.successfullyCreated": "Hornitzailea sortuta",
