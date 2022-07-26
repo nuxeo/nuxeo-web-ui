@@ -388,6 +388,11 @@ Polymer({
     },
 
     _localStorageName: String,
+
+    _excludedDocs: {
+      type: Number,
+      value: 0,
+    },
   },
 
   observers: [
@@ -514,6 +519,7 @@ Polymer({
       this.unlisten(oldView, 'items-changed', '_itemsChanged');
       this.unlisten(oldView, 'quick-filters-changed', '_quickFiltersChanged');
       this.unlisten(oldView, 'select-all-active-changed', '_selectAllActiveChanged');
+      this.unlisten(oldView, '_excluded-items-changed', '_excludedDocsChanged');
       // we need to clear the selected items and selection (removes selection synchronization)
       if (this.selectedItems) {
         this.selectedItems = [];
@@ -543,6 +549,7 @@ Polymer({
       this.listen(view, 'items-changed', '_itemsChanged');
       this.listen(view, 'quick-filters-changed', '_quickFiltersChanged');
       this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
+      this.listen(view, '_excluded-items-changed', '_excludedDocsChanged');
       view.nxProvider = this.nxProvider;
       // update view
       this.reset();
@@ -728,7 +735,7 @@ Polymer({
        * XXX - set the resultsCount to be used when selectAll is active, because paginable views don't know the total
        * number of results, only the ones in the loaded pages
        */
-      this.$.toolbar._resultsCount = this.resultsCount;
+      this.$.toolbar._resultsCount = this.resultsCount - this._excludedDocs;
     }
   },
 
@@ -736,5 +743,15 @@ Polymer({
     if (this.nxProvider && e.detail.value) {
       this.quickFilters = this.nxProvider.quickFilters;
     }
+  },
+
+  _excludedDocsChanged(e) {
+    if (typeof e.detail.value === 'number' && !Number.isNaN(e.detail.value)) {
+      this._excludedDocs = e.detail.value;
+    }
+    if (Array.isArray(e.detail.value)) {
+      this._excludedDocs = e.detail.value.length;
+    }
+    this.$.toolbar._resultsCount = this.resultsCount - this._excludedDocs;
   },
 });
