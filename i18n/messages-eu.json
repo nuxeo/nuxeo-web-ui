@@ -1483,6 +1483,7 @@
   "vocabularyManagement.heading": "Hiztegiak",
   "vocabularyManagement.noEntry": "Hiztegia hutsik dago.",
   "vocabularyManagement.noEntryWhenFiltered": "Ez dago bilaketa-irizpideokin bat datorren hiztegiko sarrerarik.",
+  "vocabularyManagement.popup.addEntry": "Add Vocabulary Entry",
   "vocabularyManagement.popup.editEntry": "Editatu hiztegiko sarrera",
   "vocabularyManagement.select": "Hautatu hiztegia",
   "vocabularyManagement.selectParent": "Hautatu gurasoa",
