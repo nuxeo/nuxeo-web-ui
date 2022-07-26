@@ -86,7 +86,7 @@ limitations under the License.
     </nuxeo-card>
 
     <nuxeo-dialog id="dialog" with-backdrop no-auto-focus>
-      <h2>[[i18n('cloudProviders.popup.editEntry')]]</h2>
+      <h2>[[_computeDialogHeading(_isNew)]]</h2>
       <paper-dialog-scrollable>
         <iron-form id="form">
           <form>
@@ -261,7 +261,15 @@ limitations under the License.
             });
           }.bind(this));
         }
-      }
+      },
+
+      _computeDialogHeading: function (){
+        return this.i18n(
+          this._isNew
+            ? "cloudProviders.popup.addEntry"
+            : "cloudProviders.popup.editEntry"
+        );
+      },
     });
   </script>
 </dom-module>

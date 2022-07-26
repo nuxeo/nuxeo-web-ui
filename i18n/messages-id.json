@@ -214,6 +214,7 @@
   "cloudProviders.errorDeleting": "Terjadi sebuah kesalahan saat menghapus penyedia.",
   "cloudProviders.errorEditing": "Terjadi sebuah kesalahan saat menyunting penyedia.",
   "cloudProviders.OAuth2ServiceProviders": "Penyedia Layanan OAuth 2",
+  "cloudProviders.popup.addEntry": "Add Provider Entry",
   "cloudProviders.popup.editEntry": "Sunting Masukan Pemberi",
   "cloudProviders.serviceName": "Nama Layanan",
   "cloudProviders.successfullyCreated": "Penyedia dibuat",
