@@ -1484,6 +1484,7 @@
   "vocabularyManagement.heading": "Ordlistor",
   "vocabularyManagement.noEntry": "Denna ordlista är tom.",
   "vocabularyManagement.noEntryWhenFiltered": "Det finns inga ordlisteposter med dessa sökkriterier.",
+  "vocabularyManagement.popup.addEntry": "Lägg till en ny ordlistepost",
   "vocabularyManagement.popup.editEntry": "Redigera ordlistepost",
   "vocabularyManagement.select": "Välj en ordlista",
   "vocabularyManagement.selectParent": "Välj en överordnad",

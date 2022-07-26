@@ -1484,6 +1484,7 @@
   "vocabularyManagement.heading": "語彙",
   "vocabularyManagement.noEntry": "エントリなし",
   "vocabularyManagement.noEntryWhenFiltered": "これらの検索条件に合う語彙エントリはありません。",
+  "vocabularyManagement.popup.addEntry": "新しい単語エントリを追加",
   "vocabularyManagement.popup.editEntry": "語彙エントリを編集",
   "vocabularyManagement.select": "語彙を選択",
   "vocabularyManagement.selectParent": "親を選択",

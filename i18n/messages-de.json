@@ -1484,6 +1484,7 @@
   "vocabularyManagement.heading": "Vokabulare",
   "vocabularyManagement.noEntry": "Kein Eintrag",
   "vocabularyManagement.noEntryWhenFiltered": "Es sind keine Einträge im Vokabular mit diesen Suchkriterien vorhanden.",
+  "vocabularyManagement.popup.addEntry": "Neuen Eintrag zum Vokabular hinzufügen",
   "vocabularyManagement.popup.editEntry": "Eintrag im Vokabular bearbeiten",
   "vocabularyManagement.select": "Vokabular auswählen",
   "vocabularyManagement.selectParent": "Einen übergeordneten Eintrag auswählen",
