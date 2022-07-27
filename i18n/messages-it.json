@@ -1484,6 +1484,7 @@
   "vocabularyManagement.heading": "Vocabolari",
   "vocabularyManagement.noEntry": "Questo vocabolario è vuoto.",
   "vocabularyManagement.noEntryWhenFiltered": "Nessuna voce di vocabolario soddisfa i criteri di ricerca.",
+  "vocabularyManagement.popup.addEntry": "Aggiungi voce di vocabolario",
   "vocabularyManagement.popup.editEntry": "Modifica voce di vocabolario",
   "vocabularyManagement.select": "Seleziona un vocabolario",
   "vocabularyManagement.selectParent": "Seleziona un padre",

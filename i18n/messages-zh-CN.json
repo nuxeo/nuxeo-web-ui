@@ -1483,6 +1483,7 @@
   "vocabularyManagement.heading": "词汇",
   "vocabularyManagement.noEntry": "这个词汇是空的。",
   "vocabularyManagement.noEntryWhenFiltered": "没有这些搜索条件的词汇条目。",
+  "vocabularyManagement.popup.addEntry": "Add Vocabulary Entry",
   "vocabularyManagement.popup.editEntry": "编辑词汇表项",
   "vocabularyManagement.select": "选择词汇表",
   "vocabularyManagement.selectParent": "选择父级",

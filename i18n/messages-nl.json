@@ -1484,6 +1484,7 @@
   "vocabularyManagement.heading": "Woordenboeken",
   "vocabularyManagement.noEntry": "Dit woordenboek is leeg.",
   "vocabularyManagement.noEntryWhenFiltered": "Er zijn geen woordenboeklemma's met deze zoekcriteria.",
+  "vocabularyManagement.popup.addEntry": "Woordenlijst toevoegen",
   "vocabularyManagement.popup.editEntry": "Woordenboeklemma bewerken",
   "vocabularyManagement.select": "Een woordenboek selecteren",
   "vocabularyManagement.selectParent": "Een bovenliggende selecteren",
