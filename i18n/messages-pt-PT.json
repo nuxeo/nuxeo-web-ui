@@ -1483,6 +1483,7 @@
   "vocabularyManagement.heading": "Vocabulários",
   "vocabularyManagement.noEntry": "Este vocabulário está vazio.",
   "vocabularyManagement.noEntryWhenFiltered": "Nenhum registro de vocabulário com estes critérios de pesquisa.",
+  "vocabularyManagement.popup.addEntry": "Add Vocabulary Entry",
   "vocabularyManagement.popup.editEntry": "Editar o registro de vocabulário",
   "vocabularyManagement.select": "Selecione um vocabulário",
   "vocabularyManagement.selectParent": "Selecione um pai",

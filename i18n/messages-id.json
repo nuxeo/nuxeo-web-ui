@@ -1483,6 +1483,7 @@
   "vocabularyManagement.heading": "Kosakata",
   "vocabularyManagement.noEntry": "Kosakata ini kosong.",
   "vocabularyManagement.noEntryWhenFiltered": "Tidak ada masukan kosa kata dengan kriteria pencarian ini.",
+  "vocabularyManagement.popup.addEntry": "Add Vocabulary Entry",
   "vocabularyManagement.popup.editEntry": "Sunting Masukan Kosakata",
   "vocabularyManagement.select": "Pilih Kosakata",
   "vocabularyManagement.selectParent": "Pilih Induk",
