@@ -26,7 +26,7 @@ limitations under the License.
 
     <nuxeo-input
       role="widget"
-      label="[[i18n('title')]]"
+      label="[[i18n('label.title')]]"
       name="title"
       value="{{document.properties.dc:title}}"
       autofocus
@@ -93,7 +93,7 @@ limitations under the License.
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         /**
-         * @doctype Workspace
+         * @doctype UserWorkspacesRoot
          */
         document: Object,
       },
