@@ -54,13 +54,13 @@ limitations under the License.
       >
       </paper-toggle-button>
     </div>
-
     <nuxeo-input
       role="widget"
       label="[[i18n('vocabularyManagement.edit.ordering')]]"
       name="ordering"
       type="number"
       value="{{entry.properties.ordering::change}}"
+      max="2147483646"
     >
     </nuxeo-input>
   </template>
