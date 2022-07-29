@@ -15,19 +15,52 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../../bower_components/nuxeo-elements/nuxeo-operation.html">
-<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html">
-<link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
-<link rel="import" href="../nuxeo-document-storage/nuxeo-document-storage.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html" />
+<link
+  rel="import"
+  href="../../bower_components/iron-flex-layout/iron-flex-layout.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-elements/nuxeo-operation.html"
+/>
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html" />
+<link
+  rel="import"
+  href="../../bower_components/paper-button/paper-button.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/paper-icon-button/paper-icon-button.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-ui-elements/widgets/nuxeo-tooltip.html"
+/>
+<link
+  rel="import"
+  href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html"
+/>
+<link
+  rel="import"
+  href="../nuxeo-document-storage/nuxeo-document-storage.html"
+/>
 
 <!--
 `nuxeo-clipboard`
@@ -43,7 +76,9 @@ limitations under the License.
 
       .content {
         @apply --layout-vertical;
-        height: calc(100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        height: calc(
+          100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0))
+        );
       }
 
       nuxeo-data-list {
@@ -115,38 +150,63 @@ limitations under the License.
       }
 
       .tip {
-        opacity: .5;
+        opacity: 0.5;
         display: block;
         font-weight: 300;
         padding: 8px;
         text-align: center;
         font-size: 1rem;
       }
-
+      
     </style>
 
-    <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>
-    <nuxeo-operation id="op" input="docs:[[_uids(documents.*)]]"
-                     params="[[_opParams(targetDocument)]]"
-                     sync-indexing></nuxeo-operation>
+    <nuxeo-document-storage
+      id="storage"
+      name="nuxeo-clipboard"
+      documents="{{documents}}"
+    >
+    </nuxeo-document-storage>
+    <nuxeo-operation
+      id="op"
+      input="docs:[[_uids(documents.*)]]"
+      params="[[_opParams(targetDocument)]]"
+      sync-indexing
+    >
+    </nuxeo-operation>
 
     <div class="header">[[i18n('app.clipboard')]]</div>
 
     <div class="content">
-      <nuxeo-data-list items="[[documents]]" id="list"
-                       selected-item="{{selectedDocument}}"
-                       selection-enabled select-on-tap as="document"
-                       empty-label="[[i18n('clipboard.empty')]]"
-                       empty-label-when-filtered="[[i18n('clipboard.empty')]]">
+      <nuxeo-data-list
+        items="[[documents]]"
+        id="list"
+        selected-item="{{selectedDocument}}"
+        selection-enabled
+        select-on-tap
+        as="document"
+        empty-label="[[i18n('clipboard.empty')]]"
+        empty-label-when-filtered="[[i18n('clipboard.empty')]]"
+      >
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-box">
               <div class="list-item-info">
                 <div class="list-item-thumbnail">
-                  <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
+                  <nuxeo-document-thumbnail document="[[document]]">
+                  </nuxeo-document-thumbnail>
                 </div>
-                <div class="list-item-title">[[document.title]]</div>
-                <iron-icon class="remove" icon="nuxeo:remove" alt="Remove" on-tap="_remove"></iron-icon>
+                <div class="list-item-title">
+                  <label>
+                    [[_title(document)]]
+                  </label>
+                </div>
+                <iron-icon
+                  class="remove"
+                  icon="nuxeo:remove"
+                  alt="Remove"
+                  on-tap="_remove"
+                >
+                </iron-icon>
               </div>
             </div>
           </div>
@@ -159,14 +219,26 @@ limitations under the License.
 
       <div class="toolbar">
         <div class="actions">
-          <paper-button id="paste" on-tap="execute" data-op="Document.Copy"
-                        disabled="[[!canPaste(documents, targetDocument, documents.splices)]]" noink class="primary clear">
+          <paper-button
+            id="paste"
+            on-tap="execute"
+            data-op="Document.Copy"
+            disabled="[[!canPaste(documents, targetDocument, documents.splices)]]"
+            noink
+            class="primary clear"
+          >
             <iron-icon icon="nuxeo:copy"></iron-icon>
             [[i18n('clipboard.copy')]]
           </paper-button>
           <nuxeo-tooltip for="paste">[[i18n('clipboard.copy')]]</nuxeo-tooltip>
-          <paper-button id="move" on-tap="execute" data-op="Document.Move"
-                        disabled="[[!canPaste(documents, targetDocument, documents.splices)]]" noink class="primary clear">
+          <paper-button
+            id="move"
+            on-tap="execute"
+            data-op="Document.Move"
+            disabled="[[!canPaste(documents, targetDocument, documents.splices)]]"
+            noink
+            class="primary clear"
+          >
             <iron-icon icon="nuxeo:move"></iron-icon>
             [[i18n('clipboard.move')]]
           </paper-button>
@@ -177,8 +249,12 @@ limitations under the License.
   </template>
   <script>
     Polymer({
-      is: 'nuxeo-clipboard',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      is: "nuxeo-clipboard",
+      behaviors: [
+        Nuxeo.RoutingBehavior,
+        Nuxeo.I18nBehavior,
+        Nuxeo.FiltersBehavior
+      ],
 
       properties: {
         documents: {
@@ -187,21 +263,21 @@ limitations under the License.
         },
         targetDocument: {
           type: Object,
-          observer: '_documentChanged'
+          observer: "_documentChanged"
         },
         selectedDocument: {
           type: Object,
-          observer: '_observeSelectedDocument'
+          observer: "_observeSelectedDocument"
         }
       },
 
-      observers: [
-        '_observeDocuments(documents.splices)'
-      ],
+      observers: ["_observeDocuments(documents.splices)"],
 
       _observeDocuments: function() {
         if (this.documents) {
-          this.fire('nx-clipboard-updated', {docCount: this.documents.length});
+          this.fire("nx-clipboard-updated", {
+            docCount: this.documents.length
+          });
         }
       },
 
@@ -209,27 +285,28 @@ limitations under the License.
         if (newValue && this.contains(newValue)) {
           var document = this.$.storage.get(newValue);
           if (document && document.title !== newValue.title) {
-            this.$.storage.update(document, { title: newValue.title })
+            this.$.storage.update(document, { title: newValue.title });
           }
         }
       },
 
-      add: function (docs) {
+      add: function(docs) {
         var uids = [];
 
         if (docs instanceof Array) {
-          docs.forEach(function (doc) {
-            this.$.storage.add(doc);
-          }.bind(this));
+          docs.forEach(
+            function(doc) {
+              this.$.storage.add(doc);
+            }.bind(this)
+          );
           uids = docs.map(function(doc) {
             return doc.uid;
           });
-        }
-        else {
+        } else {
           this.$.storage.add(docs);
           uids.push(docs.uid);
         }
-        this.fire('added-to-clipboard', {docIds : uids});
+        this.fire("added-to-clipboard", { docIds: uids });
       },
 
       contains: function(doc) {
@@ -241,39 +318,51 @@ limitations under the License.
       },
 
       canPaste: function(documents, doc) {
-        if (!documents || documents.length === 0 || !this.hasFacet(doc, 'Folderish')) {
+        if (
+          !documents ||
+          documents.length === 0 ||
+          !this.hasFacet(doc, "Folderish")
+        ) {
           return false;
         }
         return doc.contextParameters && doc.contextParameters.subtypes
           ? documents.every(function(entry) {
-            return doc.contextParameters.subtypes.map(function(e) {
-              return e.type;
-            }).indexOf(entry.type) > -1;
-          })
+              return (
+                doc.contextParameters.subtypes
+                  .map(function(e) {
+                    return e.type;
+                  })
+                  .indexOf(entry.type) > -1
+              );
+            })
           : true;
       },
 
       execute: function(evt) {
         this.$.op.op = evt.currentTarget.dataset.op;
-        this.$.op.execute().then(function() {
-          this.documents = [];
-          this.fire('document-updated');
-        }.bind(this));
+        this.$.op.execute().then(
+          function() {
+            this.documents = [];
+            this.fire("document-updated");
+          }.bind(this)
+        );
       },
 
       _remove: function(evt) {
         evt.stopImmediatePropagation();
         this.remove(evt.model.document);
-        this.fire('removed-from-clipboard', {docId : evt.model.document.uid});
+        this.fire("removed-from-clipboard", { docId: evt.model.document.uid });
       },
 
       _uids: function() {
         if (this.documents && this.documents !== null) {
-          return this.documents.map(function(doc) {
-            return doc.uid;
-          }).join(',');
+          return this.documents
+            .map(function(doc) {
+              return doc.uid;
+            })
+            .join(",");
         }
-        return '';
+        return "";
       },
 
       _opParams: function() {
@@ -287,17 +376,25 @@ limitations under the License.
       _observeSelectedDocument: function(doc) {
         if (doc) {
           if (doc.isVersion) {
-            this.navigateTo('document', doc.uid);
+            this.navigateTo("document", doc.uid);
           } else {
-            this.navigateTo('browse', doc.path);
+            this.navigateTo("browse", doc.path);
           }
         }
       },
 
+      _title(document) {
+        if (document) {
+          return document.type === "Root"
+            ? this.i18n("browse.root")
+            : document.title;
+        }
+      },
+
       _computedClass: function(isSelected) {
-        var classes = 'list-item';
+        var classes = "list-item";
         if (isSelected) {
-          classes += ' selected';
+          classes += " selected";
         }
         return classes;
       }
