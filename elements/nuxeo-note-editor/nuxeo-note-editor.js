@@ -69,11 +69,11 @@ Polymer({
       paper-textarea,
       nuxeo-document-preview {
         display: block;
-        min-height: calc(80vh - 132px);
+        min-height: calc(80vh - 90px);
       }
 
       nuxeo-html-editor {
-        min-height: calc(80vh - 132px);
+        min-height: calc(80vh - 90px);
         height: var(--nuxeo-note-editor-html-height);
       }
 
