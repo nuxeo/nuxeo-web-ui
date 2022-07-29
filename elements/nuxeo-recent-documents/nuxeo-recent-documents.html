@@ -15,13 +15,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html">
-<link rel="import" href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html">
-<link rel="import" href="../nuxeo-document-storage/nuxeo-document-storage.html">
-<link rel="import" href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html" />
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-ui-elements/nuxeo-routing-behavior.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-ui-elements/nuxeo-i18n-behavior.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-ui-elements/nuxeo-filters-behavior.html"
+/>
+<link
+  rel="import"
+  href="../../bower_components/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.html"
+/>
+<link
+  rel="import"
+  href="../nuxeo-document-storage/nuxeo-document-storage.html"
+/>
+<link
+  rel="import"
+  href="../nuxeo-document-thumbnail/nuxeo-document-thumbnail.html"
+/>
 
 <!--
 `nuxeo-recent-documents`
@@ -31,7 +49,6 @@ limitations under the License.
 <dom-module id="nuxeo-recent-documents">
   <template>
     <style include="nuxeo-styles">
-
       .content {
         @apply --layout-vertical;
       }
@@ -39,7 +56,9 @@ limitations under the License.
       nuxeo-data-list {
         display: block;
         position: relative;
-        min-height: calc(100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        min-height: calc(
+          100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0))
+        );
       }
 
       .list-item {
@@ -70,31 +89,50 @@ limitations under the License.
       }
     </style>
 
-    <nuxeo-document-storage id="storage" name="nuxeo-recent-documents" documents="{{documents}}"></nuxeo-document-storage>
+    <nuxeo-document-storage
+      id="storage"
+      name="nuxeo-recent-documents"
+      documents="{{documents}}"
+    ></nuxeo-document-storage>
 
     <div class="header">[[i18n('app.recentlyViewed')]]</div>
     <div class="content">
-      <nuxeo-data-list items="[[documents]]" id="recentDocumentsList" as="document"
-        selected-item="{{selectedRecent}}" items="{{favorites}}"
-        selection-enabled select-on-tap
+      <nuxeo-data-list
+        items="[[documents]]"
+        id="recentDocumentsList"
+        as="document"
+        selected-item="{{selectedRecent}}"
+        items="{{favorites}}"
+        selection-enabled
+        select-on-tap
         empty-label="[[i18n('recentDocuments.empty')]]"
-        empty-label-when-filtered="[[i18n('recentDocuments.empty')]]">
+        empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
+      >
         <template>
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-info">
-              <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
-              <div class="list-item-title">[[document.title]]</div>
+              <nuxeo-document-thumbnail
+                document="[[document]]"
+              ></nuxeo-document-thumbnail>
+              <div class="list-item-title">
+                <label>
+                  [[_title(document)]]
+                </label>
+              </div>
             </div>
           </div>
         </template>
       </nuxeo-data-list>
     </div>
-
   </template>
   <script>
     Polymer({
-      is: 'nuxeo-recent-documents',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      is: "nuxeo-recent-documents",
+      behaviors: [
+        Nuxeo.RoutingBehavior,
+        Nuxeo.I18nBehavior,
+        Nuxeo.FiltersBehavior
+      ],
       properties: {
         documents: {
           type: Array,
@@ -106,7 +144,7 @@ limitations under the License.
         },
         selectedRecent: {
           type: Object,
-          observer: '_selectedRecentChanged',
+          observer: "_selectedRecentChanged",
           notify: true
         }
       },
@@ -114,7 +152,7 @@ limitations under the License.
       add: function(doc) {
         this.$.storage.add(doc);
         if (this.documents.length > this.maxSize) {
-          this.splice('documents', -1, 1);
+          this.splice("documents", -1, 1);
         }
       },
 
@@ -132,23 +170,30 @@ limitations under the License.
       },
 
       _computedClass: function(isSelected) {
-        var classes = 'list-item';
+        var classes = "list-item";
         if (isSelected) {
-          classes += ' selected';
+          classes += " selected";
         }
         return classes;
+      },
+
+      _title(document) {
+        if (document) {
+          return document.type === "Root"
+            ? this.i18n("browse.root")
+            : document.title;
+        }
       },
 
       _selectedRecentChanged: function(doc) {
         if (doc) {
           if (doc.isVersion) {
-            this.navigateTo('document', doc.uid);
+            this.navigateTo("document", doc.uid);
           } else {
-            this.navigateTo('browse', doc.path);
+            this.navigateTo("browse", doc.path);
           }
         }
       }
-
     });
   </script>
 </dom-module>
