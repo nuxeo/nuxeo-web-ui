@@ -237,6 +237,12 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="parentinspectorAction" slot="DOCUMENT_ACTIONS" order="11">
+  <template>
+    <nuxeo-parent-inspector-button document="[[document]]"></nuxeo-parent-inspector-button>
+  </template>
+</nuxeo-slot-content>
+
 <nuxeo-slot-content name="deleteDocumentAction" slot="DOCUMENT_ACTIONS" order="15">
   <template>
     <nuxeo-delete-document-button document="[[document]]"></nuxeo-delete-document-button>

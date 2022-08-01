@@ -1229,6 +1229,8 @@
   "publication.unpublish.success": "Document successfully unpublished.",
   "publication.unpublish.error": "Error while unpublishing the document.",
   "publication.unpublishAll": "Unpublish All",
+  "parent.inspector.text":"This is the parent inspector. It displays information about the parent of this document.",
+  "parent.inspector.label":"Parent Inspector",
   "queryWidget.noDocuments": "There are no items to show.",
   "recentDocuments.empty": "There are no recent documents to display.",
   "recentDocumentsTable.lastViewed": "Last Viewed",
