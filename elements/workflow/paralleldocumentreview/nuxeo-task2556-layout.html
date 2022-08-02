@@ -30,9 +30,9 @@ limitations under the License.
                            value="{{task.variables.participants}}">
     </nuxeo-user-suggestion>
 
-    <paper-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
-                    value="{{task.variables.comment}}" always-float-label>
-    </paper-textarea>
+    <nuxeo-textarea role="widget" label="[[i18n('wf.parallelDocumentReview.comment')]]"
+                    value="{{task.variables.comment}}" >
+    </nuxeo-textarea>
 
     <nuxeo-date-picker role="widget"
                        label="[[i18n('wf.parallelDocumentReview.endDate')]]"
