@@ -95,7 +95,9 @@ Polymer({
           <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
             <div class="list-item-info">
               <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
-              <div class="list-item-title">[[document.title]]</div>
+              <div class="list-item-title">
+                [[_title(document)]]
+              </div>
             </div>
           </div>
         </template>
@@ -172,6 +174,12 @@ Polymer({
       } else {
         this._addOrUpdateStorage(doc);
       }
+    }
+  },
+
+  _title(document) {
+    if (document) {
+      return document.type === 'Root' ? this.i18n('browse.root') : document.title;
     }
   },
 
