@@ -98,10 +98,9 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-date-picker',
-  (element) =>
-    moment(element.element('vaadin-date-picker input').getValue(), global.dateFormat).format(global.dateFormat),
+  (element) => moment(element.element('vaadin-text-field').getValue(), global.dateFormat).format(global.dateFormat),
   (element, value) => {
-    const date = element.element('vaadin-date-picker input');
+    const date = element.element('vaadin-text-field');
     if (date.getValue()) {
       date.element('div[part="clear-button"]').click();
     }
