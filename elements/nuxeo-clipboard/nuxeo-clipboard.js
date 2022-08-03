@@ -156,7 +156,9 @@ Polymer({
                 <div class="list-item-thumbnail">
                   <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
                 </div>
-                <div class="list-item-title">[[document.title]]</div>
+                <div class="list-item-title">
+                  [[_title(document)]]
+                </div>
                 <iron-icon class="remove" icon="nuxeo:remove" alt="Remove" on-tap="_remove"></iron-icon>
               </div>
             </div>
@@ -299,6 +301,12 @@ Polymer({
   _observeSelectedDocument(doc) {
     if (doc) {
       this.navigateTo(doc);
+    }
+  },
+
+  _title(document) {
+    if (document) {
+      return document.type === 'Root' ? this.i18n('browse.root') : document.title;
     }
   },
 
