@@ -64,6 +64,23 @@ Polymer({
         font-weight: normal;
       }
 
+      #createButton {
+        display: inline-block;
+        border: none;
+        padding: 0;
+        margin: 0;
+        text-decoration: none;
+        background-color: transparent;
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        cursor: pointer;
+        text-align: center;
+        transition: background 250ms ease-in-out, transform 150ms ease;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+      }
+
       .buttons {
         @apply --layout-horizontal;
         @apply --layout-justified;
@@ -102,9 +119,9 @@ Polymer({
       sync-indexing
     ></nuxeo-operation>
 
-    <nuxeo-tag class="create" disabled$="[[!_isAvailable(document)]]" on-tap="_toggleDialog" uppercase
-      >[[label]]</nuxeo-tag
-    >
+    <button id="createButton" on-tap="_toggleDialog" aria-label$="[[label]]">
+      <nuxeo-tag class="create" disabled$="[[!_isAvailable(document)]]" uppercase>[[label]]</nuxeo-tag>
+    </button>
 
     <nuxeo-dialog
       id="dialog"
