@@ -1142,7 +1142,7 @@ Polymer({
     }
   },
 
-  _import() {
+  _import(error) {
     this._creating = true;
     const params = {
       context: {
@@ -1157,10 +1157,8 @@ Polymer({
           this._handleSuccess(this._mergeResponses(response1, response2));
         }, this._handleError.bind(this));
       }, this._handleError.bind(this));
-    } else if (doLocal) {
-      this._smartImportLocalFiles(params).then(this._handleSuccess.bind(this), this._handleError.bind(this));
     } else {
-      this._smartImportRemoteFiles(params).then(this._handleSuccess.bind(this), this._handleError.bind(this));
+      this._handleError(error);
     }
   },
 
