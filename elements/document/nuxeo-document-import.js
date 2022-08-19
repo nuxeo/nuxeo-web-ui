@@ -1157,10 +1157,11 @@ Polymer({
           this._handleSuccess(this._mergeResponses(response1, response2));
         }, this._handleError.bind(this));
       }, this._handleError.bind(this));
-    } else if (doLocal) {
-      this._smartImportLocalFiles(params).then(this._handleSuccess.bind(this), this._handleError.bind(this));
     } else {
-      this._smartImportRemoteFiles(params).then(this._handleSuccess.bind(this), this._handleError.bind(this));
+      this.set('_creating', false);
+      this.set('_importErrorMessage', this.i18n('documentImport.error.importFailed'));
+      const message = error.message || (error.detail && error.detail.error);
+      this.notify({ message: `${this.i18n('label.error').toUpperCase()}: ${message}` });
     }
   },
 
