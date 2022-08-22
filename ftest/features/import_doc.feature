@@ -9,7 +9,7 @@ Feature: Import and Create Documents
     And I have permission ReadWrite for this document
     And I browse to the document
 
-  Scenario: Import a Document without adding properties
+  Scenario: Import a Document after adding properties
     When I click the Create Document button
     Then I go to the import tab
     And I can see the import tab content
@@ -19,7 +19,7 @@ Feature: Import and Create Documents
     And I can see the inline nuxeo-image-viewer previewer
     And I can see the picture formats panel
 
-  Scenario: Import 6 documents without adding properties
+  Scenario: Import 6 documents after adding properties
     When I click the Create Document button
     Then I go to the import tab
     And I can see the import tab content
