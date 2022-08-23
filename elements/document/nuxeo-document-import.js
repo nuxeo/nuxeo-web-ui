@@ -520,7 +520,7 @@ Polymer({
             class="primary"
             on-tap="_import"
             disabled$="[[!_canImport(_creating, hasLocalFilesUploaded,hasRemoteFiles,canCreate)]]"
-            aria-label$="[[i18n('command.create')]]"
+            aria-label$="[[i18n('documentImport.error.importFailed')]]"
           >
             <template is="dom-if" if="[[!_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
               [[i18n('command.create')]]
