@@ -53,4 +53,4 @@ jobs:
           github_user_email: ui+jx-bot@nuxeo.com
 
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_TOKEN }}
