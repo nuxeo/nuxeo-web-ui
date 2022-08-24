@@ -119,9 +119,9 @@ Polymer({
       sync-indexing
     ></nuxeo-operation>
 
-    <nuxeo-tag class="create" disabled$="[[!_isAvailable(document)]]" on-tap="_toggleDialog" uppercase
-      >[[label]]</nuxeo-tag
-    >
+    <button id="createButton" on-tap="_toggleDialog" aria-label$="[[label]]">
+      <nuxeo-tag class="create" disabled$="[[!_isAvailable(document)]]" uppercase>[[label]]</nuxeo-tag>
+    </button>
 
     <nuxeo-dialog
       id="dialog"
