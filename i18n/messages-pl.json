@@ -470,7 +470,7 @@
   "documentPage.route.noTasks": "Brak zadań.",
   "documentPage.route.view.graph": "Pokaż wykres",
   "documentPage.route.view.graph.error": "Wystąpił błąd podczas rysowania wykresu procesu",
-  "documentPage.info": "informacje",
+  "documentPage.info": "Informacje",
   "documentPage.initiated.workflow.currentUser": "Uruchomiłeś proces {0} dla tego dokumentu.",
   "documentPage.initiated.workflow": "uruchomił proces {0} dla tego dokumentu.",
   "documentPage.metadata": "Właściwości",
