@@ -70,6 +70,23 @@ Polymer({
         @apply --buttons-bar;
       }
 
+      #createButton {
+        display: inline-block;
+        border: none;
+        padding: 0;
+        margin: 0;
+        text-decoration: none;
+        background-color: transparent;
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        cursor: pointer;
+        text-align: center;
+        transition: background 250ms ease-in-out, transform 150ms ease;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+      }
+
       paper-radio-group {
         margin: 16px;
       }
