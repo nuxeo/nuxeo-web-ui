@@ -498,7 +498,7 @@ Polymer({
             </div>
           </template>
         </div>
-        <span class="upload-error">[[_importErrorMessage]]</span>
+        <span class="upload-error" aria-live="assertive">[[_importErrorMessage]]</span>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary"
