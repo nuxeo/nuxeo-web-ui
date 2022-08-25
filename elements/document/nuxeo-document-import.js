@@ -498,9 +498,7 @@ Polymer({
             </div>
           </template>
         </div>
-        <span class="upload-error" aria-live="assertive" hidden$="[[!hasFiles]]">
-          [[i18n('documentImport.error.importFailed')]]
-        </span>
+        <span class="upload-error" aria-live="assertive">[[_importErrorMessage]]</span>
         <div class="buttons horizontal end-justified layout">
           <div class="flex start-justified">
             <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary"
