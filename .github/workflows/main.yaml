@@ -5,6 +5,9 @@ on:
     branches:
       - maintenance-3.0.x
 
+  # Manually trigger the workflow
+  workflow_dispatch:
+  
 jobs:
   lint:
     uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@maintenance-3.0.x
