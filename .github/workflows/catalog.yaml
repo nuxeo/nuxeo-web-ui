@@ -17,11 +17,8 @@ on:
         default: ''
         required: false
 
-  push:
-    branches:
-      - maintenance-3.0.x
-    paths:
-      - 'elements/**'
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -39,8 +36,8 @@ jobs:
           npm install
           npm install -g gulp
 
-      - name: Setup parameters (push)
-        if: github.event_name == 'push'
+      - name: Setup parameters (release)
+        if: github.event_name == 'release'
         run: |
           BRANCH_NAME=maintenance-3.0.x
           TARGET_PLATFORM=11.3
