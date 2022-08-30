@@ -42,6 +42,7 @@ jobs:
           BRANCH_NAME=maintenance-3.0.x
           TARGET_PLATFORM=11.3
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "RELEASE_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
 
       - name: Setup parameters (workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'
@@ -75,3 +76,23 @@ jobs:
         run: |
           CATALOG_VERSION=$(mvn help:evaluate -Dexpression=project.version -f data/applications/nuxeo/$TARGET_PLATFORM/nuxeo-web-ui/pom.xml)
           ./scripts/maven-deploy.sh data/applications/nuxeo/TARGET_PLATFORM $CATALOG_VERSION${{ github.event.inputs.classifier }}
+
+      - name: Checkout NOS repository
+        uses: actions/checkout@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+        with:
+          repository: nuxeo/nos
+          path: nos
+          fetch-depth: 0
+
+      - name: Create pull request for catalog update in NOS
+        working-directory: nos
+        env:
+          GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+        run: | 
+          git checkout -b designer-catalog-update
+          mvn versions:set-property -Dproperty=view.designer.catalog.3.0.x -DnewVersion=$RELEASE_NAME
+          git add .
+          git commit -m "Update Designer catalog"
+          gh pr create --base master --fill
