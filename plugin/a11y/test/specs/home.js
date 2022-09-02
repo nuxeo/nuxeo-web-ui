@@ -13,8 +13,8 @@ const EXPECTED_VIOLATIONS = {
   'landmark-one-main': 1,
   'meta-viewport': 1,
   'page-has-heading-one': 1,
-  region: 29,
-  'nested-interactive': 13,
+  region: 25,
+  'nested-interactive': 15,
 };
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
