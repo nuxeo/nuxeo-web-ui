@@ -274,7 +274,7 @@ limitations under the License.
           var comment = this.comments[index];
           this.$.commentList.itemForElement(comment);
           this.$.selector.select(comment);
-          this.set('reply', comment.text);
+          this.set('reply', event.detail.comment);
           this.$$('#replyContainer').focus();
         }
         event.stopPropagation();
