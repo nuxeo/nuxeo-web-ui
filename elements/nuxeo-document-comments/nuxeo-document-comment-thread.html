@@ -276,6 +276,7 @@ limitations under the License.
           this.$.selector.select(comment);
           this.set('reply', comment.text);
           this.$$('#replyContainer').focus();
+          this.reply = event.detail.comment;
         }
         event.stopPropagation();
       },

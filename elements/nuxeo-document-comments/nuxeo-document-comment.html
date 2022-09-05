@@ -186,7 +186,7 @@ limitations under the License.
             </template>
           </div>
           <div class="text">
-            <span inner-h-t-m-l="[[_computeTextToDisplay(comment.text, maxChars, truncated)]]"></span>
+            <span id="view-comment" inner-h-t-m-l="[[_computeTextToDisplay(comment.text, maxChars, truncated)]]"></span>
             <template is="dom-if" if="[[truncated]]">
               <span class="smaller opaque link" on-tap="_showFullComment">[[i18n('comments.showAll')]]</span>
             </template>
@@ -254,8 +254,8 @@ limitations under the License.
         this.fire('delete-comment', {commentId: this.comment.id});
       },
 
-      _editComment: function() {
-        this.fire('edit-comment', {commentId: this.comment.id});
+      _editComment: function () {
+        this.fire('edit-comment', {commentId: this.comment.id, comment: this.$$('#view-comment').innerHTML});
       },
 
       _expand: function () {
