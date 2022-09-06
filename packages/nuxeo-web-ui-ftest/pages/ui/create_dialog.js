@@ -1,10 +1,15 @@
 import path from 'path';
 import BasePage from '../base';
 import DocumentCreate from './browser/document_create';
+import DocumentLayout from './browser/document_layout';
 
 export default class CreateDialog extends BasePage {
   get documentCreate() {
     return new DocumentCreate('nuxeo-document-create');
+  }
+
+  get documentImportLayout() {
+    return new DocumentLayout('nuxeo-document-import');
   }
 
   importTab(name) {
@@ -58,6 +63,10 @@ export default class CreateDialog extends BasePage {
     return this.el.element('div[name="upload"] paper-button[id="create"]');
   }
 
+  get importCreateButtonProperties() {
+    return this.el.element('paper-button[name="createWithProperties"]');
+  }
+
   get importCSVButton() {
     return this.el.element('div[name="upload"] paper-button.primary');
   }
@@ -84,5 +93,25 @@ export default class CreateDialog extends BasePage {
 
   get createButton() {
     return this.el.element('paper-button[id="create"]');
+  }
+
+  get addProperties() {
+    return this.el.element('paper-button[id="edit"]');
+  }
+
+  get selectAnAssetType() {
+    return this.el.element('nuxeo-select[name="assetType"]');
+  }
+
+  get applyAll() {
+    return this.el.element('paper-button[name="applyAll"]');
+  }
+
+  selectAssetType(val) {
+    driver.waitForVisible('nuxeo-select[id="docTypeDropdown"] paper-item');
+    const selectasset = this.el
+      .elements('nuxeo-select[id="docTypeDropdown"] paper-item[role="option"]')
+      .find((e) => e.getText() === val);
+    selectasset.click();
   }
 }
