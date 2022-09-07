@@ -1,0 +1,24 @@
+{
+  "globals": {
+    "$": true,
+    "addedVocabularyEntries": true,
+    "addedComments": true,
+    "driver": true,
+    "fixtures": true,
+    "liveCollections": true,
+    "liveDocuments": true,
+    "runningWorkflows": true,
+    "users": true,
+    "groups": true,
+    "browser": true,
+    "moment": true
+  },
+  "overrides": [
+    {
+      "files": ["features/step_definitions/*.js"],
+      "rules": {
+        "no-unused-expressions": "off"
+      }
+    }
+  ]
+}
