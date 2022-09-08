@@ -87,6 +87,9 @@ jobs:
         pushd packages/nuxeo-web-ui-ftest
         npm install
         popd
+        pushd packages/nuxeo-designer-catalog
+        npm install
+        popd
 
     - name: 'Update settings.xml with server configuration'
       run: |
