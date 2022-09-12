@@ -222,7 +222,8 @@ Polymer({
         </div>
         <div class="delegatedActions" hidden="[[!_displayDelegatedAction(displaySort, view)]]">
           <template is="dom-if" if="[[_displaySelectAll(view, view.selectAllEnabled)]]">
-            <nuxeo-checkmark checked="[[selectAllActive]]" on-click="_toggleSelectAll"></nuxeo-checkmark>
+            <nuxeo-checkmark checked="[[_isChecked(view.selectAllActive, _excludedDocs)]]" on-click="_toggleSelectAll">
+            </nuxeo-checkmark>
           </template>
           <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
             <nuxeo-sort-select
@@ -482,8 +483,7 @@ Polymer({
     if (!this.view) {
       return;
     }
-
-    if (this.view.selectAllActive) {
+    if (this._excludedDocs === 0 && this.view.selectAllActive) {
       this.clearSelection();
     } else {
       this.selectAll();
@@ -743,6 +743,13 @@ Polymer({
     if (this.nxProvider && e.detail.value) {
       this.quickFilters = this.nxProvider.quickFilters;
     }
+  },
+
+  _isChecked(selectAllActive, _excludedDocs) {
+    if (selectAllActive && _excludedDocs === 0) {
+      return true;
+    }
+    return false;
   },
 
   _excludedDocsChanged(e) {
