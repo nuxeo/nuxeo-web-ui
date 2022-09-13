@@ -94,7 +94,6 @@ Feature: Bulk Edit
     And I deselect the "Second_File" document
     When I cannot see the display selection link
     Then I select all the documents
-    And I select all the documents
     And I deselect the "First_File" document
     And I click the bulk edit button with "default" layout
     And I can bulk edit multiple properties in "default" layout:
