@@ -561,6 +561,7 @@ Polymer({
                         attr-for-selected="key"
                         label="[[i18n('documentImportForm.type.label')]]"
                         placeholder="[[i18n('documentImportForm.type.placeholder')]]"
+                        name="assetType"
                         error-message="[[i18n('documentImportForm.type.error')]]"
                         required
                       >
@@ -668,6 +669,7 @@ Polymer({
             <paper-button
               noink
               class="text"
+              name="applyAll"
               on-tap="_applyToAll"
               disabled$="[[_disableApplyToAll(_initializingDoc,_creating,canCreate,customizing,docIdx)]]"
             >
@@ -678,6 +680,7 @@ Polymer({
           <paper-button
             noink
             class="primary"
+            name="createWithProperties"
             on-tap="_importWithProperties"
             disabled$="[[!_canImportWithMetadata(_creating,_initializingDoc,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]"
             aria-label$="[[i18n('command.create')]]"
