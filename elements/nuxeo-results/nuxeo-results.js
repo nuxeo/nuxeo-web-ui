@@ -746,10 +746,7 @@ Polymer({
   },
 
   _isChecked(selectAllActive, _excludedDocs) {
-    if (selectAllActive && _excludedDocs === 0) {
-      return true;
-    }
-    return false;
+    return selectAllActive && _excludedDocs === 0;
   },
 
   _excludedDocsChanged(e) {
