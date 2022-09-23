@@ -116,7 +116,8 @@ Select2Editor.prototype.open = function() {
 
   this.$textarea.css({
     height: $(this.TD).height(),
-    'min-width': $(this.TD).outerWidth(),
+    width: $(this.TD).width(),
+    'min-width': $(this.TD).width(),
   });
 
   // display the list
