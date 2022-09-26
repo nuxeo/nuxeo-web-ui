@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
@@ -169,7 +169,7 @@ jobs:
 
           # ensure the deployment is restarted to pull the new preview image
           kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
-          
+
           echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
 
           echo ::set-output name=url::"https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com"
@@ -187,11 +187,11 @@ jobs:
             })
 
   result:
-    name: "Result: ${{ needs.preview.outputs.url }}"
+    name: 'Result: ${{ needs.preview.outputs.url }}'
     needs: preview
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - name: "Result: ${{ needs.preview.outputs.url }}"
+      - name: 'Result: ${{ needs.preview.outputs.url }}'
         run: |
           echo ${{ needs.preview.outputs.url }}

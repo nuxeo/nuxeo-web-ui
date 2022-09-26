@@ -34,7 +34,7 @@ jobs:
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
-          node-version: 16
+          node-version: 18
 
       - name: Install
         env:
