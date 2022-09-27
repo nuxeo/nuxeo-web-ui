@@ -43,11 +43,6 @@ limitations under the License.
   </target>
 
   <target name="install" description="Install npm depedencies" unless="skipInstall">
-    <exec executable="${cmd.npm}" failonerror="true">
-      <arg value="install" />
-      <!-- remove next line once NXBT-3340 is closed -->
-      <arg value="--@nuxeo:registry=&quot;https://packages.nuxeo.com/repository/npm-public&quot;" />
-    </exec>
   </target>
 
   <target name="init" description="Download all node and web dependencies" depends="install">
@@ -55,7 +50,6 @@ limitations under the License.
   </target>
 
   <target name="npm-build" depends="init" unless="skipBuild">
-    <npm-run script="build" />
   </target>
 
   <target name="build" depends="npm-build">

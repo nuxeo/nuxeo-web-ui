@@ -51,13 +51,23 @@
             </configuration>
           </execution>
           <execution>
-            <id>run-tests</id>
+            <id>run-install</id>
             <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
+              <goal>npm-install</goal>
             </goals>
             <configuration>
-              <target>run-bench</target>
+              <executable>npm</executable>
+              <commandlineArgs>install</commandlineArgs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>run-tests</id>
+            <goals>
+              <goal>integration-test-verify</goal>
+            </goals>
+            <configuration>
+              <executable>npm</executable>
+              <commandlineArgs>start</commandlineArgs>
             </configuration>
           </execution>
           <execution>
