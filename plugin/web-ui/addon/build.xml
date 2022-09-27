@@ -1,13 +1,10 @@
 <?xml version="1.0"?>
 <!--
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,8 +27,27 @@ limitations under the License.
     <delete dir="node_modules" />
   </target>
 
-  <target name="install" description="Install npm depedencies" unless="skipInstall">
+  <target name="clean">
+    <exec executable="cmd"
+      failonerror="true"
+      osfamily="windows">
+      <arg value="/c"/>
+      <arg value="time"/>
+      <arg value="/t" />
+    </exec>
+    <exec executable="date"
+      failonerror="true"
+      osfamily="unix">
+      <arg value="+%H:%M" />
+    </exec>
+  </target>
 
+  <target name="install" description="Install npm depedencies" unless="skipInstall">
+    <exec executable="${cmd.npm}" failonerror="true">
+      <arg value="install" />
+      <!-- remove next line once NXBT-3340 is closed -->
+      <arg value="--@nuxeo:registry=&quot;https://packages.nuxeo.com/repository/npm-public&quot;" />
+    </exec>
   </target>
 
   <target name="init" description="Download all node and web dependencies" depends="install">
@@ -39,7 +55,7 @@ limitations under the License.
   </target>
 
   <target name="npm-build" depends="init" unless="skipBuild">
-    
+    <npm-run script="build" />
   </target>
 
   <target name="build" depends="npm-build">
