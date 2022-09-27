@@ -26,22 +26,7 @@ limitations under the License.
   <target name="clean" description="Clean npm and bower dependencies">
     <delete dir="node_modules" />
   </target>
-
-  <target name="clean">
-    <exec executable="cmd"
-      failonerror="true"
-      osfamily="windows">
-      <arg value="/c"/>
-      <arg value="time"/>
-      <arg value="/t" />
-    </exec>
-    <exec executable="date"
-      failonerror="true"
-      osfamily="unix">
-      <arg value="+%H:%M" />
-    </exec>
-  </target>
-
+  
   <target name="install" description="Install npm depedencies" unless="skipInstall">
   </target>
 
