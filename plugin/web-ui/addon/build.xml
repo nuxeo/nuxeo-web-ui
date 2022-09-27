@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
 <!--
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
     http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,15 +29,17 @@ limitations under the License.
   <target name="clean" description="Clean npm and bower dependencies">
     <delete dir="node_modules" />
   </target>
-  
-  <target name="install" description="Install npm depedencies" unless="skipInstall">
-  </target>
+
+   <exec-node name="npm-install" module="npm" failonerror="true" >
+      <arg value="run" />
+    </exec-node>
 
   <target name="init" description="Download all node and web dependencies" depends="install">
     <!-- npm-run script="${lint.script}" /-->
   </target>
 
   <target name="npm-build" depends="init" unless="skipBuild">
+    <npm-run script="build" />
   </target>
 
   <target name="build" depends="npm-build">
@@ -44,6 +49,21 @@ limitations under the License.
       </fileset>
     </copy>
   </target>
+
+   <macrodef name="exec-node">
+    <attribute name="module" description="The name of the NodeJS module to execute" />
+    <attribute name="failonerror" default="true" description="Fail if the exit code is not 0" />
+    <element name="args" implicit="yes" description="Argument to pass to the exec task" />
+    <sequential>
+      <exec executable="cmd.exe" failonerror="@{failonerror}" osfamily="winnt">
+        <arg line="/c  @{module}" />
+        <args />
+      </exec>
+      <exec executable="@{module}" failonerror="@{failonerror}" osfamily="unix" logError="true">
+        <args />
+      </exec>
+    </sequential>
+  </macrodef>
 
   <macrodef name="npm-run">
     <attribute name="script"/>
