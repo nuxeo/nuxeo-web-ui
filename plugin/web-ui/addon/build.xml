@@ -31,8 +31,8 @@ limitations under the License.
   </target>
 
   <target name="install" description="Install npm depedencies" unless="skipInstall">
-    <exec executable="${cmd.npm}" failonerror="true">
-    <arg>install</arg>
+    <exec executable="${cmd}" failonerror="true">
+     <arg line="/c npm install" />
       <!-- remove next line once NXBT-3340 is closed -->
     </exec>
   </target>
