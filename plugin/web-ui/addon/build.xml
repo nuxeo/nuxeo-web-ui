@@ -30,11 +30,8 @@ limitations under the License.
     <delete dir="node_modules" />
   </target>
 
-  <target name="install" description="Install npm depedencies" unless="skipInstall">
-    <exec executable="${cmd}" failonerror="true">
-     <arg line="/c npm install" />
-      <!-- remove next line once NXBT-3340 is closed -->
-    </exec>
+   <target name="install" description="Install npm depedencies" unless="skipInstall">
+  
   </target>
 
   <target name="init" description="Download all node and web dependencies" depends="install">
