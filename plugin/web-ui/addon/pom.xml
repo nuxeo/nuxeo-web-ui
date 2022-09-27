@@ -76,9 +76,8 @@
             <id>npm-build</id>
             <phase>process-resources</phase>
             <configuration>
-              <target>
-                <ant antfile="${basedir}/build.xml" dir="${basedir}"></ant>
-              </target>
+             <executable>npm</executable>
+              <commandlineArgs>build</commandlineArgs>
             </configuration>
             <goals>
               <goal>run</goal>

@@ -30,8 +30,8 @@ limitations under the License.
     <delete dir="node_modules" />
   </target>
 
-   <target name="install" description="Install npm depedencies" unless="skipInstall">
-  
+  <target name="install" description="Install npm depedencies" unless="skipInstall">
+
   </target>
 
   <target name="init" description="Download all node and web dependencies" depends="install">
@@ -39,7 +39,7 @@ limitations under the License.
   </target>
 
   <target name="npm-build" depends="init" unless="skipBuild">
-    <npm-run script="build" />
+    
   </target>
 
   <target name="build" depends="npm-build">
