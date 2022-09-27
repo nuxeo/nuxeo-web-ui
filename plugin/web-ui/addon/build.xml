@@ -32,7 +32,7 @@ limitations under the License.
 
   <target name="install" description="Install npm depedencies" unless="skipInstall">
     <exec executable="${cmd.npm}" failonerror="true">
-      <arg value="install" />
+    <arg>install</arg>
       <!-- remove next line once NXBT-3340 is closed -->
     </exec>
   </target>
