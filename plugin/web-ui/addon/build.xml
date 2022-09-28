@@ -30,9 +30,11 @@ limitations under the License.
     <delete dir="node_modules" />
   </target>
 
-   <exec-node name="npm-install" module="npm" failonerror="true" >
-      <arg value="run" />
-    </exec-node>
+  <target name="install" description="Install npm depedencies" unless="skipInstall">
+    <exec executable="${cmd.npm}" failonerror="true">
+      <arg value="install" />
+    </exec>
+  </target>
 
   <target name="init" description="Download all node and web dependencies" depends="install">
     <!-- npm-run script="${lint.script}" /-->
@@ -49,21 +51,6 @@ limitations under the License.
       </fileset>
     </copy>
   </target>
-
-   <macrodef name="exec-node">
-    <attribute name="module" description="The name of the NodeJS module to execute" />
-    <attribute name="failonerror" default="true" description="Fail if the exit code is not 0" />
-    <element name="args" implicit="yes" description="Argument to pass to the exec task" />
-    <sequential>
-      <exec executable="cmd.exe" failonerror="@{failonerror}" osfamily="winnt">
-        <arg line="/c  @{module}" />
-        <args />
-      </exec>
-      <exec executable="@{module}" failonerror="@{failonerror}" osfamily="unix" logError="true">
-        <args />
-      </exec>
-    </sequential>
-  </macrodef>
 
   <macrodef name="npm-run">
     <attribute name="script"/>

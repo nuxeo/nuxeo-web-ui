@@ -62,24 +62,12 @@
             </goals>
           </execution>
           <execution>
-            <id>npm-install</id>
-            <phase>npm-install-process</phase>
-            <configuration>
-              <executable>npm</executable>
-              <commandlineArgs>install</commandlineArgs>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-          <execution>
             <id>npm-build</id>
             <phase>process-resources</phase>
             <configuration>
-             <configuration>
-              <executable>npm</executable>
-              <commandlineArgs>build</commandlineArgs>
-            </configuration>
+              <target>
+                <ant antfile="${basedir}/build.xml" dir="${basedir}"></ant>
+              </target>
             </configuration>
             <goals>
               <goal>run</goal>
@@ -113,4 +101,5 @@
       </snapshots>
     </repository>
   </repositories>
+
 </project>

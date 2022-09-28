@@ -81,7 +81,7 @@ jobs:
 
       - name: Promote Web UI ${{ github.event.inputs.version }} to ${{ env.VERSION }}
         env:
-          PACKAGE: nuxeo-web-ui-${{ env.VERSION }} 
+          PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
           PADDED=$(printf '%03d' $(echo ${{ github.event.inputs.version }} | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))

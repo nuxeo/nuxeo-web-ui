@@ -9,11 +9,6 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "config": {
-    "workbox": {
-      "cli": "6.5.4"
-    }
-  },
   "devDependencies": {
     "@cucumber/cucumber": "^7.0.0",
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
@@ -69,7 +64,7 @@
     "webpack-dev-server": "^3.11.0",
     "webpack-log": "^3.0.1",
     "webpack-merge": "^5.2.0",
-    "workbox-cli": "6.5.4"
+    "workbox-cli": "3.6.3"
   },
   "scripts": {
     "postinstall": "check-engine --ignore",
@@ -79,7 +74,7 @@
     "prebuild": "npm-run-all prepare:*",
     "prepare:tmp": "rm -rf .tmp",
     "prepare:i18n": "node scripts/merge-messages.js",
-    "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v$npm_package_config_workbox_cli .tmp/workbox",
+    "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v3.6.3 .tmp/workbox",
     "build": "webpack --env production",
     "postbuild": "npm-run-all fix:*",
     "fix:preview": "replace 'elements/' '${window.location.pathname}/' dist/index.html",
