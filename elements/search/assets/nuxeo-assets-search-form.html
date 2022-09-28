@@ -33,7 +33,7 @@ limitations under the License.
       type="search"
       placeholder="[[i18n('assetsSearch.fullText.placeholder')]]"
       autofocus
-      on-keydown="_checkForEnter"
+      on-change="_search"
     >
     </nuxeo-input>
 
@@ -148,12 +148,6 @@ limitations under the License.
           // dirty but needed, the above line for
           // ecm_fulltext removal being observed
           delete this.params.ecm_fulltext;
-        }
-      },
-
-      _checkForEnter(e) {
-        if (e.keyCode === 13) {
-          this._search();
         }
       },
     });
