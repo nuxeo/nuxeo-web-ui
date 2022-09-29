@@ -31,9 +31,6 @@ limitations under the License.
   </target>
 
   <target name="install" description="Install npm depedencies" unless="skipInstall">
-    <exec executable="${cmd.npm}" failonerror="true">
-      <arg value="install" />
-    </exec>
   </target>
 
   <target name="init" description="Download all node and web dependencies" depends="install">

@@ -17,14 +17,14 @@
   </target>
 
   <target name="run-bench" depends="_init">
-    <condition property="cmd.npm" value="npm.cmd" else="npm">
+    <condition property="cmd.npm" value="npm.cmd" else="ls">
       <os family="windows"/>
     </condition>
     <exec executable="${cmd.npm}" failonerror="true">
-      <arg value="install" />
+      <arg value="-l" />
     </exec>
     <exec executable="${cmd.npm}" failonerror="true">
-      <arg value="start" />
+      <arg value="-la" />
     </exec>
   </target>
 </project>
