@@ -61,17 +61,6 @@
               <goal>run</goal>
             </goals>
           </execution>
-           <execution>
-            <id>npm-install</id>
-            <phase>npm-install-process</phase>
-            <configuration>
-              <executable>npm</executable>
-              <commandlineArgs>install</commandlineArgs>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
           <execution>
             <id>npm-build</id>
             <phase>process-resources</phase>
