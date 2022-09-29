@@ -39,7 +39,7 @@ limitations under the License.
                  value="{{searchTerm}}"
                  placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
                  autofocus
-                 on-keydown="_checkForEnter">
+                 on-change="_search">
     </nuxeo-input>
 
     <nuxeo-path-suggestion value="{{_path}}" label="[[i18n('defaultSearch.path')]]" role="widget"></nuxeo-path-suggestion>
@@ -113,13 +113,6 @@ limitations under the License.
           this.set('params.ecm_path', [this._path]);
         }
       },
-
-      _checkForEnter: function(e) {
-        if (e.keyCode === 13) {
-          this._search();
-        }
-      }
-
     });
   </script>
 </dom-module>
