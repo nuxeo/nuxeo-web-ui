@@ -20,10 +20,10 @@
     <condition property="cmd.npm" value="npm.cmd" else="npm">
       <os family="windows"/>
     </condition>
-    <exec executable="${cmd.npm}" dir="../../" failonerror="true">
+    <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
     </exec>
-    <exec executable="${cmd.npm}" dir="../../" failonerror="true">
+    <exec executable="${cmd.npm}" failonerror="true">
       <arg value="start" />
     </exec>
   </target>
