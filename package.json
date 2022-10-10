@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "vendor": "Nuxeo",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^7.0.0",
@@ -43,7 +43,7 @@
     "karma-source-map-support": "^1.4.0",
     "karma-static": "^1.0.1",
     "lint-staged": "^10.1.1",
-    "lit-html": "^1.0.0",
+    "lit-html": "^2.4.0",
     "minimist": "^1.2.0",
     "mocha": "^7.1.1",
     "npm-run-all": "^4.1.5",
@@ -55,9 +55,9 @@
     "style-loader": "^2.0.0",
     "url-loader": "^4.1.1",
     "vm-browserify": "^1.1.2",
-    "wdio-chromedriver-service": "^7.0.0",
+    "wdio-chromedriver-service": "^8.0.0",
     "wdio-cucumber-reporter": "0.0.2",
-    "wdio-json-reporter": "^2.0.0",
+    "wdio-json-reporter": "^3.0.0",
     "webpack": "^5.3.0",
     "webpack-bundle-analyzer": "^3.9.0",
     "webpack-cli": "^4.1.0",
@@ -74,7 +74,7 @@
     "prebuild": "npm-run-all prepare:*",
     "prepare:tmp": "rm -rf .tmp",
     "prepare:i18n": "node scripts/merge-messages.js",
-    "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v$npm_package_devDependencies_workbox_cli .tmp/workbox",
+    "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v3.6.3 .tmp/workbox",
     "build": "webpack --env production",
     "postbuild": "npm-run-all fix:*",
     "fix:preview": "replace 'elements/' '${window.location.pathname}/' dist/index.html",
@@ -104,7 +104,7 @@
     "test:watch": "karma start --auto-watch=true --single-run=false"
   },
   "dependencies": {
-    "@material/mwc-snackbar": "^0.21.0",
+    "@material/mwc-snackbar": "^0.27.0",
     "@nuxeo/chart-elements": "^4.0.0-nx.1",
     "@nuxeo/moment": "^2.24.0-nx.0",
     "@nuxeo/nuxeo-dataviz-elements": "~3.0.16-rc.0",
@@ -174,7 +174,8 @@
     "@polymer/paper-toolbar": "^3.0.0",
     "@polymer/paper-tooltip": "^3.0.0",
     "@polymer/polymer": "^3.0.0",
-    "@wdio/allure-reporter": "^7.2.0",
+    "@popeindustries/lit-html-server": "^5.0.5",
+    "@wdio/allure-reporter": "^7.25.1",
     "@webcomponents/html-imports": "^1.2.0",
     "aws-sdk": "^2.420.0",
     "dotenv": "^8.0.0",
@@ -184,12 +185,13 @@
     "jquery": "^3.3.1",
     "jsondiffpatch": "^0.3.11",
     "jsplumb": "2.13.0",
+    "lit-element": "^3.2.2",
     "nuxeo": "^3.2.1",
     "select2": "~3.5.1",
     "three": "~0.125.0",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1",
-    "webdriverio": "^7.2.0"
+    "webdriverio": "^7.25.1"
   },
   "husky": {
     "hooks": {
