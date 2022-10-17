@@ -23,12 +23,12 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       platform: 'Windows 10',
       version: 'latest',
     },
-    sl_latest_firefox: {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      platform: 'Windows 10',
-      version: 'latest',
-    },
+    // sl_latest_firefox: {
+    //   base: 'SauceLabs',
+    //   browserName: 'firefox',
+    //   platform: 'Windows 10',
+    //   version: 'latest',
+    // },
     sl_latest_edge: {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
