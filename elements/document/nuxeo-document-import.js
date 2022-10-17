@@ -1,13 +1,10 @@
 /**
 @license
 (C) Copyright Nuxeo Corp. (http://nuxeo.com/)
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,8 +37,11 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-layout.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { DocumentCreationBehavior } from '../nuxeo-document-creation/nuxeo-document-creation-behavior.js';
+
+const createDisabled = config.get('importCreateDisabled.buttonDisabeled', false);
 
 /**
 `nuxeo-document-import`
@@ -60,26 +60,21 @@ Polymer({
           overflow-x: hidden;
         }
       }
-
       paper-spinner-lite {
         --paper-spinner-color: var(--default-primary-color);
       }
-
       paper-dialog-scrollable {
         display: block;
         @apply --layout-flex;
       }
-
       paper-dialog-scrollable:after {
         height: 0;
       }
-
       .suggester {
         background-color: var(--input-background, rgba(0, 0, 0, 0.05));
         padding: 8px 16px;
         margin: 12px 32px;
       }
-
       .file-to-import {
         height: 58px;
         margin: 0 0.3em 0.8em;
@@ -89,15 +84,12 @@ Polymer({
         border: 1px solid var(--divider-color);
         position: relative;
       }
-
       file-to-import:first-child {
         overflow: hidden;
       }
-
       paper-progress {
         width: 100%;
       }
-
       #dropzone {
         padding: 1em;
         position: relative;
@@ -107,29 +99,23 @@ Polymer({
         min-height: 100px;
         margin: 1em 2em 5em;
       }
-
       #form {
         padding: 0 32px;
       }
-
       #document-import {
         margin-bottom: 2.5em;
       }
-
       #blobEditor {
         @apply --layout-flex-3;
       }
-
       #blobList {
         @apply --layout-vertical;
         @apply --layout-flex;
         padding-top: 4px;
       }
-
       #blobList .error {
         margin: 8px;
       }
-
       #blobList .file-error {
         display: block;
         font-weight: normal;
@@ -137,7 +123,6 @@ Polymer({
         line-height: 10px;
         margin-top: 4px;
       }
-
       #checkmarkNote {
         color: var(--secondary-text-color, #939caa);
         font-size: 11px;
@@ -145,37 +130,30 @@ Polymer({
         opacity: 0.75;
         word-break: break-word;
       }
-
       #dropzone .file-error {
         white-space: nowrap;
       }
-
       #sidePanel {
         @apply --layout-vertical;
         @apply --layout-flex;
         background: var(--nuxeo-page-background);
         min-width: 200px;
       }
-
       .blobCheck {
         display: block;
         width: 16px;
         height: 16px;
         margin: 2px 0;
       }
-
       .blobCheck.checked {
         color: var(--nuxeo-validated);
       }
-
       .blobCheck.unchecked {
         opacity: 0.3;
       }
-
       .blobCheck.hidden {
         visibility: hidden;
       }
-
       .file-overview {
         @apply --layout-vertical;
         border: 1px solid var(--divider-color);
@@ -188,23 +166,18 @@ Polymer({
         color: var(--secondary-text-color);
         height: 88px;
       }
-
       .file-overview:hover {
         @apply --nuxeo-block-hover;
       }
-
       .file-overview.selected {
         @apply --nuxeo-block-selected;
       }
-
       .file-overview.selected .name {
         color: var(--nuxeo-primary-color, #0066ff);
       }
-
       .file-overview .name:hover {
         color: var(--nuxeo-primary-color, #0066ff);
       }
-
       .name {
         display: -webkit-box;
         font-weight: bold;
@@ -214,18 +187,15 @@ Polymer({
         word-break: break-all;
         overflow: hidden;
       }
-
       .size {
         font-size: 0.8rem;
         opacity: 0.3;
         padding: 0.1em 0.5em;
         white-space: nowrap;
       }
-
       .wrap.baseline {
         align-items: baseline;
       }
-
       .complete {
         background-color: var(--nuxeo-validated);
         border-radius: 2em;
@@ -235,49 +205,39 @@ Polymer({
         top: 0.8em;
         text-align: center;
       }
-
       .complete iron-icon {
         width: 1.2em;
         height: 1.3em;
       }
-
       .provider {
         color: var(--nuxeo-primary-color);
       }
-
       .dropzone-label {
         cursor: pointer;
         margin: 16px 0 48px 0;
       }
-
       .dropzone-heading {
         font-weight: bold;
         margin: 4px 8px;
         padding: 4px 8px;
         width: 100%;
       }
-
       .clear {
         width: 3em;
         text-align: right;
       }
-
       .clear paper-icon-button {
         padding: 0 0 1em 0.5em;
       }
-
       .file-to-import:last-of-type {
         margin-bottom: 3em;
       }
-
       .file-to-import[error] {
         border: 1px solid var(--paper-input-container-invalid-color, #de350b);
       }
-
       .file-to-import > div:first-child {
         overflow: hidden;
       }
-
       .add-more {
         position: absolute;
         bottom: 0;
@@ -287,57 +247,46 @@ Polymer({
         background-color: var(--nuxeo-box);
         padding: 0.5em;
       }
-
       .buttons {
         @apply --buttons-bar;
       }
-
       .add-more .importActions {
         margin-left: 8px;
       }
-
       .importActions > * {
         margin-left: 8px;
       }
-
       @media (max-width: 1024px) {
         .file-to-import {
           width: calc(100% - 2em);
         }
       }
-
       .error {
         border-left: 4px solid var(--nuxeo-warn-text);
         color: var(--primary-text-color);
         padding-left: 8px;
       }
-
       .upload-error {
         color: var(--primary-text-color, #243238);
         margin: 1em 2em;
         padding-left: 8px;
       }
-
       .upload-error:not(:empty) {
         border-left: 4px solid var(--nuxeo-warn-text, #de350b);
       }
-
       .upload-error:empty::before {
         content: '\\200b';
         display: inline;
       }
-
       .file-error {
         color: var(--paper-input-container-invalid-color, #de350b);
         font-size: 12px;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-
       .importing-label {
         margin-right: 8px;
       }
-
       iron-pages,
       div[name='upload'],
       div[name='customize'] {
@@ -347,11 +296,9 @@ Polymer({
       div[name='upload'] {
         outline: none;
       }
-
       paper-progress {
         margin-top: 8px;
       }
-
       button.link {
         color: var(--nuxeo-link-color, #3a3a54);
         padding: 0;
@@ -360,13 +307,11 @@ Polymer({
         cursor: pointer;
         font: inherit;
       }
-
       button.link:hover {
         color: var(--nuxeo-link-hover-color, #0066ff);
         font: inherit;
       }
     </style>
-
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-resource id="blobRemover"></nuxeo-resource>
     <nuxeo-operation id="fileManagerImport" op="FileManager.Import" sync-indexing></nuxeo-operation>
@@ -377,9 +322,7 @@ Polymer({
       response="{{createResponse}}"
     ></nuxeo-document>
     <nuxeo-document id="parentFetcher" doc-path="[[targetPath]]"></nuxeo-document>
-
     <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
-
     <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="upload vertical layout flex" tabindex="0">
@@ -395,7 +338,6 @@ Polymer({
           ></nuxeo-path-suggestion>
           <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
         </div>
-
         <div id="dropzone" class="vertical layout flex">
           <input hidden id="uploadFiles" type="file" on-change="_filesChanged" multiple />
           <template is="dom-if" if="[[!hasFiles]]">
@@ -533,7 +475,6 @@ Polymer({
           </paper-button>
         </div>
       </div>
-
       <!--Stage: allow the user to fill in properties for the uploaded files and create the respective documents-->
       <div name="customize" class="vertical layout flex">
         <div class="horizontal layout flex">
@@ -647,7 +588,6 @@ Polymer({
           <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary">
             [[i18n('command.cancel')]]
           </paper-button>
-
           <div>
             <paper-button
               noink
@@ -665,7 +605,6 @@ Polymer({
             >
               [[i18n('documentImportForm.nextDocument')]]&nbsp;❯
             </paper-button>
-
             <paper-button
               noink
               class="text"
@@ -676,7 +615,6 @@ Polymer({
               [[i18n('documentImportForm.applyToAll')]]
             </paper-button>
           </div>
-
           <paper-button
             noink
             class="primary"
@@ -697,7 +635,6 @@ Polymer({
         </div>
       </div>
     </iron-pages>
-
     <nuxeo-document-creation-stats id="creationStats"></nuxeo-document-creation-stats>
   `,
 
@@ -871,6 +808,9 @@ Polymer({
   },
 
   _canImport() {
+    if (createDisabled) {
+      return !createDisabled;
+    }
     return (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles) && this.canCreate && !this._creating;
   },
 
@@ -879,6 +819,9 @@ Polymer({
   },
 
   _canImportWithMetadata() {
+    if (createDisabled) {
+      return this._getAllFiles().every((file) => 'checked' in file);
+    }
     return this._getAllFiles().every((file) => 'checked' in file) && this._canImport();
   },
 
