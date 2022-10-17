@@ -40,8 +40,11 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-layout.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { DocumentCreationBehavior } from '../nuxeo-document-creation/nuxeo-document-creation-behavior.js';
+
+const flag = config.get('createDisabled.flag', false);
 
 /**
 `nuxeo-document-import`
@@ -871,6 +874,9 @@ Polymer({
   },
 
   _canImport() {
+    if (flag) {
+      return !flag;
+    }
     return (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles) && this.canCreate && !this._creating;
   },
 
@@ -879,6 +885,9 @@ Polymer({
   },
 
   _canImportWithMetadata() {
+    if (flag) {
+      return this._getAllFiles().every((file) => 'checked' in file);
+    }
     return this._getAllFiles().every((file) => 'checked' in file) && this._canImport();
   },
 

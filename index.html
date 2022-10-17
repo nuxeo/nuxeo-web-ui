@@ -115,7 +115,10 @@ limitations under the License.
               ],
               blob: ['appLinks', 'preview'],
             },
-            // expressions: { eval: false },
+            /*createDisabled:{ // uncomment to disable create and force user to add properties and then create
+              flag: true
+            },*/
+            expressions: { eval: false },
             dateFormat: 'LL',
             dateTimeFormat: 'LLL',
             firstDayOfWeek: '',
@@ -124,6 +127,7 @@ limitations under the License.
                 hrefBase: 'elements/search/',
               },
             },
+
             /* analytics: {
               documentDistribution: {
                 disableThreshold: 100, // uncomment to set the threshold value that disables the distribution analytics
