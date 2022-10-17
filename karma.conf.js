@@ -101,7 +101,7 @@ module.exports = (config) => {
     browserConsoleLogOptions: {
       level: 'error',
     },
-    logLevel: config.LOG_ERROR,
+    logLevel: config.LOG_DEBUG,
     captureTimeout: 120000,
     /** Some errors come in JSON format with a message property. */
     formatError(error) {
