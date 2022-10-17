@@ -109,3 +109,19 @@ Feature: Search
     When I click the "assetsSearch" button
     And I perform a fulltext search for picture on assetsSearch
     Then I can see 3 search results
+
+  @config('selection.selectAllEnabled','true')
+  Scenario: in Assets Search
+    Given I have the following documents
+      | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
+      | Workspace  | My_Pictures      | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                 |                  |        |            |
+      | Picture    | picture 1        | invoice | art/culture             | europe/Portugal      | BJones  | /default-domain/My_Pictures     |                  |        | sample.png |
+      | Picture    | picture 2        | invoice | art/culture             | europe/Portugal      | BJones  | /default-domain/My_Pictures     |                  |        | sample.png |
+      | Picture    | picture 3        | invoice | art/culture             | europe/Portugal      | BJones  | /default-domain/My_Pictures     |                  |        | sample.png |
+    When I click the "assetsSearch" button
+    And I perform a fulltext search for picture on assetsSearch
+    Then I can see 3 search results
+    And I select all the documents
+    Then I can trash selected documents
+    And I can navigate to trash pill
+    And I can see 3 documents
