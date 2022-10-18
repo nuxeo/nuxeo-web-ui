@@ -28,12 +28,9 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     },
     sl_latest_firefox: {
       base: 'SauceLabs',
-      browserName: 'firefox',
+      browserName: 'FirefoxNightlyHeadless',
       platform: 'Windows 10',
       version: 'latest',
-      'sauce:options': {
-        seleniumVersion: '3.14.0',
-      },
     },
     sl_latest_edge: {
       base: 'SauceLabs',
