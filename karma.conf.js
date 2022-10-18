@@ -12,6 +12,9 @@ let customLaunchers = {
   FirefoxHeadless: {
     base: 'Firefox',
     flags: ['-headless'],
+    prefs: {
+      'network.proxy.type': 0,
+    },
   },
 };
 
@@ -23,12 +26,15 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       platform: 'Windows 10',
       version: 'latest',
     },
-    // sl_latest_firefox: {
-    //   base: 'SauceLabs',
-    //   browserName: 'firefox',
-    //   platform: 'Windows 10',
-    //   version: 'latest',
-    // },
+    sl_latest_firefox: {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      platform: 'Windows 10',
+      version: 'latest',
+      'sauce:options': {
+        seleniumVersion: '3.14.0',
+      },
+    },
     sl_latest_edge: {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
@@ -103,6 +109,7 @@ module.exports = (config) => {
     },
     logLevel: config.LOG_DEBUG,
     captureTimeout: 180000,
+    extendedDebugging: true,
     /** Some errors come in JSON format with a message property. */
     formatError(error) {
       try {
