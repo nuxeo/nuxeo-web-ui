@@ -12,9 +12,6 @@ let customLaunchers = {
   FirefoxHeadless: {
     base: 'Firefox',
     flags: ['-headless'],
-    prefs: {
-      'network.proxy.type': 0,
-    },
   },
 };
 
@@ -28,7 +25,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     },
     sl_latest_firefox: {
       base: 'SauceLabs',
-      browserName: 'FirefoxNightlyHeadless',
+      browserName: 'firefox',
       platform: 'Windows 10',
       version: 'latest',
     },
