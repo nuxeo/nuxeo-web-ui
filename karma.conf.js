@@ -26,7 +26,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     sl_latest_firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
-      platform: 'Windows',
+      platform: 'Windows 10',
       version: 'latest',
       screenResolution: '1280x1024',
       geckodriverVersion: '0.30.0',
