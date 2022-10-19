@@ -174,7 +174,7 @@
     "@polymer/paper-toolbar": "^3.0.0",
     "@polymer/paper-tooltip": "^3.0.0",
     "@polymer/polymer": "^3.0.0",
-    "@wdio/allure-reporter": "^7.25.2",
+    "@wdio/allure-reporter": "^7.2.0",
     "@webcomponents/html-imports": "^1.2.0",
     "aws-sdk": "^2.420.0",
     "dotenv": "^8.0.0",
