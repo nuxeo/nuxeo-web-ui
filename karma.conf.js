@@ -28,6 +28,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       browserName: 'firefox',
       platform: 'Windows 10',
       version: 'latest',
+      geckodriverVersion: '0.30.0',
     },
     sl_latest_edge: {
       base: 'SauceLabs',
@@ -101,8 +102,7 @@ module.exports = (config) => {
     browserConsoleLogOptions: {
       level: 'error',
     },
-    logLevel: config.LOG_ERROR,
-    captureTimeout: 120000,
+    logLevel: config.LOG_WARN,
     /** Some errors come in JSON format with a message property. */
     formatError(error) {
       try {
