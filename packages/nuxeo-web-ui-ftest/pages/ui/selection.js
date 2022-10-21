@@ -58,4 +58,8 @@ export default class Selection extends BasePage {
   clickResultsActionMenu(selector) {
     clickActionMenu(this.el, selector);
   }
+
+  get compare() {
+    return this.el.element('nuxeo-document-diff-button');
+  }
 }
