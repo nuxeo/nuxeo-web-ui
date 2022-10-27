@@ -104,6 +104,13 @@ Polymer({
         width: 1.5em;
         height: 1.5em;
       }
+
+      #removeButton {
+        border: none;
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
+      }
     </style>
 
     <nuxeo-operation id="removeFromFavOp" op="Document.RemoveFromFavorites"></nuxeo-operation>
@@ -142,14 +149,16 @@ Polymer({
                   <nuxeo-document-thumbnail document="[[favorite]]"></nuxeo-document-thumbnail>
                 </div>
                 <div class="list-item-title">[[favorite.title]]</div>
-                <iron-icon
-                  id="removeFromFavorites"
-                  class="remove"
-                  icon="nuxeo:remove"
-                  data-uid$="[[favorite.uid]]"
-                  on-tap="_removeFromFavorites"
-                >
-                </iron-icon>
+                <button id="removeButton" on-tap="_removeFromFavorites" aria-label$="[[i18n('command.remove')]]">
+                  <iron-icon
+                    aria-hidden="true"
+                    id="removeFromFavorites"
+                    class="remove"
+                    icon="nuxeo:remove"
+                    data-uid$="[[favorite.uid]]"
+                  >
+                  </iron-icon>
+                </button>
               </div>
             </div>
           </div>
