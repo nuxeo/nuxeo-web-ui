@@ -182,3 +182,27 @@ Feature: Trash Management
     Then I can see the document has 1 children
     Then I navigate to "ws" child
     Then I can see the document has 1 children
+
+    @config('selection.selectAllEnabled','true')
+    Scenario: Unselect few documents and trash selected documents
+    Given I have the following documents
+      | doctype       | title            | nature  | subjects                | coverage             | creator | path                              | collections      | tag    | file       |
+      | Workspace     | ws               | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain                   |                  |        |            |
+      | File          | File1            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                |                  |        |            |
+      | File          | File2            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                |                  |        |            |
+      | File          | File3            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                |                  |        |            |
+      | File          | File4            | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/ws                |                  |        |            |
+    When I login as "Administrator"
+    And I browse to the document with path "/default-domain/ws"
+    And I select all the documents
+    And I deselect the "File1" document
+    Then I can trash selected documents
+    Then I click the toast notification dismiss button
+    And I can navigate to trash pill
+    And I can see 3 document
+    When I select all the documents
+    And I deselect the "File4" document
+    Then I can untrash selected documents
+    And I can navigate to view pill
+    And I can see 3 documents
+    
