@@ -133,3 +133,27 @@ Feature: Internal Publication
     And I can see the document has the following publication
       | path                                          | rendition | version |
       | /default-domain/sections/section1/my_document |           | 0.1     |
+
+  @config('selection.selectAllEnabled','true')
+  Scenario: Unselect some documents and publish selected documents
+    Given I login as "John"
+    And I have the following documents
+      | doctype    | title            | nature  | subjects                | coverage             | creator | path                            | collections      | tag    | file       |
+      | Workspace  | PublishTest      | booklet | sciences/astronomy      | europe/Portugal      | SJones  | /default-domain                 |                  |        |            |
+      | File       | PublishFile      | invoice | society/ecology         | europe/France        | JSmith  | /default-domain/PublishTest     |                  | urgent |            |
+      | Note       | PublishNote      | memo    | art/culture             | europe/France        | SJones  | /default-domain/PublishTest     |                  | urgent | sample.odt |
+      | File       | PublishFile1     | invoice | society/ecology         | europe/France        | JSmith  | /default-domain/PublishTest     |                  | urgent |            |
+      | Note       | PublishNote1     | memo    | art/culture             | europe/France        | SJones  | /default-domain/PublishTest     |                  | urgent | sample.odt |
+    And I have permission ReadWrite for the document with path "/default-domain/PublishTest"
+    And I have permission ReadWrite for the document with path "/default-domain/sections/section1"
+    When I browse to the document with path "/default-domain/PublishTest"
+    And I select all the documents
+    And I deselect the "PublishFile" document
+    Then I can publish selection to "section1"
+    When I browse to the document with path "/default-domain/sections/section1"
+    Then I can see the document has 3 children
+    When I navigate to "PublishNote" child
+    Then I can see the document is a publication
+    And I cannot see to publication pill
+    And I can unpublish the document
+    And I can see the document has 2 children    
