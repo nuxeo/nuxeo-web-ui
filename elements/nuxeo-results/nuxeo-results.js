@@ -214,6 +214,7 @@ Polymer({
                   selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
                   disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
                   on-tap="_toggleDisplayMode"
+                  aria-selected="true"
                 >
                 </paper-icon-button>
               </template>
