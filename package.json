@@ -74,7 +74,7 @@
     "prebuild": "npm-run-all prepare:*",
     "prepare:tmp": "rm -rf .tmp",
     "prepare:i18n": "node scripts/merge-messages.js",
-    "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v$npm_package_devDependencies_workbox_cli .tmp/workbox",
+    "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v3.6.3 .tmp/workbox",
     "build": "webpack --env production",
     "postbuild": "npm-run-all fix:*",
     "fix:preview": "replace 'elements/' '${window.location.pathname}/' dist/index.html",
