@@ -301,6 +301,7 @@ Polymer({
       name="browser"
       on-tap="toggle"
       aria-label$="[[i18n('command.search')]]"
+      aria-expanded="[[toggled]]"
     ></paper-icon-button>
 
     <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
