@@ -190,7 +190,7 @@ Polymer({
 
       <div class="resultActions" hidden$="[[hideContentViewActions]]">
         <div class="commonActions">
-          <span class="resultsCount" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]">
+          <span class="resultsCount" aria-live="polite" hidden$="[[!_showResultsCount(nxProvider, resultsCount)]]">
             [[_resultsCountLabel]]
           </span>
           <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
