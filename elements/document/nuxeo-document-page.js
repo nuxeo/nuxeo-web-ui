@@ -192,6 +192,7 @@ Polymer({
             noink
             icon="nuxeo:details"
             on-tap="_toggleOpened"
+            aria-expanded="[[opened]]"
             aria-labelledby="detailsTooltip"
           ></paper-icon-button>
           <nuxeo-tooltip for="details" id="detailsTooltip">[[i18n('documentPage.details.opened')]]</nuxeo-tooltip>
