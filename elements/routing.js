@@ -26,6 +26,17 @@ function scrollToTop(ctx, next) {
   next();
 }
 
+function _routeAdmin(selectedAdminTab, errorPath, routeData) {
+  const hasPermission =
+    app.currentUser.isAdministrator || app.currentUser.extendedGroups.find((grp) => grp.name === 'powerusers');
+  if (hasPermission) {
+    app.selectedAdminTab = selectedAdminTab;
+    app.show('admin', routeData);
+  } else {
+    app.showError(404, '', errorPath);
+  }
+}
+
 // Routes
 page('*', scrollToTop, (ctx, next) => {
   next();
@@ -70,25 +81,21 @@ page('/doc/:repo?/:id/', (data) => {
 });
 
 page('/admin/:tab?', (data) => {
-  // prevent currentUser from being undefined
   app.$.nxcon.connect().then(() => {
-    // block access to admin center to non-admin/non-power users
-    const hasPermission =
-      app.currentUser.isAdministrator || app.currentUser.extendedGroups.find((grp) => grp.name === 'powerusers');
-    if (hasPermission) {
-      if (data.params.tab) {
-        app.selectedAdminTab = data.params.tab;
-      }
-      app.show('admin');
-    } else {
-      app.showError(404, '', data.path);
-    }
+    _routeAdmin(data.params.tab ? data.params.tab : '', data.path);
+  });
+});
+
+page('/admin/user-group-management/:type', (data) => {
+  app.$.nxcon.connect().then(() => {
+    _routeAdmin('user-group-management', data.path, [data.params.type]);
   });
 });
 
 page('/admin/user-group-management/:type/:id(.*)', (data) => {
-  app.selectedAdminTab = 'user-group-management';
-  app.show('admin', [data.params.type, data.params.id]);
+  app.$.nxcon.connect().then(() => {
+    _routeAdmin('user-group-management', data.path, [data.params.type, data.params.id]);
+  });
 });
 
 page('/user/:id', (data) => {
