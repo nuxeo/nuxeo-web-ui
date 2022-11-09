@@ -3,7 +3,7 @@
   "repository": "nuxeo/nuxeo-web-ui.git",
   "homepage": "http://www.nuxeo.com",
   "name": "@nuxeo/nuxeo-web-ui",
-  "version": "3.0.17-SNAPSHOT",
+  "version": "3.0.17-rc.4",
   "license": "Apache-2.0",
   "vendor": "Nuxeo",
   "engines": {
