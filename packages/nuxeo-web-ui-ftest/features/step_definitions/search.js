@@ -130,6 +130,10 @@ When(/^I perform a (.+) search for (.+) on (.+)$/, function(searchType, searchTe
   searchForm.search(searchType, searchTerm);
 });
 
+When('I switch to filter view', function() {
+  this.ui.filterView.click();
+});
+
 Then(/^I can see (\d+) search results$/, function(numberOfResults) {
   const { displayMode } = this.ui.results;
   if (numberOfResults === 0) {
