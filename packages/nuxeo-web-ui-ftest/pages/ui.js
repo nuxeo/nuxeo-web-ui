@@ -189,4 +189,8 @@ export default class UI extends BasePage {
   bulkEdit(selector) {
     return new BulkEdit(selector);
   }
+
+  get filterView() {
+    return this.el.element('paper-icon-button[id="toogleFilter"]');
+  }
 }
