@@ -213,8 +213,8 @@ export const DocumentContentBehavior = [
 
     _computeSortOptions() {
       return [
-        { field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc' },
-        { field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true },
+        { field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc', selected: true },
+        { field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc' },
         { field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc' },
         { field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc' },
         { field: 'state', label: this.i18n('searchResults.sort.field.state'), order: 'asc' },
