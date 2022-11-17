@@ -25,11 +25,31 @@ limitations under the License.
     <style include="nuxeo-styles"></style>
 
     <nuxeo-results name="assets" nx-provider="[[nxProvider]]">
-      <nuxeo-justified-grid name="grid" icon="icons:apps" class="results" selection-enabled>
+      <nuxeo-data-grid
+        name="grid"
+        icon="icons:apps"
+        class="results"
+        empty-label="[[emptyLabel]]"
+        empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
+        selection-enabled
+        settings-enabled
+        display-quick-filters
+        draggable$="[[_hasWritePermission(document)]]"
+        drop-target-filter="[[_dropTargetFilter]]"
+      >
         <template>
-          <nuxeo-justified-grid-item></nuxeo-justified-grid-item>
+          <nuxeo-document-grid-thumbnail
+            class="grid-box"
+            tabindex$="{{tabIndex}}"
+            selected$="{{selected}}"
+            index="[[index]]"
+            doc="[[item]]"
+            on-navigate="_navigate"
+            selected-items="[[selectedItems]]"
+          >
+          </nuxeo-document-grid-thumbnail>
         </template>
-      </nuxeo-justified-grid>
+      </nuxeo-data-grid>
 
       <nuxeo-data-table
         name="table"
