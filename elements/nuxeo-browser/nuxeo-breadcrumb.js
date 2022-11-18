@@ -100,7 +100,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
           #ancestors a,
           #ellipsis {
             @apply --nuxeo-link;
-            opacity: 0.5;
+            opacity: 0.7;
             font-weight: 400;
             letter-spacing: 0.02rem;
             text-decoration: none;
