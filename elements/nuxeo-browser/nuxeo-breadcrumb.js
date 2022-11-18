@@ -95,6 +95,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             white-space: pre;
             opacity: 0.5;
             font-weight: 300;
+            color: var(--nuxeo-link-color);
           }
 
           #ancestors a,
