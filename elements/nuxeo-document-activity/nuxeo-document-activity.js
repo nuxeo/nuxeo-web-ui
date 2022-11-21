@@ -40,7 +40,7 @@ Polymer({
       }
 
       .datetime {
-        opacity: 0.5;
+        opacity: 0.7;
         margin-left: 3px;
       }
     </style>
