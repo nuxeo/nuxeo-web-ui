@@ -7,7 +7,6 @@ import { reportA11y } from '../a11y-reporter.js';
 const EXPECTED_VIOLATIONS = {
   'aria-command-name': 1,
   'aria-allowed-attr': 4,
-  'aria-required-parent': 9,
   'aria-tooltip-name': 1,
   'duplicate-id': 28,
   'landmark-one-main': 1,
