@@ -89,7 +89,7 @@ Polymer({
       }
 
       iron-icon {
-        opacity: 0.3;
+        opacity: 0.7;
         width: 1.3rem;
         margin-right: -1.6em;
         margin-top: -0.07rem;
