@@ -217,7 +217,7 @@ Polymer({
 
       .size {
         font-size: 0.8rem;
-        opacity: 0.3;
+        opacity: 0.7;
         padding: 0.1em 0.5em;
         white-space: nowrap;
       }
