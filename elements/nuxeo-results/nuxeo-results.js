@@ -150,7 +150,7 @@ Polymer({
       }
 
       .resultsCount {
-        opacity: 0.5;
+        opacity: 0.7;
         margin-right: 16px;
         transition: opacity 100ms ease-in-out;
       }
