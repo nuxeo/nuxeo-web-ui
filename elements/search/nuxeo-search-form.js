@@ -172,6 +172,10 @@ Polymer({
         font-weight: 500;
       }
 
+      #actionsDropdown > .iron-selected {
+        background-color: #8c8c8c;
+      }
+
       .row {
         box-sizing: border-box;
         margin-bottom: 1rem;
