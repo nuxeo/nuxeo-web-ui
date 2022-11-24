@@ -103,6 +103,7 @@ Polymer({
 
   _update(user, document, xpath) {
     this.blob = document && this._deepFind(document.properties, xpath);
+    this.blob.data += '&clientReason=view';
     this.actionContext = { user: this.user, document: this.document, blob: this.blob, xpath: this.xpath };
   },
 
