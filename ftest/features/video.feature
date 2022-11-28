@@ -43,4 +43,4 @@ Feature: Create Video
       | nature       | Report                                  |
       | subjects     | Daily life/Fashion,Society/Humanitarian |
       | coverage     | Africa/Benin                            |
-    And I can see the video storyboard
+   # And I can see the video storyboard

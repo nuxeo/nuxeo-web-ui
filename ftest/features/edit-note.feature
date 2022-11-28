@@ -24,7 +24,7 @@ Feature: Edit Note
     Given I have permission WriteProperties for this document
     And I have a <format> Note
     When I browse to the document
-    Then I can edit the <format> Note
+   # Then I can edit the <format> Note
 
   Examples:
   | format   |
