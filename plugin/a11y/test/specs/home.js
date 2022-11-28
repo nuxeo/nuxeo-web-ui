@@ -1,6 +1,6 @@
 import '../imports';
 import documentService from '@nuxeo/nuxeo-web-ui-ftest/features/step_definitions/support/services/documentService';
-import login from '../helpers/login';
+import { authRedirect } from '../helpers/login';
 import { reportA11y } from '../a11y-reporter.js';
 
 const EXPECTED_VIOLATIONS = {
@@ -30,7 +30,9 @@ describe('Nuxeo Home', () => {
   });
 
   reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, async () => {
-    await login();
-    await browser.url('#!/home');
+    await authRedirect(browser, '#!/home');
+    await browser.$('nuxeo-card[icon="nuxeo:edit"]').waitForExist({ timeout: 5000 });
+    const context = await browser.$(`nuxeo-card[icon="nuxeo:edit"]`);
+    return context;
   });
 });

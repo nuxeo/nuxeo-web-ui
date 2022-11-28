@@ -7,4 +7,12 @@ const login = async (username = 'Administrator', password = 'Administrator') => 
   await logIn.submit();
 };
 
+export const authRedirect = async (browser, path) => {
+  await login();
+  await browser.url(path);
+  await browser.execute(() => {
+    document.dispatchEvent(new CustomEvent('automation-ready'));
+  });
+};
+
 export default login;
