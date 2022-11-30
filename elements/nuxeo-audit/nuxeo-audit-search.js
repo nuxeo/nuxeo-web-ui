@@ -116,7 +116,9 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
           </template>
           <nuxeo-data-table-column name="[[i18n('audit.comment')]]">
             <template>
-              <a href$="[[_parseComment(item.comment)]]">[[_formatComment(item.comment)]]</a>
+              <a href$="[[_parseComment(item.comment)]]"
+                >[[_formatComment(item.comment, item.extended.clientReason)]]</a
+              >
             </template>
           </nuxeo-data-table-column>
           <template is="dom-if" if="[[_isAvailable(document)]]">
@@ -264,11 +266,13 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
     return null;
   }
 
-  _formatComment(comment) {
+  _formatComment(comment, clientReason) {
     if (moment(comment, moment.ISO_8601).isValid()) {
       return this.formatDateTime(comment);
     }
-    return comment;
+    return clientReason && clientReason.toLowerCase().indexOf('view') > -1
+      ? `${this.i18n('command.view')}: [${comment}]`
+      : comment;
   }
 }
 

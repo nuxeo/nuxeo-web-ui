@@ -72,7 +72,9 @@ Polymer({
   },
 
   _activity(event) {
-    return this.i18n(`activity.${event.eventId}`);
+    return this.i18n(
+      `activity.${event.extended && event.extended.clientReason ? event.extended.clientReason : event.eventId}`,
+    );
   },
 
   _documentChanged() {
@@ -105,6 +107,15 @@ Polymer({
   _areGatherableActivities(a, b) {
     let delta = new Date(a.eventDate) - new Date(b.eventDate);
     delta = delta / 1000 / 60 / 60; // Converts ms to hours
-    return a.eventId === b.eventId && a.eventId === 'download' && a.principalName === b.principalName && delta < 24;
+    return !!(
+      a.extended &&
+      a.extended.clientReason &&
+      b.extended &&
+      b.extended.clientReason &&
+      (a.extended.clientReason === 'view' || a.extended.clientReason === 'download') &&
+      a.extended.clientReason === b.extended.clientReason &&
+      a.principalName === b.principalName &&
+      delta < 24
+    );
   },
 });

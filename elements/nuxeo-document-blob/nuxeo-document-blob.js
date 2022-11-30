@@ -73,7 +73,7 @@ Polymer({
     <template is="dom-if" if="[[blob]]">
       <div class="row">
         <div class="info">
-          <div><a href="[[blob.data]]" title="[[blob.name]]">[[blob.name]]</a></div>
+          <div><a href="[[blob.viewData]]" title="[[blob.name]]">[[blob.name]]</a></div>
           <div class="detail">[[formatSize(blob.length)]]</div>
         </div>
         <div class="actions">
