@@ -100,10 +100,10 @@ jobs:
 
       - name: Link elements to Web UI
         run: |
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${{env.ELEMENTS_CORE}}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${{env.ELEMENTS_UI}}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${{env.ELEMENTS_DATAVIZ}}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${{env.ELEMENTS_HELPERS}}
+          npm install --loglevel silly --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${{env.ELEMENTS_CORE}}
+          npm install --loglevel silly --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${{env.ELEMENTS_UI}}
+          npm install --loglevel silly --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${{env.ELEMENTS_DATAVIZ}}
+          npm install --loglevel silly --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${{env.ELEMENTS_HELPERS}}
 
       - name: 'Update settings.xml with server configuration'
         run: |
