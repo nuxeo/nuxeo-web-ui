@@ -94,6 +94,10 @@ jobs:
           popd
           popd
           
+      - name: 'Update .npmrc with npm registry credentials'
+        run: |
+          echo '//packages.nuxeo.com/repository/npm-public/:_authToken=${{ secrets.PACKAGES_AUTH_TOKEN }}' > ~/.npmrc
+
       - name: Link elements to Web UI
         run: |
           npm config set @nuxeo:registry ${{ env.NPM_REPOSITORY }}
