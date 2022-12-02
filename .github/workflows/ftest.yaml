@@ -93,6 +93,10 @@ jobs:
           echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
           popd
+          
+      - name: 'Update .npmrc with npm registry credentials'
+        run: |
+          echo '@nuxeo:registry=${{ env.NPM_REPOSITORY }}:_authToken=${{ secrets.PACKAGES_AUTH_TOKEN }}' > ~/.npmrc
 
       - name: Link elements to Web UI
         run: |
