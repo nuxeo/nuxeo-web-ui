@@ -691,6 +691,8 @@ Polymer({
   },
 
   clearSelection() {
+    this._excludedDocs = -1;
+    this.selectAllActive = false;
     this.view.clearSelection();
   },
 
