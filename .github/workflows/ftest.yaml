@@ -100,8 +100,8 @@ jobs:
 
       - name: Link elements to Web UI
         run: |
-          npm config set @nuxeo:registry ${{ env.NPM_REPOSITORY }}
-          npm config set //packages.nuxeo.com/repository/npm-public/:_authToken ${{ secrets.PACKAGES_AUTH_TOKEN }}
+          npm config set @nuxeo:registry ${{ env.NPM_REPOSITORY }}     
+          npm config set _auth="$(echo -n '${{ secrets.PACKAGES_AUTH_USER }}:${{ secrets.PACKAGES_AUTH_TOKEN }}' | base64)"
           npm install --loglevel silly --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${{env.ELEMENTS_CORE}}
           npm install --loglevel silly --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${{env.ELEMENTS_UI}}
           npm install --loglevel silly --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${{env.ELEMENTS_DATAVIZ}}
