@@ -26,6 +26,10 @@ export default class DocumentPage extends BasePage {
     return this.el.element('nuxeo-preview-button');
   }
 
+  get downloadButton() {
+    return this.el.$('nuxeo-download-button');
+  }
+
   get versionInfoBar() {
     this.el.waitForExist('#versionInfoBar');
     this.el.waitForVisible('#versionInfoBar');
