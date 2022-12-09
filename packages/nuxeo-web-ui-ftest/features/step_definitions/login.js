@@ -30,8 +30,8 @@ Given('user {string} exists', (username) =>
 
 When('I login as {string}', function(username) {
   const login = Login.get();
-  login.username = username;
-  login.password = users[username];
+  login.setusername(username);
+  login.setpassword(users[username]);
   login.submit();
   this.username = username;
   this.ui = UI.get();

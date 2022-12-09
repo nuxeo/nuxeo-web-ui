@@ -1,17 +1,17 @@
 export default class Login {
   async setusername(username) {
     const user = $('#username');
-    await (await user).setValue(username);
+    await user.setValue(username);
   }
 
   async setpassword(password) {
     const passwd = $('#password');
-    await (await passwd).setValue(password);
+    await passwd.setValue(password);
   }
 
   async submit() {
     const submitBtn = $("[name='Submit']");
-    await (await submitBtn).click();
+    submitBtn.click();
   }
 
   static get() {
