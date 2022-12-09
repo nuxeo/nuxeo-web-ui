@@ -18,3 +18,7 @@ Then('I can see {string} in the Activity feed', function(activity) {
   this.ui.activityFeed.waitForVisible();
   this.ui.activityFeed.getActivity(activity).waitForVisible().should.be.true;
 });
+Then('I click the blob download button', function() {
+  const page = this.ui.browser.documentPage(this.doc.type);
+  page.downloadButton.click();
+});
