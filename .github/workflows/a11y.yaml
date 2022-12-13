@@ -43,6 +43,18 @@ jobs:
         node-version: 18
         scope: '@nuxeo'
 
+    - name: Install Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+          pushd packages/nuxeo-designer-catalog
+          npm install
+          popd    
+
     - uses: actions/setup-java@v2
       with:
         distribution: 'zulu'
@@ -61,7 +73,7 @@ jobs:
             </settings>' > ~/.m2/settings.xml
 
     - name: Web UI build
-      run: mvn -B -ntp install
+      run: mvn -ntp install -DskipInstall
 
     - name: A11y checks
       run: mvn -B -ntp -f plugin/a11y install
