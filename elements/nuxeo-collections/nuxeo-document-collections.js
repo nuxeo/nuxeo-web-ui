@@ -24,6 +24,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tags.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
 /**
 `nuxeo-document-collections`
@@ -49,6 +50,13 @@ Polymer({
         opacity: 0.6;
       }
 
+      #removeCollection {
+        border: none;
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
+      }
+
       iron-icon:hover {
         cursor: pointer;
         opacity: 1;
@@ -68,14 +76,22 @@ Polymer({
       <nuxeo-tag>
         <div class="item">
           <a class="title ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
-          <iron-icon icon="nuxeo:cross" name="remove" on-tap="remove" data-uid$="[[item.uid]]"></iron-icon>
+          <button id="removeCollection" aria-label$="[[i18n('command.remove')]]">
+            <iron-icon
+              icon="nuxeo:cross"
+              name="remove"
+              on-tap="remove"
+              aria-hidden="true"
+              data-uid$="[[item.uid]]"
+            ></iron-icon>
+          </button>
         </div>
       </nuxeo-tag>
     </template>
   `,
 
   is: 'nuxeo-document-collections',
-  behaviors: [RoutingBehavior],
+  behaviors: [RoutingBehavior, I18nBehavior],
 
   properties: {
     document: Object,

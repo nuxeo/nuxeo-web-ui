@@ -89,7 +89,7 @@ Polymer({
       }
 
       iron-icon {
-        opacity: 0.3;
+        opacity: 0.7;
         width: 1.3rem;
         margin-right: -1.6em;
         margin-top: -0.07rem;
@@ -147,6 +147,10 @@ Polymer({
       .header h5 {
         margin: 0;
       }
+
+      .loaddata {
+        display: none;
+      }
     </style>
 
     <nuxeo-document
@@ -187,6 +191,9 @@ Polymer({
             <template class="flex" is="dom-if" if="[[!isLeaf]]">
               <paper-spinner active$="[[loading]]" aria-hidden="true"></paper-spinner>
               <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]" aria-hidden="true"></iron-icon>
+              <template is="dom-if" if="[[loading]]">
+                <span class="loaddata" aria-live="polite">[[_loading(loading)]]</span>
+              </template>
             </template>
             <span class="node-name flex">
               <a href$="[[urlFor(item)]]">[[_title(item)]]</a>
@@ -348,6 +355,10 @@ Polymer({
 
   _title(item) {
     return item.type === 'Root' ? this.i18n('browse.root') : item.title;
+  },
+
+  _loading(loading) {
+    return loading ? this.i18n('label.loading') : '';
   },
 
   removeDocuments(documents) {

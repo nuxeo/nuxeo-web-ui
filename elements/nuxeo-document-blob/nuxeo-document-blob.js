@@ -59,7 +59,7 @@ Polymer({
       }
 
       .detail {
-        opacity: 0.5;
+        opacity: 0.7;
       }
 
       nuxeo-actions-menu {

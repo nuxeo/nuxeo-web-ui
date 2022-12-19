@@ -126,7 +126,7 @@ Polymer({
       }
 
       .collection-property {
-        opacity: 0.5;
+        opacity: 0.7;
         margin-right: 0.2em;
       }
 

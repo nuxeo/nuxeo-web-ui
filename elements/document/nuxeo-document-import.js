@@ -217,7 +217,7 @@ Polymer({
 
       .size {
         font-size: 0.8rem;
-        opacity: 0.3;
+        opacity: 0.7;
         padding: 0.1em 0.5em;
         white-space: nowrap;
       }
@@ -526,7 +526,9 @@ Polymer({
               [[i18n('command.create')]]
             </template>
             <template is="dom-if" if="[[_isUploadingOrImporting(_creating, hasLocalFiles, hasLocalFilesUploaded)]]">
-              <span class="importing-label" hidden$="[[_creating]]">[[i18n('documentImport.uploading')]]</span>
+              <span class="importing-label" hidden$="[[_creating]]" aria-live="assertive">
+                [[i18n('documentImport.uploading')]]
+              </span>
               <span class="importing-label" hidden$="[[!_creating]]">[[i18n('documentImport.importing')]]</span>
               <paper-spinner-lite active></paper-spinner-lite>
             </template>

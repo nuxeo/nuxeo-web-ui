@@ -172,6 +172,10 @@ Polymer({
         font-weight: 500;
       }
 
+      #actionsDropdown > .iron-selected {
+        background-color: #8c8c8c;
+      }
+
       .row {
         box-sizing: border-box;
         margin-bottom: 1rem;
@@ -336,7 +340,7 @@ Polymer({
             <template>
               <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
                 <div class="list-item-box">
-                  <div class="list-item-info">
+                  <div class="list-item-info" role="listitem" aria-selected="true">
                     <div class="vertical layout center">
                       <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
                     </div>

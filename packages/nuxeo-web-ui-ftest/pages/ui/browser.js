@@ -371,4 +371,8 @@ export default class Browser extends BasePage {
     publishDialog.waitForVisible();
     return publishDialog;
   }
+
+  get comparePage() {
+    return this.el.element('nuxeo-diff-page div.header');
+  }
 }
