@@ -84,7 +84,10 @@ limitations under the License.
             this.$.operation.execute().then(function() {
               this.fire('nuxeo-documents-untrashed', {documents: this.documents});
               this.documents = [];
-              this.fire('refresh');
+              this._fetchDebouncer =
+              Polymer.Debouncer.debounce(this._fetchDebouncer, Polymer.Async.timeOut.after(100), function() {
+                this.fire('refresh');
+              }.bind(this));
             }.bind(this),
             function(error) {
               this.fire('nuxeo-documents-untrashed', {error: error,  documents: this.documents});

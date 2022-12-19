@@ -100,7 +100,10 @@ limitations under the License.
             op.execute().then(function() {
               this.fire('nuxeo-documents-deleted', {documents: this.documents});
               this.documents = [];
-              this.fire('refresh');
+              this._fetchDebouncer =
+              Polymer.Debouncer.debounce(this._fetchDebouncer, Polymer.Async.timeOut.after(100), function() {
+                this.fire('refresh');
+              }.bind(this));
             }.bind(this),
             function(error) {
               this.fire('nuxeo-documents-deleted', {error: error, documents: this.documents});
