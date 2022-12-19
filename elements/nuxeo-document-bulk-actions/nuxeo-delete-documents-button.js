@@ -19,6 +19,8 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-operation-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 
 /**
@@ -89,7 +91,9 @@ class NuxeoDeleteDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBe
         .then(() => {
           this.fire('nuxeo-documents-deleted', detail);
           this.documents = [];
-          this.fire('refresh');
+          this._fetchDebouncer = Debouncer.debounce(this._fetchDebouncer, timeOut.after(100), () => {
+            this.fire('refresh');
+          });
         })
         .catch((error) => {
           if (!isSelectAllActive) {

@@ -23,6 +23,8 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class';
+import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
 
 /**
@@ -83,7 +85,9 @@ class NuxeoUntrashDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersB
         .then(() => {
           this.fire('nuxeo-documents-untrashed', detail);
           this.documents = [];
-          this.fire('refresh');
+          this._fetchDebouncer = Debouncer.debounce(this._fetchDebouncer, timeOut.after(100), () => {
+            this.fire('refresh');
+          });
         })
         .catch((error) => {
           if (!isSelectAllActive) {
