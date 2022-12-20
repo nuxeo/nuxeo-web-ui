@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "vendor": "Nuxeo",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^7.0.0",
