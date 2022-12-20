@@ -9,7 +9,7 @@ export default class Login {
     await (await passwd).setValue(password);
   }
 
-  async submit() {
+  async submitFts() {
     const submitBtn = $("[name='Submit']");
     await (await submitBtn).click();
   }
