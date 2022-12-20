@@ -9,9 +9,24 @@ export default class Login {
     $('#password').setValue(password);
   }
 
-  submit() {
+  submitSync() {
     $('[name="Submit"]').waitForDisplayed();
     return $('[name="Submit"]').click();
+  }
+
+  async setUsername(username) {
+    const user = $('#username');
+    await (await user).setValue(username);
+  }
+
+  async setPassword(password) {
+    const passwd = $('#password');
+    await (await passwd).setValue(password);
+  }
+
+  async submit() {
+    const submitBtn = $("[name='Submit']");
+    await (await submitBtn).click();
   }
 
   static get() {

@@ -32,7 +32,7 @@ When('I login as {string}', function(username) {
   const login = Login.get();
   login.username = username;
   login.password = users[username];
-  login.submit();
+  login.submitSync();
   this.username = username;
   this.ui = UI.get();
   driver.waitForVisible('nuxeo-page');

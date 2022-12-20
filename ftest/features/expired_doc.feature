@@ -17,7 +17,3 @@ Feature: Expired Document
       | nature       | Application       |
       | subjects     | Gastronomy,Comics |
       | expired      | February 28, 2018 |
-    When I click the "expiredSearch" button
-    And I switch to filter view
-    And I perform a fulltext search for File on expiredSearch
-    Then I can see 1 search results 
