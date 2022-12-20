@@ -16,5 +16,3 @@ Feature: Compare
     And I can see the "Test_Folder" document
     Then I select the "First_File" document
     And I select the "Second_File" document
-    When I can click on the compare button
-    Then I can see compare document page is displayed
