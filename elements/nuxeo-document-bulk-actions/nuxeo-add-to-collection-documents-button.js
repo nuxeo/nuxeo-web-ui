@@ -46,6 +46,8 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
         paper-dialog-scrollable {
           --paper-dialog-scrollable: {
             -webkit-overflow-scrolling: auto;
+            max-width: 500px;
+            max-height: 150px;
           }
         }
       </style>
