@@ -1,3 +1,4 @@
+import moment from 'moment';
 import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
 import Drawer from './ui/drawer';
@@ -95,7 +96,7 @@ export default class UI extends BasePage {
       const locale = browser.execute(() => window.nuxeo.I18n.language || 'en');
       if (locale) {
         global.locale = locale;
-        moment.locale(global.locale);
+        moment.updateLocale(global.locale);
       }
     }
     return new UI('nuxeo-app');
@@ -188,9 +189,5 @@ export default class UI extends BasePage {
 
   bulkEdit(selector) {
     return new BulkEdit(selector);
-  }
-
-  get filterView() {
-    return this.el.element('paper-icon-button[id="toogleFilter"]');
   }
 }

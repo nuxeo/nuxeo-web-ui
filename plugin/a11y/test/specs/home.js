@@ -1,18 +1,18 @@
 import '../imports';
-import UI from '@nuxeo/nuxeo-web-ui-ftest/pages/ui';
 import documentService from '@nuxeo/nuxeo-web-ui-ftest/features/step_definitions/support/services/documentService';
-import login from '../helpers/login';
+import { authRedirect } from '../helpers/login';
 import { reportA11y } from '../a11y-reporter.js';
 
 const EXPECTED_VIOLATIONS = {
   'aria-command-name': 1,
   'aria-allowed-attr': 4,
+  'aria-required-parent': 9,
   'aria-tooltip-name': 1,
   'duplicate-id': 28,
   'landmark-one-main': 1,
   'meta-viewport': 1,
   'page-has-heading-one': 1,
-  region: 22,
+  region: 25,
   'nested-interactive': 15,
 };
 
@@ -29,9 +29,10 @@ describe('Nuxeo Home', () => {
     await documentService.create(parent.path, child);
   });
 
-  reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, () => {
-    login();
-    const ui = UI.get();
-    ui.home.el.$('nuxeo-card[icon="nuxeo:edit"]').waitForDisplayed();
+  reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, async () => {
+    await authRedirect(browser, '#!/home');
+    await browser.$('nuxeo-card[icon="nuxeo:edit"]').waitForExist({ timeout: 5000 });
+    const context = await browser.$(`nuxeo-card[icon="nuxeo:edit"]`);
+    return context;
   });
 });
