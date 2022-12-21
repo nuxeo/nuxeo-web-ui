@@ -986,6 +986,7 @@
   "label.dublincore.state": "State",
   "label.dublincore.subjects": "Subjects",
   "label.dublincore.title": "Title",
+  "label.dublincore.source": "Source",
   "label.error": "Error",
   "label.mail.folder.email": "Email",
   "label.mail.folder.emails_limit": "Limit of New Fetched Emails",

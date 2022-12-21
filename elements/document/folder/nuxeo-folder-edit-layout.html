@@ -33,7 +33,14 @@ limitations under the License.
       required
     >
     </nuxeo-input>
-
+    <nuxeo-input
+    role="widget"
+    label="[[i18n('source')]]"
+    name="source"
+    value="{{document.properties.dc:source}}"
+    autofocus
+  >
+  </nuxeo-input>
     <nuxeo-textarea
       role="widget"
       label="[[i18n('label.description')]]"
