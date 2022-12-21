@@ -58,7 +58,7 @@ export default class Browser extends BasePage {
   get currentPageName() {
     // get selected pill to get it's name
     this.waitForVisible('#documentViewsItems nuxeo-page-item.iron-selected');
-    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
+    const pill = this.el.$('#documentViewsItems nuxeo-page-item.iron-selected');
     // get active page name
     return pill.getAttribute('name');
   }
@@ -76,7 +76,7 @@ export default class Browser extends BasePage {
   }
 
   get breadcrumb() {
-    return this.el.element('nuxeo-breadcrumb');
+    return this.el.$('nuxeo-breadcrumb');
   }
 
   get title() {
@@ -84,7 +84,7 @@ export default class Browser extends BasePage {
   }
 
   _section(name) {
-    return this.el.element(`#nxContent [name='${name}']`);
+    return this.el.$(`#nxContent [name='${name}']`);
   }
 
   get editButton() {
