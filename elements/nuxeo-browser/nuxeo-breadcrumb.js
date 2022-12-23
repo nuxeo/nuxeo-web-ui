@@ -53,7 +53,13 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             white-space: nowrap;
             overflow: hidden;
           }
-
+          .trash-icon {
+            height: 16px;
+            width: 16px;
+            color: var(--nuxeo-warn-text, #ff0000);
+            display: inline-block;
+            margin-top: 5px;
+          }
           .current {
             font-weight: 400;
             display: block;
@@ -116,6 +122,14 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
               display: none;
             }
           }
+          .doc-title-uid-trash {
+            display: inline-flex;
+            width: auto;
+        }
+        .doc-title-uid {
+          padding-top: 5px;
+          display: inline-flex;
+        }
         </style>
 
         <nuxeo-connection id="nxcon" url="{{url}}"></nuxeo-connection>
@@ -125,14 +139,26 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             <iron-icon src="[[_icon(document, url)]]"></iron-icon>
           </div>
           <div class="doc-path">
-            <a
-              href$="[[urlFor(document)]]"
-              class="current breadcrumb-item breadcrumb-item-current"
-              aria-current="page"
-              title="[[_title(document)]]"
-            >
-              [[_title(document)]]
-            </a>
+          <div class="doc-title-uid-trash">
+          <div class="doc-title-uid">
+              <a
+                href$="[[urlFor(document)]]"
+                class="current breadcrumb-item breadcrumb-item-current"
+                aria-current="page"
+                title="[[_title(document)]]"
+              >
+                [[_title(document)]]
+              </a>
+              <span class="doc-uid">
+                [[_documentUID(document)]]
+              </span>
+          </div>
+          <template is="dom-if" if="[[_isTrashed(document)]]">
+            <span class="trash-icon-parent">
+             <iron-icon class="trash-icon" id="trashIcon" name="trashIcon" icon="delete" ></iron-icon>
+            <span>
+          </template>
+      </div>
             <nav aria-label="Breadcrumb">
               <ol id="ancestors"></ol>
             </nav>
@@ -249,6 +275,16 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
       if (document) {
         return document.type === 'Root' ? this.i18n('browse.root') : document.title;
       }
+    }
+
+    _documentUID(document) {
+      if (document) {
+        return `(${document.uid.substring(document.uid.lastIndexOf('-') + 1, document.uid.length)})`.trim();
+      }
+    }
+
+    _isTrashed(document) {
+      return document && document.isTrashed;
     }
 
     _icon(document, url) {

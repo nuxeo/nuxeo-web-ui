@@ -55,13 +55,7 @@ Feature: Clipboard
      | move   | 0         |
      | paste  | 3         |
 
-  Scenario: Can't use clipboard for destinations which don't allow certain types
-    Given I browse to the document with path "/default-domain/Src"
-    And I select the "File1" document
-    And I can see the selection toolbar
-    And I can add selection to clipboard
-    When I browse to the document with path "/default-domain"
-    Then I can see clipboard actions disabled
+  
 
   Scenario: Clipboard is updated when document's title changes
     Given I have permission ReadWrite for the document with path "/default-domain/Src/File1"

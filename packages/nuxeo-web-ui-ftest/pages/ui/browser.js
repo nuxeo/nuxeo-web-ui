@@ -9,6 +9,7 @@ import DocumentTask from './browser/document_task';
 import DocumentFormLayout from './browser/document_form_layout';
 import Selection from './selection';
 import Results from './results';
+import ParentInspector from './parent_inspector';
 import { clickActionMenu, url } from '../helpers';
 
 export default class Browser extends BasePage {
@@ -89,6 +90,18 @@ export default class Browser extends BasePage {
 
   get editButton() {
     return this.el.element('#edit-button');
+  }
+
+  get parentInspector() {
+    return new ParentInspector('nuxeo-document-parent-inspector-button');
+  }
+
+  get parentInspectorButton() {
+    return this.el.element('nuxeo-document-parent-inspector-button');
+  }
+
+  get parentInspectorDialog() {
+    return this.el.element('#dialog');
   }
 
   editForm(docType) {
@@ -180,6 +193,7 @@ export default class Browser extends BasePage {
 
   addToFavorites() {
     this.el.click('nuxeo-favorites-toggle-button');
+    driver.alertAccept();
     return this.isFavorite;
   }
 
