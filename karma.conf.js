@@ -20,20 +20,20 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     sl_latest_chrome: {
       base: 'SauceLabs',
       browserName: 'chrome',
-      platform: 'Windows 10',
+      platform: 'Windows 7',
       version: 'latest',
     },
     sl_latest_firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
-      platform: 'Windows 10',
+      platform: 'Windows 7',
       version: 'latest',
       geckodriverVersion: '0.30.0',
     },
     sl_latest_edge: {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
-      platform: 'Windows 10',
+      platform: 'Windows 7',
       version: 'latest',
     },
     sl_latest_safari: {
