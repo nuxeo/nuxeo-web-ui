@@ -60,9 +60,10 @@ module.exports = (config) => {
     basePath: '',
     singleRun: true,
     browsers: config.browsers && config.browsers.length > 0 ? config.browsers : Object.keys(customLaunchers),
-    browserDisconnectTimeout: 10 * 1000,
+    browserDisconnectTimeout: 1000,
     browserDisconnectTolerance: 1,
-    browserNoActivityTimeout: 5 * 60 * 1000,
+    browserNoActivityTimeout: 4 * 60 * 1000,
+    captureTimeout: 4 * 60 * 1000,
     customLaunchers,
     middleware: ['static'],
     static: {
@@ -102,7 +103,7 @@ module.exports = (config) => {
     browserConsoleLogOptions: {
       level: 'error',
     },
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
     /** Some errors come in JSON format with a message property. */
     formatError(error) {
       try {
@@ -130,7 +131,7 @@ module.exports = (config) => {
       mocha: {
         reporter: 'html',
         ui: 'tdd',
-        timeout: 3000,
+        timeout: 2000,
       },
       chai: {
         includeStack: true,
