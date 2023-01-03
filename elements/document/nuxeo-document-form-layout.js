@@ -38,6 +38,7 @@ Polymer({
       form {
         @apply --layout-vertical;
         height: 100%;
+        max-width: 970px;
       }
 
       .scrollable {
