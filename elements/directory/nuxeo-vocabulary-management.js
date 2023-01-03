@@ -117,6 +117,7 @@ Polymer({
             id="table"
             empty-label="[[i18n('vocabularyManagement.noEntry')]]"
             empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered')]]"
+            style$="[[_visibleDataTableStyle(entries)]]"
           >
             <template is="dom-repeat" items="[[colDef]]" as="col">
               <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
@@ -202,6 +203,10 @@ Polymer({
   },
 
   observers: ['_refresh(selectedVocabulary)'],
+
+  _visibleDataTableStyle(entries) {
+    return entries.length ? 'display: block;' : 'display: none;';
+  },
 
   _visibleChanged() {
     if (this.visible && !this.vocabularies) {
