@@ -35,6 +35,11 @@ Polymer({
         margin-inline-end: 12px;
       }
 
+      .properties span {
+        min-width: 6rem;
+        text-align: left;
+      }
+
       .properties .item {
         @apply --layout-horizontal;
         @apply --layout-flex;
