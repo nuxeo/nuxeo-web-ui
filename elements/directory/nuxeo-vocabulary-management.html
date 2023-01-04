@@ -108,7 +108,8 @@ limitations under the License.
           </div>
           <nuxeo-data-table id="table"
             empty-label="[[i18n('vocabularyManagement.noEntry')]]"
-            empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered')]]">
+            empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered')]]"
+            style$="[[_visibleDataTableStyle(entries)]]">
             <template is="dom-repeat" items="[[colDef]]" as="col">
               <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
                 <template>
@@ -183,6 +184,10 @@ limitations under the License.
           '_refresh(selectedVocabulary)'
         ],
 
+        _visibleDataTableStyle: function (entries) {
+          return entries.length ? 'display: block;' : 'display: none;';
+        },
+        
         _visibleChanged: function() {
           if (this.visible && !this.vocabularies) {
             Polymer.RenderStatus.afterNextRender(this, function() {
