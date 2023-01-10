@@ -323,7 +323,7 @@ Polymer({
       responsive-width="720px"
       edge-swipe-sensitivity="0"
     >
-      <div slot="drawer">
+      <div slot="drawer" role="list">
         <!-- logo -->
         <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
           <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
