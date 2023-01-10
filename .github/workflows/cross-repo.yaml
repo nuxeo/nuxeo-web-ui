@@ -65,6 +65,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
+          node-version: 18
           registry-url: ${{ env.NPM_REPOSITORY }}
           scope: '@nuxeo'
       

@@ -51,6 +51,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+        node-version: 18
         scope: '@nuxeo'
 
     - name: Prepare environment
