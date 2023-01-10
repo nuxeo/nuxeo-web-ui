@@ -39,9 +39,9 @@ jobs:
 
     - uses: actions/setup-node@v3
       with:
-        registry-url: ${{ env.NPM_REPOSITORY }}
-        node-version: 18
+        registry-url: registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
         scope: '@nuxeo'
+        node-version: 18
 
     - uses: actions/setup-java@v2
       with:
