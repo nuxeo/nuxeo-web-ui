@@ -41,7 +41,6 @@
     "node-fetch": "^2.6.1",
     "nuxeo": "^3.6.0",
     "wdio-chromedriver-service": "^7.0.0",
-    "wdio-cucumberjs-json-reporter": "^2.0.3",
-    "webdriverio": "^7.2.0"
+    "wdio-cucumberjs-json-reporter": "^2.0.3"
   }
 }

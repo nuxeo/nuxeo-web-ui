@@ -189,8 +189,7 @@
     "select2": "~3.5.1",
     "three": "~0.125.0",
     "uuid": "^3.3.2",
-    "web-animations-js": "^2.3.1",
-    "webdriverio": "^7.16.16"
+    "web-animations-js": "^2.3.1"
   },
   "husky": {
     "hooks": {
