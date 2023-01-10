@@ -613,6 +613,14 @@ Polymer({
     },
 
     /**
+     * The current document loaded is bound to this property.
+     */
+    currentDocument: {
+      type: Object,
+      value: null,
+    },
+
+    /**
      * If `true`, aggregagtes from page provider definition will not be computed.
      */
     skipAggregates: Boolean,
@@ -630,6 +638,12 @@ Polymer({
 
   listeners: {
     'iron-resize': '_calculateViewportHeight',
+  },
+
+  ready() {
+    window.addEventListener('navigate', (e) => {
+      this.currentDocument = e && e.detail && e.detail.item;
+    });
   },
 
   _visibleChanged() {
@@ -713,7 +727,9 @@ Polymer({
   _selectedDocChanged(doc, old) {
     if ((doc && doc.path && !old) || (doc && doc.path && old && old.path && doc.path !== old.path)) {
       this.__renderDebouncer = Debouncer.debounce(this.__renderDebouncer, timeOut.after(150), () => {
-        this.navigateTo(doc);
+        if (!this.currentDocument || (this.currentDocument && this.currentDocument.path !== doc.path)) {
+          this.navigateTo(doc);
+        }
       });
     }
   },
