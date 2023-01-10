@@ -38,6 +38,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: 18
           scope: '@nuxeo'
 
       - uses: actions/setup-java@v2
