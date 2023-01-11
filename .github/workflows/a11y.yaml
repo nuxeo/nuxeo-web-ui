@@ -44,16 +44,16 @@ jobs:
         node-version: 18
 
     - name: Install Web UI
-          env:
-            NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-          run: |
-            npm install
-            pushd packages/nuxeo-web-ui-ftest
-            npm install
-            popd
-            pushd packages/nuxeo-designer-catalog
-            npm install
-            popd
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      run: |
+        npm install
+        pushd packages/nuxeo-web-ui-ftest
+        npm install
+        popd
+        pushd packages/nuxeo-designer-catalog
+        npm install
+        popd
 
     - uses: actions/setup-java@v2
       with:
