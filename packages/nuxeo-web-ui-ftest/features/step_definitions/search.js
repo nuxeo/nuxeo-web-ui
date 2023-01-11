@@ -124,9 +124,9 @@ When(/^I clear the (.+) search on (.+)$/, function(searchType, searchName) {
   searchForm.search(searchType);
 });
 
-When(/^I perform a (.+) search for (.+) on (.+)$/, function(searchType, searchTerm, searchName) {
+When(/^I perform a (.+) search for (.+) on (.+)$/, async function(searchType, searchTerm, searchName) {
   const searchForm = this.ui.searchForm(searchName);
-  searchForm.waitForVisible();
+  await searchForm.waitForVisible();
   searchForm.search(searchType, searchTerm);
 });
 

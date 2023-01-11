@@ -1,7 +1,7 @@
 import { Then, When } from '@cucumber/cucumber';
 
-When('I click the View Tasks Dashboard link', function() {
-  this.ui.drawer.tasks.dashboardLink.click();
+When('I click the View Tasks Dashboard link', async function() {
+  await this.ui.drawer.tasks.dashboardLink.click();
 });
 When(/^I (\w+) the task for following actors:$/, function(option, table) {
   option.should.to.be.oneOf(['delegate', 'reassign'], 'An unknown type was passed as argument');
@@ -18,14 +18,23 @@ When(/^I (\w+) the task for following actors:$/, function(option, table) {
   driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
-Then('I can see the list of tasks', function() {
-  this.ui.drawer.tasks.waitForVisible().should.be.true;
+Then('I can see the list of tasks', async function() {
+  const isVisible = await this.ui.drawer.tasks.waitForVisible();
+  if (!isVisible) {
+    throw new Error('Expected list of tasks to be visible');
+  }
 });
-Then('I can see the View Tasks Dashboard link', function() {
-  this.ui.drawer.tasks.dashboardLink.waitForVisible().should.be.true;
+Then('I can see the View Tasks Dashboard link', async function() {
+  const isVisible = await this.ui.drawer.tasks.dashboardLink.waitForVisible();
+  if (!isVisible) {
+    throw new Error('Expected View Tasks Dashboard link to be visible');
+  }
 });
-Then('I can see the Tasks Dashboard', function() {
-  this.ui.tasks.waitForVisible().should.be.true;
+Then('I can see the Tasks Dashboard', async function() {
+  const isVisible = await this.ui.tasks.waitForVisible();
+  if (!isVisible) {
+    throw new Error('Expected Tasks Dashboard to be visible');
+  }
 });
 Then(/^I can process the workflow$/, function() {
   this.ui.browser.documentTaskView.waitForVisible();

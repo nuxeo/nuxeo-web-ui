@@ -265,7 +265,7 @@ Then('I can see the document has {int} children', function(nb) {
   this.ui.browser.waitForNbChildren(nb);
 });
 
-Then(/^I can see a process is running in the document$/,async function() {
+Then(/^I can see a process is running in the document$/, async function() {
   const documentPage = this.ui.browser.documentPage();
   // check info bar in the document is visible
   await documentPage.infoBar.waitForVisible();
