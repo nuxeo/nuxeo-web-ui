@@ -1491,8 +1491,9 @@ Polymer({
   },
 
   _clipboardUpdated(e) {
+    const detail = e.detail.docCount;
     this.clipboard = this.clipboard || this.$$('#clipboard');
-    this.set('clipboardDocCount', e.detail.docCount);
+    this.set('clipboardDocCount', detail);
   },
 
   _removeFromClipboard(docs) {
