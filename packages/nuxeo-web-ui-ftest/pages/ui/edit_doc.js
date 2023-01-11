@@ -3,7 +3,7 @@ import BasePage from '../base';
 export default class EditDoc extends BasePage {
   submit() {
     this.el.waitForVisible('paper-button.primary');
-    this.el.element('paper-button.primary').click();
+    this.el.$('paper-button.primary').click();
   }
 
   editTitle(docType) {

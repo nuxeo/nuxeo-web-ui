@@ -17,7 +17,7 @@ export default class Administration extends BasePage {
   }
 
   get userGroupCreateButton() {
-    return this.el.element('#createButton');
+    return this.el.$('#createButton');
   }
 
   get vocabularyManagement() {

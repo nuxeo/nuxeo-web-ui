@@ -3,23 +3,23 @@ import BasePage from '../base';
 export default class Group extends BasePage {
   getField(field) {
     $(this._selector).waitForVisible();
-    return this.el.element(`[id="${field}"]`);
+    return this.el.$(`[id="${field}"]`);
   }
 
   get dropdown() {
-    return this.el.element('#menu');
+    return this.el.$('#menu');
   }
 
   get groupItem() {
-    return this.el.element('paper-icon-item[name="group"]');
+    return this.el.$('paper-icon-item[name="group"]');
   }
 
   get createGroupForm() {
-    return this.el.element('nuxeo-create-group #form');
+    return this.el.$('nuxeo-create-group #form');
   }
 
   get createGroupButton() {
-    return this.el.element('nuxeo-create-group #createButton');
+    return this.el.$('nuxeo-create-group #createButton');
   }
 
   get editGroupButton() {

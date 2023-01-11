@@ -6,15 +6,15 @@ export default class BulkEdit extends BasePage {
   }
 
   get dialog() {
-    return this.el.element('#dialog');
+    return this.el.$('#dialog');
   }
 
   get cancelButton() {
-    return this.el.element('.actions :first-child');
+    return this.el.$('.actions :first-child');
   }
 
   get saveButton() {
-    return this.el.element('.actions #save');
+    return this.el.$('.actions #save');
   }
 
   getField(field) {
@@ -52,7 +52,7 @@ export default class BulkEdit extends BasePage {
   }
 
   getBulkEditOptions(field) {
-    let bulkWidget = this.el.element(`[name="${field}"]`).parentElement();
+    let bulkWidget = this.el.$(`[name="${field}"]`).parentElement();
     // some elements generated in Studio are wrapped in divs
     if (bulkWidget.getTagName() !== 'nuxeo-bulk-widget') {
       bulkWidget = bulkWidget.parentElement();
@@ -62,14 +62,14 @@ export default class BulkEdit extends BasePage {
 
   bulkEditOptionsList(fieldName, editOption) {
     driver.waitUntil(() => {
-      const els = driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
+      const els = driver.$$(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
       return els.length > 1;
     });
 
     const listItems = this.el
-      .element(`[name="${fieldName}"]`)
+      .$(`[name="${fieldName}"]`)
       .parentElement()
-      .elements('nuxeo-select paper-item');
+      .$$('nuxeo-select paper-item');
     return listItems.find((e) => e.getText() === editOption);
   }
 }

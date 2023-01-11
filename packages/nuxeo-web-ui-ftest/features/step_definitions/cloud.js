@@ -7,62 +7,80 @@ Given('provider {string} exists in providers', (provider) =>
   }),
 );
 
-Then('I can see the nuxeo-cloud-providers page', function() {
+Then('I can see the nuxeo-cloud-providers page',async function() {
   this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.nuxeoCloudProviders.waitForVisible().should.be.true;
+  const isVisible = await this.ui.administration.cloudServices.nuxeoCloudProviders.waitForVisible();
+  if (!isVisible) {
+    throw new Error('Nuxeo cloud providers page to be visible');
+  }
 });
 
-Then('I can see the nuxeo-cloud-tokens page', function() {
+Then('I can see the nuxeo-cloud-tokens page',async function() {
   this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.nuxeoCloudTokens.waitForVisible().should.be.true;
+  const isVisible = await this.ui.administration.cloudServices.nuxeoCloudTokens.waitForVisible();
+  if (!isVisible) {
+    throw new Error('Nuxeo cloud tokens page to be visible');
+  }
 });
 
-Then('I can see the nuxeo-oauth2-provided-tokens table', function() {
+Then('I can see the nuxeo-oauth2-provided-tokens table',async function() {
   this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.nuxeoCloudTokensAuthorizedApplications.waitForVisible().should.be.true;
+  const isVisible = await this.ui.administration.cloudServices.nuxeoCloudTokensAuthorizedApplications.waitForVisible();
+  if (!isVisible) {
+    throw new Error('Nuxeo oauth provided tokens page to be visible');
+  }
 });
 
-Then('I can see the nuxeo-oauth2-consumed-tokens table', function() {
+Then('I can see the nuxeo-oauth2-consumed-tokens table',async function() {
   this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.nuxeoCloudTokensCloudAccount.waitForVisible().should.be.true;
+  const isVisible = await this.ui.administration.cloudServices.nuxeoCloudTokensCloudAccount.waitForVisible();
+  if (!isVisible) {
+    throw new Error('Nuxeo oauth2 consumed tokens page to be visible');
+  }
 });
 
-Then('I can add the following provider:', function(provider) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.addProvider(provider);
+Then('I can add the following provider:',async function(provider) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  await this.ui.administration.cloudServices.addProvider(provider);
   global.providers[provider.rows()[0][1]] = {
     serviceName: provider.rows()[0][1],
   };
 });
 
-Then('I can see {string} provider', function(name) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.waitForHasProvider(name).should.be.true;
+Then('I can see {string} provider',async function(name) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  const isVisible = await this.ui.administration.cloudServices.waitForHasProvider(name);
+  if (!isVisible) {
+    throw new Error('provider to be visible');
+  }
 });
 
-Then('I cannot see {string} provider', function(name) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.waitForHasProvider(name, true).should.be.true;
+Then('I cannot see {string} provider',async function(name) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  const isVisible = await this.ui.administration.cloudServices.waitForHasProvider(name, true);
+  if (!isVisible) {
+    throw new Error('provider to be visible');
+  }
 });
 
-Then('I can edit {string} provider to:', function(currentName, newDetails) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.editProvider(currentName, newDetails);
+Then('I can edit {string} provider to:',async function(currentName, newDetails) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  await this.ui.administration.cloudServices.editProvider(currentName, newDetails);
   delete global.providers[currentName];
   global.providers[newDetails.rows()[0][1]] = {
     serviceName: newDetails.rows()[0][1],
   };
 });
 
-Then('I can delete {string} provider', function(name) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.deleteProvider(name);
+Then('I can delete {string} provider',async function(name) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  await this.ui.administration.cloudServices.deleteProvider(name);
   delete global.providers[name];
 });
 
-When('I click the {string} pill', function(name) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.clickElementName(name);
+When('I click the {string} pill',async function(name) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  await this.ui.administration.cloudServices.clickElementName(name);
 });
 
 Given('Client {string} exists in clients', (clientId) =>
@@ -74,40 +92,49 @@ Given('Client {string} exists in clients', (clientId) =>
   }),
 );
 
-Then('I can see the nuxeo-cloud-consumers page', function() {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.nuxeoCloudConsumers.waitForVisible().should.be.true;
+Then('I can see the nuxeo-cloud-consumers page',async function() {
+  await this.ui.administration.cloudServices.waitForVisible();
+  const isVisible = await this.ui.administration.cloudServices.nuxeoCloudConsumers.waitForVisible();
+  if (!isVisible) {
+    throw new Error('nuxeo cloud consumer page to be visible');
+  }
 });
 
-Then('I can add the following client:', function(client) {
-  this.ui.administration.cloudServices.waitForVisible();
+Then('I can add the following client:',async function(client) {
+  await this.ui.administration.cloudServices.waitForVisible();
   this.ui.administration.cloudServices.addClient(client);
   global.clients[client.rows()[0][1]] = {
     clientId: client.rows()[0][1],
   };
 });
 
-Then('I can see {string} client', function(clientId) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.waitForHasClient(clientId).should.be.true;
+Then('I can see {string} client',async function(clientId) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  const isVisible = await this.ui.administration.cloudServices.waitForHasClient(clientId);
+  if (!isVisible) {
+    throw new Error('client to be visible');
+  }
 });
 
-Then('I cannot see {string} client', function(clientId) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.waitForHasClient(clientId, true).should.be.true;
+Then('I cannot see {string} client',async function(clientId) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  const isVisible = await this.ui.administration.cloudServices.waitForHasClient(clientId, true);
+  if (isVisible) {
+    throw new Error('client to not be visible');
+  }
 });
 
-Then('I can edit {string} client to:', function(currentClientId, newDetails) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.editClient(currentClientId, newDetails);
+Then('I can edit {string} client to:',async function(currentClientId, newDetails) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  await this.ui.administration.cloudServices.editClient(currentClientId, newDetails);
   delete global.clients[currentClientId];
   global.clients[newDetails.rows()[0][1]] = {
     clientId: newDetails.rows()[0][1],
   };
 });
 
-Then('I can delete {string} client', function(clientId) {
-  this.ui.administration.cloudServices.waitForVisible();
-  this.ui.administration.cloudServices.deleteClient(clientId);
+Then('I can delete {string} client',async function(clientId) {
+  await this.ui.administration.cloudServices.waitForVisible();
+  await this.ui.administration.cloudServices.deleteClient(clientId);
   delete global.clients[clientId];
 });

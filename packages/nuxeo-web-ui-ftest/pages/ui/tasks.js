@@ -2,7 +2,7 @@ import BasePage from '../base';
 
 export default class Tasks extends BasePage {
   get nbItems() {
-    const items = this.el.elements('#list .list-item');
+    const items = this.el.$$('#list .list-item');
     let count = 0;
     items.forEach((item) => {
       if (item.isVisible()) {
@@ -13,6 +13,6 @@ export default class Tasks extends BasePage {
   }
 
   get dashboardLink() {
-    return this.el.element('.tasks-dashboard #link');
+    return this.el.$('.tasks-dashboard #link');
   }
 }

@@ -2,20 +2,20 @@ import BasePage from '../base';
 
 export default class NoteEditor extends BasePage {
   setContent(content) {
-    this.el.element('#editor').waitForVisible();
-    this.el.element('#editor').setValue(content);
+    this.el.$('#editor').waitForVisible();
+    this.el.$('#editor').setValue(content);
   }
 
   get textarea() {
-    return this.el.element('#textarea');
+    return this.el.$('#textarea');
   }
 
   get editButton() {
-    return this.el.element('#editNote');
+    return this.el.$('#editNote');
   }
 
   hasContent(content) {
-    const editor = this.el.element('#editor');
+    const editor = this.el.$('#editor');
     editor.waitForVisible();
     driver.waitUntil(() => {
       try {
@@ -33,7 +33,7 @@ export default class NoteEditor extends BasePage {
   }
 
   save() {
-    const button = this.el.element('paper-button[name="editorSave"]');
+    const button = this.el.$('paper-button[name="editorSave"]');
     button.waitForVisible();
     button.click();
   }

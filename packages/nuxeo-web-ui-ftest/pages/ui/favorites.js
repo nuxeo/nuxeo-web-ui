@@ -8,7 +8,7 @@ export default class Favorites extends BasePage {
 
   removeDocument(doc) {
     this.waitForVisible();
-    const favorites = this.el.elements('#favoritesList');
+    const favorites = this.el.$$('#favoritesList');
     return favorites.some((favorite) => {
       if (this._hasDocument(doc, this.el)) {
         favorite.click('iron-icon.remove');

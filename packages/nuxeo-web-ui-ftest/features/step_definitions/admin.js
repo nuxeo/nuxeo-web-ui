@@ -32,8 +32,11 @@ Then('I can see the users and groups page', async function() {
   }
 });
 
-Then('I can see the vocabulary page', function() {
-  this.ui.administration.vocabularyManagement.waitForVisible().should.be.true;
+Then('I can see the vocabulary page',async function() {
+  const isVisible = await this.ui.administration.vocabularyManagement.waitForVisible()
+  if (!isVisible) {
+    throw new Error('Expected vocabulary page to be visible');
+  }
 });
 
 Then('I can see the audit page', async function() {
@@ -57,12 +60,12 @@ Then('I can see the cloud services page', async function() {
   }
 });
 
-Given('I am on cloud services page', function() {
-  this.ui.administration.goToCloudServices();
+Given('I am on cloud services page',async function() {
+  await this.ui.administration.goToCloudServices();
 });
 
 // ¯\_(ツ)_/¯ no way to escape a / character in cucumber expressions
-When(/^I click the new user\/group button$/, function() {
-  this.ui.administration.userGroupCreateButton.waitForVisible();
-  this.ui.administration.userGroupCreateButton.click();
+When(/^I click the new user\/group button$/,async function() {
+  await this.ui.administration.userGroupCreateButton.waitForVisible();
+  await this.ui.administration.userGroupCreateButton.click();
 });

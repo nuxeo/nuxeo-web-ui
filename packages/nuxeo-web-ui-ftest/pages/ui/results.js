@@ -96,10 +96,10 @@ export default class Results extends BasePage {
   }
 
   get deleteDocumentsButton() {
-    return this.el.element('nuxeo-delete-documents-button[hard]');
+    return this.el.$('nuxeo-delete-documents-button[hard]');
   }
 
   get untrashDocumentsButton() {
-    return this.el.element('nuxeo-untrash-documents-button');
+    return this.el.$('nuxeo-untrash-documents-button');
   }
 }

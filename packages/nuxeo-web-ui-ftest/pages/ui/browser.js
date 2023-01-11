@@ -40,7 +40,7 @@ export default class Browser extends BasePage {
   }
 
   get permissionsViewButton() {
-    return this.el.element('nuxeo-page-item[name="permissions"]');
+    return this.el.$('nuxeo-page-item[name="permissions"]');
   }
 
   get publicationView() {
@@ -48,7 +48,7 @@ export default class Browser extends BasePage {
   }
 
   get publicationViewButton() {
-    return this.el.element('nuxeo-page-item[name="publication"]');
+    return this.el.$('nuxeo-page-item[name="publication"]');
   }
 
   get documentTaskView() {
@@ -88,7 +88,7 @@ export default class Browser extends BasePage {
   }
 
   get editButton() {
-    return this.el.element('#edit-button');
+    return this.el.$('#edit-button');
   }
 
   editForm(docType) {
@@ -96,11 +96,11 @@ export default class Browser extends BasePage {
   }
 
   get header() {
-    return this.currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    return this.currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
   }
 
   get rows() {
-    return this.currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    return this.currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
   }
 
   waitForChildren() {
@@ -108,7 +108,7 @@ export default class Browser extends BasePage {
   }
 
   addToCollection(name) {
-    const button = this.el.element('nuxeo-add-to-collection-button');
+    const button = this.el.$('nuxeo-add-to-collection-button');
     button.waitForVisible();
     if (!button.isExisting('#dialog') || !button.isVisible('#dialog')) {
       button.click();
@@ -154,10 +154,10 @@ export default class Browser extends BasePage {
   removeFromCollection(name) {
     const { el } = this;
     el.waitForVisible('nuxeo-document-collections nuxeo-tag');
-    const collections = this.el.elements('nuxeo-document-collections nuxeo-tag');
+    const collections = this.el.$$('nuxeo-document-collections nuxeo-tag');
     collections.some((collection) => {
       if (collection.getText().trim() === name) {
-        const remove = collection.element('iron-icon[name="remove"]');
+        const remove = collection.$('iron-icon[name="remove"]');
         remove.waitForVisible();
         remove.scrollIntoView();
         remove.click();
@@ -168,7 +168,7 @@ export default class Browser extends BasePage {
   }
 
   removeSelectionFromCollection() {
-    const button = this.el.element('nuxeo-collection-remove-action');
+    const button = this.el.$('nuxeo-collection-remove-action');
     button.waitForVisible();
     button.click();
   }
@@ -198,7 +198,7 @@ export default class Browser extends BasePage {
   waitForHasChild(doc) {
     const { el } = this;
     el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
-    const titles = el.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
+    const titles = el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
     return titles.some((title) => title.getText().trim() === doc.title);
   }
 
@@ -223,7 +223,7 @@ export default class Browser extends BasePage {
     for (i = 0; i < rows.length; i++) {
       if (
         rows[i]
-          .element('nuxeo-data-table-cell a.title')
+          .$('nuxeo-data-table-cell a.title')
           .getText()
           .trim() === title
       ) {
@@ -236,16 +236,16 @@ export default class Browser extends BasePage {
   sortContent(field, order) {
     driver.waitUntil(() => {
       this.waitForChildren();
-      const columns = this.currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-column');
+      const columns = this.currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-column');
       const idx = columns
         .map((col) => browser.execute((el) => el.sortBy, col))
         .findIndex((colSortByField) => colSortByField && colSortByField.toLowerCase() === field.toLowerCase());
       if (idx === -1) {
         throw new Error('Field not found');
       }
-      const header = this.currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-      const sortElt = header.element(`nuxeo-data-table-cell:nth-of-type(${idx + 1}) nuxeo-data-table-column-sort`);
-      const currentSorting = sortElt.element('paper-icon-button').getAttribute('direction');
+      const header = this.currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+      const sortElt = header.$(`nuxeo-data-table-cell:nth-of-type(${idx + 1}) nuxeo-data-table-column-sort`);
+      const currentSorting = sortElt.$('paper-icon-button').getAttribute('direction');
       if (currentSorting && order.toLowerCase() === currentSorting.toLowerCase()) {
         return true;
       }

@@ -5,12 +5,12 @@ import { clickActionMenu } from '../helpers';
 
 export default class Selection extends BasePage {
   addToClipboard() {
-    this.el.element('nuxeo-clipboard-documents-button').click();
+    this.el.$('nuxeo-clipboard-documents-button').click();
     this.waitForNotVisible();
   }
 
   get addDocumentsToCollectionButton() {
-    return this.el.element('nuxeo-add-to-collection-documents-button');
+    return this.el.$('nuxeo-add-to-collection-documents-button');
   }
 
   get addToCollectionDialog() {
@@ -26,12 +26,12 @@ export default class Selection extends BasePage {
 
   moveDown() {
     this.el.waitForVisible('nuxeo-move-documents-down-button');
-    this.el.element('nuxeo-move-documents-down-button').click();
+    this.el.$('nuxeo-move-documents-down-button').click();
   }
 
   moveUp() {
     this.el.waitForVisible('nuxeo-move-documents-up-button');
-    this.el.element('nuxeo-move-documents-up-button').click();
+    this.el.$('nuxeo-move-documents-up-button').click();
   }
 
   trashDocuments() {
@@ -39,11 +39,11 @@ export default class Selection extends BasePage {
   }
 
   get trashDocumentsButton() {
-    return this.el.element('nuxeo-delete-documents-button');
+    return this.el.$('nuxeo-delete-documents-button');
   }
 
   get publishDocumentsButton() {
-    return this.el.element('nuxeo-publish-button #publishButton');
+    return this.el.$('nuxeo-publish-button #publishButton');
   }
 
   get publishDialog() {
@@ -60,6 +60,6 @@ export default class Selection extends BasePage {
   }
 
   get compare() {
-    return this.el.element('nuxeo-document-diff-button');
+    return this.el.$('nuxeo-document-diff-button');
   }
 }

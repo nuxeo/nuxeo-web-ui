@@ -8,21 +8,21 @@ export default class User extends BasePage {
     driver.waitForVisible(this._selector);
     this.el.waitForVisible(parent);
     if (field === 'password' || field === 'passwordConfirmation') {
-      return this.el.element(`${parent} [id="${field}"]`);
+      return this.el.$(`${parent} [id="${field}"]`);
     }
-    return this.el.element(`${parent} [name="${field}"]`);
+    return this.el.$(`${parent} [name="${field}"]`);
   }
 
   get dropdown() {
-    return this.el.element('#menu');
+    return this.el.$('#menu');
   }
 
   get userItem() {
-    return this.el.element('paper-icon-item[name="user"]');
+    return this.el.$('paper-icon-item[name="user"]');
   }
 
   get createUserForm() {
-    return this.el.element('nuxeo-create-user #form');
+    return this.el.$('nuxeo-create-user #form');
   }
 
   get createUserDialog() {

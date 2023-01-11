@@ -13,7 +13,7 @@ export default class CreateDialog extends BasePage {
   }
 
   importTab(name) {
-    return this.el.element(`paper-tab[name="${name}"]`);
+    return this.el.$(`paper-tab[name="${name}"]`);
   }
 
   get pages() {
@@ -26,13 +26,13 @@ export default class CreateDialog extends BasePage {
    * @deprecated since 3.0.3. Please use method importPage instead.
    * */
   get importCsvDialog() {
-    return this.el.element('#csvCreation');
+    return this.el.$('#csvCreation');
   }
 
   importPage(name) {
-    const pageName = this.pages.element('.iron-selected').getAttribute('name');
+    const pageName = this.pages.$('.iron-selected').getAttribute('name');
     if (pageName === name) {
-      return this.pages.element(`[name=${pageName}]`);
+      return this.pages.$(`[name=${pageName}]`);
     }
     throw new Error(`The "${name}" element could not be located. Received "${pageName}" instead`);
   }
@@ -43,14 +43,14 @@ export default class CreateDialog extends BasePage {
    * @deprecated since 3.0.3. Please use method upload instead.
    * */
   setFileToImport(file) {
-    const field = this.importCsvDialog.element('#dropzone #uploadFiles');
+    const field = this.importCsvDialog.$('#dropzone #uploadFiles');
     field.waitForExist();
     return field.chooseFile(path.resolve(fixtures.blobs.get(file)));
   }
 
   upload(file, name) {
     this.importPage(name).waitForVisible();
-    const field = this.importPage(name).element('#dropzone #uploadFiles');
+    const field = this.importPage(name).$('#dropzone #uploadFiles');
     field.waitForExist();
     // XXX we need to reset the input value to prevent duplicate upload of files (when the method is called recursively)
     browser.execute((el) => {
@@ -60,57 +60,57 @@ export default class CreateDialog extends BasePage {
   }
 
   get importCreateButton() {
-    return this.el.element('div[name="upload"] paper-button[id="create"]');
+    return this.el.$('div[name="upload"] paper-button[id="create"]');
   }
 
   get importCreateButtonProperties() {
-    return this.el.element('paper-button[name="createWithProperties"]');
+    return this.el.$('paper-button[name="createWithProperties"]');
   }
 
   get importCSVButton() {
-    return this.el.element('div[name="upload"] paper-button.primary');
+    return this.el.$('div[name="upload"] paper-button.primary');
   }
 
   get selectedCSVToImport() {
-    return this.el.element('#dropzone div.complete');
+    return this.el.$('#dropzone div.complete');
   }
 
   get selectedFileToImport() {
-    return this.el.element('div.file-to-import');
+    return this.el.$('div.file-to-import');
   }
 
   get importCloseButton() {
-    return this.el.element('div[name="progress"] paper-button.primary');
+    return this.el.$('div[name="progress"] paper-button.primary');
   }
 
   get importError() {
-    return this.el.element('div[name="progress"] #list div.item');
+    return this.el.$('div[name="progress"] #list div.item');
   }
 
   get importSuccess() {
-    return this.el.element('#progress div.successful');
+    return this.el.$('#progress div.successful');
   }
 
   get createButton() {
-    return this.el.element('paper-button[id="create"]');
+    return this.el.$('paper-button[id="create"]');
   }
 
   get addProperties() {
-    return this.el.element('paper-button[id="edit"]');
+    return this.el.$('paper-button[id="edit"]');
   }
 
   get selectAnAssetType() {
-    return this.el.element('nuxeo-select[name="assetType"]');
+    return this.el.$('nuxeo-select[name="assetType"]');
   }
 
   get applyAll() {
-    return this.el.element('paper-button[name="applyAll"]');
+    return this.el.$('paper-button[name="applyAll"]');
   }
 
   selectAssetType(val) {
     driver.waitForVisible('nuxeo-select[id="docTypeDropdown"] paper-item');
     const selectasset = this.el
-      .elements('nuxeo-select[id="docTypeDropdown"] paper-item[role="option"]')
+      .$$('nuxeo-select[id="docTypeDropdown"] paper-item[role="option"]')
       .find((e) => e.getText() === val);
     selectasset.click();
   }
