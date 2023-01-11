@@ -59,7 +59,7 @@ export default class UI extends BasePage {
   }
 
   get results() {
-    if (this.el.element('nuxeo-browser').isVisible()) {
+    if (this.el.$('nuxeo-browser').isVisible()) {
       return this.browser.results;
     }
     return new Search('nuxeo-search-results-layout[id="results"]');
@@ -80,19 +80,19 @@ export default class UI extends BasePage {
   }
 
   get adminButton() {
-    return this.el.element('nuxeo-menu-icon[name="administration"]');
+    return this.el.$('nuxeo-menu-icon[name="administration"]');
   }
 
   get drawer() {
     return new Drawer('div[slot="drawer"]');
   }
 
-  static get() {
-    url(process.env.NUXEO_URL ? '' : 'ui');
+  static async get() {
+    driver.url(process.env.NUXEO_URL ? '' : 'ui');
     if (!global.locale) {
-      $('nuxeo-app:not([unresolved])').waitForVisible();
+      await driver.element('nuxeo-app:not([unresolved])').waitForVisible();
       /* global window */
-      const locale = browser.execute(() => window.nuxeo.I18n.language || 'en');
+      const locale = await driver.execute(() => window.nuxeo.I18n.language || 'en');
       if (locale) {
         global.locale = locale;
         moment.locale(global.locale);
@@ -110,15 +110,15 @@ export default class UI extends BasePage {
   }
 
   get pages() {
-    return this.el.element('#pages');
+    return this.el.$('#pages');
   }
 
   get search() {
-    return this.pages.element('nuxeo-search-results');
+    return this.pages.$('nuxeo-search-results');
   }
 
   get suggester() {
-    return this.el.element('#mainContainer nuxeo-suggester');
+    return this.el.$('#mainContainer nuxeo-suggester');
   }
 
   get administration() {
@@ -148,7 +148,7 @@ export default class UI extends BasePage {
   }
 
   get tasks() {
-    return this.pages.element('nuxeo-tasks');
+    return this.pages.$('nuxeo-tasks');
   }
 
   get isConnectionActive() {

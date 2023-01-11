@@ -1,17 +1,25 @@
 import { Then, When } from '@cucumber/cucumber';
 
-Then('I can see the {word} tree', function(tab) {
-  this.ui.drawer._section(tab).waitForVisible().should.be.true;
+Then('I can see the {word} tree', async function(tab) {
+  const isVisible = await this.ui.drawer._section(tab).waitForVisible();
+  if (!isVisible) {
+    throw new Error(`Expected ${tab} tree to be visible`);
+  }
 });
 
-Then('I can see the {string} {word} tree node', function(title, tab) {
-  this.ui.drawer._section(tab).waitForVisible();
-  driver.waitUntil(() =>
-    this.ui.drawer
-      ._section(tab)
-      .elements('.content a')
-      .some((e) => e.getText() === title),
-  );
+Then('I can see the {string} {word} tree node', async function(title, tab) {
+  await this.ui.drawer._section(tab).waitForVisible();
+  let found = false;
+  while (!found) {
+    const elements = await this.ui.drawer._section(tab).$$('.content a');
+    for (const element of elements) {
+      const text = await element.getText();
+      if (text === title) {
+        found = true;
+        break;
+      }
+    }
+  }
 });
 
 Then('I can navigate to {word} pill', function(pill) {
@@ -32,18 +40,30 @@ Then('I am on the {word} pill', function(pill) {
   this.ui.browser.currentPageName.should.equal(pill);
 });
 
-When('I click {string} in the {word} tree', function(title, tab) {
+When('I click {string} in the {word} tree', async function(title, tab) {
   const section = this.ui.drawer._section(tab);
-  section.waitForVisible();
-  driver.waitUntil(() => section.elements('.content a').some((e) => e.getText() === title));
-  const el = section.elements('.content a').find((e) => e.getText() === title);
-  el.waitForVisible();
-  el.click();
+  await section.waitForVisible();
+  let found = false;
+  while (!found) {
+    const elements = await section.$$('.content a');
+    for (const element of elements) {
+      const text = await element.getText();
+      console.log(text);
+      if (text === title) {
+        found = true;
+        await element.click();
+        break;
+      }
+    }
+  }
 });
 
-Then('I can see the {string} document', function(title) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.hasTitle(title).should.be.true;
+Then('I can see the {string} document', async function(title) {
+  await this.ui.browser.waitForVisible();
+  const isVisible = await this.ui.browser.hasTitle(title).waitForVisible();
+  if (!isVisible) {
+    throw new Error(`Expected document to be visible`);
+  }
 });
 
 Then('I select all child documents', function() {
@@ -219,6 +239,6 @@ Then('I can delete all the documents from the {string} collection', function(nam
   driver.pause(1000);
 });
 
-Then('I can see the browser title as {string}', (title) => {
-  driver.waitUntil(() => title === browser.getTitle());
+Then('I can see the browser title as {string}', async function(title) {
+  await driver.waitUntil(async () => title === await browser.getTitle());
 });

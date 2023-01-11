@@ -58,7 +58,7 @@ export default class Browser extends BasePage {
   get currentPageName() {
     // get selected pill to get it's name
     this.waitForVisible('#documentViewsItems nuxeo-page-item.iron-selected');
-    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
+    const pill = this.el.$('#documentViewsItems nuxeo-page-item.iron-selected');
     // get active page name
     return pill.getAttribute('name');
   }
@@ -71,12 +71,12 @@ export default class Browser extends BasePage {
    * Gets a Results page helper, assuming current visible page has a <nuxeo-results> in there.
    */
   get results() {
-    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
+    const pill = this.el.$('#documentViewsItems nuxeo-page-item.iron-selected');
     return new Results(`#nxContent [name='${pill.getAttribute('name')}']`);
   }
 
   get breadcrumb() {
-    return this.el.element('nuxeo-breadcrumb');
+    return this.el.$('nuxeo-breadcrumb');
   }
 
   get title() {
@@ -84,7 +84,7 @@ export default class Browser extends BasePage {
   }
 
   _section(name) {
-    return this.el.element(`#nxContent [name='${name}']`);
+    return this.el.$(`#nxContent [name='${name}']`);
   }
 
   get editButton() {
@@ -279,7 +279,7 @@ export default class Browser extends BasePage {
     this.waitForChildren();
     this.rows.forEach((row) => {
       if (row.isVisible('nuxeo-data-table-checkbox')) {
-        row.element('nuxeo-data-table-checkbox').click();
+        row.$('nuxeo-data-table-checkbox').click();
       }
     });
   }
@@ -301,7 +301,7 @@ export default class Browser extends BasePage {
   }
 
   get publicationInfobar() {
-    return this.el.element('nuxeo-publication-info-bar');
+    return this.el.$('nuxeo-publication-info-bar');
   }
 
   get selectionToolbar() {
@@ -309,7 +309,7 @@ export default class Browser extends BasePage {
   }
 
   get trashedInfobar() {
-    return this.el.element('#trashedInfoBar');
+    return this.el.$('#trashedInfoBar');
   }
 
   get trashDocumentButton() {
@@ -329,7 +329,7 @@ export default class Browser extends BasePage {
 
   get startWorkflowButton() {
     // XXX: using a more specific selector here to ensure we can check for isExisting()
-    return this.el.element('.document-actions nuxeo-workflow-button #startButton');
+    return this.el.$('.document-actions nuxeo-workflow-button #startButton');
   }
 
   clickDocumentActionMenu(selector) {
@@ -340,11 +340,11 @@ export default class Browser extends BasePage {
     // click the action to trigger the dialog
     clickActionMenu(this.el, 'nuxeo-workflow-button');
     // select the workflow
-    const workflowSelect = this.el.element('.document-actions nuxeo-workflow-button nuxeo-select');
+    const workflowSelect = this.el.$('.document-actions nuxeo-workflow-button nuxeo-select');
     workflowSelect.waitForVisible();
     fixtures.layouts.setValue(workflowSelect, workflow);
     // click the start button
-    this.el.element('.document-actions nuxeo-workflow-button #startButton').click();
+    this.el.$('.document-actions nuxeo-workflow-button #startButton').click();
   }
 
   _selectChildDocument(title, deselect) {
@@ -373,6 +373,6 @@ export default class Browser extends BasePage {
   }
 
   get comparePage() {
-    return this.el.element('nuxeo-diff-page div.header');
+    return this.el.$('nuxeo-diff-page div.header');
   }
 }

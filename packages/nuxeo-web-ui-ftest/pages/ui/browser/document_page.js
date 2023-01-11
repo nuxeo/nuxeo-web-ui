@@ -41,19 +41,19 @@ export default class DocumentPage extends BasePage {
   }
 
   get info() {
-    return this.el.element('nuxeo-document-info');
+    return this.el.$('nuxeo-document-info');
   }
 
   get infoBar() {
-    return this.el.element('nuxeo-document-info-bar');
+    return this.el.$('nuxeo-document-info-bar');
   }
 
   get taskInfo() {
-    return this.el.element('nuxeo-document-info-bar .task');
+    return this.el.$('nuxeo-document-info-bar .task');
   }
 
   get processWorkflowButton() {
-    return this.el.element('nuxeo-document-info-bar .task paper-button');
+    return this.el.$('nuxeo-document-info-bar .task paper-button');
   }
 
   get abandonWorkflowButton() {

@@ -5,15 +5,15 @@ import { url } from '../helpers';
 
 export default class Administration extends BasePage {
   get analytics() {
-    return this.el.element('nuxeo-analytics');
+    return this.el.$('nuxeo-analytics');
   }
 
   get nxqlSearch() {
-    return this.el.element('nuxeo-search-page#nxql');
+    return this.el.$('nuxeo-search-page#nxql');
   }
 
   get userAndGroupManagement() {
-    return this.el.element('nuxeo-user-group-management');
+    return this.el.$('nuxeo-user-group-management');
   }
 
   get userGroupCreateButton() {
@@ -35,7 +35,7 @@ export default class Administration extends BasePage {
   }
 
   get audit() {
-    return this.el.element('nuxeo-audit');
+    return this.el.$('nuxeo-audit');
   }
 
   get cloudServices() {

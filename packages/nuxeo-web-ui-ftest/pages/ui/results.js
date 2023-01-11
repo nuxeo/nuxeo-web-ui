@@ -11,7 +11,7 @@ export default class Results extends BasePage {
   }
 
   get displayModes() {
-    return this.el.elements('div.resultActions paper-icon-button.displayMode');
+    return this.el.$('div.resultActions paper-icon-button.displayMode');
   }
 
   get displayMode() {
@@ -43,11 +43,11 @@ export default class Results extends BasePage {
   getResults(displayMode) {
     switch (displayMode) {
       case 'grid':
-        return this.el.elements('nuxeo-document-grid-thumbnail, nuxeo-justified-grid-item');
+        return this.el.$('nuxeo-document-grid-thumbnail, nuxeo-justified-grid-item');
       case 'list':
-        return this.el.elements('nuxeo-document-list-item');
+        return this.el.$('nuxeo-document-list-item');
       default:
-        return this.el.elements('nuxeo-data-table[name="table"] div.item');
+        return this.el.$('nuxeo-data-table[name="table"] div.item');
     }
   }
 
@@ -80,7 +80,7 @@ export default class Results extends BasePage {
   }
 
   get resultsCountLabel() {
-    return this.el.element('div.resultActions .resultsCount');
+    return this.el.$('div.resultActions .resultsCount');
   }
 
   deleteDocuments() {

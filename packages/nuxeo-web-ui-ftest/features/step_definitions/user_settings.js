@@ -44,8 +44,8 @@ Given(/^I have tokens for the following OAuth2 clients$/, function(table) {
   return Promise.all(table.rows().map((row) => fixtures.oauth2Clients.createToken(row[0], this.username)));
 });
 
-When(/^I am on user authorized applications page$/, function() {
-  this.ui.goToUserAuthorizedApps();
+When(/^I am on user authorized applications page$/,async function() {
+  await this.ui.goToUserAuthorizedApps();
 });
 
 Then(/^I can see "(.+)" as an authorized application$/, function(application) {

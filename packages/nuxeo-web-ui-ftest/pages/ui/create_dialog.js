@@ -17,7 +17,7 @@ export default class CreateDialog extends BasePage {
   }
 
   get pages() {
-    return this.el.element('#holder iron-pages');
+    return this.el.$('#holder iron-pages');
   }
 
   /**

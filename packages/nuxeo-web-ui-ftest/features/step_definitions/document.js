@@ -100,8 +100,8 @@ Given(/^I have a (.+) Note$/, function(format) {
   });
 });
 
-When(/^I browse to the document$/, function() {
-  this.ui.browser.browseTo(this.doc.path);
+When(/^I browse to the document$/, async function() {
+  await this.ui.browser.browseTo(this.doc.path);
 });
 
 When(/^I browse to the "(.*)" document page$/, function(page) {
@@ -265,17 +265,17 @@ Then('I can see the document has {int} children', function(nb) {
   this.ui.browser.waitForNbChildren(nb);
 });
 
-Then(/^I can see a process is running in the document$/, function() {
+Then(/^I can see a process is running in the document$/,async function() {
   const documentPage = this.ui.browser.documentPage();
   // check info bar in the document is visible
-  documentPage.infoBar.waitForVisible();
+  await documentPage.infoBar.waitForVisible();
   // assert that info bar displays a task is running
-  documentPage.taskInfo.waitForVisible();
+  await documentPage.taskInfo.waitForVisible();
   // assert that there's a button to process the task
-  documentPage.processWorkflowButton.waitForVisible();
+  await documentPage.processWorkflowButton.waitForVisible();
   // assert that document info says a process is running
-  documentPage.info.waitForVisible();
-  documentPage.info.waitForVisible('[name="process"]');
+  await documentPage.info.waitForVisible();
+  await documentPage.info.waitForVisible('[name="process"]');
 });
 
 Then(/^I can see a process is not running in the document$/, function() {
