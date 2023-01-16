@@ -7,7 +7,7 @@ on:
     inputs:
       branch_name:
         description: 'The name of the branch to build.'
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
         required: true
       sauce_labs:
         description: 'Run unit tests on Sauce Labs?'
@@ -40,12 +40,12 @@ on:
         required: false
       caller_id:
         description: 'run identifier'
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
         type: string
         required: false
 
 env:
-  REFERENCE_BRANCH: maintenance-3.0.x
+  REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
