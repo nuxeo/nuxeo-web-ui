@@ -117,7 +117,7 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
-        run: mvn -ntp install -Pftest -DskipInstall
+        run: mvn -ntp -X install -Pftest -DskipInstall
 
       - name: Archive cucumber reports
         if: ${{ always() }}
