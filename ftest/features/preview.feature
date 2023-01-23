@@ -57,5 +57,5 @@ Feature: Content Preview
       | sample.mp4 | nuxeo-video-viewer |
       | sample.mp3 | audio              |
       | sample.pdf | nuxeo-pdf-viewer   |
-      | sample.odt | iframe             |
-      | sample.txt | iframe             |
+      | sample.odt | embed              |
+      | sample.txt | embed              |
