@@ -1,6 +1,9 @@
 name: Functional tests
 
 on:
+  push:
+    branches:
+      - maintenance-3.1.x
   pull_request:
     branches:
       - maintenance-3.1.x

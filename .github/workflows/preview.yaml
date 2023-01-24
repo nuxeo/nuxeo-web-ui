@@ -1,6 +1,9 @@
 name: Preview
 
 on:
+  push:
+    branches:
+      - maintenance-3.1.x
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:

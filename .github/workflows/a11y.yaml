@@ -1,6 +1,9 @@
 name: A11y
 
 on:
+  push:
+    branches:
+      - maintenance-3.1.x
   pull_request:
     branches:
       - maintenance-3.1.x
