@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to promote (e.g.: 3.0.6-rc.6)'
+        description: 'Version to promote (e.g.: 3.1.6-rc.2)'
         required: true
       referenceBranch:
         description: 'Branch to be updated after the promotion'
         required: true
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
       dryRun:
         description: 'Run the workflow without pushing code or publishing artifacts'
         type: boolean
