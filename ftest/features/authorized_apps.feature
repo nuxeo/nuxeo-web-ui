@@ -3,8 +3,7 @@ Feature: Authorized Applications
   Users can manage their authorized applications.
 
   Background:
-    Given user "John" exists in group "members"
-    And I login as "John"
+    Given I login as "Administrator"
     And the following OAuth2 clients exist
       | name             |
       | My Client        |
@@ -22,3 +21,9 @@ Feature: Authorized Applications
     When I am on user authorized applications page
     Then I can revoke access for "My Client" application
     And I can only see 1 authorized application
+
+  Scenario: Admin center as member user
+    Given user "John" exists in group "members"
+    And I login as "John"
+    When I am on user authorized applications page
+    Then I can not see any authorized applications

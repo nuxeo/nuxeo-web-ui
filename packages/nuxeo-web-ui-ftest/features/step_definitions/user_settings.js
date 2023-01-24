@@ -73,3 +73,7 @@ Then(/^I can revoke access for "(.+)" application$/, function(appName) {
   this.ui.userAuthorizedApps.waitForVisible();
   driver.waitUntil(() => this.ui.userAuthorizedApps.getApps(appName).length === 0);
 });
+
+Then(/^I can not see any authorized applications/, function() {
+  driver.waitUntil(() => this.ui.userAuthorizedApps.getApps().length === 0);
+});
