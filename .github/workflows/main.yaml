@@ -1,9 +1,7 @@
 name: Main
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - maintenance-3.1.x
 

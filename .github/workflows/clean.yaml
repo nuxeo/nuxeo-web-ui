@@ -1,9 +1,6 @@
 name: Cleanup
 
 on:
-  push:
-    branches:
-      - maintenance-3.1.x
   pull_request:
     types: [closed, unlabeled]
     branches:
