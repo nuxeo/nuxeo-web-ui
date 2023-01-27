@@ -105,7 +105,7 @@ jobs:
 
     - name: Nuxeo package build
       run: |
-        mvn -ntp install -DskipInstall
+         mvn -X -ntp install -DskipInstall
         mvn -B -nsu -ntp -f plugin/itests/addon install
         mvn -B -nsu -ntp -f plugin/itests/marketplace install
 
