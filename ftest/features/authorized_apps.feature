@@ -1,10 +1,11 @@
 Feature: Authorized Applications
 
-  Users can manage their authorized applications.
+  As an Administrator I can manage authorized applications
+  As a member user I have no authorized applications
 
   Background:
-    Given user "John" exists in group "members"
-    And I login as "John"
+
+    Given I login as "Administrator"
     And the following OAuth2 clients exist
       | name             |
       | My Client        |
@@ -14,7 +15,7 @@ Feature: Authorized Applications
       | My Client        |
       | My Second Client |
 
-  Scenario: View authorized applications
+  Scenario: View authorized applications    
     When I am on user authorized applications page
     Then I can only see 2 authorized applications
 
@@ -22,3 +23,9 @@ Feature: Authorized Applications
     When I am on user authorized applications page
     Then I can revoke access for "My Client" application
     And I can only see 1 authorized application
+
+  Scenario: members cannot see authorized applications
+    Given user "John" exists in group "members"
+    And I login as "John" 
+    When I am on user authorized applications page
+    Then I cannot see authorized application

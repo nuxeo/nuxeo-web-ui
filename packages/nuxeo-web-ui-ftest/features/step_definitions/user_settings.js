@@ -61,6 +61,10 @@ Then(/^I can only see (\d+) authorized application[s]?$/, function(numberOfApps)
   driver.waitUntil(() => this.ui.userAuthorizedApps.getApps().length === numberOfApps);
 });
 
+Then('I cannot see authorized application', function() {
+  this.ui.emptyAuthorizedApps.waitForVisible();
+});
+
 Then(/^I can revoke access for "(.+)" application$/, function(appName) {
   this.ui.userAuthorizedApps.waitForVisible();
   browser.waitUntil(() => this.ui.userAuthorizedApps.getApps().length > 0);
