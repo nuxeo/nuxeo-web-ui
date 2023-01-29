@@ -29,4 +29,3 @@ Feature: Authorized Applications
     And I login as "John" 
     When I am on user authorized applications page
     Then I cannot see authorized application
-    
