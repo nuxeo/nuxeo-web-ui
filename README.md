@@ -99,7 +99,7 @@ This also builds the marketplace running the functionnal tests.
 
 At the moment, CI for Nuxeo Web UI is built on top of [Github Actions](https://github.com/features/actions). We currently provide worflow definitions for building and testing Nuxeo Web UI, to setup preview environments for pull requests, and to promote new releases.
 
-Although there are no cross-repo support for building and testing Nuxeo Web UI with [nuxeo-elements](https://github.com/nuxeo/nuxeo-elements/tree/maintenance-3.0.x), preview environments are setup with cross-repo support. To this extent, in pull requests annotated with the tag `preview`, the workflow will lookup for a corresponding branch with the same name in `nuxeo-elements` repo, and use it in the preview instance.
+Although there are no cross-repo support for building and testing Nuxeo Web UI with [nuxeo-elements](https://github.com/nuxeo/nuxeo-elements/tree/maintenance-3.1.x), preview environments are setup with cross-repo support. To this extent, in pull requests annotated with the tag `preview`, the workflow will lookup for a corresponding branch with the same name in `nuxeo-elements` repo, and use it in the preview instance.
 
 ## License
 
