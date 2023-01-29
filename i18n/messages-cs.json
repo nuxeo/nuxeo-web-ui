@@ -24,6 +24,7 @@
   "activity.lifecycle_transition_event": "updated the document lifecycle state",
   "activity.removedFromCollection": "removed from collection",
   "activity.Review completed successfully": "successfully completed the review",
+  "activity.view": "viewed the document",
   "activity.workflowCanceled": "canceled a review",
   "activity.workflowTaskAssigned": "started a review",
   "activity.workflowTaskCompleted": "completed a review task",
