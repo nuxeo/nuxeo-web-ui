@@ -2,7 +2,7 @@ properties([
     [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
             string(name: 'BRANCH', defaultValue: '', description: 'Branch to test, fall-backs on $BASE_BRANCH if not found.', trim: false),
-            choice(name: 'BASE_BRANCH', choices: ['maintenance-3.0.x'], description: 'The branch to fallback on when $BRANCH is not found.'),
+            choice(name: 'BASE_BRANCH', choices: ['maintenance-3.1.x'], description: 'The branch to fallback on when $BRANCH is not found.'),
             string(name: 'SLAVE', defaultValue: 'SLAVE', description: 'Slave label to be used.', trim: false),
             booleanParam(name: 'CLEAN', defaultValue: false, description: 'Run npm cache clean?'),
             booleanParam(name: 'SAUCE_LAB', defaultValue: true, description: 'Should unit tests be run on Sauce Lab (or just Chrome on the slave)?'),
