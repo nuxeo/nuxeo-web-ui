@@ -7,7 +7,7 @@ on:
     inputs:
       branch_name:
         description: 'The name of the branch to build.'
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
         required: true
       sauce_labs:
         description: 'Run unit tests on Sauce Labs?'
@@ -40,12 +40,12 @@ on:
         required: false
       caller_id:
         description: 'run identifier'
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
         type: string
         required: false
 
 env:
-  REFERENCE_BRANCH: maintenance-3.0.x
+  REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
@@ -71,7 +71,7 @@ jobs:
       - uses: actions/setup-java@v2
         with: 
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '17'
 
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
@@ -101,6 +101,9 @@ jobs:
         run: |
           npm install
           pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+          pushd plugin/a11y
           npm install
           popd
           pushd packages/nuxeo-designer-catalog
