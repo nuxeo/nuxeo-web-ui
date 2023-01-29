@@ -4,17 +4,17 @@ on:
   pull_request:
     types: [closed, unlabeled]
     branches:
-      - maintenance-3.0.x
+      - maintenance-3.1.x
 
   workflow_dispatch:
     inputs:
       branch_name:
         description: 'The name of the branch to preview.'
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
         required: true
       caller_id:
         description: 'run identifier'
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
         type: string
         required: false
 
