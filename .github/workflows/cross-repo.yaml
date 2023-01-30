@@ -103,6 +103,9 @@ jobs:
           pushd packages/nuxeo-web-ui-ftest
           npm install
           popd
+          pushd plugin/a11y
+          npm install
+          popd
           pushd packages/nuxeo-designer-catalog
           npm install
           popd
