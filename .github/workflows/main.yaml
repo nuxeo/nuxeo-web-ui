@@ -53,6 +53,11 @@ jobs:
         registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
         scope: '@nuxeo'
 
+    - uses: actions/setup-java@v2
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
     - name: Prepare environment
       run: |
         echo "BRANCH_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
