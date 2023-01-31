@@ -151,6 +151,10 @@ export default class UI extends BasePage {
     return this.pages.element('nuxeo-tasks');
   }
 
+  get emptyAuthorizedApps() {
+    return this.el.$('nuxeo-data-table .emptyResult');
+  }
+
   get isConnectionActive() {
     /* global document */
     return driver.execute(() => document.querySelector('nuxeo-connection').active);
