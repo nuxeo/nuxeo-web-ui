@@ -7,7 +7,7 @@ on:
 
   # Manually trigger the workflow
   workflow_dispatch:
-  
+
 jobs:
   lint:
     uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@maintenance-3.1.x
@@ -41,112 +41,112 @@ jobs:
       branch: maintenance-3.1.x
 
   build:
-    needs: [ lint, test, a11y, ftest ]
-    runs-on: [ self-hosted, master ]
+    needs: [lint, test, a11y, ftest]
+    runs-on: [self-hosted, master]
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
+      - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
 
-    - uses: actions/setup-node@v3
-      with:
-        registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
-        scope: '@nuxeo'
+      - uses: actions/setup-node@v3
+        with:
+          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          scope: '@nuxeo'
 
-    - uses: actions/setup-java@v2
-      with:
-        distribution: 'zulu'
-        java-version: '17'
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
-    - name: Prepare environment
-      run: |
-        echo "BRANCH_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
-        echo "PACKAGE_VERSION=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
+      - name: Prepare environment
+        run: |
+          echo "BRANCH_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
+          echo "PACKAGE_VERSION=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
 
-    - name: Get prerelease version
-      run: |
-        git fetch origin --tags
-        RC_VERSION=$(git tag --sort=taggerdate --list "v${PACKAGE_VERSION/-SNAPSHOT}*" | tail -1 | tr -d '\n')
-        echo "VERSION=$(npx semver -i prerelease --preid rc ${RC_VERSION:-$PACKAGE_VERSION}  | tr -d '\n')" >> $GITHUB_ENV
+      - name: Get prerelease version
+        run: |
+          git fetch origin --tags
+          RC_VERSION=$(git tag --sort=taggerdate --list "v${PACKAGE_VERSION/-SNAPSHOT}*" | tail -1 | tr -d '\n')
+          echo "VERSION=$(npx semver -i prerelease --preid rc ${RC_VERSION:-$PACKAGE_VERSION}  | tr -d '\n')" >> $GITHUB_ENV
 
-    - name: Update versions
-      run: |
-        find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$PACKAGE_VERSION"'/'"$VERSION"'/g' {} \;
+      - name: Update versions
+        run: |
+          find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$PACKAGE_VERSION"'/'"$VERSION"'/g' {} \;
 
-        # set padded version to build package for connect preprod
-        PADDED=$(printf '%03d' $(echo $VERSION | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
-        PADDED_VERSION=$(echo $VERSION | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
-        echo "PADDED_VERSION=$PADDED_VERSION" >> $GITHUB_ENV
-        sed -i -e 's/\${project.version}/'"$PADDED_VERSION"'/g' plugin/web-ui/marketplace/pom.xml
+          # set padded version to build package for connect preprod
+          PADDED=$(printf '%03d' $(echo $VERSION | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
+          PADDED_VERSION=$(echo $VERSION | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
+          echo "PADDED_VERSION=$PADDED_VERSION" >> $GITHUB_ENV
+          sed -i -e 's/\${project.version}/'"$PADDED_VERSION"'/g' plugin/web-ui/marketplace/pom.xml
 
-        npm version ${VERSION} --no-git-tag-version
-        pushd packages/nuxeo-web-ui-ftest
-        npm version ${VERSION} --no-git-tag-version
-        popd
+          npm version ${VERSION} --no-git-tag-version
+          pushd packages/nuxeo-web-ui-ftest
+          npm version ${VERSION} --no-git-tag-version
+          popd
 
-    - name: Install
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: |
-        npm install
-        pushd packages/nuxeo-web-ui-ftest
-        npm install
-        popd
-        pushd packages/nuxeo-designer-catalog
-        npm install
-        popd
+      - name: Install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+          pushd packages/nuxeo-designer-catalog
+          npm install
+          popd
 
-    - name: 'Update settings.xml with server configuration'
-      run: |
-        echo '<settings>
-            <servers>
-              <server>
-                <id>maven-internal</id>
-                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-              </server>
-            </servers>
-            </settings>' > ~/.m2/settings.xml
+      - name: 'Update settings.xml with server configuration'
+        run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
 
-    - name: Nuxeo package build
-      run: |
-        mvn -X -ntp install -DskipInstall
-        mvn -B -nsu -ntp -f plugin/itests/addon install
-        mvn -B -nsu -ntp -f plugin/itests/marketplace install
+      - name: Nuxeo package build
+        run: |
+          mvn -ntp install -DskipInstall
+          mvn -B -nsu -ntp -f plugin/itests/addon install
+          mvn -B -nsu -ntp -f plugin/itests/marketplace install
 
-    - name: Archive packages
-      uses: actions/upload-artifact@v2
-      with:
-        name: packages
-        path: |
-          plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
-          plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
+      - name: Archive packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: packages
+          path: |
+            plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+            plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
 
-    - name: Tag
-      run: |
-        git add package-lock.json packages/nuxeo-web-ui-ftest/package-lock.json
-        git commit -a -m "Release ${VERSION}"
-        git tag -a v${VERSION} -m "Release ${VERSION}"
-        git push origin v${VERSION}
+      - name: Tag
+        run: |
+          git add package-lock.json packages/nuxeo-web-ui-ftest/package-lock.json
+          git commit -a -m "Release 3.1.0-rc.79"
+          git tag -a v3.1.0-rc.79 -m "Release 3.1.0-rc.79"
+          git push origin v3.1.0-rc.79
 
-    - name: Publish Nuxeo packages
-      env:
-        CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
-      run: |
-        PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
-        STATUS_CODE=`curl -i --silent --output publish-req.output -w "%{http_code}" -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"`
-        cat publish-req.output
-        if [[ "$STATUS_CODE" != "200" ]]
-        then
-          exit 1
-        else
-          exit 0
-        fi
+      - name: Publish Nuxeo packages
+        env:
+          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+        run: |
+          PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
+          STATUS_CODE=`curl -i --silent --output publish-req.output -w "%{http_code}" -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"`
+          cat publish-req.output
+          if [[ "$STATUS_CODE" != "200" ]]
+          then
+            exit 1
+          else
+            exit 0
+          fi
 
-    - name: Publish Web UI FTest framework
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: |
-        pushd packages/nuxeo-web-ui-ftest/
-        npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag SNAPSHOT
-        popd
+      - name: Publish Web UI FTest framework
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          pushd packages/nuxeo-web-ui-ftest/
+          npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag SNAPSHOT
+          popd
