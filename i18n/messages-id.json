@@ -24,6 +24,7 @@
   "activity.lifecycle_transition_event": "memperbarui dokumen negara siklus kehidupan",
   "activity.removedFromCollection": "dihapus dari koleksi",
   "activity.Review completed successfully": "berhasil menyelesaikan ulasan",
+  "activity.view": "viewed the document",
   "activity.workflowCanceled": "membatalkan ulasan",
   "activity.workflowTaskAssigned": "memulai ulasan",
   "activity.workflowTaskCompleted": "menyelesaikan tugas peninjauan",

@@ -24,6 +24,7 @@
   "activity.lifecycle_transition_event": "تم تحديث حالة دورة حياة المستند",
   "activity.removedFromCollection": "تمت الإزالة من المجموعة",
   "activity.Review completed successfully": "تم إكمال المراجعة بنجاح",
+  "activity.view": "viewed the document",
   "activity.workflowCanceled": "ألغيت المراجعة",
   "activity.workflowTaskAssigned": "بدأت المراجعة",
   "activity.workflowTaskCompleted": "تم إكمال عملية المراجعة",
