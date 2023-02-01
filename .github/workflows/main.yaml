@@ -3,42 +3,42 @@ name: Main
 on:
   push:
     branches:
-      - maintenance-3.0.x
+      - maintenance-3.1.x
 
   # Manually trigger the workflow
   workflow_dispatch:
   
 jobs:
   lint:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@maintenance-3.0.x
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@maintenance-3.1.x
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
 
   test:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@maintenance-3.0.x
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@maintenance-3.1.x
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
     with:
-      branch: maintenance-3.0.x
+      branch: maintenance-3.1.x
 
   a11y:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@maintenance-3.0.x
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@maintenance-3.1.x
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
       PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
     with:
-      branch: maintenance-3.0.x
+      branch: maintenance-3.1.x
 
   ftest:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@maintenance-3.0.x
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@maintenance-3.1.x
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
       PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
     with:
-      branch: maintenance-3.0.x
+      branch: maintenance-3.1.x
 
   build:
     needs: [ lint, test, a11y, ftest ]
@@ -52,6 +52,11 @@ jobs:
       with:
         registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
         scope: '@nuxeo'
+
+    - uses: actions/setup-java@v2
+      with:
+        distribution: 'zulu'
+        java-version: '17'
 
     - name: Prepare environment
       run: |
@@ -105,7 +110,7 @@ jobs:
 
     - name: Nuxeo package build
       run: |
-        mvn -ntp install -DskipInstall
+        mvn -X -ntp install -DskipInstall
         mvn -B -nsu -ntp -f plugin/itests/addon install
         mvn -B -nsu -ntp -f plugin/itests/marketplace install
 
