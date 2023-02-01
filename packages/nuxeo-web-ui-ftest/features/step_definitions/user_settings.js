@@ -62,7 +62,7 @@ Then(/^I can only see (\d+) authorized application[s]?$/, function(numberOfApps)
 });
 
 Then('I cannot see authorized application', function() {
-  this.ui.emptyAuthorizedApps.waitForVisible();
+  this.ui.emptyAuthorizedApps.waitForDisplayed();
 });
 
 Then(/^I can revoke access for "(.+)" application$/, function(appName) {
