@@ -24,6 +24,7 @@
   "activity.lifecycle_transition_event": "estado del ciclo de vida del documento actualizado",
   "activity.removedFromCollection": "eliminado de la colección",
   "activity.Review completed successfully": "revisión completada con éxito",
+  "activity.view": "visto el documento",
   "activity.workflowCanceled": "revisión cancelada",
   "activity.workflowTaskAssigned": "revisión iniciada",
   "activity.workflowTaskCompleted": "tarea de revisión completada",
