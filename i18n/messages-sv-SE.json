@@ -24,6 +24,7 @@
   "activity.lifecycle_transition_event": "uppdaterade dokumentets livscykelstatus",
   "activity.removedFromCollection": "borttagen från samling",
   "activity.Review completed successfully": "slutförde granskningen framgångsrikt",
+  "activity.view": "sett dokumentet",
   "activity.workflowCanceled": "avbröt en granskning",
   "activity.workflowTaskAssigned": "startade en granskning",
   "activity.workflowTaskCompleted": "slutförde en granskningsuppgift",

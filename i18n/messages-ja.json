@@ -24,6 +24,7 @@
   "activity.lifecycle_transition_event": "文書のライフサイクルの状態を更新しました",
   "activity.removedFromCollection": "コレクションから削除しました",
   "activity.Review completed successfully": "レビューを正常に完了しました",
+  "activity.view": "ドキュメントを閲覧",
   "activity.workflowCanceled": "レビューをキャンセルしました",
   "activity.workflowTaskAssigned": "レビューを開始しました",
   "activity.workflowTaskCompleted": "レビュータスクを完了しました",

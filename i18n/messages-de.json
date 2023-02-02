@@ -24,6 +24,7 @@
   "activity.lifecycle_transition_event": "Status des Dokumentlebenszyklus aktualisiert",
   "activity.removedFromCollection": "Aus Sammlung entfernt",
   "activity.Review completed successfully": "Überprüfung wurde erfolgreich abgeschlossen",
+  "activity.view": "hat das Dokument angesehen",
   "activity.workflowCanceled": "Eine Überprüfung wurde abgebrochen",
   "activity.workflowTaskAssigned": "Eine Überprüfung wurde gestartet",
   "activity.workflowTaskCompleted": "Eine Überprüfung wurde ausgeführt",
