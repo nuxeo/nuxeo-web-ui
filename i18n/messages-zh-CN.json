@@ -24,6 +24,7 @@
   "activity.lifecycle_transition_event": "更新文档生命周期状态",
   "activity.removedFromCollection": "从收藏中移除",
   "activity.Review completed successfully": "完成审阅",
+  "activity.view": "viewed the document",
   "activity.workflowCanceled": "取消审阅",
   "activity.workflowTaskAssigned": "开始审阅",
   "activity.workflowTaskCompleted": "完成审阅任务",
