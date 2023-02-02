@@ -24,6 +24,7 @@
   "activity.lifecycle_transition_event": "heeft de levenscyclusstatus van het document bijgewerkt",
   "activity.removedFromCollection": "uit collectie verwijderd",
   "activity.Review completed successfully": "heeft de review voltooid",
+  "activity.view": "heeft het document bekeken",
   "activity.workflowCanceled": "heeft een review geannuleerd",
   "activity.workflowTaskAssigned": "is een review gestart",
   "activity.workflowTaskCompleted": "heeft een reviewtaak voltooid",
