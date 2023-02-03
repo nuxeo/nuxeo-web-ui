@@ -52,7 +52,7 @@ suite('nuxeo-picture-formats', () => {
               content: {
                 data: 'file1.jpeg?changeToken=1-0',
                 length: '',
-                downloadData: 'file1.jpeg?changeToken=1-0&clientReason=download',
+                downloadUrl: 'file1.jpeg?changeToken=1-0&clientReason=download',
               },
             },
           ],
@@ -64,7 +64,7 @@ suite('nuxeo-picture-formats', () => {
           dimensions: '66 x 66',
           size: '',
           format: 'picture/jpeg',
-          downloadData: 'file1.jpeg?changeToken=1-0&clientReason=download',
+          downloadUrl: 'file1.jpeg?changeToken=1-0&clientReason=download',
         },
       ];
       element.xpath = 'file:content';
