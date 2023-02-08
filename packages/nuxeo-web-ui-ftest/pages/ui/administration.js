@@ -1,6 +1,7 @@
 import BasePage from '../base';
 import Vocabulary from './admin/vocabulary';
 import CloudServices from './admin/cloudServices';
+import Audit from './admin/audit';
 import { url } from '../helpers';
 
 export default class Administration extends BasePage {
@@ -35,7 +36,7 @@ export default class Administration extends BasePage {
   }
 
   get audit() {
-    return this.el.element('nuxeo-audit');
+    return new Audit('nuxeo-audit');
   }
 
   get cloudServices() {
