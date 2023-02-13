@@ -62,16 +62,18 @@ limitations under the License.
 
     <div role="widget">
       <label>[[i18n('defaultSearch.collections')]]</label>
-      <nuxeo-selectivity
-        operation="User.GetCollections"
-        min-chars="0"
-        placeholder="[[i18n('defaultSearch.collections.placeholder')]]"
-        value="{{params.ecm_collections}}"
-        multiple="true"
-        name="collections"
-        aria-label$="[[i18n('defaultSearch.collections')]]"
-      >
-      </nuxeo-selectivity>
+      <template is="dom-if" if="[[_checkForCollectionTitle(params)]]">
+        <nuxeo-selectivity
+          operation="User.GetCollections"
+          min-chars="0"
+          placeholder="[[i18n('defaultSearch.collections.placeholder')]]"
+          value="{{params.ecm_collections}}"
+          multiple="true"
+          name="collections"
+          aria-label$="[[i18n('defaultSearch.collections')]]"
+        >
+        </nuxeo-selectivity>
+      </template>
     </div>
 
     <div role="widget">
@@ -176,6 +178,14 @@ limitations under the License.
         if (e.keyCode === 13) {
           this._search();
         }
+      },
+
+      _checkForCollectionTitle(params) {
+        return (
+          params == null ||
+          Object.keys(params).length === 0 ||
+          (params && params.ecm_collections.some((item) => item.displayLabel || item.title || item.text))
+        );
       },
     });
   </script>
