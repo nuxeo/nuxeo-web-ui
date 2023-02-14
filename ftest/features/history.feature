@@ -1,14 +1,25 @@
 Feature: History
 
-  Background:
-    Given user "John" exists in group "members"
-    And I login as "John"
+  Background: 
+    Given I login as "Administrator"
     And I have a Workspace document
-    And I have a File document
-    And I browse to the document
 
   Scenario: Validate entries in history tab
-    When I can navigate to History pill
-    Then I can see the history table
+    When I have a File document
+    And This document has file "<file>" for content
+    And I browse to the document
+    And I reload the page
+    Then I can navigate to History pill
+    And I can see the history table
     And I have a non empty history table
     And I can see "Document created" entry in history table
+    And I can see "Download" entry in history table
+
+    Examples: 
+      | file       |
+      | sample.png |
+      | sample.mp4 |
+      | sample.mp3 |
+      | sample.pdf |
+      | sample.txt |
+      | sample.odt |
