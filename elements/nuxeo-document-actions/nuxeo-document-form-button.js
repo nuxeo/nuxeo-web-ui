@@ -145,6 +145,7 @@ Polymer({
 
   _closeDialog() {
     this.dialog.close();
+    this.document = undefined;
   },
 
   _formLayoutOpened(e) {
