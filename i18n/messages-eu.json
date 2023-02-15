@@ -24,7 +24,7 @@
   "activity.lifecycle_transition_event": "dokumentuaren bizi-zikloko egoera eguneratua",
   "activity.removedFromCollection": "bildumatik kendua",
   "activity.Review completed successfully": "ikuskapena behar bezala burutua",
-  "activity.view": "viewed the document",
+  "activity.view": "dokumentua ikusia",
   "activity.workflowCanceled": "ikuskapena ezeztatua",
   "activity.workflowTaskAssigned": "ikuskapena abiarazia",
   "activity.workflowTaskCompleted": "ikuskapeneko zeregina burutua",
