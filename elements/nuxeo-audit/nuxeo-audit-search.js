@@ -68,8 +68,20 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
           placeholder="[[i18n('audit.usernamePlaceholder')]]"
         ></nuxeo-user-suggestion>
         <div class="row-container">
-          <nuxeo-date-picker role="widget" label="[[i18n('audit.from')]]" value="{{startDate}}"> </nuxeo-date-picker>
-          <nuxeo-date-picker role="widget" label="[[i18n('audit.to')]]" value="{{endDate}}"> </nuxeo-date-picker>
+          <nuxeo-date-picker
+            role="widget"
+            label="[[i18n('audit.from')]]"
+            value="{{startDate}}"
+            aria-label$="[[i18n('documentPage.process.start')]]"
+          >
+          </nuxeo-date-picker>
+          <nuxeo-date-picker
+            role="widget"
+            label="[[i18n('audit.to')]]"
+            value="{{endDate}}"
+            aria-label$="[[i18n('wf.parallelDocumentReview.endDate')]]"
+          >
+          </nuxeo-date-picker>
         </div>
         <div class="row-container">
           <nuxeo-directory-suggestion
