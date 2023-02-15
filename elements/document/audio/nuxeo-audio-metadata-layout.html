@@ -59,7 +59,9 @@ limitations under the License.
 
     <div role="widget" hidden$="[[!document.properties.dc:expired]]">
       <label>[[i18n('label.dublincore.expire')]]</label>
-      <div name="expired">[[formatDate(document.properties.dc:expired)]]</div>
+      <div name="expired" aria-label$="[[i18n('label.dublincore.expire')]]">
+        [[formatDate(document.properties.dc:expired)]]
+      </div>
     </div>
   </template>
 
