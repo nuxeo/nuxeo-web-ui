@@ -63,9 +63,11 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
 
       <nuxeo-card>
         <nuxeo-user-suggestion
+          role="widget"
           value="{{principalName}}"
           label="[[i18n('audit.username')]]"
           placeholder="[[i18n('audit.usernamePlaceholder')]]"
+          aria-label$="[[i18n('audit.username')]]"
         ></nuxeo-user-suggestion>
         <div class="row-container">
           <nuxeo-date-picker
@@ -92,6 +94,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
             multiple="true"
             placeholder="[[i18n('audit.selectEventTypes')]]"
             min-chars="0"
+            aria-label$="[[i18n('audit.eventTypes')]]"
           >
           </nuxeo-directory-suggestion>
           <nuxeo-directory-suggestion
@@ -101,6 +104,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
             value="{{category}}"
             placeholder="[[i18n('audit.selectEventCategory')]]"
             min-chars="0"
+            aria-label$="[[i18n('audit.eventCategory')]]"
           >
           </nuxeo-directory-suggestion>
         </div>
