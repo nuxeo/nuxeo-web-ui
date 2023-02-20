@@ -210,7 +210,7 @@ Polymer({
           <paper-icon-button
             noink
             icon="icons:check"
-            title="select"
+            title="[[_computeTitle(doc)]]"
             on-tap="_onCheckBoxTap"
             role="checkbox"
             aria-checked="[[selected]]"
@@ -285,5 +285,9 @@ Polymer({
 
   _hasDocument() {
     return this.doc && this.doc.uid;
+  },
+
+  _computeTitle(doc) {
+    return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
   },
 });

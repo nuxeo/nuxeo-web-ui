@@ -211,7 +211,12 @@ Polymer({
           <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
         </div>
         <div class="select">
-          <paper-icon-button noink icon="icons:check" title="select" on-tap="_onCheckBoxTap"></paper-icon-button>
+          <paper-icon-button
+            noink
+            icon="icons:check"
+            title="[[_computeTitle(doc)]]"
+            on-tap="_onCheckBoxTap"
+          ></paper-icon-button>
         </div>
       </div>
     </div>
@@ -278,5 +283,9 @@ Polymer({
 
   _selectedItemsChanged() {
     this.selectionMode = this.selectedItems && this.selectedItems.length > 0;
+  },
+
+  _computeTitle(doc) {
+    return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
   },
 });
