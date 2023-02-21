@@ -300,7 +300,7 @@ Polymer({
       icon="nuxeo:search"
       name="browser"
       on-tap="toggle"
-      aria-label$="[[i18n('command.search')]]"
+      aria-label$="[[i18n('pickerSearch.title')]]"
       aria-expanded="[[toggled]]"
     ></paper-icon-button>
 
