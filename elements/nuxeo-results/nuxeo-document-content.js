@@ -268,6 +268,7 @@ Polymer({
           field="dc:subjects"
           hidden
           flex="60"
+          overflow="auto"
         >
           <template>
             <template is="dom-repeat" items="[[item.properties.dc:subjects]]" as="subject">
