@@ -141,7 +141,7 @@ Polymer({
           noink
           class="primary"
           on-tap="_publish"
-          disabled$="[[!_canPublish(document,publishSpace)]]"
+          disabled$="[[!_canPublish(_isDisable,document,publishSpace)]]"
         >
           [[i18n('publication.publish')]]
         </paper-button>
@@ -168,6 +168,11 @@ Polymer({
     selectedRendition: {
       type: String,
       value: 'none',
+    },
+
+    _isDisable: {
+      type: Boolean,
+      value: false,
     },
 
     _isMultiple: {
