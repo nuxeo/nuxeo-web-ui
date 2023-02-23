@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "ikuskapena ezeztatua",
   "activity.workflowTaskAssigned": "ikuskapena abiarazia",
   "activity.workflowTaskCompleted": "ikuskapeneko zeregina burutua",
+  "activity.versionRemoved": "Version removed",
+  "activity.documentRestored": "Document restored",
   "accessibility.logo": "Aplikazioaren logoa",
   "addToCollectionDocumentsButton.dialog.add": "Gehitu bildumara",
   "addToCollectionDocumentsButton.dialog.cancel": "Utzi",

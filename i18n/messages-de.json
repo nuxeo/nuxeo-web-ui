@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "Eine Überprüfung wurde abgebrochen",
   "activity.workflowTaskAssigned": "Eine Überprüfung wurde gestartet",
   "activity.workflowTaskCompleted": "Eine Überprüfung wurde ausgeführt",
+  "activity.versionRemoved": "Version entfernt",
+  "activity.documentRestored": "Dokument wiederhergestellt",
   "accessibility.logo": "Logo der Anwendung",
   "addToCollectionDocumentsButton.dialog.add": "Der Sammlung hinzufügen",
   "addToCollectionDocumentsButton.dialog.cancel": "Abbrechen",

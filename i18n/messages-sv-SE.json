@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "avbröt en granskning",
   "activity.workflowTaskAssigned": "startade en granskning",
   "activity.workflowTaskCompleted": "slutförde en granskningsuppgift",
+  "activity.versionRemoved": "Version borttagen",
+  "activity.documentRestored": "Dokument återställt",
   "accessibility.logo": "Programlogotyp",
   "addToCollectionDocumentsButton.dialog.add": "Lägg till i samlingen",
   "addToCollectionDocumentsButton.dialog.cancel": "Avbryt",
