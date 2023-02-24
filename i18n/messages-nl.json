@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "heeft een review geannuleerd",
   "activity.workflowTaskAssigned": "is een review gestart",
   "activity.workflowTaskCompleted": "heeft een reviewtaak voltooid",
+  "activity.versionRemoved": "Versie verwijderd",
+  "activity.documentRestored": "Document hersteld",
   "accessibility.logo": "Applicatielogo",
   "addToCollectionDocumentsButton.dialog.add": "Toevoegen aan Collectie",
   "addToCollectionDocumentsButton.dialog.cancel": "Annuleren",

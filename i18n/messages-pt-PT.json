@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "revisão cancelada",
   "activity.workflowTaskAssigned": "revisão iniciada",
   "activity.workflowTaskCompleted": "tarefa de revisão concluída",
+  "activity.versionRemoved": "Version removed",
+  "activity.documentRestored": "Document restored",
   "accessibility.logo": "Logotipo da aplicação",
   "addToCollectionDocumentsButton.dialog.add": "Adicionar à Coleção",
   "addToCollectionDocumentsButton.dialog.cancel": "Cancelar",
