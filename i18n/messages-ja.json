@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "レビューをキャンセルしました",
   "activity.workflowTaskAssigned": "レビューを開始しました",
   "activity.workflowTaskCompleted": "レビュータスクを完了しました",
+  "activity.versionRemoved": "バージョンが削除されました",
+  "activity.documentRestored": "ドキュメントは復元されました",
   "accessibility.logo": "アプリケーションロゴ",
   "addToCollectionDocumentsButton.dialog.add": "コレクションに追加",
   "addToCollectionDocumentsButton.dialog.cancel": "キャンセル",
