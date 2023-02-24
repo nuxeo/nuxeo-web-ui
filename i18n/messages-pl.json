@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "anulował przegląd",
   "activity.workflowTaskAssigned": "rozpoczął przegląd",
   "activity.workflowTaskCompleted": "zakończył zadanie przeglądu",
+  "activity.versionRemoved": "Version removed",
+  "activity.documentRestored": "Document restored",
   "accessibility.logo": "Logo aplikacji",
   "addToCollectionDocumentsButton.dialog.add": "Dodaj do kolekcji",
   "addToCollectionDocumentsButton.dialog.cancel": "Anuluj",

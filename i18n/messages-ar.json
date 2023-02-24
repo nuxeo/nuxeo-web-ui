@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "ألغيت المراجعة",
   "activity.workflowTaskAssigned": "بدأت المراجعة",
   "activity.workflowTaskCompleted": "تم إكمال عملية المراجعة",
+  "activity.versionRemoved": "Version removed",
+  "activity.documentRestored": "Document restored",
   "accessibility.logo": "شعار التطبيق",
   "addToCollectionDocumentsButton.dialog.add": "إضافة إلى مجموعة",
   "addToCollectionDocumentsButton.dialog.cancel": "إلغاء",

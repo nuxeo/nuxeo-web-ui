@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "取消审阅",
   "activity.workflowTaskAssigned": "开始审阅",
   "activity.workflowTaskCompleted": "完成审阅任务",
+  "activity.versionRemoved": "Version removed",
+  "activity.documentRestored": "Document restored",
   "accessibility.logo": "应用程序Logo",
   "addToCollectionDocumentsButton.dialog.add": "添加到收藏",
   "addToCollectionDocumentsButton.dialog.cancel": "取消",
