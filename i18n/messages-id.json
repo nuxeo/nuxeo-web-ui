@@ -28,6 +28,8 @@
   "activity.workflowCanceled": "membatalkan ulasan",
   "activity.workflowTaskAssigned": "memulai ulasan",
   "activity.workflowTaskCompleted": "menyelesaikan tugas peninjauan",
+  "activity.versionRemoved": "Version removed",
+  "activity.documentRestored": "Document restored",
   "accessibility.logo": "Logo Aplikasi",
   "addToCollectionDocumentsButton.dialog.add": "Masukkan ke dalam koleksi",
   "addToCollectionDocumentsButton.dialog.cancel": "Batalkan",
