@@ -19,6 +19,7 @@ import { IronOverlayBehavior } from '@polymer/iron-overlay-behavior/iron-overlay
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
 import { IronValidatableBehavior } from '@polymer/iron-validatable-behavior/iron-validatable-behavior.js';
 import { IronValidatorBehavior } from '@polymer/iron-validator-behavior/iron-validator-behavior.js';
+import { IronFormElementBehavior } from '@polymer/iron-form-element-behavior/iron-form-element-behavior.js';
 import { Templatizer } from '@polymer/polymer/lib/legacy/templatizer-behavior.js';
 
 // expose behaviors for compat
@@ -43,6 +44,7 @@ Object.assign(Polymer, { dom, html, importHref, mixinBehaviors, Debouncer, Async
 window.Polymer = Polymer;
 window.PolymerElement = PolymerElement;
 window.importHref = importHref;
+Polymer.IronFormElementBehavior = IronFormElementBehavior;
 Polymer.IronOverlayBehavior = IronOverlayBehavior;
 Polymer.IronResizableBehavior = IronResizableBehavior;
 Polymer.IronValidatableBehavior = IronValidatableBehavior;
