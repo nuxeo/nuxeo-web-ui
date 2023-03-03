@@ -323,7 +323,7 @@ Polymer({
           <paper-spinner-lite active$="[[loading]]" hidden$="[[!loading]]"></paper-spinner-lite>
         </div>
 
-        <div id="queue" hidden$="{{!queue}}">
+        <div id="queue" hidden$="{{!queue}}" role="list">
           <template is="dom-if" if="[[_displayQuickFilters(_quickFilters)]]">
             <nuxeo-quick-filters quick-filters="{{_quickFilters}}" on-quick-filters-changed="refresh">
             </nuxeo-quick-filters>
