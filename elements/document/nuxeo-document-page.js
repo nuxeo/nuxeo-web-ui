@@ -223,6 +223,7 @@ Polymer({
                 allow-new-tags
                 placeholder="[[i18n('documentPage.tags.placeholder')]]"
                 readonly="[[!isTaggable(document)]]"
+                aria-label$="[[i18n('documentPage.tags')]]"
               >
               </nuxeo-tag-suggestion>
             </div>
@@ -246,7 +247,12 @@ Polymer({
             </paper-tabs>
             <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
               <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
-                <nuxeo-document-comment-thread name="comments" uid="[[document.uid]]"></nuxeo-document-comment-thread>
+                <nuxeo-document-comment-thread
+                  name="comments"
+                  uid="[[document.uid]]"
+                  aria-label$="[[i18n('documentPage.comments')]]"
+                >
+                </nuxeo-document-comment-thread>
               </template>
               <nuxeo-document-activity name="activity" document="[[document]]"></nuxeo-document-activity>
             </iron-pages>
