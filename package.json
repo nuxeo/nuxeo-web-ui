@@ -7,7 +7,7 @@
   "vendor": "Nuxeo",
   "private": true,
   "devDependencies": {
-    "check-engine": "^1.10.0",
+    "check-engine": "1.10.0",
     "css-slam": "^1.2.1",
     "del": "^2.1.0",
     "eslint-plugin-html": "^2.0.0",
