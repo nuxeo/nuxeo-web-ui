@@ -216,7 +216,7 @@ Polymer({
 
           <!-- tags -->
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
-            <div class="section">
+            <div class="section" aria-label$="[[i18n('documentPage.tags')]]">
               <h5>[[i18n('documentPage.tags')]]</h5>
               <nuxeo-tag-suggestion
                 document="[[document]]"
@@ -244,7 +244,12 @@ Polymer({
               </template>
               <nuxeo-page-item name="activity" label="[[i18n('documentPage.activity')]]"></nuxeo-page-item>
             </paper-tabs>
-            <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-item="{{page}}">
+            <iron-pages
+              selected="[[selectedTab]]"
+              attr-for-selected="name"
+              selected-item="{{page}}"
+              aria-label$="[[i18n('documentPage.comments')]]"
+            >
               <template is="dom-if" if="[[hasFacet(document, 'Commentable')]]">
                 <nuxeo-document-comment-thread name="comments" uid="[[document.uid]]"></nuxeo-document-comment-thread>
               </template>
