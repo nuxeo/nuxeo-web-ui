@@ -1,3 +1,4 @@
+@watch
 Feature: Content Preview
 
   Document and attachment previews are well displayed on document view and actions
@@ -57,5 +58,5 @@ Feature: Content Preview
       | sample.mp4 | nuxeo-video-viewer |
       | sample.mp3 | audio              |
       | sample.pdf | nuxeo-pdf-viewer   |
-      | sample.odt | embed              |
-      | sample.txt | embed              |
+      | sample.odt | object              |
+      | sample.txt | object              |
