@@ -65,7 +65,7 @@ Polymer({
       }
 
       .list-item.selected,
-      .list-item:focus,
+      .selected:focus,
       .list-item.selected:focus {
         @apply --nuxeo-block-selected;
       }
