@@ -126,6 +126,10 @@ Polymer({
       type: Object,
       observer: '_currentDocumentChanged',
     },
+    focused: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   add(doc) {
@@ -143,9 +147,13 @@ Polymer({
     this.$.storage.remove(doc);
   },
 
-  update(doc) {
-    this.$.storage.remove(doc);
-    this.$.storage.add(doc);
+  update(doc, focused) {
+    if (focused) {
+      this.$.storage.remove(doc);
+      this.$.storage.add(doc);
+    } else {
+      this.$.storage.add(doc);
+    }
   },
 
   _computedClass(isSelected) {
