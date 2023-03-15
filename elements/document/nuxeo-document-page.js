@@ -218,13 +218,14 @@ Polymer({
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
               <h5>[[i18n('documentPage.tags')]]</h5>
+              <span aria-label$="[[i18n('documentPage.tags')]]">
               <nuxeo-tag-suggestion
                 document="[[document]]"
                 allow-new-tags
                 placeholder="[[i18n('documentPage.tags.placeholder')]]"
-                readonly="[[!isTaggable(document)]]"
-                aria-label$="[[i18n('documentPage.tags')]]"
+                readonly="[[!isTaggable(document)]]"  
               >
+              </span
               </nuxeo-tag-suggestion>
             </div>
           </template>
