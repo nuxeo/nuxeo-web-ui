@@ -47,6 +47,10 @@ Polymer({
         border-bottom: 2px solid var(--nuxeo-app-header-pill-active);
         color: var(--nuxeo-app-header-pill-active);
       }
+
+      :host(:focus) {
+        background-color: #dedfe3;
+      }
     </style>
 
     <div>[[i18n(label)]]</div>
