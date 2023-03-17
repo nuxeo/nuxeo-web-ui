@@ -94,7 +94,7 @@ Polymer({
       <div class="toolbar" id="toolbar">
         <slot id="header" slot="header" name="header"></slot>
       </div>
-      <div id="tabs">
+      <div id="tabs" role="list">
         <slot name="tabs"></slot>
       </div>
       <div id="content">
