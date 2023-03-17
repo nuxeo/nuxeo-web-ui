@@ -229,7 +229,7 @@ Polymer({
           </template>
 
           <!-- activity -->
-          <div class="section">
+          <div class="section" role="list">
             <paper-tabs
               autoselect
               attr-for-selected="name"
