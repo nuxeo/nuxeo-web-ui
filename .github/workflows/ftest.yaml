@@ -150,3 +150,7 @@ jobs:
           path: |
             plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
             plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
+      
+      - name: A11y checks
+        run: |
+          mvn -B -ntp -f plugin/a11y install -DskipInstall
