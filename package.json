@@ -185,7 +185,7 @@
     "jsondiffpatch": "^0.3.11",
     "jsplumb": "2.13.0",
     "lit-element": "^3.2.2",
-    "nuxeo": "^3.2.1",
+    "nuxeo": "^4.0.3",
     "select2": "~3.5.1",
     "three": "~0.125.0",
     "uuid": "^3.3.2",
