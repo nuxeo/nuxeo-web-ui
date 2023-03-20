@@ -64,4 +64,4 @@ jobs:
       run: mvn -B -ntp install
 
     - name: A11y checks
-      run: mvn -B -nsu -f plugin/a11y -ntp install
+      run: mvn -B -ntp -f plugin/a11y install

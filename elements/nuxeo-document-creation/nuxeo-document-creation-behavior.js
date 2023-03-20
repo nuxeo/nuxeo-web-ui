@@ -87,7 +87,7 @@ export const DocumentCreationBehavior = [
         schemaFetcher = document.createElement('nuxeo-resource');
         this.shadowRoot.appendChild(schemaFetcher);
       }
-      schemaFetcher.path = join(join('path/', this.targetPath),'/@emptyWithDefault');
+      schemaFetcher.path = join(join('path/', this.targetPath), '/@emptyWithDefault');
       schemaFetcher.params = { type: this.selectedDocType.type };
       schemaFetcher.headers = {
         properties: '*',
