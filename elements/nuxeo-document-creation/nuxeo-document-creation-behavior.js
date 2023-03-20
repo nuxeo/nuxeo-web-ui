@@ -18,6 +18,7 @@ limitations under the License.
 import { config } from '@nuxeo/nuxeo-elements';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
+import { join } from '@nuxeo/nuxeo-elements/utils';
 
 let schemaFetcher = null;
 
@@ -86,7 +87,7 @@ export const DocumentCreationBehavior = [
         schemaFetcher = document.createElement('nuxeo-resource');
         this.shadowRoot.appendChild(schemaFetcher);
       }
-      schemaFetcher.path = `path/${this.targetPath}/@emptyWithDefault`;
+      schemaFetcher.path = join(join('path/', this.targetPath),'/@emptyWithDefault');
       schemaFetcher.params = { type: this.selectedDocType.type };
       schemaFetcher.headers = {
         properties: '*',
