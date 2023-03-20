@@ -118,10 +118,13 @@ jobs:
           RUN_ALL: false
           BAIL: 0
         run: mvn -ntp install -Pftest -DskipInstall
+ 
+      - name: Web UI build
+        run: mvn -B -ntp install
 
       - name: A11y checks
-        run: mvn -B -ntp -f plugin/a11y install -DskipInstall
-        
+        run: mvn -B -ntp -f plugin/a11y install
+
       - name: Archive cucumber reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
