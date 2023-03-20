@@ -190,7 +190,6 @@ jobs:
           mvn install -ntp $active_profiles -DskipInstall
 
       - name: A11y checks
-        if: ${{ github.event.inputs.skip_a11y == 'false' }}
         run: |
           mvn -B -nsu -f plugin/a11y -ntp install
 
