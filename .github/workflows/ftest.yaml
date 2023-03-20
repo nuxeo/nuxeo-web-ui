@@ -119,6 +119,9 @@ jobs:
           BAIL: 0
         run: mvn -ntp install -Pftest -DskipInstall
 
+      - name: A11y checks
+        run: mvn -B -ntp -f plugin/a11y install -DskipInstall
+        
       - name: Archive cucumber reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
@@ -150,7 +153,3 @@ jobs:
           path: |
             plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
             plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
-      
-      - name: A11y checks
-        run: |
-          mvn -B -ntp -f plugin/a11y install -DskipInstall
