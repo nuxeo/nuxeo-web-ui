@@ -33,6 +33,7 @@ limitations under the License.
       placeholder="[[i18n('defaultSearch.fullText.placeholder')]]"
       autofocus
       on-change="_search"
+      aria-label$="[[i18n('defaultSearch.fullText')]]"
     >
     </nuxeo-input>
 
@@ -40,6 +41,7 @@ limitations under the License.
       value="{{_path}}"
       label="[[i18n('defaultSearch.path')]]"
       role="widget"
+      aria-label$="[[i18n('defaultSearch.path')]]"
     ></nuxeo-path-suggestion>
 
     <div role="widget">
@@ -50,6 +52,7 @@ limitations under the License.
         value="{{params.dc_creator_agg}}"
         multiple="true"
         name="authors"
+        aria-label$="[[i18n('defaultSearch.authors')]]"
       >
       </nuxeo-dropdown-aggregation>
     </div>
