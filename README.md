@@ -65,6 +65,7 @@ npm run ftest
 npm run build
 ```
 
+
 Build and optimize the current project, ready for deployment. This includes linting as well as vulcanization, image, script, stylesheet and HTML optimization and minification.
 
 #### Run with Docker Compose
