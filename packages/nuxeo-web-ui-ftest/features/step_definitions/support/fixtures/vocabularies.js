@@ -29,8 +29,8 @@ After(() =>
   Promise.all(
     addedVocabularyEntries.map((entry) =>
       nuxeo
-        .request(`/directory/${entry.directoryName}`)
-        .delete(entry)
+        .request(`/directory/${entry.directoryName}/${entry.id}`)
+        .delete()
         .catch(() => {}),
     ),
   ) // eslint-disable-line arrow-body-style
