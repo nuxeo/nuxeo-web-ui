@@ -1,4 +1,3 @@
-@watch
 Feature: Content Preview
 
   Document and attachment previews are well displayed on document view and actions
