@@ -551,8 +551,8 @@ Polymer({
             // filter null values
             Object.keys(params).forEach((param) => {
               const value = params[param];
-              if (value && param !== 'dc:title') {
-                result[param] = value;
+              if (value !== null && param !== 'dc:title') {
+                result[param] = typeof value === 'boolean' ? value.toString() : value;
               }
             });
             // allow search to be visible on JSF UI
