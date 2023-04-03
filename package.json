@@ -7,10 +7,13 @@
   "license": "Apache-2.0",
   "vendor": "Nuxeo",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
+  },
+  "config": {
+    "workboxCli": "3.6.3"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^7.0.0",
+    "@cucumber/cucumber": "^9.5.1",
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@nuxeo/testing-helpers": "~3.1.6-rc.0",
     "@open-wc/eslint-config": "^0.3.0",
@@ -55,9 +58,9 @@
     "style-loader": "^2.0.0",
     "url-loader": "^4.1.1",
     "vm-browserify": "^1.1.2",
-    "wdio-chromedriver-service": "^8.0.0",
+    "wdio-chromedriver-service": "^8.1.1",
     "wdio-cucumber-reporter": "0.0.2",
-    "wdio-json-reporter": "^2.0.0",
+    "wdio-json-reporter": "^3.0.0",
     "webpack": "^5.3.0",
     "webpack-bundle-analyzer": "^3.9.0",
     "webpack-cli": "^4.1.0",
@@ -74,7 +77,7 @@
     "prebuild": "npm-run-all prepare:*",
     "prepare:tmp": "rm -rf .tmp",
     "prepare:i18n": "node scripts/merge-messages.js",
-    "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v$npm_package_devDependencies_workbox_cli .tmp/workbox",
+    "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v${npm_package_config_workboxCli} .tmp/workbox",
     "build": "webpack --env production",
     "postbuild": "npm-run-all fix:*",
     "fix:preview": "replace 'elements/' '${window.location.pathname}/' dist/index.html",
@@ -174,7 +177,7 @@
     "@polymer/paper-toolbar": "^3.0.1",
     "@polymer/paper-tooltip": "^3.0.1",
     "@polymer/polymer": "^3.5.1",
-    "@wdio/allure-reporter": "^7.2.0",
+    "@wdio/allure-reporter": "^8.29.1",
     "@webcomponents/html-imports": "^1.2.0",
     "aws-sdk": "^2.420.0",
     "dotenv": "^8.0.0",
@@ -190,7 +193,7 @@
     "three": "~0.125.0",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1",
-    "webdriverio": "^7.16.16"
+    "webdriverio": "^8.29.1"
   },
   "husky": {
     "hooks": {

@@ -1,51 +1,71 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 
 export default class DocumentPublications extends BasePage {
   get count() {
-    const rows = this.el.elements('nuxeo-data-table#table nuxeo-data-table-row:not([header])');
-    return rows.filter((result) => result.getAttribute('hidden') === null).length;
-  }
-
-  hasPublication(path, rendition, version) {
-    return !!this.getPublicationRow(path, rendition, version);
-  }
-
-  getPublicationRow(path, rendition, version) {
-    this.waitForVisible('nuxeo-data-table#table nuxeo-data-table-row:not([header])');
-    const rows = this.el.elements('nuxeo-data-table#table nuxeo-data-table-row:not([header])');
-    const result = rows.find((row) => {
-      if (row.isVisible('nuxeo-data-table-cell a.path')) {
-        const foundPath = row.getText('nuxeo-data-table-cell a.path').toLowerCase();
-        if (foundPath.indexOf(path.trim().toLowerCase()) !== 0) {
-          return false;
+    return (async () => {
+      await driver.pause(1000);
+      let elementCount = 0;
+      const elementsHidden = await browser
+        .$$('nuxeo-data-table#table nuxeo-data-table-row:not([header])')
+        .map((img) => img.getAttribute('hidden'));
+      for (let i = 0; i < elementsHidden.length; i++) {
+        const row = elementsHidden[i];
+        if (row === null) {
+          elementCount++;
         }
-        const foundRendition = row
-          .getText('nuxeo-data-table-cell .rendition')
-          .trim()
-          .toLowerCase();
-        if (foundRendition !== rendition.toLowerCase()) {
-          return false;
-        }
-        const foundVersion = row
-          .getText('nuxeo-data-table-cell .version')
-          .trim()
-          .toLowerCase();
-        if (foundVersion && version != null && foundVersion !== version.toLowerCase()) {
-          return false;
-        }
-        return true;
       }
-      return false;
-    });
-    return result;
+      return elementCount;
+    })();
   }
 
-  republish(path, rendition, version) {
-    const pubRow = this.getPublicationRow(path, rendition, version);
+  async hasPublication(path, rendition, version) {
+    const pubicationRow = await !!this.getPublicationRow(path, rendition, version);
+    return pubicationRow;
+  }
+
+  async getPublicationRow(path, rendition, version) {
+    const ele = await this.el.$('nuxeo-data-table#table nuxeo-data-table-row:not([header])');
+    await ele.waitForVisible();
+    const rows = await this.el.$$('nuxeo-data-table#table nuxeo-data-table-row:not([header])');
+    let index;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      if (row.isVisible('nuxeo-data-table-cell a.path')) {
+        const foundPathEle = await row.$('nuxeo-data-table-cell a.path');
+        const foundPath = await foundPathEle.getText();
+        const foundPathLowerCase = await foundPath.trim().toLowerCase();
+        if (foundPathLowerCase.indexOf(path.trim().toLowerCase()) !== 0) {
+          index = -1;
+        }
+        const foundRenditionEle = await row.$('nuxeo-data-table-cell .rendition');
+        const foundRendition = await foundRenditionEle.getText();
+        const foundRenditionLowerCase = foundRendition.trim().toLowerCase();
+        if (foundRenditionLowerCase !== rendition.toLowerCase()) {
+          index = -1;
+        }
+        const foundVersionEle = await row.$('nuxeo-data-table-cell .version');
+        const foundVersion = await foundVersionEle.getText();
+        const foundVersionLowerCase = await foundVersion.trim().toLowerCase();
+        if (foundVersionLowerCase && version != null && foundVersion !== version.toLowerCase()) {
+          index = -1;
+        }
+        index = i;
+      }
+    }
+    if (index !== -1) {
+      return rows[index];
+    }
+    return false;
+  }
+
+  async republish(path, rendition, version) {
+    const pubRow = await this.getPublicationRow(path, rendition, version);
     if (pubRow) {
-      pubRow.waitForVisible('paper-button.republish');
-      pubRow.element('paper-button.republish').click();
-      driver.alertAccept();
+      await pubRow.waitForVisible('paper-button.republish');
+      const pubRowEle = await pubRow.element('paper-button.republish');
+      await pubRowEle.click();
+      await driver.alertAccept();
     } else {
       throw new Error(`Could not find publication ${path} ${rendition} ${version}`);
     }

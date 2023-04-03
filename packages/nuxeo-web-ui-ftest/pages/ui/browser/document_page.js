@@ -11,7 +11,7 @@ export default class DocumentPage extends BasePage {
   }
 
   get view() {
-    return new DocumentView(`${this._selector} nuxeo-document-view div#container`, this.docType);
+    return (async () => new DocumentView(`${this._selector} nuxeo-document-view div#container`, this.docType))();
   }
 
   get metadata() {
@@ -37,11 +37,17 @@ export default class DocumentPage extends BasePage {
   }
 
   get restoreVersionButton() {
-    return this.versionInfoBar.element('nuxeo-restore-version-button');
+    return (async () => {
+      const versionInfoBar = await this.versionInfoBar;
+      return versionInfoBar.element('nuxeo-restore-version-button');
+    })();
   }
 
   get restoreVersionButtonConfirm() {
-    return this.versionInfoBar.element('nuxeo-restore-version-button paper-button[dialog-confirm]');
+    return (async () => {
+      const versionInfoBar = await this.versionInfoBar;
+      return versionInfoBar.element('nuxeo-restore-version-button paper-button[dialog-confirm]');
+    })();
   }
 
   get info() {
@@ -69,20 +75,29 @@ export default class DocumentPage extends BasePage {
   }
 
   get publicationsCount() {
-    const info = this.el.element('nuxeo-document-info');
-    if (info) {
-      const items = this.el.elements('nuxeo-document-info .item');
-      const pub = items.find((i) => i.element('label').getText() === 'Publications');
-      if (pub) {
-        return parseInt(
-          pub
-            .element('div')
-            .getText()
-            .trim(),
-          10,
-        );
+    return (async () => {
+      const info = await this.el.element('nuxeo-document-info');
+      if (info) {
+        const items = await this.el.elements('nuxeo-document-info .item');
+        let pub;
+        for (let i = 0; i < items.length; i++) {
+          // eslint-disable-next-line no-await-in-loop
+          const itemText = await items[i].getText();
+          if (itemText === 'Publications') {
+            pub = items[i];
+          }
+        }
+        if (pub) {
+          return parseInt(
+            pub
+              .$('div')
+              .getText()
+              .trim(),
+            10,
+          );
+        }
       }
-    }
-    return 0;
+      return 0;
+    })();
   }
 }

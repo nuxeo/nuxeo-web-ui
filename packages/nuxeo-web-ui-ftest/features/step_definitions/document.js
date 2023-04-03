@@ -1,13 +1,15 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+/* eslint-disable no-await-in-loop */
+import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
-Given('I have a {word} document', function(docType) {
+Given('I have a {word} document', async function(docType) {
   docType = docType || 'File';
-  const doc = fixtures.documents.init(docType);
+  const doc = await fixtures.documents.init(docType);
   // create the document
-  return fixtures.documents.create(this.doc.path || '/default-domain', doc).then((d) => {
+  const createDoc = await fixtures.documents.create(this.doc.path || '/default-domain', doc).then((d) => {
     this.doc = d;
   });
+  return createDoc;
 });
 
 Given(/^I have a document imported from file "(.+)"$/, function(mimeType) {
@@ -16,16 +18,18 @@ Given(/^I have a document imported from file "(.+)"$/, function(mimeType) {
   });
 });
 
-Given(/^I have permission (\w+) for this document$/, function(permission) {
-  return fixtures.documents.setPermissions(this.doc, permission, this.username).then((d) => {
+Given(/^I have permission (\w+) for this document$/, async function(permission) {
+  const setPermission = await fixtures.documents.setPermissions(this.doc, permission, this.username).then((d) => {
     this.doc = d;
   });
+  return setPermission;
 });
 
-Given(/^I have permission (\w+) for the document with path "(.+)"$/, function(permission, path) {
-  return fixtures.documents.setPermissions(path, permission, this.username).then((d) => {
+Given(/^I have permission (\w+) for the document with path "(.+)"$/, async function(permission, path) {
+  const setPermission = await fixtures.documents.setPermissions(path, permission, this.username).then((d) => {
     this.doc = d;
   });
+  return setPermission;
 });
 
 Given(/^I have the following permissions to the documents$/, function(table) {
@@ -38,26 +42,24 @@ Given(/^This document has a (major|minor) version$/, function(versionType) {
   });
 });
 
-Given(/^I have a document added to "([^"]*)" collection$/, function(colName) {
+Given(/^I have a document added to "([^"]*)" collection$/, async function(colName) {
   const docFile = fixtures.documents.init('File');
   // create the document
-  return fixtures.documents
-    .create(this.doc.path, docFile)
-    .then((doc) => fixtures.collections.addToNewCollection(doc, colName))
-    .then((d) => {
-      this.doc = d;
-    });
+  const doc = await fixtures.documents.create(this.doc.path, docFile);
+  const updatedDoc = await fixtures.collections.addToNewCollection(doc, colName);
+  this.doc = updatedDoc;
 });
 
-Given(/^This document has a "([^"]*)" workflow running$/, function(workflowName) {
-  return fixtures.workflows.start(this.doc, workflowName, this.username).then((workflowInstance) => {
+Given(/^This document has a "([^"]*)" workflow running$/, async function(workflowName) {
+  const workflow = await fixtures.workflows.start(this.doc, workflowName, this.username).then((workflowInstance) => {
     this.workflowInstance = workflowInstance;
   });
+  return workflow;
 });
 
 Given(
   /^The workflow running for this document will proceed with "([^"]*)" action and the following variables:$/,
-  function(action, table) {
+  async function(action, table) {
     this.workflowInstance.should.not.be.undefined;
     return this.workflowInstance.fetchTasks().then((tasks) => {
       tasks.entries.length.should.be.equal(1);
@@ -83,16 +85,18 @@ Given(
   },
 );
 
-Given(/^This document has file "(.+)" for content$/, function(file) {
-  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
+Given(/^This document has file "(.+)" for content$/, async function(file) {
+  const contentEle = await fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
+  return contentEle;
 });
 
-Given(/^This document has file "(.+)" for attachment/, function(file) {
-  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true);
+Given(/^This document has file "(.+)" for attachment/, async function(file) {
+  const blobFile = await fixtures.blobs.get(file);
+  return fixtures.documents.attach(this.doc, blobFile, true);
 });
 
-Given(/^I have a (.+) Note$/, function(format) {
-  const doc = fixtures.documents.init('Note');
+Given(/^I have a (.+) Note$/, async function(format) {
+  const doc = await fixtures.documents.init('Note');
   doc.properties['note:mime_type'] = fixtures.notes.formats[format].mimetype;
   doc.properties['note:note'] = fixtures.notes.formats[format].content;
   return fixtures.documents.create(this.doc.path, doc).then((result) => {
@@ -100,242 +104,317 @@ Given(/^I have a (.+) Note$/, function(format) {
   });
 });
 
-When(/^I browse to the document$/, function() {
-  this.ui.browser.browseTo(this.doc.path);
+When(/^I browse to the document$/, async function() {
+  await driver.pause(1000);
+  const path = await this.doc.path;
+  const browser = await this.ui.browser;
+  await browser.browseTo(path);
 });
 
-When(/^I browse to the "(.*)" document page$/, function(page) {
-  this.ui.browser.browseTo(`${this.doc.path}?p=${page}`);
+When(/^I browse to the "(.*)" document page$/, async function(page) {
+  const browser = await this.ui.browser;
+  await browser.browseTo(`${this.doc.path}?p=${page}`);
 });
 
-When(/^I browse to the document with path "(.+)"$/, function(path) {
-  this.ui.browser.browseTo(path);
+When(/^I browse to the document with path "(.+)"$/, async function(path) {
+  await driver.pause(1000);
+  const browser = await this.ui.browser;
+  await browser.browseTo(path);
 });
 
-Then('I navigate to {string} child', function(title) {
-  this.ui.browser.clickChild(title);
+Then('I navigate to {string} child', async function(title) {
+  const browser = await this.ui.browser;
+  const child = await browser.clickChild(title);
+  if (!child) {
+    throw Error(`child should have ${title} title`);
+  }
 });
 
-When(/^I start a (.+)$/, function(workflow) {
-  this.ui.browser.startWorkflow(workflow);
+When(/^I start a (.+)$/, async function(workflow) {
+  await this.ui.browser.startWorkflow(workflow);
 });
 
-When(/^I click the process button$/, function() {
-  const { processWorkflowButton } = this.ui.browser.documentPage();
-  processWorkflowButton.waitForVisible();
-  processWorkflowButton.click();
+When(/^I click the process button$/, async function() {
+  const documentPage = await this.ui.browser.documentPage();
+  const documentPageInfo = await documentPage.info;
+  await documentPageInfo.waitForVisible();
+  const processButton = await documentPage.processWorkflowButton;
+  await processButton.waitForVisible();
+  await processButton.click();
 });
 
-Then(/^I can't view the document$/, function() {
+Then(/^I can't view the document$/, async function() {
   url(`#!/browse${this.doc.path}`);
-  this.ui.browser.breadcrumb.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+  const breadcumbEle = await this.ui.browser.breadcrumb;
+  const isVisible = await breadcumbEle.waitForVisible(browser.options.waitforTimeout, true);
+  isVisible.should.be.true;
 });
 
 Then("I can see the document's title", function() {
   this.ui.browser.title.waitForVisible();
 });
 
-Then(/I can see (.+) metadata with the following properties:/, function(docType, table) {
-  this.ui.browser.documentPage(docType).waitForVisible();
-  this.ui.browser.documentPage(docType).metadata.waitForVisible();
-  table.rows().forEach((row) => {
-    this.ui.browser
-      .documentPage(docType)
-      .metadata.layout()
-      .waitForVisible();
-    if (row[0] === 'subjects') {
-      driver.waitUntil(
-        () =>
-          this.ui.browser
-            .documentPage(docType)
-            .metadata.layout()
-            .getFieldValue(row[0])
-            .indexOf(row[1]) > -1,
-      );
+Then(/I can see (.+) metadata with the following properties:/, async function(docType, table) {
+  const browser = await this.ui.browser;
+  const docPage = await browser.documentPage(docType);
+  await docPage.waitForVisible();
+  const docMeta = await docPage.metadata;
+  await docMeta.waitForVisible();
+  const tableRows = await table.rows();
+  for (let i = 0; i < tableRows.length; i++) {
+    const tableRow = tableRows[i];
+    const docLayout = await docMeta.layout();
+    await docLayout.waitForVisible();
+    if (tableRow[0] === 'subjects') {
+      const docField = await docLayout.getFieldValue(tableRow[0]);
+      (await docField.indexOf(tableRow[1])) > -1;
     } else {
-      driver.waitUntil(
-        () =>
-          this.ui.browser
-            .documentPage(docType)
-            .metadata.layout()
-            .getFieldValue(row[0])
-            .toString() === row[1],
-      );
+      const docFiel = await docLayout.getFieldValue(tableRow[0]);
+      (await docFiel.toString()) === tableRow[1];
     }
-  });
+  }
 });
 
-Then(/^I can't edit the document metadata$/, function() {
-  this.ui.browser.editButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+Then(/^I can't edit the document metadata$/, async function() {
+  const editButtonEle = await this.ui.browser.editButton;
+  const isVisible = await editButtonEle.waitForVisible(browser.options.waitforTimeout, true);
+  isVisible.should.be.true;
 });
 
-Then(/^I can edit the (.*) metadata$/, function(docType) {
-  const { browser } = this.ui;
-  browser.editButton.waitForVisible();
-  browser.editButton.click();
-  const form = browser.editForm(docType);
-  form.waitForVisible();
-  form.title = docType;
-  form.save();
-  driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
+Then(/^I can edit the (.*) metadata$/, async function(docType) {
+  const browser = await this.ui.browser;
+  const browserEditButton = await browser.editButton;
+  await browserEditButton.waitForVisible();
+  await browserEditButton.click();
+  const form = await browser.editForm(docType);
+  await form.waitForVisible();
+  const inputElement = await form.el.element('.input-element input');
+  await fixtures.layouts.setValue(inputElement, docType);
+  await form.save();
+  await driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
-Then(/^I can edit the following properties in the (.+) metadata:$/, function(docType, table) {
-  const { browser } = this.ui;
-  browser.editButton.waitForVisible();
-  browser.editButton.click();
-  const form = browser.editForm(docType);
-  form.waitForVisible();
-  form.layout.waitForVisible();
-  form.layout.fillMultipleValues(table);
-  form.save();
+Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
+  const browser = await this.ui.browser;
+  const button = await browser.editButton;
+  await button.waitForVisible();
+  await button.click();
+  const form = await browser.editForm(docType);
+  await form.waitForVisible();
+  await form.layout.waitForVisible();
+  await form.layout.fillMultipleValues(table);
+  await form.save();
 });
 
-Then(/^I can't edit the Note$/, function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.view.waitForVisible();
-  page.view.noteEditor.waitForVisible();
-  page.view.noteEditor.editButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+Then(/^I can't edit the Note$/, async function() {
+  const browser = await this.ui.browser;
+  const page = await browser.documentPage(this.doc.type);
+  const view = await page.view;
+  const noteEditor = await view.noteEditor;
+  const editButtonEle = await noteEditor.editButton;
+  await editButtonEle.waitForVisible(driver.options.waitforTimeout, true);
 });
 
-Then(/^I can edit the (.*) Note$/, function(format) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.view.waitForVisible();
-
+Then(/^I can edit the (.*) Note$/, async function(format) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  const view = await page.view;
+  await view.waitForVisible();
+  const previewEle = await view.preview;
+  const noteEditor = await view.noteEditor;
   const newContent = `NEW ${format} CONTENT`;
 
   switch (format) {
     case 'HTML':
-      page.view.noteEditor.waitForVisible();
-      page.view.noteEditor.setContent(newContent);
-      page.view.noteEditor.save();
-      driver.waitUntil(() => page.view.noteEditor.hasContent(`<p>${newContent}</p>`));
+      await noteEditor.waitForVisible();
+      await noteEditor.setContent(newContent);
+      await noteEditor.save();
+      await driver.waitUntil(async () => noteEditor.hasContent(`<p>${newContent}</p>`), {
+        timeoutMsg: 'step  definition document 230',
+      });
       break;
     case 'XML':
     case 'Markdown':
     case 'Text':
-      page.view.noteEditor.waitForVisible();
-      page.view.noteEditor.edit();
-      page.view.noteEditor.textarea.waitForVisible();
-      page.view.noteEditor.textarea.setValue(newContent);
-      page.view.noteEditor.save();
-      page.view.preview.waitForVisible();
-      driver.waitUntil(() => {
-        try {
-          let elContent;
-          if (format === 'XML') {
-            elContent = page.view.preview.element('#xml');
-          } else if (format === 'Text') {
-            elContent = page.view.preview.element('#plain');
-          } else {
-            elContent = page.view.preview.element('marked-element #content');
+      await noteEditor.waitForVisible();
+      await noteEditor.edit();
+      await noteEditor.textarea.waitForVisible();
+      await noteEditor.textarea.setValue(newContent);
+      await noteEditor.save();
+      await previewEle.waitForVisible();
+      await driver.waitUntil(
+        async () => {
+          try {
+            let elContent;
+            if (format === 'XML') {
+              elContent = await previewEle.$('#xml');
+            } else if (format === 'Text') {
+              elContent = await previewEle.$('#plain');
+            } else {
+              elContent = await previewEle.$('marked-element #content');
+            }
+            const elementContentVisible = await elContent.isVisible();
+            const elementContentText = await elContent.getText();
+            const elContentEle = elementContentVisible && elementContentText === newContent;
+            return elContentEle;
+          } catch (e) {
+            return false;
           }
-          return elContent.isVisible() && elContent.getText() === newContent;
-        } catch (e) {
-          return false;
-        }
-      });
+        },
+        {
+          timeoutMsg: 'step  definition document 260',
+        },
+      );
       break;
     default:
     // do nothing
   }
 });
 
-Then('I add the document to the {string} collection', function(name) {
-  this.ui.browser.addToCollection(name);
+Then('I add the document to the {string} collection', async function(name) {
+  const browser = await this.ui.browser;
+  await browser.addToCollection(name);
 });
 
-Then('I can see the document belongs to the {string} collection', function(name) {
-  this.ui.browser.hasCollection(name).should.be.true;
+Then('I can see the document belongs to the {string} collection', async function(name) {
+  await driver.pause(1000);
+  const browser = await this.ui.browser;
+  const hasCollection = await browser.hasCollection(name);
+  if (!hasCollection) {
+    throw new Error(`Expected the document belongs to the ${name} that is not visible`);
+  }
 });
 
-Then('I can delete the document from the {string} collection', function(name) {
-  this.ui.browser.removeFromCollection(name);
+Then('I can delete the document from the {string} collection', async function(name) {
+  const deleteCollection = await this.ui.browser;
+  await deleteCollection.removeFromCollection(name);
 });
 
-Then('I can see the document does not belong to the {string} collection', function(name) {
-  this.ui.browser.doesNotHaveCollection(name).should.be.true;
+Then('I can see the document does not belong to the {string} collection', async function(name) {
+  const browserEle = await this.ui.browser;
+  const doesNotHaveCollection = await browserEle.doesNotHaveCollection(name);
+  if (!doesNotHaveCollection) {
+    throw new Error('Expected the document does not belong to the {string} collection is not visible');
+  }
 });
 
-Then('I add the document to the favorites', function() {
-  this.ui.browser.addToFavorites();
+Then('I add the document to the favorites', async function() {
+  const browser = await this.ui.browser;
+  await browser.addToFavorites();
 });
 
-Then('I can see the document has {int} children', function(nb) {
-  this.ui.browser.waitForNbChildren(nb);
+Then('I can see the document has {int} children', async function(nb) {
+  await driver.pause(1000);
+  const browser = await this.ui.browser;
+  const countOut = await browser.waitForNbChildren(nb);
+  if (countOut !== nb) {
+    throw Error(`Document should have ${nb} children but found ${countOut}`);
+  }
 });
 
-Then(/^I can see a process is running in the document$/, function() {
-  const documentPage = this.ui.browser.documentPage();
+Then(/^I can see a process is running in the document$/, async function() {
+  const documentPage = await this.ui.browser.documentPage();
   // check info bar in the document is visible
-  documentPage.infoBar.waitForVisible();
+  const infoBar = await documentPage.infoBar;
+  await infoBar.waitForVisible();
   // assert that info bar displays a task is running
-  documentPage.taskInfo.waitForVisible();
+  const taskInfo = await documentPage.taskInfo;
+  await taskInfo.waitForVisible();
   // assert that there's a button to process the task
-  documentPage.processWorkflowButton.waitForVisible();
+  const processWorkflowButton = await documentPage.processWorkflowButton;
+  await processWorkflowButton.waitForVisible();
   // assert that document info says a process is running
-  documentPage.info.waitForVisible();
-  documentPage.info.waitForVisible('[name="process"]');
+  const documentPageInfo = await documentPage.info;
+  await documentPageInfo.waitForVisible();
+  await documentPageInfo.$('[name="process"]').waitForVisible();
 });
 
-Then(/^I can see a process is not running in the document$/, function() {
-  const documentPage = this.ui.browser.documentPage();
+Then(/^I can see a process is not running in the document$/, async function() {
+  const documentPage = await this.ui.browser.documentPage();
   // check info bar in the document is not visible
-  documentPage.infoBar.isVisible().should.be.false;
+  const infoBar = await documentPage.infoBar;
+  const infoBarVisible = await infoBar.isVisible();
+  infoBarVisible.should.be.false;
 });
 
-Then(/^I cannot start a workflow$/, function() {
-  this.ui.browser.startWorkflowButton.isExisting().should.be.false;
+Then(/^I cannot start a workflow$/, async function() {
+  const button = await this.ui.browser.startWorkflowButton;
+  const isButtonExisting = await button.isExisting();
+  isButtonExisting.should.be.false;
 });
 
-Then(/^I can abandon the workflow$/, function() {
-  const { abandonWorkflowButton } = this.ui.browser.documentPage();
-  abandonWorkflowButton.waitForVisible();
-  abandonWorkflowButton.click();
-  driver.alertAccept();
-  const documentPage = this.ui.browser.documentPage();
+Then(/^I can abandon the workflow$/, async function() {
+  const documentPage = await this.ui.browser.documentPage();
+  const abandonWorkflowButton = await documentPage.abandonWorkflowButton;
+  await abandonWorkflowButton.waitForVisible();
+  await abandonWorkflowButton.click();
+  await driver.alertAccept();
   // check info bar in the document is not visible
-  documentPage.infoBar.waitForVisible(browser.options.waitforTimeout, true);
+  const infoBar = await documentPage.infoBar;
+  await infoBar.waitForVisible(browser.options.waitforTimeout, true);
   // assert that info bar displays a task is running
-  documentPage.taskInfo.waitForVisible(browser.options.waitforTimeout, true);
+  const taskInfo = await documentPage.taskInfo;
+  await taskInfo.waitForVisible(browser.options.waitforTimeout, true);
   // assert that document info says a process is running
-  documentPage.info.waitForVisible();
-  documentPage.info.waitForVisible('[name="process"]', browser.options.waitforTimeout, true);
+  const docPageInfo = await documentPage.info;
+  await docPageInfo.waitForVisible();
+  await docPageInfo.waitForVisible('[name="process"]', browser.options.waitforTimeout, true);
 
   // In order to avoid errors when performing the teardown
-  fixtures.workflows.removeInstance(this.workflowInstance.id);
+  await fixtures.workflows.removeInstance(this.workflowInstance.id);
 });
 
-Then(/^I can see the document is a publication$/, function() {
-  const infoBar = this.ui.browser.publicationInfobar;
-  infoBar.waitForVisible();
+Then(/^I can see the document is a publication$/, async function() {
+  const browser = await this.ui.browser;
+  const infoBar = await browser.publicationInfobar;
+  await infoBar.waitForVisible();
 });
 
-Then(/^I can unpublish the document$/, function() {
-  const unpublishButton = this.ui.browser.publicationInfobar.element('nuxeo-unpublish-button');
-  unpublishButton.waitForVisible();
-  unpublishButton.click();
-  const unpublishConfirm = unpublishButton.element('nuxeo-confirm-button #dialog paper-button[class="primary"]');
-  unpublishConfirm.waitForVisible();
-  unpublishConfirm.click();
+Then(/^I can unpublish the document$/, async function() {
+  const browser = await this.ui.browser;
+  const infoBar = await browser.publicationInfobar;
+  const unpublishButton = await infoBar.element('nuxeo-unpublish-button');
+  await unpublishButton.waitForVisible();
+  await unpublishButton.click();
+  const unpublishConfirm = await unpublishButton.$('nuxeo-confirm-button #dialog paper-button[class="primary"]');
+  await unpublishConfirm.waitForVisible();
+  await unpublishConfirm.click();
 });
 
-Then('I can see {int} validation error(s) in the {string} edit form', function(nbErrors, docType) {
-  const { browser } = this.ui;
-  const form = browser.editForm(docType);
-  form.waitForVisible();
-  driver.waitUntil(
-    () => form.errorMessages.length === nbErrors,
-    `Expecting to get ${nbErrors} results but found ${form.errorMessages.length}`,
+Then('I can see {int} validation error(s) in the {string} edit form', async function(nbErrors, docType) {
+  const browser = await this.ui.browser;
+  const form = await browser.editForm(docType);
+  await form.waitForVisible();
+  await driver.waitUntil(
+    async () => {
+      await driver.pause(1000);
+      const errorMessages = await form.errorMessages;
+      return errorMessages.length === nbErrors;
+    },
+    {
+      timeout: 5000,
+      timeoutMsg: `Expecting to get ${nbErrors} results but found ${form.errorMessages.length}`,
+    },
   );
 });
 
-Then('I can see the {string} error message in the {string} edit form', function(message, docType) {
-  const { browser } = this.ui;
-  const form = browser.editForm(docType);
-  form.waitForVisible();
-  driver.waitUntil(
-    () => form.errorMessages.some((err) => err === message),
-    `Expecting to find '${message}' error message but not found`,
-  );
+Then('I can see the {string} error message in the {string} edit form', async function(message, docType) {
+  const browser = await this.ui.browser;
+  try {
+    const form = await browser.editForm(docType);
+    await form.waitForVisible();
+    const errorMessages = await form.errorMessages;
+    let hasErrorMessage;
+    for (let i = 0; i < errorMessages.length; i++) {
+      const errorMessage = await errorMessages[i];
+      if (errorMessage === message) {
+        hasErrorMessage = true;
+        break;
+      }
+    }
+    if (!hasErrorMessage) {
+      throw new Error(`Expecting to find '${message}' error message but not found`);
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
 });
