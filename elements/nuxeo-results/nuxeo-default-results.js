@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -81,11 +82,12 @@ Polymer({
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
+        last-index="[[_lastIndex]]"
       >
         <template>
           <nuxeo-document-grid-thumbnail
             class="grid-box"
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{_computeTabAndLastIndex(index)}"
             selected$="{{selected}}"
             selected-items="[[selectedItems]]"
             index="[[index]]"
@@ -262,6 +264,11 @@ Polymer({
       notify: true,
     },
 
+    _lastIndex: {
+      type: Number,
+      value: 0,
+    },
+
     emptyLabel: String,
     emptyLabelWhenFiltered: String,
   },
@@ -289,5 +296,11 @@ Polymer({
 
   _contentStoredInColdStorage(doc) {
     return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
+  },
+
+  _computeTabAndLastIndex(index) {
+    const tabindex = index + 1;
+    this._lastIndex = this.nxProvider.resultsCount;
+    return tabindex.toString();
   },
 });

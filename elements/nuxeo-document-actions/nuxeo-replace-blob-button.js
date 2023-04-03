@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -55,7 +56,7 @@ Polymer({
 
     <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('replaceBlobButton.dialog.heading')]]</h2>
-      <nuxeo-dropzone id="dropzone" value="{{value}}" has-files="{{_canSubmit}}"></nuxeo-dropzone>
+      <nuxeo-dropzone id="dropzone" value="{{value}}" has-files-uploaded="{{_canSubmit}}"></nuxeo-dropzone>
       <div class="buttons">
         <paper-button dialog-dismiss on-tap="_cancel" class="secondary"
           >[[i18n('replaceBlobButton.dialog.cancel')]]</paper-button
@@ -183,9 +184,44 @@ Polymer({
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
       !this.isTrashed(doc) &&
-      !(doc.isRecord && this.xpath !== 'file:content') &&
-      !(this.isUnderRetentionOrLegalHold(doc) && this.xpath === 'file:content') &&
-      !(this.hasFacet(doc, 'ColdStorage') && this.hasContent(doc, 'coldstorage:coldContent'))
+      !(this.hasFacet(doc, 'ColdStorage') && this.hasContent(doc, 'coldstorage:coldContent')) &&
+      !this._isPropUnderRetention(doc)
     );
+  },
+
+  _isPropUnderRetention(doc) {
+    if (doc && doc.isUnderRetentionOrLegalHold && doc.retainedProperties && doc.retainedProperties.length > 0) {
+      const { retainedProperties } = doc;
+      /* if retained property is multivalued attachment, and all files are to be retained, denoted by ‘*’,
+        then return true.
+        if retained property is multivalued attachment, but only a single file is to be retained,
+        then return true only for that file */
+      return retainedProperties.find(
+        (prop) =>
+          this._transformXpathRegex(prop, this.xpath) || // xpath = docname:files/*/file
+          prop.startsWith(this.xpath) || // xpath = docname:files/1/file
+          (prop.includes(this.xpath.split('/')[0]) && !prop.includes('/')), // xpath = docname:files
+      );
+    }
+    return false;
+  },
+
+  _transformXpathRegex(prop, xpath) {
+    const transformedArray = [];
+    const splitter = '/';
+    const star = '*';
+    if (prop.includes(star)) {
+      let xpathArray = xpath.split(splitter);
+
+      for (let i = 0; i < xpathArray.length; i++) {
+        if (!Number.isNaN(parseInt(xpathArray[i], 10))) {
+          xpathArray[i] = star;
+        }
+        transformedArray.push(xpathArray[i]);
+      }
+      xpathArray = transformedArray;
+      xpath = xpathArray.join(splitter);
+    }
+    return prop === xpath;
   },
 });

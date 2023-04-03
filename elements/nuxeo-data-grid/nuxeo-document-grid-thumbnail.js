@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -62,8 +63,7 @@ Polymer({
         border: 2px solid transparent;
       }
 
-      .bubbleBox:hover,
-      .bubbleBox:focus {
+      .bubbleBox:hover {
         z-index: 500;
         border: 2px solid var(--nuxeo-link-hover-color);
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
@@ -107,7 +107,6 @@ Polymer({
       }
 
       .bubbleBox .select {
-        display: none;
         position: absolute;
         top: 1rem;
         left: 1rem;
@@ -141,7 +140,6 @@ Polymer({
       }
 
       .bubbleBox .actions {
-        display: none;
         background-color: var(--nuxeo-box);
         position: absolute;
         bottom: 0;
@@ -156,12 +154,6 @@ Polymer({
 
       .actions paper-icon-button:hover iron-icon {
         @apply --nuxeo-action-hover;
-      }
-
-      .bubbleBox:hover .actions,
-      .bubbleBox:hover .select,
-      .bubbleBox[selection-mode] .select {
-        display: block;
       }
 
       .bubbleBox:hover .select:hover {
@@ -188,14 +180,39 @@ Polymer({
       :host(.droptarget-hover) .bubbleBox {
         border: 2px dashed var(--nuxeo-grid-selected);
       }
+
+      :host(:focus) .bubbleBox {
+        z-index: 500;
+        border: 2px solid var(--nuxeo-link-hover-color);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+      }
+
+      :host(:focus) .bubbleBox .actions,
+      :host(:focus) .bubbleBox .select,
+      .bubbleBox:hover .actions,
+      .bubbleBox:hover .select,
+      .bubbleBox[selection-mode] .select {
+        opacity: 1;
+        height: auto;
+        overflow: visible;
+        transition: opacity 0.2s ease, height 0.2s ease;
+      }
+
+      .bubbleBox .actions,
+      .bubbleBox .select {
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+        transition: opacity 0.2s ease, height 0.2s ease;
+      }
     </style>
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
-      <div class="thumbnailContainer" on-tap="handleClick">
+      <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
         <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick">
+        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" tabindex="0">
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
@@ -212,6 +229,7 @@ Polymer({
             icon="icons:check"
             title="[[_computeTitle(doc)]]"
             on-tap="_onCheckBoxTap"
+            on-keydown="_onCheckBoxTap"
             role="checkbox"
             aria-checked="[[selected]]"
           ></paper-icon-button>
@@ -271,12 +289,15 @@ Polymer({
   },
 
   _onCheckBoxTap(e) {
-    this._toogleSelect(e);
+    // WEBUI-1262 : prevents checkbox selection during tab navigation
+    if (e.type === 'tap' || (e.key !== 'Tab' && e.key !== 'Shift')) {
+      this._toogleSelect(e);
+    }
   },
 
   _toogleSelect(e) {
     this.selected = !this.selected;
-    this.fire('selected', { index: this.index, shiftKey: e.detail.sourceEvent.shiftKey });
+    this.fire('selected', { index: this.index, shiftKey: e.type === 'tap' ? e.detail.sourceEvent.shiftKey : false });
   },
 
   _selectedItemsChanged() {

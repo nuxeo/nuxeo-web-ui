@@ -4,17 +4,17 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-      - maintenance-3.0.x
+      - maintenance-3.1.x
 
   workflow_dispatch:
     inputs:
       branch_name:
         description: 'The name of the branch to preview.'
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
         required: true
       caller_id:
         description: 'run identifier'
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
         type: string
         required: false
 
@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
@@ -63,7 +63,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-web-ui
           branch: ${BRANCH_NAME}
-          default-branch: maintenance-3.0.x
+          default-branch: maintenance-3.1.x
 
       - uses: actions/checkout@v3
         with:
@@ -80,7 +80,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-elements
           branch: ${BRANCH_NAME}
-          default-branch: maintenance-3.0.x
+          default-branch: maintenance-3.1.x
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2

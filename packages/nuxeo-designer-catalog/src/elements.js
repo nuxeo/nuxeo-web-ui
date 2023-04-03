@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +15,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+const path = require('path');
 const fs = require('fs-extra');
 const gutil = require('gulp-util');
-const path = require('path');
 
 const _ = require('lodash');
 const async = require('async');

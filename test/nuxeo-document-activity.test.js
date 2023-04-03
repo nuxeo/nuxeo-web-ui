@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -107,6 +108,26 @@ suite('nuxeo-document-activity', () => {
     });
 
     test('Should display the activity name as download when user performs download action', async () => {
+      element.document = {
+        'entity-type': 'document',
+        contextParameters: {
+          element: {
+            entries: [
+              {
+                path: '/default-domain',
+                title: 'Domain',
+                type: 'Domain',
+                uid: '1',
+              },
+            ],
+          },
+          audit: [],
+        },
+        path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
+        title: 'my file',
+        type: 'File',
+        uid: '7',
+      };
       const event = {
         extended: {
           clientReason: 'download',
@@ -141,37 +162,53 @@ suite('nuxeo-document-activity', () => {
     });
 
     test('Should gather the download actions as one group', async () => {
-      const a = {
-        extended: {
-          clientReason: 'download',
+      const original = [
+        {
+          extended: {
+            clientReason: 'download',
+          },
+          eventDate: '2022-12-15T08:38:12.665Z',
+          principalName: 'John Doe',
         },
-        eventDate: '2022-12-15T08:38:12.665Z',
-        principalName: 'John Doe',
-      };
-      const b = {
-        extended: {
-          clientReason: 'download',
+        {
+          extended: {
+            clientReason: 'download',
+          },
+          eventDate: '2022-12-15T08:36:12.665Z',
+          principalName: 'John Doe',
         },
-        eventDate: '2022-12-15T08:36:12.665Z',
-        principalName: 'John Doe',
-      };
-      expect(element._areGatherableActivities(a, b)).to.equal(true);
+      ];
+      const expected = [
+        {
+          extended: { clientReason: 'download' },
+          eventDate: '2022-12-15T08:38:12.665Z',
+          principalName: 'John Doe',
+        },
+      ];
+      expect(element._gatherDuplicatedActivities(original)[0].extended.clientReason).to.equal(
+        expected[0].extended.clientReason,
+      );
+      expect(element._gatherDuplicatedActivities(original)[0].eventDate).to.equal(expected[0].eventDate);
+      expect(element._gatherDuplicatedActivities(original)[0].principalName).to.equal(expected[0].principalName);
+      expect(element._gatherDuplicatedActivities(original).length).to.equal(1);
     });
     test('Should not group non-gatherable activities', async () => {
-      const a = {
-        extended: {
-          clientReason: 'download',
+      const original = [
+        {
+          extended: {
+            clientReason: 'download',
+          },
+          eventDate: '2022-12-15T08:38:12.665Z',
+          principalName: 'John Doe',
         },
-        eventDate: '2022-12-15T08:38:12.665Z',
-        principalName: 'John Doe',
-      };
-      const b = {
-        eventId: 'documentCreated',
-        extended: {},
-        eventDate: '2022-12-15T08:36:12.665Z',
-        principalName: 'John Doe',
-      };
-      expect(element._areGatherableActivities(a, b)).to.equal(false);
+        {
+          eventId: 'documentCreated',
+          extended: {},
+          eventDate: '2022-12-15T08:36:12.665Z',
+          principalName: 'John Doe',
+        },
+      ];
+      expect(element._gatherDuplicatedActivities(original).length).to.equal(2);
     });
   });
 });

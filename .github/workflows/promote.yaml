@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to promote (e.g.: 3.0.6-rc.6)'
+        description: 'Version to promote (e.g.: 3.1.2-rc.2)'
         required: true
       referenceBranch:
         description: 'Branch to be updated after the promotion'
         required: true
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
       dryRun:
         description: 'Run the workflow without pushing code or publishing artifacts'
         type: boolean
@@ -21,15 +21,16 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
       - uses: actions/checkout@v2
         with:
           ref: v${{ github.event.inputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
+      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -e 's/-rc.[0-9]*//')" >> $GITHUB_ENV
 

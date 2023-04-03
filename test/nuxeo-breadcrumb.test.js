@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -107,6 +108,29 @@ suite('nuxeo-breadcrumb', () => {
     });
   });
 
+  suite('Visibility without breadcrum entries', () => {
+    const document2 = {
+      'entity-type': 'document',
+      contextParameters: {},
+      path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
+      title: 'my file',
+      type: 'File',
+      uid: '7',
+    };
+    setup(async () => {
+      server = await login();
+      breadcrumb = await fixture(
+        html`
+          <nuxeo-breadcrumb .document=${document2} .router=${router}></nuxeo-breadcrumb>
+        `,
+      );
+    });
+
+    test('Should display a breadcrumb when document does not have breadcrumb entries', async () => {
+      expect(isElementVisible(breadcrumb)).to.be.true;
+    });
+  });
+
   suite('Breadcrumb composition', () => {
     test('Should display all the ancestors except the last one when document has breadcrumb entries', async () => {
       const ancestors = breadcrumb.shadowRoot.querySelector('#ancestors');
@@ -161,6 +185,35 @@ suite('nuxeo-breadcrumb', () => {
       expect(isElementVisible(nuxeoBreadcrumb)).to.be.true;
       const ancestors = nuxeoBreadcrumb.shadowRoot.querySelector('#ancestors');
       expect(ancestors.childElementCount).to.be.below(6);
+    });
+  });
+  suite('Title', () => {
+    test('title should not return title if document is not present or type is root', async () => {
+      const document3 = {
+        type: 'Root',
+        title: 'breadcrumb',
+      };
+      expect(breadcrumb._title(document3)).to.be.not.equal(document3.title);
+      expect(breadcrumb._title()).to.be.undefined;
+    });
+    test('Should return title when document.type is not root', async () => {
+      const document4 = {
+        title: 'breadcrumb',
+      };
+      expect(breadcrumb._title(document4)).to.equal(document4.title);
+    });
+  });
+
+  suite('Icon', () => {
+    test('Should return concat when document and url is present else empty', async () => {
+      const document5 = {
+        properties: {
+          'common:icon': 'testicon',
+        },
+      };
+      const url = 'path/';
+      expect(breadcrumb._icon(document5, '')).to.equal('');
+      expect(breadcrumb._icon(document5, url)).to.equal('path/testicon');
     });
   });
 });

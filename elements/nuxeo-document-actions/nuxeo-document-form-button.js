@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -51,7 +52,7 @@ Polymer({
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <div class="action" on-tap="_openDialog">
+      <div class="action" on-tap="_openDialog" tabindex="0">
         <paper-icon-button noink id="[[layout]]-button" icon="[[icon]]" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n(label)]]</span>
         <nuxeo-tooltip>[[i18n(label)]]</nuxeo-tooltip>

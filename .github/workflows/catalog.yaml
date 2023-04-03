@@ -7,11 +7,11 @@ on:
     inputs:
       target_platform:
         description: 'The Nuxeo server target platform to build the catalog for.'
-        default: '11.3'
+        default: '2023.0'
         required: true
       branch_name:
         description: 'The name of the Nuxeo Web UI branch to generate the catalog for.'
-        default: 'maintenance-3.0.x'
+        default: 'maintenance-3.1.x'
         required: true
       classifier:
         description: 'Classifier to name a custom version of the catalog (used for testing purposes).'
@@ -31,31 +31,31 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: git config --global user.name "nuxeo-web-ui-jx-bot" && git config --global user.email "ui+jx-bot@nuxeo.com"
+      - run: git config --global user.name "nuxeo-webui-jx-bot" && git config --global user.email "webui@hyland.com"
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 10
+          node-version: 14
 
       - uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '17'
 
       - name: 'Update settings.xml with server configuration'
         run: |
           echo '<settings>
             <mirrors>
               <mirror>
-                <id>nos-team</id>
+                <id>maven-internal</id>
                 <mirrorOf>external:*</mirrorOf>
-                <url>https://nexus-jx.nos.build.nuxeo.com/repository/maven-group/</url>
+                <url>https://packages.nuxeo.com/repository/maven-internal/</url>
               </mirror>
             </mirrors>
             <servers>
               <server>
                 <id>nos-team</id>
-                <username>nuxeo-web-ui-jx-bot</username>
+                <username>nuxeo-webui-jx-bot</username>
                 <password>${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}</password>
               </server>
               <server>
@@ -75,13 +75,19 @@ jobs:
               </server>
             </servers>
           </settings>' > ~/.m2/settings.xml
+     
+      - name: Install libxml2-utils (xmllint)
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Install libxml2-utils (xmllint)
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
       - name: Setup parameters (release)
         if: github.event_name == 'release'
         working-directory: packages/nuxeo-designer-catalog
         run: |
           echo "BRANCH_NAME=v${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
-          echo "TARGET_PLATFORM=11.3" >> $GITHUB_ENV
+          echo "TARGET_PLATFORM=2023.0" >> $GITHUB_ENV
 
       - name: Setup parameters (workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'
@@ -103,8 +109,9 @@ jobs:
 
       - name: Bundle the catalog
         run: |
+          sudo chmod +r pom.xml
+          CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)${{ github.event.inputs.classifier }}
           pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
-          CATALOG_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml)${{ github.event.inputs.classifier }}
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
           CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
           echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
@@ -144,7 +151,7 @@ jobs:
           GH_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
         run: | 
           git checkout -b designer-catalog-update-$CATALOG_VERSION
-          mvn versions:set-property -Dproperty=view.designer.catalog.11.3 -DnewVersion=$CATALOG_VERSION
+          mvn versions:set-property -Dproperty=view.designer.catalog.2023.0 -DnewVersion=$CATALOG_VERSION
           git add .
           git commit -m "Update Designer catalog with version $CATALOG_VERSION"
           git push origin designer-catalog-update-$CATALOG_VERSION

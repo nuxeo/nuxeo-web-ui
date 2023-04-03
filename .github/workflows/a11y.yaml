@@ -3,12 +3,12 @@ name: A11y
 on:
   pull_request:
     branches:
-      - maintenance-3.0.x
+      - maintenance-3.1.x
   workflow_call:
     inputs:
       branch:
         description: 'The current branch'
-        default: maintenance-3.0.x
+        default: maintenance-3.1.x
         type: string
         required: false
     secrets:
@@ -18,14 +18,14 @@ on:
       PACKAGES_AUTH_USER:
         description: 'PACKAGES_AUTH_USER'
         required: true
-      PACKAGES_AUTH_TOKEN: 
+      PACKAGES_AUTH_TOKEN:
         description: 'PACKAGES_AUTH_TOKEN'
         required: true
 
 env:
-  REFERENCE_BRANCH: maintenance-3.0.x
+  REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
 jobs:
   a11y:
@@ -35,18 +35,30 @@ jobs:
       with:
         ref: ${{ env.BRANCH_NAME }}
 
-    - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
+      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
     - uses: actions/setup-node@v3
       with:
         registry-url: ${{ env.NPM_REPOSITORY }}
-        node-version: 14
+        node-version: 18
         scope: '@nuxeo'
+    
+    - name: Install Web UI
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      run: |
+        npm install
+        pushd packages/nuxeo-web-ui-ftest
+        npm install
+        popd
+        pushd packages/nuxeo-designer-catalog
+        npm install
+        popd
 
     - uses: actions/setup-java@v2
       with:
         distribution: 'zulu'
-        java-version: '11'
+        java-version: '17'
 
     - name: 'Update settings.xml with server configuration'
       run: |

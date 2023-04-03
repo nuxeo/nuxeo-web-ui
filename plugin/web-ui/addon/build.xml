@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!--
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,8 +34,6 @@ limitations under the License.
   <target name="install" description="Install npm depedencies" unless="skipInstall">
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
-      <!-- remove next line once NXBT-3340 is closed -->
-      <arg value="--@nuxeo:registry=&quot;https://packages.nuxeo.com/repository/npm-public&quot;" />
     </exec>
   </target>
 

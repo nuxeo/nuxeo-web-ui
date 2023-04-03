@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,14 +17,14 @@ limitations under the License.
 */
 
 // Include Gulp & tools we'll use
+const path = require('path');
+const { spawn } = require('child_process');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 const git = require('gulp-git');
 const del = require('del');
-const { spawn } = require('child_process');
-const runSequence = require('run-sequence');
+const runSequence = require('gulp4-run-sequence');
 const merge = require('merge-stream');
-const path = require('path');
 const bower = require('gulp-bower');
 const fs = require('fs-extra');
 const stream = require('./src/utils/stream').obj;

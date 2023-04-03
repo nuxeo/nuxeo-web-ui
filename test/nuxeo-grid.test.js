@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -148,6 +149,81 @@ suite('nuxeo-grid', () => {
     expect(console.warn.notCalled).to.be.true;
   });
 
+  suite('Should generate proper style when partial properties are set', () => {
+    test('Should not log warning when column property is not set', async () => {
+      grid.columns = 3;
+      grid.rows = 4;
+      grid.rowGap = '8px';
+      grid.columnGap = '8px';
+      grid.gap = '16px';
+      grid.alignItems = 'center';
+      grid.justifyItems = 'center';
+      grid.justify = '';
+
+      const [top, main] = grid.querySelectorAll('*');
+      top.setAttribute('data-row', '1');
+      top.setAttribute('data-column-span', '1');
+      main.setAttribute('data-row', '2');
+      main.setAttribute('data-column-span', '2');
+      main.setAttribute('data-row-span', '2');
+
+      await flush();
+      expect(console.warn.notCalled).to.be.true;
+    });
+
+    test('Should not log warning when only row span property is set', async () => {
+      grid.columns = 0;
+      grid.rows = 0;
+      grid.rowGap = '8px';
+      grid.columnGap = '8px';
+      grid.gap = '16px';
+      grid.alignItems = 'center';
+      grid.justifyItems = 'center';
+
+      const [main] = grid.querySelectorAll('*');
+      main.setAttribute('data-row-span', '1');
+      main.setAttribute('data-row-span', '2');
+
+      await flush();
+      expect(console.warn.notCalled).to.be.true;
+    });
+
+    test('Should not log warning when only when only column span property is set', async () => {
+      grid.columns = 0;
+      grid.rows = 0;
+      grid.rowGap = '8px';
+      grid.columnGap = '8px';
+      grid.gap = '16px';
+      grid.alignItems = 'center';
+      grid.justifyItems = 'center';
+
+      const [top, main] = grid.querySelectorAll('*');
+      top.setAttribute('data-column-span', '3');
+      main.setAttribute('data-column-span', '2');
+      await flush();
+      expect(console.warn.notCalled).to.be.true;
+    });
+
+    test('Should generate proper style when align and justify properties are set', async () => {
+      grid.columns = 0;
+      grid.rows = 0;
+      grid.rowGap = '8px';
+      grid.columnGap = '8px';
+      grid.gap = '16px';
+      grid.alignItems = 'center';
+      grid.justifyItems = 'center';
+
+      const [main] = grid.querySelectorAll('*');
+      main.setAttribute('data-row-span', '1');
+      main.setAttribute('data-row-span', '2');
+      main.setAttribute('data-align', 'center');
+      main.setAttribute('data-justify', 'center');
+
+      await flush();
+      expect(console.warn.notCalled).to.be.true;
+    });
+  });
+
   test('Should generate proper style when column and row templates are set', async () => {
     grid.columns = 100; // this will be ignored if templateColumns is defined
     grid.rows = 300; // this will be ignored if templateRows is defined
@@ -179,6 +255,52 @@ suite('nuxeo-grid', () => {
     grid-row-gap: 8px;
     align-items: center;
     justify-items: center;
+  }
+  ::slotted([data-child-id="1"]) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  ::slotted([data-child-id="2"]) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  ::slotted([data-child-id="3"]) {
+    grid-column: 1;
+    grid-row: 3;
+  }
+}
+`;
+    expect(getStyle(grid)).to.equal(expected);
+    expect(console.warn.notCalled).to.be.true;
+  });
+  test('Should generate proper style when align and justify items are empty', async () => {
+    grid.columns = 100; // this will be ignored if templateColumns is defined
+    grid.rows = 300; // this will be ignored if templateRows is defined
+    grid.rowGap = '8px';
+    grid.columnGap = '8px';
+    grid.gap = '16px';
+    grid.alignItems = '';
+    grid.justifyItems = '';
+    grid.templateColumns = '1fr 300px auto';
+    grid.templateRows = '2fr auto 200px';
+    grid.columnspan = '1';
+    await flush();
+    const expected = `:host {
+  display: grid;
+  grid-template-columns: 1fr 300px auto;
+  grid-template-rows: 2fr auto 200px;
+  grid-gap: 16px;
+  grid-column-gap: 8px;
+  grid-row-gap: 8px;
+}
+@media (max-width: 1024px) {
+  :host {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-gap: 16px;
+    grid-column-gap: 8px;
+    grid-row-gap: 8px;
   }
   ::slotted([data-child-id="1"]) {
     grid-column: 1;

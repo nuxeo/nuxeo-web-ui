@@ -6,10 +6,10 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-  # Sync when a commit is done on maintenance-3.0.x
+  # Sync when a commit is done on maintenance-3.1.x
   push:
     branches:
-      - maintenance-3.0.x
+      - maintenance-3.1.x
     paths:
       - 'i18n/messages.json'
   
@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Crowdin Action
-        uses: crowdin/github-action@1.4.9
+        uses: crowdin/github-action@v1
         with:
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
@@ -52,8 +52,8 @@ jobs:
           download_translations: true
 
           # User properties
-          github_user_name: nuxeo-web-ui-jx-bot
-          github_user_email: ui+jx-bot@nuxeo.com
+          github_user_name: nuxeo-webui-jx-bot
+          github_user_email: webui@hyland.com
 
         env:
           GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}

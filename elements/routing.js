@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -115,7 +116,7 @@ page('/tasks', () => {
 });
 
 page('/diff/:id1/:id2', (data) => {
-  app.showDiff(data.params.id1, data.params.id2);
+  app.showDiff(data.params.id2, data.params.id1);
 });
 
 // use two capture groups, a first one for the page name, and a second for the page route (optional)

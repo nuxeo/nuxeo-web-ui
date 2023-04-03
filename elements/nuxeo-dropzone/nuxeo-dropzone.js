@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -219,7 +220,7 @@ Polymer({
       </template>
     </div>
 
-    <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, multiple, updateDocument, blobList)]]">
+    <div id="dropzone" hidden$="[[!_isDropzoneVisible(document, hasFiles, multiple, updateDocument, blobList)]]">
       <div id="container">
         <button class="link" on-click="open">
           [[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]
@@ -304,6 +305,12 @@ Polymer({
      * Flag that indicates if there are already uploaded files on the dropzone.
      */
     hasFiles: {
+      type: Boolean,
+      readOnly: true,
+      value: false,
+      notify: true,
+    },
+    hasFilesUploaded: {
       type: Boolean,
       readOnly: true,
       value: false,
@@ -397,6 +404,7 @@ Polymer({
   observers: ['_reset(value)', '_filesChanged(files.splices)', '_legacyReset(document)'],
 
   attached() {
+    this.uploadedFiles = [];
     this.connection = this.$.nx;
     this.setupDropZone(this.$.dropzone);
   },
@@ -411,6 +419,12 @@ Polymer({
   },
 
   async importBatch(data) {
+    this.uploadedFiles.map((item) => {
+      if (!item.batchId) {
+        item.batchId = data.detail.batchId;
+      }
+      return item.batchId;
+    });
     if (data.type === 'nx-blob-picked') {
       this.set('files', data.detail.blobs);
     } else {
@@ -446,6 +460,7 @@ Polymer({
       // if we're already displaying an error, we better update it, otherwise the user can be mislead
       this.validate();
     }
+    this._setHasFilesUploaded(true);
   },
 
   _getFiles(data) {
@@ -512,11 +527,17 @@ Polymer({
   },
 
   _reset(value) {
+    if (value && value['upload-batch'] && this.uploadedFiles)
+      this.files = this.uploadedFiles.filter((item) => item.batchId === value['upload-batch']);
     if (
       value == null ||
       (Array.isArray(value) &&
         value.filter(
-          (file) => !Object.prototype.hasOwnProperty.call(this.valueKey ? file[this.valueKey] : file, 'data'),
+          (file) =>
+            !Object.prototype.hasOwnProperty.call(
+              this.valueKey && file[this.valueKey] != null ? file[this.valueKey] : file,
+              'data',
+            ),
         ).length === 0) ||
       Object.prototype.hasOwnProperty.call(value, 'data')
     ) {
@@ -534,10 +555,12 @@ Polymer({
 
   _filesChanged() {
     this._setHasFiles(this.files.length > 0);
+    this._setHasFilesUploaded(false);
   },
 
   _upload(files) {
     if (files && files.length > 0) {
+      Array.from(files).forEach((item) => this.uploadedFiles.push(item));
       this.uploadFiles(files);
     }
   },
@@ -562,7 +585,18 @@ Polymer({
     return this.i18n && this.draggingFiles ? this.i18n(this.dragContentMessage) : this.i18n(this.message);
   },
 
-  _isDropzoneVisible() {
+  _isDropzoneVisible(document) {
+    if (
+      document &&
+      document.isUnderRetentionOrLegalHold &&
+      document.retainedProperties &&
+      document.retainedProperties.length > 0
+    ) {
+      if (document.retainedProperties.indexOf(this.xpath) !== -1) {
+        return false;
+      }
+    }
+
     // Area to drop files should stay visible when the element is attached to a blob list property
     // and, e.g, when using the element on a form: creation or edition of documents.
     // This will allow the user to manage the list of files.

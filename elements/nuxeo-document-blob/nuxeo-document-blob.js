@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -73,7 +74,7 @@ Polymer({
     <template is="dom-if" if="[[blob]]">
       <div class="row">
         <div class="info">
-          <div><a href="[[blob.downloadUrl]]" title="[[blob.name]]">[[blob.name]]</a></div>
+          <div><a href="[[_getDownloadBlobUrl()]]" title="[[blob.name]]">[[blob.name]]</a></div>
           <div class="detail">[[formatSize(blob.length)]]</div>
         </div>
         <div class="actions">
@@ -113,6 +114,17 @@ Polymer({
       }
       obj = obj[path[i]];
     }
+    if (obj && !obj.downloadUrl) {
+      // this feature has not been implemented in 'view vs download', this would be implemented in WEBUI-1146.
+      obj.downloadUrl = obj.data;
+    }
     return obj;
+  },
+
+  _getDownloadBlobUrl() {
+    if (this.blob) {
+      return this.blob.downloadUrl ? this.blob.downloadUrl : this.blob.data;
+    }
+    return '';
   },
 });

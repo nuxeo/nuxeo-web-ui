@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -51,13 +52,13 @@ window.nuxeo.I18n.en['label.dublincore.subjects'] = 'Subjects';
 Nuxeo = Nuxeo || {};
 Nuxeo.LayoutBehavior = LayoutBehavior;
 
-// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/maintenance-3.0.x/ui/test/ui-test-helpers.js
+// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/maintenance-3.1.x/ui/test/ui-test-helpers.js
 // should be refactored and moved to the public helpers in nuxeo-elements (see ELEMENTS-1437 & WEBUI-604)
 function waitForLayoutLoad(layout) {
   return Promise.race([waitForEvent(layout, 'element-changed'), waitForAttrMutation(layout.$.error, 'hidden', null)]);
 }
 
-// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/maintenance-3.0.x/ui/test/nuxeo-document-picker.test.js
+// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/maintenance-3.1.x/ui/test/nuxeo-document-picker.test.js
 // should be refactored and moved to the public helpers in nuxeo-elements (see ELEMENTS-1437 & WEBUI-604)
 const waitForDialogOpen = async (dialog) => {
   if (!isElementVisible(dialog)) {
@@ -66,7 +67,7 @@ const waitForDialogOpen = async (dialog) => {
   }
 };
 
-// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/maintenance-3.0.x/ui/test/nuxeo-document-picker.test.js
+// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/maintenance-3.1.x/ui/test/nuxeo-document-picker.test.js
 // should be refactored and moved to the public helpers in nuxeo-elements (see ELEMENTS-1437 & WEBUI-604)
 const waitForDialogClose = async (dialog) => {
   if (isElementVisible(dialog)) {
@@ -376,6 +377,48 @@ suite('nuxeo-edit-documents-button', () => {
       await waitForDialogOpen(dialog);
       // set dc:nature update mode to remove
       natureBulkWidget.updateMode = 'remove';
+      // set a dc:expired date
+      expiredWidget.value = new Date();
+      // click the save button
+      save.click();
+      await waitForDialogClose(dialog);
+      // check that dialog is closed
+      expect(isElementVisible(dialog)).to.be.false;
+    });
+
+    test('Should submit form when properties are modified correctly when update mode is replace', async () => {
+      button = await buildButton();
+      const { dialog, save } = button.$;
+      const natureWidget = getWidget('dc:nature');
+      const natureBulkWidget = getBulkWidget(natureWidget);
+      const expiredWidget = getWidget('dc:expired');
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      await waitForDialogOpen(dialog);
+      // set dc:nature update mode to remove
+      natureBulkWidget.updateMode = 'replace';
+      natureWidget.value = 'test';
+      // set a dc:expired date
+      expiredWidget.value = new Date();
+      // click the save button
+      save.click();
+      await waitForDialogClose(dialog);
+      // check that dialog is closed
+      expect(isElementVisible(dialog)).to.be.false;
+    });
+
+    test('Should submit form when properties are modified correctly when update mode is addvalues', async () => {
+      button = await buildButton();
+      const { dialog, save } = button.$;
+      const natureWidget = getWidget('dc:nature');
+      const natureBulkWidget = getBulkWidget(natureWidget);
+      const expiredWidget = getWidget('dc:expired');
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      await waitForDialogOpen(dialog);
+      // set dc:nature update mode to remove
+      natureBulkWidget.updateMode = 'addValues';
+      natureWidget.value = 'test';
       // set a dc:expired date
       expiredWidget.value = new Date();
       // click the save button

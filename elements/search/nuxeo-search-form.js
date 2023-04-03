@@ -1,6 +1,7 @@
 /**
 @license
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -551,8 +552,8 @@ Polymer({
             // filter null values
             Object.keys(params).forEach((param) => {
               const value = params[param];
-              if (value && param !== 'dc:title') {
-                result[param] = value;
+              if (value !== null && param !== 'dc:title') {
+                result[param] = typeof value === 'boolean' ? value.toString() : value;
               }
             });
             // allow search to be visible on JSF UI
@@ -588,7 +589,10 @@ Polymer({
      * @ignore
      * If `true`, the current element is visible.
      * */
-    visible: Boolean,
+    visible: {
+      type: Boolean,
+      notify: true,
+    },
     /**
      * If `true`, automatically execute the search each time a param is changed.
      */
@@ -754,7 +758,7 @@ Polymer({
     if (this.results && this.auto && this.visible && this._validate()) {
       this.__fetchDebouncer = Debouncer.debounce(this.__fetchDebouncer, timeOut.after(300), () => {
         this.results.reset();
-        this._fetch(this.results);
+        this._fetch(this.results).then(this._navigateToResults.bind(this));
       });
     }
   },
