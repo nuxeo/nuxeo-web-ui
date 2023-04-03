@@ -22,34 +22,26 @@ jobs:
     with:
       branch: maintenance-3.1.x
 
-  #==================================================================================================================
-  # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1266 is resolved.
-  #==================================================================================================================
-  # a11y:
-  #   uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@maintenance-3.1.x
-  #   secrets:
-  #     NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-  #     PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
-  #     PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
-  #   with:
-  #     branch: maintenance-3.1.x
-  #==================================================================================================================
+  a11y:
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@maintenance-3.1.x
+    secrets:
+      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
+      PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
+    with:
+      branch: maintenance-3.1.x
 
-  #==================================================================================================================
-  # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1267 is resolved.
-  #==================================================================================================================
-  # ftest:
-  #   uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@maintenance-3.1.x
-  #   secrets:
-  #     NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-  #     PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
-  #     PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
-  #   with:
-  #     branch: maintenance-3.1.x
-  #==================================================================================================================
+  ftest:
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@maintenance-3.1.x
+    secrets:
+      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
+      PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
+    with:
+      branch: maintenance-3.1.x
 
   build:
-    needs: [lint, test]
+    needs: [lint, test, a11y, ftest]
     runs-on: [self-hosted, master]
     steps:
       - uses: actions/checkout@v2
