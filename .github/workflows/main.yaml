@@ -10,12 +10,12 @@ on:
   
 jobs:
   lint:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@maintenance-3.1.x
+    uses: --ignore nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@maintenance-3.1.x
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
 
   test:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@maintenance-3.1.x
+    uses: --ignore nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@maintenance-3.1.x
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -23,7 +23,7 @@ jobs:
       branch: maintenance-3.1.x
 
   a11y:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@maintenance-3.1.x
+    uses: --ignore nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@maintenance-3.1.x
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
@@ -32,7 +32,7 @@ jobs:
       branch: maintenance-3.1.x
 
   ftest:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@maintenance-3.1.x
+    uses: --ignore nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@maintenance-3.1.x
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
@@ -125,9 +125,9 @@ jobs:
     - name: Tag
       run: |
         git add package-lock.json packages/nuxeo-web-ui-ftest/package-lock.json
-        git commit -a -m "Release ${VERSION}"
-        git tag -a v${VERSION} -m "Release ${VERSION}"
-        git push origin v${VERSION}
+        git commit -a -m "Release 3.1.0-rc.79"
+        git tag -a v3.1.0-rc.79 -m "Release 3.1.0-rc.79"
+        git push origin v3.1.0-rc.79
 
     - name: Publish Nuxeo packages
       env:
