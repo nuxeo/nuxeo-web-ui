@@ -496,13 +496,17 @@ limitations under the License.
                 // filter null values
                 for (var param in params) {
                   var value = params[param];
-                  if (value && param !== 'dc:title') {
+                  if (value !== null && param !== 'dc:title') {
                     if (Array.isArray(value)) {
                       result[param] = value.map(function(item) {
                         return (item && item['entity-type']) ? (item.uid || item.id) : item;
                       });
                     } else {
-                      result[param] = (value && value['entity-type']) ? (value.uid || value.id) : value;
+                      if (value && value['entity-type']) {
+                        result[param] = (value.uid || value.id)
+                      } else {
+                        result[param] = typeof value === 'boolean' ? value.toString() : value
+                      }
                     }
                   }
                 }
