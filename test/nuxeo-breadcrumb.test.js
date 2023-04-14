@@ -99,7 +99,7 @@ suite('nuxeo-breadcrumb', () => {
     test('Should display the document title when a document is set and has a title', async () => {
       const title = breadcrumb.shadowRoot.querySelector('.current');
       expect(isElementVisible(title)).to.be.true;
-      expect(title.innerText).to.equal('my file');
+      expect(title.innerText).to.equal('my file (7)');
     });
 
     test('Should display a breadcrumb when a document is set', async () => {
