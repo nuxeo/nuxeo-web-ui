@@ -73,6 +73,13 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             border-radius: 2px;
           }
 
+          .trash-icon {
+            height: 16px;
+            width: 16px;
+            color: var(--nuxeo-warn-text, #ff0000);
+            display: inline-block;
+          }
+
           #ancestors {
             max-width: 100%;
             list-style-type: none;
@@ -132,6 +139,9 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
               title="[[_title(document)]]"
             >
               [[_title(document)]]
+              <template is="dom-if" if="[[_isTrashed(document)]]">
+                <iron-icon class="trash-icon" id="trashIcon" name="trashIcon" icon="delete"></iron-icon>
+              </template>
             </a>
             <nav aria-label="Breadcrumb">
               <ol id="ancestors"></ol>
@@ -247,8 +257,14 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
 
     _title(document) {
       if (document) {
-        return document.type === 'Root' ? this.i18n('browse.root') : document.title;
+        return document.type === 'Root'
+          ? this.i18n('browse.root')
+          : `${document.title} (${document.uid.substring(document.uid.lastIndexOf('-') + 1)})`;
       }
+    }
+
+    _isTrashed(document) {
+      return document && document.isTrashed;
     }
 
     _icon(document, url) {

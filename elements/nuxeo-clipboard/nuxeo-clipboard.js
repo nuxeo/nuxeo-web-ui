@@ -263,9 +263,7 @@ Polymer({
     if (!documents || documents.length === 0 || !this.hasFacet(doc, 'Folderish')) {
       return false;
     }
-    return doc.contextParameters && doc.contextParameters.subtypes
-      ? documents.every((entry) => doc.contextParameters.subtypes.map((e) => e.type).indexOf(entry.type) > -1)
-      : true;
+    return true;
   },
 
   execute(evt) {
