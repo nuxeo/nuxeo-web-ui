@@ -7,7 +7,8 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ "maintenance-3.0.x" ]
   schedule:
-    - cron: '29 20 * * 5'
+    # At 01:00 on Sunday
+    - cron: '0 1 * * SUN'
   workflow_call:
     inputs:
       branch:
@@ -48,45 +49,45 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-        with:
+      with:
           ref: ${{ env.BRANCH_NAME }}
 
     - uses: actions/setup-node@v1
-        with:
+      with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           scope: '@nuxeo'
 
     - uses: actions/setup-java@v2
-        with: 
+      with: 
           distribution: 'zulu'
           java-version: '11'
 
     - name: Determine nuxeo-elements branch to link
-        id: pick_nuxeo_elements_branch
-        run: |
+      id: pick_nuxeo_elements_branch
+      run: |
           if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
             echo ::set-output name=branch::${{ env.BRANCH_NAME }}
           else
             echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
           fi
     - name: Install Web UI
-        env:
+      env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
+      run: |
           npm install
           pushd packages/nuxeo-web-ui-ftest
           npm install
           popd
     - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
-        with:
+      uses: actions/checkout@v2
+      with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
           fetch-depth: 1
           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
 
     - name: Pack Elements modules
-        run: |
+      run: |
           pushd nuxeo-elements
           pushd core
           echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
@@ -102,13 +103,13 @@ jobs:
           popd
           popd
     - name: Link elements to Web UI
-        run: |
+      run: |
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
     - name: 'Update settings.xml with server configuration'
-        run: |
+      run: |
           echo '<settings>
               <servers>
                 <server>
@@ -119,7 +120,7 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
     - name: Nuxeo package build
-        run: mvn install -DskipInstall
+      run: mvn install -DskipInstall
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
