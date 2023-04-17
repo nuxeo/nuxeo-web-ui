@@ -1,0 +1,150 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "maintenance-3.0.x" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "maintenance-3.0.x" ]
+  schedule:
+    - cron: '29 20 * * 5'
+  workflow_call:
+    inputs:
+      branch:
+        description: 'The branch to Analyze'
+        type: string
+        required: true
+    secrets:
+      NPM_PACKAGES_TOKEN:
+        description: 'NPM_PACKAGES_TOKEN'
+        required: true
+      PACKAGES_AUTH_USER:
+        description: 'PACKAGES_AUTH_USER'
+        required: true
+      PACKAGES_AUTH_TOKEN:
+        description: 'PACKAGES_AUTH_TOKEN'
+        required: true
+
+env:
+  REFERENCE_BRANCH: maintenance-3.0.x
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java', 'javascript' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
+        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+
+    steps:
+    - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+    - uses: actions/setup-node@v1
+        with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          scope: '@nuxeo'
+
+    - uses: actions/setup-java@v2
+        with: 
+          distribution: 'zulu'
+          java-version: '11'
+
+    - name: Determine nuxeo-elements branch to link
+        id: pick_nuxeo_elements_branch
+        run: |
+          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
+            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
+          else
+            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
+          fi
+    - name: Install Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+    - name: Checkout the nuxeo-elements repo
+        uses: actions/checkout@v2
+        with:
+          repository: nuxeo/nuxeo-elements
+          path: nuxeo-elements
+          fetch-depth: 1
+          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+
+    - name: Pack Elements modules
+        run: |
+          pushd nuxeo-elements
+          pushd core
+          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd ui
+          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd dataviz
+          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd testing-helpers
+          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          popd
+    - name: Link elements to Web UI
+        run: |
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+    - name: 'Update settings.xml with server configuration'
+        run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
+    - name: Nuxeo package build
+        run: mvn install -DskipInstall
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with "+" to use these queries and those in the config file.
+
+        # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+        # queries: security-extended,security-and-quality
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"
