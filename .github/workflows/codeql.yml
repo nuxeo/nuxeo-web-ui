@@ -1,8 +1,6 @@
 name: CodeQL
 
 on:
-  push:
-    branches: [ "security-patch-v1-2023" ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "maintenance-3.0.x" ]
@@ -43,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'java', 'javascript' ]
+        language: [ 'javascript' ]
         # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
