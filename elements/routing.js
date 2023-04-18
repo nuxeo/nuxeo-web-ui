@@ -115,7 +115,7 @@ page('/tasks', () => {
 });
 
 page('/diff/:id1/:id2', (data) => {
-  app.showDiff(data.params.id1, data.params.id2);
+  app.showDiff(data.params.id2, data.params.id1);
 });
 
 // use two capture groups, a first one for the page name, and a second for the page route (optional)
