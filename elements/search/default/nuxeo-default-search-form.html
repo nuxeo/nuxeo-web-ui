@@ -59,10 +59,9 @@ limitations under the License.
       >
       </nuxeo-dropdown-aggregation>
     </div>
-
-    <div role="widget">
-      <label>[[i18n('defaultSearch.collections')]]</label>
-      <template is="dom-if" if="[[_checkForCollectionTitle(params)]]">
+    <template is="dom-if" if="[[_checkForCollectionTitle(params)]]">
+      <div role="widget">
+        <label>[[i18n('defaultSearch.collections')]]</label>
         <nuxeo-selectivity
           operation="User.GetCollections"
           min-chars="0"
@@ -73,9 +72,8 @@ limitations under the License.
           aria-label$="[[i18n('defaultSearch.collections')]]"
         >
         </nuxeo-selectivity>
-      </template>
-    </div>
-
+      </div>
+    </template>
     <div role="widget">
       <label>[[i18n('defaultSearch.tags')]]</label>
       <nuxeo-tag-suggestion
