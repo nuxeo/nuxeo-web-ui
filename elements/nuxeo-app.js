@@ -323,6 +323,7 @@ Polymer({
       responsive-width="720px"
       edge-swipe-sensitivity="0"
     >
+      <!-- testing A11y-->
       <div slot="drawer" role="list">
         <!-- logo -->
         <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
