@@ -18,6 +18,7 @@ const EXPECTED_VIOLATIONS = {
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
   'aria-allowed-role': 5,
+  'color-contrast-enhanced': 2,
   'color-contrast': 8,
 };
 
