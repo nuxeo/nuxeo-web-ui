@@ -14,15 +14,14 @@ on:
   schedule:
     # At 01:00 on Sunday
     - cron: '0 1 * * SUN'
-
-workflow_call:
+  workflow_call:
     inputs:
       branch:
         description: 'The branch to Analyze'
         type: string
         required: true
     secrets:
-    NPM_PACKAGES_TOKEN:
+      NPM_PACKAGES_TOKEN:
         description: 'NPM_PACKAGES_TOKEN'
         required: true
       PACKAGES_AUTH_USER:
