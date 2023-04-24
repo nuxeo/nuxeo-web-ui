@@ -5,7 +5,7 @@
 
 # This workflow will initiate a Veracode Static Analysis Pipeline scan, return a results.json and convert to SARIF for upload as a code scanning alert
 
-name: Veracode Static Analysis Scan
+name: Veracode Scan
 
 on:
   pull_request:
@@ -48,7 +48,7 @@ permissions:
 
 jobs:
   # This workflow contains a job to build and submit pipeline scan, you will need to customize the build process accordingly and make sure the artifact you build is used as the file input to the pipeline scan file parameter
-  build-and-pipeline-scan:
+  static-application-security-testing:
     # The type of runner that the job will run on
     permissions:
       contents: read # for actions/checkout to fetch code
