@@ -15,6 +15,34 @@ on:
     # At 01:00 on Sunday
     - cron: '0 1 * * SUN'
 
+workflow_call:
+    inputs:
+      branch:
+        description: 'The branch to Analyze'
+        type: string
+        required: true
+    secrets:
+    NPM_PACKAGES_TOKEN:
+        description: 'NPM_PACKAGES_TOKEN'
+        required: true
+      PACKAGES_AUTH_USER:
+        description: 'PACKAGES_AUTH_USER'
+        required: true
+      PACKAGES_AUTH_TOKEN:
+        description: 'PACKAGES_AUTH_TOKEN'
+        required: true
+      VERACODE_API_ID:
+        description: 'VERACODE_API_ID'
+        required: true
+      VERACODE_API_KEY:
+        description: 'VERACODE_API_KEY'
+        required: true
+
+env:
+  REFERENCE_BRANCH: maintenance-3.0.x
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 permissions:
   contents: read
@@ -31,21 +59,93 @@ jobs:
     steps:
 
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
       with:
-        repository: ''
+          ref: ${{ env.BRANCH_NAME }}
 
-    - run: zip -r veracode-scan-target.zip ./
+    - uses: actions/setup-node@v1
+      with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: 14
+          scope: '@nuxeo'
+
+    - uses: actions/setup-java@v2
+      with: 
+          distribution: 'zulu'
+          java-version: '11'
+
+    - name: Determine nuxeo-elements branch to link
+      id: pick_nuxeo_elements_branch
+      run: |
+          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
+            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
+          else
+            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
+          fi
+    - name: Install Web UI
+      env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+    - name: Checkout the nuxeo-elements repo
+      uses: actions/checkout@v2
+      with:
+          repository: nuxeo/nuxeo-elements
+          path: nuxeo-elements
+          fetch-depth: 1
+          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+
+    - name: Pack Elements modules
+      run: |
+          pushd nuxeo-elements
+          pushd core
+          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd ui
+          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd dataviz
+          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd testing-helpers
+          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          popd
+    - name: Link elements to Web UI
+      run: |
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+    - name: 'Update settings.xml with server configuration'
+      run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
+    - name: Nuxeo package build
+      run: mvn install -DskipInstall
+    - name: Archive packages
+      uses: actions/upload-artifact@v2
+      with:
+        name: packages
+        path: |
+          plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
 
     # download the Veracode Static Analysis Pipeline scan jar
     - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
     - run: unzip -o pipeline-scan-LATEST.zip
 
-    - uses: actions/setup-java@v3
-      with:
-        java-version: 8
-        distribution: 'temurin'
-    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file veracode-scan-target.zip
+    
+    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
       continue-on-error: true
     - name: Convert pipeline scan output to SARIF format
       id: convert
