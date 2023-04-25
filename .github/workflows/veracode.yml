@@ -153,3 +153,28 @@ jobs:
       with:
         # Path to SARIF file relative to the root of the repository
         sarif_file: veracode-results.sarif
+    - name: Slack notification
+        if: failure() && (github.event_name == 'push' || github.event_name == 'schedule')
+        uses: slackapi/slack-github-action@v1.23.0
+        env:
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        with:
+          channel-id: 'C054U5NFYCT'
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "#A30200",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> failed in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
