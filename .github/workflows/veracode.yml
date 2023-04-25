@@ -142,14 +142,17 @@ jobs:
     # download the Veracode Static Analysis Pipeline scan jar
     - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
     - run: unzip -o pipeline-scan-LATEST.zip   
-    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High, Medium" --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
       continue-on-error: true
     - name: Convert pipeline scan output to SARIF format
       id: convert
-      uses: veracode/veracode-pipeline-scan-results-to-sarif@ff08ae5b45d5384cb4679932f184c013d34da9be
+      uses: Veracode/veracode-pipeline-scan-results-to-sarif@v1.0.5
       with:
         pipeline-results-json: results.json
-    - uses: github/codeql-action/upload-sarif@v2
+        output-results-sarif: veracode-results.sarif
+        finding-rule-level: "3:1:0"
+    - name: Upload SARIF file to repository
+      uses: github/codeql-action/upload-sarif@v2
       with:
         # Path to SARIF file relative to the root of the repository
         sarif_file: veracode-results.sarif
