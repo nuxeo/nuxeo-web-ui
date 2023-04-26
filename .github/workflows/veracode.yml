@@ -5,7 +5,7 @@
 
 # This workflow will initiate a Veracode Static Analysis Pipeline scan, return a results.json and convert to SARIF for upload as a code scanning alert
 
-name: Veracode Scan
+name: Veracode
 
 on:
   pull_request:
@@ -48,7 +48,7 @@ permissions:
 
 jobs:
   # This workflow contains a job to build and submit pipeline scan, you will need to customize the build process accordingly and make sure the artifact you build is used as the file input to the pipeline scan file parameter
-  static-application-security-testing:
+  sast-scan:
     # The type of runner that the job will run on
     permissions:
       contents: read # for actions/checkout to fetch code
@@ -175,8 +175,22 @@ jobs:
                 "type": "section",
                 "text": {
                    "type": "mrkdwn",
-                   "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ job.steps.scanning.outcome }} in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>"
+                   "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ job.status }} in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>"
                  }
               }
             ]
           }
+    - name: Send scan result summary to slack
+      uses: crederauk/slack-workflow-summary@v1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        success-emoji: ':heavy-check-mark:'
+        skipped-emoji: ':heavy-minus-sign:'
+        failed-emoji: ':heavy-cross-mark:'
+    - name: Send scan result file to slack
+      uses: adrey/slack-file-upload-action@master
+      with:
+        token: ${{ secrets.SLACK_BOT_TOKEN }}
+        path: results.txt
+        channel: ${{ secrets.SLACK_CHANNEL_ID }}
