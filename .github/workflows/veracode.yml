@@ -143,8 +143,8 @@ jobs:
     - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
     - run: unzip -o pipeline-scan-LATEST.zip   
     - name: Code Scanning
-      id: scanning
-      run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+      id: code_scanning
+      run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --summary_output=true --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
       continue-on-error: true
     - name: Convert pipeline scan output to SARIF format
       id: convert
@@ -169,7 +169,7 @@ jobs:
         channel-id: ${{ env.SLACK_CHANNEL_ID }}
         payload: |
           {
-            "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ job.steps.scanning.outcome }} in nuxeo/nuxeo-web-ui <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>",
+            "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ steps.code_scanning.outcome }} in nuxeo/nuxeo-web-ui <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>",
             "blocks": [
               {
                 "type": "section",
