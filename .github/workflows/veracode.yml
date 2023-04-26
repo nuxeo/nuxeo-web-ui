@@ -157,7 +157,7 @@ jobs:
         # Path to SARIF file relative to the root of the repository
         sarif_file: veracode-results.sarif
     - name: Slack notification
-      if: github.event_name == 'pull_request' || github.event_name == 'schedule')
+      if: (github.event_name == 'pull_request' || github.event_name == 'schedule')
       uses: slackapi/slack-github-action@v1.23.0
       env:
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
