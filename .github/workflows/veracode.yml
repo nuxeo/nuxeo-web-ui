@@ -142,7 +142,9 @@ jobs:
     # download the Veracode Static Analysis Pipeline scan jar
     - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
     - run: unzip -o pipeline-scan-LATEST.zip   
-    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+    - name: Code Scanning
+      id: scanning
+      run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
       continue-on-error: true
     - name: Convert pipeline scan output to SARIF format
       id: convert
@@ -162,17 +164,18 @@ jobs:
       env:
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
       with:
-        channel-id: 'C054U5NFYCT'
+        channel-id: ${{ env.SLACK_CHANNEL_ID }}
         payload: |
           {
-            "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> completed in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>",
+            "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{!e job.steps.scanning.status == failure()  ? Failed : Completed}} in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>",
             "blocks": [
               {
                 "type": "section",
                 "text": {
                    "type": "mrkdwn",
-                   "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> completed in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>"
+                   "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{!e job.steps.scanning.status == failure()  ? Failed : Completed}} in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>"
                  }
               }
             ]
