@@ -169,13 +169,13 @@ jobs:
         channel-id: ${{ env.SLACK_CHANNEL_ID }}
         payload: |
           {
-            "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ job.steps.scanning.status == failure()  ? Failed : Completed }} in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>",
+            "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ job.steps.scanning.outcome }} in nuxeo/nuxeo-web-ui <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>",
             "blocks": [
               {
                 "type": "section",
                 "text": {
                    "type": "mrkdwn",
-                   "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ job.steps.scanning.status == failure()  ? Failed : Completed }} in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>"
+                   "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ job.steps.scanning.outcome }} in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>"
                  }
               }
             ]
