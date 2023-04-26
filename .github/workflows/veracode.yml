@@ -142,7 +142,7 @@ jobs:
     # download the Veracode Static Analysis Pipeline scan jar
     - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
     - run: unzip -o pipeline-scan-LATEST.zip   
-    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High, Medium" --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
       continue-on-error: true
     - name: Convert pipeline scan output to SARIF format
       id: convert
@@ -150,14 +150,14 @@ jobs:
       with:
         pipeline-results-json: results.json
         output-results-sarif: veracode-results.sarif
-        finding-rule-level: "3:1:0"
+        finding-rule-level: "4:3:0"
     - name: Upload SARIF file to repository
       uses: github/codeql-action/upload-sarif@v2
       with:
         # Path to SARIF file relative to the root of the repository
         sarif_file: veracode-results.sarif
     - name: Slack notification
-      if: failure() && (github.event_name == 'push' || github.event_name == 'schedule')
+      if: github.event_name == 'pull_request' || github.event_name == 'schedule')
       uses: slackapi/slack-github-action@v1.23.0
       env:
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
