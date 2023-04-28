@@ -462,6 +462,7 @@ Polymer({
       this._sequencer(calls).then(() => {
         this._hasVersions = this.documents.some((doc) => doc.isVersion);
         this.leftUid = null; // prevent accidental comparison with an old document
+        this.rightUid = null; // prevent accidental comparison with an old document
         this.leftUid = this.documents[1].uid;
         this.rightUid = this.documents[0].uid;
       });
