@@ -51,7 +51,7 @@ Polymer({
     </style>
 
     <template is="dom-if" if="[[_isAvailable(document)]]">
-      <div class="action" on-tap="_openDialog">
+      <div class="action" on-tap="_openDialog" tabindex="0">
         <paper-icon-button noink id="[[layout]]-button" icon="[[icon]]" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n(label)]]</span>
         <nuxeo-tooltip>[[i18n(label)]]</nuxeo-tooltip>
