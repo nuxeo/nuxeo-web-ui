@@ -404,6 +404,7 @@ Polymer({
   observers: ['_reset(value)', '_filesChanged(files.splices)', '_legacyReset(document)'],
 
   attached() {
+    this.uploadedFiles = [];
     this.connection = this.$.nx;
     this.setupDropZone(this.$.dropzone);
   },
@@ -418,6 +419,12 @@ Polymer({
   },
 
   async importBatch(data) {
+    this.uploadedFiles.map((item) => {
+      if (!item.batchId) {
+        item.batchId = data.detail.batchId;
+      }
+      return item.batchId;
+    });
     if (data.type === 'nx-blob-picked') {
       this.set('files', data.detail.blobs);
     } else {
@@ -520,6 +527,8 @@ Polymer({
   },
 
   _reset(value) {
+    if (value && this.uploadedFiles)
+      this.files = this.uploadedFiles.filter((item) => item.batchId === value['upload-batch']);
     if (
       value == null ||
       (Array.isArray(value) &&
@@ -547,6 +556,7 @@ Polymer({
 
   _upload(files) {
     if (files && files.length > 0) {
+      Array.from(files).forEach((item) => this.uploadedFiles.push(item));
       this.uploadFiles(files);
     }
   },
