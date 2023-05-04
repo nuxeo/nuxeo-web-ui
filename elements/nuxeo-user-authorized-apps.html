@@ -65,7 +65,9 @@ limitations under the License.
             </template>
           </nuxeo-data-table-column>
         </nuxeo-data-table>
-        <span>[[i18n('authorizedApps.grantNotice')]]</span>
+        <template is="dom-if" if="[[_isAppAvailable(clients)]]">
+          <span>[[i18n('authorizedApps.grantNotice')]]</span>
+        </template>
       </nuxeo-card>
     </nuxeo-page>
   </template>
@@ -120,6 +122,10 @@ limitations under the License.
 
       _authorizationDate(client) {
         return this._token(client).creationDate;
+      },
+
+      _isAppAvailable(clients) {
+        return clients.length > 0;
       },
 
       _revoke(e) {
