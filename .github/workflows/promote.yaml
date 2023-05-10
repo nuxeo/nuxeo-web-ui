@@ -29,7 +29,7 @@ jobs:
         with:
           ref: v${{ github.event.inputs.version }}
 
-      - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
+      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -e 's/-rc.[0-9]*//')" >> $GITHUB_ENV
 
