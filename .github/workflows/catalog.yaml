@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: git config --global user.name "nuxeo-web-ui-jx-bot" && git config --global user.email "ui+jx-bot@nuxeo.com"
+      - run: git config --global user.name "nuxeo-webui-jx-bot" && git config --global user.email "webui@hyland.com"
 
       - uses: actions/setup-node@v3
         with:
@@ -55,7 +55,7 @@ jobs:
             <servers>
               <server>
                 <id>nos-team</id>
-                <username>nuxeo-web-ui-jx-bot</username>
+                <username>nuxeo-webui-jx-bot</username>
                 <password>${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}</password>
               </server>
               <server>

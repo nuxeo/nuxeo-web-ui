@@ -46,7 +46,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - run: git config user.name "nuxeo-web-ui-jx-bot" && git config user.email "ui+jx-bot@nuxeo.com"
+    - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
     - uses: actions/setup-node@v3
       with:
