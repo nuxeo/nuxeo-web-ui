@@ -66,7 +66,8 @@ Please check out the [Web UI functional testing documentation](https://doc.nuxeo
 
 ## License
 
-[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt) Copyright (c) Nuxeo SA
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt) ©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 
 ## About Nuxeo
