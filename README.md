@@ -49,9 +49,10 @@ Build and optimize the current project, ready for deployment. This includes lint
 
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) 
 
-(C) Copyright Nuxeo Corp. (http://nuxeo.com/)
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
-All images, icons, fonts, and videos contained in this folder are copyrighted by Nuxeo, all rights reserved.
+All images, icons, fonts, and videos contained in this folder are copyrighted by Hyland Software, all rights reserved.
 
 ## About Nuxeo
 
