@@ -125,9 +125,9 @@ jobs:
       - name: Tag
         run: |
           git add package-lock.json packages/nuxeo-web-ui-ftest/package-lock.json
-          git commit -a -m "Release 3.1.0-rc.79"
-          git tag -a v3.1.0-rc.79 -m "Release 3.1.0-rc.79"
-          git push origin v3.1.0-rc.79
+          git commit -a -m "Release ${VERSION}"
+          git tag -a v${VERSION} -m "Release ${VERSION}"
+          git push origin v${VERSION}
 
       - name: Publish Nuxeo packages
         env:
