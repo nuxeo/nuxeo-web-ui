@@ -103,6 +103,7 @@ Polymer({
   observers: ['_update(user, document, xpath)'],
 
   _update(user, document, xpath) {
+    
     this.blob = document && this._deepFind(document.properties, xpath);
     this.actionContext = { user: this.user, document: this.document, blob: this.blob, xpath: this.xpath };
   },
