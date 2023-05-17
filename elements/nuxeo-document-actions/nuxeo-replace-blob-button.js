@@ -56,7 +56,7 @@ Polymer({
 
     <nuxeo-dialog id="dialog" with-backdrop>
       <h2>[[i18n('replaceBlobButton.dialog.heading')]]</h2>
-      <nuxeo-dropzone id="dropzone" value="{{value}}" has-files="{{_canSubmit}}"></nuxeo-dropzone>
+      <nuxeo-dropzone id="dropzone" value="{{value}}" has-files-uploaded="{{_canSubmit}}"></nuxeo-dropzone>
       <div class="buttons">
         <paper-button dialog-dismiss on-tap="_cancel" class="secondary"
           >[[i18n('replaceBlobButton.dialog.cancel')]]</paper-button
