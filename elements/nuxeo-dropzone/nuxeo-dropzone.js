@@ -310,6 +310,12 @@ Polymer({
       value: false,
       notify: true,
     },
+    hasFilesUploaded: {
+      type: Boolean,
+      readOnly: true,
+      value: false,
+      notify: true,
+    },
     _errorMessage: {
       type: String,
     },
@@ -447,6 +453,7 @@ Polymer({
       // if we're already displaying an error, we better update it, otherwise the user can be mislead
       this.validate();
     }
+    this._setHasFilesUploaded(true);
   },
 
   _getFiles(data) {
@@ -535,6 +542,7 @@ Polymer({
 
   _filesChanged() {
     this._setHasFiles(this.files.length > 0);
+    this._setHasFilesUploaded(false);
   },
 
   _upload(files) {
