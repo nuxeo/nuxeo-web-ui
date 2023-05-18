@@ -277,6 +277,12 @@ limitations under the License.
           value: false,
           notify: true,
         },
+        hasFilesUploaded: {
+          type: Boolean,
+          readOnly: true,
+          value: false,
+          notify: true,
+        },
         /**
          * A string containing an xpath expression, connected by dot (.) characters instead of slashes (/).
          */
@@ -430,6 +436,7 @@ limitations under the License.
         } else {
           this.invalid = false;
         }
+        this._setHasFilesUploaded(true);
       },
 
       _deleteFile: function(e) {
@@ -460,6 +467,7 @@ limitations under the License.
 
       _filesChanged: function() {
         this._setHasFiles(this.files.length > 0);
+        this._setHasFilesUploaded(false);
       },
 
       _upload: function(files) {
