@@ -755,7 +755,7 @@ Polymer({
     if (this.results && this.auto && this.visible && this._validate()) {
       this.__fetchDebouncer = Debouncer.debounce(this.__fetchDebouncer, timeOut.after(300), () => {
         this.results.reset();
-        this._fetch(this.results);
+        this._fetch(this.results).then(this._navigateToResults.bind(this));
       });
     }
   },
