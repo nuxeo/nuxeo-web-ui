@@ -698,7 +698,7 @@ limitations under the License.
           this.__fetchDebouncer = Polymer.Debouncer.debounce(this.__fetchDebouncer, Polymer.Async.timeOut.after(300),
             function() {
               this.results.reset();
-              this._fetch(this.results);
+              this._fetch(this.results).then(this._navigateToResults.bind(this));
             }.bind(this));
         }
       },
