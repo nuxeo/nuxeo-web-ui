@@ -114,7 +114,7 @@ Polymer({
       }
       obj = obj[path[i]];
     }
-    if (!obj.downloadUrl) {
+    if (obj && !obj.downloadUrl) {
       // this feature has not been implemented in 'view vs download', this would be implemented in WEBUI-1146.
       obj.downloadUrl = obj.data;
     }
