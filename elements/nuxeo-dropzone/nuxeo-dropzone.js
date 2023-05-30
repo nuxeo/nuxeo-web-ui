@@ -546,7 +546,7 @@ Polymer({
 
   _upload(files) {
     if (files && files.length > 0) {
-      this.uploadedFiles.push(files[0]);
+      Array.from(files).forEach((item) => this.uploadedFiles.push(item));
       this.uploadFiles(files);
     }
   },
