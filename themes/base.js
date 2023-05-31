@@ -337,7 +337,7 @@ const template = html`
 
         --nuxeo-results-selection-actions-menu-max-width: 280px;
 
-        --nuxeo-document-blob-actions-menu-max-width: 160px;
+        --nuxeo-document-blob-actions-menu-max-width: 120px;
 
         --nuxeo-document-create-popup-height: 85vh;
         --nuxeo-document-create-popup-width: 65vw;

@@ -57,6 +57,7 @@ Polymer({
         overflow: hidden;
         display: block;
         text-overflow: ellipsis;
+        word-break: break-all;
       }
 
       .detail {
