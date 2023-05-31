@@ -159,15 +159,22 @@ Polymer({
   },
 
   _showSaveAs() {
-    return this._isSearchFormVisible && (this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this._dirty));
+    return (
+      this._dirty ||
+      (!this._dirty && this.isSavedSearch) ||
+      (this._isSearchFormVisible && (this.isSavedSearch || (!this.isSavedSearch && this.searchForm && this._dirty)))
+    );
   },
 
   _showSave() {
-    return this._isSearchFormVisible && this.isSavedSearch && this._dirty && this._hasPermissions();
+    return (
+      ((this._dirty && this.isSavedSearch) || (this._isSearchFormVisible && this.isSavedSearch && this._dirty)) &&
+      this._hasPermissions()
+    );
   },
 
   _showOtherSearchActions() {
-    return this._isSearchFormVisible && this.isSavedSearch && this._hasPermissions();
+    return (this.isSavedSearch || (this._isSearchFormVisible && this.isSavedSearch)) && this._hasPermissions();
   },
 
   _hasPermissions() {
