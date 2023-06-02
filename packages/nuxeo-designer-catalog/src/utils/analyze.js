@@ -24,6 +24,13 @@ module.exports = (pkg, sourcePaths, libraries, pkgManagement, callback) => {
   // workaround for handling analysis from bower_components libraries
   Analysis.isExternal = () => false;
   const componentDir = pkgManagement === 'npm' ? 'node_modules' : 'bower_components';
+  const getNuxeoModulePath = (elPath) => {
+    const PrifixPackage = '@nuxeo';
+    if (decodeURIComponent(elPath).includes(PrifixPackage)) {
+      return elPath.substring(elPath.indexOf(PrifixPackage));
+    }
+    return elPath;
+  };
   Promise.all(
     sourcePaths
       .filter((p) => fs.existsSync(p))
@@ -78,6 +85,7 @@ module.exports = (pkg, sourcePaths, libraries, pkgManagement, callback) => {
               } else {
                 elPath = element.path.replace(`/${componentDir}`, '');
               }
+              elPath = getNuxeoModulePath(elPath);
 
               return {
                 type: 'element',
@@ -139,10 +147,11 @@ module.exports = (pkg, sourcePaths, libraries, pkgManagement, callback) => {
           data.behaviors =
             data.metadata && data.metadata.polymer && data.metadata.polymer.behaviors
               ? data.metadata.polymer.behaviors.map((behavior) => {
-                  const elPath =
+                  let elPath =
                     behavior.path.indexOf(`/${componentDir}`) < 0
                       ? path.join(pkg.base, behavior.path)
                       : behavior.path.replace(`/${componentDir}`, '');
+                  elPath = getNuxeoModulePath(elPath);
                   return {
                     type: 'behavior',
                     desc: behavior.description,
