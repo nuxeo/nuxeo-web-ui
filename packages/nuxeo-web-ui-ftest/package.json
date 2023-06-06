@@ -1,6 +1,6 @@
 {
   "name": "@nuxeo/nuxeo-web-ui-ftest",
-  "version": "3.0.24-SNAPSHOT",
+  "version": "3.0.24-rc.2",
   "bin": {
     "nuxeo-web-ui-ftest": "./bin/nuxeo-web-ui-ftest.js"
   },
