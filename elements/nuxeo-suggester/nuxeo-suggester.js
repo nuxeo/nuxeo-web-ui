@@ -328,7 +328,7 @@ Polymer({
     },
     searchDelay: {
       type: Number,
-      value: 200,
+      value: 500,
     },
     target: {
       type: Object,
