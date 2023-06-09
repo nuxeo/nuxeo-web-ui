@@ -105,7 +105,7 @@ Polymer({
     _isSearchFormVisible: Boolean,
   },
 
-  ready() {
+  created() {
     this._searchFormVisibilityChanged = (event) => {
       this._isSearchFormVisible = event.target.visible;
     };

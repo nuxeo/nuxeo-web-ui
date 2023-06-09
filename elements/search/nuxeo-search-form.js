@@ -589,7 +589,10 @@ Polymer({
      * @ignore
      * If `true`, the current element is visible.
      * */
-    visible: Boolean,
+    visible: {
+      type: Boolean,
+      notify: true,
+    },
     /**
      * If `true`, automatically execute the search each time a param is changed.
      */
