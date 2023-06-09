@@ -1014,7 +1014,7 @@ Polymer({
     this.drawerWidth = '52px';
     this.drawerOpened = false;
     this.$.drawerPanel.closeDrawer();
-    this._selected = this.selectedTab = '';
+    this.selectedTab = '';
   },
 
   _fetchTaskCount() {
