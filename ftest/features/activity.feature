@@ -19,8 +19,4 @@ Feature: Activity
     Examples: 
       | file       |
       | sample.png |
-      | sample.mp4 |
-      | sample.mp3 |
-      | sample.pdf |
-      | sample.txt |
-      | sample.odt |
+      

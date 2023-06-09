@@ -66,10 +66,27 @@ suite('nuxeo-picture-formats', () => {
           size: '',
           format: 'picture/jpeg',
           downloadUrl: 'file1.jpeg?changeToken=1-0&clientReason=download',
+          data: 'file1.jpeg?changeToken=1-0',
         },
       ];
       element.xpath = 'file:content';
       expect(element._getAdditionalFormats(document)).to.eql(additionalFormats);
+    });
+  });
+
+  suite('fetch download url', () => {
+    test('Should fetch download url when item has downloadUrl property', () => {
+      const item = {
+        downloadUrl: 'abc.docx?changeToken=1-0&clientReason=download',
+      };
+      expect(element._getDownloadUrl(item)).to.equal('abc.docx?changeToken=1-0&clientReason=download');
+    });
+
+    test('Should fetch download url when item does not have downloadUrl property', () => {
+      const item = {
+        data: 'abc.docx?changeToken=1-0',
+      };
+      expect(element._getDownloadUrl(item)).to.equal('abc.docx?changeToken=1-0');
     });
   });
 });
