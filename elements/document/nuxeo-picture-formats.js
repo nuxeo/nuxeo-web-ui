@@ -82,7 +82,8 @@ Polymer({
   },
 
   _getAdditionalFormats(document) {
-    return document && document.properties['picture:views']
+    const views = document && document.properties['picture:views'];
+    return views
       ? document.properties['picture:views'].map((view) => {
           return {
             name: view.description,
