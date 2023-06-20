@@ -184,9 +184,27 @@ Polymer({
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
       !this.isTrashed(doc) &&
-      !(doc.isRecord && this.xpath !== 'file:content') &&
-      !(this.isUnderRetentionOrLegalHold(doc) && this.xpath === 'file:content') &&
-      !(this.hasFacet(doc, 'ColdStorage') && this.hasContent(doc, 'coldstorage:coldContent'))
+      // !(doc.isRecord && this.xpath !== 'file:content') &&
+      !(this.hasFacet(doc, 'ColdStorage') && this.hasContent(doc, 'coldstorage:coldContent')) &&
+      !this._isPropUnderRetention(doc)
     );
+  },
+
+  _isPropUnderRetention(doc) {
+    if (doc.retainedProperties && doc.retainedProperties.length > 0) {
+      const retprop = this.xpath.substring(0, this.xpath.indexOf('/'));
+      const retprop2 = this.xpath;
+      if (doc.retainedProperties.indexOf(retprop2) !== -1 || doc.retainedProperties.indexOf(retprop) !== -1) {
+        window.console.log(retprop);
+        window.console.log(retprop2);
+        return true;
+      }
+
+      // return (
+      //   this.xpath.startsWith('files:files') ? doc.retainedProperties.some((item) => item.includes('files:files'))
+      //   : doc.retainedProperties.includes(this.xpath)
+      // )
+    }
+    return false;
   },
 });
