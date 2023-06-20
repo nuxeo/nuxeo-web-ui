@@ -1,0 +1,31 @@
+<!--
+`nuxeo-checkext-view-layout`
+@group Nuxeo UI
+@element nuxeo-checkext-view-layout
+-->
+<dom-module id="nuxeo-checkext-view-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+
+    <div role="widget">
+      <label>Single</label>
+      <nuxeo-document-blob document="[[document]]" xpath="checkext:single" name="single"></nuxeo-document-blob>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-checkext-view-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype checkext
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>

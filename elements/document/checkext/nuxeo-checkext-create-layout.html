@@ -1,0 +1,60 @@
+<!--
+`nuxeo-checkext-create-layout`
+@group Nuxeo UI
+@element nuxeo-checkext-create-layout
+-->
+<dom-module id="nuxeo-checkext-create-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:title}}"
+      label="Title"
+      type="text"
+      required="true"
+      name="title"
+    ></nuxeo-input>
+
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:description}}"
+      label="Description"
+      type="text"
+      name="description"
+    ></nuxeo-input>
+
+    <div role="widget">
+      <label id="multipleField">Multiple</label>
+      <nuxeo-dropzone
+        value="{{document.properties.checkext:multiple}}"
+        multiple="true"
+        aria-labelledby="multipleField"
+        name="multiple"
+      ></nuxeo-dropzone>
+    </div>
+
+    <div role="widget">
+      <label id="singleField">Single</label>
+      <nuxeo-dropzone
+        value="{{document.properties.checkext:single}}"
+        aria-labelledby="singleField"
+        name="single"
+      ></nuxeo-dropzone>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-checkext-create-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype checkext
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>

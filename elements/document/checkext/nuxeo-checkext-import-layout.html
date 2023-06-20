@@ -1,0 +1,41 @@
+<!--
+`nuxeo-checkext-import-layout`
+@group Nuxeo UI
+@element nuxeo-checkext-import-layout
+-->
+<dom-module id="nuxeo-checkext-import-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:title}}"
+      label="Title"
+      type="text"
+      required="true"
+      name="title"
+    ></nuxeo-input>
+
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:description}}"
+      label="Description"
+      type="text"
+      name="description"
+    ></nuxeo-input>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-checkext-import-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype checkext
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>

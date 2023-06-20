@@ -1,0 +1,48 @@
+<!--
+`nuxeo-checkext-metadata-layout`
+@group Nuxeo UI
+@element nuxeo-checkext-metadata-layout
+-->
+<dom-module id="nuxeo-checkext-metadata-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+    <div role="widget">
+      <label>Title</label>
+      <div name="title">[[document.properties.dc:title]]</div>
+    </div>
+
+    <div role="widget">
+      <label>Description</label>
+      <div name="description">[[document.properties.dc:description]]</div>
+    </div>
+
+    <div role="widget">
+      <label>Multiple</label>
+      <nuxeo-document-attachments
+        document="{{document}}"
+        xpath="checkext:multiple"
+        name="multiple"
+      ></nuxeo-document-attachments>
+    </div>
+
+    <div role="widget">
+      <label>Single</label>
+      <nuxeo-document-blob document="[[document]]" xpath="checkext:single" name="single"></nuxeo-document-blob>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-checkext-metadata-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype checkext
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>
