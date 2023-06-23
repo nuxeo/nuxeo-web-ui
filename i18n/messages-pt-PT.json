@@ -1515,5 +1515,6 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading": "Duração média por usuário",
   "workflowAnalytics.averageTaskDurationPerUser.user": "Usuário",
   "workflowAnalytics.averageWorkflowDuration.heading": "Duração média de fluxo de trabalho",
-  "workflowAnalytics.workflowInitiators.heading": "Iniciadores de fluxo de trabalho"
+  "workflowAnalytics.workflowInitiators.heading": "Iniciadores de fluxo de trabalho",
+  "dummy.text": "dummy text"
 }

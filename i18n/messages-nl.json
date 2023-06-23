@@ -1515,5 +1515,6 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading": "Gemiddelde taakduur per gebruiker",
   "workflowAnalytics.averageTaskDurationPerUser.user": "Gebruiker",
   "workflowAnalytics.averageWorkflowDuration.heading": "Gemiddelde duur workflow",
-  "workflowAnalytics.workflowInitiators.heading": "Initiatoren workflow"
+  "workflowAnalytics.workflowInitiators.heading": "Initiatoren workflow",
+  "dummy.text": "Dummytekst"
 }
