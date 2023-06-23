@@ -1515,5 +1515,6 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading": "Rata-rata Durasi Tugas per Pengguna",
   "workflowAnalytics.averageTaskDurationPerUser.user": "Pengguna",
   "workflowAnalytics.averageWorkflowDuration.heading": "Rata-rata Durasi Alur Kerja",
-  "workflowAnalytics.workflowInitiators.heading": "Inisiator Alur Kerja"
+  "workflowAnalytics.workflowInitiators.heading": "Inisiator Alur Kerja",
+  "dummy.text": "dummy text"
 }

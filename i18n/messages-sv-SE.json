@@ -1515,5 +1515,6 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading": "Genomsnittlig varaktighet för aktivitet per användare",
   "workflowAnalytics.averageTaskDurationPerUser.user": "Användare",
   "workflowAnalytics.averageWorkflowDuration.heading": "Genomsnittlig varaktighet för arbetsflöde",
-  "workflowAnalytics.workflowInitiators.heading": "Initierare för arbetsflöden"
+  "workflowAnalytics.workflowInitiators.heading": "Initierare för arbetsflöden",
+  "dummy.text": "dummy text"
 }

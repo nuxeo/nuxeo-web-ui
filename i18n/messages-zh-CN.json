@@ -1515,5 +1515,6 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading": "每个用户的平均任务工期",
   "workflowAnalytics.averageTaskDurationPerUser.user": "用户",
   "workflowAnalytics.averageWorkflowDuration.heading": "平均工作流工期",
-  "workflowAnalytics.workflowInitiators.heading": "工作流启动器"
+  "workflowAnalytics.workflowInitiators.heading": "工作流启动器",
+  "dummy.text": "dummy text"
 }
