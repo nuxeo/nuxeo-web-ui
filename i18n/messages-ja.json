@@ -1515,5 +1515,6 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading": "ユーザごとの平均タスク持続時間",
   "workflowAnalytics.averageTaskDurationPerUser.user": "ユーザ",
   "workflowAnalytics.averageWorkflowDuration.heading": "平均ワークフロー持続時間",
-  "workflowAnalytics.workflowInitiators.heading": "ワークフローイニシエータ"
+  "workflowAnalytics.workflowInitiators.heading": "ワークフローイニシエータ",
+  "dummy.text": "ダミーテキスト"
 }

@@ -1515,5 +1515,6 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading": "Zereginen batez besteko iraupena erabiltzaileka",
   "workflowAnalytics.averageTaskDurationPerUser.user": "Erabiltzailea",
   "workflowAnalytics.averageWorkflowDuration.heading": "Lan-fluxuen batez besteko iraupena",
-  "workflowAnalytics.workflowInitiators.heading": "Lan-fluxuen abiarazleak"
+  "workflowAnalytics.workflowInitiators.heading": "Lan-fluxuen abiarazleak",
+  "dummy.text": "dummy text"
 }
