@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: 14
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          scope: '@nuxeo'          
 
       - uses: actions/checkout@v2
         with:
@@ -31,11 +32,11 @@ jobs:
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -e 's/-rc.[0-9]*//')" >> $GITHUB_ENV
-      - run: npm config list
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          npm config list
           OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
           npm version $VERSION --no-git-tag-version
           pushd packages/nuxeo-web-ui-ftest/
