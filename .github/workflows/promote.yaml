@@ -23,7 +23,6 @@ jobs:
         with:
           node-version: 14
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
-          scope: '@nuxeo'
 
       - uses: actions/checkout@v2
         with:
@@ -35,7 +34,7 @@ jobs:
 
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
         env:
-          NODE_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
           npm version $VERSION --no-git-tag-version
