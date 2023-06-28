@@ -35,7 +35,7 @@ jobs:
 
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
           npm version $VERSION --no-git-tag-version
