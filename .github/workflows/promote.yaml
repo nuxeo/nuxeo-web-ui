@@ -61,13 +61,13 @@ jobs:
       - if: ${{ github.event.inputs.dryRun == 'false' }}
         run: git push origin v$VERSION
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
 
       - name: Create Github release v${{ env.VERSION }}
         if: ${{ github.event.inputs.dryRun == 'false' }}
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
         with:
           tag_name: v${{ env.VERSION }}
           release_name: Release ${{ env.VERSION }}
