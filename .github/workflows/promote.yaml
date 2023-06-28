@@ -19,12 +19,7 @@ jobs:
   promote:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 14
-          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
-          scope: '@nuxeo'
-
+    
       - uses: actions/checkout@v2
         with:
           ref: v${{ github.event.inputs.version }}
