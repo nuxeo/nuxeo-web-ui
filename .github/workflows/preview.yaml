@@ -92,7 +92,7 @@ jobs:
 
       - name: Install
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm install nuxeo-elements/core
           npm install nuxeo-elements/ui

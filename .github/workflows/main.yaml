@@ -81,7 +81,7 @@ jobs:
 
     - name: Install
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       run: |
         npm install
         pushd packages/nuxeo-web-ui-ftest
@@ -140,7 +140,7 @@ jobs:
 
     - name: Publish Web UI FTest framework
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       run: |
         pushd packages/nuxeo-web-ui-ftest/
         npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag SNAPSHOT
