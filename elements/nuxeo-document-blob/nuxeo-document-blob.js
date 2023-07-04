@@ -74,7 +74,7 @@ Polymer({
     <template is="dom-if" if="[[blob]]">
       <div class="row">
         <div class="info">
-          <div><a href="[[blob.downloadUrl]]" title="[[blob.name]]">[[blob.name]]</a></div>
+          <div><a href="[[_getDownloadBlobUrl()]]" title="[[blob.name]]">[[blob.name]]</a></div>
           <div class="detail">[[formatSize(blob.length)]]</div>
         </div>
         <div class="actions">
@@ -119,5 +119,12 @@ Polymer({
       obj.downloadUrl = obj.data;
     }
     return obj;
+  },
+
+  _getDownloadBlobUrl() {
+    if (this.blob) {
+      return this.blob.downloadUrl ? this.blob.downloadUrl : this.blob.data;
+    }
+    return '';
   },
 });
