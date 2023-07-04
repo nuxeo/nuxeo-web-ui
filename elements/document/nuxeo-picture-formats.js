@@ -56,7 +56,7 @@ Polymer({
           <span>[[item.dimensions]]</span>
           <span>[[item.size]]</span>
           <span>[[item.format]]</span>
-          <a id="download-[[index]]" href="[[item.downloadUrl]]">
+          <a id="download-[[index]]" href="[[_getDownloadUrl(item)]]">
             <iron-icon
               icon="nuxeo:download"
               aria-label="[[i18n('pictureViewLayout.download.tooltip')]] [[item.name]] [[item.dimensions]]"
@@ -90,8 +90,16 @@ Polymer({
             size: this.formatSize(view.content.length),
             format: view.info.format,
             downloadUrl: view.content.downloadUrl,
+            data: view.content.data,
           };
         })
       : [];
+  },
+
+  _getDownloadUrl(item) {
+    if (item) {
+      return item.downloadUrl ? item.downloadUrl : item.data;
+    }
+    return '';
   },
 });
