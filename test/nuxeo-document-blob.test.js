@@ -33,14 +33,14 @@ suite('nuxeo-document-blob', () => {
       element.blob = {
         downloadUrl: 'abc.docx?changeToken=1-0&clientReason=download',
       };
-      expect(element._getDocumentBlobUrl()).to.equal('abc.docx?changeToken=1-0&clientReason=download');
+      expect(element._getDownloadBlobUrl()).to.equal('abc.docx?changeToken=1-0&clientReason=download');
     });
 
     test('Should fetch download url when blob does not have downloadUrl property', () => {
       element.blob = {
         data: 'abc.docx?changeToken=1-0',
       };
-      expect(element._getDocumentBlobUrl()).to.equal('abc.docx?changeToken=1-0');
+      expect(element._getDownloadBlobUrl()).to.equal('abc.docx?changeToken=1-0');
     });
   });
 });
