@@ -679,6 +679,8 @@ Polymer({
   refresh() {
     if (this.page === 'search') {
       this._refreshSearch();
+    } else if (this.page === 'tasks') {
+      this.loadTask(this.currentTaskId);
     } else if ((this.docPath && this.docPath.length > 0) || (this.docId && this.docId.length > 0)) {
       const id = this.docId || (this.currentDocument && this.currentDocument.uid);
       this.load('browse', id, this.docPath, this.docAction);
