@@ -184,9 +184,29 @@ Polymer({
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
       !this.isTrashed(doc) &&
-      !(doc.isRecord && this.xpath !== 'file:content') &&
-      !(this.isUnderRetentionOrLegalHold(doc) && this.xpath === 'file:content') &&
-      !(this.hasFacet(doc, 'ColdStorage') && this.hasContent(doc, 'coldstorage:coldContent'))
+      // !(doc.isRecord && this.xpath !== 'file:content') &&
+      !(this.hasFacet(doc, 'ColdStorage') && this.hasContent(doc, 'coldstorage:coldContent')) &&
+      !this._isPropUnderRetention(doc)
     );
+  },
+
+  _isPropUnderRetention(doc) {
+    if (doc && doc.isUnderRetentionOrLegalHold && doc.retainedProperties.length > 0) {
+      const { retainedProperties } = doc;
+      // when retained property = xpath (as in file:content)
+      if (retainedProperties.some((props) => props === this.xpath)) {
+        return true;
+      }
+      /* if retained property is multivalued attachment, and all files are to be retained, denoted by ‘*’,
+        then return true.
+        if retained property is multivalued attachment, but only a single file is to be retained,
+        then return true only for that file */
+      return retainedProperties.find(
+        (prop) =>
+          (prop.includes(this.xpath.split('/')[0]) && prop.includes('/*')) ||
+          prop.substring(0, prop.indexOf('/file')) === this.xpath,
+      );
+    }
+    return false;
   },
 });

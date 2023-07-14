@@ -139,12 +139,27 @@ Polymer({
   _isDropzoneAvailable(doc) {
     return (
       doc &&
-      !doc.isRecord &&
+      // !doc.isRecord &&
       this.hasPermission(doc, 'WriteProperties') &&
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
-      !this.isTrashed(doc)
+      !this.isTrashed(doc) &&
+      !this._isPropUnderRetention(doc)
     );
+  },
+
+  _isPropUnderRetention(doc) {
+    if (doc?.isUnderRetentionOrLegalHold && doc.retainedProperties.length > 0) {
+      const retainXpath = doc.retainedProperties.find((prop) => prop.startsWith(this.xpath.concat('/*/')));
+      return doc.retainedProperties.some(
+        (prop) =>
+          prop.includes(retainXpath) ||
+          prop.includes(this.xpath) ||
+          prop.substring(0, prop.indexOf('/')) === this.xpath,
+      );
+    }
+
+    return false;
   },
 
   _computeFiles() {
