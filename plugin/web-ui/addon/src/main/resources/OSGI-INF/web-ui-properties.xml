@@ -35,6 +35,9 @@
 
     <!-- S3 Direct upload -->
     <property name="org.nuxeo.web.ui.s3.useDirectUpload">${nuxeo.s3storage.useDirectUpload:=false}</property>
+    
+    <!-- Redirect to final download url -->
+    <property name="org.nuxeo.web.ui.url.followRedirect">${org.nuxeo.download.url.follow.redirect:=false}</property>
 
     <!-- Max Results for Tables, Grids and Lists plugged on a Nuxeo Page Provider. Falls back on elasticsearch max result window by default. -->
     <property name="org.nuxeo.web.ui.listingMaxItems">${org.nuxeo.elasticsearch.provider.maxResultWindow:=10000}</property>
