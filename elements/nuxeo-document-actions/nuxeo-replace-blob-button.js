@@ -184,9 +184,44 @@ Polymer({
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
       !this.isTrashed(doc) &&
-      !(doc.isRecord && this.xpath !== 'file:content') &&
-      !(this.isUnderRetentionOrLegalHold(doc) && this.xpath === 'file:content') &&
-      !(this.hasFacet(doc, 'ColdStorage') && this.hasContent(doc, 'coldstorage:coldContent'))
+      !(this.hasFacet(doc, 'ColdStorage') && this.hasContent(doc, 'coldstorage:coldContent')) &&
+      !this._isPropUnderRetention(doc)
     );
+  },
+
+  _isPropUnderRetention(doc) {
+    if (doc && doc.isUnderRetentionOrLegalHold && doc.retainedProperties && doc.retainedProperties.length > 0) {
+      const { retainedProperties } = doc;
+      /* if retained property is multivalued attachment, and all files are to be retained, denoted by ‘*’,
+        then return true.
+        if retained property is multivalued attachment, but only a single file is to be retained,
+        then return true only for that file */
+      return retainedProperties.find(
+        (prop) =>
+          this._transformXpathRegex(prop, this.xpath) ||
+          prop.startsWith(this.xpath) ||
+          (prop.includes(this.xpath.split('/')[0]) && !prop.includes('/')),
+      );
+    }
+    return false;
+  },
+
+  _transformXpathRegex(prop, xpath) {
+    const transformedArray = [];
+    const splitter = '/';
+    const star = '*';
+    if (prop.includes(star)) {
+      let xpathArray = xpath.split(splitter);
+
+      for (let i = 0; i < xpathArray.length; i++) {
+        if (!Number.isNaN(parseInt(xpathArray[i], 10))) {
+          xpathArray[i] = star;
+        }
+        transformedArray.push(xpathArray[i]);
+      }
+      xpathArray = transformedArray;
+      xpath = xpathArray.join(splitter);
+    }
+    return prop === xpath;
   },
 });
