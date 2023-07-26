@@ -75,7 +75,7 @@ Polymer({
         <nuxeo-dropzone
           value="{{_attachments}}"
           multiple
-          value-key="file"
+          value-key="[[_getFileValue()]]"
           uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
           message="[[i18n('documentAttachments.upload.add')]]"
           drag-content-message="[[i18n('documentAttachments.upload.drop')]]"
@@ -163,5 +163,10 @@ Polymer({
 
   _isAvailable(document, xpath) {
     return document && xpath && this.hasSchema(document, xpath.split(':')[0]);
+  },
+
+  _getFileValue(){
+    const fileName = this.document.type == "File" && this.xpath=="files:files" ? "file":"";
+    return fileName;
   },
 });
