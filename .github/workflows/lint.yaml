@@ -114,7 +114,10 @@ jobs:
           pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/11.3
           echo "Bundle"
           pwd
+          mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml
           echo "Bundle1"
+          CATALOG_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml)
+          echo $CATALOG_VERSION
           echo "CATALOG_VERSION=11.3" >> $GITHUB_ENV
           echo "Bundle2"
           CATALOG_NAME=$ARTIFACT_ID-11.3.zip
