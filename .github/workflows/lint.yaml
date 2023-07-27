@@ -56,7 +56,7 @@ jobs:
             <mirrors>
               <mirror>
                 <id>nos-team</id>
-                <mirrorOf>external:*</mirrorOf>
+                <mirrorOf>external:*,!nuxeo-studio</mirrorOf>
                 <url>https://packages.nuxeo.com/repository/maven-internal/</url>
               </mirror>
             </mirrors>
