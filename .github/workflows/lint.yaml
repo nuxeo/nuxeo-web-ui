@@ -10,18 +10,11 @@ on:
       catalog_version:
         description: "The Nuxeo server target platform to build the catalog for."
         required: true
-  workflow_call:
-    inputs:
       branch:
         description: "The current branch"
         default: maintenance-3.0.x
         type: string
         required: false
-    secrets:
-      NPM_PACKAGES_TOKEN:
-        description: "NPM_PACKAGES_TOKEN"
-        required: true
-
 env:
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
   ARTIFACT_ID: view-designer-catalog
@@ -42,15 +35,6 @@ jobs:
           registry-url: "https://packages.nuxeo.com/repository/npm-public/"
           node-version: 14
           scope: "@nuxeo"
-
-      - name: Install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm install
-
-      - name: Lint
-        run: npm run lint
-
       - uses: actions/setup-java@v3
         with:
           distribution: "zulu"
