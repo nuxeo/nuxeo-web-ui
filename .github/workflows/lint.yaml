@@ -101,7 +101,7 @@ jobs:
 
       - name: Bundle the catalog
         run: |
-          pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
+          pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/11.3
           CATALOG_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml)${{ github.event.inputs.classifier }}
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
           CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
