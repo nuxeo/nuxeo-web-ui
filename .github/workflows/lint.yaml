@@ -115,10 +115,13 @@ jobs:
           echo "Bundle"
           pwd
           CATALOG_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml)
+          echo "Bundle1"
           echo "CATALOG_VERSION=11.3" >> $GITHUB_ENV
+          echo "Bundle2"
           CATALOG_NAME=$ARTIFACT_ID-11.3.zip
+          echo "Bundle3"
           echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
-          echo "Bundle -1"
+          echo "Bundle4"
           zip -q -r $CATALOG_NAME nuxeo-web-ui data hints catalog.json
           popd
 
