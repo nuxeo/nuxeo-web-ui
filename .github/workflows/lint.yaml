@@ -4,23 +4,29 @@ on:
   pull_request:
     branches:
       - maintenance-3.0.x
+
+  workflow_dispatch:
+    inputs:
+      catalog_version:
+        description: "The Nuxeo server target platform to build the catalog for."
+        required: true
   workflow_call:
     inputs:
       branch:
-        description: 'The current branch'
+        description: "The current branch"
         default: maintenance-3.0.x
         type: string
         required: false
     secrets:
       NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
+        description: "NPM_PACKAGES_TOKEN"
         required: true
 
 env:
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
   ARTIFACT_ID: view-designer-catalog
   GROUP_ID: org.nuxeo.web.ui.studio
-  
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -28,14 +34,14 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ env.BRANCH_NAME }}
-      
+
       - run: git config --global user.name "nuxeo-webui-jx-bot" && git config --global user.email "webui@hyland.com"
 
       - uses: actions/setup-node@v3
         with:
-          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          registry-url: "https://packages.nuxeo.com/repository/npm-public/"
           node-version: 14
-          scope: '@nuxeo'
+          scope: "@nuxeo"
 
       - name: Install
         env:
@@ -47,10 +53,10 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '11'
+          distribution: "zulu"
+          java-version: "11"
 
-      - name: 'Update settings.xml with server configuration'
+      - name: "Update settings.xml with server configuration"
         run: |
           echo '<settings>
             <mirrors>
@@ -99,7 +105,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/nuxeo-designer-catalog
-        run: | 
+        run: |
           npm install
           npm install -g gulp
 
@@ -112,18 +118,9 @@ jobs:
       - name: Bundle the catalog
         run: |
           pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/11.3
-          echo "Bundle"
-          pwd
-          mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml
-          echo "Bundle1"
-          CATALOG_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml)
-          echo $CATALOG_VERSION
-          echo "CATALOG_VERSION=11.3" >> $GITHUB_ENV
-          echo "Bundle2"
-          CATALOG_NAME=$ARTIFACT_ID-11.3.zip
-          echo "Bundle3"
+          CATALOG_VERSION=${{inputs.catalog_version}}
+          echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
+          CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
           echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
-          echo "Bundle4"
           zip -q -r $CATALOG_NAME nuxeo-web-ui data hints catalog.json
           popd
-
