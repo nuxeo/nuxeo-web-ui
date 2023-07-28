@@ -49,7 +49,7 @@ jobs:
               <mirror>
                 <id>nos-team</id>
                 <mirrorOf>external:*</mirrorOf>
-                <url>https://nexus-jx.nos.build.nuxeo.com/repository/maven-group/</url>
+                <url>https://packages.nuxeo.com/repository/maven-internal/</url>
               </mirror>
             </mirrors>
             <servers>
@@ -76,6 +76,9 @@ jobs:
             </servers>
           </settings>' > ~/.m2/settings.xml
 
+      - name: Install libxml2-utils (xmllint)
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
       - name: Setup parameters (release)
         if: github.event_name == 'release'
         working-directory: packages/nuxeo-designer-catalog
@@ -91,7 +94,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/nuxeo-designer-catalog
-        run: | 
+        run: |
           npm install
           npm install -g gulp
 
@@ -103,8 +106,9 @@ jobs:
 
       - name: Bundle the catalog
         run: |
+          sudo chmod +r pom.xml
+          CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)${{ github.event.inputs.classifier }}
           pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
-          CATALOG_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml)${{ github.event.inputs.classifier }}
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
           CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
           echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
@@ -142,7 +146,7 @@ jobs:
         working-directory: nos
         env:
           GH_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
-        run: | 
+        run: |
           git checkout -b designer-catalog-update-$CATALOG_VERSION
           mvn versions:set-property -Dproperty=view.designer.catalog.11.3 -DnewVersion=$CATALOG_VERSION
           git add .
