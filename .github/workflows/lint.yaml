@@ -104,6 +104,7 @@ jobs:
 
       - name: Bundle the catalog
         run: |
+          sudo chmod +r pom.xml
           CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
           pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/11.3
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
