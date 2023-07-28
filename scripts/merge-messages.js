@@ -1,6 +1,6 @@
-const glob = require('glob');
-const { mkdirSync, existsSync, writeFileSync } = require('fs');
 const path = require('path');
+const { mkdirSync, existsSync, writeFileSync } = require('fs');
+const glob = require('glob');
 
 const DEST = '.tmp/i18n';
 const CWD = process.cwd();
