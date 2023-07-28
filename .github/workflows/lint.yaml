@@ -52,6 +52,11 @@ jobs:
             </mirrors>
             <servers>
               <server>
+                <id>nos-team</id>
+                <username>nuxeo-webui-jx-bot</username>
+                <password>${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}</password>
+              </server>
+              <server>
                 <id>maven-internal</id>
                 <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
                 <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
@@ -96,8 +101,8 @@ jobs:
 
       - name: Bundle the catalog
         run: |
+          CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
           pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/11.3
-          CATALOG_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml)${{ github.event.inputs.classifier }}
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
           CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
           echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
