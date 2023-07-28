@@ -1,6 +1,5 @@
-import { After, Status } from '@cucumber/cucumber';
-
 import * as path from 'path';
+import { After, Status } from '@cucumber/cucumber';
 import * as mkdirp from 'mkdirp';
 
 After(function(scenario) {

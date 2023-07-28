@@ -29,8 +29,8 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const chromeLauncher = require('chrome-launcher');
 const { execSync } = require('child_process');
+const chromeLauncher = require('chrome-launcher');
 const fetch = require('node-fetch');
 
 const wdioBin = require.resolve('@wdio/cli/bin/wdio');
