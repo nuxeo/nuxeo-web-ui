@@ -52,11 +52,6 @@ jobs:
             </mirrors>
             <servers>
               <server>
-                <id>nos-team</id>
-                <username>nuxeo-webui-jx-bot</username>
-                <password>${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}</password>
-              </server>
-              <server>
                 <id>maven-internal</id>
                 <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
                 <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
