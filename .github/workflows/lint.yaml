@@ -107,6 +107,8 @@ jobs:
           sudo chmod +r pom.xml
           CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
           pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/11.3
+          echo "Test"
+          echo $CATALOG_VERSION
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
           CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
           echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
