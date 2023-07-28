@@ -99,14 +99,14 @@ jobs:
       - name: Generate catalog
         working-directory: packages/nuxeo-designer-catalog
         run: |
-          gulp catalog --tp 11.3 --webui-branch maintenance-3.0.x
-          gulp hints --tp 11.3
+          gulp catalog --tp $TARGET_PLATFORM --webui-branch $BRANCH_NAME
+          gulp hints --tp $TARGET_PLATFORM
 
       - name: Bundle the catalog
         run: |
           sudo chmod +r pom.xml
           CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
-          pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/11.3
+          pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
           echo "Test"
           echo $CATALOG_VERSION
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
