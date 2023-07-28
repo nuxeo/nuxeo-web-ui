@@ -1,5 +1,5 @@
-const chai = require('chai');
 const path = require('path');
+const chai = require('chai');
 const htmlReporter = require('multiple-cucumber-html-reporter');
 
 const CompatService = require('./wdio-compat-plugin');
