@@ -17,8 +17,8 @@ limitations under the License.
 */
 
 // Include Gulp & tools we'll use
-const path = require('path');
 const { spawn } = require('child_process');
+const path = require('path');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 const git = require('gulp-git');
