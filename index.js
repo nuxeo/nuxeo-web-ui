@@ -10,11 +10,11 @@ const loadApp = () => import(/* webpackMode: "eager" */ './elements/nuxeo-app.js
 const loadLegacy = () => import(/* webpackMode: "eager" */ './legacy.js');
 const loadBundle = () =>
   import('./elements/nuxeo-web-ui-bundle.html').then(({ default: bundleHtml }) => importHTML(bundleHtml));
-const loadAddons = () => {
+const loadAddons = async () => {
   const bundles = [...Nuxeo.UI.bundles, 'nuxeo-spreadsheet'];
   // load addons / bundles
   // NXP-26977: await loading of addons
-  Promise.all(
+  await Promise.all(
     bundles.map((url) => {
       if (url.endsWith('.html')) {
         return new Promise((resolve, reject) => importHref(url, resolve, reject));
