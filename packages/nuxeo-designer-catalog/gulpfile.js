@@ -17,14 +17,14 @@ limitations under the License.
 */
 
 // Include Gulp & tools we'll use
+const path = require('path');
+const { spawn } = require('child_process');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 const git = require('gulp-git');
 const del = require('del');
-const { spawn } = require('child_process');
 const runSequence = require('run-sequence');
 const merge = require('merge-stream');
-const path = require('path');
 const bower = require('gulp-bower');
 const fs = require('fs-extra');
 const stream = require('./src/utils/stream').obj;
