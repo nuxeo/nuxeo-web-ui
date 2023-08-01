@@ -220,7 +220,7 @@ Polymer({
       </template>
     </div>
 
-    <div id="dropzone" hidden$="[[!_isDropzoneVisible(hasFiles, multiple, updateDocument, blobList)]]">
+    <div id="dropzone" hidden$="[[!_isDropzoneVisible(document, hasFiles, multiple, updateDocument, blobList)]]">
       <div id="container">
         <button class="link" on-click="open">
           [[_computeMessage(draggingFiles, message, dragContentMessage, i18n)]]
@@ -581,7 +581,13 @@ Polymer({
     return this.i18n && this.draggingFiles ? this.i18n(this.dragContentMessage) : this.i18n(this.message);
   },
 
-  _isDropzoneVisible() {
+  _isDropzoneVisible(document) {
+    if (document && document.isUnderRetentionOrLegalHold && document.retainedProperties.length > 0) {
+      if (document.retainedProperties.indexOf(this.xpath) !== -1) {
+        return false;
+      }
+    }
+
     // Area to drop files should stay visible when the element is attached to a blob list property
     // and, e.g, when using the element on a form: creation or edition of documents.
     // This will allow the user to manage the list of files.
