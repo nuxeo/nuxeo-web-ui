@@ -54,9 +54,9 @@ jobs:
           echo '<settings>
             <mirrors>
               <mirror>
-                <id>nos-team</id>
+                <id>maven-internal</id>
                 <mirrorOf>external:*</mirrorOf>
-                <url>https://nexus-jx.nos.build.nuxeo.com/repository/maven-group/</url>
+                <url>https://packages.nuxeo.com/repository/maven-internal/</url>
               </mirror>
             </mirrors>
             <servers>
