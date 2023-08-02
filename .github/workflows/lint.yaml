@@ -18,6 +18,8 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
+  ARTIFACT_ID: view-designer-catalog
+  GROUP_ID: org.nuxeo.web.ui.studio
 
 jobs:
   lint:
@@ -94,8 +96,8 @@ jobs:
       - name: Setup parameters (workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'
         run: |
-          echo "BRANCH_NAME=${{ github.event.inputs.branch_name }}" >> $GITHUB_ENV
-          echo "TARGET_PLATFORM=${{ github.event.inputs.target_platform }}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=maintenance-3.0.x" >> $GITHUB_ENV
+          echo "TARGET_PLATFORM=11.3" >> $GITHUB_ENV
 
       - name: Install dependencies
         working-directory: packages/nuxeo-designer-catalog
@@ -106,8 +108,8 @@ jobs:
       - name: Generate catalog
         working-directory: packages/nuxeo-designer-catalog
         run: |
-          gulp catalog --tp $TARGET_PLATFORM --webui-branch $BRANCH_NAME
-          gulp hints --tp $TARGET_PLATFORM
+          gulp catalog --tp 11.3 --webui-branch maintenance-3.0.x
+          gulp hints --tp 11.3
 
       - name: Bundle the catalog
         run: |
