@@ -143,3 +143,22 @@ jobs:
           pushd data/applications/nuxeo/11.3
           mvn deploy:deploy-file -Dfile=$CATALOG_NAME -DgroupId=$GROUP_ID -DartifactId=$ARTIFACT_ID -Dversion=$CATALOG_VERSION -Dpackaging=zip -DrepositoryId=$MVN_REPO_ID -Durl=$MVN_REPO_URL
           popd
+
+      - name: Checkout NOS repository
+        uses: actions/checkout@v3
+        with:
+          repository: nuxeo/nos
+          token: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+          path: nos
+
+      - name: Create pull request for catalog update in NOS
+        working-directory: nos
+        env:
+          GH_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+        run: | 
+          git checkout -b designer-catalog-update-$CATALOG_VERSION
+          mvn versions:set-property -Dproperty=view.designer.catalog.11.3 -DnewVersion=$CATALOG_VERSION
+          git add .
+          git commit -m "Update Designer catalog with version $CATALOG_VERSION"
+          git push origin designer-catalog-update-$CATALOG_VERSION
+          gh pr create --base master --fill
