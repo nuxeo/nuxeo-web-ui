@@ -115,9 +115,11 @@ jobs:
         run: |
           sudo chmod +r pom.xml
           CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)${{ github.event.inputs.classifier }}
+          echo CATALOG_VERSION
           pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/11.3
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
           CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
+          echo CATALOG_NAME
           echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
           zip -q -r $CATALOG_NAME nuxeo-web-ui data hints catalog.json
           popd
@@ -137,7 +139,7 @@ jobs:
             MVN_REPO_ID=maven-public-snapshots
             MVN_REPO_URL=https://packages.nuxeo.com/repository/maven-public-snapshots/
           fi
-
-          pushd data/applications/nuxeo/$TARGET_PLATFORM
+          echo $CATALOG_NAME
+          pushd data/applications/nuxeo/11.3
           mvn deploy:deploy-file -Dfile=$CATALOG_NAME -DgroupId=$GROUP_ID -DartifactId=$ARTIFACT_ID -Dversion=$CATALOG_VERSION -Dpackaging=zip -DrepositoryId=$MVN_REPO_ID -Durl=$MVN_REPO_URL
           popd
