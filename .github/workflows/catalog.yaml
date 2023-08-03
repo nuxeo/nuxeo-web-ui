@@ -47,7 +47,7 @@ jobs:
           echo '<settings>
             <mirrors>
               <mirror>
-                <id>nos-team</id>
+                <id>maven-internal</id>
                 <mirrorOf>external:*</mirrorOf>
                 <url>https://packages.nuxeo.com/repository/maven-internal/</url>
               </mirror>
