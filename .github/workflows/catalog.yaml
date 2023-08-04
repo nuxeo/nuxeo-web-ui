@@ -35,7 +35,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 10
+          node-version: 14
 
       - uses: actions/setup-java@v3
         with:
@@ -47,9 +47,9 @@ jobs:
           echo '<settings>
             <mirrors>
               <mirror>
-                <id>nos-team</id>
+                <id>maven-internal</id>
                 <mirrorOf>external:*</mirrorOf>
-                <url>https://nexus-jx.nos.build.nuxeo.com/repository/maven-group/</url>
+                <url>https://packages.nuxeo.com/repository/maven-internal/</url>
               </mirror>
             </mirrors>
             <servers>
@@ -75,13 +75,16 @@ jobs:
               </server>
             </servers>
           </settings>' > ~/.m2/settings.xml
+     
+      - name: Install libxml2-utils (xmllint)
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
       - name: Setup parameters (release)
         if: github.event_name == 'release'
         working-directory: packages/nuxeo-designer-catalog
         run: |
           echo "BRANCH_NAME=v${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
-          echo "TARGET_PLATFORM=11.3" >> $GITHUB_ENV
+          echo "TARGET_PLATFORM=2023.0" >> $GITHUB_ENV
 
       - name: Setup parameters (workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'
@@ -103,8 +106,9 @@ jobs:
 
       - name: Bundle the catalog
         run: |
+          sudo chmod +r pom.xml
+          CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)${{ github.event.inputs.classifier }}
           pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
-          CATALOG_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout -f nuxeo-web-ui/pom.xml)${{ github.event.inputs.classifier }}
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
           CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
           echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
