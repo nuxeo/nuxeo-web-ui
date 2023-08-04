@@ -166,7 +166,6 @@ Polymer({
   },
 
   _getFileValue() {
-    const fileName = this.document.type === 'File' && this.xpath === 'files:files' ? 'file' : '';
-    return fileName;
+    return this.xpath === 'files:files' ? 'file' : '';
   },
 });
