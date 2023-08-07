@@ -533,7 +533,11 @@ Polymer({
       value == null ||
       (Array.isArray(value) &&
         value.filter(
-          (file) => !Object.prototype.hasOwnProperty.call(this.valueKey ? file[this.valueKey] : file, 'data'),
+          (file) =>
+            !Object.prototype.hasOwnProperty.call(
+              this.valueKey && file[this.valueKey] != null ? file[this.valueKey] : file,
+              'data',
+            ),
         ).length === 0) ||
       Object.prototype.hasOwnProperty.call(value, 'data')
     ) {
