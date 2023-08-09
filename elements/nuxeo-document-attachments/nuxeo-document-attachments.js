@@ -143,8 +143,17 @@ Polymer({
       this.hasPermission(doc, 'WriteProperties') &&
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
-      !this.isTrashed(doc)
+      !this.isTrashed(doc) &&
+      !this._isPropUnderRetention(doc)
     );
+  },
+
+  _isPropUnderRetention(doc) {
+    if (doc && doc.isUnderRetentionOrLegalHold && doc.retainedProperties && doc.retainedProperties.length > 0) {
+      return doc.retainedProperties.some((prop) => prop.startsWith(this.xpath));
+    }
+
+    return false;
   },
 
   _computeFiles() {
