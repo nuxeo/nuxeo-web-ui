@@ -7,7 +7,7 @@ on:
     inputs:
       target_platform:
         description: 'The Nuxeo server target platform to build the catalog for.'
-        default: '11.3'
+        default: '2023.0'
         required: true
       branch_name:
         description: 'The name of the Nuxeo Web UI branch to generate the catalog for.'
@@ -148,7 +148,7 @@ jobs:
           GH_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
         run: | 
           git checkout -b designer-catalog-update-$CATALOG_VERSION
-          mvn versions:set-property -Dproperty=view.designer.catalog.11.3 -DnewVersion=$CATALOG_VERSION
+          mvn versions:set-property -Dproperty=view.designer.catalog.2023.0 -DnewVersion=$CATALOG_VERSION
           git add .
           git commit -m "Update Designer catalog with version $CATALOG_VERSION"
           git push origin designer-catalog-update-$CATALOG_VERSION
