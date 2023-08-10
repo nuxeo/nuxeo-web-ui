@@ -72,6 +72,11 @@ suite('nuxeo-picture-formats', () => {
       element.xpath = 'file:content';
       expect(element._getAdditionalFormats(document)).to.eql(additionalFormats);
     });
+    test('Should not get additional formats for asset when document is not present', () => {
+      const additionalFormats = [];
+      element.xpath = 'file:content';
+      expect(element._getAdditionalFormats()).to.eql(additionalFormats);
+    });
   });
 
   suite('fetch download url', () => {
@@ -87,6 +92,9 @@ suite('nuxeo-picture-formats', () => {
         data: 'abc.docx?changeToken=1-0',
       };
       expect(element._getDownloadUrl(item)).to.equal('abc.docx?changeToken=1-0');
+    });
+    test('Should not fetch download url when input is not provided', () => {
+      expect(element._getDownloadUrl()).to.equal('');
     });
   });
 });

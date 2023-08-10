@@ -42,5 +42,28 @@ suite('nuxeo-document-blob', () => {
       };
       expect(element._getDownloadBlobUrl()).to.equal('abc.docx?changeToken=1-0');
     });
+    test('Should fetch download url when docunent is present', () => {
+      element.document = {
+        properties: {
+          'file:content': {
+            appLinks: [],
+            data: 'abc.docx?changeToken=1-0',
+            digest: '2e7d1a1ba7018c048bebdf1d07481ee3',
+            digestAlgorithm: 'MD5',
+            length: '5763',
+            'mime-type': 'image/jpeg',
+            name: 'kitten1 (4).jpeg',
+          },
+        },
+      };
+      expect(element._getDownloadBlobUrl()).to.equal('abc.docx?changeToken=1-0');
+    });
+    test('Should not fetch download url when document is not present', () => {
+      expect(element._getDownloadBlobUrl()).to.equal('');
+    });
+    test('Should not fetch download url when document properties are not present', () => {
+      element.document = {};
+      expect(element._getDownloadBlobUrl()).to.equal('');
+    });
   });
 });
