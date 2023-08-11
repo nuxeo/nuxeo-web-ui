@@ -1099,20 +1099,20 @@ Polymer({
 
   _displayUser(user) {
     if (user) {
-      let result = '';
+      let res = '';
       if (user.properties.firstName) {
-        result += user.properties.firstName;
+        res += user.properties.firstName;
       }
       if (user.properties.lastName) {
-        if (result.length > 0) {
-          result += ' ';
+        if (res.length > 0) {
+          res += ' ';
         }
-        result += user.properties.lastName;
+        res += user.properties.lastName;
       }
-      if (result.length === 0) {
-        result = user.id;
+      if (res.length === 0) {
+        res = user.id;
       }
-      return result;
+      return res;
     }
   },
 
