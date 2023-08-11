@@ -339,7 +339,6 @@ Polymer({
           on-iron-activate="_toggleDrawer"
           aria-label$="[[i18n('app.drawer')]]"
           aria-expanded="[[drawerOpened]]"
-          on-keyup="_toggleDrawer"
         >
           <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
           <nuxeo-menu-icon
@@ -670,9 +669,6 @@ Polymer({
     this.removeAttribute('unresolved');
 
     Performance.mark('nuxeo-app.ready');
-    this.$.menu.addEventListener('keyup', (event) => {
-      this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
-    });
   },
 
   _resetTaskSelection() {
@@ -991,14 +987,11 @@ Polymer({
     this.navigateTo('search', target.searchName);
   },
 
-  _toggleDrawer(e, selectedObj) {
-    const selectedItem = e.type === 'keyup' ? selectedObj : e;
-    const selectedItemDetailSelected =
-      selectedItem.detail && selectedItem.detail.selected ? selectedItem.detail.selected : 0;
-    if (this._selected === selectedItemDetailSelected && this.drawerOpened) {
+  _toggleDrawer(e) {
+    if (e.detail.selected && this._selected === e.detail.selected && this.drawerOpened) {
       this._closeDrawer();
     } else {
-      this._selected = this.selectedTab = selectedItemDetailSelected;
+      this._selected = this.selectedTab = e.detail.selected;
       this._openDrawer();
     }
   },
