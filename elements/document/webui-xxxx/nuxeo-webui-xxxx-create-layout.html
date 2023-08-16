@@ -1,0 +1,83 @@
+<!--
+`nuxeo-webui-xxxx-create-layout`
+@group Nuxeo UI
+@element nuxeo-webui-xxxx-create-layout
+-->
+<dom-module id="nuxeo-webui-xxxx-create-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:title}}"
+      label="Title"
+      type="text"
+      required="true"
+      name="title"
+    ></nuxeo-input>
+
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:description}}"
+      label="Description"
+      type="text"
+      name="description"
+    ></nuxeo-input>
+
+    <!-- <nuxeo-input value="{{document.properties.webui-xxxx:ent_description}}" label="Ent Description" type="text" 
+    pattern="^(?!\s)([-a-zA-Z0-9 !@#$pattern()'.+=_,/\\&quot;])*?(?<!\s)$" name="ent_description" role="widget"></nuxeo-input>   -->
+
+    <!-- <nuxeo-input role="widget" value="{{document.properties.dc:description2}}" label="Desc2" type="text" name="description2" minlength="5"></nuxeo-input> -->
+
+    <!-- <nuxeo-input value="{{document.properties.webui-xxxx:ent_description}}" label="Ent Description" type="text" 
+    pattern="^\s*(.*)\s*$" name="ent_description" role="widget"></nuxeo-input>    -->
+
+    <!-- <nuxeo-input value="{{document.properties.webui-xxxx:ent_description}}" label="Ent Description" type="text" 
+    pattern="^\s*.*\s*$" name="ent_description" role="widget"></nuxeo-input> -->
+
+    <!-- <nuxeo-input value="{{document.properties.webui-xxxx:ent_description}}" label="Ent Description" type="text" 
+    pattern="^\s*(\S(?:.*\S)?)\s*$" name="ent_description" role="widget"></nuxeo-input>  -->
+
+    <!-- <nuxeo-input value="{{document.properties.webui-xxxx:ent_description}}" label="Ent Description" type="text" 
+    pattern="\S+" name="ent_description" role="widget"></nuxeo-input>  -->
+
+    <!-- <nuxeo-input value="{{document.properties.webui-xxxx:ent_description}}" label="Ent Description" type="text" 
+    pattern="^\s*(\S|\S.*\S)\s*$" name="ent_description" role="widget"></nuxeo-input> -->
+
+    <!--- Tried by web ui team abd working fine -->
+    <nuxeo-input
+      value="{{document.properties.webui-xxxx:ent_description}}"
+      label="Ent Description"
+      type="text"
+      pattern="^(?!\s)(?!.*\s$).*$"
+      name="ent_description"
+      role="widget"
+    ></nuxeo-input>
+
+    <!-- <nuxeo-input value="{{document.properties.webui-xxxx:ent_description}}" label="Ent Description" type="text" 
+    pattern="^(?!\s)([-a-zA-Z0-9 !@#$&()'.+=_,/\\"])*?(?<!\s)$" name="ent_description" role="widget"></nuxeo-input> -->
+
+    <div role="widget">
+      <label id="contentField">Content</label>
+      <nuxeo-dropzone
+        value="{{document.properties.file:content}}"
+        aria-labelledby="contentField"
+        name="content"
+      ></nuxeo-dropzone>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-webui-xxxx-create-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * @doctype WEBUI-XXXX
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>
