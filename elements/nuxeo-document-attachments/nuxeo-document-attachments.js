@@ -139,7 +139,6 @@ Polymer({
   _isDropzoneAvailable(doc) {
     return (
       doc &&
-      !doc.isRecord &&
       this.hasPermission(doc, 'WriteProperties') &&
       !this.isImmutable(doc) &&
       !this.hasType(doc, 'Root') &&
