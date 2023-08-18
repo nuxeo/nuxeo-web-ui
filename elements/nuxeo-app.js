@@ -823,6 +823,7 @@ Polymer({
   },
 
   _updateTitle() {
+    if (!this.page) return;
     const title = [];
     switch (this.page) {
       case 'browse':
