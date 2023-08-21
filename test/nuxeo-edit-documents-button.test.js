@@ -386,6 +386,48 @@ suite('nuxeo-edit-documents-button', () => {
       expect(isElementVisible(dialog)).to.be.false;
     });
 
+    test('Should submit form when properties are modified correctly when update mode is replace', async () => {
+      button = await buildButton();
+      const { dialog, save } = button.$;
+      const natureWidget = getWidget('dc:nature');
+      const natureBulkWidget = getBulkWidget(natureWidget);
+      const expiredWidget = getWidget('dc:expired');
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      await waitForDialogOpen(dialog);
+      // set dc:nature update mode to remove
+      natureBulkWidget.updateMode = 'replace';
+      natureWidget.value = 'test';
+      // set a dc:expired date
+      expiredWidget.value = new Date();
+      // click the save button
+      save.click();
+      await waitForDialogClose(dialog);
+      // check that dialog is closed
+      expect(isElementVisible(dialog)).to.be.false;
+    });
+
+    test('Should submit form when properties are modified correctly when update mode is addvalues', async () => {
+      button = await buildButton();
+      const { dialog, save } = button.$;
+      const natureWidget = getWidget('dc:nature');
+      const natureBulkWidget = getBulkWidget(natureWidget);
+      const expiredWidget = getWidget('dc:expired');
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      await waitForDialogOpen(dialog);
+      // set dc:nature update mode to remove
+      natureBulkWidget.updateMode = 'addValues';
+      natureWidget.value = 'test';
+      // set a dc:expired date
+      expiredWidget.value = new Date();
+      // click the save button
+      save.click();
+      await waitForDialogClose(dialog);
+      // check that dialog is closed
+      expect(isElementVisible(dialog)).to.be.false;
+    });
+
     test('Should show the append option only if the field is multivalued', async () => {
       button = await buildButton();
       const { dialog } = button.$;
