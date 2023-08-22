@@ -989,10 +989,11 @@ Polymer({
   },
 
   _toggleDrawer(e) {
-    if (e.detail.selected && this._selected === e.detail.selected && this.drawerOpened) {
+    const a = e.detail.selected;
+    if (a && this._selected === a && this.drawerOpened) {
       this._closeDrawer();
     } else {
-      this._selected = this.selectedTab = e.detail.selected;
+      this._selected = this.selectedTab = a;
       this._openDrawer();
     }
   },
