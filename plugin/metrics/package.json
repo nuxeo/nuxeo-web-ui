@@ -10,6 +10,6 @@
     "cleankill": "^2.0.0",
     "sauce-connect-launcher": "^1.2.4",
     "uuid": "^3.3.2",
-    "webdriverio": "^4.13.0"
+    "webdriverio": "^8.11.0"
   }
 }
