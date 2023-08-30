@@ -25,8 +25,9 @@ const capability = {
   // grid with only 5 firefox instance available you can make sure that not more than
   // 5 instance gets started at a time.
   maxInstances: 1,
-  browserName: process.env.BROWSER,
+  browserName: 'chrome',
   acceptInsecureCerts: true,
+  browserVersion: '114.0.5735.90',
 };
 
 const options = {};
