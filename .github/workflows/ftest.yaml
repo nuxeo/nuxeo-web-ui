@@ -47,9 +47,9 @@ jobs:
       
       - name: Verify Chrome Installation
         run: |
-        echo google-chrome --version
-        echo "google-chrome"
-        echo which google-chrome
+          echo google-chrome --version
+          echo "google-chrome"
+          echo which google-chrome
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
