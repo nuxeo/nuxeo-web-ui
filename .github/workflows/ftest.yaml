@@ -45,13 +45,6 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
       
-      # - name: Download and Install Chrome
-      #   run: |
-      #     wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/116.0.5845.96/linux64/chrome-linux64.zip
-      #     unzip chrome-linux64.zip -d chrome-linux64
-      #     mv chrome-linux64 /opt/
-      #     ln -s /opt/chrome-linux64/chrome /usr/local/bin/google-chrome
-
       - name: Verify Chrome Installation
         run: |
         echo google-chrome --version
