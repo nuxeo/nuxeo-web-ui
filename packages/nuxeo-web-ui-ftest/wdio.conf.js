@@ -26,9 +26,6 @@ const capability = {
   // 5 instance gets started at a time.
   maxInstances: 1,
   browserName: process.env.BROWSER,
-  'goog:chromeOptions': {
-    binary: chromeLauncher.Launcher.getInstallations()[0] || "/usr/bin/google-chrome" // Replace with actual path
-  },
   acceptInsecureCerts: true,
 };
 
@@ -188,6 +185,12 @@ exports.config = {
       {
         installArgs: { drivers },
         args: { drivers },
+      },
+    ],
+    [
+      'chromedriver', // Add chromedriver service
+      {
+        chromedriverCustomPath: '/opt/chrome-linux64/chrome',
       },
     ],
     [CompatService],
