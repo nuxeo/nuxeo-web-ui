@@ -190,7 +190,7 @@ exports.config = {
     [
       'chromedriver', // Add chromedriver service
       {
-        chromedriverCustomPath: '/opt/chrome-linux64/chrome',
+        chromedriverCustomPath: '/usr/bin/google-chrome',
       },
     ],
     [CompatService],
