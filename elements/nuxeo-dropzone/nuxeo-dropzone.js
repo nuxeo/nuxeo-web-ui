@@ -527,7 +527,7 @@ Polymer({
   },
 
   _reset(value) {
-    if (value && this.uploadedFiles)
+    if (value && value['upload-batch'] && this.uploadedFiles)
       this.files = this.uploadedFiles.filter((item) => item.batchId === value['upload-batch']);
     if (
       value == null ||
