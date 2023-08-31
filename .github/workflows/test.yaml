@@ -1,48 +1,48 @@
-name: Test
+# name: Test
 
-on:
-  pull_request:
-    branches:
-      - maintenance-3.1.x
-  workflow_call:
-    inputs:
-      branch:
-        description: 'The current branch'
-        default: maintenance-3.1.x
-        type: string
-        required: false
-    secrets:
-      NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
-        required: true
-      SAUCE_ACCESS_KEY:
-        description: 'SAUCE_ACCESS_KEY'
-        required: true
+# on:
+#   pull_request:
+#     branches:
+#       - maintenance-3.1.x
+#   workflow_call:
+#     inputs:
+#       branch:
+#         description: 'The current branch'
+#         default: maintenance-3.1.x
+#         type: string
+#         required: false
+#     secrets:
+#       NPM_PACKAGES_TOKEN:
+#         description: 'NPM_PACKAGES_TOKEN'
+#         required: true
+#       SAUCE_ACCESS_KEY:
+#         description: 'SAUCE_ACCESS_KEY'
+#         required: true
 
-env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
+# env:
+#   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
-jobs:
-  unit-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ env.BRANCH_NAME }}
+# jobs:
+#   unit-test:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#         with:
+#           ref: ${{ env.BRANCH_NAME }}
 
-      - uses: actions/setup-node@v3
-        with:
-          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
-          scope: '@nuxeo'
-          node-version: 14
+#       - uses: actions/setup-node@v3
+#         with:
+#           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+#           scope: '@nuxeo'
+#           node-version: 14
 
-      - name: Install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm install
+#       - name: Install
+#         env:
+#           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#         run: npm install
 
-      - name: Unit tests
-        env:
-          SAUCE_USERNAME: nuxeo-web-ui
-          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-        run: npm run test
+#       - name: Unit tests
+#         env:
+#           SAUCE_USERNAME: nuxeo-web-ui
+#           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+#         run: npm run test

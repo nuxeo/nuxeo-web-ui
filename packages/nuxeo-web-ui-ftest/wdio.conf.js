@@ -140,7 +140,7 @@ exports.config = {
   sync: true,
   //
   // Level of logging verbosity: trace | debug | info | warn | error | silent
-  logLevel: 'error',
+  logLevel: 'debug',
   //
   // Enables colors for log output.
   coloredLogs: true,
@@ -185,6 +185,12 @@ exports.config = {
       {
         installArgs: { drivers },
         args: { drivers },
+      },
+    ],
+    [
+      'chromedriver', // Add chromedriver service
+      {
+        chromedriverCustomPath: '/usr/bin/google-chrome',
       },
     ],
     [CompatService],
