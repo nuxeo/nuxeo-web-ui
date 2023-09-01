@@ -25,6 +25,7 @@ let rootDocument;
 let levelOneDocuments;
 let levelTwoDocuments;
 let levelThreeDocuments;
+let levelFourDocuments;
 let levelOneDocument;
 let levelTwoDocument;
 let uidCounter;
@@ -263,6 +264,10 @@ suite('nuxeo-document-tree', () => {
       // assert there's no icon to expand the node
       const icon = node.querySelector('iron-icon');
       expect(icon).to.be.null;
+      expect(documentTree._icon(false)).to.be.equal('icons:folder');
+      expect(documentTree._icon(true)).to.be.equal('icons:folder-open');
+      expect(documentTree._loading(false)).to.be.equal('');
+      expect(documentTree._documentChanged()).to.be.undefined;
     });
 
     test('Icons should be updated due to tree node expansion', async () => {
@@ -310,6 +315,23 @@ suite('nuxeo-document-tree', () => {
       expect(documentTree.parents).to.have.length(1);
       expect(documentTree.parents[0].uid).to.be.equal(4);
       isElementVisible(documentTree.shadowRoot.querySelector('.parents'));
+    });
+
+    test('Tree breadcrumb is present with root document', async () => {
+      // set the new document that contains the breadcrumb
+
+      levelFourDocuments = [
+        generateDocument({ type: 'Root', parentRef: '7', parentPath: '/Folder6/Folder7', isFolderish: false }),
+        generateDocument({ type: 'File', parentRef: '8', parentPath: '/Folder6/Folder8', isFolderish: false }),
+      ];
+      const [doc] = levelFourDocuments;
+      documentTree.currentDocument = doc;
+      await flush();
+      await waitForChildListMutation(documentTree.$.tree);
+      await waitForTreeNodeLoading(documentTree);
+
+      const nodes = getTreeNodes(documentTree);
+      expect(nodes).to.have.length(4);
     });
 
     test('Tree should collapse when clicking on a document', async () => {
@@ -395,6 +417,24 @@ suite('nuxeo-document-tree', () => {
       });
     });
 
+    test('Should not remove document when documents to be deleted are not present', async () => {
+      // fire the event to remove the documents from the tree
+      const documentsToDelete = null;
+      window.dispatchEvent(
+        new CustomEvent('nuxeo-documents-deleted', {
+          detail: {
+            documents: documentsToDelete,
+          },
+        }),
+      );
+      await flush();
+      await waitForTreeNodeLoading(documentTree);
+
+      // assert that the documents are not removed
+      const nodes = getTreeNodes(documentTree);
+      expect(nodes).to.have.length(4);
+    });
+
     test('Should update the tree when a document is created', async () => {
       // the newly created document
       const document = generateDocument({
@@ -453,6 +493,28 @@ suite('nuxeo-document-tree', () => {
       const node = Array.from(nodes).find((n) => n.data.title === title);
       expect(node).to.be.not.null;
       expect(node.querySelector('.node-name').textContent.trim()).to.be.equal(title);
+    });
+
+    test('When server responded with 403', async () => {
+      // set a new title a document to validate the refresh-display updates the tree
+      const title = 'New doc title';
+      levelOneDocuments[0].title = title;
+      // override the response to retrieve the updated document
+      generatePageProviderResponse(levelOneDocuments);
+      server.respondWith('GET', '/api/v1/path/Folder4/Folder6', [403, jsonHeader, JSON.stringify(levelTwoDocument)]);
+
+      // dispatch the refresh-display event
+      window.dispatchEvent(new CustomEvent('refresh-display'));
+      await flush();
+      await waitForChildListMutation(documentTree.$.tree);
+      await waitForTreeNodeLoading(documentTree);
+
+      // check we still have all the tree nodes
+      const nodes = getTreeNodes(documentTree);
+      expect(nodes).to.have.length(4);
+      // assert the node has the updated title
+      const node = Array.from(nodes).find((n) => n.data.title === title);
+      expect(node).to.be.undefined;
     });
   });
 });
