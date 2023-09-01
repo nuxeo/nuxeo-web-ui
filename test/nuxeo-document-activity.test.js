@@ -108,6 +108,26 @@ suite('nuxeo-document-activity', () => {
     });
 
     test('Should display the activity name as download when user performs download action', async () => {
+      element.document = {
+        'entity-type': 'document',
+        contextParameters: {
+          element: {
+            entries: [
+              {
+                path: '/default-domain',
+                title: 'Domain',
+                type: 'Domain',
+                uid: '1',
+              },
+            ],
+          },
+          audit: [],
+        },
+        path: '/default-domain/workspaces/my workspace/folder 1/folder 2/folder 3/my file',
+        title: 'my file',
+        type: 'File',
+        uid: '7',
+      };
       const event = {
         extended: {
           clientReason: 'download',
