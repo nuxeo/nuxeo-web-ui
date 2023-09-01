@@ -101,5 +101,93 @@ suite('nuxeo-audit-search', () => {
       sinon.spy(element, '_formatComment');
       expect(element._formatComment('file1.jpeg', 'view')).to.equal('View: [file1.jpeg]');
     });
+    test('Should return the comment only', () => {
+      sinon.spy(element, '_formatComment');
+      expect(element._formatComment('file1.jpeg', '')).to.equal('file1.jpeg');
+    });
+    test('Should return the formatted date when date is passed as comment', () => {
+      sinon.spy(element, '_formatComment');
+      expect(element._formatComment('2022-12-16T08:38:12.665Z', '')).to.equal('December 16, 2022 8:38 AM');
+    });
+  });
+  suite('build params', () => {
+    test('Should return document id when document and uid is present', () => {
+      element.events = ['abc'];
+      element.document = {
+        uid: '123',
+      };
+      element.category = 'test';
+      element.startDate = '2022-12-16T08:38:12.665Z';
+      element.endDate = '2022-12-15T08:38:12.665Z';
+      sinon.spy(element, '_formatComment');
+      element.visible = true;
+      expect(element.documentId).to.equal(element.document.uid);
+    });
+    test('Should return empty document id when document is not present', () => {
+      element.events = ['abc'];
+      element.document = null;
+      sinon.spy(element, '_formatComment');
+      element.visible = true;
+      expect(element.documentId).to.equal('');
+    });
+    test('Should return the text View to identify type of download alongwith file name', () => {
+      sinon.spy(element, '_formatComment');
+      element.visible = true;
+      expect(element._buildParams().principalName).to.equal('');
+    });
+  });
+  suite('get document url', () => {
+    test('Should not return when docUUID is not present', () => {
+      const item = {
+        properties: {
+          'file:content': {
+            appLinks: [],
+            downloadUrl: null,
+            data: 'abc.docx?changeToken=1-0',
+            digest: '2e7d1a1ba7018c048bebdf1d07481ee3',
+            digestAlgorithm: 'MD5',
+            encoding: null,
+            length: '5763',
+            'mime-type': 'image/jpeg',
+            name: 'kitten1 (4).jpeg',
+          },
+        },
+      };
+      expect(element._getDocumentURL(item)).to.be.undefined;
+    });
+  });
+  suite('parse comment', () => {
+    test('Should not parse when properties are not set', () => {
+      expect(element._parseComment('file1.jpeg')).to.be.null;
+    });
+  });
+  suite('format document', () => {
+    test('Should not format when properties are not set', () => {
+      const item = {
+        properties: {
+          'file:content': {
+            appLinks: [],
+            downloadUrl: null,
+            data: 'abc.docx?changeToken=1-0',
+            digest: '2e7d1a1ba7018c048bebdf1d07481ee3',
+            digestAlgorithm: 'MD5',
+            encoding: null,
+            length: '5763',
+            'mime-type': 'image/jpeg',
+            name: 'kitten1 (4).jpeg',
+          },
+        },
+      };
+      expect(element._formatDocument(item)).to.equal('');
+      expect(element._formatDocument()).to.be.undefined;
+    });
+  });
+  suite('format i18n', () => {
+    test('Should return concat when key is present', () => {
+      expect(element._formati18n('audit', 1)).to.equal('audit1');
+    });
+    test('Should not return when key is not present', () => {
+      expect(element._formati18n('audit')).to.equal('');
+    });
   });
 });
