@@ -63,9 +63,16 @@ jobs:
     - name: Web UI build
       run: mvn -B -ntp install
 
+          - name: Install google chrome
+            run:
+                wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.133-1_amd64.deb
+                sudo apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.133-1_amd64.deb
+                sudo ln -s /usr/bin/google-chrome /usr/bin/chrome
+                chrome --version
+
     #==================================================================================================================
     # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1266 is resolved.
     #==================================================================================================================
-    # - name: A11y checks
-    #   run: mvn -B -ntp -f plugin/a11y install
+    - name: A11y checks
+      run: mvn -B -ntp -f plugin/a11y install
     #==================================================================================================================
