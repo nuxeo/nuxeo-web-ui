@@ -32,7 +32,7 @@ const options = {
 if (process.env.HEADLESS) {
   options.args.push('--window-size=1920,1080');
   options.args.push('--single-process');
-  options.args.push('--headless');
+  // options.args.push('--headless');
   options.args.push('--disable-gpu');
   options.args.push('--disable-dev-shm-usage');
 }

@@ -114,9 +114,12 @@ if (process.env.DRIVER_VERSION == null) {
   console.log(`${version} detected.`);
   const match = version && version.match(/([0-9]+)\./);
   if (match) {
-    const checkVersion = match[1];
+    // this line of code has been commented on due to some driver issues,
+    // we will resume it once WEBUI-1267 is resolved.
+    // const checkVersion = match[1];
     try {
-      done = fetch(`https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${checkVersion}`).then((response) => {
+      // we will update dynamci release version once WEBUI-1267 is resolved
+      done = fetch(`https://chromedriver.storage.googleapis.com/LATEST_RELEASE_114`).then((response) => {
         if (response.ok) {
           return response
             .text()

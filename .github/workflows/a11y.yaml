@@ -18,7 +18,7 @@ on:
       PACKAGES_AUTH_USER:
         description: 'PACKAGES_AUTH_USER'
         required: true
-      PACKAGES_AUTH_TOKEN: 
+      PACKAGES_AUTH_TOKEN:
         description: 'PACKAGES_AUTH_TOKEN'
         required: true
 
@@ -31,41 +31,45 @@ jobs:
   a11y:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ env.BRANCH_NAME }}
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.BRANCH_NAME }}
 
-    - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
+      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
-    - uses: actions/setup-node@v3
-      with:
-        registry-url: ${{ env.NPM_REPOSITORY }}
-        node-version: 14
-        scope: '@nuxeo'
+      - uses: actions/setup-node@v3
+        with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: 14
+          scope: '@nuxeo'
 
-    - uses: actions/setup-java@v2
-      with:
-        distribution: 'zulu'
-        java-version: '17'
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
-    - name: 'Update settings.xml with server configuration'
-      run: |
-        echo '<settings>
-            <servers>
-              <server>
-                <id>maven-internal</id>
-                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-              </server>
-            </servers>
-            </settings>' > ~/.m2/settings.xml
+      - name: Install google chrome 
+        shell: bash
+        run: |
+            wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
+            apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
+            ln -s /usr/bin/google-chrome /usr/bin/chrome
+            chrome --version    
 
-    - name: Web UI build
-      run: mvn -B -ntp install
+      - name: 'Update settings.xml with server configuration'
+        run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
 
-    #==================================================================================================================
-    # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1266 is resolved.
-    #==================================================================================================================
-    # - name: A11y checks
-    #   run: mvn -B -ntp -f plugin/a11y install
-    #==================================================================================================================
+      - name: Web UI build
+        run: mvn -B -ntp install
+
+      - name: A11y checks
+        run: mvn -B -ntp -f plugin/a11y install
