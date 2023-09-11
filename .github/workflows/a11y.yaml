@@ -29,7 +29,7 @@ env:
 
 jobs:
   a11y:
-    runs-on: ubuntu-latest
+    runs-on: [ self-hosted, master ]
     steps:
     - uses: actions/checkout@v2
       with:
