@@ -47,13 +47,10 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: '11'
-
     - name: Install google chrome
-        shell: bash
-        run: |
-            wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
-            apt install -f --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
-            ln -s /usr/bin/google-chrome /usr/bin/chrome -f
+      run: |
+        wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
+        apt install ./google-chrome-stable_114.0.5735.90-1_amd64.deb
             chrome --version        
 
     - name: 'Update settings.xml with server configuration'
