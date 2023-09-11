@@ -51,8 +51,7 @@ jobs:
       - name: Install google chrome
         run: |
             wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
-            apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
-            apt chrome --version    
+            apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb 
 
       - name: 'Update settings.xml with server configuration'
         run: |
