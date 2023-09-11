@@ -335,6 +335,10 @@ Polymer({
         text-overflow: ellipsis;
       }
 
+      .upload.vertical.layout.flex {
+        overflow: auto;
+      }
+
       .importing-label {
         margin-right: 8px;
       }
