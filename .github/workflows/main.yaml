@@ -44,13 +44,13 @@ jobs:
     uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@maintenance-3.1.x
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
+      PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}a
       PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
     with:
       branch: maintenance-3.1.x
 
   build:
-    needs: [action, lint, test, a11y, ftest]
+    needs: [lint, test, a11y, ftest]
     runs-on: [self-hosted, master]
     steps:
       - uses: actions/checkout@v2
