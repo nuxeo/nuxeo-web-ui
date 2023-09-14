@@ -15,7 +15,7 @@ const match = version && version.match(/([0-9]+)\./);
 if (match) {
   const checkVersion = match[1];
   try {
-    fetch(`https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${checkVersion}`).then((response) => {
+    fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then((response) => {
       if (response.ok) {
         return response
           .text()

@@ -116,21 +116,23 @@ if (process.env.DRIVER_VERSION == null) {
   if (match) {
     const checkVersion = match[1];
     try {
-      done = fetch(`https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${checkVersion}`).then((response) => {
-        if (response.ok) {
-          return response
-            .text()
-            .then((newDriverVersion) => {
-              // eslint-disable-next-line no-console
-              console.log(`ChromeDriver ${newDriverVersion} needed.`);
-              process.env.DRIVER_VERSION = newDriverVersion;
-            })
-            .catch((e) => {
-              console.error('unable to parse ChromeDriver version: ', e);
-            });
-        }
-        console.error('unable to fetch ChromeDriver version: ', response);
-      });
+      done = fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then(
+        (response) => {
+          if (response.ok) {
+            return response
+              .text()
+              .then((newDriverVersion) => {
+                // eslint-disable-next-line no-console
+                console.log(`ChromeDriver ${newDriverVersion} needed.`);
+                process.env.DRIVER_VERSION = newDriverVersion;
+              })
+              .catch((e) => {
+                console.error('unable to parse ChromeDriver version: ', e);
+              });
+          }
+          console.error('unable to fetch ChromeDriver version: ', response);
+        },
+      );
     } catch (e) {
       console.error('unable to fetch ChromeDriver version: ', e);
     }

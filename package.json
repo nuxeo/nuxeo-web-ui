@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "vendor": "Nuxeo",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^7.0.0",
@@ -57,7 +57,7 @@
     "vm-browserify": "^1.1.2",
     "wdio-chromedriver-service": "^8.0.0",
     "wdio-cucumber-reporter": "0.0.2",
-    "wdio-json-reporter": "^2.0.0",
+    "wdio-json-reporter": "^3.0.0",
     "webpack": "^5.3.0",
     "webpack-bundle-analyzer": "^3.9.0",
     "webpack-cli": "^4.1.0",
@@ -174,7 +174,7 @@
     "@polymer/paper-toolbar": "^3.0.0",
     "@polymer/paper-tooltip": "^3.0.0",
     "@polymer/polymer": "^3.0.0",
-    "@wdio/allure-reporter": "^7.2.0",
+    "@wdio/allure-reporter": "^7.32.0",
     "@webcomponents/html-imports": "^1.2.0",
     "aws-sdk": "^2.420.0",
     "dotenv": "^8.0.0",
