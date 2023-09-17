@@ -159,6 +159,7 @@ Polymer({
       .vertical {
         @apply --layout-flex;
         @apply --layout-vertical;
+        overflow: auto;
       }
 
       iron-pages {
