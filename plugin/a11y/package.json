@@ -2,7 +2,7 @@
   "name": "@nuxeo/nuxeo-web-ui-a11y",
   "version": "1.0.0",
   "engines": {
-    "node": ">=10.23.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "start": "npm run test",
