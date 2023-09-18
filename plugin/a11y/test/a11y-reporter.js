@@ -22,6 +22,7 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     before(() => {
       report = getReport();
+      console.log("Violations Report",report)
     });
 
     Object.entries(expectedViolations).forEach(([violation, issues]) => {
@@ -43,6 +44,7 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     before(() => {
       report = getReport();
+      console.log("Incomplete Report",report)
     });
 
     Object.entries(expectedIncompleteViolations).forEach(([violation, issues]) => {
