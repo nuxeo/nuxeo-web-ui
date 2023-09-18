@@ -7,8 +7,6 @@ import { reportA11y } from '../a11y-reporter.js';
 const EXPECTED_VIOLATIONS = {
   'aria-command-name': 1,
   'aria-allowed-attr': 4,
-  'aria-required-children': 4,
-  'color-contrast': 12,
   'aria-tooltip-name': 1,
   'landmark-one-main': 1,
   'meta-viewport': 1,
@@ -19,8 +17,6 @@ const EXPECTED_VIOLATIONS = {
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
   'aria-allowed-role': 5,
-  'color-contrast-enhanced': 2,
-  'aria-required-children': 1,
 };
 
 describe('Nuxeo Home', () => {

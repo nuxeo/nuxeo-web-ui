@@ -5,13 +5,9 @@ import login from '../helpers/login';
 import { reportA11y } from '../a11y-reporter.js';
 
 const EXPECTED_VIOLATIONS = {
-  'aria-allowed-attr': 1,
   'aria-command-name': 1,
-  'aria-required-children': 4,
   'aria-roles': 3,
   'aria-tooltip-name': 1,
-  'color-contrast-enhanced': 15,
-  'color-contrast': 1,
   'landmark-one-main': 1,
   'meta-viewport': 1,
   'page-has-heading-one': 1,
@@ -21,7 +17,6 @@ const EXPECTED_VIOLATIONS = {
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
   'aria-allowed-role': 7,
-  'aria-prohibited-attr': 1,
   'aria-valid-attr-value': 1,
   'color-contrast-enhanced': 2,
 };
