@@ -40,7 +40,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         registry-url: ${{ env.NPM_REPOSITORY }}
-        node-version: 14
+        node-version: 18
         scope: '@nuxeo'
 
     - uses: actions/setup-java@v2
@@ -63,9 +63,5 @@ jobs:
     - name: Web UI build
       run: mvn -B -ntp install
 
-    #==================================================================================================================
-    # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1266 is resolved.
-    #==================================================================================================================
-    # - name: A11y checks
-    #   run: mvn -B -ntp -f plugin/a11y install
-    #==================================================================================================================
+    - name: A11y checks
+      run: mvn -B -ntp -f plugin/a11y install
