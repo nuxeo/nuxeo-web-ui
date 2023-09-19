@@ -47,7 +47,7 @@ limitations under the License.
       >
         <template>
           <nuxeo-document-grid-thumbnail
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{computeTabIndex(index)}}"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
@@ -144,16 +144,16 @@ limitations under the License.
         <nuxeo-data-table-column name="[[i18n('label.dublincore.nature')]]" field="dc:nature" hidden>
           <template>
             <nuxeo-tag hidden$="[[!item.properties.dc:nature]]"
-              >[[formatDirectory(item.properties.dc:nature)]]</nuxeo-tag
-            >
+              >[[formatDirectory(item.properties.dc:nature)]]
+            </nuxeo-tag>
           </template>
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column name="[[i18n('label.dublincore.coverage')]]" field="dc:coverage" hidden>
           <template>
             <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]"
-              >[[formatDirectory(item.properties.dc:coverage)]]</nuxeo-tag
-            >
+              >[[formatDirectory(item.properties.dc:coverage)]]
+            </nuxeo-tag>
           </template>
         </nuxeo-data-table-column>
 
@@ -227,6 +227,53 @@ limitations under the License.
         },
       },
 
+      ready() {
+        this.addEventListener('keydown', this.handleKeyDown.bind(this));
+      },
+
+      computeTabIndex(index) {
+        return index.toString();
+      },
+
+      handleKeyDown(event) {
+        const thumbnailElements = this.shadowRoot.querySelectorAll('nuxeo-document-grid-thumbnail');
+
+        if (thumbnailElements.length === 0) {
+          return;
+        }
+
+        let currentIndex = Array.from(thumbnailElements).findIndex((element) => element.selected);
+
+        if (currentIndex === -1) {
+          currentIndex = 0;
+        }
+
+        if (event.key === 'ArrowLeft') {
+          currentIndex = (currentIndex - 1 + thumbnailElements.length) % thumbnailElements.length;
+        } else if (event.key === 'ArrowRight') {
+          currentIndex = (currentIndex + 1) % thumbnailElements.length;
+        }
+        //  console.log(thumbnailElements[currentIndex]);
+        thumbnailElements.forEach((element) => {
+          element.selected = false;
+        });
+
+        thumbnailElements[currentIndex].selected = true;
+
+        const selectedThumbnail = thumbnailElements[currentIndex];
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) {
+              // Scroll the screen to make the selected thumbnail visible
+              //   selectedThumbnail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          });
+        });
+
+        // Observe the selected thumbnail
+        observer.observe(selectedThumbnail);
+        //    event.preventDefault();
+      },
       attached() {
         this.sortOptions = [
           { field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc' },

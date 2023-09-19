@@ -159,6 +159,7 @@ Polymer({
         @apply --nuxeo-action-hover;
       }
 
+      :host([selected]) .actions,
       .bubbleBox:hover .actions,
       .bubbleBox:hover .select,
       .bubbleBox[selection-mode] .select {

@@ -414,6 +414,9 @@ Polymer({
 
   get items() {
     if (this.view && this.view.items) {
+      if (this.view.items.length > 0) {
+        //  console.log(this.view.items);
+      }
       return this.view.items;
     }
     // XXX: this.view.items is not working
