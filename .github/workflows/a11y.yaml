@@ -43,6 +43,7 @@ jobs:
         node-version: 18
         scope: '@nuxeo'
 
+
     - name: Install Web UI
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
