@@ -189,9 +189,9 @@ Polymer({
         border: 2px dashed var(--nuxeo-grid-selected);
       }
 
-      a:focus {
+      /* a:focus {
         outline: none;
-      }
+      } */
 
       :host(:focus) .bubbleBox {
         z-index: 500;
@@ -204,9 +204,9 @@ Polymer({
         display: block;
       }
 
-      :host(:focus) .bubbleBox .actions nuxeo-favorites-toggle-button:focus,
-      :host(:focus) .bubbleBox .actions nuxeo-download-button:focus {
-        border: 2px solid red;
+      .bubbleBox .actions nuxeo-favorites-toggle-button:focus,
+      .bubbleBox .actions nuxeo-download-button:focus {
+        border: 2px solid green;
       }
     </style>
 
