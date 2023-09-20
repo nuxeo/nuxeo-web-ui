@@ -63,8 +63,7 @@ Polymer({
         border: 2px solid transparent;
       }
 
-      .bubbleBox:hover,
-      .bubbleBox:focus {
+      .bubbleBox:hover {
         z-index: 500;
         border: 2px solid var(--nuxeo-link-hover-color);
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
@@ -189,14 +188,34 @@ Polymer({
       :host(.droptarget-hover) .bubbleBox {
         border: 2px dashed var(--nuxeo-grid-selected);
       }
+
+      a:focus {
+        outline: none;
+      }
+
+      :host(:focus) .bubbleBox {
+        z-index: 500;
+        border: 2px solid var(--nuxeo-link-hover-color);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+      }
+
+      :host(:focus) .bubbleBox .actions,
+      :host(:focus) .bubbleBox .select {
+        display: block;
+      }
+
+      :host(:focus) .bubbleBox .actions nuxeo-favorites-toggle-button:focus,
+      :host(:focus) .bubbleBox .actions nuxeo-download-button:focus {
+        border: 2px solid red;
+      }
     </style>
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
-      <div class="thumbnailContainer" on-tap="handleClick">
+      <div class="thumbnailContainer" on-tap="handleClick" tabindex="2">
         <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick">
+        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" tabindex="3">
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
@@ -204,10 +223,10 @@ Polymer({
           </div>
         </a>
         <div class="actions">
-          <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
-          <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
+          <nuxeo-favorites-toggle-button document="[[doc]]" tabindex="4"></nuxeo-favorites-toggle-button>
+          <nuxeo-download-button document="[[doc]]" tabindex="5"></nuxeo-download-button>
         </div>
-        <div class="select">
+        <div class="select" tabindex="1">
           <paper-icon-button
             noink
             icon="icons:check"
@@ -248,6 +267,10 @@ Polymer({
 
     index: {
       type: Number,
+    },
+
+    tabindex: {
+      type: String,
     },
   },
 

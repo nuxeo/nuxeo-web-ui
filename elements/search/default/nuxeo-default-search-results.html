@@ -47,7 +47,7 @@ limitations under the License.
       >
         <template>
           <nuxeo-document-grid-thumbnail
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{computeTabIndex(index)}}"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
@@ -144,16 +144,16 @@ limitations under the License.
         <nuxeo-data-table-column name="[[i18n('label.dublincore.nature')]]" field="dc:nature" hidden>
           <template>
             <nuxeo-tag hidden$="[[!item.properties.dc:nature]]"
-              >[[formatDirectory(item.properties.dc:nature)]]</nuxeo-tag
-            >
+              >[[formatDirectory(item.properties.dc:nature)]]
+            </nuxeo-tag>
           </template>
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column name="[[i18n('label.dublincore.coverage')]]" field="dc:coverage" hidden>
           <template>
             <nuxeo-tag hidden$="[[!item.properties.dc:coverage]]"
-              >[[formatDirectory(item.properties.dc:coverage)]]</nuxeo-tag
-            >
+              >[[formatDirectory(item.properties.dc:coverage)]]
+            </nuxeo-tag>
           </template>
         </nuxeo-data-table-column>
 
@@ -245,6 +245,10 @@ limitations under the License.
 
       _contentStoredInColdStorage(doc) {
         return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
+      },
+
+      computeTabIndex(index) {
+        return (index + 1).toString();
       },
     });
   </script>
