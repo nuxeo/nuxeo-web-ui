@@ -8,7 +8,6 @@ const EXPECTED_VIOLATIONS = {
   'aria-command-name': 1,
   'aria-allowed-attr': 4,
   'aria-tooltip-name': 1,
-  'duplicate-id': 28,
   'landmark-one-main': 1,
   'meta-viewport': 1,
   'page-has-heading-one': 1,
@@ -18,7 +17,7 @@ const EXPECTED_VIOLATIONS = {
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
   'aria-allowed-role': 5,
-  'color-contrast': 8,
+  'color-contrast-enhanced': 2,
 };
 
 describe('Nuxeo Home', () => {
