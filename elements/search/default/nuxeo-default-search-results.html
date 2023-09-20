@@ -47,7 +47,7 @@ limitations under the License.
       >
         <template>
           <nuxeo-document-grid-thumbnail
-            tabindex$="{{computeTabIndex(index)}}"
+            tabindex="0"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
@@ -55,6 +55,16 @@ limitations under the License.
             selected-items="[[selectedItems]]"
           >
           </nuxeo-document-grid-thumbnail>
+          <!--  <div style="width: 100px; height: 100px; border: 1px solid black" tabindex="0">
+            <div style="width: 80px; height: 80px; border: 1px solid red; display: flex;" tabindex="0">
+                <div style="width: 50px; height: 50px; border: 1px solid green;" tabindex="0">
+                  Hi
+                </div>
+                <div style="width: 50px; height: 50px; border: 1px solid green;" tabindex="0">
+                  Hello
+                </div>
+            </div>
+          </div> -->
         </template>
       </nuxeo-data-grid>
 
