@@ -217,14 +217,18 @@ Polymer({
       /* div.actions *:focus-visible {
         outline: none;
       } */
+
+      /* :host *:focus-visible {
+        outline: none;
+      } */
     </style>
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
-      <div class="thumbnailContainer" on-tap="handleClick">
+      <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
         <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
       </div>
 
-      <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" tabindex="-1">
+      <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" tabindex="0">
         <div class="dataContainer">
           <div class="title" id="title">[[doc.title]]</div>
           <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
@@ -234,13 +238,6 @@ Polymer({
       <div class="actions">
         <nuxeo-favorites-toggle-button document="[[doc]]" tabindex="0"></nuxeo-favorites-toggle-button>
         <nuxeo-download-button document="[[doc]]" tabindex="0"></nuxeo-download-button>
-
-        <!--  <div style="width: 50px; height: 50px; border: 1px solid green;" tabindex="0">
-                  Hi
-          </div>
-          <div style="width: 50px; height: 50px; border: 1px solid green;" tabindex="0">
-                  Hello
-          </div> -->
       </div>
       <div class="select" tabindex="0">
         <paper-icon-button
