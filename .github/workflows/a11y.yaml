@@ -29,7 +29,7 @@ env:
 
 jobs:
   a11y:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, master]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -47,6 +47,11 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: '17'
+      
+    - name: Install google chrome
+      run: |
+        wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
+        apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
 
     - name: 'Update settings.xml with server configuration'
       run: |
@@ -63,9 +68,5 @@ jobs:
     - name: Web UI build
       run: mvn -B -ntp install
 
-    #==================================================================================================================
-    # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1266 is resolved.
-    #==================================================================================================================
-    # - name: A11y checks
-    #   run: mvn -B -ntp -f plugin/a11y install
-    #==================================================================================================================
+    - name: A11y checks
+      run: mvn -B -ntp -f plugin/a11y install
