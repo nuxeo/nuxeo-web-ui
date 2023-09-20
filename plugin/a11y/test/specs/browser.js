@@ -7,7 +7,6 @@ const EXPECTED_VIOLATIONS = {
   'aria-command-name': 1,
   'aria-roles': 3,
   'aria-tooltip-name': 1,
-  'duplicate-id': 28,
   'landmark-one-main': 1,
   'meta-viewport': 1,
   'page-has-heading-one': 1,
@@ -16,7 +15,6 @@ const EXPECTED_VIOLATIONS = {
 };
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
-  'aria-allowed-attr': 1,
   'aria-allowed-role': 7,
   'aria-valid-attr-value': 1,
   'color-contrast-enhanced': 2,

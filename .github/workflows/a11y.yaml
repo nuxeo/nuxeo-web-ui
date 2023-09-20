@@ -29,7 +29,7 @@ env:
 
 jobs:
   a11y:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, master]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -60,6 +60,11 @@ jobs:
         distribution: 'zulu'
         java-version: '11'
 
+    - name: Install google chrome
+      run: |
+        wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
+        apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
+
     - name: 'Update settings.xml with server configuration'
       run: |
         echo '<settings>
@@ -77,3 +82,4 @@ jobs:
 
     - name: A11y checks
       run: mvn -B -ntp -f plugin/a11y install
+
