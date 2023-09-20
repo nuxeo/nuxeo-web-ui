@@ -211,11 +211,11 @@ Polymer({
     </style>
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
-      <div class="thumbnailContainer" on-tap="handleClick" tabindex="2">
+      <div class="thumbnailContainer" on-tap="handleClick">
         <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" tabindex="3">
+        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick">
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
@@ -223,10 +223,10 @@ Polymer({
           </div>
         </a>
         <div class="actions">
-          <nuxeo-favorites-toggle-button document="[[doc]]" tabindex="4"></nuxeo-favorites-toggle-button>
-          <nuxeo-download-button document="[[doc]]" tabindex="5"></nuxeo-download-button>
+          <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
+          <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
         </div>
-        <div class="select" tabindex="1">
+        <div class="select">
           <paper-icon-button
             noink
             icon="icons:check"
