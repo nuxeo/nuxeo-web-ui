@@ -63,8 +63,7 @@ Polymer({
         border: 2px solid transparent;
       }
 
-      .bubbleBox:hover,
-      .bubbleBox:focus {
+      .bubbleBox:hover {
         z-index: 500;
         border: 2px solid var(--nuxeo-link-hover-color);
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
@@ -108,7 +107,7 @@ Polymer({
       }
 
       .bubbleBox .select {
-        display: none;
+        // display: none;
         position: absolute;
         top: 1rem;
         left: 1rem;
@@ -142,7 +141,7 @@ Polymer({
       }
 
       .bubbleBox .actions {
-        display: none;
+        // display: none;
         background-color: var(--nuxeo-box);
         position: absolute;
         bottom: 0;
@@ -159,11 +158,11 @@ Polymer({
         @apply --nuxeo-action-hover;
       }
 
-      .bubbleBox:hover .actions,
+      /* .bubbleBox:hover .actions,
       .bubbleBox:hover .select,
       .bubbleBox[selection-mode] .select {
         display: block;
-      }
+      } */
 
       .bubbleBox:hover .select:hover {
         border: 2px solid var(--nuxeo-button-primary);
@@ -189,35 +188,67 @@ Polymer({
       :host(.droptarget-hover) .bubbleBox {
         border: 2px dashed var(--nuxeo-grid-selected);
       }
+
+      :host(:focus) .bubbleBox {
+        z-index: 500;
+        border: 2px solid var(--nuxeo-link-hover-color);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+      }
+
+      :host(:focus) .bubbleBox .actions,
+      :host(:focus) .bubbleBox .select,
+      .bubbleBox:hover .actions,
+      .bubbleBox:hover .select,
+      .bubbleBox[selection-mode] .select {
+        opacity: 1;
+        height: auto;
+        overflow: visible;
+        transition: opacity 0.2s ease, height 0.2s ease;
+      }
+
+      .bubbleBox .actions,
+      .bubbleBox .select {
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+        transition: opacity 0.2s ease, height 0.2s ease;
+      }
+
+      /* div.actions *:focus-visible {
+        outline: none;
+      } */
+
+      /* :host *:focus-visible {
+        outline: none;
+      } */
     </style>
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
-      <div class="thumbnailContainer" on-tap="handleClick">
+      <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
         <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
       </div>
-      <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick">
-          <div class="dataContainer">
-            <div class="title" id="title">[[doc.title]]</div>
-            <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
-            <nuxeo-tooltip for="title">[[doc.title]]</nuxeo-tooltip>
-          </div>
-        </a>
-        <div class="actions">
-          <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
-          <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
+
+      <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" tabindex="0">
+        <div class="dataContainer">
+          <div class="title" id="title">[[doc.title]]</div>
+          <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
+          <nuxeo-tooltip for="title">[[doc.title]]</nuxeo-tooltip>
         </div>
-        <div class="select">
-          <paper-icon-button
-            noink
-            icon="icons:check"
-            title="[[_computeTitle(doc)]]"
-            on-tap="_onCheckBoxTap"
-            role="checkbox"
-            aria-checked="[[selected]]"
-          ></paper-icon-button>
-        </div>
-      </template>
+      </a>
+      <div class="actions">
+        <nuxeo-favorites-toggle-button document="[[doc]]" tabindex="0"></nuxeo-favorites-toggle-button>
+        <nuxeo-download-button document="[[doc]]" tabindex="0"></nuxeo-download-button>
+      </div>
+      <div class="select" tabindex="0">
+        <paper-icon-button
+          noink
+          icon="icons:check"
+          title="[[_computeTitle(doc)]]"
+          on-tap="_onCheckBoxTap"
+          role="checkbox"
+          aria-checked="[[selected]]"
+        ></paper-icon-button>
+      </div>
     </div>
   `,
 
@@ -249,6 +280,10 @@ Polymer({
     index: {
       type: Number,
     },
+
+    tabindex: {
+      type: String,
+    },
   },
 
   observers: ['_selectedItemsChanged(selectedItems.splices)'],
@@ -261,6 +296,10 @@ Polymer({
       doc.contextParameters.thumbnail.url
       ? doc.contextParameters.thumbnail.url
       : '';
+  },
+
+  computeTabIndex(index) {
+    return (Number(this.tabindex) + Number(index)).toString();
   },
 
   handleClick(e) {
@@ -289,6 +328,9 @@ Polymer({
   },
 
   _computeTitle(doc) {
+    // const myComponent = document.querySelector('nuxeo-document-grid-thumbnail');
+    // const shadowRootMode = myComponent.shadowRoot.constructor.mode;
+    // console.log(shadowRootMode);
     return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
   },
 });
