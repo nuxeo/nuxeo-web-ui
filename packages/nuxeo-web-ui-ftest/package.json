@@ -41,6 +41,8 @@
     "nuxeo": "^4.0.3",
     "wdio-chromedriver-service": "^8.1.1",
     "wdio-cucumberjs-json-reporter": "^4.4.3",
-    "webdriverio": "^7.9.0"
+    "webdriverio": "^7.9.0",  
+    "webdriver":"^8.16.11",
+    "chromedriver":"117.0.1"
   }
 }

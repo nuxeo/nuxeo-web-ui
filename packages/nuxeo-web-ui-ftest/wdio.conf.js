@@ -42,6 +42,8 @@ switch (capability.browserName) {
       options.args.push('--headless');
       options.args.push('--disable-gpu');
       options.args.push('--disable-dev-shm-usage');
+      options.args.push('--start-maximized');
+      options.args.push('--start-fullscreen');
     }
     if (process.env.BROWSER_BINARY) {
       options.binary = process.env.BROWSER_BINARY;
@@ -189,6 +191,7 @@ exports.config = {
     ],
     [CompatService],
     [ShadowService],
+    ['chromedriver'],
   ],
 
   //
