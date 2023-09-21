@@ -47,7 +47,7 @@ limitations under the License.
       >
         <template>
           <nuxeo-document-grid-thumbnail
-            tabindex="0"
+            tabindex$="{{computeTabIndex(index)}}"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
@@ -245,6 +245,10 @@ limitations under the License.
 
       _contentStoredInColdStorage(doc) {
         return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
+      },
+
+      computeTabIndex(index) {
+        return (index + 1).toString();
       },
     });
   </script>
