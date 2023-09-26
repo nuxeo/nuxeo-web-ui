@@ -1,11 +1,11 @@
-import { Then } from '@cucumber/cucumber';
+import { Then } from '../../node_modules/@cucumber/cucumber';
 
-Then('I can navigate to the document selected in the {string} single document suggestion widget', function(name) {
-  this.ui.browser
-    .documentPage('DocSuggestion')
-    .metadata.layout()
-    .getField(name)
-    .element('.selectivity-single-selected-item')
-    .element('a')
-    .click();
+Then('I can navigate to the document selected in the {string} single document suggestion widget', async function(name) {
+  const docpageEle = await this.ui.browser.documentPage('DocSuggestion');
+  const docmetaEle = await docpageEle.metadata;
+  const layoutEle = await docmetaEle.layout();
+  const fieldEle = await layoutEle.getField(name);
+  const singleItemELe = await fieldEle.element('.selectivity-single-selected-item');
+  const elementEx = await singleItemELe.element('a');
+  elementEx.click();
 });
