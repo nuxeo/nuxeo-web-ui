@@ -18,19 +18,26 @@ export default class Administration extends BasePage {
   }
 
   get userGroupCreateButton() {
-    return this.el.element('#createButton');
+    return (async () => {
+      const createEle = await this.el.element('#createButton');
+      return createEle;
+    })();
   }
 
   get vocabularyManagement() {
-    if (!browser.getUrl().endsWith('vocabulary-management')) {
-      url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
-    }
-    return new Vocabulary('nuxeo-vocabulary-management');
+    return (async () => {
+      const browserUrl = await browser.getUrl();
+      if (!browserUrl.endsWith('vocabulary-management')) {
+        await url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
+      }
+      return new Vocabulary('nuxeo-vocabulary-management');
+    })();
   }
 
-  goToVocabularyManagement() {
-    if (!browser.getUrl().endsWith('vocabulary-management')) {
-      url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
+  async goToVocabularyManagement() {
+    const browserUrl = await browser.getUrl();
+    if (!browserUrl.endsWith('vocabulary-management')) {
+      await url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
     }
     return this.vocabularyManagement;
   }
@@ -43,9 +50,11 @@ export default class Administration extends BasePage {
     return new CloudServices('nuxeo-cloud-services');
   }
 
-  goToCloudServices() {
-    if (!browser.getUrl().endsWith('cloud-services')) {
-      url(process.env.NUXEO_URL ? '#!/admin/cloud-services' : 'ui/#!/admin/cloud-services');
+  async goToCloudServices() {
+    const browserUrl = await browser.getUrl();
+    await driver.pause(1000);
+    if (!browserUrl.endsWith('cloud-services')) {
+      await url(process.env.NUXEO_URL ? '#!/admin/cloud-services' : 'ui/#!/admin/cloud-services');
     }
     return this.cloudServices;
   }

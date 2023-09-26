@@ -1,4 +1,4 @@
-import { After, Before } from '@cucumber/cucumber';
+import { After, Before } from '../../../../node_modules/@cucumber/cucumber';
 import documentService from '../services/documentService';
 
 fixtures.documents = documentService;
