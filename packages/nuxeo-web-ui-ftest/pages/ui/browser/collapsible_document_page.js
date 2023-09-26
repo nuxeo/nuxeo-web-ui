@@ -20,12 +20,13 @@ export default class CollapsibleDocumentPage extends DocumentPage {
     return super.versions;
   }
 
-  expandDetailsCard() {
-    this.detailsCard.waitForVisible();
+  async expandDetailsCard() {
+    const detailcardEle = await this.detailsCard;
+    await detailcardEle.waitForVisible();
     // XXX: getAttribute('opened') returns 'false' instead of null when the attribute is set to false, not sure why
-    if (this.detailsCard.getAttribute('opened') === 'false') {
-      this.detailsCard.waitForVisible('h5.header');
-      this.detailsCard.click('h5.header');
+    if (detailcardEle.getAttribute('opened') === 'false') {
+      await detailcardEle.waitForVisible('h5.header');
+      await detailcardEle.click('h5.header');
     }
   }
 
