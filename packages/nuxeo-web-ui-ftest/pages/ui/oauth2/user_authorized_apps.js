@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 
 class AuthorizedApp {
@@ -6,29 +7,45 @@ class AuthorizedApp {
   }
 
   get name() {
-    return this.el.elements('nuxeo-data-table-cell')[0].getText();
+    return (async () => {
+      const eles = await this.el.elements('nuxeo-data-table-cell');
+      const ele = await eles[0];
+      const eleText = await ele.getText();
+      return eleText;
+    })();
   }
 
   get authorizationDate() {
     return this.el.elements('nuxeo-data-table-cell')[1].getText();
   }
 
-  revokeButton() {
-    return this.el.element('paper-icon-button[name="revoke"]');
+  async revokeButton() {
+    return (async () => {
+      const ele = await this.el.element('paper-icon-button[name="revoke"]');
+      return ele;
+    })();
   }
 }
 
 export default class UserAuthorizedApps extends BasePage {
-  getApps(appName) {
-    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
-    let apps = this.el
-      .elements('nuxeo-data-table nuxeo-data-table-row')
-      .splice(1) // skip the header
-      .map((el) => new AuthorizedApp(el)) // and map every element to a wrapper we can work with
-      .filter((app) => !!app.name.trim());
-    // because clients are update after tokens, there might be empty rows that must be filtered
+  async getApps(appName) {
+    await driver.pause(3000);
+    const elEx = await this.el;
+    await elEx.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
+    const appsNew = await this.el
+      .$$('nuxeo-data-table nuxeo-data-table-row:not([header])')
+      .map((el) => new AuthorizedApp(el));
+    const apps = await appsNew.filter(async (app) => !!(await app.name).trim());
+    const filterApps = [];
     if (appName) {
-      apps = apps.filter((app) => app.name === appName);
+      for (let i = 0; i < apps.length; i++) {
+        const app = await apps[i];
+        const appText = await app.el.$('nuxeo-data-table-cell').getText();
+        if (appName === appText) {
+          filterApps.push(app);
+        }
+      }
+      return filterApps;
     }
     return apps;
   }

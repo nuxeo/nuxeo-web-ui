@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+
 import path from 'path';
 import BasePage from '../base';
 import DocumentCreate from './browser/document_create';
@@ -12,12 +14,13 @@ export default class CreateDialog extends BasePage {
     return new DocumentLayout('nuxeo-document-import');
   }
 
-  importTab(name) {
-    return this.el.element(`paper-tab[name="${name}"]`);
+  async importTab(name) {
+    const ele = await this.el.element(`paper-tab[name="${name}"]`);
+    return ele;
   }
 
   get pages() {
-    return this.el.element('#holder iron-pages');
+    return (async () => this.el.element('#holder iron-pages'))();
   }
 
   /**
@@ -29,10 +32,13 @@ export default class CreateDialog extends BasePage {
     return this.el.element('#csvCreation');
   }
 
-  importPage(name) {
-    const pageName = this.pages.element('.iron-selected').getAttribute('name');
+  async importPage(name) {
+    const getPages = await this.pages;
+    const page = await getPages.element('.iron-selected');
+    const pageName = await page.getAttribute('name');
     if (pageName === name) {
-      return this.pages.element(`[name=${pageName}]`);
+      const pageEle = await getPages.element(`[name=${pageName}]`);
+      return pageEle;
     }
     throw new Error(`The "${name}" element could not be located. Received "${pageName}" instead`);
   }
@@ -42,16 +48,19 @@ export default class CreateDialog extends BasePage {
    *
    * @deprecated since 3.0.3. Please use method upload instead.
    * */
-  setFileToImport(file) {
-    const field = this.importCsvDialog.element('#dropzone #uploadFiles');
-    field.waitForExist();
+
+  async setFileToImport(file) {
+    const CsvDialog = await this.importCsvDialog;
+    const field = await CsvDialog.element('#dropzone #uploadFiles');
+    await field.waitForExist();
     return field.chooseFile(path.resolve(fixtures.blobs.get(file)));
   }
 
-  upload(file, name) {
-    this.importPage(name).waitForVisible();
-    const field = this.importPage(name).element('#dropzone #uploadFiles');
-    field.waitForExist();
+  async upload(file, name) {
+    const importPage = await this.importPage(name);
+    await importPage.waitForVisible();
+    const field = await importPage.element('#dropzone #uploadFiles');
+    await field.waitForExist();
     // XXX we need to reset the input value to prevent duplicate upload of files (when the method is called recursively)
     browser.execute((el) => {
       el.value = '';
@@ -64,11 +73,14 @@ export default class CreateDialog extends BasePage {
   }
 
   get importCreateButtonProperties() {
-    return this.el.element('paper-button[name="createWithProperties"]');
+    return (async () => this.el.$('paper-button[name="createWithProperties"]'))();
   }
 
   get importCSVButton() {
-    return this.el.element('div[name="upload"] paper-button.primary');
+    return (async () => {
+      const impCsvBtn = await this.el.element('div[name="upload"] paper-button.primary');
+      return impCsvBtn;
+    })();
   }
 
   get selectedCSVToImport() {
@@ -76,11 +88,17 @@ export default class CreateDialog extends BasePage {
   }
 
   get selectedFileToImport() {
-    return this.el.element('div.file-to-import');
+    return (async () => {
+      const filetoImp = await this.el.element('div.file-to-import');
+      return filetoImp;
+    })();
   }
 
   get importCloseButton() {
-    return this.el.element('div[name="progress"] paper-button.primary');
+    return (async () => {
+      const impClose = await this.el.element('div[name="progress"] paper-button.primary');
+      return impClose;
+    })();
   }
 
   get importError() {
@@ -88,7 +106,10 @@ export default class CreateDialog extends BasePage {
   }
 
   get importSuccess() {
-    return this.el.element('#progress div.successful');
+    return (async () => {
+      const impSuccess = await this.el.element('#progress div.successful');
+      return impSuccess;
+    })();
   }
 
   get createButton() {
@@ -100,18 +121,28 @@ export default class CreateDialog extends BasePage {
   }
 
   get selectAnAssetType() {
-    return this.el.element('nuxeo-select[name="assetType"]');
+    return (async () => {
+      const assetElement = await this.el.$('nuxeo-select[name="assetType"]');
+      return assetElement;
+    })();
   }
 
   get applyAll() {
-    return this.el.element('paper-button[name="applyAll"]');
+    return (async () => this.el.$('paper-button[name="applyAll"]'))();
   }
 
-  selectAssetType(val) {
-    driver.waitForVisible('nuxeo-select[id="docTypeDropdown"] paper-item');
-    const selectasset = this.el
-      .elements('nuxeo-select[id="docTypeDropdown"] paper-item[role="option"]')
-      .find((e) => e.getText() === val);
-    selectasset.click();
+  async selectAssetType(val) {
+    await driver.waitForVisible('nuxeo-select[id="docTypeDropdown"] paper-item');
+    const selectAssetElements = await this.el.elements('nuxeo-select[id="docTypeDropdown"] paper-item[role="option"]');
+    let selectAsset;
+    for (let i = 0; i < selectAssetElements.length; i++) {
+      const e = selectAssetElements[i];
+      const text = await e.getText();
+      if (text === val) {
+        selectAsset = e;
+        break;
+      }
+    }
+    await selectAsset.click();
   }
 }
