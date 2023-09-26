@@ -229,6 +229,7 @@ Polymer({
             icon="icons:check"
             title="[[_computeTitle(doc)]]"
             on-tap="_onCheckBoxTap"
+            on-keydown="_onCheckBoxTap"
             role="checkbox"
             aria-checked="[[selected]]"
           ></paper-icon-button>
@@ -288,12 +289,15 @@ Polymer({
   },
 
   _onCheckBoxTap(e) {
-    this._toogleSelect(e);
+    // WEBUI-1262 : prevents checkbox selection during tab navigation
+    if (e.type === 'tap' || (e.key !== 'Tab' && e.key !== 'Shift')) {
+      this._toogleSelect(e);
+    }
   },
 
   _toogleSelect(e) {
     this.selected = !this.selected;
-    this.fire('selected', { index: this.index, shiftKey: e.detail.sourceEvent.shiftKey });
+    this.fire('selected', { index: this.index, shiftKey: e.type === 'tap' ? e.detail.sourceEvent.shiftKey : false });
   },
 
   _selectedItemsChanged() {
