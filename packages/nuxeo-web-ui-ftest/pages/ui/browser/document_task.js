@@ -33,19 +33,28 @@ export default class DocumentTask extends BasePage {
     return this.el.element('#layout');
   }
 
-  setUserOrGroup(userOrGroup) {
-    const fieldEl = this.el.element('[name="userGroup"]');
-    fixtures.layouts.setValue(fieldEl, userOrGroup);
+  async setUserOrGroup(userOrGroup) {
+    const fieldEl = await this.el.element('[name="userGroup"]');
+    await fixtures.layouts.setValue(fieldEl, userOrGroup);
   }
 
-  actorExists(element, actor) {
-    const users = element.elements('nuxeo-user-tag .tag a');
-    return users.some((user) => user.getText() === `${actor}`);
+  async actorExists(element, actor) {
+    const users = await element.elements('nuxeo-user-tag .tag a');
+    for (let i = 0; i < users.length; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      const user = await users[i].getText();
+      if (user === actor) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  performAction(name) {
-    this.taskLayout.waitForVisible();
-    this.el.waitForVisible(`.options paper-button[name="${name}"]`);
-    this.el.element(`.options paper-button[name="${name}"]`).click();
+  async performAction(name) {
+    const layout = await this.taskLayout;
+    await layout.waitForVisible();
+    const ele = await this.el.element(`.options paper-button[name="${name}"]`);
+    await ele.waitForVisible();
+    await ele.click();
   }
 }

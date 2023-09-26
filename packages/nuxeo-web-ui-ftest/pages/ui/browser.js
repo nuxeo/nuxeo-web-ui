@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../base';
 import DocumentPage from './browser/document_page';
 import CollapsibleDocumentPage from './browser/collapsible_document_page';
@@ -12,19 +13,21 @@ import Results from './results';
 import { clickActionMenu, url } from '../helpers';
 
 export default class Browser extends BasePage {
-  documentPage(docType) {
-    const page = fixtures.layouts.page[docType] || 'nuxeo-document-page';
+  async documentPage(docType) {
+    const page = (await fixtures.layouts.page[docType]) || 'nuxeo-document-page';
     if (page === 'nuxeo-collapsible-document-page') {
       return new CollapsibleDocumentPage(page, docType);
     }
     return new DocumentPage(page, docType);
   }
 
-  browseTo(path) {
-    url(`#!/browse${path}`);
-    this.waitForVisible();
-    this.breadcrumb.waitForVisible();
-    this.currentPage.waitForVisible();
+  async browseTo(path) {
+    await url(`#!/browse${path}`);
+    await this.waitForVisible();
+    const breadcrumb = await this.breadcrumb;
+    await breadcrumb.waitForVisible();
+    const currentPage = await this.currentPage;
+    await currentPage.waitForVisible();
   }
 
   get view() {
@@ -40,7 +43,7 @@ export default class Browser extends BasePage {
   }
 
   get permissionsViewButton() {
-    return this.el.element('nuxeo-page-item[name="permissions"]');
+    return this.el.$('nuxeo-page-item[name="permissions"]');
   }
 
   get publicationView() {
@@ -48,7 +51,7 @@ export default class Browser extends BasePage {
   }
 
   get publicationViewButton() {
-    return this.el.element('nuxeo-page-item[name="publication"]');
+    return this.el.$('nuxeo-page-item[name="publication"]');
   }
 
   get documentTaskView() {
@@ -56,260 +59,352 @@ export default class Browser extends BasePage {
   }
 
   get currentPageName() {
-    // get selected pill to get it's name
-    this.waitForVisible('#documentViewsItems nuxeo-page-item.iron-selected');
-    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
-    // get active page name
-    return pill.getAttribute('name');
+    return (async () => {
+      // get selected pill to get it's name
+      const pill = await this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
+      const attributeName = await pill.getAttribute('name');
+      return attributeName;
+    })();
   }
 
   get currentPage() {
-    return this._section(this.currentPageName);
+    return (async () => {
+      const pageName = await this.currentPageName;
+      const section = await this._section(pageName);
+      return section;
+    })();
   }
 
   /**
    * Gets a Results page helper, assuming current visible page has a <nuxeo-results> in there.
    */
   get results() {
-    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
-    return new Results(`#nxContent [name='${pill.getAttribute('name')}']`);
+    return (async () => {
+      const ele = await this.el;
+      const pill = await ele.$('#documentViewsItems nuxeo-page-item.iron-selected');
+      const getAttributeName = await pill.getAttribute('name');
+      const getViewElement = await new Results(`#nxContent [name=${getAttributeName}]`);
+      return getViewElement;
+    })();
   }
 
   get breadcrumb() {
-    return this.el.element('nuxeo-breadcrumb');
+    return (async () => {
+      const element = await this.el.element('nuxeo-breadcrumb');
+      return element;
+    })();
   }
 
   get title() {
     return this.breadcrumb.getText('.breadcrumb-item-current');
   }
 
-  _section(name) {
-    return this.el.element(`#nxContent [name='${name}']`);
+  async _section(name) {
+    const nxname = await this.el.$(`#nxContent [name='${name}']`);
+    return nxname;
   }
 
   get editButton() {
-    return this.el.element('#edit-button');
+    return (async () => {
+      const editButton = await this.el.$('#edit-button');
+      return editButton;
+    })();
   }
 
-  editForm(docType) {
-    return new DocumentFormLayout('#edit-dialog nuxeo-document-form-layout', docType, 'edit');
+  async editForm(docType) {
+    const docFormLayout = await new DocumentFormLayout('#edit-dialog nuxeo-document-form-layout', docType, 'edit');
+    return docFormLayout;
   }
 
   get header() {
-    return this.currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    return (async () => {
+      const currentPage = await this.currentPage;
+      const ele = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+      return ele;
+    })();
   }
 
   get rows() {
-    return this.currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    return (async () => {
+      await driver.pause(1000);
+      const currentPage = await this.currentPage;
+      const rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+      return rowsTemp;
+    })();
   }
 
-  waitForChildren() {
-    this.currentPage.waitForExist('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
+  async waitForChildren() {
+    const currentPage = await this.currentPage;
+    const ele = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
+    await ele.waitForExist();
   }
 
-  addToCollection(name) {
-    const button = this.el.element('nuxeo-add-to-collection-button');
-    button.waitForVisible();
-    if (!button.isExisting('#dialog') || !button.isVisible('#dialog')) {
-      button.click();
+  async addToCollection(name) {
+    const button = await this.el.$('nuxeo-add-to-collection-button');
+    await button.waitForVisible();
+    const dialogExistingEle = await button.isExisting('#dialog');
+    const dialogVisibleEle = await button.isVisible('#dialog');
+    if (!dialogExistingEle || !dialogVisibleEle) {
+      await button.click();
     }
-    const dialog = new AddToCollectionDialog(`${this._selector}  nuxeo-add-to-collection-button #dialog`);
-    dialog.waitForVisible();
-    dialog.addToCollection(name);
-    this.el.waitForVisible('nuxeo-document-collections nuxeo-tag');
+    const dialog = await new AddToCollectionDialog(`${this._selector}  nuxeo-add-to-collection-button #dialog`);
+    await dialog.waitForVisible();
+    await dialog.addToCollection(name);
+    const docCollectionEle = await this.el.$('nuxeo-document-collections nuxeo-tag');
+    await docCollectionEle.waitForVisible();
   }
 
-  doesNotHaveCollection(name) {
+  async doesNotHaveCollection(name) {
     const page = this.el;
-    driver.waitUntil(() => {
-      if (!driver.isExisting('nuxeo-document-collections')) {
-        return true;
+    const nuxeoDocEle = await driver.isExisting('nuxeo-document-collections');
+    if (!nuxeoDocEle) {
+      return true;
+    }
+    try {
+      const collections = await page.elements('nuxeo-document-collections nuxeo-tag');
+      for (let i = 0; i < collections.length; i++) {
+        const collection = await collections[i];
+        const getTextEle = await collection.getText();
+        if (getTextEle.trim() !== name) {
+          return false;
+        }
       }
-      try {
-        const collections = page.elements('nuxeo-document-collections nuxeo-tag');
-        return collections.every((collection) => collection.getText().trim() !== name);
-      } catch (e) {
-        return false;
-      }
-    }, 'The document does belong to the collection');
-    return true;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  hasCollection(name) {
-    const page = this.el;
-    driver.waitUntil(() => {
-      if (!driver.isExisting('nuxeo-document-collections')) {
-        return false;
-      }
-      try {
-        const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
-        return collections.some((collection) => collection.getText().trim() === name);
-      } catch (e) {
-        return false;
-      }
-    }, 'The document does not belong to the collection');
-    return true;
-  }
-
-  removeFromCollection(name) {
-    const { el } = this;
-    el.waitForVisible('nuxeo-document-collections nuxeo-tag');
-    const collections = this.el.elements('nuxeo-document-collections nuxeo-tag');
-    collections.some((collection) => {
-      if (collection.getText().trim() === name) {
-        const remove = collection.element('iron-icon[name="remove"]');
-        remove.waitForVisible();
-        remove.scrollIntoView();
-        remove.click();
-        return true;
+  async hasCollection(name) {
+    const page = await this.el;
+    const docCollection = await driver.isExisting('nuxeo-document-collections');
+    if (!docCollection) {
+      return false;
+    }
+    try {
+      const collections = await page.$$('nuxeo-document-collections nuxeo-tag a');
+      for (let i = 0; i < collections.length; i++) {
+        const collection = await collections[i];
+        const getTextEle = await collection.getText();
+        if (getTextEle.trim() === name) {
+          return true;
+        }
       }
       return false;
-    });
+    } catch (e) {
+      return false;
+    }
   }
 
-  removeSelectionFromCollection() {
-    const button = this.el.element('nuxeo-collection-remove-action');
-    button.waitForVisible();
-    button.click();
+  async removeFromCollection(name) {
+    const { el } = await this;
+    await el.$('nuxeo-document-collections nuxeo-tag').waitForVisible();
+    const collections = await this.el.$$('nuxeo-document-collections nuxeo-tag');
+    let found = false;
+    for (let index = 0; index < collections.length; index++) {
+      const collectionText = await collections[index].getText();
+      if (collectionText.trim() === name) {
+        const remove = await collections[index].$('iron-icon[name="remove"]');
+        await remove.waitForVisible();
+        await remove.scrollIntoView();
+        await remove.click();
+        found = true;
+      }
+      return false;
+    }
+    return found;
+  }
+
+  async removeSelectionFromCollection() {
+    const button = await this.el.$('nuxeo-collection-remove-action');
+    await button.waitForVisible();
+    await button.click();
   }
 
   get isFavorite() {
-    this.el.waitForExist('nuxeo-favorites-toggle-button[favorite]');
-    return true;
+    return (async () => {
+      await this.el.waitForExist('nuxeo-favorites-toggle-button[favorite]');
+      return true;
+    })();
   }
 
-  addToFavorites() {
-    this.el.click('nuxeo-favorites-toggle-button');
-    return this.isFavorite;
+  async addToFavorites() {
+    await this.el.$('nuxeo-favorites-toggle-button').click();
+    const fav = await this.isFavorite;
+    return fav;
   }
 
-  hasTitle(title) {
-    $('.breadcrumb-item-current').waitForVisible();
-    driver.waitUntil(
-      () =>
-        $('.breadcrumb-item-current')
-          .getText()
-          .trim() === title,
-      'The document does not have such title',
-    );
-    return true;
+  async hasTitle(title) {
+    await driver.pause(1000);
+    const breadcrumb = await $('.breadcrumb-item-current');
+    const breadcrumbText = await breadcrumb.getText();
+    if (breadcrumbText.trim() === title) {
+      return true;
+    }
+    return false;
   }
 
-  waitForHasChild(doc) {
+  async waitForHasChild(doc) {
     const { el } = this;
-    el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
-    const titles = el.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
-    return titles.some((title) => title.getText().trim() === doc.title);
-  }
-
-  clickChild(title) {
-    this.waitForChildren();
-    return this.rows.some((row) => {
-      if (
-        row.isVisible('nuxeo-data-table-cell a.title') &&
-        row.getText('nuxeo-data-table-cell a.title').trim() === title
-      ) {
-        row.click();
+    const dataTable = await el.$('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
+    await dataTable.waitForVisible();
+    const titles = await el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
+    for (let i = 0; i < titles.length; i++) {
+      const row = await titles[i].getText();
+      if (row.trim() === doc.title) {
         return true;
       }
-      return false;
-    });
+    }
+    return false;
   }
 
-  indexOfChild(title) {
-    this.waitForChildren();
-    const { rows } = this;
-    let i;
-    for (i = 0; i < rows.length; i++) {
-      if (
-        rows[i]
-          .element('nuxeo-data-table-cell a.title')
-          .getText()
-          .trim() === title
-      ) {
+  async clickChild(title) {
+    await this.waitForChildren();
+    const rowTemp = await this.rows;
+    for (let i = 0; i < rowTemp.length; i++) {
+      const row = rowTemp[i];
+      const rowEl = await row.$('nuxeo-data-table-cell a.title');
+      const rowVisible = await rowEl.isVisible();
+      const getText = await rowEl.getText();
+      const rowText = (await getText.trim()) === title;
+      if (rowVisible && rowText) {
+        await row.click();
+        return true; // Exit the loop once a match is found
+      }
+    }
+    return false;
+  }
+
+  async indexOfChild(title) {
+    await driver.pause(1000);
+    await this.waitForChildren();
+    await driver.pause(1000);
+    const rowTemp = await this.rows;
+    for (let i = 0; i < rowTemp.length; i++) {
+      const ele = await rowTemp[i].element('nuxeo-data-table-cell a.title');
+      const eleText = await ele.getText();
+      if (eleText.trim() === title) {
         return i;
       }
     }
     return -1;
   }
 
-  sortContent(field, order) {
-    driver.waitUntil(() => {
-      this.waitForChildren();
-      const columns = this.currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-column');
-      const idx = columns
-        .map((col) => browser.execute((el) => el.sortBy, col))
-        .findIndex((colSortByField) => colSortByField && colSortByField.toLowerCase() === field.toLowerCase());
-      if (idx === -1) {
+  async sortContent(field, order) {
+    try {
+      await this.waitForChildren();
+      const currentPage = await this.currentPage;
+      const idx = await currentPage
+        .$$('nuxeo-data-table[name="table"] nuxeo-data-table-column')
+        .map((col) => browser.execute((el) => el.sortBy, col));
+      const columnIndex = idx.findIndex((colSortByField) => {
+        const sortByColumn = colSortByField;
+        return sortByColumn && sortByColumn.toLowerCase() === field.toLowerCase();
+      });
+      if (columnIndex === -1) {
         throw new Error('Field not found');
       }
-      const header = this.currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-      const sortElt = header.element(`nuxeo-data-table-cell:nth-of-type(${idx + 1}) nuxeo-data-table-column-sort`);
-      const currentSorting = sortElt.element('paper-icon-button').getAttribute('direction');
-      if (currentSorting && order.toLowerCase() === currentSorting.toLowerCase()) {
+      const header = await currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+      const sortElt = await header.$(
+        `nuxeo-data-table-cell:nth-of-type(${columnIndex + 1}) nuxeo-data-table-column-sort`,
+      );
+      const currentSorting = await sortElt.element('paper-icon-button');
+      const direction = await currentSorting.getAttribute('direction');
+      if (direction && order.toLowerCase() === direction.toLowerCase()) {
         return true;
       }
-      sortElt.click();
+      await sortElt.click();
       return false;
-    });
+    } catch (error) {
+      console.warn(error);
+    }
   }
 
   /*
    * Results might vary with the viewport size as only visible items are taken into account.
    */
-  waitForNbChildren(nb) {
-    driver.waitUntil(() => {
-      let count = 0;
-      try {
-        const { rows } = this;
-        rows.forEach((row) => {
-          if (row.isVisible() && row.isVisible('nuxeo-data-table-cell a.title')) {
-            count++;
-          }
-        });
-        return count === nb;
-      } catch (e) {
-        // prevent stale row from breaking execution
-        return false;
+  async waitForNbChildren(nb) {
+    let count = 0;
+    await driver.pause(2000);
+    const currentPage = await this.currentPage;
+    const rowTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    for (let i = 0; i < rowTemp.length; i++) {
+      if (count === nb) {
+        break;
       }
-    });
+      const row = await rowTemp[i];
+      const isRowVisible = await row.isVisible();
+      const isRowElementVisible = await row.isVisible('nuxeo-data-table-cell a.title');
+      if (isRowVisible && isRowElementVisible) {
+        count++;
+      }
+    }
+    return count;
   }
 
-  selectAllChildDocuments() {
-    this.waitForChildren();
-    this.rows.forEach((row) => {
-      if (row.isVisible('nuxeo-data-table-checkbox')) {
-        row.element('nuxeo-data-table-checkbox').click();
+  async selectAllChildDocuments() {
+    await this.waitForChildren();
+    await driver.waitUntil(
+      async () => {
+        const rowWithCheckbox = await browser.$$(
+          'nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header] nuxeo-data-table-checkbox',
+        );
+        return rowWithCheckbox.length > 0;
+      },
+      {
+        timeout: 10000,
+        timeoutMsg: 'expecteed selectAllChildDocuments',
+      },
+    );
+    const rowTemp = await this.rows;
+    for (let index = 0; index < rowTemp.length; index++) {
+      const checkboxVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox');
+      if (checkboxVisible) {
+        rowTemp[index].$('nuxeo-data-table-checkbox').click();
       }
-    });
-  }
-
-  selectAllDocuments() {
-    this.waitForChildren();
-    const { header } = this;
-    if (header.isVisible('nuxeo-data-table-checkbox')) {
-      header.element('nuxeo-data-table-checkbox').click();
     }
   }
 
-  selectChildDocument(title) {
-    return this._selectChildDocument(title);
+  async selectAllDocuments() {
+    await this.waitForChildren();
+    const currentPage = await this.currentPage;
+    const header = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    const ele = await header.$('nuxeo-data-table-checkbox');
+    const isHeaderVisible = await ele.isVisible();
+    if (await isHeaderVisible) {
+      await ele.click();
+    }
   }
 
-  deselectChildDocument(title) {
-    return this._selectChildDocument(title, true);
+  async selectChildDocument(title) {
+    const childDoc = await this._selectChildDocument(title);
+    return childDoc;
+  }
+
+  async deselectChildDocument(title) {
+    const childDoc = await this._selectChildDocument(title, true);
+    return childDoc;
   }
 
   get publicationInfobar() {
-    return this.el.element('nuxeo-publication-info-bar');
+    return (async () => {
+      const ele = await this.el;
+      const outElement = await ele.$('nuxeo-publication-info-bar');
+      return outElement;
+    })();
   }
 
   get selectionToolbar() {
-    return new Selection(`${this.currentPage.getTagName()} nuxeo-selection-toolbar#toolbar`);
+    return (async () => {
+      const currentPage = await this.currentPage;
+      const tagName = await currentPage.getTagName();
+      const selectionBar = await new Selection(`${tagName} nuxeo-selection-toolbar#toolbar`);
+      return selectionBar;
+    })();
   }
 
   get trashedInfobar() {
-    return this.el.element('#trashedInfoBar');
+    return this.el.$('#trashedInfoBar');
   }
 
   get trashDocumentButton() {
@@ -329,50 +424,56 @@ export default class Browser extends BasePage {
 
   get startWorkflowButton() {
     // XXX: using a more specific selector here to ensure we can check for isExisting()
-    return this.el.element('.document-actions nuxeo-workflow-button #startButton');
+    return this.el.$('.document-actions nuxeo-workflow-button #startButton');
   }
 
-  clickDocumentActionMenu(selector) {
-    clickActionMenu(this.el.element('nuxeo-actions-menu'), selector);
+  async clickDocumentActionMenu(selector) {
+    const ele = await this.el;
+    const id = await ele.$('nuxeo-actions-menu');
+    await clickActionMenu(id, selector);
   }
 
-  startWorkflow(workflow) {
+  async startWorkflow(workflow) {
     // click the action to trigger the dialog
-    clickActionMenu(this.el, 'nuxeo-workflow-button');
+    await clickActionMenu(this.el, 'nuxeo-workflow-button');
     // select the workflow
-    const workflowSelect = this.el.element('.document-actions nuxeo-workflow-button nuxeo-select');
-    workflowSelect.waitForVisible();
-    fixtures.layouts.setValue(workflowSelect, workflow);
+    const workflowSelect = await this.el.$('.document-actions nuxeo-workflow-button nuxeo-select');
+    await workflowSelect.waitForVisible();
+    await fixtures.layouts.setValue(workflowSelect, workflow);
     // click the start button
-    this.el.element('.document-actions nuxeo-workflow-button #startButton').click();
+    const ele = await this.el.$('.document-actions nuxeo-workflow-button #startButton');
+    await ele.click();
   }
 
-  _selectChildDocument(title, deselect) {
-    const found = this.rows.some((row) => {
-      if (
-        (deselect
-          ? row.isVisible('nuxeo-data-table-checkbox[checked]')
-          : row.isVisible('nuxeo-data-table-checkbox:not([checked])')) &&
-        row.getText('nuxeo-data-table-cell a.title').trim() === title
-      ) {
-        row.element('nuxeo-data-table-checkbox').click();
-        return true;
-      }
-      return false;
-    });
-    if (!found) {
-      throw new Error(`Cannot find document with title "${title}"`);
+  async _selectChildDocument(title, deselect) {
+    const rowTemp = await this.rows;
+    const elementTitle = await browser
+      .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
+      .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
+    const nonEmptyTitles = elementTitle.filter((nonEmpty) => nonEmpty.trim() !== '');
+    const index = nonEmptyTitles.findIndex((currenTitle) => currenTitle === title);
+    await driver.pause(1000);
+    const isCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox[checked]');
+    const isNotCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox:not([checked])');
+    if ((deselect ? isCheckedVisible : isNotCheckedVisible) && index >= 0) {
+      const currentRow = await rowTemp[index].$('nuxeo-data-table-checkbox');
+      await currentRow.click();
+      return true;
     }
+    return false;
   }
 
   get publishDialog() {
-    clickActionMenu(this.el, 'nuxeo-publish-button');
-    const publishDialog = new PublicationDialog('#publishDialog');
-    publishDialog.waitForVisible();
-    return publishDialog;
+    return (async () => {
+      const ele = await this.el;
+      await clickActionMenu(ele, 'nuxeo-publish-button');
+      const publishDialog = new PublicationDialog('#publishDialog');
+      await publishDialog.waitForVisible();
+      return publishDialog;
+    })();
   }
 
   get comparePage() {
-    return this.el.element('nuxeo-diff-page div.header');
+    return this.el.$('nuxeo-diff-page div.header');
   }
 }
