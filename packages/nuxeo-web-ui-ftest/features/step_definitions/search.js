@@ -1,4 +1,4 @@
-import { Given, Then, When } from '@cucumber/cucumber';
+import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
 Then('I can see the {string} search panel', function(name) {
@@ -111,114 +111,154 @@ When('I browse to the saved search', function() {
   url(`#!/doc/${this.savedSearch.id}`);
 });
 
-Then('I can see that my saved search "{word}" on "{word}" is selected', function(savedSearchName, searchName) {
-  this.ui.searchForm(searchName).menuButton.waitForVisible();
-  const el = this.ui.searchForm(searchName).getSavedSearch(savedSearchName);
-  el.waitForExist().should.be.true;
-  el.getAttribute('class').should.equal('iron-selected');
+Then('I can see that my saved search "{word}" on "{word}" is selected', async function(savedSearchName, searchName) {
+  const searchForm = await this.ui.searchForm(searchName);
+  const menuButton = await searchForm.menuButton;
+  await menuButton.waitForVisible();
+  const savedSearch = await this.ui.searchForm(searchName).getSavedSearch(savedSearchName);
+  const savedSearchExist = await savedSearch.waitForExist();
+  savedSearchExist.should.be.true;
+  const attr = await savedSearch.getAttribute('class');
+  attr.should.equal('iron-selected');
 });
 
-When(/^I clear the (.+) search on (.+)$/, function(searchType, searchName) {
-  const searchForm = this.ui.searchForm(searchName);
-  searchForm.waitForVisible();
-  searchForm.search(searchType);
+When(/^I clear the (.+) search on (.+)$/, async function(searchType, searchName) {
+  const searchForm = await this.ui.searchForm(searchName);
+  await searchForm.waitForVisible();
+  await searchForm.search(searchType);
 });
 
-When(/^I perform a (.+) search for (.+) on (.+)$/, function(searchType, searchTerm, searchName) {
-  const searchForm = this.ui.searchForm(searchName);
-  searchForm.waitForVisible();
-  searchForm.search(searchType, searchTerm);
+When(/^I perform a (.+) search for (.+) on (.+)$/, async function(searchType, searchTerm, searchName) {
+  const searchForm = await this.ui.searchForm(searchName);
+  await searchForm.waitForVisible();
+  await driver.pause(3000);
+  await searchForm.search(searchType, searchTerm);
 });
 
-When('I switch to filter view', function() {
-  this.ui.filterView.click();
+When('I switch to filter view', async function() {
+  await driver.pause(3000);
+  const filterView = await this.ui.filterView;
+  await filterView.click();
+  await browser.pause(3000);
 });
 
-Then(/^I can see (\d+) search results$/, function(numberOfResults) {
-  const { displayMode } = this.ui.results;
+Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
+  const uiResult = await this.ui.results;
+  const displayMode = await uiResult.displayMode;
   if (numberOfResults === 0) {
-    driver.waitUntil(
-      () => this.ui.results.resultsCount(displayMode) === 0,
-      `Expecting to get ${numberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
-    );
-    this.ui.results.noResults.waitForVisible().should.be.true;
+    const outResult2 = await uiResult.resultsCount(displayMode);
+    if (outResult2 !== numberOfResults) {
+      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
+    }
+    const emptyResult = await uiResult.noResults;
+    const emptyResultVisible = await emptyResult.waitForVisible();
+    emptyResultVisible.should.be.true;
   } else {
-    this.ui.results.resultsCountLabel.waitForVisible();
-    driver.waitUntil(
-      () =>
-        parseInt(this.ui.results.resultsCountLabel.getText(), 10) === numberOfResults &&
-        this.ui.results.resultsCount(displayMode) === numberOfResults,
-      `Expecting to get ${numberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
-    );
+    const outLabel = await uiResult.resultsCountLabel;
+    await outLabel.waitForVisible();
+    const outText = await outLabel.getText();
+    const outResult = parseInt(outText, 10);
+    if (outResult !== numberOfResults) {
+      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult}`);
+    }
+    const outResult2 = await uiResult.resultsCount(displayMode);
+    if (outResult2 !== numberOfResults) {
+      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
+    }
   }
 });
 
-Then(/^I can see more than (\d+) search results$/, function(minNumberOfResults) {
-  const { displayMode } = this.ui.results;
-  driver.waitUntil(
-    () => this.ui.results.resultsCount(displayMode) > minNumberOfResults,
-    `Expecting to get more than ${minNumberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
-  );
-});
-
-Then('I edit the results columns to show {string}', function(heading) {
-  this.ui.results.actions.waitForVisible();
-  if (this.ui.results.displayMode !== 'table' && this.ui.results.toggleTableView.isVisible()) {
-    this.ui.results.toggleTableView.click();
+Then(/^I can see more than (\d+) search results$/, async function(minNumberOfResults) {
+  await driver.pause(3000);
+  const results = await this.ui.results;
+  const displayMode = await results.displayMode;
+  const output = await results.resultsCount(displayMode);
+  if (output > minNumberOfResults) {
+    return true;
   }
-  this.ui.results.toggleColumnSettings.waitForVisible();
-  this.ui.results.toggleColumnSettings.click();
-  this.ui.results.getColumnCheckbox(heading).waitForExist();
-  this.ui.results.checkColumnCheckbox(heading);
-  this.ui.results.columnsCloseButton.click();
-  this.ui.results.getResultsColumn(heading).waitForExist().should.be.true;
+  throw Error(`Expecting to get more than ${minNumberOfResults} but found ${output}`);
 });
 
-Then(/^I save my search as "(.+)"$/, function(searchName) {
-  this.ui.searchResults.saveSearchAsButton.waitForVisible();
-  this.ui.searchResults.saveSearchAsButton.click();
-  this.ui.searchResults.enterInput(searchName);
-  this.ui.searchResults.confirmSaveSearchButton.click();
+Then('I edit the results columns to show {string}', async function(heading) {
+  const result = await this.ui.results;
+  const actions = await result.actions;
+  await actions.waitForVisible();
+  const dispMode = await result.displayMode;
+  const togTableview = await result.toggleTableView;
+  if ((await dispMode) !== 'table' && (await togTableview.isVisible())) {
+    await togTableview.click();
+  }
+  const toggleSettings = await result.toggleColumnSettings;
+  await toggleSettings.waitForVisible();
+  await toggleSettings.click();
+  const columnCheckbox = await result.getColumnCheckbox(heading);
+  await columnCheckbox.waitForExist();
+  await result.checkColumnCheckbox(heading);
+  const button = await result.columnsCloseButton;
+  await button.click();
+  const resultsColumn = await result.getResultsColumn(heading);
+  const isColumnExist = await resultsColumn.waitForExist();
+  isColumnExist.should.be.true;
 });
 
-Then(/^I share my "(.+)" search with (.+)/, function(searchName, username) {
-  this.ui.searchResults.savedSearchActionButton.waitForVisible();
-  this.ui.searchResults.savedSearchActionButton.click();
-  this.ui.searchResults.shareAction.waitForVisible();
-  this.ui.searchResults.shareAction.click();
-  this.ui.searchForm(searchName).permissionsView.newPermissionButton.waitForVisible();
-  this.ui.searchForm(searchName).permissionsView.newPermissionButton.click();
-  this.ui.searchForm(searchName).permissionsView.setPermissions(username, {
+Then(/^I save my search as "(.+)"$/, async function(searchName) {
+  const saveAsButton = await this.ui.searchResults.saveSearchAsButton;
+  await saveAsButton.waitForVisible();
+  await saveAsButton.click();
+  await this.ui.searchResults.enterInput(searchName);
+  const confirmSaveButton = await this.ui.searchResults.confirmSaveSearchButton;
+  await confirmSaveButton.click();
+});
+
+Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username) {
+  const savedSearchButton = await this.ui.searchResults.savedSearchActionButton;
+  await savedSearchButton.waitForVisible();
+  await savedSearchButton.click();
+  const shareActionButton = await this.ui.searchResults.shareAction;
+  await shareActionButton.waitForVisible();
+  await shareActionButton.click();
+  const searchForm = await this.ui.searchForm(searchName);
+  const PremissionButton = await searchForm.permissionsView.newPermissionButton;
+  await PremissionButton.waitForVisible();
+  await PremissionButton.click();
+  await searchForm.permissionsView.setPermissions(username, {
     permission: 'Read',
     timeFrame: 'permanent',
     notify: false,
   });
-  this.ui.searchForm(searchName).permissionsView.createPermissionButton.waitForVisible();
-  this.ui.searchForm(searchName).permissionsView.createPermissionButton.click();
-  this.ui
-    .searchForm(searchName)
-    .permissionsView.permission('Read', username, 'permanent')
-    .waitForVisible();
+  const createPermissionButton = await searchForm.permissionsView.createPermissionButton;
+  await createPermissionButton.waitForVisible();
+  await createPermissionButton.click();
+  const permissionVisible = await searchForm.permissionsView.permission('Read', username, 'permanent');
+  permissionVisible.should.be.true;
 });
 
-Then(/^I can view my saved search "(.+)" on "(.+)"$/, function(savedSearchName, searchName) {
-  this.ui.searchForm(searchName).menuButton.waitForVisible();
-  this.ui.searchForm(searchName).menuButton.click();
-  this.ui
-    .searchForm(searchName)
-    .getSavedSearch(savedSearchName)
-    .waitForExist().should.be.true;
+Then(/^I can view my saved search "(.+)" on "(.+)"$/, async function(savedSearchName, searchName) {
+  const searchForm = await this.ui.searchForm(searchName);
+  const menuButton = await searchForm.menuButton;
+  await menuButton.waitForVisible();
+  await menuButton.click();
+  const savedSearch = await searchForm.getSavedSearch(savedSearchName);
+  const savedSearchExist = await savedSearch.waitForExist();
+  savedSearchExist.should.be.true;
 });
 
-When(/^I click the QuickSearch button$/, function() {
-  this.ui.searchButton.waitForVisible();
-  this.ui.searchButton.click();
+When(/^I click the QuickSearch button$/, async function() {
+  const button = await this.ui.searchButton;
+  await button.waitForVisible();
+  await button.click();
 });
 
-When(/^I perform a QuickSearch for (.+)/, function(searchTerm) {
-  return this.ui.quickSearch.enterInput(searchTerm);
+When(/^I perform a QuickSearch for (.+)/, async function(searchTerm) {
+  const quickSearch = await this.ui.quickSearch;
+  await quickSearch.enterInput(searchTerm);
 });
 
-Then(/^I can see (\d+) QuickSearch results$/, function(numberOfResults) {
-  driver.waitUntil(() => this.ui.quickSearch.quickSearchResultsCount() === numberOfResults);
+Then(/^I can see (\d+) QuickSearch results$/, async function(numberOfResults) {
+  const quickSearch = await this.ui.quickSearch;
+  await driver.pause(1000);
+  const result = await quickSearch.quickSearchResultsCount();
+  if (result !== numberOfResults) {
+    throw Error(`Expecting to get ${numberOfResults} results but found ${result}`);
+  }
 });
