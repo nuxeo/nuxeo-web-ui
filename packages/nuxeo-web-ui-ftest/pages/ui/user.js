@@ -1,16 +1,19 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../base';
 
 export default class User extends BasePage {
-  getField(field, opts) {
+  async getField(field, opts) {
     opts = opts || {};
     const parent = opts.parent || '';
-    driver.waitForExist(this._selector);
-    driver.waitForVisible(this._selector);
-    this.el.waitForVisible(parent);
+    await driver.waitForExist(this._selector);
+    await driver.waitForVisible(this._selector);
+    await this.el.waitForVisible(parent);
     if (field === 'password' || field === 'passwordConfirmation') {
-      return this.el.element(`${parent} [id="${field}"]`);
+      const fieldEle = await this.el.element(`${parent} [id="${field}"]`);
+      return fieldEle;
     }
-    return this.el.element(`${parent} [name="${field}"]`);
+    const finalEle = await this.el.element(`${parent} [name="${field}"]`);
+    return finalEle;
   }
 
   get dropdown() {
@@ -53,34 +56,40 @@ export default class User extends BasePage {
     return this.el.element('#deleteUserDialog paper-button');
   }
 
-  fillMultipleValues(table, opts) {
+  async fillMultipleValues(table, opts) {
     opts = opts || {};
     const parent = opts.parent || '';
-    table.rows().forEach((row) => {
+    const rows = table.rows();
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
       if (row[0] === 'username') {
-        // eslint-disable-next-line prefer-destructuring
+        /* eslint-disable prefer-destructuring */
         global.users[row[1]] = row[1];
-        this.el.element('paper-toggle-button[name="password-toggle"]').waitForVisible();
-        this.el.element('paper-toggle-button[name="password-toggle"]').click();
+        const toggleEle = await this.el.element('paper-toggle-button[name="password-toggle"]');
+        await toggleEle.waitForVisible();
+        await toggleEle.click();
       }
-      const fieldEl = this.getField(row[0], { parent });
-      fieldEl.waitForVisible();
-      return fixtures.layouts.setValue(fieldEl, row[1]);
-    });
+      const fieldEl = await this.getField(row[0], { parent });
+      await fieldEl.waitForVisible();
+      await fixtures.layouts.setValue(fieldEl, row[1]);
+    }
   }
 
-  searchFor(searchTerm) {
-    driver.waitForExist(this._selector);
-    driver.waitForVisible(this._selector);
-    const searchBox = this.el.element('nuxeo-user-group-search nuxeo-input');
-    searchBox.waitForVisible();
-    return fixtures.layouts.setValue(searchBox, searchTerm);
+  async searchFor(searchTerm) {
+    await driver.waitForExist(this._selector);
+    await driver.waitForVisible(this._selector);
+    const searchBox = await this.el.element('nuxeo-user-group-search nuxeo-input');
+    await searchBox.waitForVisible();
+    const finaleEle = await fixtures.layouts.setValue(searchBox, searchTerm);
+    return finaleEle;
   }
 
-  searchResult(searchTerm) {
-    const match = () =>
-      this.el.elements('nuxeo-card[name="users"] .table [name="id"]').find((e) => e.getText() === searchTerm);
-    driver.waitUntil(match);
-    return match();
+  async searchResult(searchTerm) {
+    const ele = await this.el;
+    await driver.pause(3000);
+    const results = await ele.elements('nuxeo-card[name="users"] .table [name="id"]');
+
+    const match = await results.find(async (e) => (await e.getText()) === searchTerm);
+    return match;
   }
 }

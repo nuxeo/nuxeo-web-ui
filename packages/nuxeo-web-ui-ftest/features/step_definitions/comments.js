@@ -1,4 +1,4 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 
 Given('I have the following comment thread:', function(table) {
   /*
@@ -25,110 +25,173 @@ Given(/([^\s']+)(?:'s)? comment "(.*)" has the following replies:/, (user, text,
   return comments.reduce((current, next) => current.then(next), Promise.resolve([]));
 });
 
-When(/I edit ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, function(user, text, newText) {
-  this.ui.browser
-    .documentPage()
-    .comments.getComment(text, user === 'my' ? this.username : user)
-    .edit();
-  this.ui.browser.documentPage().comments.writeComment(newText);
-  this.ui.browser.documentPage().comments.waitForNotVisible('.input-area iron-icon[name="submit"]');
+When(/I edit ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, async function(user, text, newText) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+
+  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+  await comment.edit();
+
+  await currentComments.writeComment(newText);
+  await currentComments.waitForNotVisible('.input-area iron-icon[name="submit"]');
 });
 
-When(/I expand the reply thread for ([^\s']+)(?:'s)? comment "(.*)"/, function(user, text) {
-  const link = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user)
-    .summaryLink;
-  link.waitForVisible();
-  link.scrollIntoView();
-  link.click();
+When(/I expand the reply thread for ([^\s']+)(?:'s)? comment "(.*)"/, async function(user, text) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+
+  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+  const summaryLink = await comment.summaryLink;
+  await summaryLink.waitForVisible();
+  await summaryLink.scrollIntoView();
+  await summaryLink.click();
 });
 
-When('I load all comments', function() {
-  const link = this.ui.browser.documentPage().comments.loadMoreCommentsLink;
-  link.waitForVisible();
-  link.scrollIntoView();
-  link.click();
+When('I load all comments', async function() {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+  const link = await currentComments.loadMoreCommentsLink;
+  await link.waitForVisible();
+  await link.scrollIntoView();
+  await link.click();
 });
 
-When(/I load all replies for ([^\s']+)(?:'s)? comment "(.*)"/, function(user, text) {
-  const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
-  const link = comment.thread.loadMoreCommentsLink;
-  link.waitForVisible();
-  link.scrollIntoView();
-  link.click();
+When(/I load all replies for ([^\s']+)(?:'s)? comment "(.*)"/, async function(user, text) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+
+  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+  const thread = await comment.thread;
+  await thread.waitForVisible();
+  const link = await thread.loadMoreCommentsLink;
+  await link.waitForVisible();
+  await link.scrollIntoView();
+  await link.click();
 });
 
-When(/I remove ([^\s']+)(?:'s)? comment "(.*)"/, function(user, text) {
-  return this.ui.browser
-    .documentPage()
-    .comments.getComment(text, user === 'my' ? this.username : user)
-    .remove();
+When(/I remove ([^\s']+)(?:'s)? comment "(.*)"/, async function(user, text) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+
+  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+  const remove = await comment.remove();
+  return remove;
 });
 
-When(/I reply to ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, function(user, text, reply) {
-  return this.ui.browser
-    .documentPage()
-    .comments.getComment(text, user === 'my' ? this.username : user)
-    .reply(reply);
+When(/I reply to ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, async function(user, text, reply) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+
+  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+  const replyComment = await comment.reply(reply);
+  return replyComment;
 });
 
-When('I write a comment with the following text: {string}', function(comment) {
-  return this.ui.browser.documentPage().comments.writeComment(comment);
+When('I write a comment with the following text: {string}', async function(comment) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+  return currentComments.writeComment(comment);
 });
 
-Then('I can see the comment thread has {int} visible item(s)', function(nb) {
-  this.ui.browser.documentPage().comments.waitForVisible();
-  driver.waitUntil(() => this.ui.browser.documentPage().comments.nbItems === nb);
+Then('I can see the comment thread has {int} visible item(s)', async function(nb) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+  const nbItemLength = await currentComments.nbItems;
+  nbItemLength.should.be.equals(nb);
 });
 
-Then('I can see the comment thread has a total of {int} item(s) to be loaded', function(total) {
-  this.ui.browser.documentPage().comments.waitForVisible();
-  const link = this.ui.browser.documentPage().comments.loadMoreCommentsLink;
-  link.waitForVisible();
-  link.getText().should.be.equals(`View all ${total} comments`);
+Then('I can see the comment thread has a total of {int} item(s) to be loaded', async function(total) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+  const link = await currentComments.loadMoreCommentsLink;
+  await link.waitForVisible();
+  const linkText = await link.getText();
+  linkText.should.be.equals(`View all ${total} comments`);
 });
 
-Then("I can see document's comment thread", function() {
-  this.ui.browser.documentPage().comments.waitForVisible().should.be.true;
+Then("I can see document's comment thread", async function() {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  const commentVisible = await currentComments.waitForVisible();
+  commentVisible.should.be.true;
 });
 
-Then(/I can see the reply thread for ([^\s']+)(?:'s)? comment "(.*)" has a total of (\d+) items to be loaded/, function(
-  user,
-  text,
-  total,
-) {
-  const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
-  comment.thread.waitForVisible();
-  const link = comment.thread.loadMoreCommentsLink;
-  link.waitForVisible();
-  link.getText().should.be.equals(`View all ${total} replies`);
+Then(
+  /I can see the reply thread for ([^\s']+)(?:'s)? comment "(.*)" has a total of (\d+) items to be loaded/,
+  async function(user, text, total) {
+    const docPage = await this.ui.browser.documentPage();
+    const currentComments = await docPage.comments;
+    await currentComments.waitForVisible();
+
+    const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+    const thread = await comment.thread;
+    await thread.waitForVisible();
+    const link = await thread.loadMoreCommentsLink;
+    await link.waitForVisible();
+    const linkText = await link.getText();
+    linkText.should.be.equals(`View all ${total} replies`);
+  },
+);
+
+Then(/I can see ([^\s']+)(?:'s)? comment: "(.*)"/, async function(user, text) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+  return comment;
 });
 
-Then(/I can see ([^\s']+)(?:'s)? comment: "(.*)"/, function(user, text) {
-  return this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
+Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has (\d+) visible replies/, async function(user, text, nb) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+
+  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+  const thread = await comment.thread;
+  await thread.waitForVisible();
+  const nbItemLength = await thread.nbItems;
+  nbItemLength.should.be.equals(nb);
 });
 
-Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has (\d+) visible replies/, function(user, text, nb) {
-  const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
-  comment.thread.waitForVisible();
-  comment.thread.nbItems.should.be.equals(nb);
+Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has a reply thread with (\d+) replies/, async function(user, text, nb) {
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+
+  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+  const summaryLink = await comment.summaryLink;
+  await summaryLink.waitForVisible();
+  const summaryText = await summaryLink.getText();
+  summaryText.should.be.equals(`${nb} Replies`);
 });
 
-Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has a reply thread with (\d+) replies/, function(user, text, nb) {
-  const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
-  comment.summaryLink.waitForVisible();
-  comment.summaryLink.getText().should.be.equals(`${nb} Replies`);
-});
-
-Then(/I (can|cannot) see the extended options available for ([^\s']+)(?:'s)? comment: "(.*)"/, function(
+Then(/I (can|cannot) see the extended options available for ([^\s']+)(?:'s)? comment: "(.*)"/, async function(
   option,
   user,
   text,
 ) {
   option.should.to.be.oneOf(['can', 'cannot'], 'An unknown option was passed as argument');
-  const comment = this.ui.browser.documentPage().comments.getComment(text, user === 'my' ? this.username : user);
+  const docPage = await this.ui.browser.documentPage();
+  const currentComments = await docPage.comments;
+  await currentComments.waitForVisible();
+
+  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+  const commentOptions = await comment.options;
+
   if (option === 'can') {
-    comment.options.isVisible().should.be.true;
+    const commentOptionsVisible = await commentOptions.isVisible();
+    commentOptionsVisible.should.be.true;
   } else {
-    comment.options.isExisting().should.be.false;
+    const commentOptionsExist = await commentOptions.isExisting();
+    commentOptionsExist.should.be.false;
   }
 });

@@ -9,7 +9,7 @@ Feature: Create Document
     And I have permission ReadWrite for this document
     And I browse to the document
 
-  Scenario Outline: Create <doctype>
+  Scenario Outline: Create <doctype> and verify metadata properties
     When I click the Create Document button
     And I select <doctype> from the Document Type menu
     And I create a document with the following properties:
@@ -33,6 +33,22 @@ Feature: Create Document
     | doctype    |
     | Note       |
     | File       |
+  
+ Scenario Outline: Create <doctype>
+    When I click the Create Document button
+    And I select <doctype> from the Document Type menu
+    And I create a document with the following properties:
+      | name         | value             |
+      | title        | my title          |
+      | description  | my description    |
+      | nature       | Application       |
+      | subjects     | Gastronomy,Comics |
+      | expired      | February 28, 2018 |
+
+    Then I see the <doctype> page
+
+  Examples:
+    | doctype    |
     | Folder     |
     | Workspace  |
     | Collection |

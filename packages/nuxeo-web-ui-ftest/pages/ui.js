@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
 import Drawer from './ui/drawer';
@@ -15,19 +16,25 @@ import UserCloudServices from './ui/oauth2/user_cloud_services';
 import { refresh, url } from './helpers';
 
 export default class UI extends BasePage {
-  goHome() {
-    this.drawer.logo.click();
+  async goHome() {
+    const logoEle = await this.drawer.logo;
+    await logoEle.waitForVisible();
+    await logoEle.click();
   }
 
-  reload() {
-    refresh();
+  async reload() {
+    await refresh();
   }
 
   get activityFeed() {
-    $('nuxeo-document-page nuxeo-page-item[name="activity"]').waitForVisible();
-    browser.click('nuxeo-document-page nuxeo-page-item[name="activity"]');
-    $('nuxeo-document-activity').waitForVisible();
-    return new ActivityFeed('nuxeo-document-activity');
+    return (async () => {
+      await $('nuxeo-document-page nuxeo-page-item[name="activity"]').waitForVisible();
+      browser.click('nuxeo-document-page nuxeo-page-item[name="activity"]');
+      await this.reload();
+      await $('nuxeo-document-activity').waitForVisible();
+      const activity = new ActivityFeed('nuxeo-document-activity');
+      return activity;
+    })();
   }
 
   get historyTable() {
@@ -55,14 +62,19 @@ export default class UI extends BasePage {
   }
 
   get searchButton() {
-    return this.el.element('#searchButton');
+    return this.el.$('#searchButton');
   }
 
   get results() {
-    if (this.el.element('nuxeo-browser').isVisible()) {
-      return this.browser.results;
-    }
-    return new Search('nuxeo-search-results-layout[id="results"]');
+    return (async () => {
+      const ele = await this.el.element('nuxeo-browser');
+      const isElementVisible = await ele.isVisible();
+      if (isElementVisible) {
+        const resultEle = this.browser.results;
+        return resultEle;
+      }
+      return new Search('nuxeo-search-results-layout[id="results"]');
+    })();
   }
 
   get searchResults() {
@@ -71,16 +83,22 @@ export default class UI extends BasePage {
   }
 
   get createDialog() {
-    this._createDialog = this._createDialog ? this._createDialog : new CreateDialog('#createDocDialog');
-    return this._createDialog;
+    return (async () => {
+      const createEle = await new CreateDialog('#createDocDialog');
+      this._createDialog = this._createDialog ? this._createDialog : createEle;
+      return this._createDialog;
+    })();
   }
 
   get createButton() {
-    return this.el.element('#createBtn');
+    return (async () => {
+      const buttonCreate = await this.el.element('#createBtn');
+      return buttonCreate;
+    })();
   }
 
   get adminButton() {
-    return this.el.element('nuxeo-menu-icon[name="administration"]');
+    return this.el.$('nuxeo-menu-icon[name="administration"]');
   }
 
   get drawer() {
@@ -88,17 +106,18 @@ export default class UI extends BasePage {
   }
 
   static get() {
-    url(process.env.NUXEO_URL ? '' : 'ui');
-    if (!global.locale) {
-      $('nuxeo-app:not([unresolved])').waitForVisible();
-      /* global window */
-      const locale = browser.execute(() => window.nuxeo.I18n.language || 'en');
-      if (locale) {
-        global.locale = locale;
-        moment.locale(global.locale);
+    return (async () => {
+      url(process.env.NUXEO_URL ? '' : 'ui');
+      if (!(await global.locale)) {
+        await $('nuxeo-app:not([unresolved])').waitForVisible();
+        const locale = await browser.execute(() => window.nuxeo.I18n.language || 'en');
+        if (locale) {
+          global.locale = locale;
+          await moment.locale(global.locale);
+        }
       }
-    }
-    return new UI('nuxeo-app');
+      return new UI('nuxeo-app');
+    })();
   }
 
   get home() {
@@ -110,15 +129,15 @@ export default class UI extends BasePage {
   }
 
   get pages() {
-    return this.el.element('#pages');
+    return this.el.$('#pages');
   }
 
   get search() {
-    return this.pages.element('nuxeo-search-results');
+    return this.pages.$('nuxeo-search-results');
   }
 
   get suggester() {
-    return this.el.element('#mainContainer nuxeo-suggester');
+    return this.el.$('#mainContainer nuxeo-suggester');
   }
 
   get administration() {
@@ -126,29 +145,40 @@ export default class UI extends BasePage {
   }
 
   get userCloudServices() {
-    return new UserCloudServices('nuxeo-user-cloud-services');
+    return (async () => {
+      const cloudServiceELe = await new UserCloudServices('nuxeo-user-cloud-services');
+      return cloudServiceELe;
+    })();
   }
 
-  goToUserCloudServices() {
-    if (!browser.getUrl().endsWith('user-cloud-services')) {
+  async goToUserCloudServices() {
+    const browserUrl = await browser.getUrl();
+    if (!browserUrl.endsWith('user-cloud-services')) {
       url(process.env.NUXEO_URL ? '#!/user-cloud-services' : 'ui/#!/user-cloud-services');
     }
-    return this.userCloudServices;
+
+    const cloudServiceELe = await this.userCloudServices;
+
+    return cloudServiceELe;
+    // }
   }
 
   get userAuthorizedApps() {
     return new UserAuthorizedApps('nuxeo-user-authorized-apps');
   }
 
-  goToUserAuthorizedApps() {
-    if (!browser.getUrl().endsWith('user-authorized-apps')) {
-      url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
+  async goToUserAuthorizedApps() {
+    const browserUrl = await browser.getUrl();
+    if (!browserUrl.endsWith('user-authorized-apps')) {
+      await url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
     }
-    return this.userAuthorizedApps;
+    if (await this.userAuthorizedApps.waitForVisible()) {
+      return this.userAuthorizedApps;
+    }
   }
 
   get tasks() {
-    return this.pages.element('nuxeo-tasks');
+    return this.pages.$('nuxeo-tasks');
   }
 
   get emptyAuthorizedApps() {
@@ -161,7 +191,9 @@ export default class UI extends BasePage {
   }
 
   waitRequests() {
-    driver.waitUntil(() => !this.isConnectionActive, 5000, 'Waiting for inactive connection');
+    driver.waitUntil(() => !this.isConnectionActive, 5000, 'Waiting for inactive connection', {
+      timeoutMsg: 'waitRequests timeout',
+    });
   }
 
   view(option) {
@@ -172,22 +204,35 @@ export default class UI extends BasePage {
     dropdown.click(`#dropdown #contentWrapper div paper-menu div paper-icon-item[name="${selection}"]`);
   }
 
-  waitForToastNotVisible() {
-    driver.waitUntil(() => driver.elements('mwc-snackbar').every((toast) => !toast.getAttribute('open')));
-  }
-
-  getToastDismissButton() {
-    return this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
-  }
-
-  getToastMessage(message) {
-    let snackBar;
-    driver.waitUntil(() => {
-      snackBar = this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
-      const trimmedMessage = message.trim().replace(/"/g, '');
-      return snackBar.getText() === trimmedMessage;
+  async waitForToastNotVisible() {
+    driver.waitUntil(async () => {
+      const mwcsnackbar = await driver.elements('mwc-snackbar');
+      return mwcsnackbar.every((toast) => !toast.getAttribute('open'), {
+        timeoutMsg: 'waitForToastNotVisible timedout',
+      });
     });
-    return snackBar.getText();
+  }
+
+  async getToastDismissButton() {
+    const snackbar = await this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
+    return snackbar;
+  }
+
+  async getToastMessage(message) {
+    let snackBarText;
+    await driver.waitUntil(
+      async () => {
+        const snackBar = await this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
+        snackBarText = await snackBar.getText();
+        const trimmedMessage = message.trim().replace(/"/g, '');
+        return snackBarText === trimmedMessage;
+      },
+      {
+        timeoutMsg: 'getToastMessage timedout',
+      },
+    );
+
+    return snackBarText;
   }
 
   bulkEdit(selector) {
@@ -195,6 +240,6 @@ export default class UI extends BasePage {
   }
 
   get filterView() {
-    return this.el.element('paper-icon-button[id="toogleFilter"]');
+    return this.el.$('paper-icon-button[id="toogleFilter"]');
   }
 }

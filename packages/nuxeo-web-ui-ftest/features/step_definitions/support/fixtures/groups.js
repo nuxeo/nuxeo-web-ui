@@ -1,4 +1,4 @@
-import { After } from '@cucumber/cucumber';
+import { After } from '../../../../node_modules/@cucumber/cucumber';
 import nuxeo from '../services/client';
 
 global.groups = {
