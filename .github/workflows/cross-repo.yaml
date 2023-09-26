@@ -67,16 +67,12 @@ jobs:
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           scope: '@nuxeo'
+          node-version: 18
       
       - uses: actions/setup-java@v2
         with: 
           distribution: 'zulu'
           java-version: '11'
-
-      - name: Install google chrome
-        run: |
-          wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
-          apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
 
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
@@ -142,6 +138,18 @@ jobs:
           echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
           popd
+
+      - name: Add .npmrc
+        run: |
+          pushd /tmp/_temp/
+          rm .npmrc
+          touch .npmrc
+          popd
+          echo '
+           packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+           @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+           always-auth=true
+          ' >> /tmp/_temp/.npmrc
 
       - name: Link elements to Web UI
         run: |

@@ -1,4 +1,4 @@
-import { After } from '@cucumber/cucumber';
+import { After } from '../../../../node_modules/@cucumber/cucumber';
 import nuxeo from '../services/client';
 
 global.users = {
@@ -7,8 +7,9 @@ global.users = {
 
 fixtures.users = {
   DEFAULT_PASSWORD: 'password',
-  create: (user) => {
-    const { username } = user.properties;
+  create: async (user) => {
+    const username = await user.properties.username;
+    await driver.pause(1000);
     if (username in users) {
       return users[username];
     }

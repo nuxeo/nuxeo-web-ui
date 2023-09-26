@@ -1,123 +1,154 @@
-import { When } from '@cucumber/cucumber';
+import { When } from '../../node_modules/@cucumber/cucumber';
 
-When(/^I can see the version info bar with text "(.*)"$/, function(text) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versionInfoBar.waitForVisible();
-  page.versionInfoBar.getText().should.equal(text);
+When(/^I can see the version info bar with text "(.*)"$/, async function(text) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const versionInfoBar = await page.versionInfoBar;
+  await versionInfoBar.waitForVisible();
+  const versionInfoBarText = await versionInfoBar.getText();
+  versionInfoBarText.should.equal(text);
 });
 
-When(/^The document is unversioned$/, function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.createVersionButton.waitForVisible();
+When(/^The document is unversioned$/, async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const createVersionBtn = await page.versions.createVersionButton;
+  await createVersionBtn.waitForVisible();
 });
 
-When(/^I click the Create Version button$/, function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.createVersionButton.waitForVisible();
-  page.versions.createVersionButton.click();
+When(/^I click the Create Version button$/, async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const createVersionBtn = await page.versions.createVersionButton;
+  await createVersionBtn.waitForVisible();
+  await createVersionBtn.click();
 });
 
-When(/^The create version dialog appears$/, function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.dialog.waitForVisible();
-  page.versions.dialog.waitForVisible('paper-button[dialog-dismiss]');
-  page.versions.dialog.waitForVisible('paper-button[dialog-confirm]');
+When(/^The create version dialog appears$/, async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const pageVersionDialog = await page.versions.dialog;
+  await pageVersionDialog.waitForVisible();
+  await pageVersionDialog.waitForVisible('paper-button[dialog-dismiss]');
+  await pageVersionDialog.waitForVisible('paper-button[dialog-confirm]');
 });
 
-When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, function(v1, v2, v3, v4) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.dialog.waitForVisible();
-  page.versions.dialogNextMinor.getText().should.equal(`${v1}.${v2}`);
-  page.versions.dialogNextMajor.getText().should.equal(`${v3}.${v4}`);
+When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, async function(v1, v2, v3, v4) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const pageVersionDialog = await page.versions.dialog;
+  await pageVersionDialog.waitForVisible();
+  const dialogMinor = await page.versions.dialogNextMinor;
+  const dialogMinorText = await dialogMinor.getText();
+  dialogMinorText.should.equal(`${v1}.${v2}`);
+  const dialogMajor = await page.versions.dialogNextMajor;
+  const dialogMajorText = await dialogMajor.getText();
+  dialogMajorText.should.equal(`${v3}.${v4}`);
 });
 
-When(/^I create a (major|minor) version$/, function(versionType) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.dialog.waitForVisible();
+When(/^I create a (major|minor) version$/, async function(versionType) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const pageVersionDialog = await page.versions.dialog;
+  await pageVersionDialog.waitForVisible();
   switch (versionType) {
-    case 'major':
-      page.versions.dialogMajorOption.click();
+    case 'major': {
+      const dialogMajorOpt = await page.versions.dialogMajorOption;
+      await dialogMajorOpt.click();
       break;
-    case 'minor':
-      page.versions.dialogMinorOption.click();
+    }
+    case 'minor': {
+      const dialogMinorOpt = await page.versions.dialogMinorOption;
+      await dialogMinorOpt.click();
       break;
+    }
     default:
     // do nothing
   }
-  page.versions.dialogConfirmButton.waitForVisible();
-  page.versions.dialogConfirmButton.click();
+  const dialogConfirmBtn = await page.versions.dialogConfirmButton;
+  await dialogConfirmBtn.waitForVisible();
+  await dialogConfirmBtn.click();
 });
 
-When(/^The document version is ([^"]*)$/, function(label) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.toggle.waitForVisible();
-  driver.waitUntil(() => page.versions.toggle.getText() === label, `No version found with label "${label}"`);
+When(/^The document version is ([^"]*)$/, async function(label) {
+  await driver.pause(1000);
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const versionsToggle = await page.versions.toggle;
+  await versionsToggle.waitForVisible();
+  const versionsToggleText = await versionsToggle.getText();
+  if (versionsToggleText !== label) {
+    throw new Error(`No version found with label "${label}"`);
+  }
 });
 
-When(/^I click the versions list$/, function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.toggle.waitForVisible();
-  page.versions.toggle.click();
-  page.versions.listItems.waitForVisible();
+When(/^I click the versions list$/, async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const versions = await page.versions;
+  await versions.waitForVisible();
+  const versionsToggle = await versions.toggle;
+  await versionsToggle.waitForVisible();
+  await versionsToggle.click();
+  const versionsListItems = await versions.listItems;
+  await versionsListItems.waitForVisible();
 });
 
-When(/^I click the versions list at index (\d+)$/, function(index) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.listItem(index).waitForExist();
-  page.versions.listItems.waitForVisible();
-  page.versions.listItem(index).waitForExist();
-  page.versions.listItem(index).waitForVisible();
-  page.versions.listItem(index).click();
+When(/^I click the versions list at index (\d+)$/, async function(index) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const versions = await page.versions;
+  await versions.waitForVisible();
+  await versions.listItem(index).waitForExist();
+  await versions.listItems.waitForVisible();
+  await versions.listItem(index).waitForExist();
+  await versions.listItem(index).waitForVisible();
+  await versions.listItem(index).click();
 });
 
-When(/^Versions item index at (\d+) is ([^"]*)$/, function(index, text) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions
-    .listItemTitle(index)
-    .getText()
-    .should.equals(text);
+When(/^Versions item index at (\d+) is ([^"]*)$/, async function(index, text) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const versions = await page.versions;
+  await versions.waitForVisible();
+  const listItemTitle = await versions.listItemTitle(index);
+  const listItemTitleText = await listItemTitle.getText();
+  listItemTitleText.should.equals(text);
 });
 
-When(/^Versions count is (\d+)$/, function(count) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.listCount.should.equal(count);
+When(/^Versions count is (\d+)$/, async function(count) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const versions = await page.versions;
+  await versions.waitForVisible();
+  const listCount = await versions.listCount;
+  listCount.should.equal(count);
 });
 
-When(/^I click the Create Version button in versions list$/, function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.listItems.waitForVisible();
-  page.versions.listCreateVersionButton.waitForVisible();
-  page.versions.listCreateVersionButton.click();
+When(/^I click the Create Version button in versions list$/, async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const versions = await page.versions;
+  await versions.waitForVisible();
+  await versions.listItems.waitForVisible();
+  const listCreateVersionButton = await versions.listCreateVersionButton;
+  await listCreateVersionButton.waitForVisible();
+  await listCreateVersionButton.click();
 });
 
-When(/^I can restore version$/, function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.restoreVersionButton.waitForVisible();
-  page.restoreVersionButton.click();
-  page.restoreVersionButtonConfirm.waitForVisible();
-  page.restoreVersionButtonConfirm.click();
+When(/^I can restore version$/, async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const restoreVersionButton = await page.restoreVersionButton;
+  await restoreVersionButton.waitForVisible();
+  await restoreVersionButton.click();
+  const restoreVersionButtonConfirm = await page.restoreVersionButtonConfirm;
+  await restoreVersionButtonConfirm.waitForVisible();
+  await restoreVersionButtonConfirm.click();
 });

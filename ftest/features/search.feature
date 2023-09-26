@@ -46,17 +46,6 @@ Feature: Search
     | coverage    | Europe/Portugal         | 5            |
     #| size        | Between 100 KB and 1 MB | 1            | disabled until scroll works in shadow dom
 
-  Scenario: Default Saved Search
-    When I click the "defaultSearch" button
-    And I perform a coverage search for Europe/France on defaultSearch
-    Then I edit the results columns to show "Subjects"
-    And I save my search as "Local Search"
-    And I share my "defaultSearch" search with JSmith
-    When I logout
-    And I login as "JSmith"
-    And I click the "defaultSearch" button
-    Then I can view my saved search "Local Search" on "defaultSearch"
-
   Scenario: Navigate to Default Saved Search by ID
     Given I have a saved search named "Portugal", for the "default_search" page provider, with the following parameters
       | key             | value               |
@@ -109,3 +98,14 @@ Feature: Search
     When I click the "assetsSearch" button
     And I perform a fulltext search for picture on assetsSearch
     Then I can see 3 search results
+
+  Scenario: Default Saved Search
+    When I click the "defaultSearch" button
+    And I perform a coverage search for Europe/France on defaultSearch
+    Then I edit the results columns to show "Subjects"
+    And I save my search as "Local Search"
+    And I share my "defaultSearch" search with JSmith
+    When I logout
+    And I login as "JSmith"
+    And I click the "defaultSearch" button
+    Then I can view my saved search "Local Search" on "defaultSearch"
