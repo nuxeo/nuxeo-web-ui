@@ -1,8 +1,12 @@
 import BasePage from '../base';
 
 export default class ActivityFeed extends BasePage {
-  getActivity(activity) {
-    this.el.waitForExist('.value span');
-    return this.el.$$('.value span').find((e) => e.getText() === activity);
+  async getActivity(activity) {
+    await this.el.waitForExist('.value span');
+    const valueSpan = await this.el.$$('.value span').find(async (e) => {
+      const currentText = await e.getText();
+      return currentText === activity;
+    });
+    return valueSpan;
   }
 }
