@@ -31,23 +31,17 @@ When('I click the clipboard paste action', async function() {
 });
 
 Then('I can see the clipboard has {string} document', async function(title) {
-  await this.ui.drawer.clipboard.waitForVisible();
+  const clipboardEle = await this.ui.drawer.clipboard;
+  await clipboardEle.waitForVisible();
   let found = false;
-  await driver.waitUntil(
-    async () => {
-      const clipboardItems = await this.ui.drawer.clipboard.el.$$('#list .list-item-title');
-      for (let index = 0; index < clipboardItems.length; index++) {
-        const elementText = await clipboardItems[index].getText();
-        if (elementText === title) found = true;
-      }
-      return found;
-    },
-    {
-      timeout: 3000,
-      timeoutMsg: 'step  definition clipborad 37',
-    },
-  );
+  const clipboardItems = await clipboardEle.el.$$('#list .list-item-title');
+  for (let index = 0; index < clipboardItems.length; index++) {
+    const elementText = await clipboardItems[index].getText();
+    if (elementText === title) found = true;
+  }
+  return found;
 });
+
 Then('I can see the clipboard has {int} item(s)', async function(nb) {
   const drawer = await this.ui.drawer;
   const clipboard = await drawer.clipboard;

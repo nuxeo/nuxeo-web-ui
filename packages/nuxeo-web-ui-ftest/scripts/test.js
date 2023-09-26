@@ -114,7 +114,6 @@ if (process.env.DRIVER_VERSION == null) {
   if (match) {
     const checkVersion = match[1];
     try {
-      // chrome for testing url
       done = fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then(
         (response) => {
           if (response.ok) {

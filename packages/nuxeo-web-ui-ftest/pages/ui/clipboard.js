@@ -41,6 +41,7 @@ export default class Clipboard extends BasePage {
 
   async removeItem(title) {
     const items = await this.el.$$('nuxeo-data-list#list .list-item');
+    await driver.pause(2000);
     let found = false;
     for (let index = 0; index < items.length; index++) {
       const itemVisible = await items[index].isVisible();
