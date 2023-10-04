@@ -17,7 +17,7 @@ if (match) {
   //  we will revert this once driver issue is resolved.
   const checkVersion = 114;
   try {
-    fetch(`https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${checkVersion}`).then((response) => {
+    fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then((response) => {
       if (response.ok) {
         return response
           .text()
