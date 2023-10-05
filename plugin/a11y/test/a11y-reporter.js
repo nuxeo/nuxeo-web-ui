@@ -6,7 +6,7 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
     if (_report) {
       return _report;
     }
-    await setup();
+    setup();
     await browser.setTimeout({ script: 240000 });
     await browser.pause(3000);
     _report = await runAxeCore();

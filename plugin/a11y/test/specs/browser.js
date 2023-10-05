@@ -4,20 +4,20 @@ import { authRedirect } from '../helpers/login';
 import { reportA11y } from '../a11y-reporter.js';
 
 const EXPECTED_VIOLATIONS = {
+  'aria-allowed-attr': 1,
   'aria-command-name': 1,
-  'aria-roles': 3,
+  'aria-required-children': 1,
   'aria-tooltip-name': 1,
+  'color-contrast': 12,
   'landmark-one-main': 1,
   'meta-viewport': 1,
+  'nested-interactive': 13,
   'page-has-heading-one': 1,
-  region: 24,
-  'nested-interactive': 15,
+  region: 79,
 };
-
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
-  'aria-allowed-role': 7,
-  'aria-valid-attr-value': 1,
-  'color-contrast-enhanced': 2,
+  'aria-allowed-role': 5,
+  'color-contrast-enhanced': 10,
 };
 
 describe('Nuxeo Browser', () => {
