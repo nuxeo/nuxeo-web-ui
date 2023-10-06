@@ -1,6 +1,6 @@
 import '../imports';
-import UI from '@nuxeo/nuxeo-web-ui-ftest/pages/ui';
 import documentService from '@nuxeo/nuxeo-web-ui-ftest/features/step_definitions/support/services/documentService';
+import UI from '@nuxeo/nuxeo-web-ui-ftest/pages/ui';
 import login from '../helpers/login';
 import { reportA11y } from '../a11y-reporter.js';
 
@@ -28,7 +28,7 @@ describe('Nuxeo Home', () => {
     await documentService.create(parent.path, child);
   });
 
-  reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, () => {
+  reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, async () => {
     login();
     const ui = UI.get();
     ui.home.el.$('nuxeo-card[icon="nuxeo:edit"]').waitForDisplayed();
