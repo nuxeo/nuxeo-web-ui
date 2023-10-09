@@ -26,9 +26,16 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     sl_latest_firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
+      browserVersion: "99.0.1",
       platform: 'Windows 10',
       version: 'latest',
-      geckodriverVersion: '0.30.0',
+      geckodriverVersion: '0.33.0',
+      capabilities: {
+        firstMatch: [
+          { "browserName": "firefox", "platformName": "macos" },
+          { "browserName": "firefox", "platformName": "linux" }
+        ]
+      }
     },
     sl_latest_edge: {
       base: 'SauceLabs',
