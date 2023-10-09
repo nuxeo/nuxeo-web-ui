@@ -27,7 +27,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       base: 'SauceLabs',
       browserName: 'firefox',
       platform: 'Windows 10',
-      version: '97.0',
+      version: '99.0',
       'moz:debuggerAddress': true,
       geckodriverVersion: '0.32.1',
     },
