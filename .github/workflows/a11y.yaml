@@ -40,18 +40,25 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         registry-url: ${{ env.NPM_REPOSITORY }}
-        node-version: 14
+        node-version: 18
         scope: '@nuxeo'
+
+    - name: Install Web UI
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      run: |
+        npm install
+        pushd packages/nuxeo-web-ui-ftest
+        npm install
+        popd
+        pushd packages/nuxeo-designer-catalog
+        npm install
+        popd
 
     - uses: actions/setup-java@v2
       with:
         distribution: 'zulu'
         java-version: '11'
-
-    - name: Install google chrome
-      run: |
-        wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
-        apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
 
     - name: 'Update settings.xml with server configuration'
       run: |
