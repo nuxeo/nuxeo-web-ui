@@ -2,7 +2,6 @@ export default class Login {
   async username(username) {
     const inputUserName = await $('#username');
     await inputUserName.setValue(username);
-    // return result;
   }
 
   async password(password) {
