@@ -21,7 +21,7 @@
     "@wdio/selenium-standalone-service": "^8.15.0",
     "@wdio/spec-reporter": "^8.16.9",
     "axe-core": "^4.1.2",
-    "chrome-launcher": "^0.14.0",
+    "chrome-launcher": "^1.1.0",
     "node-fetch": "^2.6.1",
     "wdio-chromedriver-service": "^8.1.1"
   }
