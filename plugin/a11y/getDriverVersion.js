@@ -13,7 +13,7 @@ try {
 }
 const match = version && version.match(/([0-9]+)\./);
 if (match) {
-  const checkVersion = match[1];
+  const checkVersion = 117;
   //  we will revert this once driver issue is resolved.
   try {
     fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then((response) => {
