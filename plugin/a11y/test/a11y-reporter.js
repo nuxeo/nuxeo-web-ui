@@ -22,7 +22,6 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     Object.entries(expectedViolations).forEach(([violation, issues]) => {
       it(`${violation}: ${issues} issue(s)`, async () => {
-        console.log('expectedViolations expectedViolations', report);
         await expect(report.violations).toEqual(
           expect.arrayContaining([
             {
@@ -44,7 +43,6 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     Object.entries(expectedIncompleteViolations).forEach(([violation, issues]) => {
       it(`${violation}: ${issues} issue(s)`, async () => {
-        console.log('expectedIncompleteViolations expectedIncompleteViolations', report);
         await expect(report.incomplete).toEqual(
           expect.arrayContaining([
             {
