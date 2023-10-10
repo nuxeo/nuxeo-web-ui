@@ -180,6 +180,7 @@
     "@wdio/allure-reporter": "^7.32.0",
     "@webcomponents/html-imports": "^1.2.0",
     "aws-sdk": "^2.420.0",
+    "cjs-loader": "^0.1.0",
     "dotenv": "^8.0.0",
     "es6-promise": "^4.0.0",
     "extend": "^3.0.2",
