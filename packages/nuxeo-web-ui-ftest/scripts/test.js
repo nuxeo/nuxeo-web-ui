@@ -28,12 +28,10 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
 const { execSync } = require('child_process');
 const chromeLauncher = require('chrome-launcher');
 const fetch = require('node-fetch');
-
-const wdioBin = require.resolve('@wdio/cli/bin/wdio');
+const cli = require('@wdio/cli');
 const argv = require('minimist')(process.argv.slice(2));
 
 const defaultDef = './features/step_definitions';
@@ -115,7 +113,6 @@ if (process.env.DRIVER_VERSION == null) {
   const match = version && version.match(/([0-9]+)\./);
   if (match) {
     const checkVersion = match[1];
-    //  we will revert this once driver issue is resolved.
     try {
       done = fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then(
         (response) => {
@@ -141,12 +138,14 @@ if (process.env.DRIVER_VERSION == null) {
 }
 
 done.finally(() => {
-  const wdio = spawn('node', [wdioBin, ...args], { env: process.env, stdio: ['inherit', 'pipe', 'pipe'] });
-
-  wdio.stdout.pipe(process.stdout);
-  wdio.stderr.pipe(process.stderr);
-
-  wdio.on('close', (code) => {
-    process.exit(code);
-  });
+  const wdio = new cli.Launcher(args[0]);
+  wdio.run().then(
+    (code) => {
+      process.exit(code);
+    },
+    (error) => {
+      console.error('Launcher failed to start the test', error.stacktrace);
+      process.exit(1);
+    },
+  );
 });

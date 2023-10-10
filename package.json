@@ -13,7 +13,7 @@
     "workboxCli": "3.6.3"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^7.0.0",
+    "@cucumber/cucumber": "^9.5.1",
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@nuxeo/testing-helpers": "~3.0.29-rc.0",
     "@open-wc/eslint-config": "^0.3.0",

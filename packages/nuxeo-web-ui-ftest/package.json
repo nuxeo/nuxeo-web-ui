@@ -17,7 +17,6 @@
     "@babel/core": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@babel/register": "^7.14.5",
-    "@cucumber/cucumber": "^9.5.1",
     "@cucumber/tag-expressions": "^2.0.4",
     "@wdio/cli": "^8.16.11",
     "@wdio/cucumber-framework": "^8.16.11",
