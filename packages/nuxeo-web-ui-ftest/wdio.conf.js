@@ -27,6 +27,9 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
+  alwaysMatch: {
+    'moz:debuggerAddress': 'localhost:9222',
+  },
 };
 
 const options = {};
