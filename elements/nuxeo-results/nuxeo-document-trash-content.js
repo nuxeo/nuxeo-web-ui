@@ -133,7 +133,7 @@ Polymer({
         <template>
           <nuxeo-document-grid-thumbnail
             class="grid-box"
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{_computeTabIndex(index)}}"
             selected$="{{selected}}"
             index="[[index]]"
             doc="[[item]]"
@@ -367,5 +367,9 @@ Polymer({
       { field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc' },
       { field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc' },
     ];
+  },
+
+  _computeTabIndex(index) {
+    return (index + 1).toString();
   },
 });

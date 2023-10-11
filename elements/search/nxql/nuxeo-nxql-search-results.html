@@ -48,7 +48,7 @@ limitations under the License.
       >
         <template>
           <nuxeo-document-grid-thumbnail
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{_computeTabIndex(index)}}"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
@@ -199,6 +199,10 @@ limitations under the License.
 
       _navigate(e) {
         this.fire('navigate', { doc: (e.model || e.detail).item, index: (e.detail || e.model).index });
+      },
+
+      _computeTabIndex(index) {
+        return (index + 1).toString();
       },
     });
   </script>
