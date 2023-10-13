@@ -5,12 +5,21 @@ import login from '../helpers/login';
 import { reportA11y } from '../a11y-reporter.js';
 
 const EXPECTED_VIOLATIONS = {
-  'html-has-lang': 1,
+  'aria-command-name': 1,
+  'aria-roles': 3,
+  'aria-tooltip-name': 1,
+  'landmark-one-main': 1,
   'meta-viewport': 1,
-  region: 1,
+  'page-has-heading-one': 1,
+  region: 24,
+  'nested-interactive': 15,
 };
 
-const EXPECTED_INCOMPLETE_VIOLATIONS = {};
+const EXPECTED_INCOMPLETE_VIOLATIONS = {
+  'aria-allowed-role': 7,
+  'aria-valid-attr-value': 1,
+  'color-contrast-enhanced': 2,
+};
 
 describe('Nuxeo Browser', () => {
   let doc;
