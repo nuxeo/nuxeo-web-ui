@@ -228,7 +228,10 @@ module.exports = class {
           target = this.element(args.shift());
         }
         const [timeout, reverse = false] = args;
-        return target.waitForDisplayed({ timeout, reverse });
+        if (typeof target.waitForDisplayed === 'function') {
+          return target.waitForDisplayed({ timeout, reverse });
+        }
+        
       },
       true,
     );

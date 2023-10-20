@@ -83,8 +83,8 @@ Given(
   },
 );
 
-Given(/^This document has file "(.+)" for content$/, function(file) {
-  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
+Given(/^This document has file "(.+)" for content$/, async function(file) {
+  return await fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
 });
 
 Given(/^This document has file "(.+)" for attachment/, function(file) {
@@ -100,8 +100,8 @@ Given(/^I have a (.+) Note$/, function(format) {
   });
 });
 
-When(/^I browse to the document$/, function() {
-  this.ui.browser.browseTo(this.doc.path);
+When(/^I browse to the document$/, async function() {
+  await this.ui.browser.browseTo(this.doc.path);
 });
 
 When(/^I browse to the "(.*)" document page$/, function(page) {

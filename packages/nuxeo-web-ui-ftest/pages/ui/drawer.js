@@ -10,7 +10,7 @@ export default class Drawer extends BasePage {
     return this.el.$('#menu');
   }
 
-  get pages() {
+   get pages() {
     return this.el.$('iron-pages');
   }
 
@@ -58,18 +58,18 @@ export default class Drawer extends BasePage {
     return this._section('profile');
   }
 
-  open(name) {
-    this.menu.waitForVisible();
+  async open(name) {
+    await this.menu.waitForVisible();
     const section = this._section(name);
-    if (!section.isVisible()) {
-      this.menu.$(`nuxeo-menu-icon[name='${name}']`).click();
+    if (!(await section.isVisible())) {
+      await this.menu.$(`nuxeo-menu-icon[name='${name}']`).click();
     }
-    section.waitForVisible();
+    await section.waitForVisible();
     return section;
   }
 
-  _section(name) {
-    return this.pages.$(`[name='${name}']`);
+   _section(name) {
+    return  this.pages.$(`[name='${name}']`); 
   }
 
   _search(name) {
