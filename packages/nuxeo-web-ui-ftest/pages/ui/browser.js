@@ -40,7 +40,7 @@ export default class Browser extends BasePage {
   }
 
   get permissionsViewButton() {
-    return this.el.element('nuxeo-page-item[name="permissions"]');
+    return this.el.$('nuxeo-page-item[name="permissions"]');
   }
 
   get publicationView() {
@@ -48,7 +48,7 @@ export default class Browser extends BasePage {
   }
 
   get publicationViewButton() {
-    return this.el.element('nuxeo-page-item[name="publication"]');
+    return this.el.$('nuxeo-page-item[name="publication"]');
   }
 
   get documentTaskView() {
@@ -58,7 +58,7 @@ export default class Browser extends BasePage {
   get currentPageName() {
     // get selected pill to get it's name
     this.waitForVisible('#documentViewsItems nuxeo-page-item.iron-selected');
-    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
+    const pill = this.el.$('#documentViewsItems nuxeo-page-item.iron-selected');
     // get active page name
     return pill.getAttribute('name');
   }
@@ -71,12 +71,12 @@ export default class Browser extends BasePage {
    * Gets a Results page helper, assuming current visible page has a <nuxeo-results> in there.
    */
   get results() {
-    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
+    const pill = this.el.$('#documentViewsItems nuxeo-page-item.iron-selected');
     return new Results(`#nxContent [name='${pill.getAttribute('name')}']`);
   }
 
   get breadcrumb() {
-    return this.el.element('nuxeo-breadcrumb');
+    return this.el.$('nuxeo-breadcrumb');
   }
 
   get title() {
@@ -84,11 +84,11 @@ export default class Browser extends BasePage {
   }
 
   _section(name) {
-    return this.el.element(`#nxContent [name='${name}']`);
+    return this.el.$(`#nxContent [name='${name}']`);
   }
 
   get editButton() {
-    return this.el.element('#edit-button');
+    return this.el.$('#edit-button');
   }
 
   editForm(docType) {
@@ -96,19 +96,19 @@ export default class Browser extends BasePage {
   }
 
   get header() {
-    return this.currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    return this.currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
   }
 
   get rows() {
-    return this.currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    return this.currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
   }
 
-  waitForChildren() {
-    this.currentPage.waitForExist('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
+     waitForChildren() {
+  this.currentPage.waitForExist('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
   }
 
   addToCollection(name) {
-    const button = this.el.element('nuxeo-add-to-collection-button');
+    const button = this.el.$('nuxeo-add-to-collection-button');
     button.waitForVisible();
     if (!button.isExisting('#dialog') || !button.isVisible('#dialog')) {
       button.click();
@@ -154,10 +154,10 @@ export default class Browser extends BasePage {
   removeFromCollection(name) {
     const { el } = this;
     el.waitForVisible('nuxeo-document-collections nuxeo-tag');
-    const collections = this.el.elements('nuxeo-document-collections nuxeo-tag');
+    const collections = this.el.$$('nuxeo-document-collections nuxeo-tag');
     collections.some((collection) => {
       if (collection.getText().trim() === name) {
-        const remove = collection.element('iron-icon[name="remove"]');
+        const remove = collection.$('iron-icon[name="remove"]');
         remove.waitForVisible();
         remove.scrollIntoView();
         remove.click();
@@ -168,7 +168,7 @@ export default class Browser extends BasePage {
   }
 
   removeSelectionFromCollection() {
-    const button = this.el.element('nuxeo-collection-remove-action');
+    const button = this.el.$('nuxeo-collection-remove-action');
     button.waitForVisible();
     button.click();
   }
@@ -198,7 +198,7 @@ export default class Browser extends BasePage {
   waitForHasChild(doc) {
     const { el } = this;
     el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
-    const titles = el.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
+    const titles = el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
     return titles.some((title) => title.getText().trim() === doc.title);
   }
 
@@ -223,7 +223,7 @@ export default class Browser extends BasePage {
     for (i = 0; i < rows.length; i++) {
       if (
         rows[i]
-          .element('nuxeo-data-table-cell a.title')
+          .$('nuxeo-data-table-cell a.title')
           .getText()
           .trim() === title
       ) {
@@ -235,17 +235,19 @@ export default class Browser extends BasePage {
 
   sortContent(field, order) {
     driver.waitUntil(() => {
-      this.waitForChildren();
-      const columns = this.currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-column');
+       this.waitForChildren();
+      const columns =  this.currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-column');
+      console.log("columns", columns);
+      console.log("columms length", columns.length);
       const idx = columns
         .map((col) => browser.execute((el) => el.sortBy, col))
         .findIndex((colSortByField) => colSortByField && colSortByField.toLowerCase() === field.toLowerCase());
       if (idx === -1) {
         throw new Error('Field not found');
       }
-      const header = this.currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-      const sortElt = header.element(`nuxeo-data-table-cell:nth-of-type(${idx + 1}) nuxeo-data-table-column-sort`);
-      const currentSorting = sortElt.element('paper-icon-button').getAttribute('direction');
+      const header = this.currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+      const sortElt = header.$(`nuxeo-data-table-cell:nth-of-type(${idx + 1}) nuxeo-data-table-column-sort`);
+      const currentSorting = sortElt.$('paper-icon-button').getAttribute('direction');
       if (currentSorting && order.toLowerCase() === currentSorting.toLowerCase()) {
         return true;
       }
@@ -253,7 +255,7 @@ export default class Browser extends BasePage {
       return false;
     });
   }
-
+ 
   /*
    * Results might vary with the viewport size as only visible items are taken into account.
    */
@@ -279,7 +281,7 @@ export default class Browser extends BasePage {
     this.waitForChildren();
     this.rows.forEach((row) => {
       if (row.isVisible('nuxeo-data-table-checkbox')) {
-        row.element('nuxeo-data-table-checkbox').click();
+        row.$('nuxeo-data-table-checkbox').click();
       }
     });
   }
@@ -301,7 +303,7 @@ export default class Browser extends BasePage {
   }
 
   get publicationInfobar() {
-    return this.el.element('nuxeo-publication-info-bar');
+    return this.el.$('nuxeo-publication-info-bar');
   }
 
   get selectionToolbar() {
@@ -309,7 +311,7 @@ export default class Browser extends BasePage {
   }
 
   get trashedInfobar() {
-    return this.el.element('#trashedInfoBar');
+    return this.el.$('#trashedInfoBar');
   }
 
   get trashDocumentButton() {
@@ -329,7 +331,7 @@ export default class Browser extends BasePage {
 
   get startWorkflowButton() {
     // XXX: using a more specific selector here to ensure we can check for isExisting()
-    return this.el.element('.document-actions nuxeo-workflow-button #startButton');
+    return this.el.$('.document-actions nuxeo-workflow-button #startButton');
   }
 
   clickDocumentActionMenu(selector) {
@@ -340,11 +342,11 @@ export default class Browser extends BasePage {
     // click the action to trigger the dialog
     clickActionMenu(this.el, 'nuxeo-workflow-button');
     // select the workflow
-    const workflowSelect = this.el.element('.document-actions nuxeo-workflow-button nuxeo-select');
+    const workflowSelect = this.el.$('.document-actions nuxeo-workflow-button nuxeo-select');
     workflowSelect.waitForVisible();
     fixtures.layouts.setValue(workflowSelect, workflow);
     // click the start button
-    this.el.element('.document-actions nuxeo-workflow-button #startButton').click();
+    this.el.$('.document-actions nuxeo-workflow-button #startButton').click();
   }
 
   _selectChildDocument(title, deselect) {
@@ -373,6 +375,6 @@ export default class Browser extends BasePage {
   }
 
   get comparePage() {
-    return this.el.element('nuxeo-diff-page div.header');
+    return this.el.$('nuxeo-diff-page div.header');
   }
 }

@@ -29,13 +29,13 @@ Given('user {string} exists', (username) =>
 );
 
 When('I login as {string}', async function(username) {
-  const logIn = Login.get();
-  await logIn.username(username);
-  await logIn.password(username);
-  await logIn.submit();
-  this.username = username;
-  this.ui = UI.get();
-  await this.ui.waitForVisible('nuxeo-page');
+    const login = Login.get();
+    await login.setUsername(username);
+    await login.setPassword(users[username]);
+    await login.submit(); 
+    this.username= username;
+    this.ui= new UI('nuxeo-app');
+    await $('nuxeo-page').waitForDisplayed();
 });
 
 When(/^I visit (.*)$/, (path) => url(path));

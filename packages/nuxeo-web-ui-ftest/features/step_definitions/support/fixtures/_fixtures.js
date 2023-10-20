@@ -1,1 +1,1 @@
-global.fixtures = {};
+//global.fixtures = {};
