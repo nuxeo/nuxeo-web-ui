@@ -29,14 +29,6 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       "alwaysMatch": {
         "moz:debuggerAddress": true,  
       },
-      'moz:firefoxOptions': {
-        "args": [
-         // "--remote-debugging-port=9222",
-          "--no-remote",
-          "--foreground",
-          "--wait-for-browser"
-        ]
-      },
       platform: 'Windows 10',
       version: 'latest',
       geckodriverVersion: '0.31.0',
