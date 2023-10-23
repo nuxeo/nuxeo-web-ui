@@ -27,7 +27,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       base: 'SauceLabs',
       browserName: 'firefox',
       platform: 'Windows 10',
-      version: 'latest',
+      version: '118.0.2',
       "desiredCapabilities": {
         "moz:firefoxOptions":{
           "args":["--remote-debugging-port=4445"]
