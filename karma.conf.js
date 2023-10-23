@@ -26,9 +26,6 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     sl_latest_firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
-      "alwaysMatch": {
-        "moz:debuggerAddress": true,  
-      },
       platform: 'Windows 10',
       version: 'latest',
       geckodriverVersion: '0.32.1',
