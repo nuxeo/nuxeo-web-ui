@@ -29,6 +29,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       platform: 'Windows 10',
       version: 'latest',
       geckodriverVersion: '0.32.1',
+      acceptInsecureCerts: true,
     },
     sl_latest_edge: {
       base: 'SauceLabs',
