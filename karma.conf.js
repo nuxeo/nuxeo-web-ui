@@ -28,9 +28,15 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       browserName: 'firefox',
       platform: 'Windows 10',
       version: '118.0.2',
+      "seleniumVersion": "4.0.0",
       "desiredCapabilities": {
         "moz:firefoxOptions":{
           "args":["--remote-debugging-port=4445"]
+        },
+        "prefs": {
+          "devtools.debugger.remote-enabled": true,
+          "devtools.debugger.prompt-connection": false,
+          "devtools.chrome.enabled": true
         }
       }
     },
