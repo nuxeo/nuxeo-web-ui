@@ -25,7 +25,6 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     },
     sl_latest_firefox: {
       base: 'SauceLabs',
-      "acceptInsecureCerts": true,
       browserName: 'firefox',
       platform: 'Windows 10',
       version: '118.0.2',
