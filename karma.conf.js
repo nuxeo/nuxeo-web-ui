@@ -9,10 +9,10 @@ let customLaunchers = {
     base: 'ChromeHeadless',
     flags: ['--disable-gpu', '--no-sandbox'],
   },
-  FirefoxHeadless: {
-    base: 'Firefox',
-    flags: ['-headless'],
-  },
+  // FirefoxHeadless: {
+  //   base: 'Firefox',
+  //   flags: ['-headless'],
+  // },
 };
 
 if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
@@ -23,15 +23,15 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       platform: 'Windows 10',
       version: 'latest',
     },
-    sl_latest_firefox: {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      platform: 'Windows 10',
-      version: 'latest',
-    },
     sl_latest_edge: {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
+      platform: 'Windows 10',
+      version: 'latest',
+    },
+    sl_latest_firefox: {
+      base: 'SauceLabs',
+      browserName: 'firefox',
       platform: 'Windows 10',
       version: 'latest',
     },
