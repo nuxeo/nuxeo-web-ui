@@ -27,9 +27,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       base: 'SauceLabs',
       browserName: 'firefox',
       platform: 'Windows 10',
-      version: '118.0.2',
-      "seleniumVersion": "4.0.0",
-      "debuggerAddress": 'string',
+      version: 'latest',
     },
     sl_latest_edge: {
       base: 'SauceLabs',
