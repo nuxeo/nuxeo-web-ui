@@ -33,6 +33,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       base: 'SauceLabs',
       browserName: 'firefox',
       platform: 'Windows 10',
+      geckodriver: '3.1.0',
       version: '113',
     },
     sl_latest_safari: {
