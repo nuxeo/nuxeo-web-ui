@@ -32,8 +32,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       "seleniumVersion": "4.0.0",
       "desiredCapabilities": {
         "moz:firefoxOptions":{
-          // "args":["--remote-debugging-port=4445"],
-          args: determineBrowserSetupArgs(browserName)
+          "args":["--remote-debugging-port=4445"],
         },
         "prefs": {
           "devtools.debugger.remote-enabled": true,
