@@ -22,9 +22,9 @@ export default class Browser extends BasePage {
 
   browseTo(path) {
     url(`#!/browse${path}`);
-    this.waitForVisible();
-    this.breadcrumb.waitForVisible();
-    this.currentPage.waitForVisible();
+    this.waitForDisplayed();
+    this.breadcrumb.waitForDisplayed();
+    this.currentPage.waitForDisplayed();
   }
 
   get view() {

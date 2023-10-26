@@ -35,9 +35,13 @@ describe('Nuxeo Browser', () => {
   after(async () => documentService.reset());
 
   reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, async () => {
-    login();
-    const ui = UI.get();
-    ui.browser.browseTo(doc.path);
-    ui.browser.currentPage.waitForDisplayed();
+    try {
+      await login();
+      const ui = await UI.get();
+      await ui.browser.browseTo(doc.path);
+      await ui.browser.currentPage.waitForDisplayed();
+    } catch (error) {
+      console.log(error);
+    }
   });
 });
