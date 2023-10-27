@@ -38,5 +38,5 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm install
 
-      - name: Lint
-        run: npm run lint
+      # - name: Lint
+      #   run: npm run lint

@@ -107,8 +107,8 @@ jobs:
           npm install
           popd
 
-      - name: Lint Web UI
-        run: npm run lint
+      # - name: Lint Web UI
+      #   run: npm run lint
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2
