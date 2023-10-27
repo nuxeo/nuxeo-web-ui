@@ -24,6 +24,7 @@ const capability = {
   maxInstances: 1,
   browserName: 'chrome',
   acceptInsecureCerts: true,
+  browserVersion: 'stable',
 };
 const options = {
   args: ['--no-sandbox'],
