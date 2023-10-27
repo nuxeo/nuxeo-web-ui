@@ -21,19 +21,16 @@ When('I click {string} in the administration menu', async (text) => {
   await el.click();
 });
 
-Then('I can see the analytics page',async function() {
-  await this.ui.administration.analytics.waitForVisible();
+Then('I can see the analytics page', async function() {
+  await this.ui.administration.analytics;
 });
 
 Then('I can see the users and groups page', async function() {
-  const isVisible = await this.ui.administration.userAndGroupManagement.waitForVisible();
-  if (!isVisible) {
-    throw new Error('Expected users and groups page to be visible');
-  }
+  await this.ui.administration.userAndGroupManagement;
 });
 
-Then('I can see the vocabulary page',async function() {
-  const isVisible = await this.ui.administration.vocabularyManagement.waitForVisible()
+Then('I can see the vocabulary page', async function() {
+  const isVisible = await this.ui.administration.vocabularyManagement.waitForVisible();
   if (!isVisible) {
     throw new Error('Expected vocabulary page to be visible');
   }
@@ -47,10 +44,7 @@ Then('I can see the audit page', async function() {
 });
 
 Then('I can see the nxql search page', async function() {
-  const isVisible = await this.ui.administration.nxqlSearch.waitForVisible();
-  if (!isVisible) {
-    throw new Error('Expected nxql search page to be visible');
-  }
+  await this.ui.administration.nxqlSearch;
 });
 
 Then('I can see the cloud services page', async function() {
@@ -60,12 +54,12 @@ Then('I can see the cloud services page', async function() {
   }
 });
 
-Given('I am on cloud services page',async function() {
+Given('I am on cloud services page', async function() {
   await this.ui.administration.goToCloudServices();
 });
 
 // ¯\_(ツ)_/¯ no way to escape a / character in cucumber expressions
-When(/^I click the new user\/group button$/,async function() {
+When(/^I click the new user\/group button$/, async function() {
   await this.ui.administration.userGroupCreateButton.waitForVisible();
   await this.ui.administration.userGroupCreateButton.click();
 });

@@ -55,7 +55,7 @@ export default class UI extends BasePage {
   }
 
   get searchButton() {
-    return this.el.element('#searchButton');
+    return this.el.$('#searchButton');
   }
 
   get results() {

@@ -59,11 +59,11 @@ export default class Browser extends BasePage {
     // get selected pill to get it's name
     this.waitForVisible('#documentViewsItems nuxeo-page-item.iron-selected');
     const pill = this.el.$('#documentViewsItems nuxeo-page-item.iron-selected');
-    // get active page name
     return pill.getAttribute('name');
   }
 
   get currentPage() {
+    this.waitForVisible(this.currentPageName);
     return this._section(this.currentPageName);
   }
 
@@ -84,6 +84,7 @@ export default class Browser extends BasePage {
   }
 
   _section(name) {
+    //this.el.waitForVisible(`#nxContent [name='${name}']`);
     return this.el.$(`#nxContent [name='${name}']`);
   }
 
@@ -103,8 +104,8 @@ export default class Browser extends BasePage {
     return this.currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
   }
 
-     waitForChildren() {
-  this.currentPage.waitForExist('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
+  waitForChildren() {
+    this.currentPage.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
   }
 
   addToCollection(name) {
@@ -218,15 +219,29 @@ export default class Browser extends BasePage {
 
   indexOfChild(title) {
     this.waitForChildren();
-    const { rows } = this;
+    console.log('waitforchildren passed');
+    this.currentPage.waitForVisible();
+    this.currentPage.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    console.log('waited');
+    const { rows } = this.currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    console.log('rows count is', rows.length);
     let i;
+    console.log('came till here');
     for (i = 0; i < rows.length; i++) {
+      console.log('came inside');
+      rows[i].$('nuxeo-data-table-cell a.title').waitForVisible();
+      console.log('element found');
+      const text = rows[i].$('nuxeo-data-table-cell a.title').getText();
+      console.log('text is ', text);
+      console.log('found at', i);
       if (
         rows[i]
           .$('nuxeo-data-table-cell a.title')
           .getText()
           .trim() === title
       ) {
+        console.log('text 2 is ', text);
+        console.log('value is ', i);
         return i;
       }
     }
@@ -235,10 +250,10 @@ export default class Browser extends BasePage {
 
   sortContent(field, order) {
     driver.waitUntil(() => {
-       this.waitForChildren();
-      const columns =  this.currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-column');
-      console.log("columns", columns);
-      console.log("columms length", columns.length);
+      this.waitForChildren();
+      const columns = this.currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-column');
+      console.log('columns', columns);
+      console.log('columms length', columns.length);
       const idx = columns
         .map((col) => browser.execute((el) => el.sortBy, col))
         .findIndex((colSortByField) => colSortByField && colSortByField.toLowerCase() === field.toLowerCase());
@@ -255,7 +270,7 @@ export default class Browser extends BasePage {
       return false;
     });
   }
- 
+
   /*
    * Results might vary with the viewport size as only visible items are taken into account.
    */
@@ -335,7 +350,7 @@ export default class Browser extends BasePage {
   }
 
   clickDocumentActionMenu(selector) {
-    clickActionMenu(this.el.element('nuxeo-actions-menu'), selector);
+    clickActionMenu(this.el.$('nuxeo-actions-menu'), selector);
   }
 
   startWorkflow(workflow) {

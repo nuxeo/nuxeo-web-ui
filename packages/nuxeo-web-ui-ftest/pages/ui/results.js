@@ -3,20 +3,22 @@ import BasePage from '../base';
 export default class Results extends BasePage {
   get noResults() {
     // XXX using a more specific selector to return the visible label
-    return this.el.element('div.emptyResult:not([style=""])');
+    return this.el.$('div.emptyResult:not([style=""])');
   }
 
   get actions() {
-    return this.el.element('slot[name="actions"]');
+    return this.el.$('slot[name="actions"]');
   }
 
   get displayModes() {
-    return this.el.elements('div.resultActions paper-icon-button.displayMode');
+    // this.el.waitForVisible('div.resultActions paper-icon-button.displayMode');
+    return this.el.$$('div.resultActions paper-icon-button.displayMode');
   }
 
   get displayMode() {
     driver.waitUntil(() => this.displayModes.some((displayMode) => displayMode.isVisible()));
     const displayMode = this.displayModes.filter((result) => result.getAttribute('disabled') !== null);
+    console.log('display mode', displayMode);
     return displayMode[0]
       .getAttribute('title')
       .replace('Switch to ', '')
@@ -29,35 +31,35 @@ export default class Results extends BasePage {
   }
 
   get toggleColumnSettings() {
-    return this.el.element('nuxeo-data-table[name="table"] #toggleColSettings');
+    return this.el.$('nuxeo-data-table[name="table"] #toggleColSettings');
   }
 
   get columnsSettingsPopup() {
-    return this.el.element('nuxeo-data-table[name="table"] #columnsSettingsPopup');
+    return this.el.$('nuxeo-data-table[name="table"] #columnsSettingsPopup');
   }
 
   get columnsCloseButton() {
-    return this.columnsSettingsPopup.element('paper-button.primary');
+    return this.columnsSettingsPopup.$('paper-button.primary');
   }
 
   getResults(displayMode) {
     switch (displayMode) {
       case 'grid':
-        return this.el.elements('nuxeo-document-grid-thumbnail, nuxeo-justified-grid-item');
+        return this.el.$$('nuxeo-document-grid-thumbnail, nuxeo-justified-grid-item');
       case 'list':
-        return this.el.elements('nuxeo-document-list-item');
+        return this.el.$$('nuxeo-document-list-item');
       default:
-        return this.el.elements('nuxeo-data-table[name="table"] div.item');
+        return this.el.$$('nuxeo-data-table[name="table"] div.item');
     }
   }
 
   getColumnCheckbox(heading) {
     this.el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-dialog[id="columnsSettingsPopup"]');
     const tr = this.el
-      .elements('nuxeo-data-table[name="table"] nuxeo-dialog[id="columnsSettingsPopup"] tr')
+      .$$('nuxeo-data-table[name="table"] nuxeo-dialog[id="columnsSettingsPopup"] tr')
       .find((e) => e.getText() === heading);
     tr.waitForVisible('paper-checkbox');
-    return tr.element('paper-checkbox');
+    return tr.$('paper-checkbox');
   }
 
   checkColumnCheckbox(heading) {
@@ -69,9 +71,9 @@ export default class Results extends BasePage {
 
   getResultsColumn(heading) {
     this.el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-    const row = this.el.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    const row = this.el.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
     row.waitForVisible('nuxeo-data-table-cell:not([hidden])');
-    return row.elements('nuxeo-data-table-cell:not([hidden])').find((e) => e.getText() === heading);
+    return row.$$('nuxeo-data-table-cell:not([hidden])').find((e) => e.getText() === heading);
   }
 
   resultsCount(displayMode) {
@@ -80,7 +82,7 @@ export default class Results extends BasePage {
   }
 
   get resultsCountLabel() {
-    return this.el.element('div.resultActions .resultsCount');
+    return this.el.$('div.resultActions .resultsCount');
   }
 
   deleteDocuments() {
@@ -96,10 +98,10 @@ export default class Results extends BasePage {
   }
 
   get deleteDocumentsButton() {
-    return this.el.element('nuxeo-delete-documents-button[hard]');
+    return this.el.$('nuxeo-delete-documents-button[hard]');
   }
 
   get untrashDocumentsButton() {
-    return this.el.element('nuxeo-untrash-documents-button');
+    return this.el.$('nuxeo-untrash-documents-button');
   }
 }
