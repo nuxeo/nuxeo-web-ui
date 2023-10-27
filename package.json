@@ -193,7 +193,7 @@
     "three": "~0.125.0",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1",
-    "webdriverio": "^7.16.16"
+    "webdriverio": "^8.20.4"
   },
   "husky": {
     "hooks": {
