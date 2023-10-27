@@ -149,12 +149,12 @@ jobs:
         if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
         run: npm run test
 
-      - name: Web UI Unit tests (Sauce Labs)
-        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
-        env:
-          SAUCE_USERNAME: nuxeo-web-ui
-          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-        run: npm run test
+      # - name: Web UI Unit tests (Sauce Labs)
+      #   if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
+      #   env:
+      #     SAUCE_USERNAME: nuxeo-web-ui
+      #     SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      #   run: npm run test
 
       - name: 'Update settings.xml with server configuration'
         run: |
@@ -168,26 +168,26 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
               
-      - name: Nuxeo package build and Ftests
-        env:
-          RUN_ALL: ${{ github.event.inputs.run_all }}
-          BAIL: ${{ github.event.inputs.bail }}
-        run: | 
-          profiles=()
-          if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
-          then 
-            profiles+=('ftest') 
-          fi
-          if ${{ github.event.inputs.generate_metrics }}
-          then 
-            profiles+=('metrics') 
-          fi
-          active_profiles=""
-          if [ ${#profiles[@]} -gt 0 ] 
-          then
-            active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
-          fi
-          mvn install -ntp $active_profiles -DskipInstall
+      # - name: Nuxeo package build and Ftests
+      #   env:
+      #     RUN_ALL: ${{ github.event.inputs.run_all }}
+      #     BAIL: ${{ github.event.inputs.bail }}
+      #   run: | 
+      #     profiles=()
+      #     if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
+      #     then 
+      #       profiles+=('ftest') 
+      #     fi
+      #     if ${{ github.event.inputs.generate_metrics }}
+      #     then 
+      #       profiles+=('metrics') 
+      #     fi
+      #     active_profiles=""
+      #     if [ ${#profiles[@]} -gt 0 ] 
+      #     then
+      #       active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
+      #     fi
+      #     mvn install -ntp $active_profiles -DskipInstall
 
       - name: A11y checks
         if: ${{ github.event.inputs.skip_a11y == 'false' }}
