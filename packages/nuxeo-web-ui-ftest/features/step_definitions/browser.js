@@ -1,103 +1,130 @@
 import { Then, When } from '@cucumber/cucumber';
 
-Then('I can see the {word} tree', function(tab) {
-  this.ui.drawer._section(tab).waitForVisible().should.be.true;
+Then('I can see the {word} tree', async function(tab) {
+  const isVisible = await this.ui.drawer._section(tab).waitForVisible();
+  if (!isVisible) {
+    throw new Error(`Expected ${tab} tree to be visible`);
+  }
 });
 
-Then('I can see the {string} {word} tree node', function(title, tab) {
-  this.ui.drawer._section(tab).waitForVisible();
-  driver.waitUntil(() =>
-    this.ui.drawer
-      ._section(tab)
-      .elements('.content a')
-      .some((e) => e.getText() === title),
-  );
+Then('I can see the {string} {word} tree node', async function(title, tab) {
+  await this.ui.drawer.menu.waitForVisible();
+  let found = false;
+  while (!found) {
+    const elements = await this.ui.drawer._section(tab).$$('.content a');
+    for (const element of elements) {
+      const text = await element.getText();
+      console.log('text is', text, 'title is ', title);
+      if (text === title) {
+        found = true;
+        break;
+      }
+    }
+  }
 });
 
-Then('I can navigate to {word} pill', function(pill) {
-  this.ui.browser.waitForVisible();
-  const el = this.ui.browser.el.element(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
-  el.waitForVisible();
+Then('I can navigate to {word} pill', async function(pill) {
+  await this.ui.browser.waitForVisible();
+  const el = await this.ui.browser.el.$(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
+  await el.waitForVisible();
   el.click();
-  this.ui.browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
+  await this.ui.browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
 });
 
-Then('I cannot see to {word} pill', function(pill) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.waitForNotVisible(`nuxeo-page-item[name='${pill.toLowerCase()}']`).should.be.true;
+Then('I cannot see to {word} pill', async function(pill) {
+  await this.ui.browser.waitForVisible();
+  const isVisible = await this.ui.browser.waitForNotVisible(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
+  if (!isVisible) {
+    throw new Error('Expected to be visible');
+  }
 });
 
-Then('I am on the {word} pill', function(pill) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.currentPageName.should.equal(pill);
+Then('I am on the {word} pill', async function(pill) {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.currentPageName.should.equal(pill);
 });
 
-When('I click {string} in the {word} tree', function(title, tab) {
+When('I click {string} in the {word} tree', async function(title, tab) {
   const section = this.ui.drawer._section(tab);
-  section.waitForVisible();
-  driver.waitUntil(() => section.elements('.content a').some((e) => e.getText() === title));
-  const el = section.elements('.content a').find((e) => e.getText() === title);
-  el.waitForVisible();
-  el.click();
+  await section.waitForVisible();
+  let found = false;
+  while (!found) {
+    const elements = await section.$$('.content a');
+    for (const element of elements) {
+      const text = await element.getText();
+      console.log(text);
+      if (text === title) {
+        found = true;
+        await element.click();
+        break;
+      }
+    }
+  }
 });
 
-Then('I can see the {string} document', function(title) {
+Then('I can see the {string} document', async function(title) {
+  await this.ui.browser.waitForVisible();
+  const isVisible = await this.ui.browser.hasTitle(title).waitForVisible();
+  if (!isVisible) {
+    throw new Error(`Expected document to be visible`);
+  }
+});
+
+Then('I select all child documents', async function() {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectAllChildDocuments();
+});
+
+Then('I select all the documents', async function() {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectAllDocuments();
+});
+
+Then('I deselect the {string} document', async function(title) {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.deselectChildDocument(title);
+});
+
+Then('I select the {string} document', async function(title) {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectChildDocument(title);
+});
+
+Then('I can see the selection toolbar', async function() {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectionToolbar.waitForVisible();
+});
+
+When('I cannot see the display selection link', async function() {
+  const isVisible = await this.ui.browser.selectionToolbar.waitForNotVisible('.selectionLink');
+  if (!isVisible) {
+    throw new Error(`Expected display selection to be visible`);
+  }
+});
+
+Then('I can add selection to the {string} collection', async function(collectionName) {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectionToolbar.addToCollectionDialog.addToCollection(collectionName);
+});
+
+Then('I can add selection to clipboard', async function() {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectionToolbar.addToClipboard();
+});
+
+Then('I can move selection down', async function() {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectionToolbar.moveDown();
+});
+
+Then('I can move selection up', async function() {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectionToolbar.moveUp();
+});
+
+Then('I can see the {string} child document is at position {int}', async function(title, pos) {
   this.ui.browser.waitForVisible();
-  this.ui.browser.hasTitle(title).should.be.true;
-});
-
-Then('I select all child documents', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectAllChildDocuments();
-});
-
-Then('I select all the documents', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectAllDocuments();
-});
-
-Then('I deselect the {string} document', function(title) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.deselectChildDocument(title);
-});
-
-Then('I select the {string} document', function(title) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectChildDocument(title);
-});
-
-Then('I can see the selection toolbar', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.waitForVisible();
-});
-
-When('I cannot see the display selection link', function() {
-  this.ui.browser.selectionToolbar.waitForNotVisible('.selectionLink').should.be.true;
-});
-
-Then('I can add selection to the {string} collection', function(collectionName) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.addToCollectionDialog.addToCollection(collectionName);
-});
-
-Then('I can add selection to clipboard', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.addToClipboard();
-});
-
-Then('I can move selection down', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.moveDown();
-});
-
-Then('I can move selection up', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.moveUp();
-});
-
-Then('I can see the {string} child document is at position {int}', function(title, pos) {
-  this.ui.browser.waitForVisible();
-  driver.waitUntil(() => this.ui.browser.indexOfChild(title) === pos - 1);
+  await driver.waitUntil(() => this.ui.browser.indexOfChild(title) === pos - 1);
 });
 
 When('I sort the content by {string} in {string} order', function(field, order) {
@@ -105,29 +132,29 @@ When('I sort the content by {string} in {string} order', function(field, order) 
   this.ui.browser.sortContent(field, order);
 });
 
-Then('I can see {int} document(s)', function(numberOfResults) {
-  const { results } = this.ui.browser;
-  results.waitForVisible();
+Then('I can see {int} document(s)', async function(numberOfResults) {
+  const { results } = await this.ui.browser;
+  await results.waitForVisible();
 
   const { displayMode } = results;
   driver.waitUntil(() => results.resultsCount(displayMode) === numberOfResults);
 });
 
-Then(/^I can see the permissions page$/, function() {
-  this.ui.browser.permissionsView.waitForVisible();
+Then(/^I can see the permissions page$/, async function() {
+  await this.ui.browser.permissionsView.waitForVisible();
 });
 
 Then(/^I can see the document has (\d+) publications$/, function(nbPublications) {
   driver.waitUntil(() => this.ui.browser.publicationView.count === nbPublications);
 });
 
-Then(/^I can see the document has the following publication$/, function(table) {
+Then(/^I can see the document has the following publication$/, async function(table) {
   table.rows().forEach((row) => {
     this.ui.browser.publicationView.hasPublication(row[0], row[1], row[2]).should.be.true;
   });
 });
 
-Then(/^I can republish the following publication$/, function(table) {
+Then(/^I can republish the following publication$/, async function(table) {
   table.hashes().forEach((row) => {
     const { path, rendition, version } = row;
     // XXX we need to store the current version of the publication to check against the updated version after republish
@@ -171,16 +198,16 @@ Then(/^I can republish the following publication$/, function(table) {
   });
 });
 
-Then('I can publish selection to {string}', function(target) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.publishDialog.publish(target);
+Then('I can publish selection to {string}', async function(target) {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectionToolbar.publishDialog.publish(target);
   // HACK because publishing all documents is asynchronous
   driver.pause(1000);
 });
 
-Then(/^I can perform the following publications$/, function(table) {
-  let page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
+Then(/^I can perform the following publications$/, async function(table) {
+  let page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
   let pubCount = page.publicationsCount;
   pubCount.should.not.be.NaN;
   table.hashes().forEach((row) => {
@@ -213,12 +240,12 @@ Then(/^I can perform the following publications$/, function(table) {
   });
 });
 
-Then('I can delete all the documents from the {string} collection', function(name) {
-  this.ui.browser.removeSelectionFromCollection(name);
+Then('I can delete all the documents from the {string} collection', async function(name) {
+  await this.ui.browser.removeSelectionFromCollection(name);
   // HACK - because the delete all is async
   driver.pause(1000);
 });
 
-Then('I can see the browser title as {string}', (title) => {
-  driver.waitUntil(() => title === browser.getTitle());
+Then('I can see the browser title as {string}', async function(title) {
+  await driver.waitUntil(() => title === browser.getTitle());
 });

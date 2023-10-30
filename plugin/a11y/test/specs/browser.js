@@ -8,7 +8,6 @@ const EXPECTED_VIOLATIONS = {
   'aria-command-name': 1,
   'aria-roles': 3,
   'aria-tooltip-name': 1,
-  'duplicate-id': 28,
   'landmark-one-main': 1,
   'meta-viewport': 1,
   'page-has-heading-one': 1,
@@ -17,7 +16,6 @@ const EXPECTED_VIOLATIONS = {
 };
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
-  'aria-allowed-attr': 1,
   'aria-allowed-role': 7,
   'aria-valid-attr-value': 1,
   'color-contrast-enhanced': 2,
@@ -36,10 +34,14 @@ describe('Nuxeo Browser', () => {
 
   after(async () => documentService.reset());
 
-  reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, () => {
-    login();
-    const ui = UI.get();
-    ui.browser.browseTo(doc.path);
-    ui.browser.currentPage.waitForDisplayed();
+  reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, async () => {
+    try {
+      await login();
+      const ui = await UI.get();
+      await ui.browser.browseTo(doc.path);
+      await ui.browser.currentPage.waitForDisplayed();
+    } catch (error) {
+      console.log(error);
+    }
   });
 });

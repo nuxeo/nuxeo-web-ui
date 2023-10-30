@@ -3,7 +3,7 @@ import Nuxeo from 'nuxeo';
 import nuxeo from '../services/client';
 
 global.runningWorkflows = [];
-
+global.fixtures = {};
 fixtures.workflows = {
   start: (document, workflowModelName, initiator) => {
     // creating a different client to make sure the initiator of the workflow is the logged-in user

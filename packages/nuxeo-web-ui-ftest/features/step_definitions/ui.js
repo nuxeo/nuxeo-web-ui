@@ -1,7 +1,7 @@
 import { Then, When } from '@cucumber/cucumber';
 
-When('I click the {string} button', function(button) {
-  return this.ui.drawer.open(button);
+When('I click the {string} button',async function(button) {
+  return await this.ui.drawer.open(button);
 });
 When('I select {string} from the View menu', function(option) {
   return this.ui.view(option);

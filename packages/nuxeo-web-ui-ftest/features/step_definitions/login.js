@@ -28,14 +28,15 @@ Given('user {string} exists', (username) =>
   }),
 );
 
-When('I login as {string}', function(username) {
-  const login = Login.get();
-  login.username = username;
-  login.password = users[username];
-  login.submit();
+When('I login as {string}', async function(username) {
+  const logIn = Login.get();
+  await logIn.username(username);
+  const localpass= users[username];
+  await logIn.password(localpass);
+  await logIn.submit();
   this.username = username;
   this.ui = UI.get();
-  driver.waitForVisible('nuxeo-page');
+  await driver.waitForVisible('nuxeo-page');
 });
 
 When(/^I visit (.*)$/, (path) => url(path));

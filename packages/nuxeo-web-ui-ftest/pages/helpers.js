@@ -10,14 +10,14 @@ const refresh = () => {
   _flushProperties();
 };
 
-const url = (...args) => {
-  driver.url(...args);
+const url = async (...args) => {
+  await driver.url(...args);
   _flushProperties();
 };
 
 const clickActionMenu = (menu, selector) => {
   menu.waitForExist(selector);
-  const action = menu.element(selector);
+  const action = menu.$(selector);
   action.waitForExist();
   if (action.getAttribute('show-label') !== null) {
     // if the element is inside the dropdown, we need to expand it
