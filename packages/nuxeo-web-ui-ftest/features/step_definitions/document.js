@@ -1,4 +1,4 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
 Given('I have a {word} document', function(docType) {
