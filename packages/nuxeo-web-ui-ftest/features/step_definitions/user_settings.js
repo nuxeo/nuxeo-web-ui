@@ -1,4 +1,4 @@
-import { Given, Then, When } from '@cucumber/cucumber';
+import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
 
 /* Cloud Services */
 
@@ -44,8 +44,8 @@ Given(/^I have tokens for the following OAuth2 clients$/, function(table) {
   return Promise.all(table.rows().map((row) => fixtures.oauth2Clients.createToken(row[0], this.username)));
 });
 
-When(/^I am on user authorized applications page$/, function() {
-  this.ui.goToUserAuthorizedApps();
+When(/^I am on user authorized applications page$/, async function() {
+  await this.ui.goToUserAuthorizedApps();
 });
 
 Then(/^I can see "(.+)" as an authorized application$/, function(application) {
@@ -57,8 +57,8 @@ Then(/^I can see "(.+)" as an authorized application$/, function(application) {
   });
 });
 
-Then(/^I can only see (\d+) authorized application[s]?$/, function(numberOfApps) {
-  driver.waitUntil(() => this.ui.userAuthorizedApps.getApps().length === numberOfApps);
+Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberOfApps) {
+  await driver.waitUntil(() => this.ui.userAuthorizedApps.getApps().length === numberOfApps);
 });
 
 Then('I cannot see authorized application', function() {

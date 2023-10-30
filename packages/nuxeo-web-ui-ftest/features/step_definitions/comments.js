@@ -1,4 +1,4 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 
 Given('I have the following comment thread:', function(table) {
   /*

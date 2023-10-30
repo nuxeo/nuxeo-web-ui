@@ -1,4 +1,4 @@
-import { Then } from '@cucumber/cucumber';
+import { Then } from '../../node_modules/@cucumber/cucumber';
 
 Then('I click the bulk edit button with {string} layout', function(layoutName) {
   this.ui.browser.selectionToolbar.clickResultsActionMenu(`nuxeo-edit-documents-button[layout=${layoutName}]`);
