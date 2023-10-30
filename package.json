@@ -9,6 +9,9 @@
   "engines": {
     "node": ">=14.0.0"
   },
+  "resolutions": {
+    "webdriverio": "^7.19.5"
+  },
   "devDependencies": {
     "@cucumber/cucumber": "^7.0.0",
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
