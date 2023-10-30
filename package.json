@@ -10,7 +10,7 @@
     "node": ">=14.0.0"
   },
   "resolutions": {
-    "webdriverio": "^6.10.0"
+    "webdriverio": "^5.22.4"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^7.0.0",
@@ -193,7 +193,7 @@
     "three": "~0.125.0",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1",
-    "webdriverio": "^6.10.0"
+    "webdriverio": "^5.22.4"
   },
   "husky": {
     "hooks": {
