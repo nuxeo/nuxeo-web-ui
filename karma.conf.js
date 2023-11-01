@@ -27,6 +27,11 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       base: 'SauceLabs',
       browserName: 'firefox',
       version: 'latest',
+      "capabilities": {
+        "alwaysMatch": {
+          "moz:debuggerAddress": true
+        }
+      }
     },
     sl_latest_edge: {
       base: 'SauceLabs',
