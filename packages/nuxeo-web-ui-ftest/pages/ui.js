@@ -59,9 +59,11 @@ export default class UI extends BasePage {
   }
 
   get results() {
-    if (this.el.$('nuxeo-browser').isVisible()) {
-      return this.browser.results;
-    }
+    async () => {
+      if (await this.el.$('nuxeo-browser').isVisible()) {
+        return this.browser.results;
+      }
+    };
     return new Search('nuxeo-search-results-layout[id="results"]');
   }
 
@@ -92,13 +94,13 @@ export default class UI extends BasePage {
     if (!global.locale) {
       $('nuxeo-app:not([unresolved])').waitForVisible();
       /* global window */
-      setTimeout(async () => {
+      async () => {
         const locale = await browser.execute(() => window.nuxeo.I18n.language || 'en');
         if (locale) {
           global.locale = locale;
           moment.locale(global.locale);
         }
-      }, 2000);
+      };
     }
     return new UI('nuxeo-app');
   }

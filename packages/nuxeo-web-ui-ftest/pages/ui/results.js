@@ -15,13 +15,15 @@ export default class Results extends BasePage {
   }
 
   get displayMode() {
-    driver.waitUntil(() => this.displayModes.some((displayMode) => displayMode.isVisible()));
-    const displayMode = this.displayModes.filter((result) => result.getAttribute('disabled') !== null);
-    return displayMode[0]
-      .getAttribute('title')
-      .replace('Switch to ', '')
-      .replace(/ view| View/, '')
-      .toLowerCase();
+    () => {
+      this.displayModes.some((displayMode) => displayMode.isVisible());
+      const displayMode = this.displayModes.filter((result) => result.getAttribute('disabled') !== null);
+      return displayMode[0]
+        .getAttribute('title')
+        .replace('Switch to ', '')
+        .replace(/ view| View/, '')
+        .toLowerCase();
+    };
   }
 
   get toggleTableView() {
