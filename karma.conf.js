@@ -27,8 +27,8 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       base: 'SauceLabs',
       browserName: 'firefox',
       version: 'latest',
-      "capabilities": {
-        "alwaysMatch": {
+      "desiredCapabilities": {
+        "moz:firefoxOptions": {
           "moz:debuggerAddress": true
         }
       }
