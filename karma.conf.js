@@ -60,7 +60,7 @@ module.exports = (config) => {
     basePath: '',
     singleRun: true,
     browsers: config.browsers && config.browsers.length > 0 ? config.browsers : Object.keys(customLaunchers),
-    browserDisconnectTimeout: 10 * 1000,
+    browserDisconnectTimeout: 30 * 1000,
     browserDisconnectTolerance: 1,
     browserNoActivityTimeout: 5 * 60 * 1000,
     customLaunchers,
