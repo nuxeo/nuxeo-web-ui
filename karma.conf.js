@@ -27,11 +27,8 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       base: 'SauceLabs',
       browserName: 'firefox',
       version: 'latest',
-      "desiredCapabilities": {
-        "moz:firefoxOptions": {
-          "moz:debuggerAddress": true
-        }
-      }
+      platform: 'Windows 10',
+      geckodriverVersion: '0.31.0',
     },
     sl_latest_edge: {
       base: 'SauceLabs',
