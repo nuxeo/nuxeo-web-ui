@@ -20,11 +20,15 @@ export default class Browser extends BasePage {
     return new DocumentPage(page, docType);
   }
 
-  browseTo(path) {
-    url(`#!/browse${path}`);
-    this.waitForVisible();
-    this.breadcrumb.waitForVisible();
-    this.currentPage.waitForVisible();
+  async browseTo(path) {
+    await url(`#!/browse${path}`);
+    await this.waitForVisible();
+    this.breadcrumb.then(async (breadcrum) => {
+      await breadcrum.waitForVisible();
+      this.currentPage.then(async (pageName) => {
+        await pageName.waitForVisible();
+      });
+    });
   }
 
   get view() {
@@ -56,15 +60,19 @@ export default class Browser extends BasePage {
   }
 
   get currentPageName() {
-    // get selected pill to get it's name
-    this.waitForVisible('#documentViewsItems nuxeo-page-item.iron-selected');
-    const pill = this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
-    // get active page name
-    return pill.getAttribute('name');
+    return (async () => {
+      // get selected pill to get it's name
+      await $('#documentViewsItems nuxeo-page-item.iron-selected').waitForVisible();
+      const pill = await this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
+      return pill.getAttribute('name');
+    })();
   }
 
   get currentPage() {
-    return this._section(this.currentPageName);
+    return (async () => {
+      const section = await this._section(await this.currentPageName);
+      return section;
+    })();
   }
 
   /**
@@ -76,7 +84,10 @@ export default class Browser extends BasePage {
   }
 
   get breadcrumb() {
-    return this.el.element('nuxeo-breadcrumb');
+    return (async () => {
+      const elem = await this.el.element('nuxeo-breadcrumb');
+      return elem;
+    })();
   }
 
   get title() {
