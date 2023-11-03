@@ -1,8 +1,11 @@
+
 import BasePage from '../../base';
 
 export default class Audit extends BasePage {
+  
   get isAuditTableDisplayed() {
-    return this.el.$('#table').waitForDisplayed();
+
+      return this.el.element('#table').waitForDisplayed();
   }
 
   get isAuditTableFilled() {

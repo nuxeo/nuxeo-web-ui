@@ -15,10 +15,9 @@ export default class Results extends BasePage {
   }
 
   get displayMode() {
-    () => {
-      this.displayModes.some((displayMode) => displayMode.isVisible());
-      const displayMode = this.displayModes.filter((result) => result.getAttribute('disabled') !== null);
-      return displayMode[0]
+    async() =>{ await this.displayModes.some((displayMode) => displayMode.isVisible())
+      const displayMode =await this.displayModes.filter(async(result) =>await result.getAttribute('disabled') !== null);
+      return await displayMode[0]
         .getAttribute('title')
         .replace('Switch to ', '')
         .replace(/ view| View/, '')

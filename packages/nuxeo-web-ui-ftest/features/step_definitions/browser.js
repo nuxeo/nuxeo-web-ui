@@ -1,7 +1,8 @@
 import { Then, When } from '@cucumber/cucumber';
 
 Then('I can see the {word} tree', async function(tab) {
-  const isVisible = await this.ui.drawer._section(tab).waitForVisible();
+  const drawer = await this.ui.drawer._section(tab)
+  const isVisible = await drawer.waitForVisible();
   if (!isVisible) {
     throw new Error(`Expected ${tab} tree to be visible`);
   }
@@ -124,7 +125,7 @@ Then('I can move selection up', async function() {
 
 Then('I can see the {string} child document is at position {int}', async function(title, pos) {
   this.ui.browser.waitForVisible();
-  await driver.waitUntil(() => this.ui.browser.indexOfChild(title) === pos - 1);
+  await driver.waitUntil(async() => await this.ui.browser.indexOfChild(title) === pos - 1);
 });
 
 When('I sort the content by {string} in {string} order', function(field, order) {

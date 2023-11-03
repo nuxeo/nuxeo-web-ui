@@ -1,7 +1,8 @@
 import { Then } from '@cucumber/cucumber';
 
-Then('I can see the audit table', function() {
-  this.ui.administration.audit.isAuditTableDisplayed.should.be.true;
+Then('I can see the audit table', async function() {
+await this.ui.administration.audit.isAuditTableDisplayed;
+ 
 });
 
 Then('I have a non empty audit table', function() {

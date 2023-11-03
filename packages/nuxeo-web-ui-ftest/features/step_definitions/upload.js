@@ -1,7 +1,7 @@
 import { Then } from '@cucumber/cucumber';
 
-Then(/^I upload file "(.+)" as document content/, function(file) {
-  return fixtures.layouts.setValue(this.ui.browser.el.element('nuxeo-dropzone'), file);
+Then(/^I upload file "(.+)" as document content/, async function(file) {
+  return await fixtures.layouts.setValue(await this.ui.browser.el.element('nuxeo-dropzone'), file);
 });
 
 Then('I can see the blob replace button', function() {

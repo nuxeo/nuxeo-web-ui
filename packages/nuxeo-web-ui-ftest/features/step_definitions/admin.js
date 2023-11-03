@@ -1,7 +1,9 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 
 Then('I can see the administration menu', async function() {
-  const isVisible = await this.ui.drawer.administration.waitForVisible();
+  const element = await this.ui.drawer.administration;
+
+  const isVisible = await element.waitForVisible();
   if (!isVisible) {
     throw new Error('Expected administration menu to be visible');
   }
@@ -16,9 +18,10 @@ Then('I cannot see the administration button', async function() {
 
 // XXX: this.ui.drawer.administration.click()
 When('I click {string} in the administration menu', async (text) => {
-  const el = driver.$(`nuxeo-menu-item[name="${text}"]`);
+  const el = await driver.$(`nuxeo-menu-item[name="${text}"]`);
   await el.waitForVisible();
   await el.click();
+
 });
 
 Then('I can see the analytics page', async function() {
@@ -38,6 +41,7 @@ Then('I can see the vocabulary page', async function() {
 
 Then('I can see the audit page', async function() {
   const isVisible = await this.ui.administration.audit.waitForVisible();
+  console.log("audit page",isVisible )
   if (!isVisible) {
     throw new Error('Expected audit page to be visible');
   }
