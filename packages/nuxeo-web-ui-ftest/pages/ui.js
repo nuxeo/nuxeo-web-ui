@@ -59,12 +59,12 @@ export default class UI extends BasePage {
   }
 
   get results() {
-    async () => {
+    return (async () => {
       if (await this.el.$('nuxeo-browser').isVisible()) {
         return this.browser.results;
       }
-    };
-    return new Search('nuxeo-search-results-layout[id="results"]');
+      return new Search('nuxeo-search-results-layout[id="results"]');
+    })();
   }
 
   get searchResults() {
@@ -86,7 +86,9 @@ export default class UI extends BasePage {
   }
 
   get drawer() {
-    return new Drawer('div[slot="drawer"]');
+    return (async () => {
+      return new Drawer('div[slot="drawer"]');
+    })();
   }
 
   static get() {

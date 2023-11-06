@@ -7,10 +7,10 @@ import Tasks from './tasks';
 
 export default class Drawer extends BasePage {
   get menu() {
-    return(async() => { 
-      const menuTemp = await this.el.$('#menu')
-      return menuTemp})()
-    
+    return (async () => {
+      const menuTemp = await this.el.$('#menu');
+      return menuTemp;
+    })();
   }
 
   get pages() {
@@ -62,7 +62,7 @@ export default class Drawer extends BasePage {
   }
 
   async open(name) {
-  //  await this.menu.waitForVisible();
+    //  await this.menu.waitForVisible();
     const section = await this._section(name);
     if (!(await section.isVisible())) {
       const menu = await this.menu;
@@ -72,9 +72,11 @@ export default class Drawer extends BasePage {
     return section;
   }
 
-  async _section(name) {
-    const section = await this.pages.$(`[name='${name}']`); 
-    return section;
+  _section(name) {
+    return (async () => {
+      const section = await this.pages.$(`[name='${name}']`);
+      return section;
+    })();
   }
 
   _search(name) {

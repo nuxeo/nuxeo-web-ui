@@ -154,12 +154,11 @@ Then(/^I can see (\d+) search results$/, function(numberOfResults) {
 });
 
 Then(/^I can see more than (\d+) search results$/, async function(minNumberOfResults) {
-  const { displayMode } =  await this.ui.results;
-  driver.waitUntil(
-     () => this.ui.results.resultsCount(displayMode) > minNumberOfResults,
+  const { displayMode } = await this.ui.results;
+  await driver.waitUntil(
+    () => this.ui.results.resultsCount(displayMode) > minNumberOfResults,
     `Expecting to get more than ${minNumberOfResults} results but found ${this.ui.results.resultsCount(displayMode)}`,
   );
-  
 });
 
 Then('I edit the results columns to show {string}', function(heading) {

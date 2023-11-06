@@ -100,7 +100,7 @@ exports.config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
-  specs: ['../../ftest/features/**'],
+  specs: ['../../ftest/features/test/**'],
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],
@@ -150,7 +150,7 @@ exports.config = {
   //
   // Set a base URL in order to shorten url command calls. If your url parameter starts
   // with "/", then the base url gets prepended.
-  baseUrl: process.env.NUXEO_WEB_UI_URL || process.env.NUXEO_URL || 'http://localhost:8080/nuxeo/',
+  baseUrl: process.env.NUXEO_WEB_UI_URL || process.env.NUXEO_URL || 'http://127.0.0.1:8080/nuxeo/',
   //
   // Default timeout for all waitFor* commands.
   waitforTimeout: TIMEOUT,
