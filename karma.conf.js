@@ -26,9 +26,9 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     sl_latest_firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
-      platform: 'Windows 10',
       version: 'latest',
-      geckodriverVersion: '0.30.0',
+      platform: 'Windows 10',
+      geckodriverVersion: '0.31.0',
     },
     sl_latest_edge: {
       base: 'SauceLabs',
@@ -60,9 +60,9 @@ module.exports = (config) => {
     basePath: '',
     singleRun: true,
     browsers: config.browsers && config.browsers.length > 0 ? config.browsers : Object.keys(customLaunchers),
-    browserDisconnectTimeout: 10 * 1000,
+    browserDisconnectTimeout: 100 * 1000,
     browserDisconnectTolerance: 1,
-    browserNoActivityTimeout: 5 * 60 * 1000,
+    browserNoActivityTimeout: 20 * 60 * 1000,
     customLaunchers,
     middleware: ['static'],
     static: {

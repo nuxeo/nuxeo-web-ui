@@ -41,6 +41,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm install
 
+      - name: log npm lock file
+        run: cat package-lock.json
+
       - name: Unit tests
         env:
           SAUCE_USERNAME: nuxeo-web-ui
