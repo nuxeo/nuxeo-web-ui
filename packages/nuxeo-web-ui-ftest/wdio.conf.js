@@ -142,7 +142,7 @@ exports.config = {
   // Level of logging verbosity: trace | debug | info | warn | error | silent
   logLevel: 'error',
   //
-  // Enables colors for log output.
+  // Enables colors for log outputs.
   coloredLogs: true,
   //
   // Saves a screenshot to a given path if a command fails.
