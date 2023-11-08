@@ -200,15 +200,15 @@ export default class Browser extends BasePage {
     return this.isFavorite;
   }
 
-  async hasTitle(title) {
-    await $('.breadcrumb-item-current').waitForVisible();
-    driver.waitUntil(async () => {
+  hasTitle(title) {
+    return (async () => {
       const breadcrumb = await $('.breadcrumb-item-current');
-      const breadcrumbTitle = await breadcrumb.getText();
-      console.log('breadcrumbTitle', breadcrumbTitle);
-      return breadcrumbTitle.trim() === title;
-    }, 'The document does not have such title');
-    return true;
+      driver.waitUntil(async () => {
+        const breadcrumbText = await breadcrumb.getText();
+        return breadcrumbText.trim() === title;
+      }, 'The document does not have such title');
+      return true;
+    })();
   }
 
   waitForHasChild(doc) {
@@ -233,7 +233,7 @@ export default class Browser extends BasePage {
   }
 
   async indexOfChild(title) {
-    this.waitForChildren();
+    await this.waitForChildren();
     const elementTitle = await browser
       .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
       .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
@@ -247,36 +247,34 @@ export default class Browser extends BasePage {
     return -1;
   }
 
-  sortContent(field, order) {
-    driver.waitUntil(async () => {
-      try {
-        await this.waitForChildren();
-        const currentPage = await this.currentPage;
-        const columns = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-column');
-        const idx = columns
-          .map((col) => browser.execute((el) => el.sortBy, col))
-          .findIndex(async (colSortByField) => {
-            const sortByColumn = await colSortByField;
-            return sortByColumn && sortByColumn.toLowerCase() === field.toLowerCase();
-          });
-        if (idx === -1) {
-          throw new Error('Field not found');
-        }
-        const header = await currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-        const sortElt = await header.element(
-          `nuxeo-data-table-cell:nth-of-type(${idx + 1}) nuxeo-data-table-column-sort`,
-        );
-        const currentSorting = await sortElt.element('paper-icon-button');
-        const direction = await currentSorting.getAttribute('direction');
-        if (direction && order.toLowerCase() === direction.toLowerCase()) {
-          return true;
-        }
-        sortElt.click();
-        return false;
-      } catch (error) {
-        console.log(error);
+  async sortContent(field, order) {
+    try {
+      await this.waitForChildren();
+      const currentPage = await this.currentPage;
+      const idx = await currentPage
+        .$$('nuxeo-data-table[name="table"] nuxeo-data-table-column')
+        .map((col) => browser.execute((el) => el.sortBy, col));
+      const columnIndex = idx.findIndex((colSortByField) => {
+        const sortByColumn = colSortByField;
+        return sortByColumn && sortByColumn.toLowerCase() === field.toLowerCase();
+      });
+      if (columnIndex === -1) {
+        throw new Error('Field not found');
       }
-    });
+      const header = await currentPage.element('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+      const sortElt = await header.$(
+        `nuxeo-data-table-cell:nth-of-type(${columnIndex + 1}) nuxeo-data-table-column-sort`,
+      );
+      const currentSorting = await sortElt.element('paper-icon-button');
+      const direction = await currentSorting.getAttribute('direction');
+      if (direction && order.toLowerCase() === direction.toLowerCase()) {
+        return true;
+      }
+      await sortElt.click();
+      return false;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /*

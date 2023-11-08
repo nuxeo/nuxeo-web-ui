@@ -112,7 +112,9 @@ export default class UI extends BasePage {
   }
 
   get browser() {
-    return new Browser('nuxeo-browser');
+    return (() => {
+      return new Browser('nuxeo-browser');
+    })();
   }
 
   get pages() {
