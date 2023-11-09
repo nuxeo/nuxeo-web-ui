@@ -94,9 +94,9 @@ Then('I deselect the {string} document', function(title) {
   this.ui.browser.deselectChildDocument(title);
 });
 
-Then('I select the {string} document', function(title) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectChildDocument(title);
+Then('I select the {string} document', async function(title) {
+    await this.ui.browser.waitForVisible();
+await this.ui.browser.selectChildDocument(title);
 });
 
 Then('I can see the selection toolbar', function() {

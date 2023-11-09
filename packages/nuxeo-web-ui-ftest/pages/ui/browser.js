@@ -80,6 +80,7 @@ export default class Browser extends BasePage {
    */
   get results() {
     const pill = this.el.$('#documentViewsItems nuxeo-page-item.iron-selected');
+
     return new Results(`#nxContent [name='${pill.getAttribute('name')}']`);
   }
 
@@ -315,8 +316,9 @@ export default class Browser extends BasePage {
     }
   }
 
-  selectChildDocument(title) {
-    return this._selectChildDocument(title);
+  async selectChildDocument(title) {
+    const childDoc = await this._selectChildDocument(title);
+    return childDoc;
   }
 
   deselectChildDocument(title) {
@@ -328,8 +330,12 @@ export default class Browser extends BasePage {
   }
 
   get selectionToolbar() {
-    return new Selection(`${this.currentPage.getTagName()} nuxeo-selection-toolbar#toolbar`);
-  }
+  // return  this.currentPage.then(async (pageName) => {
+  //   const tag =  await pageName.getTagName(); 
+    return new Selection(`${this.currentPage.getTagName()} nuxeo-selection-toolbar#toolbar`)   
+   // })();
+    
+    }
 
   get trashedInfobar() {
     return this.el.$('#trashedInfoBar');
@@ -370,13 +376,16 @@ export default class Browser extends BasePage {
     this.el.$('.document-actions nuxeo-workflow-button #startButton').click();
   }
 
-  _selectChildDocument(title, deselect) {
-    const found = this.rows.some((row) => {
+  async _selectChildDocument(title, deselect) {
+    const rowTemp = await this.rows;
+    const found = await rowTemp.some(async(row) => {
+      // const one =
+      // const two =
+      const text = await row.getText('nuxeo-data-table-cell a.title');
       if (
-        (deselect
-          ? row.isVisible('nuxeo-data-table-checkbox[checked]')
-          : row.isVisible('nuxeo-data-table-checkbox:not([checked])')) &&
-        row.getText('nuxeo-data-table-cell a.title').trim() === title
+        deselect
+          ? await row.isVisible('nuxeo-data-table-checkbox[checked]')
+          : (await row.isVisible('nuxeo-data-table-checkbox:not([checked])')) && text.trim() === title
       ) {
         row.element('nuxeo-data-table-checkbox').click();
         return true;

@@ -19,9 +19,9 @@ class AuthorizedApp {
 }
 
 export default class UserAuthorizedApps extends BasePage {
-  getApps(appName) {
-    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
-    let apps = this.el
+  async getApps(appName) {
+    const ele = await this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
+    let apps = await this.el
       .elements('nuxeo-data-table nuxeo-data-table-row')
       .splice(1) // skip the header
       .map((el) => new AuthorizedApp(el)) // and map every element to a wrapper we can work with

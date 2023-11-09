@@ -148,8 +148,11 @@ export default class UI extends BasePage {
     return new UserAuthorizedApps('nuxeo-user-authorized-apps');
   }
 
-  goToUserAuthorizedApps() {
-    if (!browser.getUrl().endsWith('user-authorized-apps')) {
+   async goToUserAuthorizedApps() {
+    const dummyurl = await browser.getUrl();
+   // const cond =  await dummyurl.endsWith('user-authorized-apps');
+    if (!dummyurl.endsWith('user-authorized-apps')) {
+      //const cond2 =  process.env.NUXEO_URL;
       url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
     }
     return this.userAuthorizedApps;

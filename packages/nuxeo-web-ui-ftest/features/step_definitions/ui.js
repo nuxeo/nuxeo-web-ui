@@ -1,6 +1,6 @@
 import { Then, When } from '@cucumber/cucumber';
 
-When('I click the {string} button', async function(button) {
+When('I click the {string} button',async function(button) {
   const drawer = await this.ui.drawer;
   const buttonToclick = await drawer.open(button);
   return buttonToclick;
@@ -12,7 +12,8 @@ When('I reload the page', async function() {
   // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
   driver.pause(3000);
   await this.ui.reload();
-  await $('#logo').waitForVisible();
+ await $('#logo').waitForVisible();
+
 });
 Then('I can see {string} in the Activity feed', function(activity) {
   // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
