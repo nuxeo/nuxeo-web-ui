@@ -1,6 +1,4 @@
 @cleanupLocalStorage
-
-@watch
 Feature: Clipboard
 
   I can add, remove, move and copy items from/to the clipboard

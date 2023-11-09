@@ -14,9 +14,7 @@ export default class Drawer extends BasePage {
   }
 
   get pages() {
-
-      return(async()=> 
-         this.el.$('iron-pages'))() 
+    return this.el.$('iron-pages');
   }
 
   get logo() {
@@ -35,8 +33,8 @@ export default class Drawer extends BasePage {
     return this._section('search');
   }
 
-  get administration() {  
-    return(async()=> this._section('administration'))() 
+  get administration() {
+    return (async () => this._section('administration'))();
   }
 
   get recents() {
@@ -64,7 +62,7 @@ export default class Drawer extends BasePage {
   }
 
   async open(name) {
-    const menutemp =  await this.menu;
+    const menutemp = await this.menu;
     await menutemp.waitForVisible();
     const section = await this._section(name);
     if (!(await section.isVisible())) {
