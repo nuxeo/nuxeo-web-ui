@@ -1,4 +1,4 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
 let currentDocType;
 let selectedTabName;

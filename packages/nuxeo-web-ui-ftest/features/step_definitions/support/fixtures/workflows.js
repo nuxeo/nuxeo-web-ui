@@ -1,5 +1,5 @@
-import { After } from '@cucumber/cucumber';
 import Nuxeo from 'nuxeo';
+import { After } from '../../../../node_modules/@cucumber/cucumber';
 import nuxeo from '../services/client';
 
 global.runningWorkflows = [];

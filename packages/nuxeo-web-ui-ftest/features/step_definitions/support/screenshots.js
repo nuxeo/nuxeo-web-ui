@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
-import { After, Status } from '@cucumber/cucumber';
+import { After, Status } from '../../../node_modules/@cucumber/cucumber';
 
 After(function(scenario) {
   const { status } = scenario.result;

@@ -41,7 +41,7 @@ describe('Nuxeo Browser', () => {
       await ui.browser.browseTo(doc.path);
       await ui.browser.currentPage.waitForDisplayed();
     } catch (error) {
-      console.log(error);
+      console.warn(error);
     }
   });
 });

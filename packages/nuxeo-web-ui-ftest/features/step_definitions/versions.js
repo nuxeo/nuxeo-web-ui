@@ -1,4 +1,4 @@
-import { When } from '@cucumber/cucumber';
+import { When } from '../../node_modules/@cucumber/cucumber';
 
 When(/^I can see the version info bar with text "(.*)"$/, function(text) {
   const page = this.ui.browser.documentPage(this.doc.type);
