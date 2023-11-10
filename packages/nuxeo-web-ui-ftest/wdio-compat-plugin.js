@@ -228,21 +228,24 @@ module.exports = class {
           target = this.element(args.shift());
         }
         const [timeout, reverse = false] = args;
-        return target.waitForDisplayed({ timeout, reverse });
+        if (typeof target.waitForDisplayed === 'function') {
+          return target.waitForDisplayed({ timeout, reverse });
+        }
       },
       true,
     );
 
     browser.addCommand(
       'chooseFile',
-      function(...args) {
+       async function(...args) {
         let target = this;
         if (args.length > 1) {
-          target = this.element(args.shift());
+          const abc = args.shift();
+          target =await this.element(abc);
         }
         const [localFilePath] = args;
-        const remoteFile = browser.uploadFile(localFilePath);
-        target.addValue(remoteFile);
+        const remoteFile =await browser.uploadFile(localFilePath);
+         target.addValue(remoteFile);
       },
       true,
     );

@@ -257,8 +257,8 @@ fixtures.layouts = {
       ? global.fieldRegistry.getValFunc(fieldType)
       : global.fieldRegistry.getValFunc('generic'))(element);
   },
-  setValue: (element, value) => {
-    const fieldType = element.getTagName();
+  setValue: async(element, value) => {
+    const fieldType =await element.getTagName();
     (global.fieldRegistry.contains(fieldType)
       ? global.fieldRegistry.setValFunc(fieldType)
       : global.fieldRegistry.setValFunc('generic'))(element, value);

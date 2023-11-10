@@ -7,11 +7,14 @@ import Tasks from './tasks';
 
 export default class Drawer extends BasePage {
   get menu() {
-    return this.el.$('#menu');
+    return (async () => {
+      const menuEl = await this.el.$('#menu');
+      return menuEl;
+    })();
   }
 
   get pages() {
-    return this.el.$('iron-pages');
+    return (async () => this.el.$('iron-pages'))();
   }
 
   get logo() {
@@ -31,7 +34,10 @@ export default class Drawer extends BasePage {
   }
 
   get administration() {
-    return this._section('administration');
+    return (async () => {
+      const section= await this._section('administration');
+      return section;
+    })();
   }
 
   get recents() {
@@ -58,18 +64,23 @@ export default class Drawer extends BasePage {
     return this._section('profile');
   }
 
-  open(name) {
-    this.menu.waitForVisible();
-    const section = this._section(name);
-    if (!section.isVisible()) {
-      this.menu.$(`nuxeo-menu-icon[name='${name}']`).click();
+  async open(name) {
+    const currentMenu = await this.menu;
+    await currentMenu.waitForVisible();
+    const section = await this._section(name);
+    const cond = await section.isVisible();
+    if (!cond) {
+      const menu = await this.menu;
+      const buttonToclick = await menu.$(`nuxeo-menu-icon[name='${name}']`);
+      buttonToclick.click();
     }
-    section.waitForVisible();
     return section;
   }
 
-  _section(name) {
-    return this.pages.$(`[name='${name}']`);
+  async _section(name) {
+    const page = await this.pages;
+    const section = await page.$(`[name='${name}']`);
+    return section;
   }
 
   _search(name) {
