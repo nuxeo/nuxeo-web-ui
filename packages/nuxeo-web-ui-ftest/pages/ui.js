@@ -55,13 +55,15 @@ export default class UI extends BasePage {
   }
 
   get searchButton() {
-    return this.el.element('#searchButton');
+    return this.el.$('#searchButton');
   }
 
   get results() {
-    if (this.el.element('nuxeo-browser').isVisible()) {
-      return this.browser.results;
-    }
+    driver.waitUntil(async () => {
+      if (await this.el.$('nuxeo-browser').isVisible()) {
+        return this.browser.results;
+      }
+    });
     return new Search('nuxeo-search-results-layout[id="results"]');
   }
 
@@ -80,26 +82,28 @@ export default class UI extends BasePage {
   }
 
   get adminButton() {
-    return this.el.element('nuxeo-menu-icon[name="administration"]');
+    return this.el.$('nuxeo-menu-icon[name="administration"]');
   }
 
   get drawer() {
     return new Drawer('div[slot="drawer"]');
   }
 
-  static async get() {
+  static get() {
     url(process.env.NUXEO_URL ? '' : 'ui');
     if (!global.locale) {
       $('nuxeo-app:not([unresolved])').waitForVisible();
       /* global window */
-      const locale = await browser.execute(() => window.nuxeo.I18n.language || 'en');
-      if (locale) {
-        global.locale = locale;
-        moment.locale(global.locale);
-      }
-      const ui = await new UI('nuxeo-app');
-      return ui;
+      (async () => {
+        const locale = await browser.execute(() => window.nuxeo.I18n.language || 'en');
+        if (locale) {
+          global.locale = locale;
+          moment.locale(global.locale);
+        }
+        return new UI('nuxeo-app');
+      })();
     }
+    return new UI('nuxeo-app');
   }
 
   get home() {
@@ -111,15 +115,15 @@ export default class UI extends BasePage {
   }
 
   get pages() {
-    return this.el.element('#pages');
+    return this.el.$('#pages');
   }
 
   get search() {
-    return this.pages.element('nuxeo-search-results');
+    return this.pages.$('nuxeo-search-results');
   }
 
   get suggester() {
-    return this.el.element('#mainContainer nuxeo-suggester');
+    return this.el.$('#mainContainer nuxeo-suggester');
   }
 
   get administration() {
@@ -149,7 +153,7 @@ export default class UI extends BasePage {
   }
 
   get tasks() {
-    return this.pages.element('nuxeo-tasks');
+    return this.pages.$('nuxeo-tasks');
   }
 
   get emptyAuthorizedApps() {

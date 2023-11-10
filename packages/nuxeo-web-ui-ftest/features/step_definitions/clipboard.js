@@ -1,4 +1,4 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
 When('I click remove button for {string} document', function(title) {
   this.ui.drawer.clipboard.waitForVisible();
