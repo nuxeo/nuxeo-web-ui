@@ -140,7 +140,7 @@ exports.config = {
   sync: true,
   //
   // Level of logging verbosity: trace | debug | info | warn | error | silent
-  logLevel: 'info',
+  logLevel: 'trace',
   //
   // Enables colors for log output.
   coloredLogs: true,
