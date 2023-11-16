@@ -19,7 +19,7 @@ Then('I cannot see the administration button', async function() {
 // XXX: this.ui.drawer.administration.click()
 When('I click {string} in the administration menu', async (text) => {
   const el = await driver.$(`nuxeo-menu-item[name="${text}"]`);
-  setTimeout(async() => {
+  setTimeout(async () => {
     await el.waitForVisible();
     el.click();
   }, 3000);
@@ -41,14 +41,14 @@ Then('I can see the vocabulary page', async function() {
 });
 
 Then('I can see the audit page', async function() {
-  const isVisible = driver.waitUntil(async () => {
-    await this.ui.administration.admin.auditPage.isVisible();
-  });
-  setTimeout(() => {
-    if (!isVisible) {
-      throw new Error('Expected audit page to be visible');
-    }
-  }, 5000);
+  const ui = await this.ui;
+  const admin = await ui.administration;
+  const auditPage = await admin.audit;
+  const isVisible = auditPage.isVisible();
+
+  if (!isVisible) {
+    throw new Error('Expected audit page to be visible');
+  }
 });
 
 Then('I can see the nxql search page', async function() {

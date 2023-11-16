@@ -1,9 +1,9 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
-Given('I have a {word} document', function(docType) {
+Given('I have a {word} document', async function(docType) {
   docType = docType || 'File';
-  const doc = fixtures.documents.init(docType);
+  const doc = await fixtures.documents.init(docType);
   // create the document
   return fixtures.documents.create(this.doc.path || '/default-domain', doc).then((d) => {
     this.doc = d;
