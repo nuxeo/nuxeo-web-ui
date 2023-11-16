@@ -10,7 +10,7 @@
     "node": ">=14.0.0"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "8.6.0",
+    "@cucumber/cucumber": "7.3.2",
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@nuxeo/testing-helpers": "3.0.29-rc.2",
     "@open-wc/eslint-config": "0.3.12",
@@ -50,7 +50,7 @@
     "polymer-cli": "1.9.11",
     "process": "0.11.10",
     "replace": "1.2.2",
-    "sinon": "5.1.1",
+    "sinon": "9.2.4",
     "sinon-chai": "3.7.0",
     "style-loader": "2.0.0",
     "url-loader": "4.1.1",
@@ -62,7 +62,7 @@
     "webpack-bundle-analyzer": "3.9.0",
     "webpack-cli": "4.10.0",
     "webpack-dev-server": "3.11.3",
-    "webpack-log": "2.0.0",
+    "webpack-log": "3.0.2",
     "webpack-merge": "5.9.0",
     "workbox-cli": "3.6.3"
   },
@@ -121,7 +121,7 @@
     "@polymer/iron-checked-element-behavior": "3.0.1",
     "@polymer/iron-collapse": "3.0.1",
     "@polymer/iron-dropdown": "3.0.1",
-    "@polymer/iron-fit-behavior": "3.0.1",
+    "@polymer/iron-fit-behavior": "3.1.0",
     "@polymer/iron-flex-layout": "3.0.1",
     "@polymer/iron-form": "3.0.1",
     "@polymer/iron-form-element-behavior": "3.0.1",
@@ -168,7 +168,7 @@
     "@polymer/paper-slider": "3.0.1",
     "@polymer/paper-spinner": "3.0.2",
     "@polymer/paper-styles": "3.0.1",
-    "@polymer/paper-tabs": "3.0.1",
+    "@polymer/paper-tabs": "3.1.0",
     "@polymer/paper-toast": "3.0.1",
     "@polymer/paper-toggle-button": "3.0.1",
     "@polymer/paper-toolbar": "3.0.1",
@@ -180,7 +180,7 @@
     "dotenv": "8.6.0",
     "es6-promise": "4.2.8",
     "extend": "3.0.2",
-    "fs-extra": "9.1.0",
+    "fs-extra": "10.1.0",
     "jquery": "3.7.1",
     "jsondiffpatch": "0.3.11",
     "jsplumb": "2.13.0",
@@ -190,7 +190,7 @@
     "three": "0.125.2",
     "uuid": "3.4.0",
     "web-animations-js": "2.3.2",
-    "webdriverio": "6.12.1"
+    "webdriverio": "7.32.4"
   },
   "husky": {
     "hooks": {
