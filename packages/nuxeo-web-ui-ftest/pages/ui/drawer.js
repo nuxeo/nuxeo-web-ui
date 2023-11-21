@@ -35,7 +35,7 @@ export default class Drawer extends BasePage {
 
   get administration() {
     return (async () => {
-      const section= await this._section('administration');
+      const section = await this._section('administration');
       return section;
     })();
   }

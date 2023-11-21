@@ -2,14 +2,18 @@ import BasePage from '../base';
 
 export default class Clipboard extends BasePage {
   get nbItems() {
-    const items = this.el.$$('#list .list-item');
-    let count = 0;
-    items.forEach((item) => {
-      if (item.isVisible()) {
-        count++;
-      }
-    });
-    return count;
+    return (async () => {
+      await driver.pause(3000);
+      const items = await this.el.$$('#list .list-item');
+
+      const visibleItems = items.map(async (item) => {
+        const isDisplayed = await item.isDisplayed();
+        return isDisplayed;
+      });
+      const countVisibleItem = await Promise.all(visibleItems);
+      const filterItem = countVisibleItem.filter((item) => item === true);
+      return filterItem.length;
+    })();
   }
 
   get moveButton() {
@@ -34,11 +38,18 @@ export default class Clipboard extends BasePage {
     copyBtn.click();
   }
 
-  removeItem(title) {
-    const items = this.el.$$('nuxeo-data-list#list .list-item');
-    return items.some((item) => {
-      if (item.isVisible() && item.getText('.list-item-title').trim() === title) {
-        item.click('iron-icon.remove');
+  async removeItem(title) {
+    const listItem = await this.el.$('nuxeo-data-list#list .list-item');
+    await listItem.waitForVisible();
+    const items = await this.el.$$('nuxeo-data-list#list .list-item');
+    await driver.pause(3000);
+    return items.some(async (item) => {
+      const itemText = await item.getText();
+      const itemVisible = await item.isVisible();
+      console.log('itemText', itemText, 'itemVisible', itemVisible);
+      if (itemVisible && itemText.trim() === title) {
+        console.log('Item Clicked..............');
+        await item.$('iron-icon.remove').click();
         return true;
       }
       return false;

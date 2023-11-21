@@ -74,9 +74,10 @@ Then('I can see the {string} document', async function(title) {
   browserTitle.should.be.true;
 });
 
-Then('I select all child documents', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectAllChildDocuments();
+Then('I select all child documents', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  browser.selectAllChildDocuments();
 });
 
 Then('I select all the documents', function() {
@@ -90,13 +91,17 @@ Then('I deselect the {string} document', function(title) {
 });
 
 Then('I select the {string} document', async function(title) {
-    await this.ui.browser.waitForVisible();
-    await this.ui.browser.selectChildDocument(title);
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const value = await browser.selectChildDocument(title);
+  console.log(value);
 });
 
-Then('I can see the selection toolbar', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.waitForVisible();
+Then('I can see the selection toolbar', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const toolbar = await browser.selectionToolbar;
+  await toolbar.waitForVisible();
 });
 
 When('I cannot see the display selection link', function() {
@@ -108,9 +113,11 @@ Then('I can add selection to the {string} collection', function(collectionName) 
   this.ui.browser.selectionToolbar.addToCollectionDialog.addToCollection(collectionName);
 });
 
-Then('I can add selection to clipboard', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.addToClipboard();
+Then('I can add selection to clipboard', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const toolbar = await browser.selectionToolbar;
+  await toolbar.addToClipboard();
 });
 
 Then('I can move selection down', function() {

@@ -4,8 +4,9 @@ import PublicationDialog from './browser/publication_dialog';
 import { clickActionMenu } from '../helpers';
 
 export default class Selection extends BasePage {
-  addToClipboard() {
-    this.el.element('nuxeo-clipboard-documents-button').click();
+  async addToClipboard() {
+    const elem = await this.el.element('nuxeo-clipboard-documents-button');
+    elem.click();
     this.waitForNotVisible();
   }
 
