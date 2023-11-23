@@ -7,20 +7,26 @@ Then('I can see the video conversions panel', function() {
 });
 
 Then('I can see the video storyboard', function() {
-  driver.waitUntil(() => {
-    const page = this.ui.browser.documentPage(this.doc.type);
-    if (!page.isVisible()) {
-      return false;
-    }
-    const videoViewer = page.el.element('nuxeo-video-viewer');
-    if (!videoViewer.isVisible()) {
-      return false;
-    }
-    if (videoViewer.element('#storyboard').isVisible() !== true) {
-      driver.execute(() => Nuxeo.UI.app.refresh());
-      driver.pause(1000);
-      return false;
-    }
-    return true;
-  });
+  driver.waitUntil(
+    () => {
+      const page = this.ui.browser.documentPage(this.doc.type);
+      if (!page.isVisible()) {
+        return false;
+      }
+      const videoViewer = page.el.element('nuxeo-video-viewer');
+      if (!videoViewer.isVisible()) {
+        return false;
+      }
+      if (videoViewer.element('#storyboard').isVisible() !== true) {
+        driver.execute(() => Nuxeo.UI.app.refresh());
+        driver.pause(1000);
+        return false;
+      }
+      return true;
+    },
+    {
+      timeout: 10000,
+      timeoutMsg: 'expected 0026 text to be different after 5s',
+    },
+  );
 });

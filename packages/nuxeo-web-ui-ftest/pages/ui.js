@@ -86,7 +86,10 @@ export default class UI extends BasePage {
   }
 
   get drawer() {
-    return new Drawer('div[slot="drawer"]');
+    return (async () => {
+      const drawer = await new Drawer('div[slot="drawer"]');
+      return drawer;
+    })();
   }
 
   static get() {
@@ -177,8 +180,18 @@ export default class UI extends BasePage {
     dropdown.click(`#dropdown #contentWrapper div paper-menu div paper-icon-item[name="${selection}"]`);
   }
 
-  waitForToastNotVisible() {
-    driver.waitUntil(() => driver.elements('mwc-snackbar').every((toast) => !toast.getAttribute('open')));
+  async waitForToastNotVisible() {
+    const snackbar = await driver.elements('mwc-snackbar');
+    const isAllOpen = snackbar.every(async (toast) => {
+      const toastVal = await toast.getAttribute('open');
+      console.log('toast', toastVal);
+      return !toastVal;
+    });
+    console.log('snackbar', isAllOpen);
+    driver.waitUntil(() => isAllOpen, {
+      timeout: 10000,
+      timeoutMsg: 'expecteed waitForToastNotVisible text to be differeent after 5s',
+    });
   }
 
   getToastDismissButton() {

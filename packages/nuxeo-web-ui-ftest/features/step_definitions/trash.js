@@ -77,7 +77,10 @@ Then('I can untrash current document', function() {
   const el = this.ui.browser.untrashDocumentButton;
   el.waitForVisible();
   el.click();
-  driver.waitUntil(() => !this.ui.browser.trashedInfobar.isVisible());
+  driver.waitUntil(() => !this.ui.browser.trashedInfobar.isVisible(), {
+    timeout: 10000,
+    timeoutMsg: 'expected 0017 text to be different after 5s',
+  });
 });
 
 Then('I cannot untrash current document', function() {

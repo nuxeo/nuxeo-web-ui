@@ -12,7 +12,7 @@ import Results from './results';
 import { clickActionMenu, url } from '../helpers';
 
 export default class Browser extends BasePage {
-  documentPage(docType) {
+  async documentPage(docType) {
     const page = fixtures.layouts.page[docType] || 'nuxeo-document-page';
     if (page === 'nuxeo-collapsible-document-page') {
       return new CollapsibleDocumentPage(page, docType);
@@ -111,11 +111,22 @@ export default class Browser extends BasePage {
   }
 
   get rows() {
-    return this.currentPage.then(async (rowName) => {
-      rowName.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
-      const rowsTemp = await rowName.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    return (async () => {
+      const currentPage = await this.currentPage;
+      await currentPage.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+      let rowsTemp;
+      await driver.waitUntil(
+        async () => {
+          rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+          return rowsTemp.length > 0;
+        },
+        {
+          timeout: 10000,
+          timeoutMsg: '=========================rows not found!!==================',
+        },
+      );
       return rowsTemp;
-    });
+    })();
   }
 
   async waitForChildren() {
@@ -298,11 +309,13 @@ export default class Browser extends BasePage {
     });
   }
 
-  selectAllChildDocuments() {
-    this.waitForChildren();
-    this.rows.forEach((row) => {
-      if (row.isVisible('nuxeo-data-table-checkbox')) {
-        row.$('nuxeo-data-table-checkbox').click();
+  async selectAllChildDocuments() {
+    await this.waitForChildren();
+    const rows = await this.rows;
+    rows.forEach(async (row) => {
+      if (await row.isVisible('nuxeo-data-table-checkbox')) {
+        const currentRow = await row.$('nuxeo-data-table-checkbox');
+        currentRow.click();
       }
     });
   }
@@ -329,7 +342,11 @@ export default class Browser extends BasePage {
   }
 
   get selectionToolbar() {
-    return new Selection(`${this.currentPage.getTagName()} nuxeo-selection-toolbar#toolbar`);
+    return (async () => {
+      const currentPage = await this.currentPage;
+      const tagName = await currentPage.getTagName();
+      return new Selection(`${tagName} nuxeo-selection-toolbar#toolbar`);
+    })();
   }
 
   get trashedInfobar() {
@@ -373,19 +390,21 @@ export default class Browser extends BasePage {
 
   async _selectChildDocument(title, deselect) {
     const rowTemp = await this.rows;
-    const found = await rowTemp.some(async (row) => {
-      const text = await row.getText('nuxeo-data-table-cell a.title');
-      if (
-        deselect
-          ? await row.isVisible('nuxeo-data-table-checkbox[checked]')
-          : (await row.isVisible('nuxeo-data-table-checkbox:not([checked])')) && text.trim() === title
-      ) {
-        row.element('nuxeo-data-table-checkbox').click();
+    const elementTitle = await browser
+      .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
+      .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
+
+    const found = await rowTemp.map(async (row, index) => {
+      const isCheckedVisible = await row.isVisible('nuxeo-data-table-checkbox[checked]');
+      const isNotCheckedVisible = await row.isVisible('nuxeo-data-table-checkbox:not([checked])');
+      if (deselect ? isCheckedVisible : isNotCheckedVisible && elementTitle[index].trim() === title) {
+        const currentRow = await row.$('nuxeo-data-table-checkbox');
+        await currentRow.click();
         return true;
       }
       return false;
     });
-    if (!found) {
+    if (found.length === 0) {
       throw new Error(`Cannot find document with title "${title}"`);
     }
   }

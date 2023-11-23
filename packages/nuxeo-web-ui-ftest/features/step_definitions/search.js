@@ -220,5 +220,9 @@ When(/^I perform a QuickSearch for (.+)/, function(searchTerm) {
 });
 
 Then(/^I can see (\d+) QuickSearch results$/, function(numberOfResults) {
-  driver.waitUntil(() => this.ui.quickSearch.quickSearchResultsCount() === numberOfResults);
+  driver.waitUntil(() => this.ui.quickSearch.quickSearchResultsCount() === numberOfResults),
+    {
+      timeout: 10000,
+      timeoutMsg: 'expected 0014 text to be different after 5s',
+    };
 });

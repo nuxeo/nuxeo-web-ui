@@ -1,4 +1,4 @@
-import { Then, When } from '../../node_modules/@cucumber/cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 Then('I can see the {word} tree', async function(tab) {
   const drawer = await this.ui.drawer;
@@ -12,12 +12,12 @@ Then('I can see the {string} {word} tree node', async function(title, tab) {
   const sectionTab = await drawer._section(tab);
   await sectionTab.waitForVisible();
   driver.pause(10000);
-  await sectionTab.$$('.content a');
+  const elements = await sectionTab.$$('.content a');
 
   await driver.waitUntil(
     async () => {
       const sectionText = await sectionTab.$$('.content a').map((elem) => elem.getText());
-      const someSectionText = sectionText.some((e) => e === title);
+      const someSectionText = sectionText.some((e, someIndex) => e == title);
       return someSectionText;
     },
     {
@@ -51,10 +51,16 @@ When('I click {string} in the {word} tree', async function(title, tab) {
   await sectionTab.waitForVisible();
   driver.pause(10000);
   const sectionText = await sectionTab.$$('.content a').map((element) => element.getText());
-  await driver.waitUntil(async () => sectionText.some((e) => e === title), {
-    timeout: 10000,
-    timeoutMsg: 'expected text to be different after 5s',
-  });
+  await driver.waitUntil(
+    async () =>
+      sectionText.some((e) => {
+        return e === title;
+      }),
+    {
+      timeout: 10000,
+      timeoutMsg: 'expected text to be different after 5s',
+    },
+  );
   const el = await sectionTab.$$('.content a');
   const index = sectionText.findIndex((e) => e === title);
   await el[index].waitForVisible();
@@ -68,9 +74,10 @@ Then('I can see the {string} document', async function(title) {
   browserTitle.should.be.true;
 });
 
-Then('I select all child documents', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectAllChildDocuments();
+Then('I select all child documents', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  browser.selectAllChildDocuments();
 });
 
 Then('I select all the documents', function() {
@@ -84,13 +91,17 @@ Then('I deselect the {string} document', function(title) {
 });
 
 Then('I select the {string} document', async function(title) {
-  await this.ui.browser.waitForVisible();
-  await this.ui.browser.selectChildDocument(title);
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const value = await browser.selectChildDocument(title);
+  console.log(value);
 });
 
-Then('I can see the selection toolbar', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.waitForVisible();
+Then('I can see the selection toolbar', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const toolbar = await browser.selectionToolbar;
+  await toolbar.waitForVisible();
 });
 
 When('I cannot see the display selection link', function() {
@@ -102,9 +113,11 @@ Then('I can add selection to the {string} collection', function(collectionName) 
   this.ui.browser.selectionToolbar.addToCollectionDialog.addToCollection(collectionName);
 });
 
-Then('I can add selection to clipboard', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.addToClipboard();
+Then('I can add selection to clipboard', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const toolbar = await browser.selectionToolbar;
+  await toolbar.addToClipboard();
 });
 
 Then('I can move selection down', function() {
@@ -241,6 +254,8 @@ Then(/^I can perform the following publications$/, function(table) {
           page = this.ui.browser.documentPage(this.doc.type);
           const newCount = page.publicationsCount;
           let check;
+          // XXX if we pick a version that's not the latest, we no longer see the number of publications, and the versions
+          // bar will be displayed instead
           if (page.isVisible('#versionInfoBar')) {
             check = newCount === 0;
           } else {

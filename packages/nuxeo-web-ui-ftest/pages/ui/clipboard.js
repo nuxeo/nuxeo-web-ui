@@ -2,14 +2,18 @@ import BasePage from '../base';
 
 export default class Clipboard extends BasePage {
   get nbItems() {
-    const items = this.el.$$('#list .list-item');
-    let count = 0;
-    items.forEach((item) => {
-      if (item.isVisible()) {
-        count++;
-      }
-    });
-    return count;
+    return (async () => {
+      await driver.pause(3000);
+      const items = await this.el.$$('#list .list-item');
+
+      const visibleItems = items.map(async (item) => {
+        const isDisplayed = await item.isDisplayed();
+        return isDisplayed;
+      });
+      const countVisibleItem = await Promise.all(visibleItems);
+      const filterItem = countVisibleItem.filter((item) => item === true);
+      return filterItem.length;
+    })();
   }
 
   get moveButton() {
@@ -20,11 +24,11 @@ export default class Clipboard extends BasePage {
     return this.el.$('#paste');
   }
 
-  move() {
-    const moveBtn = this.moveButton;
-    moveBtn.waitForVisible();
-    moveBtn.waitForEnabled();
-    moveBtn.click();
+  async move() {
+    const moveBtn = await this.moveButton;
+    await moveBtn.waitForVisible();
+    await moveBtn.waitForEnabled();
+    await moveBtn.click();
   }
 
   paste() {
@@ -34,11 +38,18 @@ export default class Clipboard extends BasePage {
     copyBtn.click();
   }
 
-  removeItem(title) {
-    const items = this.el.$$('nuxeo-data-list#list .list-item');
-    return items.some((item) => {
-      if (item.isVisible() && item.getText('.list-item-title').trim() === title) {
-        item.click('iron-icon.remove');
+  async removeItem(title) {
+    const listItem = await this.el.$('nuxeo-data-list#list .list-item');
+    await listItem.waitForVisible();
+    const items = await this.el.$$('nuxeo-data-list#list .list-item');
+    await driver.pause(3000);
+    const itemText = await this.el.$$('nuxeo-data-list#list .list-item').map((item) => item.getText());
+
+    console.log('ABBBBC..............', items.length, itemText);
+    return items.some((item, index) => {
+      if (itemText[index].trim() === title) {
+        console.log('Item Clicked..............');
+        item.$('iron-icon.remove').click();
         return true;
       }
       return false;

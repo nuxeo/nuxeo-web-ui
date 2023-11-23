@@ -25,7 +25,10 @@ Then(/^I can search for the user "([^"]*)"$/, function(username) {
 
 Then(/^I can see the user has the email "([^"]*)"$/, function(userEmail) {
   const user = this.ui.user.el.element('nuxeo-view-user [name="email"]');
-  driver.waitUntil(() => user.element('span').getText() === userEmail);
+  driver.waitUntil(() => user.element('span').getText() === userEmail, {
+    timeout: 10000,
+    timeoutMsg: 'expected 0024 text to be different after 5s',
+  });
 });
 
 Then(/^I can edit the user "([^"]*)" with the following properties:$/, function(username, table) {

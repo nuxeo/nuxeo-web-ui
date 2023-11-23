@@ -33,27 +33,33 @@ const suggestionSet = (element, value) => {
           driver.keys('Down arrow');
         }
       }
-      driver.waitUntil(() => {
-        try {
-          dropdown = element.element('.selectivity-dropdown:last-child');
-          if (dropdown.isVisible('.selectivity-result-item.highlight')) {
-            const highlight = dropdown.element('.selectivity-result-item.highlight');
-            if (
-              highlight
-                .getText()
-                .trim()
-                .includes(values[i])
-            ) {
-              dropdown.click('.selectivity-result-item.highlight');
-              return true;
+      driver.waitUntil(
+        () => {
+          try {
+            dropdown = element.element('.selectivity-dropdown:last-child');
+            if (dropdown.isVisible('.selectivity-result-item.highlight')) {
+              const highlight = dropdown.element('.selectivity-result-item.highlight');
+              if (
+                highlight
+                  .getText()
+                  .trim()
+                  .includes(values[i])
+              ) {
+                dropdown.click('.selectivity-result-item.highlight');
+                return true;
+              }
+              return false;
             }
             return false;
+          } catch (e) {
+            return false;
           }
-          return false;
-        } catch (e) {
-          return false;
-        }
-      });
+        },
+        {
+          timeout: 10000,
+          timeoutMsg: 'expected 0027 text to be different after 5s',
+        },
+      );
     }
     // it's a reset
   } else if (element.getAttribute('multiple') !== null) {
@@ -153,8 +159,9 @@ global.fieldRegistry.register(
 global.fieldRegistry.register(
   'paper-textarea',
   (element) => element.element('#textarea').getValue(),
-  (element, value) => {
-    element.element('#textarea').setValue(value);
+  async (element, value) => {
+    const elementInput = await element.element('#textarea');
+    await elementInput.setValue(value);
   },
 );
 global.fieldRegistry.register(

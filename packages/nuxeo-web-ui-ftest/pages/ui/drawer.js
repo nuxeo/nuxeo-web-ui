@@ -26,7 +26,10 @@ export default class Drawer extends BasePage {
   }
 
   get clipboard() {
-    return new Clipboard('nuxeo-clipboard');
+    return (async () => {
+      const clipBoard = await new Clipboard('nuxeo-clipboard');
+      return clipBoard;
+    })();
   }
 
   get search() {

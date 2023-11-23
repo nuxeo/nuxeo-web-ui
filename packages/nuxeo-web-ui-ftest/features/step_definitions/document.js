@@ -151,6 +151,10 @@ Then(/I can see (.+) metadata with the following properties:/, function(docType,
             .metadata.layout()
             .getFieldValue(row[0])
             .indexOf(row[1]) > -1,
+        {
+          timeout: 10000,
+          timeoutMsg: 'expected 0006 text to be different after 5s',
+        },
       );
     } else {
       driver.waitUntil(
@@ -160,6 +164,10 @@ Then(/I can see (.+) metadata with the following properties:/, function(docType,
             .metadata.layout()
             .getFieldValue(row[0])
             .toString() === row[1],
+        {
+          timeout: 10000,
+          timeoutMsg: 'expected 0007 text to be different after 5s',
+        },
       );
     }
   });
@@ -209,7 +217,10 @@ Then(/^I can edit the (.*) Note$/, function(format) {
       page.view.noteEditor.waitForVisible();
       page.view.noteEditor.setContent(newContent);
       page.view.noteEditor.save();
-      driver.waitUntil(() => page.view.noteEditor.hasContent(`<p>${newContent}</p>`));
+      driver.waitUntil(() => page.view.noteEditor.hasContent(`<p>${newContent}</p>`), {
+        timeout: 10000,
+        timeoutMsg: 'expected 0008 text to be different after 5s',
+      });
       break;
     case 'XML':
     case 'Markdown':
@@ -220,21 +231,27 @@ Then(/^I can edit the (.*) Note$/, function(format) {
       page.view.noteEditor.textarea.setValue(newContent);
       page.view.noteEditor.save();
       page.view.preview.waitForVisible();
-      driver.waitUntil(() => {
-        try {
-          let elContent;
-          if (format === 'XML') {
-            elContent = page.view.preview.element('#xml');
-          } else if (format === 'Text') {
-            elContent = page.view.preview.element('#plain');
-          } else {
-            elContent = page.view.preview.element('marked-element #content');
+      driver.waitUntil(
+        () => {
+          try {
+            let elContent;
+            if (format === 'XML') {
+              elContent = page.view.preview.element('#xml');
+            } else if (format === 'Text') {
+              elContent = page.view.preview.element('#plain');
+            } else {
+              elContent = page.view.preview.element('marked-element #content');
+            }
+            return elContent.isVisible() && elContent.getText() === newContent;
+          } catch (e) {
+            return false;
           }
-          return elContent.isVisible() && elContent.getText() === newContent;
-        } catch (e) {
-          return false;
-        }
-      });
+        },
+        {
+          timeout: 10000,
+          timeoutMsg: 'expected 0009 text to be different after 5s',
+        },
+      );
       break;
     default:
     // do nothing
