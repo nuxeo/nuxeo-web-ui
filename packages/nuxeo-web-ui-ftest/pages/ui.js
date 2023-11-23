@@ -24,10 +24,14 @@ export default class UI extends BasePage {
   }
 
   get activityFeed() {
-    $('nuxeo-document-page nuxeo-page-item[name="activity"]').waitForVisible();
-    browser.click('nuxeo-document-page nuxeo-page-item[name="activity"]');
-    $('nuxeo-document-activity').waitForVisible();
-    return new ActivityFeed('nuxeo-document-activity');
+    return (async () => {
+      await $('nuxeo-document-page nuxeo-page-item[name="activity"]').waitForVisible();
+      browser.click('nuxeo-document-page nuxeo-page-item[name="activity"]');
+      await this.reload();
+      await $('nuxeo-document-activity').waitForVisible();
+      const activity = new ActivityFeed('nuxeo-document-activity');
+      return activity;
+    })();
   }
 
   get historyTable() {

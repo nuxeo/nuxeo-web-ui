@@ -14,11 +14,14 @@ When('I reload the page', function() {
   this.ui.reload();
   $('#logo').waitForVisible();
 });
-Then('I can see {string} in the Activity feed', function(activity) {
+Then('I can see {string} in the Activity feed', async function(activity) {
   // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
-  driver.pause(3000);
-  this.ui.activityFeed.waitForVisible();
-  this.ui.activityFeed.getActivity(activity).waitForVisible().should.be.true;
+  await driver.pause(10000);
+  const activityFeed = await this.ui.activityFeed;
+  await activityFeed.waitForVisible();
+  const activityTab = await activityFeed.getActivity(activity);
+  const activityTabVisible = await activityTab.waitForVisible();
+  await activityTabVisible.should.be.true;
 });
 Then('I click the blob download button', function() {
   const page = this.ui.browser.documentPage(this.doc.type);
