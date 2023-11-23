@@ -153,8 +153,9 @@ global.fieldRegistry.register(
 global.fieldRegistry.register(
   'paper-textarea',
   (element) => element.element('#textarea').getValue(),
-  (element, value) => {
-    element.element('#textarea').setValue(value);
+  async (element, value) => {
+    const elementInput = await element.element('#textarea');
+    await elementInput.setValue(value);
   },
 );
 global.fieldRegistry.register(

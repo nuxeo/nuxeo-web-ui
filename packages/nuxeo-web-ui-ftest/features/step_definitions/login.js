@@ -36,7 +36,7 @@ When('I login as {string}', async function(username) {
   await logIn.submit();
   this.username = username;
   this.ui = UI.get();
-  await driver.waitForVisible('nuxeo-page');
+  await this.ui.waitForVisible('nuxeo-page');
 });
 
 When(/^I visit (.*)$/, (path) => url(path));

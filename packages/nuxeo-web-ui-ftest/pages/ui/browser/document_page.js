@@ -65,7 +65,7 @@ export default class DocumentPage extends BasePage {
   }
 
   get comments() {
-    return new DocumentCommentThread('nuxeo-document-comment-thread[name="comments"]');
+    return (async () => new DocumentCommentThread('nuxeo-document-comment-thread[name="comments"]'))();
   }
 
   get publicationsCount() {
