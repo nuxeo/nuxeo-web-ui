@@ -55,8 +55,8 @@ export default class Selection extends BasePage {
     return publishDialog;
   }
 
-  clickResultsActionMenu(selector) {
-    clickActionMenu(this.el, selector);
+  async clickResultsActionMenu(selector) {
+    await clickActionMenu(this.el, selector);
   }
 
   get compare() {

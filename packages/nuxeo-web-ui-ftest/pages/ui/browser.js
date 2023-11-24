@@ -107,7 +107,11 @@ export default class Browser extends BasePage {
   }
 
   get header() {
-    return this.currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    return (async () => {
+      const currentPageElem = await this.currentPage;
+      const currentHeader = await currentPageElem.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+      return currentHeader;
+    })();
   }
 
   get rows() {
@@ -298,8 +302,8 @@ export default class Browser extends BasePage {
     });
   }
 
-  selectAllChildDocuments() {
-    this.waitForChildren();
+  async selectAllChildDocuments() {
+    await this.waitForChildren();
     this.rows.forEach((row) => {
       if (row.isVisible('nuxeo-data-table-checkbox')) {
         row.$('nuxeo-data-table-checkbox').click();
@@ -307,11 +311,20 @@ export default class Browser extends BasePage {
     });
   }
 
-  selectAllDocuments() {
-    this.waitForChildren();
-    const { header } = this;
-    if (header.isVisible('nuxeo-data-table-checkbox')) {
-      header.element('nuxeo-data-table-checkbox').click();
+  async selectAllDocuments() {
+    await this.waitForChildren();
+
+    await driver.waitUntil(async () => {
+      const rowWithCheckbox = await browser.$$(
+        'nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header] nuxeo-data-table-checkbox',
+      );
+      return rowWithCheckbox.length > 0;
+    });
+    const headerData = await this.header;
+    const checkBoxVisible = await headerData.isVisible('nuxeo-data-table-checkbox');
+    if (checkBoxVisible) {
+      const headerElement = await headerData.element('nuxeo-data-table-checkbox');
+      await headerElement.click();
     }
   }
 
@@ -329,7 +342,12 @@ export default class Browser extends BasePage {
   }
 
   get selectionToolbar() {
-    return new Selection(`${this.currentPage.getTagName()} nuxeo-selection-toolbar#toolbar`);
+    return (async () => {
+      const currentPageElem = await this.currentPage;
+      const tag = await currentPageElem.getTagName();
+      const selectionBar = await new Selection(`${tag}  #toolbar`);
+      return selectionBar;
+    })();
   }
 
   get trashedInfobar() {

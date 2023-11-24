@@ -6,7 +6,10 @@ export default class BulkEdit extends BasePage {
   }
 
   get dialog() {
-    return this.el.element('#dialog');
+    return (async () => {
+      const dialog = await this.el.element('#dialog');
+      return dialog;
+    })();
   }
 
   get cancelButton() {
@@ -18,7 +21,10 @@ export default class BulkEdit extends BasePage {
   }
 
   getField(field) {
-    return this.el.$(`[name="${field}"]`);
+    return (async () => {
+      const fieldElem = await this.el.$(`[name="${field}"]`);
+      return fieldElem;
+    })();
   }
 
   getFieldValue(field) {
@@ -32,17 +38,18 @@ export default class BulkEdit extends BasePage {
     return fixtures.layouts.setValue(fieldEl, value);
   }
 
-  editMultipleOptions(table) {
-    table.rows().forEach((row) => {
+  async editMultipleOptions(table) {
+    table.rows().forEach(async (row) => {
       const [fieldName, fieldValue, action] = row;
-      const fieldEl = this.getField(fieldName);
-      fieldEl.waitForVisible();
-      this.getBulkEditOptions(fieldName).scrollIntoView();
+      const fieldEl = await this.getField(fieldName);
+      await fieldEl.waitForVisible();
+      const bulkEditOption = await this.getBulkEditOptions(fieldName);
+      await bulkEditOption.scrollIntoView();
       if (action === 'remove') {
-        this.getBulkEditOptions(fieldName).click();
+        await bulkEditOption.click();
         this.bulkEditOptionsList(fieldName, 'Empty value(s)').click();
       } else if (action === 'addValues') {
-        this.getBulkEditOptions(fieldName).click();
+        await bulkEditOption.click();
         this.bulkEditOptionsList(fieldName, 'Add value(s)').click();
         fixtures.layouts.setValue(fieldEl, fieldValue);
       } else if (action === 'replace') {
@@ -51,25 +58,33 @@ export default class BulkEdit extends BasePage {
     });
   }
 
-  getBulkEditOptions(field) {
-    let bulkWidget = this.el.element(`[name="${field}"]`).parentElement();
+  async getBulkEditOptions(field) {
+    const filedElem = await this.el.element(`[name="${field}"]`);
+    let bulkWidget = await filedElem.parentElement();
     // some elements generated in Studio are wrapped in divs
-    if (bulkWidget.getTagName() !== 'nuxeo-bulk-widget') {
-      bulkWidget = bulkWidget.parentElement();
+    const bulkWidgetTag = await bulkWidget.getTagName();
+    if (bulkWidgetTag !== 'nuxeo-bulk-widget') {
+      bulkWidget = await bulkWidget.parentElement();
     }
-    return bulkWidget.$('nuxeo-select');
+    const bulkWidgetSelect = await bulkWidget.$('nuxeo-select');
+    return bulkWidgetSelect;
   }
 
-  bulkEditOptionsList(fieldName, editOption) {
-    driver.waitUntil(() => {
-      const els = driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
-      return els.length > 1;
-    });
+  async bulkEditOptionsList(fieldName, editOption) {
+    await driver.waitUntil(
+      async () => {
+        const els = await driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
+        return els.length > 1;
+      },
+      {
+        timeout: 3000,
+        timeoutMsg: 'expected bulkEditOptionsList text to be different after 5s',
+      },
+    );
+    const fieldNameElem = await this.el.element(`[name="${fieldName}"]`);
+    const parentElem = await fieldNameElem.parentElement();
+    const listItems = await parentElem.elements('nuxeo-select paper-item');
 
-    const listItems = this.el
-      .element(`[name="${fieldName}"]`)
-      .parentElement()
-      .elements('nuxeo-select paper-item');
     return listItems.find((e) => e.getText() === editOption);
   }
 }

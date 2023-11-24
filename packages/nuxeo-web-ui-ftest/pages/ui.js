@@ -195,8 +195,9 @@ export default class UI extends BasePage {
     return snackBar.getText();
   }
 
-  bulkEdit(selector) {
-    return new BulkEdit(selector);
+  async bulkEdit(selector) {
+    const bulkEditElem = await new BulkEdit(selector);
+    return bulkEditElem;
   }
 
   get filterView() {

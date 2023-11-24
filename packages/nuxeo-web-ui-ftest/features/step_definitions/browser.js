@@ -73,9 +73,10 @@ Then('I select all child documents', function() {
   this.ui.browser.selectAllChildDocuments();
 });
 
-Then('I select all the documents', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectAllDocuments();
+Then('I select all the documents', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  await browser.selectAllDocuments();
 });
 
 Then('I deselect the {string} document', function(title) {
@@ -88,9 +89,12 @@ Then('I select the {string} document', async function(title) {
   await this.ui.browser.selectChildDocument(title);
 });
 
-Then('I can see the selection toolbar', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.waitForVisible();
+Then('I can see the selection toolbar', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const selectionToolbarElem = await browser.selectionToolbar;
+  driver.pause(3000);
+  await selectionToolbarElem.waitForVisible();
 });
 
 When('I cannot see the display selection link', function() {
