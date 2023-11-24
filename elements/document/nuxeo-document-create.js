@@ -52,7 +52,6 @@ Polymer({
         --paper-dialog-scrollable: {
           padding: 0;
           overflow-x: hidden;
-          position: relative !important;
         }
       }
 
