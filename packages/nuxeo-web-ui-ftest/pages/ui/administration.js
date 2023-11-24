@@ -18,7 +18,10 @@ export default class Administration extends BasePage {
   }
 
   get userGroupCreateButton() {
-    return this.el.element('#createButton');
+    return (async () => {
+      const createEle = await this.el.element('#createButton');
+      return createEle;
+    })();
   }
 
   get vocabularyManagement() {

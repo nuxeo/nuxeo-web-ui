@@ -46,9 +46,10 @@ Then('I upload the following files on the tab content page:', function(table) {
 });
 
 When('I select {word} from the Document Type menu', async function(docType) {
-  const dialog = await this.ui.createDialog;
-  await dialog.waitForVisible();
-  const button = await this.ui.createDialog.documentCreate.getDoctypeButton(docType);
+  const createDialogElem = await this.ui.createDialog;
+  await createDialogElem.waitForVisible();
+  const docCreateElem = await createDialogElem.documentCreate;
+  const button = await docCreateElem.getDoctypeButton(docType);
   await button.waitForVisible();
   await button.click();
   currentDocType = docType;
