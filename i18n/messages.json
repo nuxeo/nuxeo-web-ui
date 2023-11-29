@@ -1169,6 +1169,8 @@
   "nxqlSearch.query": "NXQL Query (Ctrl+Enter to run)",
   "nxqlSearch.query.placeholder": "Enter a query",
   "nxqlSearch.heading": "NXQL Search",
+  "parent.inspector.text":"This is the parent inspector. It displays information about the parent of this document.",
+  "parent.inspector.label":"Parent Inspector",
   "pageableWidget.lastContributor": "Last Contributor",
   "pageableWidget.modified": "Modified",
   "pageableWidget.name": "Title",

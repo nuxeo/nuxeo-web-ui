@@ -275,6 +275,7 @@ import './nuxeo-document-actions/nuxeo-clipboard-toggle-button.js';
 import './nuxeo-document-actions/nuxeo-document-form-button.js';
 import './nuxeo-document-actions/nuxeo-document-edit-button.js';
 import './nuxeo-document-actions/nuxeo-replace-blob-button.js';
+import './nuxeo-document-actions/nuxeo-parent-inspector-button.js';
 
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-delete-blob-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-workflow-button.js';
