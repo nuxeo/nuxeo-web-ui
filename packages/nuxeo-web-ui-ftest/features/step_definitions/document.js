@@ -135,23 +135,18 @@ Then("I can see the document's title", function() {
   this.ui.browser.title.waitForVisible();
 });
 
-Then(/I can see (.+) metadata with the following properties:/, function(docType, table) {
-  this.ui.browser.documentPage(docType).waitForVisible();
-  this.ui.browser.documentPage(docType).metadata.waitForVisible();
+Then(/I can see (.+) metadata with the following properties:/, async function(docType, table) {
+  const docPage = await this.ui.browser.documentPage(docType);
+  await docPage.waitForVisible();
+  const docmetaData = await docPage.metadata;
+  await docmetaData.waitForVisible();
   table.rows().forEach((row) => {
-    this.ui.browser
-      .documentPage(docType)
-      .metadata.layout()
-      .waitForVisible();
+    docmetaData.layout().waitForVisible();
     if (row[0] === 'subjects') {
-      driver.waitUntil(
-        () =>
-          this.ui.browser
-            .documentPage(docType)
-            .metadata.layout()
-            .getFieldValue(row[0])
-            .indexOf(row[1]) > -1,
-      );
+      driver.waitUntil(async () => {
+        const getFiledData = await docmetaData.layout().getFieldValue(row[0]);
+        return getFiledData.indexOf(row[1]) > -1;
+      });
     } else {
       driver.waitUntil(
         () =>

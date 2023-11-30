@@ -13,16 +13,21 @@ Then('I can bulk edit multiple properties in {string} layout:', async function(l
   const dialogElem = await action.dialog;
   await dialogElem.waitForDisplayed();
   await action.editMultipleOptions(table);
-  await action.saveButton.click();
+  console.log('the End.............');
+  driver.pause(10000);
+  const saveButtonElem = await action.saveButton;
+  await saveButtonElem.click();
 });
 
-Then('I see a toast notification with the following message {string}', function(message) {
-  const notificationMessage = this.ui.getToastMessage(message);
+Then('I see a toast notification with the following message {string}', async function(message) {
+  const notificationMessage = await this.ui.getToastMessage(message);
+  console.log('notificationMessage', notificationMessage);
   const trimmedMessage = message.trim().replace(/"/g, '');
   notificationMessage.should.be.equals(trimmedMessage);
 });
 
-Then('I click the toast notification dismiss button', function() {
-  this.ui.getToastDismissButton().click();
-  this.ui.waitForToastNotVisible();
+Then('I click the toast notification dismiss button', async function() {
+  const snackbar = await this.ui.getToastDismissButton();
+  await snackbar.click();
+  await this.ui.waitForToastNotVisible();
 });

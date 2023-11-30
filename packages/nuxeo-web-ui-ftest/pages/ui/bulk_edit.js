@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 import BasePage from '../base';
 
 export default class BulkEdit extends BasePage {
@@ -17,7 +19,10 @@ export default class BulkEdit extends BasePage {
   }
 
   get saveButton() {
-    return this.el.element('.actions #save');
+    return (async () => {
+      const saveElem = await this.el.element('.actions #save');
+      return saveElem;
+    })();
   }
 
   getField(field) {
@@ -39,23 +44,26 @@ export default class BulkEdit extends BasePage {
   }
 
   async editMultipleOptions(table) {
-    table.rows().forEach(async (row) => {
+    for (const row of table.rows()) {
       const [fieldName, fieldValue, action] = row;
       const fieldEl = await this.getField(fieldName);
       await fieldEl.waitForVisible();
       const bulkEditOption = await this.getBulkEditOptions(fieldName);
+      //console.log('bulkEditOption', bulkEditOption);
       await bulkEditOption.scrollIntoView();
       if (action === 'remove') {
         await bulkEditOption.click();
-        this.bulkEditOptionsList(fieldName, 'Empty value(s)').click();
+        const emptyField = await this.bulkEditOptionsList(fieldName, 'Empty value(s)');
+        emptyField.click();
       } else if (action === 'addValues') {
         await bulkEditOption.click();
-        this.bulkEditOptionsList(fieldName, 'Add value(s)').click();
-        fixtures.layouts.setValue(fieldEl, fieldValue);
+        const addValueField = await this.bulkEditOptionsList(fieldName, 'Add value(s)');
+        await addValueField.click();
+        await fixtures.layouts.setValue(fieldEl, fieldValue);
       } else if (action === 'replace') {
-        fixtures.layouts.setValue(fieldEl, fieldValue);
+        await fixtures.layouts.setValue(fieldEl, fieldValue);
       }
-    });
+    }
   }
 
   async getBulkEditOptions(field) {
@@ -84,7 +92,15 @@ export default class BulkEdit extends BasePage {
     const fieldNameElem = await this.el.element(`[name="${fieldName}"]`);
     const parentElem = await fieldNameElem.parentElement();
     const listItems = await parentElem.elements('nuxeo-select paper-item');
+    let foundElem;
+    for (const elem of listItems) {
+      const currentElementText = await elem.getText();
 
-    return listItems.find((e) => e.getText() === editOption);
+      if (currentElementText === editOption) {
+        foundElem = elem;
+      }
+    }
+    // await foundElem.setAttribute('aria-selected', true);
+    return foundElem;
   }
 }

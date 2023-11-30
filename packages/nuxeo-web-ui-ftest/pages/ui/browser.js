@@ -391,21 +391,19 @@ export default class Browser extends BasePage {
 
   async _selectChildDocument(title, deselect) {
     const rowTemp = await this.rows;
-    const found = await rowTemp.some(async (row) => {
-      const text = await row.getText('nuxeo-data-table-cell a.title');
-      if (
-        deselect
-          ? await row.isVisible('nuxeo-data-table-checkbox[checked]')
-          : (await row.isVisible('nuxeo-data-table-checkbox:not([checked])')) && text.trim() === title
-      ) {
-        row.element('nuxeo-data-table-checkbox').click();
-        return true;
-      }
-      return false;
-    });
-    if (!found) {
-      throw new Error(`Cannot find document with title "${title}"`);
+    const elementTitle = await browser
+      .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
+      .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
+
+    const index = elementTitle.findIndex((currenTitle) => currenTitle === title);
+    const isCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox[checked]');
+    const isNotCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox:not([checked])');
+    if ((deselect ? isCheckedVisible : isNotCheckedVisible) && index >= 0) {
+      const currentRow = await rowTemp[index].$('nuxeo-data-table-checkbox');
+      await currentRow.click();
+      return true;
     }
+    return false;
   }
 
   get publishDialog() {

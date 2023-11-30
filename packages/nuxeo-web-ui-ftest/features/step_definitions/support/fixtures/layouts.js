@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import path from 'path';
 import FieldRegistry from '../services/field_registry';
 
@@ -11,52 +12,57 @@ const suggestionGet = (element) => {
   }
   return element.element('.selectivity-single-selected-item').getText();
 };
-const suggestionSet = (element, value) => {
-  const isMulti = element.getAttribute('multiple') !== null;
+
+const suggestionSet = async (element, value) => {
+  const multiElement = await element.getAttribute('multiple');
+  const isMulti = multiElement !== null;
+
   if (value) {
     const values = isMulti ? value.split(',') : [value];
-    element.waitForExist('#input');
-    element.scrollIntoView('#input');
+    await element.waitForExist('#input');
+    await element.scrollIntoView('#input');
+
     for (let i = 0; i < values.length; i++) {
       element.waitForVisible(isMulti ? 'input' : '#input');
-      element.element(isMulti ? 'input' : '.selectivity-caret').click();
-      let dropdown = element.element('.selectivity-dropdown:last-child');
+      const currentElement = await element.element(isMulti ? 'input' : '.selectivity-caret');
+      await currentElement.click();
+      let dropdown = await element.element('.selectivity-dropdown:last-child');
       if (isMulti) {
         element.waitForVisible('.selectivity-multiple-input');
-        element.element('.selectivity-multiple-input').setValue(values[i]);
+        const multipleInput = await element.element('.selectivity-multiple-input');
+        await multipleInput.setValue(values[i]);
       } else {
-        const hasSelectedValue = element.element('.selectivity-single-selected-item').isExisting();
-        dropdown.waitForVisible('.selectivity-search-input');
-        dropdown.element('.selectivity-search-input').setValue(values[i]);
+        const singleSelectivity = await element.element('.selectivity-single-selected-item');
+        const hasSelectedValue = await singleSelectivity.isExisting();
+        await dropdown.waitForVisible('.selectivity-search-input');
+        const searchInput = await dropdown.element('.selectivity-search-input');
+        await searchInput.setValue(values[i]);
         if (hasSelectedValue) {
-          dropdown.element('.selectivity-result-item').waitForVisible();
-          driver.keys('Down arrow');
+          await dropdown.element('.selectivity-result-item').waitForVisible();
+          await driver.keys('Down arrow');
         }
       }
-      driver.waitUntil(() => {
-        try {
-          dropdown = element.element('.selectivity-dropdown:last-child');
-          if (dropdown.isVisible('.selectivity-result-item.highlight')) {
-            const highlight = dropdown.element('.selectivity-result-item.highlight');
-            if (
-              highlight
-                .getText()
-                .trim()
-                .includes(values[i])
-            ) {
-              dropdown.click('.selectivity-result-item.highlight');
-              return true;
-            }
-            return false;
+
+      try {
+        dropdown = await element.element('.selectivity-dropdown:last-child');
+        const dropdownHighlight = await dropdown.$('.selectivity-result-item.highlight');
+        if (await dropdownHighlight.isVisible()) {
+          const highLightText = await dropdownHighlight.getText();
+          const hightlightTrimText = highLightText.trim();
+          if (hightlightTrimText.includes(values[i])) {
+            await dropdownHighlight.click();
+            return true;
           }
           return false;
-        } catch (e) {
-          return false;
         }
-      });
+        return false;
+      } catch (e) {
+        return false;
+      }
     }
-    // it's a reset
-  } else if (element.getAttribute('multiple') !== null) {
+  }
+  // it's a reset
+  else if (element.getAttribute('multiple') !== null) {
     element
       .elements('.selectivity-multiple-selected-item')
       .forEach((el) => el.element('.selectivity-multiple-selected-item-remove').click());
@@ -252,17 +258,18 @@ global.fieldRegistry.register(
 );
 
 fixtures.layouts = {
-  getValue: (element) => {
-    const fieldType = element.getTagName();
+  getValue: async (element) => {
+    const fieldType = await element.getTagName();
     return (global.fieldRegistry.contains(fieldType)
       ? global.fieldRegistry.getValFunc(fieldType)
       : global.fieldRegistry.getValFunc('generic'))(element);
   },
   setValue: async (element, value) => {
     const fieldType = await element.getTagName();
-    (global.fieldRegistry.contains(fieldType)
-      ? global.fieldRegistry.setValFunc(fieldType)
-      : global.fieldRegistry.setValFunc('generic'))(element, value);
+    const globalfieldType = global.fieldRegistry;
+    await (globalfieldType.contains(fieldType)
+      ? globalfieldType.setValFunc(fieldType)
+      : globalfieldType.setValFunc('generic'))(element, value);
   },
   page: {
     Note: 'nuxeo-document-page',

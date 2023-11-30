@@ -177,22 +177,28 @@ export default class UI extends BasePage {
     dropdown.click(`#dropdown #contentWrapper div paper-menu div paper-icon-item[name="${selection}"]`);
   }
 
-  waitForToastNotVisible() {
-    driver.waitUntil(() => driver.elements('mwc-snackbar').every((toast) => !toast.getAttribute('open')));
-  }
-
-  getToastDismissButton() {
-    return this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
-  }
-
-  getToastMessage(message) {
-    let snackBar;
-    driver.waitUntil(() => {
-      snackBar = this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
-      const trimmedMessage = message.trim().replace(/"/g, '');
-      return snackBar.getText() === trimmedMessage;
+  async waitForToastNotVisible() {
+    driver.waitUntil(async () => {
+      const mwcsnackbar = await driver.elements('mwc-snackbar');
+      return mwcsnackbar.every((toast) => !toast.getAttribute('open'));
     });
-    return snackBar.getText();
+  }
+
+  async getToastDismissButton() {
+    const snackbar = await this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
+    return snackbar;
+  }
+
+  async getToastMessage(message) {
+    let snackBar;
+    await driver.waitUntil(async () => {
+      snackBar = await this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
+      const trimmedMessage = message.trim().replace(/"/g, '');
+      const snackBarText = await snackBar.getText();
+      return snackBarText === trimmedMessage;
+    });
+    const snackBarText = await snackBar.getText();
+    return snackBarText;
   }
 
   async bulkEdit(selector) {

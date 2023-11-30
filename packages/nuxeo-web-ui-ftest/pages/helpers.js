@@ -23,6 +23,8 @@ const clickActionMenu = async (menu, selector) => {
   if ((await action.getAttribute('show-label')) !== null) {
     // if the element is inside the dropdown, we need to expand it
     await menu.click('#dropdownButton');
+    const menuDropdown = await menu.$('#dropdownButton');
+    await menuDropdown.click();
     await menu.waitForVisible('paper-listbox');
     await menu.waitForVisible('[slot="dropdown"] .label');
     await menu.waitForEnabled('[slot="dropdown"] .label');
@@ -30,7 +32,8 @@ const clickActionMenu = async (menu, selector) => {
   await action.waitForVisible('.action');
   await action.waitForEnabled('.action');
   // let's make sure we're clicking on the div the has the click event handler
-  await action.click('.action');
+  const actionClass = await action.$('.action');
+  await actionClass.click();
 };
 
 export { clickActionMenu, refresh, url };

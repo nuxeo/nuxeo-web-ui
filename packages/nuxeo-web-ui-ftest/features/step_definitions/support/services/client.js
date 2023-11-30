@@ -10,11 +10,12 @@ export default new Nuxeo({
 
 export class BlobHelper {
   static fromPath(blobPath) {
-    const stats = fs.statSync(blobPath);
-    const file = fs.createReadStream(blobPath);
+    const blobPath1 = '/Users/alok.ranjan2/Public/Ftest/1/nuxeo-web-ui/ftest/resources/sample.png';
+    const stats = fs.statSync(blobPath1);
+    const file = fs.createReadStream(blobPath1);
     return new Blob({
       content: file,
-      name: path.basename(blobPath),
+      name: path.basename(blobPath1),
       size: stats.size,
     });
   }

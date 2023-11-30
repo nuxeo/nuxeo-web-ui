@@ -25,7 +25,7 @@ const capability = {
   // grid with only 5 firefox instance available you can make sure that not more than
   // 5 instance gets started at a time.
   maxInstances: 1,
-  browserName: process.env.BROWSER,
+  browserName: 'chrome',
   acceptInsecureCerts: true,
 };
 
@@ -150,7 +150,7 @@ exports.config = {
   //
   // Set a base URL in order to shorten url command calls. If your url parameter starts
   // with "/", then the base url gets prepended.
-  baseUrl: process.env.NUXEO_WEB_UI_URL || process.env.NUXEO_URL || 'http://localhost:8080/nuxeo/',
+  baseUrl: process.env.NUXEO_WEB_UI_URL || process.env.NUXEO_URL || 'http://127.0.0.1:5000/nuxeo/',
   //
   // Default timeout for all waitFor* commands.
   waitforTimeout: TIMEOUT,
