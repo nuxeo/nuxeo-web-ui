@@ -50,7 +50,7 @@ Polymer({
       }
 
       nuxeo-data-table {
-        min-height: calc(100vh - 280px);
+        min-height: calc(200vh - 280px);
       }
 
       .top.actions {
