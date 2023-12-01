@@ -25,7 +25,7 @@
       >
         <template>
           <nuxeo-document-grid-thumbnail
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{_computeTabIndex(index)}}"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
@@ -41,6 +41,10 @@
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         nxProvider: Object,
+      },
+
+      _computeTabIndex(index) {
+        return (index + 1).toString();
       },
     });
   </script>

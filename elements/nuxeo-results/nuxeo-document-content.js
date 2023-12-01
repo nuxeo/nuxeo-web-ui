@@ -123,7 +123,7 @@ Polymer({
         <template>
           <nuxeo-document-grid-thumbnail
             class="grid-box"
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{_computeTabIndex(index)}}"
             selected$="{{selected}}"
             index="[[index]]"
             doc="[[item]]"
@@ -367,5 +367,9 @@ Polymer({
 
   _contentStoredInColdStorage(doc) {
     return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
+  },
+
+  _computeTabIndex(index) {
+    return (index + 1).toString();
   },
 });
