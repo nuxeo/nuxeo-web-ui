@@ -51,7 +51,7 @@ When('I select {word} from the Document Type menu', async function(docType) {
   const docCreateElem = await createDialogElem.documentCreate;
   const button = await docCreateElem.getDoctypeButton(docType);
   await button.waitForVisible();
-  await button.click();
+  button.click();
   currentDocType = docType;
 });
 

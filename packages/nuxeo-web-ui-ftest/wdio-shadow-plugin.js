@@ -160,10 +160,11 @@ module.exports = class {
       true,
     );
 
-    browser.addCommand('scrollIntoView', function(selector) {
-      return this.shadowExecute(selector, (element) =>
+    browser.addCommand('scrollIntoView', async function(selector) {
+      const viewEle = await this.shadowExecute(selector, (element) =>
         (Array.isArray(element) && element.length > 0 ? element[0] : element).scrollIntoView(),
       );
+      return viewEle;
     });
   }
 };

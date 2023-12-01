@@ -19,7 +19,6 @@ const suggestionSet = async (element, value) => {
     const values = isMulti ? value.split(',') : [value];
     await element.waitForExist('#input');
     await element.scrollIntoView('#input');
-
     for (let i = 0; i < values.length; i++) {
       element.waitForVisible(isMulti ? 'input' : '#input');
       const currentElement = await element.element(isMulti ? 'input' : '.selectivity-caret');
@@ -108,12 +107,15 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-date-picker',
-  (element) => moment(element.$('vaadin-date-picker input').getValue(), global.dateFormat).format(global.dateFormat),
+  async (element) => {
+    const getELE = await element.element('vaadin-date-picker input');
+    moment(await getELE.getValue(), global.dateFormat).format(global.dateFormat);
+  },
   async (element, value) => {
-    const date = await element.$('vaadin-date-picker input');
+    const date = await element.element('vaadin-date-picker input');
     if (await date.getValue()) {
-      const ele = await date.$('div[part="clear-button"]');
-      await ele.click();
+      const dateEle = await date.element('div[part="clear-button"]');
+      await dateEle.click();
     }
     await date.click();
     const keys = await moment(value, global.dateFormat).format('L');
@@ -147,9 +149,9 @@ global.fieldRegistry.register(
 global.fieldRegistry.register('nuxeo-tag-suggestion', suggestionGet, suggestionSet);
 global.fieldRegistry.register(
   'paper-input',
-  (element) => element.$('.input-element input').getValue(),
-  (element, value) => {
-    element.$('.input-element input').setValue(value);
+  (element) => element.element('.input-element input').getValue(),
+  async (element, value) => {
+    await element.element('.input-element input').setValue(value);
   },
 );
 global.fieldRegistry.register(
