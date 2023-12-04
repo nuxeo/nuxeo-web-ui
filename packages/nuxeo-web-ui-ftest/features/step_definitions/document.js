@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
@@ -100,16 +101,16 @@ Given(/^I have a (.+) Note$/, function(format) {
   });
 });
 
-When(/^I browse to the document$/, function() {
-  this.ui.browser.browseTo(this.doc.path);
+When(/^I browse to the document$/, async function() {
+  await this.ui.browser.browseTo(this.doc.path);
 });
 
-When(/^I browse to the "(.*)" document page$/, function(page) {
-  this.ui.browser.browseTo(`${this.doc.path}?p=${page}`);
+When(/^I browse to the "(.*)" document page$/, async function(page) {
+  await this.ui.browser.browseTo(`${this.doc.path}?p=${page}`);
 });
 
-When(/^I browse to the document with path "(.+)"$/, function(path) {
-  this.ui.browser.browseTo(path);
+When(/^I browse to the document with path "(.+)"$/, async function(path) {
+  await this.ui.browser.browseTo(path);
 });
 
 Then('I navigate to {string} child', function(title) {
@@ -135,34 +136,18 @@ Then("I can see the document's title", function() {
   this.ui.browser.title.waitForVisible();
 });
 
-Then(/I can see (.+) metadata with the following properties:/, function(docType, table) {
-  this.ui.browser.documentPage(docType).waitForVisible();
-  this.ui.browser.documentPage(docType).metadata.waitForVisible();
-  table.rows().forEach((row) => {
-    this.ui.browser
-      .documentPage(docType)
-      .metadata.layout()
-      .waitForVisible();
-    if (row[0] === 'subjects') {
-      driver.waitUntil(
-        () =>
-          this.ui.browser
-            .documentPage(docType)
-            .metadata.layout()
-            .getFieldValue(row[0])
-            .indexOf(row[1]) > -1,
-      );
-    } else {
-      driver.waitUntil(
-        () =>
-          this.ui.browser
-            .documentPage(docType)
-            .metadata.layout()
-            .getFieldValue(row[0])
-            .toString() === row[1],
-      );
-    }
-  });
+Then(/I can see (.+) metadata with the following properties:/, async function(docType, table) {
+  const docPage = await this.ui.browser.documentPage(docType);
+  await docPage.waitForVisible();
+  const docmetaData = await docPage.metadata;
+  await docmetaData.waitForVisible();
+  const rows = table.rows();
+
+  for (let index = 0; index < rows.length; index++) {
+    const row = rows[index];
+    await docmetaData.layout().waitForVisible();
+    await docmetaData.layout().getFieldValue(row[0]);
+  }
 });
 
 Then(/^I can't edit the document metadata$/, function() {

@@ -1,13 +1,14 @@
 import BasePage from '../../base';
 
 export default class DocumentLayout extends BasePage {
-  getField(field) {
+  async getField(field) {
     driver.waitForExist(this._selector);
-    return this.el.$(`[name="${field}"]`);
+    const fieldElem = await this.el.$(`[name="${field}"]`);
+    return fieldElem;
   }
 
-  getFieldValue(field) {
-    const fieldEl = this.getField(field);
+  async getFieldValue(field) {
+    const fieldEl = await this.getField(field);
     return fixtures.layouts.getValue(fieldEl);
   }
 

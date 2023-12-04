@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 import BasePage from '../base';
 
 export default class BulkEdit extends BasePage {
@@ -32,44 +34,63 @@ export default class BulkEdit extends BasePage {
     return fixtures.layouts.setValue(fieldEl, value);
   }
 
-  editMultipleOptions(table) {
-    table.rows().forEach((row) => {
+  async editMultipleOptions(table) {
+    for (const row of table.rows()) {
       const [fieldName, fieldValue, action] = row;
-      const fieldEl = this.getField(fieldName);
-      fieldEl.waitForVisible();
-      this.getBulkEditOptions(fieldName).scrollIntoView();
+      const fieldEl = await this.getField(fieldName);
+      await fieldEl.waitForVisible();
+      const bulkEditOption = await this.getBulkEditOptions(fieldName);
+      await bulkEditOption.scrollIntoView();
       if (action === 'remove') {
-        this.getBulkEditOptions(fieldName).click();
-        this.bulkEditOptionsList(fieldName, 'Empty value(s)').click();
+        await bulkEditOption.click();
+        const emptyField = await this.bulkEditOptionsList(fieldName, 'Empty value(s)');
+        emptyField.click();
       } else if (action === 'addValues') {
-        this.getBulkEditOptions(fieldName).click();
-        this.bulkEditOptionsList(fieldName, 'Add value(s)').click();
-        fixtures.layouts.setValue(fieldEl, fieldValue);
+        await bulkEditOption.click();
+        const addValueField = await this.bulkEditOptionsList(fieldName, 'Add value(s)');
+        await addValueField.click();
+        await fixtures.layouts.setValue(fieldEl, fieldValue);
       } else if (action === 'replace') {
-        fixtures.layouts.setValue(fieldEl, fieldValue);
+        await fixtures.layouts.setValue(fieldEl, fieldValue);
       }
-    });
-  }
-
-  getBulkEditOptions(field) {
-    let bulkWidget = this.el.element(`[name="${field}"]`).parentElement();
-    // some elements generated in Studio are wrapped in divs
-    if (bulkWidget.getTagName() !== 'nuxeo-bulk-widget') {
-      bulkWidget = bulkWidget.parentElement();
     }
-    return bulkWidget.$('nuxeo-select');
   }
 
-  bulkEditOptionsList(fieldName, editOption) {
-    driver.waitUntil(() => {
-      const els = driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
-      return els.length > 1;
-    });
+  async getBulkEditOptions(field) {
+    const filedElem = await this.el.element(`[name="${field}"]`);
+    let bulkWidget = await filedElem.parentElement();
+    // some elements generated in Studio are wrapped in divs
+    const bulkWidgetTag = await bulkWidget.getTagName();
+    if (bulkWidgetTag !== 'nuxeo-bulk-widget') {
+      bulkWidget = await bulkWidget.parentElement();
+    }
+    const bulkWidgetSelect = await bulkWidget.$('nuxeo-select');
+    return bulkWidgetSelect;
+  }
 
-    const listItems = this.el
-      .element(`[name="${fieldName}"]`)
-      .parentElement()
-      .elements('nuxeo-select paper-item');
-    return listItems.find((e) => e.getText() === editOption);
+  async bulkEditOptionsList(fieldName, editOption) {
+    await driver.waitUntil(
+      async () => {
+        const els = await driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
+        return els.length > 1;
+      },
+      {
+        timeout: 3000,
+        timeoutMsg: 'expected bulkEditOptionsList text to be different after 5s',
+      },
+    );
+    const fieldNameElem = await this.el.element(`[name="${fieldName}"]`);
+    const parentElem = await fieldNameElem.parentElement();
+    const listItems = await parentElem.elements('nuxeo-select paper-item');
+    let foundElem;
+    for (const elem of listItems) {
+      const currentElementText = await elem.getText();
+
+      if (currentElementText === editOption) {
+        foundElem = elem;
+      }
+    }
+    // await foundElem.setAttribute('aria-selected', true);
+    return foundElem;
   }
 }
