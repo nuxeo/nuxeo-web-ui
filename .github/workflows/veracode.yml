@@ -144,50 +144,8 @@ jobs:
     - run: unzip -o pipeline-scan-LATEST.zip   
     - name: Code Scanning
       id: code_scanning
-      run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_SECRET_API_ID}}" --veracode_api_key "${{secrets.VERACODE_SECRET_KEY}}" --fail_on_severity="Very High, High" --summary_output=true --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+      run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_SECRET_API_ID}}" --veracode_api_key "${{secrets.VERACODE_SECRET_KEY}}" --fail_on_severity="Very High, High" --summary_output=true --action UploadAndScan --appname "Nuxeo Web UI" --createprofile false --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
       continue-on-error: true
-    - name: Convert pipeline scan output to SARIF format
-      id: convert
-      uses: Veracode/veracode-pipeline-scan-results-to-sarif@v1.0.5
-      with:
-        pipeline-results-json: results.json
-        output-results-sarif: veracode-results.sarif
-        finding-rule-level: "4:3:0"
-    - name: Upload SARIF file to repository
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        # Path to SARIF file relative to the root of the repository
-        sarif_file: veracode-results.sarif
-    - name: Slack notification
-      if: (github.event_name == 'pull_request' || github.event_name == 'schedule')
-      uses: slackapi/slack-github-action@v1.23.0
-      env:
-        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-      with:
-        channel-id: ${{ env.SLACK_CHANNEL_ID }}
-        payload: |
-          {
-            "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ steps.code_scanning.outcome }} in nuxeo/nuxeo-web-ui <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>",
-            "blocks": [
-              {
-                "type": "section",
-                "text": {
-                   "type": "mrkdwn",
-                   "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ job.status }} in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>"
-                 }
-              }
-            ]
-          }
-    - name: Send scan result summary to slack
-      uses: crederauk/slack-workflow-summary@v1.2.2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-    - name: Send scan result file to slack
-      uses: adrey/slack-file-upload-action@master
-      with:
-        token: ${{ secrets.SLACK_BOT_TOKEN }}
-        path: results.txt
-        channel: ${{ secrets.SLACK_CHANNEL_ID }}
+
+
+   
