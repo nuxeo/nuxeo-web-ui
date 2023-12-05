@@ -40,8 +40,20 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         registry-url: ${{ env.NPM_REPOSITORY }}
-        node-version: 14
+        node-version: 18
         scope: '@nuxeo'
+
+    - name: Install Web UI
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      run: |
+        npm install
+        pushd packages/nuxeo-web-ui-ftest
+        npm install
+        popd
+        pushd packages/nuxeo-designer-catalog
+        npm install
+        popd
 
     - uses: actions/setup-java@v2
       with:
@@ -70,3 +82,4 @@ jobs:
 
     - name: A11y checks
       run: mvn -B -ntp -f plugin/a11y install
+
