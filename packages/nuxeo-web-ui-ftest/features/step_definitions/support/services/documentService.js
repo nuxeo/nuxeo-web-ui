@@ -70,7 +70,8 @@ class DocumentHelper {
       .then((doc) => {
         this.liveDocuments.push(doc.uid);
         return doc;
-      });
+      })
+      .catch((error) => console.log('3333', error));
   }
 
   addTag(document, tag) {

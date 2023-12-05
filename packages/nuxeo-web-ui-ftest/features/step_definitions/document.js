@@ -261,8 +261,8 @@ Then('I add the document to the favorites', function() {
   this.ui.browser.addToFavorites();
 });
 
-Then('I can see the document has {int} children', function(nb) {
-  this.ui.browser.waitForNbChildren(nb);
+Then('I can see the document has {int} children', async function(nb) {
+  await this.ui.browser.waitForNbChildren(nb);
 });
 
 Then(/^I can see a process is running in the document$/, function() {

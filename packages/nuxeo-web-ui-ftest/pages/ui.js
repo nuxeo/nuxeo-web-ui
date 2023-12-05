@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
 import Drawer from './ui/drawer';
@@ -86,7 +87,10 @@ export default class UI extends BasePage {
   }
 
   get drawer() {
-    return new Drawer('div[slot="drawer"]');
+    return (async () => {
+      const drawer = await new Drawer('div[slot="drawer"]');
+      return drawer;
+    })();
   }
 
   static get() {
@@ -177,8 +181,19 @@ export default class UI extends BasePage {
     dropdown.click(`#dropdown #contentWrapper div paper-menu div paper-icon-item[name="${selection}"]`);
   }
 
-  waitForToastNotVisible() {
-    driver.waitUntil(() => driver.elements('mwc-snackbar').every((toast) => !toast.getAttribute('open')));
+  async waitForToastNotVisible() {
+    await driver.waitUntil(async () => {
+      const mwcsnackbar = await driver.elements('mwc-snackbar');
+      let isOpen = false;
+      for (let index = 0; index < mwcsnackbar.length; index++) {
+        const attribute = await mwcsnackbar[index].getAttribute('open');
+        if (attribute === true) {
+          isOpen = true;
+        }
+      }
+      return !isOpen;
+      //driver.elements('mwc-snackbar').every((toast) => !toast.getAttribute('open'));
+    });
   }
 
   getToastDismissButton() {

@@ -1,15 +1,27 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../base';
 
 export default class Clipboard extends BasePage {
   get nbItems() {
-    const items = this.el.$$('#list .list-item');
-    let count = 0;
-    items.forEach((item) => {
-      if (item.isVisible()) {
-        count++;
+    return (async () => {
+      await driver.pause(3000);
+      const items = await this.el.$$('#list .list-item');
+      console.log('items', items.length);
+      let count = 0;
+      for (let index = 0; index < items.length; index++) {
+        const isItemVisible = await items[index].isDisplayed();
+        if (isItemVisible) {
+          count++;
+        }
       }
-    });
-    return count;
+      // items.forEach((item) => {
+      //   if (item.isVisible()) {
+      //     count++;
+      //   }
+      // });
+      console.log('count', count);
+      return count;
+    })();
   }
 
   get moveButton() {
@@ -34,14 +46,24 @@ export default class Clipboard extends BasePage {
     copyBtn.click();
   }
 
-  removeItem(title) {
-    const items = this.el.$$('nuxeo-data-list#list .list-item');
-    return items.some((item) => {
-      if (item.isVisible() && item.getText('.list-item-title').trim() === title) {
-        item.click('iron-icon.remove');
-        return true;
+  async removeItem(title) {
+    const items = await this.el.$$('nuxeo-data-list#list .list-item');
+    let found = false;
+    for (let index = 0; index < items.length; index++) {
+      const itemVisible = await items[index].isVisible();
+      const itemText = await items[index].$('.list-item-title').getText();
+      if (itemVisible && itemText === title) {
+        await items[index].$('iron-icon.remove').click();
+        found = true;
       }
-      return false;
-    });
+    }
+    return found;
+    // return items.some((item) => {
+    //   if (item.isVisible() && item.getText('.list-item-title').trim() === title) {
+    //     item.click('iron-icon.remove');
+    //     return true;
+    //   }
+    //   return false;
+    // });
   }
 }
