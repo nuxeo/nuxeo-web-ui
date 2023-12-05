@@ -144,7 +144,7 @@ jobs:
     - run: unzip -o pipeline-scan-LATEST.zip   
     - name: Code Scanning
       id: code_scanning
-      run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --summary_output=true --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+      run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_SECRET_API_ID}}" --veracode_api_key "${{secrets.VERACODE_SECRET_KEY}}" --fail_on_severity="Very High, High" --summary_output=true --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
       continue-on-error: true
     - name: Convert pipeline scan output to SARIF format
       id: convert
