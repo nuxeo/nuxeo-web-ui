@@ -24,6 +24,7 @@ const capability = {
   maxInstances: 1,
   browserName: 'chrome',
   acceptInsecureCerts: true,
+  browserVersion: 'stable',
 };
 const options = {
   args: ['--no-sandbox'],
@@ -149,17 +150,7 @@ exports.config = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: [
-    [
-      'selenium-standalone',
-      {
-        installArgs: { drivers },
-        args: { drivers },
-      },
-    ],
-    [CompatService],
-    [ShadowService],
-  ],
+  services: [[CompatService], [ShadowService]],
 
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber

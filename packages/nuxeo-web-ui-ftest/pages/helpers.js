@@ -10,8 +10,8 @@ const refresh = () => {
   _flushProperties();
 };
 
-const url = (...args) => {
-  driver.url(...args);
+const url = async (...args) => {
+  await driver.url(...args);
   _flushProperties();
 };
 

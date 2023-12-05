@@ -1,0 +1,437 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] Nuxeo Web UI - Parent                                              [pom]
+[INFO] Nuxeo Web UI - Web Application                                     [jar]
+[INFO] Nuxeo Web UI - Marketplace Package                                 [zip]
+[INFO] 
+[INFO] ----------------< org.nuxeo.web.ui:nuxeo-web-ui-parent >----------------
+[INFO] Building Nuxeo Web UI - Parent 3.0.29-SNAPSHOT                     [1/3]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- enforcer:1.4.1:enforce (enforce-dependencies) @ nuxeo-web-ui-parent ---
+[INFO] 
+[INFO] --- enforcer:1.4.1:enforce (enforce-nuxeo-dependencies) @ nuxeo-web-ui-parent ---
+[INFO] 
+[INFO] --- buildnumber:1.2:create (default) @ nuxeo-web-ui-parent ---
+[INFO] Storing buildNumber: 20231026-174939 at timestamp: 1698322779692
+[INFO] Executing: /bin/sh -c cd /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui && git rev-parse --verify HEAD
+[INFO] Working directory: /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui
+[INFO] Storing buildScmBranch: UNKNOWN
+[INFO] 
+[INFO] --- incremental-build:1.6-NX1:incremental-build (default) @ nuxeo-web-ui-parent ---
+[INFO] Verifying module descriptor ...
+[INFO] Verifying parent modules...
+[INFO] Verifying resources...
+[INFO] Resources directory does not exist /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/src/main/resources. Skipped...
+[INFO] Verifying sources...
+[INFO] No sources to check ...
+[INFO] Verifying tests sources...
+[INFO] No sources to check ...
+[INFO] Verifying tests resources...
+[INFO] Verifying test resources...
+[INFO] Resources directory does not exist /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/src/test/resources. Skipped...
+[INFO] 
+[INFO] --- resources:2.6:copy-resources (copy-readme) @ nuxeo-web-ui-parent ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- resources:2.6:copy-resources (copy-readme-parent) @ nuxeo-web-ui-parent ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- build-helper:1.8:remove-project-artifact (remove-old-installers) @ nuxeo-web-ui-parent ---
+[INFO] /Users/alok.ranjan2/.m2/repository/org/nuxeo/web/ui/nuxeo-web-ui-parent/3.0.29-SNAPSHOT removed.
+[INFO] 
+[INFO] --- install:2.5.1:install (default-install) @ nuxeo-web-ui-parent ---
+[INFO] Installing /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/pom.xml to /Users/alok.ranjan2/.m2/repository/org/nuxeo/web/ui/nuxeo-web-ui-parent/3.0.29-SNAPSHOT/nuxeo-web-ui-parent-3.0.29-SNAPSHOT.pom
+[INFO] 
+[INFO] -------------------< org.nuxeo.web.ui:nuxeo-web-ui >--------------------
+[INFO] Building Nuxeo Web UI - Web Application 3.0.29-SNAPSHOT            [2/3]
+[INFO]   from plugin/web-ui/addon/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- enforcer:1.4.1:enforce (enforce-dependencies) @ nuxeo-web-ui ---
+[INFO] 
+[INFO] --- enforcer:1.4.1:enforce (enforce-nuxeo-dependencies) @ nuxeo-web-ui ---
+[INFO] 
+[INFO] --- buildnumber:1.2:create (default) @ nuxeo-web-ui ---
+[INFO] Storing buildNumber: 20231026-174941 at timestamp: 1698322781296
+[INFO] Executing: /bin/sh -c cd /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/addon && git rev-parse --verify HEAD
+[INFO] Working directory: /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/addon
+[INFO] Storing buildScmBranch: UNKNOWN
+[INFO] 
+[INFO] --- incremental-build:1.6-NX1:incremental-build (default) @ nuxeo-web-ui ---
+[INFO] Verifying module descriptor ...
+[INFO] Verifying parent modules...
+[INFO] Verifying resources...
+[INFO] Verifying sources...
+[INFO] Verifying tests sources...
+[INFO] Verifying tests resources...
+[INFO] Verifying test resources...
+[INFO] 
+[INFO] --- resources:2.6:copy-resources (copy-readme) @ nuxeo-web-ui ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- resources:2.6:copy-resources (copy-readme-parent) @ nuxeo-web-ui ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- resources:2.6:resources (default-resources) @ nuxeo-web-ui ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 10 resources
+[INFO] 
+[INFO] --- antrun:1.7:run (npm-build) @ nuxeo-web-ui ---
+[INFO] Executing tasks
+
+main:
+
+install:
+     [exec] npm WARN EBADENGINE Unsupported engine {
+     [exec] npm WARN EBADENGINE   package: 'got@5.7.1',
+     [exec] npm WARN EBADENGINE   required: { node: '>=0.10.0 <7' },
+     [exec] npm WARN EBADENGINE   current: { node: 'v18.17.1', npm: '9.6.7' }
+     [exec] npm WARN EBADENGINE }
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT preinstall
+     [exec] > cd ./packages/nuxeo-web-ui-ftest && npm install && cd ../nuxeo-designer-catalog && npm install && cd ../../plugin/a11y && npm install
+     [exec] 
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui-ftest@3.0.29-SNAPSHOT postinstall
+     [exec] > check-engine --ignore
+     [exec] 
+     [exec] Checking versions... 
+     [exec] 
+     [exec] ✔ node was validated with >=18.0.0.
+     [exec] 
+     [exec]  Environment looks good!
+     [exec] 
+     [exec] up to date, audited 1094 packages in 1s
+     [exec] 
+     [exec] 133 packages are looking for funding
+     [exec]   run `npm fund` for details
+     [exec] 
+     [exec] 8 vulnerabilities (3 moderate, 5 high)
+     [exec] 
+     [exec] To address all issues possible (including breaking changes), run:
+     [exec]   npm audit fix --force
+     [exec] 
+     [exec] Some issues need review, and may require choosing
+     [exec] a different dependency.
+     [exec] 
+     [exec] Run `npm audit` for details.
+     [exec] 
+     [exec] > designer-catalog@1.0.0 postinstall
+     [exec] > check-engine --ignore
+     [exec] 
+     [exec] Checking versions... 
+     [exec] 
+     [exec] ✔ node was validated with >=14.0.0.
+     [exec] 
+     [exec]  Environment looks good!
+     [exec] 
+     [exec] up to date, audited 586 packages in 2s
+     [exec] 
+     [exec] 18 packages are looking for funding
+     [exec]   run `npm fund` for details
+     [exec] 
+     [exec] 11 vulnerabilities (6 high, 5 critical)
+     [exec] 
+     [exec] To address issues that do not require attention, run:
+     [exec]   npm audit fix
+     [exec] 
+     [exec] To address all issues (including breaking changes), run:
+     [exec]   npm audit fix --force
+     [exec] 
+     [exec] Run `npm audit` for details.
+     [exec] 
+     [exec] up to date, audited 1918 packages in 2s
+     [exec] 
+     [exec] 133 packages are looking for funding
+     [exec]   run `npm fund` for details
+     [exec] 
+     [exec] 8 vulnerabilities (3 moderate, 5 high)
+     [exec] 
+     [exec] To address all issues possible (including breaking changes), run:
+     [exec]   npm audit fix --force
+     [exec] 
+     [exec] Some issues need review, and may require choosing
+     [exec] a different dependency.
+     [exec] 
+     [exec] Run `npm audit` for details.
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT postinstall
+     [exec] > check-engine --ignore
+     [exec] 
+     [exec] Checking versions... 
+     [exec] 
+     [exec] ✔ node was validated with >=18.0.0.
+     [exec] 
+     [exec]  Environment looks good!
+     [exec] 
+     [exec] up to date, audited 5133 packages in 10s
+     [exec] 
+     [exec] 256 packages are looking for funding
+     [exec]   run `npm fund` for details
+     [exec] 
+     [exec] 129 vulnerabilities (8 low, 27 moderate, 63 high, 31 critical)
+     [exec] 
+     [exec] To address issues that do not require attention, run:
+     [exec]   npm audit fix
+     [exec] 
+     [exec] To address all issues possible (including breaking changes), run:
+     [exec]   npm audit fix --force
+     [exec] 
+     [exec] Some issues need review, and may require choosing
+     [exec] a different dependency.
+     [exec] 
+     [exec] Run `npm audit` for details.
+
+init:
+
+npm-build:
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT prebuild
+     [exec] > npm-run-all prepare:*
+     [exec] 
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT prepare:tmp
+     [exec] > rm -rf .tmp
+     [exec] 
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT prepare:i18n
+     [exec] > node scripts/merge-messages.js
+     [exec] 
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT prepare:workbox
+     [exec] > workbox copyLibraries .tmp && mv .tmp/workbox-v${npm_package_config_workboxCli} .tmp/workbox
+     [exec] 
+     [exec] The Workbox libraries were copied to /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/.tmp/workbox-v3.6.3
+     [exec] Add a call to workbox.setConfig({modulePathPrefix: '...'}) to your service worker to use these local libraries.
+     [exec] See https://goo.gl/Fo9gPX for further documentation.
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT build
+     [exec] > webpack --env production
+     [exec] 
+     [exec] ⬡ WEBUI: Bundling all addons
+     [exec] (node:17059) [DEP_WEBPACK_COMPILATION_ASSETS] DeprecationWarning: Compilation.assets will be frozen in future, all modifications are deprecated.
+     [exec] BREAKING CHANGE: No more changes should happen to Compilation.assets after sealing the Compilation.
+     [exec] 	Do changes to assets earlier, e. g. in Compilation.hooks.processAssets.
+     [exec] 	Make sure to select an appropriate stage from Compilation.PROCESS_ASSETS_STAGE_*.
+     [exec] (Use `node --trace-deprecation ...` to show where the warning was created)
+     [exec] 755 assets
+     [exec] orphan modules 2.5 MiB [orphan] 499 modules
+     [exec] runtime modules 9.78 KiB 19 modules
+     [exec] modules by path ./node_modules/ 12.3 MiB
+     [exec]   javascript modules 9.2 MiB 664 modules
+     [exec]   json modules 3.07 MiB
+     [exec]     ./node_modules/aws-sdk/apis/metadata.json 18.3 KiB [built] [code generated]
+     [exec]     + 245 modules
+     [exec] modules by path ./addons/ 903 KiB 29 modules
+     [exec] modules by path ./elements/ 1.11 MiB 18 modules
+     [exec] modules by path ./*.js 5.75 KiB
+     [exec]   ./index.js 2.07 KiB [built] [code generated]
+     [exec]   ./legacy.js 3.67 KiB [built] [code generated]
+     [exec] ./themes/loader.js 1.33 KiB [built] [code generated]
+     [exec] fs (ignored) 15 bytes [built] [code generated]
+     [exec] 
+     [exec] WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+     [exec] This can impact web performance.
+     [exec] Assets: 
+     [exec]   main.bundle.js (1.87 MiB)
+     [exec]   spreadsheet.app.bundle.js (615 KiB)
+     [exec]   elements.bundle.js (498 KiB)
+     [exec]   28.bundle.js (3.38 MiB)
+     [exec]   954.bundle.js (1.32 MiB)
+     [exec]   85.bundle.js (606 KiB)
+     [exec]   vendor/webcomponentsjs/webcomponents-bundle.js.map (796 KiB)
+     [exec]   vendor/webcomponentsjs/bundles/webcomponents-sd-ce-pf.js.map (794 KiB)
+     [exec]   vendor/webcomponentsjs/bundles/webcomponents-sd-ce.js.map (619 KiB)
+     [exec]   vendor/webcomponentsjs/bundles/webcomponents-sd.js.map (492 KiB)
+     [exec]   vendor/moment/moment-with-locales.min.js (285 KiB)
+     [exec]   vendor/pdfjs/build/pdf.sandbox.js (610 KiB)
+     [exec]   vendor/pdfjs/build/pdf.worker.js (984 KiB)
+     [exec]   vendor/pdfjs/web/pdf.viewer.js (440 KiB)
+     [exec] 
+     [exec] WARNING in entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (244 KiB). This can impact web performance.
+     [exec] Entrypoints:
+     [exec]   main (1.87 MiB)
+     [exec]       main.bundle.js
+     [exec]   spreadsheet.app (615 KiB)
+     [exec]       spreadsheet.app.bundle.js
+     [exec] 
+     [exec] webpack 5.89.0 compiled with 2 warnings in 15774 ms
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT postbuild
+     [exec] > npm-run-all fix:*
+     [exec] 
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT fix:preview
+     [exec] > replace 'elements/' '${window.location.pathname}/' dist/index.html
+     [exec] 
+     [exec] dist/index.html
+     [exec]  37:                 hrefBase: '${window.location.pathname}/search/',
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT fix:elements
+     [exec] > replace '/elements/' '${window.location.pathname}/' dist/*.js
+     [exec] 
+     [exec] dist/elements.bundle.js
+     [exec]  68:   `,is:"nuxeo-document-form-layout",behaviors:[u.M,o.z,l.mB],importMeta:{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/document/nuxeo-document-form-layout.js`},properties:{document:{type:Object,notify:!0},layout:{type:String,value:"edit"},headers:{type:Object},saving:{type:Boolean,value:!1,readOnly:!0}},observers:["_documentChanged(document.*)"],async _save()
+     [exec]  324:   `,is:"nuxeo-document-create",behaviors:[u.M,o.z,x.U],importMeta:{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/document/nuxeo-document-create.js`},properties:{stage:{type:String,value:"choose"},visible:{type:Boolean},creating:{type:Boolean,value:!1,readOnly:!0}},observers:["_visibleOnStage(visible,stage)"],ready(){this.addEventListener("element-changed",thi
+     [exec]  980:   `,is:"nuxeo-document-import",behaviors:[u.M,o.z,v.S,x.U],importMeta:{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/document/nuxeo-document-import.js`},properties:{batchAppend:{value:!0},stage:{type:String,value:"upload"},docIdx:{type:Number,value:-1},localFiles:{type:Array,value:[]},remoteFiles:{type:Array,value:[]},selectedDocType:{type:String,observer:"_s
+     [exec]  2029:   `,is:"nuxeo-document-view",importMeta:{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/document/nuxeo-document-view.js`},properties:{document:Object}}),(0,m.k)({_template:h.d`
+     [exec]  2037:   `,is:"nuxeo-document-metadata",importMeta:{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/document/nuxeo-document-metadata.js`},properties:{document:Object}});var _=i(16896);(0,m.k)({_template:h.d`
+     [exec]  2676:   `,is:"nuxeo-vocabulary-management",behaviors:[u.M,l.mB],importMeta:{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/directory/nuxeo-vocabulary-management.js`},properties:{vocabularies:Array,selectedVocabulary:String,entries:{type:Array,value:[]},colDef:{type:Object,notify:!0},visible:{type:Boolean,observer:"_visibleChanged"},_selectedEntry:{type:Object},_sele
+     [exec]  2951:   `,is:"nuxeo-document-task",behaviors:[u.M,d.N,r.e],importMeta:{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/workflow/nuxeo-document-task.js`},properties:{task:{type:Object},action:{type:String},_href:{type:String},_model:{type:Object},_selectedTab:{type:String,value:"resolution"},processing:{type:Boolean,value:!1,readOnly:!0}},observers:["_updateTaskLayout
+     [exec]  7528:     `}static get properties(){return{label:String,updateMode:{type:String,value:"keep",observer:"_updateModeChanged"},_message:String,_messageClass:{type:String,value:"warning"},_required:Boolean,_isMultivalued:{type:Boolean,value:!1}}}static get observers(){return["_updateMessage(_required, updateMode)"]}validate(){return!0}_setWarning(e){this._message=e,this._messageClass="warning"}_setError(e){
+     [exec]  7962:   `,is:"nuxeo-diff",behaviors:[l.mB,s.q,o.z],properties:{docIds:{type:Array,value:[]},documents:{type:Array,value:[],readOnly:!0},showAll:{type:Boolean,value:!1},unifiedView:{type:Boolean,value:!1,reflectToAttribute:!0,readOnly:!0},enrichers:{type:String},headers:{type:String,value:{"fetch-document":"properties","translate-directoryEntry":"label"}},schemas:{type:String},leftUid:{type:String,observ
+     [exec] dist/index.js
+     [exec]  2: import".${window.location.pathname}/nuxeo-wopi-link.js";import html from"./nuxeo-wopi.html";const Nuxeo=window.Nuxeo||{};Nuxeo.UI=Nuxeo.UI||{},Nuxeo.UI.config=Nuxeo.UI.config||{},Nuxeo.UI.config.enrichers=Nuxeo.UI.config.enrichers||{},Nuxeo.UI.config.enrichers.blob=Nuxeo.UI.config.enrichers.blob||[],Nuxeo.UI.config.enrichers.blob.push("wopi");const tmpl=document.createElement("template");tmpl.inne
+     [exec] dist/main.bundle.js
+     [exec]  1381:   `,is:"nuxeo-app",behaviors:[o.N,s.e,r.q],importMeta:{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/nuxeo-app.js`},properties:{productName:{type:String,value:"Nuxeo"},baseUrl:{type:String,value:"/",observer:"_baseUrlChanged"},loading:{type:Boolean,value:!1},page:{type:String,observer:"_pageChanged"},selectedTab:String,selectedAdminTab:String,currentDocument:
+     [exec]  2693:   `,is:"nuxeo-search-form",behaviors:[r.M,s.mB,o.N,n.z],importMeta:{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/search/nuxeo-search-form.js`},properties:{selectedSearch:{type:Object,notify:!0,observer:"_selectedSearchChanged"},selectedSearchIdx:{type:Number,value:0,observer:"_selectedSearchIdxChanged"},provider:{type:String},pageSize:{type:Number,value:40},
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT fix:ui_elements
+     [exec] > replace '/node_modules/@nuxeo/nuxeo-ui-elements/' '${window.location.pathname}/' dist/*.js
+     [exec] 
+     [exec] dist/954.bundle.js
+     [exec]  1261:       `}static get is(){return"nuxeo-document-layout"}static get importMeta(){return{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/nuxeo-document-layout.js`}}static get properties(){return{document:{type:Object,notify:!0},layout:{type:String,value:"view",reflectToAttribute:!0},hrefTemplate:{type:String,value:()=>"${document.type}/nuxeo-${document.type}-${layo
+     [exec]  1907:       `}static get is(){return"nuxeo-create-user"}static get properties(){return{user:{type:Object,value:{}},usePassword:{type:Boolean,value:!1},errors:{type:String,value:""},_createAnother:{type:Boolean,value:!1},_currentUser:{type:Object}}}static get importMeta(){return{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/nuxeo-user-group-management/nuxeo-create-u
+     [exec]  3053:       `}static get is(){return"nuxeo-user-management"}static get properties(){return{username:{type:String,observer:"_fetch"},user:Object,groups:{type:Object,computed:"_computeGroups(user)"},selectedGroup:{type:Object,observer:"_groupSelected"},activity:{type:Array,value:[]},resultsFilter:{type:Function,value(){return this._resultsFilter.bind(this)}},resultFormatter:{type:Function},showEditGroups:
+     [exec]  3235:       `}static get is(){return"nuxeo-user-profile"}static get properties(){return{username:{type:String,observer:"_fetch"},user:Object,groups:{type:Object,computed:"_computeGroups(user)"},readonly:{type:Boolean,value:!1,reflectToAttribute:!0}}}static get importMeta(){return{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/nuxeo-user-group-management/nuxeo-user-p
+     [exec]  3341:       `}static get is(){return"nuxeo-user-group-management"}static get properties(){return{page:{type:String,value:"search",notify:!0},selectedUser:String,selectedGroup:{type:String},readonly:{type:Boolean,value:!1,reflectToAttribute:!0},_currentUser:{type:Object}}}static get importMeta(){return{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/nuxeo-user-group-m
+     [exec]  3546:       `}static get is(){return"nuxeo-video-info"}static get properties(){return{document:Object}}}customElements.define(e.is,e)}},62514:(e,t,n)=>{"use strict";var i=n(66538),r=(n(53774),n(93366),n(14190)),s=(n(36037),n(3632),n(85621),n(93426));function o(e,t){var n=Object.keys(e);if(Object.getOwnPropertySymbols){var i=Object.getOwnPropertySymbols(e);t&&(i=i.filter((function(t){return Object.getOwn
+     [exec]  3662:       `}static get is(){return"nuxeo-pdf-viewer"}static get properties(){return{src:{type:String}}}static get importMeta(){return{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/viewers/nuxeo-pdf-viewer.js`}}_path(e){const t=document.createElement("a");return t.href=e,this.resolveUrl(`pdfjs/web/viewer.html?file=${encodeURIComponent(t.href)}`)}}customElements.de
+     [exec]  5248:       `}static get is(){return"nuxeo-html-editor"}static get properties(){return{value:{type:String,notify:!0},placeholder:{type:String,value:"Type here..."},readOnly:{type:Boolean,value:!1,reflectToAttribute:!0},_editor:{type:Object}}}static get observers(){return["_valueChanged(value, _editor)","_readOnlyChanged(readOnly, _editor)"]}static get importMeta(){return{url:`${window.location.protocol}
+     [exec] dist/main.bundle.js
+     [exec]  5503:       `}static get is(){return"nuxeo-search-form-layout"}static get importMeta(){return{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/search/nuxeo-search-form-layout.js`}}static get properties(){return{provider:String,searchName:String,params:{type:Object,notify:!0},skipAggregates:{type:Boolean,notify:!0},aggregations:{type:Object,observer:"_aggregationsChang
+     [exec]  5511:       `}static get is(){return"nuxeo-search-results-layout"}static get importMeta(){return{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/search/nuxeo-search-results-layout.js`}}static get properties(){return{searchName:String,nxProvider:HTMLElement,model:{type:Object,value:()=>({})},results:{type:Object,notify:!0},hrefBase:{type:String,value:()=>a.v.get("layo
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT fix:pdfjs
+     [exec] > replace 'pdfjs/web/viewer.html' '../vendor/pdfjs/web/viewer.html' dist/*.js
+     [exec] 
+     [exec] dist/954.bundle.js
+     [exec]  3662:       `}static get is(){return"nuxeo-pdf-viewer"}static get properties(){return{src:{type:String}}}static get importMeta(){return{url:`${window.location.protocol}//${window.location.host}${window.location.pathname}/viewers/nuxeo-pdf-viewer.js`}}_path(e){const t=document.createElement("a");return t.href=e,this.resolveUrl(`../vendor/pdfjs/web/viewer.html?file=${encodeURIComponent(t.href)}`)}}customE
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT fix:cropper
+     [exec] > replace '/node_modules/cropperjs/dist/cropper.css' 'vendor/cropperjs/dist/cropper.css' dist/*.js
+     [exec] 
+     [exec] dist/954.bundle.js
+     [exec]  3547:         <link rel="stylesheet" href="vendor/cropperjs/dist/cropper.css" />
+     [exec] 
+     [exec] > @nuxeo/nuxeo-web-ui@3.0.29-SNAPSHOT fix:fonts
+     [exec] > replace '\.\./fonts' './fonts' dist/*.js
+     [exec] 
+     [exec] dist/main.bundle.js
+     [exec]  504:         src: url('./fonts/Inter-Regular.woff2?v=3.13') format('woff2'),
+     [exec]  505:           url('./fonts/Inter-Regular.woff?v=3.13') format('woff');
+     [exec]  513:         src: url('./fonts/Inter-SemiBold.woff2?v=3.13') format('woff2'),
+     [exec]  514:           url('./fonts/Inter-SemiBold.woff?v=3.13') format('woff');
+     [exec]  522:         src: url('./fonts/Inter-Bold.woff2?v=3.13') format('woff2'),
+     [exec]  523:           url('./fonts/Inter-Bold.woff?v=3.13') format('woff');
+
+build:
+     [copy] Copying 787 files to /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/addon/target/classes/web/nuxeo.war/ui
+[INFO] Executed tasks
+[INFO] 
+[INFO] --- compiler:3.8.0:compile (default-compile) @ nuxeo-web-ui ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:2.6:testResources (default-testResources) @ nuxeo-web-ui ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- compiler:3.8.0:testCompile (default-testCompile) @ nuxeo-web-ui ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:2.22.2:test (default-test) @ nuxeo-web-ui ---
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+2023-10-26 17:50:14,129 [main] ERROR [OSGiRuntimeService] Nuxeo Platform Started
+======================================================================
+= Component Loading Status: Pending: 0 / Missing: 1 / Unstarted: 0 / Total: 15
+  * service:org.nuxeo.ecm.platform.url.marshallers references missing [target=org.nuxeo.ecm.core.io.MarshallerRegistry;point=marshallers]
+======================================================================
+[INFO] Running org.nuxeo.web.ui.url.codec.TestWebNotificationCodec
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s - in org.nuxeo.web.ui.url.codec.TestWebNotificationCodec
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:2.3.1:jar (default-jar) @ nuxeo-web-ui ---
+[INFO] Building jar: /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/addon/target/nuxeo-web-ui-3.0.29-SNAPSHOT.jar
+[INFO] 
+[INFO] --- build-helper:1.8:remove-project-artifact (remove-old-installers) @ nuxeo-web-ui ---
+[INFO] /Users/alok.ranjan2/.m2/repository/org/nuxeo/web/ui/nuxeo-web-ui/3.0.29-SNAPSHOT removed.
+[INFO] 
+[INFO] --- install:2.5.1:install (default-install) @ nuxeo-web-ui ---
+[INFO] Installing /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/addon/target/nuxeo-web-ui-3.0.29-SNAPSHOT.jar to /Users/alok.ranjan2/.m2/repository/org/nuxeo/web/ui/nuxeo-web-ui/3.0.29-SNAPSHOT/nuxeo-web-ui-3.0.29-SNAPSHOT.jar
+[INFO] Installing /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/addon/pom.xml to /Users/alok.ranjan2/.m2/repository/org/nuxeo/web/ui/nuxeo-web-ui/3.0.29-SNAPSHOT/nuxeo-web-ui-3.0.29-SNAPSHOT.pom
+[INFO] 
+[INFO] -------------< org.nuxeo.web.ui:nuxeo-web-ui-marketplace >--------------
+[INFO] Building Nuxeo Web UI - Marketplace Package 3.0.29-SNAPSHOT        [3/3]
+[INFO]   from plugin/web-ui/marketplace/pom.xml
+[INFO] --------------------------------[ zip ]---------------------------------
+[INFO] 
+[INFO] --- enforcer:1.4.1:enforce (enforce-dependencies) @ nuxeo-web-ui-marketplace ---
+[INFO] 
+[INFO] --- enforcer:1.4.1:enforce (enforce-nuxeo-dependencies) @ nuxeo-web-ui-marketplace ---
+[INFO] 
+[INFO] --- buildnumber:1.2:create (default) @ nuxeo-web-ui-marketplace ---
+[INFO] Storing buildNumber: 20231026-175016 at timestamp: 1698322816577
+[INFO] Executing: /bin/sh -c cd /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace && git rev-parse --verify HEAD
+[INFO] Working directory: /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace
+[INFO] Storing buildScmBranch: UNKNOWN
+[INFO] 
+[INFO] --- incremental-build:1.6-NX1:incremental-build (default) @ nuxeo-web-ui-marketplace ---
+[INFO] Verifying module descriptor ...
+[INFO] Verifying parent modules...
+[INFO] Verifying resources...
+[INFO] resources updated, module have to be cleaned
+[INFO] resources updated, module have to be cleaned
+[INFO] Deleting /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace/target
+[INFO] 
+[INFO] --- resources:2.6:copy-resources (copy-readme) @ nuxeo-web-ui-marketplace ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- resources:2.6:copy-resources (copy-readme-parent) @ nuxeo-web-ui-marketplace ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- ant-assembly:2.1.5:build (default-build) @ nuxeo-web-ui-marketplace ---
+[INFO] Active Maven profiles:
+os-notwindows (source: org.nuxeo:nuxeo-ecm:2021.32.1)
+
+nuxeo-web-ui.build:
+[INFO]     [mkdir] Created dir: /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace/target/marketplace
+[INFO]      [copy] Copying 2 files to /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace/target/marketplace
+[INFO]      [copy] Copying 1 file to /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace/target/marketplace/install/bundles
+[INFO]       [zip] Building zip: /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-3.0.29-SNAPSHOT.zip
+[INFO] [artifact:attach] Attaching /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-3.0.29-SNAPSHOT.zip to MavenProject: org.nuxeo.web.ui:nuxeo-web-ui-marketplace:3.0.29-SNAPSHOT @ /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace/pom.xml
+[INFO] 
+[INFO] --- build-helper:1.8:remove-project-artifact (remove-old-installers) @ nuxeo-web-ui-marketplace ---
+[INFO] /Users/alok.ranjan2/.m2/repository/org/nuxeo/web/ui/nuxeo-web-ui-marketplace/3.0.29-SNAPSHOT removed.
+[INFO] 
+[INFO] --- install:2.5.1:install (default-install) @ nuxeo-web-ui-marketplace ---
+[INFO] Installing /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-3.0.29-SNAPSHOT.zip to /Users/alok.ranjan2/.m2/repository/org/nuxeo/web/ui/nuxeo-web-ui-marketplace/3.0.29-SNAPSHOT/nuxeo-web-ui-marketplace-3.0.29-SNAPSHOT.zip
+[INFO] Installing /Users/alok.ranjan2/Public/Acess/last/nuxeo-web-ui/plugin/web-ui/marketplace/pom.xml to /Users/alok.ranjan2/.m2/repository/org/nuxeo/web/ui/nuxeo-web-ui-marketplace/3.0.29-SNAPSHOT/nuxeo-web-ui-marketplace-3.0.29-SNAPSHOT.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for Nuxeo Web UI - Parent 3.0.29-SNAPSHOT:
+[INFO] 
+[INFO] Nuxeo Web UI - Parent .............................. SUCCESS [  0.588 s]
+[INFO] Nuxeo Web UI - Web Application ..................... SUCCESS [ 35.961 s]
+[INFO] Nuxeo Web UI - Marketplace Package ................. SUCCESS [  1.273 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  38.328 s
+[INFO] Finished at: 2023-10-26T17:50:17+05:30
+[INFO] ------------------------------------------------------------------------
