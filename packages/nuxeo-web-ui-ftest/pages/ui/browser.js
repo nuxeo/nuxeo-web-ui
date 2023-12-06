@@ -104,7 +104,10 @@ export default class Browser extends BasePage {
   }
 
   get editButton() {
-    return this.el.$('#edit-button');
+    return (async () => {
+      const editButton = await this.el.$('#edit-button');
+      return editButton;
+    })();
   }
 
   async editForm(docType) {
@@ -323,13 +326,27 @@ export default class Browser extends BasePage {
     }
   }
 
-  selectAllChildDocuments() {
-    this.waitForChildren();
-    this.rows.forEach((row) => {
-      if (row.isVisible('nuxeo-data-table-checkbox')) {
-        row.$('nuxeo-data-table-checkbox').click();
+  async selectAllChildDocuments() {
+    await this.waitForChildren();
+    await driver.waitUntil(
+      async () => {
+        const rowWithCheckbox = await browser.$$(
+          'nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header] nuxeo-data-table-checkbox',
+        );
+        return rowWithCheckbox.length > 0;
+      },
+      {
+        timeout: 10000,
+        timeoutMsg: 'expecteed selectAllChildDocuments',
+      },
+    );
+    const rowTemp = await this.rows;
+    for (let index = 0; index < rowTemp.length; index++) {
+      const checkboxVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox');
+      if (checkboxVisible) {
+        rowTemp[index].$('nuxeo-data-table-checkbox').click();
       }
-    });
+    }
   }
 
   async selectAllDocuments() {

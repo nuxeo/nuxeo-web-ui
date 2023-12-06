@@ -72,9 +72,9 @@ Then('I can see the {string} document', async function(title) {
   browserTitle.should.be.true;
 });
 
-Then('I select all child documents', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectAllChildDocuments();
+Then('I select all child documents', async function() {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.selectAllChildDocuments();
 });
 
 Then('I select all the documents', async function() {
