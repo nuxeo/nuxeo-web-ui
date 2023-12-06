@@ -147,5 +147,21 @@ jobs:
       run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_SECRET_API_ID}}" --veracode_api_key "${{secrets.VERACODE_SECRET_KEY}}" --fail_on_severity="Very High, High" --summary_output=true --action UploadAndScan --appname "Nuxeo Web UI" --createprofile false --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
       continue-on-error: true
 
+    - name: Veracode Upload And Scan
+      uses: veracode/veracode-uploadandscan-action@0.2.6
+      with:
+        appname: 'Nuxeo Web UI'
+        createprofile: false
+        filepath: 'plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip'
+        vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
+        vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
+        # createsandbox: 'false'
+        sandboxname: 'master'
+        scantimeout: 0
+        exclude: '*.js'
+        include: '*.war'
+        criticality: 'VeryHigh'
+
+
 
    
