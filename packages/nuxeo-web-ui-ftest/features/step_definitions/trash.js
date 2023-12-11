@@ -61,8 +61,8 @@ Then('I cannot untrash selected documents', function() {
   this.ui.browser.results.untrashDocumentsButton.isVisible().should.be.false;
 });
 
-Then('I can trash current document', function() {
-  const el = this.ui.browser.trashDocumentButton;
+Then('I can trash current document', async function() {
+  const el = await this.ui.browser.trashDocumentButton;
   el.waitForVisible();
   el.click();
   driver.alertAccept();
