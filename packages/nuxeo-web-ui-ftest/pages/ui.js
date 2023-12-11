@@ -178,7 +178,7 @@ export default class UI extends BasePage {
   }
 
   waitForToastNotVisible() {
-    driver.waitUntil(() => driver.elements('mwc-snackbar').every((toast) => !toast.getAttribute('open')));
+    driver.waitUntil(() => driver.$$('mwc-snackbar').every((toast) => !toast.getAttribute('open')));
   }
 
   getToastDismissButton() {

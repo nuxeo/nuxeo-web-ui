@@ -1,13 +1,14 @@
 import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
-Given('I have a {word} document', function(docType) {
+Given('I have a {word} document', async function(docType) {
   docType = docType || 'File';
-  const doc = fixtures.documents.init(docType);
+  const doc = await fixtures.documents.init(docType);
   // create the document
-  return fixtures.documents.create(this.doc.path || '/default-domain', doc).then((d) => {
+  const createDoc = await fixtures.documents.create(this.doc.path || '/default-domain', doc).then((d) => {
     this.doc = d;
   });
+  return createDoc;
 });
 
 Given(/^I have a document imported from file "(.+)"$/, function(mimeType) {
@@ -16,10 +17,11 @@ Given(/^I have a document imported from file "(.+)"$/, function(mimeType) {
   });
 });
 
-Given(/^I have permission (\w+) for this document$/, function(permission) {
-  return fixtures.documents.setPermissions(this.doc, permission, this.username).then((d) => {
+Given(/^I have permission (\w+) for this document$/, async function(permission) {
+  const setPermission = await fixtures.documents.setPermissions(this.doc, permission, this.username).then((d) => {
     this.doc = d;
   });
+  return setPermission;
 });
 
 Given(/^I have permission (\w+) for the document with path "(.+)"$/, function(permission, path) {
@@ -49,15 +51,16 @@ Given(/^I have a document added to "([^"]*)" collection$/, function(colName) {
     });
 });
 
-Given(/^This document has a "([^"]*)" workflow running$/, function(workflowName) {
-  return fixtures.workflows.start(this.doc, workflowName, this.username).then((workflowInstance) => {
+Given(/^This document has a "([^"]*)" workflow running$/, async function(workflowName) {
+  const workflow = await fixtures.workflows.start(this.doc, workflowName, this.username).then((workflowInstance) => {
     this.workflowInstance = workflowInstance;
   });
+  return workflow;
 });
 
 Given(
   /^The workflow running for this document will proceed with "([^"]*)" action and the following variables:$/,
-  function(action, table) {
+  async function(action, table) {
     this.workflowInstance.should.not.be.undefined;
     return this.workflowInstance.fetchTasks().then((tasks) => {
       tasks.entries.length.should.be.equal(1);
@@ -100,30 +103,37 @@ Given(/^I have a (.+) Note$/, function(format) {
   });
 });
 
-When(/^I browse to the document$/, function() {
-  this.ui.browser.browseTo(this.doc.path);
+When(/^I browse to the document$/, async function() {
+  await this.ui.browser.browseTo(this.doc.path);
 });
 
 When(/^I browse to the "(.*)" document page$/, function(page) {
   this.ui.browser.browseTo(`${this.doc.path}?p=${page}`);
 });
 
-When(/^I browse to the document with path "(.+)"$/, function(path) {
-  this.ui.browser.browseTo(path);
+When(/^I browse to the document with path "(.+)"$/, async function(path) {
+  await driver.pause(2000);
+  await this.ui.browser.browseTo(path);
 });
 
-Then('I navigate to {string} child', function(title) {
-  this.ui.browser.clickChild(title);
+Then('I navigate to {string} child', async function(title) {
+  const child = await this.ui.browser.clickChild(title);
+  if (!child) {
+    throw Error(`child should have ${title} title`);
+  }
 });
 
 When(/^I start a (.+)$/, function(workflow) {
   this.ui.browser.startWorkflow(workflow);
 });
 
-When(/^I click the process button$/, function() {
-  const { processWorkflowButton } = this.ui.browser.documentPage();
-  processWorkflowButton.waitForVisible();
-  processWorkflowButton.click();
+When(/^I click the process button$/, async function() {
+  const documentPage = await this.ui.browser.documentPage();
+  const documentPageInfo = await documentPage.info;
+  await documentPageInfo.waitForVisible();
+  const processButton = await documentPage.processWorkflowButton;
+  await processButton.waitForVisible();
+  await processButton.click();
 });
 
 Then(/^I can't view the document$/, function() {
@@ -180,15 +190,15 @@ Then(/^I can edit the (.*) metadata$/, function(docType) {
   driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
-Then(/^I can edit the following properties in the (.+) metadata:$/, function(docType, table) {
+Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
   const { browser } = this.ui;
-  browser.editButton.waitForVisible();
-  browser.editButton.click();
+  await browser.editButton.waitForVisible();
+  await browser.editButton.click();
   const form = browser.editForm(docType);
-  form.waitForVisible();
-  form.layout.waitForVisible();
-  form.layout.fillMultipleValues(table);
-  form.save();
+  await form.waitForVisible();
+  await form.layout.waitForVisible();
+  await form.layout.fillMultipleValues(table);
+  await form.save();
 });
 
 Then(/^I can't edit the Note$/, function() {
@@ -261,21 +271,27 @@ Then('I add the document to the favorites', function() {
   this.ui.browser.addToFavorites();
 });
 
-Then('I can see the document has {int} children', function(nb) {
-  this.ui.browser.waitForNbChildren(nb);
+Then('I can see the document has {int} children', async function(nb) {
+  if (await !this.ui.browser.waitForNbChildren(nb)) {
+    throw Error(`Document should have ${nb} children`);
+  }
 });
 
-Then(/^I can see a process is running in the document$/, function() {
-  const documentPage = this.ui.browser.documentPage();
+Then(/^I can see a process is running in the document$/, async function() {
+  const documentPage = await this.ui.browser.documentPage();
   // check info bar in the document is visible
-  documentPage.infoBar.waitForVisible();
+  const infoBar = await documentPage.infoBar;
+  await infoBar.waitForVisible();
   // assert that info bar displays a task is running
-  documentPage.taskInfo.waitForVisible();
+  const taskInfo = await documentPage.taskInfo;
+  await taskInfo.waitForVisible();
   // assert that there's a button to process the task
-  documentPage.processWorkflowButton.waitForVisible();
+  const processWorkflowButton = await documentPage.processWorkflowButton;
+  await processWorkflowButton.waitForVisible();
   // assert that document info says a process is running
-  documentPage.info.waitForVisible();
-  documentPage.info.waitForVisible('[name="process"]');
+  const documentPageInfo = await documentPage.info;
+  await documentPageInfo.waitForVisible();
+  await documentPageInfo.$('[name="process"]').waitForVisible();
 });
 
 Then(/^I can see a process is not running in the document$/, function() {
@@ -306,18 +322,19 @@ Then(/^I can abandon the workflow$/, function() {
   fixtures.workflows.removeInstance(this.workflowInstance.id);
 });
 
-Then(/^I can see the document is a publication$/, function() {
-  const infoBar = this.ui.browser.publicationInfobar;
-  infoBar.waitForVisible();
+Then(/^I can see the document is a publication$/, async function() {
+  const infoBar = await this.ui.browser.publicationInfobar;
+  await infoBar.waitForVisible();
 });
 
-Then(/^I can unpublish the document$/, function() {
-  const unpublishButton = this.ui.browser.publicationInfobar.element('nuxeo-unpublish-button');
-  unpublishButton.waitForVisible();
-  unpublishButton.click();
-  const unpublishConfirm = unpublishButton.element('nuxeo-confirm-button #dialog paper-button[class="primary"]');
-  unpublishConfirm.waitForVisible();
-  unpublishConfirm.click();
+Then(/^I can unpublish the document$/, async function() {
+  const infoBar = await this.ui.browser.publicationInfobar;
+  const unpublishButton = await infoBar.element('nuxeo-unpublish-button');
+  await unpublishButton.waitForVisible();
+  await unpublishButton.click();
+  const unpublishConfirm = await unpublishButton.$('nuxeo-confirm-button #dialog paper-button[class="primary"]');
+  await unpublishConfirm.waitForVisible();
+  await unpublishConfirm.click();
 });
 
 Then('I can see {int} validation error(s) in the {string} edit form', function(nbErrors, docType) {
