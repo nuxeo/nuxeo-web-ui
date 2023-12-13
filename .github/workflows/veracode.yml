@@ -158,9 +158,9 @@ jobs:
         # createsandbox: 'false'
         sandboxname: 'master'
         scantimeout: 0
-        exclude: '*.js'
         include: '*.war'
         criticality: 'VeryHigh'
+        includenewmodules: 'true'
 
 
 
