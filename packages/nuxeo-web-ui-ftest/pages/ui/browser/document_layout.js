@@ -11,7 +11,8 @@ export default class DocumentLayout extends BasePage {
 
   async getFieldValue(field) {
     const fieldEl = await this.getField(field);
-    return fixtures.layouts.getValue(fieldEl);
+    const finalFieldEle = await fixtures.layouts.getValue(fieldEl);
+    return finalFieldEle;
   }
 
   async setFieldValue(field, value) {
