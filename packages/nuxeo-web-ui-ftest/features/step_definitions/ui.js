@@ -5,6 +5,7 @@ When('I click the {string} button', async function(button) {
   const buttonToclick = await drawer.open(button);
   return buttonToclick;
 });
+
 When('I select {string} from the View menu', function(option) {
   return this.ui.view(option);
 });
