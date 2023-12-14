@@ -19,16 +19,20 @@ class AuthorizedApp {
 }
 
 export default class UserAuthorizedApps extends BasePage {
-  getApps(appName) {
-    this.el.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
-    let apps = this.el
-      .elements('nuxeo-data-table nuxeo-data-table-row')
-      .splice(1) // skip the header
-      .map((el) => new AuthorizedApp(el)) // and map every element to a wrapper we can work with
-      .filter((app) => !!app.name.trim());
-    // because clients are update after tokens, there might be empty rows that must be filtered
+  async getApps(appName) {
+    const elEx = await this.el;
+    await elEx.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
+    const elExElements = await elEx.elements('nuxeo-data-table nuxeo-data-table-row');
+    const appSplice = elExElements.splice(1); // skip the header
+    const appMaps = appSplice.map((el) => new AuthorizedApp(el));
+    const appNames = await this.el
+      .$$('nuxeo-data-table nuxeo-data-table-row:not([header])')
+      .map((img) => img.$('nuxeo-data-table-cell').getText());
+
+    let apps = appMaps.filter((_, index) => !!appName[index].trim());
+
     if (appName) {
-      apps = apps.filter((app) => app.name === appName);
+      apps = apps.filter((_, index) => appNames[index] === appName);
     }
     return apps;
   }

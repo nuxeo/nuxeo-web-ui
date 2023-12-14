@@ -98,8 +98,9 @@ export default class Browser extends BasePage {
     return this.breadcrumb.getText('.breadcrumb-item-current');
   }
 
-  _section(name) {
-    return this.el.$(`#nxContent [name='${name}']`);
+  async _section(name) {
+    const nxname = await this.el.$(`#nxContent [name='${name}']`);
+    return nxname;
   }
 
   get editButton() {
@@ -119,11 +120,22 @@ export default class Browser extends BasePage {
   }
 
   get rows() {
-    return this.currentPage.then(async (rowName) => {
-      rowName.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
-      const rowsTemp = await rowName.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    return (async () => {
+      const currentPage = await this.currentPage;
+      await currentPage.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+      let rowsTemp;
+      await driver.waitUntil(
+        async () => {
+          rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+          return rowsTemp.length > 0;
+        },
+        {
+          timeout: 10000,
+          timeoutMsg: 'rows not found!!',
+        },
+      );
       return rowsTemp;
-    });
+    })();
   }
 
   async waitForChildren() {
