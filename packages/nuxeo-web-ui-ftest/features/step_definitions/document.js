@@ -257,8 +257,8 @@ Then('I can see the document does not belong to the {string} collection', functi
   this.ui.browser.doesNotHaveCollection(name).should.be.true;
 });
 
-Then('I add the document to the favorites', function() {
-  this.ui.browser.addToFavorites();
+Then('I add the document to the favorites', async function() {
+  await this.ui.browser.addToFavorites();
 });
 
 Then('I can see the document has {int} children', function(nb) {

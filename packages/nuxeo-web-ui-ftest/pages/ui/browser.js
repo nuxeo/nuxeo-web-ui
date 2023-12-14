@@ -191,13 +191,16 @@ export default class Browser extends BasePage {
   }
 
   get isFavorite() {
-    this.el.waitForExist('nuxeo-favorites-toggle-button[favorite]');
-    return true;
+    return (async () => {
+      await this.el.waitForExist('nuxeo-favorites-toggle-button[favorite]');
+      return true;
+    })();
   }
 
-  addToFavorites() {
-    this.el.click('nuxeo-favorites-toggle-button');
-    return this.isFavorite;
+  async addToFavorites() {
+    await this.el.$('nuxeo-favorites-toggle-button').click();
+    const fav = await this.isFavorite;
+    return fav;
   }
 
   hasTitle(title) {
