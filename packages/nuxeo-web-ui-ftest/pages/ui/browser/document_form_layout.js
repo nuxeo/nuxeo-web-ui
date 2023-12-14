@@ -10,7 +10,7 @@ export default class DocumentFormLayout extends BasePage {
   }
 
   set title(title) {
-    return this.el.element('.input-element input').setValue(title);
+    return this.el.$('.input-element input').setValue(title);
   }
 
   get layout() {
@@ -31,8 +31,8 @@ export default class DocumentFormLayout extends BasePage {
   }
 
   async save() {
-    const button = await this.el.$('.actions #save');
-    button.waitForVisible();
-    button.click();
+    const button = await this.el.element('.actions #save');
+    await button.waitForVisible();
+    await button.click();
   }
 }

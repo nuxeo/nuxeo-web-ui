@@ -197,46 +197,51 @@ Then(/^I can edit the following properties in the (.+) metadata:$/, async functi
   await form.save();
 });
 
-Then(/^I can't edit the Note$/, function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.view.waitForVisible();
-  page.view.noteEditor.waitForVisible();
-  page.view.noteEditor.editButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+Then(/^I can't edit the Note$/, async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.view.waitForVisible();
+  await page.view.noteEditor.waitForVisible();
+  const editButtonEle = await page.view.noteEditor.editButton;
+  await editButtonEle.waitForVisible(browser.options.waitforTimeout, true);
 });
 
-Then(/^I can edit the (.*) Note$/, function(format) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.view.waitForVisible();
+Then(/^I can edit the (.*) Note$/, async function(format) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.view.waitForVisible();
+  const previewEle = await page.view.preview;
 
   const newContent = `NEW ${format} CONTENT`;
 
   switch (format) {
     case 'HTML':
-      page.view.noteEditor.waitForVisible();
-      page.view.noteEditor.setContent(newContent);
-      page.view.noteEditor.save();
-      driver.waitUntil(() => page.view.noteEditor.hasContent(`<p>${newContent}</p>`));
+      await page.view.noteEditor.waitForVisible();
+      await page.view.noteEditor.setContent(newContent);
+      await page.view.noteEditor.save();
+      await driver.waitUntil(() => page.view.noteEditor.hasContent(`<p>${newContent}</p>`));
       break;
     case 'XML':
     case 'Markdown':
     case 'Text':
-      page.view.noteEditor.waitForVisible();
-      page.view.noteEditor.edit();
-      page.view.noteEditor.textarea.waitForVisible();
-      page.view.noteEditor.textarea.setValue(newContent);
-      page.view.noteEditor.save();
-      page.view.preview.waitForVisible();
-      driver.waitUntil(() => {
+      await page.view.noteEditor.waitForVisible();
+      await page.view.noteEditor.edit();
+      await page.view.noteEditor.textarea.waitForVisible();
+      await page.view.noteEditor.textarea.setValue(newContent);
+      await page.view.noteEditor.save();
+      await previewEle.waitForVisible();
+      await driver.waitUntil(async () => {
         try {
           let elContent;
           if (format === 'XML') {
-            elContent = page.view.preview.element('#xml');
+            elContent = await previewEle.$('#xml');
           } else if (format === 'Text') {
-            elContent = page.view.preview.element('#plain');
+            elContent = await previewEle.$('#plain');
           } else {
-            elContent = page.view.preview.element('marked-element #content');
+            elContent = await previewEle.$('marked-element #content');
           }
-          return elContent.isVisible() && elContent.getText() === newContent;
+          const elementContentVisible = await elContent.isVisible();
+          const elementContentText = await elContent.getText();
+          const elContentEle = elementContentVisible && elementContentText === newContent;
+          return elContentEle;
         } catch (e) {
           return false;
         }
