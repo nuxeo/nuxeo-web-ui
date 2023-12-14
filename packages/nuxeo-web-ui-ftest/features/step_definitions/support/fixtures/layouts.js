@@ -268,7 +268,9 @@ global.fieldRegistry.register('nuxeo-document-blob', (element) => {
 global.fieldRegistry.register(
   'generic',
   (element) => element.getText(),
-  (element, value) => element.setValue(value),
+  async (element, value) => {
+    await element.setValue(value);
+  },
 );
 
 fixtures.layouts = {
@@ -277,6 +279,7 @@ fixtures.layouts = {
     return (global.fieldRegistry.contains(fieldType)
       ? await global.fieldRegistry.getValFunc(fieldType)
       : global.fieldRegistry.getValFunc('generic'))(element);
+    return fieldTypeEle;
   },
   setValue: async (element, value) => {
     const fieldType = await element.getTagName();

@@ -134,8 +134,8 @@ When(/^I perform a (.+) search for (.+) on (.+)$/, async function(searchType, se
   await searchForm.search(searchType, searchTerm);
 });
 
-When('I switch to filter view', function() {
-  this.ui.filterView.click();
+When('I switch to filter view', async function() {
+  await this.ui.filterView.click();
 });
 
 Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
@@ -159,7 +159,7 @@ Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
     }
     const outResult2 = await uiResult.resultsCount(displayMode);
     if (outResult2 !== numberOfResults) {
-      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
+      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult}`);
     }
   }
 });

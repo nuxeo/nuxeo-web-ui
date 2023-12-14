@@ -226,6 +226,6 @@ export default class UI extends BasePage {
   }
 
   get filterView() {
-    return this.el.element('paper-icon-button[id="toogleFilter"]');
+    return this.el.$('paper-icon-button[id="toogleFilter"]');
   }
 }
