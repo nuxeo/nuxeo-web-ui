@@ -23,7 +23,10 @@ export default class Group extends BasePage {
   }
 
   get editGroupButton() {
-    return this.el.element('#editGroupButton');
+    return (async () => {
+      const editEle = await this.el.element('#editGroupButton');
+      return editEle;
+    })();
   }
 
   get editGroupLabel() {
@@ -31,40 +34,56 @@ export default class Group extends BasePage {
   }
 
   get editGroupDialogButton() {
-    return this.el.element('#editGroupDialog paper-button.primary');
+    return (async () => {
+      const groupDialogEle = await this.el.element('#editGroupDialog paper-button.primary');
+      return groupDialogEle;
+    })();
   }
 
   get deleteGroupButton() {
-    return this.el.element('#deleteGroupButton');
+    return (async () => {
+      const deleteGroupEle = await this.el.element('#deleteGroupButton');
+      return deleteGroupEle;
+    })();
   }
 
   get confirmDeleteGroupButton() {
-    return this.el.element('#deleteGroupDialog paper-button');
+    return (async () => {
+      const confirmButtonEle = await this.el.element('#deleteGroupDialog paper-button');
+      return confirmButtonEle;
+    })();
   }
 
-  fillMultipleValues(table) {
-    table.rows().forEach((row) => {
+  async fillMultipleValues(table) {
+    table.rows().forEach(async (row) => {
       if (row[0] === 'groupName') {
         // eslint-disable-next-line prefer-destructuring
         global.groups[row[1]] = row[1];
       }
-      const fieldEl = this.getField(row[0]);
-      fieldEl.waitForVisible();
-      return fixtures.layouts.setValue(fieldEl, row[1]);
+      const fieldEl = await this.getField(row[0]);
+      await fieldEl.waitForVisible();
+      const setEle = await fixtures.layouts.setValue(fieldEl, row[1]);
+      return setEle;
     });
   }
 
-  searchFor(searchTerm) {
-    driver.waitForExist(this._selector);
-    driver.waitForVisible(this._selector);
-    const searchBox = this.el.element('nuxeo-user-group-search paper-input');
-    searchBox.waitForVisible();
-    return fixtures.layouts.setValue(searchBox, searchTerm);
+  async searchFor(searchTerm) {
+    await driver.waitForExist(this._selector);
+    await driver.waitForVisible(this._selector);
+    const searchBox = await this.el.element('nuxeo-user-group-search paper-input');
+    await searchBox.waitForVisible();
+    const setEle = await fixtures.layouts.setValue(searchBox, searchTerm);
+    return setEle;
   }
 
-  searchResult(searchTerm) {
-    const match = (e) => e.getText() === searchTerm;
-    driver.waitUntil(() => this.el.elements('nuxeo-card[name="groups"] .table [name="id"]').some(match));
-    return this.el.elements('nuxeo-card[name="groups"] .table [name="id"]').find(match);
+  async searchResult(searchTerm) {
+    const match = async (e) => (await e.getText()) === searchTerm;
+    driver.waitUntil(async () => {
+      const tableEle = await this.el.elements('nuxeo-card[name="groups"] .table [name="id"]');
+      await tableEle.some(match);
+    });
+
+    const groupEle = await this.el.elements('nuxeo-card[name="groups"] .table [name="id"]');
+    return groupEle.find(match);
   }
 }

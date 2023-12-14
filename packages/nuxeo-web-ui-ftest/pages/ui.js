@@ -15,8 +15,10 @@ import UserCloudServices from './ui/oauth2/user_cloud_services';
 import { refresh, url } from './helpers';
 
 export default class UI extends BasePage {
-  goHome() {
-    this.drawer.logo.click();
+  async goHome() {
+    const logoEle = await this.drawer.logo;
+    await logoEle.waitForVisible();
+    await logoEle.click();
   }
 
   reload() {
@@ -75,12 +77,18 @@ export default class UI extends BasePage {
   }
 
   get createDialog() {
-    this._createDialog = this._createDialog ? this._createDialog : new CreateDialog('#createDocDialog');
-    return this._createDialog;
+    return (async () => {
+      const cd = await new CreateDialog('#createDocDialog');
+      this._createDialog = this._createDialog ? this._createDialog : cd;
+      return this._createDialog;
+    })();
   }
 
   get createButton() {
-    return this.el.element('#createBtn');
+    return (async () => {
+      const buttonCreate = await this.el.element('#createBtn');
+      return buttonCreate;
+    })();
   }
 
   get adminButton() {
@@ -147,11 +155,14 @@ export default class UI extends BasePage {
     return new UserAuthorizedApps('nuxeo-user-authorized-apps');
   }
 
-  goToUserAuthorizedApps() {
-    if (!browser.getUrl().endsWith('user-authorized-apps')) {
-      url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
+  async goToUserAuthorizedApps() {
+    const browserUrl = await browser.getUrl();
+    if (!browserUrl.endsWith('user-authorized-apps')) {
+      await url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
     }
-    return this.userAuthorizedApps;
+    if (await this.userAuthorizedApps.waitForVisible()) {
+      return this.userAuthorizedApps;
+    }
   }
 
   get tasks() {
