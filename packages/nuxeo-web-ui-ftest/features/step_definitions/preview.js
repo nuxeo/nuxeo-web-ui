@@ -14,17 +14,21 @@ When('I click the preview button for the attachment', function() {
   page.metadata.attachments.previewButton.click();
 });
 
-Then(/^I can see the inline ([-\w]+) previewer$/, function(viewerType) {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.view.waitForVisible();
-  const { preview } = page.view;
-  preview.waitForVisible();
+Then(/^I can see the inline ([-\w]+) previewer$/, async function(viewerType) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  await page.view.waitForVisible();
+  await page;
+  const viewEle = await page.view;
+  const preview = await viewEle.preview;
+  await preview.waitForVisible();
+
   if (viewerType === 'plain') {
     preview.waitForVisible(`#${viewerType}`);
+
     return;
   }
-  preview.waitForVisible(viewerType);
+  await preview.waitForVisible(viewerType);
 });
 
 Then(/^I can see a ([-\w]+) previewer$/, (viewerType) => {
