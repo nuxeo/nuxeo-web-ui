@@ -67,6 +67,7 @@ Given('I am on cloud services page', async function() {
 
 // ¯\_(ツ)_/¯ no way to escape a / character in cucumber expressions
 When(/^I click the new user\/group button$/, async function() {
-  await this.ui.administration.userGroupCreateButton.waitForVisible();
-  await this.ui.administration.userGroupCreateButton.click();
+  const userGroupEle = await this.ui.administration.userGroupCreateButton;
+  await userGroupEle.waitForVisible();
+  await userGroupEle.click();
 });

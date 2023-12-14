@@ -58,19 +58,24 @@ Then(/^I can see "(.+)" as an authorized application$/, function(application) {
 });
 
 Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberOfApps) {
-  await driver.waitUntil(() => this.ui.userAuthorizedApps.getApps().length === numberOfApps);
+  const authPage = await this.ui.userAuthorizedApps;
+  await authPage.waitForVisible();
+  const apps = await this.ui.userAuthorizedApps.getApps();
+  driver.waitUntil(() => apps.length === numberOfApps);
 });
 
 Then('I cannot see authorized application', function() {
   this.ui.emptyAuthorizedApps.waitForDisplayed();
 });
 
-Then(/^I can revoke access for "(.+)" application$/, function(appName) {
-  this.ui.userAuthorizedApps.waitForVisible();
-  browser.waitUntil(() => this.ui.userAuthorizedApps.getApps().length > 0);
-  const apps = this.ui.userAuthorizedApps.getApps(appName);
-  apps.length.should.equal(1);
-  const revokeButton = apps[0].revokeButton();
+Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
+  const authPage = await this.ui.userAuthorizedApps;
+  await authPage.waitForVisible();
+  const apps = await this.ui.userAuthorizedApps.getApps();
+  await browser.waitUntil(() => apps.length > 0);
+  const appRevoke = await this.ui.userAuthorizedApps.getApps(appName);
+  appRevoke.length.should.equal(1);
+  const revokeButton = await apps[0].revokeButton();
   revokeButton.waitForVisible();
   revokeButton.click();
   driver.alertAccept();
