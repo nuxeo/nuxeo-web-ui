@@ -28,10 +28,11 @@
         sort-label="[[i18n('searchResults.sort.label')]]"
         selection-enabled
         display-quick-filters
+        last-index="[[_lastIndex]]"
       >
         <template>
           <nuxeo-document-grid-thumbnail
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{_computeTabAndLastIndex(index)}}"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
@@ -108,10 +109,20 @@
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         nxProvider: Object,
+        _lastIndex: {
+          type: Number,
+          value: 0,
+        },
       },
 
       _navigate(e) {
         this.fire('navigate', { doc: (e.model || e.detail).item });
+      },
+
+      _computeTabAndLastIndex(index) {
+        const tabindex = index + 1;
+        this._lastIndex = this.nxProvider.resultsCount;
+        return tabindex.toString();
       },
     });
   </script>
