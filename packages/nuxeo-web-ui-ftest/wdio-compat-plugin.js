@@ -252,8 +252,9 @@ module.exports = class {
 
     browser.addCommand(
       'hasElementByTextContent',
-      function(selector, textContent) {
-        return this.elements(selector).some((e) => e.getText() === textContent);
+      async function(selector, textContent) {
+        const ele = await this.elements(selector);
+        return ele.some((e) => e.getText() === textContent);
       },
       true,
     );

@@ -63,9 +63,9 @@ Then('I cannot untrash selected documents', function() {
 
 Then('I can trash current document', async function() {
   const el = await this.ui.browser.trashDocumentButton;
-  el.waitForVisible();
-  el.click();
-  driver.alertAccept();
+  await el.waitForVisible();
+  await el.click();
+  await driver.alertAccept();
 });
 
 Then('I cannot trash current document', function() {
@@ -84,12 +84,13 @@ Then('I cannot untrash current document', function() {
   this.ui.browser.untrashDocumentButton.isExisting().should.be.false;
 });
 
-Then('I can permanently delete current document', function() {
-  this.ui.browser.trashedInfobar.waitForVisible();
-  const el = this.ui.browser.deleteDocumentButton;
-  el.waitForVisible();
-  el.click();
-  driver.alertAccept();
+Then('I can permanently delete current document', async function() {
+  const trashedToolbar = await this.ui.browser.trashedInfobar;
+  await trashedToolbar.waitForVisible();
+  const el = await this.ui.browser.deleteDocumentButton;
+  await el.waitForVisible();
+  await el.click();
+  await driver.alertAccept();
 });
 
 Then('I cannot permanently delete current document', function() {
