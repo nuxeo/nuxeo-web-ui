@@ -59,12 +59,14 @@ export default class UI extends BasePage {
   }
 
   get results() {
-    driver.waitUntil(async () => {
-      if (await this.el.$('nuxeo-browser').isVisible()) {
+    return (async () => {
+      const ele = await this.el.element('nuxeo-browser');
+      const isElementVisible = await ele.isVisible();
+      if (isElementVisible) {
         return this.browser.results;
       }
-    });
-    return new Search('nuxeo-search-results-layout[id="results"]');
+      return new Search('nuxeo-search-results-layout[id="results"]');
+    })();
   }
 
   get searchResults() {

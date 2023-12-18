@@ -60,9 +60,11 @@ const suggestionSet = async (element, value) => {
   }
   // it's a reset
   else if (element.getAttribute('multiple') !== null) {
-    element
-      .elements('.selectivity-multiple-selected-item')
-      .forEach((el) => el.element('.selectivity-multiple-selected-item-remove').click());
+    const dropdown = element.elements('.selectivity-multiple-selected-item');
+    for (let i = 0; i < dropdown.length; i++) {
+      const dropdownElement = await dropdown[i].element('.selectivity-multiple-selected-item-remove');
+      await dropdownElement.click();
+    }
   } else {
     const item = element.element('.selectivity-single-selected-item');
     if (item) {
@@ -73,8 +75,9 @@ const suggestionSet = async (element, value) => {
 global.fieldRegistry.register(
   'nuxeo-input',
   (element) => element.$('.input-element input').getValue(),
-  (element, value) => {
-    element.$('.input-element input').setValue(value);
+  async (element, value) => {
+    const ele = await element.$('.input-element input');
+    await ele.setValue(value);
   },
 );
 global.fieldRegistry.register(
@@ -106,22 +109,24 @@ global.fieldRegistry.register(
 global.fieldRegistry.register(
   'nuxeo-date-picker',
   (element) => moment(element.$('vaadin-date-picker input').getValue(), global.dateFormat).format(global.dateFormat),
-  (element, value) => {
-    const date = element.$('vaadin-date-picker input');
-    if (date.getValue()) {
-      date.$('div[part="clear-button"]').click();
+  async (element, value) => {
+    const date = await element.$('vaadin-date-picker input');
+    if (await date.getValue()) {
+      const ele = await date.$('div[part="clear-button"]');
+      await ele.click();
     }
-    date.click();
-    const keys = moment(value, global.dateFormat).format('L');
-    driver.keys(keys);
-    driver.keys('Enter');
+    await date.click();
+    const keys = await moment(value, global.dateFormat).format('L');
+    await driver.keys(keys);
+    await driver.keys('Enter');
   },
 );
 global.fieldRegistry.register(
   'nuxeo-textarea',
   (element) => element.element('#textarea').getValue(),
-  (element, value) => {
-    element.$('#textarea').setValue(value);
+  async (element, value) => {
+    const ele = await element.$('#textarea');
+    await ele.setValue(value);
   },
 );
 global.fieldRegistry.register('nuxeo-user-suggestion', suggestionGet, suggestionSet);
@@ -259,9 +264,9 @@ global.fieldRegistry.register(
 );
 
 fixtures.layouts = {
-  getValue: (element) => {
-    const fieldType = element.getTagName();
-    return (global.fieldRegistry.contains(fieldType)
+  getValue: async (element) => {
+    const fieldType = await element.getTagName();
+    await (global.fieldRegistry.contains(fieldType)
       ? global.fieldRegistry.getValFunc(fieldType)
       : global.fieldRegistry.getValFunc('generic'))(element);
   },

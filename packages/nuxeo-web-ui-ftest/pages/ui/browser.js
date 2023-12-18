@@ -13,8 +13,8 @@ import Results from './results';
 import { clickActionMenu, url } from '../helpers';
 
 export default class Browser extends BasePage {
-  documentPage(docType) {
-    const page = fixtures.layouts.page[docType] || 'nuxeo-document-page';
+  async documentPage(docType) {
+    const page = (await fixtures.layouts.page[docType]) || 'nuxeo-document-page';
     if (page === 'nuxeo-collapsible-document-page') {
       return new CollapsibleDocumentPage(page, docType);
     }
@@ -370,8 +370,10 @@ export default class Browser extends BasePage {
     return this.el.$('.document-actions nuxeo-workflow-button #startButton');
   }
 
-  clickDocumentActionMenu(selector) {
-    clickActionMenu(this.el.$('nuxeo-actions-menu'), selector);
+  async clickDocumentActionMenu(selector) {
+    const ele = await this.el;
+    const id = await ele.$('nuxeo-actions-menu');
+    await clickActionMenu(id, selector);
   }
 
   startWorkflow(workflow) {

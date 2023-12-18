@@ -9,8 +9,8 @@ export default class DocumentLayout extends BasePage {
     return result;
   }
 
-  getFieldValue(field) {
-    const fieldEl = this.getField(field);
+  async getFieldValue(field) {
+    const fieldEl = await this.getField(field);
     return fixtures.layouts.getValue(fieldEl);
   }
 
@@ -29,8 +29,7 @@ export default class DocumentLayout extends BasePage {
       const fieldEl = await this.getField(fieldName);
       await fieldEl.waitForVisible();
       await fieldEl.scrollIntoView();
-      const result = await fixtures.layouts.setValue(fieldEl, row[1]);
-      return result;
+      await fixtures.layouts.setValue(fieldEl, row[1]);
     }
   }
 }

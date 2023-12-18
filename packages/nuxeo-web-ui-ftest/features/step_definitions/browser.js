@@ -33,7 +33,8 @@ Then('I can navigate to {word} pill', async function(pill) {
   const ele = await this.ui.browser.el.$(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
   await ele.waitForVisible();
   await ele.click();
-  await this.ui.browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
+  const pillTab = await this.ui.browser.el.$(`#nxContent [name='${pill.toLowerCase()}']`);
+  await pillTab.waitForVisible();
 });
 
 Then('I cannot see to {word} pill', async function(pill) {
