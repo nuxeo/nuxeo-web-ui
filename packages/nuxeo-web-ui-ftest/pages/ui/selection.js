@@ -11,18 +11,27 @@ export default class Selection extends BasePage {
   }
 
   get addDocumentsToCollectionButton() {
-    return this.el.element('nuxeo-add-to-collection-documents-button');
+    return (async () => {
+      const thisEle = await this.el;
+      const documentsButtonEle = await thisEle.$('nuxeo-add-to-collection-documents-button');
+      return documentsButtonEle;
+    })();
   }
 
   get addToCollectionDialog() {
-    const button = this.addDocumentsToCollectionButton;
-    button.waitForVisible();
-    if (!button.isExisting('#dialog') || !button.isVisible('#dialog')) {
-      button.click();
-    }
-    const dialog = new AddToCollectionDialog(`${this._selector} nuxeo-add-to-collection-documents-button #dialog`);
-    dialog.waitForVisible();
-    return dialog;
+    return (async () => {
+      const button = await this.addDocumentsToCollectionButton;
+      await button.waitForVisible();
+
+      if (!(await button.isExisting('#dialog')) || !(await button.isVisible('#dialog'))) {
+        await button.click();
+      }
+      const dialog = new AddToCollectionDialog(
+        `${await this._selector} nuxeo-add-to-collection-documents-button #dialog`,
+      );
+      await dialog.waitForVisible();
+      return dialog;
+    })();
   }
 
   moveDown() {

@@ -84,8 +84,9 @@ Then('I select all the documents', async function() {
 });
 
 Then('I deselect the {string} document', async function(title) {
-  await this.ui.browser.waitForVisible();
-  await this.ui.browser.deselectChildDocument(title);
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  await browser.deselectChildDocument(title);
 });
 
 Then('I select the {string} document', async function(title) {
@@ -105,9 +106,12 @@ When('I cannot see the display selection link', function() {
   this.ui.browser.selectionToolbar.waitForNotVisible('.selectionLink').should.be.true;
 });
 
-Then('I can add selection to the {string} collection', function(collectionName) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.addToCollectionDialog.addToCollection(collectionName);
+Then('I can add selection to the {string} collection', async function(collectionName) {
+  const browserEle = await this.ui.browser;
+  await browserEle.waitForVisible();
+  const selectionToolEle = await browserEle.selectionToolbar;
+  const addToDialog = await selectionToolEle.addToCollectionDialog;
+  await addToDialog.addToCollection(collectionName);
 });
 
 Then('I can add selection to clipboard', async function() {
@@ -144,14 +148,13 @@ When('I sort the content by {string} in {string} order', async function(field, o
 });
 
 Then('I can see {int} document(s)', async function(numberOfResults) {
-  const browserEle = await this.ui.browser;
-  const results = await browserEle.results;
-  await results.waitForVisible();
-  const displayMode = await results.displayMode;
-  await driver.pause(3000);
-  const countEle = await results.resultsCount(displayMode);
-  if (countEle !== numberOfResults) {
-    throw Error('Number of documents are not as expected');
+  const out = await this.ui.browser;
+  const uiResult = await out.results;
+
+  const displayMode = await uiResult.displayMode;
+  const outResult = await uiResult.resultsCount(displayMode);
+  if (outResult !== numberOfResults) {
+    throw Error(`Expecting to get ${numberOfResults} results but found ${outResult}`);
   }
 });
 
