@@ -148,70 +148,86 @@ export default class Browser extends BasePage {
     await ele.waitForExist();
   }
 
-  addToCollection(name) {
-    const button = this.el.$('nuxeo-add-to-collection-button');
-    button.waitForVisible();
-    if (!button.isExisting('#dialog') || !button.isVisible('#dialog')) {
-      button.click();
+  async addToCollection(name) {
+    const button = await this.el.$('nuxeo-add-to-collection-button');
+    await button.waitForVisible();
+    const dialogExistingEle = await button.isExisting('#dialog');
+    const dialogVisibleEle = await button.isVisible('#dialog');
+    if (!dialogExistingEle || !dialogVisibleEle) {
+      await button.click();
     }
-    const dialog = new AddToCollectionDialog(`${this._selector}  nuxeo-add-to-collection-button #dialog`);
-    dialog.waitForVisible();
-    dialog.addToCollection(name);
-    this.el.waitForVisible('nuxeo-document-collections nuxeo-tag');
+    const dialog = await new AddToCollectionDialog(`${this._selector}  nuxeo-add-to-collection-button #dialog`);
+    await dialog.waitForVisible();
+    await dialog.addToCollection(name);
+    const docCollectionEle = await this.el.$('nuxeo-document-collections nuxeo-tag');
+    await docCollectionEle.waitForVisible();
   }
 
-  doesNotHaveCollection(name) {
+  async doesNotHaveCollection(name) {
     const page = this.el;
-    driver.waitUntil(() => {
-      if (!driver.isExisting('nuxeo-document-collections')) {
-        return true;
+    const nuxeoDocEle = await driver.isExisting('nuxeo-document-collections');
+    if (!nuxeoDocEle) {
+      return true;
+    }
+    try {
+      const collections = await page.elements('nuxeo-document-collections nuxeo-tag');
+      for (let i = 0; i < collections.length; i++) {
+        const collection = await collections[i];
+        const getTextEle = await collection.getText();
+        if (getTextEle.trim() !== name) {
+          return false;
+        }
       }
-      try {
-        const collections = page.elements('nuxeo-document-collections nuxeo-tag');
-        return collections.every((collection) => collection.getText().trim() !== name);
-      } catch (e) {
-        return false;
-      }
-    }, 'The document does belong to the collection');
-    return true;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  hasCollection(name) {
-    const page = this.el;
-    driver.waitUntil(() => {
-      if (!driver.isExisting('nuxeo-document-collections')) {
-        return false;
-      }
-      try {
-        const collections = page.elements('nuxeo-document-collections nuxeo-tag a');
-        return collections.some((collection) => collection.getText().trim() === name);
-      } catch (e) {
-        return false;
-      }
-    }, 'The document does not belong to the collection');
-    return true;
-  }
-
-  removeFromCollection(name) {
-    const { el } = this;
-    el.waitForVisible('nuxeo-document-collections nuxeo-tag');
-    const collections = this.el.$$('nuxeo-document-collections nuxeo-tag');
-    collections.some((collection) => {
-      if (collection.getText().trim() === name) {
-        const remove = collection.$('iron-icon[name="remove"]');
-        remove.waitForVisible();
-        remove.scrollIntoView();
-        remove.click();
-        return true;
+  async hasCollection(name) {
+    const page = await this.el;
+    const docCollection = await driver.isExisting('nuxeo-document-collections');
+    if (!docCollection) {
+      return false;
+    }
+    try {
+      const collections = await page.$$('nuxeo-document-collections nuxeo-tag a');
+      for (let i = 0; i < collections.length; i++) {
+        const collection = await collections[i];
+        const getTextEle = await collection.getText();
+        if (getTextEle.trim() === name) {
+          return true;
+        }
       }
       return false;
-    });
+    } catch (e) {
+      return false;
+    }
   }
 
-  removeSelectionFromCollection() {
-    const button = this.el.$('nuxeo-collection-remove-action');
-    button.waitForVisible();
-    button.click();
+  async removeFromCollection(name) {
+    const { el } = await this;
+    await el.$('nuxeo-document-collections nuxeo-tag').waitForVisible();
+    const collections = await this.el.$$('nuxeo-document-collections nuxeo-tag');
+    let found = false;
+    for (let index = 0; index < collections.length; index++) {
+      const collectionText = await collections[index].getText();
+      if (collectionText.trim() === name) {
+        const remove = await collections[index].$('iron-icon[name="remove"]');
+        await remove.waitForVisible();
+        await remove.scrollIntoView();
+        await remove.click();
+        found = true;
+      }
+      return false;
+    }
+    return found;
+  }
+
+  async removeSelectionFromCollection() {
+    const button = await this.el.$('nuxeo-collection-remove-action');
+    await button.waitForVisible();
+    await button.click();
   }
 
   get isFavorite() {
@@ -239,11 +255,18 @@ export default class Browser extends BasePage {
     })();
   }
 
-  waitForHasChild(doc) {
+  async waitForHasChild(doc) {
     const { el } = this;
-    el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
-    const titles = el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
-    return titles.some((title) => title.getText().trim() === doc.title);
+    const dataTable = await el.$('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
+    await dataTable.waitForVisible();
+    const titles = await el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row a.title');
+    for (let i = 0; i < titles.length; i++) {
+      const row = await titles[i].getText();
+      if (row.trim() === doc.title) {
+        return true;
+      }
+    }
+    return false;
   }
 
   async clickChild(title) {

@@ -17,7 +17,8 @@ Then('I see a toast notification with the following message {string}', async fun
   await notificationMessage.should.be.equals(trimmedMessage);
 });
 
-Then('I click the toast notification dismiss button', function() {
-  this.ui.getToastDismissButton().click();
-  this.ui.waitForToastNotVisible();
+Then('I click the toast notification dismiss button', async function() {
+  const snackbar = await this.ui.getToastDismissButton();
+  await snackbar.click();
+  await this.ui.waitForToastNotVisible();
 });

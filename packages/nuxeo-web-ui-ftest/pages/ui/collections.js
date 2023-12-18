@@ -1,61 +1,82 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../base';
 
 export default class Collections extends BasePage {
-  waitForHasCollection(name, reverse) {
+  async waitForHasCollection(name, reverse) {
     const { el } = this;
-    driver.waitUntil(
-      () => {
-        const collections = el.elements('span.collection-name');
+
+    await driver.waitUntil(
+      async () => {
+        const collections = await el.$$('span.collection-name');
+
         if (reverse) {
-          return collections.every((collection) => collection.getText().trim() !== name);
+          return collections.every(async (collection) => (await collection.getText()).trim() !== name);
         }
-        return collections.some((collection) => collection.getText().trim() === name);
+
+        return collections.some(async (collection) => (await collection.getText()).trim() === name);
       },
       reverse ? 'There is such collection' : 'There is no such collection',
     );
+
     return true;
   }
 
-  select(name) {
-    const el = this.el.element('#collectionsList span.title');
-    if (el.getText().trim() === name) {
-      el.click();
-      return true;
+  async select(name) {
+    const ele = await this.el;
+    const rows = await ele.$$('#collectionsList span.title');
+    for (let i = 0; i < rows.length; i++) {
+      const el = rows[i];
+      const textEle = await el.getText();
+      if (textEle.trim() === name) {
+        await el.click();
+        return true;
+      }
     }
     return false;
   }
 
   get isQueueMode() {
-    return this.el.isExisting('#membersList') && this.el.isVisible('#membersList');
+    const abc = this.el.isExisting('#membersList') && this.el.isVisible('#membersList');
+    return abc;
   }
 
   get queueCount() {
-    return this.el.elements('#membersList div').length;
+    return this.el.$$('#membersList div').length;
   }
 
-  waitForHasMember(doc, reverse) {
-    const { el } = this;
-    driver.waitUntil(
-      () => {
-        const members = el.elements('#membersList .list-item-title');
-        if (reverse) {
-          return members.every((member) => member.getText().trim() !== doc.title);
+  async waitForHasMember(doc, reverse) {
+    await driver.pause(2000);
+    const result = await (async () => {
+      const ele = await this.el;
+      const entriesTitle = await ele.$$('#membersList .list-item-title').map((img) => img.getText());
+      const index = await entriesTitle.findIndex((currenTitle) => currenTitle.trim() === doc.title);
+      if (reverse) {
+        if (index !== -1) {
+          return false;
         }
-        return members.some((member) => member.getText().trim() === doc.title);
-      },
-      reverse ? 'There is such member in the collection' : 'There is no such member in the collection',
-    );
-    return true;
+      } else {
+        if (index !== -1) {
+          return true;
+        }
+        return false;
+      }
+      return true;
+    })();
+    return result;
   }
 
-  removeMember(doc) {
-    const members = this.el.elements('#membersList');
-    return members.some((member) => {
-      if (member.isVisible('span.list-item-title') && member.getText('span.list-item-title').trim() === doc.title) {
-        member.click('iron-icon.remove');
+  async removeMember(doc) {
+    const members = await this.el.$$('#membersList');
+    for (let i = 0; i < members.length; i++) {
+      const member = await members[i].$('span.list-item-title');
+      const isRowVisibleEle = await member.isVisible();
+      const getTextEle = await member.getText();
+      if (isRowVisibleEle && getTextEle.trim() === doc.title) {
+        const buttonEle = await members[i].$('iron-icon.remove');
+        await buttonEle.click();
         return true;
       }
-      return false;
-    });
+    }
+    return false;
   }
 }

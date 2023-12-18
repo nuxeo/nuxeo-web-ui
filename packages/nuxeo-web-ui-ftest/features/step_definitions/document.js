@@ -41,15 +41,12 @@ Given(/^This document has a (major|minor) version$/, function(versionType) {
   });
 });
 
-Given(/^I have a document added to "([^"]*)" collection$/, function(colName) {
+Given(/^I have a document added to "([^"]*)" collection$/, async function(colName) {
   const docFile = fixtures.documents.init('File');
   // create the document
-  return fixtures.documents
-    .create(this.doc.path, docFile)
-    .then((doc) => fixtures.collections.addToNewCollection(doc, colName))
-    .then((d) => {
-      this.doc = d;
-    });
+  const doc = await fixtures.documents.create(this.doc.path, docFile);
+  const updatedDoc = await fixtures.collections.addToNewCollection(doc, colName);
+  this.doc = updatedDoc;
 });
 
 Given(/^This document has a "([^"]*)" workflow running$/, async function(workflowName) {
@@ -250,20 +247,31 @@ Then(/^I can edit the (.*) Note$/, function(format) {
   }
 });
 
-Then('I add the document to the {string} collection', function(name) {
-  this.ui.browser.addToCollection(name);
+Then('I add the document to the {string} collection', async function(name) {
+  const browser = await this.ui.browser;
+  await browser.addToCollection(name);
 });
 
-Then('I can see the document belongs to the {string} collection', function(name) {
-  this.ui.browser.hasCollection(name).should.be.true;
+Then('I can see the document belongs to the {string} collection', async function(name) {
+  await driver.pause(3000);
+  const browser = await this.ui.browser;
+  const hasCollection = await browser.hasCollection(name);
+  if (!hasCollection) {
+    throw new Error(`Expected the document belongs to the ${name} that is not visible`);
+  }
 });
 
-Then('I can delete the document from the {string} collection', function(name) {
-  this.ui.browser.removeFromCollection(name);
+Then('I can delete the document from the {string} collection', async function(name) {
+  const deleteCollection = await this.ui.browser;
+  await deleteCollection.removeFromCollection(name);
 });
 
-Then('I can see the document does not belong to the {string} collection', function(name) {
-  this.ui.browser.doesNotHaveCollection(name).should.be.true;
+Then('I can see the document does not belong to the {string} collection', async function(name) {
+  const browserEle = await this.ui.browser;
+  const doesNotHaveCollection = await browserEle.doesNotHaveCollection(name);
+  if (!doesNotHaveCollection) {
+    throw new Error('Expected the document does not belong to the {string} collection is not visible');
+  }
 });
 
 Then('I add the document to the favorites', async function() {
