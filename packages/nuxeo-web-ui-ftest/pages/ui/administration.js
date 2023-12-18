@@ -43,9 +43,11 @@ export default class Administration extends BasePage {
     return new CloudServices('nuxeo-cloud-services');
   }
 
-  goToCloudServices() {
-    if (!browser.getUrl().endsWith('cloud-services')) {
-      url(process.env.NUXEO_URL ? '#!/admin/cloud-services' : 'ui/#!/admin/cloud-services');
+  async goToCloudServices() {
+    const browserUrl = await browser.getUrl();
+    await driver.pause(1000);
+    if (!browserUrl.endsWith('cloud-services')) {
+      await url(process.env.NUXEO_URL ? '#!/admin/cloud-services' : 'ui/#!/admin/cloud-services');
     }
     return this.cloudServices;
   }

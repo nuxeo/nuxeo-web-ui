@@ -1,159 +1,175 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 
 export default class CloudServices extends BasePage {
   get nuxeoCloudTokens() {
-    return this.el.element('nuxeo-cloud-tokens');
+    return this.el.$('nuxeo-cloud-tokens');
   }
 
   get nuxeoCloudTokensAuthorizedApplications() {
-    return this.el.element('nuxeo-oauth2-provided-tokens');
+    return this.el.$('nuxeo-oauth2-provided-tokens');
   }
 
   get nuxeoCloudTokensCloudAccount() {
-    return this.el.element('nuxeo-oauth2-consumed-tokens');
+    return this.el.$('nuxeo-oauth2-consumed-tokens');
   }
 
   get nuxeoCloudProviders() {
-    return this.el.element('nuxeo-cloud-providers');
+    return this.el.$('nuxeo-cloud-providers');
   }
 
   get nuxeoCloudConsumers() {
-    return this.el.element('nuxeo-cloud-consumers');
+    return this.el.$('nuxeo-cloud-consumers');
   }
 
-  addProvider(provider) {
-    driver.waitForVisible('#addEntry');
-    this.el.element('#addEntry').click();
-    driver.waitForVisible('#dialog:not([aria-hidden])');
-    this.fillProviderDetails(provider);
-    this.clickElementName('save');
+  async addProvider(provider) {
+    await driver.waitForVisible('#addEntry');
+    const elem = await this.el.$('#addEntry');
+    await elem.click();
+    await driver.waitForVisible('#dialog:not([aria-hidden])');
+    await this.fillProviderDetails(provider);
+    await this.clickElementName('save');
   }
 
-  editProvider(currentName, newDetails) {
-    driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="serviceName"]');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
-    const edited = rows.some((row) => {
-      if (row.isVisible('[name="serviceName"]') && row.getText('[name="serviceName"]').trim() === currentName) {
-        row.click('[name="edit"]');
-        driver.waitForVisible('#dialog:not([aria-hidden])');
-        this.fillProviderDetails(newDetails);
-        this.el.click('#dialog:not([aria-hidden]) paper-button[name="save"]');
-        return true;
-      }
-      return false;
-    });
-    if (!edited) {
-      throw new Error(`now provider found with named "${currentName}"`);
+  async editProvider(currentName, newDetails) {
+    const rows = await this.el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    const edited = await this.el
+      .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
+      .map((img) => img.$('nuxeo-data-table-cell span[name="serviceName"]').getText());
+    const index = edited.findIndex((currenTitle) => currenTitle === currentName);
+    if (index !== -1) {
+      const rowEle = await rows[index];
+      const editButton = await rowEle.$('[name="edit"]');
+      await editButton.click();
+      await driver.waitForVisible('#dialog:not([aria-hidden])');
+      await this.fillProviderDetails(newDetails);
+      const saveButtonEle = await this.el.$('#dialog:not([aria-hidden]) paper-button[name="save"]');
+      await saveButtonEle.click();
+      return true;
+    }
+    return false;
+  }
+
+  async deleteProvider(serviceName) {
+    const rows = await browser.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    const deleted = await browser
+      .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
+      .map((img) => img.$('nuxeo-data-table-cell span[name="serviceName"]').getText());
+    const index = deleted.findIndex((currenTitle) => currenTitle === serviceName);
+    if (index !== -1) {
+      const rowEle = await rows[index].$('[name="delete"]');
+      await rowEle.click();
+      await driver.alertAccept();
+      return true;
+    }
+    return false;
+  }
+
+  async fillProviderDetails(provider) {
+    const rows = provider.rows();
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const abc = await this.el.$(`#dialog:not([aria-hidden]) input[name="${row[0]}"`);
+      await abc.setValue(row[1]);
     }
   }
 
-  deleteProvider(serviceName) {
-    driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="serviceName"]');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
-    const deleted = rows.some((row) => {
-      if (row.isVisible('[name="serviceName"]') && row.getText('[name="serviceName"]').trim() === serviceName) {
-        row.click('[name="delete"]');
-        driver.alertAccept();
-        return true;
-      }
-      return false;
-    });
-    if (!deleted) {
-      throw new Error(`now provider found with named "${serviceName}"`);
-    }
-  }
-
-  fillProviderDetails(provider) {
-    provider.rows().forEach((row) => {
-      this.el.element(`#dialog:not([aria-hidden]) input[name="${row[0]}"`).setValue(row[1]);
-    });
-  }
-
-  clickElementName(name) {
+  async clickElementName(name) {
     const selector = `[name="${name}"]`;
-    driver.waitForVisible(selector);
-    this.el.element(selector).click();
+    await driver.waitForExist(selector);
+    await this.el.$(selector).click();
   }
 
-  waitForHasProvider(id, reverse) {
+  async waitForHasProvider(id, reverse) {
     const { el } = this;
-    driver.waitUntil(
-      () => {
-        const providers = el.elements('[name="serviceName"');
+
+    await driver.waitUntil(
+      async () => {
+        const providers = await el.elements('[name="serviceName"]');
+
         if (reverse) {
-          return providers.every((provider) => provider.getText().trim() !== id);
+          return providers.every(async (provider) => (await provider.getText()).trim() !== id);
         }
-        return providers.some((provider) => provider.getText().trim() === id);
+
+        return providers.some(async (provider) => (await provider.getText()).trim() === id);
       },
       reverse ? 'The cloud services does have such provider' : 'The cloud services does not have such provider',
     );
+
     return true;
   }
 
-  waitForHasClient(id, reverse) {
+  async waitForHasClient(id, reverse) {
     const { el } = this;
-    driver.waitUntil(
-      () => {
-        const clients = el.elements('[name="id"');
+
+    await driver.waitUntil(
+      async () => {
+        const clients = await el.elements('[name="id"]');
+
         if (reverse) {
-          return clients.every((client) => client.getText().trim() !== id);
+          return clients.every(async (client) => (await client.getText()).trim() !== id);
         }
-        return clients.some((client) => client.getText().trim() === id);
+
+        return clients.some(async (client) => (await client.getText()).trim() === id);
       },
       reverse ? 'The cloud services does have such client' : 'The cloud services does not have such client',
     );
+
     return true;
   }
 
-  fillClientDetails(client) {
-    client.rows().forEach((row) => {
-      this.el.element(`#dialog:not([aria-hidden]) input[name="${row[0]}"`).setValue(row[1]);
-    });
-  }
-
-  clickOnSaveClientBtn() {
-    this.el.click('#dialog:not([aria-hidden]) paper-button[id="save"]');
-  }
-
-  addClient(client) {
-    driver.waitForVisible('#addClient');
-    this.el.element('#addClient').click();
-    driver.waitForVisible('#dialog:not([aria-hidden])');
-    this.fillClientDetails(client);
-    this.clickOnSaveClientBtn();
-  }
-
-  editClient(currentClientId, newDetails) {
-    driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="id"]');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
-    const edited = rows.some((row) => {
-      if (row.isVisible('[name="id"]') && row.getText('[name="id"]').trim() === currentClientId) {
-        row.click('[name="edit"]');
-        driver.waitForVisible('#dialog:not([aria-hidden])');
-        this.fillClientDetails(newDetails);
-        this.clickOnSaveClientBtn();
-        return true;
-      }
-      return false;
-    });
-    if (!edited) {
-      throw new Error(`no client found with id "${currentClientId}"`);
+  async fillClientDetails(client) {
+    const clientRows = client.rows();
+    for (let i = 0; i < clientRows.length; i++) {
+      const row = clientRows[i];
+      const fillClientDetails = await this.el.$(`#dialog:not([aria-hidden]) input[name="${row[0]}"`);
+      await fillClientDetails.setValue(row[1]);
     }
   }
 
-  deleteClient(clientId) {
-    driver.waitForVisible('nuxeo-data-table nuxeo-data-table-row [name="id"]');
-    const rows = this.el.elements('nuxeo-data-table nuxeo-data-table-row');
-    const deleted = rows.some((row) => {
-      if (row.isVisible('[name="id"]') && row.getText('[name="id"]').trim() === clientId) {
-        row.click('[name="delete"]');
-        driver.alertAccept();
-        return true;
-      }
-      return false;
-    });
-    if (!deleted) {
-      throw new Error(`no client found with Id "${clientId}"`);
+  async clickOnSaveClientBtn() {
+    const saveButton = await this.el.element('#dialog:not([aria-hidden]) paper-button[id="save"]');
+    await saveButton.click();
+  }
+
+  async addClient(client) {
+    await driver.waitForVisible('#addClient');
+    const addClient = await this.el.element('#addClient');
+    await addClient.click();
+    await driver.waitForVisible('#dialog:not([aria-hidden])');
+    await this.fillClientDetails(client);
+    await this.clickOnSaveClientBtn();
+  }
+
+  async editClient(currentClientId, newDetails) {
+    const rows = await this.el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    const edited = await this.el
+      .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
+      .map((img) => img.$('nuxeo-data-table-cell span[name="id"]').getText());
+    const index = edited.findIndex((currenTitle) => currenTitle === currentClientId);
+    if (index !== -1) {
+      const rowEle = await rows[index].$('[name="edit"]');
+      await rowEle.click();
+      await driver.waitForVisible('#dialog:not([aria-hidden])');
+      await this.fillClientDetails(newDetails);
+      await this.clickOnSaveClientBtn();
+      return true;
     }
+    return false;
+  }
+
+  async deleteClient(clientId) {
+    const rows = await browser.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    const deleted = await browser
+      .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
+      .map((img) => img.$('nuxeo-data-table-cell span[name="id"]').getText());
+    const index = deleted.findIndex((currenTitle) => currenTitle === clientId);
+    if (index !== -1) {
+      const rowEle = await rows[index].$('[name="delete"]');
+      await rowEle.click();
+      await driver.alertAccept();
+      return true;
+    }
+    return false;
   }
 }
