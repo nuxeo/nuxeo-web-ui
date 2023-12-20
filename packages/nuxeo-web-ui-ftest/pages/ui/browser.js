@@ -205,12 +205,13 @@ export default class Browser extends BasePage {
 
   hasTitle(title) {
     return (async () => {
+      await driver.pause(1000);
       const breadcrumb = await $('.breadcrumb-item-current');
-      driver.waitUntil(async () => {
-        const breadcrumbText = await breadcrumb.getText();
-        return breadcrumbText.trim() === title;
-      }, 'The document does not have such title');
-      return true;
+      const breadcrumbText = await breadcrumb.getText();
+      if (breadcrumbText.trim() === title) {
+        return true;
+      }
+      return false;
     })();
   }
 

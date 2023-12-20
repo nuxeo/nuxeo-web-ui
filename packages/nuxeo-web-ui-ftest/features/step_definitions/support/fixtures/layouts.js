@@ -74,7 +74,7 @@ const suggestionSet = async (element, value) => {
 };
 global.fieldRegistry.register(
   'nuxeo-input',
-  (element) => element.$('.input-element input').getValue(),
+  async (element) => element.$('.input-element input').getValue(),
   async (element, value) => {
     const ele = await element.$('.input-element input');
     await ele.setValue(value);
@@ -266,8 +266,8 @@ global.fieldRegistry.register(
 fixtures.layouts = {
   getValue: async (element) => {
     const fieldType = await element.getTagName();
-    await (global.fieldRegistry.contains(fieldType)
-      ? global.fieldRegistry.getValFunc(fieldType)
+    return (global.fieldRegistry.contains(fieldType)
+      ? await global.fieldRegistry.getValFunc(fieldType)
       : global.fieldRegistry.getValFunc('generic'))(element);
   },
   setValue: async (element, value) => {
