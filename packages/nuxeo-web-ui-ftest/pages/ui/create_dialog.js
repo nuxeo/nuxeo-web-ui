@@ -42,9 +42,11 @@ export default class CreateDialog extends BasePage {
    *
    * @deprecated since 3.0.3. Please use method upload instead.
    * */
-  setFileToImport(file) {
-    const field = this.importCsvDialog.element('#dropzone #uploadFiles');
-    field.waitForExist();
+
+  async setFileToImport(file) {
+    const CsvDialog = await this.importCsvDialog;
+    const field = await CsvDialog.element('#dropzone #uploadFiles');
+    await field.waitForExist();
     return field.chooseFile(path.resolve(fixtures.blobs.get(file)));
   }
 
@@ -68,7 +70,10 @@ export default class CreateDialog extends BasePage {
   }
 
   get importCSVButton() {
-    return this.el.element('div[name="upload"] paper-button.primary');
+    return (async () => {
+      const impCsvBtn = await this.el.element('div[name="upload"] paper-button.primary');
+      return impCsvBtn;
+    })();
   }
 
   get selectedCSVToImport() {
@@ -76,11 +81,17 @@ export default class CreateDialog extends BasePage {
   }
 
   get selectedFileToImport() {
-    return this.el.element('div.file-to-import');
+    return (async () => {
+      const filetoImp = await this.el.element('div.file-to-import');
+      return filetoImp;
+    })();
   }
 
   get importCloseButton() {
-    return this.el.element('div[name="progress"] paper-button.primary');
+    return (async () => {
+      const impClose = await this.el.element('div[name="progress"] paper-button.primary');
+      return impClose;
+    })();
   }
 
   get importError() {
@@ -88,7 +99,10 @@ export default class CreateDialog extends BasePage {
   }
 
   get importSuccess() {
-    return this.el.element('#progress div.successful');
+    return (async () => {
+      const impSuccess = await this.el.element('#progress div.successful');
+      return impSuccess;
+    })();
   }
 
   get createButton() {

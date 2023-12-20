@@ -150,15 +150,23 @@ Then("I can see the document's title", function() {
 });
 
 Then(/I can see (.+) metadata with the following properties:/, async function(docType, table) {
-  const docPage = await this.ui.browser.documentPage(docType);
+  const browser = await this.ui.browser;
+  const docPage = await browser.documentPage(docType);
   await docPage.waitForVisible();
-  const docmetaData = await docPage.metadata;
-  await docmetaData.waitForVisible();
-  const rows = table.rows();
-  for (let index = 0; index < rows.length; index++) {
-    const row = rows[index];
-    await docmetaData.layout().waitForVisible();
-    await docmetaData.layout().getFieldValue(row[0]);
+  const docMeta = await docPage.metadata;
+  await docMeta.waitForVisible();
+  const tableRows = await table.rows;
+  for (let i = 0; i < tableRows.length; i++) {
+    const tableRow = tableRows[i];
+    const docLayout = await docMeta.layout();
+    await docLayout.waitForVisible();
+    if (tableRow[0] === 'subjects') {
+      const docField = await docLayout.getFieldValue(tableRow[0]);
+      (await docField.indexOf(tableRow[1])) > -1;
+    } else {
+      const docFiel = await docLayout.getFieldValue(tableRow[0]);
+      (await docFiel.toString()) === tableRow[1];
+    }
   }
 });
 
