@@ -12,7 +12,10 @@ export default class Results extends BasePage {
   }
 
   get displayModes() {
-    return this.el.$$('div.resultActions paper-icon-button.displayMode');
+    return(async()=>{
+       const ele =  await this.el.$$('div.resultActions paper-icon-button.displayMode');
+       return ele; 
+    })()
   }
 
   get displayMode() {
