@@ -139,9 +139,9 @@ export default class Browser extends BasePage {
   }
 
   async waitForChildren() {
-    await this.currentPage.then(async (pageName) => {
-      await pageName.$('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
-    });
+    const currentPage = await this.currentPage;
+    const ele = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
+    await ele.waitForExist();
   }
 
   addToCollection(name) {
@@ -241,17 +241,18 @@ export default class Browser extends BasePage {
 
   async clickChild(title) {
     await this.waitForChildren();
-    const rowsTemp = await this.rows;
-    for (let i = 0; i < rowsTemp.length; i++) {
-      const row = await rowsTemp[i].$('nuxeo-data-table-cell a.title');
-      const isRowVisible = await row.isVisible();
-      const rowText = await row.getText();
-      if (isRowVisible && rowText.trim() === title) {
+    const rowTemp = await this.rows;
+    for (let i = 0; i < rowTemp.length; i++) {
+      const row = rowTemp[i];
+      const rowEl = await row.$('nuxeo-data-table-cell a.title');
+      const rowVisible = await rowEl.isVisible();
+      const getText = await rowEl.getText();
+      const rowText = (await getText.trim()) === title;
+      if (rowVisible && rowText) {
         await row.click();
-        return true;
+        break; // Exit the loop once a match is found
       }
     }
-    return false;
   }
 
   async indexOfChild(title) {

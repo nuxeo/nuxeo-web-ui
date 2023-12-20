@@ -127,13 +127,13 @@ Then('I can move selection up', function() {
 });
 
 Then('I can see the {string} child document is at position {int}', async function(title, pos) {
+  await driver.pause(1000);
   const browser = await this.ui.browser;
   await browser.waitForVisible();
   const childIndex = await browser.indexOfChild(title);
-  await driver.waitUntil(async () => childIndex === pos - 1, {
-    timeout: 10000,
-    timeoutMsg: 'expected 4774 text to be different after 5s',
-  });
+  if (childIndex !== pos - 1) {
+    throw Error(`${childIndex} child document not present at expected position`);
+  }
 });
 
 When('I sort the content by {string} in {string} order', async function(field, order) {

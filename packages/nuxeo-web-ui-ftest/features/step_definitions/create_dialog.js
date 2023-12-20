@@ -4,9 +4,9 @@ let currentDocType;
 let selectedTabName;
 
 When('I click the Create Document button', async function() {
-  const button = await this.ui.createButton;
-  await button.waitForVisible();
-  await button.click();
+  const createBtn = await this.ui.createButton;
+  await createBtn.waitForVisible();
+  await createBtn.click();
 });
 
 Then('I click the Create button to finish the import', function() {
@@ -18,10 +18,11 @@ Then('I click the Create button to finish the import', function() {
   driver.pause(3000); // XXX just give it some time to the server to do the conversions
 });
 
-Then(/^I go to the (.+) tab$/, function(name) {
+Then(/^I go to the (.+) tab$/, async function(name) {
   const dialog = this.ui.createDialog;
   dialog.waitForVisible();
-  dialog.importTab(name).click();
+  const dialogImport = await dialog.importTab(name);
+  await dialogImport.click();
 });
 
 Then(/^I can see the (.+) tab content$/, function(name) {
