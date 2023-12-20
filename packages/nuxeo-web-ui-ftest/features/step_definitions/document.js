@@ -104,6 +104,7 @@ Given(/^I have a (.+) Note$/, function(format) {
 });
 
 When(/^I browse to the document$/, async function() {
+  await driver.pause(500);
   await this.ui.browser.browseTo(this.doc.path);
 });
 
@@ -191,7 +192,7 @@ Then(/^I can edit the (.*) metadata$/, function(docType) {
 });
 
 Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
-  const { browser } = this.ui;
+  const browser = await this.ui.browser;
   await browser.editButton.waitForVisible();
   await browser.editButton.click();
   const form = browser.editForm(docType);
