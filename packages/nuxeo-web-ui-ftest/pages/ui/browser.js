@@ -78,13 +78,13 @@ export default class Browser extends BasePage {
    * Gets a Results page helper, assuming current visible page has a <nuxeo-results> in there.
    */
   get results() {
-    return(async()=>{
-     const ele = await this.el;
-     const pill = await ele.$('#documentViewsItems nuxeo-page-item.iron-selected');
-     const name = await pill.getAttribute('name')
-     const newRes = await new Results(`#nxContent [name=${name}]`);
-     return newRes;
-    })()
+    return (async () => {
+      const ele = await this.el;
+      const pill = await ele.$('#documentViewsItems nuxeo-page-item.iron-selected');
+      const getAttributeName = await pill.getAttribute('name');
+      const getViewElement = await new Results(`#nxContent [name=${getAttributeName}]`);
+      return getViewElement;
+    })();
   }
 
   get breadcrumb() {
