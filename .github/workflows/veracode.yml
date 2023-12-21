@@ -132,15 +132,6 @@ jobs:
               </settings>' > ~/.m2/settings.xml
 
     
-    - name: Nuxeo package build
-      run: mvn install -DskipInstall
-    - name: Archive packages
-      uses: actions/upload-artifact@v2
-      with:
-        name: packages
-        path: |
-          plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
-
     - name: Install zip
       run: sudo apt-get install zip
 
@@ -149,6 +140,15 @@ jobs:
     
     - name: Display zip contents of nuxeo-web-ui
       run: ls -R
+
+    - name: Nuxeo package build
+      run: mvn install -DskipInstall
+    - name: Archive packages
+      uses: actions/upload-artifact@v2
+      with:
+        name: packages
+        path: |
+          plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
 
     # download the Veracode Static Analysis Pipeline scan jar
     - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
