@@ -4,9 +4,8 @@ import PublicationDialog from './browser/publication_dialog';
 import { clickActionMenu } from '../helpers';
 
 export default class Selection extends BasePage {
-  async addToClipboard() {
-    const ele = await this.el;
-    await ele.$('nuxeo-clipboard-documents-button').click();
+  addToClipboard() {
+    this.el.element('nuxeo-clipboard-documents-button').click();
     this.waitForNotVisible();
   }
 
@@ -35,8 +34,8 @@ export default class Selection extends BasePage {
     this.el.element('nuxeo-move-documents-up-button').click();
   }
 
-  trashDocuments() {
-    this.clickResultsActionMenu('nuxeo-delete-documents-button');
+  async trashDocuments() {
+    await this.clickResultsActionMenu('nuxeo-delete-documents-button');
   }
 
   get trashDocumentsButton() {

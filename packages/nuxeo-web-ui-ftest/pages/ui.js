@@ -65,7 +65,8 @@ export default class UI extends BasePage {
       const ele = await this.el.element('nuxeo-browser');
       const isElementVisible = await ele.isVisible();
       if (isElementVisible) {
-        return this.browser.results;
+        const resultEle = this.browser.results;
+        return resultEle;
       }
       return new Search('nuxeo-search-results-layout[id="results"]');
     })();
@@ -78,8 +79,8 @@ export default class UI extends BasePage {
 
   get createDialog() {
     return (async () => {
-      const cd = await new CreateDialog('#createDocDialog');
-      this._createDialog = this._createDialog ? this._createDialog : cd;
+      const createEle = await new CreateDialog('#createDocDialog');
+      this._createDialog = this._createDialog ? this._createDialog : createEle;
       return this._createDialog;
     })();
   }
@@ -141,14 +142,22 @@ export default class UI extends BasePage {
   }
 
   get userCloudServices() {
-    return new UserCloudServices('nuxeo-user-cloud-services');
+    return (async () => {
+      const cloudServiceELe = await new UserCloudServices('nuxeo-user-cloud-services');
+      return cloudServiceELe;
+    })();
   }
 
-  goToUserCloudServices() {
-    if (!browser.getUrl().endsWith('user-cloud-services')) {
+  async goToUserCloudServices() {
+    const browserUrl = await browser.getUrl();
+    if (!browserUrl.endsWith('user-cloud-services')) {
       url(process.env.NUXEO_URL ? '#!/user-cloud-services' : 'ui/#!/user-cloud-services');
     }
-    return this.userCloudServices;
+
+    const cloudServiceELe = await this.userCloudServices;
+
+    return cloudServiceELe;
+    // }
   }
 
   get userAuthorizedApps() {
@@ -190,12 +199,16 @@ export default class UI extends BasePage {
     dropdown.click(`#dropdown #contentWrapper div paper-menu div paper-icon-item[name="${selection}"]`);
   }
 
-  waitForToastNotVisible() {
-    driver.waitUntil(() => driver.$$('mwc-snackbar').every((toast) => !toast.getAttribute('open')));
+  async waitForToastNotVisible() {
+    driver.waitUntil(async () => {
+      const mwcsnackbar = await driver.elements('mwc-snackbar');
+      return mwcsnackbar.every((toast) => !toast.getAttribute('open'));
+    });
   }
 
-  getToastDismissButton() {
-    return this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
+  async getToastDismissButton() {
+    const snackbar = await this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
+    return snackbar;
   }
 
   getToastMessage(message) {

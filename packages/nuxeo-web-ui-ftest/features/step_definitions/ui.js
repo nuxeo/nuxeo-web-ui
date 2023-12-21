@@ -2,7 +2,7 @@ import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
 When('I click the {string} button', async function(button) {
   const drawer = await this.ui.drawer;
-  const buttonToclick = drawer.open(button);
+  const buttonToclick = await drawer.open(button);
   return buttonToclick;
 });
 When('I select {string} from the View menu', function(option) {
