@@ -143,29 +143,16 @@ jobs:
     - name: Display zip contents of nuxeo-web-ui
       run: ls -R
 
-    - name: Nuxeo package build
-      run: mvn install -DskipInstall
-    - name: Archive packages
-      uses: actions/upload-artifact@v2
-      with:
-        name: packages
-        path: |
-          plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
-
-    # download the Veracode Static Analysis Pipeline scan jar
-    - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
-    - run: unzip -o pipeline-scan-LATEST.zip   
-    - name: Code Scanning
-      id: code_scanning
-      run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_SECRET_API_ID}}" --veracode_api_key "${{secrets.VERACODE_SECRET_KEY}}" --fail_on_severity="Very High, High" --summary_output=true --action UploadAndScan --appname "Nuxeo Web UI" --createprofile false --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
-      continue-on-error: true
+    - name: Get Latest Tag
+      id: get-tag
+      run: echo "::set-output name=TAG::$(git describe --tags --abbrev=0)"
 
     - name: Veracode Upload And Scan
       uses: veracode/veracode-uploadandscan-action@0.2.6
       with:
         appname: 'Nuxeo Web UI'
         createprofile: false
-        filepath: 'nuxeo-web-ui-test.zip'
+        filepath: 'nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip'
         vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
         vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
         # createsandbox: 'false'
