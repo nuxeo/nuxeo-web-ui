@@ -133,12 +133,12 @@ jobs:
 
     - name: list files
       run: ls 
-      
+
     - name: Install zip
       run: sudo apt-get install zip
 
     - name: Zip nuxeo-web-ui
-      run: zip -r nuxeo-web-ui-test.zip nuxeo-web-ui
+      run: zip -r nuxeo-web-ui-test.zip *
     
     - name: Display zip contents of nuxeo-web-ui
       run: ls -R
