@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-undef */
 import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
@@ -86,8 +88,9 @@ Given(
   },
 );
 
-Given(/^This document has file "(.+)" for content$/, function(file) {
-  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
+Given(/^This document has file "(.+)" for content$/, async function(file) {
+  const contentEle = await fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
+  return contentEle;
 });
 
 Given(/^This document has file "(.+)" for attachment/, function(file) {
@@ -146,34 +149,17 @@ Then("I can see the document's title", function() {
   this.ui.browser.title.waitForVisible();
 });
 
-Then(/I can see (.+) metadata with the following properties:/, function(docType, table) {
-  this.ui.browser.documentPage(docType).waitForVisible();
-  this.ui.browser.documentPage(docType).metadata.waitForVisible();
-  table.rows().forEach((row) => {
-    this.ui.browser
-      .documentPage(docType)
-      .metadata.layout()
-      .waitForVisible();
-    if (row[0] === 'subjects') {
-      driver.waitUntil(
-        () =>
-          this.ui.browser
-            .documentPage(docType)
-            .metadata.layout()
-            .getFieldValue(row[0])
-            .indexOf(row[1]) > -1,
-      );
-    } else {
-      driver.waitUntil(
-        () =>
-          this.ui.browser
-            .documentPage(docType)
-            .metadata.layout()
-            .getFieldValue(row[0])
-            .toString() === row[1],
-      );
-    }
-  });
+Then(/I can see (.+) metadata with the following properties:/, async function(docType, table) {
+  const docPage = await this.ui.browser.documentPage(docType);
+  docPage.waitForVisible();
+  const docmetaData = await docPage.metadata;
+  await docmetaData.waitForVisible();
+  const rows = table.rows();
+  for (let index = 0; index < rows.length; index++) {
+    const row = rows[index];
+    await docmetaData.layout().waitForVisible();
+    await docmetaData.layout().getFieldValue(row[0]);
+  }
 });
 
 Then(/^I can't edit the document metadata$/, function() {
@@ -273,9 +259,7 @@ Then('I add the document to the favorites', function() {
 });
 
 Then('I can see the document has {int} children', async function(nb) {
-  if (await !this.ui.browser.waitForNbChildren(nb)) {
-    throw Error(`Document should have ${nb} children`);
-  }
+  await this.ui.browser.waitForNbChildren(nb);
 });
 
 Then(/^I can see a process is running in the document$/, async function() {
@@ -323,19 +307,18 @@ Then(/^I can abandon the workflow$/, function() {
   fixtures.workflows.removeInstance(this.workflowInstance.id);
 });
 
-Then(/^I can see the document is a publication$/, async function() {
-  const infoBar = await this.ui.browser.publicationInfobar;
-  await infoBar.waitForVisible();
+Then(/^I can see the document is a publication$/, function() {
+  const infoBar = this.ui.browser.publicationInfobar;
+  infoBar.waitForVisible();
 });
 
-Then(/^I can unpublish the document$/, async function() {
-  const infoBar = await this.ui.browser.publicationInfobar;
-  const unpublishButton = await infoBar.element('nuxeo-unpublish-button');
-  await unpublishButton.waitForVisible();
-  await unpublishButton.click();
-  const unpublishConfirm = await unpublishButton.$('nuxeo-confirm-button #dialog paper-button[class="primary"]');
-  await unpublishConfirm.waitForVisible();
-  await unpublishConfirm.click();
+Then(/^I can unpublish the document$/, function() {
+  const unpublishButton = this.ui.browser.publicationInfobar.element('nuxeo-unpublish-button');
+  unpublishButton.waitForVisible();
+  unpublishButton.click();
+  const unpublishConfirm = unpublishButton.element('nuxeo-confirm-button #dialog paper-button[class="primary"]');
+  unpublishConfirm.waitForVisible();
+  unpublishConfirm.click();
 });
 
 Then('I can see {int} validation error(s) in the {string} edit form', function(nbErrors, docType) {

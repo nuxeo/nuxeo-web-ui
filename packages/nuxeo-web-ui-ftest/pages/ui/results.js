@@ -125,16 +125,16 @@ export default class Results extends BasePage {
     })();
   }
 
-  deleteDocuments() {
-    const el = this.deleteDocumentsButton;
-    el.waitForVisible();
-    el.click();
+  async deleteDocuments() {
+    const el = await this.deleteDocumentsButton;
+    await el.waitForVisible();
+    await el.click();
   }
 
-  untrashDocuments() {
-    const el = this.untrashDocumentsButton;
-    el.waitForVisible();
-    el.click();
+  async untrashDocuments() {
+    const el = await this.untrashDocumentsButton;
+    await el.waitForVisible();
+    await el.click();
   }
 
   get deleteDocumentsButton() {

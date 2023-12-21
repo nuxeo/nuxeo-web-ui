@@ -159,7 +159,7 @@ Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
     }
     const outResult2 = await uiResult.resultsCount(displayMode);
     if (outResult2 !== numberOfResults) {
-      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult}`);
+      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
     }
   }
 });

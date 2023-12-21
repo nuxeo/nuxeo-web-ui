@@ -33,8 +33,7 @@ Then('I can navigate to {word} pill', async function(pill) {
   const ele = await this.ui.browser.el.$(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
   await ele.waitForVisible();
   await ele.click();
-  const pillTab = await this.ui.browser.el.$(`#nxContent [name='${pill.toLowerCase()}']`);
-  await pillTab.waitForVisible();
+  await this.ui.browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
 });
 
 Then('I cannot see to {word} pill', async function(pill) {
@@ -43,9 +42,10 @@ Then('I cannot see to {word} pill', async function(pill) {
   outElement.should.be.true;
 });
 
-Then('I am on the {word} pill', function(pill) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.currentPageName.should.equal(pill);
+Then('I am on the {word} pill', async function(pill) {
+  await this.ui.browser.waitForVisible();
+  const currentPageEle = await this.ui.browser.currentPageName;
+  currentPageEle.should.equal(pill);
 });
 
 When('I click {string} in the {word} tree', async function(title, tab) {
@@ -82,9 +82,9 @@ Then('I select all the documents', async function() {
   await ele.selectAllDocuments();
 });
 
-Then('I deselect the {string} document', function(title) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.deselectChildDocument(title);
+Then('I deselect the {string} document', async function(title) {
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.deselectChildDocument(title);
 });
 
 Then('I select the {string} document', async function(title) {
@@ -141,15 +141,16 @@ When('I sort the content by {string} in {string} order', async function(field, o
   await browser.sortContent(field, order);
 });
 
-Then('I can see {int} document(s)', function(numberOfResults) {
-  const { results } = this.ui.browser;
-  results.waitForVisible();
-
-  const { displayMode } = results;
-  driver.waitUntil(() => results.resultsCount(displayMode) === numberOfResults, {
-    timeout: 10000,
-    timeoutMsg: 'expected 5 text to be different after 5s',
-  });
+Then('I can see {int} document(s)', async function(numberOfResults) {
+  const browserEle = await this.ui.browser;
+  const results = await browserEle.results;
+  await results.waitForVisible();
+  const displayMode = await results.displayMode;
+  await driver.pause(3000);
+  const countEle = await results.resultsCount(displayMode);
+  if (countEle !== numberOfResults) {
+    throw Error('Number of documents are not as expected');
+  }
 });
 
 Then(/^I can see the permissions page$/, async function() {

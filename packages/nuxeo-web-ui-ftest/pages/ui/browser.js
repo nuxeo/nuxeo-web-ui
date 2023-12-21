@@ -329,12 +329,11 @@ export default class Browser extends BasePage {
 
   async selectAllDocuments() {
     await this.waitForChildren();
-    const currentPage = await this.currentPage;
-    const header = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-    const ele = await header.$('nuxeo-data-table-checkbox');
-    const isHeaderVisible = await ele.isVisible();
-    if (await isHeaderVisible) {
-      await ele.click();
+    const header = await this.header;
+    const headerVisible = await header.isVisible('nuxeo-data-table-checkbox');
+    if (headerVisible) {
+      const headerEle = await header.element('nuxeo-data-table-checkbox');
+      await headerEle.click();
     }
   }
 
@@ -343,8 +342,9 @@ export default class Browser extends BasePage {
     return childDoc;
   }
 
-  deselectChildDocument(title) {
-    return this._selectChildDocument(title, true);
+  async deselectChildDocument(title) {
+    const childDoc = await this._selectChildDocument(title, true);
+    return childDoc;
   }
 
   get publicationInfobar() {
@@ -410,9 +410,11 @@ export default class Browser extends BasePage {
     const elementTitle = await browser
       .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
       .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
-
-    const index = await elementTitle.findIndex((currenTitle) => currenTitle === title);
+    const nonEmptyTitles = elementTitle.filter((nonEmpty) => nonEmpty.trim() !== '');
+    const index = nonEmptyTitles.findIndex((currenTitle) => currenTitle === title);
+    await driver.pause(3000);
     const isCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox[checked]');
+    await driver.pause(1000);
     const isNotCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox:not([checked])');
     if ((deselect ? isCheckedVisible : isNotCheckedVisible) && index >= 0) {
       const currentRow = await rowTemp[index].$('nuxeo-data-table-checkbox');
