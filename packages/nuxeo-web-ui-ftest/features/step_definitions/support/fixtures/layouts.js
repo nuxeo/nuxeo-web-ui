@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import path from 'path';
 import FieldRegistry from '../services/field_registry';
 
@@ -9,57 +10,61 @@ const suggestionGet = (element) => {
       .map((v) => v.getText())
       .join(',');
   }
-  return element.element('.selectivity-single-selected-item').getText();
+  return element.$('.selectivity-single-selected-item').getText();
 };
-const suggestionSet = (element, value) => {
-  const isMulti = element.getAttribute('multiple') !== null;
+const suggestionSet = async (element, value) => {
+  const multiElement = await element.getAttribute('multiple');
+  const isMulti = multiElement !== null;
   if (value) {
     const values = isMulti ? value.split(',') : [value];
-    element.waitForExist('#input');
-    element.scrollIntoView('#input');
+    await element.waitForExist('#input');
+    await element.scrollIntoView('#input');
+
     for (let i = 0; i < values.length; i++) {
       element.waitForVisible(isMulti ? 'input' : '#input');
-      element.element(isMulti ? 'input' : '.selectivity-caret').click();
-      let dropdown = element.element('.selectivity-dropdown:last-child');
+      const currentElement = await element.element(isMulti ? 'input' : '.selectivity-caret');
+      await currentElement.click();
+      let dropdown = await element.element('.selectivity-dropdown:last-child');
       if (isMulti) {
         element.waitForVisible('.selectivity-multiple-input');
-        element.element('.selectivity-multiple-input').setValue(values[i]);
+        const multipleInput = await element.element('.selectivity-multiple-input');
+        await multipleInput.setValue(values[i]);
       } else {
-        const hasSelectedValue = element.element('.selectivity-single-selected-item').isExisting();
-        dropdown.waitForVisible('.selectivity-search-input');
-        dropdown.element('.selectivity-search-input').setValue(values[i]);
+        const singleSelectivity = await element.element('.selectivity-single-selected-item');
+        const hasSelectedValue = await singleSelectivity.isExisting();
+        await dropdown.waitForVisible('.selectivity-search-input');
+        const searchInput = await dropdown.element('.selectivity-search-input');
+        await searchInput.setValue(values[i]);
         if (hasSelectedValue) {
-          dropdown.element('.selectivity-result-item').waitForVisible();
-          driver.keys('Down arrow');
+          await dropdown.element('.selectivity-result-item').waitForVisible();
+          await driver.keys('Down arrow');
         }
       }
-      driver.waitUntil(() => {
-        try {
-          dropdown = element.element('.selectivity-dropdown:last-child');
-          if (dropdown.isVisible('.selectivity-result-item.highlight')) {
-            const highlight = dropdown.element('.selectivity-result-item.highlight');
-            if (
-              highlight
-                .getText()
-                .trim()
-                .includes(values[i])
-            ) {
-              dropdown.click('.selectivity-result-item.highlight');
-              return true;
-            }
-            return false;
+      try {
+        dropdown = await element.element('.selectivity-dropdown:last-child');
+        const dropdownHighlight = await dropdown.$('.selectivity-result-item.highlight');
+        if (await dropdownHighlight.isVisible()) {
+          const highLightText = await dropdownHighlight.getText();
+          const hightlightTrimText = highLightText.trim();
+          if (hightlightTrimText.includes(values[i])) {
+            await dropdownHighlight.click();
+            return true;
           }
           return false;
-        } catch (e) {
-          return false;
         }
-      });
+        return false;
+      } catch (e) {
+        return false;
+      }
     }
-    // it's a reset
-  } else if (element.getAttribute('multiple') !== null) {
-    element
-      .elements('.selectivity-multiple-selected-item')
-      .forEach((el) => el.element('.selectivity-multiple-selected-item-remove').click());
+  }
+  // it's a reset
+  else if (element.getAttribute('multiple') !== null) {
+    const dropdown = element.elements('.selectivity-multiple-selected-item');
+    for (let i = 0; i < dropdown.length; i++) {
+      const dropdownElement = await dropdown[i].element('.selectivity-multiple-selected-item-remove');
+      await dropdownElement.click();
+    }
   } else {
     const item = element.element('.selectivity-single-selected-item');
     if (item) {
@@ -69,21 +74,26 @@ const suggestionSet = (element, value) => {
 };
 global.fieldRegistry.register(
   'nuxeo-input',
-  (element) => element.element('.input-element input').getValue(),
-  (element, value) => {
-    element.element('.input-element input').setValue(value);
+  (element) => element.$('.input-element input').getValue(),
+  async (element, value) => {
+    const ele = await element.$('.input-element input');
+    await ele.setValue(value);
   },
 );
 global.fieldRegistry.register(
   'nuxeo-select',
   (element) => {
-    element.element('.input-element input').getValue();
+    element.$('.input-element input').getValue();
   },
-  (element, value) => {
-    element.element('.input-element input').click();
-    element.waitForExist('paper-item');
-    const item = element.elements('paper-item').find((e) => e.getText() === value);
-    item.click();
+  async (element, value) => {
+    const input = await element.$('.input-element input');
+    await input.click();
+    await element.$('paper-item').waitForExist();
+    const rows = await element.$$('paper-item');
+    const elementTitle = await element.$$('paper-item').map((img) => img.getText());
+    const index = elementTitle.findIndex((currenTitle) => currenTitle === value);
+    const item = await rows[index];
+    await item.click();
   },
 );
 global.fieldRegistry.register(
@@ -98,24 +108,25 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-date-picker',
-  (element) =>
-    moment(element.element('vaadin-date-picker input').getValue(), global.dateFormat).format(global.dateFormat),
-  (element, value) => {
-    const date = element.element('vaadin-date-picker input');
-    if (date.getValue()) {
-      date.element('div[part="clear-button"]').click();
+  (element) => moment(element.$('vaadin-date-picker input').getValue(), global.dateFormat).format(global.dateFormat),
+  async (element, value) => {
+    const date = await element.$('vaadin-date-picker input');
+    if (await date.getValue()) {
+      const ele = await date.$('div[part="clear-button"]');
+      await ele.click();
     }
-    date.click();
-    const keys = moment(value, global.dateFormat).format('L');
-    driver.keys(keys);
-    driver.keys('Enter');
+    await date.click();
+    const keys = await moment(value, global.dateFormat).format('L');
+    await driver.keys(keys);
+    await driver.keys('Enter');
   },
 );
 global.fieldRegistry.register(
   'nuxeo-textarea',
   (element) => element.element('#textarea').getValue(),
-  (element, value) => {
-    element.element('#textarea').setValue(value);
+  async (element, value) => {
+    const ele = await element.$('#textarea');
+    await ele.setValue(value);
   },
 );
 global.fieldRegistry.register('nuxeo-user-suggestion', suggestionGet, suggestionSet);
@@ -125,48 +136,49 @@ global.fieldRegistry.register('nuxeo-dropdown-aggregation', suggestionGet, sugge
 global.fieldRegistry.register('nuxeo-selectivity', suggestionGet, suggestionSet);
 global.fieldRegistry.register(
   'nuxeo-select2',
-  (element) => element.element('div ul li input').getValue(),
+  (element) => element.$('div ul li input').getValue(),
   (element, value) => {
-    element.element('div ul li input').click();
-    driver.element('div ul li input').setValue(value);
+    element.$('div ul li input').click();
+    driver.$('div ul li input').setValue(value);
     $(`//div[text()='${value}' and @class='select2-result-label']`).waitForVisible();
-    driver.element(`//div[text()='${value}' and @class='select2-result-label']`).click();
+    driver.$(`//div[text()='${value}' and @class='select2-result-label']`).click();
   },
 );
 global.fieldRegistry.register('nuxeo-tag-suggestion', suggestionGet, suggestionSet);
 global.fieldRegistry.register(
   'paper-input',
-  (element) => element.element('.input-element input').getValue(),
+  (element) => element.$('.input-element input').getValue(),
   (element, value) => {
-    element.element('.input-element input').setValue(value);
+    element.$('.input-element input').setValue(value);
   },
 );
 global.fieldRegistry.register(
   'paper-radio-button',
-  (element) => element.element('#radioContainer').getAttribute('multiple') !== null,
+  (element) => element.$('#radioContainer').getAttribute('multiple') !== null,
   (element, value) => {
     if (value) {
-      element.element('#radioContainer').click();
+      element.$('#radioContainer').click();
     }
   },
 );
 global.fieldRegistry.register(
   'paper-textarea',
-  (element) => element.element('#textarea').getValue(),
+  (element) => element.$('#textarea').getValue(),
   (element, value) => {
-    element.element('#textarea').setValue(value);
+    element.$('#textarea').setValue(value);
   },
 );
 global.fieldRegistry.register(
   'paper-checkbox',
   (element) => element.getAttribute('checked') !== null,
-  (element, value) => {
+  async (element, value) => {
+    const ele = await element.getAttribute('checked');
     if (
-      ((value === false || value === 'false') && element.getAttribute('checked') !== null) ||
-      ((value === true || value === 'true') && element.getAttribute('checked') === null)
+      ((value === false || value === 'false') && ele !== null) ||
+      ((value === true || value === 'true') && ele === null)
     ) {
-      element.scrollIntoView();
-      element.click();
+      await element.scrollIntoView();
+      await element.click();
     }
   },
 );
@@ -175,23 +187,24 @@ global.fieldRegistry.register(
   (element) => {
     let el = element;
     if (el.getAttribute('collapsible') !== null) {
-      el = el.element('iron-collapse');
+      el = el.$('iron-collapse');
     }
-    return el.element('paper-checkbox').getAttribute('aria-checked') !== null;
+    return el.$('paper-checkbox').getAttribute('aria-checked') !== null;
   },
-  (element, value) => {
+  async (element, value) => {
     let el = element;
-    el.waitForVisible();
-    if (el.getAttribute('collapsible') !== null) {
-      el = el.element('iron-collapse');
-      const button = element.element('button');
-      button.waitForVisible();
-      button.click();
+    await el.waitForVisible();
+    if ((await el.getAttribute('collapsible')) !== null) {
+      el = await el.element('iron-collapse');
+      const button = await element.$('button');
+      await button.waitForVisible();
+      await button.click();
     }
-    el.waitForVisible('paper-checkbox');
-    const els = el.elements('paper-checkbox');
-    const checkbox = els.find((e) => {
-      const text = e.getText();
+    const paperCheckbox = await el.$('paper-checkbox');
+    await paperCheckbox.waitForVisible();
+    const els = await el.$$('paper-checkbox');
+    const checkbox = await els.find(async (e) => {
+      const text = await e.getText();
       return typeof text === 'string' && text.trim().includes(value);
     });
     checkbox.click();
@@ -199,7 +212,7 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-dropzone',
-  (element) => element.element("input[id='input']").getValue(),
+  (element) => element.$("input[id='input']").getValue(),
   (element, value) => {
     element.waitForExist("input[id='input']");
     element.chooseFile("input[id='input']", path.resolve(fixtures.blobs.get(value)));
@@ -210,9 +223,9 @@ global.fieldRegistry.register(
   (element) => {
     element.scrollIntoView();
     const result = [];
-    element.elements('nuxeo-data-table-row:not([header])').forEach((row) => {
+    element.$$('nuxeo-data-table-row:not([header])').forEach((row) => {
       const cellValue = [];
-      row.elements('nuxeo-data-table-cell:not([header])').forEach((cell) => {
+      row.$$('nuxeo-data-table-cell:not([header])').forEach((cell) => {
         const txt = cell.getText();
         if (txt) {
           cellValue.push(txt);
@@ -226,10 +239,10 @@ global.fieldRegistry.register(
     element.scrollIntoView();
     const jValues = JSON.parse(values);
     jValues.forEach((value) => {
-      element.element('#addEntry').click();
+      element.$('#addEntry').click();
       const dialog = element.element('nuxeo-dialog[id="dialog"]:not([aria-hidden])');
       dialog.waitForVisible();
-      const form = element.element('#editForm');
+      const form = element.$('#editForm');
       form.waitForVisible();
       Object.keys(value).forEach((property) => {
         form.waitForVisible(`[name="${property}"]`);
@@ -242,7 +255,7 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register('nuxeo-document-blob', (element) => {
   element.scrollIntoView();
-  return element.element('a').getAttribute('title');
+  return element.$('a').getAttribute('title');
 });
 global.fieldRegistry.register(
   'generic',
@@ -251,15 +264,15 @@ global.fieldRegistry.register(
 );
 
 fixtures.layouts = {
-  getValue: (element) => {
-    const fieldType = element.getTagName();
-    return (global.fieldRegistry.contains(fieldType)
+  getValue: async (element) => {
+    const fieldType = await element.getTagName();
+    await (global.fieldRegistry.contains(fieldType)
       ? global.fieldRegistry.getValFunc(fieldType)
       : global.fieldRegistry.getValFunc('generic'))(element);
   },
-  setValue: (element, value) => {
-    const fieldType = element.getTagName();
-    (global.fieldRegistry.contains(fieldType)
+  setValue: async (element, value) => {
+    const fieldType = await element.getTagName();
+    await (global.fieldRegistry.contains(fieldType)
       ? global.fieldRegistry.setValFunc(fieldType)
       : global.fieldRegistry.setValFunc('generic'))(element, value);
   },

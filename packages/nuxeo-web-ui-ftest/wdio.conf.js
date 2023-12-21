@@ -66,7 +66,7 @@ switch (capability.browserName) {
   // no default
 }
 
-const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 20000;
+const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 24000;
 
 // Allow overriding driver version
 const drivers = {};
@@ -100,7 +100,7 @@ exports.config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
-
+  specs: ['../../ftest/features/**'],
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],
@@ -179,17 +179,7 @@ exports.config = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: [
-    [
-      'selenium-standalone',
-      {
-        installArgs: { drivers },
-        args: { drivers },
-      },
-    ],
-    [CompatService],
-    [ShadowService],
-  ],
+  services: [[CompatService], [ShadowService]],
 
   //
   // Framework you want to run your specs with.

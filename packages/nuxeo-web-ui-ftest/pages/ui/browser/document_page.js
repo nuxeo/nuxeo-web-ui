@@ -69,20 +69,22 @@ export default class DocumentPage extends BasePage {
   }
 
   get publicationsCount() {
-    const info = this.el.element('nuxeo-document-info');
-    if (info) {
-      const items = this.el.elements('nuxeo-document-info .item');
-      const pub = items.find((i) => i.element('label').getText() === 'Publications');
-      if (pub) {
-        return parseInt(
-          pub
-            .element('div')
-            .getText()
-            .trim(),
-          10,
-        );
+    return (async () => {
+      const info = await this.el.$('nuxeo-document-info');
+      if (info) {
+        const items = await this.el.$$('nuxeo-document-info .item');
+        const pub = items.find((i) => i.$('label').getText() === 'Publications');
+        if (pub) {
+          return parseInt(
+            pub
+              .$('div')
+              .getText()
+              .trim(),
+            10,
+          );
+        }
       }
-    }
-    return 0;
+      return 0;
+    })();
   }
 }

@@ -228,20 +228,23 @@ module.exports = class {
           target = this.element(args.shift());
         }
         const [timeout, reverse = false] = args;
-        return target.waitForDisplayed({ timeout, reverse });
+        if (typeof target.waitForDisplayed === 'function') {
+          return target.waitForDisplayed({ timeout, reverse });
+        }
       },
       true,
     );
 
     browser.addCommand(
       'chooseFile',
-      function(...args) {
+      async function(...args) {
         let target = this;
         if (args.length > 1) {
-          target = this.element(args.shift());
+          const argShift = args.shift();
+          target = await this.element(argShift);
         }
         const [localFilePath] = args;
-        const remoteFile = browser.uploadFile(localFilePath);
+        const remoteFile = await browser.uploadFile(localFilePath);
         target.addValue(remoteFile);
       },
       true,
@@ -249,8 +252,9 @@ module.exports = class {
 
     browser.addCommand(
       'hasElementByTextContent',
-      function(selector, textContent) {
-        return this.elements(selector).some((e) => e.getText() === textContent);
+      async function(selector, textContent) {
+        const ele = await this.elements(selector);
+        return ele.some((e) => e.getText() === textContent);
       },
       true,
     );

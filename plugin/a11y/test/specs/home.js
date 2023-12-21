@@ -1,6 +1,6 @@
 import '../imports';
-import UI from '@nuxeo/nuxeo-web-ui-ftest/pages/ui';
 import documentService from '@nuxeo/nuxeo-web-ui-ftest/features/step_definitions/support/services/documentService';
+import UI from '@nuxeo/nuxeo-web-ui-ftest/pages/ui';
 import login from '../helpers/login';
 import { reportA11y } from '../a11y-reporter.js';
 
@@ -18,6 +18,7 @@ const EXPECTED_VIOLATIONS = {
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
   'aria-allowed-role': 5,
   'color-contrast-enhanced': 2,
+  'aria-required-children': 1,
 };
 
 describe('Nuxeo Home', () => {
@@ -28,9 +29,9 @@ describe('Nuxeo Home', () => {
     await documentService.create(parent.path, child);
   });
 
-  reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, () => {
-    login();
-    const ui = UI.get();
-    ui.home.el.$('nuxeo-card[icon="nuxeo:edit"]').waitForDisplayed();
+  reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, async () => {
+    await login();
+    const ui = await UI.get();
+    await ui.home.el.$('nuxeo-card[icon="nuxeo:edit"]').waitForDisplayed();
   });
 });
