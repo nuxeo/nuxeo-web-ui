@@ -131,7 +131,9 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
-    
+    - name: list files
+      run: ls 
+      
     - name: Install zip
       run: sudo apt-get install zip
 
