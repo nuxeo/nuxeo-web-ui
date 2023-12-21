@@ -1,62 +1,62 @@
-name: Cleanup
+# name: Cleanup
 
-on:
-  pull_request:
-    types: [closed, unlabeled]
-    branches:
-      - maintenance-3.0.x
+# on:
+#   pull_request:
+#     types: [closed, unlabeled]
+#     branches:
+#       - maintenance-3.0.x
 
-  workflow_dispatch:
-    inputs:
-      branch_name:
-        description: 'The name of the branch to preview.'
-        default: 'maintenance-3.0.x'
-        required: true
-      caller_id:
-        description: 'run identifier'
-        default: 'maintenance-3.0.x'
-        type: string
-        required: false
+#   workflow_dispatch:
+#     inputs:
+#       branch_name:
+#         description: 'The name of the branch to preview.'
+#         default: 'maintenance-3.0.x'
+#         required: true
+#       caller_id:
+#         description: 'run identifier'
+#         default: 'maintenance-3.0.x'
+#         type: string
+#         required: false
 
-env:
-  GKE_CLUSTER: jx-prod
-  GKE_ZONE: us-east1-b
+# env:
+#   GKE_CLUSTER: jx-prod
+#   GKE_ZONE: us-east1-b
 
-jobs:
-  id:
-    name: Remote Caller ID ${{ github.event.inputs.caller_id }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: ${{ github.event.inputs.id }}
-        run: echo run identifier ${{ github.event.inputs.id }}
-  cleanup:
-    needs: id
-    name: Preview
-    if: (github.event.action == 'unlabeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
+# jobs:
+#   id:
+#     name: Remote Caller ID ${{ github.event.inputs.caller_id }}
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: ${{ github.event.inputs.id }}
+#         run: echo run identifier ${{ github.event.inputs.id }}
+#   cleanup:
+#     needs: id
+#     name: Preview
+#     if: (github.event.action == 'unlabeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview') || github.event_name == 'workflow_dispatch'
+#     runs-on: ubuntu-latest
+#     steps:
 
-    - name: Prepare environment (pull_request)
-      if: github.event_name == 'pull_request'
-      run: |
-        BRANCH_NAME=${GITHUB_HEAD_REF##*/}
-        echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
+#     - name: Prepare environment (pull_request)
+#       if: github.event_name == 'pull_request'
+#       run: |
+#         BRANCH_NAME=${GITHUB_HEAD_REF##*/}
+#         echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
 
-    - name: Prepare environment (workflow_dispatch)
-      if: github.event_name == 'workflow_dispatch'
-      run: |
-        BRANCH_NAME=${{ github.event.inputs.branch_name }}
-        echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
+#     - name: Prepare environment (workflow_dispatch)
+#       if: github.event_name == 'workflow_dispatch'
+#       run: |
+#         BRANCH_NAME=${{ github.event.inputs.branch_name }}
+#         echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
 
-    - name: Get GKE credentials
-      uses: google-github-actions/get-gke-credentials@v0.2.1
-      with:
-        cluster_name: ${{ env.GKE_CLUSTER }}
-        location: ${{ env.GKE_ZONE }}
-        project_id: ${{ secrets.GKE_PROJECT }}
-        credentials: ${{ secrets.GKE_SA_KEY }}
+#     - name: Get GKE credentials
+#       uses: google-github-actions/get-gke-credentials@v0.2.1
+#       with:
+#         cluster_name: ${{ env.GKE_CLUSTER }}
+#         location: ${{ env.GKE_ZONE }}
+#         project_id: ${{ secrets.GKE_PROJECT }}
+#         credentials: ${{ secrets.GKE_SA_KEY }}
 
-    - name: Cleanup preview namespace
-      continue-on-error: true
-      run: |
-        kubectl delete ns ${PREVIEW_NAMESPACE}
+#     - name: Cleanup preview namespace
+#       continue-on-error: true
+#       run: |
+#         kubectl delete ns ${PREVIEW_NAMESPACE}

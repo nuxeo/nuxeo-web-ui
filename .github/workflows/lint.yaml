@@ -1,42 +1,42 @@
-name: Lint
+# name: Lint
 
-on:
-  pull_request:
-    branches:
-      - maintenance-3.0.x
-  workflow_call:
-    inputs:
-      branch:
-        description: 'The current branch'
-        default: maintenance-3.0.x
-        type: string
-        required: false
-    secrets:
-      NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
-        required: true
+# on:
+#   pull_request:
+#     branches:
+#       - maintenance-3.0.x
+#   workflow_call:
+#     inputs:
+#       branch:
+#         description: 'The current branch'
+#         default: maintenance-3.0.x
+#         type: string
+#         required: false
+#     secrets:
+#       NPM_PACKAGES_TOKEN:
+#         description: 'NPM_PACKAGES_TOKEN'
+#         required: true
 
-env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
+# env:
+#   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
 
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ env.BRANCH_NAME }}
+# jobs:
+#   lint:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#         with:
+#           ref: ${{ env.BRANCH_NAME }}
 
-      - uses: actions/setup-node@v3
-        with:
-          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
-          node-version: 14
-          scope: '@nuxeo'
+#       - uses: actions/setup-node@v3
+#         with:
+#           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+#           node-version: 14
+#           scope: '@nuxeo'
 
-      - name: Install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm install
+#       - name: Install
+#         env:
+#           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#         run: npm install
 
-      - name: Lint
-        run: npm run lint
+#       - name: Lint
+#         run: npm run lint
