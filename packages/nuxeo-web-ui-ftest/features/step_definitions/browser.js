@@ -27,7 +27,6 @@ Then('I can see the {string} {word} tree node', async function(title, tab) {
     },
   );
 });
-
 Then('I can navigate to {word} pill', async function(pill) {
   await this.ui.browser.waitForVisible();
   const ele = await this.ui.browser.el.$(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
@@ -44,7 +43,8 @@ Then('I cannot see to {word} pill', async function(pill) {
 
 Then('I am on the {word} pill', async function(pill) {
   await this.ui.browser.waitForVisible();
-  const currentPageEle = await this.ui.browser.currentPageName;
+  const browserEle = await this.ui.browser;
+  const currentPageEle = await browserEle.currentPageName;
   currentPageEle.should.equal(pill);
 });
 

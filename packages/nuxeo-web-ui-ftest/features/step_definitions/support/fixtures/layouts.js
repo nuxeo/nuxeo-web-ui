@@ -1,16 +1,24 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-await-in-loop */
 import path from 'path';
 import FieldRegistry from '../services/field_registry';
 
 global.fieldRegistry = new FieldRegistry();
-const suggestionGet = (element) => {
-  if (element.getAttribute('multiple') !== null) {
-    return element
-      .elements('.selectivity-multiple-selected-item')
-      .map((v) => v.getText())
-      .join(',');
+const suggestionGet = async (element) => {
+  const multiElement = await element.getAttribute('multiple');
+  const isMulti = multiElement !== null;
+  if (isMulti) {
+    const multiSelectivity = await element.$$('.selectivity-multiple-selected-item');
+    const filedValues = [];
+    for (let index = 0; index < multiSelectivity.length; index++) {
+      const singleText = await multiSelectivity[index].getText();
+      filedValues.push(singleText);
+    }
+    return filedValues.join(',');
   }
-  return element.$('.selectivity-single-selected-item').getText();
+  const singleElement = await element.$('.selectivity-single-selected-item');
+  const singleElementText = await singleElement.getText();
+  return singleElementText;
 };
 const suggestionSet = async (element, value) => {
   const multiElement = await element.getAttribute('multiple');
@@ -29,10 +37,9 @@ const suggestionSet = async (element, value) => {
         const multipleInput = await element.element('.selectivity-multiple-input');
         await multipleInput.setValue(values[i]);
       } else {
-        const singleSelectivity = await element.element('.selectivity-single-selected-item');
+        const singleSelectivity = await element.$('.selectivity-single-selected-item');
         const hasSelectedValue = await singleSelectivity.isExisting();
-        await dropdown.waitForVisible('.selectivity-search-input');
-        const searchInput = await dropdown.element('.selectivity-search-input');
+        const searchInput = await dropdown.$('.selectivity-search-input');
         await searchInput.setValue(values[i]);
         if (hasSelectedValue) {
           await dropdown.element('.selectivity-result-item').waitForVisible();
@@ -41,8 +48,9 @@ const suggestionSet = async (element, value) => {
       }
       try {
         dropdown = await element.element('.selectivity-dropdown:last-child');
-        const dropdownHighlight = await dropdown.$('.selectivity-result-item.highlight');
-        if (await dropdownHighlight.isVisible()) {
+        const dropdownHighlight = await dropdown.element('.selectivity-result-item.highlight');
+        const isvisible = await dropdownHighlight.isVisible();
+        if (isvisible) {
           const highLightText = await dropdownHighlight.getText();
           const hightlightTrimText = highLightText.trim();
           if (hightlightTrimText.includes(values[i])) {
@@ -75,8 +83,8 @@ global.fieldRegistry.register(
   'nuxeo-input',
   async (element) => element.$('.input-element input').getValue(),
   async (element, value) => {
-    const ele = await element.$('.input-element input');
-    await ele.setValue(value);
+    const setEle = await element.element('.input-element input');
+    await setEle.setValue(value);
   },
 );
 global.fieldRegistry.register(
@@ -97,8 +105,9 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-date',
-  (element) => {
-    const date = moment(element.element('#datetime').getText(), global.dateFormat).format(global.dateFormat);
+  async (element) => {
+    const dateEle = await element.element('#datetime');
+    const date = moment(await dateEle.getText(), global.dateFormat).format(global.dateFormat);
     return date;
   },
   () => {
@@ -108,8 +117,8 @@ global.fieldRegistry.register(
 global.fieldRegistry.register(
   'nuxeo-date-picker',
   async (element) => {
-    const getELE = await element.element('vaadin-date-picker input');
-    moment(await getELE.getValue(), global.dateFormat).format(global.dateFormat);
+    const getEle = await element.element('vaadin-date-picker input');
+    moment(await getEle.getValue(), global.dateFormat).format(global.dateFormat);
   },
   async (element, value) => {
     const date = await element.element('vaadin-date-picker input');
@@ -125,7 +134,10 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-textarea',
-  (element) => element.element('#textarea').getValue(),
+  async (element) => {
+    const getEle = await element.element('#textarea');
+    await getEle.getValue();
+  },
   async (element, value) => {
     const ele = await element.$('#textarea');
     await ele.setValue(value);
@@ -262,7 +274,9 @@ global.fieldRegistry.register('nuxeo-document-blob', (element) => {
 global.fieldRegistry.register(
   'generic',
   (element) => element.getText(),
-  (element, value) => element.setValue(value),
+  async (element, value) => {
+    await element.setValue(value);
+  },
 );
 
 fixtures.layouts = {

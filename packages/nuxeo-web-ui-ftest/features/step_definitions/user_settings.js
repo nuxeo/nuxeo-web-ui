@@ -10,24 +10,27 @@ Given(/^I have tokens for the following OAuth2 providers$/, function(table) {
   return Promise.all(table.rows().map((row) => fixtures.oauth2Providers.createToken(row[0], this.username)));
 });
 
-When(/^I am on user cloud services page$/, function() {
-  return this.ui.goToUserCloudServices();
+When(/^I am on user cloud services page$/, async function() {
+  const cloudServiceEle = await this.ui.goToUserCloudServices();
+  return cloudServiceEle;
 });
 
-Then(/^I can only see (\d+) provider token[s]? that belong[s]? to me$/, function(numberOfTokens) {
-  this.ui.userCloudServices.waitForVisible();
-  driver.waitUntil(() => this.ui.userCloudServices.getTokens(this.username).length === numberOfTokens);
+Then(/^I can only see (\d+) provider token[s]? that belong[s]? to me$/, async function(numberOfTokens) {
+  const cloudServiceEle = await this.ui.userCloudServices;
+  cloudServiceEle.waitForVisible();
+  const tokenEle = await cloudServiceEle.getTokens(this.username);
+  if (!tokenEle.length === numberOfTokens) {
+    throw new Error('Tokens count is not as expected ');
+  }
 });
 
-Then(/^I can delete token for provider "(.+)" that belongs to me$/, function(provider) {
-  this.ui.userCloudServices.waitForVisible();
-  let tokens;
-  driver.waitUntil(() => {
-    tokens = this.ui.userCloudServices.getTokens(this.username, provider);
-    return tokens.length === 1;
-  });
-  const deleteButton = tokens[0].deleteButton();
-  deleteButton.waitForVisible();
+Then(/^I can delete token for provider "(.+)" that belongs to me$/, async function(provider) {
+  const cloudServiceEle = await this.ui.userCloudServices;
+  cloudServiceEle.waitForVisible();
+  const tokens = await cloudServiceEle.getTokens(this.username, provider);
+  driver.waitUntil(() => tokens.length === 1);
+  const deleteButton = await tokens[0].deleteButton();
+  await deleteButton.waitForVisible();
   deleteButton.click();
   driver.alertAccept();
   this.ui.userCloudServices.waitForVisible();

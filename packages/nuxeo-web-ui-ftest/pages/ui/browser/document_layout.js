@@ -3,8 +3,8 @@ import BasePage from '../../base';
 
 export default class DocumentLayout extends BasePage {
   async getField(field) {
-    await driver.waitForExist(this._selector);
-    const fieldEle = await this.el.element(`[name="${field}"]`);
+    driver.waitForExist(this._selector);
+    const fieldEle = await this.el.$(`[name="${field}"]`);
     return fieldEle;
   }
 

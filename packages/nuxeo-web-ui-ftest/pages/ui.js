@@ -157,7 +157,6 @@ export default class UI extends BasePage {
     const cloudServiceELe = await this.userCloudServices;
 
     return cloudServiceELe;
-    // }
   }
 
   get userAuthorizedApps() {
