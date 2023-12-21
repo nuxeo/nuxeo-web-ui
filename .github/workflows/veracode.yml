@@ -138,7 +138,7 @@ jobs:
       run: sudo apt-get install zip
 
     - name: Zip nuxeo-web-ui
-      run: zip -r nuxeo-web-ui-test.zip *
+      run: zip -r nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip *
     
     - name: Display zip contents of nuxeo-web-ui
       run: ls -R
