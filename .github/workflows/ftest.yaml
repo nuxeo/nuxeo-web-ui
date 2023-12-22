@@ -39,7 +39,7 @@ jobs:
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           scope: '@nuxeo'
-          node-version: 16
+          node-version: 18
 
       - uses: actions/setup-java@v2
         with: 
@@ -58,6 +58,9 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
+      - name: Check Nexus Repository Authentication
+        run: |
+          curl -u ${{ secrets.PACKAGES_AUTH_USER }}:${{ secrets.PACKAGES_AUTH_TOKEN }} ${{ env.NPM_REPOSITORY }}
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
@@ -99,14 +102,25 @@ jobs:
 
       - name: List npm config
         run: |
+          echo "List Files"
+          ls -al
+          echo "view npmrc"
+          cat .npmrc
+          echo "Npm Congig List"
           npm config ls -l
+          pwd
+          echo "Link Files"
+          echo ${ELEMENTS_CORE}
+          echo nuxeo-elements/core/${ELEMENTS_CORE}
 
       - name: Link elements to Web UI
         run: |
+          export NPM_CONFIG_LOGLEVEL=silly
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE} --verbose
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI} --verbose
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ} --verbose
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS} --verbose
+
 
       - name: Functional tests
         env:
