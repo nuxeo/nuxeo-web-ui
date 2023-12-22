@@ -39,11 +39,25 @@ jobs:
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           scope: '@nuxeo'
+          node-version: 18
 
       - uses: actions/setup-java@v2
         with: 
           distribution: 'zulu'
           java-version: '11'
+
+      - name: 'Update settings.xml with server configuration'
+        run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
+
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
@@ -54,17 +68,17 @@ jobs:
             echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
           fi
 
-      # - name: Install Web UI
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      #   run: |
-      #     npm install
-      #     pushd packages/nuxeo-web-ui-ftest
-      #     npm install
-      #     popd
-      #     pushd packages/nuxeo-designer-catalog
-      #     npm install
-      #     popd
+      - name: Install Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+          pushd packages/nuxeo-designer-catalog
+          npm install
+          popd
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2
@@ -104,18 +118,6 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI} --verbose
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ} --verbose
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS} --verbose
-
-      - name: 'Update settings.xml with server configuration'
-        run: |
-          echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
 
       - name: Functional tests
         env:
