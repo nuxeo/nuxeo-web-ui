@@ -97,7 +97,6 @@ jobs:
 
       - name: List npm config
         run: |
-          npm cache clean --force
           npm config ls -l
 
       - name: Link elements to Web UI
