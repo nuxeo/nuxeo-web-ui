@@ -39,7 +39,7 @@ jobs:
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
-          node-version: 18
+          node-version: 14
 
       - uses: actions/setup-java@v2
         with: 
@@ -94,6 +94,10 @@ jobs:
           echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
           popd
+
+      - name: List npm config
+        run: |
+          npm config ls -l
 
       - name: Link elements to Web UI
         run: |
