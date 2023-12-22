@@ -57,7 +57,10 @@ export default class Drawer extends BasePage {
   }
 
   get personal() {
-    return this._section('personalWorkspace');
+    return (async () => {
+      const personal = await this._section('personalWorkspace');
+      return personal;
+    })();
   }
 
   get profile() {
