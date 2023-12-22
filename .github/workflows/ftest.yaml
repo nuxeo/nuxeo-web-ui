@@ -95,6 +95,12 @@ jobs:
           popd
           popd
 
+      - name: List npm config
+        run: |
+          npm install -g npm@latest
+          npm cache clean --force
+          npm config ls -l
+
       - name: Link elements to Web UI
         run: |
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE} --verbose
