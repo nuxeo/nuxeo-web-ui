@@ -1,17 +1,20 @@
 import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
-When('I click the preview button', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.previewButton.waitForVisible();
-  page.previewButton.click();
+When('I click the preview button', async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const buttonEle = await page.previewButton;
+  await buttonEle.waitForVisible();
+  await buttonEle.click();
 });
 
-When('I click the preview button for the attachment', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.metadata.attachments.waitForVisible();
-  page.metadata.attachments.previewButton.click();
+When('I click the preview button for the attachment', async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const attachEle = await page.metadata.attachments;
+  await attachEle.waitForVisible();
+  const buttonEle = await attachEle.previewButton;
+  await buttonEle.click();
 });
 
 Then(/^I can see the inline ([-\w]+) previewer$/, async function(viewerType) {
