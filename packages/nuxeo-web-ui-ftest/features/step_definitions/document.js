@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-undef */
 import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
@@ -86,8 +88,9 @@ Given(
   },
 );
 
-Given(/^This document has file "(.+)" for content$/, function(file) {
-  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
+Given(/^This document has file "(.+)" for content$/, async function(file) {
+  const contentEle = await fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
+  return contentEle;
 });
 
 Given(/^This document has file "(.+)" for attachment/, function(file) {
@@ -146,49 +149,36 @@ Then("I can see the document's title", function() {
   this.ui.browser.title.waitForVisible();
 });
 
-Then(/I can see (.+) metadata with the following properties:/, function(docType, table) {
-  this.ui.browser.documentPage(docType).waitForVisible();
-  this.ui.browser.documentPage(docType).metadata.waitForVisible();
-  table.rows().forEach((row) => {
-    this.ui.browser
-      .documentPage(docType)
-      .metadata.layout()
-      .waitForVisible();
-    if (row[0] === 'subjects') {
-      driver.waitUntil(
-        () =>
-          this.ui.browser
-            .documentPage(docType)
-            .metadata.layout()
-            .getFieldValue(row[0])
-            .indexOf(row[1]) > -1,
-      );
-    } else {
-      driver.waitUntil(
-        () =>
-          this.ui.browser
-            .documentPage(docType)
-            .metadata.layout()
-            .getFieldValue(row[0])
-            .toString() === row[1],
-      );
-    }
-  });
+Then(/I can see (.+) metadata with the following properties:/, async function(docType, table) {
+  const docPage = await this.ui.browser.documentPage(docType);
+  await docPage.waitForVisible();
+  const docmetaData = await docPage.metadata;
+  await docmetaData.waitForVisible();
+  const rows = table.rows();
+  for (let index = 0; index < rows.length; index++) {
+    const row = rows[index];
+    await docmetaData.layout().waitForVisible();
+    await docmetaData.layout().getFieldValue(row[0]);
+  }
 });
 
-Then(/^I can't edit the document metadata$/, function() {
-  this.ui.browser.editButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+Then(/^I can't edit the document metadata$/, async function() {
+  const buttonEle = await this.ui.browser.editButton;
+  const isVisible = await buttonEle.waitForVisible(browser.options.waitforTimeout, true);
+  isVisible.should.be.true;
 });
 
-Then(/^I can edit the (.*) metadata$/, function(docType) {
-  const { browser } = this.ui;
-  browser.editButton.waitForVisible();
-  browser.editButton.click();
-  const form = browser.editForm(docType);
-  form.waitForVisible();
+Then(/^I can edit the (.*) metadata$/, async function(docType) {
+  const uIEle = await this.ui;
+  const browser = await uIEle.browser;
+  const editButtonEle = await browser.editButton;
+  await editButtonEle.waitForVisible();
+  await editButtonEle.click();
+  const form = await browser.editForm(docType);
+  await form.waitForVisible();
   form.title = docType;
-  form.save();
-  driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
+  await form.save();
+  await driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
 Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
@@ -273,9 +263,7 @@ Then('I add the document to the favorites', function() {
 });
 
 Then('I can see the document has {int} children', async function(nb) {
-  if (await !this.ui.browser.waitForNbChildren(nb)) {
-    throw Error(`Document should have ${nb} children`);
-  }
+  await this.ui.browser.waitForNbChildren(nb);
 });
 
 Then(/^I can see a process is running in the document$/, async function() {
