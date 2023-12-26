@@ -1,13 +1,17 @@
 import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
-When('I click the Nuxeo logo', function() {
-  return this.ui.goHome();
+When('I click the Nuxeo logo', async function() {
+  const home = await this.ui.goHome();
+  return home;
 });
 
-Then('I can see my home', function() {
-  this.ui.home.waitForVisible().should.be.true;
+Then('I can see my home', async function() {
+  const check = await this.ui.home.waitForVisible();
+  check.should.be.true;
 });
 
-Then('I have a {string} card', function(title) {
-  this.ui.home.card(title).waitForVisible().should.be.true;
+Then('I have a {string} card', async function(title) {
+  const card = await this.ui.home.card(title);
+  const visi = await card.waitForVisible();
+  visi.should.be.true;
 });
