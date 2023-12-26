@@ -259,7 +259,9 @@ Then('I add the document to the favorites', function() {
 });
 
 Then('I can see the document has {int} children', async function(nb) {
-  await this.ui.browser.waitForNbChildren(nb);
+  if (await !this.ui.browser.waitForNbChildren(nb)) {
+    throw Error(`Document should have ${nb} children`);
+  }
 });
 
 Then(/^I can see a process is running in the document$/, async function() {
@@ -307,18 +309,19 @@ Then(/^I can abandon the workflow$/, function() {
   fixtures.workflows.removeInstance(this.workflowInstance.id);
 });
 
-Then(/^I can see the document is a publication$/, function() {
-  const infoBar = this.ui.browser.publicationInfobar;
-  infoBar.waitForVisible();
+Then(/^I can see the document is a publication$/, async function() {
+  const infoBar = await this.ui.browser.publicationInfobar;
+  await infoBar.waitForVisible();
 });
 
-Then(/^I can unpublish the document$/, function() {
-  const unpublishButton = this.ui.browser.publicationInfobar.element('nuxeo-unpublish-button');
-  unpublishButton.waitForVisible();
-  unpublishButton.click();
-  const unpublishConfirm = unpublishButton.element('nuxeo-confirm-button #dialog paper-button[class="primary"]');
-  unpublishConfirm.waitForVisible();
-  unpublishConfirm.click();
+Then(/^I can unpublish the document$/, async function() {
+  const infoBar = await this.ui.browser.publicationInfobar;
+  const unpublishButton = await infoBar.element('nuxeo-unpublish-button');
+  await unpublishButton.waitForVisible();
+  await unpublishButton.click();
+  const unpublishConfirm = await unpublishButton.$('nuxeo-confirm-button #dialog paper-button[class="primary"]');
+  await unpublishConfirm.waitForVisible();
+  await unpublishConfirm.click();
 });
 
 Then('I can see {int} validation error(s) in the {string} edit form', function(nbErrors, docType) {

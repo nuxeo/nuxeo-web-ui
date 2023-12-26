@@ -329,11 +329,12 @@ export default class Browser extends BasePage {
 
   async selectAllDocuments() {
     await this.waitForChildren();
-    const header = await this.header;
-    const headerVisible = await header.isVisible('nuxeo-data-table-checkbox');
-    if (headerVisible) {
-      const headerEle = await header.element('nuxeo-data-table-checkbox');
-      await headerEle.click();
+    const currentPage = await this.currentPage;
+    const header = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    const ele = await header.$('nuxeo-data-table-checkbox');
+    const isHeaderVisible = await ele.isVisible();
+    if (await isHeaderVisible) {
+      await ele.click();
     }
   }
 
