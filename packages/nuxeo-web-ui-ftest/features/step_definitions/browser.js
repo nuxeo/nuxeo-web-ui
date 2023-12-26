@@ -88,8 +88,9 @@ Then('I deselect the {string} document', async function(title) {
 });
 
 Then('I select the {string} document', async function(title) {
-  await this.ui.browser.waitForVisible();
-  await this.ui.browser.selectChildDocument(title);
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  await browser.selectChildDocument(title);
 });
 
 Then('I can see the selection toolbar', async function() {
