@@ -155,9 +155,10 @@ global.fieldRegistry.register(
 global.fieldRegistry.register(
   'paper-radio-button',
   (element) => element.$('#radioContainer').getAttribute('multiple') !== null,
-  (element, value) => {
+  async (element, value) => {
     if (value) {
-      element.$('#radioContainer').click();
+      const setEle = await element.element('#radioContainer');
+      await setEle.click();
     }
   },
 );

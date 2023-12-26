@@ -137,9 +137,11 @@ When(/^I click the process button$/, async function() {
   await processButton.click();
 });
 
-Then(/^I can't view the document$/, function() {
+Then(/^I can't view the document$/, async function() {
   url(`#!/browse${this.doc.path}`);
-  this.ui.browser.breadcrumb.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+  const breadcumbEle = await this.ui.browser.breadcrumb;
+  const isVisible = await breadcumbEle.waitForVisible(browser.options.waitforTimeout, true);
+  isVisible.should.be.true;
 });
 
 Then("I can see the document's title", function() {
