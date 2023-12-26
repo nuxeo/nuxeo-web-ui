@@ -4,7 +4,6 @@ import { url } from '../../pages/helpers';
 Given('I have a {word} document', async function(docType) {
   docType = docType || 'File';
   const doc = await fixtures.documents.init(docType);
-  // create the document
   const createDoc = await fixtures.documents.create(this.doc.path || '/default-domain', doc).then((d) => {
     this.doc = d;
   });
