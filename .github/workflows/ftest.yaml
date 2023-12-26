@@ -58,6 +58,9 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
+      - name: view settings.xml
+        run : cat ~/.m2/settings.xml
+        
       - name: Check Nexus Repository Authentication
         run: |
           curl -u ${{ secrets.PACKAGES_AUTH_USER }}:${{ secrets.PACKAGES_AUTH_TOKEN }} ${{ env.NPM_REPOSITORY }}
