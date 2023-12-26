@@ -3,10 +3,7 @@ import BasePage from '../../base';
 
 export default class DocumentPermissions extends BasePage {
   get newPermissionButton() {
-    return (async () => {
-      const ele = await this.el;
-      return ele.element('#localPermissions #newPermissionButton');
-    })();
+    return this.el.element('#localPermissions #newPermissionButton');
   }
 
   get createPermissionButton() {
@@ -30,7 +27,7 @@ export default class DocumentPermissions extends BasePage {
 
   async permission(permission, name, timeFrame) {
     const ele = await this.el;
-    const rows = await ele.elements('div.acl-table-row');
+    const rows = await ele.$$('div.acl-table-row');
     for (let i = 0; i < rows.length; i++) {
       const nameCheck = name ? await rows[i].isExisting(`span.user[title="${name} - ${name}@test.com"]`) : true;
       const permissionCheck = permission ? await !!rows[i].hasElementByTextContent('span.label', permission) : true;
@@ -50,25 +47,27 @@ export default class DocumentPermissions extends BasePage {
     return ele.element(`[name="${field}"]`);
   }
 
-  getEditField(field) {
-    this.el.waitForVisible();
+  async getEditField(field) {
+    const ele = await this.el;
+    await ele.waitForVisible();
     if (field === 'begin' || field === 'end') {
-      return this.el.element(`nuxeo-document-acl-table nuxeo-popup-permission [id="${field}"]`);
+      return ele.element(`nuxeo-document-acl-table nuxeo-popup-permission [id="${field}"]`);
     }
-    return this.el.element(`nuxeo-document-acl-table nuxeo-popup-permission [name="${field}"]`);
+    return ele.element(`nuxeo-document-acl-table nuxeo-popup-permission [name="${field}"]`);
   }
 
   async setFieldValue(field, value) {
     const fieldEl = await this.getField(field);
     await fieldEl.waitForVisible();
-    const ret = await fixtures.layouts.setValue(fieldEl, value);
-    return ret;
+    const finalSet = await fixtures.layouts.setValue(fieldEl, value);
+    return finalSet;
   }
 
-  editFieldValue(field, value) {
-    const fieldEl = this.getEditField(field);
-    fieldEl.waitForVisible();
-    return fixtures.layouts.setValue(fieldEl, value);
+  async editFieldValue(field, value) {
+    const fieldEl = await this.getEditField(field);
+    await fieldEl.waitForVisible();
+    const finalGet = await fixtures.layouts.setValue(fieldEl, value);
+    return finalGet;
   }
 
   async setPermissions(name, opts) {
@@ -93,22 +92,22 @@ export default class DocumentPermissions extends BasePage {
     await this.setFieldValue('notify', notify);
   }
 
-  editPermissions(opts) {
+  async editPermissions(opts) {
     opts = opts || {};
     const permission = opts.permission || '';
     const timeFrame = opts.timeFrame || '';
     const begin = opts.begin || '';
     const end = opts.end || '';
     const { notify } = opts;
-    this.editFieldValue('right', permission);
-    this.editFieldValue(timeFrame, timeFrame);
+    await this.editFieldValue('right', permission);
+    await this.editFieldValue(timeFrame, timeFrame);
     if (timeFrame === 'datebased') {
-      this.editFieldValue('begin', begin);
+      await this.editFieldValue('begin', begin);
       if (end) {
-        this.editFieldValue('end', end);
+        await this.editFieldValue('end', end);
       }
     }
-    this.editFieldValue('notify', notify);
+    await this.editFieldValue('notify', notify);
   }
 
   waitForVisible() {
