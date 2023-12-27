@@ -112,7 +112,9 @@ if (process.env.DRIVER_VERSION == null) {
   console.log(`${version} detected.`);
   const match = version && version.match(/([0-9]+)\./);
   if (match) {
-    const checkVersion = match[1];
+    //  const checkVersion = match[1];
+    //  we will revert this once driver issue is resolved.
+    const checkVersion = 120;
     try {
       done = fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then(
         (response) => {
