@@ -43,7 +43,8 @@ const suggestionSet = async (element, value) => {
         const searchInput = await dropdown.element('.selectivity-search-input');
         await searchInput.setValue(values[i]);
         if (hasSelectedValue) {
-          await dropdown.element('.selectivity-result-item').waitForVisible();
+          const dropdownElement = await dropdown.element('.selectivity-result-item');
+          await dropdownElement.waitForVisible();
           await driver.keys('Down arrow');
         }
       }

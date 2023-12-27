@@ -3,8 +3,8 @@ import DocumentLayout from './document_layout';
 
 export default class DocumentCreate extends BasePage {
   async getDoctypeButton(docType) {
-    const typeSelec = await this.el.$(`div[name="typeSelection"] paper-button[name="${docType}"]`);
-    return typeSelec;
+    const typeSelection = await this.el.$(`div[name="typeSelection"] paper-button[name="${docType}"]`);
+    return typeSelection;
   }
 
   layout(docType) {
