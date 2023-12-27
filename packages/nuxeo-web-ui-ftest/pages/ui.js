@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import Browser from './ui/browser';
 import CreateDialog from './ui/create_dialog';
 import Drawer from './ui/drawer';
@@ -211,14 +212,15 @@ export default class UI extends BasePage {
     return snackbar;
   }
 
-  getToastMessage(message) {
+  async getToastMessage(message) {
     let snackBar;
-    driver.waitUntil(() => {
-      snackBar = this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
+    await driver.waitUntil(async () => {
+      snackBar = await this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
       const trimmedMessage = message.trim().replace(/"/g, '');
-      return snackBar.getText() === trimmedMessage;
+      return (await snackBar.getText()) === trimmedMessage;
     });
-    return snackBar.getText();
+    const snackBarText = await snackBar.getText();
+    return snackBarText;
   }
 
   bulkEdit(selector) {

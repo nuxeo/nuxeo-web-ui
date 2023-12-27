@@ -9,41 +9,51 @@ When('I click the Create Document button', async function() {
   await createBtn.click();
 });
 
-Then('I click the Create button to finish the import', function() {
-  const importButton = this.ui.createDialog.importCreateButton;
-  importButton.waitForVisible();
-  importButton.waitForEnabled();
-  importButton.click();
+Then('I click the Create button to finish the import', async function() {
+  const createDialog = await this.ui.createDialog;
+  const importButton = await createDialog.importCreateButton;
+  await importButton.waitForVisible();
+  await importButton.waitForEnabled();
+  await driver.pause(5000);
+  await importButton.click();
   driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
-  driver.pause(3000); // XXX just give it some time to the server to do the conversions
+  await driver.pause(3000); // XXX just give it some time to the server to do the conversions
 });
 
 Then(/^I go to the (.+) tab$/, async function(name) {
-  const dialog = this.ui.createDialog;
-  dialog.waitForVisible();
-  const dialogImport = await dialog.importTab(name);
-  await dialogImport.click();
+  const dialog = await this.ui.createDialog;
+  await dialog.waitForVisible();
+  const importTab = await dialog.importTab(name);
+  await importTab.click();
 });
 
-Then(/^I can see the (.+) tab content$/, function(name) {
-  const dialog = this.ui.createDialog;
-  dialog.waitForVisible();
-  dialog.importPage(name).waitForVisible();
+Then(/^I can see the (.+) tab content$/, async function(name) {
+  const dialog = await this.ui.createDialog;
+  await dialog.waitForVisible();
+  const importPage = await dialog.importPage(name);
+  importPage.click();
   selectedTabName = name;
 });
 
-Then(/^I upload the (.+) on the tab content page$/, function(file) {
-  const dialog = this.ui.createDialog;
-  dialog.waitForVisible();
-  dialog.upload(file, selectedTabName);
-  dialog.selectedFileToImport.waitForVisible();
+Then(/^I upload the (.+) on the tab content page$/, async function(file) {
+  const dialog = await this.ui.createDialog;
+  await dialog.waitForVisible();
+  await dialog.upload(file, selectedTabName);
+  const FileToImport = await dialog.selectedFileToImport;
+  await FileToImport.waitForVisible();
 });
 
-Then('I upload the following files on the tab content page:', function(table) {
-  const dialog = this.ui.createDialog;
-  dialog.waitForVisible();
-  const docs = table.rows().map((row) => dialog.upload(row[0], selectedTabName));
-  return docs.reduce((current, next) => current.then(next), Promise.resolve([]));
+Then('I upload the following files on the tab content page:', async function(table) {
+  const dialog = await this.ui.createDialog;
+  await dialog.waitForVisible();
+  const rows = await table.rows();
+  const rowArray = Array.from(rows);
+  const docs = await rowArray.reduce(async (currentPromise, row) => {
+    const currentArray = await currentPromise;
+    const uploadedDoc = await dialog.upload(row[0], selectedTabName);
+    return [...currentArray, uploadedDoc];
+  }, Promise.resolve([]));
+  return docs;
 });
 
 When('I select {word} from the Document Type menu', async function(docType) {
@@ -81,10 +91,14 @@ Then('I see the {word} page', async function(docType) {
   await docPageView.waitForVisible();
 });
 
-Then(/^I can see that a document of the type (.+) and title (.+) is created$/, function(docType, title) {
+Then(/^I can see that a document of the type (.+) and title (.+) is created$/, async function(docType, title) {
   this.ui.browser.waitForNotVisible('iron-overlay-backdrop');
-  this.ui.browser.documentPage(docType).view.waitForVisible();
+  const documentPage = await this.ui.browser.documentPage(docType);
+  const docView = await documentPage.view;
+  await docView.waitForVisible();
+  await driver.pause(2000);
   currentDocType = docType;
-  this.ui.browser.hasTitle(title).should.be.true;
+  const docTitle = await this.ui.browser.hasTitle(title);
+  await docTitle.should.be.true;
   this.doc = { type: currentDocType, title };
 });
