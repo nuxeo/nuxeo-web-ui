@@ -167,27 +167,30 @@ jobs:
                 </server>
               </servers>
               </settings>' > ~/.m2/settings.xml
-              
-      - name: Nuxeo package build and Ftests
-        env:
-          RUN_ALL: ${{ github.event.inputs.run_all }}
-          BAIL: ${{ github.event.inputs.bail }}
-        run: | 
-          profiles=()
-          if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
-          then 
-            profiles+=('ftest') 
-          fi
-          if ${{ github.event.inputs.generate_metrics }}
-          then 
-            profiles+=('metrics') 
-          fi
-          active_profiles=""
-          if [ ${#profiles[@]} -gt 0 ] 
-          then
-            active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
-          fi
-          mvn install -ntp $active_profiles -DskipInstall
+
+      #==================================================================================================================
+      # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1267 is resolved.
+      #==================================================================================================================        
+      # - name: Nuxeo package build and Ftests
+      #   env:
+      #     RUN_ALL: ${{ github.event.inputs.run_all }}
+      #     BAIL: ${{ github.event.inputs.bail }}
+      #   run: | 
+      #     profiles=()
+      #     if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
+      #     then 
+      #       profiles+=('ftest') 
+      #     fi
+      #     if ${{ github.event.inputs.generate_metrics }}
+      #     then 
+      #       profiles+=('metrics') 
+      #     fi
+      #     active_profiles=""
+      #     if [ ${#profiles[@]} -gt 0 ] 
+      #     then
+      #       active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
+      #     fi
+      #     mvn install -ntp $active_profiles -DskipInstall
 
       - name: A11y checks
         if: ${{ github.event.inputs.skip_a11y == 'false' }}
