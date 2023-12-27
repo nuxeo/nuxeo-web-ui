@@ -103,6 +103,15 @@ jobs:
           popd
           popd
 
+
+      - name: add .npmrc
+        run: |
+          echo '
+           packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+           @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+           always-auth=true
+          ' >> /tmp/_temp/.npmrc
+
       - name: View .npmrc
         run: | 
           echo /tmp/_temp/.npmrc
