@@ -103,6 +103,12 @@ jobs:
           popd
           popd
 
+      - name: View .npmrc
+        run: | 
+          echo /tmp/_temp/.npmrc
+          cat /tmp/_temp/.npmrc
+          echo "----End------"
+
       - name: List npm config
         run: |
           echo "List Files"
