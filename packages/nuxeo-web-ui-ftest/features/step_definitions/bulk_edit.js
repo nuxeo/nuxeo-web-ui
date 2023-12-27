@@ -11,10 +11,10 @@ Then('I can bulk edit multiple properties in {string} layout:', function(layoutN
   action.saveButton.click();
 });
 
-Then('I see a toast notification with the following message {string}', function(message) {
-  const notificationMessage = this.ui.getToastMessage(message);
-  const trimmedMessage = message.trim().replace(/"/g, '');
-  notificationMessage.should.be.equals(trimmedMessage);
+Then('I see a toast notification with the following message {string}', async function(message) {
+  const notificationMessage = await this.ui.getToastMessage(message);
+  const trimmedMessage = await message.trim().replace(/"/g, '');
+  await notificationMessage.should.be.equals(trimmedMessage);
 });
 
 Then('I click the toast notification dismiss button', function() {
