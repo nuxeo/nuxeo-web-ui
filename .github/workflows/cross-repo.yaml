@@ -73,6 +73,11 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
 
+      - name: Install google chrome
+        run: |
+          wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
+          apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
+
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         id: pick_nuxeo_web_ui_branch
@@ -167,30 +172,27 @@ jobs:
                 </server>
               </servers>
               </settings>' > ~/.m2/settings.xml
-
-      #==================================================================================================================
-      # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1267 is resolved.
-      #==================================================================================================================        
-      # - name: Nuxeo package build and Ftests
-      #   env:
-      #     RUN_ALL: ${{ github.event.inputs.run_all }}
-      #     BAIL: ${{ github.event.inputs.bail }}
-      #   run: | 
-      #     profiles=()
-      #     if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
-      #     then 
-      #       profiles+=('ftest') 
-      #     fi
-      #     if ${{ github.event.inputs.generate_metrics }}
-      #     then 
-      #       profiles+=('metrics') 
-      #     fi
-      #     active_profiles=""
-      #     if [ ${#profiles[@]} -gt 0 ] 
-      #     then
-      #       active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
-      #     fi
-      #     mvn install -ntp $active_profiles -DskipInstall
+              
+      - name: Nuxeo package build and Ftests
+        env:
+          RUN_ALL: ${{ github.event.inputs.run_all }}
+          BAIL: ${{ github.event.inputs.bail }}
+        run: | 
+          profiles=()
+          if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
+          then 
+            profiles+=('ftest') 
+          fi
+          if ${{ github.event.inputs.generate_metrics }}
+          then 
+            profiles+=('metrics') 
+          fi
+          active_profiles=""
+          if [ ${#profiles[@]} -gt 0 ] 
+          then
+            active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
+          fi
+          mvn install -ntp $active_profiles -DskipInstall
 
       - name: A11y checks
         if: ${{ github.event.inputs.skip_a11y == 'false' }}
