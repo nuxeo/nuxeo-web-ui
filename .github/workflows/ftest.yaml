@@ -118,14 +118,11 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
-      #==================================================================================================================
-      # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1267 is resolved.
-      #==================================================================================================================
-      # - name: Functional tests
-      #   env:
-      #     RUN_ALL: false
-      #     BAIL: 0
-      #   run: mvn -ntp install -Pftest -DskipInstall
+      - name: Functional tests
+        env:
+          RUN_ALL: false
+          BAIL: 0
+        run: mvn -ntp install -Pftest -DskipInstall
 
       - name: Archive cucumber reports
         if: ${{ always() }}
