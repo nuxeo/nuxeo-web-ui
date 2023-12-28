@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions */
 /* eslint-disable no-await-in-loop */
 import path from 'path';
 import FieldRegistry from '../services/field_registry';
@@ -27,6 +26,7 @@ const suggestionSet = async (element, value) => {
     const values = isMulti ? value.split(',') : [value];
     await element.waitForExist('#input');
     await element.scrollIntoView('#input');
+
     for (let i = 0; i < values.length; i++) {
       element.waitForVisible(isMulti ? 'input' : '#input');
       const currentElement = await element.element(isMulti ? 'input' : '.selectivity-caret');
@@ -37,9 +37,10 @@ const suggestionSet = async (element, value) => {
         const multipleInput = await element.element('.selectivity-multiple-input');
         await multipleInput.setValue(values[i]);
       } else {
-        const singleSelectivity = await element.$('.selectivity-single-selected-item');
+        const singleSelectivity = await element.element('.selectivity-single-selected-item');
         const hasSelectedValue = await singleSelectivity.isExisting();
-        const searchInput = await dropdown.$('.selectivity-search-input');
+        await dropdown.waitForVisible('.selectivity-search-input');
+        const searchInput = await dropdown.element('.selectivity-search-input');
         await searchInput.setValue(values[i]);
         if (hasSelectedValue) {
           await dropdown.element('.selectivity-result-item').waitForVisible();
@@ -48,9 +49,8 @@ const suggestionSet = async (element, value) => {
       }
       try {
         dropdown = await element.element('.selectivity-dropdown:last-child');
-        const dropdownHighlight = await dropdown.element('.selectivity-result-item.highlight');
-        const isvisible = await dropdownHighlight.isVisible();
-        if (isvisible) {
+        const dropdownHighlight = await dropdown.$('.selectivity-result-item.highlight');
+        if (await dropdownHighlight.isVisible()) {
           const highLightText = await dropdownHighlight.getText();
           const hightlightTrimText = highLightText.trim();
           if (hightlightTrimText.includes(values[i])) {
@@ -83,8 +83,8 @@ global.fieldRegistry.register(
   'nuxeo-input',
   async (element) => element.$('.input-element input').getValue(),
   async (element, value) => {
-    const setEle = await element.element('.input-element input');
-    await setEle.setValue(value);
+    const ele = await element.$('.input-element input');
+    await ele.setValue(value);
   },
 );
 global.fieldRegistry.register(
@@ -116,15 +116,12 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-date-picker',
-  async (element) => {
-    const getEle = await element.element('vaadin-date-picker input');
-    moment(await getEle.getValue(), global.dateFormat).format(global.dateFormat);
-  },
+  (element) => moment(element.$('vaadin-date-picker input').getValue(), global.dateFormat).format(global.dateFormat),
   async (element, value) => {
-    const date = await element.element('vaadin-date-picker input');
+    const date = await element.$('vaadin-date-picker input');
     if (await date.getValue()) {
-      const dateEle = await date.element('div[part="clear-button"]');
-      await dateEle.click();
+      const ele = await date.$('div[part="clear-button"]');
+      await ele.click();
     }
     await date.click();
     const keys = await moment(value, global.dateFormat).format('L');
@@ -134,10 +131,7 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-textarea',
-  async (element) => {
-    const getEle = await element.element('#textarea');
-    await getEle.getValue();
-  },
+  (element) => element.element('#textarea').getValue(),
   async (element, value) => {
     const ele = await element.$('#textarea');
     await ele.setValue(value);
@@ -161,17 +155,18 @@ global.fieldRegistry.register(
 global.fieldRegistry.register('nuxeo-tag-suggestion', suggestionGet, suggestionSet);
 global.fieldRegistry.register(
   'paper-input',
-  (element) => element.element('.input-element input').getValue(),
-  async (element, value) => {
-    await element.element('.input-element input').setValue(value);
+  (element) => element.$('.input-element input').getValue(),
+  (element, value) => {
+    element.$('.input-element input').setValue(value);
   },
 );
 global.fieldRegistry.register(
   'paper-radio-button',
   (element) => element.$('#radioContainer').getAttribute('multiple') !== null,
-  (element, value) => {
+  async (element, value) => {
     if (value) {
-      element.$('#radioContainer').click();
+      const setEle = await element.element('#radioContainer');
+      await setEle.click();
     }
   },
 );
@@ -274,9 +269,7 @@ global.fieldRegistry.register('nuxeo-document-blob', (element) => {
 global.fieldRegistry.register(
   'generic',
   (element) => element.getText(),
-  async (element, value) => {
-    await element.setValue(value);
-  },
+  (element, value) => element.setValue(value),
 );
 
 fixtures.layouts = {

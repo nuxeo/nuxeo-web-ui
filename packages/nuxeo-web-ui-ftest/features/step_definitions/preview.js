@@ -21,7 +21,6 @@ Then(/^I can see the inline ([-\w]+) previewer$/, async function(viewerType) {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   await page.view.waitForVisible();
-  await page;
   const viewEle = await page.view;
   const preview = await viewEle.preview;
   await preview.waitForVisible();

@@ -25,7 +25,7 @@ const capability = {
   // grid with only 5 firefox instance available you can make sure that not more than
   // 5 instance gets started at a time.
   maxInstances: 1,
-  browserName: process.env.BROWSER,
+  browserName: 'chrome',
   acceptInsecureCerts: true,
 };
 
@@ -219,7 +219,7 @@ exports.config = {
     // <boolean> fail if there are any undefined or pending steps
     strict: true,
     // <string> (expression) only execute the features or scenarios with tags matching the expression
-    tagExpression: process.env.TAG_EXPRESSION,
+    tagExpression: '@watch',
     // <number> timeout for step definitions
     timeout: process.env.DEBUG ? 24 * 60 * 60 * 1000 : TIMEOUT + 500,
     // <boolean> Enable this config to treat undefined definitions as warnings.

@@ -116,24 +116,27 @@ Then('I can add selection to clipboard', async function() {
   await toolbar.addToClipboard();
 });
 
-Then('I can move selection down', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.moveDown();
+Then('I can move selection down', async function() {
+  await this.ui.browser.waitForVisible();
+  const toolbarEle = await this.ui.browser.selectionToolbar;
+  await toolbarEle.moveDown();
 });
 
-Then('I can move selection up', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.moveUp();
+Then('I can move selection up', async function() {
+  await this.ui.browser.waitForVisible();
+  const toolbaarEle = await this.ui.browser.selectionToolbar;
+  await toolbaarEle.moveUp();
 });
 
 Then('I can see the {string} child document is at position {int}', async function(title, pos) {
+  await driver.pause(1000);
   const browser = await this.ui.browser;
   await browser.waitForVisible();
   const childIndex = await browser.indexOfChild(title);
-  await driver.waitUntil(async () => childIndex === pos - 1, {
-    timeout: 10000,
-    timeoutMsg: 'expected 4774 text to be different after 5s',
-  });
+  await driver.pause(3000);
+  if (childIndex !== pos - 1) {
+    throw Error(`${childIndex} child document not present at expected position`);
+  }
 });
 
 When('I sort the content by {string} in {string} order', async function(field, order) {

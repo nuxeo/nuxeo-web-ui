@@ -25,14 +25,17 @@ export default class Selection extends BasePage {
     return dialog;
   }
 
-  moveDown() {
-    this.el.waitForVisible('nuxeo-move-documents-down-button');
-    this.el.element('nuxeo-move-documents-down-button').click();
+  async moveDown() {
+    await this.el.waitForVisible('nuxeo-move-documents-down-button');
+    const moveDownEle = await this.el.element('nuxeo-move-documents-down-button');
+    await moveDownEle.click();
   }
 
-  moveUp() {
-    this.el.waitForVisible('nuxeo-move-documents-up-button');
-    this.el.element('nuxeo-move-documents-up-button').click();
+  async moveUp() {
+    const ele = await this.el;
+    await ele.waitForVisible('nuxeo-move-documents-up-button');
+    const moveUpEle = await this.el.element('nuxeo-move-documents-up-button');
+    await moveUpEle.click();
   }
 
   async trashDocuments() {
