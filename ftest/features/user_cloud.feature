@@ -1,3 +1,4 @@
+@watch
 Feature: User Cloud Services
 
   Users can manage their OAuth2 provider tokens.

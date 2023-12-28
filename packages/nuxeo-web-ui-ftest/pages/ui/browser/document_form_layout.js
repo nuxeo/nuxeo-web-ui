@@ -9,7 +9,11 @@ export default class DocumentFormLayout extends BasePage {
   }
 
   set title(title) {
-    return this.el.element('.input-element input').setValue(title);
+    return (async () => {
+      const inputEle = await this.el.element('.input-element input');
+      const setEle = await inputEle.setValue(title);
+      return setEle;
+    })();
   }
 
   get layout() {

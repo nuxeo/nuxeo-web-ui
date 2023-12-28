@@ -10,7 +10,7 @@ Feature: Permissions
 
   Scenario: Give a permission to user
     When I give Edit permission to "Susan" on the document
-    Then I can see that "Susan" has the Edit permission
+   Then I can see that "Susan" has the Edit permission
     When I logout
     And I login as "Susan"
     And I browse to the document

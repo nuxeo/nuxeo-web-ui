@@ -3,14 +3,21 @@ import path from 'path';
 import FieldRegistry from '../services/field_registry';
 
 global.fieldRegistry = new FieldRegistry();
-const suggestionGet = (element) => {
-  if (element.getAttribute('multiple') !== null) {
-    return element
-      .elements('.selectivity-multiple-selected-item')
-      .map((v) => v.getText())
-      .join(',');
+const suggestionGet = async (element) => {
+  const multiElement = await element.getAttribute('multiple');
+  const isMulti = multiElement !== null;
+  if (isMulti) {
+    const multiSelectivity = await element.$$('.selectivity-multiple-selected-item');
+    const filedValues = [];
+    for (let index = 0; index < multiSelectivity.length; index++) {
+      const singleText = await multiSelectivity[index].getText();
+      filedValues.push(singleText);
+    }
+    return filedValues.join(',');
   }
-  return element.$('.selectivity-single-selected-item').getText();
+  const singleElement = await element.$('.selectivity-single-selected-item');
+  const singleElementText = await singleElement.getText();
+  return singleElementText;
 };
 const suggestionSet = async (element, value) => {
   const multiElement = await element.getAttribute('multiple');
@@ -98,8 +105,9 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-date',
-  (element) => {
-    const date = moment(element.element('#datetime').getText(), global.dateFormat).format(global.dateFormat);
+  async (element) => {
+    const dateEle = await element.element('#datetime');
+    const date = moment(await dateEle.getText(), global.dateFormat).format(global.dateFormat);
     return date;
   },
   () => {
@@ -155,9 +163,10 @@ global.fieldRegistry.register(
 global.fieldRegistry.register(
   'paper-radio-button',
   (element) => element.$('#radioContainer').getAttribute('multiple') !== null,
-  (element, value) => {
+  async (element, value) => {
     if (value) {
-      element.$('#radioContainer').click();
+      const setEle = await element.element('#radioContainer');
+      await setEle.click();
     }
   },
 );

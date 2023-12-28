@@ -139,9 +139,9 @@ export default class Browser extends BasePage {
   }
 
   async waitForChildren() {
-    await this.currentPage.then(async (pageName) => {
-      await pageName.$('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
-    });
+    const currentPage = await this.currentPage;
+    const ele = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
+    await ele.waitForExist();
   }
 
   addToCollection(name) {
@@ -259,7 +259,6 @@ export default class Browser extends BasePage {
     const elementTitle = await browser
       .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
       .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
-
     let i;
     for (i = 0; i < elementTitle.length; i++) {
       if (elementTitle[i].trim() === title) {
@@ -413,7 +412,7 @@ export default class Browser extends BasePage {
       .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
     const nonEmptyTitles = elementTitle.filter((nonEmpty) => nonEmpty.trim() !== '');
     const index = nonEmptyTitles.findIndex((currenTitle) => currenTitle === title);
-    await driver.pause(3000);
+    await driver.pause(1000);
     const isCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox[checked]');
     await driver.pause(1000);
     const isNotCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox:not([checked])');

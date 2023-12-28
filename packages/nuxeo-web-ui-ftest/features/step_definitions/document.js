@@ -140,9 +140,11 @@ When(/^I click the process button$/, async function() {
   await processButton.click();
 });
 
-Then(/^I can't view the document$/, function() {
+Then(/^I can't view the document$/, async function() {
   url(`#!/browse${this.doc.path}`);
-  this.ui.browser.breadcrumb.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+  const breadcumbEle = await this.ui.browser.breadcrumb;
+  const isVisible = await breadcumbEle.waitForVisible(browser.options.waitforTimeout, true);
+  isVisible.should.be.true;
 });
 
 Then("I can see the document's title", function() {
@@ -151,7 +153,7 @@ Then("I can see the document's title", function() {
 
 Then(/I can see (.+) metadata with the following properties:/, async function(docType, table) {
   const docPage = await this.ui.browser.documentPage(docType);
-  docPage.waitForVisible();
+  await docPage.waitForVisible();
   const docmetaData = await docPage.metadata;
   await docmetaData.waitForVisible();
   const rows = table.rows();
@@ -162,26 +164,30 @@ Then(/I can see (.+) metadata with the following properties:/, async function(do
   }
 });
 
-Then(/^I can't edit the document metadata$/, function() {
-  this.ui.browser.editButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+Then(/^I can't edit the document metadata$/, async function() {
+  const buttonEle = await this.ui.browser.editButton;
+  const isVisible = await buttonEle.waitForVisible(browser.options.waitforTimeout, true);
+  isVisible.should.be.true;
 });
 
-Then(/^I can edit the (.*) metadata$/, function(docType) {
-  const { browser } = this.ui;
-  browser.editButton.waitForVisible();
-  browser.editButton.click();
-  const form = browser.editForm(docType);
-  form.waitForVisible();
+Then(/^I can edit the (.*) metadata$/, async function(docType) {
+  const uIEle = await this.ui;
+  const browser = await uIEle.browser;
+  const editButtonEle = await browser.editButton;
+  await editButtonEle.waitForVisible();
+  await editButtonEle.click();
+  const form = await browser.editForm(docType);
+  await form.waitForVisible();
   form.title = docType;
-  form.save();
-  driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
+  await form.save();
+  await driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
 Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
   const browser = await this.ui.browser;
   await browser.editButton.waitForVisible();
   await browser.editButton.click();
-  const form = browser.editForm(docType);
+  const form = await browser.editForm(docType);
   await form.waitForVisible();
   await form.layout.waitForVisible();
   await form.layout.fillMultipleValues(table);

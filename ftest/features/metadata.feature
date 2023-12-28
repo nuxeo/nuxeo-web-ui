@@ -46,8 +46,26 @@ Feature: Edit metadata
     | doctype  |
     | Note     |
     | File     |
-    #| Folder   |
-    #| Workspace|
+
+ Scenario Outline: Edit <doctype> metadata for Folder and Workspace
+    Given I have a <doctype> document
+    And I have permission ReadWrite for this document
+    When I browse to the document
+    Then I can edit the following properties in the <doctype> metadata:
+      | name         | value                |
+      | title        | my title             |
+      | description  | my description       |
+      | nature       | Internship report    |
+      | subjects     | Medicine,Video games |
+      | coverage     | Canada               |
+      | expired      | April 12, 2082       |
+
+    Then I see the <doctype> page
+
+  Examples:
+    | doctype  |
+    | Folder   |
+    | Workspace|
 
   Scenario: Clear selectivity widget
     Given I have a File document
