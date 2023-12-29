@@ -46,22 +46,24 @@ Then('I upload the following files on the tab content page:', function(table) {
 });
 
 When('I select {word} from the Document Type menu', async function(docType) {
-  const dialog = await this.ui.createDialog;
-  await dialog.waitForVisible();
-  const button = await this.ui.createDialog.documentCreate.getDoctypeButton(docType);
+  const createDialogElem = await this.ui.createDialog;
+  await createDialogElem.waitForVisible();
+  const docCreateElem = await createDialogElem.documentCreate;
+  const button = await docCreateElem.getDoctypeButton(docType);
   await button.waitForVisible();
   await button.click();
   currentDocType = docType;
 });
 
 When('I create a document with the following properties:', async function(table) {
-  await this.ui.createDialog.documentCreate.waitForVisible();
-  const layout = await this.ui.createDialog.documentCreate.layout(currentDocType);
+  const createDialogElem = await this.ui.createDialog;
+  const docCreateEle = await createDialogElem.documentCreate;
+  const layout = await docCreateEle.layout(currentDocType);
   await layout.fillMultipleValues(table);
   const field = await layout.getField('title');
   field.should.not.be.empty;
   const title = await layout.getFieldValue('title');
-  const button = await this.ui.createDialog.createButton;
+  const button = await createDialogElem.createButton;
   await button.waitForVisible();
   await button.click();
   await this.ui.browser.waitForNotVisible('iron-overlay-backdrop');
