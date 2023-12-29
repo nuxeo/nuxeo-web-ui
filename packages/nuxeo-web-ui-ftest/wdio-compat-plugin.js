@@ -1,132 +1,6 @@
-/* eslint-disable prefer-arrow-callback */
-/**
- * Inspired by:
- * - https://github.com/diego-fernandez-santos/wdio-shadow
- * - https://www.npmjs.com/package/query-selector-shadow-dom
- */
-
-function findDeep(selector, multiple, baseElement, filterBy) {
-  const reference = baseElement || document.documentElement;
-
-  function findParentOrHost(element) {
-    const { parentNode } = element;
-    if (parentNode && parentNode.host && parentNode.tagName !== 'A') {
-      return parentNode.host;
-    }
-    return parentNode === reference ? null : parentNode;
-  }
-
-  function collectAllElementsDeep(sel = null) {
-    const allElements = [];
-
-    const findAllElements = function(nodes) {
-      for (let i = 0; i < nodes.length; i++) {
-        const el = nodes[i];
-        allElements.push(el);
-        // If the element has a shadow root, dig deeper.
-        if (el.shadowRoot) {
-          findAllElements(el.shadowRoot.querySelectorAll('*'));
-        }
-      }
-    };
-    findAllElements(reference.querySelectorAll('*'));
-    if (reference.shadowRoot) {
-      findAllElements(reference.shadowRoot.querySelectorAll('*'));
-    }
-    // cleanup any duplicates
-    return Array.from(new Set(sel ? allElements.filter((el) => el.matches(sel)) : allElements));
-  }
-
-  function findMatchingElement(splitSelector, possibleElementsIndex) {
-    return (element) => {
-      let position = possibleElementsIndex;
-      let parent = element;
-      let foundElement = false;
-      while (parent && parent !== reference) {
-        const foundMatch = parent.matches(splitSelector[position]);
-        if (foundMatch && position === 0) {
-          foundElement = true;
-          break;
-        }
-        if (foundMatch) {
-          position--;
-        }
-        parent = findParentOrHost(parent);
-      }
-      return foundElement;
-    };
-  }
-
-  function _querySelectorDeep(sel, findMany) {
-    const lightElement = reference.querySelector(sel);
-
-    if (document.head.createShadowRoot || document.head.attachShadow) {
-      // no need to do any special if selector matches something specific in light-dom
-      if (!findMany && lightElement) {
-        return lightElement;
-      }
-      // do the best to support complex selectors and split the query
-      const splitSelector = sel.match(/(([^\s"']+\s*[,>+~]\s*)+|'[^']*'+|"[^"]*"+|[^\s"']+)+/g);
-
-      const possibleElementsIndex = splitSelector.length - 1;
-      const possibleElements = collectAllElementsDeep(splitSelector[possibleElementsIndex]);
-      const findElements = findMatchingElement(splitSelector, possibleElementsIndex);
-      if (findMany) {
-        return possibleElements.filter(findElements);
-      }
-      return possibleElements.find(findElements);
-    }
-    if (!findMany) {
-      return lightElement;
-    }
-    return reference.querySelectorAll(sel);
-  }
-
-  function querySelectorAllDeep(sel) {
-    return _querySelectorDeep(sel, true);
-  }
-
-  function querySelectorDeep(sel) {
-    return _querySelectorDeep(sel);
-  }
-
-  let result;
-  if (selector) {
-    result = multiple ? querySelectorAllDeep(selector) : querySelectorDeep(selector);
-  } else {
-    result = multiple ? [reference] : reference;
-  }
-  if (result && filterBy) {
-    // eslint-disable-next-line no-new-func
-    const filter = new Function(['element'], filterBy);
-    if (Array.isArray(result)) {
-      return result.filter(filter);
-    }
-    return filter(result) ? result : null;
-  }
-  return result;
-}
-
-function rebuildSelector(using, selector) {
-  switch (using) {
-    case 'id':
-      return `#${selector}`;
-    case 'tag name':
-      return selector;
-    case 'name':
-      return `[name="${selector}"]`;
-    default:
-      return selector;
-  }
-}
-
-const shadowElement = (selector, multiple, baseElement, filterBy) =>
-  browser.execute(findDeep, selector, multiple === true, baseElement, filterBy);
-
-// export init function for initialization
 module.exports = class {
   static get name() {
-    return 'ShadowDOM';
+    return 'CompatV4';
   }
 
   before() {
@@ -134,29 +8,174 @@ module.exports = class {
       throw new Error('A WebdriverIO instance is needed to initialise wdio-webcomponents');
     }
 
-    browser.addCommand('shadowExecute', function(arg1, arg2) {
-      if (typeof arg1 === 'function') {
-        const elem = this.shadowElement();
-        return this.execute(arg1, elem);
-      }
-      return this.shadowElement(arg1).then((r) => this.execute(arg2, r.value));
+    // Add commands to the browser scope.
+    browser.addCommand('alertAccept', async function() {
+      return this.acceptAlert();
     });
 
-    browser.overwriteCommand('findElement', (origFn, using, value) => shadowElement(rebuildSelector(using, value)));
+    browser.addCommand('alertDismiss', async function() {
+      return this.dismissAlert();
+    });
 
-    browser.overwriteCommand('findElements', (origFn, using, value) =>
-      shadowElement(rebuildSelector(using, value), true),
-    );
+    browser.addCommand('alertText', async function() {
+      return this.getAlertText();
+    });
 
-    browser.overwriteCommand(
-      'findElementFromElement',
-      async (origFn, el, using, value) => shadowElement(rebuildSelector(using, value), false, { ELEMENT: el }),
+    browser.addCommand('click', async function(selector) {
+      const element = await this.$(selector);
+      return element.click();
+    });
+
+    browser.addCommand('element', async function(selector) {
+      return this.$(selector);
+    });
+
+    browser.addCommand('elements', async function(selector) {
+      const res = this.$$(selector);
+      // XXX keep compat with v4 format
+      if (!res.value) {
+        res.value = res;
+      }
+      return res;
+    });
+
+    browser.addCommand('getAttribute', async function(selector, attributeName) {
+      const element = await this.$(selector);
+      return element.getAttribute(attributeName);
+    });
+
+    /**
+     * The getCookie param was a string in v4. Reason for not changing to array.
+     * Also if a name parameter is not passed an array of cookies will be returned,
+     * otherwise the cookie object is returned. If not found then the return obj will be undefined.
+     */
+    browser.addCommand('getCookie', async function(name) {
+      if (name === undefined) {
+        return this.getCookies();
+      }
+      const cookie = await this.getCookies(name);
+      return cookie[0];
+    });
+
+    browser.addCommand('getCssProperty', async function(selector, propertyName) {
+      const element = await this.$(selector);
+      return element.getCSSProperty(propertyName);
+    });
+
+    browser.addCommand('getSource', async function() {
+      return this.getPageSource();
+    });
+
+    // In V4 dimension with choices width|height were valid, V5 getWindowSize ignores any function parameters.
+    // Adding for backwards compatability.
+    browser.addCommand('getViewportSize', async function(dimension = '') {
+      if (dimension.toLowerCase() === 'width' || dimension.toLowerCase() === 'height') {
+        return this.getWindowSize()[dimension];
+      }
+      return this.getWindowSize();
+    });
+
+    browser.addCommand('isExisting', async function(selector) {
+      const element = await this.$(selector);
+      return element.isExisting();
+    });
+
+    browser.addCommand('isVisible', async function(selector) {
+      const element = await this.$(selector);
+      return element.isDisplayed();
+    });
+
+    browser.addCommand('moveToObject', async function(selector, x = undefined, y = undefined) {
+      const element = await this.$(selector);
+      return element.moveTo(x, y);
+    });
+
+    browser.addCommand('reload', async function() {
+      return this.reloadSession();
+    });
+
+    browser.addCommand('screenshot', async function() {
+      return this.takeScreenshot();
+    });
+
+    browser.addCommand('scroll', async function() {
+      return this.scrollIntoView();
+    });
+
+    browser.addCommand('setCookie', async function(cookieObj) {
+      return this.setCookies(cookieObj);
+    });
+
+    browser.addCommand('setValue', async function(selector, value) {
+      const element = await this.$(selector);
+      return element.setValue(value);
+    });
+
+    /**
+     * In v4 the param is an object, in v5 width and height is passed.
+     * Keeping as an object for backwards compatability.
+     *
+     * REF: https://github.com/webdriverio-boneyard/v4/blob/master/lib/commands/setViewportSize.js
+     */
+    browser.addCommand('setViewportSize', async function(widthHeightObject) {
+      const { width, height } = widthHeightObject;
+      return this.setWindowSize(width, height);
+    });
+
+    /* Same as getSource. */
+    browser.addCommand('source', async function() {
+      return this.getPageSource();
+    });
+
+    browser.addCommand('switchTab', async function(windowHandle) {
+      return this.switchToWindow(windowHandle);
+    });
+
+    browser.addCommand('title', async function() {
+      return this.getTitle();
+    });
+
+    browser.addCommand('waitForExist', async function(selector, timeout, reverse = false) {
+      const element = await this.$(selector);
+      return element.waitForExist({ timeout, reverse });
+    });
+
+    browser.addCommand('windowHandles', async function() {
+      return this.getWindowHandles();
+    });
+
+    browser.addCommand('windowHandleFullscreen', async function() {
+      return this.fullscreenwindow();
+    });
+
+    browser.addCommand('windowHandleMaximize', async function() {
+      return this.maximizeWindow();
+    });
+
+    browser.addCommand('waitForVisible', async function(selector, timeout, reverse = false) {
+      const element = await this.$(selector);
+      return element.waitForDisplayed({ timeout, reverse });
+    });
+
+    // Add commands to the element scope.
+    browser.addCommand(
+      'element',
+      async function(selector) {
+        return this.$(selector);
+      },
       true,
     );
 
-    browser.overwriteCommand(
-      'findElementsFromElement',
-      async (origFn, el, using, value) => shadowElement(rebuildSelector(using, value), true, { ELEMENT: el }),
+    browser.addCommand(
+      'elements',
+      async function(selector) {
+        const res = this.$$(selector);
+        // XXX keep compat with v4 format
+        if (!res.value) {
+          res.value = res;
+        }
+        return res;
+      },
       true,
     );
 
@@ -249,14 +268,6 @@ module.exports = class {
         },
         true,
       );
-      return viewEle;
-    });
-    
-    browser.addCommand('scrollIntoView', async function(selector) {
-      const viewEle = await this.shadowExecute(selector, (element) =>
-        (Array.isArray(element) && element.length > 0 ? element[0] : element).scrollIntoView(),
-      );
-      return viewEle;
     });
   }
 };

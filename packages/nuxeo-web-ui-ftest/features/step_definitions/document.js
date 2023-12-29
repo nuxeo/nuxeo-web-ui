@@ -151,7 +151,7 @@ Then("I can see the document's title", function() {
 
 Then(/I can see (.+) metadata with the following properties:/, async function(docType, table) {
   const docPage = await this.ui.browser.documentPage(docType);
-  docPage.waitForVisible();
+  await docPage.waitForVisible();
   const docmetaData = await docPage.metadata;
   await docmetaData.waitForVisible();
   const rows = table.rows();
