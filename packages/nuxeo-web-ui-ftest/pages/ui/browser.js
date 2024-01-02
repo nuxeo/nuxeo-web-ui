@@ -107,8 +107,9 @@ export default class Browser extends BasePage {
     return this.el.$('#edit-button');
   }
 
-  editForm(docType) {
-    return new DocumentFormLayout('#edit-dialog nuxeo-document-form-layout', docType, 'edit');
+  async editForm(docType) {
+    const docFormLayout = await new DocumentFormLayout('#edit-dialog nuxeo-document-form-layout', docType, 'edit');
+    return docFormLayout;
   }
 
   get header() {
