@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 import DocumentLayout from './document_layout';
 
@@ -17,7 +18,16 @@ export default class DocumentFormLayout extends BasePage {
   }
 
   get errorMessages() {
-    return this.el.elements('#error .error').map((errorElt) => errorElt.getText());
+    return (async () => {
+      const errorElements = await this.el.elements('#error .error');
+      const errorTexts = [];
+      for (let i = 0; i < errorElements.length; i++) {
+        const errorElement = errorElements[i];
+        const errorText = await errorElement.getText();
+        errorTexts.push(errorText);
+      }
+      return errorTexts;
+    })();
   }
 
   async save() {
