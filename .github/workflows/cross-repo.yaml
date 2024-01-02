@@ -67,111 +67,111 @@
 #         with:
 #           registry-url: ${{ env.NPM_REPOSITORY }}
 #           scope: '@nuxeo'
-      
-#       - uses: actions/setup-java@v2
-#         with: 
-#           distribution: 'zulu'
-#           java-version: '11'
 
-#       - name: Install google chrome
-#         run: |
-#           wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
-#           apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
+      - uses: actions/setup-java@v2
+        with: 
+          distribution: 'zulu'
+          java-version: '11'
 
-#       - name: Determine nuxeo-web-ui branch to use
-#         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
-#         id: pick_nuxeo_web_ui_branch
-#         with:
-#           repository: nuxeo/nuxeo-web-ui
-#           branch: ${{ github.event.inputs.branch_name }}
-#           default-branch: ${{ env.REFERENCE_BRANCH }}
+      - name: Install google chrome
+        run: |
+          wget -q https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
+          apt install -y --allow-downgrades ./google-chrome-stable_114.0.5735.90-1_amd64.deb
 
-#       - name: Determine nuxeo-elements branch to use
-#         id: pick_nuxeo_elements_branch
-#         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
-#         with:
-#           repository: nuxeo/nuxeo-elements
-#           branch: ${{ github.event.inputs.branch_name }}
-#           default-branch: ${{ env.REFERENCE_BRANCH }}
+      - name: Determine nuxeo-web-ui branch to use
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
+        id: pick_nuxeo_web_ui_branch
+        with:
+          repository: nuxeo/nuxeo-web-ui
+          branch: ${{ github.event.inputs.branch_name }}
+          default-branch: ${{ env.REFERENCE_BRANCH }}
 
-#       - name: Checkout nuxeo-web-ui repo
-#         uses: actions/checkout@v2
-#         with:
-#           repository: nuxeo/nuxeo-web-ui
-#           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
+      - name: Determine nuxeo-elements branch to use
+        id: pick_nuxeo_elements_branch
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
+        with:
+          repository: nuxeo/nuxeo-elements
+          branch: ${{ github.event.inputs.branch_name }}
+          default-branch: ${{ env.REFERENCE_BRANCH }}
 
-#       - name: Install Web UI
-#         env:
-#           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-#         run: |
-#           npm install
-#           pushd packages/nuxeo-web-ui-ftest
-#           npm install
-#           popd
-#           pushd packages/nuxeo-designer-catalog
-#           npm install
-#           popd
+      - name: Checkout nuxeo-web-ui repo
+        uses: actions/checkout@v2
+        with:
+          repository: nuxeo/nuxeo-web-ui
+          ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
-#       - name: Lint Web UI
-#         run: npm run lint
+      - name: Install Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+          pushd packages/nuxeo-designer-catalog
+          npm install
+          popd
 
-#       - name: Checkout the nuxeo-elements repo
-#         uses: actions/checkout@v2
-#         with:
-#           repository: nuxeo/nuxeo-elements
-#           path: nuxeo-elements
-#           fetch-depth: 1
-#           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+      - name: Lint Web UI
+        run: npm run lint
 
-#       - name: Pack Elements modules
-#         run: |
-#           pushd nuxeo-elements
-#           pushd core
-#           echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-#           popd
+      - name: Checkout the nuxeo-elements repo
+        uses: actions/checkout@v2
+        with:
+          repository: nuxeo/nuxeo-elements
+          path: nuxeo-elements
+          fetch-depth: 1
+          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
 
-#           pushd ui
-#           echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-#           popd
+      - name: Pack Elements modules
+        run: |
+          pushd nuxeo-elements
+          pushd core
+          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
 
-#           pushd dataviz
-#           echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-#           popd
+          pushd ui
+          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
 
-#           pushd testing-helpers
-#           echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-#           popd
-#           popd
+          pushd dataviz
+          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
 
-#       - name: Link elements to Web UI
-#         run: |
-#           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
-#           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
-#           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-#           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+          pushd testing-helpers
+          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          popd
 
-#       - name: Web UI Unit tests
-#         if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
-#         run: npm run test
+      - name: Link elements to Web UI
+        run: |
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
 
-#       - name: Web UI Unit tests (Sauce Labs)
-#         if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
-#         env:
-#           SAUCE_USERNAME: nuxeo-web-ui
-#           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-#         run: npm run test
+      - name: Web UI Unit tests
+        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
+        run: npm run test
 
-#       - name: 'Update settings.xml with server configuration'
-#         run: |
-#           echo '<settings>
-#               <servers>
-#                 <server>
-#                   <id>maven-internal</id>
-#                   <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-#                   <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-#                 </server>
-#               </servers>
-#               </settings>' > ~/.m2/settings.xml
+      - name: Web UI Unit tests (Sauce Labs)
+        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
+        env:
+          SAUCE_USERNAME: nuxeo-web-ui
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        run: npm run test
+
+      - name: 'Update settings.xml with server configuration'
+        run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
               
 #       - name: Nuxeo package build and Ftests
 #         env:
