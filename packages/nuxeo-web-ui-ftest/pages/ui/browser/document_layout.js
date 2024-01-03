@@ -1,30 +1,36 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 
 export default class DocumentLayout extends BasePage {
   async getField(field) {
-    driver.waitForExist(this._selector);
-    const fieldElem = await this.el.$(`[name="${field}"]`);
-    return fieldElem;
+    await driver.waitForExist(this._selector);
+    const ele = await this.el;
+    const result = await ele.$(`[name="${field}"]`);
+    return result;
   }
 
   async getFieldValue(field) {
     const fieldEl = await this.getField(field);
-    return fixtures.layouts.getValue(fieldEl);
+    const finalFieldEle = await fixtures.layouts.getValue(fieldEl);
+    return finalFieldEle;
   }
 
-  setFieldValue(field, value) {
-    const fieldEl = this.getField(field);
-    fieldEl.waitForVisible();
-    return fixtures.layouts.setValue(fieldEl, value);
+  async setFieldValue(field, value) {
+    const fieldEl = await this.getField(field);
+    await fieldEl.waitForVisible();
+    const result = await fixtures.layouts.setValue(fieldEl, value);
+    return result;
   }
 
-  fillMultipleValues(table) {
-    table.rows().forEach((row) => {
+  async fillMultipleValues(table) {
+    const rows = table.rows();
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
       const fieldName = row[0];
-      const fieldEl = this.getField(fieldName);
-      fieldEl.waitForVisible();
-      fieldEl.scrollIntoView();
-      return fixtures.layouts.setValue(fieldEl, row[1]);
-    });
+      const fieldEl = await this.getField(fieldName);
+      await fieldEl.waitForVisible();
+      await fieldEl.scrollIntoView();
+      await fixtures.layouts.setValue(fieldEl, row[1]);
+    }
   }
 }

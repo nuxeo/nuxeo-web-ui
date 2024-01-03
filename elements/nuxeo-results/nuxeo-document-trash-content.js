@@ -129,11 +129,12 @@ Polymer({
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
+        last-index="[[_lastIndex]]"
       >
         <template>
           <nuxeo-document-grid-thumbnail
             class="grid-box"
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{_computeTabAndLastIndex(index)}}"
             selected$="{{selected}}"
             index="[[index]]"
             doc="[[item]]"
@@ -339,6 +340,10 @@ Polymer({
      * The label to be dislayed when there are no results with filtering applied.
      */
     emptyLabelWhenFiltered: String,
+    _lastIndex: {
+      type: Number,
+      value: 0,
+    },
   },
 
   _emptyTrash() {
@@ -367,5 +372,11 @@ Polymer({
       { field: 'dc:modified', label: this.i18n('searchResults.sort.field.modified'), order: 'desc' },
       { field: 'dc:lastContributor', label: this.i18n('searchResults.sort.field.lastContributor'), order: 'asc' },
     ];
+  },
+
+  _computeTabAndLastIndex(index) {
+    const tabindex = index + 1;
+    this._lastIndex = this.nxProvider.resultsCount;
+    return tabindex.toString();
   },
 });

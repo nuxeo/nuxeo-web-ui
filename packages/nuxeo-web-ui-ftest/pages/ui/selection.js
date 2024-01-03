@@ -4,8 +4,9 @@ import PublicationDialog from './browser/publication_dialog';
 import { clickActionMenu } from '../helpers';
 
 export default class Selection extends BasePage {
-  addToClipboard() {
-    this.el.element('nuxeo-clipboard-documents-button').click();
+  async addToClipboard() {
+    const ele = await this.el;
+    await ele.$('nuxeo-clipboard-documents-button').click();
     this.waitForNotVisible();
   }
 
@@ -34,8 +35,8 @@ export default class Selection extends BasePage {
     this.el.element('nuxeo-move-documents-up-button').click();
   }
 
-  trashDocuments() {
-    this.clickResultsActionMenu('nuxeo-delete-documents-button');
+  async trashDocuments() {
+    await this.clickResultsActionMenu('nuxeo-delete-documents-button');
   }
 
   get trashDocumentsButton() {
@@ -47,16 +48,21 @@ export default class Selection extends BasePage {
   }
 
   get publishDialog() {
-    if (!this.el.isExisting('#publishDialog') || !this.el.isVisible('#publishDialog')) {
-      this.clickResultsActionMenu('nuxeo-publish-button');
-    }
-    const publishDialog = new PublicationDialog(`${this._selector} #publishDialog`);
-    publishDialog.waitForVisible();
-    return publishDialog;
+    return (async () => {
+      const elementIsExisting = await this.el.isExisting('#publishDialog');
+      const elementIsVisible = await this.el.isVisible('#publishDialog');
+      if ((await !elementIsExisting) || (await !elementIsVisible)) {
+        await this.clickResultsActionMenu('nuxeo-publish-button');
+      }
+      const publishDialog = new PublicationDialog(`${this._selector} #publishDialog`);
+      await publishDialog.waitForVisible();
+      return publishDialog;
+    })();
   }
 
-  clickResultsActionMenu(selector) {
-    clickActionMenu(this.el, selector);
+  async clickResultsActionMenu(selector) {
+    const ele = await this.el;
+    await clickActionMenu(ele, selector);
   }
 
   get compare() {

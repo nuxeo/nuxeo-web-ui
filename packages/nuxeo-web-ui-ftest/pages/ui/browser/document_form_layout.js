@@ -20,8 +20,8 @@ export default class DocumentFormLayout extends BasePage {
     return this.el.elements('#error .error').map((errorElt) => errorElt.getText());
   }
 
-  save() {
-    const button = this.el.element('.actions #save');
+  async save() {
+    const button = await this.el.$('.actions #save');
     button.waitForVisible();
     button.click();
   }

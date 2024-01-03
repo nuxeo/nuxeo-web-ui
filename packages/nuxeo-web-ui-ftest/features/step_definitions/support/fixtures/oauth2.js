@@ -68,14 +68,18 @@ fixtures.oauth2Clients = {
   delete: (entryId) => oauth2ClientsDir.delete(entryId).then(() => delete global.oauth2Clients[entryId]),
 };
 
-After(() =>
+After(async () =>
   Promise.all([
     Promise.all(
-      Object.keys(global.oauth2Providers).map((provider) => fixtures.oauth2Providers.delete(provider).catch(() => {})),
+      Object.keys(global.oauth2Providers).map(async (provider) =>
+        fixtures.oauth2Providers.delete(provider).catch(() => {}),
+      ),
     ),
     Promise.all(
-      Object.keys(global.oauth2Clients).map((client) => fixtures.oauth2Clients.delete(client).catch(() => {})),
+      Object.keys(global.oauth2Clients).map(async (client) => fixtures.oauth2Clients.delete(client).catch(() => {})),
     ),
-    Promise.all(Object.keys(global.oauth2Tokens).map((token) => fixtures.oauth2Tokens.delete(token).catch(() => {}))),
+    Promise.all(
+      Object.keys(global.oauth2Tokens).map(async (token) => fixtures.oauth2Tokens.delete(token).catch(() => {})),
+    ),
   ]),
 );

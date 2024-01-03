@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
 Then('I can see the {word} tree', async function(tab) {
@@ -27,22 +28,24 @@ Then('I can see the {string} {word} tree node', async function(title, tab) {
   );
 });
 
-Then('I can navigate to {word} pill', function(pill) {
-  this.ui.browser.waitForVisible();
-  const el = this.ui.browser.el.element(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
-  el.waitForVisible();
-  el.click();
-  this.ui.browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
+Then('I can navigate to {word} pill', async function(pill) {
+  await this.ui.browser.waitForVisible();
+  const ele = await this.ui.browser.el.$(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
+  await ele.waitForVisible();
+  await ele.click();
+  await this.ui.browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
 });
 
-Then('I cannot see to {word} pill', function(pill) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.waitForNotVisible(`nuxeo-page-item[name='${pill.toLowerCase()}']`).should.be.true;
+Then('I cannot see to {word} pill', async function(pill) {
+  await this.ui.browser.waitForVisible();
+  const outElement = await this.ui.browser.waitForNotVisible(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
+  outElement.should.be.true;
 });
 
-Then('I am on the {word} pill', function(pill) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.currentPageName.should.equal(pill);
+Then('I am on the {word} pill', async function(pill) {
+  await this.ui.browser.waitForVisible();
+  const currentPageEle = await this.ui.browser.currentPageName;
+  currentPageEle.should.equal(pill);
 });
 
 When('I click {string} in the {word} tree', async function(title, tab) {
@@ -73,28 +76,28 @@ Then('I select all child documents', function() {
   this.ui.browser.selectAllChildDocuments();
 });
 
-Then('I select all the documents', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectAllDocuments();
+Then('I select all the documents', async function() {
+  await this.ui.browser.waitForVisible();
+  const ele = await this.ui.browser;
+  await ele.selectAllDocuments();
 });
 
 Then('I deselect the {string} document', async function(title) {
-  const browser = await this.ui.browser;
-  await browser.waitForVisible();
-  await browser.deselectChildDocument(title);
+  await this.ui.browser.waitForVisible();
+  await this.ui.browser.deselectChildDocument(title);
 });
 
 Then('I select the {string} document', async function(title) {
-  await this.ui.browser.waitForVisible();
-  await this.ui.browser.selectChildDocument(title);
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  await browser.selectChildDocument(title);
 });
 
 Then('I can see the selection toolbar', async function() {
   const browser = await this.ui.browser;
   await browser.waitForVisible();
-  const selectionToolbarElem = await browser.selectionToolbar;
-  driver.pause(3000);
-  await selectionToolbarElem.waitForVisible();
+  const toolbar = await browser.selectionToolbar;
+  await toolbar.waitForVisible();
 });
 
 When('I cannot see the display selection link', async function() {
@@ -112,9 +115,11 @@ Then('I can add selection to the {string} collection', function(collectionName) 
   this.ui.browser.selectionToolbar.addToCollectionDialog.addToCollection(collectionName);
 });
 
-Then('I can add selection to clipboard', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.addToClipboard();
+Then('I can add selection to clipboard', async function() {
+  const browser = await this.ui.browser;
+  browser.waitForVisible();
+  const toolbar = await browser.selectionToolbar;
+  await toolbar.addToClipboard();
 });
 
 Then('I can move selection down', function() {
@@ -128,13 +133,13 @@ Then('I can move selection up', function() {
 });
 
 Then('I can see the {string} child document is at position {int}', async function(title, pos) {
+  await driver.pause(1000);
   const browser = await this.ui.browser;
   await browser.waitForVisible();
   const childIndex = await browser.indexOfChild(title);
-  await driver.waitUntil(async () => childIndex === pos - 1, {
-    timeout: 10000,
-    timeoutMsg: 'expected 4774 text to be different after 5s',
-  });
+  if (childIndex !== pos - 1) {
+    throw Error(`${childIndex} child document not present at expected position`);
+  }
 });
 
 When('I sort the content by {string} in {string} order', async function(field, order) {
@@ -143,134 +148,92 @@ When('I sort the content by {string} in {string} order', async function(field, o
   await browser.sortContent(field, order);
 });
 
-Then('I can see {int} document(s)', function(numberOfResults) {
-  const { results } = this.ui.browser;
-  results.waitForVisible();
-
-  const { displayMode } = results;
-  driver.waitUntil(() => results.resultsCount(displayMode) === numberOfResults, {
-    timeout: 10000,
-    timeoutMsg: 'expected 5 text to be different after 5s',
-  });
+Then('I can see {int} document(s)', async function(numberOfResults) {
+  const browserEle = await this.ui.browser;
+  const results = await browserEle.results;
+  await results.waitForVisible();
+  const displayMode = await results.displayMode;
+  await driver.pause(3000);
+  const countEle = await results.resultsCount(displayMode);
+  if (countEle !== numberOfResults) {
+    throw Error('Number of documents are not as expected');
+  }
 });
 
 Then(/^I can see the permissions page$/, async function() {
   await this.ui.browser.permissionsView.waitForVisible();
 });
 
-Then(/^I can see the document has (\d+) publications$/, function(nbPublications) {
-  driver.waitUntil(() => this.ui.browser.publicationView.count === nbPublications, {
-    timeout: 10000,
-    timeoutMsg: 'expected 6 text to be different after 5s',
-  });
+Then(/^I can see the document has (\d+) publications$/, async function(nbPublications) {
+  const count = await this.ui.browser.publicationView.count;
+  if ((await count) !== nbPublications) {
+    throw new Error(`Expected count to be equal ${nbPublications}`);
+  }
 });
 
-Then(/^I can see the document has the following publication$/, function(table) {
-  table.rows().forEach((row) => {
-    this.ui.browser.publicationView.hasPublication(row[0], row[1], row[2]).should.be.true;
-  });
+Then(/^I can see the document has the following publication$/, async function(table) {
+  const rows = table.rows();
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const publication = await this.ui.browser.publicationView;
+    const isRowPresent = await publication.hasPublication(row[0], row[1], row[2]);
+    await isRowPresent.should.be.true;
+  }
 });
 
-Then(/^I can republish the following publication$/, function(table) {
-  table.hashes().forEach((row) => {
-    const { path, rendition, version } = row;
-    // XXX we need to store the current version of the publication to check against the updated version after republish
-    let previousVersion;
-    driver.waitUntil(
-      () => {
-        const pubRow = this.ui.browser.publicationView.getPublicationRow(path, rendition);
-        if (!pubRow) {
-          return false;
-        }
-        previousVersion = parseFloat(
-          pubRow
-            .getText('nuxeo-data-table-cell .version')
-            .trim()
-            .toLowerCase(),
-        );
-        return !Number.isNaN(previousVersion);
-      },
-      {
-        timeout: 10000,
-        timeoutMsg: 'expected 7 text to be different after 5s',
-      },
-    );
-    this.ui.browser.publicationView.republish(path, rendition, version);
-    // XXX we need to wait for the new version to be greater than the previous one, otherwise we can have the steps
-    // executed after this one operating over an outdated list of publications
-    driver.waitUntil(
-      () => {
-        try {
-          const pubRow = this.ui.browser.publicationView.getPublicationRow(path, rendition);
-          if (!pubRow) {
-            return false;
-          }
-          const newVersion = parseFloat(
-            pubRow
-              .getText('nuxeo-data-table-cell .version')
-              .trim()
-              .toLowerCase(),
-          );
-          if (Number.isNaN(newVersion)) {
-            return false;
-          }
-          return newVersion > previousVersion;
-        } catch (e) {
-          return false;
-        }
-      },
-      {
-        timeout: 10000,
-        timeoutMsg: 'expected 8 text to be different after 5s',
-      },
-    );
-  });
+Then(/^I can republish the following publication$/, async function(table) {
+  const rows = table.hashes();
+  for (let i = 0; i < rows.length; i++) {
+    const { path, rendition, version } = rows[i];
+    let pubRow = await this.ui.browser.publicationView.getPublicationRow(path, rendition);
+    if (!pubRow) {
+      return false;
+    }
+    const ele = await pubRow.$('nuxeo-data-table-cell .version').getText();
+    const previousVersion = parseFloat(ele.trim().toLowerCase());
+    await this.ui.browser.publicationView.republish(path, rendition, version);
+    pubRow = await this.ui.browser.publicationView.getPublicationRow(path, rendition);
+    const eleNew = await pubRow.$('nuxeo-data-table-cell .version').getText();
+    const newVersion = parseFloat(eleNew.trim().toLowerCase());
+    if (Number.isNaN(newVersion)) {
+      throw Error('Failed to republish the document');
+    }
+    return newVersion > previousVersion;
+  }
 });
 
-Then('I can publish selection to {string}', function(target) {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.publishDialog.publish(target);
+Then('I can publish selection to {string}', async function(target) {
+  await this.ui.browser.waitForVisible();
+  const selectionToolBar = await this.ui.browser.selectionToolbar;
+  const dialog = await selectionToolBar.publishDialog;
+  await dialog.publish(target);
   // HACK because publishing all documents is asynchronous
-  driver.pause(1000);
+  await driver.pause(1000);
 });
 
-Then(/^I can perform the following publications$/, function(table) {
+Then(/^I can perform the following publications$/, async function(table) {
   let page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  let pubCount = page.publicationsCount;
+  await page.waitForVisible();
+  let pubCount = await page.publicationsCount;
   pubCount.should.not.be.NaN;
-  table.hashes().forEach((row) => {
-    const { target, rendition, version, override } = row;
-    this.ui.browser.publishDialog.publish(target, rendition, version, override);
-    // XXX We need to wait for the document to be updated after publishing, but this might take a while. If we don't
-    // do it, the next step can ve triggered before the view is updated, which can lead to an unexpected state. A way
-    // to achieve this is to wait for the number of publications to be updated on the document info panel.
-    driver.waitUntil(
-      () => {
-        try {
-          page = this.ui.browser.documentPage(this.doc.type);
-          const newCount = page.publicationsCount;
-          let check;
-          if (page.isVisible('#versionInfoBar')) {
-            check = newCount === 0;
-          } else {
-            // XXX the problem might not be solved if we're only overriding one publication
-            check = override ? newCount === 1 : newCount > pubCount;
-          }
-          if (check) {
-            pubCount = page.publicationsCount;
-            return true;
-          }
-        } catch (e) {
-          return false;
-        }
-      },
-      {
-        timeout: 10000,
-        timeoutMsg: 'expected 9 text to be different after 5s',
-      },
-    );
-  });
+  const rows = table.hashes();
+  for (let i = 0; i < rows.length; i++) {
+    const { target, rendition, version, override } = rows[i];
+    const dialog = await this.ui.browser.publishDialog;
+    await dialog.publish(target, rendition, version, override);
+    page = await this.ui.browser.documentPage(this.doc.type);
+    const newCount = await page.publicationsCount;
+    let check;
+    const bar = await page.isVisible('#versionInfoBar');
+    if (bar) {
+      check = newCount === 0;
+    } else {
+      check = override ? newCount === 1 : newCount > pubCount;
+    }
+    if (check) {
+      pubCount = page.publicationsCount;
+    }
+  }
 });
 
 Then('I can delete all the documents from the {string} collection', function(name) {

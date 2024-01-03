@@ -45,10 +45,11 @@ limitations under the License.
         icon="nuxeo:view-thumbnails"
         empty-label="[[i18n('searchResults.noResults')]]"
         selection-enabled
+        last-index="[[_lastIndex]]"
       >
         <template>
           <nuxeo-document-grid-thumbnail
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{_computeTabAndLastIndex(index)}}"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
@@ -195,10 +196,21 @@ limitations under the License.
       behaviors: [Nuxeo.LayoutBehavior],
       properties: {
         nxProvider: Object,
+
+        _lastIndex: {
+          type: Number,
+          value: 0,
+        },
       },
 
       _navigate(e) {
         this.fire('navigate', { doc: (e.model || e.detail).item, index: (e.detail || e.model).index });
+      },
+
+      _computeTabAndLastIndex(index) {
+        const tabindex = index + 1;
+        this._lastIndex = this.nxProvider.resultsCount;
+        return tabindex.toString();
       },
     });
   </script>

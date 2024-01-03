@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../base';
 import DocumentPage from './browser/document_page';
 import CollapsibleDocumentPage from './browser/collapsible_document_page';
@@ -12,8 +13,8 @@ import Results from './results';
 import { clickActionMenu, url } from '../helpers';
 
 export default class Browser extends BasePage {
-  documentPage(docType) {
-    const page = fixtures.layouts.page[docType] || 'nuxeo-document-page';
+  async documentPage(docType) {
+    const page = (await fixtures.layouts.page[docType]) || 'nuxeo-document-page';
     if (page === 'nuxeo-collapsible-document-page') {
       return new CollapsibleDocumentPage(page, docType);
     }
@@ -23,12 +24,10 @@ export default class Browser extends BasePage {
   async browseTo(path) {
     await url(`#!/browse${path}`);
     await this.waitForVisible();
-    this.breadcrumb.then(async (breadcrum) => {
-      await breadcrum.waitForVisible();
-      this.currentPage.then(async (pageName) => {
-        await pageName.waitForVisible();
-      });
-    });
+    const breadcrumb = await this.breadcrumb;
+    await breadcrumb.waitForVisible();
+    const currentPage = await this.currentPage;
+    await currentPage.waitForVisible();
   }
 
   get view() {
@@ -79,8 +78,13 @@ export default class Browser extends BasePage {
    * Gets a Results page helper, assuming current visible page has a <nuxeo-results> in there.
    */
   get results() {
-    const pill = this.el.$('#documentViewsItems nuxeo-page-item.iron-selected');
-    return new Results(`#nxContent [name='${pill.getAttribute('name')}']`);
+    return (async () => {
+      const ele = await this.el;
+      const pill = await ele.$('#documentViewsItems nuxeo-page-item.iron-selected');
+      const getAttributeName = await pill.getAttribute('name');
+      const getViewElement = await new Results(`#nxContent [name=${getAttributeName}]`);
+      return getViewElement;
+    })();
   }
 
   get breadcrumb() {
@@ -94,8 +98,9 @@ export default class Browser extends BasePage {
     return this.breadcrumb.getText('.breadcrumb-item-current');
   }
 
-  _section(name) {
-    return this.el.$(`#nxContent [name='${name}']`);
+  async _section(name) {
+    const nxname = await this.el.$(`#nxContent [name='${name}']`);
+    return nxname;
   }
 
   get editButton() {
@@ -108,24 +113,35 @@ export default class Browser extends BasePage {
 
   get header() {
     return (async () => {
-      const currentPageElem = await this.currentPage;
-      const currentHeader = await currentPageElem.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-      return currentHeader;
+      const currentPage = await this.currentPage;
+      const ele = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+      return ele;
     })();
   }
 
   get rows() {
-    return this.currentPage.then(async (rowName) => {
-      rowName.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
-      const rowsTemp = await rowName.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    return (async () => {
+      const currentPage = await this.currentPage;
+      await currentPage.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+      let rowsTemp;
+      await driver.waitUntil(
+        async () => {
+          rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+          return rowsTemp.length > 0;
+        },
+        {
+          timeout: 10000,
+          timeoutMsg: 'rows not found!!',
+        },
+      );
       return rowsTemp;
-    });
+    })();
   }
 
   async waitForChildren() {
-    await this.currentPage.then(async (pageName) => {
-      await pageName.$('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
-    });
+    const currentPage = await this.currentPage;
+    const ele = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
+    await ele.waitForExist();
   }
 
   addToCollection(name) {
@@ -195,23 +211,27 @@ export default class Browser extends BasePage {
   }
 
   get isFavorite() {
-    this.el.waitForExist('nuxeo-favorites-toggle-button[favorite]');
-    return true;
+    return (async () => {
+      await this.el.waitForExist('nuxeo-favorites-toggle-button[favorite]');
+      return true;
+    })();
   }
 
-  addToFavorites() {
-    this.el.click('nuxeo-favorites-toggle-button');
-    return this.isFavorite;
+  async addToFavorites() {
+    await this.el.$('nuxeo-favorites-toggle-button').click();
+    const fav = await this.isFavorite;
+    return fav;
   }
 
   hasTitle(title) {
     return (async () => {
+      await driver.pause(1000);
       const breadcrumb = await $('.breadcrumb-item-current');
-      driver.waitUntil(async () => {
-        const breadcrumbText = await breadcrumb.getText();
-        return breadcrumbText.trim() === title;
-      }, 'The document does not have such title');
-      return true;
+      const breadcrumbText = await breadcrumb.getText();
+      if (breadcrumbText.trim() === title) {
+        return true;
+      }
+      return false;
     })();
   }
 
@@ -222,18 +242,20 @@ export default class Browser extends BasePage {
     return titles.some((title) => title.getText().trim() === doc.title);
   }
 
-  clickChild(title) {
-    this.waitForChildren();
-    return this.rows.some((row) => {
-      if (
-        row.isVisible('nuxeo-data-table-cell a.title') &&
-        row.getText('nuxeo-data-table-cell a.title').trim() === title
-      ) {
-        row.click();
-        return true;
+  async clickChild(title) {
+    await this.waitForChildren();
+    const rowTemp = await this.rows;
+    for (let i = 0; i < rowTemp.length; i++) {
+      const row = rowTemp[i];
+      const rowEl = await row.$('nuxeo-data-table-cell a.title');
+      const rowVisible = await rowEl.isVisible();
+      const getText = await rowEl.getText();
+      const rowText = (await getText.trim()) === title;
+      if (rowVisible && rowText) {
+        await row.click();
+        break; // Exit the loop once a match is found
       }
-      return false;
-    });
+    }
   }
 
   async indexOfChild(title) {
@@ -284,22 +306,20 @@ export default class Browser extends BasePage {
   /*
    * Results might vary with the viewport size as only visible items are taken into account.
    */
-  waitForNbChildren(nb) {
-    driver.waitUntil(() => {
-      let count = 0;
-      try {
-        const { rows } = this;
-        rows.forEach((row) => {
-          if (row.isVisible() && row.isVisible('nuxeo-data-table-cell a.title')) {
-            count++;
-          }
-        });
-        return count === nb;
-      } catch (e) {
-        // prevent stale row from breaking execution
-        return false;
+  async waitForNbChildren(nb) {
+    let count = 0;
+    try {
+      const rowTemp = await this.rows;
+      for (let i = 0; i < rowTemp.length; i++) {
+        if ((await rowTemp[i].isVisible()) && (await rowTemp[i].isVisible('nuxeo-data-table-cell a.title'))) {
+          count++;
+        }
       }
-    });
+      return count === nb;
+    } catch (e) {
+      // prevent stale row from breaking execution
+      return false;
+    }
   }
 
   selectAllChildDocuments() {
@@ -313,17 +333,12 @@ export default class Browser extends BasePage {
 
   async selectAllDocuments() {
     await this.waitForChildren();
-
-    await driver.waitUntil(async () => {
-      const rowWithCheckbox = await browser.$$(
-        'nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header] nuxeo-data-table-checkbox',
-      );
-      return rowWithCheckbox.length > 0;
-    });
-    const headerElem = await this.header;
-    const headerCheckbox = await headerElem.$('nuxeo-data-table-checkbox');
-    if (headerCheckbox.isVisible()) {
-      await headerCheckbox.click();
+    const currentPage = await this.currentPage;
+    const header = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    const ele = await header.$('nuxeo-data-table-checkbox');
+    const isHeaderVisible = await ele.isVisible();
+    if (await isHeaderVisible) {
+      await ele.click();
     }
   }
 
@@ -338,14 +353,18 @@ export default class Browser extends BasePage {
   }
 
   get publicationInfobar() {
-    return this.el.$('nuxeo-publication-info-bar');
+    return (async () => {
+      const ele = await this.el;
+      const outElement = await ele.$('nuxeo-publication-info-bar');
+      return outElement;
+    })();
   }
 
   get selectionToolbar() {
     return (async () => {
-      const currentPageElem = await this.currentPage;
-      const tag = await currentPageElem.getTagName();
-      const selectionBar = await new Selection(`${tag} nuxeo-selection-toolbar#toolbar`);
+      const currentPage = await this.currentPage;
+      const tagName = await currentPage.getTagName();
+      const selectionBar = await new Selection(`${tagName} nuxeo-selection-toolbar#toolbar`);
       return selectionBar;
     })();
   }
@@ -374,8 +393,10 @@ export default class Browser extends BasePage {
     return this.el.$('.document-actions nuxeo-workflow-button #startButton');
   }
 
-  clickDocumentActionMenu(selector) {
-    clickActionMenu(this.el.element('nuxeo-actions-menu'), selector);
+  async clickDocumentActionMenu(selector) {
+    const ele = await this.el;
+    const id = await ele.$('nuxeo-actions-menu');
+    await clickActionMenu(id, selector);
   }
 
   startWorkflow(workflow) {
@@ -394,9 +415,11 @@ export default class Browser extends BasePage {
     const elementTitle = await browser
       .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
       .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
-
-    const index = elementTitle.findIndex((currenTitle) => currenTitle === title);
+    const nonEmptyTitles = elementTitle.filter((nonEmpty) => nonEmpty.trim() !== '');
+    const index = nonEmptyTitles.findIndex((currenTitle) => currenTitle === title);
+    await driver.pause(3000);
     const isCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox[checked]');
+    await driver.pause(1000);
     const isNotCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox:not([checked])');
     if ((deselect ? isCheckedVisible : isNotCheckedVisible) && index >= 0) {
       const currentRow = await rowTemp[index].$('nuxeo-data-table-checkbox');
@@ -407,10 +430,13 @@ export default class Browser extends BasePage {
   }
 
   get publishDialog() {
-    clickActionMenu(this.el, 'nuxeo-publish-button');
-    const publishDialog = new PublicationDialog('#publishDialog');
-    publishDialog.waitForVisible();
-    return publishDialog;
+    return (async () => {
+      const ele = await this.el;
+      await clickActionMenu(ele, 'nuxeo-publish-button');
+      const publishDialog = new PublicationDialog('#publishDialog');
+      await publishDialog.waitForVisible();
+      return publishDialog;
+    })();
   }
 
   get comparePage() {

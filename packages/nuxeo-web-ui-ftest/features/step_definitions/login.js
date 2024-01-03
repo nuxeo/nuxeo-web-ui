@@ -43,13 +43,15 @@ When(/^I visit (.*)$/, (path) => url(path));
 
 When('I logout', () => Login.get());
 
-Then('I am logged in as {string}', function(username) {
-  const currentUser = this.ui.drawer
-    .open('profile')
-    .element('.header')
-    .getText()
-    .toLowerCase();
-  currentUser.should.be.equal(username.toLowerCase());
+Then('I am logged in as {string}', async function(username) {
+  const profileEle = await this.ui.drawer.open('profile');
+  const headerEle = await profileEle.element('.header');
+  await driver.pause(1000);
+  const currentUser = await headerEle.getText();
+  currentUser.toLowerCase().should.be.equal(username.toLowerCase());
 });
 
-Then('I am logged out', () => driver.isVisible('#username').should.be.true);
+Then('I am logged out', async () => {
+  const isVisible = await driver.isVisible('#username');
+  isVisible.should.be.true;
+});

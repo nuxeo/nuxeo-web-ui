@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../base';
 
 export default class Results extends BasePage {
@@ -11,15 +12,24 @@ export default class Results extends BasePage {
   }
 
   get displayModes() {
-    return this.el.$$('div.resultActions paper-icon-button.displayMode');
+    return (async () => {
+      const ele = await this.el.$$('div.resultActions paper-icon-button.displayMode');
+      return ele;
+    })();
   }
 
   get displayMode() {
     return (async () => {
-      this.displayModes.some((displayMode) => displayMode.isVisible());
-      const displayMode = await this.displayModes.filter((result) => result.getAttribute('disabled') !== null);
-      return displayMode[0]
-        .getAttribute('title')
+      const displayModesRows = await this.displayModes;
+      const displayModeArr = [];
+      for (let i = 0; i < displayModesRows.length; i++) {
+        const row = displayModesRows[i];
+        if ((await row.getAttribute('disabled')) !== null) {
+          displayModeArr.push(row);
+        }
+      }
+      const attr = await displayModeArr[0].getAttribute('title');
+      return attr
         .replace('Switch to ', '')
         .replace(/ view| View/, '')
         .toLowerCase();
@@ -27,7 +37,16 @@ export default class Results extends BasePage {
   }
 
   get toggleTableView() {
-    return this.displayModes.find((e) => e.getAttribute('title').includes('Table View'));
+    return (async () => {
+      const displayModesRows = await this.displayModes;
+      for (let i = 0; i < displayModesRows.length; i++) {
+        const row = displayModesRows[i];
+        const attr = await row.getAttribute('title');
+        if (attr.includes('Table View')) {
+          return row;
+        }
+      }
+    })();
   }
 
   get toggleColumnSettings() {
@@ -53,48 +72,69 @@ export default class Results extends BasePage {
     }
   }
 
-  getColumnCheckbox(heading) {
-    this.el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-dialog[id="columnsSettingsPopup"]');
-    const tr = this.el
+  async getColumnCheckbox(heading) {
+    const ele = await this.el;
+    await ele.$('nuxeo-data-table[name="table"] nuxeo-dialog[id="columnsSettingsPopup"]').waitForVisible();
+    const rows = await ele.$$('nuxeo-data-table[name="table"] nuxeo-dialog[id="columnsSettingsPopup"] tr');
+    const elementTitle = await ele
       .$$('nuxeo-data-table[name="table"] nuxeo-dialog[id="columnsSettingsPopup"] tr')
-      .find((e) => e.getText() === heading);
-    tr.waitForVisible('paper-checkbox');
-    return tr.$('paper-checkbox');
+      .map((img) => img.getText());
+    const index = elementTitle.findIndex((currenTitle) => currenTitle === heading);
+    const result = await rows[index].$('paper-checkbox');
+    await result.waitForVisible();
+    return result;
   }
 
-  checkColumnCheckbox(heading) {
-    const checkbox = this.getColumnCheckbox(heading);
-    if (checkbox.getAttribute('checked') === null) {
+  async checkColumnCheckbox(heading) {
+    const checkbox = await this.getColumnCheckbox(heading);
+    if ((await checkbox.getAttribute('checked')) === null) {
       return checkbox.click();
     }
   }
 
-  getResultsColumn(heading) {
-    this.el.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-    const row = this.el.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
-    row.waitForVisible('nuxeo-data-table-cell:not([hidden])');
-    return row.$$('nuxeo-data-table-cell:not([hidden])').find((e) => e.getText() === heading);
+  async getResultsColumn(heading) {
+    const ele = await this.el;
+    await ele.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]').waitForVisible();
+    const row = await ele.$('nuxeo-data-table[name="table"] nuxeo-data-table-row[header]');
+    const rowElement = await row.$('nuxeo-data-table-cell:not([hidden])');
+    await rowElement.waitForVisible();
+    const titleRows = await row.$$('nuxeo-data-table-cell:not([hidden])');
+    const rowTitles = await row.$$('nuxeo-data-table-cell:not([hidden])').map((img) => img.getText());
+    const index = rowTitles.findIndex((currenTitle) => currenTitle === heading);
+    const result = await titleRows[index];
+    return result;
   }
 
-  resultsCount(displayMode) {
-    const rows = this.getResults(displayMode);
-    return rows ? rows.filter((result) => result.getAttribute('hidden') === null).length : 0;
+  async resultsCount(displayMode) {
+    const rows = await this.getResults(displayMode);
+    let elementCount = 0;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const elementsHidden = await row.getAttribute('hidden');
+      if (elementsHidden === null) {
+        elementCount++;
+      }
+    }
+    return elementCount;
   }
 
   get resultsCountLabel() {
-    return this.el.$('div.resultActions .resultsCount');
+    return (async () => {
+      const ele = await this.el;
+      return ele.$('div.resultActions .resultsCount');
+    })();
   }
 
-  deleteDocuments() {
-    const el = this.deleteDocumentsButton;
-    el.waitForVisible();
-    el.click();
+  async deleteDocuments() {
+    const el = await this.deleteDocumentsButton;
+    await el.waitForVisible();
+    await el.click();
   }
 
-  untrashDocuments() {
-    const el = this.untrashDocumentsButton;
-    el.waitForVisible();
-    el.click();
+  async untrashDocuments() {
+    const el = await this.untrashDocumentsButton;
+    await el.waitForVisible();
+    await el.click();
   }
 
   get deleteDocumentsButton() {

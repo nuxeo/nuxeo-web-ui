@@ -33,14 +33,15 @@ export default class DocumentTask extends BasePage {
     return this.el.element('#layout');
   }
 
-  setUserOrGroup(userOrGroup) {
-    const fieldEl = this.el.element('[name="userGroup"]');
-    fixtures.layouts.setValue(fieldEl, userOrGroup);
+  async setUserOrGroup(userOrGroup) {
+    const fieldEl = await this.el.element('[name="userGroup"]');
+    await fixtures.layouts.setValue(fieldEl, userOrGroup);
   }
 
-  actorExists(element, actor) {
-    const users = element.elements('nuxeo-user-tag .tag a');
-    return users.some((user) => user.getText() === `${actor}`);
+  async actorExists(element, actor) {
+    const users = await element.$$('nuxeo-user-tag .tag a');
+    const result = await users.some(async (user) => (await user.getText()) === `${actor}`);
+    return result;
   }
 
   performAction(name) {

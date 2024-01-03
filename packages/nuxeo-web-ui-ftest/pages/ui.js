@@ -15,8 +15,10 @@ import UserCloudServices from './ui/oauth2/user_cloud_services';
 import { refresh, url } from './helpers';
 
 export default class UI extends BasePage {
-  goHome() {
-    this.drawer.logo.click();
+  async goHome() {
+    const logoEle = await this.drawer.logo;
+    await logoEle.waitForVisible();
+    await logoEle.click();
   }
 
   reload() {
@@ -59,12 +61,15 @@ export default class UI extends BasePage {
   }
 
   get results() {
-    driver.waitUntil(async () => {
-      if (await this.el.$('nuxeo-browser').isVisible()) {
-        return this.browser.results;
+    return (async () => {
+      const ele = await this.el.element('nuxeo-browser');
+      const isElementVisible = await ele.isVisible();
+      if (isElementVisible) {
+        const resultEle = this.browser.results;
+        return resultEle;
       }
-    });
-    return new Search('nuxeo-search-results-layout[id="results"]');
+      return new Search('nuxeo-search-results-layout[id="results"]');
+    })();
   }
 
   get searchResults() {
@@ -73,12 +78,18 @@ export default class UI extends BasePage {
   }
 
   get createDialog() {
-    this._createDialog = this._createDialog ? this._createDialog : new CreateDialog('#createDocDialog');
-    return this._createDialog;
+    return (async () => {
+      const createEle = await new CreateDialog('#createDocDialog');
+      this._createDialog = this._createDialog ? this._createDialog : createEle;
+      return this._createDialog;
+    })();
   }
 
   get createButton() {
-    return this.el.element('#createBtn');
+    return (async () => {
+      const buttonCreate = await this.el.element('#createBtn');
+      return buttonCreate;
+    })();
   }
 
   get adminButton() {
@@ -131,25 +142,36 @@ export default class UI extends BasePage {
   }
 
   get userCloudServices() {
-    return new UserCloudServices('nuxeo-user-cloud-services');
+    return (async () => {
+      const cloudServiceELe = await new UserCloudServices('nuxeo-user-cloud-services');
+      return cloudServiceELe;
+    })();
   }
 
-  goToUserCloudServices() {
-    if (!browser.getUrl().endsWith('user-cloud-services')) {
+  async goToUserCloudServices() {
+    const browserUrl = await browser.getUrl();
+    if (!browserUrl.endsWith('user-cloud-services')) {
       url(process.env.NUXEO_URL ? '#!/user-cloud-services' : 'ui/#!/user-cloud-services');
     }
-    return this.userCloudServices;
+
+    const cloudServiceELe = await this.userCloudServices;
+
+    return cloudServiceELe;
+    // }
   }
 
   get userAuthorizedApps() {
     return new UserAuthorizedApps('nuxeo-user-authorized-apps');
   }
 
-  goToUserAuthorizedApps() {
-    if (!browser.getUrl().endsWith('user-authorized-apps')) {
-      url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
+  async goToUserAuthorizedApps() {
+    const browserUrl = await browser.getUrl();
+    if (!browserUrl.endsWith('user-authorized-apps')) {
+      await url(process.env.NUXEO_URL ? '#!/user-authorized-apps' : 'ui/#!/user-authorized-apps');
     }
-    return this.userAuthorizedApps;
+    if (await this.userAuthorizedApps.waitForVisible()) {
+      return this.userAuthorizedApps;
+    }
   }
 
   get tasks() {
@@ -189,16 +211,14 @@ export default class UI extends BasePage {
     return snackbar;
   }
 
-  async getToastMessage(message) {
+  getToastMessage(message) {
     let snackBar;
-    await driver.waitUntil(async () => {
-      snackBar = await this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
+    driver.waitUntil(() => {
+      snackBar = this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
       const trimmedMessage = message.trim().replace(/"/g, '');
-      const snackBarText = await snackBar.getText();
-      return snackBarText === trimmedMessage;
+      return snackBar.getText() === trimmedMessage;
     });
-    const snackBarText = await snackBar.getText();
-    return snackBarText;
+    return snackBar.getText();
   }
 
   bulkEdit(selector) {
@@ -206,6 +226,6 @@ export default class UI extends BasePage {
   }
 
   get filterView() {
-    return this.el.element('paper-icon-button[id="toogleFilter"]');
+    return this.el.$('paper-icon-button[id="toogleFilter"]');
   }
 }
