@@ -82,11 +82,12 @@ Polymer({
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
+        last-index="[[_lastIndex]]"
       >
         <template>
           <nuxeo-document-grid-thumbnail
             class="grid-box"
-            tabindex$="{{tabIndex}}"
+            tabindex$="{{_computeTabAndLastIndex(index)}"
             selected$="{{selected}}"
             selected-items="[[selectedItems]]"
             index="[[index]]"
@@ -263,6 +264,11 @@ Polymer({
       notify: true,
     },
 
+    _lastIndex: {
+      type: Number,
+      value: 0,
+    },
+
     emptyLabel: String,
     emptyLabelWhenFiltered: String,
   },
@@ -290,5 +296,11 @@ Polymer({
 
   _contentStoredInColdStorage(doc) {
     return this.hasFacet(doc, 'ColdStorage') && doc.properties && doc.properties['coldstorage:coldContent'];
+  },
+
+  _computeTabAndLastIndex(index) {
+    const tabindex = index + 1;
+    this._lastIndex = this.nxProvider.resultsCount;
+    return tabindex.toString();
   },
 });
