@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-undef */
 import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
@@ -127,8 +126,8 @@ Then('I navigate to {string} child', async function(title) {
   }
 });
 
-When(/^I start a (.+)$/, function(workflow) {
-  this.ui.browser.startWorkflow(workflow);
+When(/^I start a (.+)$/, async function(workflow) {
+  await this.ui.browser.startWorkflow(workflow);
 });
 
 When(/^I click the process button$/, async function() {
@@ -174,15 +173,17 @@ Then(/^I can't edit the document metadata$/, function() {
   this.ui.browser.editButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
 });
 
-Then(/^I can edit the (.*) metadata$/, function(docType) {
-  const { browser } = this.ui;
-  browser.editButton.waitForVisible();
-  browser.editButton.click();
-  const form = browser.editForm(docType);
-  form.waitForVisible();
-  form.title = docType;
-  form.save();
-  driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
+Then(/^I can edit the (.*) metadata$/, async function(docType) {
+  const browser = await this.ui.browser;
+  const browserEditButton = await browser.editButton;
+  await browserEditButton.waitForVisible();
+  await browserEditButton.click();
+  const form = await browser.editForm(docType);
+  await form.waitForVisible();
+  const inputElement = await form.el.element('.input-element input');
+  await fixtures.layouts.setValue(inputElement, docType);
+  await form.save();
+  await driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
 Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
@@ -289,32 +290,39 @@ Then(/^I can see a process is running in the document$/, async function() {
   await documentPageInfo.$('[name="process"]').waitForVisible();
 });
 
-Then(/^I can see a process is not running in the document$/, function() {
-  const documentPage = this.ui.browser.documentPage();
+Then(/^I can see a process is not running in the document$/, async function() {
+  const documentPage = await this.ui.browser.documentPage();
   // check info bar in the document is not visible
-  documentPage.infoBar.isVisible().should.be.false;
+  const infoBar = await documentPage.infoBar;
+  const infoBarVisible = await infoBar.isVisible();
+  infoBarVisible.should.be.false;
 });
 
-Then(/^I cannot start a workflow$/, function() {
-  this.ui.browser.startWorkflowButton.isExisting().should.be.false;
+Then(/^I cannot start a workflow$/, async function() {
+  const button = await this.ui.browser.startWorkflowButton;
+  const isButtonExisting = await button.isExisting();
+  isButtonExisting.should.be.false;
 });
 
-Then(/^I can abandon the workflow$/, function() {
-  const { abandonWorkflowButton } = this.ui.browser.documentPage();
-  abandonWorkflowButton.waitForVisible();
-  abandonWorkflowButton.click();
-  driver.alertAccept();
-  const documentPage = this.ui.browser.documentPage();
+Then(/^I can abandon the workflow$/, async function() {
+  const documentPage = await this.ui.browser.documentPage();
+  const abandonWorkflowButton = await documentPage.abandonWorkflowButton;
+  await abandonWorkflowButton.waitForVisible();
+  await abandonWorkflowButton.click();
+  await driver.alertAccept();
   // check info bar in the document is not visible
-  documentPage.infoBar.waitForVisible(browser.options.waitforTimeout, true);
+  const infoBar = await documentPage.infoBar;
+  await infoBar.waitForVisible(browser.options.waitforTimeout, true);
   // assert that info bar displays a task is running
-  documentPage.taskInfo.waitForVisible(browser.options.waitforTimeout, true);
+  const taskInfo = await documentPage.taskInfo;
+  await taskInfo.waitForVisible(browser.options.waitforTimeout, true);
   // assert that document info says a process is running
-  documentPage.info.waitForVisible();
-  documentPage.info.waitForVisible('[name="process"]', browser.options.waitforTimeout, true);
+  const docPageInfo = await documentPage.info;
+  await docPageInfo.waitForVisible();
+  await docPageInfo.waitForVisible('[name="process"]', browser.options.waitforTimeout, true);
 
   // In order to avoid errors when performing the teardown
-  fixtures.workflows.removeInstance(this.workflowInstance.id);
+  await fixtures.workflows.removeInstance(this.workflowInstance.id);
 });
 
 Then(/^I can see the document is a publication$/, async function() {

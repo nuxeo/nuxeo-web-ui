@@ -21,8 +21,8 @@ export default class UI extends BasePage {
     await logoEle.click();
   }
 
-  reload() {
-    refresh();
+  async reload() {
+    await refresh();
   }
 
   get activityFeed() {

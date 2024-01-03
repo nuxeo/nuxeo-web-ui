@@ -37,11 +37,17 @@ export default class DocumentPage extends BasePage {
   }
 
   get restoreVersionButton() {
-    return this.versionInfoBar.element('nuxeo-restore-version-button');
+    return (async () => {
+      const versionInfoBar = await this.versionInfoBar;
+      return versionInfoBar.element('nuxeo-restore-version-button');
+    })();
   }
 
   get restoreVersionButtonConfirm() {
-    return this.versionInfoBar.element('nuxeo-restore-version-button paper-button[dialog-confirm]');
+    return (async () => {
+      const versionInfoBar = await this.versionInfoBar;
+      return versionInfoBar.element('nuxeo-restore-version-button paper-button[dialog-confirm]');
+    })();
   }
 
   get info() {
