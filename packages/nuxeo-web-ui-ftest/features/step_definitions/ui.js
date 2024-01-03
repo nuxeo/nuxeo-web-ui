@@ -9,11 +9,11 @@ When('I click the {string} button', async function(button) {
 When('I select {string} from the View menu', function(option) {
   return this.ui.view(option);
 });
-When('I reload the page', function() {
+When('I reload the page', async function() {
   // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
-  driver.pause(3000);
-  this.ui.reload();
-  $('#logo').waitForVisible();
+  await driver.pause(3000);
+  await this.ui.reload();
+  await $('#logo').waitForVisible();
 });
 Then('I can see {string} in the Activity feed', async function(activity) {
   // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled

@@ -5,9 +5,9 @@ const _flushProperties = () => {
   }, global.config || []);
 };
 
-const refresh = () => {
-  driver.refresh();
-  _flushProperties();
+const refresh = async () => {
+  await driver.refresh();
+  await _flushProperties();
 };
 
 const url = async (...args) => {

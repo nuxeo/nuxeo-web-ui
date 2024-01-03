@@ -23,15 +23,25 @@ export default class DocumentVersions extends BasePage {
   }
 
   get dialogMinorOption() {
-    return this.dialog.$('paper-radio-button[name="minor"]');
+    return (async () => {
+      const dialog = await this.dialog;
+      const element = await dialog.$('paper-radio-button[name="minor"]');
+      return element;
+    })();
   }
 
   get dialogNextMajor() {
-    return this.dialog.$('#nextMajor');
+    return (async () => {
+      const dialog = await this.dialog;
+      return dialog.$('#nextMajor');
+    })();
   }
 
   get dialogNextMinor() {
-    return this.dialog.$('#nextMinor');
+    return (async () => {
+      const dialog = await this.dialog;
+      return dialog.$('#nextMinor');
+    })();
   }
 
   get dialogDismissButton() {
