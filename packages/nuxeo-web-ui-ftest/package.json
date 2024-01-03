@@ -35,7 +35,7 @@
     "mkdirp": "^0.5.1",
     "moment": "^2.29.4",
     "multiple-cucumber-html-reporter": "^1.18.0",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.3.2",
     "nuxeo": "^4.0.3",
     "wdio-chromedriver-service": "^8.1.1",
     "wdio-cucumberjs-json-reporter": "^5.1.7",

@@ -22,7 +22,7 @@
     "@wdio/spec-reporter": "^8.16.9",
     "axe-core": "^4.1.2",
     "chrome-launcher": "0.15.2",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.3.2",
     "wdio-chromedriver-service": "^8.1.1"
   }
 }
