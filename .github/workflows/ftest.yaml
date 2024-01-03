@@ -79,6 +79,17 @@ jobs:
             echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
           fi
 
+      - name: Install Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+          pushd packages/nuxeo-designer-catalog
+          npm install
+          popd
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2
