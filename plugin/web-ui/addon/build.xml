@@ -34,6 +34,8 @@ limitations under the License.
   <target name="install" description="Install npm depedencies" unless="skipInstall">
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
+      <!-- remove next line once NXBT-3340 is closed -->
+      <arg value="--@nuxeo:registry=&quot;https://packages.nuxeo.com/repository/npm-public&quot;" />
     </exec>
   </target>
 
