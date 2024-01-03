@@ -110,8 +110,8 @@ When(/^I browse to the document$/, async function() {
   await this.ui.browser.browseTo(this.doc.path);
 });
 
-When(/^I browse to the "(.*)" document page$/, function(page) {
-  this.ui.browser.browseTo(`${this.doc.path}?p=${page}`);
+When(/^I browse to the "(.*)" document page$/, async function(page) {
+  await this.ui.browser.browseTo(`${this.doc.path}?p=${page}`);
 });
 
 When(/^I browse to the document with path "(.+)"$/, async function(path) {

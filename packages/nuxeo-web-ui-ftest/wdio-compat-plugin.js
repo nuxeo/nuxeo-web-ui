@@ -224,7 +224,7 @@ module.exports = class {
       'waitForVisible',
       async function(...args) {
         let target = this;
-        if (typeof args[0] === 'string') {
+        if (typeof args[0] === 'string' && typeof target.waitForDisplayed !== 'function') {
           target = this.element(args.shift());
         }
         const [timeout, reverse = false] = args;
