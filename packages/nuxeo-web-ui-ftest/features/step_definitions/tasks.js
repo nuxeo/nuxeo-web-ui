@@ -90,6 +90,6 @@ Then('I can see the my task list has {int} item(s)', async function(nb) {
     throw Error(`Expected task count ${nb} but found ${result}`);
   }
 });
-Then('I can perform the {string} task action', function(name) {
-  this.ui.browser.documentTaskView.performAction(name);
+Then('I can perform the {string} task action', async function(name) {
+  await this.ui.browser.documentTaskView.performAction(name);
 });
