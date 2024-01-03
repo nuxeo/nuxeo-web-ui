@@ -100,8 +100,14 @@ Then('I can see the selection toolbar', async function() {
   await toolbar.waitForVisible();
 });
 
-When('I cannot see the display selection link', function() {
-  this.ui.browser.selectionToolbar.waitForNotVisible('.selectionLink').should.be.true;
+When('I cannot see the display selection link', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const selectionToolbarElem = await browser.selectionToolbar;
+  driver.pause(3000);
+  await selectionToolbarElem.waitForVisible();
+  const selectionLinkVisible = await selectionToolbarElem.waitForNotVisible('.selectionLink');
+  selectionLinkVisible.should.be.true;
 });
 
 Then('I can add selection to the {string} collection', function(collectionName) {
