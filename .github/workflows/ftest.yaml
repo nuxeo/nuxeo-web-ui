@@ -39,6 +39,7 @@ jobs:
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           scope: '@nuxeo'
+          node-version: 18
 
       - uses: actions/setup-java@v2
         with: 
@@ -93,6 +94,19 @@ jobs:
           echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
           popd
+
+      - name: add .npmrc
+        run: |
+          pushd /tmp/_temp/
+          ls
+          rm .npmrc
+          touch .npmrc
+          popd
+          echo '
+           packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+           @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+           always-auth=true
+          ' >> /tmp/_temp/.npmrc
 
       - name: Link elements to Web UI
         run: |
