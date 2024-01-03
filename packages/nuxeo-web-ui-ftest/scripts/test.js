@@ -100,9 +100,6 @@ let done = Promise.resolve();
 
 if (process.env.DRIVER_VERSION == null) {
   const chromePath = chromeLauncher.Launcher.getFirstInstallation();
-  const chromePath2 = chromeLauncher.Launcher.getInstallations();
-  // eslint-disable-next-line no-console
-  console.log(chromePath2);
   let version;
   try {
     version = execSync(`"${chromePath}" --version`)
@@ -114,8 +111,6 @@ if (process.env.DRIVER_VERSION == null) {
   // eslint-disable-next-line no-console
   console.log(`${version} detected.`);
   const match = version && version.match(/([0-9]+)\./);
-  // eslint-disable-next-line no-console
-  console.log(match);
   if (match) {
     const checkVersion = match[1];
     try {
