@@ -66,16 +66,17 @@ const suggestionSet = async (element, value) => {
     }
   }
   // it's a reset
-  else if (element.getAttribute('multiple') !== null) {
-    const dropdown = element.elements('.selectivity-multiple-selected-item');
+  else if (multiElement !== null) {
+    const dropdown = await element.elements('.selectivity-multiple-selected-item');
     for (let i = 0; i < dropdown.length; i++) {
       const dropdownElement = await dropdown[i].element('.selectivity-multiple-selected-item-remove');
       await dropdownElement.click();
     }
   } else {
-    const item = element.element('.selectivity-single-selected-item');
+    const item = await element.element('.selectivity-single-selected-item');
     if (item) {
-      item.element('.selectivity-single-selected-item-remove').click();
+      const ele = await item.element('.selectivity-single-selected-item-remove');
+      await ele.click();
     }
   }
 };

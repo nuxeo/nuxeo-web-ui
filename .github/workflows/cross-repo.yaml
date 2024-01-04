@@ -112,8 +112,8 @@ jobs:
           npm install
           popd
 
-      # - name: Lint Web UI
-      #   run: npm run lint
+      - name: Lint Web UI
+        run: npm run lint
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2
@@ -154,12 +154,12 @@ jobs:
         if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'false' }}
         run: npm run test
 
-      # - name: Web UI Unit tests (Sauce Labs)
-      #   if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
-      #   env:
-      #     SAUCE_USERNAME: nuxeo-web-ui
-      #     SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-      #   run: npm run test
+      - name: Web UI Unit tests (Sauce Labs)
+        if: ${{ github.event.inputs.skip_unit_tests == 'false' && github.event.inputs.sauce_labs == 'true' }}
+        env:
+          SAUCE_USERNAME: nuxeo-web-ui
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        run: npm run test
 
       - name: 'Update settings.xml with server configuration'
         run: |
