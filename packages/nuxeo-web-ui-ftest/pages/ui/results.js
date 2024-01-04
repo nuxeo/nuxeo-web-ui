@@ -61,7 +61,7 @@ export default class Results extends BasePage {
     return this.columnsSettingsPopup.$('paper-button.primary');
   }
 
-  getResults(displayMode) {
+  async getResults(displayMode) {
     switch (displayMode) {
       case 'grid':
         return this.el.$$('nuxeo-document-grid-thumbnail, nuxeo-justified-grid-item');
