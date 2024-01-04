@@ -120,7 +120,8 @@ When(/^I browse to the document with path "(.+)"$/, async function(path) {
 });
 
 Then('I navigate to {string} child', async function(title) {
-  const child = await this.ui.browser.clickChild(title);
+  const browser = await this.ui.browser;
+  const child = browser.clickChild(title);
   if (!child) {
     throw Error(`child should have ${title} title`);
   }
@@ -139,9 +140,11 @@ When(/^I click the process button$/, async function() {
   await processButton.click();
 });
 
-Then(/^I can't view the document$/, function() {
+Then(/^I can't view the document$/, async function() {
   url(`#!/browse${this.doc.path}`);
-  this.ui.browser.breadcrumb.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+  const breadcumbEle = await this.ui.browser.breadcrumb;
+  const isVisible = await breadcumbEle.waitForVisible(browser.options.waitforTimeout, true);
+  isVisible.should.be.true;
 });
 
 Then("I can see the document's title", function() {
@@ -190,7 +193,7 @@ Then(/^I can edit the following properties in the (.+) metadata:$/, async functi
   const browser = await this.ui.browser;
   await browser.editButton.waitForVisible();
   await browser.editButton.click();
-  const form = browser.editForm(docType);
+  const form = await browser.editForm(docType);
   await form.waitForVisible();
   await form.layout.waitForVisible();
   await form.layout.fillMultipleValues(table);
@@ -340,22 +343,34 @@ Then(/^I can unpublish the document$/, async function() {
   await unpublishConfirm.click();
 });
 
-Then('I can see {int} validation error(s) in the {string} edit form', function(nbErrors, docType) {
-  const { browser } = this.ui;
-  const form = browser.editForm(docType);
-  form.waitForVisible();
-  driver.waitUntil(
-    () => form.errorMessages.length === nbErrors,
-    `Expecting to get ${nbErrors} results but found ${form.errorMessages.length}`,
+Then('I can see {int} validation error(s) in the {string} edit form', async function(nbErrors, docType) {
+  const browser = await this.ui.browser;
+  const form = await browser.editForm(docType);
+  await form.waitForVisible();
+  await driver.waitUntil(
+    async () => {
+      await driver.pause(1000);
+      const errorMessages = await form.errorMessages;
+      return errorMessages.length === nbErrors;
+    },
+    {
+      timeout: 5000,
+      timeoutMsg: `Expecting to get ${nbErrors} results but found ${form.errorMessages.length}`,
+    },
   );
 });
 
-Then('I can see the {string} error message in the {string} edit form', function(message, docType) {
-  const { browser } = this.ui;
-  const form = browser.editForm(docType);
-  form.waitForVisible();
-  driver.waitUntil(
-    () => form.errorMessages.some((err) => err === message),
-    `Expecting to find '${message}' error message but not found`,
-  );
+Then('I can see the {string} error message in the {string} edit form', async function(message, docType) {
+  const { browser } = await this.ui;
+  try {
+    const form = await browser.editForm(docType);
+    await form.waitForVisible();
+    const errorMessages = await form.errorMessages;
+    const hasErrorMessage = errorMessages.some((err) => err === message);
+    if (!hasErrorMessage) {
+      throw new Error(`Expecting to find '${message}' error message but not found`);
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
 });

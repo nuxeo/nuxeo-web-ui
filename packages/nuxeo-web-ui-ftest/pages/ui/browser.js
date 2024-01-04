@@ -107,8 +107,9 @@ export default class Browser extends BasePage {
     return this.el.$('#edit-button');
   }
 
-  editForm(docType) {
-    return new DocumentFormLayout('#edit-dialog nuxeo-document-form-layout', docType, 'edit');
+  async editForm(docType) {
+    const docFormLayout = await new DocumentFormLayout('#edit-dialog nuxeo-document-form-layout', docType, 'edit');
+    return docFormLayout;
   }
 
   get header() {
@@ -399,15 +400,16 @@ export default class Browser extends BasePage {
     await clickActionMenu(id, selector);
   }
 
-  startWorkflow(workflow) {
+  async startWorkflow(workflow) {
     // click the action to trigger the dialog
-    clickActionMenu(this.el, 'nuxeo-workflow-button');
+    await clickActionMenu(this.el, 'nuxeo-workflow-button');
     // select the workflow
-    const workflowSelect = this.el.$('.document-actions nuxeo-workflow-button nuxeo-select');
-    workflowSelect.waitForVisible();
-    fixtures.layouts.setValue(workflowSelect, workflow);
+    const workflowSelect = await this.el.$('.document-actions nuxeo-workflow-button nuxeo-select');
+    await workflowSelect.waitForVisible();
+    await fixtures.layouts.setValue(workflowSelect, workflow);
     // click the start button
-    this.el.$('.document-actions nuxeo-workflow-button #startButton').click();
+    const ele = await this.el.$('.document-actions nuxeo-workflow-button #startButton');
+    await ele.click();
   }
 
   async _selectChildDocument(title, deselect) {

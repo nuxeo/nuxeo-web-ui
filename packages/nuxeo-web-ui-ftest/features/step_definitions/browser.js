@@ -54,14 +54,15 @@ When('I click {string} in the {word} tree', async function(title, tab) {
   await sectionTab.waitForVisible();
   driver.pause(10000);
   const sectionText = await sectionTab.$$('.content a').map((element) => element.getText());
-  await driver.waitUntil(async () => sectionText.some((e) => e === title), {
+  await driver.waitUntil(async () => sectionText.some(async (e) => (await e) === title), {
     timeout: 10000,
     timeoutMsg: 'expected text to be different after 5s',
   });
   const el = await sectionTab.$$('.content a');
-  const index = sectionText.findIndex((e) => e === title);
-  await el[index].waitForVisible();
-  await el[index].click();
+  const index = sectionText.findIndex(async (e) => (await e) === title);
+  const elEle = await el[index];
+  await elEle.waitForVisible();
+  await elEle.click();
 });
 
 Then('I can see the {string} document', async function(title) {

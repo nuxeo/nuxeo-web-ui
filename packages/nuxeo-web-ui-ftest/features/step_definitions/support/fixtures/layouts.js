@@ -43,7 +43,8 @@ const suggestionSet = async (element, value) => {
         const searchInput = await dropdown.element('.selectivity-search-input');
         await searchInput.setValue(values[i]);
         if (hasSelectedValue) {
-          await dropdown.element('.selectivity-result-item').waitForVisible();
+          const dropdownElement = await dropdown.element('.selectivity-result-item');
+          await dropdownElement.waitForVisible();
           await driver.keys('Down arrow');
         }
       }
@@ -66,16 +67,17 @@ const suggestionSet = async (element, value) => {
     }
   }
   // it's a reset
-  else if (element.getAttribute('multiple') !== null) {
-    const dropdown = element.elements('.selectivity-multiple-selected-item');
+  else if (multiElement !== null) {
+    const dropdown = await element.elements('.selectivity-multiple-selected-item');
     for (let i = 0; i < dropdown.length; i++) {
       const dropdownElement = await dropdown[i].element('.selectivity-multiple-selected-item-remove');
       await dropdownElement.click();
     }
   } else {
-    const item = element.element('.selectivity-single-selected-item');
+    const item = await element.element('.selectivity-single-selected-item');
     if (item) {
-      item.element('.selectivity-single-selected-item-remove').click();
+      const ele = await item.element('.selectivity-single-selected-item-remove');
+      await ele.click();
     }
   }
 };
@@ -163,9 +165,10 @@ global.fieldRegistry.register(
 global.fieldRegistry.register(
   'paper-radio-button',
   (element) => element.$('#radioContainer').getAttribute('multiple') !== null,
-  (element, value) => {
+  async (element, value) => {
     if (value) {
-      element.$('#radioContainer').click();
+      const setEle = await element.element('#radioContainer');
+      await setEle.click();
     }
   },
 );

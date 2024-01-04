@@ -44,9 +44,11 @@ export default class DocumentTask extends BasePage {
     return result;
   }
 
-  performAction(name) {
-    this.taskLayout.waitForVisible();
-    this.el.waitForVisible(`.options paper-button[name="${name}"]`);
-    this.el.element(`.options paper-button[name="${name}"]`).click();
+  async performAction(name) {
+    const layout = await this.taskLayout;
+    await layout.waitForVisible();
+    const ele = await this.el.element(`.options paper-button[name="${name}"]`);
+    await ele.waitForVisible();
+    await ele.click();
   }
 }

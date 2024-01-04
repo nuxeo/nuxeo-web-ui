@@ -18,16 +18,15 @@ When('I click the preview button for the attachment', async function() {
 });
 
 Then(/^I can see the inline ([-\w]+) previewer$/, async function(viewerType) {
-  const page = await this.ui.browser.documentPage(this.doc.type);
+  const uiBrowser = await this.ui.browser;
+  const page = await uiBrowser.documentPage(this.doc.type);
   await page.waitForVisible();
-  await page.view.waitForVisible();
-  const viewEle = await page.view;
-  const preview = await viewEle.preview;
+  const pageView = await page.view;
+  await pageView.waitForVisible();
+  const preview = await pageView.preview;
   await preview.waitForVisible();
-
   if (viewerType === 'plain') {
-    preview.waitForVisible(`#${viewerType}`);
-
+    await preview.waitForVisible(`#${viewerType}`);
     return;
   }
   await preview.waitForVisible(viewerType);
