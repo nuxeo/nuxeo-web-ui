@@ -95,7 +95,7 @@ export default class Search extends Results {
       const searchInputEle = await this.el.$('#searchInput .input-element input');
       await searchInputEle.waitForVisible();
       await searchInputEle.setValue(searchTerm);
-      await driver.keys('Enter');
+      driver.keys('Enter');
     } else {
       await this.setFieldValue(searchType, searchTerm);
     }
