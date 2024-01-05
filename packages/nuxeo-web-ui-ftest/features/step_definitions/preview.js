@@ -32,6 +32,6 @@ Then(/^I can see the inline ([-\w]+) previewer$/, async function(viewerType) {
   await preview.waitForVisible(viewerType);
 });
 
-Then(/^I can see a ([-\w]+) previewer$/, (viewerType) => {
-  $(`#dialog ${viewerType}`).waitForVisible();
+Then(/^I can see a ([-\w]+) previewer$/, async (viewerType) => {
+  await $(`#dialog ${viewerType}`).waitForVisible();
 });
