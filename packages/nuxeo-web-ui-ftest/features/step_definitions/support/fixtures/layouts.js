@@ -218,14 +218,14 @@ global.fieldRegistry.register(
       const text = await e.getText();
       return typeof text === 'string' && text.trim().includes(value);
     });
-    checkbox.click();
+    await checkbox.click();
   },
 );
 global.fieldRegistry.register(
   'nuxeo-dropzone',
-  (element) => element.$("input[id='input']").getValue(),
-  (element, value) => {
-    element.waitForExist("input[id='input']");
+  async (element) => element.$("input[id='input']").getValue(),
+  async (element, value) => {
+    await element.waitForExist("input[id='input']");
     element.chooseFile("input[id='input']", path.resolve(fixtures.blobs.get(value)));
   },
 );
@@ -246,22 +246,27 @@ global.fieldRegistry.register(
     });
     return JSON.stringify(result);
   },
-  (element, values) => {
-    element.scrollIntoView();
+  async (element, values) => {
+    await element.scrollIntoView();
     const jValues = JSON.parse(values);
-    jValues.forEach((value) => {
-      element.$('#addEntry').click();
-      const dialog = element.element('nuxeo-dialog[id="dialog"]:not([aria-hidden])');
-      dialog.waitForVisible();
-      const form = element.$('#editForm');
-      form.waitForVisible();
-      Object.keys(value).forEach((property) => {
-        form.waitForVisible(`[name="${property}"]`);
-        fixtures.layouts.setValue(form.element(`[name="${property}"]`), value[property]);
-      });
-      dialog.waitForVisible('paper-button[id="save"]');
-      dialog.click('paper-button[id="save"]');
-    });
+    for (let index = 0; index < jValues.length; index++) {
+      const value = jValues[index];
+      const addEntryEle = await element.element('#addEntry');
+      await addEntryEle.click();
+      const dialog = await element.element('nuxeo-dialog[id="dialog"]:not([aria-hidden])');
+      await dialog.waitForVisible();
+      const form = await element.element('#editForm');
+      await form.waitForVisible();
+      const objKeys = Object.keys(value);
+      for (let ind = 0; ind < objKeys.length; ind++) {
+        const property = objKeys[ind];
+        await form.waitForVisible(`[name="${property}"]`);
+        const formEle = await form.element(`[name="${property}"]`);
+        await fixtures.layouts.setValue(formEle, value[property]);
+      }
+      await dialog.waitForVisible('paper-button[id="save"]');
+      await dialog.$('paper-button[id="save"]').click();
+    }
   },
 );
 global.fieldRegistry.register('nuxeo-document-blob', (element) => {

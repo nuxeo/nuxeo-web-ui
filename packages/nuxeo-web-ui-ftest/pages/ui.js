@@ -217,13 +217,14 @@ export default class UI extends BasePage {
   }
 
   async getToastMessage(message) {
-    let snackBar;
+    let snackBarText;
     await driver.waitUntil(async () => {
-      snackBar = await this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
+      const snackBar = await this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
+      snackBarText = await snackBar.getText();
       const trimmedMessage = message.trim().replace(/"/g, '');
-      return (await snackBar.getText()) === trimmedMessage;
+      return snackBarText === trimmedMessage;
     });
-    const snackBarText = await snackBar.getText();
+
     return snackBarText;
   }
 

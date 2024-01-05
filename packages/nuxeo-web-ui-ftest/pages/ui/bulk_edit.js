@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-
 import BasePage from '../base';
 
 export default class BulkEdit extends BasePage {
@@ -8,7 +7,10 @@ export default class BulkEdit extends BasePage {
   }
 
   get dialog() {
-    return this.el.element('#dialog');
+    return (async () => {
+      const ele = await this.el.element('#dialog');
+      return ele;
+    })();
   }
 
   get cancelButton() {
@@ -16,7 +18,10 @@ export default class BulkEdit extends BasePage {
   }
 
   get saveButton() {
-    return this.el.element('.actions #save');
+    return (async () => {
+      const ele = await this.el.element('.actions #save');
+      return ele;
+    })();
   }
 
   getField(field) {
@@ -60,8 +65,8 @@ export default class BulkEdit extends BasePage {
   }
 
   async getBulkEditOptions(field) {
-    const filedElem = await this.el.element(`[name="${field}"]`);
-    let bulkWidget = await filedElem.parentElement();
+    const fieldEle = await this.el.element(`[name="${field}"]`);
+    let bulkWidget = await fieldEle.parentElement();
     // some elements generated in Studio are wrapped in divs
     const bulkWidgetTag = await bulkWidget.getTagName();
     if (bulkWidgetTag !== 'nuxeo-bulk-widget') {
@@ -72,16 +77,10 @@ export default class BulkEdit extends BasePage {
   }
 
   async bulkEditOptionsList(fieldName, editOption) {
-    await driver.waitUntil(
-      async () => {
-        const ele = await driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
-        return ele.length > 1;
-      },
-      {
-        timeout: 3000,
-        timeoutMsg: 'expected bulkEditOptionsList text to be different after 5s',
-      },
-    );
+    await driver.waitUntil(async () => {
+      const ele = await driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
+      return ele.length > 1;
+    });
     const fieldNameElem = await this.el.element(`[name="${fieldName}"]`);
     const parentElem = await fieldNameElem.parentElement();
     const listItems = await parentElem.elements('nuxeo-select paper-item');
