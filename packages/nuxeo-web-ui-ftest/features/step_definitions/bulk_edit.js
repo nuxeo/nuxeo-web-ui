@@ -10,11 +10,11 @@ Then('I click the bulk edit button with {string} layout', async function(layoutN
 
 Then('I can bulk edit multiple properties in {string} layout:', async function(layoutName, table) {
   const action = await this.ui.bulkEdit(`nuxeo-edit-documents-button[layout="${layoutName}"]`);
-  const dialogElem = await action.dialog;
-  await dialogElem.waitForDisplayed();
+  const dialog = await action.dialog;
+  await dialog.waitForDisplayed();
   await action.editMultipleOptions(table);
-  const saveButtonElem = await action.saveButton;
-  await saveButtonElem.click();
+  const saveButtonEle = await action.saveButton;
+  await saveButtonEle.click();
 });
 
 Then('I see a toast notification with the following message {string}', async function(message) {
@@ -24,7 +24,7 @@ Then('I see a toast notification with the following message {string}', async fun
 });
 
 Then('I click the toast notification dismiss button', async function() {
-  const snackbar = await this.ui.getToastDismissButton();
-  await snackbar.click();
+  const toastDismissButton = await this.ui.getToastDismissButton();
+  await toastDismissButton.click();
   await this.ui.waitForToastNotVisible();
 });
