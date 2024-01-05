@@ -131,6 +131,7 @@ When(/^I clear the (.+) search on (.+)$/, async function(searchType, searchName)
 When(/^I perform a (.+) search for (.+) on (.+)$/, async function(searchType, searchTerm, searchName) {
   const searchForm = await this.ui.searchForm(searchName);
   await searchForm.waitForVisible();
+  await driver.pause(3000);
   await searchForm.search(searchType, searchTerm);
 });
 
