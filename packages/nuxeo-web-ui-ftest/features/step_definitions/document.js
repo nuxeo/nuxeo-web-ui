@@ -89,7 +89,7 @@ Given(/^This document has file "(.+)" for content$/, async function(file) {
   return contentEle;
 });
 
-Given(/^This document has file "(.+)" for attachment/, function(file) {
+Given(/^This document has file "(.+)" for attachment/, async function(file) {
   return fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true);
 });
 
