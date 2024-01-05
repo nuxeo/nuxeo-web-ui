@@ -77,8 +77,9 @@ When('I create a document with the following properties:', async function(table)
   const button = await createDialogElem.createButton;
   await button.waitForVisible();
   await button.click();
-  await this.ui.browser.waitForNotVisible('iron-overlay-backdrop');
-  const hasTitle = await this.ui.browser.hasTitle(title);
+  const browser = await this.ui.browser;
+  await browser.waitForNotVisible('iron-overlay-backdrop');
+  const hasTitle = await browser.hasTitle(title);
   hasTitle.should.be.true;
   this.doc = { type: currentDocType, title };
 });
