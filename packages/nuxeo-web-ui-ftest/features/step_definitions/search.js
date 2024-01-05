@@ -136,7 +136,8 @@ When(/^I perform a (.+) search for (.+) on (.+)$/, async function(searchType, se
 });
 
 When('I switch to filter view', async function() {
-  await this.ui.filterView.click();
+  const filterView = await this.ui.filterView;
+  await filterView.click();
 });
 
 Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
