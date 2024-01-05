@@ -8,8 +8,9 @@ Then(/^I upload file "(.+)" as document content/, async function(file) {
 Then('I can see the blob replace button', async function() {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
-  await page.view.waitForVisible();
-  const ele = await page.view.el.element('nuxeo-replace-blob-button');
+  const view = await page.view;
+  await view.waitForVisible();
+  const ele = await view.el.element('nuxeo-replace-blob-button');
   const result = await ele.waitForVisible();
   result.should.be.true;
 });
@@ -17,8 +18,9 @@ Then('I can see the blob replace button', async function() {
 Then("I can't see the blob replace button", async function() {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
-  await page.view.waitForVisible();
-  const ele = await page.view.el.element('nuxeo-replace-blob-button');
+  const view = await page.view;
+  await view.waitForVisible();
+  const ele = await view.el.element('nuxeo-replace-blob-button');
   const result = await ele.waitForVisible(5000, true);
   result.should.be.true;
 });
@@ -26,8 +28,9 @@ Then("I can't see the blob replace button", async function() {
 Then('I can see the option to add new attachments', async function() {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
-  await page.metadata.waitForVisible();
-  const ele = await page.metadata.el.element('nuxeo-dropzone');
+  const metadata = await page.metadata;
+  await metadata.waitForVisible();
+  const ele = await metadata.el.element('nuxeo-dropzone');
   const result = await ele.waitForVisible();
   result.should.be.true;
 });
@@ -35,16 +38,18 @@ Then('I can see the option to add new attachments', async function() {
 Then("I can't see the option to add new attachments", async function() {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
-  await page.metadata.waitForVisible();
-  const result = await page.metadata.waitForNotVisible('nuxeo-dropzone');
+  const metadata = await page.metadata;
+  await metadata.waitForVisible();
+  const result = await metadata.waitForNotVisible('nuxeo-dropzone');
   result.should.be.true;
 });
 
 Then('I can see the option to add a main blob', async function() {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
-  await page.view.waitForVisible();
-  const ele = await page.view.el.element('nuxeo-dropzone');
+  const view = await page.view;
+  await view.waitForVisible();
+  const ele = await view.el.element('nuxeo-dropzone');
   const result = await ele.waitForVisible();
   result.should.be.true;
 });
@@ -52,7 +57,8 @@ Then('I can see the option to add a main blob', async function() {
 Then("I can't see the option to add a main blob", async function() {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
-  await page.view.waitForVisible();
-  const result = await page.view.waitForNotVisible('nuxeo-dropzone');
+  const view = await page.view;
+  await view.waitForVisible();
+  const result = await view.waitForNotVisible('nuxeo-dropzone');
   result.should.be.true;
 });
