@@ -37,8 +37,9 @@ Then('I can navigate to {word} pill', async function(pill) {
 });
 
 Then('I cannot see to {word} pill', async function(pill) {
-  await this.ui.browser.waitForVisible();
-  const outElement = await this.ui.browser.waitForNotVisible(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const outElement = await browser.waitForNotVisible(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
   outElement.should.be.true;
 });
 
@@ -116,7 +117,7 @@ Then('I can add selection to the {string} collection', async function(collection
 
 Then('I can add selection to clipboard', async function() {
   const browser = await this.ui.browser;
-  browser.waitForVisible();
+  await browser.waitForVisible();
   const toolbar = await browser.selectionToolbar;
   await toolbar.addToClipboard();
 });
@@ -210,7 +211,7 @@ Then('I can publish selection to {string}', async function(target) {
 });
 
 Then(/^I can perform the following publications$/, async function(table) {
-  let page = this.ui.browser.documentPage(this.doc.type);
+  let page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   let pubCount = await page.publicationsCount;
   pubCount.should.not.be.NaN;

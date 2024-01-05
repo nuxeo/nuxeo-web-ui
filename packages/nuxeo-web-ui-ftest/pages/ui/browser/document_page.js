@@ -76,10 +76,17 @@ export default class DocumentPage extends BasePage {
 
   get publicationsCount() {
     return (async () => {
-      const info = await this.el.$('nuxeo-document-info');
+      const info = await this.el.element('nuxeo-document-info');
       if (info) {
-        const items = await this.el.$$('nuxeo-document-info .item');
-        const pub = items.find((i) => i.$('label').getText() === 'Publications');
+        const items = await this.el.elements('nuxeo-document-info .item');
+        let pub;
+        for (let i = 0; i < items.length; i++) {
+          // eslint-disable-next-line no-await-in-loop
+          const itemText = await items[i].getText();
+          if (itemText === 'Publications') {
+            pub = items[i];
+          }
+        }
         if (pub) {
           return parseInt(
             pub

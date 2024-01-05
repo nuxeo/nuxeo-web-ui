@@ -280,9 +280,10 @@ export default class Browser extends BasePage {
       const rowText = (await getText.trim()) === title;
       if (rowVisible && rowText) {
         await row.click();
-        break; // Exit the loop once a match is found
+        return true; // Exit the loop once a match is found
       }
     }
+    return false;
   }
 
   async indexOfChild(title) {

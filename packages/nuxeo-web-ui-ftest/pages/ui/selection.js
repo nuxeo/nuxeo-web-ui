@@ -5,9 +5,9 @@ import { clickActionMenu } from '../helpers';
 
 export default class Selection extends BasePage {
   async addToClipboard() {
-    const ele = await this.el;
-    await ele.$('nuxeo-clipboard-documents-button').click();
-    this.waitForNotVisible();
+    const button = await this.el.element('nuxeo-clipboard-documents-button');
+    await button.click();
+    await this.waitForNotVisible();
   }
 
   get addDocumentsToCollectionButton() {
