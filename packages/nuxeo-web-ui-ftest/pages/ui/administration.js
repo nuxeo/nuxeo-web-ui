@@ -25,15 +25,19 @@ export default class Administration extends BasePage {
   }
 
   get vocabularyManagement() {
-    if (!browser.getUrl().endsWith('vocabulary-management')) {
-      url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
-    }
-    return new Vocabulary('nuxeo-vocabulary-management');
+    return (async () => {
+      const browserUrl = await browser.getUrl();
+      if (!browserUrl.endsWith('vocabulary-management')) {
+        await url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
+      }
+      return new Vocabulary('nuxeo-vocabulary-management');
+    })();
   }
 
-  goToVocabularyManagement() {
-    if (!browser.getUrl().endsWith('vocabulary-management')) {
-      url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
+  async goToVocabularyManagement() {
+    const browserUrl = await browser.getUrl();
+    if (!browserUrl.endsWith('vocabulary-management')) {
+      await url(process.env.NUXEO_URL ? '#!/admin/vocabulary-management' : 'ui/#!/admin/vocabulary-management');
     }
     return this.vocabularyManagement;
   }

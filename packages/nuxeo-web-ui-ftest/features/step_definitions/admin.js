@@ -34,7 +34,9 @@ Then('I can see the users and groups page', async function() {
 });
 
 Then('I can see the vocabulary page', async function() {
-  const isVisible = await this.ui.administration.vocabularyManagement.waitForVisible();
+  const adminstration = await this.ui.administration;
+  const vocabManagement = await adminstration.vocabularyManagement;
+  const isVisible = await vocabManagement.waitForVisible();
   if (!isVisible) {
     throw new Error('Expected vocabulary page to be visible');
   }
