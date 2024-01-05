@@ -6,8 +6,9 @@ When('I click the {string} button', async function(button) {
   return buttonToclick;
 });
 
-When('I select {string} from the View menu', function(option) {
-  return this.ui.view(option);
+When('I select {string} from the View menu', async function(option) {
+  const ui = await this.ui;
+  return ui.view(option);
 });
 When('I reload the page', async function() {
   // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
