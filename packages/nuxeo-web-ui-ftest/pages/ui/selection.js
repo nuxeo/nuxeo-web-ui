@@ -34,14 +34,16 @@ export default class Selection extends BasePage {
     })();
   }
 
-  moveDown() {
-    this.el.waitForVisible('nuxeo-move-documents-down-button');
-    this.el.element('nuxeo-move-documents-down-button').click();
+  async moveDown() {
+    await this.el.waitForVisible('nuxeo-move-documents-down-button');
+    const ele = await this.el.element('nuxeo-move-documents-down-button');
+    await ele.click();
   }
 
-  moveUp() {
-    this.el.waitForVisible('nuxeo-move-documents-up-button');
-    this.el.element('nuxeo-move-documents-up-button').click();
+  async moveUp() {
+    await this.el.waitForVisible('nuxeo-move-documents-up-button');
+    const ele = await this.el.element('nuxeo-move-documents-up-button');
+    await ele.click();
   }
 
   async trashDocuments() {

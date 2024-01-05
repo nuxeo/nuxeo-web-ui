@@ -29,11 +29,12 @@ Then('I can see the {string} {word} tree node', async function(title, tab) {
 });
 
 Then('I can navigate to {word} pill', async function(pill) {
-  await this.ui.browser.waitForVisible();
-  const ele = await this.ui.browser.el.$(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const ele = await browser.el.$(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
   await ele.waitForVisible();
   await ele.click();
-  await this.ui.browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
+  await browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
 });
 
 Then('I cannot see to {word} pill', async function(pill) {
@@ -135,14 +136,18 @@ Then('I can add selection to clipboard', async function() {
   await toolbar.addToClipboard();
 });
 
-Then('I can move selection down', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.moveDown();
+Then('I can move selection down', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const selectionToolbar = await browser.selectionToolbar;
+  await selectionToolbar.moveDown();
 });
 
-Then('I can move selection up', function() {
-  this.ui.browser.waitForVisible();
-  this.ui.browser.selectionToolbar.moveUp();
+Then('I can move selection up', async function() {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const selectionToolbar = await browser.selectionToolbar;
+  await selectionToolbar.moveUp();
 });
 
 Then('I can see the {string} child document is at position {int}', async function(title, pos) {
@@ -215,8 +220,9 @@ Then(/^I can republish the following publication$/, async function(table) {
 });
 
 Then('I can publish selection to {string}', async function(target) {
-  await this.ui.browser.waitForVisible();
-  const selectionToolBar = await this.ui.browser.selectionToolbar;
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const selectionToolBar = await browser.selectionToolbar;
   const dialog = await selectionToolBar.publishDialog;
   await dialog.publish(target);
   // HACK because publishing all documents is asynchronous
