@@ -3,13 +3,16 @@ import BasePage from '../base';
 export default class Recents extends BasePage {
   get nbItems() {
     return (async () => {
-      const items = await this.el.$$('#recentDocumentsList .list-item');
+      await driver.pause(2000);
+      const items = await this.el.elements('#recentDocumentsList .list-item');
       let count = 0;
-      items.forEach(async (item) => {
-        if (item.isVisible()) {
+      for (let i = 0; i < items.length; i++) {
+        // eslint-disable-next-line no-await-in-loop
+        const item = await items[i].isVisible();
+        if (item) {
           count++;
         }
-      });
+      }
       return count;
     })();
   }

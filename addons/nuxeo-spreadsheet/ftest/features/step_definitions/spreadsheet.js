@@ -1,10 +1,9 @@
-/* eslint-disable no-undef */
-// eslint-disable-next-line import/no-unresolved
 import { Then, When } from '@cucumber/cucumber';
 import Spreadsheet from '../../pages/spreadsheet';
 
 When('I open the spreadsheet', async function() {
   const result = await this.ui.results;
+  const browser = await this.ui.browser;
   const actions = await result.actions;
   const buttonEle = await actions.element('nuxeo-spreadsheet-button');
   await buttonEle.click();
@@ -64,6 +63,7 @@ When('I save the spreadsheet', async function() {
 
 When('I close the spreadsheet', async function() {
   const spreadsheet = await this.spreadsheet;
+  const browser = await this.ui.browser;
   if (spreadsheet) {
     await spreadsheet.close();
     await browser.switchToFrame(null);

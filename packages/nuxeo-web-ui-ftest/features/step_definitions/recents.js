@@ -13,14 +13,19 @@ Then('I can see the list of recently viewed documents', function() {
 });
 
 Then('I can see the list of recently viewed documents has {int} item(s)', async function(nb) {
-  await this.ui.drawer.recents.waitForVisible();
-  driver.waitUntil(async () => (await this.ui.drawer.recents.nbItems) === nb);
+  const drawer = await this.ui.drawer;
+  const recents = await drawer.recents;
+  await recents.waitForVisible();
+  const item = await recents.nbItems;
+  if (item !== nb) {
+    throw Error(`Expected count of ${nb} but found ${item}`);
+  }
 });
 
 Then('I can see the list of recently viewed documents has {string} document', async function(title) {
-  await this.ui.drawer.recents.waitForVisible();
-  const derwa = await this.ui.drawer;
-  const rece = await derwa.recents;
-  const member = await rece.waitForHasMember(title);
+  const drawer = await this.ui.drawer;
+  const recents = await drawer.recents;
+  await recents.waitForVisible();
+  const member = await recents.waitForHasMember(title);
   member.should.be.true;
 });

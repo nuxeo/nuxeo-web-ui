@@ -1,4 +1,3 @@
-/* eslint-disable no-return-await */
 export default class Spreadsheet {
   constructor() {
     driver.waitUntil(() => driver.execute(() => window.spreadheet));
@@ -21,7 +20,7 @@ export default class Spreadsheet {
         const table = await this.table;
         const headerElements = await table.elements('thead span');
         const headerElementArray = Array.from(headerElements);
-        const header = await Promise.all(headerElementArray.map(async (e) => await e.getText()));
+        const header = await Promise.all(headerElementArray.map(async (e) => e.getText()));
         return header;
       } catch (error) {
         console.error('Error fetching headers:', error);

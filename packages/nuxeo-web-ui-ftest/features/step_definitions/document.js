@@ -118,7 +118,7 @@ When(/^I browse to the document with path "(.+)"$/, async function(path) {
 
 Then('I navigate to {string} child', async function(title) {
   const browser = await this.ui.browser;
-  const child = browser.clickChild(title);
+  const child = await browser.clickChild(title);
   if (!child) {
     throw Error(`child should have ${title} title`);
   }
