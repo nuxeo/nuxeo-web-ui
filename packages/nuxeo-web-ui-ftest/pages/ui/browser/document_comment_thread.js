@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 import DocumentComment from './document_comment'; /* eslint import/no-cycle: 0 */
 
@@ -13,13 +14,14 @@ export default class DocumentCommentThread extends BasePage {
     return (async () => {
       await driver.pause(3000);
       const items = await this.el.elements('nuxeo-document-comment');
-      const visibleItems = items.map(async (item) => {
-        const isDisplayed = await item.isVisible();
-        return isDisplayed;
-      });
-      const countVisibleItem = await Promise.all(visibleItems);
-      const filterItem = countVisibleItem.filter((item) => item === true);
-      return filterItem.length;
+      let count = 0;
+      for (let i = 0; i < items.length; i++) {
+        const item = await items[i].isVisible();
+        if (item) {
+          count++;
+        }
+      }
+      return count;
     })();
   }
 
@@ -32,18 +34,19 @@ export default class DocumentCommentThread extends BasePage {
 
   async getComment(text, user) {
     const comments = await this.el.elements('nuxeo-document-comment');
-    const match = comments.map(async (item) => {
+    let trueIndex;
+    for (let i = 0; i < comments.length; i++) {
+      const item = await comments[i];
       const comment = new DocumentComment(item);
       const authorName = await comment.author;
       const authorText = await authorName.getText();
       const commentText = await comment.text;
       const textComment = await commentText.getText();
-      return authorText === user && textComment === text;
-    });
-
-    const promiseValue = await Promise.all(match);
-    const trueIndex = promiseValue.findIndex((item) => item === true);
-
+      if (authorText === user && textComment === text) {
+        trueIndex = i;
+        break;
+      }
+    }
     if (trueIndex > -1) {
       return new DocumentComment(comments[trueIndex]);
     }

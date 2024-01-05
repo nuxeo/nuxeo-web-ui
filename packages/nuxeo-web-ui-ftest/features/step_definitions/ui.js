@@ -24,7 +24,8 @@ Then('I can see {string} in the Activity feed', async function(activity) {
   const activityTabVisible = await activityTab.waitForVisible();
   await activityTabVisible.should.be.true;
 });
-Then('I click the blob download button', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.downloadButton.click();
+Then('I click the blob download button', async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  const button = await page.downloadButton;
+  await button.click();
 });

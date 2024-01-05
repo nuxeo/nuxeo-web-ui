@@ -188,8 +188,9 @@ Then(/^I can edit the (.*) metadata$/, async function(docType) {
 
 Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
   const browser = await this.ui.browser;
-  await browser.editButton.waitForVisible();
-  await browser.editButton.click();
+  const button = await browser.editButton;
+  await button.waitForVisible();
+  await button.click();
   const form = await browser.editForm(docType);
   await form.waitForVisible();
   await form.layout.waitForVisible();
@@ -198,35 +199,37 @@ Then(/^I can edit the following properties in the (.+) metadata:$/, async functi
 });
 
 Then(/^I can't edit the Note$/, async function() {
-  const page = await this.ui.browser.documentPage(this.doc.type);
-  await page.view.waitForVisible();
-  await page.view.noteEditor.waitForVisible();
-  const editButtonEle = await page.view.noteEditor.editButton;
-  await editButtonEle.waitForVisible(browser.options.waitforTimeout, true);
+  const browser = await this.ui.browser;
+  const page = await browser.documentPage(this.doc.type);
+  const view = await page.view;
+  const noteEditor = await view.noteEditor;
+  const editButtonEle = await noteEditor.editButton;
+  await editButtonEle.waitForVisible(driver.options.waitforTimeout, true);
 });
 
 Then(/^I can edit the (.*) Note$/, async function(format) {
   const page = await this.ui.browser.documentPage(this.doc.type);
-  await page.view.waitForVisible();
-  const previewEle = await page.view.preview;
-
+  const view = await page.view;
+  await view.waitForVisible();
+  const previewEle = await view.preview;
+  const noteEditor = await view.noteEditor;
   const newContent = `NEW ${format} CONTENT`;
 
   switch (format) {
     case 'HTML':
-      await page.view.noteEditor.waitForVisible();
-      await page.view.noteEditor.setContent(newContent);
-      await page.view.noteEditor.save();
-      await driver.waitUntil(() => page.view.noteEditor.hasContent(`<p>${newContent}</p>`));
+      await noteEditor.waitForVisible();
+      await noteEditor.setContent(newContent);
+      await noteEditor.save();
+      await driver.waitUntil(() => noteEditor.hasContent(`<p>${newContent}</p>`));
       break;
     case 'XML':
     case 'Markdown':
     case 'Text':
-      await page.view.noteEditor.waitForVisible();
-      await page.view.noteEditor.edit();
-      await page.view.noteEditor.textarea.waitForVisible();
-      await page.view.noteEditor.textarea.setValue(newContent);
-      await page.view.noteEditor.save();
+      await noteEditor.waitForVisible();
+      await noteEditor.edit();
+      await noteEditor.textarea.waitForVisible();
+      await noteEditor.textarea.setValue(newContent);
+      await noteEditor.save();
       await previewEle.waitForVisible();
       await driver.waitUntil(async () => {
         try {

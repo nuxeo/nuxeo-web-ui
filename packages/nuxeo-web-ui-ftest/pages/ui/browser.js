@@ -126,7 +126,6 @@ export default class Browser extends BasePage {
   get rows() {
     return (async () => {
       const currentPage = await this.currentPage;
-      await currentPage.waitForVisible('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
       let rowsTemp;
       await driver.waitUntil(
         async () => {
@@ -243,16 +242,14 @@ export default class Browser extends BasePage {
     return fav;
   }
 
-  hasTitle(title) {
-    return (async () => {
-      await driver.pause(1000);
-      const breadcrumb = await $('.breadcrumb-item-current');
-      const breadcrumbText = await breadcrumb.getText();
-      if (breadcrumbText.trim() === title) {
-        return true;
-      }
-      return false;
-    })();
+  async hasTitle(title) {
+    await driver.pause(1000);
+    const breadcrumb = await $('.breadcrumb-item-current');
+    const breadcrumbText = await breadcrumb.getText();
+    if (breadcrumbText.trim() === title) {
+      return true;
+    }
+    return false;
   }
 
   async waitForHasChild(doc) {

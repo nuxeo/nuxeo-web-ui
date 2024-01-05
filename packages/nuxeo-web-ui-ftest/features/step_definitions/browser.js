@@ -53,17 +53,24 @@ When('I click {string} in the {word} tree', async function(title, tab) {
   const drawer = await this.ui.drawer;
   const sectionTab = await drawer._section(tab);
   await sectionTab.waitForVisible();
-  driver.pause(10000);
+  await driver.pause(3000);
   const sectionText = await sectionTab.$$('.content a').map((element) => element.getText());
-  await driver.waitUntil(async () => sectionText.some(async (e) => (await e) === title), {
-    timeout: 10000,
-    timeoutMsg: 'expected text to be different after 5s',
-  });
-  const el = await sectionTab.$$('.content a');
-  const index = sectionText.findIndex(async (e) => (await e) === title);
-  const elEle = await el[index];
-  await elEle.waitForVisible();
-  await elEle.click();
+  const el = await sectionTab.elements('.content a');
+  let index;
+  for (let i = 0; i < sectionText.length; i++) {
+    const item = sectionText[i];
+    if (item === title) {
+      index = i;
+      break;
+    }
+  }
+  if (index > -1) {
+    const elEle = await el[index];
+    await elEle.waitForVisible();
+    await elEle.click();
+  } else {
+    throw Error(`Expected title to be ${title} but not found`);
+  }
 });
 
 Then('I can see the {string} document', async function(title) {
@@ -155,9 +162,9 @@ When('I sort the content by {string} in {string} order', async function(field, o
 });
 
 Then('I can see {int} document(s)', async function(numberOfResults) {
-  const out = await this.ui.browser;
-  const uiResult = await out.results;
-
+  await driver.pause(2000);
+  const browser = await this.ui.browser;
+  const uiResult = await browser.results;
   const displayMode = await uiResult.displayMode;
   const outResult = await uiResult.resultsCount(displayMode);
   if (outResult !== numberOfResults) {
@@ -241,10 +248,11 @@ Then(/^I can perform the following publications$/, async function(table) {
   }
 });
 
-Then('I can delete all the documents from the {string} collection', function(name) {
-  this.ui.browser.removeSelectionFromCollection(name);
+Then('I can delete all the documents from the {string} collection', async function(name) {
+  const browser = await this.ui.browser;
+  await browser.removeSelectionFromCollection(name);
   // HACK - because the delete all is async
-  driver.pause(1000);
+  await driver.pause(1000);
 });
 
 Then('I can see the browser title as {string}', async (title) => {
