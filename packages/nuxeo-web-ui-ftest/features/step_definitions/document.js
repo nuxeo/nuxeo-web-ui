@@ -25,7 +25,7 @@ Given(/^I have permission (\w+) for this document$/, async function(permission) 
   return setPermission;
 });
 
-Given(/^I have permission (\w+) for the document with path "(.+)"$/, function(permission, path) {
+Given(/^I have permission (\w+) for the document with path "(.+)"$/, async function(permission, path) {
   return fixtures.documents.setPermissions(path, permission, this.username).then((d) => {
     this.doc = d;
   });
@@ -103,8 +103,9 @@ Given(/^I have a (.+) Note$/, function(format) {
 });
 
 When(/^I browse to the document$/, async function() {
-  await driver.pause(500);
-  await this.ui.browser.browseTo(this.doc.path);
+  const path = await this.doc.path;
+  await driver.pause(1000);
+  await this.ui.browser.browseTo(path);
 });
 
 When(/^I browse to the "(.*)" document page$/, async function(page) {
