@@ -3,8 +3,9 @@ import Login from '../../pages/login';
 import UI from '../../pages/ui';
 import { url } from '../../pages/helpers';
 
-Given('user {string} exists in group {string}', (username, group) =>
-  fixtures.users.create({
+Given('user {string} exists in group {string}', async (username, group) => {
+  const users = await fixtures.users;
+  await users.create({
     'entity-type': 'user',
     properties: {
       username,
@@ -13,8 +14,8 @@ Given('user {string} exists in group {string}', (username, group) =>
       password: fixtures.users.DEFAULT_PASSWORD,
       groups: [group],
     },
-  }),
-);
+  });
+});
 
 Given('user {string} exists', (username) =>
   fixtures.users.create({
