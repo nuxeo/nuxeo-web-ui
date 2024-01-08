@@ -22,20 +22,12 @@ export default class Browser extends BasePage {
   }
 
   async browseTo(path) {
-    // eslint-disable-next-line no-console
-    console.log(`Inside browseTo ${path}`);
     await url(`#!/browse${path}`);
-    const abc = await this.waitForVisible();
-    // eslint-disable-next-line no-console
-    console.log(abc);
+    await this.waitForVisible();
     const breadcrumb = await this.breadcrumb;
-    const bread = await breadcrumb.waitForVisible();
-    // eslint-disable-next-line no-console
-    console.log(bread);
+    await breadcrumb.waitForVisible();
     const currentPage = await this.currentPage;
-    const result = await currentPage.waitForVisible();
-    // eslint-disable-next-line no-console
-    console.log(result);
+    await currentPage.waitForVisible();
   }
 
   get view() {
