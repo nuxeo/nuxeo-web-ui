@@ -171,8 +171,10 @@ Then(/I can see (.+) metadata with the following properties:/, async function(do
   }
 });
 
-Then(/^I can't edit the document metadata$/, function() {
-  this.ui.browser.editButton.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+Then(/^I can't edit the document metadata$/, async function() {
+  const editButtonEle = await this.ui.browser.editButton;
+  const isVisible = await editButtonEle.waitForVisible(browser.options.waitforTimeout, true);
+  isVisible.should.be.true;
 });
 
 Then(/^I can edit the (.*) metadata$/, async function(docType) {
