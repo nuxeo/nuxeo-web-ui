@@ -86,7 +86,7 @@ Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
   driver.alertAccept();
   await authPage.waitForVisible();
   const appResults = await authPage.getApps(appName);
-  if (appResults !== 0) {
+  if (appResults.length !== 0) {
     throw Error(`Expected app count should be 0`);
   }
 });
