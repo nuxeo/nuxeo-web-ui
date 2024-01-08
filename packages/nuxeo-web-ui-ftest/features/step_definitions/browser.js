@@ -35,6 +35,7 @@ Then('I can navigate to {word} pill', async function(pill) {
   await ele.waitForVisible();
   await ele.click();
   await browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
+  await driver.pause(3000);
 });
 
 Then('I cannot see to {word} pill', async function(pill) {

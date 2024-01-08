@@ -32,6 +32,7 @@ Then('I can trash selected documents', async function() {
   await toolBarEle.trashDocuments();
   await driver.alertAccept();
   await toolBarEle.waitForNotVisible();
+  await driver.pause(3000);
 });
 
 Then('I cannot trash selected documents', async function() {
@@ -67,6 +68,7 @@ Then('I can untrash selected documents', async function() {
   await resultEle.untrashDocuments();
   await driver.alertAccept();
   await toolBarEle.waitForNotVisible();
+  await driver.pause(3000);
 });
 
 Then('I cannot untrash selected documents', async function() {
