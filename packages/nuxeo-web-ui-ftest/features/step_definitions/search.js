@@ -136,8 +136,10 @@ When(/^I perform a (.+) search for (.+) on (.+)$/, async function(searchType, se
 });
 
 When('I switch to filter view', async function() {
+  await driver.pause(3000);
   const filterView = await this.ui.filterView;
   await filterView.click();
+  await browser.pause(3000);
 });
 
 Then(/^I can see (\d+) search results$/, async function(numberOfResults) {

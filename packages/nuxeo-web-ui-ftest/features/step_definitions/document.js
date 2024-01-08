@@ -3,8 +3,6 @@ import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
 Given('I have a {word} document', async function(docType) {
-  // eslint-disable-next-line no-console
-  console.log(`I have a ${docType} document`);
   docType = docType || 'File';
   const doc = await fixtures.documents.init(docType);
   // create the document
@@ -28,8 +26,6 @@ Given(/^I have permission (\w+) for this document$/, async function(permission) 
 });
 
 Given(/^I have permission (\w+) for the document with path "(.+)"$/, async function(permission, path) {
-  // eslint-disable-next-line no-console
-  console.log(path);
   const setPermission = await fixtures.documents.setPermissions(path, permission, this.username).then((d) => {
     this.doc = d;
   });
@@ -108,6 +104,7 @@ Given(/^I have a (.+) Note$/, function(format) {
 });
 
 When(/^I browse to the document$/, async function() {
+  await driver.pause(3000);
   const path = await this.doc.path;
   await driver.pause(1000);
   await this.ui.browser.browseTo(path);

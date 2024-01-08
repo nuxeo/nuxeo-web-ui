@@ -29,6 +29,7 @@ Then('I can see the {string} {word} tree node', async function(title, tab) {
 });
 
 Then('I can navigate to {word} pill', async function(pill) {
+  await driver.pause(3000);
   const browser = await this.ui.browser;
   await browser.waitForVisible();
   const ele = await browser.el.$(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
