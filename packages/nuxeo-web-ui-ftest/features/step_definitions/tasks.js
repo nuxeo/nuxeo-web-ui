@@ -72,7 +72,8 @@ Then(/^I can see that "([^"]*)" belongs to (\w+) actors$/, async function(user, 
   option.should.to.be.oneOf(['delegated', 'assigned'], 'An unknown type was passed as argument');
 
   // Workaround to WDIO limitation
-  const { documentTaskView } = this.ui.browser;
+  const browser = await this.ui.browser;
+  const documentTaskView = await browser.documentTaskView;
   await documentTaskView.waitForVisible();
   await documentTaskView.waitForVisible(
     `${option === 'delegated' ? '#delegatedActors' : '#assignedActors'} nuxeo-tags`,
