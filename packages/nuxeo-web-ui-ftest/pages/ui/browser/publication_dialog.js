@@ -37,7 +37,8 @@ export default class PublicationDialog extends BasePage {
     await this.el.waitForEnabled('#publish');
     const ele = await this.el.$('#publish');
     await ele.click();
-    return driver.waitForVisible('iron-overlay-backdrop', driver.options.waitForTimeout, true);
+    const result = await driver.waitForVisible('iron-overlay-backdrop', 30000, true);
+    return result;
   }
 
   waitForVisible() {

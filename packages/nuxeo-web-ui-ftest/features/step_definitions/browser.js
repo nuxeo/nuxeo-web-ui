@@ -238,7 +238,8 @@ Then(/^I can perform the following publications$/, async function(table) {
   for (let i = 0; i < rows.length; i++) {
     const { target, rendition, version, override } = rows[i];
     const dialog = await this.ui.browser.publishDialog;
-    await dialog.publish(target, rendition, version, override);
+    const isdocumentPublished = await dialog.publish(target, rendition, version, override);
+    isdocumentPublished.should.be.true;
     page = await this.ui.browser.documentPage(this.doc.type);
     const newCount = await page.publicationsCount;
     let check;
