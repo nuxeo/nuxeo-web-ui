@@ -77,21 +77,24 @@ export default class BulkEdit extends BasePage {
   }
 
   async bulkEditOptionsList(fieldName, editOption) {
-    await driver.waitUntil(async () => {
-      const ele = await driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
-      return ele.length > 1;
-    });
-    const fieldNameElem = await this.el.element(`[name="${fieldName}"]`);
-    const parentElem = await fieldNameElem.parentElement();
-    const listItems = await parentElem.elements('nuxeo-select paper-item');
-    let foundElem;
-    for (let index = 0; index < listItems.length; index++) {
-      const elem = listItems[index];
-      const currentElementText = await elem.getText();
-      if (currentElementText === editOption) {
-        foundElem = elem;
+    // await driver.waitUntil(async () => {
+    //   const ele = await driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
+    //   return ele.length > 1;
+    // });
+    const ele = await driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
+    if (ele.length > 1) {
+      const fieldNameElem = await this.el.element(`[name="${fieldName}"]`);
+      const parentElem = await fieldNameElem.parentElement();
+      const listItems = await parentElem.elements('nuxeo-select paper-item');
+      let foundElem;
+      for (let index = 0; index < listItems.length; index++) {
+        const elem = listItems[index];
+        const currentElementText = await elem.getText();
+        if (currentElementText === editOption) {
+          foundElem = elem;
+        }
       }
+      return foundElem;
     }
-    return foundElem;
   }
 }
