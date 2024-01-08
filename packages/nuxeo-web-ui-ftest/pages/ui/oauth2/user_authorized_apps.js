@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 
 class AuthorizedApp {
@@ -13,8 +14,11 @@ class AuthorizedApp {
     return this.el.elements('nuxeo-data-table-cell')[1].getText();
   }
 
-  revokeButton() {
-    return this.el.element('paper-icon-button[name="revoke"]');
+  async revokeButton() {
+    return (async () => {
+      const ele = await this.el.element('paper-icon-button[name="revoke"]');
+      return ele;
+    })();
   }
 }
 
@@ -22,17 +26,19 @@ export default class UserAuthorizedApps extends BasePage {
   async getApps(appName) {
     const elEx = await this.el;
     await elEx.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
-    const elExElements = await elEx.elements('nuxeo-data-table nuxeo-data-table-row');
-    const appSplice = elExElements.splice(1); // skip the header
-    const appMaps = appSplice.map((el) => new AuthorizedApp(el));
-    const appNames = await this.el
+    const apps = await this.el
       .$$('nuxeo-data-table nuxeo-data-table-row:not([header])')
-      .map((img) => img.$('nuxeo-data-table-cell').getText());
-
-    let apps = appMaps.filter((_, index) => !!appName[index].trim());
-
+      .map((el) => new AuthorizedApp(el));
+    const filterApps = [];
     if (appName) {
-      apps = apps.filter((_, index) => appNames[index] === appName);
+      for (let i = 0; i < apps.length; i++) {
+        const app = await apps[i];
+        const appText = await app.el.$('nuxeo-data-table-cell').getText();
+        if (appName === appText) {
+          filterApps.push(app);
+        }
+      }
+      return filterApps;
     }
     return apps;
   }

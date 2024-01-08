@@ -75,14 +75,18 @@ Then('I cannot see authorized application', function() {
 Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
   const authPage = await this.ui.userAuthorizedApps;
   await authPage.waitForVisible();
-  const apps = await this.ui.userAuthorizedApps.getApps();
+  const apps = await authPage.getApps();
   await browser.waitUntil(() => apps.length > 0);
-  const appRevoke = await this.ui.userAuthorizedApps.getApps(appName);
+  const appRevoke = await authPage.getApps(appName);
   appRevoke.length.should.equal(1);
-  const revokeButton = await apps[0].revokeButton();
-  revokeButton.waitForVisible();
-  revokeButton.click();
+  const app = await apps[0];
+  const revokeButton = await app.revokeButton();
+  await revokeButton.waitForVisible();
+  await revokeButton.click();
   driver.alertAccept();
-  this.ui.userAuthorizedApps.waitForVisible();
-  driver.waitUntil(() => this.ui.userAuthorizedApps.getApps(appName).length === 0);
+  await authPage.waitForVisible();
+  const appResults = await authPage.getApps(appName);
+  if (appResults !== 0) {
+    throw Error(`Expected app count should be 0`);
+  }
 });
