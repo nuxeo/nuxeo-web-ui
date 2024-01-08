@@ -119,7 +119,8 @@ When(/^I browse to the "(.*)" document page$/, async function(page) {
 
 When(/^I browse to the document with path "(.+)"$/, async function(path) {
   await driver.pause(2000);
-  await this.ui.browser.browseTo(path);
+  const browser = await this.ui.browser;
+  await browser.browseTo(path);
 });
 
 Then('I navigate to {string} child', async function(title) {
