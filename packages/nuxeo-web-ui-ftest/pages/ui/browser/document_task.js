@@ -39,9 +39,15 @@ export default class DocumentTask extends BasePage {
   }
 
   async actorExists(element, actor) {
-    const users = await element.$$('nuxeo-user-tag .tag a');
-    const result = await users.some(async (user) => (await user.getText()) === `${actor}`);
-    return result;
+    const users = await element.elements('nuxeo-user-tag .tag a');
+    for (let i = 0; i < users.length; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      const user = await users[i].getText();
+      if (user === actor) {
+        return true;
+      }
+    }
+    return false;
   }
 
   async performAction(name) {
