@@ -79,7 +79,7 @@ Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
   await browser.waitUntil(() => apps.length > 0);
   const appRevoke = await authPage.getApps(appName);
   appRevoke.length.should.equal(1);
-  const app = await apps[0];
+  const app = await appRevoke[0];
   const revokeButton = await app.revokeButton();
   await revokeButton.waitForVisible();
   await revokeButton.click();
