@@ -10,28 +10,32 @@ Given(/^I have tokens for the following OAuth2 providers$/, function(table) {
   return Promise.all(table.rows().map((row) => fixtures.oauth2Providers.createToken(row[0], this.username)));
 });
 
-When(/^I am on user cloud services page$/, function() {
-  return this.ui.goToUserCloudServices();
+When(/^I am on user cloud services page$/, async function() {
+  const cloudServicesEle = await this.ui.goToUserCloudServices();
+  return cloudServicesEle;
 });
 
-Then(/^I can only see (\d+) provider token[s]? that belong[s]? to me$/, function(numberOfTokens) {
-  this.ui.userCloudServices.waitForVisible();
-  driver.waitUntil(() => this.ui.userCloudServices.getTokens(this.username).length === numberOfTokens);
+Then(/^I can only see (\d+) provider token[s]? that belong[s]? to me$/, async function(numberOfTokens) {
+  const cloudService = await this.ui.userCloudServices;
+  await cloudService.waitForVisible();
+  const tokenEle = await cloudService.getTokens(this.username);
+  if (tokenEle.length !== numberOfTokens) {
+    throw Error('Provider token no.s are not as expected');
+  }
 });
 
-Then(/^I can delete token for provider "(.+)" that belongs to me$/, function(provider) {
-  this.ui.userCloudServices.waitForVisible();
-  let tokens;
-  driver.waitUntil(() => {
-    tokens = this.ui.userCloudServices.getTokens(this.username, provider);
-    return tokens.length === 1;
-  });
-  const deleteButton = tokens[0].deleteButton();
-  deleteButton.waitForVisible();
-  deleteButton.click();
-  driver.alertAccept();
-  this.ui.userCloudServices.waitForVisible();
-  driver.waitUntil(() => this.ui.userCloudServices.getTokens(this.username, provider).length === 0);
+Then(/^I can delete token for provider "(.+)" that belongs to me$/, async function(provider) {
+  const cloudServicePage = await this.ui.userCloudServices;
+  await cloudServicePage.waitForVisible();
+  const tokenEle = await cloudServicePage.getTokens(this.username, provider);
+  tokenEle.length.should.be.equal(1);
+  const deleteButton = await tokenEle[0].deleteButton();
+  await deleteButton.waitForVisible();
+  await deleteButton.click();
+  await driver.alertAccept();
+  await cloudServicePage.waitForVisible();
+  const tokenAfterDelete = await cloudServicePage.getTokens(this.username, provider);
+  tokenAfterDelete.length.should.be.equal(0);
 });
 
 /* Authorized Applications */
