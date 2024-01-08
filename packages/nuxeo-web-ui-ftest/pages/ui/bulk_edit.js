@@ -77,10 +77,6 @@ export default class BulkEdit extends BasePage {
   }
 
   async bulkEditOptionsList(fieldName, editOption) {
-    // await driver.waitUntil(async () => {
-    //   const ele = await driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
-    //   return ele.length > 1;
-    // });
     const ele = await driver.elements(`${this._selector} nuxeo-bulk-widget nuxeo-select paper-item`);
     if (ele.length > 1) {
       const fieldNameElem = await this.el.element(`[name="${fieldName}"]`);
@@ -96,5 +92,6 @@ export default class BulkEdit extends BasePage {
       }
       return foundElem;
     }
+    return false;
   }
 }
