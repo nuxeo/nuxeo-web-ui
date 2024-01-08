@@ -26,8 +26,8 @@ fixtures.workflows = {
     return workflow;
   },
 
-  delete: async (workflowInstanceId) => {
-    await nuxeo.workflows().delete(workflowInstanceId);
+  delete: (workflowInstanceId) => {
+    nuxeo.workflows().delete(workflowInstanceId);
   },
 
   removeInstance: (workflowInstanceId) => {
@@ -38,13 +38,11 @@ fixtures.workflows = {
   },
 };
 
-After(async () =>
+After(() =>
   Promise.all(
     Object.keys(runningWorkflows).map((index) => {
       const workflowInstanceId = runningWorkflows[index];
-      return fixtures.workflows
-        .delete(workflowInstanceId)
-        .then(() => fixtures.workflows.removeInstance(workflowInstanceId));
+      return fixtures.workflows.removeInstance(workflowInstanceId);
     }),
   ),
 );
