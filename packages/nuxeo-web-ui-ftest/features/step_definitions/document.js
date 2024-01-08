@@ -26,9 +26,10 @@ Given(/^I have permission (\w+) for this document$/, async function(permission) 
 });
 
 Given(/^I have permission (\w+) for the document with path "(.+)"$/, async function(permission, path) {
-  return fixtures.documents.setPermissions(path, permission, this.username).then((d) => {
+  const setPermission = await fixtures.documents.setPermissions(path, permission, this.username).then((d) => {
     this.doc = d;
   });
+  return setPermission;
 });
 
 Given(/^I have the following permissions to the documents$/, function(table) {
