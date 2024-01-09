@@ -64,10 +64,10 @@ Then(/^I can see "(.+)" as an authorized application$/, function(application) {
 Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberOfApps) {
   const authPage = await this.ui.userAuthorizedApps;
   await authPage.waitForVisible();
-  const apps = await this.ui.userAuthorizedApps.getApps();
-  await driver.waitUntil(async () => (await apps.length) === numberOfApps, {
-    timeoutMsg: 'cannot see authorized application',
-  });
+  const apps = await authPage.getApps();
+  if (apps.length !== numberOfApps) {
+    throw Error(`Expected app count should be ${numberOfApps} but found ${apps.length}`);
+  }
 });
 
 Then('I cannot see authorized application', function() {
