@@ -17,7 +17,8 @@ When(/^I give (\w+) permission to "([^"]*)" on the document$/, async function(pe
   const createPermissionEle = await viewEle.createPermissionButton;
   await createPermissionEle.waitForVisible();
   await createPermissionEle.click();
-  await viewEle.permission(permission, name, 'permanent');
+  const viewElement = await this.ui.browser.permissionsView;
+  await viewElement.permission(permission, name, 'permanent');
 });
 
 When(/^I give (\w+) permission on the document to the following users:$/, async function(permission, table) {
@@ -43,15 +44,17 @@ When(/^I give (\w+) permission on the document to the following users:$/, async 
   await createPermissionEle.click();
 });
 
-Given(/^"([^"]*)" has (\w+) permission on the document$/, function(name, permission) {
-  fixtures.documents.setPermissions(this.doc, permission, name).then((d) => {
+Given(/^"([^"]*)" has (\w+) permission on the document$/, async function(name, permission) {
+  await fixtures.documents.setPermissions(this.doc, permission, name).then((d) => {
     this.doc = d;
   });
 });
 
 Then(/^I can see that "([^"]*)" has the (\w+) permission$/, async function(name, permission) {
-  const permissionEle = await this.ui.browser.permissionsView.permission(permission, name);
-  permissionEle.should.be.true;
+  const permissionView = await this.ui.browser.permissionsView;
+  const permissionEle = await permissionView.permission(permission, name);
+  const isVisible = await permissionEle.waitForVisible();
+  isVisible.should.be.true;
 });
 
 When(/^I edit the (\w+) permission on the document for "([^"]*)" to start (\w+)$/, async function(
@@ -59,13 +62,14 @@ When(/^I edit the (\w+) permission on the document for "([^"]*)" to start (\w+)$
   name,
   date,
 ) {
-  const viewButtonEle = await this.ui.browser.permissionsViewButton;
+  const viewButtonEle = this.ui.browser.permissionsViewButton;
   await viewButtonEle.waitForVisible();
   await viewButtonEle.click();
   const viewEle = await this.ui.browser.permissionsView;
   await viewEle.waitForVisible();
-  await viewEle.permission(permission, name);
-  const editPermissionEle = await this.ui.browser.permissionsView.editPermissionButton;
+  const permissionEle = await viewEle.permission(permission, name);
+  await permissionEle.waitForVisible();
+  const editPermissionEle = await viewEle.editPermissionButton;
   await editPermissionEle.waitForVisible();
   if (date === 'tomorrow') {
     date = new Date();
@@ -79,8 +83,8 @@ When(/^I edit the (\w+) permission on the document for "([^"]*)" to start (\w+)$
     begin: date,
     notify: false,
   });
-  const updateEle = await viewEle.updatePermissionButton;
-  await updateEle.click();
-  const isPermission = await viewEle.permission(permission, name, 'datebased');
-  isPermission.should.be.true;
+  const updatePermission = await viewEle.updatePermissionButton;
+  await updatePermission.click();
+  const permitEle = await viewEle.permission(permission, name, 'datebased');
+  await permitEle.waitForVisible();
 });

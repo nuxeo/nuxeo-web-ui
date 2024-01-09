@@ -25,17 +25,35 @@ export default class DocumentPermissions extends BasePage {
     })();
   }
 
-  async permission(permission, name, timeFrame) {
-    const ele = await this.el;
-    const rows = await ele.$$('div.acl-table-row');
-    for (let i = 0; i < rows.length; i++) {
-      const nameCheck = name ? await rows[i].isExisting(`span.user[title="${name} - ${name}@test.com"]`) : true;
-      const permissionCheck = permission ? await !!rows[i].hasElementByTextContent('span.label', permission) : true;
-      // XXX should rely on a class or column header name
-      const timeFrameCheck = timeFrame ? await !!rows[i].hasElementByTextContent('span', permission) : true;
-      return nameCheck && permissionCheck && timeFrameCheck;
+  async hasElement(selector, textContent, currentElement) {
+    const ele = await currentElement.elements(selector);
+    let found = false;
+    for (let i = 0; i < ele.length; i++) {
+      const text = await ele[i].getText();
+      if (text === textContent) {
+        found = true;
+      }
     }
-    return false;
+    return found;
+  }
+
+  async permission(permission, name, timeFrame) {
+    let found;
+    const rows = await this.el.elements('div.acl-table-row');
+    for (let i = 0; i < rows.length; i++) {
+      const nameEle = await rows[i].isExisting(`span.user[title="${name} - ${name}@test.com"]`);
+      const nameCheck = name ? nameEle : true;
+      const contentEle = await this.hasElement('span.label', permission, rows[i]);
+      const permissionCheck = permission ? await !!contentEle : true;
+      // XXX should rely on a class or column header name
+      const timeFrameEle = await this.hasElement('span', permission, rows[i]);
+      const timeFrameCheck = timeFrame ? !!timeFrameEle : true;
+      if (nameCheck && permissionCheck && timeFrameCheck) {
+        found = rows[i];
+        break;
+      }
+    }
+    return found;
   }
 
   async getField(field) {
