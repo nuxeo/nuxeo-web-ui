@@ -44,11 +44,13 @@ Then('I can see the clipboard has {string} document', async function(title) {
   );
 });
 Then('I can see the clipboard has {int} item(s)', async function(nb) {
-  await this.ui.drawer.clipboard.waitForVisible();
-  await driver.waitUntil(async () => {
-    const nbItems = await this.ui.drawer.clipboard.nbItems;
-    return nbItems === nb;
-  });
+  const drawer = await this.ui.drawer;
+  const clipboard = await drawer.clipboard;
+  await clipboard.waitForVisible();
+  const nbItems = await clipboard.nbItems;
+  if (nbItems !== nb) {
+    throw Error(`Expected clipboard count to be ${nb} but found ${nbItems}`);
+  }
 });
 Then('I can see clipboard actions disabled', function() {
   if (!this.ui.drawer.clipboard.isVisible()) {
