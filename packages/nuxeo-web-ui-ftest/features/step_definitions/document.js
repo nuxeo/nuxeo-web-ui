@@ -300,6 +300,7 @@ Then('I add the document to the favorites', async function() {
 });
 
 Then('I can see the document has {int} children', async function(nb) {
+  await driver.pause(2000);
   const browser = await this.ui.browser;
   const countMatch = await browser.waitForNbChildren(nb);
   if (!countMatch) {

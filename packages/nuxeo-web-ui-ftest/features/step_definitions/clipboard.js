@@ -7,22 +7,25 @@ When('I click remove button for {string} document', function(title) {
 });
 
 When('I click the clipboard move action', async function() {
-  const isClipboarVisible = await this.ui.drawer.clipboard.isVisible();
+  const drawer = await this.ui.drawer;
+  const clipboard = await drawer.clipboard;
+  const isClipboarVisible = await clipboard.isVisible();
   if (!isClipboarVisible) {
-    const draw = this.ui.drawer;
-    await draw.open('clipboard');
+    await drawer.open('clipboard');
   }
   await this.ui.waitForToastNotVisible();
-  await this.ui.drawer.clipboard.move();
+  await clipboard.move();
 });
 
 When('I click the clipboard paste action', async function() {
-  const drawerVisible = await this.ui.drawer.clipboard.isVisible();
-  if (!drawerVisible) {
-    await this.ui.drawer.open('clipboard');
+  const drawer = await this.ui.drawer;
+  const clipboard = await drawer.clipboard;
+  const isClipboarVisible = await clipboard.isVisible();
+  if (!isClipboarVisible) {
+    await drawer.open('clipboard');
   }
   await this.ui.waitForToastNotVisible();
-  await this.ui.drawer.clipboard.paste();
+  await clipboard.paste();
 });
 
 Then('I can see the clipboard has {string} document', async function(title) {
