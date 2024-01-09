@@ -211,8 +211,10 @@ Then(/^I can republish the following publication$/, async function(table) {
     }
     const ele = await pubRow.$('nuxeo-data-table-cell .version').getText();
     const previousVersion = parseFloat(ele.trim().toLowerCase());
-    await this.ui.browser.publicationView.republish(path, rendition, version);
-    pubRow = await this.ui.browser.publicationView.getPublicationRow(path, rendition);
+    const browser = await this.ui.browser;
+    const publicationView = await browser.publicationView;
+    await publicationView.republish(path, rendition, version);
+    pubRow = await publicationView.getPublicationRow(path, rendition);
     const eleNew = await pubRow.$('nuxeo-data-table-cell .version').getText();
     const newVersion = parseFloat(eleNew.trim().toLowerCase());
     if (Number.isNaN(newVersion)) {
