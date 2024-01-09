@@ -207,17 +207,11 @@ export default class UI extends BasePage {
   }
 
   async waitForToastNotVisible() {
-    await driver.waitUntil(async () => {
+    driver.waitUntil(async () => {
       const mwcsnackbar = await driver.elements('mwc-snackbar');
-      return mwcsnackbar.every(
-        async (toast) => {
-          const isAttrPresent = await !toast.getAttribute('open');
-          return isAttrPresent;
-        },
-        {
-          timeoutMsg: 'waitForToastNotVisible timedout',
-        },
-      );
+      return mwcsnackbar.every((toast) => !toast.getAttribute('open'), {
+        timeoutMsg: 'waitForToastNotVisible timedout',
+      });
     });
   }
 

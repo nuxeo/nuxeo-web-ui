@@ -7,7 +7,11 @@ class AuthorizedApp {
   }
 
   get name() {
-    return this.el.elements('nuxeo-data-table-cell')[0].getText();
+    return (async () => {
+      const ele = await this.el.elements('nuxeo-data-table-cell')[0];
+      const eleText = await ele.getText();
+      return eleText;
+    })();
   }
 
   get authorizationDate() {
@@ -26,9 +30,10 @@ export default class UserAuthorizedApps extends BasePage {
   async getApps(appName) {
     const elEx = await this.el;
     await elEx.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
-    const apps = await this.el
+    const appsNew = await this.el
       .$$('nuxeo-data-table nuxeo-data-table-row:not([header])')
       .map((el) => new AuthorizedApp(el));
+    const apps = await appsNew.filter(async (app) => !!(await app.name).trim());
     const filterApps = [];
     if (appName) {
       for (let i = 0; i < apps.length; i++) {
