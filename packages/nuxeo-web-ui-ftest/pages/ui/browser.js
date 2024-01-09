@@ -334,7 +334,7 @@ export default class Browser extends BasePage {
   async waitForNbChildren(nb) {
     let count = 0;
     try {
-      const rowTemp = await this.rows;
+      const rowTemp = await this.el.rows;
       for (let i = 0; i < rowTemp.length; i++) {
         if ((await rowTemp[i].isVisible()) && (await rowTemp[i].isVisible('nuxeo-data-table-cell a.title'))) {
           count++;
