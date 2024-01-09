@@ -293,7 +293,9 @@ Then('I add the document to the favorites', async function() {
 });
 
 Then('I can see the document has {int} children', async function(nb) {
-  if (await !this.ui.browser.waitForNbChildren(nb)) {
+  const browser = await this.ui.browser;
+  const countMatch = await browser.waitForNbChildren(nb);
+  if (!countMatch) {
     throw Error(`Document should have ${nb} children`);
   }
 });
@@ -351,12 +353,14 @@ Then(/^I can abandon the workflow$/, async function() {
 });
 
 Then(/^I can see the document is a publication$/, async function() {
-  const infoBar = await this.ui.browser.publicationInfobar;
+  const browser = await this.ui.browser;
+  const infoBar = await browser.publicationInfobar;
   await infoBar.waitForVisible();
 });
 
 Then(/^I can unpublish the document$/, async function() {
-  const infoBar = await this.ui.browser.publicationInfobar;
+  const browser = await this.ui.browser;
+  const infoBar = await browser.publicationInfobar;
   const unpublishButton = await infoBar.element('nuxeo-unpublish-button');
   await unpublishButton.waitForVisible();
   await unpublishButton.click();

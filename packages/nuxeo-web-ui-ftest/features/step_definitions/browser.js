@@ -84,14 +84,15 @@ Then('I can see the {string} document', async function(title) {
 });
 
 Then('I select all child documents', async function() {
-  await this.ui.browser.waitForVisible();
-  await this.ui.browser.selectAllChildDocuments();
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  await browser.selectAllChildDocuments();
 });
 
 Then('I select all the documents', async function() {
-  await this.ui.browser.waitForVisible();
-  const ele = await this.ui.browser;
-  await ele.selectAllDocuments();
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  await browser.selectAllDocuments();
 });
 
 Then('I deselect the {string} document', async function(title) {
@@ -184,7 +185,8 @@ Then(/^I can see the permissions page$/, async function() {
 });
 
 Then(/^I can see the document has (\d+) publications$/, async function(nbPublications) {
-  const count = await this.ui.browser.publicationView.count;
+  const browser = await this.ui.browser;
+  const count = await browser.publicationView.count;
   if ((await count) !== nbPublications) {
     throw new Error(`Expected count to be equal ${nbPublications}`);
   }
@@ -228,7 +230,7 @@ Then('I can publish selection to {string}', async function(target) {
   const dialog = await selectionToolBar.publishDialog;
   await dialog.publish(target);
   // HACK because publishing all documents is asynchronous
-  await driver.pause(1000);
+  await driver.pause(2000);
 });
 
 Then(/^I can perform the following publications$/, async function(table) {
