@@ -52,15 +52,21 @@ Then('I can see the clipboard has {int} item(s)', async function(nb) {
     throw Error(`Expected clipboard count to be ${nb} but found ${nbItems}`);
   }
 });
-Then('I can see clipboard actions disabled', function() {
-  if (!this.ui.drawer.clipboard.isVisible()) {
-    this.ui.drawer.open('clipboard');
+Then('I can see clipboard actions disabled', async function() {
+  const drawer = await this.ui.drawer;
+  const clipboard = await drawer.clipboard;
+  const isClipboardVisible = await clipboard.isVisible();
+  if (!isClipboardVisible) {
+    await drawer.open('clipboard');
   }
-  const { moveButton } = this.ui.drawer.clipboard;
-  moveButton.waitForVisible();
-  driver.waitUntil(() => moveButton.getAttribute('disabled') !== null);
-
-  const { pasteButton } = this.ui.drawer.clipboard;
-  pasteButton.waitForVisible();
-  driver.waitUntil(() => pasteButton.getAttribute('disabled') !== null);
+  const moveButton = await clipboard.moveButton;
+  await moveButton.waitForVisible();
+  await driver.waitUntil(async () => (await moveButton.getAttribute('disabled')) !== null, {
+    timeoutMsg: 'step  definition clipborad 65',
+  });
+  const pasteButton = await clipboard.pasteButton;
+  await pasteButton.waitForVisible();
+  await driver.waitUntil(async () => (await pasteButton.getAttribute('disabled')) !== null, {
+    timeoutMsg: 'step  definition clipborad 70',
+  });
 });

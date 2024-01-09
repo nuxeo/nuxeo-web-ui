@@ -17,6 +17,8 @@ Then('I have a non empty history table', async function() {
   }
 });
 
-Then('I can see {string} entry in history table', function(performedAction) {
-  this.ui.historyTable.waitForHasEntry(performedAction).should.be.true;
+Then('I can see {string} entry in history table', async function(performedAction) {
+  const historyTable = await this.ui.historyTable;
+  const hasEntry = await historyTable.waitForHasEntry(performedAction);
+  hasEntry.should.be.true;
 });

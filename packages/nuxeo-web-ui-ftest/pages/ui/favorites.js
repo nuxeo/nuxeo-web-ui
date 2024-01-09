@@ -15,8 +15,17 @@ export default class Favorites extends BasePage {
       const favorite = favorites[i];
       const hasDocumentEle = await this._hasDocument(doc, this.el);
       if (hasDocumentEle) {
-        favorite.$('iron-icon.remove').click();
-        driver.waitUntil(() => !hasDocumentEle);
+        const ele = await favorite.$('iron-icon.remove');
+        await ele.click();
+        await driver.waitUntil(
+          async () => {
+            const hasDocumentEleResult = await this._hasDocument(doc, this.el);
+            return !hasDocumentEleResult;
+          },
+          {
+            timeoutMsg: 'removeDocument timedout',
+          },
+        );
         return true;
       }
       return false;

@@ -226,7 +226,9 @@ Then(/^I can edit the (.*) Note$/, async function(format) {
       await noteEditor.waitForVisible();
       await noteEditor.setContent(newContent);
       await noteEditor.save();
-      await driver.waitUntil(() => noteEditor.hasContent(`<p>${newContent}</p>`));
+      await driver.waitUntil(async () => noteEditor.hasContent(`<p>${newContent}</p>`), {
+        timeoutMsg: 'step  definition document 230',
+      });
       break;
     case 'XML':
     case 'Markdown':
@@ -237,24 +239,29 @@ Then(/^I can edit the (.*) Note$/, async function(format) {
       await noteEditor.textarea.setValue(newContent);
       await noteEditor.save();
       await previewEle.waitForVisible();
-      await driver.waitUntil(async () => {
-        try {
-          let elContent;
-          if (format === 'XML') {
-            elContent = await previewEle.$('#xml');
-          } else if (format === 'Text') {
-            elContent = await previewEle.$('#plain');
-          } else {
-            elContent = await previewEle.$('marked-element #content');
+      await driver.waitUntil(
+        async () => {
+          try {
+            let elContent;
+            if (format === 'XML') {
+              elContent = await previewEle.$('#xml');
+            } else if (format === 'Text') {
+              elContent = await previewEle.$('#plain');
+            } else {
+              elContent = await previewEle.$('marked-element #content');
+            }
+            const elementContentVisible = await elContent.isVisible();
+            const elementContentText = await elContent.getText();
+            const elContentEle = elementContentVisible && elementContentText === newContent;
+            return elContentEle;
+          } catch (e) {
+            return false;
           }
-          const elementContentVisible = await elContent.isVisible();
-          const elementContentText = await elContent.getText();
-          const elContentEle = elementContentVisible && elementContentText === newContent;
-          return elContentEle;
-        } catch (e) {
-          return false;
-        }
-      });
+        },
+        {
+          timeoutMsg: 'step  definition document 260',
+        },
+      );
       break;
     default:
     // do nothing

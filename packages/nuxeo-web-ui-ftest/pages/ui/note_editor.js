@@ -17,16 +17,22 @@ export default class NoteEditor extends BasePage {
     })();
   }
 
-  hasContent(content) {
-    const editor = this.el.element('#editor');
-    editor.waitForVisible();
-    driver.waitUntil(() => {
-      try {
-        return editor.getHTML(false) === content;
-      } catch (e) {
-        return false;
-      }
-    }, 'The editor does not have such content');
+  async hasContent(content) {
+    const editor = await this.el.element('#editor');
+    await editor.waitForVisible();
+    await driver.waitUntil(
+      async () => {
+        try {
+          const result = (await editor.getHTML(false)) === content;
+          return result;
+        } catch (e) {
+          return false;
+        }
+      },
+      {
+        timeoutMsg: 'The editor does not have such content',
+      },
+    );
     return true;
   }
 

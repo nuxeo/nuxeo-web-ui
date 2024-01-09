@@ -21,17 +21,20 @@ export default class Audit extends BasePage {
     })();
   }
 
-  waitForHasEntry(action, reverse) {
-    const { el } = this;
-    driver.waitUntil(
-      () => {
-        const cells = el.$$('#table nuxeo-data-table-cell');
+  async waitForHasEntry(action, reverse) {
+    const el = await this.el;
+    await driver.waitUntil(
+      async () => {
+        const cells = await el.$$('#table nuxeo-data-table-cell');
         if (reverse) {
-          return cells.every((cell) => cell.getText().trim() !== action);
+          return cells.every(async (cell) => (await cell.getText()).trim() !== action);
         }
-        return cells.some((cell) => cell.getText().trim() === action);
+        return cells.some(async (cell) => (await cell.getText()).trim() === action);
       },
       reverse ? 'The audit does have such entry' : 'The audit does not have such entry',
+      {
+        timeoutMsg: 'The audit does have such entry',
+      },
     );
     return true;
   }

@@ -11,5 +11,8 @@ Then('I have a non empty audit table', async function() {
 });
 
 Then('I can see {string} entry in audit table', async function(performedAction) {
-  await this.ui.administration.audit.waitForHasEntry(performedAction).should.be.true;
+  const administration = await this.ui.administration;
+  const audit = await administration.audit;
+  const hasEntry = await audit.waitForHasEntry(performedAction);
+  hasEntry.should.be.true;
 });

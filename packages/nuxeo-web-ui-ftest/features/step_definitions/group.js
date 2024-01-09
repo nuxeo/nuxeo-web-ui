@@ -35,42 +35,49 @@ Then(/^I can search for the following groups$/, function(table) {
   });
 });
 
-Then(/^I can edit the following groups$/, function(table) {
-  table.rows().forEach(async (row) => {
+Then(/^I can edit the following groups$/, async function(table) {
+  await table.rows().forEach(async (row) => {
     await this.ui.group.searchFor(row[0]);
-    driver.waitUntil(async () => {
-      // XXX horrible temporary workaround for stale element when clicking the result (see NXP-27621)
-      try {
-        const result = await this.ui.group.searchResult(row[0]);
-        await result.waitForVisible();
-        await result.click();
-        return true;
-      } catch (e) {
-        return false;
-      }
-    });
-    const editgroupEle = await this.ui.group.editGroupButton;
-    await editgroupEle.waitForVisible();
-    await editgroupEle.click();
+    await driver.waitUntil(
+      async () => {
+        // XXX horrible temporary workaround for stale element when clicking the result (see NXP-27621)
+        try {
+          const result = await this.ui.group.searchResult(row[0]);
+          await result.waitForVisible();
+          await result.click();
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      {
+        timeoutMsg: 'edit following groups timedout',
+      },
+    );
+    const editgroup = await this.ui.group;
+    const editgroupbutton = await editgroup.editGroupButton;
+    await editgroupbutton.waitForVisible();
+    await editgroupbutton.click();
     await fixtures.layouts.setValue(this.ui.group.editGroupLabel, row[1]);
-    const editDialogEle = await this.ui.group.editGroupDialogButton;
+    const editDialogEle = await editgroup.editGroupDialogButton;
     await editDialogEle.waitForVisible();
     await editDialogEle.click();
     await browser.back();
   });
 });
 
-Then(/^I can delete the following groups$/, function(table) {
-  table.rows().forEach(async (row) => {
-    await this.ui.group.searchFor(row[0]);
-    const searchResultEle = await this.ui.group.searchResult(row[0]);
-    searchResultEle.waitForVisible();
+Then(/^I can delete the following groups$/, async function(table) {
+  await table.rows().forEach(async (row) => {
+    const group = await this.ui.group;
+    await group.searchFor(row[0]);
+    const searchResultEle = await group.searchResult(row[0]);
+    await searchResultEle.waitForVisible();
     await searchResultEle.click();
-    const deleteEle = await this.ui.group.deleteGroupButton;
+    const deleteEle = await group.deleteGroupButton;
     await deleteEle.waitForVisible();
     await deleteEle.click();
-    const confirmEle = await this.ui.group.confirmDeleteGroupButton;
-    confirmEle.waitForVisible();
+    const confirmEle = await group.confirmDeleteGroupButton;
+    await confirmEle.waitForVisible();
     await confirmEle.click();
   });
 });
