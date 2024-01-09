@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
 
 When(/^I give (\w+) permission to "([^"]*)" on the document$/, async function(permission, name) {
@@ -30,18 +31,20 @@ When(/^I give (\w+) permission on the document to the following users:$/, async 
   const newPermissionEle = await viewEle.newPermissionButton;
   await newPermissionEle.waitForVisible();
   await newPermissionEle.click();
-
-  table.rows().forEach(async (row) => {
+  const rows = table.rows();
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
     await viewEle.setPermissions(row[0], {
       permission,
       timeFrame: 'permanent',
       notify: false,
     });
-  });
+  }
 
   const createPermissionEle = await viewEle.createPermissionButton;
   await createPermissionEle.waitForVisible();
   await createPermissionEle.click();
+  await driver.pause(3000);
 });
 
 Given(/^"([^"]*)" has (\w+) permission on the document$/, async function(name, permission) {
