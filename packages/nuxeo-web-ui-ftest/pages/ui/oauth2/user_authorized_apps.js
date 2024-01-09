@@ -29,6 +29,7 @@ class AuthorizedApp {
 
 export default class UserAuthorizedApps extends BasePage {
   async getApps(appName) {
+    await driver.pause(3000);
     const elEx = await this.el;
     await elEx.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
     const appsNew = await this.el
