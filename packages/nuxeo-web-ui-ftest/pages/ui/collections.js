@@ -3,21 +3,21 @@ import BasePage from '../base';
 
 export default class Collections extends BasePage {
   async waitForHasCollection(name, reverse) {
-    const { el } = this;
+    const el = await this.el;
 
     await driver.waitUntil(
       async () => {
         const collections = await el.$$('span.collection-name');
-
         if (reverse) {
           return collections.every(async (collection) => (await collection.getText()).trim() !== name);
         }
-
         return collections.some(async (collection) => (await collection.getText()).trim() === name);
       },
       reverse ? 'There is such collection' : 'There is no such collection',
+      {
+        timeoutMsg: 'waitForHasCollection timedout',
+      },
     );
-
     return true;
   }
 

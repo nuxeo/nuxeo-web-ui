@@ -193,7 +193,9 @@ export default class UI extends BasePage {
   }
 
   waitRequests() {
-    driver.waitUntil(() => !this.isConnectionActive, 5000, 'Waiting for inactive connection');
+    driver.waitUntil(() => !this.isConnectionActive, 5000, 'Waiting for inactive connection', {
+      timeoutMsg: 'waitRequests timeout',
+    });
   }
 
   view(option) {
@@ -205,9 +207,11 @@ export default class UI extends BasePage {
   }
 
   async waitForToastNotVisible() {
-    driver.waitUntil(async () => {
+    await driver.waitUntil(async () => {
       const mwcsnackbar = await driver.elements('mwc-snackbar');
-      return mwcsnackbar.every((toast) => !toast.getAttribute('open'));
+      return mwcsnackbar.every((toast) => !toast.getAttribute('open'), {
+        timeoutMsg: 'waitForToastNotVisible timedout',
+      });
     });
   }
 
@@ -218,12 +222,17 @@ export default class UI extends BasePage {
 
   async getToastMessage(message) {
     let snackBarText;
-    await driver.waitUntil(async () => {
-      const snackBar = await this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
-      snackBarText = await snackBar.getText();
-      const trimmedMessage = message.trim().replace(/"/g, '');
-      return snackBarText === trimmedMessage;
-    });
+    await driver.waitUntil(
+      async () => {
+        const snackBar = await this.el.element('#snackbarPanel mwc-snackbar[open] .mdc-snackbar__label');
+        snackBarText = await snackBar.getText();
+        const trimmedMessage = message.trim().replace(/"/g, '');
+        return snackBarText === trimmedMessage;
+      },
+      {
+        timeoutMsg: 'getToastMessage timedout',
+      },
+    );
 
     return snackBarText;
   }

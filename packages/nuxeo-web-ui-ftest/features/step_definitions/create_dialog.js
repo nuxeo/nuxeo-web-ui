@@ -16,7 +16,7 @@ Then('I click the Create button to finish the import', async function() {
   await importButton.waitForEnabled();
   await driver.pause(5000);
   await importButton.click();
-  driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
+  await driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
   await driver.pause(3000); // XXX just give it some time to the server to do the conversions
 });
 

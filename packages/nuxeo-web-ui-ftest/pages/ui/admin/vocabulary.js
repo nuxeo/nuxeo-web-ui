@@ -39,6 +39,9 @@ export default class Vocabulary extends BasePage {
         return cells.some(async (cell) => (await cell.getText()).trim() === id);
       },
       reverse ? 'The vocabulary does have such entry' : 'The vocabulary does not have such entry',
+      {
+        timeoutMsg: 'waitForHasEntry timedout',
+      },
     );
     return true;
   }

@@ -81,40 +81,38 @@ export default class CloudServices extends BasePage {
   }
 
   async waitForHasProvider(id, reverse) {
-    const { el } = this;
-
+    const el = await this.el;
     await driver.waitUntil(
       async () => {
         const providers = await el.elements('[name="serviceName"]');
-
         if (reverse) {
           return providers.every(async (provider) => (await provider.getText()).trim() !== id);
         }
-
         return providers.some(async (provider) => (await provider.getText()).trim() === id);
       },
       reverse ? 'The cloud services does have such provider' : 'The cloud services does not have such provider',
+      {
+        timeoutMsg: 'waitForHasProvider timedout',
+      },
     );
-
     return true;
   }
 
   async waitForHasClient(id, reverse) {
-    const { el } = this;
-
+    const el = await this.el;
     await driver.waitUntil(
       async () => {
         const clients = await el.elements('[name="id"]');
-
         if (reverse) {
           return clients.every(async (client) => (await client.getText()).trim() !== id);
         }
-
         return clients.some(async (client) => (await client.getText()).trim() === id);
       },
       reverse ? 'The cloud services does have such client' : 'The cloud services does not have such client',
+      {
+        timeoutMsg: 'waitForHasClient timedout',
+      },
     );
-
     return true;
   }
 

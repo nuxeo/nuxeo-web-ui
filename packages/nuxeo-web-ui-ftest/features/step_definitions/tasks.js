@@ -25,7 +25,7 @@ When(/^I (\w+) the task for following actors:$/, async function(option, table) {
   const confirmButton = await this.ui.browser.documentTaskView.confirmButton;
   await confirmButton.waitForVisible();
   await confirmButton.click();
-  driver.waitForExist('iron-overlay-backdrop', 5000, true);
+  await driver.waitForExist('iron-overlay-backdrop', 5000, true);
 });
 
 Then('I can see the list of tasks', async function() {
