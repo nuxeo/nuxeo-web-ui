@@ -331,20 +331,17 @@ export default class Browser extends BasePage {
   /*
    * Results might vary with the viewport size as only visible items are taken into account.
    */
-  async waitForNbChildren(nb) {
+  async waitForNbChildren() {
+    await driver.pause(2000);
     let count = 0;
-    try {
-      const rowTemp = await this.el.rows;
-      for (let i = 0; i < rowTemp.length; i++) {
-        if ((await rowTemp[i].isVisible()) && (await rowTemp[i].isVisible('nuxeo-data-table-cell a.title'))) {
-          count++;
-        }
+    const rowTemp = await this.el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    for (let i = 0; i < rowTemp.length; i++) {
+      const row = await rowTemp[i];
+      if ((await row.isVisible()) && (await row.isVisible('nuxeo-data-table-cell a.title'))) {
+        count++;
       }
-      return count === nb;
-    } catch (e) {
-      // prevent stale row from breaking execution
-      return false;
     }
+    return count;
   }
 
   async selectAllChildDocuments() {
