@@ -8,7 +8,8 @@ class AuthorizedApp {
 
   get name() {
     return (async () => {
-      const ele = await this.el.elements('nuxeo-data-table-cell')[0];
+      const eles = await this.el.elements('nuxeo-data-table-cell');
+      const ele = await eles[0];
       const eleText = await ele.getText();
       return eleText;
     })();
