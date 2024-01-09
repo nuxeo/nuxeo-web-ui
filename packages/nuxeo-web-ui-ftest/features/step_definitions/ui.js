@@ -1,6 +1,7 @@
 import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
 When('I click the {string} button', async function(button) {
+  await driver.pause(2000);
   const drawer = await this.ui.drawer;
   const buttonToclick = await drawer.open(button);
   return buttonToclick;

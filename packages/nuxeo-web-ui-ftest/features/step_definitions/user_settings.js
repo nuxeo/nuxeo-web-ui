@@ -62,6 +62,7 @@ Then(/^I can see "(.+)" as an authorized application$/, function(application) {
 });
 
 Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberOfApps) {
+  await driver.pause(2000);
   const authPage = await this.ui.userAuthorizedApps;
   await authPage.waitForVisible();
   const apps = await authPage.getApps();
