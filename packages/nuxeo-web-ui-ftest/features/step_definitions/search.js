@@ -230,7 +230,8 @@ Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username)
   await createPermissionButton.waitForVisible();
   await createPermissionButton.click();
   const permissionVisible = await searchForm.permissionsView.permission('Read', username, 'permanent');
-  permissionVisible.should.be.true;
+  const isVisible = await permissionVisible.waitForVisible();
+  isVisible.should.be.true;
 });
 
 Then(/^I can view my saved search "(.+)" on "(.+)"$/, async function(savedSearchName, searchName) {
