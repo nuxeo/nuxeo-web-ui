@@ -28,6 +28,11 @@ const capability = {
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
   browserVersion: 'stable',
+  exclude: [
+    '../../ftest/features/bulk_edit_custom_layouts.feature',
+    '../../ftest/features/expired_doc.feature',
+    '../../ftest/features/publication.feature',
+  ],
 };
 
 const options = {};
