@@ -29,24 +29,27 @@ class AuthorizedApp {
 
 export default class UserAuthorizedApps extends BasePage {
   async getApps(appName) {
-    await driver.pause(3000);
     const elEx = await this.el;
     await elEx.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
     const appsNew = await this.el
       .$$('nuxeo-data-table nuxeo-data-table-row:not([header])')
       .map((el) => new AuthorizedApp(el));
-    const apps = await appsNew.filter(async (app) => !!(await app.name).trim());
+    const filterAppNames = [];
     const filterApps = [];
-    if (appName) {
-      for (let i = 0; i < apps.length; i++) {
-        const app = await apps[i];
-        const appText = await app.el.$('nuxeo-data-table-cell').getText();
-        if (appName === appText) {
-          filterApps.push(app);
-        }
+    const apps = await appsNew.filter(async (app) => !!(await app.name).trim());
+    for (let i = 0; i < apps.length; i++) {
+      const app = await apps[i];
+      const appText = await app.el.$('nuxeo-data-table-cell').getText();
+      if (appText.trim() !== '') {
+        filterAppNames.push(app);
       }
+      if (appName === appText) {
+        filterApps.push(app);
+      }
+    }
+    if (appName) {
       return filterApps;
     }
-    return apps;
+    return filterAppNames;
   }
 }
