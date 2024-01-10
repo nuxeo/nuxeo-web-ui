@@ -15,8 +15,10 @@ export default class Login {
   }
 
   static get() {
-    const baseUrl = process.env.NUXEO_URL || '';
-    driver.url(baseUrl ? `${baseUrl}/logout` : 'logout');
-    return new this();
+    return (async () => {
+      const baseUrl = process.env.NUXEO_URL || '';
+      await driver.url(baseUrl ? `${baseUrl}/logout` : 'logout');
+      return new this();
+    })();
   }
 }

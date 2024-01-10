@@ -143,6 +143,7 @@ When('I switch to filter view', async function() {
 });
 
 Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
+  await driver.pause(2000);
   const uiResult = await this.ui.results;
   const displayMode = await uiResult.displayMode;
   if (numberOfResults === 0) {

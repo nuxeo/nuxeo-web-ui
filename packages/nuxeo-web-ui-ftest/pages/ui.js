@@ -106,20 +106,18 @@ export default class UI extends BasePage {
   }
 
   static get() {
-    url(process.env.NUXEO_URL ? '' : 'ui');
-    if (!global.locale) {
-      $('nuxeo-app:not([unresolved])').waitForVisible();
-      /* global window */
-      (async () => {
+    return (async () => {
+      url(process.env.NUXEO_URL ? '' : 'ui');
+      if (!(await global.locale)) {
+        await $('nuxeo-app:not([unresolved])').waitForVisible();
         const locale = await browser.execute(() => window.nuxeo.I18n.language || 'en');
         if (locale) {
           global.locale = locale;
-          moment.locale(global.locale);
+          await moment.locale(global.locale);
         }
-        return new UI('nuxeo-app');
-      })();
-    }
-    return new UI('nuxeo-app');
+      }
+      return new UI('nuxeo-app');
+    })();
   }
 
   get home() {

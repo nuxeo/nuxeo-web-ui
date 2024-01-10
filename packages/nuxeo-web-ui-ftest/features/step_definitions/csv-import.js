@@ -1,4 +1,4 @@
-import { When } from '@cucumber/cucumber';
+import { When } from '../../node_modules/@cucumber/cucumber';
 
 /**
  * Import the csv file
@@ -6,8 +6,8 @@ import { When } from '@cucumber/cucumber';
  * @deprecated since 3.0.3. Please use "I upload the (.+) on the tab content page" located in create_dialog.js
  * */
 When(/^I import the (.+) file$/, async function(file) {
-  const dialog = this.ui.createDialog;
-  dialog.waitForVisible();
+  const dialog = await this.ui.createDialog;
+  await dialog.waitForVisible();
   await dialog.setFileToImport(file);
   const selectedFileToImport = await dialog.selectedFileToImport;
   const selectVisible = await selectedFileToImport.waitForVisible();

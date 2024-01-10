@@ -30,19 +30,19 @@ Given('user {string} exists', (username) =>
 );
 
 When('I login as {string}', async function(username) {
-  const logIn = Login.get();
+  const logIn = await Login.get();
   await logIn.username(username);
   const password = users[username];
   await logIn.password(password);
   await logIn.submit();
   this.username = username;
-  this.ui = UI.get();
+  this.ui = await UI.get();
   await this.ui.waitForVisible('nuxeo-page');
 });
 
 When(/^I visit (.*)$/, (path) => url(path));
 
-When('I logout', () => Login.get());
+When('I logout', async () => Login.get());
 
 Then('I am logged in as {string}', async function(username) {
   const profileEle = await this.ui.drawer.open('profile');

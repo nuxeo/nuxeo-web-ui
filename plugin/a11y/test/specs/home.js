@@ -32,6 +32,7 @@ describe('Nuxeo Home', () => {
   reportA11y(EXPECTED_VIOLATIONS, EXPECTED_INCOMPLETE_VIOLATIONS, async () => {
     await login();
     const ui = await UI.get();
-    await ui.home.el.$('nuxeo-card[icon="nuxeo:edit"]').waitForDisplayed();
+    const ele = await ui.home.el.$('nuxeo-card[icon="nuxeo:edit"]');
+    await ele.waitForDisplayed();
   });
 });

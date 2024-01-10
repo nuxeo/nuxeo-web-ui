@@ -38,8 +38,10 @@ describe('Nuxeo Browser', () => {
     try {
       await login();
       const ui = await UI.get();
+      await ui.waitForVisible('nuxeo-page');
       await ui.browser.browseTo(doc.path);
-      await ui.browser.currentPage.waitForDisplayed();
+      const page = await ui.browser.currentPage;
+      await page.waitForDisplayed();
     } catch (error) {
       console.warn(error);
     }
