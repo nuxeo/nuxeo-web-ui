@@ -1,9 +1,11 @@
 /* eslint-disable no-await-in-loop */
 import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
-When('I click remove button for {string} document', function(title) {
-  this.ui.drawer.clipboard.waitForVisible();
-  this.ui.drawer.clipboard.removeItem(title);
+When('I click remove button for {string} document', async function(title) {
+  const drawer = await this.ui.drawer;
+  const clipboard = await drawer.clipboard;
+  await clipboard.waitForVisible();
+  await clipboard.removeItem(title);
 });
 
 When('I click the clipboard move action', async function() {

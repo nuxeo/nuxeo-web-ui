@@ -44,9 +44,11 @@ export default class Clipboard extends BasePage {
     let found = false;
     for (let index = 0; index < items.length; index++) {
       const itemVisible = await items[index].isVisible();
-      const itemText = await items[index].$('.list-item-title').getText();
+      const item = await items[index].$('.list-item-title');
+      const itemText = await item.getText();
       if (itemVisible && itemText === title) {
-        await items[index].$('iron-icon.remove').click();
+        const ele = await items[index].$('iron-icon.remove');
+        await ele.click();
         found = true;
       }
     }
