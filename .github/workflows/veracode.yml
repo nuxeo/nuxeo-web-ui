@@ -134,9 +134,17 @@ jobs:
     - name: list files
       run: ls 
 
-    - name: Delete node_modules
+    - name: Delete root-level node_modules
       run: |
         rm -rf node_modules
+
+    - name: Delete nuxeo-designer-catalog/node_modules
+      run: |
+        rm -rf packages/nuxeo-designer-catalog/node_modules
+        
+    - name: Delete plugin/a11y/node_modules
+      run: |
+        rm -rf plugin/a11y/node_modules
 
     - name: list files
       run: ls 
