@@ -176,7 +176,7 @@ jobs:
         vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
         # createsandbox: 'false'
         sandboxname: 'master'
-        scantimeout: 0
+        scantimeout: 1200
         include: '*.war, *.zip, *.js'
         criticality: 'VeryHigh'
         includenewmodules: 'true'
