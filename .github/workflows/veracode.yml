@@ -141,6 +141,10 @@ jobs:
     - name: Delete nuxeo-designer-catalog/node_modules
       run: |
         rm -rf packages/nuxeo-designer-catalog/node_modules
+
+    - name: Delete packages/nuxeo-web-ui-ftest/node_modules
+      run: |
+        rm -rf packages/nuxeo-web-ui-ftest/node_modules
         
     - name: Delete plugin/a11y/node_modules
       run: |
