@@ -30,6 +30,7 @@ Given('user {string} exists', (username) =>
 );
 
 When('I login as {string}', async function(username) {
+  await driver.pause(2000);
   const logIn = await Login.get();
   await logIn.username(username);
   const password = users[username];
