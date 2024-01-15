@@ -80,6 +80,7 @@ Then('I can see the {string} document', async function(title) {
   const browser = await this.ui.browser;
   await browser.waitForVisible();
   const browserTitle = await browser.hasTitle(title);
+  console.log('step definition browserjs 83', title, browserTitle);
   browserTitle.should.be.true;
 });
 

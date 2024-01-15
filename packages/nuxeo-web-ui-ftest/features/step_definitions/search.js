@@ -41,7 +41,7 @@ Given(/^I have the following users$/, (table) =>
   ),
 );
 
-Given(/^I have the following documents$/, (table) => {
+Given(/^I have the following documents$/, async (table) => {
   browser.pause(1000);
   const tasks = table.hashes().map((row) => () => {
     const { doctype, title, creator, nature, subjects, coverage, path, collections, tag, file } = row;

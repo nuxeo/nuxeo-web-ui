@@ -115,6 +115,7 @@ When(/^I browse to the "(.*)" document page$/, async function(page) {
 });
 
 When(/^I browse to the document with path "(.+)"$/, async function(path) {
+  console.log('path=======', path);
   console.log('one==========');
   await driver.pause(2000);
   console.log('two=========');
