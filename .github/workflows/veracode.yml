@@ -12,8 +12,8 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ "maintenance-3.0.x" ]
   schedule:
-    # At 01:00 on Sunday
-    - cron: '0 1 * * SUN'
+     # At 20:00 every day
+     - cron: '0 20 * * *'
   workflow_call:
     inputs:
       branch:
@@ -131,27 +131,23 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
-    - name: list files
-      run: ls 
-
-    - name: Delete root-level node_modules
+    - name: Delete Node Modules
       run: |
         rm -rf node_modules
-
-    - name: Delete nuxeo-designer-catalog/node_modules
-      run: |
         rm -rf packages/nuxeo-designer-catalog/node_modules
-
-    - name: Delete packages/nuxeo-web-ui-ftest/node_modules
-      run: |
         rm -rf packages/nuxeo-web-ui-ftest/node_modules
-        
-    - name: Delete plugin/a11y/node_modules
-      run: |
-        rm -rf plugin/a11y/node_modules
+        rm -rf plugin/a11y/node_modules 
 
-    - name: list files
-      run: ls 
+    - name: Delete Test Folders
+      run: |
+        rm -rf nuxeo-elements/testing-helpers/
+        rm -rf nuxeo-elements/ui/test/
+        rm -rf nuxeo-web-ui/ftest/
+        rm -rf nuxeo-web-ui/plugin/
+        rm -rf nuxeo-web-ui/scripts/
+        rm -rf nuxeo-web-ui/test/
+        rm -rf nuxeo-web-ui/packages/nuxeo-web-ui-ftest/
+        rm -rf nuxeo-elements/storybook/
 
     - name: Install zip
       run: sudo apt-get install zip
@@ -174,13 +170,9 @@ jobs:
         filepath: 'nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip'
         vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
         vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
-        # createsandbox: 'false'
         sandboxname: 'master'
         scantimeout: 600
-        include: '*.war, *.zip, *.js'
+        include: '*.war, *.zip, *.js, *.html, *.css, *.json'
         criticality: 'VeryHigh'
         includenewmodules: 'true'
-
-
-
-   
+        scanallnonfataltopvulns: 'true'
