@@ -76,7 +76,7 @@ exports.config = {
   // directory is where your package.json resides, so `wdio` will be called from there.
   //
   hostname: '127.0.0.1',
-  port: '8080',
+  port: 8080,
   specs: ['./test/specs/**/*.js'],
   // Patterns to exclude.
   exclude: [
