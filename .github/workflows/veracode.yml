@@ -151,12 +151,12 @@ jobs:
       run: |
         rm -rf nuxeo-elements/testing-helpers/
         rm -rf nuxeo-elements/ui/test/
-        rm -rf nuxeo-web-ui/ftest/
-        rm -rf nuxeo-web-ui/plugin/
-        rm -rf nuxeo-web-ui/scripts/
-        rm -rf nuxeo-web-ui/test/
-        rm -rf nuxeo-web-ui/packages/nuxeo-web-ui-ftest/
         rm -rf nuxeo-elements/storybook/
+        rm -rf ftest/
+        rm -rf plugin/
+        rm -rf scripts/
+        rm -rf test/
+        rm -rf packages/nuxeo-web-ui-ftest/
 
     - name: Install zip
       run: sudo apt-get install zip
