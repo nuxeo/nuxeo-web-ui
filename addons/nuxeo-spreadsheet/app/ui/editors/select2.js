@@ -1,5 +1,5 @@
 /*
- * ©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+ *©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
  *
  * All rights reserved. This program and the accompanying materials

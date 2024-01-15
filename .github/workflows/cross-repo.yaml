@@ -192,14 +192,10 @@ jobs:
           fi
           mvn install -ntp $active_profiles -DskipInstall
 
-      #==================================================================================================================
-      # this line of code has been commented on due to some driver issues, we will resume it once WEBUI-1266 is resolved.
-      #==================================================================================================================
-      # - name: A11y checks
-      #   if: ${{ github.event.inputs.skip_a11y == 'false' }}
-      #   run: |
-      #     mvn -B -nsu -f plugin/a11y -ntp install
-      #==================================================================================================================
+      - name: A11y checks
+        if: ${{ github.event.inputs.skip_a11y == 'false' }}
+        run: |
+          mvn -B -nsu -f plugin/a11y -ntp install
 
       - name: Archive cucumber reports
         if: ${{ always() }}

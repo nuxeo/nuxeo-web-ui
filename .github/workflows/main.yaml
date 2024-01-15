@@ -63,11 +63,6 @@ jobs:
           echo "BRANCH_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
           echo "PACKAGE_VERSION=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
 
-      - name: Prepare environment
-        run: |
-          echo "BRANCH_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
-          echo "PACKAGE_VERSION=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
-
       - name: Get prerelease version
         run: |
           git fetch origin --tags
@@ -101,11 +96,17 @@ jobs:
           npm install
           popd
 
-      - name: Nuxeo package build
+      - name: 'Update settings.xml with server configuration'
         run: |
-          mvn -ntp install -DskipInstall
-          mvn -B -nsu -ntp -f plugin/itests/addon install
-          mvn -B -nsu -ntp -f plugin/itests/marketplace install
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
 
       - name: Nuxeo package build
         run: |

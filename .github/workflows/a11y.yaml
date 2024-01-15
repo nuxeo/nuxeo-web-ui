@@ -35,7 +35,7 @@ jobs:
       with:
         ref: ${{ env.BRANCH_NAME }}
 
-      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
+    - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
     - uses: actions/setup-node@v3
       with:

@@ -97,23 +97,4 @@ suite('nuxeo-picture-formats', () => {
       expect(element._getDownloadUrl()).to.equal('');
     });
   });
-
-  suite('fetch download url', () => {
-    test('Should fetch download url when item has downloadUrl property', () => {
-      const item = {
-        downloadUrl: 'abc.docx?changeToken=1-0&clientReason=download',
-      };
-      expect(element._getDownloadUrl(item)).to.equal('abc.docx?changeToken=1-0&clientReason=download');
-    });
-
-    test('Should fetch download url when item does not have downloadUrl property', () => {
-      const item = {
-        data: 'abc.docx?changeToken=1-0',
-      };
-      expect(element._getDownloadUrl(item)).to.equal('abc.docx?changeToken=1-0');
-    });
-    test('Should not fetch download url when input is not provided', () => {
-      expect(element._getDownloadUrl()).to.equal('');
-    });
-  });
 });

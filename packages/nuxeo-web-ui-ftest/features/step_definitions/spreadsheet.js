@@ -64,11 +64,9 @@ When('I save the spreadsheet', async function() {
 
 When('I close the spreadsheet', async function() {
   const spreadsheet = await this.spreadsheet;
-  const browser = await this.ui.browser;
   if (spreadsheet) {
     await spreadsheet.close();
-    const browserEle = await browser.el;
-    await browserEle.switchToFrame(null);
+    await browser.switchToFrame(null);
   } else {
     throw Error('Error: Spreadsheet does not exist!!');
   }
