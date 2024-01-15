@@ -32,18 +32,21 @@ export default class DocumentPublications extends BasePage {
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       if (row.isVisible('nuxeo-data-table-cell a.path')) {
-        const foundPath = await row.$('nuxeo-data-table-cell a.path').getText();
-        const foundPathLowerCase = await foundPath.toLowerCase();
+        const foundPathEle = await row.$('nuxeo-data-table-cell a.path');
+        const foundPath = await foundPathEle.getText();
+        const foundPathLowerCase = await foundPath.trim().toLowerCase();
         if (foundPathLowerCase.indexOf(path.trim().toLowerCase()) !== 0) {
           index = -1;
         }
-        const foundRendition = await row.$('nuxeo-data-table-cell .rendition').getText();
+        const foundRenditionEle = await row.$('nuxeo-data-table-cell .rendition');
+        const foundRendition = await foundRenditionEle.getText();
         const foundRenditionLowerCase = foundRendition.trim().toLowerCase();
         if (foundRenditionLowerCase !== rendition.toLowerCase()) {
           index = -1;
         }
-        const foundVersion = await row.$('nuxeo-data-table-cell .version').getText();
-        const foundVersionLowerCase = foundVersion.trim().toLowerCase();
+        const foundVersionEle = await row.$('nuxeo-data-table-cell .version');
+        const foundVersion = await foundVersionEle.getText();
+        const foundVersionLowerCase = await foundVersion.trim().toLowerCase();
         if (foundVersionLowerCase && version != null && foundVersion !== version.toLowerCase()) {
           index = -1;
         }
@@ -60,8 +63,8 @@ export default class DocumentPublications extends BasePage {
     const pubRow = await this.getPublicationRow(path, rendition, version);
     if (pubRow) {
       await pubRow.waitForVisible('paper-button.republish');
-      const xyz = await pubRow.element('paper-button.republish');
-      await xyz.click();
+      const pubRowEle = await pubRow.element('paper-button.republish');
+      await pubRowEle.click();
       await driver.alertAccept();
     } else {
       throw new Error(`Could not find publication ${path} ${rendition} ${version}`);

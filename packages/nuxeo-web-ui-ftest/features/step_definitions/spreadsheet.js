@@ -1,4 +1,4 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Then, When } from '../../node_modules/@cucumber/cucumber';
 import Spreadsheet from '../../pages/spreadsheet';
 
 When('I open the spreadsheet', async function() {
@@ -11,7 +11,8 @@ When('I open the spreadsheet', async function() {
   await dialog.waitForVisible();
   const iframe = await buttonEle.element('#iframe');
   await iframe.waitForExist();
-  await browser.switchToFrame(iframe);
+  const browserEle = await browser.el;
+  await browserEle.switchToFrame(iframe);
   this.spreadsheet = await new Spreadsheet();
 });
 
@@ -63,7 +64,6 @@ When('I save the spreadsheet', async function() {
 
 When('I close the spreadsheet', async function() {
   const spreadsheet = await this.spreadsheet;
-  const browser = await this.ui.browser;
   if (spreadsheet) {
     await spreadsheet.close();
     await browser.switchToFrame(null);

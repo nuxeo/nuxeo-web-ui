@@ -17,8 +17,9 @@ Given('user {string} exists in group {string}', async (username, group) => {
   });
 });
 
-Given('user {string} exists', (username) =>
-  fixtures.users.create({
+Given('user {string} exists', async (username) => {
+  const users = await fixtures.users;
+  await users.create({
     'entity-type': 'user',
     properties: {
       username,
@@ -26,17 +27,19 @@ Given('user {string} exists', (username) =>
       email: `${username}@test.com`,
       password: fixtures.users.DEFAULT_PASSWORD,
     },
-  }),
-);
+  });
+});
 
 When('I login as {string}', async function(username) {
+  await driver.pause(2000);
   const logIn = await Login.get();
   await logIn.username(username);
-  const password = users[username];
+  const password = await users[username];
   await logIn.password(password);
   await logIn.submit();
   this.username = username;
   this.ui = await UI.get();
+  await driver.pause(2000);
   await this.ui.waitForVisible('nuxeo-page');
 });
 
