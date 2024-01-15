@@ -25,7 +25,6 @@ const capability = {
   browserName: 'chrome',
   acceptInsecureCerts: true,
   browserVersion: 'stable',
-  hostname: '127.0.0.1',
 };
 const options = {
   args: ['--no-sandbox'],
