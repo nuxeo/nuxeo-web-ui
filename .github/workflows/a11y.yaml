@@ -29,51 +29,51 @@ env:
 
 jobs:
   a11y:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, master]
     steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ env.BRANCH_NAME }}
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.BRANCH_NAME }}
 
-    - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
+      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
-    - uses: actions/setup-node@v3
-      with:
-        registry-url: ${{ env.NPM_REPOSITORY }}
-        node-version: 18
-        scope: '@nuxeo'
-    
-    - name: Install Web UI
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      run: |
-        npm install
-        pushd packages/nuxeo-web-ui-ftest
-        npm install
-        popd
-        pushd packages/nuxeo-designer-catalog
-        npm install
-        popd
+      - uses: actions/setup-node@v3
+        with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: 18
+          scope: '@nuxeo'
 
-    - uses: actions/setup-java@v2
-      with:
-        distribution: 'zulu'
-        java-version: '17'
+      - name: Install Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+          pushd packages/nuxeo-designer-catalog
+          npm install
+          popd
 
-    - name: 'Update settings.xml with server configuration'
-      run: |
-        echo '<settings>
-            <servers>
-              <server>
-                <id>maven-internal</id>
-                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-              </server>
-            </servers>
-            </settings>' > ~/.m2/settings.xml
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
-    - name: Web UI build
-      run: mvn -B -ntp install
+      - name: 'Update settings.xml with server configuration'
+        run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
 
-    - name: A11y checks
-      run: mvn -B -ntp -f plugin/a11y install
+      - name: Web UI build
+        run: mvn -B -ntp install
+
+      - name: A11y checks
+        run: mvn -B -ntp -f plugin/a11y install

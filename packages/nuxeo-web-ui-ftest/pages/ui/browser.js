@@ -289,9 +289,8 @@ export default class Browser extends BasePage {
       .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
       .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
 
-    let i;
-    for (i = 0; i < elementTitle.length; i++) {
-      if (elementTitle[i].trim() === title) {
+    for (let i = 0; i < elementTitle.length; i++) {
+      if ((await elementTitle[i].trim()) === title) {
         return i;
       }
     }
