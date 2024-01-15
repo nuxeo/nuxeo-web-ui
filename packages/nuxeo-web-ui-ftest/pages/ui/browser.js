@@ -61,7 +61,8 @@ export default class Browser extends BasePage {
   get currentPageName() {
     return (async () => {
       // get selected pill to get it's name
-      await $('#documentViewsItems nuxeo-page-item.iron-selected').waitForVisible();
+      const selectedPill = await $('#documentViewsItems nuxeo-page-item.iron-selected');
+      await selectedPill.waitForVisible();
       const pill = await this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
       return pill.getAttribute('name');
     })();

@@ -12,7 +12,7 @@ const refresh = async () => {
 
 const url = async (...args) => {
   await driver.url(...args);
-  _flushProperties();
+  await _flushProperties();
 };
 
 const clickActionMenu = async (menu, selector) => {
