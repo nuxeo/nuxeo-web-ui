@@ -140,6 +140,15 @@ jobs:
 
     - name: Delete Test Folders
       run: |
+       ls -al
+       cd nuxeo-elements
+       ls -al
+       cd ..
+       cd packages
+       ls -al
+       
+    - name: Delete Test Folders
+      run: |
         rm -rf nuxeo-elements/testing-helpers/
         rm -rf nuxeo-elements/ui/test/
         rm -rf nuxeo-web-ui/ftest/
