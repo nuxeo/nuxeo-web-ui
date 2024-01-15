@@ -28,7 +28,7 @@ const capability = {
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
   browserVersion: 'stable',
-  exclude: ['../../ftest/features/bulk_edit_custom_layouts.feature'],
+  exclude: [],
 };
 
 const options = {};
