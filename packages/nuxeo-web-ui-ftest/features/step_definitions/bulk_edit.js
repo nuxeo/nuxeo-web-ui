@@ -13,7 +13,6 @@ Then('I can bulk edit multiple properties in {string} layout:', async function(l
   const dialog = await action.dialog;
   await dialog.waitForDisplayed();
   await action.editMultipleOptions(table);
-
   const saveButtonEle = await action.saveButton;
   await saveButtonEle.click();
 });
