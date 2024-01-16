@@ -332,9 +332,8 @@ export default class Browser extends BasePage {
    * Results might vary with the viewport size as only visible items are taken into account.
    */
   async waitForNbChildren() {
-    await driver.pause(2000);
+    const rowTemp = await this.rows;
     let count = 0;
-    const rowTemp = await this.el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
     for (let i = 0; i < rowTemp.length; i++) {
       const row = await rowTemp[i];
       if ((await row.isVisible()) && (await row.isVisible('nuxeo-data-table-cell a.title'))) {
