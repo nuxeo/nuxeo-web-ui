@@ -22,19 +22,12 @@ export default class Browser extends BasePage {
   }
 
   async browseTo(path) {
-    console.log('5=========');
     await url(`#!/browse${path}`);
-    console.log('6=========');
     await this.waitForVisible();
-    console.log('7=========');
     const breadcrumb = await this.breadcrumb;
-    console.log('8=========');
     await breadcrumb.waitForVisible();
-    console.log('9=========');
     const currentPage = await this.currentPage;
-    console.log('10=========');
     await currentPage.waitForVisible();
-    console.log('11=========');
   }
 
   get view() {
