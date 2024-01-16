@@ -61,15 +61,16 @@ export default class Browser extends BasePage {
   get currentPageName() {
     return (async () => {
       // get selected pill to get it's name
-      await $('#documentViewsItems nuxeo-page-item.iron-selected').waitForVisible();
       const pill = await this.el.element('#documentViewsItems nuxeo-page-item.iron-selected');
-      return pill.getAttribute('name');
+      const attributeName = await pill.getAttribute('name');
+      return attributeName;
     })();
   }
 
   get currentPage() {
     return (async () => {
-      const section = await this._section(await this.currentPageName);
+      const pageName = await this.currentPageName;
+      const section = await this._section(pageName);
       return section;
     })();
   }
@@ -331,15 +332,25 @@ export default class Browser extends BasePage {
   /*
    * Results might vary with the viewport size as only visible items are taken into account.
    */
-  async waitForNbChildren() {
-    const rowTemp = await this.rows;
-    let count = 0;
-    for (let i = 0; i < rowTemp.length; i++) {
-      const row = await rowTemp[i];
-      if ((await row.isVisible()) && (await row.isVisible('nuxeo-data-table-cell a.title'))) {
-        count++;
+  async waitForNbChildren(nb) {
+    let count;
+    await driver.waitUntil(async () => {
+      const currentPage = await this.currentPage;
+      const rowTemp = await currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+      count = 0;
+      try {
+        for (let i = 0; i < rowTemp.length; i++) {
+          const row = await rowTemp[i];
+          if ((await row.isVisible()) && (await row.isVisible('nuxeo-data-table-cell a.title'))) {
+            count++;
+          }
+        }
+        return count === nb;
+      } catch (e) {
+        // prevent stale row from breaking execution
+        return false;
       }
-    }
+    });
     return count;
   }
 

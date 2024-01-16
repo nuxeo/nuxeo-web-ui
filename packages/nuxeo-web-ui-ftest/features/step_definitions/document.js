@@ -300,9 +300,8 @@ Then('I add the document to the favorites', async function() {
 });
 
 Then('I can see the document has {int} children', async function(nb) {
-  await driver.pause(2000);
   const browser = await this.ui.browser;
-  const countOut = await browser.waitForNbChildren();
+  const countOut = await browser.waitForNbChildren(nb);
   if (countOut !== nb) {
     throw Error(`Document should have ${nb} children but found ${countOut}`);
   }
