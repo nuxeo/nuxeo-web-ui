@@ -65,7 +65,7 @@ jobs:
     - uses: actions/setup-node@v1
       with:
           registry-url: ${{ env.NPM_REPOSITORY }}
-          node-version: 14
+          node-version: 18
           scope: '@nuxeo'
 
     - uses: actions/setup-java@v2
@@ -137,15 +137,6 @@ jobs:
         rm -rf packages/nuxeo-designer-catalog/node_modules
         rm -rf packages/nuxeo-web-ui-ftest/node_modules
         rm -rf plugin/a11y/node_modules 
-
-    - name: Delete Test Folders
-      run: |
-       ls -al
-       cd nuxeo-elements
-       ls -al
-       cd ..
-       cd packages
-       ls -al
        
     - name: Delete Test Folders
       run: |
@@ -163,9 +154,6 @@ jobs:
 
     - name: Zip nuxeo-web-ui
       run: zip -r nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip *
-    
-    - name: Display zip contents of nuxeo-web-ui
-      run: ls -R
 
     - name: Get Latest Tag
       id: get-tag
