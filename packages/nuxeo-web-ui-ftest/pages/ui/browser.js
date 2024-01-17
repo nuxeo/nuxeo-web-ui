@@ -288,10 +288,10 @@ export default class Browser extends BasePage {
     await this.waitForChildren();
     const elementTitle = await browser
       .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
-      .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
+      .map(async (img) => img.$('nuxeo-data-table-cell a.title').getText());
 
     for (let i = 0; i < elementTitle.length; i++) {
-      if (elementTitle[i].trim() === title) {
+      if ((await elementTitle[i].trim()) === title) {
         return i;
       }
     }
