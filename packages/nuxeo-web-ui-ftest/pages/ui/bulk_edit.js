@@ -24,19 +24,23 @@ export default class BulkEdit extends BasePage {
     })();
   }
 
-  getField(field) {
-    return this.el.$(`[name="${field}"]`);
+  async getField(field) {
+    const ele = await this.el;
+    const result = await ele.$(`[name="${field}"]`);
+    return result;
   }
 
-  getFieldValue(field) {
-    const fieldEl = this.getField(field);
-    return fixtures.layouts.getValue(fieldEl);
+  async getFieldValue(field) {
+    const fieldEl = await this.getField(field);
+    const finalFieldEle = await fixtures.layouts.getValue(fieldEl);
+    return finalFieldEle;
   }
 
-  setFieldValue(field, value) {
-    const fieldEl = this.getField(field);
-    fieldEl.waitForVisible();
-    return fixtures.layouts.setValue(fieldEl, value);
+  async setFieldValue(field, value) {
+    const fieldEl = await this.getField(field);
+    await fieldEl.waitForVisible();
+    const result = await fixtures.layouts.setValue(fieldEl, value);
+    return result;
   }
 
   async editMultipleOptions(table) {
@@ -52,7 +56,7 @@ export default class BulkEdit extends BasePage {
       if (action === 'remove') {
         await bulkEditOption.click();
         const emptyField = await this.bulkEditOptionsList(fieldName, 'Empty value(s)');
-        emptyField.click();
+        await emptyField.click();
       } else if (action === 'addValues') {
         await bulkEditOption.click();
         const addValueField = await this.bulkEditOptionsList(fieldName, 'Add value(s)');

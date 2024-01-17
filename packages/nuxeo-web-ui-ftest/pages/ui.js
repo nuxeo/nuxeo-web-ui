@@ -110,7 +110,7 @@ export default class UI extends BasePage {
       url(process.env.NUXEO_URL ? '' : 'ui');
       if (!(await global.locale)) {
         await $('nuxeo-app:not([unresolved])').waitForVisible();
-        const locale = await browser.execute(() => window.nuxeo.I18n.language || 'en');
+        const locale = await browser.execute(async () => (await window.nuxeo.I18n.language) || 'en');
         if (locale) {
           global.locale = locale;
           await moment.locale(global.locale);
@@ -205,12 +205,17 @@ export default class UI extends BasePage {
   }
 
   async waitForToastNotVisible() {
-    driver.waitUntil(async () => {
-      const mwcsnackbar = await driver.elements('mwc-snackbar');
-      return mwcsnackbar.every((toast) => !toast.getAttribute('open'), {
-        timeoutMsg: 'waitForToastNotVisible timedout',
-      });
-    });
+    const mwcsnackbar = await driver.elements('mwc-snackbar');
+    let found = true;
+    for (let i = 0; i < mwcsnackbar.length; i++) {
+      const toast = await mwcsnackbar[i];
+      const isAttrPresent = await toast.getAttribute('open');
+      if (isAttrPresent) {
+        found = false;
+        break;
+      }
+    }
+    return found;
   }
 
   async getToastDismissButton() {

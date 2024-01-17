@@ -41,7 +41,7 @@ Given(/^I have the following users$/, (table) =>
   ),
 );
 
-Given(/^I have the following documents$/, (table) => {
+Given(/^I have the following documents$/, async (table) => {
   browser.pause(1000);
   const tasks = table.hashes().map((row) => () => {
     const { doctype, title, creator, nature, subjects, coverage, path, collections, tag, file } = row;
@@ -230,7 +230,8 @@ Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username)
   const createPermissionButton = await searchForm.permissionsView.createPermissionButton;
   await createPermissionButton.waitForVisible();
   await createPermissionButton.click();
-  const permissionVisible = await searchForm.permissionsView.permission('Read', username, 'permanent');
+  const permissionView = await searchForm.permissionsView;
+  const permissionVisible = await permissionView.permission('Read', username, 'permanent');
   const isVisible = await permissionVisible.waitForVisible();
   isVisible.should.be.true;
 });
