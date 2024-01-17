@@ -230,7 +230,8 @@ Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username)
   const createPermissionButton = await searchForm.permissionsView.createPermissionButton;
   await createPermissionButton.waitForVisible();
   await createPermissionButton.click();
-  const permissionVisible = await searchForm.permissionsView.permission('Read', username, 'permanent');
+  const permissionView = await searchForm.permissionsView;
+  const permissionVisible = await permissionView.permission('Read', username, 'permanent');
   const isVisible = await permissionVisible.waitForVisible();
   isVisible.should.be.true;
 });
