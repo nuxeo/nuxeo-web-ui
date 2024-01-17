@@ -117,16 +117,13 @@ jobs:
     - name: add .npmrc
       run: |
         ls
-        pushd /tmp/_temp/
-        ls
-        rm .npmrc
         touch .npmrc
-        popd
         echo '
           packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
           @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
           always-auth=true
-        ' >> /tmp/_temp/.npmrc
+        ' >> .npmrc
+        cat .npmrc
 
     - name: Link elements to Web UI
       run: |
