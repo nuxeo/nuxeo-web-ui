@@ -116,6 +116,7 @@ jobs:
 
     - name: add .npmrc
       run: |
+        ls
         pushd /tmp/_temp/
         ls
         rm .npmrc
