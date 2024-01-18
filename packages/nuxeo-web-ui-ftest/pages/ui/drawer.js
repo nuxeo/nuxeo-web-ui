@@ -75,7 +75,7 @@ export default class Drawer extends BasePage {
     if (!isVisible) {
       const menu = await this.menu;
       const buttonToclick = await menu.$(`nuxeo-menu-icon[name='${name}']`);
-      buttonToclick.click();
+      await buttonToclick.click();
     }
     return section;
   }
