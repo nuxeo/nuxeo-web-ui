@@ -31,7 +31,8 @@ When('I click the clipboard paste action', async function() {
 });
 
 Then('I can see the clipboard has {string} document', async function(title) {
-  const clipboardEle = await this.ui.drawer.clipboard;
+  const drawer = await this.ui.drawer;
+  const clipboardEle = await drawer.clipboard;
   await clipboardEle.waitForVisible();
   let found = false;
   const clipboardItems = await clipboardEle.el.$$('#list .list-item-title');
