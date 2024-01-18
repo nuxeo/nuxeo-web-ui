@@ -285,6 +285,7 @@ export default class Browser extends BasePage {
   }
 
   async indexOfChild(title) {
+    await driver.pause(2000);
     await this.waitForChildren();
     const elementTitle = await browser
       .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
