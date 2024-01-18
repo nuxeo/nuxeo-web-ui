@@ -18,11 +18,17 @@ export default class Clipboard extends BasePage {
   }
 
   get moveButton() {
-    return this.el.$('#move');
+    return (async () => {
+      const moveButton = await this.el.$('#move');
+      return moveButton;
+    })();
   }
 
   get pasteButton() {
-    return this.el.$('#paste');
+    return (async () => {
+      const pasteButton = await this.el.$('#paste');
+      return pasteButton;
+    })();
   }
 
   async move() {
