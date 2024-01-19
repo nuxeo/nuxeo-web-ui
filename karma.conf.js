@@ -54,7 +54,11 @@ module.exports = (config) => {
   } else if (config.sauceRunName) {
     sauceLabs.testName = config.sauceRunName;
   }
-
+  const capabilities = {
+    browserName: 'firefox',
+    browserVersion: 'latest',
+    platformName: 'Windows 10',
+  }
   config.set({
     sauceLabs,
     basePath: '',
@@ -64,6 +68,7 @@ module.exports = (config) => {
     browserDisconnectTolerance: 1,
     browserNoActivityTimeout: 5 * 60 * 1000,
     customLaunchers,
+    capabilities,
     middleware: ['static'],
     static: {
       path: path.join(process.cwd(), ''),
