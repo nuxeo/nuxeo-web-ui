@@ -34,7 +34,6 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       browserName: 'firefox',
       platform: 'Windows 10',
       version: 'latest',
-      geckodriverVersion: '0.30.0',
     },
     sl_latest_safari: {
       base: 'SauceLabs',
@@ -95,16 +94,7 @@ module.exports = (config) => {
       // needed for npm link or lerna support
       preserveSymlinks: true,
     },
-    services: [
-      [
-        "selenium-standalone",
-        {
-          "drivers": {
-            "firefox": "0.30.0"
-          }
-        }
-      ]
-    ],
+
     reporters,
     port: 9876,
     colors: true,
