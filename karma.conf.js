@@ -34,6 +34,7 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       browserName: 'firefox',
       platform: 'Windows 10',
       version: 'latest',
+      'moz:debuggerAddress': true,
     },
     sl_latest_safari: {
       base: 'SauceLabs',
