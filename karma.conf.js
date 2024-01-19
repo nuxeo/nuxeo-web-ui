@@ -96,7 +96,7 @@ module.exports = (config) => {
     },
 
     reporters,
-    port: 9876,
+    port: 443,
     colors: true,
     browserConsoleLogOptions: {
       level: 'error',
