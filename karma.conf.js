@@ -95,7 +95,16 @@ module.exports = (config) => {
       // needed for npm link or lerna support
       preserveSymlinks: true,
     },
-
+    services: [
+      [
+        "selenium-standalone",
+        {
+          "drivers": {
+            "firefox": "0.30.0"
+          }
+        }
+      ]
+    ],
     reporters,
     port: 9876,
     colors: true,
