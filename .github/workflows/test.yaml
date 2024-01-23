@@ -39,7 +39,7 @@ jobs:
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Unit tests
         env:
