@@ -34,7 +34,6 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       browserName: 'firefox',
       platform: 'Windows 10',
       version: 'latest',
-      'moz:debuggerAddress': true,
     },
     sl_latest_safari: {
       base: 'SauceLabs',
@@ -54,11 +53,7 @@ module.exports = (config) => {
   } else if (config.sauceRunName) {
     sauceLabs.testName = config.sauceRunName;
   }
-  const capabilities = {
-    browserName: 'firefox',
-    browserVersion: 'latest',
-    platformName: 'Windows 10',
-  }
+
   config.set({
     sauceLabs,
     basePath: '',
@@ -68,7 +63,6 @@ module.exports = (config) => {
     browserDisconnectTolerance: 1,
     browserNoActivityTimeout: 5 * 60 * 1000,
     customLaunchers,
-    capabilities,
     middleware: ['static'],
     static: {
       path: path.join(process.cwd(), ''),
@@ -102,7 +96,7 @@ module.exports = (config) => {
     },
 
     reporters,
-    port: 443,
+    port: 9876,
     colors: true,
     browserConsoleLogOptions: {
       level: 'error',
