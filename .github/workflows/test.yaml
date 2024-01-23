@@ -41,6 +41,11 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm install --legacy-peer-deps
 
+      - name: check node version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: node --version
+
       - name: Unit tests
         env:
           SAUCE_USERNAME: nuxeo-web-ui
