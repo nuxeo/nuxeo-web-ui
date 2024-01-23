@@ -34,17 +34,12 @@ jobs:
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
-          node-version: 18
+          node-version: 14
 
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm install --legacy-peer-deps
-
-      - name: check node version
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: node --version
+        run: npm install
 
       - name: Unit tests
         env:
