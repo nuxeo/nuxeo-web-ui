@@ -108,6 +108,7 @@ Polymer({
       }
 
       .container {
+        min-height: 260px;
         margin: 0 2rem;
         padding: 0;
         display: inline-block;
