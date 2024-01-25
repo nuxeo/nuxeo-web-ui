@@ -177,7 +177,7 @@
     "@polymer/paper-toolbar": "^3.0.1",
     "@polymer/paper-tooltip": "^3.0.1",
     "@polymer/polymer": "^3.5.1",
-    "@wdio/allure-reporter": "^7.32.0",
+    "@wdio/allure-reporter": "^8.29.1",
     "@webcomponents/html-imports": "^1.2.0",
     "aws-sdk": "^2.420.0",
     "dotenv": "^8.0.0",
@@ -193,7 +193,7 @@
     "three": "~0.125.0",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1",
-    "webdriverio": "^8.20.4"
+    "webdriverio": "^8.29.1"
   },
   "husky": {
     "hooks": {
