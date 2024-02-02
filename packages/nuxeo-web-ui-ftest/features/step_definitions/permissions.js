@@ -1,68 +1,90 @@
-import { Given, Then, When } from '@cucumber/cucumber';
+import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
 
-When(/^I give (\w+) permission to "([^"]*)" on the document$/, function(permission, name) {
-  this.ui.browser.permissionsViewButton.waitForVisible();
-  this.ui.browser.permissionsViewButton.click();
-  this.ui.browser.permissionsView.waitForVisible();
-  this.ui.browser.permissionsView.newPermissionButton.waitForVisible();
-  this.ui.browser.permissionsView.newPermissionButton.click();
-  this.ui.browser.permissionsView.setPermissions(name, {
+When(/^I give (\w+) permission to "([^"]*)" on the document$/, async function(permission, name) {
+  const viewButtonEle = await this.ui.browser.permissionsViewButton;
+  await viewButtonEle.waitForVisible();
+  await viewButtonEle.click();
+  const viewEle = await this.ui.browser.permissionsView;
+  await viewEle.waitForVisible();
+  const newPermissionEle = await viewEle.newPermissionButton;
+  await newPermissionEle.waitForVisible();
+  await newPermissionEle.click();
+  await viewEle.setPermissions(name, {
     permission,
     timeFrame: 'permanent',
     notify: false,
   });
-  this.ui.browser.permissionsView.createPermissionButton.waitForVisible();
-  this.ui.browser.permissionsView.createPermissionButton.click();
-  this.ui.browser.permissionsView.permission(permission, name, 'permanent').waitForVisible();
+  const createPermissionEle = await viewEle.createPermissionButton;
+  await createPermissionEle.waitForVisible();
+  await createPermissionEle.click();
+  const viewElement = await this.ui.browser.permissionsView;
+  await viewElement.permission(permission, name, 'permanent');
 });
 
-When(/^I give (\w+) permission on the document to the following users:$/, function(permission, table) {
-  this.ui.browser.permissionsViewButton.waitForVisible();
-  this.ui.browser.permissionsViewButton.click();
-  this.ui.browser.permissionsView.waitForVisible();
-  this.ui.browser.permissionsView.newPermissionButton.waitForVisible();
-  this.ui.browser.permissionsView.newPermissionButton.click();
+When(/^I give (\w+) permission on the document to the following users:$/, async function(permission, table) {
+  const viewButtonEle = await this.ui.browser.permissionsViewButton;
+  await viewButtonEle.waitForVisible();
+  await viewButtonEle.click();
+  const viewEle = await this.ui.browser.permissionsView;
+  await viewEle.waitForVisible();
+  const newPermissionEle = await viewEle.newPermissionButton;
+  await newPermissionEle.waitForVisible();
+  await newPermissionEle.click();
 
-  table.rows().forEach((row) => {
-    this.ui.browser.permissionsView.setPermissions(row[0], {
+  table.rows().forEach(async (row) => {
+    await viewEle.setPermissions(row[0], {
       permission,
       timeFrame: 'permanent',
       notify: false,
     });
   });
 
-  this.ui.browser.permissionsView.createPermissionButton.waitForVisible();
-  this.ui.browser.permissionsView.createPermissionButton.click();
+  const createPermissionEle = await viewEle.createPermissionButton;
+  await createPermissionEle.waitForVisible();
+  await createPermissionEle.click();
 });
 
-Given(/^"([^"]*)" has (\w+) permission on the document$/, function(name, permission) {
-  fixtures.documents.setPermissions(this.doc, permission, name).then((d) => {
+Given(/^"([^"]*)" has (\w+) permission on the document$/, async function(name, permission) {
+  await fixtures.documents.setPermissions(this.doc, permission, name).then((d) => {
     this.doc = d;
   });
 });
 
-Then(/^I can see that "([^"]*)" has the (\w+) permission$/, function(name, permission) {
-  this.ui.browser.permissionsView.permission(permission, name).waitForVisible().should.be.true;
+Then(/^I can see that "([^"]*)" has the (\w+) permission$/, async function(name, permission) {
+  const permissionView = await this.ui.browser.permissionsView;
+  const permissionEle = await permissionView.permission(permission, name);
+  const isVisible = await permissionEle.waitForVisible();
+  isVisible.should.be.true;
 });
 
-When(/^I edit the (\w+) permission on the document for "([^"]*)" to start (\w+)$/, function(permission, name, date) {
-  this.ui.browser.permissionsViewButton.waitForVisible();
-  this.ui.browser.permissionsViewButton.click();
-  this.ui.browser.permissionsView.waitForVisible();
-  this.ui.browser.permissionsView.permission(permission, name).waitForVisible();
-  this.ui.browser.permissionsView.editPermissionButton.waitForVisible();
+When(/^I edit the (\w+) permission on the document for "([^"]*)" to start (\w+)$/, async function(
+  permission,
+  name,
+  date,
+) {
+  const viewButtonEle = this.ui.browser.permissionsViewButton;
+  await viewButtonEle.waitForVisible();
+  await viewButtonEle.click();
+  const viewEle = await this.ui.browser.permissionsView;
+  await viewEle.waitForVisible();
+  const permissionEle = await viewEle.permission(permission, name);
+  await permissionEle.waitForVisible();
+  const editPermissionEle = await viewEle.editPermissionButton;
+  await editPermissionEle.waitForVisible();
   if (date === 'tomorrow') {
     date = new Date();
     date.setDate(date.getDate() + 1);
   }
-  this.ui.browser.permissionsView.editPermissionButton.click();
-  this.ui.browser.permissionsView.waitForVisible();
-  this.ui.browser.permissionsView.editPermissions({
+  await editPermissionEle.click();
+  await viewEle.waitForVisible();
+  await viewEle.editPermissions({
     permission,
     timeFrame: 'datebased',
     begin: date,
     notify: false,
   });
-  this.ui.browser.permissionsView.updatePermissionButton.click();
-  this.ui.browser.permissionsView.permission(permission, name, 'datebased').waitForVisible();
+  const updatePermission = await viewEle.updatePermissionButton;
+  await updatePermission.click();
+  const permitEle = await viewEle.permission(permission, name, 'datebased');
+  await permitEle.waitForVisible();
 });

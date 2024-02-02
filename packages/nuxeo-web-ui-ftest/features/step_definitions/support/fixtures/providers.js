@@ -1,4 +1,4 @@
-import { After } from '@cucumber/cucumber';
+import { After } from '../../../../node_modules/@cucumber/cucumber';
 import nuxeo from '../services/client';
 
 const endPoint = '/oauth2/provider/';
@@ -43,4 +43,6 @@ fixtures.providers = {
       .then(() => delete global.providers[provider]),
 };
 
-After(() => Promise.all(Object.keys(global.providers).map((provider) => fixtures.providers.delete(provider))));
+After(async () =>
+  Promise.all(Object.keys(global.providers).map(async (provider) => fixtures.providers.delete(provider))),
+);

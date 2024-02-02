@@ -1,24 +1,33 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
-When('I click the {string} button', function(button) {
-  return this.ui.drawer.open(button);
+When('I click the {string} button', async function(button) {
+  await driver.pause(2000);
+  const drawer = await this.ui.drawer;
+  const buttonToclick = await drawer.open(button);
+  return buttonToclick;
 });
-When('I select {string} from the View menu', function(option) {
-  return this.ui.view(option);
+
+When('I select {string} from the View menu', async function(option) {
+  const ui = await this.ui;
+  return ui.view(option);
 });
-When('I reload the page', function() {
+When('I reload the page', async function() {
   // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
-  driver.pause(3000);
-  this.ui.reload();
-  $('#logo').waitForVisible();
+  await driver.pause(3000);
+  await this.ui.reload();
+  await $('#logo').waitForVisible();
 });
-Then('I can see {string} in the Activity feed', function(activity) {
+Then('I can see {string} in the Activity feed', async function(activity) {
   // XXX temporary fix for async issue with activity feed; will be fixed when NXP-21771 is tackled
-  driver.pause(3000);
-  this.ui.activityFeed.waitForVisible();
-  this.ui.activityFeed.getActivity(activity).waitForVisible().should.be.true;
+  await driver.pause(10000);
+  const activityFeed = await this.ui.activityFeed;
+  await activityFeed.waitForVisible();
+  const activityTab = await activityFeed.getActivity(activity);
+  const activityTabVisible = await activityTab.waitForVisible();
+  await activityTabVisible.should.be.true;
 });
-Then('I click the blob download button', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.downloadButton.click();
+Then('I click the blob download button', async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  const button = await page.downloadButton;
+  await button.click();
 });
