@@ -1,22 +1,25 @@
 export default class Login {
-  set username(username) {
-    $('#username').waitForDisplayed();
-    $('#username').setValue(username);
+  async username(username) {
+    const inputUserName = await $('#username');
+    await inputUserName.setValue(username);
   }
 
-  set password(password) {
-    $('#password').waitForDisplayed();
-    $('#password').setValue(password);
+  async password(password) {
+    const inputPassword = await $('#password');
+    await inputPassword.setValue(password);
   }
 
-  submit() {
-    $('[name="Submit"]').waitForDisplayed();
-    return $('[name="Submit"]').click();
+  async submit() {
+    const submitButton = await $('[name="Submit"]');
+    await submitButton.click();
   }
 
   static get() {
-    const baseUrl = process.env.NUXEO_URL || '';
-    driver.url(baseUrl ? `${baseUrl}/logout` : 'logout');
-    return new this();
+    return (async () => {
+      const baseUrl = (await process.env.NUXEO_URL) || '';
+      await driver.pause(1000);
+      await browser.url(baseUrl ? `${baseUrl}/logout` : 'logout');
+      return new this();
+    })();
   }
 }
