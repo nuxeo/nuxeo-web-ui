@@ -28,12 +28,10 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
 const { execSync } = require('child_process');
 const chromeLauncher = require('chrome-launcher');
 const fetch = require('node-fetch');
-
-const wdioBin = require.resolve('@wdio/cli/bin/wdio');
+const cli = require('@wdio/cli');
 const argv = require('minimist')(process.argv.slice(2));
 
 const defaultDef = './features/step_definitions';
@@ -116,21 +114,23 @@ if (process.env.DRIVER_VERSION == null) {
   if (match) {
     const checkVersion = match[1];
     try {
-      done = fetch(`https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${checkVersion}`).then((response) => {
-        if (response.ok) {
-          return response
-            .text()
-            .then((newDriverVersion) => {
-              // eslint-disable-next-line no-console
-              console.log(`ChromeDriver ${newDriverVersion} needed.`);
-              process.env.DRIVER_VERSION = newDriverVersion;
-            })
-            .catch((e) => {
-              console.error('unable to parse ChromeDriver version: ', e);
-            });
-        }
-        console.error('unable to fetch ChromeDriver version: ', response);
-      });
+      done = fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then(
+        (response) => {
+          if (response.ok) {
+            return response
+              .text()
+              .then((newDriverVersion) => {
+                // eslint-disable-next-line no-console
+                console.log(`ChromeDriver ${newDriverVersion} needed.`);
+                process.env.DRIVER_VERSION = newDriverVersion;
+              })
+              .catch((e) => {
+                console.error('unable to parse ChromeDriver version: ', e);
+              });
+          }
+          console.error('unable to fetch ChromeDriver version: ', response);
+        },
+      );
     } catch (e) {
       console.error('unable to fetch ChromeDriver version: ', e);
     }
@@ -138,12 +138,14 @@ if (process.env.DRIVER_VERSION == null) {
 }
 
 done.finally(() => {
-  const wdio = spawn('node', [wdioBin, ...args], { env: process.env, stdio: ['inherit', 'pipe', 'pipe'] });
-
-  wdio.stdout.pipe(process.stdout);
-  wdio.stderr.pipe(process.stderr);
-
-  wdio.on('close', (code) => {
-    process.exit(code);
-  });
+  const wdio = new cli.Launcher(args[0]);
+  wdio.run().then(
+    (code) => {
+      process.exit(code);
+    },
+    (error) => {
+      console.error('Launcher failed to start the test', error.stacktrace);
+      process.exit(1);
+    },
+  );
 });

@@ -8,17 +8,30 @@ export default class Search extends Results {
   }
 
   get saveSearchAsButton() {
-    driver.waitForVisible('#actions paper-button');
-    return driver.elements('#actions paper-button').find((e) => e.getText() === 'Save As');
+    return (async () => {
+      const eles = await driver.$('#actions paper-button');
+      await eles.waitForVisible();
+      const buttons = await driver.$$('#actions paper-button');
+      const rowTitles = await driver.$$('#actions paper-button').map((img) => img.getText());
+      const index = rowTitles.findIndex((currenTitle) => currenTitle === 'Save As');
+      const result = await buttons[index];
+      return result;
+    })();
   }
 
   get confirmSaveSearchButton() {
-    driver.waitForVisible('#saveDialog paper-button.primary');
-    return driver.element('#saveDialog paper-button.primary');
+    return (async () => {
+      const ele = await driver.$('#saveDialog paper-button.primary');
+      await ele.waitForVisible();
+      return ele;
+    })();
   }
 
   get menuButton() {
-    return this.el.element('#menuButton');
+    return (async () => {
+      const ele = await this.el;
+      return ele.element('#menuButton');
+    })();
   }
 
   get savedSearchActionButton() {
@@ -26,30 +39,42 @@ export default class Search extends Results {
   }
 
   get shareAction() {
-    driver.waitForVisible('nuxeo-saved-search-actions paper-item');
-    return driver.elements('nuxeo-saved-search-actions paper-item').find((e) => e.getText() === 'Share');
+    return (async () => {
+      const ele = await driver.$('nuxeo-saved-search-actions paper-item');
+      await ele.waitForVisible();
+      const buttons = await driver.$$('nuxeo-saved-search-actions paper-item');
+      const rowTitles = await driver.$$('nuxeo-saved-search-actions paper-item').map((img) => img.getText());
+      const index = rowTitles.findIndex((currenTitle) => currenTitle === 'Share');
+      const result = await buttons[index];
+      return result;
+    })();
   }
 
   get permissionsView() {
     return new DocumentPermissions(`${this._selector} nuxeo-document-permissions`);
   }
 
-  getSavedSearch(savedSearchName) {
-    driver.waitUntil(() => {
-      const els = driver.elements(`${this._selector} #actionsDropdown paper-item`);
-      return els.length > 1;
-    });
-    return this.el.elements('#actionsDropdown paper-item').find((e) => e.getText() === savedSearchName);
+  async getSavedSearch(savedSearchName) {
+    const selector = await this._selector;
+    const els = await driver.elements(`${selector} #actionsDropdown paper-item`);
+    if (els.length > 1) {
+      return els[1];
+    }
+    const ele = await this.el;
+    const dropdownList = await ele.elements('#actionsDropdown paper-item');
+    const dropdownElenent = await dropdownList.find(async (e) => (await e.getText()) === savedSearchName);
+    return dropdownElenent;
   }
 
   enterInput(text) {
     return driver.keys(text);
   }
 
-  getField(field) {
-    driver.waitForExist(this._selector);
-    driver.waitForVisible(this._selector);
-    return this.el.element(`[name="${field}"]`);
+  async getField(field) {
+    await driver.waitForExist(this._selector);
+    await driver.waitForVisible(this._selector);
+    const ele = await this.el.$(`[name="${field}"]`);
+    return ele;
   }
 
   getFieldValue(field) {
@@ -58,29 +83,37 @@ export default class Search extends Results {
     return fixtures.layouts.getValue(fieldEl);
   }
 
-  setFieldValue(field, value) {
-    let fieldEl;
-    driver.waitUntil(() => {
-      fieldEl = this.getField(field);
-      return !!fieldEl;
-    });
-    fieldEl.waitForVisible();
-    fieldEl.scrollIntoView();
+  async setFieldValue(field, value) {
+    const fieldEl = await this.getField(field);
+    await fieldEl.waitForVisible();
+    await fieldEl.scrollIntoView();
     return fixtures.layouts.setValue(fieldEl, value);
   }
 
-  search(searchType, searchTerm) {
+  async search(searchType, searchTerm) {
     if (searchType === 'fulltext') {
-      this.el.element('#searchInput .input-element input').waitForVisible();
-      this.el.element('#searchInput .input-element input').setValue(searchTerm);
-      driver.keys('Enter');
+      const searchInputEle = await this.el.$('#searchInput .input-element input');
+      await searchInputEle.waitForVisible();
+      await searchInputEle.setValue(searchTerm);
+      await driver.keys('Enter');
     } else {
-      this.setFieldValue(searchType, searchTerm);
+      await this.setFieldValue(searchType, searchTerm);
     }
   }
 
-  quickSearchResultsCount() {
-    const rows = this.el.element('#results #selector').elements('a.item');
-    return rows.filter((result) => result.getAttribute('hidden') === null).length;
+  async quickSearchResultsCount() {
+    const ele = await this.el;
+    const selector = await ele.element('#results #selector');
+    const rows = await selector.elements('a.item');
+    let count = 0;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      // eslint-disable-next-line no-await-in-loop
+      const attr = await row.getAttribute('hidden');
+      if (attr === null) {
+        count++;
+      }
+    }
+    return count;
   }
 }

@@ -1,4 +1,4 @@
-import { After } from '@cucumber/cucumber';
+import { After } from '../../../../node_modules/@cucumber/cucumber';
 
 /* global document, localStorage  */
 // cleans up local storage fo the current user

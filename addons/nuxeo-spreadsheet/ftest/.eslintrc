@@ -1,7 +1,0 @@
-{
-  "globals": {
-    "driver": true,
-    "assert": true,
-    "expect": true
-  }
-}

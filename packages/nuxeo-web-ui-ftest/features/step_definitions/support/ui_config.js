@@ -1,4 +1,4 @@
-import { Before } from '@cucumber/cucumber';
+import { Before } from '../../../node_modules/@cucumber/cucumber';
 
 Before((e) => {
   const { tags } = e.pickle;
