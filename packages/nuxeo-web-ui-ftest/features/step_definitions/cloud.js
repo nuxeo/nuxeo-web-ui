@@ -1,4 +1,4 @@
-import { Given, Then, When } from '@cucumber/cucumber';
+import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
 
 Given('provider {string} exists in providers', (provider) =>
   fixtures.providers.create({

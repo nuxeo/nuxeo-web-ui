@@ -1,4 +1,4 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
 When('I click the Nuxeo logo', function() {
   return this.ui.goHome();

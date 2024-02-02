@@ -1,4 +1,4 @@
-import { Then } from '@cucumber/cucumber';
+import { Then } from '../../node_modules/@cucumber/cucumber';
 
 Then('I can see the document belongs to the favorites', function() {
   this.ui.drawer.favorites.hasDocument(this.doc).should.be.true;

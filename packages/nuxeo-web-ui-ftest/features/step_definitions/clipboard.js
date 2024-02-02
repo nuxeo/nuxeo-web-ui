@@ -1,16 +1,18 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
 When('I click remove button for {string} document', function(title) {
   this.ui.drawer.clipboard.waitForVisible();
   this.ui.drawer.clipboard.removeItem(title);
 });
 
-When('I click the clipboard move action', function() {
-  if (!this.ui.drawer.clipboard.isVisible()) {
-    this.ui.drawer.open('clipboard');
+When('I click the clipboard move action', async function() {
+  const isClipboarVisible = await this.ui.drawer.clipboard.isVisible();
+  if (!isClipboarVisible) {
+    const draw = this.ui.drawer;
+    await draw.open('clipboard');
   }
-  this.ui.waitForToastNotVisible();
-  this.ui.drawer.clipboard.move();
+  await this.ui.waitForToastNotVisible();
+  await this.ui.drawer.clipboard.move();
 });
 
 When('I click the clipboard paste action', function() {

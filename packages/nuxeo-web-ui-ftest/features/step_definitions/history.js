@@ -1,4 +1,4 @@
-import { Then } from '@cucumber/cucumber';
+import { Then } from '../../node_modules/@cucumber/cucumber';
 
 Then('I can see the history table', function() {
   this.ui.historyTable.isHistoryTableVisible.should.be.true;

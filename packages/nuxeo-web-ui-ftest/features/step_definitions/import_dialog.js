@@ -1,4 +1,4 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Then, When } from '../../node_modules/@cucumber/cucumber';
 
 When('I click on Add Properties button', function() {
   this.ui.createDialog.addProperties.waitForVisible();

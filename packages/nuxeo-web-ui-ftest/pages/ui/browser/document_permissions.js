@@ -1,8 +1,12 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 
 export default class DocumentPermissions extends BasePage {
   get newPermissionButton() {
-    return this.el.element('#localPermissions #newPermissionButton');
+    return (async () => {
+      const ele = await this.el;
+      return ele.element('#localPermissions #newPermissionButton');
+    })();
   }
 
   get createPermissionButton() {
@@ -18,28 +22,32 @@ export default class DocumentPermissions extends BasePage {
   }
 
   get timeFrameButton() {
-    return this.el.element('paper-radio-button #radioContainer');
+    return (async () => {
+      const ele = await this.el;
+      return ele.element('paper-radio-button #radioContainer');
+    })();
   }
 
-  permission(permission, name, timeFrame) {
-    return driver.waitUntil(() => {
-      const rows = this.el.elements('div.acl-table-row');
-      return rows.find((row) => {
-        const nameCheck = name ? row.isExisting(`span.user[title="${name} - ${name}@test.com"]`) : true;
-        const permissionCheck = permission ? !!row.hasElementByTextContent('span.label', permission) : true;
-        // XXX should rely on a class or column header name
-        const timeFrameCheck = timeFrame ? !!row.hasElementByTextContent('span', permission) : true;
-        return nameCheck && permissionCheck && timeFrameCheck;
-      });
-    });
-  }
-
-  getField(field) {
-    this.el.waitForVisible();
-    if (field === 'begin' || field === 'end') {
-      return this.el.element(`[id="${field}"]`);
+  async permission(permission, name, timeFrame) {
+    const ele = await this.el;
+    const rows = await ele.elements('div.acl-table-row');
+    for (let i = 0; i < rows.length; i++) {
+      const nameCheck = name ? await rows[i].isExisting(`span.user[title="${name} - ${name}@test.com"]`) : true;
+      const permissionCheck = permission ? await !!rows[i].hasElementByTextContent('span.label', permission) : true;
+      // XXX should rely on a class or column header name
+      const timeFrameCheck = timeFrame ? await !!rows[i].hasElementByTextContent('span', permission) : true;
+      return nameCheck && permissionCheck && timeFrameCheck;
     }
-    return this.el.element(`[name="${field}"]`);
+    return false;
+  }
+
+  async getField(field) {
+    const ele = await this.el;
+    await ele.waitForVisible();
+    if (field === 'begin' || field === 'end') {
+      return ele.element(`[id="${field}"]`);
+    }
+    return ele.element(`[name="${field}"]`);
   }
 
   getEditField(field) {
@@ -50,10 +58,11 @@ export default class DocumentPermissions extends BasePage {
     return this.el.element(`nuxeo-document-acl-table nuxeo-popup-permission [name="${field}"]`);
   }
 
-  setFieldValue(field, value) {
-    const fieldEl = this.getField(field);
-    fieldEl.waitForVisible();
-    return fixtures.layouts.setValue(fieldEl, value);
+  async setFieldValue(field, value) {
+    const fieldEl = await this.getField(field);
+    await fieldEl.waitForVisible();
+    const ret = await fixtures.layouts.setValue(fieldEl, value);
+    return ret;
   }
 
   editFieldValue(field, value) {
@@ -62,7 +71,7 @@ export default class DocumentPermissions extends BasePage {
     return fixtures.layouts.setValue(fieldEl, value);
   }
 
-  setPermissions(name, opts) {
+  async setPermissions(name, opts) {
     opts = opts || {};
     const permission = opts.permission || '';
     const timeFrame = opts.timeFrame || '';
@@ -70,17 +79,18 @@ export default class DocumentPermissions extends BasePage {
     const end = opts.end || '';
     const { notify } = opts;
     if (name) {
-      this.setFieldValue('userGroup', name);
+      await this.setFieldValue('userGroup', name);
     }
-    this.setFieldValue('right', permission);
-    this.timeFrameButton.click();
+    await this.setFieldValue('right', permission);
+    const timeButton = await this.timeFrameButton;
+    await timeButton.click();
     if (timeFrame === 'datebased') {
-      this.setFieldValue('begin', begin);
+      await this.setFieldValue('begin', begin);
       if (end) {
-        this.setFieldValue('end', end);
+        await this.setFieldValue('end', end);
       }
     }
-    this.setFieldValue('notify', notify);
+    await this.setFieldValue('notify', notify);
   }
 
   editPermissions(opts) {

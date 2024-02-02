@@ -2,12 +2,23 @@ import BasePage from '../../base';
 
 export default class Audit extends BasePage {
   get isAuditTableDisplayed() {
-    return this.el.$('#table').waitForDisplayed();
+    return (async () => {
+      const tableEl = this.el.$('#table').waitForDisplayed();
+      return tableEl;
+    })();
   }
 
   get isAuditTableFilled() {
-    this.el.waitForDisplayed('#table nuxeo-data-table-row');
-    return !this.el.$$('#table nuxeo-data-table-row').some((row) => row.getText().trim().length === 0);
+    return (async () => {
+      const element = await this.el;
+      const tableRow = await element.$$('#table nuxeo-data-table-row');
+      return !(
+        tableRow.some(async (row) => {
+          const text = await row.getText();
+          return text.trim().length;
+        }) === 0
+      );
+    })();
   }
 
   waitForHasEntry(action, reverse) {

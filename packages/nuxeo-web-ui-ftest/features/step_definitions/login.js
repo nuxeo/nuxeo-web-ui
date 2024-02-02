@@ -1,4 +1,4 @@
-import { Given, Then, When } from '@cucumber/cucumber';
+import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
 import Login from '../../pages/login';
 import UI from '../../pages/ui';
 import { url } from '../../pages/helpers';
@@ -28,14 +28,15 @@ Given('user {string} exists', (username) =>
   }),
 );
 
-When('I login as {string}', function(username) {
-  const login = Login.get();
-  login.username = username;
-  login.password = users[username];
-  login.submit();
+When('I login as {string}', async function(username) {
+  const logIn = Login.get();
+  await logIn.username(username);
+  const password = users[username];
+  await logIn.password(password);
+  await logIn.submit();
   this.username = username;
   this.ui = UI.get();
-  driver.waitForVisible('nuxeo-page');
+  await this.ui.waitForVisible('nuxeo-page');
 });
 
 When(/^I visit (.*)$/, (path) => url(path));

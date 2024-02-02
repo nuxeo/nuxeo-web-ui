@@ -1,197 +1,197 @@
-name: Preview
+# name: Preview
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled]
-    branches:
-      - maintenance-3.0.x
+# on:
+#   pull_request:
+#     types: [opened, synchronize, reopened, labeled]
+#     branches:
+#       - maintenance-3.0.x
 
-  workflow_dispatch:
-    inputs:
-      branch_name:
-        description: 'The name of the branch to preview.'
-        default: 'maintenance-3.0.x'
-        required: true
-      caller_id:
-        description: 'run identifier'
-        default: 'maintenance-3.0.x'
-        type: string
-        required: false
+#   workflow_dispatch:
+#     inputs:
+#       branch_name:
+#         description: 'The name of the branch to preview.'
+#         default: 'maintenance-3.0.x'
+#         required: true
+#       caller_id:
+#         description: 'run identifier'
+#         default: 'maintenance-3.0.x'
+#         type: string
+#         required: false
 
-env:
-  DOCKER_REGISTRY: us-east1-docker.pkg.dev
-  DOCKER_IMAGE: ${{ secrets.GKE_PROJECT }}/webui/nuxeo-web-ui
-  GKE_CLUSTER: jx-prod
-  GKE_ZONE: us-east1-b
+# env:
+#   DOCKER_REGISTRY: us-east1-docker.pkg.dev
+#   DOCKER_IMAGE: ${{ secrets.GKE_PROJECT }}/webui/nuxeo-web-ui
+#   GKE_CLUSTER: jx-prod
+#   GKE_ZONE: us-east1-b
 
-jobs:
-  id:
-    name: Remote Caller ID ${{ github.event.inputs.caller_id }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: ${{ github.event.inputs.id }}
-        run: echo run identifier ${{ github.event.inputs.id }}
-  preview:
-    needs: id
-    name: Setup
-    outputs:
-      url: ${{ steps.preview.outputs.url }}
-    if: (github.event.action == 'labeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 14
-          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
-          scope: '@nuxeo'
+# jobs:
+#   id:
+#     name: Remote Caller ID ${{ github.event.inputs.caller_id }}
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: ${{ github.event.inputs.id }}
+#         run: echo run identifier ${{ github.event.inputs.id }}
+#   preview:
+#     needs: id
+#     name: Setup
+#     outputs:
+#       url: ${{ steps.preview.outputs.url }}
+#     if: (github.event.action == 'labeled' && github.event.label.name == 'preview') || contains(github.event.pull_request.labels.*.name, 'preview') || github.event_name == 'workflow_dispatch'
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/setup-node@v3
+#         with:
+#           node-version: 18
+#           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+#           scope: '@nuxeo'
 
-      - name: Setup branch name (pull_request)
-        if: github.event_name == 'pull_request'
-        run: |
-          BRANCH_NAME=${GITHUB_HEAD_REF##*/}
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+#       - name: Setup branch name (pull_request)
+#         if: github.event_name == 'pull_request'
+#         run: |
+#           BRANCH_NAME=${GITHUB_HEAD_REF##*/}
+#           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
-      - name: Setup branch name (workflow_dispatch)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          BRANCH_NAME=${{ github.event.inputs.branch_name }}
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+#       - name: Setup branch name (workflow_dispatch)
+#         if: github.event_name == 'workflow_dispatch'
+#         run: |
+#           BRANCH_NAME=${{ github.event.inputs.branch_name }}
+#           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
-      - name: Determine nuxeo-web-ui branch to use
-        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
-        id: pick_nuxeo_web_ui_branch
-        with:
-          repository: nuxeo/nuxeo-web-ui
-          branch: ${BRANCH_NAME}
-          default-branch: maintenance-3.0.x
+#       - name: Determine nuxeo-web-ui branch to use
+#         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
+#         id: pick_nuxeo_web_ui_branch
+#         with:
+#           repository: nuxeo/nuxeo-web-ui
+#           branch: ${BRANCH_NAME}
+#           default-branch: maintenance-3.0.x
 
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
+#       - uses: actions/checkout@v3
+#         with:
+#           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
-      - name: Prepare environment
-        run: |
-          echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME" >> $GITHUB_ENV
-          echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
+#       - name: Prepare environment
+#         run: |
+#           echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME" >> $GITHUB_ENV
+#           echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
 
-      - name: Determine nuxeo-elements branch to use
-        id: pick_nuxeo_elements_branch
-        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
-        with:
-          repository: nuxeo/nuxeo-elements
-          branch: ${BRANCH_NAME}
-          default-branch: maintenance-3.0.x
+#       - name: Determine nuxeo-elements branch to use
+#         id: pick_nuxeo_elements_branch
+#         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
+#         with:
+#           repository: nuxeo/nuxeo-elements
+#           branch: ${BRANCH_NAME}
+#           default-branch: maintenance-3.0.x
 
-      - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-elements
-          path: nuxeo-elements
-          fetch-depth: 1
-          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+#       - name: Checkout the nuxeo-elements repo
+#         uses: actions/checkout@v2
+#         with:
+#           repository: nuxeo/nuxeo-elements
+#           path: nuxeo-elements
+#           fetch-depth: 1
+#           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
 
-      - name: Install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          npm install nuxeo-elements/core
-          npm install nuxeo-elements/ui
-          npm install nuxeo-elements/dataviz
-          npm install
+#       - name: Install
+#         env:
+#           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#         run: |
+#           npm install nuxeo-elements/core
+#           npm install nuxeo-elements/ui
+#           npm install nuxeo-elements/dataviz
+#           npm install
 
-      - name: Webpack build
-        run: |
-          npm run build
+#       - name: Webpack build
+#         run: |
+#           npm run build
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v1
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.DOCKER_REGISTRY }}
-          username: _json_key
-          password: ${{ secrets.GKE_SA_KEY }}
+#       - name: Login to DockerHub
+#         uses: docker/login-action@v1
+#         with:
+#           registry: ${{ env.DOCKER_REGISTRY }}
+#           username: _json_key
+#           password: ${{ secrets.GKE_SA_KEY }}
 
-      - name: Build and push server image
-        uses: docker/build-push-action@v2
-        with:
-          context: server
-          pull: true
-          push: true
-          file: server/Dockerfile
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
+#       - name: Build and push server image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: server
+#           pull: true
+#           push: true
+#           file: server/Dockerfile
+#           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
 
-      - name: Build and push image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          pull: true
-          push: true
-          file: Dockerfile
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
-          build-args: SERVER_IMAGE=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
+#       - name: Build and push image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: .
+#           pull: true
+#           push: true
+#           file: Dockerfile
+#           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+#           build-args: SERVER_IMAGE=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
 
-      - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v0.2.1
-        with:
-          cluster_name: ${{ env.GKE_CLUSTER }}
-          location: ${{ env.GKE_ZONE }}
-          project_id: ${{ secrets.GKE_PROJECT }}
-          credentials: ${{ secrets.GKE_SA_KEY }}
+#       - name: Get GKE credentials
+#         uses: google-github-actions/get-gke-credentials@v0.2.1
+#         with:
+#           cluster_name: ${{ env.GKE_CLUSTER }}
+#           location: ${{ env.GKE_ZONE }}
+#           project_id: ${{ secrets.GKE_PROJECT }}
+#           credentials: ${{ secrets.GKE_SA_KEY }}
 
-      - name: Check preview namespace
-        id: preview_ns
-        run: |
-          echo ::set-output name=exists::$(kubectl get namespace ${PREVIEW_NAMESPACE})
+#       - name: Check preview namespace
+#         id: preview_ns
+#         run: |
+#           echo ::set-output name=exists::$(kubectl get namespace ${PREVIEW_NAMESPACE})
 
-      - name: Create preview namespace
-        if: ${{ !steps.preview_ns.outputs.exists }}
-        run: |
-          kubectl create namespace ${PREVIEW_NAMESPACE}
+#       - name: Create preview namespace
+#         if: ${{ !steps.preview_ns.outputs.exists }}
+#         run: |
+#           kubectl create namespace ${PREVIEW_NAMESPACE}
 
-      - name: Install preview
-        id: preview
-        working-directory: ./charts/preview
-        run: |
-          # add helm jx repo
-          helm repo add jx https://jenkins-x-charts.github.io/v2/
+#       - name: Install preview
+#         id: preview
+#         working-directory: ./charts/preview
+#         run: |
+#           # add helm jx repo
+#           helm repo add jx https://jenkins-x-charts.github.io/v2/
 
-          # substitute env variables in values.yaml
-          mv values.yaml values.yaml.tosubst
-          envsubst < values.yaml.tosubst > values.yaml
+#           # substitute env variables in values.yaml
+#           mv values.yaml values.yaml.tosubst
+#           envsubst < values.yaml.tosubst > values.yaml
 
-          # update helm deps
-          helm dependency update .
+#           # update helm deps
+#           helm dependency update .
 
-          # install
-          helm upgrade --install --namespace ${PREVIEW_NAMESPACE} ${PREVIEW_NAMESPACE} .
+#           # install
+#           helm upgrade --install --namespace ${PREVIEW_NAMESPACE} ${PREVIEW_NAMESPACE} .
 
-          # ensure the deployment is restarted to pull the new preview image
-          kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
+#           # ensure the deployment is restarted to pull the new preview image
+#           kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
           
-          echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
+#           echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
 
-          echo ::set-output name=url::"https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com"
+#           echo ::set-output name=url::"https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com"
 
-      - uses: actions/github-script@0.9.0
-        if: github.event_name == 'pull_request'
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `:star: PR built and available [here](${process.env.PREVIEW_URL})`
-            })
+#       - uses: actions/github-script@0.9.0
+#         if: github.event_name == 'pull_request'
+#         with:
+#           github-token: ${{ secrets.GITHUB_TOKEN }}
+#           script: |
+#             github.issues.createComment({
+#               issue_number: context.issue.number,
+#               owner: context.repo.owner,
+#               repo: context.repo.repo,
+#               body: `:star: PR built and available [here](${process.env.PREVIEW_URL})`
+#             })
 
-  result:
-    name: "Result: ${{ needs.preview.outputs.url }}"
-    needs: preview
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - name: "Result: ${{ needs.preview.outputs.url }}"
-        run: |
-          echo ${{ needs.preview.outputs.url }}
+#   result:
+#     name: "Result: ${{ needs.preview.outputs.url }}"
+#     needs: preview
+#     runs-on: ubuntu-latest
+#     if: github.event_name == 'workflow_dispatch'
+#     steps:
+#       - name: "Result: ${{ needs.preview.outputs.url }}"
+#         run: |
+#           echo ${{ needs.preview.outputs.url }}

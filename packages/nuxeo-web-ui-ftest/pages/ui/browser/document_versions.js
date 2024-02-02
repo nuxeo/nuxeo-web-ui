@@ -2,82 +2,98 @@ import BasePage from '../../base';
 
 export default class DocumentVersions extends BasePage {
   get createVersionButton() {
-    return this.el.element('nuxeo-document-create-version');
+    return this.el.$('nuxeo-document-create-version');
   }
 
   get dialog() {
-    if (this.list.isVisible()) {
-      return this.el.element('nuxeo-document-versions-list nuxeo-document-create-version #dialog:not([aria-hidden])');
-    }
-    return this.el.element('nuxeo-document-create-version #dialog:not([aria-hidden])');
+    return (async () => {
+      if (await this.list.isVisible()) {
+        return this.el.$('nuxeo-document-versions-list nuxeo-document-create-version #dialog:not([aria-hidden])');
+      }
+      return this.el.$('nuxeo-document-create-version #dialog:not([aria-hidden])');
+    })();
   }
 
   get dialogMajorOption() {
-    return this.dialog.element('paper-radio-button[name="major"]');
+    return (async () => {
+      const dialog = await this.dialog;
+      const element = await dialog.$('paper-radio-button[name="major"]');
+      return element;
+    })();
   }
 
   get dialogMinorOption() {
-    return this.dialog.element('paper-radio-button[name="minor"]');
+    return this.dialog.$('paper-radio-button[name="minor"]');
   }
 
   get dialogNextMajor() {
-    return this.dialog.element('#nextMajor');
+    return this.dialog.$('#nextMajor');
   }
 
   get dialogNextMinor() {
-    return this.dialog.element('#nextMinor');
+    return this.dialog.$('#nextMinor');
   }
 
   get dialogDismissButton() {
-    return this.dialog.element('paper-button[dialog-dismiss]');
+    return this.dialog.$('paper-button[dialog-dismiss]');
   }
 
   get dialogConfirmButton() {
-    return this.dialog.element('paper-button[dialog-confirm]');
+    return (async () => {
+      const dialog = await this.dialog;
+      const element = await dialog.$('paper-button[dialog-confirm]');
+      return element;
+    })();
   }
 
   get toggle() {
-    return this.el.element('nuxeo-tag.toggle');
+    return (async () => {
+      const ele = await this.el;
+      const toggleElement = await ele.$('nuxeo-tag.toggle');
+      return toggleElement;
+    })();
   }
 
   get list() {
-    return this.el.element('nuxeo-document-versions-list');
+    return this.el.$('nuxeo-document-versions-list');
   }
 
   get listCreateVersionButton() {
-    return this.list.element('nuxeo-document-create-version');
+    return this.list.$('nuxeo-document-create-version');
   }
 
   get listCount() {
-    return this.list.elements('div[name="version-item"]').length;
+    return this.list.$$('div[name="version-item"]').length;
   }
 
   get listItems() {
-    return this.list.element('#list-items');
+    return this.list.$('#list-items');
   }
 
   listItem(index) {
-    return this.list.element(`#version-id-${index}`);
+    return this.list.$(`#version-id-${index}`);
   }
 
   listItemTitle(index) {
-    return this.list.element(`#version-id-${index}.title`);
+    return this.list.$(`#version-id-${index}.title`);
   }
 
-  selectVersion(label) {
-    if (this.toggle.getText().trim() === label) {
+  async selectVersion(label) {
+    const toggleElement = await this.toggle;
+    const text = await toggleElement.getText();
+    if ((await text.trim()) === label) {
       return true;
     }
-    this.listItems.waitForVisible('div[name="version-item"] .title');
-    const items = this.listItems.elements('div[name="version-item"]');
-    const version = items.find((item) => {
-      const foundLabel = item.getText('.title').trim();
-      return foundLabel === label;
-    });
-    if (!version) {
+    const listItems = await this.listItems;
+    await listItems.$('div[name="version-item"] .title').waitForVisible();
+    const listItems1 = await this.listItems.$$('div[name="version-item"]');
+    const itemsTitle = await browser.$$('div[name="version-item"]').map((img) => img.$('.title').getText());
+    const index = itemsTitle.findIndex((currenTitle) => currenTitle === label);
+    if (index === -1) {
       throw Error(`Could not find version ${label}`);
     }
-    version.waitForVisible();
-    version.click();
+    const version = await listItems1[index];
+    await version.waitForVisible();
+    await version.click();
   }
 }

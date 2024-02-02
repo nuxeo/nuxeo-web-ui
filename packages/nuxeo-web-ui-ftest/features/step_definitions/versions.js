@@ -1,4 +1,4 @@
-import { When } from '@cucumber/cucumber';
+import { When } from '../../node_modules/@cucumber/cucumber';
 
 When(/^I can see the version info bar with text "(.*)"$/, function(text) {
   const page = this.ui.browser.documentPage(this.doc.type);
@@ -7,28 +7,31 @@ When(/^I can see the version info bar with text "(.*)"$/, function(text) {
   page.versionInfoBar.getText().should.equal(text);
 });
 
-When(/^The document is unversioned$/, function() {
+When(/^The document is unversioned$/, async function() {
   const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.createVersionButton.waitForVisible();
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const createVersionBtn = await page.versions.createVersionButton;
+  await createVersionBtn.waitForVisible();
 });
 
-When(/^I click the Create Version button$/, function() {
+When(/^I click the Create Version button$/, async function() {
   const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.createVersionButton.waitForVisible();
-  page.versions.createVersionButton.click();
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const createVersionBtn = await page.versions.createVersionButton;
+  await createVersionBtn.waitForVisible();
+  await createVersionBtn.click();
 });
 
-When(/^The create version dialog appears$/, function() {
+When(/^The create version dialog appears$/, async function() {
   const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.dialog.waitForVisible();
-  page.versions.dialog.waitForVisible('paper-button[dialog-dismiss]');
-  page.versions.dialog.waitForVisible('paper-button[dialog-confirm]');
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const pageVersionDialog = await page.versions.dialog;
+  await pageVersionDialog.waitForVisible();
+  await pageVersionDialog.waitForVisible('paper-button[dialog-dismiss]');
+  await pageVersionDialog.waitForVisible('paper-button[dialog-confirm]');
 });
 
 When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, function(v1, v2, v3, v4) {
@@ -40,23 +43,29 @@ When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, function(v
   page.versions.dialogNextMajor.getText().should.equal(`${v3}.${v4}`);
 });
 
-When(/^I create a (major|minor) version$/, function(versionType) {
+When(/^I create a (major|minor) version$/, async function(versionType) {
   const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.versions.waitForVisible();
-  page.versions.dialog.waitForVisible();
+  await page.waitForVisible();
+  await page.versions.waitForVisible();
+  const pageVersionDialog = await page.versions.dialog;
+  await pageVersionDialog.waitForVisible();
   switch (versionType) {
-    case 'major':
-      page.versions.dialogMajorOption.click();
+    case 'major': {
+      const dialogMajorOpt = await page.versions.dialogMajorOption;
+      await dialogMajorOpt.click();
       break;
-    case 'minor':
-      page.versions.dialogMinorOption.click();
+    }
+    case 'minor': {
+      const dialogMinorOpt = await page.versions.dialogMinorOption;
+      await dialogMinorOpt.click();
       break;
+    }
     default:
     // do nothing
   }
-  page.versions.dialogConfirmButton.waitForVisible();
-  page.versions.dialogConfirmButton.click();
+  const dialogConfirmBtn = await page.versions.dialogConfirmButton;
+  await dialogConfirmBtn.waitForVisible();
+  await dialogConfirmBtn.click();
 });
 
 When(/^The document version is ([^"]*)$/, function(label) {
