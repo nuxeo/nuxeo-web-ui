@@ -114,9 +114,9 @@ if (process.env.DRIVER_VERSION == null) {
   console.log(`${version} detected.`);
   const match = version && version.match(/([0-9]+)\./);
   if (match) {
-    const checkVersion = match[1];
+    // const checkVersion = match[1];
     try {
-      done = fetch(`https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${checkVersion}`).then((response) => {
+      done = fetch(`https://chromedriver.storage.googleapis.com/LATEST_RELEASE`).then((response) => {
         if (response.ok) {
           return response
             .text()
