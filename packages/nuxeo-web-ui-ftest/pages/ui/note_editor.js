@@ -7,34 +7,44 @@ export default class NoteEditor extends BasePage {
   }
 
   get textarea() {
-    return this.el.element('#textarea');
+    return this.el.$('#textarea');
   }
 
   get editButton() {
-    return this.el.element('#editNote');
+    return (async () => {
+      const editButton = await this.el.element('#editNote');
+      return editButton;
+    })();
   }
 
-  hasContent(content) {
-    const editor = this.el.element('#editor');
-    editor.waitForVisible();
-    driver.waitUntil(() => {
-      try {
-        return editor.getHTML(false) === content;
-      } catch (e) {
-        return false;
-      }
-    }, 'The editor does not have such content');
+  async hasContent(content) {
+    const editor = await this.el.element('#editor');
+    await editor.waitForVisible();
+    await driver.waitUntil(
+      async () => {
+        try {
+          const result = (await editor.getHTML(false)) === content;
+          return result;
+        } catch (e) {
+          return false;
+        }
+      },
+      {
+        timeoutMsg: 'The editor does not have such content',
+      },
+    );
     return true;
   }
 
-  edit() {
-    this.editButton.waitForVisible();
-    this.editButton.click();
+  async edit() {
+    const editButtonEle = await this.editButton;
+    await editButtonEle.waitForVisible();
+    await editButtonEle.click();
   }
 
-  save() {
-    const button = this.el.element('paper-button[name="editorSave"]');
-    button.waitForVisible();
-    button.click();
+  async save() {
+    const button = await this.el.$('paper-button[name="editorSave"]');
+    await button.waitForVisible();
+    await button.click();
   }
 }

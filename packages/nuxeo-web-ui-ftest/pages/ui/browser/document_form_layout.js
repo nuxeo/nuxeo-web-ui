@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 import DocumentLayout from './document_layout';
 
@@ -9,7 +10,7 @@ export default class DocumentFormLayout extends BasePage {
   }
 
   set title(title) {
-    return this.el.element('.input-element input').setValue(title);
+    return this.el.$('.input-element input').setValue(title);
   }
 
   get layout() {
@@ -17,12 +18,21 @@ export default class DocumentFormLayout extends BasePage {
   }
 
   get errorMessages() {
-    return this.el.elements('#error .error').map((errorElt) => errorElt.getText());
+    return (async () => {
+      const errorElements = await this.el.elements('#error .error');
+      const errorTexts = [];
+      for (let i = 0; i < errorElements.length; i++) {
+        const errorElement = errorElements[i];
+        const errorText = await errorElement.getText();
+        errorTexts.push(errorText);
+      }
+      return errorTexts;
+    })();
   }
 
-  save() {
-    const button = this.el.element('.actions #save');
-    button.waitForVisible();
-    button.click();
+  async save() {
+    const button = await this.el.element('.actions #save');
+    await button.waitForVisible();
+    await button.click();
   }
 }

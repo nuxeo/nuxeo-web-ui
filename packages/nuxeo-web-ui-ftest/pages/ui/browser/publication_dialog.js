@@ -2,48 +2,43 @@ import BasePage from '../../base';
 import DocumentVersions from './document_versions';
 
 export default class PublicationDialog extends BasePage {
-  publish(target, rendition, version, override) {
+  async publish(target, rendition, version, override) {
     // set target
-    this.waitForVisible('#target');
-    // XXX some times #target gets stale somewhere in between fetching it and setting the value...
-    driver.waitUntil(() => {
-      try {
-        const targetSelect = this.el.element('#target');
-        fixtures.layouts.setValue(targetSelect, target);
-        return true;
-      } catch (e) {
-        return false;
-      }
-    });
+    const targetSelect = await this.el.$('#target');
+    await targetSelect.waitForVisible();
+    await fixtures.layouts.setValue(targetSelect, target);
     // set rendition
     if (rendition) {
-      const renditionSelect = this.el.element('#rendition');
-      fixtures.layouts.setValue(renditionSelect, rendition);
+      const renditionSelect = await this.el.$('#rendition');
+      await fixtures.layouts.setValue(renditionSelect, rendition);
     }
     // set version
     if (version) {
       const versionsList = new DocumentVersions(`${this._selector} #version`);
-      versionsList.toggle.waitForVisible();
-      versionsList.toggle.click();
-      versionsList.list.waitForVisible();
-      versionsList.selectVersion(version);
+      const versionListToggle = await versionsList.toggle;
+      await versionListToggle.waitForVisible();
+      await versionListToggle.click();
+      const list = await versionsList.list;
+      await list.waitForVisible();
+      await versionsList.selectVersion(version);
       // XXX we need to wait for the version to change, otherwise we could be sending the wrong version
-      versionsList.waitForVisible('.toggle-text');
-      driver.waitUntil(() => {
-        try {
-          return versionsList.el.element('.toggle-text').getText() === version;
-        } catch (e) {
-          return false;
-        }
-      });
+      const ele = await versionsList.el.$('.toggle-text');
+      await driver.pause(2000);
+      await ele.waitForVisible();
+      const outputText = await ele.getText();
+      if (outputText !== version) {
+        throw Error(`Could not find version ${version}`);
+      }
     }
     if (override) {
-      const overrideCheckbox = this.el.element('#override');
-      fixtures.layouts.setValue(overrideCheckbox, true);
+      const overrideCheckbox = await this.el.$('#override');
+      await fixtures.layouts.setValue(overrideCheckbox, true);
     }
-    this.el.waitForEnabled('#publish');
-    this.el.click('#publish');
-    return driver.waitForVisible('iron-overlay-backdrop', driver.options.waitForTimeout, true);
+    await this.el.waitForEnabled('#publish');
+    const ele = await this.el.$('#publish');
+    await ele.click();
+    const result = await driver.waitForVisible('iron-overlay-backdrop', 30000, true);
+    return result;
   }
 
   waitForVisible() {

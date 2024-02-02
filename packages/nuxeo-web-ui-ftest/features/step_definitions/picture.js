@@ -1,7 +1,11 @@
-import { Then } from '@cucumber/cucumber';
+import { Then } from '../../node_modules/@cucumber/cucumber';
 
-Then('I can see the picture formats panel', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.el.$('.additional').waitForVisible('nuxeo-picture-formats').should.be.true;
+Then('I can see the picture formats panel', async function() {
+  const uiBrowser = await this.ui.browser;
+  const page = await uiBrowser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const additionalPage = await page.el.element('.additional');
+  await additionalPage.waitForVisible();
+  const pageElement = await additionalPage.waitForVisible('nuxeo-picture-formats');
+  await pageElement.should.be.true;
 });

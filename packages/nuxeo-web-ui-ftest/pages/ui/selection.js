@@ -4,38 +4,50 @@ import PublicationDialog from './browser/publication_dialog';
 import { clickActionMenu } from '../helpers';
 
 export default class Selection extends BasePage {
-  addToClipboard() {
-    this.el.element('nuxeo-clipboard-documents-button').click();
-    this.waitForNotVisible();
+  async addToClipboard() {
+    const button = await this.el.element('nuxeo-clipboard-documents-button');
+    await button.click();
+    await this.waitForNotVisible();
   }
 
   get addDocumentsToCollectionButton() {
-    return this.el.element('nuxeo-add-to-collection-documents-button');
+    return (async () => {
+      const thisEle = await this.el;
+      const documentsButtonEle = await thisEle.$('nuxeo-add-to-collection-documents-button');
+      return documentsButtonEle;
+    })();
   }
 
   get addToCollectionDialog() {
-    const button = this.addDocumentsToCollectionButton;
-    button.waitForVisible();
-    if (!button.isExisting('#dialog') || !button.isVisible('#dialog')) {
-      button.click();
-    }
-    const dialog = new AddToCollectionDialog(`${this._selector} nuxeo-add-to-collection-documents-button #dialog`);
-    dialog.waitForVisible();
-    return dialog;
+    return (async () => {
+      const button = await this.addDocumentsToCollectionButton;
+      await button.waitForVisible();
+
+      if (!(await button.isExisting('#dialog')) || !(await button.isVisible('#dialog'))) {
+        await button.click();
+      }
+      const dialog = new AddToCollectionDialog(
+        `${await this._selector} nuxeo-add-to-collection-documents-button #dialog`,
+      );
+      await dialog.waitForVisible();
+      return dialog;
+    })();
   }
 
-  moveDown() {
-    this.el.waitForVisible('nuxeo-move-documents-down-button');
-    this.el.element('nuxeo-move-documents-down-button').click();
+  async moveDown() {
+    await this.el.waitForVisible('nuxeo-move-documents-down-button');
+    const ele = await this.el.element('nuxeo-move-documents-down-button');
+    await ele.click();
   }
 
-  moveUp() {
-    this.el.waitForVisible('nuxeo-move-documents-up-button');
-    this.el.element('nuxeo-move-documents-up-button').click();
+  async moveUp() {
+    await this.el.waitForVisible('nuxeo-move-documents-up-button');
+    const ele = await this.el.element('nuxeo-move-documents-up-button');
+    await ele.click();
   }
 
-  trashDocuments() {
-    this.clickResultsActionMenu('nuxeo-delete-documents-button');
+  async trashDocuments() {
+    await this.clickResultsActionMenu('nuxeo-delete-documents-button');
   }
 
   get trashDocumentsButton() {
@@ -47,16 +59,21 @@ export default class Selection extends BasePage {
   }
 
   get publishDialog() {
-    if (!this.el.isExisting('#publishDialog') || !this.el.isVisible('#publishDialog')) {
-      this.clickResultsActionMenu('nuxeo-publish-button');
-    }
-    const publishDialog = new PublicationDialog(`${this._selector} #publishDialog`);
-    publishDialog.waitForVisible();
-    return publishDialog;
+    return (async () => {
+      const elementIsExisting = await this.el.isExisting('#publishDialog');
+      const elementIsVisible = await this.el.isVisible('#publishDialog');
+      if ((await !elementIsExisting) || (await !elementIsVisible)) {
+        await this.clickResultsActionMenu('nuxeo-publish-button');
+      }
+      const publishDialog = new PublicationDialog(`${this._selector} #publishDialog`);
+      await publishDialog.waitForVisible();
+      return publishDialog;
+    })();
   }
 
-  clickResultsActionMenu(selector) {
-    clickActionMenu(this.el, selector);
+  async clickResultsActionMenu(selector) {
+    const ele = await this.el;
+    await clickActionMenu(ele, selector);
   }
 
   get compare() {

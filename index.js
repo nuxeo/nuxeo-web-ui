@@ -28,13 +28,17 @@ const loadAddons = async () => {
     }),
   );
 };
-const setupApp = () =>
+const setupApp = async () =>
   customElements.whenDefined('nuxeo-app').then(() => {
-    Nuxeo.UI.app = document.querySelector('nuxeo-app');
-    if (!Nuxeo.UI.app) {
+    if (Nuxeo && Nuxeo.UI) {
+      Nuxeo.UI.app = document.querySelector('nuxeo-app');
+      if (!Nuxeo.UI.app) {
+        console.error('could not find nuxeo-app');
+      }
+      setFallbackNotificationTarget(Nuxeo.UI.app);
+    } else {
       console.error('could not find nuxeo-app');
     }
-    setFallbackNotificationTarget(Nuxeo.UI.app);
   });
 const loadRouting = async () => {
   if (config.get('router.htmlImport')) {
