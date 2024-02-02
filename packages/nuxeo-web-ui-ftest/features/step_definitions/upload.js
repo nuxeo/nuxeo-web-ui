@@ -1,47 +1,64 @@
-import { Then } from '@cucumber/cucumber';
+import { Then } from '../../node_modules/@cucumber/cucumber';
 
-Then(/^I upload file "(.+)" as document content/, function(file) {
-  return fixtures.layouts.setValue(this.ui.browser.el.element('nuxeo-dropzone'), file);
+Then(/^I upload file "(.+)" as document content/, async function(file) {
+  const element = await this.ui.browser.el.element('nuxeo-dropzone');
+  await fixtures.layouts.setValue(element, file);
 });
 
-Then('I can see the blob replace button', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.view.waitForVisible();
-  page.view.waitForVisible('nuxeo-replace-blob-button').should.be.true;
+Then('I can see the blob replace button', async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const view = await page.view;
+  await view.waitForVisible();
+  const ele = await view.el.element('nuxeo-replace-blob-button');
+  const result = await ele.waitForVisible();
+  result.should.be.true;
 });
 
-Then("I can't see the blob replace button", function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.view.waitForVisible();
-  page.view.el.element('nuxeo-replace-blob-button').waitForVisible(browser.options.waitforTimeout, true).should.be.true;
+Then("I can't see the blob replace button", async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const view = await page.view;
+  await view.waitForVisible();
+  const ele = await view.el.element('nuxeo-replace-blob-button');
+  const result = await ele.waitForVisible(5000, true);
+  result.should.be.true;
 });
 
-Then('I can see the option to add new attachments', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.metadata.waitForVisible();
-  page.metadata.waitForVisible('nuxeo-dropzone').should.be.true;
+Then('I can see the option to add new attachments', async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const metadata = await page.metadata;
+  await metadata.waitForVisible();
+  const ele = await metadata.el.element('nuxeo-dropzone');
+  const result = await ele.waitForVisible();
+  result.should.be.true;
 });
 
-Then("I can't see the option to add new attachments", function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.metadata.waitForVisible();
-  page.metadata.waitForNotVisible('nuxeo-dropzone').should.be.true;
+Then("I can't see the option to add new attachments", async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const metadata = await page.metadata;
+  await metadata.waitForVisible();
+  const result = await metadata.waitForNotVisible('nuxeo-dropzone');
+  result.should.be.true;
 });
 
-Then('I can see the option to add a main blob', function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.view.waitForVisible();
-  page.view.waitForVisible('nuxeo-dropzone').should.be.true;
+Then('I can see the option to add a main blob', async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const view = await page.view;
+  await view.waitForVisible();
+  const ele = await view.el.element('nuxeo-dropzone');
+  const result = await ele.waitForVisible();
+  result.should.be.true;
 });
 
-Then("I can't see the option to add a main blob", function() {
-  const page = this.ui.browser.documentPage(this.doc.type);
-  page.waitForVisible();
-  page.view.waitForVisible();
-  page.view.waitForNotVisible('nuxeo-dropzone').should.be.true;
+Then("I can't see the option to add a main blob", async function() {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+  const view = await page.view;
+  await view.waitForVisible();
+  const result = await view.waitForNotVisible('nuxeo-dropzone');
+  result.should.be.true;
 });
