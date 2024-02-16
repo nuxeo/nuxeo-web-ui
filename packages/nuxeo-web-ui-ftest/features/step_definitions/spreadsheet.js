@@ -38,7 +38,7 @@ Then('I can see the {string} spreadsheet column', async function(column) {
     const header = await spreadsheet.headers;
     await header.includes(column);
   } else {
-    throw Error('Error: Spreadsheet does not exist!!');
+    throw new Error('Error: Spreadsheet does not exist!!');
   }
 });
 
@@ -47,7 +47,7 @@ When('I set the spreadsheet cell {int},{int} to {string}', async function(row, c
   if (spreadsheet) {
     spreadsheet.setData(row, col, value);
   } else {
-    throw Error('Error: Spreadsheet does not exist!!');
+    throw new Error('Error: Spreadsheet does not exist!!');
   }
 });
 
@@ -58,7 +58,7 @@ When('I save the spreadsheet', async function() {
     const consoleEle = await spreadsheet.console;
     await consoleEle.getText();
   } else {
-    throw Error('Error: Spreadsheet does not exist!!');
+    throw new Error('Error: Spreadsheet does not exist!!');
   }
 });
 
@@ -68,7 +68,7 @@ When('I close the spreadsheet', async function() {
     await spreadsheet.close();
     await browser.switchToFrame(null);
   } else {
-    throw Error('Error: Spreadsheet does not exist!!');
+    throw new Error('Error: Spreadsheet does not exist!!');
   }
 });
 

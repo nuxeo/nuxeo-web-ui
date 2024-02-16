@@ -5,6 +5,7 @@ import { url } from '../../pages/helpers';
 
 Given('user {string} exists in group {string}', async (username, group) => {
   const users = await fixtures.users;
+  await driver.pause(1000);
   await users.create({
     'entity-type': 'user',
     properties: {
@@ -19,6 +20,7 @@ Given('user {string} exists in group {string}', async (username, group) => {
 
 Given('user {string} exists', async (username) => {
   const users = await fixtures.users;
+  await driver.pause(1000);
   await users.create({
     'entity-type': 'user',
     properties: {
@@ -31,7 +33,7 @@ Given('user {string} exists', async (username) => {
 });
 
 When('I login as {string}', async function(username) {
-  await driver.pause(2000);
+  await driver.pause(1000);
   const logIn = await Login.get();
   await logIn.username(username);
   const password = await users[username];
@@ -39,7 +41,6 @@ When('I login as {string}', async function(username) {
   await logIn.submit();
   this.username = username;
   this.ui = await UI.get();
-  await driver.pause(2000);
   await this.ui.waitForVisible('nuxeo-page');
 });
 
@@ -48,7 +49,8 @@ When(/^I visit (.*)$/, (path) => url(path));
 When('I logout', async () => Login.get());
 
 Then('I am logged in as {string}', async function(username) {
-  const profileEle = await this.ui.drawer.open('profile');
+  const drawer = await this.ui.drawer;
+  const profileEle = await drawer.open('profile');
   const headerEle = await profileEle.element('.header');
   await driver.pause(1000);
   const currentUser = await headerEle.getText();

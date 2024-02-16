@@ -240,12 +240,12 @@ exports.config = {
   //
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
-  before: () => {
+  before: async () => {
     /*
      * Increase window size to avoid hidden buttons
      */
     try {
-      browser.maximizeWindow();
+      await browser.maximizeWindow();
     } catch (e) {
       console.error('Failed to maximize.');
     }
@@ -300,7 +300,7 @@ exports.config = {
   //
   // Gets executed after all workers got shut down and the process is about to exit. It is not
   // possible to defer the end of the process using a promise.
-  onComplete: () => {
+  onComplete: async () => {
     if (process.env.CUCUMBER_REPORT_PATH) {
       // Generate the report when it all tests are done
       htmlReporter.generate({

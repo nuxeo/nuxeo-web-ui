@@ -86,9 +86,8 @@ export default class User extends BasePage {
 
   async searchResult(searchTerm) {
     const ele = await this.el;
-    await driver.pause(3000);
+    await driver.pause(1000);
     const results = await ele.elements('nuxeo-card[name="users"] .table [name="id"]');
-
     const match = await results.find(async (e) => (await e.getText()) === searchTerm);
     return match;
   }

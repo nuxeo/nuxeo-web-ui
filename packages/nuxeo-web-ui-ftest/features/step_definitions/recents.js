@@ -18,7 +18,7 @@ Then('I can see the list of recently viewed documents has {int} item(s)', async 
   await recents.waitForVisible();
   const item = await recents.nbItems;
   if (item !== nb) {
-    throw Error(`Expected count of ${nb} but found ${item}`);
+    throw new Error(`Expected count of ${nb} but found ${item}`);
   }
 });
 

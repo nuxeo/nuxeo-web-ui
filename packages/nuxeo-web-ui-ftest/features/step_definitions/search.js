@@ -11,9 +11,9 @@ Then('I cannot see the search results', function() {
   this.ui.search.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
 });
 
-Given(/^I have the following groups$/, (table) =>
+Given(/^I have the following groups$/, async (table) =>
   Promise.all(
-    table.rows().map((row) =>
+    await table.rows().map(async (row) =>
       fixtures.groups.create({
         'entity-type': 'group',
         groupname: row[0],
@@ -23,9 +23,9 @@ Given(/^I have the following groups$/, (table) =>
   ),
 );
 
-Given(/^I have the following users$/, (table) =>
+Given(/^I have the following users$/, async (table) =>
   Promise.all(
-    table.rows().map((row) =>
+    await table.rows().map(async (row) =>
       fixtures.users.create({
         'entity-type': 'user',
         properties: {
@@ -42,12 +42,10 @@ Given(/^I have the following users$/, (table) =>
 );
 
 Given(/^I have the following documents$/, async (table) => {
-  browser.pause(1000);
-  const tasks = table.hashes().map((row) => () => {
+  await driver.pause(1000);
+  const tasks = await table.hashes().map((row) => async () => {
     const { doctype, title, creator, nature, subjects, coverage, path, collections, tag, file } = row;
-
-    const doc = fixtures.documents.init(doctype, title);
-
+    const doc = await fixtures.documents.init(doctype, title);
     // assign basic dc properties (unprefixed)
     Object.assign(doc.properties, {
       'dc:title': title,
@@ -56,19 +54,16 @@ Given(/^I have the following documents$/, async (table) => {
       'dc:subjects': Array.isArray(subjects) ? subjects : [subjects],
       'dc:coverage': coverage,
     });
-
     // fill in dummy note content
     if (doctype === 'Note') {
       doc.properties['note:note'] = 'Lorem Ipsum';
     }
-
     // fill in any other properties (prefixed)
     Object.keys(row)
       .filter((k) => k.indexOf(':') !== -1)
       .forEach((k) => {
         doc.properties[k] = row[k];
       });
-
     // create the document
     return (
       fixtures.documents
@@ -131,25 +126,25 @@ When(/^I clear the (.+) search on (.+)$/, async function(searchType, searchName)
 When(/^I perform a (.+) search for (.+) on (.+)$/, async function(searchType, searchTerm, searchName) {
   const searchForm = await this.ui.searchForm(searchName);
   await searchForm.waitForVisible();
-  await driver.pause(3000);
+  await driver.pause(1000);
   await searchForm.search(searchType, searchTerm);
 });
 
 When('I switch to filter view', async function() {
-  await driver.pause(3000);
+  await driver.pause(1000);
   const filterView = await this.ui.filterView;
   await filterView.click();
-  await browser.pause(3000);
+  await driver.pause(1000);
 });
 
 Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
-  await driver.pause(2000);
+  await driver.pause(1000);
   const uiResult = await this.ui.results;
   const displayMode = await uiResult.displayMode;
   if (numberOfResults === 0) {
     const outResult2 = await uiResult.resultsCount(displayMode);
     if (outResult2 !== numberOfResults) {
-      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
+      throw new Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
     }
     const emptyResult = await uiResult.noResults;
     const emptyResultVisible = await emptyResult.waitForVisible();
@@ -160,24 +155,24 @@ Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
     const outText = await outLabel.getText();
     const outResult = parseInt(outText, 10);
     if (outResult !== numberOfResults) {
-      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult}`);
+      throw new Error(`Expecting to get ${numberOfResults} results but found ${outResult}`);
     }
     const outResult2 = await uiResult.resultsCount(displayMode);
     if (outResult2 !== numberOfResults) {
-      throw Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
+      throw new Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
     }
   }
 });
 
 Then(/^I can see more than (\d+) search results$/, async function(minNumberOfResults) {
-  await driver.pause(3000);
+  await driver.pause(1000);
   const results = await this.ui.results;
   const displayMode = await results.displayMode;
   const output = await results.resultsCount(displayMode);
   if (output > minNumberOfResults) {
     return true;
   }
-  throw Error(`Expecting to get more than ${minNumberOfResults} but found ${output}`);
+  throw new Error(`Expecting to get more than ${minNumberOfResults} but found ${output}`);
 });
 
 Then('I edit the results columns to show {string}', async function(heading) {
@@ -212,25 +207,26 @@ Then(/^I save my search as "(.+)"$/, async function(searchName) {
 });
 
 Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username) {
-  const savedSearchButton = await this.ui.searchResults.savedSearchActionButton;
+  const savedSearch = await this.ui.searchResults;
+  const savedSearchButton = await savedSearch.savedSearchActionButton;
   await savedSearchButton.waitForVisible();
   await savedSearchButton.click();
-  const shareActionButton = await this.ui.searchResults.shareAction;
+  const shareActionButton = await savedSearch.shareAction;
   await shareActionButton.waitForVisible();
   await shareActionButton.click();
   const searchForm = await this.ui.searchForm(searchName);
-  const PremissionButton = await searchForm.permissionsView.newPermissionButton;
-  await PremissionButton.waitForVisible();
-  await PremissionButton.click();
-  await searchForm.permissionsView.setPermissions(username, {
+  const permissionView = await searchForm.permissionsView;
+  const permissionButton = await permissionView.newPermissionButton;
+  await permissionButton.waitForVisible();
+  await permissionButton.click();
+  await permissionView.setPermissions(username, {
     permission: 'Read',
     timeFrame: 'permanent',
     notify: false,
   });
-  const createPermissionButton = await searchForm.permissionsView.createPermissionButton;
+  const createPermissionButton = await permissionView.createPermissionButton;
   await createPermissionButton.waitForVisible();
   await createPermissionButton.click();
-  const permissionView = await searchForm.permissionsView;
   const permissionVisible = await permissionView.permission('Read', username, 'permanent');
   const isVisible = await permissionVisible.waitForVisible();
   isVisible.should.be.true;
@@ -262,6 +258,6 @@ Then(/^I can see (\d+) QuickSearch results$/, async function(numberOfResults) {
   await driver.pause(1000);
   const result = await quickSearch.quickSearchResultsCount();
   if (result !== numberOfResults) {
-    throw Error(`Expecting to get ${numberOfResults} results but found ${result}`);
+    throw new Error(`Expecting to get ${numberOfResults} results but found ${result}`);
   }
 });

@@ -126,18 +126,9 @@ export default class Browser extends BasePage {
 
   get rows() {
     return (async () => {
+      await driver.pause(1000);
       const currentPage = await this.currentPage;
-      let rowsTemp;
-      await driver.waitUntil(
-        async () => {
-          rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
-          return rowsTemp.length > 0;
-        },
-        {
-          timeout: 10000,
-          timeoutMsg: 'rows not found!!',
-        },
-      );
+      const rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
       return rowsTemp;
     })();
   }
@@ -285,13 +276,14 @@ export default class Browser extends BasePage {
   }
 
   async indexOfChild(title) {
+    await driver.pause(1000);
     await this.waitForChildren();
-    const elementTitle = await browser
-      .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
-      .map(async (img) => img.$('nuxeo-data-table-cell a.title').getText());
-
-    for (let i = 0; i < elementTitle.length; i++) {
-      if ((await elementTitle[i].trim()) === title) {
+    await driver.pause(1000);
+    const rowTemp = await this.rows;
+    for (let i = 0; i < rowTemp.length; i++) {
+      const ele = await rowTemp[i].element('nuxeo-data-table-cell a.title');
+      const eleText = await ele.getText();
+      if (eleText.trim() === title) {
         return i;
       }
     }
@@ -332,24 +324,21 @@ export default class Browser extends BasePage {
    * Results might vary with the viewport size as only visible items are taken into account.
    */
   async waitForNbChildren(nb) {
-    let count;
-    await driver.waitUntil(async () => {
-      const currentPage = await this.currentPage;
-      const rowTemp = await currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
-      count = 0;
-      try {
-        for (let i = 0; i < rowTemp.length; i++) {
-          const row = await rowTemp[i];
-          if ((await row.isVisible()) && (await row.isVisible('nuxeo-data-table-cell a.title'))) {
-            count++;
-          }
-        }
-        return count === nb;
-      } catch (e) {
-        // prevent stale row from breaking execution
-        return false;
+    let count = 0;
+    await driver.pause(2000);
+    const currentPage = await this.currentPage;
+    const rowTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    for (let i = 0; i < rowTemp.length; i++) {
+      if (count === nb) {
+        break;
       }
-    });
+      const row = await rowTemp[i];
+      const isRowVisible = await row.isVisible();
+      const isRowElementVisible = await row.isVisible('nuxeo-data-table-cell a.title');
+      if (isRowVisible && isRowElementVisible) {
+        count++;
+      }
+    }
     return count;
   }
 
@@ -463,9 +452,8 @@ export default class Browser extends BasePage {
       .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
     const nonEmptyTitles = elementTitle.filter((nonEmpty) => nonEmpty.trim() !== '');
     const index = nonEmptyTitles.findIndex((currenTitle) => currenTitle === title);
-    await driver.pause(3000);
-    const isCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox[checked]');
     await driver.pause(1000);
+    const isCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox[checked]');
     const isNotCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox:not([checked])');
     if ((deselect ? isCheckedVisible : isNotCheckedVisible) && index >= 0) {
       const currentRow = await rowTemp[index].$('nuxeo-data-table-checkbox');

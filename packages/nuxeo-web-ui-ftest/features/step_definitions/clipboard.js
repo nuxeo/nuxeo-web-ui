@@ -31,7 +31,8 @@ When('I click the clipboard paste action', async function() {
 });
 
 Then('I can see the clipboard has {string} document', async function(title) {
-  const clipboardEle = await this.ui.drawer.clipboard;
+  const drawer = await this.ui.drawer;
+  const clipboardEle = await drawer.clipboard;
   await clipboardEle.waitForVisible();
   let found = false;
   const clipboardItems = await clipboardEle.el.$$('#list .list-item-title');
@@ -48,7 +49,7 @@ Then('I can see the clipboard has {int} item(s)', async function(nb) {
   await clipboard.waitForVisible();
   const nbItems = await clipboard.nbItems;
   if (nbItems !== nb) {
-    throw Error(`Expected clipboard count to be ${nb} but found ${nbItems}`);
+    throw new Error(`Expected clipboard count to be ${nb} but found ${nbItems}`);
   }
 });
 Then('I can see clipboard actions disabled', async function() {

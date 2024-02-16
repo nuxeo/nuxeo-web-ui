@@ -7,8 +7,9 @@ global.users = {
 
 fixtures.users = {
   DEFAULT_PASSWORD: 'password',
-  create: (user) => {
-    const { username } = user.properties;
+  create: async (user) => {
+    const username = await user.properties.username;
+    await driver.pause(1000);
     if (username in users) {
       return users[username];
     }

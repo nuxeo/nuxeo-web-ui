@@ -29,7 +29,10 @@ export default class CreateDialog extends BasePage {
    * @deprecated since 3.0.3. Please use method importPage instead.
    * */
   get importCsvDialog() {
-    return this.el.element('#csvCreation');
+    return (async () => {
+      const ele = await this.el.element('#csvCreation');
+      return ele;
+    })();
   }
 
   async importPage(name) {
@@ -52,7 +55,10 @@ export default class CreateDialog extends BasePage {
   async setFileToImport(file) {
     const CsvDialog = await this.importCsvDialog;
     const field = await CsvDialog.element('#dropzone #uploadFiles');
-    await field.waitForExist();
+    const fieldExist = await field.waitForExist();
+    if (fieldExist !== true) {
+      throw new Error(`unable to import the file`);
+    }
     return field.chooseFile(path.resolve(fixtures.blobs.get(file)));
   }
 

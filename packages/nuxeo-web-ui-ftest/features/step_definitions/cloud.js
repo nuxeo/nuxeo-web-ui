@@ -1,6 +1,6 @@
 import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
 
-Given('provider {string} exists in providers', (provider) =>
+Given('provider {string} exists in providers', async (provider) =>
   fixtures.providers.create({
     'entity-type': 'nuxeoOAuth2ServiceProvider',
     serviceName: provider,
@@ -17,7 +17,8 @@ Then('I can see the nuxeo-cloud-providers page', async function() {
 });
 
 Then('I can see the nuxeo-cloud-tokens page', async function() {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   const nuxeoCloudTokenPage = await cloudServicesEle.nuxeoCloudTokens.waitForVisible();
   if (!nuxeoCloudTokenPage) {
@@ -26,7 +27,8 @@ Then('I can see the nuxeo-cloud-tokens page', async function() {
 });
 
 Then('I can see the nuxeo-oauth2-provided-tokens table', async function() {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   const nuxeoOauth2ProvidedEle = await cloudServicesEle.nuxeoCloudTokensAuthorizedApplications.waitForVisible();
   if (!nuxeoOauth2ProvidedEle) {
@@ -35,7 +37,8 @@ Then('I can see the nuxeo-oauth2-provided-tokens table', async function() {
 });
 
 Then('I can see the nuxeo-oauth2-consumed-tokens table', async function() {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   const nuxeoOauth2ConsumedTokens = await cloudServicesEle.nuxeoCloudTokensCloudAccount.waitForVisible();
   if (!nuxeoOauth2ConsumedTokens) {
@@ -44,7 +47,8 @@ Then('I can see the nuxeo-oauth2-consumed-tokens table', async function() {
 });
 
 Then('I can add the following provider:', async function(provider) {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   await cloudServicesEle.addProvider(provider);
   global.providers[provider.rows()[0][1]] = {
@@ -53,7 +57,8 @@ Then('I can add the following provider:', async function(provider) {
 });
 
 Then('I can see {string} provider', async function(name) {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   const cloudServices = await cloudServicesEle.waitForHasProvider(name);
   if (!cloudServices) {
@@ -62,7 +67,8 @@ Then('I can see {string} provider', async function(name) {
 });
 
 Then('I cannot see {string} provider', async function(name) {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   const existingProvider = await cloudServicesEle.waitForHasProvider(name, true);
   if (!existingProvider) {
@@ -71,7 +77,8 @@ Then('I cannot see {string} provider', async function(name) {
 });
 
 Then('I can edit {string} provider to:', async function(currentName, newDetails) {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   await cloudServicesEle.editProvider(currentName, newDetails);
   delete global.providers[currentName];
@@ -81,14 +88,16 @@ Then('I can edit {string} provider to:', async function(currentName, newDetails)
 });
 
 Then('I can delete {string} provider', async function(name) {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   await cloudServicesEle.deleteProvider(name);
   delete global.providers[name];
 });
 
 When('I click the {string} pill', async function(name) {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   await cloudServicesEle.clickElementName(name);
 });
@@ -103,7 +112,8 @@ Given('Client {string} exists in clients', async (clientId) =>
 );
 
 Then('I can see the nuxeo-cloud-consumers page', async function() {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   const NuxeoCloudConsumersPage = await cloudServicesEle.nuxeoCloudConsumers;
   const NuxeoCloudConsumersPageIsVisible = await NuxeoCloudConsumersPage.waitForVisible();
@@ -113,7 +123,8 @@ Then('I can see the nuxeo-cloud-consumers page', async function() {
 });
 
 Then('I can add the following client:', async function(client) {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   await cloudServicesEle.addClient(client);
   global.clients[await client.rows()[0][1]] = {
@@ -122,7 +133,8 @@ Then('I can add the following client:', async function(client) {
 });
 
 Then('I can see {string} client', async function(clientId) {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   const newClientID = await cloudServicesEle.waitForHasClient(clientId);
   if (!newClientID) {
@@ -131,7 +143,8 @@ Then('I can see {string} client', async function(clientId) {
 });
 
 Then('I cannot see {string} client', async function(clientId) {
-  const cloudServicesEle = await this.ui.administration.cloudServices;
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
   await cloudServicesEle.waitForVisible();
   const existingClientEle = await cloudServicesEle.waitForHasClient(clientId, true);
   if (!existingClientEle) {

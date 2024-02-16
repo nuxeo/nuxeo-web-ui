@@ -45,7 +45,7 @@ export default class Collections extends BasePage {
   }
 
   async waitForHasMember(doc, reverse) {
-    await driver.pause(2000);
+    await driver.pause(1000);
     const result = await (async () => {
       const ele = await this.el;
       const entriesTitle = await ele.$$('#membersList .list-item-title').map((img) => img.getText());

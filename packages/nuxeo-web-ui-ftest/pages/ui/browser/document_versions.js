@@ -100,7 +100,7 @@ export default class DocumentVersions extends BasePage {
     const itemsTitle = await browser.$$('div[name="version-item"]').map((img) => img.$('.title').getText());
     const index = itemsTitle.findIndex((currenTitle) => currenTitle === label);
     if (index === -1) {
-      throw Error(`Could not find version ${label}`);
+      throw new Error(`Could not find version ${label}`);
     }
     const version = await listItems1[index];
     await version.waitForVisible();

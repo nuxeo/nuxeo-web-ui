@@ -4,7 +4,7 @@ import BasePage from '../base';
 export default class Clipboard extends BasePage {
   get nbItems() {
     return (async () => {
-      await driver.pause(3000);
+      await driver.pause(1000);
       const items = await this.el.$$('#list .list-item');
       let count = 0;
       for (let index = 0; index < items.length; index++) {
@@ -18,11 +18,17 @@ export default class Clipboard extends BasePage {
   }
 
   get moveButton() {
-    return this.el.$('#move');
+    return (async () => {
+      const moveButton = await this.el.$('#move');
+      return moveButton;
+    })();
   }
 
   get pasteButton() {
-    return this.el.$('#paste');
+    return (async () => {
+      const pasteButton = await this.el.$('#paste');
+      return pasteButton;
+    })();
   }
 
   async move() {
@@ -41,7 +47,7 @@ export default class Clipboard extends BasePage {
 
   async removeItem(title) {
     const items = await this.el.$$('nuxeo-data-list#list .list-item');
-    await driver.pause(2000);
+    await driver.pause(1000);
     let found = false;
     for (let index = 0; index < items.length; index++) {
       const itemVisible = await items[index].isVisible();

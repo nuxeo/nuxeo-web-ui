@@ -22,7 +22,7 @@ class Token {
 
 export default class UserCloudServices extends BasePage {
   async getTokens(user, provider) {
-    await driver.pause(3000);
+    await driver.pause(1000);
     const ele = await this.el;
     await ele.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
     const rowElements = await ele.elements('nuxeo-data-table nuxeo-data-table-row');

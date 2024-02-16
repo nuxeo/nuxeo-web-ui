@@ -14,9 +14,9 @@ Given(/^I have the following trashed documents$/, (table) => {
   return tasks.reduce((current, next) => current.then(next), Promise.resolve([]));
 });
 
-Given(/^I have a (.*) document trashed/, function(docType) {
+Given(/^I have a (.*) document trashed/, async function(docType) {
   docType = docType || 'File';
-  const doc = fixtures.documents.init(docType);
+  const doc = await fixtures.documents.init(docType);
   // create the document
   return fixtures.documents.create(this.doc.path, doc).then((d) =>
     fixtures.documents.trash(d).then((trashedDoc) => {
@@ -32,7 +32,7 @@ Then('I can trash selected documents', async function() {
   await toolBarEle.trashDocuments();
   await driver.alertAccept();
   await toolBarEle.waitForNotVisible();
-  await driver.pause(3000);
+  await driver.pause(1000);
 });
 
 Then('I cannot trash selected documents', async function() {
@@ -68,7 +68,7 @@ Then('I can untrash selected documents', async function() {
   await resultEle.untrashDocuments();
   await driver.alertAccept();
   await toolBarEle.waitForNotVisible();
-  await driver.pause(3000);
+  await driver.pause(1000);
 });
 
 Then('I cannot untrash selected documents', async function() {
@@ -102,7 +102,7 @@ Then('I can untrash current document', async function() {
   await driver.pause(1000);
   const infoVisible = await infoBarEle.isVisible();
   if (infoVisible) {
-    throw Error('Document is not untrashed');
+    throw new Error('Document is not untrashed');
   }
 });
 
@@ -130,5 +130,5 @@ Then('I cannot permanently delete current document', async function() {
 When(/^I perform a Trash Search for (.+)/, async function(searchTerm) {
   const searcFormEle = await this.ui.trashSearchForm;
   await searcFormEle.search('fulltext', searchTerm);
-  await driver.pause(3000);
+  await driver.pause(1000);
 });

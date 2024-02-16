@@ -14,10 +14,10 @@ Then('I click the Create button to finish the import', async function() {
   const importButton = await createDialog.importCreateButton;
   await importButton.waitForVisible();
   await importButton.waitForEnabled();
-  await driver.pause(5000);
+  await driver.pause(2000);
   await importButton.click();
   await driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
-  await driver.pause(3000); // XXX just give it some time to the server to do the conversions
+  await driver.pause(1000); // XXX just give it some time to the server to do the conversions
 });
 
 Then(/^I go to the (.+) tab$/, async function(name) {
@@ -93,13 +93,14 @@ Then('I see the {word} page', async function(docType) {
 });
 
 Then(/^I can see that a document of the type (.+) and title (.+) is created$/, async function(docType, title) {
-  this.ui.browser.waitForNotVisible('iron-overlay-backdrop');
-  const documentPage = await this.ui.browser.documentPage(docType);
+  const browser = await this.ui.browser;
+  await browser.waitForNotVisible('iron-overlay-backdrop');
+  const documentPage = await browser.documentPage(docType);
   const docView = await documentPage.view;
   await docView.waitForVisible();
-  await driver.pause(2000);
+  await driver.pause(1000);
   currentDocType = docType;
-  const docTitle = await this.ui.browser.hasTitle(title);
+  const docTitle = await browser.hasTitle(title);
   await docTitle.should.be.true;
   this.doc = { type: currentDocType, title };
 });

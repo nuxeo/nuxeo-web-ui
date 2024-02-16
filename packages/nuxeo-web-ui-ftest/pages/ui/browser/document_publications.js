@@ -4,7 +4,7 @@ import BasePage from '../../base';
 export default class DocumentPublications extends BasePage {
   get count() {
     return (async () => {
-      await driver.pause(2000);
+      await driver.pause(1000);
       let elementCount = 0;
       const elementsHidden = await browser
         .$$('nuxeo-data-table#table nuxeo-data-table-row:not([header])')

@@ -2,9 +2,9 @@ import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
 
 /* Cloud Services */
 
-Given(/^the following OAuth2 providers exist$/, (table) =>
-  Promise.all(table.rows().map((row) => fixtures.oauth2Providers.create(row[0]))),
-);
+Given(/^the following OAuth2 providers exist$/, async (table) => {
+  Promise.all(table.rows().map(async (row) => fixtures.oauth2Providers.create(row[0])));
+});
 
 Given(/^I have tokens for the following OAuth2 providers$/, function(table) {
   return Promise.all(table.rows().map((row) => fixtures.oauth2Providers.createToken(row[0], this.username)));
@@ -20,7 +20,7 @@ Then(/^I can only see (\d+) provider token[s]? that belong[s]? to me$/, async fu
   await cloudService.waitForVisible();
   const tokenEle = await cloudService.getTokens(this.username);
   if (tokenEle.length !== numberOfTokens) {
-    throw Error('Provider token no.s are not as expected');
+    throw new Error('Provider token no.s are not as expected');
   }
 });
 
@@ -40,12 +40,12 @@ Then(/^I can delete token for provider "(.+)" that belongs to me$/, async functi
 
 /* Authorized Applications */
 
-Given(/^the following OAuth2 clients exist$/, (table) =>
-  Promise.all(table.rows().map((row) => fixtures.oauth2Clients.create(row[0]))),
+Given(/^the following OAuth2 clients exist$/, async (table) =>
+  Promise.all(table.rows().map(async (row) => fixtures.oauth2Clients.create(row[0]))),
 );
 
-Given(/^I have tokens for the following OAuth2 clients$/, function(table) {
-  return Promise.all(table.rows().map((row) => fixtures.oauth2Clients.createToken(row[0], this.username)));
+Given(/^I have tokens for the following OAuth2 clients$/, async function(table) {
+  return Promise.all(table.rows().map(async (row) => fixtures.oauth2Clients.createToken(row[0], this.username)));
 });
 
 When(/^I am on user authorized applications page$/, async function() {
@@ -67,12 +67,13 @@ Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberO
   await authPage.waitForVisible();
   const apps = await authPage.getApps();
   if (apps.length !== numberOfApps) {
-    throw Error(`Expected app count should be ${numberOfApps} but found ${apps.length}`);
+    throw new Error(`Expected app count should be ${numberOfApps} but found ${apps.length}`);
   }
 });
 
-Then('I cannot see authorized application', function() {
-  this.ui.emptyAuthorizedApps.waitForDisplayed();
+Then('I cannot see authorized application', async function() {
+  const apps = await this.ui.emptyAuthorizedApps;
+  await apps.waitForDisplayed();
 });
 
 Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
@@ -90,6 +91,6 @@ Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
   await authPage.waitForVisible();
   const appResults = await authPage.getApps(appName);
   if (appResults.length !== 0) {
-    throw Error(`Expected app count should be 0 but found ${appResults.length}`);
+    throw new Error(`Expected app count should be 0 but found ${appResults.length}`);
   }
 });

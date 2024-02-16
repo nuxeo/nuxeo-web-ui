@@ -35,19 +35,20 @@ Then(/^I can see the user has the email "([^"]*)"$/, async function(userEmail) {
   const ele = await user.element('span');
   const emailText = await ele.getText();
   if (emailText !== userEmail) {
-    throw Error("I can't see the expected email for user");
+    throw new Error("I can't see the expected email for user");
   }
 });
 
 Then(/^I can edit the user "([^"]*)" with the following properties:$/, async function(username, table) {
-  await this.ui.user.searchFor(username);
-  const resultEle = await this.ui.user.searchResult(username);
+  const user = await this.ui.user;
+  await user.searchFor(username);
+  const resultEle = await user.searchResult(username);
   await resultEle.click();
-  const editButton = await this.ui.user.editUserButton;
+  const editButton = await user.editUserButton;
   await editButton.waitForVisible();
   await editButton.click();
-  await this.ui.user.fillMultipleValues(table, this.ui.user.editUserDialog);
-  const dialogButton = await this.ui.user.editUserDialogButton;
+  await this.ui.user.fillMultipleValues(table, user.editUserDialog);
+  const dialogButton = await user.editUserDialogButton;
   await dialogButton.click();
 });
 

@@ -91,11 +91,12 @@ Given(/^This document has file "(.+)" for content$/, async function(file) {
 });
 
 Given(/^This document has file "(.+)" for attachment/, async function(file) {
-  return fixtures.documents.attach(this.doc, fixtures.blobs.get(file), true);
+  const blobFile = await fixtures.blobs.get(file);
+  return fixtures.documents.attach(this.doc, blobFile, true);
 });
 
-Given(/^I have a (.+) Note$/, function(format) {
-  const doc = fixtures.documents.init('Note');
+Given(/^I have a (.+) Note$/, async function(format) {
+  const doc = await fixtures.documents.init('Note');
   doc.properties['note:mime_type'] = fixtures.notes.formats[format].mimetype;
   doc.properties['note:note'] = fixtures.notes.formats[format].content;
   return fixtures.documents.create(this.doc.path, doc).then((result) => {
@@ -104,18 +105,19 @@ Given(/^I have a (.+) Note$/, function(format) {
 });
 
 When(/^I browse to the document$/, async function() {
-  await driver.pause(3000);
-  const path = await this.doc.path;
   await driver.pause(1000);
-  await this.ui.browser.browseTo(path);
+  const path = await this.doc.path;
+  const browser = await this.ui.browser;
+  await browser.browseTo(path);
 });
 
 When(/^I browse to the "(.*)" document page$/, async function(page) {
-  await this.ui.browser.browseTo(`${this.doc.path}?p=${page}`);
+  const browser = await this.ui.browser;
+  await browser.browseTo(`${this.doc.path}?p=${page}`);
 });
 
 When(/^I browse to the document with path "(.+)"$/, async function(path) {
-  await driver.pause(2000);
+  await driver.pause(1000);
   const browser = await this.ui.browser;
   await browser.browseTo(path);
 });
@@ -158,7 +160,7 @@ Then(/I can see (.+) metadata with the following properties:/, async function(do
   await docPage.waitForVisible();
   const docMeta = await docPage.metadata;
   await docMeta.waitForVisible();
-  const tableRows = await table.rows;
+  const tableRows = await table.rows();
   for (let i = 0; i < tableRows.length; i++) {
     const tableRow = tableRows[i];
     const docLayout = await docMeta.layout();
@@ -274,7 +276,7 @@ Then('I add the document to the {string} collection', async function(name) {
 });
 
 Then('I can see the document belongs to the {string} collection', async function(name) {
-  await driver.pause(3000);
+  await driver.pause(1000);
   const browser = await this.ui.browser;
   const hasCollection = await browser.hasCollection(name);
   if (!hasCollection) {
@@ -296,11 +298,12 @@ Then('I can see the document does not belong to the {string} collection', async 
 });
 
 Then('I add the document to the favorites', async function() {
-  await this.ui.browser.addToFavorites();
+  const browser = await this.ui.browser;
+  await browser.addToFavorites();
 });
 
 Then('I can see the document has {int} children', async function(nb) {
-  await driver.pause(2000);
+  await driver.pause(1000);
   const browser = await this.ui.browser;
   const countOut = await browser.waitForNbChildren(nb);
   if (countOut !== nb) {
@@ -395,12 +398,19 @@ Then('I can see {int} validation error(s) in the {string} edit form', async func
 });
 
 Then('I can see the {string} error message in the {string} edit form', async function(message, docType) {
-  const { browser } = await this.ui;
+  const browser = await this.ui.browser;
   try {
     const form = await browser.editForm(docType);
     await form.waitForVisible();
     const errorMessages = await form.errorMessages;
-    const hasErrorMessage = errorMessages.some((err) => err === message);
+    let hasErrorMessage;
+    for (let i = 0; i < errorMessages.length; i++) {
+      const errorMessage = await errorMessages[i];
+      if (errorMessage === message) {
+        hasErrorMessage = true;
+        break;
+      }
+    }
     if (!hasErrorMessage) {
       throw new Error(`Expecting to find '${message}' error message but not found`);
     }

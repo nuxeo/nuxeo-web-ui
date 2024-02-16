@@ -84,7 +84,7 @@ When(/^The document version is ([^"]*)$/, async function(label) {
   await versionsToggle.waitForVisible();
   const versionsToggleText = await versionsToggle.getText();
   if (versionsToggleText !== label) {
-    throw Error(`No version found with label "${label}"`);
+    throw new Error(`No version found with label "${label}"`);
   }
 });
 

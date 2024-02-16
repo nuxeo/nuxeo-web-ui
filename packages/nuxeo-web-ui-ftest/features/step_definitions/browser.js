@@ -12,31 +12,27 @@ Then('I can see the {string} {word} tree node', async function(title, tab) {
   const drawer = await this.ui.drawer;
   const sectionTab = await drawer._section(tab);
   await sectionTab.waitForVisible();
-  driver.pause(10000);
   await sectionTab.$$('.content a');
-
-  await driver.waitUntil(
-    async () => {
-      const sectionText = await sectionTab.$$('.content a').map((elem) => elem.getText());
-      const someSectionText = sectionText.some((e) => e === title);
-      return someSectionText;
-    },
-    {
-      timeout: 10000,
-      timeoutMsg: 'expecteed 1 text to be differeent after 5s',
-    },
-  );
+  await driver.pause(2000);
+  const sectionTexts = await sectionTab.$$('.content a').map((elem) => elem.getText());
+  for (let i = 0; i < sectionTexts.length; i++) {
+    const sectionText = await sectionTexts[i];
+    if (sectionText === title) {
+      return true;
+    }
+  }
+  throw new Error(`Expected text to be ${title} but not found`);
 });
 
 Then('I can navigate to {word} pill', async function(pill) {
-  await driver.pause(3000);
+  await driver.pause(1000);
   const browser = await this.ui.browser;
   await browser.waitForVisible();
   const ele = await browser.el.$(`nuxeo-page-item[name='${pill.toLowerCase()}']`);
   await ele.waitForVisible();
   await ele.click();
   await browser.waitForVisible(`#nxContent [name='${pill.toLowerCase()}']`);
-  await driver.pause(3000);
+  await driver.pause(1000);
 });
 
 Then('I cannot see to {word} pill', async function(pill) {
@@ -56,7 +52,7 @@ When('I click {string} in the {word} tree', async function(title, tab) {
   const drawer = await this.ui.drawer;
   const sectionTab = await drawer._section(tab);
   await sectionTab.waitForVisible();
-  await driver.pause(3000);
+  await driver.pause(1000);
   const sectionText = await sectionTab.$$('.content a').map((element) => element.getText());
   const el = await sectionTab.elements('.content a');
   let index;
@@ -72,7 +68,7 @@ When('I click {string} in the {word} tree', async function(title, tab) {
     await elEle.waitForVisible();
     await elEle.click();
   } else {
-    throw Error(`Expected title to be ${title} but not found`);
+    throw new Error(`Expected title to be ${title} but not found`);
   }
 });
 
@@ -118,7 +114,7 @@ When('I cannot see the display selection link', async function() {
   const browser = await this.ui.browser;
   await browser.waitForVisible();
   const selectionToolbarElem = await browser.selectionToolbar;
-  await driver.pause(3000);
+  await driver.pause(1000);
   await selectionToolbarElem.waitForVisible();
   const selectionLinkVisible = await selectionToolbarElem.waitForNotVisible('.selectionLink');
   selectionLinkVisible.should.be.true;
@@ -159,7 +155,7 @@ Then('I can see the {string} child document is at position {int}', async functio
   await browser.waitForVisible();
   const childIndex = await browser.indexOfChild(title);
   if (childIndex !== pos - 1) {
-    throw Error(`${childIndex} child document not present at expected position`);
+    throw new Error(`${title} child document not present at expected position`);
   }
 });
 
@@ -175,7 +171,7 @@ Then('I can see {int} document(s)', async function(numberOfResults) {
   const displayMode = await uiResult.displayMode;
   const outResult = await uiResult.resultsCount(displayMode);
   if (outResult !== numberOfResults) {
-    throw Error(`Expecting to get ${numberOfResults} results but found ${outResult}`);
+    throw new Error(`Expecting to get ${numberOfResults} results but found ${outResult}`);
   }
 });
 
@@ -218,7 +214,7 @@ Then(/^I can republish the following publication$/, async function(table) {
     const eleNew = await pubRow.$('nuxeo-data-table-cell .version').getText();
     const newVersion = parseFloat(eleNew.trim().toLowerCase());
     if (Number.isNaN(newVersion)) {
-      throw Error('Failed to republish the document');
+      throw new Error('Failed to republish the document');
     }
     return newVersion > previousVersion;
   }
@@ -231,7 +227,7 @@ Then('I can publish selection to {string}', async function(target) {
   const dialog = await selectionToolBar.publishDialog;
   await dialog.publish(target);
   // HACK because publishing all documents is asynchronous
-  await driver.pause(2000);
+  await driver.pause(1000);
 });
 
 Then(/^I can perform the following publications$/, async function(table) {
@@ -268,15 +264,9 @@ Then('I can delete all the documents from the {string} collection', async functi
 });
 
 Then('I can see the browser title as {string}', async (title) => {
-  driver.pause(3000);
-  await driver.waitUntil(
-    async () => {
-      const browserTitle = await browser.getTitle();
-      return title === browserTitle;
-    },
-    {
-      timeout: 10000,
-      timeoutMsg: 'expected 10 text to be different after 5s',
-    },
-  );
+  await driver.pause(1000);
+  const browserTitle = await browser.getTitle();
+  if (title !== browserTitle) {
+    throw new Error(`Expected text to be ${title} but not found`);
+  }
 });

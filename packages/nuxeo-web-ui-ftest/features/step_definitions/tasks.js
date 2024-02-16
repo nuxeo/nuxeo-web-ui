@@ -88,7 +88,7 @@ Then('I can see the my task list has {int} item(s)', async function(nb) {
   await this.ui.drawer.tasks.waitForVisible();
   const result = await this.ui.drawer.tasks.nbItems;
   if (result !== nb) {
-    throw Error(`Expected task count ${nb} but found ${result}`);
+    throw new Error(`Expected task count ${nb} but found ${result}`);
   }
 });
 Then('I can perform the {string} task action', async function(name) {

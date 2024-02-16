@@ -26,6 +26,7 @@ export default class DocumentPermissions extends BasePage {
   }
 
   async hasElement(selector, textContent, currentElement) {
+    await driver.pause(1000);
     const elements = await currentElement.elements(selector);
     let found = false;
     for (let i = 0; i < elements.length; i++) {
@@ -40,16 +41,17 @@ export default class DocumentPermissions extends BasePage {
 
   async permission(permission, name, timeFrame) {
     let found;
+    await driver.pause(1000);
     const rows = await this.el.elements('div.acl-table-row');
     for (let i = 0; i < rows.length; i++) {
       const row = await rows[i];
       const nameEle = await row.isExisting(`span.user[title="${name} - ${name}@test.com"]`);
-      const nameCheck = name ? nameEle : true;
+      const nameCheck = name ? await nameEle : true;
       const contentEle = await this.hasElement('span.label', permission, row);
       const permissionCheck = permission ? await !!contentEle : true;
       // XXX should rely on a class or column header name
       const timeFrameEle = await this.hasElement('span', permission, row);
-      const timeFrameCheck = timeFrame ? !!timeFrameEle : true;
+      const timeFrameCheck = timeFrame ? await !!timeFrameEle : true;
       if (nameCheck && permissionCheck && timeFrameCheck) {
         found = row;
         break;

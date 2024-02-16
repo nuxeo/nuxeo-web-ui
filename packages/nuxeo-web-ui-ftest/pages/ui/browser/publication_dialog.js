@@ -23,11 +23,11 @@ export default class PublicationDialog extends BasePage {
       await versionsList.selectVersion(version);
       // XXX we need to wait for the version to change, otherwise we could be sending the wrong version
       const ele = await versionsList.el.$('.toggle-text');
-      await driver.pause(2000);
+      await driver.pause(1000);
       await ele.waitForVisible();
       const outputText = await ele.getText();
       if (outputText !== version) {
-        throw Error(`Could not find version ${version}`);
+        throw new Error(`Could not find version ${version}`);
       }
     }
     if (override) {

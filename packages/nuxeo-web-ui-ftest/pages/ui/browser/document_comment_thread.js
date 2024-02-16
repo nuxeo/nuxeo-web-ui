@@ -12,7 +12,7 @@ export default class DocumentCommentThread extends BasePage {
 
   get nbItems() {
     return (async () => {
-      await driver.pause(3000);
+      await driver.pause(1000);
       const items = await this.el.elements('nuxeo-document-comment');
       let count = 0;
       for (let i = 0; i < items.length; i++) {

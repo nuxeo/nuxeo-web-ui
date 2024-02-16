@@ -13,11 +13,14 @@ When(/^I import the (.+) file$/, async function(file) {
   const selectVisible = await selectedFileToImport.waitForVisible();
   await selectVisible.should.be.true;
   const importcb = await dialog.importCSVButton;
+  const csvButton = await importcb.waitForVisible();
+  csvButton.should.be.true;
   await importcb.click();
   const importSuccess = await dialog.importSuccess;
   await importSuccess.waitForVisible();
   const importCloseButton = await dialog.importCloseButton;
-  await importCloseButton.waitForVisible();
+  const closeButton = await importCloseButton.waitForVisible();
+  closeButton.should.be.true;
   await importCloseButton.click();
 });
 

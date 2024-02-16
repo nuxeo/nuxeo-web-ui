@@ -10,7 +10,8 @@ Then('I can see the administration menu', async function() {
 });
 
 Then('I cannot see the administration button', async function() {
-  const isVisible = await this.ui.adminButton.isVisible();
+  const button = await this.ui.adminButton;
+  const isVisible = await button.isVisible();
   if (isVisible) {
     throw new Error('Expected administration button to not be visible');
   }
