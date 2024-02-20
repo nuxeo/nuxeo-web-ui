@@ -95,10 +95,9 @@ jobs:
           popd
           popd
 
-      - name: add .npmrc
+      - name: Add .npmrc
         run: |
           pushd /tmp/_temp/
-          ls
           rm .npmrc
           touch .npmrc
           popd
