@@ -1,4 +1,4 @@
-import { When } from '@cucumber/cucumber';
+import { When } from '../../node_modules/@cucumber/cucumber';
 /**
  * Import the csv file
  *
