@@ -1,4 +1,5 @@
-import { Then, When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then, When } from '@cucumber/cucumber';
 
 When('I can click on the compare button', async function() {
   await this.ui.browser.waitForVisible();

@@ -1,4 +1,5 @@
-import { Then } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then } from '@cucumber/cucumber';
 
 Then(/^I upload file "(.+)" as document content/, async function(file) {
   const element = await this.ui.browser.el.element('nuxeo-dropzone');

@@ -1,4 +1,5 @@
-import { After } from '../../../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { After } from '@cucumber/cucumber';
 
 /* global document, localStorage  */
 // cleans up local storage fo the current user

@@ -1,4 +1,5 @@
-import { Then } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then } from '@cucumber/cucumber';
 
 Then('I can see the {string} collection', async function(name) {
   const collection = await this.ui.drawer.collections.waitForHasCollection(name);
