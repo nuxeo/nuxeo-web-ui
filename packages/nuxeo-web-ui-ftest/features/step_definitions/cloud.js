@@ -1,4 +1,5 @@
-import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Given, Then, When } from '@cucumber/cucumber';
 
 Given('provider {string} exists in providers', async (provider) =>
   fixtures.providers.create({

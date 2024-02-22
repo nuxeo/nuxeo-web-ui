@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Given, Then, When } from '@cucumber/cucumber';
 
 When(/^I give (\w+) permission to "([^"]*)" on the document$/, async function(permission, name) {
   const viewButtonEle = await this.ui.browser.permissionsViewButton;

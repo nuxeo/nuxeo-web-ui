@@ -1,4 +1,5 @@
-import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Given, Then, When } from '@cucumber/cucumber';
 
 Given('I am on vocabulary page', async function() {
   const administration = await this.ui.administration;
