@@ -1,4 +1,5 @@
-import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Given, Then, When } from '@cucumber/cucumber';
 
 Given(/^I have the following trashed documents$/, (table) => {
   const tasks = table.rows().map((row) => () => {

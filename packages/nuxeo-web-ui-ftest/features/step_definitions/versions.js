@@ -1,4 +1,5 @@
-import { When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { When } from '@cucumber/cucumber';
 
 When(/^I can see the version info bar with text "(.*)"$/, async function(text) {
   const page = await this.ui.browser.documentPage(this.doc.type);

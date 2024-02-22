@@ -1,4 +1,5 @@
-import { Before } from '../../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Before } from '@cucumber/cucumber';
 
 Before((e) => {
   const { tags } = e.pickle;

@@ -1,4 +1,5 @@
-import { Then } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then } from '@cucumber/cucumber';
 
 Then('I click the bulk edit button with {string} layout', async function(layoutName) {
   const browser = await this.ui.browser;

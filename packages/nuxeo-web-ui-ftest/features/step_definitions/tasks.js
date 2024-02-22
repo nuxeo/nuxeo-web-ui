@@ -1,4 +1,5 @@
-import { Then, When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then, When } from '@cucumber/cucumber';
 
 When('I click the View Tasks Dashboard link', async function() {
   const dashboardLink = await this.ui.drawer.tasks.dashboardLink;

@@ -1,4 +1,5 @@
-import { Then } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then } from '@cucumber/cucumber';
 
 Then('I can see my personal workspace', async function() {
   const personalEle = await this.ui.drawer.personal;

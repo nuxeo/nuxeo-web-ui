@@ -1,4 +1,5 @@
-import { Then, When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then, When } from '@cucumber/cucumber';
 import Spreadsheet from '../../pages/spreadsheet';
 
 When('I open the spreadsheet', async function() {

@@ -1,4 +1,5 @@
-import { Then } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then } from '@cucumber/cucumber';
 
 Then('I can navigate to the document selected in the {string} single document suggestion widget', async function(name) {
   const docpageEle = await this.ui.browser.documentPage('DocSuggestion');

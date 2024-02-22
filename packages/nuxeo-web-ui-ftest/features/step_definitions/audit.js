@@ -1,4 +1,5 @@
-import { Then } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then } from '@cucumber/cucumber';
 
 Then('I can see the audit table', async function() {
   const isAuditTableDisplay = await this.ui.administration.audit.isAuditTableDisplayed;
