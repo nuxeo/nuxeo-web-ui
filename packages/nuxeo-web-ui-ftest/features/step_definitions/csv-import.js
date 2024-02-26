@@ -1,4 +1,5 @@
-import { When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { When } from '@cucumber/cucumber';
 
 /**
  * Import the csv file

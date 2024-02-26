@@ -1,4 +1,5 @@
-import { Given, Then, When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Given, Then, When } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
 Then('I can see the {string} search panel', function(name) {

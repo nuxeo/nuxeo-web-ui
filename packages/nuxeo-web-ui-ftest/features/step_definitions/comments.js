@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Given, When, Then } from '@cucumber/cucumber';
 
 Given('I have the following comment thread:', function(table) {
   /*
