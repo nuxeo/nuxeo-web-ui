@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import { Then, When } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Then, When } from '@cucumber/cucumber';
 
 When('I click remove button for {string} document', async function(title) {
   const drawer = await this.ui.drawer;

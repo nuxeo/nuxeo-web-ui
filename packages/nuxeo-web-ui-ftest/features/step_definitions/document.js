@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import { Given, When, Then } from '../../node_modules/@cucumber/cucumber';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Given, When, Then } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 
 Given('I have a {word} document', async function(docType) {
