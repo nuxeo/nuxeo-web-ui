@@ -14,7 +14,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@cucumber/cucumber": "^9.5.1",
+    "@cucumber/cucumber": "9.5.1",
     "@babel/core": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@babel/register": "^7.14.5",
@@ -38,7 +38,7 @@
     "node-fetch": "^2.6.1",
     "nuxeo": "^4.0.3",
     "wdio-chromedriver-service": "^8.1.1",
-    "wdio-cucumberjs-json-reporter": "^5.1.7",
+    "wdio-cucumberjs-json-reporter": "^5.2.1",
     "webdriverio": "8.20.4"
   }
 }
