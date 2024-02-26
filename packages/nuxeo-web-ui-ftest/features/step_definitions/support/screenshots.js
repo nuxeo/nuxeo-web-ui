@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
-
 import { After, Status } from '@cucumber/cucumber';
 
 After(async function(scenario) {

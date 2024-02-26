@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-
 import { Then, When } from '@cucumber/cucumber';
 
 When(/^I select group from the dropdown menu$/, async function() {

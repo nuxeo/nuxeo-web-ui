@@ -1,5 +1,4 @@
 import Nuxeo from 'nuxeo';
-
 import { After } from '@cucumber/cucumber';
 
 global.addedComments = [];

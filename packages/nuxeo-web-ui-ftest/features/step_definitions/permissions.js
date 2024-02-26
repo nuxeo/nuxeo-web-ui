@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-
 import { Given, Then, When } from '@cucumber/cucumber';
 
 When(/^I give (\w+) permission to "([^"]*)" on the document$/, async function(permission, name) {

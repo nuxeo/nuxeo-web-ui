@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-
 import { Given, When, Then } from '@cucumber/cucumber';
 
 Given('I have the following comment thread:', function(table) {

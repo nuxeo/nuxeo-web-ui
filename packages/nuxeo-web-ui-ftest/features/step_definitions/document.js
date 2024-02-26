@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-
 import { Given, When, Then } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 

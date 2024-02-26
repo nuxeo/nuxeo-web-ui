@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-
 import { Then, When } from '@cucumber/cucumber';
 
 When('I click remove button for {string} document', async function(title) {
