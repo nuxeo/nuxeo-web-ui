@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { When } from '@cucumber/cucumber';
 
 When(/^I can see the version info bar with text "(.*)"$/, async function(text) {

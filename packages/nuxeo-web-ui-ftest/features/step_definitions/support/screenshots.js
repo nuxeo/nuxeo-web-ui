@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import { After, Status } from '@cucumber/cucumber';
 
 After(async function(scenario) {

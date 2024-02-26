@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Then } from '@cucumber/cucumber';
 
 Then('I can navigate to the document selected in the {string} single document suggestion widget', async function(name) {

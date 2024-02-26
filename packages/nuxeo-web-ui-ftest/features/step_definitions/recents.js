@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Then, When } from '@cucumber/cucumber';
 
 When('I can click on recently viewed documents item {string}', async function(title) {

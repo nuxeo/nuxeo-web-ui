@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, Then, When } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers';
 

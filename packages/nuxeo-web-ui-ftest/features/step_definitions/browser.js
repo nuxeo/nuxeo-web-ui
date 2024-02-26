@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import { Then, When } from '@cucumber/cucumber';
 
 Then('I can see the {word} tree', async function(tab) {

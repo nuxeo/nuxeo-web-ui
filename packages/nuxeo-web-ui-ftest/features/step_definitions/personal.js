@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Then } from '@cucumber/cucumber';
 
 Then('I can see my personal workspace', async function() {
