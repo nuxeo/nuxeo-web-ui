@@ -546,14 +546,20 @@ Polymer({
     paramMutator: {
       type: Function,
       value() {
-        return function(params) {
+        return function(params, modifyPayload = false) {
           const result = {};
           if (params) {
             // filter null values
             Object.keys(params).forEach((param) => {
               const value = params[param];
               if (value !== null && param !== 'dc:title') {
-                result[param] = typeof value === 'boolean' ? value.toString() : value;
+                if (modifyPayload && Array.isArray(value)) {
+                  result[param] = value.map((item) =>
+                    item && item['entity-type'] ? item.uid || `${item.properties.parent}/${item.id}` : item,
+                  );
+                } else {
+                  result[param] = typeof value === 'boolean' ? value.toString() : value;
+                }
               }
             });
             // allow search to be visible on JSF UI
@@ -767,7 +773,7 @@ Polymer({
     if (this._isSavedSearch()) {
       this.isSavedSearch = true;
       this.selectedSearch = this._searches[this.selectedSearchIdx - 1];
-      this.params = this._mutateParams(this.selectedSearch.params);
+      this.params = this._mutateParams(this.selectedSearch.params, true);
       this._navigateToResults();
     } else {
       this._clear();
@@ -926,8 +932,8 @@ Polymer({
     });
   },
 
-  _mutateParams(params) {
-    return this.paramMutator ? this.paramMutator(params) : params;
+  _mutateParams(params, modifyPayload) {
+    return this.paramMutator ? this.paramMutator(params, modifyPayload) : params;
   },
 
   _computeSavedSearchesParams() {
