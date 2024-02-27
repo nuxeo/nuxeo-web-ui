@@ -119,6 +119,7 @@ Polymer({
 
       #blobEditor {
         @apply --layout-flex-3;
+        min-height: 90px;
       }
 
       #blobList {
@@ -355,6 +356,10 @@ Polymer({
 
       paper-progress {
         margin-top: 8px;
+      }
+
+      .heightFix {
+        height: fit-content;
       }
 
       button.link {
@@ -651,7 +656,7 @@ Polymer({
           </paper-dialog-scrollable>
         </div>
         <div class="buttons horizontal justified layout">
-          <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary">
+          <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary heightFix">
             [[i18n('command.cancel')]]
           </paper-button>
 
@@ -686,7 +691,7 @@ Polymer({
 
           <paper-button
             noink
-            class="primary"
+            class="primary heightFix"
             name="createWithProperties"
             on-tap="_importWithProperties"
             disabled$="[[!_canImportWithMetadata(_creating,_initializingDoc,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]"
