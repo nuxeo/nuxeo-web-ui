@@ -78,6 +78,9 @@ limitations under the License.
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+  
+  <!-- Content security policy (needs Nuxeo.UI.config.expressions.eval = false) -->
+  <meta http-equiv="Content-Security-Policy" content="img-src data: blob: *; default-src blob: *; script-src data: * 'nonce-dummy'; style-src 'unsafe-inline' *; font-src data: *"/>
 
   <style>
     <%@include file="index.css"%>
