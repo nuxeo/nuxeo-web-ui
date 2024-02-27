@@ -288,7 +288,7 @@ Polymer({
       // notify that there was a resize
       this.dispatchEvent(
         new CustomEvent('resize', {
-          bubbles: false,
+          bubbles: true,
           composed: true,
         }),
       );
