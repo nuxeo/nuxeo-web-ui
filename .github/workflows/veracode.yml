@@ -53,7 +53,7 @@ jobs:
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only requiredsss for a private repository by github/codeql-action/upload-sarif to get the Action run status
+      actions: read # only requiredssfffs for a private repository by github/codeql-action/upload-sarif to get the Action run status
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
