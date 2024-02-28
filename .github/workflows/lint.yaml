@@ -22,6 +22,9 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v2
         with:
