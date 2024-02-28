@@ -25,6 +25,9 @@ env:
 jobs:
   unit-test:
     runs-on: [ self-hosted, master ]
+    concurrency:
+        group: ${{ github.workflow }}-${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
+        cancel-in-progress: true
     steps:
       - uses: actions/checkout@v2
         with:
