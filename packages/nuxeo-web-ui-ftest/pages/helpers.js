@@ -17,7 +17,6 @@ const url = async (...args) => {
 
 const clickActionMenu = async (menu, selector) => {
   const action = await menu.$(selector);
-  await action.waitForExist();
   if ((await action.getAttribute('show-label')) !== null) {
     // if the element is inside the dropdown, we need to expand it
     const myButton = await menu.$('#dropdownButton');
