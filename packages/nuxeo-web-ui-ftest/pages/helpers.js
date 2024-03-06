@@ -16,6 +16,7 @@ const url = async (...args) => {
 };
 
 const clickActionMenu = async (menu, selector) => {
+  await driver.pause(2000);
   const action = await menu.$(selector);
   await action.waitForExist();
   if ((await action.getAttribute('show-label')) !== null) {
