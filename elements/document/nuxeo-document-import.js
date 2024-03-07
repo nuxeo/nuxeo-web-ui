@@ -119,6 +119,7 @@ Polymer({
 
       #blobEditor {
         @apply --layout-flex-3;
+        min-height: 72px;
       }
 
       #blobList {
@@ -357,6 +358,11 @@ Polymer({
         margin-top: 8px;
       }
 
+      .heightFix {
+        height: fit-content;
+        width: 100px;
+      }
+
       button.link {
         color: var(--nuxeo-link-color, #3a3a54);
         padding: 0;
@@ -385,7 +391,7 @@ Polymer({
 
     <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
 
-    <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
+    <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical heightFix layout flex">
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="upload vertical layout flex" tabindex="0">
         <div class="suggester">
@@ -651,7 +657,7 @@ Polymer({
           </paper-dialog-scrollable>
         </div>
         <div class="buttons horizontal justified layout">
-          <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary">
+          <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary heightFix">
             [[i18n('command.cancel')]]
           </paper-button>
 
@@ -686,7 +692,7 @@ Polymer({
 
           <paper-button
             noink
-            class="primary"
+            class="primary heightFix"
             name="createWithProperties"
             on-tap="_importWithProperties"
             disabled$="[[!_canImportWithMetadata(_creating,_initializingDoc,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]"
