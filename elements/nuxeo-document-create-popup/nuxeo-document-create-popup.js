@@ -74,6 +74,10 @@ Polymer({
         width: 100%;
       }
 
+      .widthFix {
+        width: 100%;
+      }
+
       iron-pages {
         @apply --layout-flex;
         @apply --layout-horizontal;
@@ -88,7 +92,7 @@ Polymer({
         <nuxeo-slot name="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
       </paper-tabs>
       <div id="holder" class="vertical layout flex">
-        <iron-pages selected="[[selectedTab]]" attr-for-selected="name" selected-attribute="visible">
+        <iron-pages selected="[[selectedTab]]" attr-for-selected="name" class="widthFix" selected-attribute="visible">
           <nuxeo-slot name="CREATE_POPUP_PAGES" model="[[importContext]]"></nuxeo-slot>
           <nuxeo-document-create
             id="simpleCreation"
@@ -100,6 +104,7 @@ Polymer({
           <nuxeo-document-import
             id="bulkCreation"
             name="import"
+            class="widthFix"
             parent="[[parent]]"
             target-path="{{parentPath}}"
             suggester-children="{{suggesterChildren}}"
