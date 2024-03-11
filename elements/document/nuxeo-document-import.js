@@ -119,6 +119,7 @@ Polymer({
 
       #blobEditor {
         @apply --layout-flex-3;
+        min-height: 66px;
       }
 
       #blobList {
@@ -155,7 +156,7 @@ Polymer({
         @apply --layout-vertical;
         @apply --layout-flex;
         background: var(--nuxeo-page-background);
-        min-width: 200px;
+        min-width: 100px;
       }
 
       .blobCheck {
@@ -319,6 +320,10 @@ Polymer({
         padding-left: 8px;
       }
 
+      .upload-error:empty {
+        display: none;
+      }
+
       .upload-error:not(:empty) {
         border-left: 4px solid var(--nuxeo-warn-text, #de350b);
       }
@@ -370,6 +375,14 @@ Polymer({
         color: var(--nuxeo-link-hover-color, #0066ff);
         font: inherit;
       }
+
+      .heightFix {
+        height: fit-content;
+      }
+
+      .widthFix {
+        width: 100%;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -385,7 +398,7 @@ Polymer({
 
     <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
 
-    <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex">
+    <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex widthFix">
       <!--Stage: allow the user to upload files-->
       <div name="upload" class="upload vertical layout flex" tabindex="0">
         <div class="suggester">
@@ -651,7 +664,7 @@ Polymer({
           </paper-dialog-scrollable>
         </div>
         <div class="buttons horizontal justified layout">
-          <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary">
+          <paper-button noink dialog-dismiss on-tap="_cancel" hidden$="[[_creating]]" class="secondary heightFix">
             [[i18n('command.cancel')]]
           </paper-button>
 
@@ -686,7 +699,7 @@ Polymer({
 
           <paper-button
             noink
-            class="primary"
+            class="primary heightFix"
             name="createWithProperties"
             on-tap="_importWithProperties"
             disabled$="[[!_canImportWithMetadata(_creating,_initializingDoc,canCreate,hasLocalFilesUploaded,hasRemoteFiles,localFiles.*,remoteFiles.*)]]"
