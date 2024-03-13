@@ -12,8 +12,8 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ "maintenance-3.0.x" ]
   schedule:
-    # At 01:00 on Sunday
-    - cron: '0 1 * * SUN'
+     # At 20:00 every day
+     - cron: '0 20 * * *'
   workflow_call:
     inputs:
       branch:
@@ -65,7 +65,7 @@ jobs:
     - uses: actions/setup-node@v1
       with:
           registry-url: ${{ env.NPM_REPOSITORY }}
-          node-version: 14
+          node-version: 18
           scope: '@nuxeo'
 
     - uses: actions/setup-java@v2
@@ -113,6 +113,7 @@ jobs:
           echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
           popd
+
     - name: Link elements to Web UI
       run: |
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
@@ -130,64 +131,45 @@ jobs:
                 </server>
               </servers>
               </settings>' > ~/.m2/settings.xml
-    - name: Nuxeo package build
-      run: mvn install -DskipInstall
-    - name: Archive packages
-      uses: actions/upload-artifact@v2
-      with:
-        name: packages
-        path: |
-          plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
 
-    # download the Veracode Static Analysis Pipeline scan jar
-    - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
-    - run: unzip -o pipeline-scan-LATEST.zip   
-    - name: Code Scanning
-      id: code_scanning
-      run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --summary_output=true --file plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
-      continue-on-error: true
-    - name: Convert pipeline scan output to SARIF format
-      id: convert
-      uses: Veracode/veracode-pipeline-scan-results-to-sarif@v1.0.5
+    - name: Delete Node Modules
+      run: |
+        rm -rf node_modules
+        rm -rf packages/nuxeo-designer-catalog/node_modules
+        rm -rf packages/nuxeo-web-ui-ftest/node_modules
+        rm -rf plugin/a11y/node_modules 
+       
+    - name: Delete Test Folders
+      run: |
+        rm -rf nuxeo-elements/testing-helpers/
+        rm -rf nuxeo-elements/ui/test/
+        rm -rf nuxeo-elements/storybook/
+        rm -rf ftest/
+        rm -rf plugin/
+        rm -rf scripts/
+        rm -rf test/
+        rm -rf packages/nuxeo-web-ui-ftest/
+
+    - name: Install zip
+      run: sudo apt-get install zip
+
+    - name: Zip nuxeo-web-ui
+      run: zip -r nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip *
+
+    - name: Get Latest Tag
+      id: get-tag
+      run: echo "::set-output name=TAG::$(git describe --tags --abbrev=0)"
+
+    - name: Veracode Upload And Scan
+      uses: veracode/veracode-uploadandscan-action@0.2.6
       with:
-        pipeline-results-json: results.json
-        output-results-sarif: veracode-results.sarif
-        finding-rule-level: "4:3:0"
-    - name: Upload SARIF file to repository
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        # Path to SARIF file relative to the root of the repository
-        sarif_file: veracode-results.sarif
-    - name: Slack notification
-      if: (github.event_name == 'pull_request' || github.event_name == 'schedule')
-      uses: slackapi/slack-github-action@v1.23.0
-      env:
-        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-      with:
-        channel-id: ${{ env.SLACK_CHANNEL_ID }}
-        payload: |
-          {
-            "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ steps.code_scanning.outcome }} in nuxeo/nuxeo-web-ui <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>",
-            "blocks": [
-              {
-                "type": "section",
-                "text": {
-                   "type": "mrkdwn",
-                   "text": "<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|Code scanning> ${{ job.status }} in nuxeo/nuxeo-WEB-UI <${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ github.ref_name }}>"
-                 }
-              }
-            ]
-          }
-    - name: Send scan result summary to slack
-      uses: crederauk/slack-workflow-summary@v1.2.2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-    - name: Send scan result file to slack
-      uses: adrey/slack-file-upload-action@master
-      with:
-        token: ${{ secrets.SLACK_BOT_TOKEN }}
-        path: results.txt
-        channel: ${{ secrets.SLACK_CHANNEL_ID }}
+        appname: 'Nuxeo Web UI'
+        createprofile: false
+        filepath: 'nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip'
+        vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
+        vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
+        sandboxname: 'master'
+        scantimeout: 600
+        include: '*.war, *.zip, *.js, *.html, *.css, *.json'
+        criticality: 'VeryHigh'
+        includenewmodules: 'true'
