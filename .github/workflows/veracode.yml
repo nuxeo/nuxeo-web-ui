@@ -96,15 +96,18 @@ jobs:
           path: nuxeo-elements
           fetch-depth: 1
           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
-          
+
     - name: add .npmrc
       run: |
+        cat .npmrc
+        echo "-------------------"
         touch .npmrc
         echo '
-          packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
-          @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
-          always-auth=true
+        packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+        @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+        always-auth=true
         ' >> .npmrc
+        echo "-------------------"
         cat .npmrc
 
     - name: Pack Elements modules
