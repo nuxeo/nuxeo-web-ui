@@ -99,7 +99,10 @@ jobs:
 
     - name: add .npmrc
       run: |
-        ls -al
+        cat .npmrc
+        echo '
+          packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+        ' >> .npmrc
 
     - name: Pack Elements modules
       run: |
