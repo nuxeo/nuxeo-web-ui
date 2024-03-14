@@ -110,6 +110,21 @@ jobs:
         echo "-------------------"
         cat .npmrc
 
+    - name: add .npmrc again
+      run: |
+        pushd /tmp/_temp/
+        echo "-------------------"
+        ls
+        echo "-------------------"
+        rm .npmrc
+        touch .npmrc
+        popd
+        echo '
+          packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+          @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+          always-auth=true
+        ' >> /tmp/_temp/.npmrc
+
     - name: Pack Elements modules
       run: |
           pushd nuxeo-elements
