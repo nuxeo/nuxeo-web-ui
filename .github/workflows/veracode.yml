@@ -224,7 +224,7 @@ jobs:
 
     - name: pipeline-scan action step
       id: pipeline-scan
-      uses: veracode/Veracode-pipeline-scan-action@latest
+      uses: veracode/Veracode-pipeline-scan-action@1.0.14
       with:
         vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
         vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
