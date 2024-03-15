@@ -222,16 +222,27 @@ jobs:
       id: get-tag
       run: echo "::set-output name=TAG::$(git describe --tags --abbrev=0)"
 
-    - name: Veracode Upload And Scan
-      uses: veracode/veracode-uploadandscan-action@0.2.6
+    - name: pipeline-scan action step
+      id: pipeline-scan
+      uses: veracode/Veracode-pipeline-scan-action@latest
       with:
-        appname: 'Nuxeo Web UI'
-        createprofile: false
-        filepath: 'nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip'
         vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
         vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
-        sandboxname: 'master'
-        scantimeout: 600
-        include: '*.war, *.zip, *.js, *.html, *.css, *.json'
-        criticality: 'VeryHigh'
-        includenewmodules: 'true'
+        file: 'nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip'
+        request_policy: "VeraDemo Policy"
+        fail_build: true
+
+
+    # - name: Veracode Upload And Scan
+    #   uses: veracode/veracode-uploadandscan-action@0.2.6
+    #   with:
+    #     appname: 'Nuxeo Web UI'
+    #     createprofile: false
+    #     filepath: 'nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip'
+    #     vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
+    #     vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
+    #     sandboxname: 'master'
+    #     scantimeout: 600
+    #     include: '*.war, *.zip, *.js, *.html, *.css, *.json'
+    #     criticality: 'VeryHigh'
+    #     includenewmodules: 'true'
