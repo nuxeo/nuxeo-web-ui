@@ -73,6 +73,25 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
 
+    - name: 'Update settings.xml with server configuration'
+      run: |
+        echo '<settings>
+            <servers>
+              <server>
+                <id>maven-internal</id>
+                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+              </server>
+            </servers>
+            </settings>' > ~/.m2/settings.xml
+
+    - name: view settings.xml
+      run : cat ~/.m2/settings.xml
+          
+    - name: Check Nexus Repository Authentication
+      run: |
+        curl -u ${{ secrets.PACKAGES_AUTH_USER }}:${{ secrets.PACKAGES_AUTH_TOKEN }} ${{ env.NPM_REPOSITORY }}
+
     - name: Determine nuxeo-elements branch to link
       id: pick_nuxeo_elements_branch
       run: |
@@ -81,6 +100,7 @@ jobs:
           else
             echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
           fi
+
     - name: Install Web UI
       env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
@@ -89,6 +109,7 @@ jobs:
           pushd packages/nuxeo-web-ui-ftest
           npm install
           popd
+
     - name: Checkout the nuxeo-elements repo
       uses: actions/checkout@v2
       with:
@@ -97,12 +118,6 @@ jobs:
           fetch-depth: 1
           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
 
-    - name: add .npmrc
-      run: |
-        cat .npmrc
-        echo '
-          packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
-        ' >> .npmrc
 
     - name: Pack Elements modules
       run: |
@@ -121,6 +136,19 @@ jobs:
           popd
           popd
 
+    - name: add .npmrc
+      run: |
+        pushd /tmp/_temp/
+        ls
+        rm .npmrc
+        touch .npmrc
+        popd
+        echo '
+          packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+          @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+          always-auth=true
+        ' >> /tmp/_temp/.npmrc
+
     - name: Link elements to Web UI
       run: |
           npm config set @nuxeo:registry https://packages.nuxeo.com/repository/npm-public/
@@ -128,18 +156,7 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
-    - name: 'Update settings.xml with server configuration'
-      run: |
-          echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
-
+  
     - name: Delete Node Modules
       run: |
         rm -rf node_modules
