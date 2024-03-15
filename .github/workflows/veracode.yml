@@ -62,7 +62,7 @@ jobs:
       with:
           ref: ${{ env.BRANCH_NAME }}
 
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v3
       with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           node-version: 18
