@@ -213,7 +213,7 @@ jobs:
         rm -rf packages/nuxeo-web-ui-ftest/
 
     - name: Install zip
-      run: sudo apt-get install zip
+      run: apt-get install zip
 
     - name: Zip nuxeo-web-ui
       run: zip -r nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip *
