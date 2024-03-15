@@ -102,11 +102,8 @@ jobs:
 
     - name: Install Docker
       run: |
-        # Update the package index
-        sudo apt-get update
-        
         # Install necessary packages to allow apt to use a repository over HTTPS
-        sudo apt-get install -y \
+        apt-get install -y \
             apt-transport-https \
             ca-certificates \
             curl \
@@ -116,16 +113,13 @@ jobs:
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
         
         # Add Docker repository to APT sources
-        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        
-        # Update the package index again
-        sudo apt-get update
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
         
         # Install Docker
-        sudo apt-get install -y docker-ce
+        apt-get install -y docker-ce
         
         # Verify Docker installation
-        sudo docker --version
+        docker --version
 
 
     - name: view settings.xml
