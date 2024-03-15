@@ -84,6 +84,21 @@ jobs:
               </server>
             </servers>
             </settings>' > ~/.m2/settings.xml
+          
+    - name: Get OS Details
+      run: |
+        if [ -f /etc/os-release ]; then
+          source /etc/os-release
+          echo "Operating System: $PRETTY_NAME"
+        elif [ -f /etc/redhat-release ]; then
+          cat /etc/redhat-release
+        elif [ -f /etc/centos-release ]; then
+          cat /etc/centos-release
+        elif [ -f /etc/debian_version ]; then
+          cat /etc/debian_version
+        else
+          echo "Unable to determine operating system"
+        fi
 
     - name: view settings.xml
       run : cat ~/.m2/settings.xml
