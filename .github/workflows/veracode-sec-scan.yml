@@ -209,8 +209,3 @@ jobs:
           include: '*.war, *.zip, *.js, *.html, *.css, *.json'
           criticality: 'High'
           includenewmodules: 'true'
-
-      - name: Delete artifact
-        uses: actions/delete-artifact@v2
-        with:
-          name: nuxeo-web-ui
