@@ -191,6 +191,11 @@ jobs:
           name: nuxeo-web-ui
           path: .
 
+      - name: List downloaded artifact
+        run: |
+          ls -l
+          pwd
+
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.6
         with:
