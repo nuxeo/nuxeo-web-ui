@@ -5,6 +5,7 @@ on:
     workflows: ["Veracode Build"]
     types:
       - completed
+  workflow_dispatch:
   workflow_call:
     inputs:
       branch:
