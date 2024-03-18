@@ -57,6 +57,12 @@ jobs:
     runs-on: [self-hosted, master]
     steps:
 
+
+    - name: Determine latest tag
+      id: latest_tag
+      run: |
+        echo "::set-output name=TAG::$(git describe --tags `git rev-list --tags --max-count=1`)"
+        echo nuxeo-web-ui-${{ steps.latest_tag.outputs.TAG }}.zip
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
     - uses: actions/checkout@v2
       with:
