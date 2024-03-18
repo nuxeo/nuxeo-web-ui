@@ -114,6 +114,19 @@ jobs:
           popd
           popd
 
+    - name: add .npmrc
+      run: |
+        pushd /tmp/_temp/
+        ls
+        rm .npmrc
+        touch .npmrc
+        popd
+        echo '
+          packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+          @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+          always-auth=true
+        ' >> /tmp/_temp/.npmrc
+
     - name: Link elements to Web UI
       run: |
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
@@ -156,7 +169,7 @@ jobs:
     - name: Zip nuxeo-web-ui
       run: |
         echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip
-        zip -r nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip *
+        zip -r nuxeo-web-ui.zip *
 
     - name: Upload ZIP as artifact
       uses: actions/upload-artifact@v2
