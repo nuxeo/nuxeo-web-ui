@@ -207,7 +207,7 @@ jobs:
           sandboxname: 'master'
           scantimeout: 600
           include: '*.war, *.zip, *.js, *.html, *.css, *.json'
-          criticality: 'VeryHigh'
+          criticality: 'High'
           includenewmodules: 'true'
 
       - name: Delete artifact
