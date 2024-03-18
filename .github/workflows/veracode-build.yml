@@ -58,13 +58,20 @@ jobs:
     steps:
 
 
-    - name: Set env
-      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-    - name: Test
+    - name: Get Tags
+      id: tags
       run: |
-        echo $RELEASE_VERSION
-        echo ${{ env.RELEASE_VERSION }}
+        git fetch --tags
+        echo "Tags fetched"
+    - name: Get Latest Tag
+      id: latest-tag
+      run: |
+        latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+        echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
+
+    - name: Use Latest Tag
+      run: |
+        echo "The latest tag is $LATEST_TAG"
 
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
     - uses: actions/checkout@v2
