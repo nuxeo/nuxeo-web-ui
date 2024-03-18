@@ -201,7 +201,7 @@ jobs:
         with:
           appname: 'Nuxeo Web UI'
           createprofile: false
-          filepath: 'nuxeo-web-ui.zip'
+          filepath: '/home/runner/work/nuxeo-web-ui/nuxeo-web-ui/nuxeo-web-ui.zip'
           vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
           vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
           sandboxname: 'master'
