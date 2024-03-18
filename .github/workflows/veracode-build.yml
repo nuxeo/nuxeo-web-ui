@@ -40,7 +40,7 @@ on:
 env:
   REFERENCE_BRANCH: maintenance-3.0.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
+  BRANCH_NAME: ${{ 'maintenance-3.0.x' }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 permissions:
@@ -56,22 +56,6 @@ jobs:
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     runs-on: [self-hosted, master]
     steps:
-
-
-    - name: Get Tags
-      id: tags
-      run: |
-        git fetch --tags
-        echo "Tags fetched"
-    - name: Get Latest Tag
-      id: latest-tag
-      run: |
-        latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-        echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
-
-    - name: Use Latest Tag
-      run: |
-        echo "The latest tag is $LATEST_TAG"
 
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
     - uses: actions/checkout@v2
@@ -89,14 +73,6 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
 
-    - name: Determine nuxeo-elements branch to link
-      id: pick_nuxeo_elements_branch
-      run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
-          else
-            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
-          fi
     - name: Install Web UI
       env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
@@ -111,7 +87,7 @@ jobs:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
           fetch-depth: 1
-          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+          ref: ${{ env.BRANCH_NAME }}
 
     - name: Pack Elements modules
       run: |
