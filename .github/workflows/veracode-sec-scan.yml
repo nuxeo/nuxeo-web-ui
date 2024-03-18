@@ -178,6 +178,7 @@ jobs:
         path: nuxeo-web-ui.zip
   
   sast-scan:
+    needs: sast-scan-build
     permissions:
       contents: read
       security-events: write
