@@ -1,66 +1,66 @@
-name: Veracode Scan
+# name: Veracode Scan
 
-on:
-  workflow_run:
-    workflows: ["Veracode Build"]
-    types:
-      - completed
-  workflow_dispatch:
-  workflow_call:
-    inputs:
-      branch:
-        description: 'The branch to Analyze'
-        type: string
-        required: true
-    secrets:
-      NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
-        required: true
-      PACKAGES_AUTH_USER:
-        description: 'PACKAGES_AUTH_USER'
-        required: true
-      PACKAGES_AUTH_TOKEN:
-        description: 'PACKAGES_AUTH_TOKEN'
-        required: true
-      VERACODE_API_ID:
-        description: 'VERACODE_API_ID'
-        required: true
-      VERACODE_API_KEY:
-        description: 'VERACODE_API_KEY'
-        required: true
+# on:
+#   workflow_run:
+#     workflows: ["Veracode Build"]
+#     types:
+#       - completed
+#   workflow_dispatch:
+#   workflow_call:
+#     inputs:
+#       branch:
+#         description: 'The branch to Analyze'
+#         type: string
+#         required: true
+#     secrets:
+#       NPM_PACKAGES_TOKEN:
+#         description: 'NPM_PACKAGES_TOKEN'
+#         required: true
+#       PACKAGES_AUTH_USER:
+#         description: 'PACKAGES_AUTH_USER'
+#         required: true
+#       PACKAGES_AUTH_TOKEN:
+#         description: 'PACKAGES_AUTH_TOKEN'
+#         required: true
+#       VERACODE_API_ID:
+#         description: 'VERACODE_API_ID'
+#         required: true
+#       VERACODE_API_KEY:
+#         description: 'VERACODE_API_KEY'
+#         required: true
 
-env:
-  REFERENCE_BRANCH: maintenance-3.0.x
-  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
+# env:
+#   REFERENCE_BRANCH: maintenance-3.0.x
+#   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+#   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
 
-permissions:
-  contents: read
+# permissions:
+#   contents: read
 
-jobs:
-  sast-scan:
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: nuxeo-web-ui
-          path: .
+# jobs:
+#   sast-scan:
+#     permissions:
+#       contents: read
+#       security-events: write
+#       actions: read
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Download artifact
+#         uses: actions/download-artifact@v2
+#         with:
+#           name: nuxeo-web-ui
+#           path: .
 
-      - name: Veracode Upload And Scan
-        uses: veracode/veracode-uploadandscan-action@0.2.6
-        with:
-          appname: 'Nuxeo Web UI'
-          createprofile: false
-          filepath: 'nuxeo-web-ui.zip'
-          vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
-          vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
-          sandboxname: 'master'
-          scantimeout: 600
-          include: '*.war, *.zip, *.js, *.html, *.css, *.json'
-          criticality: 'VeryHigh'
-          includenewmodules: 'true'
+#       - name: Veracode Upload And Scan
+#         uses: veracode/veracode-uploadandscan-action@0.2.6
+#         with:
+#           appname: 'Nuxeo Web UI'
+#           createprofile: false
+#           filepath: 'nuxeo-web-ui.zip'
+#           vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
+#           vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
+#           sandboxname: 'master'
+#           scantimeout: 600
+#           include: '*.war, *.zip, *.js, *.html, *.css, *.json'
+#           criticality: 'VeryHigh'
+#           includenewmodules: 'true'
