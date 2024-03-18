@@ -1,0 +1,166 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# This workflow will initiate a Veracode Static Analysis Pipeline scan, return a results.json and convert to SARIF for upload as a code scanning alert
+
+name: Veracode Build
+
+on:
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "maintenance-3.0.x" ]
+  schedule:
+     # At 20:00 every day
+     - cron: '0 20 * * *'
+  workflow_call:
+    inputs:
+      branch:
+        description: 'The branch to Analyze'
+        type: string
+        required: true
+    secrets:
+      NPM_PACKAGES_TOKEN:
+        description: 'NPM_PACKAGES_TOKEN'
+        required: true
+      PACKAGES_AUTH_USER:
+        description: 'PACKAGES_AUTH_USER'
+        required: true
+      PACKAGES_AUTH_TOKEN:
+        description: 'PACKAGES_AUTH_TOKEN'
+        required: true
+      VERACODE_API_ID:
+        description: 'VERACODE_API_ID'
+        required: true
+      VERACODE_API_KEY:
+        description: 'VERACODE_API_KEY'
+        required: true
+
+env:
+  REFERENCE_BRANCH: maintenance-3.0.x
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+permissions:
+  contents: read
+
+jobs:
+  # This workflow contains a job to build and submit pipeline scan, you will need to customize the build process accordingly and make sure the artifact you build is used as the file input to the pipeline scan file parameter
+  sast-scan:
+    # The type of runner that the job will run on
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: [self-hosted, master]
+    steps:
+
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
+    - uses: actions/checkout@v2
+      with:
+          ref: ${{ env.BRANCH_NAME }}
+
+    - uses: actions/setup-node@v1
+      with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: 18
+          scope: '@nuxeo'
+
+    - uses: actions/setup-java@v2
+      with: 
+          distribution: 'zulu'
+          java-version: '11'
+
+    - name: Determine nuxeo-elements branch to link
+      id: pick_nuxeo_elements_branch
+      run: |
+          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
+            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
+          else
+            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
+          fi
+    - name: Install Web UI
+      env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+    - name: Checkout the nuxeo-elements repo
+      uses: actions/checkout@v2
+      with:
+          repository: nuxeo/nuxeo-elements
+          path: nuxeo-elements
+          fetch-depth: 1
+          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+
+    - name: Pack Elements modules
+      run: |
+          pushd nuxeo-elements
+          pushd core
+          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd ui
+          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd dataviz
+          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd testing-helpers
+          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          popd
+
+    - name: Link elements to Web UI
+      run: |
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+    - name: 'Update settings.xml with server configuration'
+      run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
+
+    - name: Delete Node Modules
+      run: |
+        rm -rf node_modules
+        rm -rf packages/nuxeo-designer-catalog/node_modules
+        rm -rf packages/nuxeo-web-ui-ftest/node_modules
+        rm -rf plugin/a11y/node_modules 
+       
+    - name: Delete Test Folders
+      run: |
+        rm -rf nuxeo-elements/testing-helpers/
+        rm -rf nuxeo-elements/ui/test/
+        rm -rf nuxeo-elements/storybook/
+        rm -rf ftest/
+        rm -rf plugin/
+        rm -rf scripts/
+        rm -rf test/
+        rm -rf packages/nuxeo-web-ui-ftest/
+
+    - name: Install zip
+      run: sudo apt-get install zip
+
+    - name: Zip nuxeo-web-ui
+      run: |
+        echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip
+        zip -r nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip *
+
+    - name: Upload ZIP as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: nuxeo-web-ui
+        path: nuxeo-web-ui.zip
+    
