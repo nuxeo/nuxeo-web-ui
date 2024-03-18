@@ -1,4 +1,4 @@
-name: Veracode Build
+name: Veracode Scan
 
 on:
   workflow_run:
