@@ -24,7 +24,7 @@ env:
 
 jobs:
   unit-test:
-    runs-on: [ self-hosted, master ]
+    runs-on: [self-hosted, master]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -35,6 +35,10 @@ jobs:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
           node-version: 18
+
+      - name: cache clean
+        id: cache_clean
+        run: npm cache clean --force
 
       - name: Install
         env:
