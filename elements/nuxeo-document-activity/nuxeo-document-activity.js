@@ -108,6 +108,12 @@ Polymer({
   _areGatherableActivities(a, b) {
     let delta = new Date(a.eventDate) - new Date(b.eventDate);
     delta = delta / 1000 / 60 / 60; // Converts ms to hours
+    if (a && a.eventId === 'download' && a.extended && !a.extended.clientReason) {
+      a.extended.clientReason = 'download';
+    }
+    if (b && b.eventId === 'download' && b.extended && !b.extended.clientReason) {
+      b.extended.clientReason = 'download';
+    }
     return !!(
       a.extended &&
       a.extended.clientReason &&
