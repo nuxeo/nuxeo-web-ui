@@ -57,10 +57,10 @@ limitations under the License.
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 
     <!-- Content security policy (needs Nuxeo.UI.config.expressions.eval = false) -->
-    <meta
+    <!-- <meta
       http-equiv="Content-Security-Policy"
       content="img-src data: blob: *; default-src blob: *; script-src data: * 'nonce-dummy'; style-src 'unsafe-inline' *; font-src data: *"
-    />
+    /> -->
 
     <link rel="stylesheet" type="text/css" href="index.css" />
   </head>
@@ -119,7 +119,7 @@ limitations under the License.
               ],
               blob: ['appLinks', 'preview'],
             },
-            expressions: { eval: false },
+            // expressions: { eval: false },
             dateFormat: 'LL',
             dateTimeFormat: 'LLL',
             firstDayOfWeek: '',
