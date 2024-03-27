@@ -74,6 +74,13 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             border-radius: 2px;
           }
 
+          .trash-icon-parent {
+            display: inline-block;
+            height: 16px;
+            width: 16px;
+            color: var(--nuxeo-warn-text, #ff0000);
+          }
+
           #ancestors {
             max-width: 100%;
             list-style-type: none;
@@ -133,6 +140,9 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
               title="[[_title(document)]]"
             >
               [[_title(document)]]
+              <span class="trash-icon-parent">
+                <paper-icon-button hidden$="[[!document.isTrashed]]" icon="[[icon]]" noink></paper-icon-button>
+              </span>
             </a>
             <nav aria-label="Breadcrumb">
               <ol id="ancestors"></ol>
@@ -151,6 +161,10 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
         document: {
           type: Object,
           observer: '_setBreadcrumbElements',
+        },
+        icon: {
+          type: String,
+          value: 'nuxeo:delete',
         },
       };
     }
@@ -248,7 +262,9 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
 
     _title(document) {
       if (document) {
-        return document.type === 'Root' ? this.i18n('browse.root') : document.title;
+        const lastHyphenIndex = document.uid.lastIndexOf('-');
+        const extractedSubstring = lastHyphenIndex !== -1 ? document.uid.substring(lastHyphenIndex + 1) : document.uid;
+        return document.type === 'Root' ? this.i18n('browse.root') : `${document.title} (${extractedSubstring})`;
       }
     }
 

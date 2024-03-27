@@ -243,6 +243,12 @@
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="parentinspectorAction" slot="DOCUMENT_ACTIONS" order="11">
+  <template>
+    <nuxeo-parent-inspector-button document="[[document]]"></nuxeo-parent-inspector-button>
+  </template>
+</nuxeo-slot-content>
+
 <nuxeo-slot-content name="addToColDocumentAction" slot="DOCUMENT_ACTIONS" order="20">
   <template>
     <nuxeo-add-to-collection-button document="[[document]]"></nuxeo-add-to-collection-button>
