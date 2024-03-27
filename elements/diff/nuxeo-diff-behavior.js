@@ -341,7 +341,7 @@ export const DiffBehavior = {
       offset += hunk.range.original[1] - hunk.range.new[1];
       start += hunk.range.original[1] + (end - start);
     });
-    return result;
+    return decodeURIComponent(result);
   },
 
   /* delta helpers: arrays */
