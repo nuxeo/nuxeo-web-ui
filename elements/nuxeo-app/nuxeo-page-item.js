@@ -52,6 +52,9 @@ Polymer({
       :host(:focus) {
         background-color: #dedfe3;
       }
+      :host(:focus-visible) {
+        outline: auto;
+      }
     </style>
 
     <div>[[i18n(label)]]</div>
