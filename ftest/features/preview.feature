@@ -57,5 +57,5 @@ Feature: Content Preview
       | sample.mp4 | nuxeo-video-viewer |
       | sample.mp3 | audio              |
       | sample.pdf | nuxeo-pdf-viewer   |
-      | sample.odt | object              |
-      | sample.txt | object              |
+      | sample.odt | nuxeo-pdf-viewer   |
+      | sample.txt | nuxeo-pdf-viewer   |
