@@ -191,7 +191,7 @@ Polymer({
       }
 
       :host([loading]) .loadable {
-        opacity: 0.25;
+        opacity: 0.26;
       }
 
       paper-spinner-lite {
