@@ -76,9 +76,7 @@ Polymer({
       <div class="item">
         <label>[[i18n('documentInfo.publications')]]</label>
         <div>
-          <a href$="[[_urlForPub(document)]]">
-            [[document.contextParameters.publications.resultsCount]]
-          </a>
+          <a href$="[[_urlForPub(document)]]"> [[document.contextParameters.publications.resultsCount]] </a>
         </div>
       </div>
     </template>
@@ -92,7 +90,7 @@ Polymer({
     </div>
     <div class="item">
       <label>[[i18n('documentInfo.by')]]</label>
-      <nuxeo-user-tag user="[[document.properties.dc:creator]]"></nuxeo-user-tag>
+      <nuxeo-tags type="user" items="[[_creatorList]]"></nuxeo-tags>
     </div>
     <div class="item">
       <label>[[i18n('documentInfo.contributors')]]</label>
@@ -113,6 +111,10 @@ Polymer({
       value: false,
       reflectToAttribute: true,
     },
+    _creatorList: {
+      type: Array,
+      value: [],
+    },
   },
 
   _showPub(doc) {
@@ -130,6 +132,9 @@ Polymer({
       this.document.contextParameters &&
       this.document.contextParameters.runningWorkflows &&
       this.document.contextParameters.runningWorkflows.length > 0;
+    if (this.document && this.document.properties) {
+      this._creatorList = [this.document.properties['dc:creator']];
+    }
   },
 
   _urlForPub() {
