@@ -77,10 +77,17 @@ export default class Group extends BasePage {
   }
 
   async searchResult(searchTerm) {
-    const ele = await this.el;
-    await driver.pause(1000);
-    const results = await ele.elements('nuxeo-card[name="groups"] .table [name="id"]');
-    const match = await results.find(async (e) => (await e.getText()) === searchTerm);
-    return match;
+    let matchedElements;
+    const match = async (e) => {
+      const currentText = await e.getText();
+      return currentText === searchTerm;
+    };
+    await driver.waitUntil(async () => {
+      matchedElements = await this.el.elements('nuxeo-card[name="groups"] .table [name="id"]');
+      const results = await matchedElements.some(match);
+      return results;
+    });
+
+    return matchedElements.find(match);
   }
 }
