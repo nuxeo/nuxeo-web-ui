@@ -2,7 +2,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Then, When } from '@cucumber/cucumber';
 
-When(/^I select group from the dropdown menu$/, async function() {
+When(/^I select group from the dropdown menu$/, async function () {
   const groupELe = this.ui.group;
   const groupDropEle = await groupELe.dropdown;
   await groupDropEle.waitForVisible();
@@ -10,20 +10,20 @@ When(/^I select group from the dropdown menu$/, async function() {
   await groupItemEle.click();
 });
 
-When(/^I can see the new group form$/, async function() {
+When(/^I can see the new group form$/, async function () {
   const groupELe = this.ui.group;
   const groupFormEle = await groupELe.createGroupForm;
   await groupFormEle.waitForVisible();
 });
 
-Then(/^I can create a group with the following properties:$/, async function(table) {
+Then(/^I can create a group with the following properties:$/, async function (table) {
   const groupELe = this.ui.group;
   await groupELe.fillMultipleValues(table);
   const groupButtonEle = await groupELe.createGroupButton;
   await groupButtonEle.click();
 });
 
-Then(/^I can search for the following groups$/, async function(table) {
+Then(/^I can search for the following groups$/, async function (table) {
   const rows = await table.rows();
   for (let i = 0; i < rows.length; i++) {
     const row = await rows[i];
@@ -31,6 +31,7 @@ Then(/^I can search for the following groups$/, async function(table) {
     const groups = await this.ui.group;
     await groups.searchFor(rowFirstCol);
     const resultEle = await groups.searchResult(rowFirstCol);
+    await driver.pause(3000);
     const visible = await resultEle.waitForVisible();
     if (!visible) {
       throw new Error('Result not found');
@@ -50,7 +51,7 @@ Then(/^I can search for the following groups$/, async function(table) {
   }
 });
 
-Then(/^I can edit the following groups$/, async function(table) {
+Then(/^I can edit the following groups$/, async function (table) {
   const rows = await table.rows();
   for (let i = 0; i < rows.length; i++) {
     const row = await rows[i];
@@ -71,7 +72,7 @@ Then(/^I can edit the following groups$/, async function(table) {
   }
 });
 
-Then(/^I can delete the following groups$/, async function(table) {
+Then(/^I can delete the following groups$/, async function (table) {
   const rows = await table.rows();
   for (let i = 0; i < rows.length; i++) {
     const row = await rows[i];
