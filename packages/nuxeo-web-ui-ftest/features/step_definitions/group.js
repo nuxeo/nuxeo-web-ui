@@ -31,6 +31,7 @@ Then(/^I can search for the following groups$/, async function(table) {
     const groups = await this.ui.group;
     await groups.searchFor(rowFirstCol);
     const resultEle = await groups.searchResult(rowFirstCol);
+    await driver.pause(5000);
     const visible = await resultEle.waitForVisible();
     if (!visible) {
       throw new Error('Result not found');
