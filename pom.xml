@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
   <name>Nuxeo Web UI - Parent</name>
   <description>Nuxeo Web UI - Parent</description>
-  <version>3.0.33-SNAPSHOT</version>
+  <version>3.0.33-rc.2</version>
 
   <properties>
     <nuxeo.target.version>2021.*</nuxeo.target.version>
