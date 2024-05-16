@@ -84,8 +84,10 @@ export const DocumentCreationBehavior = [
 
     newDocument(type, properties) {
       if (!schemaFetcher) {
-        schemaFetcher = document.createElement('nuxeo-resource');
+        schemaFetcher = document.createElement('div');
+        schemaFetcher.innerHTML = '<nuxeo-resource></nuxeo-resource>';
         this.shadowRoot.appendChild(schemaFetcher);
+        [schemaFetcher] = schemaFetcher.getElementsByTagName('nuxeo-resource');
       }
       schemaFetcher.path = `path/${this.targetPath}/@emptyWithDefault`;
       schemaFetcher.params = { type: this.selectedDocType.type };
