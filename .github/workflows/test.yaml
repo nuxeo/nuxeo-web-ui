@@ -41,6 +41,20 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm install
 
+      - uses: actions/setup-java@v2
+        with: 
+            distribution: 'zulu'
+            java-version: '11'
+
+      - name: Check Java Version
+        run: java --version
+
+      - name: Nuxeo package build
+        run: |
+          mvn -ntp install -DskipInstall
+          mvn -B -nsu -ntp -f plugin/itests/addon install
+          mvn -B -nsu -ntp -f plugin/itests/marketplace install
+
       - name: Unit tests
         env:
           SAUCE_USERNAME: nuxeo-web-ui
