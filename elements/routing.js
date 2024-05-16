@@ -196,7 +196,7 @@ app.router = {
     }
     const isFullpath = /^http(s)?:\/\//.test(path);
     if (isFullpath) {
-      window.location = encodeURI(path);
+      window.location = path;
     } else {
       page(path);
     }
