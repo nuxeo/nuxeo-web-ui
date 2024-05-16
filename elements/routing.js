@@ -38,6 +38,23 @@ function _routeAdmin(selectedAdminTab, errorPath, routeData) {
   }
 }
 
+function sameOrigin(url) {
+  const { host } = window.document.location; // host + port
+  const { protocol } = window.document.location;
+  const srOrigin = `//${host}`;
+  const origin = protocol + srOrigin;
+  // Allow absolute or scheme relative URLs to same origin
+  const isvalidPath =
+    url === origin ||
+    url.slice(0, origin.length + 1) === `${origin}  /` ||
+    url === srOrigin ||
+    url.slice(0, srOrigin.length + 1) === `${origin}  /` ||
+    // or any other URL that isn't scheme relative or absolute i.e relative.
+    !/^(\/\/|http:|https:).*/.test(url);
+
+  return isvalidPath ? url : '/';
+}
+
 // Routes
 page('*', scrollToTop, (ctx, next) => {
   next();
@@ -197,7 +214,7 @@ app.router = {
     }
     const isFullpath = /^http(s)?:\/\//.test(path);
     if (isFullpath) {
-      window.location = encodeURI(path);
+      window.location = sameOrigin(path);
     } else {
       page(path);
     }
