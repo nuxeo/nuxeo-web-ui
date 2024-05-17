@@ -20,8 +20,6 @@ import { config } from '@nuxeo/nuxeo-elements';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 
-let schemaFetcher = null;
-
 /**
  * `Nuxeo.DocumentCreationBehavior`
  *
@@ -78,24 +76,34 @@ export const DocumentCreationBehavior = [
       subtypes: {
         type: Array,
       },
+
+      _resource: {
+        type: Object,
+        readOnly: true,
+      },
+    },
+
+    get resource() {
+      if (!this._resource) {
+        this._set_resource(document.createElement('nuxeo-resource'));
+        this.shadowRoot.appendChild(this._resource);
+      }
+      return this._resource;
     },
 
     observers: ['_validateLocation(isValidTargetPath,suggesterChildren)', '_updateDocument(selectedDocType, parent)'],
 
     newDocument(type, properties) {
-      if (!schemaFetcher) {
-        schemaFetcher = document.createElement('nuxeo-resource');
-        this.shadowRoot.appendChild(schemaFetcher);
-      }
-      schemaFetcher.path = `path/${this.targetPath}/@emptyWithDefault`;
-      schemaFetcher.params = { type: this.selectedDocType.type };
-      schemaFetcher.headers = {
+      const { resource } = this;
+      resource.path = `path/${this.targetPath}/@emptyWithDefault`;
+      resource.params = { type: this.selectedDocType.type };
+      resource.headers = {
         properties: '*',
         'fetch-document': 'properties',
         'translate-directoryEntry': 'label',
       };
-      schemaFetcher.enrichers = config.get('enrichers', {});
-      return schemaFetcher.get().then((doc) => {
+      resource.enrichers = config.get('enrichers', {});
+      return resource.get().then((doc) => {
         if (properties) {
           Object.keys(properties).forEach((prop) => {
             doc.properties[prop] = properties[prop];
