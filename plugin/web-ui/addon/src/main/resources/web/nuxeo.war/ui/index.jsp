@@ -98,15 +98,15 @@ limitations under the License.
     </div>
   </nuxeo-app>
 
-  <script src="vendor/webcomponentsjs/webcomponents-loader.js"></script>
+  <script nonce="dummy" src="vendor/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script src="vendor/html-imports/html-imports.min.js"></script>
+  <script nonce="dummy" src="vendor/html-imports/html-imports.min.js"></script>
 
-  <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
+  <script nonce="dummy" src="vendor/web-animations/web-animations-next-lite.min.js"></script>
 
-  <script src="config.jsp"></script>
+  <script nonce="dummy" src="config.jsp"></script>
 
-  <script src="main.bundle.js"></script>
+  <script nonce="dummy" src="main.bundle.js"></script>
 
 </body>
 
