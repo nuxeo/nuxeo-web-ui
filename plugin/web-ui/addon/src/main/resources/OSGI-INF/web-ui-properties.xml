@@ -50,5 +50,9 @@
 
     <!-- Properties to be fetched when loading the user object in user management, default is empty -->
     <property name="org.nuxeo.web.ui.user.management.fetch.document" list="true"></property>
+
+    <!-- allowed url to redirect -->
+    <property name="org.nuxeo.web.ui.trustedDomains">${nuxeo.trustedDomains}</property>
+    
   </extension>
 </component>
