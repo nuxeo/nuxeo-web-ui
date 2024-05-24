@@ -27,6 +27,23 @@ function scrollToTop(ctx, next) {
   next();
 }
 
+function getTrustedDomains(path) {
+  const trustedDomains = Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.trustedDomains;
+  const pathUrl = new URL(path);
+  const { hostname } = pathUrl;
+  const queryParams = pathUrl.search.split('?')[1];
+  const encodepath = queryParams ? `${pathUrl.origin}?${encodeURIComponent(queryParams)}` : path;
+  if (!trustedDomains) return { encodepath, isvalidUrl: true };
+  const trustedDomainList = trustedDomains.split(',');
+  const isvalidUrl = trustedDomainList.some((url) => {
+    const isFullpath = /^http(s)?:\/\//.test(url);
+    const parsedURL = isFullpath ? url : `https://${url}`;
+    const { hostname: currentUrlhost } = new URL(parsedURL);
+    return currentUrlhost.toLowerCase() === hostname.toLowerCase();
+  });
+  return { encodepath, isvalidUrl };
+}
+
 function _routeAdmin(selectedAdminTab, errorPath, routeData) {
   const hasPermission =
     app.currentUser.isAdministrator || app.currentUser.extendedGroups.find((grp) => grp.name === 'powerusers');
@@ -37,7 +54,6 @@ function _routeAdmin(selectedAdminTab, errorPath, routeData) {
     app.showError(404, '', errorPath);
   }
 }
-
 // Routes
 page('*', scrollToTop, (ctx, next) => {
   next();
@@ -197,7 +213,12 @@ app.router = {
     }
     const isFullpath = /^http(s)?:\/\//.test(path);
     if (isFullpath) {
-      window.location = path;
+      const { encodepath, isvalidUrl } = getTrustedDomains(path);
+      if (isvalidUrl) {
+        const link = document.createElement('a');
+        link.setAttribute('href', encodepath);
+        link.click();
+      }
     } else {
       page(path);
     }
