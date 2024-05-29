@@ -52,7 +52,7 @@
     <property name="org.nuxeo.web.ui.user.management.fetch.document" list="true"></property>
 
     <!-- allowed url to redirect -->
-    <property name="org.nuxeo.web.ui.trustedDomains">${nuxeo.trustedDomains}</property>
-    
+   <property name="org.nuxeo.web.ui.trustedDomains">${org.nuxeo.web.ui.trustedDomains:=''}</property>
+
   </extension>
 </component>
