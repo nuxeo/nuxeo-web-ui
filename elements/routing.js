@@ -27,21 +27,34 @@ function scrollToTop(ctx, next) {
   next();
 }
 
-function getTrustedDomains(path) {
+function createUrlFromString(str) {
+  const httpRegex = /^https?:\/\//;
+  const wwwRegex = /www\./;
+  str = httpRegex.test(str) ? str : `http://${str}`;
+  str = wwwRegex.test(str) ? str : str.replace(/^(https?:\/\/)?/, '$1www.');
+  return str;
+}
+
+function isTrustedDomain(path) {
   const trustedDomains = Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.trustedDomains;
+  if (!trustedDomains) return true;
+  const modifiedPathUrl = createUrlFromString(path);
+  const pathUrl = new URL(modifiedPathUrl);
+  const { hostname: userHostName } = pathUrl;
+  const trustedDomainList = trustedDomains.split(',');
+  const isValidUrl = trustedDomainList.some((url) => {
+    const updatedUrl = createUrlFromString(url);
+    const { hostname: currentUrlHostName } = new URL(updatedUrl);
+    return currentUrlHostName?.toLowerCase() === userHostName?.toLowerCase();
+  });
+  return isValidUrl;
+}
+
+function encodeQueryParams(path) {
   const pathUrl = new URL(path);
-  const { hostname } = pathUrl;
   const queryParams = pathUrl.search.split('?')[1];
   const encodepath = queryParams ? `${pathUrl.origin}?${encodeURIComponent(queryParams)}` : path;
-  if (!trustedDomains) return { encodepath, isvalidUrl: true };
-  const trustedDomainList = trustedDomains.split(',');
-  const isvalidUrl = trustedDomainList.some((url) => {
-    const isFullpath = /^http(s)?:\/\//.test(url);
-    const parsedURL = isFullpath ? url : `https://${url}`;
-    const { hostname: currentUrlhost } = new URL(parsedURL);
-    return currentUrlhost.toLowerCase() === hostname.toLowerCase();
-  });
-  return { encodepath, isvalidUrl };
+  return encodepath;
 }
 
 function _routeAdmin(selectedAdminTab, errorPath, routeData) {
@@ -213,8 +226,9 @@ app.router = {
     }
     const isFullpath = /^http(s)?:\/\//.test(path);
     if (isFullpath) {
-      const { encodepath, isvalidUrl } = getTrustedDomains(path);
-      if (isvalidUrl) {
+      const isValidUrl = isTrustedDomain(path);
+      if (isValidUrl) {
+        const encodepath = encodeQueryParams(path);
         const link = document.createElement('a');
         link.setAttribute('href', encodepath);
         link.click();
