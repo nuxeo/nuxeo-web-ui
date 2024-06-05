@@ -12,6 +12,8 @@
           to="nuxeo.war/ui/i18n/messages-es.json" />
     <copy from="nuxeo.war/ui/i18n/messages-pt-PT.json"
           to="nuxeo.war/ui/i18n/messages-pt.json" />
+    <copy from="nuxeo.war/ui/i18n/messages-sv-SE.json"
+          to="nuxeo.war/ui/i18n/messages-sv.json" />
     <!-- Add fallback to four-letter locales -->
     <copy from="nuxeo.war/ui/i18n/messages-fr.json"
           to="nuxeo.war/ui/i18n/messages-fr-FR.json" />
