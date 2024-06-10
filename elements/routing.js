@@ -37,7 +37,6 @@ function _routeAdmin(selectedAdminTab, errorPath, routeData) {
     app.showError(404, '', errorPath);
   }
 }
-
 // Routes
 page('*', scrollToTop, (ctx, next) => {
   next();
