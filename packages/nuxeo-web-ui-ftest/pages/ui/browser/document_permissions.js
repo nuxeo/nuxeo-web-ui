@@ -93,6 +93,7 @@ export default class DocumentPermissions extends BasePage {
   }
 
   async setPermissions(name, opts) {
+    console.log('inside set permission 1')
     opts = opts || {};
     const permission = opts.permission || '';
     const timeFrame = opts.timeFrame || '';
@@ -101,18 +102,23 @@ export default class DocumentPermissions extends BasePage {
     const { notify } = opts;
     if (name) {
       await this.setFieldValue('userGroup', name);
+      console.log('inside set permission 2')
     }
     await this.setFieldValue('right', permission);
+    console.log('inside set permission 3')
     const timeButton = await this.timeFrameButton;
-    console.log('timeButton', timeButton)
+    console.log('inside set permission 4', timeButton)
     await timeButton.click();
+    console.log('inside set permission 5')
     if (timeFrame === 'datebased') {
       await this.setFieldValue('begin', begin);
+      console.log('inside set permission 6')
       if (end) {
         await this.setFieldValue('end', end);
       }
     }
     await this.setFieldValue('notify', notify);
+    console.log('inside set permission 7')
   }
 
   async editPermissions(opts) {

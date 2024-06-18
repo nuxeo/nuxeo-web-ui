@@ -228,11 +228,13 @@ Then(/^I share my "(.+)" search with (.+)/, async function (searchName, username
   await permissionButton.waitForVisible();
   console.log('permissionButton',permissionButton)
   await permissionButton.click();
+  console.log('permissionButtonClick')
   await permissionView.setPermissions(username, {
     permission: 'Read',
     timeFrame: 'permanent',
     notify: false,
   });
+  console.log('permissionView setprmission done')
   const createPermissionButton = await permissionView.createPermissionButton;
   console.log('createPermissionButton11111',createPermissionButton)
   await createPermissionButton.waitForVisible();
