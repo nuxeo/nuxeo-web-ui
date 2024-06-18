@@ -44,8 +44,13 @@ export default class Search extends Results {
       await ele.waitForVisible();
       const buttons = await driver.$$('nuxeo-saved-search-actions paper-item');
       const rowTitles = await driver.$$('nuxeo-saved-search-actions paper-item').map((img) => img.getText());
-      const index = rowTitles.findIndex((currenTitle) => currenTitle === 'Share');
-      const result = await buttons[index];
+      let rowIndex;
+      for (let index = 0; index < rowTitles.length; index++) {
+        if (rowTitles[index] === 'Share') {
+          rowIndex = index;
+        }
+      }
+      const result = await buttons[rowIndex];
       return result;
     })();
   }

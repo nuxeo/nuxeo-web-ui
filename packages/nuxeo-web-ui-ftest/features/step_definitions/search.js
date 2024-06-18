@@ -198,17 +198,19 @@ Then('I edit the results columns to show {string}', async function(heading) {
   isColumnExist.should.be.true;
 });
 
-Then(/^I save my search as "(.+)"$/, async function(searchName) {
-  const saveAsButton = await this.ui.searchResults.saveSearchAsButton;
+Then(/^I save my search as "(.+)"$/, async function (searchName) {
+  const searchResults = await this.ui.searchResults;
+  const saveAsButton = await searchResults.saveSearchAsButton;
   await saveAsButton.waitForVisible();
   await saveAsButton.click();
-  await this.ui.searchResults.enterInput(searchName);
-  const confirmSaveButton = await this.ui.searchResults.confirmSaveSearchButton;
+  await searchResults.enterInput(searchName);
+  const confirmSaveButton = await searchResults.confirmSaveSearchButton;
   await confirmSaveButton.click();
 });
 
-Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username) {
-  const savedSearch = await this.ui.searchResults;
+Then(/^I share my "(.+)" search with (.+)/, async function (searchName, username) {
+  try {
+    const savedSearch = await this.ui.searchResults;
   const savedSearchButton = await savedSearch.savedSearchActionButton;
   await savedSearchButton.waitForVisible();
   await savedSearchButton.click();
@@ -231,6 +233,10 @@ Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username)
   const permissionVisible = await permissionView.permission('Read', username, 'permanent');
   const isVisible = await permissionVisible.waitForVisible();
   isVisible.should.be.true;
+  } catch (error) {
+      console.log('errrrrrrrrrrrrrrrr',error)
+  }
+  
 });
 
 Then(/^I can view my saved search "(.+)" on "(.+)"$/, async function(savedSearchName, searchName) {

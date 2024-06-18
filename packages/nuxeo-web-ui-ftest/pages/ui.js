@@ -78,8 +78,11 @@ export default class UI extends BasePage {
   }
 
   get searchResults() {
-    const { displayMode } = this.results;
-    return new Search(`nuxeo-data-${displayMode}`);
+    return (async () => {
+      const { displayMode } = await this.results;
+      const search = await new Search(`nuxeo-data-${displayMode}`);
+      return search;
+    })();
   }
 
   get createDialog() {
