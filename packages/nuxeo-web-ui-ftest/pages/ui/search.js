@@ -35,7 +35,10 @@ export default class Search extends Results {
   }
 
   get savedSearchActionButton() {
-    return driver.element('nuxeo-saved-search-actions paper-icon-button');
+    return(async()=>{
+      const el = await driver.$('nuxeo-saved-search-actions paper-icon-button');
+      return el
+    })();
   }
 
   get shareAction() {
@@ -43,10 +46,9 @@ export default class Search extends Results {
       const ele = await driver.$('nuxeo-saved-search-actions paper-item');
       await ele.waitForVisible();
       const buttons = await driver.$$('nuxeo-saved-search-actions paper-item');
-
       let rowIndex;
       for (let index = 0; index < buttons.length; index++) {
-        const buttonText = await buttons[index].getText()
+        const buttonText = await buttons[index].getText();
         if (buttonText=== 'Share') {
           rowIndex = index;
           break;

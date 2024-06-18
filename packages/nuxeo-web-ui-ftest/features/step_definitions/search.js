@@ -220,8 +220,11 @@ Then(/^I share my "(.+)" search with (.+)/, async function (searchName, username
   console.log('shareActionButton',shareActionButton)
   await shareActionButton.click();
   const searchForm = await this.ui.searchForm(searchName);
+  console.log('searchForm',searchForm)
   const permissionView = await searchForm.permissionsView;
+  console.log('permissionView',permissionView)
   const permissionButton = await permissionView.newPermissionButton;
+  console.log('permissionButton1111111',permissionButton)
   await permissionButton.waitForVisible();
   console.log('permissionButton',permissionButton)
   await permissionButton.click();
