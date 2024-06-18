@@ -213,14 +213,17 @@ Then(/^I share my "(.+)" search with (.+)/, async function (searchName, username
   const savedSearch = await this.ui.searchResults;
   const savedSearchButton = await savedSearch.savedSearchActionButton;
   await savedSearchButton.waitForVisible();
+  console.log('savedSearchButton',savedSearchButton)
   await savedSearchButton.click();
   const shareActionButton = await savedSearch.shareAction;
   await shareActionButton.waitForVisible();
+  console.log('shareActionButton',shareActionButton)
   await shareActionButton.click();
   const searchForm = await this.ui.searchForm(searchName);
   const permissionView = await searchForm.permissionsView;
   const permissionButton = await permissionView.newPermissionButton;
   await permissionButton.waitForVisible();
+  console.log('permissionButton',permissionButton)
   await permissionButton.click();
   await permissionView.setPermissions(username, {
     permission: 'Read',
@@ -229,9 +232,11 @@ Then(/^I share my "(.+)" search with (.+)/, async function (searchName, username
   });
   const createPermissionButton = await permissionView.createPermissionButton;
   await createPermissionButton.waitForVisible();
+  console.log('createPermissionButton',createPermissionButton)
   await createPermissionButton.click();
   const permissionVisible = await permissionView.permission('Read', username, 'permanent');
   const isVisible = await permissionVisible.waitForVisible();
+  console.log('isVisible',isVisible)
   isVisible.should.be.true;
   } catch (error) {
       console.log('errrrrrrrrrrrrrrrr',error)
