@@ -104,6 +104,7 @@ export default class DocumentPermissions extends BasePage {
     }
     await this.setFieldValue('right', permission);
     const timeButton = await this.timeFrameButton;
+    console.log('timeButton', timeButton)
     await timeButton.click();
     if (timeFrame === 'datebased') {
       await this.setFieldValue('begin', begin);

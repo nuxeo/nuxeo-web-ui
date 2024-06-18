@@ -234,6 +234,7 @@ Then(/^I share my "(.+)" search with (.+)/, async function (searchName, username
     notify: false,
   });
   const createPermissionButton = await permissionView.createPermissionButton;
+  console.log('createPermissionButton11111',createPermissionButton)
   await createPermissionButton.waitForVisible();
   console.log('createPermissionButton',createPermissionButton)
   await createPermissionButton.click();
