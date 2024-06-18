@@ -210,7 +210,7 @@ Then(/^I save my search as "(.+)"$/, async function (searchName) {
 
 Then(/^I share my "(.+)" search with (.+)/, async function (searchName, username) {
   try {
-    const savedSearch = await this.ui.searchResults;
+  const savedSearch = await this.ui.searchResults;
   const savedSearchButton = await savedSearch.savedSearchActionButton;
   await savedSearchButton.waitForVisible();
   await savedSearchButton.click();
