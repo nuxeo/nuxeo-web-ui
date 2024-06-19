@@ -64,9 +64,11 @@ export default class DocumentPermissions extends BasePage {
     const ele = await this.el;
     await ele.waitForVisible();
     if (field === 'begin' || field === 'end') {
-      return ele.element(`[id="${field}"]`);
+      const idElement = await ele.element(`[id="${field}"]`);
+       return idElement;
     }
-    return ele.element(`[name="${field}"]`);
+    const nameElement = await ele.element(`[name="${field}"]`);
+    return nameElement;
   }
 
   async getEditField(field) {
