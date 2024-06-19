@@ -83,7 +83,9 @@ export default class DocumentPermissions extends BasePage {
   async setFieldValue(field, value) {
     const fieldEl = await this.getField(field);
     await fieldEl.waitForVisible();
+    console.log('setFieldValue111', fieldEl)
     const finalSet = await fixtures.layouts.setValue(fieldEl, value);
+    console.log('finalSet2222', finalSet)
     return finalSet;
   }
 
