@@ -101,6 +101,7 @@ export default class DocumentPermissions extends BasePage {
     const end = opts.end || '';
     const { notify } = opts;
     if (name) {
+      console.log('inside set permission 8')
       await this.setFieldValue('userGroup', name);
       console.log('inside set permission 2')
     }
