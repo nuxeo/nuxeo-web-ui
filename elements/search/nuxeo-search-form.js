@@ -558,7 +558,6 @@ Polymer({
                     let output = item.id || item;
                     while (item?.properties?.parent) {
                       output = `${item.properties.parent.id}/${output}`;
-                      item = item.properties.parent;
                     }
                     return output;
                   });
