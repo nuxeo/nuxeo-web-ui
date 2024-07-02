@@ -43,6 +43,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 
 /**
  `nuxeo-search-form`
@@ -431,7 +432,7 @@ Polymer({
   `,
 
   is: 'nuxeo-search-form',
-  behaviors: [NotifyBehavior, I18nBehavior, RoutingBehavior, IronResizableBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, RoutingBehavior, IronResizableBehavior, FormatBehavior],
   importMeta: import.meta,
 
   properties: {
@@ -819,6 +820,17 @@ Polymer({
   },
 
   _search() {
+    if (this.form && this.form.searchTerm) {
+      this.set('params.ecm_fulltext', this.formatFulltext(this.form.searchTerm));
+      this.set(
+        'params.highlight',
+        'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name',
+      );
+    } else if (this.params && this.params.ecm_fulltext) {
+      this.set('params.ecm_fulltext', '');
+      delete this.params.ecm_fulltext;
+      delete this.params.highlight;
+    }
     if (this.results && this._validate()) {
       this.results.reset();
       return this._fetch(this.results).then(this._navigateToResults.bind(this));
