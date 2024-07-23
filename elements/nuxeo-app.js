@@ -459,11 +459,7 @@ Polymer({
       </paper-header-panel>
     </paper-drawer-panel>
 
-    <nuxeo-document-create-button
-      class$="[[page]]"
-      parent="[[currentParent]]"
-      hidden$="[[isMobile]]"
-    ></nuxeo-document-create-button>
+    <nuxeo-document-create-button class$="[[page]]" parent="[[currentParent]]"></nuxeo-document-create-button>
     <nuxeo-document-create-popup
       id="importPopup"
       parent="[[currentParent]]"
