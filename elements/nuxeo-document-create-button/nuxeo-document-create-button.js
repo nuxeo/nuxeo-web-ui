@@ -185,6 +185,7 @@ Polymer({
   },
 
   _displayWizard(e) {
+    e.preventDefault();
     if (!this.hidden) {
       this.fire('create-document', e.detail);
     }
