@@ -78,6 +78,7 @@ limitations under the License.
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+
   <style>
     <%@include file="index.css"%>
   </style>
@@ -97,15 +98,15 @@ limitations under the License.
     </div>
   </nuxeo-app>
 
-  <script src="vendor/webcomponentsjs/webcomponents-loader.js" nonce="dummy"></script>
+  <script src="vendor/webcomponentsjs/webcomponents-loader.js"></script>
 
-  <script src="vendor/html-imports/html-imports.min.js" nonce="dummy"></script>
+  <script src="vendor/html-imports/html-imports.min.js"></script>
 
-  <script src="vendor/web-animations/web-animations-next-lite.min.js" nonce="dummy"></script>
+  <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
 
-  <script src="config.jsp" nonce="dummy"></script>
+  <script src="config.jsp"></script>
 
-  <script src="main.bundle.js" nonce="dummy"></script>
+  <script src="main.bundle.js"></script>
 
 </body>
 
