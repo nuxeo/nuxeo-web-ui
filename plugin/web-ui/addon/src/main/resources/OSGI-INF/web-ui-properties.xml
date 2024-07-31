@@ -51,5 +51,8 @@
     <!-- Properties to be fetched when loading the user object in user management, default is empty -->
     <property name="org.nuxeo.web.ui.user.management.fetch.document" list="true"></property>
 
+    <!-- Max results for nuxeo select options. default is 1000.-->
+    <property name="org.nuxeo.web.ui.pagination.nuxeoSelectOptions.listingMaxItems">${org.nuxeo.pagination.nuxeoSelectOptions.maxAllowedItems:=1000}</property>
+
   </extension>
 </component>
