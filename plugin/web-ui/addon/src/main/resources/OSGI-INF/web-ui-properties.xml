@@ -53,6 +53,8 @@
 
     <!-- Max results for nuxeo select options. default is 1000.-->
     <property name="org.nuxeo.web.ui.pagination.nuxeoSelectOptions.listingMaxItems">${org.nuxeo.pagination.nuxeoSelectOptions.maxAllowedItems:=1000}</property>
+    <!-- allowed url to redirect -->
+   <property name="org.nuxeo.web.ui.trustedDomains">${org.nuxeo.web.ui.trustedDomains:=}</property>
 
   </extension>
 </component>
