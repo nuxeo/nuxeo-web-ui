@@ -186,15 +186,22 @@ const development = merge([
     devtool: 'cheap-module-source-map',
     plugins: [new CopyWebpackPlugin({ patterns: [...tmp, ...polyfills, ...addons, ...thirdparty] })],
     devServer: {
-      contentBase: TARGET,
+      static: {
+        directory: TARGET,
+      },
       compress: true,
-      overlay: true,
+      client: {
+        overlay: true,
+      },
       port: 5000,
       host: '0.0.0.0',
       historyApiFallback: true,
-      proxy: {
-        '/nuxeo': `http://${process.env.NUXEO_HOST || 'localhost:8080'}/`,
-      },
+      proxy: [
+        {
+          context: ['/nuxeo'],
+          target: `http://${process.env.NUXEO_HOST || 'localhost:8080'}/`,
+        },
+      ],
     },
   },
 ]);
@@ -226,6 +233,11 @@ const production = merge([
       }),
       ...analyzer,
     ],
+    devServer: {
+      client: {
+        overlay: false,
+      },
+    },
   },
 ]);
 
