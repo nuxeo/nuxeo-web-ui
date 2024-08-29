@@ -62,8 +62,8 @@
     "wdio-json-reporter": "^3.0.0",
     "webpack": "^5.3.0",
     "webpack-bundle-analyzer": "^3.9.0",
-    "webpack-cli": "^4.1.0",
-    "webpack-dev-server": "^3.11.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.4",
     "webpack-log": "^3.0.1",
     "webpack-merge": "^5.2.0",
     "workbox-cli": "3.6.3"
