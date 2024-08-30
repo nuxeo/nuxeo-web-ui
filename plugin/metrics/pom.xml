@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.nuxeo.web.ui</groupId>
     <artifactId>nuxeo-web-ui-parent</artifactId>
-    <version>3.1.12-SNAPSHOT</version>
+    <version>3.1.12-rc.5</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
