@@ -134,21 +134,21 @@ jobs:
 
       - name: Archive cucumber reports
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: cucumber-reports
           path: ftest/target/cucumber-reports/
 
       - name: Archive screenshots
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: screenshots
           path: ftest/target/screenshots/
 
       - name: Archive logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: logs
           path: |
@@ -157,7 +157,7 @@ jobs:
 
       - name: Archive packages
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: packages
           path: |
