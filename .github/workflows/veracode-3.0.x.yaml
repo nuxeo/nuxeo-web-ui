@@ -8,11 +8,8 @@
 name: Veracode Maintenance 3.0.x
 
 on:
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "maintenance-3.0.x" ]
   schedule:
-     - cron: '30 14 * * *'   # 14:30 UTC = 8:00 PM IST
+    - cron: '30 14 * * *'   # 14:30 UTC = 8:00 PM IST
   workflow_call:
     inputs:
       branch:
