@@ -158,7 +158,7 @@ Polymer({
               </div>
             </template>
           </div>
-          <a href="javascript:undefined" on-tap="_toggleGraphDialog" class="view-graph">[[i18n('tasks.viewGraph')]]</a>
+          <a href="#" on-tap="_toggleGraphDialog" class="view-graph">[[i18n('tasks.viewGraph')]]</a>
           <div class="horizontal spaced">
             <span>[[i18n(tasks.directive)]]</span>
           </div>
@@ -314,7 +314,8 @@ Polymer({
       .finally(() => this._setProcessing(false));
   },
 
-  _toggleGraphDialog() {
+  _toggleGraphDialog(e) {
+    e.preventDefault();
     this.$.graph.show();
   },
 
