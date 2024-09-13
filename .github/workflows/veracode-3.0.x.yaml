@@ -10,33 +10,11 @@ name: Veracode Maintenance 3.0.x
 on:
   schedule:
     - cron: '30 14 * * *'   # 14:30 UTC = 8:00 PM IST
-  workflow_call:
-    inputs:
-      branch:
-        description: 'The branch to Analyze'
-        type: string
-        required: true
-    secrets:
-      NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
-        required: true
-      PACKAGES_AUTH_USER:
-        description: 'PACKAGES_AUTH_USER'
-        required: true
-      PACKAGES_AUTH_TOKEN:
-        description: 'PACKAGES_AUTH_TOKEN'
-        required: true
-      VERACODE_API_ID:
-        description: 'VERACODE_API_ID'
-        required: true
-      VERACODE_API_KEY:
-        description: 'VERACODE_API_KEY'
-        required: true
 
 env:
   REFERENCE_BRANCH: maintenance-3.0.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
+  BRANCH_NAME: ${{ 'maintenance-3.0.x' }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 permissions:
@@ -167,7 +145,7 @@ jobs:
         zip -r nuxeo-web-ui.zip *
 
     - name: Upload ZIP as artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: nuxeo-web-ui
         path: nuxeo-web-ui.zip
@@ -181,7 +159,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: nuxeo-web-ui
           path: .
