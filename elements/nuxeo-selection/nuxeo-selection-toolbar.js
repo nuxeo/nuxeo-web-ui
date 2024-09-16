@@ -112,7 +112,7 @@ Polymer({
             <span class="count" aria-live="polite">
               [[i18n('selectionToolbar.selected.items', selectedItems.length)]]
             </span>
-            <a class="selectionLink" on-tap="toogleSelectedItemsPopup" href="#">
+            <a class="selectionLink" on-tap="toogleSelectedItemsPopup" href="javascript:void(0)">
               <span>[[i18n('selectionToolbar.display.selection')]]</span>
             </a>
           </template>
@@ -121,7 +121,7 @@ Polymer({
           <template is="dom-if" if="[[selectAllActive]]">
             <span class="count" aria-live="polite">[[i18n('selectionToolbar.selected.all', _resultsCount)]]</span>
           </template>
-          <a class="selectionLink" on-tap="clearSelection" href="#">
+          <a class="selectionLink" on-tap="clearSelection" href="javascript:void(0)">
             <span>[[i18n('command.clear')]]</span>
           </a>
         </div>
@@ -188,13 +188,11 @@ Polymer({
     this.hidden = !this.selectedItems || this.selectedItems.length === 0;
   },
 
-  toogleSelectedItemsPopup(e) {
-    e.preventDefault();
+  toogleSelectedItemsPopup() {
     this.$$('#selectedItemsPopup').toggle();
   },
 
-  clearSelection(e) {
-    e.preventDefault();
+  clearSelection() {
     this.fire('clear-selected-items');
   },
 });
