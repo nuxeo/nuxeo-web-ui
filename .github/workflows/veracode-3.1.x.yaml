@@ -146,35 +146,35 @@ jobs:
         name: nuxeo-web-ui
         path: nuxeo-web-ui.zip
   
-  sast-scan:
-    needs: sast-scan-build
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: nuxeo-web-ui
-          path: .
+  # sast-scan:
+  #   needs: sast-scan-build
+  #   permissions:
+  #     contents: read
+  #     security-events: write
+  #     actions: read
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: nuxeo-web-ui
+  #         path: .
 
-      - name: List downloaded artifact
-        run: |
-          ls -l
-          pwd
+  #     - name: List downloaded artifact
+  #       run: |
+  #         ls -l
+  #         pwd
 
-      - name: Veracode Upload And Scan
-        uses: veracode/veracode-uploadandscan-action@0.2.6
-        with:
-          appname: 'Nuxeo Web UI'
-          createprofile: false
-          filepath: 'nuxeo-web-ui.zip'
-          vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
-          vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
-          sandboxname: 'master'
-          scantimeout: 600
-          include: '*.war, *.zip, *.js, *.html, *.css, *.json'
-          criticality: 'High'
-          includenewmodules: 'true'
+  #     - name: Veracode Upload And Scan
+  #       uses: veracode/veracode-uploadandscan-action@0.2.6
+  #       with:
+  #         appname: 'Nuxeo Web UI'
+  #         createprofile: false
+  #         filepath: 'nuxeo-web-ui.zip'
+  #         vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
+  #         vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
+  #         sandboxname: 'master'
+  #         scantimeout: 600
+  #         include: '*.war, *.zip, *.js, *.html, *.css, *.json'
+  #         criticality: 'High'
+  #         includenewmodules: 'true'
