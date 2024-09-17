@@ -9,7 +9,7 @@ name: Veracode Maintenance 3.1.x
 
 on:
   schedule:
-    - cron: '30 15 * * *'  # 15:30 UTC = 9:00 PM IST
+    - cron: '30 17 * * *'  # 17:30 UTC = 11:00 PM IST
 
 env:
   REFERENCE_BRANCH: maintenance-3.1.x
