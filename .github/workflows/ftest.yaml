@@ -130,7 +130,7 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
-        run: mvn -ntp install -Pftest -DskipInstall
+        run: mvn -ntp install -Pftest -DskipInstall  -Dcucumber.options="--timeout 100000" 
 
       - name: Archive cucumber reports
         if: ${{ always() }}
