@@ -15,10 +15,18 @@ export default class Login {
   }
 
   static get() {
+    const waitForPageLoad = () => {
+      browser.waitUntil(() => browser.execute(() => document.readyState === 'complete'), {
+        timeout: 60 * 1000, // 60 seconds
+        timeoutMsg: 'Message on failure',
+      });
+    };
+
     return (async () => {
       const baseUrl = process.env.NUXEO_URL || '';
-      await driver.pause(1000);
       await browser.url(baseUrl ? `${baseUrl}/logout` : 'logout');
+      await browser.getTitle();
+      waitForPageLoad();
       return new this();
     })();
   }
