@@ -46,6 +46,11 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
 
+      - name: Install google chrome 128.0.6613.137  
+        run: |
+          wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_128.0.6613.137-1_amd64.deb
+          apt install -y --allow-downgrades ./google-chrome-stable_128.0.6613.137-1_amd64.deb
+
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
         run: |
