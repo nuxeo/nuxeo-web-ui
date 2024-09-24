@@ -16,9 +16,11 @@ export default class Login {
 
   static get() {
     return (async () => {
-      const baseUrl = process.env.NUXEO_URL || '';
+      const baseUrl = (await process.env.NUXEO_URL) || '';
+      /* eslint-disable no-console */
+      console.log(baseUrl);
       await driver.pause(1000);
-      await browser.url(baseUrl ? `${baseUrl}/logout` : 'logout');
+      await browser.url((await baseUrl) ? `${baseUrl}/logout` : 'logout');
       return new this();
     })();
   }
