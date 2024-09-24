@@ -111,27 +111,26 @@ if (process.env.DRIVER_VERSION == null) {
   // eslint-disable-next-line no-console
   console.log(`${version} detected.`);
   const match = version && version.match(/([0-9]+)\./);
-
   if (match) {
-    // const checkVersion = match[1];
+    const checkVersion = '128.0.6613.137';
     try {
-      done = fetch(
-        `https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/128.0.6613.137/linux64/chromedriver-linux64.zip`,
-      ).then((response) => {
-        if (response.ok) {
-          return response
-            .text()
-            .then((newDriverVersion) => {
-              // eslint-disable-next-line no-console
-              console.log(`ChromeDriver ${newDriverVersion} needed.`);
-              process.env.DRIVER_VERSION = newDriverVersion;
-            })
-            .catch((e) => {
-              console.error('unable to parse ChromeDriver version: ', e);
-            });
-        }
-        console.error('unable to fetch ChromeDriver version: ', response);
-      });
+      done = fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then(
+        (response) => {
+          if (response.ok) {
+            return response
+              .text()
+              .then((newDriverVersion) => {
+                // eslint-disable-next-line no-console
+                console.log(`ChromeDriver ${newDriverVersion} needed.`);
+                process.env.DRIVER_VERSION = newDriverVersion;
+              })
+              .catch((e) => {
+                console.error('unable to parse ChromeDriver version: ', e);
+              });
+          }
+          console.error('unable to fetch ChromeDriver version: ', response);
+        },
+      );
     } catch (e) {
       console.error('unable to fetch ChromeDriver version: ', e);
     }
