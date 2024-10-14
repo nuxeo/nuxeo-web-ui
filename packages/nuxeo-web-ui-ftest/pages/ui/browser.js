@@ -149,7 +149,7 @@ export default class Browser extends BasePage {
     }
     const dialog = await new AddToCollectionDialog(`${this._selector}  nuxeo-add-to-collection-button #dialog`);
     await dialog.waitForVisible();
-    await dialog.addToCollection(name);
+    await dialog.addToCollection(name.toLowerCase());
     const docCollectionEle = await this.el.$('nuxeo-document-collections nuxeo-tag');
     await docCollectionEle.waitForVisible();
   }
