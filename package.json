@@ -57,7 +57,7 @@
     "style-loader": "^2.0.0",
     "url-loader": "^4.1.1",
     "vm-browserify": "^1.1.2",
-    "wdio-chromedriver-service": "^8.1.1",
+    "wdio-chromedriver-service": "8.1.1",
     "wdio-cucumber-reporter": "0.0.2",
     "wdio-json-reporter": "^3.0.0",
     "webpack": "^5.3.0",
@@ -192,7 +192,7 @@
     "three": "~0.125.0",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1",
-    "webdriverio": "^8.29.1"
+    "webdriverio": "8.40.2"
   },
   "husky": {
     "hooks": {
