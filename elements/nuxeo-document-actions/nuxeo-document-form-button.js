@@ -142,7 +142,6 @@ Polymer({
 
   _openDialog() {
     this.dialog.open();
-    this.fire('dialog-opened');
   },
 
   _closeDialog() {
