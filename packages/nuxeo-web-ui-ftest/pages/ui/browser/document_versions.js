@@ -95,7 +95,8 @@ export default class DocumentVersions extends BasePage {
       return true;
     }
     const listItems = await this.listItems;
-    await listItems.$('div[name="version-item"] .title').waitForVisible();
+    const versionItem = await listItems.$('div[name="version-item"] .title')
+    await versionItem.waitForVisible();
     const listItems1 = await this.listItems.$$('div[name="version-item"]');
     const itemsTitle = await browser.$$('div[name="version-item"]').map((img) => img.$('.title').getText());
     const index = itemsTitle.findIndex((currenTitle) => currenTitle === label);

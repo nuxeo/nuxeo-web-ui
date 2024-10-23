@@ -199,11 +199,13 @@ Then('I edit the results columns to show {string}', async function(heading) {
 });
 
 Then(/^I save my search as "(.+)"$/, async function(searchName) {
-  const saveAsButton = await this.ui.searchResults.saveSearchAsButton;
+  const savedSearch = await this.ui.searchResults;
+  const saveAsButton = await savedSearch.saveSearchAsButton;
   await saveAsButton.waitForVisible();
   await saveAsButton.click();
-  await this.ui.searchResults.enterInput(searchName);
-  const confirmSaveButton = await this.ui.searchResults.confirmSaveSearchButton;
+  await savedSearch.enterInput(searchName);
+  await driver.pause(2000);
+  const confirmSaveButton = await savedSearch.confirmSaveSearchButton;
   await confirmSaveButton.click();
 });
 

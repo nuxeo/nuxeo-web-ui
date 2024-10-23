@@ -31,7 +31,8 @@ export default class DocumentPublications extends BasePage {
     let index;
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
-      if (row.isVisible('nuxeo-data-table-cell a.path')) {
+      const isRowVisible = await row.isVisible('nuxeo-data-table-cell a.path')
+      if (isRowVisible) {
         const foundPathEle = await row.$('nuxeo-data-table-cell a.path');
         const foundPath = await foundPathEle.getText();
         const foundPathLowerCase = await foundPath.trim().toLowerCase();
