@@ -158,6 +158,7 @@ export default class CloudServices extends BasePage {
 
   async deleteClient(clientId) {
     const rows = await browser.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+    await driver.pause(4000);
     const deleted = await browser
       .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
       .map((img) => img.$('nuxeo-data-table-cell span[name="id"]').getText());
