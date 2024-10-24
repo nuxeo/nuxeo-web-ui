@@ -189,10 +189,11 @@ Then(/^I can see the document has (\d+) publications$/, async function (nbPublic
 });
 
 Then(/^I can see the document has the following publication$/, async function (table) {
-  const rows = table.rows();
+  const rows = await table.rows();
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    const publication = await this.ui.browser.publicationView;
+    const browser = await this.ui.browser;
+    const publication = await browser.publicationView;
     const isRowPresent = await publication.hasPublication(row[0], row[1], row[2]);
     await isRowPresent.should.be.true;
   }
