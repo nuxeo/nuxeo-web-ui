@@ -183,7 +183,7 @@ export default class CloudServices extends BasePage {
     console.log('rowsrowsrowsrowsrows111111', rows)
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index]
-      const rowText = row.getText();
+      const rowText = await row.getText();
       console.log('rowTextrowTextrowTextrowText', rowText)
       const isRowVisible = await rows[index].$('[name="id"]').waitForVisible();
       console.log('isRowVisibleisRowVisibleisRowVisibleisRowVisible', isRowVisible)
