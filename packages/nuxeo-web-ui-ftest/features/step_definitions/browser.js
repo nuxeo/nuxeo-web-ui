@@ -245,6 +245,7 @@ Then(/^I can perform the following publications$/, async function (table) {
     const { target, rendition, version, override } = rows[i];
     const dialog = await browser.publishDialog;
     const isdocumentPublished = await dialog.publish(target, rendition, version, override);
+    console.log('isdocumentPublishedisdocumentPublishedisdocumentPublished', isdocumentPublished)
     isdocumentPublished.should.be.true;
     const newCount = await page.publicationsCount;
     let check;
