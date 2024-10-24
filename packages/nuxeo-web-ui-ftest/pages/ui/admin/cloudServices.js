@@ -163,8 +163,8 @@ export default class CloudServices extends BasePage {
       .map((img) => img.$('nuxeo-data-table-cell span[name="id"]').getText());
     console.log('rowsrowsrowsrowsrows', rows)
     console.log('deleteddeleteddeleteddeleted', deleted)
-    console.log('rowsrowsrowsrowsrows', index)
     const index = deleted.findIndex((currenTitle) => currenTitle === clientId);
+    console.log('rowsrowsrowsrowsrows', index)
     await driver.pause(4000);
     if (index !== -1) {
       const rowEle = await rows[index].$('[name="delete"]');
@@ -181,14 +181,15 @@ export default class CloudServices extends BasePage {
     const rows = await this.el.$$('nuxeo-data-table nuxeo-data-table-row');
     let deleted
     console.log('rowsrowsrowsrowsrows111111', rows)
-    console.log('rowsrowsrowsrowsrows', rows)
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index]
       const rowText = row.getText();
       console.log('rowTextrowTextrowTextrowText', rowText)
       const isRowVisible = await rows[index].$('[name="id"]').waitForVisible();
+      console.log('isRowVisibleisRowVisibleisRowVisibleisRowVisible', isRowVisible)
       if (isRowVisible && rowText.trim() === clientId) {
         const rowEle = await rows[index].$('[name="delete"]');
+        console.log('rowElerowElerowElerowElerowEle', rowEle)
         await rowEle.click();
         driver.alertAccept();
         deleted = true;
