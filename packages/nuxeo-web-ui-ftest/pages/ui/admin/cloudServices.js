@@ -164,7 +164,6 @@ export default class CloudServices extends BasePage {
       .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
       .map((img) => img.$('nuxeo-data-table-cell span[name="id"]').getText());
     const index = deleted.findIndex((currenTitle) => currenTitle === clientId);
-    await driver.pause(4000);
     if (index !== -1) {
       const rowEle = await rows[index].$('[name="delete"]');
       await rowEle.click();
