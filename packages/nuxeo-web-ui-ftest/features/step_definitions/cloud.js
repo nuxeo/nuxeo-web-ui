@@ -166,7 +166,7 @@ Then('I can edit {string} client to:', async function (currentClientId, newDetai
 Then('I can delete {string} client', async function (clientId) {
   const cloudServicesEle = await this.ui.administration.cloudServices;
   await cloudServicesEle.waitForVisible();
-  await cloudServicesEle.deleteClient(clientId);
+  // await cloudServicesEle.deleteClient(clientId);
   await cloudServicesEle.deleteClient1(clientId);
   delete global.clients[clientId];
 });
