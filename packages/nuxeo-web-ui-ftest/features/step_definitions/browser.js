@@ -189,11 +189,10 @@ Then(/^I can see the document has (\d+) publications$/, async function (nbPublic
 });
 
 Then(/^I can see the document has the following publication$/, async function (table) {
-  const rows = await table.rows();
+  const rows = table.rows();
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    const browser = await this.ui.browser;
-    const publication = await browser.publicationView;
+    const publication = await this.ui.browser.publicationView;
     const isRowPresent = await publication.hasPublication(row[0], row[1], row[2]);
     await isRowPresent.should.be.true;
   }
@@ -233,20 +232,18 @@ Then('I can publish selection to {string}', async function (target) {
 });
 
 Then(/^I can perform the following publications$/, async function (table) {
-  console.log('tabletabletabletabletable', table)
-  const browser = await this.ui.browser;
-  await browser.waitForVisible();
-  const page = await browser.documentPage(this.doc.type);
+  let page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   let pubCount = await page.publicationsCount;
   pubCount.should.not.be.NaN;
   const rows = table.hashes();
   for (let i = 0; i < rows.length; i++) {
     const { target, rendition, version, override } = rows[i];
-    const dialog = await browser.publishDialog;
+    const dialog = await this.ui.browser.publishDialog;
     const isdocumentPublished = await dialog.publish(target, rendition, version, override);
     console.log('isdocumentPublishedisdocumentPublishedisdocumentPublished', isdocumentPublished)
     isdocumentPublished.should.be.true;
+    page = await this.ui.browser.documentPage(this.doc.type);
     const newCount = await page.publicationsCount;
     let check;
     const bar = await page.isVisible('#versionInfoBar');

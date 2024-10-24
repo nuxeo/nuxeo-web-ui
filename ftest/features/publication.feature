@@ -28,6 +28,7 @@ Feature: Internal Publication
        | path                                          | rendition | version |
        | /default-domain/sections/section1/my_document |           | 1.0     |
     When I browse to the document
+    And This document has file "sample.png" for content
     Then I can perform the following publications
       | target            | rendition  | version | override |
       | section1          | None       |         |  true    |
