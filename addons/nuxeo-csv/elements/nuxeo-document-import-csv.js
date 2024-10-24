@@ -276,7 +276,7 @@ Polymer({
           <template is="dom-if" if="[[!hasFile]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
-                <a href="javascript:undefined" on-tap="_showUploadDialog"> [[i18n('csv.import.clickOrDrop')]]</a>
+                <a href="#" on-tap="_showUploadDialog"> [[i18n('csv.import.clickOrDrop')]]</a>
               </div>
             </div>
           </template>
@@ -581,7 +581,8 @@ Polymer({
     }
   },
 
-  _showUploadDialog() {
+  _showUploadDialog(e) {
+    e.preventDefault();
     this.$.uploadFiles.click();
   },
 
