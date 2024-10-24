@@ -163,6 +163,7 @@ export default class CloudServices extends BasePage {
       .map((img) => img.$('nuxeo-data-table-cell span[name="id"]').getText());
     console.log('rowsrowsrowsrowsrows', rows)
     console.log('deleteddeleteddeleteddeleted', deleted)
+    console.log('rowsrowsrowsrowsrows', index)
     const index = deleted.findIndex((currenTitle) => currenTitle === clientId);
     await driver.pause(4000);
     if (index !== -1) {
@@ -172,5 +173,31 @@ export default class CloudServices extends BasePage {
       return true;
     }
     return false;
+  }
+
+  async deleteClient1(clientId) {
+    const dataTable = await driver.$('nuxeo-data-table nuxeo-data-table-row [name="id"]');
+    await dataTable.waitForVisible();
+    const rows = await this.el.$$('nuxeo-data-table nuxeo-data-table-row');
+    let deleted
+    console.log('rowsrowsrowsrowsrows111111', rows)
+    console.log('rowsrowsrowsrowsrows', rows)
+    for (let index = 0; index < rows.length; index++) {
+      const row = rows[index]
+      const rowText = row.getText();
+      console.log('rowTextrowTextrowTextrowText', rowText)
+      const isRowVisible = await rows[index].$('[name="id"]').waitForVisible();
+      if (isRowVisible && rowText.trim() === clientId) {
+        const rowEle = await rows[index].$('[name="delete"]');
+        await rowEle.click();
+        driver.alertAccept();
+        deleted = true;
+      }
+      if (deleted != true) deleted = false;
+    }
+    if (!deleted) {
+      throw new Error(`no client found with Id "${clientId}"`)
+    }
+
   }
 }
