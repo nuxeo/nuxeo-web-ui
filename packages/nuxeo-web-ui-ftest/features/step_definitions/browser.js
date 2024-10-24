@@ -232,17 +232,18 @@ Then('I can publish selection to {string}', async function(target) {
 });
 
 Then(/^I can perform the following publications$/, async function(table) {
-  let page = await this.ui.browser.documentPage(this.doc.type);
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const page = await browser.documentPage(this.doc.type);
   await page.waitForVisible();
   let pubCount = await page.publicationsCount;
   pubCount.should.not.be.NaN;
   const rows = table.hashes();
   for (let i = 0; i < rows.length; i++) {
     const { target, rendition, version, override } = rows[i];
-    const dialog = await this.ui.browser.publishDialog;
+    const dialog = await browser.publishDialog;
     const isdocumentPublished = await dialog.publish(target, rendition, version, override);
     isdocumentPublished.should.be.true;
-    page = await this.ui.browser.documentPage(this.doc.type);
     const newCount = await page.publicationsCount;
     let check;
     const bar = await page.isVisible('#versionInfoBar');
