@@ -88,10 +88,9 @@ export default class DocumentPage extends BasePage {
           }
         }
         if (pub) {
+          const pubText = await pub.$('div').getText();
           return parseInt(
-            pub
-              .$('div')
-              .getText()
+            pubText
               .trim(),
             10,
           );
