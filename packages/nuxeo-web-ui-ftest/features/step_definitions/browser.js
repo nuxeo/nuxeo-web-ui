@@ -254,6 +254,7 @@ Then(/^I can perform the following publications$/, async function (table) {
     } else {
       check = override ? newCount === 1 : newCount > pubCount;
     }
+    console.log('checkcheck', check)
     if (check) {
       pubCount = await page.publicationsCount;
     }
