@@ -6,10 +6,10 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-  # Sync when a commit is done on maintenance-3.1.x
+  # Sync when a commit is done on lts-2025
   push:
     branches:
-      - maintenance-3.1.x
+      - lts-2025
     paths:
       - 'i18n/messages.json'
   

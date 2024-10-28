@@ -7,11 +7,11 @@ on:
     inputs:
       target_platform:
         description: 'The Nuxeo server target platform to build the catalog for.'
-        default: '2023.0'
+        default: '2025.0'
         required: true
       branch_name:
         description: 'The name of the Nuxeo Web UI branch to generate the catalog for.'
-        default: 'maintenance-3.1.x'
+        default: 'lts-2025'
         required: true
       classifier:
         description: 'Classifier to name a custom version of the catalog (used for testing purposes).'
@@ -37,10 +37,10 @@ jobs:
         with:
           node-version: 14
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
 
       - name: 'Update settings.xml with server configuration'
         run: |

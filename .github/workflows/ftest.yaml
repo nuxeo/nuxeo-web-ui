@@ -3,12 +3,12 @@ name: Functional tests
 on:
   pull_request:
     branches:
-      - maintenance-3.1.x
+      - lts-2025
   workflow_call:
     inputs:
       branch:
         description: 'The current branch'
-        default: maintenance-3.1.x
+        default: lts-2025
         type: string
         required: false
     secrets:
@@ -23,9 +23,9 @@ on:
         required: true
 
 env:
-  REFERENCE_BRANCH: maintenance-3.1.x
+  REFERENCE_BRANCH: lts-2025
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
 
 jobs:
   ftests:
@@ -41,10 +41,10 @@ jobs:
           scope: '@nuxeo'
           node-version: 18
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with: 
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch

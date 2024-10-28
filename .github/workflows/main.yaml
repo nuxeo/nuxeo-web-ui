@@ -3,42 +3,42 @@ name: Main
 on:
   push:
     branches:
-      - maintenance-3.1.x
+      - lts-2025
 
   # Manually trigger the workflow
   workflow_dispatch:
 
 jobs:
   lint:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@maintenance-3.1.x
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
 
   test:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@maintenance-3.1.x
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
     with:
-      branch: maintenance-3.1.x
+      branch: lts-2025
 
   a11y:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@maintenance-3.1.x
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
       PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
     with:
-      branch: maintenance-3.1.x
+      branch: lts-2025
 
   ftest:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@maintenance-3.1.x
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
       PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
     with:
-      branch: maintenance-3.1.x
+      branch: lts-2025
 
   build:
     needs: [lint, test, a11y, ftest]
@@ -53,10 +53,10 @@ jobs:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
 
       - name: Prepare environment
         run: |

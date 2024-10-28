@@ -7,7 +7,7 @@ on:
     inputs:
       branch_name:
         description: 'The name of the branch to build.'
-        default: 'maintenance-3.1.x'
+        default: 'lts-2025'
         required: true
       sauce_labs:
         description: 'Run unit tests on Sauce Labs?'
@@ -40,12 +40,12 @@ on:
         required: false
       caller_id:
         description: 'run identifier'
-        default: 'maintenance-3.1.x'
+        default: 'lts-2025'
         type: string
         required: false
 
 env:
-  REFERENCE_BRANCH: maintenance-3.1.x
+  REFERENCE_BRANCH: lts-2025'
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
@@ -69,10 +69,10 @@ jobs:
           scope: '@nuxeo'
           node-version: 18
       
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with: 
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
 
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a

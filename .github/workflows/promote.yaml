@@ -9,7 +9,7 @@ on:
       referenceBranch:
         description: 'Branch to be updated after the promotion'
         required: true
-        default: 'maintenance-3.1.x'
+        default: 'lts-2025'
       dryRun:
         description: 'Run the workflow without pushing code or publishing artifacts'
         type: boolean
