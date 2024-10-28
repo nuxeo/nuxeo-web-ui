@@ -6,16 +6,16 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-  # Sync when a commit is done on maintenance-3.1.x
+  # Sync when a commit is done on 2025-ftest-failure-test
   push:
     branches:
-      - maintenance-3.1.x
+      - 2025-ftest-failure-test
     paths:
       - 'i18n/messages.json'
-  
+
   # Manually trigger the workflow
   workflow_dispatch:
-  
+
 jobs:
   crowdin:
     runs-on: ubuntu-latest

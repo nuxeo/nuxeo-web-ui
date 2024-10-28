@@ -4,6 +4,7 @@
 ## Nuxeo Web UI
 
 ### About
+
 Nuxeo Web UI is a standard base web application for Nuxeo Platform. It is highly customizable and scalable, developed with [Polymer](https://polymer-library.polymer-project.org/) and leveraging [nuxeo-elements](https://github.com/nuxeo/nuxeo-elements), our library of custom elements.
 
 ### Install dependencies
@@ -11,6 +12,7 @@ Nuxeo Web UI is a standard base web application for Nuxeo Platform. It is highly
 ```sh
 npm install
 ```
+
 **Note: This version of Nuxeo Web UI requires node version >=14.0.0 <15.0.0.**
 
 ### Development workflow
@@ -25,13 +27,13 @@ cp .env.sample .env
 
 #### Environment variables
 
-Variable | Used by | Description | Default
---- | --- | --- | ---
-NUXEO_PACKAGES | Webpack, Docker (Nuxeo) | List of packages to enable for Web UI and Nuxeo
-NUXEO_URL | Webpack | URL used to connect to Nuxeo server from Web UI | /nuxeo
-NUXEO_HOST | Webpack | Nuxeo host address to proxy calls from the dev server | localhost:8080 
-NUXEO_WEB_UI_VERSION | Docker compose | Version of Web UI image to build /start
-NUXEO_VERSION | Docker compose | Version of Nuxeo server to launch
+| Variable             | Used by                 | Description                                           | Default        |
+| -------------------- | ----------------------- | ----------------------------------------------------- | -------------- |
+| NUXEO_PACKAGES       | Webpack, Docker (Nuxeo) | List of packages to enable for Web UI and Nuxeo       |
+| NUXEO_URL            | Webpack                 | URL used to connect to Nuxeo server from Web UI       | /nuxeo         |
+| NUXEO_HOST           | Webpack                 | Nuxeo host address to proxy calls from the dev server | localhost:8080 |
+| NUXEO_WEB_UI_VERSION | Docker compose          | Version of Web UI image to build /start               |
+| NUXEO_VERSION        | Docker compose          | Version of Nuxeo server to launch                     |
 
 #### Serve / watch
 
@@ -46,6 +48,7 @@ This makes the Web UI available on `http://0.0.0.0:5000/` to locally test. A nux
 ```
 
 #### Run tests
+
 The following commands can be run in order to run tests against Web UI.
 
 ##### Unit Tests
@@ -53,6 +56,7 @@ The following commands can be run in order to run tests against Web UI.
 ```sh
 npm run test
 ```
+
 ##### Functional Tests
 
 ```sh
@@ -87,7 +91,7 @@ Web UI will then be available at http://localhost:8080/nuxeo/ui
 mvn clean install
 ```
 
-This will build the  `plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${project.version}.zip` Web UI marketplace to be deployed in a nuxeo server.
+This will build the `plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${project.version}.zip` Web UI marketplace to be deployed in a nuxeo server.
 
 ```sh
 mvn clean install -Pftest
@@ -99,13 +103,13 @@ This also builds the marketplace running the functionnal tests.
 
 At the moment, CI for Nuxeo Web UI is built on top of [Github Actions](https://github.com/features/actions). We currently provide worflow definitions for building and testing Nuxeo Web UI, to setup preview environments for pull requests, and to promote new releases.
 
-Although there are no cross-repo support for building and testing Nuxeo Web UI with [nuxeo-elements](https://github.com/nuxeo/nuxeo-elements/tree/maintenance-3.1.x), preview environments are setup with cross-repo support. To this extent, in pull requests annotated with the tag `preview`, the workflow will lookup for a corresponding branch with the same name in `nuxeo-elements` repo, and use it in the preview instance.
+Although there are no cross-repo support for building and testing Nuxeo Web UI with [nuxeo-elements](https://github.com/nuxeo/nuxeo-elements/tree/2025-ftest-failure-test), preview environments are setup with cross-repo support. To this extent, in pull requests annotated with the tag `preview`, the workflow will lookup for a corresponding branch with the same name in `nuxeo-elements` repo, and use it in the preview instance.
 
 ## License
 
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) 
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved.
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 All images, icons, fonts, and videos contained in this folder are copyrighted by Hyland Software, all rights reserved.

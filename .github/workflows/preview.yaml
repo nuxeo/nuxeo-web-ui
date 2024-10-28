@@ -4,17 +4,17 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-      - maintenance-3.1.x
+      - 2025-ftest-failure-test
 
   workflow_dispatch:
     inputs:
       branch_name:
         description: 'The name of the branch to preview.'
-        default: 'maintenance-3.1.x'
+        default: '2025-ftest-failure-test'
         required: true
       caller_id:
         description: 'run identifier'
-        default: 'maintenance-3.1.x'
+        default: '2025-ftest-failure-test'
         type: string
         required: false
 
@@ -63,7 +63,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-web-ui
           branch: ${BRANCH_NAME}
-          default-branch: maintenance-3.1.x
+          default-branch: 2025-ftest-failure-test
 
       - uses: actions/checkout@v3
         with:
@@ -80,7 +80,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-elements
           branch: ${BRANCH_NAME}
-          default-branch: maintenance-3.1.x
+          default-branch: 2025-ftest-failure-test
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2
@@ -169,7 +169,7 @@ jobs:
 
           # ensure the deployment is restarted to pull the new preview image
           kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
-          
+
           echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
 
           echo ::set-output name=url::"https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com"
@@ -187,11 +187,11 @@ jobs:
             })
 
   result:
-    name: "Result: ${{ needs.preview.outputs.url }}"
+    name: 'Result: ${{ needs.preview.outputs.url }}'
     needs: preview
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - name: "Result: ${{ needs.preview.outputs.url }}"
+      - name: 'Result: ${{ needs.preview.outputs.url }}'
         run: |
           echo ${{ needs.preview.outputs.url }}
