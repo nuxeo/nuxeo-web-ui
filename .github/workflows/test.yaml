@@ -36,6 +36,9 @@ jobs:
           scope: '@nuxeo'
           node-version: 18
 
+      - name: delete cache
+        run: npm cache clean -f
+
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
