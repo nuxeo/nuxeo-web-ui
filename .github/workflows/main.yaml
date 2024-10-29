@@ -41,7 +41,7 @@ jobs:
       branch: lts-2025
 
   build:
-    needs: [lint, test, a11y, ftest]
+    needs: [lint, test, a11y]
     runs-on: [self-hosted, master]
     steps:
       - uses: actions/checkout@v2
