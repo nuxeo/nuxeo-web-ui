@@ -252,7 +252,7 @@ Then(/^I can perform the following publications$/, async function(table) {
       check = override ? newCount === 1 : newCount > pubCount;
     }
     if (check) {
-      pubCount = page.publicationsCount;
+      pubCount = await page.publicationsCount;
     }
   }
 });
