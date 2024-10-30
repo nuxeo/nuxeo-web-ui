@@ -64,7 +64,7 @@ Polymer({
       is-available="{{isProviderAvailable}}"
     ></nuxeo-liveconnect-box-provider>
     <template is="dom-if" if="[[isProviderAvailable]]">
-      <a href="#" on-tap="_openPicker">
+      <a href="javascript:undefined" on-tap="_openPicker">
         <iron-icon src="[[importPath]]images/box.png"></iron-icon>
         [[i18n('liveconnectImportActions.box', 'Box')]]
       </a>
@@ -78,8 +78,7 @@ Polymer({
     this.$.provider.updateProviderInfo();
   },
 
-  _openPicker(e) {
-    e.preventDefault();
+  _openPicker() {
     this.$.provider.openPicker();
   },
 });
