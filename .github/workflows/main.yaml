@@ -31,17 +31,17 @@ jobs:
     with:
       branch: lts-2025
 
-  # ftest:
-  #   uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@lts-2025
-  #   secrets:
-  #     NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-  #     PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
-  #     PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
-  #   with:
-  #     branch: lts-2025
+  ftest:
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@lts-2025
+    secrets:
+      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
+      PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
+    with:
+      branch: lts-2025
 
   build:
-    needs: [lint, test, a11y]
+    needs: [lint, test, a11y, ftest]
     runs-on: [self-hosted, master]
     steps:
       - uses: actions/checkout@v2
