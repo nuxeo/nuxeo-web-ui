@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to promote (e.g.: 3.1.2-rc.2)'
+        description: 'Version to promote (e.g.: 2025.1.0-rc.2)'
         required: true
       referenceBranch:
         description: 'Branch to be updated after the promotion'
@@ -32,7 +32,8 @@ jobs:
 
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
-      - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -e 's/-rc.[0-9]*//')" >> $GITHUB_ENV
+      # Extract VERSION from the new format 2025.x.0-rc.y to get 2025.x.0
+      - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -E 's/-rc\.[0-9]+//')" >> $GITHUB_ENV
 
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
         env:
@@ -118,7 +119,7 @@ jobs:
         run: echo "NEW_VERSION=$(npx semver -i minor $VERSION)" >> $GITHUB_ENV
 
       - if: ${{ github.event.inputs.referenceBranch != 'master' }}
-        run: echo "NEW_VERSION=$(npx semver -i patch $VERSION)" >> $GITHUB_ENV
+        run: echo "NEW_VERSION=$(npx semver -i minor $VERSION)" >> $GITHUB_ENV
 
       - name: Align ${{ github.event.inputs.referenceBranch }} branch on next version ${{ env.NEW_VERSION }}-SNAPSHOT
         env:
