@@ -200,12 +200,12 @@ Then('I edit the results columns to show {string}', async function(heading) {
 
 Then(/^I save my search as "(.+)"$/, async function(searchName) {
   const saveAsButton = await this.ui.searchResults.saveSearchAsButton;
-  await saveAsButton.waitForVisible({ timeout: 5000 });
+  await saveAsButton.waitForVisible();
   await saveAsButton.click();
   await this.ui.searchResults.enterInput(searchName);
   const confirmSaveButton = await this.ui.searchResults.confirmSaveSearchButton;
-  await confirmSaveButton.waitForEnabled({ timeout: 5000 });
-  await confirmSaveButton.waitForClickable({ timeout: 5000 });
+  await confirmSaveButton.waitForEnabled();
+  await confirmSaveButton.waitForClickable();
   await confirmSaveButton.click();
 });
 
