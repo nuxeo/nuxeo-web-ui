@@ -204,6 +204,8 @@ Then(/^I save my search as "(.+)"$/, async function(searchName) {
   await saveAsButton.click();
   await this.ui.searchResults.enterInput(searchName);
   const confirmSaveButton = await this.ui.searchResults.confirmSaveSearchButton;
+  await confirmSaveButton.waitForEnabled();
+  await confirmSaveButton.waitForClickable();
   await confirmSaveButton.click();
 });
 
