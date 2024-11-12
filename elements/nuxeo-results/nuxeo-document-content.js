@@ -109,7 +109,7 @@ Polymer({
       display-sort="[[_canSort(document, sortOptions)]]"
       sort-options="[[sortOptions]]"
     >
-      <!-- Grid view -->
+      <!-- Grid view layout -->
       <nuxeo-data-grid
         name="grid"
         icon="nuxeo:view-thumbnails"
