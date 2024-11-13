@@ -12,7 +12,7 @@ const FTEST = path.join(__dirname, '../ftest');
 function runFunctionalTests(project, dir) {
   if (!fs.existsSync(dir)) {
     console.warn(`The directory "${dir}" doesn't exist, no tests will run for "${project}".`);
-    return;
+    return false;
   }
   console.info(`Starting Functional Tests for "${project}" on "${dir}" location.`);
   const ftestArgs = [...process.argv, '--cucumberReport', path.join(FTEST, 'target/cucumber-reports')];
@@ -21,6 +21,7 @@ function runFunctionalTests(project, dir) {
     console.error(`An error was returned by the process running the Functional Tests for "${project}".`);
     process.exit(run.status);
   }
+  return true;
 }
 
 if (fs.existsSync(path.join(FTEST, 'target/cucumber-reports')) && process.env.CUCUMBER_REPORT_PATH) {
@@ -28,9 +29,22 @@ if (fs.existsSync(path.join(FTEST, 'target/cucumber-reports')) && process.env.CU
 }
 
 if (!args.skipWebUi) {
-  runFunctionalTests('WebUI', FTEST);
+  if (!runFunctionalTests('WebUI', FTEST)) {
+    process.exit(1); 
+  }
 }
-(process.env.NUXEO_PACKAGES || '')
+
+const addons = (process.env.NUXEO_PACKAGES || '')
   .split(/[\s,]+/)
-  .filter(Boolean)
-  .forEach((addon) => runFunctionalTests(addon, path.join(__dirname, `../addons/${addon}/ftest`)));
+  .filter(Boolean);
+
+let hasFailed = false; 
+
+addons.forEach((addon) => {
+  if (hasFailed) return; 
+  const addonDir = path.join(__dirname, `../addons/${addon}/ftest`);
+  if (!runFunctionalTests(addon, addonDir)) {
+    hasFailed = true;
+    process.exit(1);
+  }
+});
