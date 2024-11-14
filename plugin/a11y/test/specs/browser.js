@@ -18,7 +18,7 @@ const EXPECTED_VIOLATIONS = {
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
   'aria-allowed-role': 7,
   'aria-valid-attr-value': 1,
-  'color-contrast-enhanced': 2,
+  'color-contrast-enhanced': 1,
 };
 
 describe('Nuxeo Browser', () => {
