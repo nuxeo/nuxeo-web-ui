@@ -130,7 +130,7 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
-        run: mvn -ntp install -Pftest -DskipInstall
+        run: mvn -ntp install -Pftest -DskipInstall -X -e -Dcucumber.options="--plugin pretty --monochrome"
 
       - name: Archive cucumber reports
         if: ${{ always() }}
