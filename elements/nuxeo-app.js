@@ -1530,7 +1530,7 @@ Polymer({
   _computeEnrichers() {
     return config.get('enrichers');
   },
-  // test
+
   _computeHeaders() {
     const headers = {
       'translate-directoryEntry': 'label',
