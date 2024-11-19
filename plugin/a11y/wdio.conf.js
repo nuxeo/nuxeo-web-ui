@@ -28,7 +28,6 @@ const capability = {
 };
 const options = {
   args: ['--no-sandbox'],
-  w3c: false,
 };
 if (process.env.HEADLESS) {
   options.args.push('--window-size=1920,1080');
