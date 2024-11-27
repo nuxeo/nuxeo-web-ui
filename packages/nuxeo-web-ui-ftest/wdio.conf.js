@@ -26,8 +26,9 @@ const capability = {
   // 5 instance gets started at a time.
   maxInstances: 1,
   browserName: process.env.BROWSER,
+  // browserName: 'chrome',
   acceptInsecureCerts: true,
-  browserVersion: '130.0.6723.116',
+  browserVersion: 'stable',
 };
 
 const options = {};
@@ -35,7 +36,6 @@ const options = {};
 switch (capability.browserName) {
   case 'chrome':
     options.args = ['--no-sandbox'];
-    options.w3c = false;
 
     if (process.env.HEADLESS) {
       options.args.push('--window-size=1920,1080');
@@ -101,6 +101,7 @@ exports.config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
+  // specs: ['../../ftest/features/**'],
   specs: [path.join(process.cwd(), './features/*.feature')],
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
