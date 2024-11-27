@@ -58,6 +58,11 @@ Polymer({
         z-index: 10;
       }
 
+      :host([dir='rtl']) #tray {
+        left: 32px;
+        right: auto;
+      }
+
       #shortcuts {
         opacity: 0;
         transition: opacity 0.25s ease-in-out;
@@ -122,6 +127,12 @@ Polymer({
       },
       computed: '_actionContext(shortcutsVisible,subtypes)',
     },
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      this.setAttribute('dir', getComputedStyle(this).direction);
+    }
   },
 
   listeners: {

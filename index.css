@@ -23,6 +23,16 @@ nuxeo-app[unresolved] {
   float: left;
 }
 
+:host([dir="rtl"]) [unresolved] #sidebar {
+  float: right;
+  background-color: aquamarine;
+}
+
+:host([dir="rtl"]) #sidebar {
+  float: right;
+  background-color: aquamarine;
+}
+
 [unresolved] #sidebar img {
   width: 100%;
   animation: glow 1s infinite alternate;
@@ -85,3 +95,4 @@ nuxeo-app[unresolved] {
     width: 100%;
   }
 }
+

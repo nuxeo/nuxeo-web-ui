@@ -20,6 +20,8 @@ import { XHRLocaleResolver } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.
 const baseUrl = window.nuxeo.I18n.baseUrl || window.location.origin + window.location.pathname;
 const msgFolder = `${baseUrl + (baseUrl.endsWith('/') ? '' : '/')}i18n`;
 window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';
+// window.nuxeo.I18n.language = 'en'
+// window.nuxeo.I18n.direction = 'rtl';
 window.nuxeo.I18n.localeResolver = new XHRLocaleResolver(msgFolder);
 window.nuxeo.I18n.loadLocale().then(() => {
   /* Set html lang attribute. Required by the better-dateinput element */

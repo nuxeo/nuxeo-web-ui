@@ -555,6 +555,13 @@ const template = html`
           padding: 16px;
         }
 
+        :host([dir='rtl']) {
+          --nuxeo-suggester-button: {
+            left: 0;
+            right: auto;
+          }
+        }
+
         --nuxeo-suggester-bar: {
           position: relative;
           top: var(--nuxeo-app-top);
