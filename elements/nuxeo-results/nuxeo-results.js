@@ -467,9 +467,8 @@ Polymer({
     if (isNumberFormattingEnabled) {
       const formattedCount = new Intl.NumberFormat().format(this.resultsCount);
       return this.i18n('results.heading.count', formattedCount);
-    } 
-      return this.i18n('results.heading.count', this.resultsCount);
-    
+    }
+    return this.i18n('results.heading.count', this.resultsCount);
   },
 
   _sortOptions() {
