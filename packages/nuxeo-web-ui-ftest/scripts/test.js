@@ -122,7 +122,7 @@ if (process.env.DRIVER_VERSION == null) {
               .then((newDriverVersion) => {
                 // eslint-disable-next-line no-console
                 console.log(`ChromeDriver ${newDriverVersion} needed.`);
-                process.env.DRIVER_VERSION = newDriverVersion;
+                process.env.DRIVER_VERSION = '130.0.6723.116';
               })
               .catch((e) => {
                 console.error('unable to parse ChromeDriver version: ', e);
