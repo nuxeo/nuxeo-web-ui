@@ -70,7 +70,7 @@ export default class Drawer extends BasePage {
   async open(name) {
     const menu = await this.menu;
     let isDrawerVisible = await this.isDrawerOpened(menu);
-    if (isDrawerVisible) {
+    if (!isDrawerVisible) {
       const buttonToclick = await menu.$(`nuxeo-menu-icon[name='${name}']`);
       await buttonToclick.click();
       isDrawerVisible = await this.isDrawerOpened(menu);
@@ -79,7 +79,7 @@ export default class Drawer extends BasePage {
   }
 
   async isDrawerOpened(menu) {
-    return Boolean(await menu.$(`paper-listbox[id='menu']`).getAttribute('aria-expanded'));
+    return (await menu.$(`paper-listbox[id='menu']`).getAttribute('aria-expanded')) === 'true';
   }
 
   async _section(name) {
