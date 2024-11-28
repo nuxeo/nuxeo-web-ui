@@ -55,6 +55,8 @@
     <property name="org.nuxeo.web.ui.pagination.nuxeoSelectOptions.listingMaxItems">${org.nuxeo.pagination.nuxeoSelectOptions.maxAllowedItems:=1000}</property>
     <!-- allowed url to redirect -->
    <property name="org.nuxeo.web.ui.trustedDomains">${org.nuxeo.web.ui.trustedDomains:=}</property>
+    <!-- Search reasult numberFormatting -->
+  <property name="org.nuxeo.web.ui.numberFormatting.enabled">${org.nuxeo.web.ui.numberFormatting.enabled:=}</property>
 
   </extension>
 </component>
