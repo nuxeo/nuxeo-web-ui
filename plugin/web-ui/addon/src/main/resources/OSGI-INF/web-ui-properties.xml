@@ -56,5 +56,8 @@
     <!-- allowed url to redirect -->
    <property name="org.nuxeo.web.ui.trustedDomains">${org.nuxeo.web.ui.trustedDomains:=}</property>
 
+   <!-- Search reasult numberFormatting -->
+  <property name="org.nuxeo.web.ui.numberFormatting.enabled">${org.nuxeo.web.ui.numberFormatting.enabled:=}</property>
+
   </extension>
 </component>
