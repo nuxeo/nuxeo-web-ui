@@ -17,6 +17,7 @@ limitations under the License.
 -->
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page import="java.util.UUID"%>
 <%@ page import="org.nuxeo.common.Environment"%>
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
 <%@ page import="org.nuxeo.ecm.core.api.repository.RepositoryManager"%>
@@ -35,6 +36,7 @@ limitations under the License.
   } else {
     baseUrl = context + "/repo/" + repository + "/ui/";
   }
+  String NX_NONCE_VALUE = UUID.randomUUID().toString();
 %>
 
 <!DOCTYPE html>
@@ -44,7 +46,7 @@ limitations under the License.
   <meta charset="UTF-8">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'nonce-<%= NX_NONCE_VALUE %>' 'strict-dynamic'">
   <title><%= Framework.getProperty(Environment.PRODUCT_NAME) %></title>
 
   <!-- Chrome for Android theme color -->
@@ -84,6 +86,10 @@ limitations under the License.
   </style>
 </head>
 
+<script nonce="<%= NX_NONCE_VALUE %>">
+  const NuxeoNonce = "<%= NX_NONCE_VALUE %>";
+</script>
+
 <body>
   <nuxeo-connection url="<%= context %>" repository-name="<%= repository %>"></nuxeo-connection>
   <nuxeo-app base-url="<%= baseUrl %>"
@@ -98,15 +104,15 @@ limitations under the License.
     </div>
   </nuxeo-app>
 
-  <script src="vendor/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="vendor/webcomponentsjs/webcomponents-loader.js" nonce="<%= NX_NONCE_VALUE %>"></script>
 
-  <script src="vendor/html-imports/html-imports.min.js"></script>
+  <script src="vendor/html-imports/html-imports.min.js" nonce="<%= NX_NONCE_VALUE %>"></script>
 
-  <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
+  <script src="vendor/web-animations/web-animations-next-lite.min.js" nonce="<%= NX_NONCE_VALUE %>"></script>
 
-  <script src="config.jsp"></script>
+  <script src="config.jsp" nonce="<%= NX_NONCE_VALUE %>"></script>
 
-  <script src="main.bundle.js"></script>
+  <script src="main.bundle.js" nonce="<%= NX_NONCE_VALUE %>"></script>
 
 </body>
 
