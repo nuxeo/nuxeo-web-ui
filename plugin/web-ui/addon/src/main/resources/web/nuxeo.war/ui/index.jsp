@@ -46,7 +46,6 @@ limitations under the License.
   <meta charset="UTF-8">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'nonce-<%= NX_NONCE_VALUE %>' 'strict-dynamic'">
 
   <title><%= Framework.getProperty(Environment.PRODUCT_NAME) %></title>
 
