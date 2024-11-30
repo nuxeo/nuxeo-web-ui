@@ -27,6 +27,7 @@ export default class Browser extends BasePage {
     const breadcrumb = await this.breadcrumb;
     await breadcrumb.waitForVisible();
     const currentPage = await this.currentPage;
+    await driver.pause(3000);
     await currentPage.waitForVisible();
   }
 
