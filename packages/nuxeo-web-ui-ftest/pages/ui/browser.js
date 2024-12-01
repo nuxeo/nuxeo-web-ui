@@ -24,15 +24,11 @@ export default class Browser extends BasePage {
   async browseTo(path) {
     await url(`#!/browse${path}`);
     await this.waitForVisible();
-    console.log('line no 27========>', await this.waitForVisible())
     const breadcrumb = await this.breadcrumb;
     await breadcrumb.waitForVisible();
-    console.log('line no 30========>', await breadcrumb.waitForVisible())
     const currentPage = await this.currentPage;
-    console.log('line no 32========>', await this.currentPage)
     await driver.pause(3000);
     await currentPage.waitForVisible();
-    console.log('line no 325========>', await currentPage.waitForVisible())
   }
 
   get view() {
