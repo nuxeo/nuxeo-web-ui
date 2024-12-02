@@ -64,7 +64,7 @@ Polymer({
       is-available="{{isProviderAvailable}}"
     ></nuxeo-liveconnect-google-drive-provider>
     <template is="dom-if" if="[[isProviderAvailable]]">
-      <a href="javascript:undefined" on-tap="_openPicker">
+      <a href="#" on-tap="_openPicker">
         <iron-icon src="[[importPath]]images/google_drive.png"></iron-icon>
         [[i18n('liveconnectImportActions.googledrive', 'Google Drive')]]
       </a>
@@ -78,7 +78,8 @@ Polymer({
     this.$.provider.updateProviderInfo();
   },
 
-  _openPicker() {
+  _openPicker(e) {
+    e.preventDefault();
     this.$.provider.openPicker();
   },
 });
