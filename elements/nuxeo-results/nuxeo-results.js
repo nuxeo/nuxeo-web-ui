@@ -457,7 +457,7 @@ Polymer({
   _computeCountLabel() {
     // Fetch the property value from web-ui-properties.xml
     const isNumberFormattingEnabled =
-    (Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.numberFormattingEnabled) || false;
+      (Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.numberFormattingEnabled) || false;
     if (this.resultsCount < 0) {
       return this.i18n('results.heading.count.unknown');
     }
