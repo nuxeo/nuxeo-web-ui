@@ -168,6 +168,7 @@ Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
 Then(/^I can see more than (\d+) search results$/, async function(minNumberOfResults) {
   await driver.pause(1000);
   const results = await this.ui.results;
+  await driver.pause(2000);
   const displayMode = await results.displayMode;
   const output = await results.resultsCount(displayMode);
   if (output > minNumberOfResults) {
