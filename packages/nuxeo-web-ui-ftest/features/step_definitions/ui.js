@@ -4,8 +4,8 @@ import { Then, When } from '@cucumber/cucumber';
 When('I click the {string} button', async function(button) {
   await driver.pause(1000);
   const drawer = await this.ui.drawer;
-  const buttonToclick = await drawer.open(button);
-  return buttonToclick;
+  const output = await drawer.open(button);
+  output.should.be.true;
 });
 
 When('I select {string} from the View menu', async function(option) {
@@ -31,4 +31,5 @@ Then('I click the blob download button', async function() {
   const page = await this.ui.browser.documentPage(this.doc.type);
   const button = await page.downloadButton;
   await button.click();
+  await driver.pause(2000);
 });
