@@ -27,7 +27,7 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
-  browserVersion: '130.0.6723.116',
+  browserVersion: 'stable',
 };
 
 const options = {};
@@ -35,7 +35,6 @@ const options = {};
 switch (capability.browserName) {
   case 'chrome':
     options.args = ['--no-sandbox'];
-    options.w3c = false;
 
     if (process.env.HEADLESS) {
       options.args.push('--window-size=1920,1080');
