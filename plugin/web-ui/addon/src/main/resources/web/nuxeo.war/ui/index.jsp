@@ -44,7 +44,7 @@ limitations under the License.
   String cspHeader = resp.getHeader("Content-Security-Policy");
   String newCspHeader = "";
   boolean isExistingCspHeaderEmpty = false;
-  if(cspHeader != null || cspHeader.trim().isEmpty()) { 
+  if(cspHeader == null || cspHeader.trim().isEmpty()) { 
     isExistingCspHeaderEmpty = true;
     cspHeader = "";
    }
