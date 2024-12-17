@@ -245,6 +245,12 @@ Polymer({
           width: 100%;
           padding: 1em;
         }
+
+        :host([dir='rtl']) #searchButton {
+          right: auto;
+          left: 0;
+          border-right: 1px solid rgba(0, 0, 0, 0.1);
+        }
       }
     </style>
 
@@ -339,6 +345,12 @@ Polymer({
     items: {
       type: Array,
     },
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      this.setAttribute('dir', getComputedStyle(this).direction);
+    }
   },
 
   toggle() {

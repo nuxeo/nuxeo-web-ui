@@ -2,6 +2,18 @@ import { config } from '@nuxeo/nuxeo-elements';
 import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 
+// RTL configuration setup
+const setupRTLSupport = () => {
+  window.nuxeo = window.nuxeo || {};
+  window.nuxeo.I18n = window.nuxeo.I18n || {};
+  const userLanguage = navigator.language || navigator.userLanguage || 'en';
+  window.console.log(`User language: ${userLanguage}`);
+  const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+  const isRTL = rtlLanguages.some((lang) => userLanguage?.startsWith(lang));
+  window.nuxeo.I18n.direction = isRTL ? 'rtl' : 'ltr';
+  document.documentElement.dir = window.nuxeo.I18n.direction;
+};
+
 // To fix WEBUI-833 and to disable the Roboto font request
 const disableRobotoFont = () => {
   window.polymerSkipLoadingFontRoboto = true;
@@ -57,6 +69,7 @@ const ready =
 
 ready
   .then(disableRobotoFont)
+  .then(setupRTLSupport)
   .then(loadApp)
   .then(loadLegacy)
   .then(loadBundle)
