@@ -81,6 +81,12 @@ Polymer({
         padding-left: 16px;
       }
 
+      :host([dir="rtl"]) #header::slotted(*), /* Chrome, Safari */
+      :host([dir="rtl"]) #toolbar::slotted(*) {
+        padding-right: 16px;
+        padding-left: 64px;
+      }
+
       @media (max-width: 720px) {
         #header::slotted(*), /* chrome, safari */
         #toolbar::slotted(*) {
@@ -105,4 +111,9 @@ Polymer({
   `,
 
   is: 'nuxeo-page',
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      this.setAttribute('dir', getComputedStyle(this).direction);
+    }
+  },
 });
