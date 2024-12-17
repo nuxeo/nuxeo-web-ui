@@ -47,6 +47,7 @@ const setupApp = async () =>
       if (!Nuxeo.UI.app) {
         console.error('could not find nuxeo-app');
       }
+      Nuxeo.UI.app.setAttribute('dir', window.nuxeo.I18n.direction);
       setFallbackNotificationTarget(Nuxeo.UI.app);
     } else {
       console.error('could not find nuxeo-app');

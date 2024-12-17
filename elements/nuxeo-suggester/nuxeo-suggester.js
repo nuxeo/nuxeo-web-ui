@@ -113,6 +113,12 @@ Polymer({
         @apply --nuxeo-suggester-button;
       }
 
+      :host([dir='rtl']) #searchButton {
+        right: auto;
+        left: 0;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
       #searchButton:hover {
         background-color: var(--nuxeo-button-primary);
         color: var(--nuxeo-button-primary-text);
@@ -244,12 +250,6 @@ Polymer({
         #results {
           width: 100%;
           padding: 1em;
-        }
-
-        :host([dir='rtl']) #searchButton {
-          right: auto;
-          left: 0;
-          border-right: 1px solid rgba(0, 0, 0, 0.1);
         }
       }
     </style>
