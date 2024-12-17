@@ -129,6 +129,13 @@ Polymer({
         height: calc(100% - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
       }
 
+      :host([dir='rtl']) paper-header-panel,
+      :host([dir='rtl']) iron-pages paper-header-panel {
+        right: var(--nuxeo-sidebar-width);
+        width: 100%;
+        margin-right: var(--dynamic-drawer-margin, 0);
+      }
+
       paper-drawer-panel[narrow] {
         --paper-drawer-panel-left-drawer-container: {
           z-index: 100;
@@ -149,6 +156,11 @@ Polymer({
         box-sizing: border-box;
         outline: none;
         background-color: var(--nuxeo-sidebar-background);
+      }
+
+      :host([dir='rtl']) #logo {
+        right: 0px;
+        left: auto;
       }
 
       #logo img {
@@ -209,6 +221,11 @@ Polymer({
         width: 16px;
         height: 100%;
         cursor: pointer;
+      }
+
+      :host([dir='rtl']) #drawer .toggle {
+        left: -16px;
+        right: auto;
       }
 
       #drawer .toggle iron-icon {
@@ -293,6 +310,17 @@ Polymer({
         justify-content: space-between;
         color: white;
         --mdc-typography-body2-font-size: 14px;
+      }
+
+      [dir='rtl'] paper-drawer-panel {
+        --paper-drawer-panel-left-drawer-container: {
+          left: auto;
+          right: 0;
+        }
+        --paper-drawer-panel-main-container: {
+          left: 0;
+          right: auto;
+        }
       }
     </style>
 
@@ -394,7 +422,7 @@ Polymer({
           </iron-pages>
 
           <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
-            <iron-icon icon="icons:chevron-left"></iron-icon>
+            <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
           </div>
         </div>
       </div>
@@ -597,6 +625,12 @@ Polymer({
     _routedSearch: {
       type: Object,
     },
+
+    _isRtl: {
+      type: Boolean,
+      value: false,
+      observer: '_onRtlChange',
+    },
   },
 
   listeners: {
@@ -642,6 +676,7 @@ Polymer({
 
   ready() {
     this.$.drawerPanel.closeDrawer();
+    this._checkRtl();
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
     this.$.drawerPanel.$.drawer.addEventListener('transitionend', () => {
       this.$.drawerPanel.notifyResize();
@@ -670,15 +705,33 @@ Polymer({
     this.removeAttribute('unresolved');
 
     Performance.mark('nuxeo-app.ready');
-
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
     });
   },
 
+  _checkRtl() {
+    const dir = getComputedStyle(this).direction;
+    this._isRtl = dir === 'rtl';
+  },
+
+  _onRtlChange() {
+    this.toggleChevronIcon = this._isRtl ? 'icons:chevron-right' : 'icons:chevron-left';
+  },
+
   _resetTaskSelection() {
     this.currentTask = null;
     this.currentTaskId = null;
+  },
+
+  _updateDrawerAlignment() {
+    const { drawerPanel } = this.$;
+    const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
+    if (isRTL) {
+      drawerPanel.setAttribute('drawer-align', 'end');
+    } else {
+      drawerPanel.setAttribute('drawer-align', 'start');
+    }
   },
 
   refresh() {
@@ -1008,6 +1061,10 @@ Polymer({
   _openDrawer() {
     const pixelsSuffix = 'px';
     this.drawerWidth = 298 + Math.round(this.sidebarWidth.substring(0, this.sidebarWidth.length - 2)) + pixelsSuffix;
+    const drawerMarginRight = 297 + pixelsSuffix;
+    this.updateStyles({
+      '--dynamic-drawer-margin': drawerMarginRight,
+    });
     this.drawerOpened = true;
     const { drawerPanel } = this.$;
     if (drawerPanel.narrow) {
@@ -1027,6 +1084,9 @@ Polymer({
     this.drawerOpened = false;
     this.$.drawerPanel.closeDrawer();
     this.selectedTab = '';
+    this.updateStyles({
+      '--dynamic-drawer-margin': '0px',
+    });
   },
 
   _fetchTaskCount() {

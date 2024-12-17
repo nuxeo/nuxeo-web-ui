@@ -70,6 +70,11 @@ Polymer({
       nuxeo-document-create-shortcuts {
         --nuxeo-document-create-shortcut-margin: 0 0 16px 0;
       }
+
+      :host([dir='rtl']) #tray {
+        left: 32px;
+        right: auto;
+      }
     </style>
 
     <nuxeo-document id="defaultDoc" doc-path="[[parent.path]]" enrichers="permissions, subtypes" response="{{parent}}">
@@ -126,6 +131,12 @@ Polymer({
 
   listeners: {
     'create-document': '_hideShortcuts',
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      this.setAttribute('dir', getComputedStyle(this).direction);
+    }
   },
 
   _parentChanged() {

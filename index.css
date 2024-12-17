@@ -28,6 +28,14 @@ nuxeo-app[unresolved] {
   animation: glow 1s infinite alternate;
 }
 
+:host([dir="rtl"]) [unresolved] #sidebar {
+  float: right;
+}
+
+:host([dir="rtl"]) #sidebar {
+  float: right;
+}
+
 [unresolved] #container {
   background-color: var(--nuxeo-page-background);
   float: left;
