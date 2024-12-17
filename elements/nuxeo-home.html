@@ -287,6 +287,12 @@ limitations under the License.
         },
       },
 
+      ready() {
+        if (!this.hasAttribute('dir')) {
+          this.setAttribute('dir', getComputedStyle(this).direction);
+        }
+      },
+
       observers: ['_processTask(_selection)'],
 
       _processTask() {

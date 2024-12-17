@@ -74,6 +74,10 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             border-radius: 2px;
           }
 
+          :host([dir='rtl']) .current-icon iron-icon {
+            margin: 0.3rem 0 0 0.5rem;
+          }
+
           #ancestors {
             max-width: 100%;
             list-style-type: none;
@@ -158,6 +162,9 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
     connectedCallback() {
       super.connectedCallback();
       this.addEventListener('iron-resize', this._resize);
+      if (!this.hasAttribute('dir')) {
+        this.setAttribute('dir', getComputedStyle(this).direction);
+      }
     }
 
     disconnectedCallback() {
