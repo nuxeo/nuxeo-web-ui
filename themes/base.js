@@ -560,6 +560,13 @@ const template = html`
           top: var(--nuxeo-app-top);
         }
 
+        :host([dir='rtl']) {
+          --nuxeo-suggester-button: {
+            left: 0;
+            right: auto;
+          }
+        }
+
         --nuxeo-suggester-width: 65%;
 
         --nuxeo-suggester-media-width: calc(100% - 90px);
