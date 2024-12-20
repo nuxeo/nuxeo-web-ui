@@ -85,7 +85,7 @@ Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
   const appRevoke = await authPage.getApps(appName);
   appRevoke.length.should.equal(1);
   const app = await appRevoke[0];
-  const revokeButton = await app.revokeButton();
+  const revokeButton = await authPage.revokeButton(app, appName);
   await revokeButton.waitForVisible();
   await revokeButton.click();
   await driver.alertAccept();
