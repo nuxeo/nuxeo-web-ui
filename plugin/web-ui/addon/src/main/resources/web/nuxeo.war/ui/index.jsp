@@ -17,10 +17,13 @@ limitations under the License.
 -->
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page import="java.util.UUID"%>
 <%@ page import="org.nuxeo.common.Environment"%>
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
 <%@ page import="org.nuxeo.ecm.core.api.repository.RepositoryManager"%>
 <%@ page import="org.nuxeo.common.utils.UserAgentMatcher"%>
+<%@ page import="javax.servlet.http.HttpServletResponse" %>
+
 
 <%
   String ua = request.getHeader("user-agent");
@@ -35,6 +38,42 @@ limitations under the License.
   } else {
     baseUrl = context + "/repo/" + repository + "/ui/";
   }
+  HttpServletResponse resp = (HttpServletResponse) pageContext.getResponse();
+  String NX_NONCE_VALUE = UUID.randomUUID().toString();
+  String updatedScriptSrcStr = "'self' 'strict-dynamic' 'nonce-" + NX_NONCE_VALUE + "'";
+  String cspHeader = resp.getHeader("Content-Security-Policy");
+  String newCspHeader = "";
+  boolean isExistingCspHeaderEmpty = false;
+  if(cspHeader == null || cspHeader.trim().isEmpty()) { 
+    isExistingCspHeaderEmpty = true;
+    cspHeader = "";
+   }
+  String scriptSrc = "";
+  String directive = null;
+  String[] directives = cspHeader.split(";");
+  boolean foundScriptSrcMatch = false;
+  boolean foundObjectSrcMatch = false;
+  for (int i = 0; i < directives.length; i++) {
+    directive = directives[i].trim();
+    if (directive.startsWith("script-src ")) {
+        foundScriptSrcMatch = true;
+        directive = directive.trim() + " " + updatedScriptSrcStr;
+        directives[i] = directive;
+    }
+    if (directive.startsWith("object-src ")) {
+      foundObjectSrcMatch = true;
+    }
+  }
+  if(foundScriptSrcMatch) {
+    newCspHeader =  String.join(";", directives);
+  }
+  else {
+    newCspHeader = cspHeader.trim() + (isExistingCspHeaderEmpty ? " script-src " : "; script-src ") + updatedScriptSrcStr;
+  }
+  if(!foundObjectSrcMatch){
+    newCspHeader = newCspHeader.trim() + "; object-src  'none'";
+  }
+  resp.setHeader("Content-Security-Policy", newCspHeader);
 %>
 
 <!DOCTYPE html>
@@ -83,6 +122,10 @@ limitations under the License.
   </style>
 </head>
 
+<script nonce="<%= NX_NONCE_VALUE %>">
+  const NuxeoNonce = "<%= NX_NONCE_VALUE %>";
+</script>
+
 <body>
   <nuxeo-connection url="<%= context %>" repository-name="<%= repository %>"></nuxeo-connection>
   <nuxeo-app base-url="<%= baseUrl %>"
@@ -97,15 +140,15 @@ limitations under the License.
     </div>
   </nuxeo-app>
 
-  <script src="vendor/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="vendor/webcomponentsjs/webcomponents-loader.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
-  <script src="vendor/html-imports/html-imports.min.js"></script>
+  <script src="vendor/html-imports/html-imports.min.js" nonce="<%= NX_NONCE_VALUE %>"></script>
 
-  <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
+  <script src="vendor/web-animations/web-animations-next-lite.min.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
-  <script src="config.jsp"></script>
+  <script src="config.jsp"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
-  <script src="main.bundle.js"></script>
+  <script src="main.bundle.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
 </body>
 

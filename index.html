@@ -89,6 +89,10 @@ limitations under the License.
     <script src="vendor/web-animations/web-animations-next-lite.min.js"></script>
 
     <script nonce="dummy">
+
+      function generateNonce(){
+        return window.crypto.randomUUID().toString('base64')
+      }
       /* eslint-disable no-var, no-unused-vars */
       var Nuxeo = {
         UI: {
@@ -128,6 +132,7 @@ limitations under the License.
                 hrefBase: 'elements/search/',
               },
             },
+            nonce: generateNonce()
             /* analytics: {
               documentDistribution: {
                 disableThreshold: 100, // uncomment to set the threshold value that disables the distribution analytics
