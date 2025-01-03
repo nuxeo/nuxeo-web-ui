@@ -81,6 +81,10 @@ limitations under the License.
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+  <script>
+    <%@include file="rtl-setup.js"%>
+  </script>
+
   <style>
     <%@include file="index.css"%>
   </style>
