@@ -22,8 +22,6 @@ limitations under the License.
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
 <%@ page import="org.nuxeo.ecm.core.api.repository.RepositoryManager"%>
 <%@ page import="org.nuxeo.common.utils.UserAgentMatcher"%>
-<%@ page import="javax.servlet.http.HttpServletResponse" %>
-
 
 <%
   String ua = request.getHeader("user-agent");
@@ -38,7 +36,6 @@ limitations under the License.
   } else {
     baseUrl = context + "/repo/" + repository + "/ui/";
   }
-  HttpServletResponse resp = (HttpServletResponse) pageContext.getResponse();
   String NX_NONCE_VALUE = UUID.randomUUID().toString();
   String updatedScriptSrcStr = "'self' 'strict-dynamic' 'nonce-" + NX_NONCE_VALUE + "'";
   String cspHeader = resp.getHeader("Content-Security-Policy");
@@ -85,6 +82,7 @@ limitations under the License.
   <meta charset="UTF-8">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'nonce-<%= NX_NONCE_VALUE %>' 'strict-dynamic'; object-src 'none'">
 
   <title><%= Framework.getProperty(Environment.PRODUCT_NAME) %></title>
 
@@ -119,6 +117,9 @@ limitations under the License.
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+  <script>
+    <%@include file="rtl-setup.js"%>
+  </script>
 
   <style>
     <%@include file="index.css"%>

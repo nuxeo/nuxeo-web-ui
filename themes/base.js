@@ -109,6 +109,7 @@ const template = html`
 
         paper-button + paper-button {
           margin-left: 8px;
+          margin-right: 8px;
         }
 
         paper-textarea {

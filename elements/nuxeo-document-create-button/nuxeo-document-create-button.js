@@ -70,6 +70,12 @@ Polymer({
       nuxeo-document-create-shortcuts {
         --nuxeo-document-create-shortcut-margin: 0 0 16px 0;
       }
+
+      :host([dir='rtl']) #tray {
+        left: 32px;
+        right: auto;
+        overflow: hidden;
+      }
     </style>
 
     <nuxeo-document id="defaultDoc" doc-path="[[parent.path]]" enrichers="permissions, subtypes" response="{{parent}}">
