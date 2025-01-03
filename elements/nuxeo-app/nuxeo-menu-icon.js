@@ -72,7 +72,7 @@ Polymer({
 
     <a href$="[[_href(urlFor, route, link)]]">
       <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip"></paper-icon-button>
-      <nuxeo-tooltip for="button" position="right" offset="0" animation-delay="0" id="tooltip"
+      <nuxeo-tooltip for="button" position="[[_tooltipPosition(_isRTL)]]" offset="0" animation-delay="0" id="tooltip"
         >[[i18n(label)]]</nuxeo-tooltip
       >
       <template is="dom-if" if="[[badge]]">
@@ -126,9 +126,26 @@ Polymer({
     badge: {
       type: String,
     },
+
+    _isRTL: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   observers: ['_srcOrIcon(icon, src)'],
+
+  _checkRtl() {
+    const dir = document.documentElement.getAttribute('dir');
+    this._isRTL = dir === 'rtl';
+  },
+
+  _tooltipPosition(isRTL) {
+    if (isRTL) {
+      return 'right';
+    }
+    return 'left';
+  },
 
   _srcOrIcon() {
     if (this.src && this.src.length > 0) {

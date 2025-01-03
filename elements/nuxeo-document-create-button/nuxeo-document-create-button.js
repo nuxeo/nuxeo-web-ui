@@ -74,6 +74,7 @@ Polymer({
       :host([dir='rtl']) #tray {
         left: 32px;
         right: auto;
+        overflow: hidden;
       }
     </style>
 

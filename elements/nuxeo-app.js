@@ -129,13 +129,6 @@ Polymer({
         height: calc(100% - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
       }
 
-      :host([dir='rtl']) paper-header-panel,
-      :host([dir='rtl']) iron-pages paper-header-panel {
-        right: var(--nuxeo-sidebar-width);
-        width: 100%;
-        margin-right: var(--dynamic-drawer-margin, 0);
-      }
-
       paper-drawer-panel[narrow] {
         --paper-drawer-panel-left-drawer-container: {
           z-index: 100;
@@ -151,7 +144,6 @@ Polymer({
         width: var(--nuxeo-sidebar-width);
         height: 53px;
         top: var(--nuxeo-app-top);
-        left: 0;
         z-index: 102;
         box-sizing: border-box;
         outline: none;
@@ -159,13 +151,24 @@ Polymer({
       }
 
       :host([dir='rtl']) #logo {
-        right: 0px;
         left: auto;
+        right: 0;
+      }
+
+      :host([dir='ltr']) #logo {
+        left: 0;
+        right: auto;
       }
 
       #logo img {
         width: var(--nuxeo-sidebar-width);
         height: 53px;
+      }
+
+      :host([dir='rtl']) #logo {
+        right: 0px;
+        height: 53px;
+        left: auto;
       }
 
       /* menu */
@@ -252,6 +255,11 @@ Polymer({
         background-color: var(--nuxeo-drawer-background);
       }
 
+      :host([dir='rtl']) #drawer iron-pages {
+        margin-right: var(--nuxeo-sidebar-width);
+        margin-left: 0;
+      }
+
       #drawer nuxeo-menu-item:hover,
       #drawer list-item:hover {
         @apply --nuxeo-block-hover;
@@ -311,17 +319,6 @@ Polymer({
         color: white;
         --mdc-typography-body2-font-size: 14px;
       }
-
-      [dir='rtl'] paper-drawer-panel {
-        --paper-drawer-panel-left-drawer-container: {
-          left: auto;
-          right: 0;
-        }
-        --paper-drawer-panel-main-container: {
-          left: 0;
-          right: auto;
-        }
-      }
     </style>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
@@ -351,6 +348,7 @@ Polymer({
       drawer-width="[[drawerWidth]]"
       responsive-width="720px"
       edge-swipe-sensitivity="0"
+      right-drawer$="[[_isRTL]]"
     >
       <div slot="drawer" role="list">
         <!-- logo -->
@@ -626,10 +624,11 @@ Polymer({
       type: Object,
     },
 
-    _isRtl: {
+    _isRTL: {
       type: Boolean,
       value: false,
-      observer: '_onRtlChange',
+      reflectToAttribute: true,
+      observer: '_directionChanged',
     },
   },
 
@@ -675,8 +674,8 @@ Polymer({
   ],
 
   ready() {
-    this.$.drawerPanel.closeDrawer();
     this._checkRtl();
+    this.$.drawerPanel.closeDrawer();
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
     this.$.drawerPanel.$.drawer.addEventListener('transitionend', () => {
       this.$.drawerPanel.notifyResize();
@@ -711,27 +710,23 @@ Polymer({
   },
 
   _checkRtl() {
-    const dir = getComputedStyle(this).direction;
-    this._isRtl = dir === 'rtl';
+    const dir = document.documentElement.getAttribute('dir');
+    this._isRTL = dir === 'rtl';
   },
 
-  _onRtlChange() {
-    this.toggleChevronIcon = this._isRtl ? 'icons:chevron-right' : 'icons:chevron-left';
+  _directionChanged(isRTL) {
+    if (isRTL) {
+      this.$.drawerPanel.setAttribute('right-drawer', '');
+      this.toggleChevronIcon = 'icons:chevron-right';
+    } else {
+      this.$.drawerPanel.removeAttribute('right-drawer');
+      this.toggleChevronIcon = 'icons:chevron-left';
+    }
   },
 
   _resetTaskSelection() {
     this.currentTask = null;
     this.currentTaskId = null;
-  },
-
-  _updateDrawerAlignment() {
-    const { drawerPanel } = this.$;
-    const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
-    if (isRTL) {
-      drawerPanel.setAttribute('drawer-align', 'end');
-    } else {
-      drawerPanel.setAttribute('drawer-align', 'start');
-    }
   },
 
   refresh() {
@@ -1061,10 +1056,6 @@ Polymer({
   _openDrawer() {
     const pixelsSuffix = 'px';
     this.drawerWidth = 298 + Math.round(this.sidebarWidth.substring(0, this.sidebarWidth.length - 2)) + pixelsSuffix;
-    const drawerMarginRight = 297 + pixelsSuffix;
-    this.updateStyles({
-      '--dynamic-drawer-margin': drawerMarginRight,
-    });
     this.drawerOpened = true;
     const { drawerPanel } = this.$;
     if (drawerPanel.narrow) {
@@ -1084,9 +1075,6 @@ Polymer({
     this.drawerOpened = false;
     this.$.drawerPanel.closeDrawer();
     this.selectedTab = '';
-    this.updateStyles({
-      '--dynamic-drawer-margin': '0px',
-    });
   },
 
   _fetchTaskCount() {

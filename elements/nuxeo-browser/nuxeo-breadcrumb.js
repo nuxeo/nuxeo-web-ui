@@ -49,6 +49,10 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             @apply --layout-horizontal;
           }
 
+          :host([dir='rtl']) .breadcrumb {
+            margin: 0.5em 0 0 1em;
+          }
+
           .doc-path {
             width: 100%;
             white-space: nowrap;
@@ -163,7 +167,8 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
       super.connectedCallback();
       this.addEventListener('iron-resize', this._resize);
       if (!this.hasAttribute('dir')) {
-        this.setAttribute('dir', getComputedStyle(this).direction);
+        const direction = document.documentElement.getAttribute('dir');
+        this.setAttribute('dir', direction);
       }
     }
 
