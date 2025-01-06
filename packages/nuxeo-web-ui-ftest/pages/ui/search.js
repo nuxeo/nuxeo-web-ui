@@ -66,9 +66,8 @@ export default class Search extends Results {
     return dropdownElenent;
   }
 
-  async enterInput(text) {
-    const isInputEntered = await driver.keys(text);
-    return isInputEntered;
+  enterInput(text) {
+    return driver.keys(text);
   }
 
   async getField(field) {

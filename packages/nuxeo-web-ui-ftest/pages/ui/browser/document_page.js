@@ -88,8 +88,13 @@ export default class DocumentPage extends BasePage {
           }
         }
         if (pub) {
-          const pubText = await pub.$('div').getText();
-          return parseInt(pubText.trim(), 10);
+          return parseInt(
+            pub
+              .$('div')
+              .getText()
+              .trim(),
+            10,
+          );
         }
       }
       return 0;

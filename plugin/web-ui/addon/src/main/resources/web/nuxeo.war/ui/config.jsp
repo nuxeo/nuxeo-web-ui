@@ -29,7 +29,6 @@
 var Nuxeo = Nuxeo || {};
 Nuxeo.UI = Nuxeo.UI || {};
 Nuxeo.UI.config = <%= cs.getPropertiesAsJson("org.nuxeo.web.ui") %>;
-Nuxeo.UI.config.nonce = NuxeoNonce;
 Nuxeo.UI.bundles = [
   <% for (Resource resource : wrm.getResources(new ResourceContextImpl(), "web-ui", "import")) { %>
   '<%= context %><%= resource.getURI() %>',
