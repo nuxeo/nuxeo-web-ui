@@ -143,6 +143,7 @@ Polymer({
         position: fixed;
         width: var(--nuxeo-sidebar-width);
         height: 53px;
+        left: 0;
         top: var(--nuxeo-app-top);
         z-index: 102;
         box-sizing: border-box;
@@ -348,6 +349,7 @@ Polymer({
       drawer-width="[[drawerWidth]]"
       responsive-width="720px"
       edge-swipe-sensitivity="0"
+      right-drawer$="[[_isRTL]]"
     >
       <div slot="drawer" role="list">
         <!-- logo -->
