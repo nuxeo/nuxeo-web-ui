@@ -77,7 +77,6 @@ jobs:
       
       - name: Zip current folder
         run: |
-          sudo apt-get install -y zip
           zip -r current-folder.zip .
 
       - name: Upload current folder artifact
