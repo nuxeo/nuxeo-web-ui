@@ -143,7 +143,6 @@ Polymer({
         position: fixed;
         width: var(--nuxeo-sidebar-width);
         height: 53px;
-        left: 0;
         top: var(--nuxeo-app-top);
         z-index: 102;
         box-sizing: border-box;
