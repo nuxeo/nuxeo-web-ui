@@ -674,8 +674,8 @@ Polymer({
   ],
 
   ready() {
-    this._checkRtl();
     this.$.drawerPanel.closeDrawer();
+    this._checkRtl();
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
     this.$.drawerPanel.$.drawer.addEventListener('transitionend', () => {
       this.$.drawerPanel.notifyResize();
