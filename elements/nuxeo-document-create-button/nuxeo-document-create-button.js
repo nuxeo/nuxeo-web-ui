@@ -136,7 +136,8 @@ Polymer({
 
   ready() {
     if (!this.hasAttribute('dir')) {
-      this.setAttribute('dir', getComputedStyle(this).direction);
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
     }
   },
 
