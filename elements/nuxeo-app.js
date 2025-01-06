@@ -348,7 +348,6 @@ Polymer({
       drawer-width="[[drawerWidth]]"
       responsive-width="720px"
       edge-swipe-sensitivity="0"
-      right-drawer$="[[_isRTL]]"
     >
       <div slot="drawer" role="list">
         <!-- logo -->

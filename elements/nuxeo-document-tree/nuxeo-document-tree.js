@@ -80,11 +80,6 @@ Polymer({
         word-break: break-word;
       }
 
-      :host([dir='rtl']) .node-name {
-        margin-left: auto;
-        margin-right: 1.3em;
-      }
-
       a {
         @apply --nuxeo-link;
       }
