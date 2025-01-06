@@ -627,7 +627,6 @@ Polymer({
     _isRTL: {
       type: Boolean,
       value: false,
-      reflectToAttribute: true,
       observer: '_directionChanged',
     },
   },
