@@ -74,6 +74,6 @@ jobs:
 
       - name: Web UI build
         run: mvn -B -ntp install
-  
+
       - name: A11y checks
         run: mvn -B -ntp -f plugin/a11y install
