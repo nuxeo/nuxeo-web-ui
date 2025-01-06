@@ -144,31 +144,16 @@ Polymer({
         width: var(--nuxeo-sidebar-width);
         height: 53px;
         top: var(--nuxeo-app-top);
+        left: 0;
         z-index: 102;
         box-sizing: border-box;
         outline: none;
         background-color: var(--nuxeo-sidebar-background);
       }
 
-      :host([dir='rtl']) #logo {
-        left: auto;
-        right: 0;
-      }
-
-      :host([dir='ltr']) #logo {
-        left: 0;
-        right: auto;
-      }
-
       #logo img {
         width: var(--nuxeo-sidebar-width);
         height: 53px;
-      }
-
-      :host([dir='rtl']) #logo {
-        right: 0px;
-        height: 53px;
-        left: auto;
       }
 
       /* menu */
@@ -226,11 +211,6 @@ Polymer({
         cursor: pointer;
       }
 
-      :host([dir='rtl']) #drawer .toggle {
-        left: -16px;
-        right: auto;
-      }
-
       #drawer .toggle iron-icon {
         visibility: hidden;
         color: var(--nuxeo-drawer-background);
@@ -253,11 +233,6 @@ Polymer({
         height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         margin-left: var(--nuxeo-sidebar-width);
         background-color: var(--nuxeo-drawer-background);
-      }
-
-      :host([dir='rtl']) #drawer iron-pages {
-        margin-right: var(--nuxeo-sidebar-width);
-        margin-left: 0;
       }
 
       #drawer nuxeo-menu-item:hover,
@@ -348,7 +323,6 @@ Polymer({
       drawer-width="[[drawerWidth]]"
       responsive-width="720px"
       edge-swipe-sensitivity="0"
-      right-drawer$="[[_isRTL]]"
     >
       <div slot="drawer" role="list">
         <!-- logo -->
@@ -420,7 +394,7 @@ Polymer({
           </iron-pages>
 
           <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
-            <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
+            <iron-icon icon="icons:chevron-left"></iron-icon>
           </div>
         </div>
       </div>
@@ -623,12 +597,6 @@ Polymer({
     _routedSearch: {
       type: Object,
     },
-
-    _isRTL: {
-      type: Boolean,
-      value: false,
-      observer: '_directionChanged',
-    },
   },
 
   listeners: {
@@ -673,7 +641,6 @@ Polymer({
   ],
 
   ready() {
-    this._checkRtl();
     this.$.drawerPanel.closeDrawer();
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
     this.$.drawerPanel.$.drawer.addEventListener('transitionend', () => {
@@ -706,21 +673,6 @@ Polymer({
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
     });
-  },
-
-  _checkRtl() {
-    const dir = document.documentElement.getAttribute('dir');
-    this._isRTL = dir === 'rtl';
-  },
-
-  _directionChanged(isRTL) {
-    if (isRTL) {
-      this.$.drawerPanel.setAttribute('right-drawer', '');
-      this.toggleChevronIcon = 'icons:chevron-right';
-    } else {
-      this.$.drawerPanel.removeAttribute('right-drawer');
-      this.toggleChevronIcon = 'icons:chevron-left';
-    }
   },
 
   _resetTaskSelection() {
