@@ -117,9 +117,6 @@ limitations under the License.
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-  <script>
-    <%@include file="rtl-setup.js"%>
-  </script>
   <style>
     <%@include file="index.css"%>
   </style>
@@ -142,6 +139,20 @@ limitations under the License.
       <span id="loading"></span>
     </div>
   </nuxeo-app>
+
+  <script nonce="<%= NX_NONCE_VALUE %>">
+    window.nuxeo = window.nuxeo || {};
+    window.nuxeo.I18n = window.nuxeo.I18n || {};
+    const userLanguage = navigator.language || navigator.userLanguage || 'en';
+    const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+    const isRTL = rtlLanguages.some((lang) => userLanguage?.startsWith(lang));
+    window.nuxeo.I18n.direction = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.setAttribute('dir', window.nuxeo.I18n.direction || 'ltr');
+    const nuxeoApp = document.querySelector('nuxeo-app');
+    if (nuxeoApp) {
+      nuxeoApp.setAttribute('dir', window.nuxeo.I18n.direction || 'ltr');
+    }
+  </script>
 
   <script src="vendor/webcomponentsjs/webcomponents-loader.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
