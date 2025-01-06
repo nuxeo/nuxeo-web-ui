@@ -117,9 +117,6 @@ limitations under the License.
   <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-  <!-- <script>
-    <%@include file="rtl-setup.js"%>
-  </script> -->
   <style>
     <%@include file="index.css"%>
   </style>
@@ -142,7 +139,9 @@ limitations under the License.
       <span id="loading"></span>
     </div>
   </nuxeo-app>
-
+  
+  <script src="rtl-setup.js" nonce="<%= NX_NONCE_VALUE %>"></script>
+  
   <script src="vendor/webcomponentsjs/webcomponents-loader.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
   <script src="vendor/html-imports/html-imports.min.js" nonce="<%= NX_NONCE_VALUE %>"></script>
