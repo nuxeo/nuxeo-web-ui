@@ -45,7 +45,7 @@ on:
         required: false
 
 env:
-  REFERENCE_BRANCH: 'lts-2025'
+  REFERENCE_BRANCH: lts-2025
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
