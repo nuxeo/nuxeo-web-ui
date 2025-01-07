@@ -133,6 +133,9 @@ Polymer({
         --paper-drawer-panel-left-drawer-container: {
           z-index: 100;
         }
+        --paper-drawer-panel-right-drawer-container: {
+          z-index: 100;
+        }
         --paper-drawer-panel-scrim: {
           z-index: 2;
         }
@@ -293,6 +296,10 @@ Polymer({
         left: 6px;
         z-index: 99;
         background-color: var(--nuxeo-drawer-background);
+      }
+
+      :host([dir='rtl']) #drawerToggle {
+        right: 6px;
       }
 
       nuxeo-document-create-button.admin {

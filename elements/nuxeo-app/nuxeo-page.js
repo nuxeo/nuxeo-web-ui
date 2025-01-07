@@ -102,6 +102,11 @@ Polymer({
           overflow-y: scroll;
           padding-left: 48px;
         }
+
+        :host([dir="rtl"]) #header::slotted(*), /* Chrome, Safari */
+        :host([dir="rtl"]) #toolbar::slotted(*) {
+          padding-right: 48px;
+        }
       }
     </style>
 
