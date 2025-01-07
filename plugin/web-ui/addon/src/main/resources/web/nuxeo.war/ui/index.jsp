@@ -141,7 +141,6 @@ limitations under the License.
   </nuxeo-app>
 
  
-  <script src="main.bundle.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
   <script src="vendor/webcomponentsjs/webcomponents-loader.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
@@ -151,6 +150,7 @@ limitations under the License.
 
   <script src="config.jsp"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
+  <script src="main.bundle.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 </body>
 
 </html>
