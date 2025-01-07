@@ -75,5 +75,15 @@ jobs:
       - name: Web UI build
         run: mvn -B -ntp install
 
+      - name: Zip current folder
+        run: |
+          zip -r current-folder.zip .
+
+      - name: Upload current folder artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: current-folder
+          path: current-folder.zip
+
       - name: A11y checks
         run: mvn -B -ntp -f plugin/a11y install
