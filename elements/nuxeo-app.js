@@ -153,11 +153,6 @@ Polymer({
         background-color: var(--nuxeo-sidebar-background);
       }
 
-      :host([dir='rtl']) #logo {
-        left: auto;
-        right: 0;
-      }
-
       :host([dir='ltr']) #logo {
         left: 0;
         right: auto;

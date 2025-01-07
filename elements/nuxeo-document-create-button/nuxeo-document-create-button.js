@@ -58,6 +58,12 @@ Polymer({
         z-index: 10;
       }
 
+      :host([dir='rtl']) #tray {
+        left: 32px;
+        right: auto;
+        overflow: hidden;
+      }
+
       #shortcuts {
         opacity: 0;
         transition: opacity 0.25s ease-in-out;
@@ -69,12 +75,6 @@ Polymer({
 
       nuxeo-document-create-shortcuts {
         --nuxeo-document-create-shortcut-margin: 0 0 16px 0;
-      }
-
-      :host([dir='rtl']) #tray {
-        left: 32px;
-        right: auto;
-        overflow: hidden;
       }
     </style>
 
