@@ -100,6 +100,14 @@ Polymer({
         cursor: pointer;
       }
 
+      [toggle]:focus {
+        outline: 2px solid black;
+        outline-offset: 0.2px;
+        border-radius: 3px;
+        box-shadow: 0 0 3px black;
+        background-color: rgba(0, 0, 0, 0);
+      }
+
       .parents {
         line-height: 1.5em;
       }
@@ -191,7 +199,16 @@ Polymer({
           <div role="treeitem" aria-expanded="[[opened]]">
             <template class="flex" is="dom-if" if="[[!isLeaf]]">
               <paper-spinner active$="[[loading]]" aria-hidden="true"></paper-spinner>
-              <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]" aria-hidden="true"></iron-icon>
+              <iron-icon
+                icon="[[_expandIcon(opened)]]"
+                toggle
+                hidden$="[[loading]]"
+                tabindex="0"
+                role="button"
+                aria-hidden="false"
+                aria-label="Toggle expand/collapse"
+                on-keydown="_handleKeydown"
+              ></iron-icon>
               <template is="dom-if" if="[[loading]]">
                 <span class="loaddata" aria-live="polite">[[_loading(loading)]]</span>
               </template>
@@ -303,6 +320,27 @@ Polymer({
           }
         });
       });
+    }
+  },
+
+  _handleKeydown(event) {
+    const icon = event.target;
+    const treeItem = icon.closest('[role="treeitem"]');
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
+      // Toggle aria-expanded state
+      const expanded = treeItem.getAttribute('aria-expanded') === 'true';
+      treeItem.setAttribute('aria-expanded', !expanded);
+      // Manually trigger the click event on the chevron icon
+      icon.click();
+      // Dispatch custom event for external handling
+      this.dispatchEvent(
+        new CustomEvent('tree-node-toggled', {
+          detail: { expanded: !expanded, target: treeItem },
+          bubbles: true,
+          composed: true,
+        }),
+      );
+      event.preventDefault(); // Prevent default scrolling or focus behavior
     }
   },
 
