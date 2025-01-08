@@ -141,7 +141,9 @@ limitations under the License.
   </nuxeo-app>
 
  
-
+  <script  nonce="<%= NX_NONCE_VALUE %>">
+     <%@include file="rtl-setup.js"%>
+  </script>
   <script src="vendor/webcomponentsjs/webcomponents-loader.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
   <script src="vendor/html-imports/html-imports.min.js" nonce="<%= NX_NONCE_VALUE %>"></script>
