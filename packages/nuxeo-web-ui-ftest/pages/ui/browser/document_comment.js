@@ -1,20 +1,23 @@
 import DocumentCommentThread from './document_comment_thread'; /* eslint import/no-cycle: 0 */
 
 export default class DocumentComment {
-  constructor(element) {
+  constructor(element, index) {
     this._el = element;
+    this._index = index;
   }
 
   get author() {
     return (async () => {
-      const author = await this._el.element('.author');
+      const ele = await this._el.elements('.author');
+      const author = await ele[this._index];
       return author;
     })();
   }
 
   get dialog() {
     return (async () => {
-      const dialog = this._el.element('#dialog');
+      const ele = this._el.elements('#dialog');
+      const dialog = await ele[this._index];
       return dialog;
     })();
   }
@@ -42,7 +45,8 @@ export default class DocumentComment {
 
   get text() {
     return (async () => {
-      const text = await this._el.element('.text span');
+      const ele = await this._el.elements('.text span');
+      const text = await ele[this._index];
       return text;
     })();
   }

@@ -37,7 +37,7 @@ export default class DocumentCommentThread extends BasePage {
     let trueIndex;
     for (let i = 0; i < comments.length; i++) {
       const item = await comments[i];
-      const comment = new DocumentComment(item);
+      const comment = new DocumentComment(item, i);
       const authorName = await comment.author;
       const authorText = await authorName.getText();
       const commentText = await comment.text;
