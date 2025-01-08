@@ -1,55 +1,45 @@
 /* eslint-disable no-await-in-loop */
 import BasePage from '../../base';
 
-class AuthorizedApp {
-  constructor(element) {
-    this.el = element;
-  }
-
-  get name() {
-    return (async () => {
-      const eles = await this.el.elements('nuxeo-data-table-cell');
-      const ele = await eles[0];
-      const eleText = await ele.getText();
-      return eleText;
-    })();
-  }
-
-  get authorizationDate() {
-    return this.el.elements('nuxeo-data-table-cell')[1].getText();
-  }
-
-  async revokeButton() {
-    return (async () => {
-      const ele = await this.el.element('paper-icon-button[name="revoke"]');
-      return ele;
-    })();
-  }
-}
-
 export default class UserAuthorizedApps extends BasePage {
   async getApps(appName) {
+    await driver.pause(2000);
     const elEx = await this.el;
     await elEx.waitForVisible('nuxeo-data-table nuxeo-data-table-row');
-    const appsNew = await this.el
-      .$$('nuxeo-data-table nuxeo-data-table-row:not([header])')
-      .map((el) => new AuthorizedApp(el));
+    const rows = await this.el.$$('nuxeo-data-table nuxeo-data-table-row:not([header])');
+    const cells = await this.el.$$('nuxeo-data-table nuxeo-data-table-row:not([header]) nuxeo-data-table-cell');
+    const cellsPerRow = cells.length / rows.length;
     const filterAppNames = [];
     const filterApps = [];
-    const apps = await appsNew.filter(async (app) => !!(await app.name).trim());
-    for (let i = 0; i < apps.length; i++) {
-      const app = await apps[i];
-      const appText = await app.el.$('nuxeo-data-table-cell').getText();
+    for (let i = 0; i < rows.length; i++) {
+      const appText = await cells[cellsPerRow * i].getText();
       if (appText.trim() !== '') {
-        filterAppNames.push(app);
+        filterAppNames.push(rows[i]);
       }
       if (appName === appText) {
-        filterApps.push(app);
+        filterApps.push(rows[i]);
       }
     }
     if (appName) {
       return filterApps;
     }
     return filterAppNames;
+  }
+
+  async revokeButton(app, appName) {
+    return (async () => {
+      const rows = await app.$$('nuxeo-data-table nuxeo-data-table-row:not([header])');
+      const cells = await app.$$('nuxeo-data-table nuxeo-data-table-row:not([header]) nuxeo-data-table-cell');
+      const cellsPerRow = cells.length / rows.length;
+      const revokeButtons = await app.$$(
+        'nuxeo-data-table nuxeo-data-table-row:not([header]) paper-icon-button[name="revoke"]',
+      );
+      for (let i = 0; i < rows.length; i++) {
+        const appText = await cells[cellsPerRow * i].getText();
+        if (appName === appText) {
+          return revokeButtons[i];
+        }
+      }
+    })();
   }
 }
