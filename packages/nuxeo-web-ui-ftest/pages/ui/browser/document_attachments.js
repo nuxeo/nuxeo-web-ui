@@ -7,6 +7,7 @@ export default class DocumentAttachments extends BasePage {
   }
 
   get previewButton() {
+    // test
     return this.el.element('nuxeo-preview-button');
   }
 
