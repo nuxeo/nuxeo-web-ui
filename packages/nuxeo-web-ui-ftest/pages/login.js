@@ -19,7 +19,6 @@ export default class Login {
       const baseUrl = process.env.NUXEO_URL || '';
       await driver.pause(1000);
       await browser.url(baseUrl ? `${baseUrl}/logout` : 'logout');
-      await driver.pause(4000);
       return new this();
     })();
   }
