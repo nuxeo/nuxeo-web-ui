@@ -33,7 +33,7 @@ Given('user {string} exists', async (username) => {
   });
 });
 
-When('I login as {string}', async function(username) {
+When('I login as {string}', async function (username) {
   await driver.pause(2000);
   const logIn = await Login.get();
   await driver.pause(2000);
@@ -43,14 +43,16 @@ When('I login as {string}', async function(username) {
   await logIn.submit();
   this.username = username;
   this.ui = await UI.get();
+  console.log("this ui ========>", this.ui)
   await this.ui.waitForVisible('nuxeo-page');
+  console.log("this ui ========> after waitForVisible", this.ui)
 });
 
 When(/^I visit (.*)$/, (path) => url(path));
 
 When('I logout', async () => Login.get());
 
-Then('I am logged in as {string}', async function(username) {
+Then('I am logged in as {string}', async function (username) {
   const drawer = await this.ui.drawer;
   const profileEle = await drawer.open('profile');
   const headerEle = await profileEle.element('.header');
