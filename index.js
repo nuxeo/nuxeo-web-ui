@@ -28,7 +28,7 @@ const loadAddons = async () => {
     }),
   );
 };
-const setupApp = async () =>
+const setupApp = () =>
   customElements.whenDefined('nuxeo-app').then(() => {
     if (Nuxeo && Nuxeo.UI) {
       Nuxeo.UI.app = document.querySelector('nuxeo-app');
@@ -52,8 +52,8 @@ const ready =
   !navigator.webdriver || window.automationReady
     ? Promise.resolve()
     : new Promise((resolve) => {
-        document.addEventListener('automation-ready', resolve);
-      });
+      document.addEventListener('automation-ready', resolve);
+    });
 
 ready
   .then(disableRobotoFont)
