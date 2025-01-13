@@ -34,8 +34,10 @@ Given('user {string} exists', async (username) => {
 });
 
 When('I login as {string}', async function (username) {
+  console.log("step_definition/loginjs line ")
   await driver.pause(2000);
   const logIn = await Login.get();
+  console.log("step_definition/loginjs line ", logIn)
   await driver.pause(2000);
   await logIn.username(username);
   const password = await users[username];
