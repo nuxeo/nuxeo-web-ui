@@ -1,4 +1,3 @@
-@watch
 Feature: Activity
 
   Background: 

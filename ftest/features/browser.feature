@@ -1,5 +1,3 @@
-@watch
-
 Feature: Browser
 
   I can browse the repository
