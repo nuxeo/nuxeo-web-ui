@@ -12,6 +12,7 @@ const refresh = async () => {
 
 const url = async (...args) => {
   await driver.url(...args);
+  console.log("inside helper.js 15", await driver.url(...args));
   _flushProperties();
 };
 
