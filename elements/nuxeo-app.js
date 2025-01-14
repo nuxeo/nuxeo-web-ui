@@ -310,6 +310,13 @@ Polymer({
         margin-left: 50px;
       }
 
+      :host([dir='rtl']) #snackbarPanel {
+        left: auto;
+        right: 0px;
+        margin-right: 50px;
+        margin-left: 0px;
+      }
+
       mwc-snackbar {
         position: relative !important;
         left: 0 !important;
@@ -320,6 +327,11 @@ Polymer({
         justify-content: space-between;
         color: white;
         --mdc-typography-body2-font-size: 14px;
+      }
+
+      :host([dir='rtl']) mwc-snackbar {
+        right: 0 !important;
+        left: auto !important;
       }
     </style>
 
