@@ -29,7 +29,7 @@ env:
 
 jobs:
   a11y:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, master]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -60,6 +60,10 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '21'
+      
+      - name: 'check java version'
+        run: |
+          java --version
 
       - name: 'Update settings.xml with server configuration'
         run: |
