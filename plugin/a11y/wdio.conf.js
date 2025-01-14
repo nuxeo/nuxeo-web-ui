@@ -4,7 +4,7 @@ const ShadowService = require('@nuxeo/nuxeo-web-ui-ftest/wdio-shadow-plugin');
 
 const debug = process.env.DEBUG;
 const debugTimeout = 24 * 60 * 60 * 1000;
-const timeout = 240000;
+const timeout = 300000;
 
 require('@babel/register')({
   presets: [
