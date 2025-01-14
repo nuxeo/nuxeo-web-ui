@@ -43,6 +43,10 @@ Polymer({
         @apply --layout-justified;
       }
 
+      .properties .item > * {
+        unicode-bidi: plaintext;
+      }
+
       iron-icon {
         fill: var(--nuxeo-text-default, #3a3a54);
       }
