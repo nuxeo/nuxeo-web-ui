@@ -275,6 +275,14 @@ const template = html`
           box-shadow: 5px 0 0 0 var(--nuxeo-primary-color) inset;
         }
 
+        [dir='rtl'] {
+          --nuxeo-block-selected: {
+            background-color: var(--nuxeo-box);
+            outline: 0;
+            box-shadow: -5px 0 0 0 var(--nuxeo-primary-color) inset;
+          }
+        }
+
         --nuxeo-card-margin-bottom: 16px;
 
         --nuxeo-card: {

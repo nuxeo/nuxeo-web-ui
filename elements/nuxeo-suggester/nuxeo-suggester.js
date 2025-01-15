@@ -190,6 +190,10 @@ Polymer({
         margin: 0 16px 0 4px;
       }
 
+      :host([dir='rtl']) .item iron-icon {
+        margin: 0 -16px 0 4px;
+      }
+
       a.item:hover,
       a.iron-selected {
         color: var(--nuxeo-text-default);
@@ -226,6 +230,10 @@ Polymer({
         width: 60px;
         height: 60px;
         margin-right: 10px;
+      }
+
+      :host([dir='rtl']) .thumbnailContainer {
+        margin-right: 16px;
       }
 
       nuxeo-document-highlights {
