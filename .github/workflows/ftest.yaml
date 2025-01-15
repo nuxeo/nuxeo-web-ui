@@ -126,11 +126,17 @@ jobs:
                 </server>
               </servers>
               </settings>' > ~/.m2/settings.xml
+            
+      - name: Verify Chrome version before
+        run: google-chrome --version
 
-      - uses: actions/setup-java@v4
-        with: 
-          distribution: 'zulu'
-          java-version: '17'
+      - name: Install Google Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+
+      - name: Verify Chrome version after
+        run: google-chrome --version
 
       - name: Functional tests
         env:
