@@ -74,7 +74,7 @@ jobs:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
           fetch-depth: 1
-          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+          ref: "lts-2025"
 
       - name: Pack Elements modules
         run: |
