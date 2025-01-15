@@ -4,17 +4,17 @@ on:
   pull_request:
     types: [closed, unlabeled]
     branches:
-      - lts-2025
+      - test-ally-ftest-2025-rks
 
   workflow_dispatch:
     inputs:
       branch_name:
         description: 'The name of the branch to preview.'
-        default: 'lts-2025'
+        default: 'test-ally-ftest-2025-rks'
         required: true
       caller_id:
         description: 'run identifier'
-        default: 'lts-2025'
+        default: 'test-ally-ftest-2025-rks'
         type: string
         required: false
 

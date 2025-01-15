@@ -6,10 +6,10 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-  # Sync when a commit is done on lts-2025
+  # Sync when a commit is done on test-ally-ftest-2025-rks
   push:
     branches:
-      - lts-2025
+      - test-ally-ftest-2025-rks
     paths:
       - 'i18n/messages.json'
   

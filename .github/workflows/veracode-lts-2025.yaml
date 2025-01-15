@@ -12,9 +12,9 @@ on:
     - cron: '30 6 * * *'  # 6:30 AM UTC = 12:00 PM IST
 
 env:
-  REFERENCE_BRANCH: lts-2025
+  REFERENCE_BRANCH: test-ally-ftest-2025-rks
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{'lts-2025' }}
+  BRANCH_NAME: ${{'test-ally-ftest-2025-rks' }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 permissions:

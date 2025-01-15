@@ -4,17 +4,17 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-      - lts-2025
+      - test-ally-ftest-2025-rks
 
   workflow_dispatch:
     inputs:
       branch_name:
         description: 'The name of the branch to preview.'
-        default: 'lts-2025'
+        default: 'test-ally-ftest-2025-rks'
         required: true
       caller_id:
         description: 'run identifier'
-        default: 'lts-2025'
+        default: 'test-ally-ftest-2025-rks'
         type: string
         required: false
 
@@ -63,7 +63,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-web-ui
           branch: ${BRANCH_NAME}
-          default-branch: lts-2025
+          default-branch: test-ally-ftest-2025-rks
 
       - uses: actions/checkout@v3
         with:
@@ -80,7 +80,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-elements
           branch: ${BRANCH_NAME}
-          default-branch: lts-2025
+          default-branch: test-ally-ftest-2025-rks
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2

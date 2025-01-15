@@ -3,42 +3,42 @@ name: Main
 on:
   push:
     branches:
-      - lts-2025
+      - test-ally-ftest-2025-rks
 
   # Manually trigger the workflow
   workflow_dispatch:
 
 jobs:
   lint:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@lts-2025
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@test-ally-ftest-2025-rks
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
 
   test:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@lts-2025
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@test-ally-ftest-2025-rks
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
     with:
-      branch: lts-2025
+      branch: test-ally-ftest-2025-rks
 
   a11y:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@lts-2025
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@test-ally-ftest-2025-rks
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
       PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
     with:
-      branch: lts-2025
+      branch: test-ally-ftest-2025-rks
 
   ftest:
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@lts-2025
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@test-ally-ftest-2025-rks
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
       PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
     with:
-      branch: lts-2025
+      branch: test-ally-ftest-2025-rks
 
   build:
     needs: [lint, test, a11y, ftest]

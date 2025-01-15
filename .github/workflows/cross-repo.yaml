@@ -7,7 +7,7 @@ on:
     inputs:
       branch_name:
         description: 'The name of the branch to build.'
-        default: 'lts-2025'
+        default: 'test-ally-ftest-2025-rks'
         required: true
       sauce_labs:
         description: 'Run unit tests on Sauce Labs?'
@@ -40,12 +40,12 @@ on:
         required: false
       caller_id:
         description: 'run identifier'
-        default: 'lts-2025'
+        default: 'test-ally-ftest-2025-rks'
         type: string
         required: false
 
 env:
-  REFERENCE_BRANCH: lts-2025'
+  REFERENCE_BRANCH: test-ally-ftest-2025-rks'
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:

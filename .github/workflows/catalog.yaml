@@ -11,7 +11,7 @@ on:
         required: true
       branch_name:
         description: 'The name of the Nuxeo Web UI branch to generate the catalog for.'
-        default: 'lts-2025'
+        default: 'test-ally-ftest-2025-rks'
         required: true
       classifier:
         description: 'Classifier to name a custom version of the catalog (used for testing purposes).'

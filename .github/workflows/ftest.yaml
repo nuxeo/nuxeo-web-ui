@@ -3,12 +3,12 @@ name: Functional tests
 on:
   pull_request:
     branches:
-      - lts-2025
+      - test-ally-ftest-2025-rks
   workflow_call:
     inputs:
       branch:
         description: 'The current branch'
-        default: lts-2025
+        default: test-ally-ftest-2025-rks
         type: string
         required: false
     secrets:
@@ -23,9 +23,9 @@ on:
         required: true
 
 env:
-  REFERENCE_BRANCH: lts-2025
+  REFERENCE_BRANCH: test-ally-ftest-2025-rks
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'test-ally-ftest-2025-rks' }}
 
 jobs:
   ftests:
