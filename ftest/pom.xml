@@ -23,11 +23,7 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-server-standalone</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.nuxeo.ecm.distribution</groupId>
+      <groupId>org.nuxeo.ftests</groupId>
       <artifactId>nuxeo-functional-tests</artifactId>
       <scope>test</scope>
     </dependency>
