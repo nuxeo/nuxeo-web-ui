@@ -38,7 +38,7 @@ export const _Suggester = {};
 /**
  * Adds a custom command to nuxeo-suggester. Expected command format:
  * { id: String, startsWith: Boolean, searchTerm: String, suggestion: Object, run: Function }
- * Here, suggestion must have and id, icon and label.
+ * Here, suggestion must have and id, icon and label.test
  */
 _Suggester.addCommand = function(command) {
   if (!command) {
