@@ -42,7 +42,10 @@ Polymer({
         line-height: 2.2rem;
         @apply --layout-justified;
       }
-
+      .properties .item span {
+        flex: 1;
+        text-align: left;
+      }
       iron-icon {
         fill: var(--nuxeo-text-default, #3a3a54);
       }
