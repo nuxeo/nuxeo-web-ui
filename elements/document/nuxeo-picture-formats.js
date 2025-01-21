@@ -47,6 +47,11 @@ Polymer({
         unicode-bidi: plaintext;
       }
 
+      .properties .item span {
+        flex: 1;
+        text-align: left;
+      }
+
       iron-icon {
         fill: var(--nuxeo-text-default, #3a3a54);
       }
