@@ -47,9 +47,13 @@ Polymer({
         unicode-bidi: plaintext;
       }
 
-      .properties .item span {
+      :host(:not([dir='rtl'])) .properties .item span {
         flex: 1;
         text-align: left;
+      }
+
+      :host([dir='rtl']) .properties .item {
+        justify-content: space-between;
       }
 
       iron-icon {
@@ -88,6 +92,13 @@ Polymer({
       type: Object,
       computed: '_getAdditionalFormats(document)',
     },
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
   },
 
   _getAdditionalFormats(document) {
