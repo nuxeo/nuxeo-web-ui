@@ -63,6 +63,7 @@ Polymer({
       :host([dir='rtl']) {
         --nuxeo-tree-children-theme: {
           padding-right: 1em;
+          padding-left: 0;
         }
       }
 
@@ -70,6 +71,10 @@ Polymer({
         padding: 5px 0;
         overflow: auto;
         height: calc(100vh - 72px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+      }
+
+      :host([dir='rtl']) .content {
+        padding-right: 24px;
       }
 
       .node-name {
@@ -100,10 +105,6 @@ Polymer({
         width: 1.3rem;
         margin-right: -1.6em;
         margin-top: -0.07rem;
-      }
-
-      :host([dir='rtl']) iron-icon {
-        margin-right: 0;
       }
 
       [toggle] {
