@@ -54,6 +54,11 @@ Polymer({
         top: 10px;
       }
 
+      :host([dir='rtl']) #editNote.edit {
+        left: 10px;
+        right: auto;
+      }
+
       #editHtml.edit {
         left: 0;
         bottom: 0;
