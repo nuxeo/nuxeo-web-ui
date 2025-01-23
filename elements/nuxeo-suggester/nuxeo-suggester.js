@@ -240,6 +240,14 @@ Polymer({
         font-size: 0.85rem;
       }
 
+      :host([dir='rtl']) paper-input {
+        --paper-input-container-label: {
+          padding-left: 0px;
+          padding-right: 8px;
+          left: -3px !important;
+        }
+      }
+
       @media (max-width: 1024px) {
         #searchButton {
           background-color: var(--nuxeo-app-header-background);
