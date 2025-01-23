@@ -58,6 +58,9 @@
 
    <!-- Search result numberFormatting -->
   <property name="org.nuxeo.web.ui.numberFormatting.enabled">${org.nuxeo.web.ui.numberFormatting.enabled:=}</property>
+  
+  <!-- Control eval allowed in CSP, default is true  -->
+  <property name="org.nuxeo.web.ui.expressions.eval">${org.nuxeo.web.ui.expressions.eval:=true}</property>
 
   </extension>
 </component>
