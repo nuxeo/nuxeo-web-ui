@@ -156,7 +156,7 @@ jobs:
             **/log/*.log
             **/nxserver/config/distribution.properties
 
-      - name: Archive packages
+      - name: Archive packages-ftest
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
