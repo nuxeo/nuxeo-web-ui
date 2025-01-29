@@ -60,6 +60,12 @@ Polymer({
         }
       }
 
+      :host([dir='rtl']) {
+        --nuxeo-tree-children-theme: {
+          padding-right: 1em;
+        }
+      }
+
       .content {
         padding: 5px 0;
         overflow: auto;
@@ -72,6 +78,10 @@ Polymer({
         vertical-align: text-top;
         margin-left: 1.3em;
         word-break: break-word;
+      }
+
+      :host([dir='rtl']) .node-name {
+        display: inline;
       }
 
       a {
@@ -94,6 +104,10 @@ Polymer({
         width: 1.3rem;
         margin-right: -1.6em;
         margin-top: -0.07rem;
+      }
+
+      :host([dir='rtl']) iron-icon {
+        margin-right: 0;
       }
 
       [toggle] {
@@ -184,12 +198,12 @@ Polymer({
     <div class="content" role="tree">
       <div class="parents" hidden$="[[_noPermission]]">
         <a href$="[[urlFor('document', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
-          <span aria-hidden="true"><iron-icon icon="icons:chevron-left"></iron-icon></span>
+          <span aria-hidden="true"><iron-icon icon="[[toggleChevronIcon]]"></iron-icon></span>
           <span class="parent">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
           <a href$="[[urlFor(item)]]">
-            <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
+            <span><iron-icon icon="[[toggleChevronIcon]]"></iron-icon></span>
             <span class="parent">[[item.title]]</span>
           </a>
         </template>
@@ -265,11 +279,21 @@ Polymer({
       type: Boolean,
       value: false,
     },
+    _isRtl: {
+      type: Boolean,
+      value: false,
+      observer: '_onRtlChange',
+    },
   },
 
   observers: ['_fetchDocument(docPath, visible)'],
 
   ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
+    this._checkRtl();
     window.addEventListener('nuxeo-documents-deleted', (e) => {
       if (e.detail.documents) {
         this.removeDocuments(e.detail.documents);
@@ -302,6 +326,15 @@ Polymer({
         return !hasFolderishChild;
       },
     };
+  },
+
+  _checkRtl() {
+    const dir = document.documentElement.getAttribute('dir');
+    this._isRtl = dir === 'rtl';
+  },
+
+  _onRtlChange() {
+    this.toggleChevronIcon = this._isRtl ? 'icons:chevron-right' : 'icons:chevron-left';
   },
 
   _hideRoot(doc) {
@@ -385,7 +418,8 @@ Polymer({
   },
 
   _expandIcon(opened) {
-    return `hardware:keyboard-arrow-${opened ? 'down' : 'right'}`;
+    const iconDirection = this._isRtl ? 'left' : 'right';
+    return `hardware:keyboard-arrow-${opened ? 'down' : iconDirection}`;
   },
 
   _icon(opened) {

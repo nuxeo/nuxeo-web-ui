@@ -89,6 +89,11 @@ Polymer({
         padding-right: 16px;
       }
 
+      :host([dir='rtl'][opened]) .main {
+        padding-right: 0;
+        padding-left: 16px;
+      }
+
       .side {
         @apply --layout-vertical;
         position: relative;
@@ -277,6 +282,13 @@ Polymer({
       reflectToAttribute: true,
       observer: '_openedChanged',
     },
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
   },
 
   _documentChanged(doc) {

@@ -44,6 +44,10 @@ Polymer({
         @apply --layout-flex;
         line-height: 2.2rem;
       }
+
+      .properties .item > * {
+        unicode-bidi: plaintext;
+      }
     </style>
 
     <div class="properties">
