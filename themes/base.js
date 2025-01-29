@@ -109,6 +109,7 @@ const template = html`
 
         paper-button + paper-button {
           margin-left: 8px;
+          margin-right: 8px;
         }
 
         paper-textarea {
@@ -272,6 +273,14 @@ const template = html`
           background-color: var(--nuxeo-box);
           outline: 0;
           box-shadow: 5px 0 0 0 var(--nuxeo-primary-color) inset;
+        }
+
+        [dir='rtl'] {
+          --nuxeo-block-selected: {
+            background-color: var(--nuxeo-box);
+            outline: 0;
+            box-shadow: -5px 0 0 0 var(--nuxeo-primary-color) inset;
+          }
         }
 
         --nuxeo-card-margin-bottom: 16px;
@@ -558,6 +567,13 @@ const template = html`
         --nuxeo-suggester-bar: {
           position: relative;
           top: var(--nuxeo-app-top);
+        }
+
+        :host([dir='rtl']) {
+          --nuxeo-suggester-button: {
+            left: 0;
+            right: auto;
+          }
         }
 
         --nuxeo-suggester-width: 65%;

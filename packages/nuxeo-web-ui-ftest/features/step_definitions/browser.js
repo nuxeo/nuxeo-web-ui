@@ -14,7 +14,7 @@ Then('I can see the {string} {word} tree node', async function(title, tab) {
   const sectionTab = await drawer._section(tab);
   await sectionTab.waitForVisible();
   await sectionTab.$$('.content a');
-  await driver.pause(2000);
+  await driver.pause(3000);
   const sectionTexts = await sectionTab.$$('.content a').map((elem) => elem.getText());
   for (let i = 0; i < sectionTexts.length; i++) {
     const sectionText = await sectionTexts[i];
@@ -265,7 +265,7 @@ Then('I can delete all the documents from the {string} collection', async functi
 });
 
 Then('I can see the browser title as {string}', async (title) => {
-  await driver.pause(1000);
+  await driver.pause(2000);
   const browserTitle = await browser.getTitle();
   if (title !== browserTitle) {
     throw new Error(`Expected text to be ${title} but not found`);

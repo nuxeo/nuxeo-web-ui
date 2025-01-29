@@ -63,6 +63,11 @@ Polymer({
         z-index: 1;
       }
 
+      :host([dir='rtl']) #editHtml.edit {
+        left: auto;
+        right: 0;
+      }
+
       .html-editor-container paper-textarea {
         padding: 0;
       }
@@ -168,6 +173,13 @@ Polymer({
       type: String,
       value: '',
     },
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
   },
 
   _documentChanged() {
