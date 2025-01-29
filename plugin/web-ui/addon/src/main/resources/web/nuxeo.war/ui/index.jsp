@@ -50,7 +50,9 @@ limitations under the License.
    }
   String scriptSrc = "";
   String directive = null;
-  String[] directives = cspHeader.split(";");
+  // Replace non-breaking spaces with regular spaces
+  cspHeader = cspHeader.replaceAll("\u00A0", " ");  // Normalizing non-breaking spaces
+  String[] directives = cspHeader.trim().replaceAll("\\s+", " ").split(";");
   boolean foundScriptSrcMatch = false;
   boolean foundObjectSrcMatch = false;
   for (int i = 0; i < directives.length; i++) {
@@ -71,7 +73,7 @@ limitations under the License.
     newCspHeader = cspHeader.trim() + (isExistingCspHeaderEmpty ? " script-src " : "; script-src ") + updatedScriptSrcStr;
   }
   if(!foundObjectSrcMatch){
-    newCspHeader = newCspHeader.trim() + "; object-src  'none'";
+    newCspHeader = newCspHeader.trim() + "; object-src 'none'";
   }
   resp.setHeader("Content-Security-Policy", newCspHeader);
 %>
