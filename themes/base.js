@@ -297,7 +297,7 @@ const template = html`
 
         --nuxeo-label: {
           display: block;
-          opacity: 0.7;
+          opacity: 0.9;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
