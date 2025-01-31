@@ -142,9 +142,9 @@ try {
       if (response.ok) {
         return response
           .text()
-          .then((response1) => {
-            const obj = JSON.parse(response1);
-            const cftVersion = obj.channels.Stable.version;
+          .then((responseJSON) => {
+            const responseObj = JSON.parse(responseJSON);
+            const cftVersion = responseObj.channels.Stable.version;
             // eslint-disable-next-line no-console
             console.log(`ChromeForTesting ${cftVersion} detected.`);
           })
