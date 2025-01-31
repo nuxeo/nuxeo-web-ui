@@ -135,6 +135,28 @@ if (process.env.DRIVER_VERSION == null) {
       console.error('unable to fetch ChromeDriver version: ', e);
     }
   }
+  try {
+    done = fetch(
+      `https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json`,
+    ).then((response) => {
+      if (response.ok) {
+        return response
+          .text()
+          .then((response1) => {
+            const obj = JSON.parse(response1);
+            const cftVersion = obj.channels.Stable.version;
+            // eslint-disable-next-line no-console
+            console.log(`ChromeForTesting ${cftVersion} detected.`);
+          })
+          .catch((e) => {
+            console.error('unable to parse Chrome for testing browser version: ', e);
+          });
+      }
+      console.error('unable to parse Chrome for testing browser version: ', response);
+    });
+  } catch (e) {
+    console.error('unable to parse Chrome for testing browser version ', e);
+  }
 }
 
 done.finally(() => {
