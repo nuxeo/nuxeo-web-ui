@@ -151,11 +151,11 @@ if (process.env.DRIVER_VERSION == null) {
               console.error('unable to parse Chrome for testing browser version: ', e);
             });
         }
-        console.error('unable to parse Chrome for testing browser version: ', response);
+        console.error('unable to fetch Chrome for testing browser version: ', response);
       },
     );
   } catch (e) {
-    console.error('unable to parse Chrome for testing browser version ', e);
+    console.error('unable to fetch Chrome for testing browser version ', e);
   }
 }
 
