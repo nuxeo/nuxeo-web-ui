@@ -239,7 +239,7 @@ Then(/^I can perform the following publications$/, async function(table) {
   await pubCount.should.not.be.NaN;
   const rows = await table.hashes();
   for (let i = 0; i < rows.length; i++) {
-    const { target, rendition, version, override } = rows[i];
+    const { target, rendition, version, override } = await rows[i];
     const dialog = await browser.publishDialog;
     const isdocumentPublished = await dialog.publish(target, rendition, version, override);
     await isdocumentPublished.should.be.true;
