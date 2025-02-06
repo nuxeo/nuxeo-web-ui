@@ -27,7 +27,7 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
-  browserVersion: 'stable',
+  browserVersion: '132.0.6834.159',
 };
 
 const options = {};
