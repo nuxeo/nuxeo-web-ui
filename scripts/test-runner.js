@@ -34,3 +34,15 @@ if (!args.skipWebUi) {
   .split(/[\s,]+/)
   .filter(Boolean)
   .forEach((addon) => runFunctionalTests(addon, path.join(__dirname, `../addons/${addon}/ftest`)));
+
+exports.config = {
+  // Add parallel execution configuration
+  maxInstances: 4, // Run 4 tests simultaneously
+  specFileRetries: 3, // Retry failed tests once
+  capabilities: [
+    {
+      maxInstances: 4,
+      browserName: 'chrome',
+    },
+  ],
+};
