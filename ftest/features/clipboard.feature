@@ -1,3 +1,4 @@
+@group2
 @cleanupLocalStorage
 Feature: Clipboard
 

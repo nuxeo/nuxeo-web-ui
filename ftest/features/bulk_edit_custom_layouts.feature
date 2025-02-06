@@ -1,3 +1,4 @@
+@group2
 Feature: Bulk Edit with custom layouts
 
   Background:

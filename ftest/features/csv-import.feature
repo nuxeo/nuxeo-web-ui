@@ -1,3 +1,4 @@
+@group3
 Feature: CSV Import
 
   Scenario: I can import a CSV file and navigate to the created documents

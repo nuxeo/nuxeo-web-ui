@@ -1,3 +1,4 @@
+@group1
 Feature: Activity
 
   Background: 

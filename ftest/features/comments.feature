@@ -1,3 +1,4 @@
+@group2
 Feature: Comments
 
   Background:

@@ -1,3 +1,4 @@
+@group3
 Feature: Create Document
 
   I can create a Document

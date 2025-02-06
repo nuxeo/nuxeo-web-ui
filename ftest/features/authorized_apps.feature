@@ -1,3 +1,4 @@
+@group1
 Feature: Authorized Applications
 
   As an Administrator I can manage authorized applications

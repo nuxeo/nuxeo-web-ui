@@ -31,6 +31,8 @@
       <env key="NUXEO_PACKAGES" value="nuxeo-csv"/>
       <arg value="run" />
       <arg value="ftest" />
+      <arg value="--" />
+      <arg value="--tags=${cucumber.tags}" />
     </exec>
   </target>
 

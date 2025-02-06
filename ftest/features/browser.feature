@@ -1,3 +1,4 @@
+@group1
 Feature: Browser
 
   I can browse the repository

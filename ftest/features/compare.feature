@@ -1,3 +1,4 @@
+@group3
 Feature: Compare
 
   I can Compare the documents

@@ -94,6 +94,9 @@
             </goals>
             <configuration>
               <target>run-tests</target>
+              <properties>
+                <cucumber.tags>${cucumber.tags}</cucumber.tags>
+              </properties>
             </configuration>
           </execution>
           <execution>

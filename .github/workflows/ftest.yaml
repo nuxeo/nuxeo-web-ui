@@ -30,6 +30,11 @@ env:
 jobs:
   ftests:
     runs-on: [ self-hosted, master ]
+    strategy:
+      matrix:
+        tags: ["@group1", "@group2", "@group3"] 
+      fail-fast: false
+      
     steps:
       - uses: actions/checkout@v2
         with:
@@ -130,8 +135,8 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
-        run: mvn -ntp install -Pftest -DskipInstall
-
+        run: mvn -ntp install -Pftest -DskipInstall -Dcucumber.tags="${{ matrix.tags }}"
+  
       - name: Archive cucumber reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
