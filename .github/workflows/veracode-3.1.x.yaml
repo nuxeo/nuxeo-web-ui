@@ -183,5 +183,5 @@ jobs:
           sandboxname: 'master'
           scantimeout: 600
           include: '*.war, *.zip, *.js, *.html, *.css, *.json'
-          criticality: 'Very High'
+          criticality: 'VeryHigh'
           includenewmodules: 'true'
