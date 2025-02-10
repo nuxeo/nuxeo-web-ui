@@ -43,17 +43,17 @@ jobs:
           node-version: 18
           scope: '@nuxeo'
 
-      - name: Install Web UI
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          npm install
-          pushd packages/nuxeo-web-ui-ftest
-          npm install
-          popd
-          pushd packages/nuxeo-designer-catalog
-          npm install
-          popd
+      # - name: Install Web UI
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      #   run: |
+      #     npm install
+      #     pushd packages/nuxeo-web-ui-ftest
+      #     npm install
+      #     popd
+      #     pushd packages/nuxeo-designer-catalog
+      #     npm install
+      #     popd
 
       - uses: actions/setup-java@v2
         with:
@@ -72,12 +72,20 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
+      - name: Configure NPM
+        run: |
+          npm config set @nuxeo:registry ${{ env.NPM_REPOSITORY }}
+          npm config set //${{ env.NPM_REPOSITORY }}/:_authToken=${{ secrets.NPM_PACKAGES_TOKEN }}
+
       - name: 'Update Nuxeo dependencies'
         run: |
-         UI_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
-         echo "UI_VERSION=$UI_VERSION" >> $GITHUB_ENV
-         echo "Updated all Nuxeo dependencies to version $UI_VERSION"
-
+          UI_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
+            --registry=${{ env.NPM_REPOSITORY }} \
+            --//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }} | \
+            jq -r '.[]' | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
+          echo "UI_VERSION=$UI_VERSION" >> $GITHUB_ENV
+          echo "Updated all Nuxeo dependencies to version $UI_VERSION"
+          
       - name: Web UI build
         run: mvn -B -ntp install
 
