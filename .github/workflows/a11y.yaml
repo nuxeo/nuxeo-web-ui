@@ -72,36 +72,16 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
-      - name: latest UI Elements version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get latest 3.0.x RC tag
+        id: get_latest_rc
         run: |
-          get_version_tag() {
-            local base_version
-            case $1 in
-              maintenance-3.0.x) base_version="3\.0" ;;
-              maintenance-3.1.x) base_version="3\.1" ;;
-              lts-2025) base_version="2025\.1" ;;
-              *) base_version="3\.0" ;;
-            esac
-            
-            version=$(curl -H "Authorization: token $GITHUB_TOKEN" \
-              -s "https://api.github.com/repos/nuxeo/nuxeo-elements/tags?per_page=100" | \
-              jq -r '.[].name' | \
-              grep -E "v${base_version}\.[0-9]+(-rc\.[0-9]+)?$" | \
-              sort -V | tail -n1 | sed 's/^v//')
-            
-            if [ -z "$version" ]; then
-              echo "Error: No matching version for branch: $1"
-              exit 1
-            fi
-            echo "$version"
-          }
+          LATEST_TAG=$(curl -s "https://api.github.com/repos/nuxeo/nuxeo-elements/tags" | \
+          jq -r '.[].name' | grep -E "^3\.0\.[0-9]+-rc\.[0-9]+$" | \
+          sort -V | tail -n 1)
           
-          ELEMENTS_VERSION=$(get_version_tag "$REFERENCE_BRANCH")
-          echo "ELEMENTS_VERSION=$ELEMENTS_VERSION" >> $GITHUB_ENV
-          echo "Latest version for $REFERENCE_BRANCH: $ELEMENTS_VERSION"
-          
+          echo "Latest tag found: $LATEST_TAG"
+          echo "LATEST_VERSION=$LATEST_TAG" >> $GITHUB_ENV
+
       - name: Web UI build
         run: mvn -B -ntp install
 
