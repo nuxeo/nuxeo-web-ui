@@ -70,6 +70,8 @@ jobs:
           echo "VERSION=$(npx semver -i prerelease --preid rc ${RC_VERSION:-$PACKAGE_VERSION}  | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Update versions
+        env:
+            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$PACKAGE_VERSION"'/'"$VERSION"'/g' {} \;
 
@@ -82,12 +84,7 @@ jobs:
           npm version ${VERSION} --no-git-tag-version
 
           # Get latest UI Elements version
-          ELEMENTS_VERSION=$(curl -s https://api.github.com/repos/nuxeo/nuxeo-elements/tags | \
-            jq -r '.[].name' | \
-            grep -E "v3\.1\.[0-9]+-rc\.[0-9]+$" | \
-            sort -V | \
-            tail -n1 | \
-            sed 's/^v//')
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
 
           echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
           # Update package.json dependencies and devDependencies
