@@ -75,6 +75,7 @@ jobs:
       - name: latest UI Elements version
         env:
           REFERENCE_BRANCH: ${{ env.REFERENCE_BRANCH }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Determine version pattern based on reference branch
           case $REFERENCE_BRANCH in
@@ -93,14 +94,21 @@ jobs:
               ;;
           esac
           
-          # Get latest matching tag
-          ELEMENTS_VERSION=$(curl -s https://api.github.com/repos/nuxeo/nuxeo-elements/tags | \
+          # Get latest matching tag with authentication
+          ELEMENTS_VERSION=$(curl -H "Authorization: token $GITHUB_TOKEN" \
+            -s "https://api.github.com/repos/nuxeo/nuxeo-elements/tags?per_page=100" | \
             jq -r '.[].name' | \
             grep -E "$VERSION_PATTERN" | \
             sort -V | \
             tail -n1 | \
             sed 's/^v//')
           
+          if [ -z "$ELEMENTS_VERSION" ]; then
+            echo "Error: No matching version found for pattern: $VERSION_PATTERN"
+            exit 1
+          fi
+          
+          echo "ELEMENTS_VERSION=$ELEMENTS_VERSION" >> $GITHUB_ENV
           echo "Latest nuxeo-elements version for $REFERENCE_BRANCH: $ELEMENTS_VERSION"
 
       - name: Web UI build
