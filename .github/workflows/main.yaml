@@ -80,16 +80,25 @@ jobs:
           sed -i -e 's/\${project.version}/'"$PADDED_VERSION"'/g' plugin/web-ui/marketplace/pom.xml
 
           npm version ${VERSION} --no-git-tag-version
+
           # Get latest UI Elements version
-          UI_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
+          ELEMENTS_VERSION=$(curl -s https://api.github.com/repos/nuxeo/nuxeo-elements/tags | \
+            jq -r '.[].name' | \
+            grep -E "v3\.1\.[0-9]+-rc\.[0-9]+$" | \
+            sort -V | \
+            tail -n1 | \
+            sed 's/^v//')
+
+          echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
           # Update package.json dependencies and devDependencies
-          jq --arg ver "~$UI_VERSION" '
+          jq --arg ver "~$ELEMENTS_VERSION" '
             .dependencies."@nuxeo/nuxeo-dataviz-elements" = $ver |
             .dependencies."@nuxeo/nuxeo-elements" = $ver |
             .dependencies."@nuxeo/nuxeo-ui-elements" = $ver |
             .devDependencies."@nuxeo/testing-helpers" = $ver
           ' package.json > tmp.json && mv tmp.json package.json
-          echo "Updated all Nuxeo dependencies to version $UI_VERSION"
+          echo "Updated all Nuxeo dependencies to version $ELEMENTS_VERSION"
+
           pushd packages/nuxeo-web-ui-ftest
           npm version ${VERSION} --no-git-tag-version
           popd
