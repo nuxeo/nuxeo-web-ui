@@ -73,10 +73,11 @@ jobs:
               </settings>' > ~/.m2/settings.xml
 
       - name: latest UI Elements version
+        env:
+          REFERENCE_BRANCH: ${{ env.REFERENCE_BRANCH }}
         run: |
-          # Get latest UI Elements pattern
-          BRANCH_NAME=${GITHUB_REF#refs/heads/}
-          case $BRANCH_NAME in
+          # Determine version pattern based on reference branch
+          case $REFERENCE_BRANCH in
             maintenance-3.0.x)
               VERSION_PATTERN="v3\.0\.[0-9]+-rc\.[0-9]+$"
               ;;
@@ -87,8 +88,8 @@ jobs:
               VERSION_PATTERN="v2025\.1\.[0-9]+-rc\.[0-9]+$"
               ;;
             *)
-              echo "Unknown branch pattern: $BRANCH_NAME"
-              exit 1
+              echo "Warning: Using default pattern for branch: $REFERENCE_BRANCH"
+              VERSION_PATTERN="v3\.0\.[0-9]+-rc\.[0-9]+$"
               ;;
           esac
           
@@ -100,7 +101,7 @@ jobs:
             tail -n1 | \
             sed 's/^v//')
           
-          echo "Latest nuxeo-elements version for $BRANCH_NAME: $ELEMENTS_VERSION"
+          echo "Latest nuxeo-elements version for $REFERENCE_BRANCH: $ELEMENTS_VERSION"
 
       - name: Web UI build
         run: mvn -B -ntp install
