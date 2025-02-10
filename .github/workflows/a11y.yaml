@@ -74,14 +74,33 @@ jobs:
 
       - name: latest UI Elements version
         run: |
-          # Get latest UI Elements version
+          # Get latest UI Elements pattern
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          case $BRANCH_NAME in
+            maintenance-3.0.x)
+              VERSION_PATTERN="v3\.0\.[0-9]+-rc\.[0-9]+$"
+              ;;
+            maintenance-3.1.x)
+              VERSION_PATTERN="v3\.1\.[0-9]+-rc\.[0-9]+$"
+              ;;
+            lts-2025)
+              VERSION_PATTERN="v2025\.1\.[0-9]+-rc\.[0-9]+$"
+              ;;
+            *)
+              echo "Unknown branch pattern: $BRANCH_NAME"
+              exit 1
+              ;;
+          esac
+          
+          # Get latest matching tag
           ELEMENTS_VERSION=$(curl -s https://api.github.com/repos/nuxeo/nuxeo-elements/tags | \
             jq -r '.[].name' | \
-            grep -E "v3\.1\.[0-9]+-rc\.[0-9]+$" | \
+            grep -E "$VERSION_PATTERN" | \
             sort -V | \
             tail -n1 | \
             sed 's/^v//')
-          echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
+          
+          echo "Latest nuxeo-elements version for $BRANCH_NAME: $ELEMENTS_VERSION"
 
       - name: Web UI build
         run: mvn -B -ntp install
