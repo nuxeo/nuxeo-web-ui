@@ -72,15 +72,13 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
-      - name: Get latest 3.0.x RC tag
-        id: get_latest_rc
+      - name: latest UI Elements version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          LATEST_TAG=$(curl -s "https://api.github.com/repos/nuxeo/nuxeo-elements/tags" | \
-          jq -r '.[].name' | grep -E "^3\.0\.[0-9]+-rc\.[0-9]+$" | \
-          sort -V | tail -n 1)
-          
-          echo "Latest tag found: $LATEST_TAG"
-          echo "LATEST_VERSION=$LATEST_TAG" >> $GITHUB_ENV
+          # Get latest UI Elements version
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "3\.0\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
+          echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
 
       - name: Web UI build
         run: mvn -B -ntp install
