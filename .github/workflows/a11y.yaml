@@ -73,15 +73,11 @@ jobs:
               </settings>' > ~/.m2/settings.xml
 
       - name: latest UI Elements version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           # Get latest UI Elements version
-          ELEMENTS_VERSION=$(curl -s https://api.github.com/repos/nuxeo/nuxeo-elements/tags | \
-            jq -r '.[].name' | \
-            grep -E "v3\.1\.[0-9]+-rc\.[0-9]+$" | \
-            sort -V | \
-            tail -n1 | \
-            sed 's/^v//')
-
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
           echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
           
       - name: Web UI build
