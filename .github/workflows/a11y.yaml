@@ -74,43 +74,34 @@ jobs:
 
       - name: latest UI Elements version
         env:
-          REFERENCE_BRANCH: ${{ env.REFERENCE_BRANCH }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Determine version pattern based on reference branch
-          case $REFERENCE_BRANCH in
-            maintenance-3.0.x)
-              VERSION_PATTERN="v3\.0\.[0-9]+-rc\.[0-9]+$"
-              ;;
-            maintenance-3.1.x)
-              VERSION_PATTERN="v3\.1\.[0-9]+-rc\.[0-9]+$"
-              ;;
-            lts-2025)
-              VERSION_PATTERN="v2025\.1\.[0-9]+-rc\.[0-9]+$"
-              ;;
-            *)
-              echo "Warning: Using default pattern for branch: $REFERENCE_BRANCH"
-              VERSION_PATTERN="v3\.0\.[0-9]+-rc\.[0-9]+$"
-              ;;
-          esac
+          get_version_tag() {
+            local base_version
+            case $1 in
+              maintenance-3.0.x) base_version="3\.0" ;;
+              maintenance-3.1.x) base_version="3\.1" ;;
+              lts-2025) base_version="2025\.1" ;;
+              *) base_version="3\.0" ;;
+            esac
+            
+            version=$(curl -H "Authorization: token $GITHUB_TOKEN" \
+              -s "https://api.github.com/repos/nuxeo/nuxeo-elements/tags?per_page=100" | \
+              jq -r '.[].name' | \
+              grep -E "v${base_version}\.[0-9]+(-rc\.[0-9]+)?$" | \
+              sort -V | tail -n1 | sed 's/^v//')
+            
+            if [ -z "$version" ]; then
+              echo "Error: No matching version for branch: $1"
+              exit 1
+            fi
+            echo "$version"
+          }
           
-          # Get latest matching tag with authentication
-          ELEMENTS_VERSION=$(curl -H "Authorization: token $GITHUB_TOKEN" \
-            -s "https://api.github.com/repos/nuxeo/nuxeo-elements/tags?per_page=100" | \
-            jq -r '.[].name' | \
-            grep -E "$VERSION_PATTERN" | \
-            sort -V | \
-            tail -n1 | \
-            sed 's/^v//')
-          
-          if [ -z "$ELEMENTS_VERSION" ]; then
-            echo "Error: No matching version found for pattern: $VERSION_PATTERN"
-            exit 1
-          fi
-          
+          ELEMENTS_VERSION=$(get_version_tag "$REFERENCE_BRANCH")
           echo "ELEMENTS_VERSION=$ELEMENTS_VERSION" >> $GITHUB_ENV
-          echo "Latest nuxeo-elements version for $REFERENCE_BRANCH: $ELEMENTS_VERSION"
-
+          echo "Latest version for $REFERENCE_BRANCH: $ELEMENTS_VERSION"
+          
       - name: Web UI build
         run: mvn -B -ntp install
 
