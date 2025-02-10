@@ -44,7 +44,7 @@ jobs:
     needs: [ lint, test, a11y, ftest ]
     runs-on: [ self-hosted, master ]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4.2.2
 
     - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
@@ -70,6 +70,8 @@ jobs:
         echo "VERSION=$(npx semver -i prerelease --preid rc ${RC_VERSION:-$PACKAGE_VERSION}  | tr -d '\n')" >> $GITHUB_ENV
 
     - name: Update versions
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
         find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$PACKAGE_VERSION"'/'"$VERSION"'/g' {} \;
 
@@ -80,6 +82,19 @@ jobs:
         sed -i -e 's/\${project.version}/'"$PADDED_VERSION"'/g' plugin/web-ui/marketplace/pom.xml
 
         npm version ${VERSION} --no-git-tag-version
+
+        # Get latest UI Elements version
+        ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "3\.0\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
+        echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
+        # Update package.json dependencies and devDependencies
+        jq --arg ver "~$ELEMENTS_VERSION" '
+            .dependencies."@nuxeo/nuxeo-dataviz-elements" = $ver |
+            .dependencies."@nuxeo/nuxeo-elements" = $ver |
+            .dependencies."@nuxeo/nuxeo-ui-elements" = $ver |
+            .devDependencies."@nuxeo/testing-helpers" = $ver
+          ' package.json > tmp.json && mv tmp.json package.json
+          echo "Updated all Nuxeo dependencies to version $ELEMENTS_VERSION"
+
         pushd packages/nuxeo-web-ui-ftest
         npm version ${VERSION} --no-git-tag-version
         popd
