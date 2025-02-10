@@ -33,12 +33,6 @@ jobs:
           node-version: 18
           scope: '@nuxeo'
 
-      - name:
-        run: |
-         UI_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
-         echo "UI_VERSION=$UI_VERSION" >> $GITHUB_ENV
-         echo "Updated all Nuxeo dependencies to version $UI_VERSION"
-
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
