@@ -99,7 +99,7 @@ Polymer({
   _restore() {
     if (this.document) {
       this.$.opRestoreVersion.input = this.document.uid;
-      this.$.opRestoreVersion.params = { checkout: true };
+      this.$.opRestoreVersion.params = { checkout: false };
       this.$.opRestoreVersion.execute().then(() => {
         this.navigateTo(
           'document',
