@@ -41,7 +41,7 @@ export default class PublicationDialog extends BasePage {
     return result;
   }
 
-  async waitForVisible() {
+  waitForVisible() {
     return this.el.waitForVisible();
   }
 }
