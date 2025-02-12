@@ -52,26 +52,28 @@ When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, async func
 });
 
 When(/^I create a (major|minor) version$/, async function(versionType) {
-  const page = await this.ui.browser.documentPage(this.doc.type);
+  const browser = await this.ui.browser;
+  const page = await browser.documentPage(this.doc.type);
   await page.waitForVisible();
-  await page.versions.waitForVisible();
-  const pageVersionDialog = await page.versions.dialog;
+  const versions = await page.versions;
+  await versions.waitForVisible();
+  const pageVersionDialog = await versions.dialog;
   await pageVersionDialog.waitForVisible();
   switch (versionType) {
     case 'major': {
-      const dialogMajorOpt = await page.versions.dialogMajorOption;
+      const dialogMajorOpt = await versions.dialogMajorOption;
       await dialogMajorOpt.click();
       break;
     }
     case 'minor': {
-      const dialogMinorOpt = await page.versions.dialogMinorOption;
+      const dialogMinorOpt = await versions.dialogMinorOption;
       await dialogMinorOpt.click();
       break;
     }
     default:
     // do nothing
   }
-  const dialogConfirmBtn = await page.versions.dialogConfirmButton;
+  const dialogConfirmBtn = await versions.dialogConfirmButton;
   await dialogConfirmBtn.waitForVisible();
   await dialogConfirmBtn.click();
 });
