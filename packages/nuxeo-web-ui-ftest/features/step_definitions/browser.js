@@ -266,7 +266,7 @@ Then('I can delete all the documents from the {string} collection', async functi
 });
 
 Then('I can see the browser title as {string}', async (title) => {
-  await driver.pause(1000);
+  await driver.pause(2000);
   const browserTitle = await browser.getTitle();
   if (title !== browserTitle) {
     throw new Error(`Expected text to be ${title} but not found`);
