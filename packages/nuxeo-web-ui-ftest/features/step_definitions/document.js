@@ -87,8 +87,8 @@ Given(
 );
 
 Given(/^This document has file "(.+)" for content$/, async function(file) {
-  const contentEle = await fixtures.documents.attach(this.doc, fixtures.blobs.get(file));
-  return contentEle;
+  const contentEle = await fixtures.blobs.get(file);
+  return fixtures.documents.attach(this.doc, contentEle);
 });
 
 Given(/^This document has file "(.+)" for attachment/, async function(file) {
