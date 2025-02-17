@@ -14,7 +14,7 @@ Then('I can see the {string} {word} tree node', async function(title, tab) {
   const sectionTab = await drawer._section(tab);
   await sectionTab.waitForVisible();
   await sectionTab.$$('.content a');
-  await driver.pause(3000);
+  await driver.pause(2000);
   const sectionTexts = await sectionTab.$$('.content a').map((elem) => elem.getText());
   for (let i = 0; i < sectionTexts.length; i++) {
     const sectionText = await sectionTexts[i];
@@ -232,17 +232,18 @@ Then('I can publish selection to {string}', async function(target) {
 });
 
 Then(/^I can perform the following publications$/, async function(table) {
-  let page = await this.ui.browser.documentPage(this.doc.type);
+  const browser = await this.ui.browser;
+  let page = await browser.documentPage(this.doc.type);
   await page.waitForVisible();
   let pubCount = await page.publicationsCount;
-  pubCount.should.not.be.NaN;
-  const rows = table.hashes();
+  await pubCount.should.not.be.NaN;
+  const rows = await table.hashes();
   for (let i = 0; i < rows.length; i++) {
-    const { target, rendition, version, override } = rows[i];
-    const dialog = await this.ui.browser.publishDialog;
+    const { target, rendition, version, override } = await rows[i];
+    const dialog = await browser.publishDialog;
     const isdocumentPublished = await dialog.publish(target, rendition, version, override);
-    isdocumentPublished.should.be.true;
-    page = await this.ui.browser.documentPage(this.doc.type);
+    await isdocumentPublished.should.be.true;
+    page = await browser.documentPage(this.doc.type);
     const newCount = await page.publicationsCount;
     let check;
     const bar = await page.isVisible('#versionInfoBar');
