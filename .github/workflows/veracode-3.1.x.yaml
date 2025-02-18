@@ -63,33 +63,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       run: |
           npm install
-          pushd packages/nuxeo-web-ui-ftest
-          npm install
-          popd
-    - name: Checkout the nuxeo-elements repo
-      uses: actions/checkout@v2
-      with:
-          repository: nuxeo/nuxeo-elements
-          path: nuxeo-elements
-          fetch-depth: 1
-          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
-
-    - name: Pack Elements modules
-      run: |
-          pushd nuxeo-elements
-          pushd core
-          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-          pushd ui
-          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-          pushd dataviz
-          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-          pushd testing-helpers
-          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-          popd
 
     - name: add .npmrc
       run: |
@@ -103,12 +76,6 @@ jobs:
           always-auth=true
         ' >> /tmp/_temp/.npmrc
 
-    - name: Link elements to Web UI
-      run: |
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
     - name: 'Update settings.xml with server configuration'
       run: |
           echo '<settings>
@@ -124,15 +91,10 @@ jobs:
     - name: Delete Node Modules
       run: |
         rm -rf node_modules
-        rm -rf packages/nuxeo-designer-catalog/node_modules
-        rm -rf packages/nuxeo-web-ui-ftest/node_modules
-        rm -rf plugin/a11y/node_modules 
+
        
     - name: Delete Test Folders
       run: |
-        rm -rf nuxeo-elements/testing-helpers/
-        rm -rf nuxeo-elements/ui/test/
-        rm -rf nuxeo-elements/storybook/
         rm -rf ftest/
         rm -rf plugin/
         rm -rf scripts/
