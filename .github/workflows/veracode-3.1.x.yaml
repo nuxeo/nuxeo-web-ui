@@ -17,7 +17,7 @@ on:
 env:
   REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{'maintenance-3.1.x' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 permissions:
@@ -50,14 +50,6 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
 
-    - name: Determine nuxeo-elements branch to link
-      id: pick_nuxeo_elements_branch
-      run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
-          else
-            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
-          fi
     - name: Install Web UI
       env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
