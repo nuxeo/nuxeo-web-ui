@@ -114,7 +114,6 @@
     "@polymer/iron-selector": "^3.0.1",
     "@polymer/iron-validatable-behavior": "^3.0.1",
     "@polymer/iron-validator-behavior": "^3.0.1",
-    "@polymer/marked-element": "^3.0.1",
     "@polymer/neon-animation": "^3.0.1",
     "@polymer/paper-badge": "^3.1.0",
     "@polymer/paper-button": "^3.0.1",
@@ -139,8 +138,7 @@
     "@polymer/paper-toast": "^3.0.1",
     "@polymer/paper-toggle-button": "^3.0.1",
     "@polymer/paper-toolbar": "^3.0.1",
-    "@polymer/paper-tooltip": "^3.0.1",
-    "@polymer/polymer": "^3.5.1"
+    "@polymer/paper-tooltip": "^3.0.1"
   },
   "husky": {
     "hooks": {
