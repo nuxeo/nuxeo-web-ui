@@ -77,7 +77,6 @@
   },
   "dependencies": {
     "@material/mwc-snackbar": "^0.26.1",
-    "@nuxeo/page": "^1.11.4-nx.0",
     "@polymer/app-layout": "^3.1.0",
     "@polymer/iron-a11y-announcer": "^3.2.0",
     "@polymer/iron-a11y-keys": "^3.0.1",
