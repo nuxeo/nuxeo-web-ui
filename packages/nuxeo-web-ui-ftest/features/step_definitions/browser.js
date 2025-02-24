@@ -234,7 +234,7 @@ Then('I can publish selection to {string}', async function(target) {
 Then(/^I can perform the following publications$/, async function(table) {
   const browser = await this.ui.browser;
   const doctType = await this.doc.type;
-  let page = await browser.documentPagedoctTyp(doctType);
+  let page = await browser.documentPage(doctType);
   await page.waitForVisible();
   let pubCount = await page.publicationsCount;
   await pubCount.should.not.be.NaN;
