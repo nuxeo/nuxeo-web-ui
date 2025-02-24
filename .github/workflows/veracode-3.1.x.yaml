@@ -54,7 +54,7 @@ jobs:
       env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       run: |
-          npm install
+          npm install --legacy-peer-deps
 
     - name: add .npmrc
       run: |
