@@ -225,7 +225,8 @@ module.exports = class {
       async function(...args) {
         let target = this;
         if (typeof args[0] === 'string' && typeof target.waitForDisplayed !== 'function') {
-          target = this.element(args.shift());
+          const argShift = args.shift();
+          target = await this.element(argShift);
         }
         const [timeout, reverse = false] = args;
         if (typeof target.waitForDisplayed === 'function') {

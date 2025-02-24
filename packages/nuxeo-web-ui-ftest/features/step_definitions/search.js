@@ -80,24 +80,23 @@ Given(/^I have the following documents$/, async (table) => {
   return tasks.reduce((current, next) => current.then(next), Promise.resolve([]));
 });
 
-Given('I have a saved search named "{word}", for the "{word}" page provider, with the following parameters', function(
-  searchName,
-  pageProvider,
-  table,
-) {
-  const hashes = table.hashes();
-  hashes.forEach((kv) => {
-    kv.value = JSON.parse(kv.value);
-  });
-  // could be replaced with Object.fromEntries(...), which is only support from nodejs 12.x on
-  const params = hashes.reduce((obj, { key, value }) => {
-    obj[key] = value;
-    return obj;
-  }, {});
-  return fixtures.savedSearches.create(searchName, pageProvider, params).then((savedSearch) => {
-    this.savedSearch = savedSearch;
-  });
-});
+Given(
+  'I have a saved search named "{word}", for the "{word}" page provider, with the following parameters',
+  async function(searchName, pageProvider, table) {
+    const hashes = await table.hashes();
+    hashes.forEach((kv) => {
+      kv.value = JSON.parse(kv.value);
+    });
+    // could be replaced with Object.fromEntries(...), which is only support from nodejs 12.x on
+    const params = hashes.reduce((obj, { key, value }) => {
+      obj[key] = value;
+      return obj;
+    }, {});
+    return fixtures.savedSearches.create(searchName, pageProvider, params).then((savedSearch) => {
+      this.savedSearch = savedSearch;
+    });
+  },
+);
 
 Given('I have permission {word} for this saved search', function(permission) {
   return fixtures.savedSearches.setPermissions(this.savedSearch, permission, this.username);
