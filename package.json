@@ -167,6 +167,7 @@
     "@polymer/paper-toggle-button": "^3.0.1",
     "@polymer/paper-toolbar": "^3.0.1",
     "@polymer/paper-tooltip": "^3.0.1",
+    "@polymer/polymer": "^3.5.1",
     "@wdio/allure-reporter": "^8.29.1",
     "@webcomponents/html-imports": "^1.2.0",
     "aws-sdk": "^2.420.0",
