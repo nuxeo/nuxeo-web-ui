@@ -247,8 +247,7 @@ Then(/^I can perform the following publications$/, async function(table) {
     page = await browser.documentPage(doctType);
     const newCount = await page.publicationsCount;
     let check;
-    const bar = await page.$('#versionInfoBar');
-    await bar.waitForVisible();
+    const bar = await page.isVisible('#versionInfoBar');
     if (bar) {
       check = newCount === 0;
     } else {
