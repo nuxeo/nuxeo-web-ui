@@ -233,7 +233,8 @@ Then('I can publish selection to {string}', async function(target) {
 
 Then(/^I can perform the following publications$/, async function(table) {
   const browser = await this.ui.browser;
-  let page = await browser.documentPage(this.doc.type);
+  const doctType = await this.doc.type;
+  let page = await browser.documentPagedoctTyp(doctType);
   await page.waitForVisible();
   let pubCount = await page.publicationsCount;
   await pubCount.should.not.be.NaN;
@@ -243,10 +244,11 @@ Then(/^I can perform the following publications$/, async function(table) {
     const dialog = await browser.publishDialog;
     const isdocumentPublished = await dialog.publish(target, rendition, version, override);
     await isdocumentPublished.should.be.true;
-    page = await browser.documentPage(this.doc.type);
+    page = await browser.documentPage(doctType);
     const newCount = await page.publicationsCount;
     let check;
-    const bar = await page.isVisible('#versionInfoBar');
+    const bar = await page.$('#versionInfoBar');
+    await bar.waitForVisible();
     if (bar) {
       check = newCount === 0;
     } else {
