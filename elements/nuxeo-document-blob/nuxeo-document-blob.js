@@ -63,6 +63,11 @@ Polymer({
         opacity: 0.7;
       }
 
+      :host([dir='rtl']) .detail {
+        text-align: right;
+        unicode-bidi: plaintext;
+      }
+
       nuxeo-actions-menu {
         height: 100%;
         max-width: var(--nuxeo-document-blob-actions-menu-max-width, 160px);
@@ -98,6 +103,13 @@ Polymer({
     },
     blob: Object,
     actionContext: Object,
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
   },
 
   observers: ['_update(user, document, xpath)'],

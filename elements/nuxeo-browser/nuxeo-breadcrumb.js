@@ -49,6 +49,10 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             @apply --layout-horizontal;
           }
 
+          :host([dir='rtl']) .breadcrumb {
+            margin: 0.5em 0 0 1em;
+          }
+
           .doc-path {
             width: 100%;
             white-space: nowrap;
@@ -72,6 +76,10 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             background-color: rgba(255, 255, 255, 0.7);
             padding: 0.2em;
             border-radius: 2px;
+          }
+
+          :host([dir='rtl']) .current-icon iron-icon {
+            margin: 0.3rem 0 0 0.5rem;
           }
 
           #ancestors {
@@ -158,6 +166,10 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
     connectedCallback() {
       super.connectedCallback();
       this.addEventListener('iron-resize', this._resize);
+      if (!this.hasAttribute('dir')) {
+        const direction = document.documentElement.getAttribute('dir');
+        this.setAttribute('dir', direction);
+      }
     }
 
     disconnectedCallback() {

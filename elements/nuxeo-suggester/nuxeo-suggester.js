@@ -113,6 +113,12 @@ Polymer({
         @apply --nuxeo-suggester-button;
       }
 
+      :host([dir='rtl']) #searchButton {
+        right: auto;
+        left: 0;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
       #searchButton:hover {
         background-color: var(--nuxeo-button-primary);
         color: var(--nuxeo-button-primary-text);
@@ -184,6 +190,10 @@ Polymer({
         margin: 0 16px 0 4px;
       }
 
+      :host([dir='rtl']) .item iron-icon {
+        margin: 0 -16px 0 4px;
+      }
+
       a.item:hover,
       a.iron-selected {
         color: var(--nuxeo-text-default);
@@ -222,8 +232,20 @@ Polymer({
         margin-right: 10px;
       }
 
+      :host([dir='rtl']) .thumbnailContainer {
+        margin-right: 16px;
+      }
+
       nuxeo-document-highlights {
         font-size: 0.85rem;
+      }
+
+      :host([dir='rtl']) paper-input {
+        --paper-input-container-label: {
+          padding-left: 0px;
+          padding-right: 8px;
+          left: -3px !important;
+        }
       }
 
       @media (max-width: 1024px) {
@@ -339,6 +361,13 @@ Polymer({
     items: {
       type: Array,
     },
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
   },
 
   toggle() {
