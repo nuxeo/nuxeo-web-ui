@@ -84,6 +84,7 @@ jobs:
       run: |
         rm -rf node_modules
         rm -rf packages/nuxeo-web-ui-ftest/node_modules
+        rm -rf packages/nuxeo-designer-catalog/node_modules
 
        
     - name: Delete Test Folders
