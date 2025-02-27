@@ -14,11 +14,6 @@
         "clean-data": "find data/applications/nuxeo/**/ ! -name 'catalog-packages.json' -delete"
     },
     "dependencies": {
-        "del": "^2.2.2",
-        "end-of-stream": "^1.4.4",
-        "fs-extra": "^4.0.3",
-        "is-stream": "^1.1.0",
-        "merge-stream": "^1.0.1",
         "pumpify": "^1.5.1",
         "run-sequence": "^1.2.2",
         "through2-filter": "^1.4.1",
