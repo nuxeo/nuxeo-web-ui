@@ -1,5 +1,5 @@
-import BasePage from '../../base';
-import DocumentVersions from './document_versions';
+import BasePage from '../../base.js';
+import DocumentVersions from './document_versions.js';
 
 export default class PublicationDialog extends BasePage {
   async publish(target, rendition, version, override) {
