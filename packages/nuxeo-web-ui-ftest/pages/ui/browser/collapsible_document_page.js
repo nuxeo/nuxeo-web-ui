@@ -1,4 +1,4 @@
-import DocumentPage from './document_page';
+import DocumentPage from './document_page.js';
 
 export default class CollapsibleDocumentPage extends DocumentPage {
   constructor(selector, docType) {
