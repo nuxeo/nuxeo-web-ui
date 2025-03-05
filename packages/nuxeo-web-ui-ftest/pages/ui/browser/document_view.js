@@ -1,5 +1,5 @@
-import BasePage from '../../base';
-import NoteEditor from '../note_editor';
+import BasePage from '../../base.js';
+import NoteEditor from '../note_editor.js';
 
 export default class DocumentView extends BasePage {
   constructor(selector, docType) {

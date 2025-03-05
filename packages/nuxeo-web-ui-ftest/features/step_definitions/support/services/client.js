@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import Nuxeo, { Blob } from 'nuxeo';
+import Nuxeo from 'nuxeo';
+
+const { Blob } = Nuxeo;
 
 export default new Nuxeo({
   auth: { method: 'basic', username: 'Administrator', password: 'Administrator' },
