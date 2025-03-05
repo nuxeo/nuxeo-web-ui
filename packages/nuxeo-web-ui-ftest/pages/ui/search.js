@@ -1,5 +1,5 @@
-import Results from './results';
-import DocumentPermissions from './browser/document_permissions';
+import Results from './results.js';
+import DocumentPermissions from './browser/document_permissions.js';
 
 export default class Search extends Results {
   get quickSearchResults() {

@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import BasePage from '../../base';
+import BasePage from '../../base.js';
 
 export default class DocumentLayout extends BasePage {
   async getField(field) {

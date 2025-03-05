@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, Then, When } from '@cucumber/cucumber';
-import { url } from '../../pages/helpers';
+import { url } from '../../pages/helpers.js';
 
 Then('I can see the {string} search panel', function(name) {
   this.ui.drawer._search(name).waitForVisible();
