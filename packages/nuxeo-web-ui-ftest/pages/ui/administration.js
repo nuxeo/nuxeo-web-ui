@@ -1,8 +1,8 @@
-import BasePage from '../base';
-import Vocabulary from './admin/vocabulary';
-import CloudServices from './admin/cloudServices';
-import Audit from './admin/audit';
-import { url } from '../helpers';
+import BasePage from '../base.js';
+import Vocabulary from './admin/vocabulary.js';
+import CloudServices from './admin/cloudServices.js';
+import Audit from './admin/audit.js';
+import { url } from '../helpers.js';
 
 export default class Administration extends BasePage {
   get analytics() {

@@ -1,4 +1,4 @@
-import nuxeo, { BlobHelper } from './client';
+import nuxeo, { BlobHelper } from './client.js';
 
 class DocumentHelper {
   constructor() {

@@ -1,6 +1,6 @@
-import BasePage from '../../base';
-import DocumentLayout from './document_layout';
-import DocumentAttachments from './document_attachments';
+import BasePage from '../../base.js';
+import DocumentLayout from './document_layout.js';
+import DocumentAttachments from './document_attachments.js';
 
 export default class DocumentMetadata extends BasePage {
   constructor(selector, docType) {
