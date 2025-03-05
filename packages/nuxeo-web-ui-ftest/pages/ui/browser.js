@@ -1,16 +1,16 @@
 /* eslint-disable no-await-in-loop */
-import BasePage from '../base';
-import DocumentPage from './browser/document_page';
-import CollapsibleDocumentPage from './browser/collapsible_document_page';
-import AddToCollectionDialog from './browser/add_to_collection_dialog';
-import PublicationDialog from './browser/publication_dialog';
-import DocumentPermissions from './browser/document_permissions';
-import DocumentPublications from './browser/document_publications';
-import DocumentTask from './browser/document_task';
-import DocumentFormLayout from './browser/document_form_layout';
-import Selection from './selection';
-import Results from './results';
-import { clickActionMenu, url } from '../helpers';
+import BasePage from '../base.js';
+import DocumentPage from './browser/document_page.js';
+import CollapsibleDocumentPage from './browser/collapsible_document_page.js';
+import AddToCollectionDialog from './browser/add_to_collection_dialog.js';
+import PublicationDialog from './browser/publication_dialog.js';
+import DocumentPermissions from './browser/document_permissions.js';
+import DocumentPublications from './browser/document_publications.js';
+import DocumentTask from './browser/document_task.js';
+import DocumentFormLayout from './browser/document_form_layout.js';
+import Selection from './selection.js';
+import Results from './results.js';
+import { clickActionMenu, url } from '../helpers.js';
 
 export default class Browser extends BasePage {
   async documentPage(docType) {

@@ -1,4 +1,4 @@
-import BasePage from '../base';
+import BasePage from '../base.js';
 
 export default class NoteEditor extends BasePage {
   setContent(content) {

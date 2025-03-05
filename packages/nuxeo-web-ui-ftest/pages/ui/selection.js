@@ -1,7 +1,7 @@
-import BasePage from '../base';
-import AddToCollectionDialog from './browser/add_to_collection_dialog';
-import PublicationDialog from './browser/publication_dialog';
-import { clickActionMenu } from '../helpers';
+import BasePage from '../base.js';
+import AddToCollectionDialog from './browser/add_to_collection_dialog.js';
+import PublicationDialog from './browser/publication_dialog.js';
+import { clickActionMenu } from '../helpers.js';
 
 export default class Selection extends BasePage {
   async addToClipboard() {
