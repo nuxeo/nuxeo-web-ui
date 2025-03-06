@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { Then } from '@cucumber/cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 Then('I can see the video conversions panel', async function() {
   const uiBrowser = await this.ui.browser;
@@ -35,4 +35,27 @@ Then('I can see the video storyboard', async function() {
       timeoutMsg: 'I cannot see the video storyboard',
     },
   );
+});
+
+When('I can edit the following properties in the Video metadata:', async function(table) {
+  const page = await this.ui.browser.documentPage(this.doc.type);
+  await page.waitForVisible();
+
+  // Wait for metadata card to be visible and enabled
+  const metadata = await page.metadata;
+  await metadata.waitForVisible();
+  await driver.waitUntil(
+    async () => {
+      const isVisible = await metadata.isVisible();
+      const isEnabled = await metadata.isEnabled();
+      return isVisible && isEnabled;
+    },
+    {
+      timeout: 30000,
+      timeoutMsg: 'Metadata form not ready for editing',
+    },
+  );
+
+  // Edit the properties with increased timeout
+  await metadata.editItems(table.rows(), 30000);
 });

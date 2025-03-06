@@ -18,7 +18,19 @@ export default class Browser extends BasePage {
     if (page === 'nuxeo-collapsible-document-page') {
       return new CollapsibleDocumentPage(page, docType);
     }
-    return new DocumentPage(page, docType);
+    const docPage = new DocumentPage(page, docType);
+    await driver.waitUntil(
+      async () => {
+        const isVisible = await docPage.isVisible();
+        const isEnabled = await docPage.isEnabled();
+        return isVisible && isEnabled;
+      },
+      {
+        timeout: 30000,
+        timeoutMsg: 'Document page not ready',
+      },
+    );
+    return docPage;
   }
 
   async browseTo(path) {
