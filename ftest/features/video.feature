@@ -1,3 +1,4 @@
+@watch 
 Feature: Create Video
 
   I can create a Video document
