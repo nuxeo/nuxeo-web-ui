@@ -140,18 +140,40 @@ export default class Browser extends BasePage {
   }
 
   async addToCollection(name) {
-    const button = await this.el.$('nuxeo-add-to-collection-button');
-    await button.waitForVisible();
-    const dialogExistingEle = await button.isExisting('#dialog');
-    const dialogVisibleEle = await button.isVisible('#dialog');
-    if (!dialogExistingEle || !dialogVisibleEle) {
-      await button.click();
+    try {
+      // Wait for and click the add to collection button
+      const button = await this.el.$('nuxeo-add-to-collection-button');
+      await button.waitForVisible({ timeout: 10000 });
+
+      // Check if dialog needs to be opened
+      const dialog = await button.$('#dialog');
+      const isDialogVisible = await dialog.isVisible();
+      if (!isDialogVisible) {
+        await button.click();
+        await driver.pause(1000); // Give dialog time to open
+      }
+
+      // Initialize and use the dialog
+      const collectionDialog = await new AddToCollectionDialog(
+        `${this._selector} nuxeo-add-to-collection-button #dialog`,
+      );
+      await collectionDialog.waitForVisible();
+      await collectionDialog.addToCollection(name);
+
+      // Wait for collection tag to appear
+      await driver.waitUntil(
+        () => this.el.$('nuxeo-document-collections nuxeo-tag').then((tag) => tag && tag.isVisible()),
+        {
+          timeout: 20000,
+          timeoutMsg: 'Collection tag did not appear after adding to collection',
+        },
+      );
+
+      return true;
+    } catch (error) {
+      console.error('Failed to add to collection:', error);
+      throw error;
     }
-    const dialog = await new AddToCollectionDialog(`${this._selector}  nuxeo-add-to-collection-button #dialog`);
-    await dialog.waitForVisible();
-    await dialog.addToCollection(name);
-    const docCollectionEle = await this.el.$('nuxeo-document-collections nuxeo-tag');
-    await docCollectionEle.waitForVisible();
   }
 
   async doesNotHaveCollection(name) {
