@@ -58,6 +58,10 @@ Polymer({
         overflow-x: auto;
       }
 
+      :host([dir='rtl']) .toolbar {
+        border-right: 1px solid var(--divider-color);
+      }
+
       #tabs {
         flex: 0 0 auto;
         background: var(--nuxeo-app-header-background);
@@ -65,6 +69,10 @@ Polymer({
         margin-top: 1px;
         overflow-x: auto;
         z-index: 1;
+      }
+
+      :host([dir='rtl']) #tabs {
+        border-right: 1px solid var(--divider-color);
       }
 
       #header::slotted(*) {
@@ -81,12 +89,23 @@ Polymer({
         padding-left: 16px;
       }
 
+      :host([dir="rtl"]) #header::slotted(*), /* Chrome, Safari */
+      :host([dir="rtl"]) #toolbar::slotted(*) {
+        padding-right: 16px;
+        padding-left: 64px;
+      }
+
       @media (max-width: 720px) {
         #header::slotted(*), /* chrome, safari */
         #toolbar::slotted(*) {
           /* firefox */
           overflow-y: scroll;
           padding-left: 48px;
+        }
+
+        :host([dir="rtl"]) #header::slotted(*), /* Chrome, Safari */
+        :host([dir="rtl"]) #toolbar::slotted(*) {
+          padding-right: 48px;
         }
       }
     </style>
@@ -105,4 +124,10 @@ Polymer({
   `,
 
   is: 'nuxeo-page',
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
+  },
 });

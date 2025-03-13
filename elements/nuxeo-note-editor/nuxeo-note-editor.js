@@ -54,6 +54,11 @@ Polymer({
         top: 10px;
       }
 
+      :host([dir='rtl']) #editNote.edit {
+        left: 10px;
+        right: auto;
+      }
+
       #editHtml.edit {
         left: 0;
         bottom: 0;
@@ -61,6 +66,11 @@ Polymer({
         width: 24px;
         height: 24px;
         z-index: 1;
+      }
+
+      :host([dir='rtl']) #editHtml.edit {
+        left: auto;
+        right: 0;
       }
 
       .html-editor-container paper-textarea {
@@ -168,6 +178,13 @@ Polymer({
       type: String,
       value: '',
     },
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
   },
 
   _documentChanged() {

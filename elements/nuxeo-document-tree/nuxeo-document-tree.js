@@ -60,6 +60,12 @@ Polymer({
         }
       }
 
+      :host([dir='rtl']) {
+        --nuxeo-tree-children-theme: {
+          padding-right: 1em;
+        }
+      }
+
       .content {
         padding: 5px 0;
         overflow: auto;
@@ -72,6 +78,10 @@ Polymer({
         vertical-align: text-top;
         margin-left: 1.3em;
         word-break: break-word;
+      }
+
+      :host([dir='rtl']) .node-name {
+        display: inline;
       }
 
       a {
@@ -96,8 +106,20 @@ Polymer({
         margin-top: -0.07rem;
       }
 
+      :host([dir='rtl']) iron-icon {
+        margin-right: 0;
+      }
+
       [toggle] {
         cursor: pointer;
+      }
+
+      [toggle]:focus {
+        outline: 2px solid black;
+        outline-offset: 0.2px;
+        border-radius: 3px;
+        box-shadow: 0 0 3px black;
+        background-color: rgba(0, 0, 0, 0);
       }
 
       .parents {
@@ -176,12 +198,12 @@ Polymer({
     <div class="content" role="tree">
       <div class="parents" hidden$="[[_noPermission]]">
         <a href$="[[urlFor('document', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
-          <span aria-hidden="true"><iron-icon icon="icons:chevron-left"></iron-icon></span>
+          <span aria-hidden="true"><iron-icon icon="[[toggleChevronIcon]]"></iron-icon></span>
           <span class="parent">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
           <a href$="[[urlFor(item)]]">
-            <span><iron-icon icon="icons:chevron-left"></iron-icon></span>
+            <span><iron-icon icon="[[toggleChevronIcon]]"></iron-icon></span>
             <span class="parent">[[item.title]]</span>
           </a>
         </template>
@@ -191,7 +213,16 @@ Polymer({
           <div role="treeitem" aria-expanded="[[opened]]">
             <template class="flex" is="dom-if" if="[[!isLeaf]]">
               <paper-spinner active$="[[loading]]" aria-hidden="true"></paper-spinner>
-              <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]" aria-hidden="true"></iron-icon>
+              <iron-icon
+                icon="[[_expandIcon(opened)]]"
+                toggle
+                hidden$="[[loading]]"
+                tabindex="0"
+                role="button"
+                aria-hidden="false"
+                aria-label="Toggle expand/collapse"
+                on-keydown="_handleKeydown"
+              ></iron-icon>
               <template is="dom-if" if="[[loading]]">
                 <span class="loaddata" aria-live="polite">[[_loading(loading)]]</span>
               </template>
@@ -248,11 +279,21 @@ Polymer({
       type: Boolean,
       value: false,
     },
+    _isRtl: {
+      type: Boolean,
+      value: false,
+      observer: '_onRtlChange',
+    },
   },
 
   observers: ['_fetchDocument(docPath, visible)'],
 
   ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
+    this._checkRtl();
     window.addEventListener('nuxeo-documents-deleted', (e) => {
       if (e.detail.documents) {
         this.removeDocuments(e.detail.documents);
@@ -287,6 +328,15 @@ Polymer({
     };
   },
 
+  _checkRtl() {
+    const dir = document.documentElement.getAttribute('dir');
+    this._isRtl = dir === 'rtl';
+  },
+
+  _onRtlChange() {
+    this.toggleChevronIcon = this._isRtl ? 'icons:chevron-right' : 'icons:chevron-left';
+  },
+
   _hideRoot(doc) {
     return this.rootDocPath !== '/' || (doc && doc.type && doc.type === 'Root');
   },
@@ -303,6 +353,27 @@ Polymer({
           }
         });
       });
+    }
+  },
+
+  _handleKeydown(event) {
+    const icon = event.target;
+    const treeItem = icon.closest('[role="treeitem"]');
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
+      // Toggle aria-expanded state
+      const expanded = treeItem.getAttribute('aria-expanded') === 'true';
+      treeItem.setAttribute('aria-expanded', !expanded);
+      // Manually trigger the click event on the chevron icon
+      icon.click();
+      // Dispatch custom event for external handling
+      this.dispatchEvent(
+        new CustomEvent('tree-node-toggled', {
+          detail: { expanded: !expanded, target: treeItem },
+          bubbles: true,
+          composed: true,
+        }),
+      );
+      event.preventDefault(); // Prevent default scrolling or focus behavior
     }
   },
 
@@ -347,7 +418,8 @@ Polymer({
   },
 
   _expandIcon(opened) {
-    return `hardware:keyboard-arrow-${opened ? 'down' : 'right'}`;
+    const iconDirection = this._isRtl ? 'left' : 'right';
+    return `hardware:keyboard-arrow-${opened ? 'down' : iconDirection}`;
   },
 
   _icon(opened) {
