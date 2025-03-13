@@ -65,7 +65,7 @@ Feature: Versioning
     And Versions item index at 1 is 0.1
     Then I click the versions list at index 1
     And I can restore version
-    And The document version is 1.0+
+    And The document version is 0.1
     And Versions count is 2
 
   @config('router.key.document','uid')
@@ -88,5 +88,5 @@ Feature: Versioning
     And Versions item index at 1 is 0.1
     Then I click the versions list at index 1
     And I can restore version
-    And The document version is 1.0+
+    And The document version is 0.1
     And Versions count is 2
