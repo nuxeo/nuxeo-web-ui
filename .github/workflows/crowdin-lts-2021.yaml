@@ -1,5 +1,5 @@
 # Workflow that syncronizes translations from Crowdin
-name: Crowdin Sync
+name: Crowdin Sync lts 2021
 
 on:
   # Check for updates every day
