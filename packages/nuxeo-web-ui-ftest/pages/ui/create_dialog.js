@@ -1,9 +1,9 @@
 /* eslint-disable no-await-in-loop */
 
 import path from 'path';
-import BasePage from '../base';
-import DocumentCreate from './browser/document_create';
-import DocumentLayout from './browser/document_layout';
+import BasePage from '../base.js';
+import DocumentCreate from './browser/document_create.js';
+import DocumentLayout from './browser/document_layout.js';
 
 export default class CreateDialog extends BasePage {
   get documentCreate() {

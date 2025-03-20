@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, When, Then } from '@cucumber/cucumber';
-import { url } from '../../pages/helpers';
+import { url } from '../../pages/helpers.js';
 
 Given('I have a {word} document', async function(docType) {
   docType = docType || 'File';

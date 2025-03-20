@@ -1,4 +1,4 @@
-import nuxeo from '../services/client';
+import nuxeo from '../services/client.js';
 
 fixtures.collections = {
   addToNewCollection: (document, colName) =>
