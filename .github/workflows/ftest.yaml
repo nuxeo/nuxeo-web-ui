@@ -1,34 +1,22 @@
+# Workflow that syncronizes translations from Crowdin
 name: Functional tests
 
 on:
+  # Check for updates every day
   pull_request:
+
+  # Sync when a commit is done on lts-2025
+  push:
     branches:
-      - maintenance-3.1.x
-  workflow_call:
-    inputs:
-      branch:
-        description: 'The current branch'
-        default: maintenance-3.1.x
-        type: string
-        required: false
-    secrets:
-      NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
-        required: true
-      PACKAGES_AUTH_USER:
-        description: 'PACKAGES_AUTH_USER'
-        required: true
-      PACKAGES_AUTH_TOKEN: 
-        description: 'PACKAGES_AUTH_TOKEN'
-        required: true
-
-env:
-  REFERENCE_BRANCH: maintenance-3.1.x
-  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
-
+      - lts-2025
+    paths:
+      - 'i18n/messages.json'
+  
+  # Manually trigger the workflow
+  workflow_dispatch:
+  
 jobs:
-  ftests:
+  crowdin:
     runs-on: ubuntu-latest
 
     steps:
@@ -40,7 +28,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Crowdin Action
-        uses: crowdin/github-action@v1
+        uses: crowdin/github-action@v2
         with:
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
