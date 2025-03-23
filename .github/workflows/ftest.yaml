@@ -1,10 +1,9 @@
 # Workflow that syncronizes translations from Crowdin
-name: Crowdin Sync lts 2025
+name: Functional tests
 
 on:
   # Check for updates every day
-  schedule:
-    - cron: '0 0 * * *'
+  pull_request:
 
   # Sync when a commit is done on lts-2025
   push:
