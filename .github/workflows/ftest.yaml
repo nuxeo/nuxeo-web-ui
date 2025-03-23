@@ -4,6 +4,8 @@ name: Functional tests
 on:
   # Check for updates every day
   pull_request:
+    branches:
+      - maintenance-3.1.x
 
   # Sync when a commit is done on lts-2025
   push:
