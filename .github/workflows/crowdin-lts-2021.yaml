@@ -21,6 +21,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ 'maintenance-3.0.x' }}
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -40,13 +44,13 @@ jobs:
           auto_approve_imported: true
 
           # Name of the branch where to merge the translations
-          localization_branch_name: crowdin-translations-update
+          localization_branch_name: crowdin-translations-update-lts-2021
           create_pull_request: true
-          pull_request_title: 'New Crowdin translations'
-          pull_request_body: 'New Crowdin pull request with translations'
+          pull_request_title: 'New Crowdin translations lts 2021'
+          pull_request_body: 'New Crowdin pull request with translations lts 2021'
 
           # The commit message
-          commit_message: 'Automatic update of translations from Crowdin'
+          commit_message: 'Automatic update of translations from Crowdin lts 2021'
 
           # Automatically download all the new translations
           download_translations: true
