@@ -1,36 +1,51 @@
 # Workflow that syncronizes translations from Crowdin
-name: Crowdin Sync lts 2023
+name: Crowdin Sync
 
 on:
   # Check for updates every day
   schedule:
     - cron: '0 0 * * *'
 
+env:
+  BRANCH_NAME: ${{ 'maintenance-3.1.x' }}
+
   # Sync when a commit is done on maintenance-3.1.x
   push:
-    branches:
-      - maintenance-3.1.x
+    branches: ${{ env.BRANCH_NAME }}
     paths:
       - 'i18n/messages.json'
   
-  # Manually trigger the workflow
-  workflow_dispatch:
-  
 jobs:
+  # in uses, cannot use environment variable for {owner}/{repo} nor matrix strategy variable for {ref}
+  # thus hardcoding them
+  call-workflow-in-lts-2021:
+    if: github.event_name == 'schedule'
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@maintenance-3.0.x
+    secrets: inherit
+    needs: crowdin
+
+  call-workflow-in-lts-2025:
+    if: github.event_name == 'schedule'
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@lts-2025
+    secrets: inherit
+    needs: call-workflow-in-lts-2021
+
   crowdin:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ 'maintenance-3.1.x' }}
-
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
 
       - name: Crowdin Action
-        uses: crowdin/github-action@v1
+        id: crowdin-sync
+        uses: crowdin/github-action@1.5.2
         with:
+          # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
+          skip_ref_checkout: true
+
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
@@ -45,8 +60,9 @@ jobs:
 
           # Name of the branch where to merge the translations
           localization_branch_name: crowdin-translations-update-lts-2023
+          pull_request_base_branch_name: ${{ env.BRANCH_NAME }}
           create_pull_request: true
-          pull_request_title: 'New Crowdin translations lts 2023'
+          pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
           pull_request_body: 'New Crowdin pull request with translations lts 2023'
 
           # The commit message
