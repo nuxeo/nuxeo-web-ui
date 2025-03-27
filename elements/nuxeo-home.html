@@ -131,6 +131,7 @@ limitations under the License.
               nx-provider="latestQuery"
               empty-label="[[i18n('queryWidget.noDocuments')]]"
               on-row-clicked="_navigate"
+              caption-text="[[i18n('table.caption.recentlyEditedDocs')]]"
             >
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
@@ -205,6 +206,7 @@ limitations under the License.
               empty-label="[[i18n('recentDocuments.empty')]]"
               empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
               on-row-clicked="_navigate"
+              caption-text="[[i18n('table.caption.recentlyViewedDocs')]]"
             >
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
@@ -243,6 +245,7 @@ limitations under the License.
               nx-provider="favoritesProvider"
               empty-label="[[i18n('favorites.empty')]]"
               on-row-clicked="_navigate"
+              caption-text="[[i18n('table.caption.favoriteDocs')]]"
             >
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>

@@ -56,6 +56,7 @@ class OAuth2ProvidedTokens extends mixinBehaviors([TokenBehavior, FormatBehavior
       icon="nuxeo:view-list"
       empty-label="[[i18n('cloudTokens.emptyResult')]]"
       items="[[tokens]]"
+      caption-text="[[i18n('cloudTokens.OAuth2Tokens.provided')]]"
     >
       <nuxeo-data-table-column name="[[i18n('cloudTokens.nuxeoLogin')]]" field="nuxeoLogin">
         <template>
