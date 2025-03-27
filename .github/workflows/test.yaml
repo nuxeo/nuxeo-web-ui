@@ -23,6 +23,7 @@ on:
 
   env:
     BRANCH_NAME: ${{ 'maintenance-3.1.x' }}
+    GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
 
   # Sync when a commit is done on maintenance-3.1.x
   push:
@@ -92,6 +93,3 @@ jobs:
           # User properties
           github_user_name: nuxeo-webui-jx-bot
           github_user_email: webui@hyland.com
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
