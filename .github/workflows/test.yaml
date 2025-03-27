@@ -3,8 +3,7 @@ name: Test
 
 on:
   # Check for updates every day
-  schedule:
-    - cron: '0 0 * * *'
+  pull_request:
 
   env:
     BRANCH_NAME: ${{ 'maintenance-3.1.x' }}
