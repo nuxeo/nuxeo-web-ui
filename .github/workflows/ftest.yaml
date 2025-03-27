@@ -132,7 +132,7 @@ jobs:
           RUN_ALL: false
           BAIL: 0
         run: |
-          mvn -ntp install -Pftest -DskipInstall -Dnuxeo.packages.xml=ftest/add-packages.xml
+          mvn -ntp install -Pftest -DskipInstall
 
       - name: Archive cucumber reports
         if: ${{ always() }}
