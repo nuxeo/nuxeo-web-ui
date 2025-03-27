@@ -33,7 +33,7 @@
       <arg value="install" />
     </exec>
     <exec executable="${cmd.npm}" dir="../" failonerror="true">
-      <env key="NUXEO_PACKAGES" value="nuxeo-csv nuxeo-search-client-opensearch1 nuxeo-search-client-opensearch1"/>
+      <env key="NUXEO_PACKAGES" value="nuxeo-csv nuxeo-search-client-opensearch1 nuxeo-opensearch1-embed-package"/>
       <arg value="run" />
       <arg value="ftest" />
     </exec>
