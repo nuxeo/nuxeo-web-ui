@@ -12,7 +12,7 @@
   <property name="mp.install" value="file:${out.dir}/nuxeo-web-ui-marketplace-${maven.project.version}.zip,
     file:${out.dir}/nuxeo-web-ui-marketplace-itests-${maven.project.version}.zip,
     file:${out.dir}/nuxeo-csv-package-${nuxeo.platform.version}.zip,
-    file:${out.dir}/nuxeo-search-client-opensearch1-package-${nuxeo.platform.version}.zip",
+    file:${out.dir}/nuxeo-search-client-opensearch1-package-${nuxeo.platform.version}.zip,
     file:${out.dir}/nuxeo-opensearch1-embed-package-${nuxeo.platform.version}.zip"/>
 
   <target name="prepare-environment" depends="_init,prepare-db,prepare-tomcat">
