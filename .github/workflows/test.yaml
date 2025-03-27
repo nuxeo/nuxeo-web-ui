@@ -1,79 +1,48 @@
-# Workflow that syncronizes translations from Crowdin
 name: Test
 
 on:
-  # Check for updates every day
   pull_request:
+    branches:
+      - maintenance-3.0.x
+  workflow_call:
+    inputs:
+      branch:
+        description: 'The current branch'
+        default: maintenance-3.0.x
+        type: string
+        required: false
+    secrets:
+      NPM_PACKAGES_TOKEN:
+        description: 'NPM_PACKAGES_TOKEN'
+        required: true
+      SAUCE_ACCESS_KEY:
+        description: 'SAUCE_ACCESS_KEY'
+        required: true
 
 env:
-  BRANCH_NAME: ${{ 'maintenance-3.1.x' }}
-  GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.0.x' }}
 
-  # Sync when a commit is done on maintenance-3.1.x
-  push:
-    branches: ['maintenance-3.1.x']
-    paths:
-      - 'i18n/messages.json'
-
-  # Manually trigger the workflow
-  workflow_dispatch:
-  
 jobs:
-  # in uses, cannot use environment variable for {owner}/{repo} nor matrix strategy variable for {ref}
-  # thus hardcoding them
-  call-workflow-in-lts-2021:
-    if: github.event_name == 'schedule'
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@maintenance-3.0.x
-    secrets: inherit
-    needs: crowdin
-
-  call-workflow-in-lts-2025:
-    if: github.event_name == 'schedule'
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@lts-2025
-    secrets: inherit
-    needs: call-workflow-in-lts-2021
-
-  crowdin:
-    runs-on: ubuntu-latest
-
+  unit-test:
+    runs-on: [ self-hosted, master ]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v2
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - name: Crowdin Action
-        id: crowdin-sync
-        uses: crowdin/github-action@1.5.2
+      - uses: actions/setup-node@v3
         with:
-          # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
-          skip_ref_checkout: true
+          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          scope: '@nuxeo'
+          node-version: 18
 
-          # Tokens
-          project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
-          token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
-          # Load external configuration file (to support translation rename)
-          config: crowdin-conf.yml
+      - name: Install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm install
 
-          # Upload sources for translation
-          upload_sources: true
-
-          # Auto-approve reference sentences we are pushing (english)
-          auto_approve_imported: true
-
-          # Name of the branch where to merge the translations
-          localization_branch_name: crowdin-translations-update-lts-2023
-          pull_request_base_branch_name: ${{ env.BRANCH_NAME }}
-          create_pull_request: true
-          pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
-          pull_request_body: 'New Crowdin pull request with translations lts 2023'
-
-          # The commit message
-          commit_message: 'Automatic update of translations from Crowdin lts 2023'
-
-          # Automatically download all the new translations
-          download_translations: true
-
-          # User properties
-          github_user_name: nuxeo-webui-jx-bot
-          github_user_email: webui@hyland.com
+      - name: Unit tests
+        env:
+          SAUCE_USERNAME: nuxeo-web-ui
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        run: npm run test
