@@ -4,6 +4,22 @@ name: Test
 on:
   # Check for updates every day
   pull_request:
+    branches:
+      - maintenance-3.1.x
+  workflow_call:
+    inputs:
+      branch:
+        description: 'The current branch'
+        default: maintenance-3.1.x
+        type: string
+        required: false
+    secrets:
+      NPM_PACKAGES_TOKEN:
+        description: 'NPM_PACKAGES_TOKEN'
+        required: true
+      SAUCE_ACCESS_KEY:
+        description: 'SAUCE_ACCESS_KEY'
+        required: true
 
   env:
     BRANCH_NAME: ${{ 'maintenance-3.1.x' }}
