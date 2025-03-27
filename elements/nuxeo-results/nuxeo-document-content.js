@@ -147,6 +147,7 @@ Polymer({
         on-row-clicked="_navigate"
         draggable$="[[_hasWritePermission(document)]]"
         drop-target-filter="[[_dropTargetFilter]]"
+        caption-text="[[i18n('documentContentView.datatable.documentContent.heading')]]"
       >
         <nuxeo-data-table-column
           name="[[i18n('documentContentView.datatable.header.title')]]"

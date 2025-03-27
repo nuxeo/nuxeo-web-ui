@@ -61,6 +61,7 @@ Polymer({
         icon="nuxeo:view-list"
         empty-label="[[i18n('cloudProviders.emptyResult')]]"
         items="[[oauth2Providers]]"
+        caption-text="[[i18n('cloudProviders.heading')]]"
       >
         <nuxeo-data-table-column name="[[i18n('cloudProviders.serviceName')]]" field="serviceName">
           <template>
