@@ -125,7 +125,7 @@ Polymer({
 
         <nuxeo-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]">
           <template is="dom-if" if="[[!_isEmpty(downloads)]]">
-            <nuxeo-data-table items="[[downloadedDocs]]">
+            <nuxeo-data-table items="[[downloadedDocs]]" caption-text="[[i18n('table.caption.topDownloads')]]">
               <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file')]]">
                 <template>[[item.title]]</template>
               </nuxeo-data-table-column>

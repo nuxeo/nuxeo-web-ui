@@ -63,6 +63,7 @@ class CloudConsumers extends mixinBehaviors([NotifyBehavior, FormatBehavior], Nu
           icon="nuxeo:view-list"
           empty-label="[[i18n('cloudConsumers.emptyResult')]]"
           items="[[oauth2Consumers]]"
+          caption-text="[[i18n('cloudConsumers.heading')]]"
         >
           <nuxeo-data-table-column name="[[i18n('cloudConsumers.name')]]" field="name">
             <template>
