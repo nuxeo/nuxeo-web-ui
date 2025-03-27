@@ -132,8 +132,7 @@ jobs:
           RUN_ALL: false
           BAIL: 0
         run: |
-          mvn -ntp install -Pftest -DskipInstall \
-          -Dnuxeo.packages.add=nuxeo-opensearch-embed
+          mvn -ntp install -Pftest -DskipInstall -Dnuxeo.packages.xml=ftest/add-packages.xml
 
       - name: Archive cucumber reports
         if: ${{ always() }}
