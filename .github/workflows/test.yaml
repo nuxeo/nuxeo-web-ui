@@ -1,16 +1,17 @@
 # Workflow that syncronizes translations from Crowdin
 name: Test
 
-env:
-  BRANCH_NAME: ${{ 'maintenance-3.1.x' }}
-  GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
-
 on:
   # Check for updates every day
   pull_request:
+
+  env:
+    BRANCH_NAME: ${{ 'maintenance-3.1.x' }}
+    GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+
   # Sync when a commit is done on maintenance-3.1.x
   push:
-    branches: ${{ env.BRANCH_NAME }}
+    branches: ['maintenance-3.1.x']
     paths:
       - 'i18n/messages.json'
 
