@@ -21,7 +21,7 @@ jobs:
     needs: crowdin
 
   call-workflow-in-lts-2025:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' github.event_name == 'pull_request'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
     uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@lts-2025
     secrets: inherit
     needs: call-workflow-in-lts-2021
