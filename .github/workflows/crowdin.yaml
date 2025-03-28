@@ -7,7 +7,7 @@ on:
 
   # Sync when a commit is done on the reference branches
   push:
-    branches: maintenance-3.0.x
+    branches: ["maintenance-3.0.x"]
     paths:
       - 'i18n/messages.json'
   
