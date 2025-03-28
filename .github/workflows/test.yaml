@@ -5,9 +5,6 @@ on:
   # Check for updates every day
   pull_request:
 
-  env:
-    BRANCH_NAME: ${{ 'maintenance-3.1.x' }}
-
   # Sync when a commit is done on maintenance-3.1.x
   push:
     branches: ["maintenance-3.1.x"]
@@ -36,7 +33,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: maintenance-3.1.x
 
       - name: Crowdin Action
         id: crowdin-sync
@@ -59,7 +56,7 @@ jobs:
 
           # Name of the branch where to merge the translations
           localization_branch_name: crowdin-translations-update-lts-2023
-          pull_request_base_branch_name: ${{ env.BRANCH_NAME }}
+          pull_request_base_branch_name: maintenance-3.1.x
           create_pull_request: true
           pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
           pull_request_body: 'New Crowdin pull request with translations lts 2023'
@@ -73,3 +70,6 @@ jobs:
           # User properties
           github_user_name: nuxeo-webui-jx-bot
           github_user_email: webui@hyland.com
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
