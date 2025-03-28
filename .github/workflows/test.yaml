@@ -15,13 +15,13 @@ jobs:
   # in uses, cannot use environment variable for {owner}/{repo} nor matrix strategy variable for {ref}
   # thus hardcoding them
   call-workflow-in-lts-2021:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
     uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@maintenance-3.0.x
     secrets: inherit
     needs: crowdin
 
   call-workflow-in-lts-2025:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' github.event_name == 'pull_request'
     uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@lts-2025
     secrets: inherit
     needs: call-workflow-in-lts-2021
