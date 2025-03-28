@@ -118,7 +118,7 @@ Polymer({
       }
 
       .tip {
-        opacity: 0.5;
+        opacity: 0.7;
         display: block;
         font-weight: 300;
         padding: 8px;
