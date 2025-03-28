@@ -63,7 +63,7 @@ Polymer({
       }
 
       .message {
-        color: #c6c6c6;
+        color: #666666;
       }
 
       nuxeo-data-table {
