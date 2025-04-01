@@ -1340,7 +1340,7 @@
   "tasks.viewGraph": "グラフを表示",
   "tasksList.dueDate": "期日",
   "tasksList.noTasks": "現在処理するタスクはありません。",
-  "tasksList.on": "On  ",
+  "tasksList.on": "オン  ",
   "tasksList.in": "内  ",
   "taskWidget.dueDate": "期日",
   "taskWidget.noTasks": "表示するタスクがありません。",
