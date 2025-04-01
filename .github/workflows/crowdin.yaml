@@ -2,19 +2,14 @@
 name: Crowdin Sync
 
 on:
-  # Check for updates every day
-  schedule:
-    - cron: '0 0 * * *'
+  # Make workflow reusable, to be called by the scheduled crowdin workflow in the default branch
+  workflow_call:
 
-  # Sync when a commit is done on lts-2025
+  # Sync when a commit is done on the reference branches
   push:
-    branches:
-      - lts-2025
+    branches: ["lts-2025"]
     paths:
       - 'i18n/messages.json'
-  
-  # Manually trigger the workflow
-  workflow_dispatch:
   
 jobs:
   crowdin:
@@ -23,10 +18,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          ref: lts-2025
 
       - name: Crowdin Action
-        uses: crowdin/github-action@v1
+        uses: crowdin/github-action@1.5.2
         with:
+          # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
+          skip_ref_checkout: true
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
@@ -40,10 +39,11 @@ jobs:
           auto_approve_imported: true
 
           # Name of the branch where to merge the translations
-          localization_branch_name: crowdin-translations-update
+          localization_branch_name: crowdin-translations-update-lts-2025
+          pull_request_base_branch_name: lts-2025
           create_pull_request: true
-          pull_request_title: 'New Crowdin translations'
-          pull_request_body: 'New Crowdin pull request with translations'
+          pull_request_title: 'New Crowdin translations by GitHub Action (lts-2025)'
+          pull_request_body: 'New Crowdin pull request with translations lts 2025'
 
           # The commit message
           commit_message: 'Automatic update of translations from Crowdin'
