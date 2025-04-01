@@ -47,12 +47,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install
+          npm install --legacy-peer-deps
           pushd packages/nuxeo-web-ui-ftest
-          npm install
+          npm install --legacy-peer-deps
           popd
           pushd packages/nuxeo-designer-catalog
-          npm install
+          npm install --legacy-peer-deps
           popd
 
       - uses: actions/setup-java@v2
