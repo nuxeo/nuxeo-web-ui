@@ -25,7 +25,7 @@ const capability = {
   // grid with only 5 firefox instance available you can make sure that not more than
   // 5 instance gets started at a time.
   maxInstances: 1,
-  browserName: 'chrome',
+  browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
   browserVersion: '132.0.6834.159',
 };
@@ -101,11 +101,10 @@ exports.config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
-  
+  specs: [path.join(process.cwd(), './features/*.feature')],
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],
-  specs: ['../../ftest/features/**'],
 
   //
   // ============
