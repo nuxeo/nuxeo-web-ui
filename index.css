@@ -20,12 +20,27 @@ nuxeo-app[unresolved] {
   background-color: var(--nuxeo-sidebar-background);
   width: 52px;
   height: 100%;
+}
+
+[dir="rtl"] [unresolved] #sidebar{
+  float: right;
+}
+
+[dir="ltr"] [unresolved]  #sidebar {
   float: left;
 }
 
 [unresolved] #sidebar img {
   width: 100%;
   animation: glow 1s infinite alternate;
+}
+
+[dir="rtl"] [unresolved] #sidebar img {
+  float: right;
+}
+
+[dir="ltr"] [unresolved] #sidebar img {
+  float: left;
 }
 
 [unresolved] #container {

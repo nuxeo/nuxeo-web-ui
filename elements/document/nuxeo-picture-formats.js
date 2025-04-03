@@ -43,6 +43,19 @@ Polymer({
         @apply --layout-justified;
       }
 
+      .properties .item > * {
+        unicode-bidi: plaintext;
+      }
+
+      :host(:not([dir='rtl'])) .properties .item span {
+        flex: 1;
+        text-align: left;
+      }
+
+      :host([dir='rtl']) .properties .item {
+        justify-content: space-between;
+      }
+
       iron-icon {
         fill: var(--nuxeo-text-default, #3a3a54);
       }
@@ -79,6 +92,13 @@ Polymer({
       type: Object,
       computed: '_getAdditionalFormats(document)',
     },
+  },
+
+  ready() {
+    if (!this.hasAttribute('dir')) {
+      const direction = document.documentElement.getAttribute('dir');
+      this.setAttribute('dir', direction);
+    }
   },
 
   _getAdditionalFormats(document) {

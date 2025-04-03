@@ -24,7 +24,7 @@ When('I click {string} in the administration menu', async (text) => {
   setTimeout(async () => {
     await el.waitForVisible();
     el.click();
-  }, 2000);
+  }, 4000);
 });
 
 Then('I can see the analytics page', async function() {

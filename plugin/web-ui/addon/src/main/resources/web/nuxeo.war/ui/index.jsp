@@ -50,7 +50,9 @@ limitations under the License.
    }
   String scriptSrc = "";
   String directive = null;
-  String[] directives = cspHeader.split(";");
+  // Replace non-breaking spaces with regular spaces
+  cspHeader = cspHeader.replaceAll("\u00A0", " ");  // Normalizing non-breaking spaces
+  String[] directives = cspHeader.trim().replaceAll("\\s+", " ").split(";");
   boolean foundScriptSrcMatch = false;
   boolean foundObjectSrcMatch = false;
   for (int i = 0; i < directives.length; i++) {
@@ -71,7 +73,7 @@ limitations under the License.
     newCspHeader = cspHeader.trim() + (isExistingCspHeaderEmpty ? " script-src " : "; script-src ") + updatedScriptSrcStr;
   }
   if(!foundObjectSrcMatch){
-    newCspHeader = newCspHeader.trim() + "; object-src  'none'";
+    newCspHeader = newCspHeader.trim() + "; object-src 'none'";
   }
   resp.setHeader("Content-Security-Policy", newCspHeader);
 %>
@@ -139,6 +141,22 @@ limitations under the License.
       <span id="loading"></span>
     </div>
   </nuxeo-app>
+
+  <script nonce="<%= NX_NONCE_VALUE %>">
+    window.nuxeo = window.nuxeo || {};
+    window.nuxeo.I18n = window.nuxeo.I18n || {};
+    const userLanguage = navigator.language || navigator.userLanguage || 'en';
+    if(userLanguage) {
+      const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+      const isRTL = rtlLanguages.some((lang) => userLanguage?.startsWith(lang));
+      window.nuxeo.I18n.direction = isRTL ? 'rtl' : 'ltr';
+      document.documentElement.setAttribute('dir', window.nuxeo.I18n.direction || 'ltr');
+      const nuxeoApp = document.querySelector('nuxeo-app');
+      if (nuxeoApp) {
+        nuxeoApp.setAttribute('dir', window.nuxeo.I18n.direction || 'ltr');
+      }
+    }
+  </script>
 
   <script src="vendor/webcomponentsjs/webcomponents-loader.js"  nonce="<%= NX_NONCE_VALUE %>"></script>
 
