@@ -59,11 +59,11 @@ jobs:
           # XXX: undo the padded lock (see WEBUI-140)
           sed -i -e 's/<webui.package.version>.*<\/webui.package.version>/<webui.package.version>${project.version}<\/webui.package.version>/g' plugin/web-ui/marketplace/pom.xml
 
-          # align on same promoted version of elements
-          npm i @nuxeo/nuxeo-elements@$VERSION --save-exact
-          npm i @nuxeo/nuxeo-dataviz-elements@$VERSION --save-exact
-          npm i @nuxeo/nuxeo-ui-elements@$VERSION --save-exact
-          npm i @nuxeo/testing-helpers@$VERSION --save-exact
+          # # align on same promoted version of elements
+          # npm i @nuxeo/nuxeo-elements@$VERSION --save-exact
+          # npm i @nuxeo/nuxeo-dataviz-elements@$VERSION --save-exact
+          # npm i @nuxeo/nuxeo-ui-elements@$VERSION --save-exact
+          # npm i @nuxeo/testing-helpers@$VERSION --save-exact
 
           echo "--------------------------------------------------------------"
           cat pom.xml
