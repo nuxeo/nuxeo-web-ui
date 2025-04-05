@@ -50,10 +50,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
-          npm version $VERSION --no-git-tag-version
-          pushd packages/nuxeo-web-ui-ftest/
-          npm version $VERSION --no-git-tag-version
-          popd
+          # npm version $VERSION --no-git-tag-version
+          # pushd packages/nuxeo-web-ui-ftest/
+          # npm version $VERSION --no-git-tag-version
+          # popd
 
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_VERSION"'/'"$VERSION"'/g' {} \;
           # XXX: undo the padded lock (see WEBUI-140)
