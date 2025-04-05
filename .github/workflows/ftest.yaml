@@ -18,7 +18,7 @@ on:
       PACKAGES_AUTH_USER:
         description: 'PACKAGES_AUTH_USER'
         required: true
-      PACKAGES_AUTH_TOKEN: 
+      PACKAGES_AUTH_TOKEN:
         description: 'PACKAGES_AUTH_TOKEN'
         required: true
 
@@ -28,138 +28,42 @@ env:
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
 jobs:
-  ftests:
-    runs-on: [ self-hosted, master ]
+  promote-testing:
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          scope: '@nuxeo'
+
       - uses: actions/checkout@v2
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - uses: actions/setup-node@v3
-        with:
-          registry-url: ${{ env.NPM_REPOSITORY }}
-          scope: '@nuxeo'
-          node-version: 18
+      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
-      - uses: actions/setup-java@v2
-        with: 
-          distribution: 'zulu'
-          java-version: '17'
+      - run: echo "VERSION='3.1.18'" >> $GITHUB_ENV
 
-      - name: Determine nuxeo-elements branch to link
-        id: pick_nuxeo_elements_branch
-        run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
-          else
-            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
-          fi
-
-      - name: Install Web UI
+      - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm install
-          pushd packages/nuxeo-web-ui-ftest
-          npm install
-          popd
-          pushd packages/nuxeo-designer-catalog
-          npm install
+          OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
+          npm version $VERSION --no-git-tag-version
+          pushd packages/nuxeo-web-ui-ftest/
+          npm version $VERSION --no-git-tag-version
           popd
 
-      - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-elements
-          path: nuxeo-elements
-          fetch-depth: 1
-          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+          find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_VERSION"'/'"$VERSION"'/g' {} \;
+          # XXX: undo the padded lock (see WEBUI-140)
+          sed -i -e 's/<webui.package.version>.*<\/webui.package.version>/<webui.package.version>${project.version}<\/webui.package.version>/g' plugin/web-ui/marketplace/pom.xml
 
-      - name: Pack Elements modules
-        run: |
-          pushd nuxeo-elements
-          pushd core
-          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
+          # align on same promoted version of elements
+          npm i @nuxeo/nuxeo-elements@$VERSION --save-exact
+          npm i @nuxeo/nuxeo-dataviz-elements@$VERSION --save-exact
+          npm i @nuxeo/nuxeo-ui-elements@$VERSION --save-exact
+          npm i @nuxeo/testing-helpers@$VERSION --save-exact
 
-          pushd ui
-          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-
-          pushd dataviz
-          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-
-          pushd testing-helpers
-          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-          popd
-
-      - name: Add .npmrc
-        run: |
-          pushd /tmp/_temp/
-          rm .npmrc
-          touch .npmrc
-          popd
-          echo '
-           packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
-           @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
-           always-auth=true
-          ' >> /tmp/_temp/.npmrc
-
-      - name: Link elements to Web UI
-        run: |
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
-
-      - name: 'Update settings.xml with server configuration'
-        run: |
-          echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
-
-      - name: Functional tests
-        env:
-          RUN_ALL: false
-          BAIL: 0
-        run: mvn -ntp install -Pftest -DskipInstall
-
-      - name: Archive cucumber reports
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: cucumber-reports
-          path: ftest/target/cucumber-reports/
-
-      - name: Archive screenshots
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots
-          path: ftest/target/screenshots/
-
-      - name: Archive logs
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: logs
-          path: |
-            **/log/*.log
-            **/nxserver/config/distribution.properties
-
-      - name: Archive packages-ftest
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: packages-ftest
-          path: |
-            plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
-            plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
+          echo "--------------------------------------------------------------"
+          cat pom.xml
