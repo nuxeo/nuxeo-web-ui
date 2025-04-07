@@ -29,7 +29,7 @@ env:
 
 jobs:
   ftests:
-    runs-on: [ ubuntu-latest ]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -47,6 +47,8 @@ jobs:
           java-version: '17'
 
       - name: Determine nuxeo-elements branch to link
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         id: pick_nuxeo_elements_branch
         run: |
           if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
