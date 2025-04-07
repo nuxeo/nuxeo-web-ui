@@ -120,6 +120,7 @@ jobs:
 
       - name: Functional tests
         env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
           RUN_ALL: false
           BAIL: 0
         run: mvn -ntp install -Pftest -DskipInstall
