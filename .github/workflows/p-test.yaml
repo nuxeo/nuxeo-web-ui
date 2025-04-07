@@ -103,7 +103,7 @@ jobs:
           popd
 
       - name: Upload Zip as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: nuxeo-web-ui-3.1.17
           path: nuxeo-web-ui-3.1.17.zip
