@@ -29,10 +29,7 @@ env:
 
 jobs:
   ftests:
-    runs-on: ubuntu-latest
-    resources:
-      cpu: 4
-      memory: 16gb
+    runs-on: ubuntu-8-cores
     steps:
       - uses: actions/checkout@v2
         with:
