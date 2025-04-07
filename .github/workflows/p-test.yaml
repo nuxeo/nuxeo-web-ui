@@ -1,0 +1,109 @@
+name: P tests
+
+on:
+  pull_request:
+    branches:
+      - maintenance-3.1.x
+  workflow_call:
+    inputs:
+      branch:
+        description: 'The current branch'
+        default: maintenance-3.1.x
+        type: string
+        required: false
+    secrets:
+      NPM_PACKAGES_TOKEN:
+        description: 'NPM_PACKAGES_TOKEN'
+        required: true
+      PACKAGES_AUTH_USER:
+        description: 'PACKAGES_AUTH_USER'
+        required: true
+      PACKAGES_AUTH_TOKEN:
+        description: 'PACKAGES_AUTH_TOKEN'
+        required: true
+
+env:
+  REFERENCE_BRANCH: maintenance-3.1.x
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
+
+jobs:
+  ftests:
+    runs-on: [self-hosted, master]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - uses: actions/setup-node@v3
+        with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          scope: '@nuxeo'
+          node-version: 18
+
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Promote Web UI 3.1.17-rc.3 to 3.1.17
+        env:
+          PACKAGE: nuxeo-web-ui-3.1.17
+          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+        run: |
+          PADDED_VERSION = '3.1.17-rc.003'
+          curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=$PADDED_VERSION"
+          unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
+          pushd $PACKAGE
+
+          # Step 6: Remove -rc.X from package.xml
+          sed -i 's/-rc.[0-9]*//' package.xml
+
+          # Step 7: Remove -rc.X from .jar file names and inside .jar content
+          for f in install/bundles/*.jar; do
+            # Define new jar name without -rc.X
+            CLEANED_JAR=$(echo $f | sed -e 's/-rc.[0-9]*//')
+
+            # Create a temporary directory to extract the jar
+            mkdir -p tmpjar && pushd tmpjar > /dev/null
+
+            # Extract the contents of the jar
+            jar xf ../$f
+
+            # Clean up pom.xml and pom.properties inside the jar
+            POM_XML="META-INF/maven/org.nuxeo.web.ui/nuxeo-web-ui/pom.xml"
+            POM_PROPS="META-INF/maven/org.nuxeo.web.ui/nuxeo-web-ui/pom.properties"
+
+            if [ -f "$POM_XML" ]; then
+              sed -i 's/-rc.[0-9]*//' "$POM_XML"
+              echo "----- Cleaned pom.xml -----"
+              cat "$POM_XML"
+            fi
+
+            if [ -f "$POM_PROPS" ]; then
+              sed -i 's/-rc.[0-9]*//' "$POM_PROPS"
+              echo "----- Cleaned pom.properties -----"
+              cat "$POM_PROPS"
+            fi
+
+            # Repackage the jar
+            jar cf ../$CLEANED_JAR *
+
+            # Clean up and exit
+            popd > /dev/null && rm -rf tmpjar
+
+            # Remove original rc jar
+            rm $f
+          done
+
+          # Step 8: Repackage the cleaned folder into a new zip
+          zip -r ../$PACKAGE.zip .
+
+          # Step 9: Exit directory
+          popd
+
+      - name: Upload Zip as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: nuxeo-web-ui-3.1.17
+          path: nuxeo-web-ui-3.1.17.zip
