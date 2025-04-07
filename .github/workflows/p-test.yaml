@@ -51,8 +51,7 @@ jobs:
           PACKAGE: nuxeo-web-ui-3.1.17
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
-          PADDED_VERSION = 3.1.17-rc.003
-          curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=$PADDED_VERSION"
+          curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=3.1.17-rc.003"
           unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
           pushd $PACKAGE
 
