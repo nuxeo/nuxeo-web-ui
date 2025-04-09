@@ -49,7 +49,7 @@ Polymer({
       }
 
       .empty {
-        opacity: 0.5;
+        opacity: 0.7;
         padding-bottom: 8px;
         font-size: 1.1em;
       }

@@ -5,6 +5,9 @@
     "start": "node ."
   },
   "license": "Apache-2.0",
+  "overrides": {
+    "ws": "8.17.1"
+  },
   "dependencies": {
     "chalk": "^2.4.1",
     "cleankill": "^2.0.0",
