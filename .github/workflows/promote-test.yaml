@@ -57,22 +57,10 @@ jobs:
             unzip "$jarfile" -d "$tempdir"
             
             # Remove RC from version in pom files
-            find "$tempdir/META-INF/maven" -type f -name "pom.xml" -exec sed -i 's/-rc.[0-9]*//' {} \;
-            find "$tempdir/META-INF/maven" -type f -name "pom.properties" -exec sed -i 's/-rc.[0-9]*//' {} \;
+            find "$tempdir/META-INF/maven" -type f \( -name "pom.xml" -o -name "pom.properties" \) -exec sed -i 's/-rc.[0-9]*//' {} \;
             
-            # Recreate JAR with proper structure
-            (cd "$tempdir" && zip -qr ../modified.jar .)
-            
-            # Get new filename without RC
-            new_jarfile=$(echo "$jarfile" | sed -e 's/-rc.[0-9]*//')
-            
-            # Replace original JAR
-            mv ../modified.jar "$new_jarfile"
-            
-            # Remove old JAR if filename changed
-            if [ "$jarfile" != "$new_jarfile" ]; then
-              rm "$jarfile"
-            fi
+            # Recreate JAR in place (keeping original filename)
+            (cd "$tempdir" && zip -qr "$OLDPWD/$jarfile" .)
             
             # Cleanup
             rm -rf "$tempdir"
