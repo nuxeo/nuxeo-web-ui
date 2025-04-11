@@ -12,6 +12,9 @@
   "config": {
     "workboxCli": "3.6.3"
   },
+  "overrides": {
+    "ws": "8.17.1"
+  },
   "devDependencies": {
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@nuxeo/testing-helpers": "~2025.3.0-rc",
