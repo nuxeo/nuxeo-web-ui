@@ -65,10 +65,15 @@ jobs:
             # Cleanup
             rm -rf "$tempdir"
           done
-
+          echo "--------inside--------------------"
+          ls -al
+          echo "----------------------------"
           # Create final package
           zip -qr ../$PACKAGE.zip .
           popd
+          echo "-------ROOT---------------------"
+          ls -al
+          echo "----------------------------"
 
       - name: Upload Zip as Artifact
         uses: actions/upload-artifact@v4
