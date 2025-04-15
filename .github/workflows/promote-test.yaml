@@ -1,4 +1,4 @@
-name: Promote release test
+name: Promote release test zip
 
 on:
   pull_request:
@@ -21,9 +21,6 @@ on:
 jobs:
   promote:
     runs-on: ubuntu-latest
-    env:
-      PACKAGE: nuxeo-web-ui-3.1.18
-      CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeocloud
     steps:
       - uses: actions/setup-node@v3
         with:
@@ -39,37 +36,45 @@ jobs:
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - name: Promote Web UI 3.1.18-rc.3 to 3.1.18
+        env:
+          PACKAGE: nuxeo-web-ui-3.1.18
+          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
-          echo "Downloading package..."
+          # Download the package
           curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=3.1.18-rc.003"
 
-          echo "Unzipping package..."
+          # Extract and remove RC from package.xml
           unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
           pushd $PACKAGE
+          sed -i 's/-rc.[0-9]*//' package.xml
 
-          echo "Removing RC suffix from package.xml..."
-          sed -i 's/-rc\.[0-9]*//' package.xml
-
-          echo "Processing JAR files..."
+          # Process each JAR file properly
           for jarfile in install/bundles/*.jar; do
+            # Create temp directory
             tempdir=$(mktemp -d)
+            
+            # Extract JAR contents
             unzip "$jarfile" -d "$tempdir"
-            find "$tempdir/META-INF/maven" -type f \( -name "pom.xml" -o -name "pom.properties" \) -exec sed -i 's/-rc\.[0-9]*//' {} \;
+            
+            # Remove RC from version in pom files
+            find "$tempdir/META-INF/maven" -type f \( -name "pom.xml" -o -name "pom.properties" \) -exec sed -i 's/-rc.[0-9]*//' {} \;
+            
+            # Recreate JAR in place (keeping original filename)
             (cd "$tempdir" && zip -qr "$OLDPWD/$jarfile" .)
+            
+            # Cleanup
             rm -rf "$tempdir"
           done
 
-          echo "Repackaging final .zip..."
+          # Create final package
           zip -qr ../$PACKAGE.zip .
           popd
 
-          echo "Final package created: $PACKAGE.zip"
-          echo "Listing files in workspace root:"
-          ls -lah
-          echo "Listing in PACKAGE directory:"
-          ls -lah $PACKAGE
-          echo "Listing zip file location:"
-          ls -lah $PACKAGE.zip
+      - name: Upload Zip as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuxeo-web-ui-3.1.18
+          path: nuxeo-web-ui-3.1.18.zip
 
       - name: Push promoted Web UI to Connect PREPROD
         env:
