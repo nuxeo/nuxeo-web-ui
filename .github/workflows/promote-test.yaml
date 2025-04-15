@@ -70,6 +70,14 @@ jobs:
           zip -qr ../$PACKAGE.zip .
           popd
 
+          echo "Final package created: $PACKAGE.zip"
+          echo "Listing files in workspace root:"
+          ls -lah
+          echo "Listing in PACKAGE directory:"
+          ls -lah $PACKAGE
+          echo "Listing zip file location:"
+          ls -lah $PACKAGE.zip
+
       - name: Upload Zip as Artifact
         uses: actions/upload-artifact@v4
         with:
