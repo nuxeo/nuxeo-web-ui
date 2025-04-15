@@ -21,9 +21,6 @@ on:
 jobs:
   promote:
     runs-on: ubuntu-latest
-    env:
-      PACKAGE: nuxeo-web-ui-3.1.18
-      CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
     steps:
       - uses: actions/setup-node@v3
         with:
@@ -39,6 +36,9 @@ jobs:
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - name: Promote Web UI 3.1.18-rc.3 to 3.1.18
+        env:
+          PACKAGE: nuxeo-web-ui-3.1.18
+          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeocloud
         run: |
           echo "Downloading package..."
           curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=3.1.18-rc.003"
@@ -71,8 +71,8 @@ jobs:
           echo "Listing zip file location:"
           ls -lah $PACKAGE.zip
 
-      - name: Upload Zip as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.PACKAGE }}
-          path: ${{ env.PACKAGE }}.zip
+      - name: Push promoted Web UI to Connect PREPROD
+        env:
+          PACKAGE: nuxeo-web-ui-3.1.18
+          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+        run: curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
