@@ -21,6 +21,9 @@ on:
 jobs:
   promote:
     runs-on: ubuntu-latest
+    env:
+      PACKAGE: nuxeo-web-ui-3.1.18
+      CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
     steps:
       - uses: actions/setup-node@v3
         with:
@@ -36,37 +39,27 @@ jobs:
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - name: Promote Web UI 3.1.18-rc.3 to 3.1.18
-        env:
-          PACKAGE: nuxeo-web-ui-3.1.18
-          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
-          # Download the package
+          echo "Downloading package..."
           curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=3.1.18-rc.003"
 
-          # Extract and remove RC from package.xml
+          echo "Unzipping package..."
           unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
           pushd $PACKAGE
-          sed -i 's/-rc.[0-9]*//' package.xml
 
-          # Process each JAR file properly
+          echo "Removing RC suffix from package.xml..."
+          sed -i 's/-rc\.[0-9]*//' package.xml
+
+          echo "Processing JAR files..."
           for jarfile in install/bundles/*.jar; do
-            # Create temp directory
             tempdir=$(mktemp -d)
-            
-            # Extract JAR contents
             unzip "$jarfile" -d "$tempdir"
-            
-            # Remove RC from version in pom files
-            find "$tempdir/META-INF/maven" -type f \( -name "pom.xml" -o -name "pom.properties" \) -exec sed -i 's/-rc.[0-9]*//' {} \;
-            
-            # Recreate JAR in place (keeping original filename)
+            find "$tempdir/META-INF/maven" -type f \( -name "pom.xml" -o -name "pom.properties" \) -exec sed -i 's/-rc\.[0-9]*//' {} \;
             (cd "$tempdir" && zip -qr "$OLDPWD/$jarfile" .)
-            
-            # Cleanup
             rm -rf "$tempdir"
           done
 
-          # Create final package
+          echo "Repackaging final .zip..."
           zip -qr ../$PACKAGE.zip .
           popd
 
