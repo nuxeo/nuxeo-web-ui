@@ -1,0 +1,76 @@
+name: Promote release test zip
+
+on:
+  pull_request:
+    branches:
+      - lts-2025
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to promote (e.g.: 2025.3.0-rc.0)'
+        required: true
+      referenceBranch:
+        description: 'Branch to be updated after the promotion'
+        required: true
+        default: 'lts-2025'
+      dryRun:
+        description: 'Run the workflow without pushing code or publishing artifacts'
+        type: boolean
+        required: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          scope: '@nuxeo'
+
+      - uses: actions/checkout@v2
+        with:
+          ref: 'lts-2025'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
+
+      - name: Promote Web UI 2025.3.0-rc.0 to 2025.3.0
+          PACKAGE: nuxeo-web-ui-2025.3.0
+          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+        run: |
+          # Download the package
+          curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=2025.3.0-rc.000"
+
+          # Extract and remove RC from package.xml
+          unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
+          pushd $PACKAGE
+          sed -i 's/-rc.[0-9]*//' package.xml
+
+          # Process each JAR file properly
+          for jarfile in install/bundles/*.jar; do
+            # Create temp directory
+            tempdir=$(mktemp -d)
+            
+            # Extract JAR contents
+            unzip "$jarfile" -d "$tempdir"
+            
+            # Remove RC from version in pom files
+            find "$tempdir/META-INF/maven" -type f \( -name "pom.xml" -o -name "pom.properties" \) -exec sed -i 's/-rc.[0-9]*//' {} \;
+            
+            # Recreate JAR in place (keeping original filename)
+            (cd "$tempdir" && zip -qr "$OLDPWD/$jarfile" .)
+            
+            # Cleanup
+            rm -rf "$tempdir"
+          done
+
+          # Create final package
+          zip -qr ../$PACKAGE.zip .
+          popd
+
+      - name: Push promoted Web UI to Connect PREPROD
+        env:
+          PACKAGE: nuxeo-web-ui-2025.3.0
+          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+        run: curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
