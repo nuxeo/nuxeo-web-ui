@@ -11,7 +11,7 @@ const EXPECTED_VIOLATIONS = {
   'landmark-one-main': 1,
   'meta-viewport': 1,
   'page-has-heading-one': 1,
-  region: 22,
+  region: 10,
   'nested-interactive': 15,
 };
 
