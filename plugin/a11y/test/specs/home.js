@@ -17,8 +17,8 @@ const EXPECTED_VIOLATIONS = {
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
   'aria-allowed-role': 5,
-  'color-contrast-enhanced': 12,
-  'aria-required-children': 4,
+  'color-contrast-enhanced': 2,
+  'aria-required-children': 1,
 };
 
 describe('Nuxeo Home', () => {
