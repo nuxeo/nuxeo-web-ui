@@ -89,11 +89,28 @@ jobs:
           PADDED=$(printf '%03d' $(echo ${{ github.event.inputs.version }} | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
           PADDED_VERSION=$(echo ${{ github.event.inputs.version }} | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
           curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=$PADDED_VERSION"
+          # Extract and remove RC from package.xml
           unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
           pushd $PACKAGE
           sed -i 's/-rc.[0-9]*//' package.xml
-          for f in install/bundles/*.jar; do mv $f $(echo $f | sed -e 's/-rc.[0-9]*//'); done
-          zip -r ../$PACKAGE.zip .
+          # Process each JAR file properly
+          for jarfile in install/bundles/*.jar; do
+            # Create temp directory
+            tempdir=$(mktemp -d)
+            
+            # Extract JAR contents
+            unzip "$jarfile" -d "$tempdir"
+            
+            # Remove RC from version in pom files
+            find "$tempdir/META-INF/maven" -type f \( -name "pom.xml" -o -name "pom.properties" \) -exec sed -i 's/-rc.[0-9]*//' {} \;
+            
+            # Recreate JAR in place (keeping original filename)
+            (cd "$tempdir" && zip -qr "$OLDPWD/$jarfile" .)
+            
+            # Cleanup
+            rm -rf "$tempdir"
+          done
+          zip -qr ../$PACKAGE.zip .
           popd
 
       - name: Push promoted Web UI to Connect PREPROD
