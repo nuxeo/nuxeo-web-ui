@@ -127,6 +127,7 @@ limitations under the License.
             </nuxeo-page-provider>
             <nuxeo-data-table
               id="latestEditedDocs"
+              class="wrap-table"
               max-items="15"
               nx-provider="latestQuery"
               empty-label="[[i18n('queryWidget.noDocuments')]]"
@@ -161,6 +162,7 @@ limitations under the License.
             <nuxeo-data-list
               nx-provider="tasksProvider"
               id="tasksList"
+              class="wrap-table"
               as="task"
               max-items="15"
               empty-label="[[i18n('tasksList.noTasks')]]"
@@ -202,6 +204,7 @@ limitations under the License.
             <nuxeo-page-provider id="recentProvider" page-size="15" schemas="uid"></nuxeo-page-provider>
             <nuxeo-data-table
               id="latestViewedDocs"
+              class="wrap-table"
               max-items="15"
               empty-label="[[i18n('recentDocuments.empty')]]"
               empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
@@ -241,6 +244,7 @@ limitations under the License.
             </nuxeo-page-provider>
             <nuxeo-data-table
               id="favoriteDocs"
+              class="wrap-table"
               max-items="15"
               nx-provider="favoritesProvider"
               empty-label="[[i18n('favorites.empty')]]"
