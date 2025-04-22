@@ -1,0 +1,27 @@
+name: Veracode SCA
+on:
+  schedule:
+    - cron: '0 19 * * *'
+  pull_request:
+    branches:
+      - maintenance-3.1.x
+  workflow_dispatch:
+
+jobs:
+  veracode-sca-task:
+    runs-on: ubuntu-latest
+    name: Scan repository with Veracode SCA
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: 'maintenance-3.1.x'
+
+      - name: Run Veracode SCA
+        env:
+          SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
+        uses: veracode/veracode-sca@v2.1.10
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          create-issues: true
