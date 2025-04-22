@@ -13,6 +13,9 @@
     "postinstall": "check-engine --ignore",
     "clean-data": "find data/applications/nuxeo/**/ ! -name 'catalog-packages.json' -delete"
   },
+  "overrides": {
+    "micromatch": "4.0.8"
+  },
   "dependencies": {
     "gulp": "^4.0.2",
     "gulp4-run-sequence": "^1.0.0",
