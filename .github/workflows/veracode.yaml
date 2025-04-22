@@ -25,3 +25,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           create-issues: true
+          debug: true
+          allow-dirty: true
