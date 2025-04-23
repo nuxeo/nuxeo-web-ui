@@ -18,6 +18,120 @@ jobs:
         with:
           ref: 'maintenance-3.1.x'
 
+      - uses: actions/setup-node@v1
+        with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          node-version: 18
+          scope: '@nuxeo'
+
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: Determine nuxeo-elements branch to link
+        id: pick_nuxeo_elements_branch
+        run: |
+          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
+            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
+          else
+            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
+          fi
+      - name: Install Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm install
+          pushd packages/nuxeo-web-ui-ftest
+          npm install
+          popd
+      - name: Checkout the nuxeo-elements repo
+        uses: actions/checkout@v2
+        with:
+          repository: nuxeo/nuxeo-elements
+          path: nuxeo-elements
+          fetch-depth: 1
+          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+
+      - name: Pack Elements modules
+        run: |
+          pushd nuxeo-elements
+          pushd core
+          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd ui
+          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd dataviz
+          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          pushd testing-helpers
+          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+          popd
+          popd
+
+      - name: add .npmrc
+        run: |
+          pushd /tmp/_temp/
+          rm .npmrc
+          touch .npmrc
+          popd
+          echo '
+            packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+            @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+            always-auth=true
+          ' >> /tmp/_temp/.npmrc
+
+      - name: Link elements to Web UI
+        run: |
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+      - name: 'Update settings.xml with server configuration'
+        run: |
+          echo '<settings>
+              <servers>
+                <server>
+                  <id>maven-internal</id>
+                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                </server>
+              </servers>
+              </settings>' > ~/.m2/settings.xml
+
+      - name: Delete Node Modules
+        run: |
+          rm -rf node_modules
+          rm -rf packages/nuxeo-designer-catalog/node_modules
+          rm -rf packages/nuxeo-web-ui-ftest/node_modules
+          rm -rf plugin/a11y/node_modules
+
+      - name: Delete Test Folders
+        run: |
+          rm -rf nuxeo-elements/testing-helpers/
+          rm -rf nuxeo-elements/ui/test/
+          rm -rf nuxeo-elements/storybook/
+          rm -rf ftest/
+          rm -rf plugin/
+          rm -rf scripts/
+          rm -rf test/
+          rm -rf packages/nuxeo-web-ui-ftest/
+
+      - name: Install zip
+        run: apt-get install zip
+
+      - name: Zip nuxeo-web-ui
+        run: |
+          echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip
+          zip -r nuxeo-web-ui.zip *
+
+      - name: Upload ZIP as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuxeo-web-ui
+          path: nuxeo-web-ui.zip
+
       - name: Run Veracode SCA
         id: sca
         continue-on-error: true
@@ -29,3 +143,4 @@ jobs:
           create-issues: true
           debug: true
           allow-dirty: true
+          path: 'nuxeo-web-ui.zip'
