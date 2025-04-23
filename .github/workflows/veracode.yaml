@@ -29,4 +29,3 @@ jobs:
           create-issues: true
           debug: true
           allow-dirty: true
-          path: 'packages/nuxeo-designer-catalog'
