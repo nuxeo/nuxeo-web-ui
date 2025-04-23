@@ -1,4 +1,3 @@
-
 {
   "activity.addedToCollection": "přidáno do kolekce",
   "activity.afterMakeRecord": "Declared as a record",
@@ -130,6 +129,7 @@
   "app.user.signOut": "Sign Out",
   "app.user.themes": "Themes",
   "app.viewTasksDashboard": "View Tasks Dashboard",
+  "assetsSearch.heading": "Asset Search Results",
   "assetsSearch.assetFormat": "Asset Format",
   "assetsSearch.assetHeight": "Asset Height",
   "assetsSearch.assetType": "Asset Type",
@@ -138,7 +138,6 @@
   "assetsSearch.colorProfile": "Color Profile",
   "assetsSearch.fullText.placeholder": "Search for something...",
   "assetsSearch.fullText": "Full Text",
-  "assetsSearch.heading": "Asset Search Results",
   "assetsSearch.videoDuration": "Video Duration",
   "audit.all": "All",
   "audit.category": "Category",
@@ -221,8 +220,8 @@
   "cloudConsumers.errorCreating": "An error occurred while creating the client.",
   "cloudConsumers.errorDeleting": "An error occurred while deleting the client.",
   "cloudConsumers.errorEditing": "An error occurred while editing the client.",
-  "cloudConsumers.isEnabled": "Enabled",
   "cloudConsumers.heading": "Cloud Consumers",
+  "cloudConsumers.isEnabled": "Enabled",
   "cloudConsumers.name": "Name",
   "cloudConsumers.redirect": "Redirect URIs",
   "cloudConsumers.secret": "Client Secret",
