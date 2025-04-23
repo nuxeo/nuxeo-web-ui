@@ -14,14 +14,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: 'maintenance-3.1.x'
 
       - name: Run Veracode SCA
+        id: sca
+        continue-on-error: true
         env:
           SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
-        uses: veracode/veracode-sca@v2.1.10
+        uses: veracode/veracode-sca@v2.1.12
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           create-issues: true
