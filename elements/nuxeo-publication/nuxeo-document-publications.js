@@ -112,6 +112,7 @@ Polymer({
         class="results"
         items="{{publishedDocs}}"
         empty-label="[[i18n('publication.noPublications')]]"
+        caption-text="[[i18n('publication.details')]]"
       >
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.path')]]" flex="200">
           <template>
