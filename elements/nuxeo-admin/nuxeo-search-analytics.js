@@ -146,7 +146,7 @@ Polymer({
         </nuxeo-search-data>
 
         <nuxeo-card heading="[[i18n('searchAnalytics.numberOfResults.heading')]]">
-          <nuxeo-data-table items="[[callPerNumberOfResults]]">
+          <nuxeo-data-table items="[[callPerNumberOfResults]]" caption-text="[[i18n('table.caption.numberOfResults')]]">
             <nuxeo-data-table-column name="[[i18n('searchAnalytics.numberOfResults.range')]]">
               <template>[[item.key]]</template>
             </nuxeo-data-table-column>
@@ -168,7 +168,10 @@ Polymer({
         </nuxeo-search-data>
 
         <nuxeo-card heading="[[i18n('searchAnalytics.mostPopularSearches.heading')]]">
-          <nuxeo-data-table items="[[callsPerFT]]">
+          <nuxeo-data-table
+            items="[[callsPerFT]]"
+            caption-text="[[i18n('searchAnalytics.mostPopularSearches.heading')]]"
+          >
             <nuxeo-data-table-column name="[[i18n('searchAnalytics.mostPopularSearches.searchTerm')]]">
               <template>[[item.key]]</template>
             </nuxeo-data-table-column>
@@ -194,7 +197,7 @@ Polymer({
         </nuxeo-search-data>
 
         <nuxeo-card heading="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.heading')]]">
-          <nuxeo-data-table items="[[callPerNumberOfPages]]">
+          <nuxeo-data-table items="[[callPerNumberOfPages]]" caption-text="[[i18n('table.caption.numberOfPages')]]">
             <nuxeo-data-table-column
               name="[[i18n('searchAnalytics.mostPopularSearches.numberOfPagesDisplayed.range')]]"
             >
@@ -219,7 +222,7 @@ Polymer({
         </nuxeo-search-data>
 
         <nuxeo-card heading="[[i18n('searchAnalytics.filtersUsed.heading')]]">
-          <nuxeo-data-table items="[[callByFilters]]">
+          <nuxeo-data-table items="[[callByFilters]]" caption-text="[[i18n('searchAnalytics.filtersUsed.heading')]]">
             <nuxeo-data-table-column name="[[i18n('searchAnalytics.filtersUsed.numberOfFilters')]]">
               <template>[[item.key]]</template>
             </nuxeo-data-table-column>
