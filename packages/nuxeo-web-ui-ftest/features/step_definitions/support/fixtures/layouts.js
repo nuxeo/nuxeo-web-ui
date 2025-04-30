@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import path from 'path';
-import FieldRegistry from '../services/field_registry';
+import FieldRegistry from '../services/field_registry.js';
 
 global.fieldRegistry = new FieldRegistry();
 const suggestionGet = async (element) => {

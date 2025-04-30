@@ -2,8 +2,8 @@ const path = require('path');
 const chai = require('chai');
 const htmlReporter = require('multiple-cucumber-html-reporter');
 
-const CompatService = require('./wdio-compat-plugin');
-const ShadowService = require('./wdio-shadow-plugin');
+const CompatService = require('./wdio-compat-plugin.cjs');
+const ShadowService = require('./wdio-shadow-plugin.cjs');
 
 const cucumberRequires = [path.join(__dirname, 'features/step_definitions/**/*.js')];
 if (process.env.CUCUMBER_REQUIRES) {

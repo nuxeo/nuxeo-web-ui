@@ -1,8 +1,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, Then, When } from '@cucumber/cucumber';
-import Login from '../../pages/login';
-import UI from '../../pages/ui';
-import { url } from '../../pages/helpers';
+import Login from '../../pages/login.js';
+import UI from '../../pages/ui.js';
+import { url } from '../../pages/helpers.js';
 
 Given('user {string} exists in group {string}', async (username, group) => {
   const users = await fixtures.users;

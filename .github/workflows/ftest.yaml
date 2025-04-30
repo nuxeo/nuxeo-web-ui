@@ -39,7 +39,7 @@ jobs:
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           scope: '@nuxeo'
-          node-version: 18
+          node-version: 22
 
       - uses: actions/setup-java@v2
         with: 
@@ -60,11 +60,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm install
+          npm prune
           pushd packages/nuxeo-web-ui-ftest
           npm install
+          npm prune
           popd
           pushd packages/nuxeo-designer-catalog
           npm install
+          npm prune
           popd
 
       - name: Checkout the nuxeo-elements repo
