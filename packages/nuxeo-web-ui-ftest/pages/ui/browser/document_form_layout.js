@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import BasePage from '../../base';
-import DocumentLayout from './document_layout';
+import BasePage from '../../base.js';
+import DocumentLayout from './document_layout.js';
 
 export default class DocumentFormLayout extends BasePage {
   constructor(selector, docType, layout) {
