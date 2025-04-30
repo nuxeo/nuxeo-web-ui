@@ -33,7 +33,6 @@ function findDeep(selector, multiple, baseElement, filterBy) {
     if (reference.shadowRoot) {
       findAllElements(reference.shadowRoot.querySelectorAll('*'));
     }
-    // cleanup any duplicates
     return Array.from(new Set(sel ? allElements.filter((el) => el.matches(sel)) : allElements));
   }
 
@@ -76,6 +75,7 @@ function findDeep(selector, multiple, baseElement, filterBy) {
       }
       return possibleElements.find(findElements);
     }
+
     if (!findMany) {
       return lightElement;
     }
@@ -124,7 +124,7 @@ const shadowElement = (selector, multiple, baseElement, filterBy) =>
   browser.execute(findDeep, selector, multiple === true, baseElement, filterBy);
 
 // export init function for initialization
-module.exports = class {
+export default class ShadowDOM {
   static get name() {
     return 'ShadowDOM';
   }
@@ -166,4 +166,4 @@ module.exports = class {
       );
     });
   }
-};
+}
