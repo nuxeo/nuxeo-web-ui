@@ -138,41 +138,6 @@ jobs:
           rm -rf test/
           rm -rf packages/nuxeo-web-ui-ftest/
 
-      - name: Install zip
-        run: apt-get install zip
-
-      - name: Zip nuxeo-web-ui
-        run: |
-          echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip
-          zip -r nuxeo-web-ui.zip *
-
-      - name: Upload ZIP as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nuxeo-web-ui
-          path: nuxeo-web-ui.zip
-
-  sast-scan:
-    needs: sast-scan-build
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: nuxeo-web-ui
-          path: .
-
-      - name: Create Veracode directory and extract files
-        run: |
-          mkdir veracode
-          unzip nuxeo-web-ui.zip -d veracode/
-          rm nuxeo-web-ui.zip
-          ls -la veracode/
-
       - name: Run Veracode SCA
         id: sca
         continue-on-error: true
@@ -184,4 +149,4 @@ jobs:
           create-issues: true
           debug: true
           allow-dirty: true
-          path: 'veracode/'
+          path: '.'
