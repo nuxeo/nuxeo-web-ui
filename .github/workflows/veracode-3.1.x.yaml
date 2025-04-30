@@ -138,6 +138,20 @@ jobs:
           rm -rf test/
           rm -rf packages/nuxeo-web-ui-ftest/
 
+      - name: Install zip
+        run: apt-get install zip
+
+      - name: Zip nuxeo-web-ui
+        run: |
+          echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip
+          zip -r nuxeo-web-ui.zip *
+
+      - name: Upload ZIP as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuxeo-web-ui
+          path: nuxeo-web-ui.zip
+
       # - name: Run Veracode SCA
       #   id: sca
       #   continue-on-error: true
