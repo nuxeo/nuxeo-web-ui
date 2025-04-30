@@ -33,6 +33,7 @@ function findDeep(selector, multiple, baseElement, filterBy) {
     if (reference.shadowRoot) {
       findAllElements(reference.shadowRoot.querySelectorAll('*'));
     }
+    // cleanup any duplicates
     return Array.from(new Set(sel ? allElements.filter((el) => el.matches(sel)) : allElements));
   }
 
@@ -124,7 +125,7 @@ const shadowElement = (selector, multiple, baseElement, filterBy) =>
   browser.execute(findDeep, selector, multiple === true, baseElement, filterBy);
 
 // export init function for initialization
-export default class ShadowDOM {
+export default class {
   static get name() {
     return 'ShadowDOM';
   }

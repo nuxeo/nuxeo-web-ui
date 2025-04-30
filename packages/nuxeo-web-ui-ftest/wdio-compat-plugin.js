@@ -1,4 +1,4 @@
-export default class CompatV4 {
+export default class {
   static get name() {
     return 'CompatV4';
   }
