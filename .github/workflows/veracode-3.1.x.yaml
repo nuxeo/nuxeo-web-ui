@@ -138,15 +138,78 @@ jobs:
           rm -rf test/
           rm -rf packages/nuxeo-web-ui-ftest/
 
+      # - name: Run Veracode SCA
+      #   id: sca
+      #   continue-on-error: true
+      #   env:
+      #     SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
+      #   uses: veracode/veracode-sca@v2.1.12
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     create-issues: true
+      #     debug: true
+      #     allow-dirty: true
+      #     path: '.'
+
+  sast-scan:
+    needs: sast-scan-build
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nuxeo-web-ui
+          path: .
+
+      - name: Create Veracode directory and extract files
+        run: |
+          mkdir veracode
+          unzip nuxeo-web-ui.zip -d veracode/
+          rm nuxeo-web-ui.zip
+          ls -la veracode/
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Setup Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          mvn -version
+
       - name: Run Veracode SCA
         id: sca
         continue-on-error: true
         env:
           SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd veracode
+          curl -sSL https://download.sourceclear.com/ci.sh > scan.sh
+          chmod +x scan.sh
+          ./scan.sh scan . --allow-dirty --debug --json=../scaResults.json --no-upload
+
+      - name: Upload scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca-results
+          path: scaResults.json
+          if-no-files-found: ignore
+
+      - name: Create GitHub Issues from Results
+        if: github.event_name == 'pull_request' && steps.sca.outcome == 'success'
         uses: veracode/veracode-sca@v2.1.12
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           create-issues: true
-          debug: true
-          allow-dirty: true
-          path: '.'
+          path: 'veracode/'
+          results-json: 'scaResults.json'
