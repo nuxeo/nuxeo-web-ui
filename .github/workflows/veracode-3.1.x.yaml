@@ -173,14 +173,26 @@ jobs:
 
       - name: pipeline-scan action step
         id: pipeline-scan
-        uses: veracode/veracode-flaws-to-issues@v2.2.25
+        uses: veracode/pipeline-scan@v2.11.5
         with:
           vid: ${{ secrets.VERACODE_SECRET_API_ID }}
           vkey: ${{ secrets.VERACODE_SECRET_KEY }}
           file: 'nuxeo-web-ui.zip'
           fail_build: false
+          summary_display: true
+          json_output_file: 'filtered_results.json'
 
-      # Upload the scan results as an artifact with improved settings
+      - name: Check for results file
+        run: |
+          ls -la
+          if [ -f filtered_results.json ]; then
+            echo "Results file exists"
+            cat filtered_results.json | jq '.' > /dev/null 2>&1 || echo "Warning: Results file is not valid JSON"
+          else
+            echo "Results file does not exist"
+            exit 1
+          fi
+
       - name: Upload scan results
         uses: actions/upload-artifact@v4
         with:
@@ -188,6 +200,9 @@ jobs:
           path: filtered_results.json
           retention-days: 7
           if-no-files-found: error
+          compression-level: 6
+          overwrite: false
+          include-hidden-files: false
 
   # This step will import the flaws from the step above
   import-issues:
