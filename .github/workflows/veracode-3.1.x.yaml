@@ -196,7 +196,7 @@ jobs:
 
   # This step will import the flaws from the step above
   import-issues:
-    needs: scan
+    needs: sast-scan
     runs-on: ubuntu-latest
     permissions:
       issues: write
