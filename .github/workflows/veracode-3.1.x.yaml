@@ -194,6 +194,14 @@ jobs:
           file: 'nuxeo-web-ui.zip'
           fail_build: false
 
+      # Upload the scan results as an artifact
+      - name: Upload scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: filtered-results
+          path: filtered_results.json
+          retention-days: 1
+
   # This step will import the flaws from the step above
   import-issues:
     needs: sast-scan
