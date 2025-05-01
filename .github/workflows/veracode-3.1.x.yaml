@@ -138,16 +138,75 @@ jobs:
           rm -rf test/
           rm -rf packages/nuxeo-web-ui-ftest/
           rm -f pom.xml
+      - name: Install zip
+        run: apt-get install zip
 
-      - name: Run Veracode SCA
-        id: sca
-        continue-on-error: true
-        env:
-          SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
-        uses: veracode/veracode-sca@v2.1.12
+      - name: Zip nuxeo-web-ui
+        run: |
+          echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip
+          zip -r nuxeo-web-ui.zip *
+
+      - name: Upload ZIP as artifact
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          create-issues: true
-          debug: true
-          allow-dirty: true
-          path: '.'
+          name: nuxeo-web-ui
+          path: nuxeo-web-ui.zip
+
+  sast-scan:
+    needs: sast-scan-build
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nuxeo-web-ui
+          path: .
+
+      - name: List downloaded artifact
+        run: |
+          ls -l
+          pwd
+
+      # - name: Veracode Upload And Scan
+      #   uses: veracode/veracode-uploadandscan-action@0.2.7
+      #   with:
+      #     appname: 'Nuxeo Web UI'
+      #     createprofile: false
+      #     filepath: 'nuxeo-web-ui.zip'
+      #     vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
+      #     vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
+      #     sandboxname: 'master'
+      #     scantimeout: 600
+      #     include: '*.war, *.zip, *.js, *.html, *.css, *.json'
+      #     criticality: 'High'
+      #     includenewmodules: 'true'
+
+      - name: pipeline-scan action step
+        id: pipeline-scan
+        uses: veracode/veracode-flaws-to-issues@v2.2.25
+        with:
+          vid: ${{ secrets.VERACODE_SECRET_API_ID }}
+          vkey: ${{ secrets.VERACODE_SECRET_KEY }}
+          file: 'nuxeo-web-ui.zip'
+          fail_build: false
+
+  # This step will import the flaws from the step above
+  import-issues:
+    needs: scan
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: get scan results
+        uses: actions/download-artifact@v3
+        with:
+          name: filtered-results
+
+      - name: import flaws as issues
+        uses: veracode/veracode-flaws-to-issues@v2.2.25
+        with:
+          scan-results-json: 'filtered_results.json'
