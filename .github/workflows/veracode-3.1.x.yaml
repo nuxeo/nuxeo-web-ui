@@ -171,20 +171,6 @@ jobs:
           ls -l
           pwd
 
-      # - name: Veracode Upload And Scan
-      #   uses: veracode/veracode-uploadandscan-action@0.2.7
-      #   with:
-      #     appname: 'Nuxeo Web UI'
-      #     createprofile: false
-      #     filepath: 'nuxeo-web-ui.zip'
-      #     vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
-      #     vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
-      #     sandboxname: 'master'
-      #     scantimeout: 600
-      #     include: '*.war, *.zip, *.js, *.html, *.css, *.json'
-      #     criticality: 'High'
-      #     includenewmodules: 'true'
-
       - name: pipeline-scan action step
         id: pipeline-scan
         uses: veracode/veracode-flaws-to-issues@v2.2.25
@@ -194,13 +180,14 @@ jobs:
           file: 'nuxeo-web-ui.zip'
           fail_build: false
 
-      # Upload the scan results as an artifact
+      # Upload the scan results as an artifact with improved settings
       - name: Upload scan results
         uses: actions/upload-artifact@v4
         with:
           name: filtered-results
           path: filtered_results.json
-          retention-days: 1
+          retention-days: 7
+          if-no-files-found: error
 
   # This step will import the flaws from the step above
   import-issues:
@@ -213,8 +200,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: filtered-results
+          path: ./scan-results
+          merge-multiple: false
+
+      - name: List downloaded files
+        run: ls -la ./scan-results
 
       - name: import flaws as issues
         uses: veracode/veracode-flaws-to-issues@v2.2.25
         with:
-          scan-results-json: 'filtered_results.json'
+          scan-results-json: './scan-results/filtered_results.json'
