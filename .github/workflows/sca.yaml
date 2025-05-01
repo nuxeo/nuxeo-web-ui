@@ -1,0 +1,30 @@
+name: Veracode Agent Based Scan
+
+on:
+  pull_request:
+    branches:
+      - maintenance-3.1.x
+
+env:
+  REFERENCE_BRANCH: maintenance-3.1.x
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch ||'maintenance-3.1.x' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      # Runs an SCA agent-based scan in the local directory
+      - name: Execute Software Composition Analysis
+        env:
+          SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
+        run: curl -sSL https://download.sourceclear.com/ci.sh | sh
