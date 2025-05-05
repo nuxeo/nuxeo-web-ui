@@ -42,4 +42,5 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           git add package.json
           git commit -m "chore: bump version to $VERSION"
-          git push origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nuxeo/nuxeo-web-ui.git v$VERSION
+          git status
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nuxeo/nuxeo-web-ui.git v$VERSION
