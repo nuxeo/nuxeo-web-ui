@@ -3,7 +3,7 @@ name: Push release
 on:
   pull_request:
     branches:
-      - maintenance-3.1.x
+      - test-maintenance-3.1.x
   workflow_dispatch:
     inputs:
       version:
