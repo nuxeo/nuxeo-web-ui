@@ -40,7 +40,7 @@ jobs:
           # Update package.json with minor version bump
           git branch --show-current
           echo "========================= branches"
-          npm version minor
+          npm version '23.1.53' --no-git-tag-version
           echo "========================= npm version"
           git status
           echo "========================= git status"
