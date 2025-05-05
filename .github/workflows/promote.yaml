@@ -60,7 +60,7 @@ jobs:
           git tag -a v$VERSION -m "Release $VERSION"
 
       - if: ${{ github.event.inputs.dryRun == 'false' }}
-        run: git push origin v$VERSION
+        run: git push origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nuxeo/nuxeo-web-ui.git v$VERSION
 
       - name: Create Github release v${{ env.VERSION }}
         if: ${{ github.event.inputs.dryRun == 'false' }}
@@ -179,4 +179,4 @@ jobs:
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
 
       - if: ${{ github.event.inputs.dryRun == 'false' }}
-        run: git push origin ${{ github.event.inputs.referenceBranch }}
+        run: git push origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nuxeo/nuxeo-web-ui.git ${{ github.event.inputs.referenceBranch }}
