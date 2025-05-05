@@ -106,6 +106,7 @@ Polymer({
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
         on-row-clicked="_navigate"
+        caption-text="[[i18n('documentContentView.datatable.heading')]]"
       >
         <nuxeo-data-table-column
           name="[[i18n('documentContentView.datatable.header.title')]]"
