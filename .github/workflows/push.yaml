@@ -44,4 +44,4 @@ jobs:
           git add package.json
           git commit -m "chore: bump version to $VERSION"
           git status
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nuxeo/nuxeo-web-ui.git v$VERSION
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nuxeo/nuxeo-web-ui.git ${{ github.event.inputs.referenceBranch }}
