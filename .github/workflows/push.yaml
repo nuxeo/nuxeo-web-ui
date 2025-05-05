@@ -40,7 +40,7 @@ jobs:
           # Update package.json with minor version bump
           git branch --show-current
           echo "========================= branches"
-          npm version '23.1.54' --no-git-tag-version
+          npm version '23.1.55' --no-git-tag-version
           echo "========================= npm version"
           git status
           echo "========================= git status"
@@ -51,4 +51,4 @@ jobs:
           echo "========================= git commit"
           git status
           echo "========================= git status"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nuxeo/nuxeo-web-ui.git ${{ github.event.inputs.referenceBranch }}
+          git push https://x-access-token:${{ secrets.GIT_ADMIN_TOKEN }}@github.com/nuxeo/nuxeo-web-ui.git ${{ github.event.inputs.referenceBranch }}
