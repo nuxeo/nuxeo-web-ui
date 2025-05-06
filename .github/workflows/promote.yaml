@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: v${{ github.event.inputs.version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GIT_ADMIN_TOKEN }}
 
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
@@ -179,4 +179,4 @@ jobs:
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
 
       - if: ${{ github.event.inputs.dryRun == 'false' }}
-        run: git push origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/nuxeo/nuxeo-web-ui.git ${{ github.event.inputs.referenceBranch }}
+        run: git push origin ${{ github.event.inputs.referenceBranch }}
