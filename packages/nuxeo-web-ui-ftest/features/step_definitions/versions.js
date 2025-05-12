@@ -28,9 +28,11 @@ When(/^I click the Create Version button$/, async function() {
 });
 
 When(/^The create version dialog appears$/, async function() {
-  const page = await this.ui.browser.documentPage(this.doc.type);
-  await page.waitForVisible();
-  await page.versions.waitForVisible();
+  const browser = await this.ui.browser;
+  const type = await this.doc.type;
+  const page = await browser.documentPage(type);
+  // await page.waitForVisible();
+  // await page.versions.waitForVisible();
   const pageVersionDialog = await page.versions.dialog;
   await pageVersionDialog.waitForVisible();
   await pageVersionDialog.waitForVisible('paper-button[dialog-dismiss]');
