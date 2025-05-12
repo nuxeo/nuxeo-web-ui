@@ -20,12 +20,10 @@ limitations under the License.
 const path = require('path');
 const { spawn } = require('child_process');
 const gulp = require('gulp');
-const gutil = require('gulp-util');
+const log = require('fancy-log');
 const git = require('gulp-git');
 const del = require('del');
-const runSequence = require('gulp4-run-sequence');
 const merge = require('merge-stream');
-const bower = require('gulp-bower');
 const fs = require('fs-extra');
 const stream = require('./src/utils/stream').obj;
 const hintsBuilder = require('./src/hints/index');
@@ -60,11 +58,6 @@ function execCatalogTask(options) {
     .pipe(stream.writeFile(destFilepath));
 }
 
-// Build nuxeo catalog
-gulp.task('catalog', (cb) => {
-  runSequence('clone-catalog', 'checkout-catalog', 'generate-catalog', 'cleanup-catalog', cb);
-});
-
 function getTargetPlatforms(base) {
   // check if a specific target platform was specified on the command line
   let tp;
@@ -80,7 +73,7 @@ function getTargetPlatforms(base) {
 }
 
 // prepare the catalog by cloning web-ui and copying necessary files
-gulp.task('clone-catalog', (cb) => {
+const cloneCatalog = (cb) => {
   const base = 'data/applications/nuxeo';
   const application = 'nuxeo-web-ui';
   const targetPlatforms = getTargetPlatforms(base);
@@ -90,10 +83,10 @@ gulp.task('clone-catalog', (cb) => {
     fs.removeSync(applicationBase);
   }
   // clone the web-ui repository
-  gutil.log('git clone nuxeo-web-ui repository');
+  log('git clone nuxeo-web-ui repository');
   return git.clone(webUiRepositoryUrl, { quiet: true, cwd: base }, (err) => {
     if (err) {
-      gutil.log(err);
+      log(err);
       return;
     }
     // copy the web-ui checkout so we can checkout different branches/tags
@@ -108,12 +101,12 @@ gulp.task('clone-catalog', (cb) => {
 
     // remove the base folder
     fs.removeSync(path.join(base, application));
-    gutil.log('git clone finished');
+    log('git clone finished');
     cb(err);
   });
-});
+};
 
-gulp.task('checkout-catalog', () => {
+const checkoutCatalog = () => {
   const base = 'data/applications/nuxeo';
   const application = 'nuxeo-web-ui';
   const targetPlatforms = getTargetPlatforms(base);
@@ -129,12 +122,12 @@ gulp.task('checkout-catalog', () => {
     targetPlatforms.map(
       (platform) =>
         new Promise((resolve, reject) => {
-          gutil.log('git checkout nuxeo-web-ui ', platform);
+          log('git checkout nuxeo-web-ui ', platform);
           const folder = path.join(base, platform, application);
           const version = branch || platform;
           git.checkout(version, { quiet: true, cwd: folder }, (err) => {
             if (err) {
-              gutil.log(err);
+              log(err);
               reject();
             }
 
@@ -145,15 +138,15 @@ gulp.task('checkout-catalog', () => {
               path.join(folder, '.gitignore'),
             ]);
 
-            gutil.log('git checkout finished for nuxeo-web-ui ', platform);
+            log('git checkout finished for nuxeo-web-ui ', platform);
             resolve();
           });
         }),
     ),
   );
-});
+};
 
-gulp.task('generate-catalog', () => {
+const generateCatalog = () => {
   const base = 'data/applications/nuxeo';
   const application = 'nuxeo-web-ui';
   const targetPlatforms = getTargetPlatforms(base);
@@ -165,7 +158,7 @@ gulp.task('generate-catalog', () => {
           // callback to generate the catalog
           const catalogCallback = (pkgManager) =>
             function() {
-              gutil.log('generate catalog for nuxeo-web-ui ', platform);
+              log('generate catalog for nuxeo-web-ui ', platform);
               execCatalogTask({
                 application,
                 destDir: path.join(base, platform),
@@ -181,26 +174,20 @@ gulp.task('generate-catalog', () => {
             };
 
           const webuiBase = path.join(base, platform, application);
-          // decide if we should use bower or npm
-          if (fs.existsSync(path.join(webuiBase, 'bower.json'))) {
-            gutil.log('bower install for nuxeo-web-ui ', platform);
-            bower({ cwd: webuiBase, verbosity: 1 }).on('end', catalogCallback('bower'));
-          } else {
-            gutil.log('npm install for nuxeo-web-ui');
-            // use absolute path for webui to run npm install
-            const npmInstall = spawn('npm', ['install'], {
-              cwd: path.join(process.cwd(), webuiBase),
-              stdio: 'inherit',
-            });
-            npmInstall.on('exit', () => catalogCallback('npm')());
-          }
+          log('npm install for nuxeo-web-ui');
+          // use absolute path for webui to run npm install
+          const npmInstall = spawn('npm', ['install'], {
+            cwd: path.join(process.cwd(), webuiBase),
+            stdio: 'inherit',
+          });
+          npmInstall.on('exit', () => catalogCallback('npm')());
         });
       },
   );
   return promiseSerial(catalogGenerators);
-});
+};
 
-gulp.task('cleanup-catalog', () => {
+const cleanupCatalog = () => {
   const base = path.resolve(__dirname, 'data/applications/nuxeo');
   const application = 'nuxeo-web-ui';
   const targetPlatforms = getTargetPlatforms(base);
@@ -209,13 +196,12 @@ gulp.task('cleanup-catalog', () => {
     (platform) =>
       function() {
         return new Promise((resolve) => {
-          gutil.log('clean up catalog files for nuxeo-web-ui ', platform);
+          log('clean up catalog files for nuxeo-web-ui ', platform);
           const appBase = path.join(base, platform, application);
-          const npmManagement = !fs.existsSync(path.join(appBase, 'bower.json'));
-          const dependencies = path.join(appBase, npmManagement ? 'node_modules' : 'bower_components');
+          const dependencies = path.join(appBase, 'node_modules');
 
           // remove unnecessary dependencies
-          ['polymer-cli', 'alloyeditor', 'Chart.js', 'hydrolysis', 'aws-sdk'].forEach((name) => {
+          ['alloyeditor', 'Chart.js', 'hydrolysis', 'aws-sdk'].forEach((name) => {
             fs.removeSync(path.join(dependencies, name));
           });
 
@@ -246,6 +232,11 @@ gulp.task('cleanup-catalog', () => {
       },
   );
   return promiseSerial(catalogCleanUp);
+};
+
+// Build nuxeo catalog
+gulp.task('catalog', (cb) => {
+  gulp.series(cloneCatalog, checkoutCatalog, generateCatalog, cleanupCatalog, cb);
 });
 
 // Build hints for the HTML editor from catalog
