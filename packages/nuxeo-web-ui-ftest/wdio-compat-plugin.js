@@ -1,4 +1,4 @@
-module.exports = class {
+export default class {
   static get name() {
     return 'CompatV4';
   }
@@ -97,7 +97,6 @@ module.exports = class {
     browser.addCommand('screenshot', async function() {
       return this.takeScreenshot();
     });
-
     browser.addCommand('scroll', async function() {
       return this.scrollIntoView();
     });
@@ -259,8 +258,8 @@ module.exports = class {
       },
       true,
     );
-
     // overwrite element comands that previously took a selector as optional argument
+
     ['getText', 'click'].forEach((name) => {
       browser.overwriteCommand(
         name,
@@ -271,4 +270,4 @@ module.exports = class {
       );
     });
   }
-};
+}

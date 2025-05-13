@@ -73,6 +73,7 @@ Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberO
 });
 
 Then('I cannot see authorized application', async function() {
+  browser.pause(1000);
   const apps = await this.ui.emptyAuthorizedApps;
   await apps.waitForDisplayed();
 });

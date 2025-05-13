@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, When, Then } from '@cucumber/cucumber';
-import { url } from '../../pages/helpers';
+import { url } from '../../pages/helpers.js';
 
 Given('I have a {word} document', async function(docType) {
   docType = docType || 'File';
@@ -198,11 +198,11 @@ Then(/^I can edit the (.*) metadata$/, async function(docType) {
 Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
   const browser = await this.ui.browser;
   const button = await browser.editButton;
-  await button.waitForVisible();
+  await button.waitForDisplayed();
   await button.click();
   const form = await browser.editForm(docType);
-  await form.waitForVisible();
-  await form.layout.waitForVisible();
+  // await form.waitForVisible();
+  // await form.layout.waitForVisible();
   await form.layout.fillMultipleValues(table);
   await form.save();
 });
