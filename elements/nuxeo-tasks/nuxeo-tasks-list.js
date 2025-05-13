@@ -113,7 +113,7 @@ Polymer({
       select-on-tap
     >
       <template>
-        <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+        <div tabindex="0" class$="[[_computedClass(selected)]]">
           <div class="task-box">
             <div class="horizontal layout center">
               <span class="task-name">[[i18n(task.name)]]</span>

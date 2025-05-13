@@ -151,7 +151,7 @@ Polymer({
         empty-label-when-filtered="[[i18n('clipboard.empty')]]"
       >
         <template>
-          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+          <div tabindex="0" class$="[[_computedClass(selected)]]">
             <div class="list-item-box">
               <div class="list-item-info">
                 <div class="list-item-thumbnail">
@@ -160,7 +160,14 @@ Polymer({
                 <div class="list-item-title">
                   [[_title(document)]]
                 </div>
-                <iron-icon class="remove" icon="nuxeo:remove" alt="Remove" on-tap="_remove"></iron-icon>
+                <iron-icon
+                  class="remove"
+                  icon="nuxeo:remove"
+                  alt="Remove"
+                  on-tap="_remove"
+                  on-keydown="_remove"
+                  tabindex="0"
+                ></iron-icon>
               </div>
             </div>
           </div>
