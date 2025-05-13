@@ -198,11 +198,11 @@ Then(/^I can edit the (.*) metadata$/, async function(docType) {
 Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
   const browser = await this.ui.browser;
   const button = await browser.editButton;
-  await button.waitForDisplayed();
+  await button.waitForVisible();
   await button.click();
   const form = await browser.editForm(docType);
-  // await form.waitForVisible();
-  // await form.layout.waitForVisible();
+  await form.waitForVisible();
+  await form.layout.waitForVisible();
   await form.layout.fillMultipleValues(table);
   await form.save();
 });

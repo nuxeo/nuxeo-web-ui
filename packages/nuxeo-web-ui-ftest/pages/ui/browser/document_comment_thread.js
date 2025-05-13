@@ -59,7 +59,6 @@ export default class DocumentCommentThread extends BasePage {
     await writingAreaContainer.click();
     await fixtures.layouts.setValue(writingAreaContainer, text);
     const inputArea = await this.el.element('.input-area iron-icon[name="submit"]');
-    await inputArea.scrollIntoView();
     await inputArea.waitForVisible();
     await inputArea.click();
   }

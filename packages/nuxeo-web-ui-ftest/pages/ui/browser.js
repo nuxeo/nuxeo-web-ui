@@ -14,7 +14,6 @@ import { clickActionMenu, url } from '../helpers.js';
 
 export default class Browser extends BasePage {
   async documentPage(docType) {
-    await driver.pause(2000);
     const page = (await fixtures.layouts.page[docType]) || 'nuxeo-document-page';
     if (page === 'nuxeo-collapsible-document-page') {
       return new CollapsibleDocumentPage(page, docType);
@@ -399,11 +398,8 @@ export default class Browser extends BasePage {
   get selectionToolbar() {
     return (async () => {
       const currentPage = await this.currentPage;
-      // console.log('1',currentPage);
       const tagName = await currentPage.getTagName();
-      // console.log('2',tagName);
       const selectionBar = await new Selection(`${tagName} nuxeo-selection-toolbar#toolbar`);
-      // console.log('3',selectionBar);
       return selectionBar;
     })();
   }

@@ -28,7 +28,7 @@ export default class DocumentLayout extends BasePage {
       const row = rows[i];
       const fieldName = row[0];
       const fieldEl = await this.getField(fieldName);
-      // await fieldEl.waitForVisible();
+      await fieldEl.waitForVisible();
       await fieldEl.scrollIntoView();
       await fixtures.layouts.setValue(fieldEl, row[1]);
     }
