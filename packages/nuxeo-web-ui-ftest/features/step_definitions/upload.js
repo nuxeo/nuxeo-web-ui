@@ -17,14 +17,13 @@ Then('I can see the blob replace button', async function() {
 });
 
 Then("I can't see the blob replace button", async function() {
-  const browser = await this.ui.browser;
-  const page = await browser.documentPage(this.doc.type);
+  const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const view = await page.view;
   await view.waitForVisible();
   const ele = await view.el.element('nuxeo-replace-blob-button');
-  const isHidden = await ele.waitForDisplayed({ timeout: 5000, reverse: true });
-  isHidden.should.be.true;
+  const result = await ele.waitForVisible(5000, true);
+  result.should.be.true;
 });
 
 Then('I can see the option to add new attachments', async function() {
