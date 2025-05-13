@@ -4,7 +4,7 @@ export default class Tasks extends BasePage {
   get nbItems() {
     return (async () => {
       await driver.pause(2000);
-      const items = await this.el.$$('[id="list"] .list-item');
+      const items = await this.el.$$('#list .list-item');
       let count = 0;
       for (let i = 0; i < items.length; i++) {
         // eslint-disable-next-line no-await-in-loop
