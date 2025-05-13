@@ -237,7 +237,7 @@ Polymer({
             empty-label-when-filtered="[[i18n('collections.empty')]]"
           >
             <template>
-              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+              <div tabindex="0" class$="[[_computedClass(selected)]]">
                 <div class="collection-box">
                   <div class="collection-info horizontal layout center">
                     <iron-icon class="collection-name-icon" icon="nuxeo:collections"></iron-icon>
@@ -273,7 +273,7 @@ Polymer({
             empty-label-when-filtered="[[i18n('collections.members.empty')]]"
           >
             <template>
-              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+              <div tabindex$="0" class$="[[_computedClass(selected)]]">
                 <div class="list-item-box">
                   <div class="list-item-info horizontal layout center">
                     <div class="vertical layout center">
