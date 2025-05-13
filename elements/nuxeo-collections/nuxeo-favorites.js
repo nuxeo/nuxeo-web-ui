@@ -143,7 +143,7 @@ Polymer({
         empty-label-when-filtered="[[i18n('favorites.empty')]]"
       >
         <template>
-          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+          <div tabindex="0" class$="[[_computedClass(selected)]]">
             <div class="list-item-box">
               <div class="list-item-info">
                 <div class="list-item-thumbnail">
