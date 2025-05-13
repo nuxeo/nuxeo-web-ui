@@ -93,7 +93,7 @@ Polymer({
         empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
       >
         <template>
-          <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+          <div tabindex="0" class$="[[_computedClass(selected)]]">
             <div class="list-item-info">
               <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
               <div class="list-item-title">
