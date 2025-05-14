@@ -550,11 +550,7 @@ Polymer({
   },
 
   _uploadInputFiles(e) {
-    // Combine new files with existing files if any
-    const newFiles = Array.from(e.target.files || []);
-    const existingFiles = Array.from(this.files || []);
-    const combinedFiles = existingFiles.concat(newFiles);
-    this._upload(combinedFiles);
+    this._upload(e.target.files);
   },
 
   _filesChanged() {
@@ -564,8 +560,14 @@ Polymer({
 
   _upload(files) {
     if (files && files.length > 0) {
-      Array.from(files).forEach((item) => this.uploadedFiles.push(item));
-      this.uploadFiles(files);
+      if (this.multiple) {
+        const allFiles = [...this.uploadedFiles, ...Array.from(files)];
+        this.uploadedFiles = allFiles;
+        this.uploadFiles(allFiles);
+      } else {
+        this.uploadedFiles = Array.from(files);
+        this.uploadFiles(files);
+      }
     }
   },
 
