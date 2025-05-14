@@ -3,6 +3,9 @@
 name: Designer Catalog Generator
 
 on:
+  pull_request:
+    branches:
+      - maintenance-3.1.x
   workflow_dispatch:
     inputs:
       target_platform:
@@ -11,7 +14,7 @@ on:
         required: true
       branch_name:
         description: 'The name of the Nuxeo Web UI branch to generate the catalog for.'
-        default: 'maintenance-3.1.x'
+        default: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
         required: true
       classifier:
         description: 'Classifier to name a custom version of the catalog (used for testing purposes).'
