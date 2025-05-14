@@ -561,11 +561,11 @@ Polymer({
   _upload(files) {
     if (files && files.length > 0) {
       if (this.multiple) {
-        const allFiles = [...this.uploadedFiles, ...Array.from(files)];
+        const allFiles = this.uploadedFiles.concat(Array.prototype.slice.call(files));
         this.uploadedFiles = allFiles;
         this.uploadFiles(allFiles);
       } else {
-        this.uploadedFiles = Array.from(files);
+        this.uploadedFiles = Array.prototype.slice.call(files);
         this.uploadFiles(files);
       }
     }
