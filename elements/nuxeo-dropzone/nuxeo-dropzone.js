@@ -550,7 +550,11 @@ Polymer({
   },
 
   _uploadInputFiles(e) {
-    this._upload(e.target.files);
+    // Combine new files with existing files if any
+    const newFiles = Array.from(e.target.files || []);
+    const existingFiles = Array.from(this.files || []);
+    const combinedFiles = existingFiles.concat(newFiles);
+    this._upload(combinedFiles);
   },
 
   _filesChanged() {
