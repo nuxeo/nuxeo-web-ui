@@ -56,12 +56,12 @@ if (argv.nuxeoUrl) {
 }
 
 if (argv.report) {
-  process.env.CUCUMBER_REPORT_PATH = argv.cucumberReport || './target/cucumber-reports';
-  process.env.JUNIT_REPORT_PATH = argv.junitReport || './target/surefire-reports';
+  process.env.CUCUMBER_REPORT_PATH = argv.cucumberReport ? argv.cucumberReport : './target/cucumber-reports';
+  process.env.JUNIT_REPORT_PATH = argv.junitReport ? argv.junitReport : './target/surefire-reports';
 }
 
 if (argv.screenshots) {
-  process.env.SCREENSHOTS_PATH = argv.screenshotPath || './target/screenshots';
+  process.env.SCREENSHOTS_PATH = argv.screenshotPath ? argv.screenshotPath : './target/screenshots';
 }
 
 let def = '';
@@ -100,11 +100,12 @@ if (argv.bail) {
 }
 
 process.env.BROWSER = argv.browser || process.env.BROWSER || 'chrome';
+
 process.env.FORCE_COLOR = true;
 
 let done = Promise.resolve();
 
-if (!process.env.DRIVER_VERSION) {
+if (process.env.DRIVER_VERSION == null) {
   const chromePath = chromeLauncher.Launcher.getFirstInstallation();
   let version;
   try {
@@ -112,7 +113,7 @@ if (!process.env.DRIVER_VERSION) {
       .toString()
       .trim();
   } catch (e) {
-    console.error('Unable to get Chrome version:', e);
+    console.error('unable to get Chrome version: ', e);
   }
   // eslint-disable-next-line no-console
   console.log(`${version} detected.`);
@@ -131,39 +132,38 @@ if (!process.env.DRIVER_VERSION) {
                 process.env.DRIVER_VERSION = newDriverVersion;
               })
               .catch((e) => {
-                console.error('Unable to parse ChromeDriver version:', e);
+                console.error('unable to parse ChromeDriver version: ', e);
               });
           }
-          console.error('Unable to fetch ChromeDriver version:', response.status);
+          console.error('unable to fetch ChromeDriver version: ', response);
         },
       );
     } catch (e) {
-      console.error('Unable to fetch ChromeDriver version:', e);
+      console.error('unable to fetch ChromeDriver version: ', e);
     }
   }
 }
-
 try {
-  done = fetch('https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json').then(
+  done = fetch(`https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json`).then(
     (response) => {
       if (response.ok) {
         return response
           .text()
-          .then((jsonStr) => {
-            const responseObj = JSON.parse(jsonStr);
+          .then((responseJSON) => {
+            const responseObj = JSON.parse(responseJSON);
             const cftVersion = responseObj.channels.Stable.version;
             // eslint-disable-next-line no-console
             console.log(`ChromeForTesting ${cftVersion} detected.`);
           })
           .catch((e) => {
-            console.error('Unable to parse Chrome for Testing version:', e);
+            console.error('unable to parse Chrome for testing browser version: ', e);
           });
       }
-      console.error('Unable to fetch Chrome for Testing version:', response.status);
+      console.error('unable to fetch Chrome for testing browser version: ', response);
     },
   );
 } catch (e) {
-  console.error('Unable to fetch Chrome for Testing version:', e);
+  console.error('unable to fetch Chrome for testing browser version ', e);
 }
 
 done.finally(() => {
@@ -173,7 +173,7 @@ done.finally(() => {
       process.exit(code);
     },
     (error) => {
-      console.error('Launcher failed to start the test', error.stacktrace || error);
+      console.error('Launcher failed to start the test', error.stacktrace);
       process.exit(1);
     },
   );
