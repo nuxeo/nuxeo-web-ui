@@ -24,6 +24,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { handleVerticalKeyNavigation } from '../common-utils.js';
 
 /**
 `nuxeo-tasks-list`
@@ -229,21 +230,6 @@ Polymer({
   },
 
   _handleKeyNav(e) {
-    const { key } = e;
-    if (key !== 'ArrowDown' && key !== 'ArrowUp') {
-      return;
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const listItems = this.shadowRoot.querySelectorAll('.list-item');
-    const currentIndex = Array.from(listItems).indexOf(e.currentTarget);
-
-    const nextIndex = key === 'ArrowDown' ? currentIndex + 1 : currentIndex - 1;
-
-    if (nextIndex >= 0 && nextIndex < listItems) {
-      listItems[nextIndex].focus();
-    }
+    handleVerticalKeyNavigation(e, '.list-item');
   },
 });
