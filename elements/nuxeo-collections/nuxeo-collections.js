@@ -35,6 +35,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbna
 import '../nuxeo-keys/nuxeo-keys.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { handleVerticalKeyNavigation } from '../common-utils.js';
 
 /**
  `nuxeo-collections`
@@ -533,21 +534,6 @@ Polymer({
   },
 
   _handleKeyNav(e) {
-    const { key } = e;
-    if (key !== 'ArrowDown' && key !== 'ArrowUp') {
-      return;
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const listItems = this.shadowRoot.querySelectorAll('.list-item');
-    const currentIndex = Array.from(listItems).indexOf(e.currentTarget);
-
-    const nextIndex = key === 'ArrowDown' ? currentIndex + 1 : currentIndex - 1;
-
-    if (nextIndex >= 0 && nextIndex < listItems.length) {
-      listItems[nextIndex].focus();
-    }
+    handleVerticalKeyNavigation(e, '.list-item');
   },
 });
