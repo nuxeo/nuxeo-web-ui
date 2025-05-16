@@ -151,7 +151,7 @@ Polymer({
         empty-label-when-filtered="[[i18n('clipboard.empty')]]"
       >
         <template>
-          <div tabindex="0" class$="[[_computedClass(selected)]]">
+          <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
             <div class="list-item-box">
               <div class="list-item-info">
                 <div class="list-item-thumbnail">
@@ -324,5 +324,24 @@ Polymer({
       classes += ' selected';
     }
     return classes;
+  },
+
+  _handleKeyNav(e) {
+    const {key} = e;
+    if (key !== 'ArrowDown' && key !== 'ArrowUp') {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const listItems = this.shadowRoot.querySelectorAll('.list-item');
+    const currentIndex = Array.from(listItems).indexOf(e.currentTarget);
+
+    const nextIndex = key === 'ArrowDown' ? currentIndex + 1 : currentIndex - 1;
+
+    if (nextIndex >= 0 && nextIndex < listItems) {
+      listItems[nextIndex].focus();
+    }
   },
 });
