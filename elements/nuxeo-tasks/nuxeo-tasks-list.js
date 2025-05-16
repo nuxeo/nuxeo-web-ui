@@ -113,7 +113,7 @@ Polymer({
       select-on-tap
     >
       <template>
-        <div tabindex="0" class$="[[_computedClass(selected)]]">
+        <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
           <div class="task-box">
             <div class="horizontal layout center">
               <span class="task-name">[[i18n(task.name)]]</span>
@@ -226,5 +226,24 @@ Polymer({
       return this.$.list._fetchRange(offset, offset + pageSize, false);
     }
     return this.$.list.fetch();
+  },
+
+  _handleKeyNav(e) {
+    const {key} = e;
+    if (key !== 'ArrowDown' && key !== 'ArrowUp') {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const listItems = this.shadowRoot.querySelectorAll('.list-item');
+    const currentIndex = Array.from(listItems).indexOf(e.currentTarget);
+
+    const nextIndex = key === 'ArrowDown' ? currentIndex + 1 : currentIndex - 1;
+
+    if (nextIndex >= 0 && nextIndex < listItems) {
+      listItems[nextIndex].focus();
+    }
   },
 });

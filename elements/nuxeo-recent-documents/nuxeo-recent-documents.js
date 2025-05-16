@@ -93,7 +93,7 @@ Polymer({
         empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
       >
         <template>
-          <div tabindex="0" class$="[[_computedClass(selected)]]">
+          <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
             <div class="list-item-info">
               <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
               <div class="list-item-title">
@@ -189,6 +189,25 @@ Polymer({
       this.update(doc);
     } else {
       this.add(doc);
+    }
+  },
+
+  _handleKeyNav(e) {
+    const {key} = e;
+    if (key !== 'ArrowDown' && key !== 'ArrowUp') {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const listItems = this.shadowRoot.querySelectorAll('.list-item');
+    const currentIndex = Array.from(listItems).indexOf(e.currentTarget);
+
+    const nextIndex = key === 'ArrowDown' ? currentIndex + 1 : currentIndex - 1;
+
+    if (nextIndex >= 0 && nextIndex < listItems) {
+      listItems[nextIndex].focus();
     }
   },
 });
