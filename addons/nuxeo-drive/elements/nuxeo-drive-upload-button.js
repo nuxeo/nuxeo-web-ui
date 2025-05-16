@@ -92,20 +92,14 @@ Polymer({
 
     const parts = this.document ? this.document.path.split('/nxfile/') : '';
     const baseUrl = parts[0];
-    const downloadUrl = `nxfile/${parts[1]}`;
+    const uploadUrl = `nxfile/${parts[0]}`;
 
-    return [
+    const finalUrl = [
       'nxdrive://transfer',
       baseUrl.replace('://', '/'), // XXX replaceFirst
-      'user',
-      this.user.id,
-      'repo',
-      this.document.repository,
-      'nxdocid',
-      this.document.uid,
-      'filename',
       'downloadUrl',
-      downloadUrl,
+      uploadUrl,
     ].join('/');
+    return finalUrl;
   },
 });

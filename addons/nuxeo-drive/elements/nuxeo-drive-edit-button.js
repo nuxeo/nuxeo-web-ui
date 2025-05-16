@@ -94,8 +94,7 @@ Polymer({
     const parts = this.blob.data.split('/nxfile/');
     const baseUrl = parts[0];
     const downloadUrl = `nxfile/${parts[1]}`;
-
-    return [
+    const finalUrl = [
       'nxdrive://edit',
       baseUrl.replace('://', '/'), // XXX replaceFirst
       'user',
@@ -109,5 +108,6 @@ Polymer({
       'downloadUrl',
       downloadUrl,
     ].join('/');
+    return finalUrl;
   },
 });
