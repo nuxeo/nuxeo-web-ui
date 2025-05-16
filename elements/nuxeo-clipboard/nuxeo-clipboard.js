@@ -327,7 +327,7 @@ Polymer({
   },
 
   _handleKeyNav(e) {
-    const {key} = e;
+    const { key } = e;
     if (key !== 'ArrowDown' && key !== 'ArrowUp') {
       return;
     }
