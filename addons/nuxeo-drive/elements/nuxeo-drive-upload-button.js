@@ -35,9 +35,9 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(document,blob)]]">
       <div class="action" on-tap="_go">
-        <paper-icon-button noink icon="icons:open-in-new" id="driveBtn" aria-labelledby="label"></paper-icon-button>
-        <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveEditButton.tooltip')]]</span>
-        <nuxeo-tooltip>[[i18n('driveEditButton.tooltip')]]</nuxeo-tooltip>
+        <paper-icon-button noink icon="icons:file-upload" id="driveBtn" aria-labelledby="label"></paper-icon-button>
+        <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveUploadButton.tooltip')]]</span>
+        <nuxeo-tooltip>[[i18n('driveUploadButton.tooltip')]]</nuxeo-tooltip>
       </div>
     </template>
 
@@ -81,25 +81,36 @@ Polymer({
         this.$.dialog.toggle();
         return;
       }
+      //  window.open(this.driveEditURL, '_top');
+      // window.open('nxdrive://transfer/http/localhost:5000/nuxeo/user/Administrator/repo/default-domain/workspaces/ws1/transfer1', '_top');
+      //  window.open('nxdrive://transfer/http/localhost:5000/default-domain/UserWorkspaces/Administrator/new_test_folder', '_top');
       window.open(this.driveEditURL, '_top');
     });
   },
 
   get driveEditURL() {
-    // if (!this.blob) {
-    //   return '';
-    // }
+    if (!this.blob) {
+      return '';
+    }
 
-    const parts = this.document ? this.document.path.split('/nxfile/') : '';
+    const parts = this.blob.data.split('/nxfile/');
     const baseUrl = parts[0];
-    const uploadUrl = `nxfile/${parts[0]}`;
-
+    const downloadUrl = `nxfile/${parts[1]}`;
     const finalUrl = [
-      'nxdrive://transfer',
+      'nxdrive://edit',
       baseUrl.replace('://', '/'), // XXX replaceFirst
+      'user',
+      this.user.id,
+      'repo',
+      this.document.repository,
+      'nxdocid',
+      this.document.uid,
+      'filename',
+      encodeURIComponent(this.blob.name),
       'downloadUrl',
-      uploadUrl,
+      downloadUrl,
     ].join('/');
+    // console.log(finalUrl);
     return finalUrl;
   },
 });
