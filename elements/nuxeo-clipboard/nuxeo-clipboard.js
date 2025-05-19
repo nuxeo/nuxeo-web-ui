@@ -166,7 +166,7 @@ Polymer({
                   icon="nuxeo:remove"
                   alt="Remove"
                   on-tap="_remove"
-                  on-keydown="_remove"
+                  on-keydown="_removeKeydown"
                   tabindex="0"
                 ></iron-icon>
               </div>
@@ -329,5 +329,15 @@ Polymer({
 
   _handleKeyNav(e) {
     handleVerticalKeyNavigation(e, '.list-item');
+  },
+
+  _removeKeydown(evt) {
+    if (evt && evt.type === 'keydown') {
+      const { key } = evt;
+      if (key !== 'Enter' && key !== ' ' && key !== 'Spacebar') {
+        return;
+      }
+      this._remove(evt);
+    }
   },
 });
