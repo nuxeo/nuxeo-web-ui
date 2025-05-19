@@ -517,9 +517,10 @@ Polymer({
       this._reset();
       this.value = '';
     }
-    if (this.document && this.xpath) {
-      this._legacyDeleteFile(e);
-    }
+    // this is a legacy code to support the old API
+    // if (this.document && this.xpath) {
+    //   this._legacyDeleteFile(e);
+    // }
     // if this is not a required field, trigger validation so the error message is updated
     if (!this.required) {
       this.validate();
