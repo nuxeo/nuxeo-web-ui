@@ -35,6 +35,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbna
 import '../nuxeo-keys/nuxeo-keys.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { handleVerticalKeyNavigation } from '../common-utils.js';
 
 /**
  `nuxeo-collections`
@@ -237,7 +238,7 @@ Polymer({
             empty-label-when-filtered="[[i18n('collections.empty')]]"
           >
             <template>
-              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+              <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
                 <div class="collection-box">
                   <div class="collection-info horizontal layout center">
                     <iron-icon class="collection-name-icon" icon="nuxeo:collections"></iron-icon>
@@ -530,5 +531,9 @@ Polymer({
       this.$.membersList.fetch();
       this.displayCollections();
     }
+  },
+
+  _handleKeyNav(e) {
+    handleVerticalKeyNavigation(e, '.list-item');
   },
 });
