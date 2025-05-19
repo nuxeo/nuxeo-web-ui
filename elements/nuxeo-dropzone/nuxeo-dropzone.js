@@ -517,9 +517,10 @@ Polymer({
       this._reset();
       this.value = '';
     }
-    if (this.document && this.xpath) {
-      this._legacyDeleteFile(e);
-    }
+    // this is a legacy code to support the old API
+    // if (this.document && this.xpath) {
+    //   this._legacyDeleteFile(e);
+    // }
     // if this is not a required field, trigger validation so the error message is updated
     if (!this.required) {
       this.validate();
@@ -560,8 +561,14 @@ Polymer({
 
   _upload(files) {
     if (files && files.length > 0) {
-      Array.from(files).forEach((item) => this.uploadedFiles.push(item));
-      this.uploadFiles(files);
+      if (this.multiple) {
+        const allFiles = this.uploadedFiles.concat(Array.prototype.slice.call(files));
+        this.uploadedFiles = allFiles;
+        this.uploadFiles(allFiles);
+      } else {
+        this.uploadedFiles = Array.prototype.slice.call(files);
+        this.uploadFiles(files);
+      }
     }
   },
 
