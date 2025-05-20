@@ -235,9 +235,7 @@ const cleanupCatalog = () => {
 };
 
 // Build nuxeo catalog
-gulp.task('catalog', (cb) => {
-  gulp.series(cloneCatalog, checkoutCatalog, generateCatalog, cleanupCatalog, cb);
-});
+gulp.task('catalog', (cb) => gulp.series(cloneCatalog, checkoutCatalog, generateCatalog, cleanupCatalog)(cb));
 
 // Build hints for the HTML editor from catalog
 gulp.task('hints', () => {

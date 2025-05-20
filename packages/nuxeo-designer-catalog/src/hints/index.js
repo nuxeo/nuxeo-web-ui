@@ -80,8 +80,8 @@ module.exports = (catalog, base) =>
           // push the hints into a new stream
           this.push(
             new Vinyl({
-              cwd: '',
-              base: '',
+              cwd: process.cwd(),
+              base: process.cwd(),
               path: 'nuxeo-cm-hints-def.json',
               contents: Buffer.from(JSON.stringify(hints)),
             }),
