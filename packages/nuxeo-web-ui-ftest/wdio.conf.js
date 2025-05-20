@@ -39,7 +39,7 @@ const options = {};
 
 switch (capability.browserName) {
   case 'chrome':
-    options.args = ['--no-sandbox'];
+    options.args = ['--no-sandbox', '--guest'];
 
     if (process.env.HEADLESS) {
       options.args.push('--window-size=1920,1080');
