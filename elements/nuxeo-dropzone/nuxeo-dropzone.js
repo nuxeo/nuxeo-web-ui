@@ -513,9 +513,14 @@ Polymer({
     if (this.multiple && Array.isArray(this.value)) {
       this.value.splice(this.value.length - this.files.length + e.model.itemsIndex, 1);
       this.splice('files', e.model.itemsIndex, 1);
+      if (this.uploadedFiles) {
+        const fileToRemove = this.uploadedFiles[e.model.itemsIndex];
+        this.uploadedFiles = this.uploadedFiles.filter((file) => file !== fileToRemove);
+      }
     } else {
       this._reset();
       this.value = '';
+      this.uploadedFiles = [];
     }
     // this is a legacy code to support the old API
     // if (this.document && this.xpath) {
