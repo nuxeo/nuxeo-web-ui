@@ -30,7 +30,9 @@ When(/^I (\w+) the task for following actors:$/, async function(option, table) {
 });
 
 Then('I can see the list of tasks', async function() {
-  const task = await this.ui.drawer.tasks.waitForVisible();
+  const ui = await this.ui;
+  const drawer = await ui.drawer;
+  const task = await drawer.tasks.waitForVisible();
   task.should.be.true;
 });
 Then('I can see the View Tasks Dashboard link', async function() {
@@ -86,8 +88,11 @@ Then(/^I can see that "([^"]*)" belongs to (\w+) actors$/, async function(user, 
   result.should.be.true;
 });
 Then('I can see the my task list has {int} item(s)', async function(nb) {
-  await this.ui.drawer.tasks.waitForVisible();
-  const result = await this.ui.drawer.tasks.nbItems;
+  const ui = await this.ui;
+  const drawer = await ui.drawer;
+  await drawer.tasks.waitForVisible();
+
+  const result = await drawer.tasks.nbItems;
   if (result !== nb) {
     throw new Error(`Expected task count ${nb} but found ${result}`);
   }
