@@ -83,8 +83,11 @@ Polymer({
       }
       //  window.open(this.driveEditURL, '_top');
       // window.open('nxdrive://transfer/http/localhost:5000/nuxeo/user/Administrator/repo/default-domain/workspaces/ws1/transfer1', '_top');
-      //  window.open('nxdrive://transfer/http/localhost:5000/default-domain/UserWorkspaces/Administrator/new_test_folder', '_top');
-      window.open(this.driveEditURL, '_top');
+      window.open(
+        'nxdrive://transfer/http/localhost:5000/default-domain/UserWorkspaces/Administrator/new_test_folder',
+        '_top',
+      );
+      //  window.open(this.driveEditURL, '_top');
     });
   },
 
