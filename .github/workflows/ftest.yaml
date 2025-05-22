@@ -137,7 +137,7 @@ jobs:
           zip -r current-folder.zip .
 
       - name: Upload current folder artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: current-folder
           path: current-folder.zip
