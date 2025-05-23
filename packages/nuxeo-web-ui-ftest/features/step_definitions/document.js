@@ -331,10 +331,9 @@ Then(/^I can see a process is running in the document$/, async function() {
 
 Then(/^I can see a process is not running in the document$/, async function() {
   const documentPage = await this.ui.browser.documentPage();
-  // check info bar in the document is not visible
   const infoBar = await documentPage.infoBar;
-  const infoBarVisible = await infoBar.isVisible();
-  infoBarVisible.should.be.false;
+  const isVisible = await documentPage.isTrulyVisible(infoBar);
+  isVisible.should.be.false;
 });
 
 Then(/^I cannot start a workflow$/, async function() {
