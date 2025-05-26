@@ -13,7 +13,8 @@
     "workboxCli": "7.3.0"
   },
   "overrides": {
-    "ws": "8.17.1"
+    "ws": "8.17.1",
+    "tar-fs": "^3.0.9"
   },
   "devDependencies": {
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
