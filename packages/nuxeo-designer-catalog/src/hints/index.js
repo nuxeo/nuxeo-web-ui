@@ -18,7 +18,7 @@ limitations under the License.
 const fs = require('fs');
 const jsonStream = require('JSONStream');
 const through = require('through2');
-const gutil = require('gulp-util');
+const Vinyl = require('vinyl');
 const _ = require('lodash');
 const htmlGenerator = require('./generators/html-hint-generator');
 const polymerGenerator = require('./generators/polymer-hint-generator');
@@ -78,9 +78,9 @@ module.exports = (catalog, base) =>
         function flush(cb) {
           // push the hints into a new stream
           this.push(
-            new gutil.File({
-              cwd: '',
-              base: '',
+            new Vinyl({
+              cwd: process.cwd(),
+              base: process.cwd(),
               path: 'nuxeo-cm-hints-def.json',
               contents: Buffer.from(JSON.stringify(hints)),
             }),
