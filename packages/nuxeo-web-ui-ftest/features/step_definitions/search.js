@@ -107,7 +107,8 @@ When('I browse to the saved search', function() {
 });
 
 Then('I can see that my saved search "{word}" on "{word}" is selected', async function(savedSearchName, searchName) {
-  const searchForm = await this.ui.searchForm(searchName);
+  const ui = await this.ui;
+  const searchForm = await ui.searchForm(searchName);
   const menuButton = await searchForm.menuButton;
   await menuButton.waitForDisplayed();
   const savedSearch = await searchForm.getSavedSearch(savedSearchName);
