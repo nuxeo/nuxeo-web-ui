@@ -39,7 +39,7 @@ const options = {};
 
 switch (capability.browserName) {
   case 'chrome':
-    options.args = ['--no-sandbox', '--guest'];
+    options.args = ['--no-sandbox'];
 
     if (process.env.HEADLESS) {
       options.args.push('--window-size=1920,1080');
@@ -51,7 +51,14 @@ switch (capability.browserName) {
     if (process.env.BROWSER_BINARY) {
       options.binary = process.env.BROWSER_BINARY;
     }
-    capability['goog:chromeOptions'] = options;
+    capability['goog:chromeOptions'] = {
+      ...options,
+      prefs: {
+        profile: {
+          password_manager_leak_detection: false,
+        },
+      },
+    };
     break;
   case 'firefox':
     options.args = [
