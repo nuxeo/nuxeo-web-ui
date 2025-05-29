@@ -39,7 +39,9 @@ jobs:
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm install
+        run: |
+        npm cache clean --force
+        npm install
 
       - name: Unit tests
         env:
