@@ -51,7 +51,14 @@ switch (capability.browserName) {
     if (process.env.BROWSER_BINARY) {
       options.binary = process.env.BROWSER_BINARY;
     }
-    capability['goog:chromeOptions'] = options;
+    capability['goog:chromeOptions'] = {
+      ...options,
+      prefs: {
+        profile: {
+          password_manager_leak_detection: false,
+        },
+      },
+    };
     break;
   case 'firefox':
     options.args = [
