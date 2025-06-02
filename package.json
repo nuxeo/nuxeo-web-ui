@@ -111,7 +111,7 @@
     "@nuxeo/nuxeo-dataviz-elements": "~3.0.43-rc",
     "@nuxeo/nuxeo-elements": "~3.0.43-rc",
     "@nuxeo/nuxeo-ui-elements": "~3.0.43-rc",
-    "@nuxeo/page": "^1.11.4-nx.0",
+    "@nuxeo/page": "1.11.4-nx.1",
     "@polymer/app-layout": "^3.1.0",
     "@polymer/iron-a11y-announcer": "^3.2.0",
     "@polymer/iron-a11y-keys": "^3.0.1",
