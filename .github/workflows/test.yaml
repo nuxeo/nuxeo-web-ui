@@ -39,7 +39,7 @@ jobs:
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: 
+        run: |
           npm cache clean --force
           npm install
 
