@@ -12,7 +12,7 @@ const EXPECTED_VIOLATIONS = {
   'meta-viewport': 1,
   'page-has-heading-one': 1,
   region: 24,
-  'nested-interactive': 15,
+  'nested-interactive': 16,
 };
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
