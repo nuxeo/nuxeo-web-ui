@@ -8,7 +8,6 @@
 name: Veracode LTS-2025
 
 on:
-on:
   schedule:
     - cron: '0 19 1,15 * *'   # 7:00 PM UTC on 1st and 15th
   workflow_dispatch:          # enables manual runs from GitHub UI
