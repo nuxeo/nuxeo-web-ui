@@ -11,11 +11,14 @@ on:
   schedule:
     - cron: '30 17 1,15 * *'  # 5:00 PM UTC on 1st and 15th each month
   workflow_dispatch:          # enables manual runs from GitHub UI
+  pull_request:
+    branches:
+      - maintenance-3.1.x
 
 env:
   REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{'maintenance-3.1.x' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 permissions:
