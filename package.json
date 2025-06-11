@@ -14,8 +14,7 @@
   },
   "overrides": {
     "ws": "8.17.1",
-    "tar-fs": "^3.0.9",
-    "glob": "^11.0.2"
+    "tar-fs": "^3.0.9"
   },
   "devDependencies": {
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
@@ -192,7 +191,7 @@
     "three": "^0.177.0",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1",
-    "webdriverio": "^8.29.1"
+    "webdriverio": "^9.15.0"
   },
   "husky": {
     "hooks": {

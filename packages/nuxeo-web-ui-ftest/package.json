@@ -15,8 +15,7 @@
   },
   "overrides": {
     "ws": "8.17.1",
-    "tar-fs": "^3.0.9",
-    "glob": "^11.0.2"
+    "tar-fs": "^3.0.9"
   },
   "dependencies": {
     "@babel/core": "^7.15.0",
@@ -24,7 +23,7 @@
     "@babel/register": "^7.14.5",
     "@cucumber/tag-expressions": "^2.0.4",
     "@wdio/cli": "^8.16.11",
-    "@wdio/cucumber-framework": "^8.16.11",
+    "@wdio/cucumber-framework": "^9.15.0",
     "@wdio/local-runner": "^8.16.11",
     "@wdio/spec-reporter": "^8.16.9",
     "babel-plugin-transform-rename-import": "^2.3.0",
@@ -44,6 +43,6 @@
     "nuxeo": "^4.0.3",
     "wdio-chromedriver-service": "^8.1.1",
     "wdio-cucumberjs-json-reporter": "^5.2.1",
-    "webdriverio": "8.20.4"
+    "webdriverio": "^9.15.0"
   }
 }
