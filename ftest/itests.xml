@@ -26,6 +26,7 @@
     </condition>
     <exec executable="${cmd.npm}" dir="../" failonerror="true">
       <arg value="install" />
+      <arg value="--legacy-peer-deps" />
     </exec>
     <exec executable="${cmd.npm}" dir="../" failonerror="true">
       <env key="NUXEO_PACKAGES" value="nuxeo-csv"/>
