@@ -1,4 +1,4 @@
-import BasePage from '../base';
+import BasePage from '../base.js';
 
 export default class EditDoc extends BasePage {
   submit() {

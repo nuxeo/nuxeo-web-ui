@@ -1,3 +1,4 @@
 #!/usr/bin/env node
 
-require('../scripts/test');
+// eslint-disable-next-line no-unused-expressions
+import('../scripts/test.js');

@@ -26,13 +26,20 @@
  *            by default set to 0, which means don't bail, run all tests
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const chromeLauncher = require('chrome-launcher');
-const fetch = require('node-fetch');
-const cli = require('@wdio/cli');
-const argv = require('minimist')(process.argv.slice(2));
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import chromeLauncher from 'chrome-launcher';
+import fetch from 'node-fetch';
+import { fileURLToPath } from 'url';
+import minimist from 'minimist';
+// eslint-disable-next-line import/no-named-default
+const { Launcher: CliLauncher } = await import('@wdio/cli');
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const argv = minimist(process.argv.slice(2));
 
 const defaultDef = './features/step_definitions';
 
@@ -160,7 +167,7 @@ try {
 }
 
 done.finally(() => {
-  const wdio = new cli.Launcher(args[0]);
+  const wdio = new CliLauncher(args[0]);
   wdio.run().then(
     (code) => {
       process.exit(code);

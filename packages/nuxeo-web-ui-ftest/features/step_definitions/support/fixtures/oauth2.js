@@ -3,8 +3,8 @@
  */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { After } from '@cucumber/cucumber';
-import nuxeo from '../services/client';
-import '../services/date';
+import nuxeo from '../services/client.js';
+import '../services/date.js';
 
 global.oauth2Tokens = {};
 const oauth2TokensDir = nuxeo.directory('oauth2Tokens');

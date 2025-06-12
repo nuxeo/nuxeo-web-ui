@@ -1,9 +1,9 @@
-import BasePage from '../base';
-import Clipboard from './clipboard';
-import Collections from './collections';
-import Favorites from './favorites';
-import Recents from './recents';
-import Tasks from './tasks';
+import BasePage from '../base.js';
+import Clipboard from './clipboard.js';
+import Collections from './collections.js';
+import Favorites from './favorites.js';
+import Recents from './recents.js';
+import Tasks from './tasks.js';
 
 export default class Drawer extends BasePage {
   get menu() {

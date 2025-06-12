@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { After, Before } from '@cucumber/cucumber';
-import documentService from '../services/documentService';
+import documentService from '../services/documentService.js';
 
 fixtures.documents = documentService;
 
