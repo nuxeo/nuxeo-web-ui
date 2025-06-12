@@ -14,19 +14,17 @@ const BUNDLES = (process.env.NUXEO_PACKAGES || '')
 
 const SOURCES = [...BUNDLES.map((b) => `addons/${b}/i18n`), 'node_modules/@nuxeo/nuxeo-ui-elements/i18n'];
 
-(async () => {
-  const files = await glob.glob('i18n/messages*.json');
-  files.forEach((file) => {
-    const messages = require(`${CWD}/${file}`);
-    const filename = path.basename(file);
+const files = glob.sync('i18n/messages*.json');
+files.forEach((file) => {
+  const messages = require(`${CWD}/${file}`);
+  const filename = path.basename(file);
 
-    SOURCES.forEach((s) => {
-      const p = `${CWD}/${s}/${filename}`;
-      if (existsSync(p)) {
-        Object.assign(messages, require(p));
-      }
-    });
-
-    writeFileSync(`${DEST}/${filename}`, JSON.stringify(messages, null, 2));
+  SOURCES.forEach((s) => {
+    const p = `${CWD}/${s}/${filename}`;
+    if (existsSync(p)) {
+      Object.assign(messages, require(p));
+    }
   });
-})();
+
+  writeFileSync(`${DEST}/${filename}`, JSON.stringify(messages, null, 2));
+});
