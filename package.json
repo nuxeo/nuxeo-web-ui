@@ -23,7 +23,6 @@
     "@open-wc/karma-esm": "^4.0.0",
     "@open-wc/prettier-config": "^0.1.0",
     "@open-wc/webpack-import-meta-loader": "^0.2.1",
-    "@wdio/cli": "^9.12.2",
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "babel-plugin-transform-rename-import": "^2.3.0",
     "chai": "^4.2.0",
