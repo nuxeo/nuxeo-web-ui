@@ -23,7 +23,6 @@
     <delete dir="node_modules" failonerror="true" />
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
-      <arg value="--legacy-peer-deps" />
     </exec>
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="start" />

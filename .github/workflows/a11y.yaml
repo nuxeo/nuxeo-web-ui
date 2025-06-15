@@ -48,12 +48,12 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm cache clean --force
-          npm install --legacy-peer-deps
+          npm install 
           pushd packages/nuxeo-web-ui-ftest
-          npm install --legacy-peer-deps
+          npm install 
           popd
           pushd packages/nuxeo-designer-catalog
-          npm install --legacy-peer-deps
+          npm install 
           popd
 
       - uses: actions/setup-java@v2

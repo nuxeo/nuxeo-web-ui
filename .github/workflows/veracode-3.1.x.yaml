@@ -63,9 +63,9 @@ jobs:
       env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       run: |
-          npm install --legacy-peer-deps
+          npm install 
           pushd packages/nuxeo-web-ui-ftest
-          npm install --legacy-peer-deps
+          npm install 
           popd
     - name: Checkout the nuxeo-elements repo
       uses: actions/checkout@v2
@@ -106,10 +106,10 @@ jobs:
 
     - name: Link elements to Web UI
       run: |
-          npm install --legacy-peer-deps --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
-          npm install --legacy-peer-deps --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
-          npm install --legacy-peer-deps --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --legacy-peer-deps --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+          npm install  --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+          npm install  --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
+          npm install  --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
+          npm install  --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
     - name: 'Update settings.xml with server configuration'
       run: |
           echo '<settings>
