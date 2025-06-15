@@ -69,6 +69,10 @@ jobs:
           npm cache clean -f
           npm install 
           popd
+          echo "--------------------------------------"
+          npm list inflight
+          echo "--------------------------------------"
+
     - name: Checkout the nuxeo-elements repo
       uses: actions/checkout@v2
       with:
