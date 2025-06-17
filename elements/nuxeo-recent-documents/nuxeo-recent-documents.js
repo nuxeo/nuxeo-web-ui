@@ -25,6 +25,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbna
 import '../nuxeo-document-storage/nuxeo-document-storage.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { handleVerticalKeyNavigation } from '../common-utils.js';
 
 /**
 `nuxeo-recent-documents`
@@ -93,7 +94,7 @@ Polymer({
         empty-label-when-filtered="[[i18n('recentDocuments.empty')]]"
       >
         <template>
-          <div tabindex="0" class$="[[_computedClass(selected)]]">
+          <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
             <div class="list-item-info">
               <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
               <div class="list-item-title">
@@ -190,5 +191,9 @@ Polymer({
     } else {
       this.add(doc);
     }
+  },
+
+  _handleKeyNav(e) {
+    handleVerticalKeyNavigation(e, '.list-item');
   },
 });

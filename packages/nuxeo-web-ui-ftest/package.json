@@ -1,7 +1,7 @@
 {
   "name": "@nuxeo/nuxeo-web-ui-ftest",
-  "version": "3.1.19-SNAPSHOT",
   "type": "module",
+  "version": "3.1.20-SNAPSHOT",
   "bin": {
     "nuxeo-web-ui-ftest": "./bin/nuxeo-web-ui-ftest.js"
   },
@@ -15,7 +15,8 @@
     "node": ">=18.0.0"
   },
   "overrides": {
-    "ws": "8.17.1"
+    "ws": "8.17.1",
+    "tar-fs": "^3.0.9"
   },
   "dependencies": {
     "@babel/core": "^7.15.0",

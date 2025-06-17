@@ -29,6 +29,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { handleVerticalKeyNavigation } from '../common-utils.js';
 
 /**
 `nuxeo-favorites`
@@ -143,7 +144,7 @@ Polymer({
         empty-label-when-filtered="[[i18n('favorites.empty')]]"
       >
         <template>
-          <div tabindex="0" class$="[[_computedClass(selected)]]">
+          <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
             <div class="list-item-box">
               <div class="list-item-info">
                 <div class="list-item-thumbnail">
@@ -245,5 +246,9 @@ Polymer({
     this.$.removeFromFavOp.execute().then(() => {
       this.fire('removed-from-favorites', { docUid });
     });
+  },
+
+  _handleKeyNav(e) {
+    handleVerticalKeyNavigation(e, '.list-item');
   },
 });

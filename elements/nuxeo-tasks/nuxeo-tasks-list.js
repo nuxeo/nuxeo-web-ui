@@ -24,6 +24,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-list/nuxeo-data-list.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { handleVerticalKeyNavigation } from '../common-utils.js';
 
 /**
 `nuxeo-tasks-list`
@@ -113,7 +114,7 @@ Polymer({
       select-on-tap
     >
       <template>
-        <div tabindex="0" class$="[[_computedClass(selected)]]">
+        <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
           <div class="task-box">
             <div class="horizontal layout center">
               <span class="task-name">[[i18n(task.name)]]</span>
@@ -226,5 +227,9 @@ Polymer({
       return this.$.list._fetchRange(offset, offset + pageSize, false);
     }
     return this.$.list.fetch();
+  },
+
+  _handleKeyNav(e) {
+    handleVerticalKeyNavigation(e, '.list-item');
   },
 });
