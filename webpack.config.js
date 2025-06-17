@@ -121,6 +121,9 @@ const common = merge([
         util: false,
         vm: require.resolve('vm-browserify'),
       },
+      alias: {
+        'marked/lib/marked.js': require.resolve('marked/lib/marked.esm.js'),
+      },
     },
     output: {
       filename: '[name].bundle.js',
