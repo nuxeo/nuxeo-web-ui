@@ -13,6 +13,9 @@
     "postinstall": "check-engine --ignore",
     "clean-data": "find data/applications/nuxeo/**/ ! -name 'catalog-packages.json' -delete"
   },
+  "overrides": {
+    "glob": "^11.0.2"
+  },
   "dependencies": {
     "async": "^3.2.3",
     "async-each": "^1.0.3",
