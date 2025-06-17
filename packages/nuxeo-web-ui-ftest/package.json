@@ -16,7 +16,8 @@
   },
   "overrides": {
     "ws": "8.17.1",
-    "tar-fs": "^3.0.9"
+    "tar-fs": "^3.0.9",
+    "glob": "^11.0.2"
   },
   "dependencies": {
     "@babel/core": "^7.15.0",
