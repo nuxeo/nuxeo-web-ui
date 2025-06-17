@@ -40,7 +40,7 @@ const OAUTH2_CONSUMERS_BASE_PATH = '/oauth2/client/';
  *
  * @memberof Nuxeo
  */
-// testing 
+// testing the `nuxeo-cloud-consumers` element
 class CloudConsumers extends mixinBehaviors([NotifyBehavior, FormatBehavior], Nuxeo.Element) {
   static get template() {
     return html`
