@@ -12,7 +12,7 @@ const setupRTLSupport = () => {
   window.nuxeo.I18n.direction = isRTL ? 'rtl' : 'ltr';
   document.documentElement.dir = window.nuxeo.I18n.direction;
 };
-
+// testing
 // To fix WEBUI-833 and to disable the Roboto font request
 const disableRobotoFont = () => {
   window.polymerSkipLoadingFontRoboto = true;
