@@ -12,10 +12,13 @@
   "config": {
     "workboxCli": "7.3.0"
   },
+  "resolutions": {
+    "inflight": "file:./inflight-fix"
+  },
   "overrides": {
     "ws": "8.17.1",
     "tar-fs": "^3.0.9",
-    "inflight": "npm:@isaacs/inflight@^1.0.0"
+    "inflight": "file:./inflight-fix"
   },
   "devDependencies": {
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
