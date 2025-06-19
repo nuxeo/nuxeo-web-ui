@@ -14,7 +14,8 @@
   },
   "overrides": {
     "ws": "8.17.1",
-    "tar-fs": "^3.0.9"
+    "tar-fs": "^3.0.9",
+    "glob": "^9.0.0"
   },
   "devDependencies": {
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
