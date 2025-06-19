@@ -1,6 +1,6 @@
-const path = require('path');
-const { mkdirSync, existsSync, writeFileSync } = require('fs');
-const glob = require('glob');
+import path from 'path';
+import { mkdirSync, existsSync, writeFileSync } from 'fs';
+import { glob } from 'glob';
 
 const DEST = '.tmp/i18n';
 const CWD = process.cwd();
@@ -14,7 +14,8 @@ const BUNDLES = (process.env.NUXEO_PACKAGES || '')
 
 const SOURCES = [...BUNDLES.map((b) => `addons/${b}/i18n`), 'node_modules/@nuxeo/nuxeo-ui-elements/i18n'];
 
-glob('i18n/messages*.json', (_, files) =>
+(async () => {
+  const files = await glob('i18n/messages*.json');
   files.forEach((file) => {
     const messages = require(`${CWD}/${file}`);
     const filename = path.basename(file);
@@ -27,5 +28,5 @@ glob('i18n/messages*.json', (_, files) =>
     });
 
     writeFileSync(`${DEST}/${filename}`, JSON.stringify(messages, null, 2));
-  }),
-);
+  });
+})();
