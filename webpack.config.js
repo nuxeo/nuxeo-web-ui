@@ -118,8 +118,11 @@ const common = merge([
       modules: [resolve(__dirname, 'node_modules')],
       // resolve some required node modules
       fallback: {
-        util: false,
+        util: require.resolve('util/'),
+        inherits: require.resolve('inherits'),
         vm: require.resolve('vm-browserify'),
+        stream: require.resolve('stream-browserify'),
+        assert: require.resolve('assert/'),
       },
     },
     output: {
@@ -166,7 +169,7 @@ const common = merge([
       new ProvidePlugin({
         THREE: 'three',
         jQuery: 'jquery',
-        process: 'process',
+        process: 'process/browser',
       }),
       new HtmlWebpackPlugin({
         title: 'Nuxeo',
