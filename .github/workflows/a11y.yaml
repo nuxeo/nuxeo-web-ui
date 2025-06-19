@@ -73,6 +73,9 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
+      - name: Npm list marked
+        run: npm list marked
+
       - name: Web UI build
         run: mvn -B -ntp install
 
