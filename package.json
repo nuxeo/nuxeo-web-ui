@@ -79,7 +79,7 @@
     "start:build": "http-server dist -p 5000 -P http://localhost:8080 -o",
     "prebuild": "npm-run-all prepare:*",
     "prepare:tmp": "rm -rf .tmp",
-    "prepare:i18n": "node scripts/merge-messages.js",
+    "prepare:i18n": "node scripts/merge-messages.mjs",
     "prepare:workbox": "workbox copyLibraries .tmp && mv .tmp/workbox-v${npm_package_config_workboxCli} .tmp/workbox",
     "build": "webpack --env production",
     "postbuild": "npm-run-all fix:*",
