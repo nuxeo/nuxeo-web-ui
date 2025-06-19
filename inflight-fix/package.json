@@ -1,8 +1,0 @@
-{
-  "name": "inflight-fix",
-  "version": "1.0.6",
-  "main": "index.js",
-  "description": "Safe replacement for inflight package without memory leaks",
-  "keywords": ["inflight", "security", "fix"],
-  "license": "ISC"
-}

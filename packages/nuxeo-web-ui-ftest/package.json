@@ -13,13 +13,9 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "resolutions": {
-    "inflight": "file:../../inflight-fix"
-  },
   "overrides": {
     "ws": "8.17.1",
-    "tar-fs": "^3.0.9",
-    "inflight": "file:../../inflight-fix"
+    "tar-fs": "^3.0.9"
   },
   "dependencies": {
     "@babel/core": "^7.15.0",

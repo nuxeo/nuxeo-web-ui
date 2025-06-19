@@ -122,6 +122,9 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
+    - name: 'list inflight using modules'
+      run : npm ls inflight
+    
     - name: Delete Node Modules
       run: |
         rm -rf node_modules
