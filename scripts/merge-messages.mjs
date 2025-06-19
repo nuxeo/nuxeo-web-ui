@@ -16,8 +16,8 @@ const SOURCES = [...BUNDLES.map((b) => `addons/${b}/i18n`), 'node_modules/@nuxeo
 
 (async () => {
   const files = await glob('i18n/messages*.json');
-  files.forEach((file) => {
-    const messages = require(`${CWD}/${file}`);
+  files.forEach(async (file) => {
+    const messages = await import(`${CWD}/${file}`, { assert: { type: "json" } });
     const filename = path.basename(file);
 
     SOURCES.forEach((s) => {
