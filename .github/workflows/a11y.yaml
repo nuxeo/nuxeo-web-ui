@@ -77,7 +77,7 @@ jobs:
         run: npm list marked
 
       - name: Web UI build
-        run: mvn -B -ntp install
+        run: mvn -B -ntp install -DskipInstall
 
       - name: A11y checks
         run: mvn -B -ntp -f plugin/a11y install
