@@ -50,9 +50,11 @@ jobs:
           npm cache clean --force
           npm install
           pushd packages/nuxeo-web-ui-ftest
+          npm cache clean --force
           npm install
           popd
           pushd packages/nuxeo-designer-catalog
+          npm cache clean --force
           npm install
           popd
 

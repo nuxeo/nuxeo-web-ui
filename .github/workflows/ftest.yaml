@@ -62,9 +62,11 @@ jobs:
           npm cache clean --force
           npm install
           pushd packages/nuxeo-web-ui-ftest
+          npm cache clean --force
           npm install
           popd
           pushd packages/nuxeo-designer-catalog
+          npm cache clean --force
           npm install
           popd
 
@@ -110,6 +112,7 @@ jobs:
 
       - name: Link elements to Web UI
         run: |
+          npm cache clean --force
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
