@@ -10,9 +10,6 @@
     "test:dev": "NUXEO_WEB_UI_URL=http://localhost:5000/ NUXEO_URL=http://localhost:8080/nuxeo/ wdio wdio.conf.js"
   },
   "license": "Apache-2.0",
-  "overrides": {
-    "marked": "^4.0.17"
-  },
   "dependencies": {
     "@babel/core": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
