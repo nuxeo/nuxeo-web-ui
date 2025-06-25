@@ -157,9 +157,6 @@ import '@nuxeo/chart-elements/chart-bar.js';
 import '@nuxeo/chart-elements/chart-line.js';
 import '@nuxeo/chart-elements/chart-pie.js';
 
-// Marked element-->
-import '@polymer/marked-element/marked-element.js';
-
 // Document layout elements -->
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-layout.js';
 import './document/nuxeo-document-form-layout.js';
