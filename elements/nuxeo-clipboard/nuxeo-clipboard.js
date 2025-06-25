@@ -108,7 +108,7 @@ Polymer({
       .remove {
         padding: 0;
         width: 1.5em;
-        height: 1.5em;
+        height: 1.4em;
       }
 
       .toolbar {
