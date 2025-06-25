@@ -156,6 +156,29 @@ export default class {
       return element.waitForDisplayed({ timeout, reverse });
     });
 
+    browser.addCommand(
+      'waitForShadowDeep',
+      async function (selectorChain, timeout = 5000) {
+        let current = await $(selectorChain[0]);
+
+        for (let i = 1; i < selectorChain.length; i++) {
+          await browser.waitUntil(async () => {
+            try {
+              current = await current.shadow$(selectorChain[i]);
+              return await current.isExisting();
+            } catch (e) {
+              return false;
+            }
+          }, {
+            timeout,
+            timeoutMsg: `Failed to find ${selectorChain[i]} in shadow DOM`
+          });
+        }
+
+        return current;
+      }
+    );
+
     // Add commands to the element scope.
     browser.addCommand(
       'element',
