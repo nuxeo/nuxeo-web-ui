@@ -11,32 +11,33 @@ export default class DocumentPage extends BasePage {
   }
   
 
-  // get view() {
-  //   return (async () => new DocumentView(`${this._selector} nuxeo-document-view div#container`, this.docType))();
-  // }
-
   get view() {
-    // console.log('Selector:', this._selector);
-
     return (async () => {
-      const selectorChain = [];
+      // Case 1: Use selector chain only for 'nuxeo-document-page'
+      if (this._selector === 'nuxeo-document-page') {
+        const selectorChain = [
+          'nuxeo-document-view',
+          'nuxeo-document-layout',
+          'nuxeo-layout',
+          'div#container',
+        ];
 
-      if (this._selector !== 'nuxeo-document-page') {
-        selectorChain.push(this._selector); // add only if not already scoped inside
+        console.log('Using shadow DOM selector chain:', selectorChain);
+
+        const container = await browser.waitForShadowDeep(selectorChain);
+        return new DocumentView(container, this.docType);
       }
 
-      selectorChain.push(
-        'nuxeo-document-view',
-        'nuxeo-document-layout',
-        'nuxeo-layout',
-        'div#container',
-      );
+      // Case 2: For any other selector, just use flat selector string
+      const flatSelector = `${this._selector} nuxeo-document-view div#container`;
+      console.log('Using flat selector:', flatSelector);
 
-
-      const container = await browser.waitForShadowDeep(selectorChain);
+      const container = await browser.$(flatSelector);
+      await container.waitForDisplayed();
       return new DocumentView(container, this.docType);
     })();
-  }
+}
+
 
   
 
