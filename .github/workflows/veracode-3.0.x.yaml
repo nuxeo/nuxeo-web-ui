@@ -9,7 +9,8 @@ name: Veracode Maintenance 3.0.x
 
 on:
   schedule:
-    - cron: '30 14 * * *'   # 14:30 UTC = 8:00 PM IST
+    - cron: '0 18 1,15 * *'  # 6:00 PM UTC on 1st and 15th
+  workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:
   REFERENCE_BRANCH: maintenance-3.0.x
@@ -51,9 +52,9 @@ jobs:
       id: pick_nuxeo_elements_branch
       run: |
           if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
+            echo "branch=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
+            echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
           fi
     - name: Install Web UI
       env:

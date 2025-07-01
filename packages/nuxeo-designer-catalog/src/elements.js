@@ -17,7 +17,7 @@ limitations under the License.
 */
 const path = require('path');
 const fs = require('fs-extra');
-const gutil = require('gulp-util');
+const log = require('fancy-log');
 
 const _ = require('lodash');
 const async = require('async');
@@ -36,7 +36,7 @@ function _parseElements(pkg, sourcePaths, packageDependencies, pkgManagement, de
       elements = elements.filter((el) => filtered.indexOf(el.is) !== -1);
     }
 
-    gutil.log(`Generated catalog with ${elements.length} elements.`);
+    log(`Generated catalog with ${elements.length} elements.`);
 
     async.map(
       elements,
@@ -50,7 +50,7 @@ function _parseElements(pkg, sourcePaths, packageDependencies, pkgManagement, de
           out.behaviors = packageData.behaviors.filter((behavior) => element.behaviors.indexOf(behavior.is) !== -1);
         }
 
-        gutil.log(`- ${elementName}`);
+        log(`- ${elementName}`);
 
         fs.writeFileSync(path.join(destDir, 'data', 'docs', `${elementName}.json`), JSON.stringify(out));
 

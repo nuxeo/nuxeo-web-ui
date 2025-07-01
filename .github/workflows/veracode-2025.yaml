@@ -9,7 +9,8 @@ name: Veracode LTS-2025
 
 on:
   schedule:
-    - cron: '30 15 * * *' # 9:00 PM IST
+    - cron: '0 19 1,15 * *'   # 7:00 PM UTC on 1st and 15th
+  workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:
   REFERENCE_BRANCH: lts-2025
@@ -50,9 +51,9 @@ jobs:
         id: pick_nuxeo_elements_branch
         run: |
           if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
+            echo "branch=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
+            echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
           fi
       - name: Install Web UI
         env:
