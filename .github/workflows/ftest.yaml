@@ -50,9 +50,9 @@ jobs:
         id: pick_nuxeo_elements_branch
         run: |
           if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo ::set-output name=branch::${{ env.BRANCH_NAME }}
+            echo "branch=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=branch::${{ env.REFERENCE_BRANCH }}
+            echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Install Web UI
