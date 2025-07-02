@@ -108,7 +108,6 @@ Polymer({
       'downloadUrl',
       downloadUrl,
     ].join('/');
-    // console.log(finalUrl);
     return finalUrl;
   },
 });
