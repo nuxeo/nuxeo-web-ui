@@ -83,7 +83,7 @@ Polymer({
       }
       // window.open(this.driveEditURL, '_top');
       window.open(
-        'nxdrive://transfer/http/localhost:8080/nuxeo/default-domain/workspaces/workspace1/folder1/upload-folder',
+        'nxdrive://direct-transfer/http/localhost:8080/nuxeo/default-domain/workspaces/workspace1/folder1/upload-folder',
         '_top',
       );
     });
