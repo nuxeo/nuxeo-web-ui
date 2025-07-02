@@ -12,7 +12,8 @@ const log = require('webpack-log')({ name: 'WEBUI' });
 // read .env file and assign to process.env
 require('dotenv').config();
 
-const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
+// const ENV = process.argv.find((arg) => arg.includes('production')) ? 'production' : 'development';
+const ENV = 'development';
 
 // we can copy things to 'src' in dev mode since if uses a mem fs
 const TARGET = ENV === 'production' ? resolve('dist') : resolve('.');
@@ -183,7 +184,7 @@ const common = merge([
 
 const development = merge([
   {
-    devtool: 'cheap-module-source-map',
+    devtool: 'source-map',
     plugins: [new CopyWebpackPlugin({ patterns: [...tmp, ...polyfills, ...addons, ...thirdparty] })],
     devServer: {
       static: {
