@@ -81,37 +81,26 @@ Polymer({
         this.$.dialog.toggle();
         return;
       }
-      // window.open(this.driveEditURL, '_top');
-      window.open(
-        'nxdrive://direct-transfer/http/localhost:8080/nuxeo/default-domain/workspaces/workspace1/folder1/upload-folder',
-        '_top',
-      );
+      window.open(this.directTransferUrl, '_top');
+      // window.open(
+      //   'nxdrive://direct-transfer/http/localhost:8080/nuxeo/default-domain/workspaces/workspace1/folder1/upload-folder',
+      //   '_top',
+      // );
     });
   },
 
-  get driveEditURL() {
-    if (!this.blob) {
-      return '';
-    }
-
-    const parts = this.blob.data.split('/nxfile/');
+  get directTransferUrl() {
+    const parts = this.blob.data.split('/ui/');
     const baseUrl = parts[0];
-    const downloadUrl = `nxfile/${parts[1]}`;
     const finalUrl = [
-      'nxdrive://edit',
-      baseUrl.replace('://', '/'), // XXX replaceFirst
+      'nxdrive://direct-transfer',
+      baseUrl.replace('://', '/'), 
       'user',
       this.user.id,
-      'repo',
-      this.document.repository,
-      'nxdocid',
-      this.document.uid,
-      'filename',
-      encodeURIComponent(this.blob.name),
-      'downloadUrl',
-      downloadUrl,
+      this.document.path
     ].join('/');
-    // console.log(finalUrl);
+    console.log(finalUrl);
     return finalUrl;
+    
   },
 });
