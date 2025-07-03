@@ -90,8 +90,9 @@ Polymer({
   },
 
   get directTransferUrl() {
-    const parts = this.blob.data.split('/ui/');
-    const baseUrl = parts[0];
+    // const parts = this.blob.data.split('/ui/');
+    // const baseUrl = parts[0];
+    const baseUrl = 'http://localhost:8080/nuxeo';
     const finalUrl = [
       'nxdrive://direct-transfer',
       baseUrl.replace('://', '/'),
