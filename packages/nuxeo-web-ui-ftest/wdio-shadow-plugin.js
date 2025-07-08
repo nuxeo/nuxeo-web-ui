@@ -124,7 +124,7 @@ const shadowElement = (selector, multiple, baseElement, filterBy) =>
   browser.execute(findDeep, selector, multiple === true, baseElement, filterBy);
 
 // export init function for initialization
-module.exports = class {
+export default class {
   static get name() {
     return 'ShadowDOM';
   }
