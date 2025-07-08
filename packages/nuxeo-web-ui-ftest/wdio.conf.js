@@ -1,9 +1,13 @@
-const path = require('path');
-const chai = require('chai');
-const htmlReporter = require('multiple-cucumber-html-reporter');
+import { fileURLToPath } from 'url';
+import path from 'path';
+import chai from 'chai';
 
-const CompatService = require('./wdio-compat-plugin');
-const ShadowService = require('./wdio-shadow-plugin');
+import htmlReporter from 'multiple-cucumber-html-reporter';
+import CompatService from './wdio-compat-plugin.js';
+import ShadowService from './wdio-shadow-plugin.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const cucumberRequires = [path.join(__dirname, 'features/step_definitions/**/*.js')];
 if (process.env.CUCUMBER_REQUIRES) {
@@ -27,7 +31,8 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
-  browserVersion: '132.0.6834.159',
+  browserVersion: '135.0.7049.114',
+  'wdio:enforceWebDriverClassic': true,
 };
 
 const options = {};
@@ -35,7 +40,6 @@ const options = {};
 switch (capability.browserName) {
   case 'chrome':
     options.args = ['--no-sandbox'];
-    options.w3c = false;
 
     if (process.env.HEADLESS) {
       options.args.push('--window-size=1920,1080');
@@ -47,7 +51,14 @@ switch (capability.browserName) {
     if (process.env.BROWSER_BINARY) {
       options.binary = process.env.BROWSER_BINARY;
     }
-    capability['goog:chromeOptions'] = options;
+    capability['goog:chromeOptions'] = {
+      ...options,
+      prefs: {
+        profile: {
+          password_manager_leak_detection: false,
+        },
+      },
+    };
     break;
   case 'firefox':
     options.args = [
@@ -77,22 +88,24 @@ if (process.env.DRIVER_VERSION) {
 }
 
 // transform nuxeo-web-ui-ftest requires
-require('@babel/register')({
-  presets: [
-    [
-      '@babel/env',
-      {
-        targets: {
-          node: 'current',
+import('@babel/register').then(({ default: register }) => {
+  register({
+    presets: [
+      [
+        '@babel/env',
+        {
+          targets: {
+            node: 'current',
+          },
         },
-      },
+      ],
     ],
-  ],
-  ignore: [/node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/],
-  plugins: [['transform-rename-import', { original: '^cucumber$', replacement: '@cucumber/cucumber' }]],
+    ignore: [/node_modules\/(?!@nuxeo\/nuxeo-web-ui-ftest)/],
+    plugins: [['transform-rename-import', { original: '^cucumber$', replacement: '@cucumber/cucumber' }]],
+  });
 });
 
-exports.config = {
+export const config = {
   //
   // ====================
   // Runner Configuration

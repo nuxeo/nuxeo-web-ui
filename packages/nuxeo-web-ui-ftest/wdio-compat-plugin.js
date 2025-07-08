@@ -1,4 +1,4 @@
-module.exports = class {
+export default class {
   static get name() {
     return 'CompatV4';
   }
@@ -97,7 +97,6 @@ module.exports = class {
     browser.addCommand('screenshot', async function() {
       return this.takeScreenshot();
     });
-
     browser.addCommand('scroll', async function() {
       return this.scrollIntoView();
     });
@@ -156,6 +155,30 @@ module.exports = class {
       const element = await this.$(selector);
       return element.waitForDisplayed({ timeout, reverse });
     });
+
+    browser.addCommand(
+      'waitForShadowDeep',
+      async function (selectorChain, timeout = 5000) {
+        let current = await $(selectorChain[0]);
+        // eslint-disable-next-line no-await-in-loop
+        for (let i = 1; i < selectorChain.length; i++) {
+          // eslint-disable-next-line no-await-in-loop
+          await browser.waitUntil(async () => {
+            try {
+              current = await current.shadow$(selectorChain[i]);
+              return await current.isExisting();
+            } catch (e) {
+              return false;
+            }
+          }, {
+            timeout,
+            timeoutMsg: `Failed to find ${selectorChain[i]} in shadow DOM`,
+          });
+        }
+
+        return current;
+      },
+    );
 
     // Add commands to the element scope.
     browser.addCommand(
@@ -259,7 +282,6 @@ module.exports = class {
       },
       true,
     );
-
     // overwrite element comands that previously took a selector as optional argument
     ['getText', 'click'].forEach((name) => {
       browser.overwriteCommand(
