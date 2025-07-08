@@ -333,8 +333,8 @@ Then(/^I can see a process is not running in the document$/, async function() {
   const documentPage = await this.ui.browser.documentPage();
   // check info bar in the document is not visible
   const infoBar = await documentPage.infoBar;
-  const infoBarVisible = await infoBar.isVisible();
-  infoBarVisible.should.be.false;
+  const isVisible = await documentPage.isTrulyVisible(infoBar);
+  isVisible.should.be.false;
 });
 
 Then(/^I cannot start a workflow$/, async function() {
@@ -346,12 +346,21 @@ Then(/^I cannot start a workflow$/, async function() {
 Then(/^I can abandon the workflow$/, async function() {
   const documentPage = await this.ui.browser.documentPage();
   const abandonWorkflowButton = await documentPage.abandonWorkflowButton;
-  await abandonWorkflowButton.waitForVisible();
+  await abandonWorkflowButton.waitForDisplayed();
   await abandonWorkflowButton.click();
   await driver.alertAccept();
   // check info bar in the document is not visible
   const infoBar = await documentPage.infoBar;
-  await infoBar.waitForVisible(browser.options.waitforTimeout, true);
+  await browser.waitUntil(
+    async () => {
+      const isVisible = await documentPage.isTrulyVisible(infoBar);
+      return !isVisible; // we want to wait until it is NOT visible
+    },
+    {
+      timeout: browser.options.waitforTimeout,
+      timeoutMsg: 'Expected infoBar to disappear but it is still visible',
+    },
+  );
   // assert that info bar displays a task is running
   const taskInfo = await documentPage.taskInfo;
   await taskInfo.waitForVisible(browser.options.waitforTimeout, true);

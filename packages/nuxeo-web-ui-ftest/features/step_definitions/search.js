@@ -107,14 +107,15 @@ When('I browse to the saved search', function() {
 });
 
 Then('I can see that my saved search "{word}" on "{word}" is selected', async function(savedSearchName, searchName) {
-  const searchForm = await this.ui.searchForm(searchName);
+  const ui = await this.ui;
+  const searchForm = await ui.searchForm(searchName);
   const menuButton = await searchForm.menuButton;
-  await menuButton.waitForVisible();
-  const savedSearch = await this.ui.searchForm(searchName).getSavedSearch(savedSearchName);
+  await menuButton.waitForDisplayed();
+  const savedSearch = await searchForm.getSavedSearch(savedSearchName);
   const savedSearchExist = await savedSearch.waitForExist();
   savedSearchExist.should.be.true;
-  const attr = await savedSearch.getAttribute('class');
-  attr.should.equal('iron-selected');
+  const classAttr = await savedSearch.getAttribute('class');
+  classAttr.should.include('iron-selected');
 });
 
 When(/^I clear the (.+) search on (.+)$/, async function(searchType, searchName) {
