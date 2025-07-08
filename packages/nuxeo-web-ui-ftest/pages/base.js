@@ -7,6 +7,12 @@ export default class BasePage {
     return $(this._selector);
   }
 
+  async isTrulyVisible(elem) {
+    const isDisplayed = await elem.isDisplayed();
+    const size = await elem.getSize();
+    return isDisplayed && size.width > 0 && size.height > 0;
+  }
+
   click(...args) {
     return this.el.click(...args);
   }
