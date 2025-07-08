@@ -58,7 +58,7 @@ export default class Search extends Results {
     const selector = await this._selector;
     const els = await driver.elements(`${selector} #actionsDropdown paper-item`);
     if (els.length > 1) {
-      return els[1];
+      return $(els[1]);
     }
     const ele = await this.el;
     const dropdownList = await ele.elements('#actionsDropdown paper-item');
