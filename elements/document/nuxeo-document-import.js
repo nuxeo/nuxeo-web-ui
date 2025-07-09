@@ -1131,7 +1131,6 @@ Polymer({
   },
 
   _cancel() {
-    this._handleError(null, true);
     this.cancelBatch();
     this._clear();
     this.fire('nx-creation-wizard-show-tabs');
@@ -1214,10 +1213,7 @@ Polymer({
     }
   },
 
-  _handleError(error, close) {
-    if (close) {
-      return;
-    }
+  _handleError(error) {
     this.set('_creating', false);
     this.set('_importErrorMessage', this.i18n('documentImport.error.importFailed'));
     const message = error.message || (error.detail && error.detail.error);
