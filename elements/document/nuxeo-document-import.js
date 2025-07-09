@@ -399,7 +399,7 @@ Polymer({
     <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
 
     <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex widthFix">
-      <!--Stage: allow the user to upload files-->
+      <!--Stage: allow the user to upload files addon-->
       <div name="upload" class="upload vertical layout flex" tabindex="0">
         <div class="suggester">
           <nuxeo-path-suggestion
@@ -1131,6 +1131,7 @@ Polymer({
   },
 
   _cancel() {
+    this._handleError(null, true);
     this.cancelBatch();
     this._clear();
     this.fire('nx-creation-wizard-show-tabs');
@@ -1213,7 +1214,10 @@ Polymer({
     }
   },
 
-  _handleError(error) {
+  _handleError(error, close) {
+    if (close) {
+      return;
+    }
     this.set('_creating', false);
     this.set('_importErrorMessage', this.i18n('documentImport.error.importFailed'));
     const message = error.message || (error.detail && error.detail.error);
