@@ -399,7 +399,7 @@ Polymer({
     <iron-a11y-keys keys="enter" on-keys-pressed="_submitKeyHandler"></iron-a11y-keys>
 
     <iron-pages selected="[[stage]]" attr-for-selected="name" class="vertical layout flex widthFix">
-      <!--Stage: allow the user to upload files addon-->
+      <!--Stage: allow the user to upload files-->
       <div name="upload" class="upload vertical layout flex" tabindex="0">
         <div class="suggester">
           <nuxeo-path-suggestion
