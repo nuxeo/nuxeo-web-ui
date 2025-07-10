@@ -158,11 +158,12 @@ export default class {
 
     browser.addCommand(
       'waitForShadowDeep',
+      // eslint-disable-next-line prefer-arrow-callback
       async function (selectorChain, timeout = 5000) {
         let current = await $(selectorChain[0]);
         // eslint-disable-next-line no-await-in-loop
         for (let i = 1; i < selectorChain.length; i++) {
-          // eslint-disable-next-line no-await-in-loop
+          // eslint-disable-next-line no-await-in-loop, no-loop-func
           await browser.waitUntil(async () => {
             try {
               current = await current.shadow$(selectorChain[i]);
