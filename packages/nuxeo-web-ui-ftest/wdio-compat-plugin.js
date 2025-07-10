@@ -156,34 +156,29 @@ export default class {
       return element.waitForDisplayed({ timeout, reverse });
     });
 
-    browser.addCommand(
-      'waitForShadowDeep',
-      // eslint-disable-next-line prefer-arrow-callback
-      async function (selectorChain, timeout = 5000) {
-        let current = await $(selectorChain[0]);
+    browser.addCommand('waitForShadowDeep', async (selectorChain, timeout = 5000) => {
+      let current = await $(selectorChain[0]);
+      for (let i = 1; i < selectorChain.length; i++) {
         // eslint-disable-next-line no-await-in-loop
-        for (let i = 1; i < selectorChain.length; i++) {
-          // eslint-disable-next-line no-await-in-loop, no-loop-func
-          await browser.waitUntil(
-            // eslint-disable-next-line no-loop-func
-            async () => {
-              try {
-                current = await current.shadow$(selectorChain[i]);
-                return await current.isExisting();
-              } catch (e) {
-                return false;
-              }
-            },
-            {
-              timeout,
-              timeoutMsg: `Failed to find ${selectorChain[i]} in shadow DOM`,
-            },
-          );
-        }
+        await browser.waitUntil(
+          // eslint-disable-next-line no-loop-func
+          async () => {
+            try {
+              current = await current.shadow$(selectorChain[i]);
+              return await current.isExisting();
+            } catch (e) {
+              return false;
+            }
+          },
+          {
+            timeout,
+            timeoutMsg: `Failed to find ${selectorChain[i]} in shadow DOM`,
+          },
+        );
+      }
 
-        return current;
-      },
-    );
+      return current;
+    });
 
     // Add commands to the element scope.
     browser.addCommand(
