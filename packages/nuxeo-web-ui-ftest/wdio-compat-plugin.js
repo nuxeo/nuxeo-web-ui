@@ -164,17 +164,21 @@ export default class {
         // eslint-disable-next-line no-await-in-loop
         for (let i = 1; i < selectorChain.length; i++) {
           // eslint-disable-next-line no-await-in-loop, no-loop-func
-          await browser.waitUntil(async () => {
-            try {
-              current = await current.shadow$(selectorChain[i]);
-              return await current.isExisting();
-            } catch (e) {
-              return false;
-            }
-          }, {
-            timeout,
-            timeoutMsg: `Failed to find ${selectorChain[i]} in shadow DOM`,
-          });
+          await browser.waitUntil(
+            // eslint-disable-next-line no-loop-func
+            async () => {
+              try {
+                current = await current.shadow$(selectorChain[i]);
+                return await current.isExisting();
+              } catch (e) {
+                return false;
+              }
+            },
+            {
+              timeout,
+              timeoutMsg: `Failed to find ${selectorChain[i]} in shadow DOM`,
+            },
+          );
         }
 
         return current;
@@ -294,4 +298,4 @@ export default class {
       );
     });
   }
-};
+}
