@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Nuxeo from 'nuxeo';
+
 const { Blob } = Nuxeo;
 
 export default new Nuxeo({
