@@ -1018,15 +1018,12 @@ Polymer({
 
   // lookup the search
   _updateSearch() {
-    this.searchForm = this.$$(`[search-name='${this.searchName}']`);
-    if (this.searchForm && this._searchOnLoad) {
-      this.searchForm._search().then(() => {
-        this._loadSavedSearch();
-        this._searchOnLoad = false;
-      });
-    } else {
-      this._redirectSavedSearch();
+    this.searchForm = this.$$(`[search-name='${this.searchName}']`),
+    this.searchForm && this._searchOnLoad ? this.searchForm._search().then(( () => {
+        this._loadSavedSearch(),
+        this._searchOnLoad = !1
     }
+    )) : this._redirectSavedSearch()
   },
 
   /**

@@ -664,19 +664,24 @@ Polymer({
 
   _visibleChanged() {
     if (this.visible) {
-      if (!this._searches) {
-        this.$['saved-searches'].get();
-        if (this.form && this.form.params !== undefined) {
-          this.params = this.form.params;
+        if(this.form && this.form.resetSelectedProviderId) {
+            this.form.resetSelectedProviderId();
         }
-      }
-      if (this.queue) {
-        this.$.list.fetch();
-      } else if (this.auto) {
-        this._fetch(this.$.provider);
-      }
+        if (!this._searches) {
+            this.$['saved-searches'].get();
+            if (this.form && this.form.params !== undefined) {
+                this.params = this.form.params;
+            }
+        }
+        if (this.queue) {
+            this.$.list.fetch();
+        } else if (this.auto) {
+            this._fetch(this.$.provider).then(
+                this._navigateToResults()
+            );
+        }
     }
-  },
+},
 
   get nxProvider() {
     return this.$.provider;
@@ -820,26 +825,9 @@ Polymer({
   },
 
   _search() {
-    if (this.form && this.form.searchTerm) {
-      this.set('params.ecm_fulltext', this.formatFulltext(this.form.searchTerm));
-      this.set(
-        'params.highlight',
-        'dc:title.fulltext,ecm:binarytext,dc:description.fulltext,ecm:tag,note:note.fulltext,file:content.name',
-      );
-    } else if (this.params && this.params.ecm_fulltext) {
-      this.set('params.ecm_fulltext', '');
-      delete this.params.ecm_fulltext;
-      delete this.params.highlight;
-    }
-    if (this.results && this._validate()) {
-      this.results.reset();
-      return this._fetch(this.results).then(this._navigateToResults.bind(this));
-    }
-    if (this.visible) {
-      // if the view is not initialized yet, navigating to the search will trigger a search and display the results
-      this.navigateTo('search', this.searchName);
-    }
-    return Promise.resolve();
+    return this.results && this._validate() ? (this.results.reset(),
+    this._fetch(this.results).then(this._navigateToResults.bind(this))) : (this.visible && this.navigateTo("search", this.searchName),
+    Promise.resolve())
   },
 
   _reset() {
