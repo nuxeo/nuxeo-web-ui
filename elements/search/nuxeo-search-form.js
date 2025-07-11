@@ -676,9 +676,7 @@ Polymer({
         if (this.queue) {
             this.$.list.fetch();
         } else if (this.auto) {
-            this._fetch(this.$.provider).then(
-                this._navigateToResults()
-            );
+            this._fetch(this.$.provider).then(this._navigateToResults());
         }
     }
 },
@@ -826,7 +824,8 @@ Polymer({
 
   _search() {
     return this.results && this._validate() ? (this.results.reset(),
-    this._fetch(this.results).then(this._navigateToResults.bind(this))) : (this.visible && this.navigateTo("search", this.searchName),
+    this._fetch(this.results).then(this._navigateToResults.bind(this))) : 
+    (this.visible && this.navigateTo("search", this.searchName),
     Promise.resolve())
   },
 

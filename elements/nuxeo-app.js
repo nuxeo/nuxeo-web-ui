@@ -1018,13 +1018,18 @@ Polymer({
 
   // lookup the search
   _updateSearch() {
-    this.searchForm = this.$$(`[search-name='${this.searchName}']`),
-    this.searchForm && this._searchOnLoad ? this.searchForm._search().then(( () => {
-        this._loadSavedSearch(),
-        this._searchOnLoad = !1
+    this.searchForm = this.$$(`[search-name='${this.searchName}']`);
+  
+    if (this.searchForm && this._searchOnLoad) {
+      this.searchForm._search().then(() => {
+        this._loadSavedSearch();
+        this._searchOnLoad = false;
+      });
+    } else {
+      this._redirectSavedSearch();
     }
-    )) : this._redirectSavedSearch()
   },
+  
 
   /**
    * Gets current search form (if any) and refreshes it. Useful to handle file deletion/restore when the user has a
