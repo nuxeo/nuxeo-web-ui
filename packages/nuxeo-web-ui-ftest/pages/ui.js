@@ -207,7 +207,7 @@ export default class UI extends BasePage {
   async waitForToastNotVisible(timeout = 5000) {
     await browser.waitUntil(
       async () => {
-        const snackbars = await this.el.$$('mwc-snackbar');
+        const snackbars = await driver.elements('mwc-snackbar');
 
         const statuses = await Promise.all(
           snackbars.map(async (snackbar) => {
