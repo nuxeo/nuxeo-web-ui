@@ -25,7 +25,8 @@ Then('I see a toast notification with the following message {string}', async fun
 });
 
 Then('I click the toast notification dismiss button', async function() {
-  const toastDismissButton = await this.ui.getToastDismissButton();
+  const ui = await this.ui;
+  const toastDismissButton = await ui.getToastDismissButton();
   await toastDismissButton.click();
   await this.ui.waitForToastNotVisible();
 });
