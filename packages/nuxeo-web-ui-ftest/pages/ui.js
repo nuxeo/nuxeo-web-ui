@@ -205,7 +205,7 @@ export default class UI extends BasePage {
   }
 
   async waitForToastNotVisible() {
-    const mwcsnackbar = await driver.elements('mwc-snackbar');
+    const mwcsnackbar = await driver.$$('mwc-snackbar');
     let found = true;
     for (let i = 0; i < mwcsnackbar.length; i++) {
       const toast = await mwcsnackbar[i];
