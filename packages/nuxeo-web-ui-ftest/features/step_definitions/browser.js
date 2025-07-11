@@ -200,19 +200,20 @@ Then(/^I can see the document has the following publication$/, async function(ta
 
 Then(/^I can republish the following publication$/, async function(table) {
   const rows = table.hashes();
+  const browser = await this.ui.browser;
+  const publicationView = await browser.publicationView;
   for (let i = 0; i < rows.length; i++) {
     const { path, rendition, version } = rows[i];
-    let pubRow = await this.ui.browser.publicationView.getPublicationRow(path, rendition);
+    let pubRow = await publicationView.getPublicationRow(path, rendition);
     if (!pubRow) {
       return false;
     }
     const ele = await pubRow.$('nuxeo-data-table-cell .version').getText();
     const previousVersion = parseFloat(ele.trim().toLowerCase());
-    const browser = await this.ui.browser;
-    const publicationView = await browser.publicationView;
     await publicationView.republish(path, rendition, version);
     pubRow = await publicationView.getPublicationRow(path, rendition);
-    const eleNew = await pubRow.$('nuxeo-data-table-cell .version').getText();
+    const versionElement = await pubRow.$('nuxeo-data-table-cell .version');
+    const eleNew = await versionElement.getText();
     const newVersion = parseFloat(eleNew.trim().toLowerCase());
     if (Number.isNaN(newVersion)) {
       throw new Error('Failed to republish the document');

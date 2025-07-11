@@ -276,13 +276,13 @@ export default class Browser extends BasePage {
   }
 
   async indexOfChild(title) {
-    await driver.pause(1000);
+    await driver.pause(1500);
     await this.waitForChildren();
-    await driver.pause(1000);
+    await driver.pause(1500);
     const rowTemp = await this.rows;
     for (let i = 0; i < rowTemp.length; i++) {
       const row = await rowTemp[i];
-      const ele = await row.element('nuxeo-data-table-cell a.title');
+      const ele = await row.$('nuxeo-data-table-cell a.title');
       const eleText = await ele.getText();
       if (eleText.trim() === title) {
         return i;
