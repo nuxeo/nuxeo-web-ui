@@ -205,39 +205,22 @@ export default class UI extends BasePage {
   }
 
   async waitForToastNotVisible() {
-    const mwcsnackbar = await this.el.$$('mwc-snackbar');
-    if (!mwcsnackbar || mwcsnackbar.length === 0) {
-      return true;
-    }
+    const mwcsnackbar = await driver.elements('mwc-snackbar');
+    let found = true;
     for (let i = 0; i < mwcsnackbar.length; i++) {
-      const toast = mwcsnackbar[i];
+      const toast = await mwcsnackbar[i];
       const isAttrPresent = await toast.getAttribute('open');
       if (isAttrPresent) {
-        return false;
+        found = false;
+        break;
       }
     }
-    return true;
+    return found;
   }
 
   async getToastDismissButton() {
-    await browser.waitUntil(
-      async () => {
-        const snackbar = await this.el.$('#snackbarPanel mwc-snackbar[open]');
-        if (!snackbar) return false;
-        return snackbar.isDisplayed();
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: 'Snackbar did not appear in time',
-      },
-    );
-    const dismissBtns = await this.el.$$('#snackbarPanel mwc-snackbar[open] #dismiss');
-    if (dismissBtns.length === 0) {
-      throw new Error('Dismiss button not found');
-    }
-    const dismissBtn = dismissBtns[0];
-    await dismissBtn.waitForExist({ timeout: 2000 });
-    return dismissBtn;
+    const snackbar = await this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
+    return snackbar;
   }
 
   async getToastMessage(message) {
