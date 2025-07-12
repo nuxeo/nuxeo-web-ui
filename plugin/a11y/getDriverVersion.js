@@ -1,6 +1,6 @@
-const { execSync } = require('child_process');
-const chromeLauncher = require('chrome-launcher');
-const fetch = require('node-fetch');
+import { execSync } from 'child_process';
+import chromeLauncher from 'chrome-launcher';
+import fetch from 'node-fetch';
 
 const chromePath = chromeLauncher.Launcher.getFirstInstallation();
 let version;

@@ -1,7 +1,7 @@
 import Nuxeo from 'nuxeo';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { After } from '@cucumber/cucumber';
-import nuxeo from '../services/client';
+import nuxeo from '../services/client.js';
 
 global.runningWorkflows = [];
 global.fixtures = {};

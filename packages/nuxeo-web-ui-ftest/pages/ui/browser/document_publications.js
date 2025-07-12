@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import BasePage from '../../base';
+import BasePage from '../../base.js';
 
 export default class DocumentPublications extends BasePage {
   get count() {
@@ -64,7 +64,7 @@ export default class DocumentPublications extends BasePage {
     const pubRow = await this.getPublicationRow(path, rendition, version);
     if (pubRow) {
       await pubRow.waitForVisible('paper-button.republish');
-      const pubRowEle = await pubRow.element('paper-button.republish');
+      const pubRowEle = await pubRow.$('paper-button.republish');
       await pubRowEle.click();
       await driver.alertAccept();
     } else {
