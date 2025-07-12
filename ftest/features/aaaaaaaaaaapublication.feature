@@ -69,6 +69,7 @@ Feature: Internal Publication
     Then I can republish the following publication
        | path                                          | rendition  | version |
        | /default-domain/sections/section1/my_document |            | 0.1     |
+    And I see a toast notification with the following message "Document successfully published"
     And I can see the document has 1 publications
     And I can see the document has the following publication
       | path                                          | rendition | version |
