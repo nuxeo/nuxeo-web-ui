@@ -221,15 +221,19 @@ export default class UI extends BasePage {
   async getToastDismissButton() {
     await browser.waitUntil(
       async () => {
-        const snackbar = await this.el.element('#snackbarPanel mwc-snackbar[open]');
-        return snackbar && snackbar.isDisplayed();
+        const snackbar = await this.el.$('#snackbarPanel mwc-snackbar[open]');
+        if (!snackbar) return false;
+        // eslint-disable-next-line no-return-await
+        return await snackbar.isDisplayed();
       },
       {
         timeout: 5000,
         timeoutMsg: 'Snackbar did not appear in time',
       },
     );
-    return this.el.$('#snackbarPanel mwc-snackbar[open] #dismiss');
+    const dismissBtn = await this.el.$('#snackbarPanel mwc-snackbar[open] #dismiss');
+    await dismissBtn.waitForExist({ timeout: 2000 });
+    return dismissBtn;
   }
 
   async getToastMessage(message) {
