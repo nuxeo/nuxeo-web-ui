@@ -205,17 +205,18 @@ export default class UI extends BasePage {
   }
 
   async waitForToastNotVisible() {
-    const mwcsnackbar = await this.el.$$('mwc-snackbar'); // ✅ scoped to page object root
-    let found = true;
+    const mwcsnackbar = await this.el.$$('mwc-snackbar');
+    if (!mwcsnackbar || mwcsnackbar.length === 0) {
+      return true;
+    }
     for (let i = 0; i < mwcsnackbar.length; i++) {
       const toast = mwcsnackbar[i];
       const isAttrPresent = await toast.getAttribute('open');
       if (isAttrPresent) {
-        found = false;
-        break;
+        return false;
       }
     }
-    return found;
+    return true;
   }
 
   async getToastDismissButton() {
@@ -223,15 +224,18 @@ export default class UI extends BasePage {
       async () => {
         const snackbar = await this.el.$('#snackbarPanel mwc-snackbar[open]');
         if (!snackbar) return false;
-        // eslint-disable-next-line no-return-await
-        return await snackbar.isDisplayed();
+        return snackbar.isDisplayed();
       },
       {
         timeout: 5000,
         timeoutMsg: 'Snackbar did not appear in time',
       },
     );
-    const dismissBtn = await this.el.$('#snackbarPanel mwc-snackbar[open] #dismiss');
+    const dismissBtns = await this.el.$$('#snackbarPanel mwc-snackbar[open] #dismiss');
+    if (dismissBtns.length === 0) {
+      throw new Error('Dismiss button not found');
+    }
+    const dismissBtn = dismissBtns[0];
     await dismissBtn.waitForExist({ timeout: 2000 });
     return dismissBtn;
   }
