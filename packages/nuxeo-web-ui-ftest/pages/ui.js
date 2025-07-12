@@ -204,31 +204,24 @@ export default class UI extends BasePage {
     dropdown.click(`#dropdown #contentWrapper div paper-menu div paper-icon-item[name="${selection}"]`);
   }
 
-  async waitForToastNotVisible(timeout = 5000) {
-    await browser.waitUntil(
-      async () => {
-        const snackbars = await this.el.$$('mwc-snackbar');
-
-        const statuses = await Promise.all(
-          snackbars.map(async (snackbar) => {
-            const isOpen = await snackbar.getAttribute('open');
-            return !isOpen;
-          }),
-        );
-
-        return statuses.every(Boolean);
-      },
-      {
-        timeout,
-        timeoutMsg: 'Toast did not disappear within expected time',
-      },
-    );
+  async waitForToastNotVisible() {
+    const mwcsnackbar = await this.el.$$('mwc-snackbar'); // ✅ scoped to page object root
+    let found = true;
+    for (let i = 0; i < mwcsnackbar.length; i++) {
+      const toast = mwcsnackbar[i];
+      const isAttrPresent = await toast.getAttribute('open');
+      if (isAttrPresent) {
+        found = false;
+        break;
+      }
+    }
+    return found;
   }
 
   async getToastDismissButton() {
     await browser.waitUntil(
       async () => {
-        const snackbar = await this.el.$('#snackbarPanel mwc-snackbar[open]');
+        const snackbar = await this.el.element('#snackbarPanel mwc-snackbar[open]');
         return snackbar && snackbar.isDisplayed();
       },
       {
