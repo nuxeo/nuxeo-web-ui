@@ -3,18 +3,32 @@ import { Then, When } from '@cucumber/cucumber';
 import Spreadsheet from '../../pages/spreadsheet.js';
 
 When('I open the spreadsheet', async function() {
+  console.log('Opening spreadsheet...', 'runnng');
   const result = await this.ui.results;
+  console.log(result, 'result');
   const browser = await this.ui.browser;
+  console.log(browser, 'browser');
+
   const actions = await result.actions;
+  console.log(actions, 'actions');
   const buttonEle = await actions.element('nuxeo-spreadsheet-button');
+  console.log(buttonEle, 'buttonEle');
   await buttonEle.click();
+  console.log('button clicked');
   const dialog = await buttonEle.element('#dialog');
+  console.log(dialog, 'dialog');
   await dialog.waitForVisible();
+  console.log('dialog visible');
   const iframe = await buttonEle.element('#iframe');
+  console.log(iframe, 'iframe');
   await iframe.waitForExist();
+  console.log('iframe exists');
   const browserEle = await browser.el;
+  console.log(browserEle, 'browserEle');
   await browserEle.switchToFrame(iframe);
+  console.log('switched to iframe');
   this.spreadsheet = await new Spreadsheet();
+  console.log(this.spreadsheet, 'spreadsheet');
 });
 
 When('I see the spreadsheet dialog', function() {
