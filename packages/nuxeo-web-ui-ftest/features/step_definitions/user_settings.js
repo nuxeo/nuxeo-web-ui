@@ -74,20 +74,8 @@ Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberO
 
 Then('I cannot see authorized application', async function() {
   const apps = await this.ui.emptyAuthorizedApps;
-
-  // Wait until the element exists and is displayed
-  await browser.waitUntil(
-    async () => {
-      const exists = await apps.isExisting();
-      if (!exists) return false;
-      return apps.isDisplayed(); // ✅ no await, not needed
-    },
-    {
-      timeout: 5000,
-      timeoutMsg: 'Expected empty authorized apps message to be visible, but it was not.',
-    },
-  );
-
+  await apps.waitForExist({ timeout: 5000 });
+  await apps.waitForDisplayed();
   // Optional: assert explicitly
   expect(await apps.isDisplayed()).toBe(true);
 });
