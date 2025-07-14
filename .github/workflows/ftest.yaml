@@ -131,7 +131,18 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
-        run: mvn -ntp install -Pftest -DskipInstall
+        run: mvn -ntp install -DskipInstall
+
+      - name: Zip current folder
+        run: |
+          zip -r current-folder.zip .
+          
+      - name: Upload current folder artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-folder
+          path: current-folder.zip
+
 
       - name: Archive cucumber reports
         if: ${{ always() }}
