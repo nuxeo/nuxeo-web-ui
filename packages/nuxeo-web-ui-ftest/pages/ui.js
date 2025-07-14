@@ -219,8 +219,11 @@ export default class UI extends BasePage {
   }
 
   async getToastDismissButton() {
-    const snackbar = await this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
-    return snackbar;
+    const snackbar = await this.el.$('mwc-snackbar[open]');
+    await snackbar.waitForExist({ timeout: 5000 });
+    const dismissBtn = await snackbar.$('#dismiss');
+    await dismissBtn.waitForExist({ timeout: 2000 });
+    return dismissBtn;
   }
 
   async getToastMessage(message) {

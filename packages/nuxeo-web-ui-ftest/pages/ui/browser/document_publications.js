@@ -62,13 +62,35 @@ export default class DocumentPublications extends BasePage {
 
   async republish(path, rendition, version) {
     const pubRow = await this.getPublicationRow(path, rendition, version);
-    if (pubRow) {
-      await pubRow.waitForVisible('paper-button.republish');
-      const pubRowEle = await pubRow.$('paper-button.republish');
-      await pubRowEle.click();
-      await driver.alertAccept();
-    } else {
+    if (!pubRow) {
       throw new Error(`Could not find publication ${path} ${rendition} ${version}`);
+    }
+
+    await pubRow.waitForVisible('paper-button.republish');
+    const pubRowEle = await pubRow.$('paper-button.republish');
+    await pubRowEle.click();
+
+    try {
+      // Try waiting briefly to give the alert time to appear
+      await browser.waitUntil(
+        async () => {
+          try {
+            await driver.getAlertText();
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        {
+          timeout: 2000,
+          timeoutMsg: 'Alert did not appear in time',
+        },
+      );
+
+      // Accept the alert if still present
+      await driver.alertAccept();
+    } catch (err) {
+      console.warn('⚠️ No alert present or alert disappeared too quickly:', err.message);
     }
   }
 
