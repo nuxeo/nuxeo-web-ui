@@ -285,7 +285,6 @@ export default class Browser extends BasePage {
 
   async indexOfChild(title) {
     await this.waitForChildren();
-
     return driver.waitUntil(
       async () => {
         const rowTemp = await this.rows;
@@ -294,7 +293,7 @@ export default class Browser extends BasePage {
           const ele = await row.$('nuxeo-data-table-cell a.title');
           const eleText = await ele.getText();
           if (eleText.trim() === title) {
-            return i;
+            return i + 1; // return 1-based index
           }
         }
         return false; // triggers retry
