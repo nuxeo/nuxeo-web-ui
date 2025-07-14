@@ -76,8 +76,6 @@ Then('I cannot see authorized application', async function() {
   const apps = await this.ui.emptyAuthorizedApps;
   await apps.waitForExist({ timeout: 5000 });
   await apps.waitForDisplayed();
-  // Optional: assert explicitly
-  expect(await apps.isDisplayed()).toBe(true);
 });
 
 Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
