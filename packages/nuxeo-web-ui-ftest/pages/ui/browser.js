@@ -133,10 +133,18 @@ export default class Browser extends BasePage {
     })();
   }
 
-  async waitForChildren() {
+  async waitForChildren(minExpected = 1) {
     const currentPage = await this.currentPage;
-    const ele = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
-    await ele.waitForExist();
+    await driver.waitUntil(
+      async () => {
+        const rows = await currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row');
+        return rows.length >= minExpected;
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: `Expected at least ${minExpected} child rows to be loaded`,
+      },
+    );
   }
 
   async addToCollection(name) {
@@ -276,19 +284,25 @@ export default class Browser extends BasePage {
   }
 
   async indexOfChild(title) {
-    await driver.pause(1500);
     await this.waitForChildren();
-    await driver.pause(1500);
-    const rowTemp = await this.rows;
-    for (let i = 0; i < rowTemp.length; i++) {
-      const row = await rowTemp[i];
-      const ele = await row.$('nuxeo-data-table-cell a.title');
-      const eleText = await ele.getText();
-      if (eleText.trim() === title) {
-        return i;
-      }
-    }
-    return -1;
+    return driver.waitUntil(
+      async () => {
+        const rowTemp = await this.rows;
+        for (let i = 0; i < rowTemp.length; i++) {
+          const row = await rowTemp[i];
+          const ele = await row.$('nuxeo-data-table-cell a.title');
+          const eleText = await ele.getText();
+          if (eleText.trim() === title) {
+            return i + 1; // return 1-based index
+          }
+        }
+        return false; // triggers retry
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: `${title} child document not found`,
+      },
+    );
   }
 
   async sortContent(field, order) {
