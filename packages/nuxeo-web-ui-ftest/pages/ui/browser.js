@@ -133,16 +133,16 @@ export default class Browser extends BasePage {
     })();
   }
 
-  async waitForChildren(minExpected = 1) {
+  async waitForChildren() {
     const currentPage = await this.currentPage;
     await driver.waitUntil(
       async () => {
         const rows = await currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row');
-        return rows.length >= minExpected;
+        return rows.length >= 1;
       },
       {
         timeout: 5000,
-        timeoutMsg: `Expected at least ${minExpected} child rows to be loaded`,
+        timeoutMsg: `Expected at least 1 child rows to be loaded`,
       },
     );
   }
@@ -293,7 +293,7 @@ export default class Browser extends BasePage {
           const ele = await row.$('nuxeo-data-table-cell a.title');
           const eleText = await ele.getText();
           if (eleText.trim() === title) {
-            return i + 1; // return 1-based index
+            return i;
           }
         }
         return false; // triggers retry
