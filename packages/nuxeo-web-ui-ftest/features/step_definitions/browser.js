@@ -153,7 +153,7 @@ Then('I can move selection up', async function() {
 Then('I can see the {string} child document is at position {int}', async function(title, pos) {
   const browser = await this.ui.browser;
   await browser.waitForVisible();
-  const index = await browser.indexOfChild(title); // 0-based
+  const index = await browser.indexOfChild(title);
   const actualPos = index + 1;
   if (actualPos !== pos) {
     throw new Error(`${title} child document not present at expected position ${pos},
