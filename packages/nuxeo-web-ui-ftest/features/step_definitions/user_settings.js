@@ -74,6 +74,7 @@ Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberO
 
 Then('I cannot see authorized application', async function() {
   const apps = await this.ui.emptyAuthorizedApps;
+  await driver.pause(2000);
   await apps.waitForExist({ timeout: 5000 });
   await apps.waitForDisplayed();
 });
