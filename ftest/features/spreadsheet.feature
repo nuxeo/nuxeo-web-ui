@@ -33,5 +33,5 @@ Feature: Spreadsheet
     When I set the spreadsheet cell 0,0 to "New Title"
     And I save the spreadsheet
     And I close the spreadsheet
-    Then I see "Test File" in the results table cell 0,0
+    Then I see "New Title" in the results table cell 0,0
     
