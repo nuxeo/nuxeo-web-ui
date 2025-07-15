@@ -285,7 +285,7 @@ export default class Browser extends BasePage {
 
   async indexOfChild(title) {
     await this.waitForChildren();
-    return driver.waitUntil(
+    const result = await driver.waitUntil(
       async () => {
         const rowTemp = await this.rows;
         for (let i = 0; i < rowTemp.length; i++) {
@@ -293,16 +293,17 @@ export default class Browser extends BasePage {
           const ele = await row.$('nuxeo-data-table-cell a.title');
           const eleText = await ele.getText();
           if (eleText.trim() === title) {
-            return i;
+            return { index: i }; // wrap to avoid falsy 0
           }
         }
-        return false; // triggers retry
+        return false;
       },
       {
         timeout: 5000,
         timeoutMsg: `${title} child document not found`,
       },
     );
+    return result.index; // unwrap and return the number
   }
 
   async sortContent(field, order) {
