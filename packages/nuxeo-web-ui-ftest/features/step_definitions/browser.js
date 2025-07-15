@@ -154,9 +154,8 @@ Then('I can see the {string} child document is at position {int}', async functio
   const browser = await this.ui.browser;
   await browser.waitForVisible();
   const index = await browser.indexOfChild(title);
-  if (index !== pos - 1) {
-    throw new Error(`${title} child document not present at expected position ${pos}, 
-      but found at position ${index + 1}`);
+  if (index !== pos) {
+    throw new Error(`${title} child document not present at expected position ${pos}`);
   }
 });
 
