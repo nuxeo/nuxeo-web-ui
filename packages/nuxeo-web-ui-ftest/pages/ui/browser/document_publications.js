@@ -65,11 +65,9 @@ export default class DocumentPublications extends BasePage {
     if (!pubRow) {
       throw new Error(`Could not find publication ${path} ${rendition} ${version}`);
     }
-
     await pubRow.waitForVisible('paper-button.republish');
     const pubRowEle = await pubRow.$('paper-button.republish');
     await pubRowEle.click();
-
     try {
       // Try waiting briefly to give the alert time to appear
       await browser.waitUntil(
@@ -86,11 +84,10 @@ export default class DocumentPublications extends BasePage {
           timeoutMsg: 'Alert did not appear in time',
         },
       );
-
       // Accept the alert if still present
       await driver.alertAccept();
     } catch (err) {
-      console.warn('⚠️ No alert present or alert disappeared too quickly:', err.message);
+      console.warn(' No alert present or alert disappeared too quickly:', err.message);
     }
   }
 
