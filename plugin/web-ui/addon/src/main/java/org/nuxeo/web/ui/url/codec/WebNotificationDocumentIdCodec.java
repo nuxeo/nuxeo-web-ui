@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.nuxeo.ecm.core.api.DocumentLocation;
 import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.impl.DocumentLocationImpl;
@@ -55,7 +54,7 @@ public class WebNotificationDocumentIdCodec extends AbstractDocumentViewCodec {
         fragments.add(getPrefix());
         fragments.add(docLoc.getServerName());
         fragments.add(docRef.toString());
-        return StringUtils.join(fragments, "/");
+        return String.join("/", fragments);
     }
 
     @Override
