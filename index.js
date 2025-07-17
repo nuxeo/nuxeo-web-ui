@@ -73,6 +73,6 @@ ready
   .then(loadApp)
   .then(loadLegacy)
   .then(loadBundle)
-  .then(loadAddons)
   .then(setupApp)
-  .then(loadRouting);
+  .then(loadRouting)
+  .then(loadAddons);
