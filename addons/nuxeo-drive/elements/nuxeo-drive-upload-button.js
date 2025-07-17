@@ -92,7 +92,7 @@ Polymer({
     const finalUrl = [
       'nxdrive://direct-transfer',
       baseUrl.replace('://', '/'),
-      this.document.path,
+      this.document.path.slice(1),
     ].join('/');
     return finalUrl;
   },
