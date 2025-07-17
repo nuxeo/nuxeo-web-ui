@@ -71,7 +71,7 @@ Polymer({
 
   _isAvailable(doc) {
     // return true;
-    return this.hasPermission(doc, 'Write') && !this.isProxy(doc);
+    return this.hasPermission(doc, 'Write') && this.hasFacet(doc, 'Folderish') && !this.isProxy(doc);
   },
 
   _go() {
