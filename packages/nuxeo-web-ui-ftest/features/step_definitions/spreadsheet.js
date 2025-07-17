@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Then, When } from '@cucumber/cucumber';
-import Spreadsheet from '../../pages/spreadsheet';
+import Spreadsheet from '../../pages/spreadsheet.js';
 
 When('I open the spreadsheet', async function() {
   const result = await this.ui.results;

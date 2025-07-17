@@ -1,8 +1,8 @@
-import BasePage from '../../base';
-import DocumentMetadata from './document_metadata';
-import DocumentView from './document_view';
-import DocumentVersions from './document_versions';
-import DocumentCommentThread from './document_comment_thread';
+import BasePage from '../../base.js';
+import DocumentMetadata from './document_metadata.js';
+import DocumentView from './document_view.js';
+import DocumentVersions from './document_versions.js';
+import DocumentCommentThread from './document_comment_thread.js';
 
 export default class DocumentPage extends BasePage {
   constructor(selector, docType) {

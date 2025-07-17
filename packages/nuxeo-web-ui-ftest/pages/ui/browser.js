@@ -1,16 +1,16 @@
 /* eslint-disable no-await-in-loop */
-import BasePage from '../base';
-import DocumentPage from './browser/document_page';
-import CollapsibleDocumentPage from './browser/collapsible_document_page';
-import AddToCollectionDialog from './browser/add_to_collection_dialog';
-import PublicationDialog from './browser/publication_dialog';
-import DocumentPermissions from './browser/document_permissions';
-import DocumentPublications from './browser/document_publications';
-import DocumentTask from './browser/document_task';
-import DocumentFormLayout from './browser/document_form_layout';
-import Selection from './selection';
-import Results from './results';
-import { clickActionMenu, url } from '../helpers';
+import BasePage from '../base.js';
+import DocumentPage from './browser/document_page.js';
+import CollapsibleDocumentPage from './browser/collapsible_document_page.js';
+import AddToCollectionDialog from './browser/add_to_collection_dialog.js';
+import PublicationDialog from './browser/publication_dialog.js';
+import DocumentPermissions from './browser/document_permissions.js';
+import DocumentPublications from './browser/document_publications.js';
+import DocumentTask from './browser/document_task.js';
+import DocumentFormLayout from './browser/document_form_layout.js';
+import Selection from './selection.js';
+import Results from './results.js';
+import { clickActionMenu, url } from '../helpers.js';
 
 export default class Browser extends BasePage {
   async documentPage(docType) {
@@ -135,8 +135,16 @@ export default class Browser extends BasePage {
 
   async waitForChildren() {
     const currentPage = await this.currentPage;
-    const ele = await currentPage.$('nuxeo-data-table[name="table"] nuxeo-data-table-row nuxeo-data-table-checkbox');
-    await ele.waitForExist();
+    await driver.waitUntil(
+      async () => {
+        const rows = await currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row');
+        return rows.length >= 1;
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: `Expected at least 1 child rows to be loaded`,
+      },
+    );
   }
 
   async addToCollection(name) {
@@ -276,19 +284,26 @@ export default class Browser extends BasePage {
   }
 
   async indexOfChild(title) {
-    await driver.pause(1000);
     await this.waitForChildren();
-    await driver.pause(1000);
-    const rowTemp = await this.rows;
-    for (let i = 0; i < rowTemp.length; i++) {
-      const row = await rowTemp[i];
-      const ele = await row.element('nuxeo-data-table-cell a.title');
-      const eleText = await ele.getText();
-      if (eleText.trim() === title) {
-        return i;
-      }
-    }
-    return -1;
+    const result = await driver.waitUntil(
+      async () => {
+        const rowTemp = await this.rows;
+        for (let i = 0; i < rowTemp.length; i++) {
+          const row = await rowTemp[i];
+          const ele = await row.$('nuxeo-data-table-cell a.title');
+          const eleText = await ele.getText();
+          if (eleText.trim() === title) {
+            return { index: i }; // wrap to avoid falsy 0
+          }
+        }
+        return false;
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: `${title} child document not found`,
+      },
+    );
+    return result.index; // unwrap and return the number
   }
 
   async sortContent(field, order) {

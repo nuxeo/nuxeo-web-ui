@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
@@ -143,7 +143,7 @@ jobs:
       - name: Check preview namespace
         id: preview_ns
         run: |
-          echo ::set-output name=exists::$(kubectl get namespace ${PREVIEW_NAMESPACE})
+          echo "exists=$(kubectl get namespace ${PREVIEW_NAMESPACE})" >> $GITHUB_OUTPUT
 
       - name: Create preview namespace
         if: ${{ !steps.preview_ns.outputs.exists }}
@@ -172,7 +172,7 @@ jobs:
           
           echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
 
-          echo ::set-output name=url::"https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com"
+          echo "url=\"https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com\"" >> $GITHUB_OUTPUT
 
       - uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
