@@ -82,10 +82,6 @@ Polymer({
         return;
       }
       window.open(this.directTransferUrl, '_top');
-      // window.open(
-      //   'nxdrive://direct-transfer/http/localhost:8080/nuxeo/default-domain/workspaces/workspace1/folder1/upload-folder',
-      //   '_top',
-      // );
     });
   },
 
@@ -96,8 +92,6 @@ Polymer({
     const finalUrl = [
       'nxdrive://direct-transfer',
       baseUrl.replace('://', '/'),
-      'user',
-      this.user.id,
       this.document.path,
     ].join('/');
     return finalUrl;
