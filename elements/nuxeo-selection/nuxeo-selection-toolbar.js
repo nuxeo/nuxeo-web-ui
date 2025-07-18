@@ -100,7 +100,7 @@ Polymer({
         cursor: pointer;
       }
       a:hover {
-        color: var(--nuxeo-selection-toolbar-link-hover, #66ffff);
+        color: var(--nuxeo-selection-toolbar-link-hover, #000);
       }
     </style>
 
