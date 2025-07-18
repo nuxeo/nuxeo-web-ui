@@ -1,19 +1,19 @@
 /* eslint-disable no-await-in-loop */
-import Browser from './ui/browser';
-import CreateDialog from './ui/create_dialog';
-import Drawer from './ui/drawer';
-import Home from './ui/home';
-import Administration from './ui/administration';
-import BasePage from './base';
-import ActivityFeed from './ui/activity_feed';
-import HistoryTable from './ui/history_table';
-import User from './ui/user';
-import Group from './ui/group';
-import Search from './ui/search';
-import BulkEdit from './ui/bulk_edit';
-import UserAuthorizedApps from './ui/oauth2/user_authorized_apps';
-import UserCloudServices from './ui/oauth2/user_cloud_services';
-import { refresh, url } from './helpers';
+import Browser from './ui/browser.js';
+import CreateDialog from './ui/create_dialog.js';
+import Drawer from './ui/drawer.js';
+import Home from './ui/home.js';
+import Administration from './ui/administration.js';
+import BasePage from './base.js';
+import ActivityFeed from './ui/activity_feed.js';
+import HistoryTable from './ui/history_table.js';
+import User from './ui/user.js';
+import Group from './ui/group.js';
+import Search from './ui/search.js';
+import BulkEdit from './ui/bulk_edit.js';
+import UserAuthorizedApps from './ui/oauth2/user_authorized_apps.js';
+import UserCloudServices from './ui/oauth2/user_cloud_services.js';
+import { refresh, url } from './helpers.js';
 
 export default class UI extends BasePage {
   async goHome() {
@@ -219,8 +219,11 @@ export default class UI extends BasePage {
   }
 
   async getToastDismissButton() {
-    const snackbar = await this.el.element('#snackbarPanel mwc-snackbar[open] #dismiss');
-    return snackbar;
+    const snackbar = await this.el.$('mwc-snackbar[open]');
+    await snackbar.waitForExist({ timeout: 5000 });
+    const dismissBtn = await snackbar.$('#dismiss');
+    await dismissBtn.waitForExist({ timeout: 2000 });
+    return dismissBtn;
   }
 
   async getToastMessage(message) {

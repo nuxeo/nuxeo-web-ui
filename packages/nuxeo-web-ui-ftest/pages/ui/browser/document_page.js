@@ -1,8 +1,8 @@
-import BasePage from '../../base';
-import DocumentMetadata from './document_metadata';
-import DocumentView from './document_view';
-import DocumentVersions from './document_versions';
-import DocumentCommentThread from './document_comment_thread';
+import BasePage from '../../base.js';
+import DocumentMetadata from './document_metadata.js';
+import DocumentView from './document_view.js';
+import DocumentVersions from './document_versions.js';
+import DocumentCommentThread from './document_comment_thread.js';
 
 export default class DocumentPage extends BasePage {
   constructor(selector, docType) {
@@ -11,7 +11,17 @@ export default class DocumentPage extends BasePage {
   }
 
   get view() {
-    return (async () => new DocumentView(`${this._selector} nuxeo-document-view div#container`, this.docType))();
+    return (async () => {
+      if (this._selector === 'nuxeo-document-page') {
+        const selectorChain = ['nuxeo-document-view', 'nuxeo-document-layout', 'nuxeo-layout', 'div#container'];
+        const container = await browser.waitForShadowDeep(selectorChain);
+        return new DocumentView(container, this.docType);
+      }
+      const flatSelector = `${this._selector} nuxeo-document-view div#container`;
+      const container = await browser.$(flatSelector);
+      await container.waitForDisplayed();
+      return new DocumentView(container, this.docType);
+    })();
   }
 
   get metadata() {
