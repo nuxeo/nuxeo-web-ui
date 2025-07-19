@@ -392,7 +392,6 @@ const template = html`
         --nx-button-secondary-hover: {
           border: 1px solid var(--nuxeo-secondary-color, #1f28bf);
           color: var(--nuxeo-secondary-color, #1f28bf);
-          box-shadow: 0 0 0 2px var(--nuxeo-secondary-color, #1f28bf);
         }
 
         --nx-button-secondary-disabled: {
