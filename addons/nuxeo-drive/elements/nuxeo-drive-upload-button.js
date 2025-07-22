@@ -22,6 +22,8 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
+window.nuxeo = window.nuxeo || {};
+const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
 /**
 `nuxeo-drive-upload-button`
 @group Nuxeo UI
@@ -88,7 +90,7 @@ Polymer({
   get directTransferUrl() {
     // const parts = this.blob.data.split('/ui/');
     // const baseUrl = parts[0];
-    const baseUrl = 'http://localhost:8080/nuxeo';
+   // const baseUrl = 'http://localhost:8080/nuxeo';
     const finalUrl = [
       'nxdrive://direct-transfer',
       baseUrl.replace('://', '/'),
