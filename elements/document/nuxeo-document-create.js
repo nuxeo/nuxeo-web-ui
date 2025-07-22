@@ -81,7 +81,7 @@ Polymer({
         @apply --nuxeo-document-create-selection-button;
       }
 
-      .typeSelection paper-button:hover {
+      .typeSelection paper-button:hover .typeSelection paper-button:focus {
         color: var(--nuxeo-link-hover-color);
         filter: brightness(102%);
         -webkit-filter: brightness(102%);
