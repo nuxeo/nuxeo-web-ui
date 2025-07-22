@@ -52,6 +52,8 @@ Polymer({
         <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
+
+    <paper-toast id="toast">[[i18n('driveUpload.directTransfer.failed')]]</paper-toast>
   `,
 
   is: 'nuxeo-drive-upload-button',
@@ -84,6 +86,11 @@ Polymer({
         return;
       }
       window.open(this.directTransferUrl, '_top');
+    })
+    .catch((error) => {
+      console.error('Token fetch failed:', error);
+     // this._showToast('Network issue: Unable to fetch token. Please try again.');
+     this.$.toast.toggle();
     });
   },
 
