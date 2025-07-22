@@ -37,7 +37,7 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(document,blob)]]">
       <div class="action" on-tap="_go">
-        <paper-icon-button noink icon="icons:file-upload" id="driveBtn" aria-labelledby="label"></paper-icon-button>
+        <paper-icon-button noink icon="nuxeo-drive-icons:direct-transfer" id="driveBtn" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveUploadButton.tooltip')]]</span>
         <nuxeo-tooltip>[[i18n('driveUploadButton.tooltip')]]</nuxeo-tooltip>
       </div>
@@ -74,38 +74,26 @@ Polymer({
   },
 
   _isAvailable(doc) {
-    // return true;
     return this.hasPermission(doc, 'Write') && this.hasFacet(doc, 'Folderish') && !this.isProxy(doc);
   },
 
- _go() {
-  this.$.token.get()
-    .then((response) => {
+  _go() {
+    this.$.token.get().then((response) => {
       const tokens = response.entries.map((token) => token.id);
       if (!tokens || !tokens.length) {
         this.$.dialog.toggle();
-        return Promise.reject(new Error('No tokens found!'));
+        return;
       }
-
-      // Simulate delayed error within Promise chain
-      return new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error('Error uploading content !!!!'));
-        }, 1000);
-      });
-
+      window.open(this.directTransferUrl, '_top');
     })
     .catch((error) => {
       console.error('Token fetch failed:', error);
-      this.$.toast.toggle();
+      this.$.toast.toggle();  
     });
-},
-
+    
+  },
 
   get directTransferUrl() {
-    // const parts = this.blob.data.split('/ui/');
-    // const baseUrl = parts[0];
-   // const baseUrl = 'http://localhost:8080/nuxeo';
     const finalUrl = [
       'nxdrive://direct-transfer',
       baseUrl.replace('://', '/'),
