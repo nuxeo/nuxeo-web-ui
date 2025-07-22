@@ -78,24 +78,29 @@ Polymer({
     return this.hasPermission(doc, 'Write') && this.hasFacet(doc, 'Folderish') && !this.isProxy(doc);
   },
 
-  _go() {
-    this.$.token.get().then((response) => {
+ _go() {
+  this.$.token.get()
+    .then((response) => {
       const tokens = response.entries.map((token) => token.id);
       if (!tokens || !tokens.length) {
         this.$.dialog.toggle();
-        return;
+        return Promise.reject(new Error('No tokens found!'));
       }
-     // window.open(this.directTransferUrl, '_top');
-     setTimeout(() => {
-      throw new Error('Error uploading content !!!!');
-     }, 1000)
+
+      // Simulate delayed error within Promise chain
+      return new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('Error uploading content !!!!'));
+        }, 1000);
+      });
+
     })
     .catch((error) => {
       console.error('Token fetch failed:', error);
-     // this._showToast('Network issue: Unable to fetch token. Please try again.');
-     this.$.toast.toggle();
+      this.$.toast.toggle();
     });
-  },
+},
+
 
   get directTransferUrl() {
     // const parts = this.blob.data.split('/ui/');
