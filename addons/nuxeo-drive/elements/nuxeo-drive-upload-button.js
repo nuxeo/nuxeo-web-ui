@@ -85,7 +85,10 @@ Polymer({
         this.$.dialog.toggle();
         return;
       }
-      window.open(this.directTransferUrl, '_top');
+     // window.open(this.directTransferUrl, '_top');
+     setTimeout(() => {
+      throw new Error('Error uploading content !!!!');
+     }, 1000)
     })
     .catch((error) => {
       console.error('Token fetch failed:', error);
