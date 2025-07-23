@@ -18,10 +18,10 @@ import '@polymer/iron-iconset-svg/iron-iconset-svg.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 const template = html`
-  <iron-iconset-svg name="nuxeo-drive-icons" size="32">
+  <iron-iconset-svg name="nuxeo-drive" size="32">
     <svg viewBox="0 0 32 32">
       <defs>
-        <g id="direct-transfer">
+        <g id="transfer">
           <path d="M20.688 17.875h7.188q0.75 0 ..." />
         </g>
       </defs>
