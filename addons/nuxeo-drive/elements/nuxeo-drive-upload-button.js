@@ -38,7 +38,7 @@ Polymer({
 
     <template is="dom-if" if="[[_isAvailable(document,blob)]]">
       <div class="action" on-tap="_go">
-        <paper-icon-button noink icon="nuxeo-drive-icons:direct-transfer" id="driveBtn" aria-labelledby="label"></paper-icon-button>
+        <paper-icon-button noink icon="nuxeo-drive:transfer" id="driveBtn" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveUploadButton.tooltip')]]</span>
         <nuxeo-tooltip>[[i18n('driveUploadButton.tooltip')]]</nuxeo-tooltip>
       </div>
