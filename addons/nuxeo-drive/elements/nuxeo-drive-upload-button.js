@@ -79,27 +79,20 @@ Polymer({
   },
 
   _go() {
-  this.$.token.get()
-    .then((response) => {
+    this.$.token.get().then((response) => {
       const tokens = response.entries.map((token) => token.id);
       if (!tokens || !tokens.length) {
         this.$.dialog.toggle();
-        return Promise.reject(new Error('No tokens found!'));
+        return;
       }
-
-      // Simulate delayed error within Promise chain
-      return new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error('Error uploading content !!!!'));
-        }, 1000);
-      });
-
+      window.open(this.directTransferUrl, '_top');
     })
     .catch((error) => {
       console.error('Token fetch failed:', error);
-      this.$.toast.toggle();
+      this.$.toast.toggle();  
     });
-},
+    
+  },
 
   get directTransferUrl() {
     const finalUrl = [
