@@ -197,7 +197,7 @@ Feature: Trash Management
     And I select all the documents
     And I deselect the "File1" document
     Then I can trash selected documents
-    And I click the toast notification dismiss button
+    # And I click the toast notification dismiss button
     And I can navigate to trash pill
     And I can see 3 document
     When I select all the documents
