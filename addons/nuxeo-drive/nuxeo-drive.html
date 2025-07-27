@@ -23,6 +23,12 @@ limitations under the License.
   </template>
 </nuxeo-slot-content>
 
+<nuxeo-slot-content name="driveUploadButton" slot="DOCUMENT_ACTIONS">
+  <template>
+    <nuxeo-drive-upload-button user="[[user]]" document="[[document]]" blob="[[blob]]"></nuxeo-drive-upload-button>
+  </template>
+</nuxeo-slot-content>
+
 <!-- BLOB ACTIONS -->
 <nuxeo-slot-content name="driveEditButton" slot="BLOB_ACTIONS">
   <template>
