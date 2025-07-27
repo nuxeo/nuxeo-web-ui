@@ -36,10 +36,10 @@ Polymer({
 
     <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
 
-    <template is="dom-if" if="[[_isAvailable(document)]]">
+    <template is="dom-if" if="[[_isAvailable(document,blob)]]">
       <div class="action" on-tap="_go">
         <paper-icon-button noink icon="nuxeo-drive:transfer" id="driveBtn" aria-labelledby="label"></paper-icon-button>
-        <span class="label" id="label">[[i18n('driveUploadButton.tooltip')]]</span>
+        <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveUploadButton.tooltip')]]</span>
         <nuxeo-tooltip>[[i18n('driveUploadButton.tooltip')]]</nuxeo-tooltip>
       </div>
     </template>
@@ -62,6 +62,14 @@ Polymer({
 
   properties: {
     document: Object,
+    /**
+     * `true` if the action should display the label, `false` otherwise.
+     */
+    showLabel: {
+      type: Boolean,
+      reflectToAttribute: true,
+      value: false,
+    },
   },
 
   _isAvailable(doc) {
