@@ -61,9 +61,7 @@ Polymer({
   behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
-    user: Object,
     document: Object,
-    blob: Object,
     /**
      * `true` if the action should display the label, `false` otherwise.
      */
