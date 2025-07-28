@@ -175,7 +175,12 @@ Polymer({
       }
 
       #actionsDropdown > .iron-selected {
-        background-color: #8c8c8c;
+        background-color: #6e6e6e;
+        color: #ffffff;
+      }
+      #actionsDropdown > .iron-selected:hover {
+        background-color: #4d4d4d; /* or any darker shade for hover effect */
+        color: white;
       }
 
       .row {
