@@ -20,12 +20,6 @@ import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-toast/paper-toast.js';
 import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import '@polymer/polymer/lib/elements/dom-if.js';
-
-import '@nuxeo/nuxeo-ui-elements/nuxeo-resource.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-dialog.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-tooltip.js';
-import '@nuxeo/nuxeo-drive/nuxeo-drive-desktop-packages.js';
-
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
