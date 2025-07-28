@@ -14,20 +14,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
-import '@polymer/paper-button/paper-button.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
-import '@polymer/paper-toast/paper-toast.js';
-import '@polymer/iron-flex-layout/iron-flex-layout-classes.js';
-import '@polymer/polymer/lib/elements/dom-if.js';
+import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-
+import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-toast/paper-toast.js';
 import './nuxeo-drive-icons.js';
 
-const baseUrl = window.nuxeo?.baseUrl || `${window.location.origin}${window.location.pathname}`;
+const baseUrl = (window.nuxeo && window.nuxeo.baseUrl) || window.location.origin + window.location.pathname;
 
-class NuxeoDriveUploadButton extends PolymerElement {
+class NuxeoDriveUploadButton extends FiltersBehavior(I18nBehavior(PolymerElement)) {
   static get is() {
     return 'nuxeo-drive-upload-button';
   }
@@ -68,19 +65,12 @@ class NuxeoDriveUploadButton extends PolymerElement {
   static get properties() {
     return {
       document: Object,
-      /**
-       * `true` if the action should display the label, `false` otherwise.
-       */
       showLabel: {
         type: Boolean,
         reflectToAttribute: true,
         value: false,
       },
     };
-  }
-
-  static get behaviors() {
-    return [I18nBehavior, FiltersBehavior];
   }
 
   _isAvailable(doc) {
@@ -105,8 +95,8 @@ class NuxeoDriveUploadButton extends PolymerElement {
   }
 
   get directTransferUrl() {
-    const path = this.document?.path?.slice(1) || '';
-    return ['nxdrive://direct-transfer', baseUrl.replace('://', '/'), path].join('/');
+    const finalUrl = ['nxdrive://direct-transfer', baseUrl.replace('://', '/'), this.document.path.slice(1)].join('/');
+    return finalUrl;
   }
 }
 
