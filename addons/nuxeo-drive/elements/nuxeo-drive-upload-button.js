@@ -32,7 +32,6 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   static get properties() {
     return {
       document: Object,
-
       /**
        * `true` if the action should display the label, `false` otherwise.
        */
