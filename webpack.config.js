@@ -214,7 +214,7 @@ const assets = ['images', 'fonts', 'themes'].map((p) => {
 
 const production = merge([
   {
-    devtool: 'source-map', // enable this if you need sourcemaps on the production version
+    /* devtool: 'source-map', // enable this if you need sourcemaps on the production version */
     plugins: [
       new CleanWebpackPlugin(),
       new CopyWebpackPlugin({
