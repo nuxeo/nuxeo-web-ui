@@ -168,6 +168,11 @@ Polymer({
         @apply --layout-flex;
         @apply --layout-horizontal;
       }
+
+      .row-separator {
+        flex-basis: 100%;
+        height: 12px;
+      }
     </style>
 
     <nuxeo-document
@@ -197,21 +202,71 @@ Polymer({
           </div>
           <paper-dialog-scrollable>
             <div name="typeSelection" class="typeSelection">
-              <template is="dom-repeat" items="[[subtypes]]" as="type">
-                <paper-button
-                  noink
-                  name$="[[type.type]]"
-                  class="docTypeButton"
-                  on-tap="_selectType"
-                  data-args$="[[type]]"
-                  disabled$="[[!_canCreate(canCreate, creating)]]"
-                  aria-label$="[[_getTypeLabel(type)]]"
-                >
-                  <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
-                  <div class="typeLabel">[[_getTypeLabel(type)]]</div>
-                  <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
-                </paper-button>
+              <!-- Reordered Layout: Folderish first, then others -->
+              <template is="dom-if" if="[[reorderLayout]]">
+                <!-- Render Folderish Types -->
+                <template is="dom-repeat" items="[[folderishTypes]]" as="type">
+                  <template is="dom-bind">
+                    <paper-button
+                      noink
+                      name$="[[type.type]]"
+                      class="docTypeButton"
+                      on-tap="_selectType"
+                      data-args$="[[type]]"
+                      disabled$="[[!_canCreate(canCreate, creating)]]"
+                      aria-label$="[[_getTypeLabel(type)]]"
+                    >
+                      <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
+                      <div class="typeLabel">[[_getTypeLabel(type)]]</div>
+                      <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
+                    </paper-button>
+                  </template>
+                </template>
+
+                <div class="row-separator"></div>
+
+                <!-- Render Non-Folderish Types -->
+                <template is="dom-repeat" items="[[otherTypes]]" as="type">
+                  <template is="dom-bind">
+                    <paper-button
+                      noink
+                      name$="[[type.type]]"
+                      class="docTypeButton"
+                      on-tap="_selectType"
+                      data-args$="[[type]]"
+                      disabled$="[[!_canCreate(canCreate, creating)]]"
+                      aria-label$="[[_getTypeLabel(type)]]"
+                    >
+                      <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
+                      <div class="typeLabel">[[_getTypeLabel(type)]]</div>
+                      <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
+                    </paper-button>
+                  </template>
+                </template>
               </template>
+
+            <!-- Default Layout: Single list of subtypes -->
+            <template is="dom-if" if="[[!reorderLayout]]">
+              <template is="dom-repeat" items="[[subtypes]]" as="type">
+                <template is="dom-bind">
+                  <paper-button
+                    noink
+                    name$="[[type.type]]"
+                    class="docTypeButton"
+                    on-tap="_selectType"
+                    data-args$="[[type]]"
+                    disabled$="[[!_canCreate(canCreate, creating)]]"
+                    aria-label$="[[_getTypeLabel(type)]]"
+                  >
+                    <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
+                    <div class="typeLabel">[[_getTypeLabel(type)]]</div>
+                    <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
+                  </paper-button>
+                </template>
+              </template>
+            </template>
+            </div>
+
             </div>
           </paper-dialog-scrollable>
         </div>
@@ -307,6 +362,20 @@ Polymer({
       value: false,
       readOnly: true,
     },
+
+    folderishTypes: {
+      type: Array,
+      computed: '_computeFolderishTypes(subtypes)',
+    },
+
+    otherTypes: {
+      type: Array,
+      computed: '_computeOtherTypes(subtypes)',
+    },
+    reorderLayout: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   observers: ['_visibleOnStage(visible,stage)'],
@@ -317,6 +386,15 @@ Polymer({
 
   init(typeId) {
     this._clear();
+
+    this.reorderLayout = !!(
+      Nuxeo &&
+      Nuxeo.UI &&
+      Nuxeo.UI.document &&
+      Nuxeo.UI.document.layout &&
+      String(Nuxeo.UI.document.layout.create)
+    );
+
     if (typeId) {
       const typeObj = this.subtypes.find((type) => type.id === typeId);
       if (typeObj) {
@@ -325,6 +403,13 @@ Polymer({
     }
   },
 
+  _computeFolderishTypes(subtypes) {
+    return (subtypes || []).filter((type) => (type.facets || []).indexOf('Folderish') > -1);
+  },
+
+  _computeOtherTypes(subtypes) {
+    return (subtypes || []).filter((type) => (type.facets || []).indexOf('Folderish') === -1);
+  },
   /**
    * Retrieves and creates the layout for the current document type
    */

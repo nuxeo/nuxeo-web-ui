@@ -62,5 +62,8 @@
   <!-- Control eval allowed in CSP, default is true  -->
   <property name="org.nuxeo.web.ui.expressions.eval">${org.nuxeo.web.ui.expressions.eval:=true}</property>
 
+  <!-- Control eval allowed in CSP, default is true  -->
+  <property name="org.nuxeo.web.ui.document.layout.create">${org.nuxeo.web.ui.document.layout.create:=false}</property>
+
   </extension>
 </component>
