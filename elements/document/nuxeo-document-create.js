@@ -390,9 +390,10 @@ Polymer({
     this.reorderLayout = !!(
       Nuxeo &&
       Nuxeo.UI &&
-      Nuxeo.UI.document &&
-      Nuxeo.UI.document.layout &&
-      String(Nuxeo.UI.document.layout.create)
+      Nuxeo.UI.config &&
+      Nuxeo.UI.config.document &&
+      Nuxeo.UI.config.document.layout &&
+      String(Nuxeo.UI.config.document.layout.create)
     );
 
     if (typeId) {
