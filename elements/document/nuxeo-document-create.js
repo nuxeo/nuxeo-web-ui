@@ -387,14 +387,13 @@ Polymer({
   init(typeId) {
     this._clear();
 
-    this.reorderLayout = !!(
+    this.reorderLayout =
       Nuxeo &&
       Nuxeo.UI &&
       Nuxeo.UI.config &&
       Nuxeo.UI.config.document &&
       Nuxeo.UI.config.document.layout &&
-      String(Nuxeo.UI.config.document.layout.create)
-    );
+      Nuxeo.UI.config.document.layout.create;
 
     if (typeId) {
       const typeObj = this.subtypes.find((type) => type.id === typeId);
