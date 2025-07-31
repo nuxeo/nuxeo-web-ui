@@ -71,7 +71,7 @@ Polymer({
       }
 
       .platform {
-        background-color: #50c3f0;
+        background-color: #337e9c;
         border-radius: 3px;
         color: #fff;
         font-size: 0.9em;
