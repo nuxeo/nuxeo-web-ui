@@ -405,11 +405,13 @@ Polymer({
   },
 
   _computeFolderishTypes(subtypes) {
-    return (subtypes || []).filter((type) => (type.facets || []).indexOf('Folderish') > -1);
+    console.log(subtypes);
+    return (subtypes || []).filter((type) => (type.facets || []).includes('Folderish'));
   },
 
   _computeOtherTypes(subtypes) {
-    return (subtypes || []).filter((type) => (type.facets || []).indexOf('Folderish') === -1);
+     console.log(subtypes);
+    return (subtypes || []).filter((type) => !(type.facets || []).includes('Folderish'));
   },
   /**
    * Retrieves and creates the layout for the current document type
