@@ -375,6 +375,7 @@ Polymer({
     reorderLayout: {
       type: Boolean,
       value: false,
+      reflectToAttribute: true
     },
   },
 
