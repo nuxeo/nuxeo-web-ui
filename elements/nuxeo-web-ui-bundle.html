@@ -116,6 +116,28 @@
     ></nuxeo-search-page>
   </template>
 </nuxeo-slot-content>
+<nuxeo-slot-content name="bannerMenuItem" slot="ADMINISTRATION_MENU" order="70">
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-menu-item
+          name="banner-form"
+          label="bannerForm.heading"
+          route="administration:banner-form"
+        ></nuxeo-menu-item>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
+<nuxeo-slot-content name="BannerPage" slot="ADMINISTRATION_PAGES">
+  <template>
+    <nuxeo-filter user="[[user]]" expression="user.isAdministrator">
+      <template>
+        <nuxeo-banner-form name="banner-form" id="banner-form"></nuxeo-banner-form>
+      </template>
+    </nuxeo-filter>
+  </template>
+</nuxeo-slot-content>
 
 <!-- ANALYTICS -->
 
