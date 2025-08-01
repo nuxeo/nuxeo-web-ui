@@ -17,15 +17,10 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
-import '@polymer/iron-flex-layout/iron-flex-layout.js';
-import '@polymer/iron-pages/iron-pages.js';
-import '@polymer/paper-listbox/paper-listbox.js';
-import '../nuxeo-app/nuxeo-page.js';
-import '../nuxeo-app/nuxeo-page-item.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-
+import '../nuxeo-app/nuxeo-page.js';
+import '../nuxeo-app/nuxeo-page-item.js';
 /**
 `nuxeo-banner-form`
 @group Nuxeo UI
@@ -33,49 +28,62 @@ import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 */
 Polymer({
   _template: html`
-    <style include="nuxeo-styles iron-flex">
-      /* document views items (pills) */
-      #documentViewsItems {
+    <style>
+      :host {
         @apply --layout-horizontal;
-        --paper-listbox-background-color: transparent;
-      }
-
-      paper-tabs {
-        height: auto;
-        display: flex;
-        padding: 0;
-        border-bottom: none transparent 0px;
-        font-size: inherit;
-        font-weight: 400;
-        --paper-tabs-selection-bar-color: transparent;
-      }
-
-      @media (max-width: 1024px) {
-        paper-listbox {
-          padding-right: 7rem;
-        }
+        @apply --layout-center;
+        background: var(--nuxeo-banner-form-background, #ffffff);
+        box-shadow: var(--nuxeo-app-header-box-shadow);
+        color: var(--nuxeo-banner-form-text, #3a3a54);
+        height: var(--nuxeo-drawer-header-height);
+        padding-left: 16px;
+        position: fixed;
+        top: var(--nuxeo-app-top, 0);
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        visibility: hidden;
+        transform: translateY(calc(- (100% + var(--nuxeo-app-top, 0))));
+        transition-duration: 0.5s;
+        transition-property: visibility, -webkit-transform, opacity;
+        transition-property: visibility, transform, opacity;
+        will-change: transform;
       }
     </style>
     <nuxeo-page>
       <div slot="header">
-        <span class="flex">[[i18n('cloudServices.heading')]]</span>
+        <h1>Hello</h1>
+      </div>
+      <div slot="content">
+        <h1>Hii</h1>
       </div>
     </nuxeo-page>
   `,
 
   is: 'nuxeo-banner-form',
-  behaviors: [I18nBehavior],
 
   properties: {
-    x: {
-      type: String,
+    banneron: {
+      type: Boolean,
+      value: false,
+      notify: true,
     },
-
-    page: {
-      type: Object,
+    bannerval: {
+      type: String,
+      value: '',
+      notify: true,
+    },
+    bannerlink: {
+      type: String,
+      value: '',
+      notify: true,
     },
   },
-  ready() {
-    this.x = '';
+  _saveinfo() {
+    const event = new CustomEvent('storage');
+    localStorage.setItem('banneron', this.banneron);
+    localStorage.setItem('bannerval', this.bannerval);
+    localStorage.setItem('bannerlink', this.bannerlink);
+    window.dispatchEvent(event);
   },
 });
