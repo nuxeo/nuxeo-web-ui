@@ -204,51 +204,27 @@ Polymer({
             <div name="typeSelection" class="typeSelection">
               <!-- Reordered Layout: Folderish first, then others -->
               <template is="dom-if" if="[[reorderLayout]]">
-                <!-- Render Folderish Types -->
+                <!-- Folderish -->
                 <template is="dom-repeat" items="[[folderishTypes]]" as="type">
-                  <template is="dom-bind">
-                    <paper-button
-                      noink
-                      name$="[[type.type]]"
-                      class="docTypeButton"
-                      on-tap="_selectType"
-                      data-args$="[[type]]"
-                      disabled$="[[!_canCreate(canCreate, creating)]]"
-                      aria-label$="[[_getTypeLabel(type)]]"
-                    >
-                      <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
-                      <div class="typeLabel">[[_getTypeLabel(type)]]</div>
-                      <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
-                    </paper-button>
-                  </template>
+                  <paper-button
+                    noink
+                    name$="[[type.type]]"
+                    class="docTypeButton"
+                    on-tap="_selectType"
+                    data-args$="[[type]]"
+                    disabled$="[[!_canCreate(canCreate, creating)]]"
+                    aria-label$="[[_getTypeLabel(type)]]"
+                  >
+                    <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
+                    <div class="typeLabel">[[_getTypeLabel(type)]]</div>
+                    <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
+                  </paper-button>
                 </template>
 
                 <div class="row-separator"></div>
 
-                <!-- Render Non-Folderish Types -->
+                <!-- Others -->
                 <template is="dom-repeat" items="[[otherTypes]]" as="type">
-                  <template is="dom-bind">
-                    <paper-button
-                      noink
-                      name$="[[type.type]]"
-                      class="docTypeButton"
-                      on-tap="_selectType"
-                      data-args$="[[type]]"
-                      disabled$="[[!_canCreate(canCreate, creating)]]"
-                      aria-label$="[[_getTypeLabel(type)]]"
-                    >
-                      <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
-                      <div class="typeLabel">[[_getTypeLabel(type)]]</div>
-                      <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
-                    </paper-button>
-                  </template>
-                </template>
-              </template>
-
-            <!-- Default Layout: Single list of subtypes -->
-            <template is="dom-if" if="[[!reorderLayout]]">
-              <template is="dom-repeat" items="[[subtypes]]" as="type">
-                <template is="dom-bind">
                   <paper-button
                     noink
                     name$="[[type.type]]"
@@ -264,9 +240,25 @@ Polymer({
                   </paper-button>
                 </template>
               </template>
-            </template>
-            </div>
 
+              <!-- Default Layout: Single list of subtypes -->
+              <template is="dom-if" if="[[!reorderLayout]]">
+                <template is="dom-repeat" items="[[subtypes]]" as="type">
+                  <paper-button
+                    noink
+                    name$="[[type.type]]"
+                    class="docTypeButton"
+                    on-tap="_selectType"
+                    data-args$="[[type]]"
+                    disabled$="[[!_canCreate(canCreate, creating)]]"
+                    aria-label$="[[_getTypeLabel(type)]]"
+                  >
+                    <iron-icon class="typeIcon" src="[[_getTypeIcon(type)]]"></iron-icon>
+                    <div class="typeLabel">[[_getTypeLabel(type)]]</div>
+                    <nuxeo-tooltip>[[_getTypeLabel(type)]]</nuxeo-tooltip>
+                  </paper-button>
+                </template>
+              </template>
             </div>
           </paper-dialog-scrollable>
         </div>
