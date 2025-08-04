@@ -375,7 +375,7 @@ Polymer({
     reorderLayout: {
       type: Boolean,
       value: false,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
   },
 
@@ -394,7 +394,8 @@ Polymer({
       Nuxeo.UI.config &&
       Nuxeo.UI.config.document &&
       Nuxeo.UI.config.document.layout &&
-      Nuxeo.UI.config.document.layout.create);
+      Nuxeo.UI.config.document.layout.create
+    );
 
     if (typeId) {
       const typeObj = this.subtypes.find((type) => type.id === typeId);
@@ -406,13 +407,15 @@ Polymer({
 
   _computeFolderishTypes(subtypes) {
     console.log(subtypes);
-    console.log((subtypes || []).filter((type) => (type.facets)));
+    console.log('Folderish');
+    console.log(subtypes.map((type) => type.facets));
     return (subtypes || []).filter((type) => (type.facets || []).includes('Folderish'));
   },
 
   _computeOtherTypes(subtypes) {
-     console.log(subtypes);
-     console.log((subtypes || []).filter((type) => (type.facets)));
+    console.log(subtypes);
+    console.log('Others');
+    console.log(subtypes.map((type) => type.facets));
     return (subtypes || []).filter((type) => !(type.facets || []).includes('Folderish'));
   },
   /**
