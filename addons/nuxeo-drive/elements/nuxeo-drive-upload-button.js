@@ -79,25 +79,26 @@ Polymer({
   },
 
   _go() {
-    this.$.token.get().then((response) => {
-      const tokens = response.entries.map((token) => token.id);
-      if (!tokens || !tokens.length) {
-        this.$.dialog.toggle();
-        return;
-      }
-      window.open(this.directTransferUrl, '_top');
-    })
-    .catch((error) => {
-      console.error('Token fetch failed::', error);
-      this.$.toast.toggle();  
-    });
-    
+    this.$.token
+      .get()
+      .then((response) => {
+        const tokens = response.entries.map((token) => token.id);
+        if (!tokens || !tokens.length) {
+          this.$.dialog.toggle();
+          return;
+        }
+        window.open(this.directTransferUrl, '_top');
+      })
+      .catch((error) => {
+        console.error('Token fetch failed::', error);
+        this.$.toast.toggle();
+      });
   },
 
   get directTransferUrl() {
     const finalUrl = [
       'nxdrive://direct-transfer',
-      baseUrl.replace('://', '/'),
+      baseUrl.split('/ui/')[0].replace('://', '/'),
       this.document.path.slice(1),
     ].join('/');
     return finalUrl;
