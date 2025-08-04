@@ -135,12 +135,12 @@ jobs:
 
       - name: Zip current folder
         run: |
-          zip -r current-folder.zip .
+          zip -r fix-folder.zip .
       - name: Upload current folder artifact
         uses: actions/upload-artifact@v4
         with:
-          name: current-folder
-          path: current-folder.zip
+          name: fix-folder
+          path: fix-folder.zip
 
       - name: Archive cucumber reports
         if: ${{ always() }}
