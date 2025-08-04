@@ -107,11 +107,13 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   }
 
   get directTransferUrl() {
-    const finalUrl = ['nxdrive://direct-transfer', baseUrl.replace('://', '/'), this.document?.path?.slice(1)].join(
-      '/',
-    );
+    const finalUrl = [
+      'nxdrive://direct-transfer',
+      baseUrl.split('/ui/')[0].replace('://', '/'),
+      this.document.path.slice(1),
+    ].join('/');
     return finalUrl;
-  }
+  },
 }
 
 customElements.define(NuxeoDriveUploadButton.is, NuxeoDriveUploadButton);
