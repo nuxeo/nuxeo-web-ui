@@ -113,7 +113,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       this.document.path.slice(1),
     ].join('/');
     return finalUrl;
-  },
+  }
 }
 
 customElements.define(NuxeoDriveUploadButton.is, NuxeoDriveUploadButton);
