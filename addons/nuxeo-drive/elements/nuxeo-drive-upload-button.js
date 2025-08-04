@@ -88,7 +88,7 @@ Polymer({
       window.open(this.directTransferUrl, '_top');
     })
     .catch((error) => {
-      console.error('Token fetch failed:', error);
+      console.error('Token fetch failed::', error);
       this.$.toast.toggle();  
     });
     
