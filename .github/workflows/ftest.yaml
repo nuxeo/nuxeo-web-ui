@@ -18,7 +18,7 @@ on:
       PACKAGES_AUTH_USER:
         description: 'PACKAGES_AUTH_USER'
         required: true
-      PACKAGES_AUTH_TOKEN:
+      PACKAGES_AUTH_TOKEN: 
         description: 'PACKAGES_AUTH_TOKEN'
         required: true
 
@@ -29,7 +29,7 @@ env:
 
 jobs:
   ftests:
-    runs-on: [self-hosted, master]
+    runs-on: [ self-hosted, master ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -42,7 +42,7 @@ jobs:
           node-version: 22
 
       - uses: actions/setup-java@v2
-        with:
+        with: 
           distribution: 'zulu'
           java-version: '17'
 
