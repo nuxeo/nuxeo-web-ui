@@ -399,16 +399,10 @@ Polymer({
   },
 
   _computeFolderishTypes(subtypes) {
-    console.log(subtypes);
-    console.log('Folderish');
-    console.log(subtypes.map((type) => type.facets));
     return (subtypes || []).filter((type) => (type.facets || []).includes('Folderish'));
   },
 
   _computeOtherTypes(subtypes) {
-    console.log(subtypes);
-    console.log('Others');
-    console.log(subtypes.map((type) => type.facets));
     return (subtypes || []).filter((type) => !(type.facets || []).includes('Folderish'));
   },
   /**
