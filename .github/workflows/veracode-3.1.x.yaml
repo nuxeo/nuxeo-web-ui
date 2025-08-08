@@ -4,16 +4,13 @@
 # documentation.
 
 # This workflow will initiate a Veracode Static Analysis Pipeline scan, return a results.json and convert to SARIF for upload as a code scanning alert
-
+ 
 name: Veracode Maintenance 3.1.x
 
 on:
-  push:
-    branches:
-      - fix-WEBUI-1790-form-data-vulnerability
   schedule:
-    - cron: '30 12 1,15 * *'
-  workflow_dispatch: # enables manual runs from GitHub UI
+    - cron: '30 17 1,15 * *'  # 5:00 PM UTC on 1st and 15th each month
+  workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:
   REFERENCE_BRANCH: maintenance-3.1.x
@@ -34,48 +31,49 @@ jobs:
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     runs-on: [self-hosted, master]
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
-      - uses: actions/checkout@v2
-        with:
+
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
+    - uses: actions/checkout@v2
+      with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - uses: actions/setup-node@v1
-        with:
+    - uses: actions/setup-node@v1
+      with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           node-version: 22
           scope: '@nuxeo'
 
-      - uses: actions/setup-java@v2
-        with:
+    - uses: actions/setup-java@v2
+      with: 
           distribution: 'zulu'
           java-version: '11'
 
-      - name: Determine nuxeo-elements branch to link
-        id: pick_nuxeo_elements_branch
-        run: |
+    - name: Determine nuxeo-elements branch to link
+      id: pick_nuxeo_elements_branch
+      run: |
           if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
             echo "branch=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
           else
             echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
           fi
-      - name: Install Web UI
-        env:
+    - name: Install Web UI
+      env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
+      run: |
           npm install
           pushd packages/nuxeo-web-ui-ftest
           npm install
           popd
-      - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
-        with:
+    - name: Checkout the nuxeo-elements repo
+      uses: actions/checkout@v2
+      with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
           fetch-depth: 1
           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
 
-      - name: Pack Elements modules
-        run: |
+    - name: Pack Elements modules
+      run: |
           pushd nuxeo-elements
           pushd core
           echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
@@ -91,26 +89,26 @@ jobs:
           popd
           popd
 
-      - name: add .npmrc
-        run: |
-          pushd /tmp/_temp/
-          rm .npmrc
-          touch .npmrc
-          popd
-          echo '
-            packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
-            @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
-            always-auth=true
-          ' >> /tmp/_temp/.npmrc
+    - name: add .npmrc
+      run: |
+        pushd /tmp/_temp/
+        rm .npmrc
+        touch .npmrc
+        popd
+        echo '
+          packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
+          @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+          always-auth=true
+        ' >> /tmp/_temp/.npmrc
 
-      - name: Link elements to Web UI
-        run: |
+    - name: Link elements to Web UI
+      run: |
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
-      - name: 'Update settings.xml with server configuration'
-        run: |
+    - name: 'Update settings.xml with server configuration'
+      run: |
           echo '<settings>
               <servers>
                 <server>
@@ -121,38 +119,38 @@ jobs:
               </servers>
               </settings>' > ~/.m2/settings.xml
 
-      - name: Delete Node Modules
-        run: |
-          rm -rf node_modules
-          rm -rf packages/nuxeo-designer-catalog/node_modules
-          rm -rf packages/nuxeo-web-ui-ftest/node_modules
-          rm -rf plugin/a11y/node_modules
+    - name: Delete Node Modules
+      run: |
+        rm -rf node_modules
+        rm -rf packages/nuxeo-designer-catalog/node_modules
+        rm -rf packages/nuxeo-web-ui-ftest/node_modules
+        rm -rf plugin/a11y/node_modules 
+       
+    - name: Delete Test Folders
+      run: |
+        rm -rf nuxeo-elements/testing-helpers/
+        rm -rf nuxeo-elements/ui/test/
+        rm -rf nuxeo-elements/storybook/
+        rm -rf ftest/
+        rm -rf plugin/
+        rm -rf scripts/
+        rm -rf test/
+        rm -rf packages/nuxeo-web-ui-ftest/
 
-      - name: Delete Test Folders
-        run: |
-          rm -rf nuxeo-elements/testing-helpers/
-          rm -rf nuxeo-elements/ui/test/
-          rm -rf nuxeo-elements/storybook/
-          rm -rf ftest/
-          rm -rf plugin/
-          rm -rf scripts/
-          rm -rf test/
-          rm -rf packages/nuxeo-web-ui-ftest/
+    - name: Install zip
+      run: apt-get install zip
 
-      - name: Install zip
-        run: apt-get install zip
+    - name: Zip nuxeo-web-ui
+      run: |
+        echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip
+        zip -r nuxeo-web-ui.zip *
 
-      - name: Zip nuxeo-web-ui
-        run: |
-          echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip
-          zip -r nuxeo-web-ui.zip *
-
-      - name: Upload ZIP as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nuxeo-web-ui
-          path: nuxeo-web-ui.zip
-
+    - name: Upload ZIP as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuxeo-web-ui
+        path: nuxeo-web-ui.zip
+  
   sast-scan:
     needs: sast-scan-build
     permissions:
