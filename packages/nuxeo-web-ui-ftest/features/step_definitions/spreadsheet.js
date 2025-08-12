@@ -70,6 +70,7 @@ When('I close the spreadsheet', async function() {
   if (spreadsheet) {
     await spreadsheet.close();
     await browser.switchToFrame(null);
+    console.log('Switched out of iframe');
   } else {
     throw new Error('Error: Spreadsheet does not exist!!');
   }
@@ -83,5 +84,6 @@ Then('I see {string} in the results table cell {int},{int}', async function(valu
   const tableCell = await tableRowValue.elements('nuxeo-data-table-cell');
   const tableCol = await tableCell[col];
   const tableColText = await tableCol.getText();
+  console.log(tableColText);
   tableColText.should.be.equal(value);
 });
