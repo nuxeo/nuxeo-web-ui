@@ -30,6 +30,7 @@ Given(/^I have permission (\w+) for the document with path "(.+)"$/, async funct
   const setPermission = await fixtures.documents.setPermissions(path, permission, this.username).then((d) => {
     this.doc = d;
   });
+  console.log("reached here");
   return setPermission;
 });
 

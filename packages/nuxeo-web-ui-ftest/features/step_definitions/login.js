@@ -42,7 +42,9 @@ When('I login as {string}', async function(username) {
   await logIn.submit();
   this.username = username;
   this.ui = await UI.get();
+  console.log('wait for nuxeo-page');
   await this.ui.waitForVisible('nuxeo-page');
+  console.log('nuxeo-page visible');
 });
 
 When(/^I visit (.*)$/, (path) => url(path));
