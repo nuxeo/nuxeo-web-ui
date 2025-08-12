@@ -14,7 +14,9 @@ When('I open the spreadsheet', async function() {
   await iframe.waitForExist();
   const browserEle = await browser.el;
   await browserEle.switchToFrame(iframe);
+  console.log('Switched to iframe');
   this.spreadsheet = await new Spreadsheet();
+  console.log('Created spreadsheet');
 });
 
 When('I see the spreadsheet dialog', function() {
