@@ -441,6 +441,7 @@ Polymer({
 
       <!-- pages -->
       <paper-header-panel slot="main" mode="seamed">
+        <nuxeo-suggester id="suggester"></nuxeo-suggester>
         <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
           <nuxeo-slot name="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
@@ -495,7 +496,6 @@ Polymer({
           hidden$="[[!isNarrow]]"
           aria-label$="[[i18n('command.menu')]]"
         ></paper-icon-button>
-        <nuxeo-suggester id="suggester"></nuxeo-suggester>
       </paper-header-panel>
     </paper-drawer-panel>
 
