@@ -58,7 +58,7 @@ jobs:
   build:
     name: Build
     needs: id
-    runs-on: [ self-hosted, master ]
+    runs-on: 4cpus-16gb-runner-ubuntu-latest
     steps:
       - name: Build parameters
         run: echo '${{ toJSON(github.event.inputs) }}'
@@ -66,6 +66,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
+          always-auth: true
           scope: '@nuxeo'
           node-version: 22
       
@@ -142,19 +143,9 @@ jobs:
           popd
           popd
 
-      - name: Add .npmrc
-        run: |
-          pushd /tmp/_temp/
-          rm .npmrc
-          touch .npmrc
-          popd
-          echo '
-           packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
-           @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
-           always-auth=true
-          ' >> /tmp/_temp/.npmrc
-
       - name: Link elements to Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
