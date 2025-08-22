@@ -42,7 +42,8 @@ jobs:
 
   build:
     needs: [lint, test, a11y, ftest]
-    runs-on: large-8cpu-runners
+    runs-on:
+      group: large-8cpu-runners
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
