@@ -3,23 +3,28 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-# This workflow will initiate a Veracode Static Analysis Pipeline scan, return a results.json and convert to SARIF for upload as a code scanning alert
+# This workflow will initiate a Veracode Static Analysis Pipeline scan, return a
+# results.json and convert to SARIF for upload as a code scanning alert
 name: Veracode Maintenance 3.0.x
 
 on:
   workflow_dispatch:          # enables manual runs from GitHub UI
+  workflow_dispatch:         # enables manual runs from GitHub UI
 
 env:
   REFERENCE_BRANCH: maintenance-3.0.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ 'maintenance-3.0.x' }}
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# A workflow run is made up of one or more jobs that can run sequentially or in
+# parallel
 permissions:
   contents: read
 
 jobs:
-  # This workflow contains a job to build and submit pipeline scan, you will need to customize the build process accordingly and make sure the artifact you build is used as the file input to the pipeline scan file parameter
+  # This workflow contains a job to build and submit pipeline scan, you will
+  # need to customize the build process accordingly and make sure the artifact
+  # you build is used as the file input to the pipeline scan file parameter
   sast-scan-build:
     permissions:
       contents: read # for actions/checkout to fetch code
@@ -29,11 +34,13 @@ jobs:
     runs-on:
       group: large-8cpu-runners
     steps:
-      - uses: catchpoint/workflow-telemetry-action@v2
-        with:
-          comment_on_pr: false
+    - uses: catchpoint/workflow-telemetry-action@v2
+      with:
+        comment_on_pr: false
 
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access
+    # it and copies all sources into ZIP file for submitting for analysis.
+    # Replace this section with your applications build steps
     - uses: actions/checkout@v2
       with:
           ref: ${{ env.BRANCH_NAME }}
