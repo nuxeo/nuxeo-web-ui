@@ -35,18 +35,18 @@ jobs:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
           scope: '@nuxeo'
           node-version: 22
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
