@@ -58,8 +58,11 @@ jobs:
   build:
     name: Build
     needs: id
-    runs-on: 4cpus-16gb-runner-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
+      - uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
       - name: Build parameters
         run: echo '${{ toJSON(github.event.inputs) }}'
 
