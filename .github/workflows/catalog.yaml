@@ -75,7 +75,7 @@ jobs:
               </server>
             </servers>
           </settings>' > ~/.m2/settings.xml
-     
+
       - name: Install libxml2-utils (xmllint)
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
@@ -94,7 +94,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/nuxeo-designer-catalog
-        run: | 
+        run: |
           npm install
           npm install -g gulp
 
@@ -146,7 +146,7 @@ jobs:
         working-directory: nos
         env:
           GH_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
-        run: | 
+        run: |
           git checkout -b designer-catalog-update-$CATALOG_VERSION
           mvn versions:set-property -Dproperty=view.designer.catalog.2023.0 -DnewVersion=$CATALOG_VERSION
           git add .

@@ -14,7 +14,7 @@ on:
 
   # Manually trigger the workflow
   workflow_dispatch:
-  
+
 jobs:
   # in uses, cannot use environment variable for {owner}/{repo} nor matrix strategy variable for {ref}
   # thus hardcoding them
