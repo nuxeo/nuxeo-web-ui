@@ -1,7 +1,7 @@
 {
   "name": "@nuxeo/nuxeo-web-ui-ftest",
-  "version": "2025.5.0-SNAPSHOT",
-   "type": "module",
+  "version": "2025.7.0-SNAPSHOT",
+  "type": "module",
   "bin": {
     "nuxeo-web-ui-ftest": "./bin/nuxeo-web-ui-ftest.js"
   },
