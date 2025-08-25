@@ -195,17 +195,15 @@ Polymer({
     const dialog = this.$$('#selectedItemsPopup');
     if (dialog) {
       dialog.toggle();
-
-      // attach listener dynamically every time
       dialog.addEventListener(
         'iron-overlay-closed',
         () => {
           if (this._lastFocused) {
-            this._lastFocused.focus(); // restore focus properly
+            this._lastFocused.focus();
           }
         },
         { once: true },
-      ); // clean after one use
+      );
     }
   },
 
@@ -219,7 +217,7 @@ Polymer({
     if (dialog) {
       dialog.addEventListener('iron-overlay-closed', () => {
         if (this._lastFocused) {
-          this._lastFocused.focus(); // restore focus
+          this._lastFocused.focus();
         }
       });
     }
