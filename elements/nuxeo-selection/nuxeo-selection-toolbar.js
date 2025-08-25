@@ -190,11 +190,38 @@ Polymer({
 
   toogleSelectedItemsPopup(e) {
     e.preventDefault();
-    this.$$('#selectedItemsPopup').toggle();
+    this._lastFocused = e.currentTarget;
+
+    const dialog = this.$$('#selectedItemsPopup');
+    if (dialog) {
+      dialog.toggle();
+
+      // attach listener dynamically every time
+      dialog.addEventListener(
+        'iron-overlay-closed',
+        () => {
+          if (this._lastFocused) {
+            this._lastFocused.focus(); // restore focus properly
+          }
+        },
+        { once: true },
+      ); // clean after one use
+    }
   },
 
   clearSelection(e) {
     e.preventDefault();
     this.fire('clear-selected-items');
+  },
+
+  ready() {
+    const dialog = this.$$('#selectedItemsPopup');
+    if (dialog) {
+      dialog.addEventListener('iron-overlay-closed', () => {
+        if (this._lastFocused) {
+          this._lastFocused.focus(); // restore focus
+        }
+      });
+    }
   },
 });
