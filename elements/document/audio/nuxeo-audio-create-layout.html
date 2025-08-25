@@ -23,18 +23,28 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-audio-create-layout">
   <template>
-    <style include="nuxeo-styles"></style>
+    <style include="nuxeo-styles">
+      .er {
+        color: red;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+    </style>
 
     <nuxeo-input
       role="widget"
       label="[[i18n('title')]]"
       name="title"
       value="{{document.properties.dc:title}}"
+      id="inputElem"
+      on-input="_showError"
       autofocus
       required
     >
     </nuxeo-input>
-
+    <template is="dom-if" if="[[isVisible]]">
+      <p class="er">Title cannot be blank</p>
+    </template>
     <nuxeo-textarea
       role="widget"
       label="[[i18n('label.description')]]"
@@ -103,6 +113,14 @@ limitations under the License.
          * @doctype Audio
          */
         document: Object,
+        isVisible: {
+          type: Boolean,
+          value: false,
+        },
+      },
+      _showError() {
+        const inputelem = this.$.inputElem.value || '';
+        this.set('isVisible', inputelem.trim() === '');
       },
     });
   </script>
