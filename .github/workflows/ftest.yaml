@@ -58,9 +58,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y tightvncserver fluxbox
           echo ${{ secrets.VNC_PASSWORD }} | vncpasswd -f > ~/.vnc/passwd
-          Xvnc -depth 8 -geometry 1200x1080 -rfbauth ~/.vnc/passwd -desktop "${{ github.workflow }}" ${{ env.DISPLAY }} &
+          Xvnc -depth 24 -geometry 1200x1080 -rfbauth ~/.vnc/passwd -desktop "${{ github.workflow }}" ${{ env.DISPLAY }} &
           fluxbox &
-          ssh -o StrictHostKeyChecking=no -N -R 5901:localhost:5901 -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} &
+          ssh -o StrictHostKeyChecking=no -N -R "*:5901:localhost:5901" -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} &
         env:
           DEBIAN_FRONTEND: noninteractive
 
