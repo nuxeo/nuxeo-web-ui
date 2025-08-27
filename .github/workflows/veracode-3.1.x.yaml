@@ -9,7 +9,7 @@ name: Veracode Maintenance 3.1.x
 
 on:
   schedule:
-    - cron: '30 17 1,15 * *'  # 5:00 PM UTC on 1st and 15th each month
+    - cron: '30 17 * * *'  # 5:00 PM UTC daily
   workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:
@@ -173,6 +173,7 @@ jobs:
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.6
         with:
+          scanname: 'Nuxeo WebUI - LTS2023 - ${{ github.run_id }}'
           appname: 'Nuxeo Web UI'
           createprofile: false
           filepath: 'nuxeo-web-ui.zip'
