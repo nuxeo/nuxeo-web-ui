@@ -26,6 +26,7 @@ env:
   REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
+  NODE_OPTIONS: "--max-old-space-size=2048"
   DISPLAY: ":1"
 jobs:
   ftests:
@@ -51,12 +52,25 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      - uses: browser-actions/setup-chrome@v2
+        id: setup-chrome
+        with:
+          chrome-version: 138.0.7204.157
+          install-chromedriver: true
+          install-dependencies: true
+
       - name: Convoluted VNC setup
         run: |
+          sudo apt-get --purge remove -y google-chrome-stable chromium-browser
+          sudo ln -sf  ${{ steps.setup-chrome.outputs.chrome-bin-path }}/google-chrome /usr/local/bin/google-chrome
+          sudo ln -sf  ${{ steps.setup-chrome.outputs.chromedriver-bin-path }}/chromedriver /usr/local/bin/chromedriver
+          sudo apt-get update
+          sudo apt-get install -y tightvncserver fluxbox imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
+          sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
+          npm install -g bower
+          npm install -g gulp-cli
           mkdir -p ~/.ssh ~/.vnc
           echo -n ${{ secrets.SSH_PRIVATE_KEY }} | base64 -d > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
-          sudo apt-get update
-          sudo apt-get install -y tightvncserver fluxbox
           echo ${{ secrets.VNC_PASSWORD }} | vncpasswd -f > ~/.vnc/passwd
           Xvnc -depth 24 -geometry 1200x1080 -rfbauth ~/.vnc/passwd -desktop "${{ github.workflow }}" ${{ env.DISPLAY }} &
           fluxbox &
