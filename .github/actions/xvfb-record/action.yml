@@ -49,6 +49,7 @@ runs:
         [[ $? -eq 0 ]] && sleep 3 || (echo "Xvfb failed to start"; exit 1)
         ffmpeg -y -nostdin -f x11grab -i ${{ env.DISPLAY }} -s sxga recording.$VIDEXT > ffmpeg.log 2>&1 & FFMPEG="$!"
         echo "FFMPEG=$FFMPEG" >> $GITHUB_OUTPUT
+        echo "DISPLAY=${DISPLAY}" >> $GITHUB_OUTPUT
       env:
         DEBIAN_FRONTEND: noninteractive
         DISPLAY: :99
@@ -64,6 +65,8 @@ runs:
         retry_on: ${{ inputs.retry_on }}
         retry_wait_seconds: ${{ inputs.retry_wait_seconds }}
         command: ${{ inputs.test_command }}
+      env:
+        DISPLAY: ${{ steps.record.outputs.DISPLAY }}
 
     - name: Stop recording
       if: always() && steps.record.outcome == 'success'
@@ -80,5 +83,5 @@ runs:
       with:
         name: xvfbrecording
         path: |
-          /tmp/xvfb.${{ inputs.video_extension }}
+          /tmp/recording.${{ inputs.video_extension }}
           /tmp/ffmpeg.log
