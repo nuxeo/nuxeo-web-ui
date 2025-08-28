@@ -9,7 +9,7 @@ name: Veracode Maintenance 3.1.x
 
 on:
   schedule:
-    - cron: '30 17 * * *'  # 17:30 UTC = 11:00 PM IST
+    - cron: '30 17 * * *'  # 5:30 PM UTC daily
 
 env:
   REFERENCE_BRANCH: maintenance-3.1.x
@@ -39,7 +39,7 @@ jobs:
     - uses: actions/setup-node@v1
       with:
           registry-url: ${{ env.NPM_REPOSITORY }}
-          node-version: 18
+          node-version: 22
           scope: '@nuxeo'
 
     - uses: actions/setup-java@v2
@@ -172,6 +172,7 @@ jobs:
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.6
         with:
+          version: 'Nuxeo WebUI - LTS2023 - ${{ github.run_id }}'
           appname: 'Nuxeo Web UI'
           createprofile: false
           filepath: 'nuxeo-web-ui.zip'
