@@ -4,12 +4,12 @@ description: |
   and uploads the recording as an artifact.
   To trigger recording, include the specified tag (by default "[xvfb_record]") in your commit message.
 inputs:
-  test-command:
+  test_command:
     description: |
       The command to run your tests. This command should start the tests and exit when
       they are done. Example: `npm test` or `pytest tests/`
     required: true
-  video-extension:
+  video_extension:
     description: "The video file extension/format to use (e.g. ogv, mp4, mkv)"
     required: false
     default: "mkv"
@@ -29,16 +29,16 @@ inputs:
     description: "The number of seconds to wait between retry attempts"
     required: false
     default: 10
-  triggering-tag:
-    description: "A tag to add to trrigger the recording (other wise will execute without recording)"
+  record_video:
+    description: "Whether to record video or not (true/false)"
     required: false
-    default: "[xvfb_record]"
+    default: true
 
 runs:
   using: "composite"
   steps:
     - name: Xvfb setup & record
-      if: contains(github.event.head_commit.message, inputs.triggering-tag)
+      if: inputs.record_video == 'true'
       id: record
       run: |
         sudo apt-get update
@@ -52,17 +52,17 @@ runs:
         DEBIAN_FRONTEND: noninteractive
         DISPLAY: :99
         FFREPORT: file=ffmpeg.log:level=info
-        VIDEXT: ${{ inputs.video-extension }}
+        VIDEXT: ${{ inputs.video_extension }}
       working-directory: /tmp
 
-    - name: Run tests using command ${{ inputs.test-command }}
+    - name: Run tests using command ${{ inputs.test_command }}
       uses: nick-fields/retry@v2
       with:
         timeout_minutes: ${{ inputs.timeout_minutes }}
         max_attempts: ${{ inputs.max_attempts }}
         retry_on: ${{ inputs.retry_on }}
         retry_wait_seconds: ${{ inputs.retry_wait_seconds }}
-        command: ${{ inputs.test-command }}
+        command: ${{ inputs.test_command }}
 
     - name: Stop recording
       if: always() && steps.record.outcome == 'success'
@@ -73,10 +73,10 @@ runs:
         kill $FFMPEG
 
     - name: Archive Xvfb recording
-      if: always() && contains(github.event.head_commit.message, inputs.triggering-tag)
+      if: always() && inputs.record_video == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: xvfbrecording
         path: |
-          /tmp/xvfb.${{ inputs.video-extension }}
+          /tmp/xvfb.${{ inputs.video_extension }}
           /tmp/ffmpeg.log
