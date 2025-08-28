@@ -140,7 +140,7 @@ jobs:
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
-          record_video: ${{ contains(github.event.head_commit.message, '[record video]') || github.event_name == 'workflow_call' }}
+          record_video: ${{ contains(github.event.pull_request.labels.*.name, 'video') }}
           max_attempts: 3
 
       - name: Archive cucumber reports
