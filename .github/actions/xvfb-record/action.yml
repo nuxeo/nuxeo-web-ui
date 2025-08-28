@@ -2,7 +2,6 @@ name: "Xvfb recorder"
 description: |
   This action sets up an Xvfb server, runs a specified test command, records the Xvfb session using ffmpeg,
   and uploads the recording as an artifact.
-  To trigger recording, include the specified tag (by default "[xvfb_record]") in your commit message.
 inputs:
   test_command:
     description: |
