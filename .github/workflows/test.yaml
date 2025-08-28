@@ -25,7 +25,7 @@ env:
 jobs:
   unit-test:
     runs-on:
-      group: large-8cpu-runners
+      group: medium-4cpu-runners
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
