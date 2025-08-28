@@ -1,5 +1,8 @@
 name: "Xvfb recorder"
-description: "Record a video of a browser test running in a headless Xvfb environment"
+description: |
+  This action sets up an Xvfb server, runs a specified test command, records the Xvfb session using ffmpeg,
+  and uploads the recording as an artifact.
+  To trigger recording, include the specified tag (by default "[xvfb_record]") in your commit message.
 inputs:
   test-command:
     description: |
@@ -26,11 +29,16 @@ inputs:
     description: "The number of seconds to wait between retry attempts"
     required: false
     default: 10
+  triggering-tag:
+    description: "A tag to add to trrigger the recording (other wise will execute without recording)"
+    required: false
+    default: "[xvfb_record]"
 
 runs:
   using: "composite"
   steps:
     - name: Xvfb setup & record
+      if: contains(github.event.head_commit.message, inputs.triggering-tag)
       id: record
       run: |
         sudo apt-get update
@@ -65,7 +73,7 @@ runs:
         kill $FFMPEG
 
     - name: Archive Xvfb recording
-      if: ${{ always() }}
+      if: always() && contains(github.event.head_commit.message, inputs.triggering-tag)
       uses: actions/upload-artifact@v4
       with:
         name: xvfbrecording
