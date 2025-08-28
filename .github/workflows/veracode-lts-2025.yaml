@@ -171,7 +171,7 @@ jobs:
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.6
         with:
-          scanname: 'Nuxeo WebUI - LTS2025 - ${{ github.run_id }}'
+          version: 'Nuxeo WebUI - LTS2025 - ${{ github.run_id }}'
           appname: 'Nuxeo Web UI'
           createprofile: false
           filepath: 'nuxeo-web-ui.zip'
