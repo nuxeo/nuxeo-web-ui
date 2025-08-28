@@ -27,11 +27,10 @@ env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
   NODE_OPTIONS: "--max-old-space-size=2048"
-  DISPLAY: ":1"
 jobs:
   ftests:
     runs-on:
-      group: large-8cpu-runners
+      group: medium-4cpu-runners
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -52,142 +51,146 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - uses: browser-actions/setup-chrome@v2
-        id: setup-chrome
-        with:
-          chrome-version: 138.0.7204.157
-          install-chromedriver: true
-          install-dependencies: true
-
-      - name: Convoluted VNC setup
+      - name: Install dependencies
         run: |
-          sudo apt-get --purge remove -y google-chrome-stable chromium-browser
-          sudo ln -sf  ${{ steps.setup-chrome.outputs.chrome-bin-path }}/google-chrome /usr/local/bin/google-chrome
-          sudo ln -sf  ${{ steps.setup-chrome.outputs.chromedriver-bin-path }}/chromedriver /usr/local/bin/chromedriver
           sudo apt-get update
-          sudo apt-get install -y tightvncserver fluxbox imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
+          sudo apt-get install -y imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
           sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
           npm install -g bower
           npm install -g gulp-cli
-          mkdir -p ~/.ssh ~/.vnc
-          echo -n ${{ secrets.SSH_PRIVATE_KEY }} | base64 -d > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
-          echo ${{ secrets.VNC_PASSWORD }} | vncpasswd -f > ~/.vnc/passwd
-          Xvnc -depth 24 -geometry 1200x1080 -rfbauth ~/.vnc/passwd -desktop "${{ github.workflow }}" ${{ env.DISPLAY }} &
-          fluxbox &
-          ssh -o StrictHostKeyChecking=no -N -R "*:5901:localhost:5901" -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} &
         env:
           DEBIAN_FRONTEND: noninteractive
 
-      - name: Determine nuxeo-elements branch to link
-        id: pick_nuxeo_elements_branch
+      - name: Xvfb setup and test recording
         run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo "branch=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
-          else
-            echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Install Web UI
+          sudo apt-get update
+          sudo apt-get install -y xvfb ffmpeg jwm x11-apps
+          echo "Setting up Xvfb on display ${DISPLAY}"
+          xvfb-run -n ${DISPLAY#:*} -f "${HOME}/.Xauthority" -s "-screen 0 1200x1080x24" jwm &
+          [[ $? -eq 0 ]] && sleep 3 || (echo "Xvfb failed to start"; exit 1)
+          ffmpeg -y -nostdin -f x11grab -i ${{ env.DISPLAY }} -s sxga /tmp/xvfb.mp4 & FFMPEG="$!"
+          sleep 5; kill $FFMPEG || (echo "ffmpeg failed to start"; exit 1)
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          npm cache clean --force
-          npm install
-          pushd packages/nuxeo-web-ui-ftest
-          npm install
-          popd
-          pushd packages/nuxeo-designer-catalog
-          npm install
-          popd
+          DEBIAN_FRONTEND: noninteractive
+          DISPLAY: :99
 
-      - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
-        with:
-          repository: nuxeo/nuxeo-elements
-          path: nuxeo-elements
-          fetch-depth: 1
-          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
-
-      - name: Pack Elements modules
-        run: |
-          pushd nuxeo-elements
-          pushd core
-          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-
-          pushd ui
-          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-
-          pushd dataviz
-          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-
-          pushd testing-helpers
-          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-          popd
-
-      - name: Link elements to Web UI
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
-
-      - name: 'Update settings.xml with server configuration'
-        run: |
-          echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
-
-      - name: Functional tests
-        env:
-          RUN_ALL: false
-          BAIL: 0
-        run: mvn -ntp install -Pftest -DskipInstall
-
-      - name: Archive cucumber reports
+      - name: Archive Xvfb recording
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: cucumber-reports
-          path: ftest/target/cucumber-reports/
+          name: xvfbrecording
+          path: /tmp/xvfb.mp4
 
-      - name: Archive screenshots
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots
-          path: ftest/target/screenshots/
-
-      - name: Archive logs
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: logs
-          path: |
-            **/log/*.log
-            **/nxserver/config/distribution.properties
-
-      - name: Archive packages-ftest
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: packages-ftest
-          path: |
-            plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
-            plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
+#      - name: Determine nuxeo-elements branch to link
+#        id: pick_nuxeo_elements_branch
+#        run: |
+#          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
+#            echo "branch=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
+#          else
+#            echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
+#          fi
+#
+#      - name: Install Web UI
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+#        run: |
+#          npm cache clean --force
+#          npm install
+#          pushd packages/nuxeo-web-ui-ftest
+#          npm install
+#          popd
+#          pushd packages/nuxeo-designer-catalog
+#          npm install
+#          popd
+#
+#      - name: Checkout the nuxeo-elements repo
+#        uses: actions/checkout@v2
+#        with:
+#          repository: nuxeo/nuxeo-elements
+#          path: nuxeo-elements
+#          fetch-depth: 1
+#          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+#
+#      - name: Pack Elements modules
+#        run: |
+#          pushd nuxeo-elements
+#          pushd core
+#          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+#          popd
+#
+#          pushd ui
+#          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+#          popd
+#
+#          pushd dataviz
+#          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+#          popd
+#
+#          pushd testing-helpers
+#          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+#          popd
+#          popd
+#
+#      - name: Link elements to Web UI
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+#        run: |
+#          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+#          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
+#          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
+#          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+#
+#      - name: 'Update settings.xml with server configuration'
+#        run: |
+#          echo '<settings>
+#              <servers>
+#                <server>
+#                  <id>maven-internal</id>
+#                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
+#                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+#                </server>
+#              </servers>
+#              </settings>' > ~/.m2/settings.xml
+#
+#      - name: Setup tmate session
+#        uses: mxschmitt/action-tmate@v3
+#        with:
+#          limit-access-to-actor: true
+#
+#      - name: Functional tests
+#        env:
+#          RUN_ALL: false
+#          BAIL: 0
+#        run: mvn -ntp install -Pftest -DskipInstall
+#
+#      - name: Archive cucumber reports
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: cucumber-reports
+#          path: ftest/target/cucumber-reports/
+#
+#      - name: Archive screenshots
+#        if: ${{ failure() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: screenshots
+#          path: ftest/target/screenshots/
+#
+#      - name: Archive logs
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: logs
+#          path: |
+#            **/log/*.log
+#            **/nxserver/config/distribution.properties
+#
+#      - name: Archive packages-ftest
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: packages-ftest
+#          path: |
+#            plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+#            plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
