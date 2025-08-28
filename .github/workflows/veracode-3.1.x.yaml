@@ -180,7 +180,7 @@ jobs:
           vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
           vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
           sandboxname: 'master'
-          scantimeout: 600
+          scantimeout: 1200
           include: '*.war, *.zip, *.js, *.html, *.css, *.json'
           criticality: 'High'
           includenewmodules: 'true'
