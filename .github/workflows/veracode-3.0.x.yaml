@@ -8,8 +8,6 @@
 name: Veracode Maintenance 3.0.x
 
 on:
-  schedule:
-    - cron: '0 18 1,15 * *'  # 6:00 PM UTC on 1st and 15th
   workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:
