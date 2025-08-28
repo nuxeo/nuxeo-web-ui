@@ -68,8 +68,9 @@ jobs:
           echo "Setting up Xvfb on display ${DISPLAY}"
           xvfb-run -n ${DISPLAY#:*} -f "${HOME}/.Xauthority" -s "-screen 0 1200x1080x24" jwm &
           [[ $? -eq 0 ]] && sleep 3 || (echo "Xvfb failed to start"; exit 1)
-          ffmpeg -y -nostdin -f x11grab -i ${{ env.DISPLAY }} -s sxga /tmp/xvfb.mp4 & FFMPEG="$!"
-          sleep 5; kill $FFMPEG || (echo "ffmpeg failed to start"; exit 1)
+          cd /tmp; nohup ffmpeg -y -nostdin -f x11grab -i ${{ env.DISPLAY }} -s sxga /tmp/xvfb.ogv & FFMPEG="$!"
+          sleep 5; echo "Now killing $(ps --no-headers -C ffmpeg) (registred PID: $FFMPEG)";
+          kill $FFMPEG || (echo "ffmpeg failed to start"; exit 1)
         env:
           DEBIAN_FRONTEND: noninteractive
           DISPLAY: :99
@@ -79,7 +80,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: xvfbrecording
-          path: /tmp/xvfb.mp4
+          path: |
+            /tmp/xvfb.ogv
+            /tmp/nohup.out
 
 #      - name: Determine nuxeo-elements branch to link
 #        id: pick_nuxeo_elements_branch
