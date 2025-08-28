@@ -1,0 +1,53 @@
+name: "Xvfb recorder"
+description: "Record a video of a browser test running in a headless Xvfb environment"
+inputs:
+  test-command:
+    description: |
+      The command to run your tests. This command should start the tests and exit when
+      they are done. Example: `npm test` or `pytest tests/`
+    required: true
+  video-extension:
+    description: "The video file extension/format to use (e.g. ogv, mp4, mkv)"
+    required: false
+    default: "mkv"
+runs:
+  using: "composite"
+  steps:
+    - name: Xvfb setup & record
+      id: record
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb ffmpeg jwm x11-apps
+        echo "Setting up Xvfb on display ${DISPLAY}"
+        xvfb-run -n ${DISPLAY#:*} -f "${HOME}/.Xauthority" -s "-screen 0 1200x1080x24" jwm &
+        [[ $? -eq 0 ]] && sleep 3 || (echo "Xvfb failed to start"; exit 1)
+        ffmpeg -y -nostdin -f x11grab -i ${{ env.DISPLAY }} -s sxga recording.$VIDEXT > ffmpeg.log 2>&1 & FFMPEG="$!"
+        echo "FFMPEG=$FFMPEG" >> $GITHUB_OUTPUT
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        DISPLAY: :99
+        FFREPORT: file=ffmpeg.log:level=info
+        VIDEXT: ${{ inputs.video-extension }}
+      working-directory: /tmp
+
+    - name: Run tests
+      run: |
+        echo "Running tests with command: ${{ inputs.test-command }}"
+        exec ${{ inputs.test-command }}
+
+    - name: Stop recording
+      if: always() && steps.record.outcome == 'success'
+      env:
+        FFMPEG: ${{ steps.record.outputs.FFMPEG }}
+      run: |
+        echo "Now killing $(ps --no-headers -C ffmpeg) (registred PID: $FFMPEG)";
+        kill $FFMPEG
+
+    - name: Archive Xvfb recording
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: xvfbrecording
+        path: |
+          /tmp/xvfb.${{ inputs.video-extension }}
+          /tmp/ffmpeg.log
