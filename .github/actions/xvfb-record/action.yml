@@ -10,6 +10,23 @@ inputs:
     description: "The video file extension/format to use (e.g. ogv, mp4, mkv)"
     required: false
     default: "mkv"
+  timeout_minutes:
+    description: "The maximum time (in minutes) to allow the test command to run"
+    required: false
+    default: 60
+  max_attempts:
+    description: "The maximum number of attempts to run the test command"
+    required: false
+    default: 1
+  retry_on:
+    description: "A comma-separated list of exit codes that should trigger a retry (any, error or timeout)"
+    required: false
+    default: error
+  retry_wait_seconds:
+    description: "The number of seconds to wait between retry attempts"
+    required: false
+    default: 10
+
 runs:
   using: "composite"
   steps:
@@ -30,10 +47,14 @@ runs:
         VIDEXT: ${{ inputs.video-extension }}
       working-directory: /tmp
 
-    - name: Run tests
-      run: |
-        echo "Running tests with command: ${{ inputs.test-command }}"
-        exec ${{ inputs.test-command }}
+    - name: Run tests using command ${{ inputs.test-command }}
+      uses: nick-fields/retry@v2
+      with:
+        timeout_minutes: ${{ inputs.timeout_minutes }}
+        max_attempts: ${{ inputs.max_attempts }}
+        retry_on: ${{ inputs.retry_on }}
+        retry_wait_seconds: ${{ inputs.retry_wait_seconds }}
+        command: ${{ inputs.test-command }}
 
     - name: Stop recording
       if: always() && steps.record.outcome == 'success'
