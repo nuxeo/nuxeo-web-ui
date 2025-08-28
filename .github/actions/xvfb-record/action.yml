@@ -74,7 +74,7 @@ runs:
       env:
         FFMPEG: ${{ steps.record.outputs.FFMPEG }}
       run: |
-        echo "Now killing $(ps --no-headers -C ffmpeg) (registred PID: $FFMPEG)";
+        echo "Now killing PID $FFMPEG ($(ps --no-headers -fp $FFMPEG))"
         kill $FFMPEG
 
     - name: Archive Xvfb recording
