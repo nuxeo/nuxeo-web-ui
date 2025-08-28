@@ -9,7 +9,7 @@ name: Veracode LTS-2025
 
 on:
   schedule:
-    - cron: '0 19 1,15 * *'   # 7:00 PM UTC on 1st and 15th
+    - cron: '0 19 * * *'   # 7:00 PM UTC daily
   workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:
@@ -172,13 +172,14 @@ jobs:
       - name: Veracode Upload And Scan
         uses: veracode/veracode-uploadandscan-action@0.2.6
         with:
+          version: 'Nuxeo WebUI - LTS2025 - ${{ github.run_id }}'
           appname: 'Nuxeo Web UI'
           createprofile: false
           filepath: 'nuxeo-web-ui.zip'
           vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
           vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
           sandboxname: 'master'
-          scantimeout: 600
+          scantimeout: 1200
           include: '*.war, *.zip, *.js, *.html, *.css, *.json'
           criticality: 'High'
           includenewmodules: 'true'
