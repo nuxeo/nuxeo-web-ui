@@ -100,7 +100,7 @@ Polymer({
         cursor: pointer;
       }
       a:hover {
-        color: var(--nuxeo-selection-toolbar-link-hover, #000);
+        color: var(--nuxeo-selection-toolbar-link-hover, #66ffff);
       }
     </style>
 
@@ -190,11 +190,36 @@ Polymer({
 
   toogleSelectedItemsPopup(e) {
     e.preventDefault();
-    this.$$('#selectedItemsPopup').toggle();
+    this._lastFocused = e.currentTarget;
+
+    const dialog = this.$$('#selectedItemsPopup');
+    if (dialog) {
+      dialog.toggle();
+      dialog.addEventListener(
+        'iron-overlay-closed',
+        () => {
+          if (this._lastFocused) {
+            this._lastFocused.focus();
+          }
+        },
+        { once: true },
+      );
+    }
   },
 
   clearSelection(e) {
     e.preventDefault();
     this.fire('clear-selected-items');
+  },
+
+  ready() {
+    const dialog = this.$$('#selectedItemsPopup');
+    if (dialog) {
+      dialog.addEventListener('iron-overlay-closed', () => {
+        if (this._lastFocused) {
+          this._lastFocused.focus();
+        }
+      });
+    }
   },
 });

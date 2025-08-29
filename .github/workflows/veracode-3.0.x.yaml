@@ -7,9 +7,8 @@
  
 name: Veracode Maintenance 3.0.x
 
-on:
-  schedule:
-    - cron: '30 14 * * *'   # 14:30 UTC = 8:00 PM IST
+#on:
+#  workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:
   REFERENCE_BRANCH: maintenance-3.0.x
