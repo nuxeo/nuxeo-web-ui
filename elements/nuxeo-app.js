@@ -729,7 +729,7 @@ Polymer({
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
 
     this.$.drawerPanel.addEventListener('opened-changed', () => {
-      this.$.drawerPanel.parentElement.notifyResize?.();
+      this.$.drawerPanel.parentElement.notifyResize();
     });
 
     const { toast } = this.$;
