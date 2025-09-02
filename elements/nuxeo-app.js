@@ -433,7 +433,7 @@ text-decoration: none;
       <app-drawer id="drawerMenu" swipe-open align$="[[_drawerAlign(_isRTL)]]"">
         <div role="list">
           <!-- logo -->
-          <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
+          <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection" tabindex="-1">
             <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
           </a>
 
@@ -794,8 +794,8 @@ text-decoration: none;
   },
 
   skipLinkEvent() {
-    const {skipLink} = this.$;
-    const {mainContent} = this.$;
+    const { skipLink } = this.$;
+    const { mainContent } = this.$;
     let keyboardUsed = false;
 
     function handleFirstTab(e) {
@@ -803,7 +803,6 @@ text-decoration: none;
         keyboardUsed = true;
 
         e.preventDefault(); // stop normal tab behavior
-        skipLink.style.top = '0'; // show skip link
         skipLink.focus({ preventScroll: true }); // focus skip link
 
         document.removeEventListener('keydown', handleFirstTab);
@@ -819,10 +818,9 @@ text-decoration: none;
       document.addEventListener('keydown', handleFirstTab);
     }
 
-    // Hide skip link if user switches to mouse
+    // Reset keyboard state on mouse
     document.addEventListener('mousedown', () => {
       keyboardUsed = false;
-      skipLink.style.top = '-40px';
       document.addEventListener('keydown', handleFirstTab);
     });
 
@@ -840,11 +838,6 @@ text-decoration: none;
       e.preventDefault();
       mainContent.focus();
       mainContent.scrollIntoView({ behavior: 'smooth' });
-    });
-
-    // Hide skip link when focus leaves
-    skipLink.addEventListener('blur', () => {
-      skipLink.style.top = '-40px';
     });
   },
   _checkRtl() {
