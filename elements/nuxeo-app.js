@@ -301,6 +301,12 @@ Polymer({
               background-color: var(--nuxeo-drawer-background);
             }
 
+            #drawerToggle svg,
+            #drawerToggle g,
+            #drawerToggle path {
+              tabindex: -1; 
+          }
+
             :host([dir='rtl']) #drawerToggle {
               right: 6px;
             }
@@ -373,7 +379,32 @@ Polymer({
     overflow: auto;
   }
 
+  .skip-link {
+  position: absolute;
+  top: -40px; /* keep it off-screen initially */
+  left: 0;
+  background: lightgrey;
+  border: 1px dotted gray;
+  color: #000;
+  padding: 8px 16px;
+  z-index: 1000;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0; /* slide down into view */
+}
+
+.skip-link:hover {
+outline: none;
+text-decoration: none;
+}
+
+
     </style>
+
+    <a href="#main-content" id="skipLink" class="skip-link">Skip to main content</a>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
@@ -475,7 +506,7 @@ Polymer({
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout id="mainContent">
+      <app-header-layout id="mainContent" tabindex="-1">
         <app-header reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button
@@ -484,12 +515,13 @@ Polymer({
               on-tap="_openDrawer"
               hidden$="[[!isNarrow]]"
               aria-label$="[[i18n('command.menu')]]"
+              tabindex="-1"
             ></paper-icon-button>
           </app-toolbar>
         </app-header>
 
         <main>
-          <nuxeo-suggester id="suggester" tabindex="0"></nuxeo-suggester>
+          <nuxeo-suggester id="suggester"></nuxeo-suggester>
           <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot name="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
@@ -723,6 +755,7 @@ Polymer({
   ],
 
   ready() {
+    this.skipLinkEvent();
     this._checkRtl();
 
     this.$.drawerMenu.opened = false; // close
@@ -760,6 +793,60 @@ Polymer({
     });
   },
 
+  skipLinkEvent() {
+    const {skipLink} = this.$;
+    const {mainContent} = this.$;
+    let keyboardUsed = false;
+
+    function handleFirstTab(e) {
+      if (!keyboardUsed && e.key === 'Tab') {
+        keyboardUsed = true;
+
+        e.preventDefault(); // stop normal tab behavior
+        skipLink.style.top = '0'; // show skip link
+        skipLink.focus({ preventScroll: true }); // focus skip link
+
+        document.removeEventListener('keydown', handleFirstTab);
+      }
+    }
+
+    // Attach listener regardless of DOMContentLoaded state
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('keydown', handleFirstTab);
+      });
+    } else {
+      document.addEventListener('keydown', handleFirstTab);
+    }
+
+    // Hide skip link if user switches to mouse
+    document.addEventListener('mousedown', () => {
+      keyboardUsed = false;
+      skipLink.style.top = '-40px';
+      document.addEventListener('keydown', handleFirstTab);
+    });
+
+    // Activate skip link with Enter or Space
+    skipLink.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        mainContent.focus();
+        mainContent.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    // Activate on click
+    skipLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      mainContent.focus();
+      mainContent.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Hide skip link when focus leaves
+    skipLink.addEventListener('blur', () => {
+      skipLink.style.top = '-40px';
+    });
+  },
   _checkRtl() {
     const dir = document.documentElement.getAttribute('dir');
     this._isRTL = dir === 'rtl';
@@ -1664,5 +1751,16 @@ Polymer({
    */
   _isEmpty(obj) {
     return Object.keys(obj).length === 0;
+  },
+
+  _focusFirstMenuItem() {
+    const drawer = this.$.drawerMenu;
+    if (!drawer) {
+      return;
+    }
+    const firstItem = drawer.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
+    if (firstItem) {
+      firstItem.focus();
+    }
   },
 });
