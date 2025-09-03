@@ -104,304 +104,285 @@ setPassiveTouchGestures(true);
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
-            /**
+      /**
               * iOS fix for NXP-25986: prevent \`paper-header-panel\` from creating a new stacking context
               * for more details, see: https://github.com/PolymerElements/paper-dialog/issues/44#issuecomment-172013206
               * this will only work for iOS since it's the only supporting \`-webkit-overflow-scrolling\`
               */
-            :host {
-              --paper-header-panel-container: {
-                -webkit-overflow-scrolling: auto;
-              }
-            }
 
-            paper-header-panel,
-            iron-pages paper-header-panel {
-              --paper-header-panel-body: {
-                background: var(--nuxeo-page-background);
-              }
-              height: 100%;
-            }
+      :host {
+        --app-header-background-rear-layer: {
+          -webkit-overflow-scrolling: auto;
+        };
+      }
 
-            paper-drawer-panel {
-              top: var(--nuxeo-app-top, 0);
-              bottom: var(--nuxeo-app-bottom, 0);
-              height: calc(100% - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
-            }
+      /* Layout base */
+      app-drawer-layout {
+        display: flex;
+        flex-direction: row;
+      }
 
-            paper-drawer-panel[narrow] {
-              --paper-drawer-panel-left-drawer-container: {
-                z-index: 100;
-              }
-              --paper-drawer-panel-right-drawer-container: {
-                z-index: 100;
-              }
-              --paper-drawer-panel-scrim: {
-                z-index: 2;
-              }
-            }
+      /* Drawer */
+      app-drawer {
+        --app-drawer-width: 350px;
+        top: var(--nuxeo-app-top, 0);
+        bottom: var(--nuxeo-app-bottom, 0);
+        height: calc(100% - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+      }
 
-            /* logo */
-            #logo {
-              position: fixed;
-              width: var(--nuxeo-sidebar-width);
-              height: 53px;
-              top: var(--nuxeo-app-top);
-              z-index: 102;
-              box-sizing: border-box;
-              outline: none;
-              background-color: var(--nuxeo-sidebar-background);
-            }
+      /* Main content */
+      app-header-layout {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        margin: 20px;
+        background: var(--nuxeo-page-background);
+        height: 100%;
+      }
 
-            :host([dir='ltr']) #logo {
-              left: 0;
-              right: auto;
-            }
+      main {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+      }
 
-            #logo img {
-              width: var(--nuxeo-sidebar-width);
-              height: 53px;
-            }
+      /* Narrow mode */
+      app-drawer-layout[narrow] app-drawer {
+        z-index: 100;
+      }
+      app-drawer-layout[narrow]::part(scrim) {
+        z-index: 2;
+      }
 
-            :host([dir='rtl']) #logo {
-              right: 0px;
-              height: 53px;
-              left: auto;
-            }
+      /* logo */
+      #logo {
+        position: fixed;
+        width: var(--nuxeo-sidebar-width);
+        height: 53px;
+        top: var(--nuxeo-app-top);
+        z-index: 102;
+        box-sizing: border-box;
+        outline: none;
+        background-color: var(--nuxeo-sidebar-background);
+      }
 
-            /* menu */
-            #menu {
-              @apply --nuxeo-sidebar;
-              position: fixed;
-              width: var(--nuxeo-sidebar-width);
-              height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
-              z-index: 100;
-              padding: 0;
-              padding-top: 54px;
-              overflow: auto;
-              display: flex;
-              flex-direction: column;
-            }
+      :host([dir='ltr']) #logo {
+        left: 0;
+        right: auto;
+      }
 
-            #logo:hover img {
-              background: rgba(0, 0, 0, 0.2);
-              color: var(--nuxeo-sidebar-menu-hover);
-            }
+      #logo img {
+        width: var(--nuxeo-sidebar-width);
+        height: 53px;
+      }
 
-            #logo:hover img {
-              filter: brightness(110%);
-              -webkit-filter: brightness(110%);
-            }
+      :host([dir='rtl']) #logo {
+        right: 0px;
+        height: 53px;
+        left: auto;
+      }
 
-            /* Apply margin-top: auto to all settings and then reset them, except the first one */
-            #menu > .settings {
-              margin-top: auto;
-            }
+      /* menu */
+      #menu {
+        @apply --nuxeo-sidebar;
+        position: fixed;
+        width: var(--nuxeo-sidebar-width);
+        height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        z-index: 100;
+        padding: 0;
+        padding-top: 54px;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+      }
 
-            #menu > .settings ~ .settings {
-              margin: 0;
-              order: 1;
-            }
-              #drawer {
-                width: var(--nuxeo-sidebar-width); /* same as main drawer width */
-                box-sizing: border-box; /* ensures padding doesn't increase width */
-                overflow: hidden;
-              }
+      #logo:hover img {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
 
-              #drawer-pages {
-                width: 100%; /* take full width of drawer-content */
-            }
-            @media (max-width: 1024px), (max-height: 700px) {
-              #drawer .toggle {
-                display: none;
-              }
-            }
+      #logo:hover img {
+        filter: brightness(110%);
+        -webkit-filter: brightness(110%);
+      }
 
-            /* drawer */
-            #drawer {
-              overflow: auto;
-              width: 100%;
-            }
+      /* Apply margin-top: auto to all settings and then reset them, except the first one */
+      #menu > .settings {
+        margin-top: auto;
+      }
 
-            #drawer .toggle {
-              position: absolute;
-              right: -16px;
-              top: 0;
-              width: 16px;
-              height: 100%;
-              cursor: pointer;
-            }
+      #menu > .settings ~ .settings {
+        margin: 0;
+        order: 1;
+      }
+      #drawer {
+        width: var(--nuxeo-sidebar-width); /* same as main drawer width */
+        box-sizing: border-box; /* ensures padding doesn't increase width */
+        overflow: hidden;
+      }
 
-            :host([dir='rtl']) #drawer .toggle {
-              left: -16px;
-              right: auto;
-            }
+      #drawer-pages {
+        width: 100%; /* take full width of drawer-content */
+      }
+      @media (max-width: 1024px), (max-height: 700px) {
+        #drawer .toggle {
+          display: none;
+        }
+      }
 
-            #drawer .toggle iron-icon {
-              visibility: hidden;
-              color: var(--nuxeo-drawer-background);
-              background-color: var(--nuxeo-drawer-text);
-              width: 16px;
-              height: 48px;
-              top: calc(50% - 24px);
-              opacity: 0.6;
-            }
+      /* drawer */
+      #drawer {
+        overflow: auto;
+        width: 100%;
+      }
 
-            #drawer:hover .toggle iron-icon,
-            #drawer .toggle:hover iron-icon {
-              visibility: visible;
-            }
+      #drawer .toggle {
+        position: absolute;
+        right: -16px;
+        top: 0;
+        width: 16px;
+        height: 100%;
+        cursor: pointer;
+      }
 
-            #drawer iron-pages {
-              @apply --layout-vertical;
-              color: var(--nuxeo-drawer-text);
-              width: calc(100% - var(--nuxeo-sidebar-width));
-              height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
-              margin-left: var(--nuxeo-sidebar-width);
-              background-color: var(--nuxeo-drawer-background);
-            }
+      :host([dir='rtl']) #drawer .toggle {
+        left: -16px;
+        right: auto;
+      }
 
-            :host([dir='rtl']) #drawer iron-pages {
-              margin-right: var(--nuxeo-sidebar-width);
-              margin-left: 0;
-            }
+      #drawer .toggle iron-icon {
+        visibility: hidden;
+        color: var(--nuxeo-drawer-background);
+        background-color: var(--nuxeo-drawer-text);
+        width: 16px;
+        height: 48px;
+        top: calc(50% - 24px);
+        opacity: 0.6;
+      }
 
-            #drawer nuxeo-menu-item:hover,
-            #drawer list-item:hover {
-              @apply --nuxeo-block-hover;
-            }
+      #drawer:hover .toggle iron-icon,
+      #drawer .toggle:hover iron-icon {
+        visibility: visible;
+      }
 
-            #drawer .list-item.selected,
-            #drawer nuxeo-menu-item.iron-selected,
-            #drawer .list-item:focus,
-            #drawer nuxeo-menu-item:focus,
-            #drawer .list-item.selected:focus,
-            #drawer nuxeo-menu-item.iron-selected:focus {
-              @apply --nuxeo-block-selected;
-            }
+      #drawer iron-pages {
+        @apply --layout-vertical;
+        color: var(--nuxeo-drawer-text);
+        width: calc(100% - var(--nuxeo-sidebar-width));
+        height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        margin-left: var(--nuxeo-sidebar-width);
+        background-color: var(--nuxeo-drawer-background);
+      }
 
-            #drawer nuxeo-menu-item {
-              @apply --nuxeo-sidebar-item-theme;
-              --nuxeo-menu-item-link {
-                @apply --nuxeo-sidebar-item-link;
-              }
-            }
+      :host([dir='rtl']) #drawer iron-pages {
+        margin-right: var(--nuxeo-sidebar-width);
+        margin-left: 0;
+      }
 
-            #drawer .profile nuxeo-menu-item:last-of-type {
-              @apply --layout-vertical;
-              border: none;
-              justify-content: flex-end;
-            }
+      #drawer nuxeo-menu-item:hover,
+      #drawer list-item:hover {
+        @apply --nuxeo-block-hover;
+      }
 
-            #drawerToggle {
-              position: absolute;
-              top: 5px;
-              left: 6px;
-              z-index: 99;
-              background-color: var(--nuxeo-drawer-background);
-            }
+      #drawer .list-item.selected,
+      #drawer nuxeo-menu-item.iron-selected,
+      #drawer .list-item:focus,
+      #drawer nuxeo-menu-item:focus,
+      #drawer .list-item.selected:focus,
+      #drawer nuxeo-menu-item.iron-selected:focus {
+        @apply --nuxeo-block-selected;
+      }
 
-            #drawerToggle svg,
-            #drawerToggle g,
-            #drawerToggle path {
-              tabindex: -1; 
-          }
+      #drawer nuxeo-menu-item {
+        @apply --nuxeo-sidebar-item-theme;
+        --nuxeo-menu-item-link {
+          @apply --nuxeo-sidebar-item-link;
+        }
+      }
 
-            :host([dir='rtl']) #drawerToggle {
-              right: 6px;
-            }
+      #drawer .profile nuxeo-menu-item:last-of-type {
+        @apply --layout-vertical;
+        border: none;
+        justify-content: flex-end;
+      }
 
-            nuxeo-document-create-button.admin {
-              display: none;
-            }
+      #drawerToggle {
+        position: absolute;
+        top: 5px;
+        left: 6px;
+        z-index: 99;
+        background-color: var(--nuxeo-drawer-background);
+      }
 
-            #snackbarPanel {
-              position: absolute;
-              bottom: 0;
-              left: 0px;
-              display: flex;
-              flex-direction: column-reverse;
-              margin-left: 50px;
-            }
+      #drawerToggle svg,
+      #drawerToggle g,
+      #drawerToggle path {
+        tabindex: -1;
+      }
 
-            :host([dir='rtl']) #snackbarPanel {
-              left: auto;
-              right: 0px;
-              margin-right: 50px;
-              margin-left: 0px;
-            }
+      :host([dir='rtl']) #drawerToggle {
+        right: 6px;
+      }
 
-            mwc-snackbar {
-              position: relative !important;
-              left: 0 !important;
-              top: 0 !important;
-              z-index: 103;
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              color: white;
-              --mdc-typography-body2-font-size: 14px;
-            }
+      nuxeo-document-create-button.admin {
+        display: none;
+      }
 
-            :host([dir='rtl']) mwc-snackbar {
-              right: 0 !important;
-              left: auto !important;
-            }
+      #snackbarPanel {
+        position: absolute;
+        bottom: 0;
+        left: 0px;
+        display: flex;
+        flex-direction: column-reverse;
+        margin-left: 50px;
+      }
 
-             
-            html, body, app-drawer-layout, app-header-layout, main {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
+      :host([dir='rtl']) #snackbarPanel {
+        left: auto;
+        right: 0px;
+        margin-right: 50px;
+        margin-left: 0px;
+      }
 
+      mwc-snackbar {
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+        z-index: 103;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+        --mdc-typography-body2-font-size: 14px;
+      }
 
-  app-drawer-layout {
-    display: flex;
-    flex-direction: row; /* Drawer on the left, main content on the right */
-  }
+      :host([dir='rtl']) mwc-snackbar {
+        right: 0 !important;
+        left: auto !important;
+      }
 
-  app-drawer {
-    flex: 0 0 var(--nuxeo-sidebar-width); /* fixed width drawer */
-    --app-drawer-width: var(--nuxeo-sidebar-width);
-  }
+      .skip-link {
+        position: absolute;
+        top: -40px; /* keep it off-screen initially */
+        left: 0;
+        background: lightgrey;
+        border: 1px dotted gray;
+        color: #000;
+        padding: 8px 16px;
+        z-index: 1000;
+        text-decoration: none;
+        transition: top 0.2s ease;
+      }
 
-  app-header-layout {
-    flex: 1 1 auto; /* main content fills remaining width */
-    display: flex;
-    flex-direction: column;
-  }
+      .skip-link:focus {
+        top: 0; /* slide down into view */
+      }
 
-  main {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-  }
-
-  .skip-link {
-  position: absolute;
-  top: -40px; /* keep it off-screen initially */
-  left: 0;
-  background: lightgrey;
-  border: 1px dotted gray;
-  color: #000;
-  padding: 8px 16px;
-  z-index: 1000;
-  text-decoration: none;
-  transition: top 0.2s ease;
-}
-
-.skip-link:focus {
-  top: 0; /* slide down into view */
-}
-
-.skip-link:hover {
-outline: none;
-text-decoration: none;
-}
-
-
+      .skip-link:hover {
+        outline: none;
+        text-decoration: none;
+      }
     </style>
 
     <a href="#main-content" id="skipLink" class="skip-link">Skip to main content</a>
@@ -430,8 +411,14 @@ text-decoration: none;
 
     <app-drawer-layout id="drawerPanel" fullbleed responsive-width="720px">
       <!-- Drawer -->
-      <app-drawer id="drawerMenu" swipe-open align$="[[_drawerAlign(_isRTL)]]"">
-        <div role="list">
+      <app-drawer
+        id="drawerMenu"
+        swipe-open
+        align$="[[_drawerAlign(_isRTL)]]"
+        style="width:350px"
+        opened="{{drawerOpened}}"
+      >
+        <div role="list" style="width:350px">
           <!-- logo -->
           <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection" tabindex="-1">
             <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
@@ -466,7 +453,7 @@ text-decoration: none;
           </paper-listbox>
 
           <!-- drawer content -->
-          <div id="drawer">
+          <div id="drawer" style="width:350px">
             <iron-pages
               id="drawer-pages"
               selected="[[selectedTab]]"
