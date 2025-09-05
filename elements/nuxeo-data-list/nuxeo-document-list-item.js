@@ -250,6 +250,7 @@ Polymer({
 
     index: {
       type: Number,
+      reflectToAttribute: true,
     },
   },
 

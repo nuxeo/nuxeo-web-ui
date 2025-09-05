@@ -208,11 +208,11 @@ Polymer({
     </style>
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
-      <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
+      <div class="thumbnailContainer" on-tap="handleClick" on-keydown="_handleKeydown" tabindex="0">
         <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" tabindex="0">
+        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick"  tabindex="0">
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
@@ -265,6 +265,7 @@ Polymer({
 
     index: {
       type: Number,
+      reflectToAttribute: true
     },
   },
 
@@ -324,4 +325,53 @@ Polymer({
   _computeTitle(doc) {
     return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
   },
+
+  _handleKeydown(e) {
+        const index = parseInt(e.currentTarget.getAttribute('index'), 10);
+        console.log(index);
+        const totalItems = this.nxProvider.resultsCount;
+        let newIndex = index;
+
+        switch (e.key) {
+          case 'ArrowRight':
+          case 'ArrowDown':
+            if (index < totalItems - 1) newIndex = index + 1;
+            this._focusGridItem(newIndex, e.currentTarget);
+            break;
+          case 'ArrowLeft':
+          case 'ArrowUp':
+            if (index > 0) newIndex = index - 1;
+            this._focusGridItem(newIndex, e.currentTarget);
+            break;
+          case 'Enter':
+          case ' ':
+            // e.preventDefault();
+            //  this._navigate(e);
+            if (typeof e.currentTarget['_toogleSelect'] === 'function') {
+              e.currentTarget._toogleSelect(e);
+            } else {
+              // fallback: fire same event it would fire
+              e.currentTarget.dispatchEvent(
+                new CustomEvent('selected', {
+                  detail: { index, shiftKey: e.shiftKey },
+                  bubbles: true,
+                  composed: true,
+                }),
+              );
+            }
+            return;
+          default:
+            return; // ignore other keys
+        }
+        
+      },
+
+      _focusGridItem(index, element) {
+        console.log(element);
+        const focusElem = element && element.tagName.toLowerCase();
+        const items = this.shadowRoot.querySelectorAll(focusElem);
+        if (items[index]) {
+          items[index].focus();
+        }
+      },
 });

@@ -54,6 +54,7 @@ limitations under the License.
             index="[[index]]"
             on-navigate="_navigate"
             selected-items="[[selectedItems]]"
+            on-keydown="_handleKeydown"
           >
           </nuxeo-document-grid-thumbnail>
         </template>
@@ -204,10 +205,12 @@ limitations under the License.
       >
         <template>
           <nuxeo-document-list-item
+            tabindex$="{{_computeTabAndLastIndex(index)}}"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
             on-navigate="_navigate"
+            on-keydown="_handleKeydown"
             selected-items="[[selectedItems]]"
           >
           </nuxeo-document-list-item>
@@ -258,6 +261,50 @@ limitations under the License.
         const tabindex = index + 1;
         this._lastIndex = this.nxProvider.resultsCount;
         return tabindex.toString();
+      },
+
+      _handleKeydown(e) {
+        const index = parseInt(e.currentTarget.getAttribute('index'), 10);
+        const totalItems = this.nxProvider.resultsCount;
+        let newIndex = index;
+
+        switch (e.key) {
+          case 'ArrowRight':
+          case 'ArrowDown':
+            if (index < totalItems - 1) newIndex = index + 1;
+            break;
+          case 'ArrowLeft':
+          case 'ArrowUp':
+            if (index > 0) newIndex = index - 1;
+            break;
+          case 'Enter':
+          case ' ':
+            e.preventDefault();
+            if (typeof e.currentTarget.handleClick === 'function') {
+              // 🔑 delegate to child’s click handler
+              e.currentTarget.handleClick({
+                type: 'keydown',
+                ctrlKey: e.ctrlKey,
+                shiftKey: e.shiftKey,
+                metaKey: e.metaKey,
+                button: 0, // left mouse button equivalent
+                detail: { sourceEvent: e },
+              });
+            }
+            return;
+          default:
+            return;
+        }
+
+        this._focusGridItem(newIndex);
+      },
+      _focusGridItem(index) {
+       //  console.log(element);
+        const focusElem = element && element.tagName.toLowerCase();
+        const items = this.shadowRoot.querySelectorAll(focusElem);
+        if (items[index]) {
+          items[index].focus();
+        }
       },
     });
   </script>
