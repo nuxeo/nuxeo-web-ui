@@ -28,7 +28,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 /**
 `nuxeo-analytics`
-@group Nuxeo UI
+@group nuxeo UI
 @element nuxeo-analytics
 */
 Polymer({
@@ -74,8 +74,13 @@ Polymer({
   ready() {
     if (super.ready) super.ready();
     const listbox = this.$$('paper-listbox');
+
     listbox.addEventListener('keydown', (e) => {
       e.preventDefault();
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        return;
+      }
       if (e.key === 'ArrowLeft') {
         listbox.selectPrevious();
         listbox.selectedItem.focus();
