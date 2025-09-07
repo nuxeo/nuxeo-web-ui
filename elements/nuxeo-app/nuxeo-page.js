@@ -111,13 +111,13 @@ Polymer({
     </style>
 
     <div class="page">
-      <div class="toolbar" id="toolbar">
+      <div class="toolbar" id="toolbar" role="banner">
         <slot id="header" slot="header" name="header"></slot>
       </div>
-      <div id="tabs" role="list">
+      <div id="tabs" role="navigation">
         <slot name="tabs"></slot>
       </div>
-      <div id="content">
+      <div id="content" role="main">
         <slot></slot>
       </div>
     </div>
