@@ -397,8 +397,14 @@ Polymer({
 
     <app-drawer-layout id="drawerPanel" fullbleed responsive-width="720px">
       <!-- Drawer -->
-      <app-drawer id="drawerMenu" swipe-open align$="[[_drawerAlign(_isRTL)]]" opened="{{drawerOpened}}">
-        <div role="list" style="width: {{drawerWidth}}">
+      <app-drawer
+        id="drawerMenu"
+        swipe-open
+        align$="[[_drawerAlign(_isRTL)]]"
+        opened="{{drawerOpened}}"
+        hidden$="[[isDrawerHidden(isNarrow, drawerOpened)]]"
+      >
+        <div role="list">
           <!-- logo -->
           <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection" tabindex="-1">
             <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
@@ -679,6 +685,11 @@ Polymer({
       reflectToAttribute: true,
       observer: '_directionChanged',
     },
+    isNarrow: {
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true,
+    },
   },
 
   listeners: {
@@ -720,11 +731,15 @@ Polymer({
   observers: [
     '_computeSharedActionContext(currentUser)',
     '_updateTitle(page, i18n, currentDocument, searchForm, currentTask, selectedAdminTab)',
+    '_handleNarrowChange(isNarrow)',
   ],
 
   ready() {
     this.skipLinkEvent();
     this._checkRtl();
+
+    this._updateIsNarrow();
+    window.addEventListener('resize', this._updateIsNarrow.bind(this));
 
     this.$.drawerMenu.opened = false; // close
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
@@ -759,6 +774,11 @@ Polymer({
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
     });
+  },
+
+  disconnectedCallback() {
+    window.removeEventListener('resize', this._updateIsNarrow.bind(this));
+    super.disconnectedCallback();
   },
 
   skipLinkEvent() {
@@ -1716,6 +1736,23 @@ Polymer({
     const firstItem = drawer.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
     if (firstItem) {
       firstItem.focus();
+    }
+  },
+
+  _updateIsNarrow() {
+    this.isNarrow = window.innerWidth <= 720;
+  },
+
+  isDrawerHidden(isNarrow, drawerOpened) {
+    if (isNarrow) {
+      return !drawerOpened;
+    }
+    return false;
+  },
+
+  _handleNarrowChange(isNarrow) {
+    if (isNarrow) {
+      this.drawerOpened = false;
     }
   },
 });
