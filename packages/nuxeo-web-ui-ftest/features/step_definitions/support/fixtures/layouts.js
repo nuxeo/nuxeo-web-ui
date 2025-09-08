@@ -118,8 +118,55 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-date-picker',
-  (element) => moment(element.$('vaadin-date-picker input').getValue(), global.dateFormat).format(global.dateFormat),
+  async (element) => {
+    // Try custom-date-picker first, fallback to vaadin-date-picker for backward compatibility
+    try {
+      const customInput = await element.$('custom-date-picker input');
+      if (await customInput.isExisting()) {
+        const value = await customInput.getValue();
+        return moment(value, global.dateFormat).format(global.dateFormat);
+      }
+    } catch (e) {
+      // Fallback to vaadin-date-picker
+    }
+    return moment(await element.$('vaadin-date-picker input').getValue(), global.dateFormat).format(global.dateFormat);
+  },
   async (element, value) => {
+    // Try custom-date-picker first, fallback to vaadin-date-picker for backward compatibility
+    try {
+      const customInput = await element.$('custom-date-picker input');
+      if (await customInput.isExisting()) {
+        // Clear existing value if any
+        const currentValue = await customInput.getValue();
+        if (currentValue) {
+          const clearButton = await element.$(
+            'custom-date-picker button[aria-label*="clear"], custom-date-picker .clear-button',
+          );
+          if (await clearButton.isExisting()) {
+            await clearButton.click();
+          } else {
+            // Clear by selecting all and deleting
+            await customInput.click();
+            await driver.keys(['Control', 'a']);
+            await driver.keys('Delete');
+          }
+        }
+
+        // Set the new value
+        await customInput.click();
+        await customInput.setValue(value);
+
+        // Trigger change event
+        await customInput.click();
+        await driver.keys('Tab'); // Move focus away to trigger validation
+
+        return;
+      }
+    } catch (e) {
+      // Fallback to vaadin-date-picker
+    }
+
+    // Fallback to original vaadin-date-picker logic
     const date = await element.$('vaadin-date-picker input');
     if (await date.getValue()) {
       const ele = await date.$('div[part="clear-button"]');
