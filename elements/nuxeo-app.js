@@ -237,6 +237,7 @@ Polymer({
         width: 16px;
         height: 100%;
         cursor: pointer;
+        z-index: 10;
       }
 
       :host([dir='rtl']) #drawer .toggle {
