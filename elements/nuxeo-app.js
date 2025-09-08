@@ -218,10 +218,12 @@ Polymer({
       }
 
       #drawer {
-        overflow: visible;
-        width: 100%;
         position: relative;
         box-sizing: border-box;
+        height: 100%;
+        overflow: visible;
+        width: var(--app-drawer-width, 350px);
+        transition: width 0.3s ease;
       }
 
       #drawer .toggle {
@@ -1160,7 +1162,9 @@ Polymer({
     const selectedItemDetailSelected =
       selectedItem.detail && selectedItem.detail.selected ? selectedItem.detail.selected : 0;
     if (this._selected === selectedItemDetailSelected && this.drawerOpened) {
-      this._closeDrawer();
+      requestAnimationFrame(() => {
+        this._closeDrawer();
+      });
     } else {
       this._selected = this.selectedTab = selectedItemDetailSelected;
       this._openDrawer();
@@ -1187,7 +1191,8 @@ Polymer({
   _closeDrawer() {
     this.drawerWidth = this.sidebarWidth;
     this.drawerOpened = false;
-    this.$.drawerMenu.opened = false; // close
+    const drawerMenu = this.$ && this.$.drawerMenu;
+    drawerMenu.removeAttribute('opened');
     this.selectedTab = '';
   },
 
