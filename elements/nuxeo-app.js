@@ -105,10 +105,10 @@ Polymer({
   _template: html`
     <style include="nuxeo-styles">
       /**
-                    * iOS fix for NXP-25986: prevent \`paper-header-panel\` from creating a new stacking context
-                    * for more details, see: https://github.com/PolymerElements/paper-dialog/issues/44#issuecomment-172013206
-                    * this will only work for iOS since it's the only supporting \`-webkit-overflow-scrolling\`
-                    */
+        * iOS fix for NXP-25986: prevent \`paper-header-panel\` from creating a new stacking context
+        * for more details, see: https://github.com/PolymerElements/paper-dialog/issues/44#issuecomment-172013206
+        * this will only work for iOS since it's the only supporting \`-webkit-overflow-scrolling\`
+        */
 
       :host {
         --app-header-background-rear-layer: {
@@ -124,7 +124,6 @@ Polymer({
 
       /* Drawer */
       app-drawer {
-        // --app-drawer-width: 350px;
         top: var(--nuxeo-app-top, 0);
         bottom: var(--nuxeo-app-bottom, 0);
         height: calc(100% - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
@@ -135,7 +134,6 @@ Polymer({
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
-        // margin: 20px;
         background: var(--nuxeo-page-background);
         height: 100%;
       }
@@ -208,14 +206,11 @@ Polymer({
         margin: 0;
         order: 1;
       }
-      #drawer {
-        width: var(--nuxeo-sidebar-width); /* same as main drawer width */
-        box-sizing: border-box; /* ensures padding doesn't increase width */
-      }
 
       #drawer-pages {
-        width: 100%; /* take full width of drawer-content */
+        width: 100%;
       }
+
       @media (max-width: 1024px), (max-height: 700px) {
         #drawer .toggle {
           display: none;
@@ -226,6 +221,7 @@ Polymer({
         overflow: visible;
         width: 100%;
         position: relative;
+        box-sizing: border-box;
       }
 
       #drawer .toggle {
@@ -356,7 +352,7 @@ Polymer({
 
       .skip-link {
         position: absolute;
-        top: -40px; /* keep it off-screen initially */
+        top: -40px;
         left: 0;
         background: lightgrey;
         border: 1px dotted gray;
@@ -368,20 +364,12 @@ Polymer({
       }
 
       .skip-link:focus {
-        top: 0; /* slide down into view */
+        top: 0;
       }
 
       .skip-link:hover {
         outline: none;
         text-decoration: none;
-      }
-
-      #drawer iron-pages {
-        flex: 1 1 auto;
-        display: flex;
-        flex-direction: column;
-        min-width: 0; /* prevents shrinking to 0 */
-        min-height: 0;
       }
     </style>
 
@@ -406,8 +394,6 @@ Polymer({
       path="/task/[[currentTaskId]]"
       headers='{"fetch-document": "properties", "translate-directoryEntry": "label", "fetch-directoryEntry": "parent", "fetch-task": "targetDocumentIds,actors"}'
     ></nuxeo-resource>
-
-    <!-- new app layout begins -->
 
     <app-drawer-layout id="drawerPanel" fullbleed responsive-width="720px">
       <!-- Drawer -->
@@ -502,7 +488,7 @@ Polymer({
         </app-header>
 
         <main>
-          <nuxeo-suggester id="suggester"></nuxeo-suggester>
+          <nuxeo-suggester id="suggester" tabindex="0"></nuxeo-suggester>
           <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot name="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
@@ -783,15 +769,12 @@ Polymer({
     function handleFirstTab(e) {
       if (!keyboardUsed && e.key === 'Tab') {
         keyboardUsed = true;
-
-        e.preventDefault(); // stop normal tab behavior
-        skipLink.focus({ preventScroll: true }); // focus skip link
-
+        e.preventDefault();
+        skipLink.focus({ preventScroll: true });
         document.removeEventListener('keydown', handleFirstTab);
       }
     }
 
-    // Attach listener regardless of DOMContentLoaded state
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', handleFirstTab);
