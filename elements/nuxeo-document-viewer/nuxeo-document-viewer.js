@@ -75,7 +75,7 @@ Polymer({
   created() {
     this._createMethodObserver('_valueChanged(document.properties.file:content)', true);
   },
-
+  // test comment
   _valueChanged(e) {
     if (!e || e.data) {
       return;
