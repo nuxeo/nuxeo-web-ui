@@ -762,49 +762,46 @@ Polymer({
   },
 
   skipLinkEvent() {
-    const { skipLink } = this.$;
-    const { mainContent } = this.$;
+    const { skipLink, mainContent } = this.$;
     let keyboardUsed = false;
 
-    function handleFirstTab(e) {
+    const handleFirstTab = (e) => {
       if (!keyboardUsed && e.key === 'Tab') {
         keyboardUsed = true;
         e.preventDefault();
         skipLink.focus({ preventScroll: true });
         document.removeEventListener('keydown', handleFirstTab);
       }
-    }
+    };
 
+    // Attach listener once DOM is ready
+    const attachTabListener = () => document.addEventListener('keydown', handleFirstTab);
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        document.addEventListener('keydown', handleFirstTab);
-      });
+      document.addEventListener('DOMContentLoaded', attachTabListener);
     } else {
-      document.addEventListener('keydown', handleFirstTab);
+      attachTabListener();
     }
 
-    // Reset keyboard state on mouse
+    // Reset keyboard state when mouse is used
     document.addEventListener('mousedown', () => {
       keyboardUsed = false;
-      document.addEventListener('keydown', handleFirstTab);
+      attachTabListener();
     });
 
-    // Activate skip link with Enter or Space
-    skipLink.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        mainContent.focus();
-        mainContent.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-
-    // Activate on click
-    skipLink.addEventListener('click', (e) => {
+    // Helper to focus main content
+    const activateMainContent = (e) => {
       e.preventDefault();
       mainContent.focus();
       mainContent.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Activate skip link with Enter, Space, or click
+    skipLink.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') activateMainContent(e);
     });
+    skipLink.addEventListener('click', activateMainContent);
   },
+
   _checkRtl() {
     const dir = document.documentElement.getAttribute('dir');
     this._isRTL = dir === 'rtl';
