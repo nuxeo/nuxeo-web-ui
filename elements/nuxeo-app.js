@@ -226,8 +226,6 @@ Polymer({
         overflow: visible;
         width: 100%;
         position: relative;
-        transition: width 0.3s ease, /* smooth expand/collapse */ opacity 0.2s ease; /* optional fade */
-        // opacity: 0;
       }
 
       #drawer .toggle {
