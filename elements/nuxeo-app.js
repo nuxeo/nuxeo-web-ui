@@ -375,7 +375,7 @@ Polymer({
       }
     </style>
 
-    <a href="#main-content" id="skipLink" class="skip-link">Skip to main content</a>
+    <a href="#main-content" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
