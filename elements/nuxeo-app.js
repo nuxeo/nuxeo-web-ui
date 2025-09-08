@@ -104,316 +104,285 @@ setPassiveTouchGestures(true);
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
-            /**
+      /**
                     * iOS fix for NXP-25986: prevent \`paper-header-panel\` from creating a new stacking context
                     * for more details, see: https://github.com/PolymerElements/paper-dialog/issues/44#issuecomment-172013206
                     * this will only work for iOS since it's the only supporting \`-webkit-overflow-scrolling\`
                     */
 
-            :host {
-              --app-header-background-rear-layer: {
-                -webkit-overflow-scrolling: auto;
-              };
-            }
+      :host {
+        --app-header-background-rear-layer: {
+          -webkit-overflow-scrolling: auto;
+        }
+      }
 
-            /* Layout base */
-            app-drawer-layout {
-              display: flex;
-              flex-direction: row;
-            }
+      /* Layout base */
+      app-drawer-layout {
+        display: flex;
+        flex-direction: row;
+      }
 
-            /* Drawer */
-            app-drawer {
-             // --app-drawer-width: 350px;
-              top: var(--nuxeo-app-top, 0);
-              bottom: var(--nuxeo-app-bottom, 0);
-              height: calc(100% - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
-            }
+      /* Drawer */
+      app-drawer {
+        // --app-drawer-width: 350px;
+        top: var(--nuxeo-app-top, 0);
+        bottom: var(--nuxeo-app-bottom, 0);
+        height: calc(100% - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+      }
 
-            /* Main content */
-            app-header-layout {
-              flex: 1 1 auto;
-              display: flex;
-              flex-direction: column;
-              // margin: 20px;
-              background: var(--nuxeo-page-background);
-              height: 100%;
-            }
+      /* Main content */
+      app-header-layout {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        // margin: 20px;
+        background: var(--nuxeo-page-background);
+        height: 100%;
+      }
 
-            main {
-              flex: 1 1 auto;
-              display: flex;
-              flex-direction: column;
-              overflow: auto;
-            }
+      main {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+      }
 
-            /* Narrow mode */
-            app-drawer-layout[narrow] app-drawer {
-              z-index: 100;
-            }
-            app-drawer-layout[narrow]::part(scrim) {
-              z-index: 2;
-            }
+      /* logo */
+      #logo {
+        position: fixed;
+        width: var(--nuxeo-sidebar-width);
+        height: 53px;
+        top: var(--nuxeo-app-top);
+        z-index: 102;
+        box-sizing: border-box;
+        outline: none;
+        background-color: var(--nuxeo-sidebar-background);
+      }
 
-            /* logo */
-            #logo {
-              position: fixed;
-              width: var(--nuxeo-sidebar-width);
-              height: 53px;
-              top: var(--nuxeo-app-top);
-              z-index: 102;
-              box-sizing: border-box;
-              outline: none;
-              background-color: var(--nuxeo-sidebar-background);
-            }
+      :host([dir='ltr']) #logo {
+        left: 0;
+        right: auto;
+      }
 
-            :host([dir='ltr']) #logo {
-              left: 0;
-              right: auto;
-            }
+      #logo img {
+        width: var(--nuxeo-sidebar-width);
+        height: 53px;
+      }
 
-            #logo img {
-              width: var(--nuxeo-sidebar-width);
-              height: 53px;
-            }
+      :host([dir='rtl']) #logo {
+        right: 0px;
+        height: 53px;
+        left: auto;
+      }
 
-            :host([dir='rtl']) #logo {
-              right: 0px;
-              height: 53px;
-              left: auto;
-            }
+      /* menu */
+      #menu {
+        @apply --nuxeo-sidebar;
+        position: fixed;
+        width: var(--nuxeo-sidebar-width);
+        height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        z-index: 100;
+        padding: 0;
+        padding-top: 54px;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+      }
 
-            /* menu */
-            #menu {
-              @apply --nuxeo-sidebar;
-              position: fixed;
-              width: var(--nuxeo-sidebar-width);
-              height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
-              z-index: 100;
-              padding: 0;
-              padding-top: 54px;
-              overflow: auto;
-              display: flex;
-              flex-direction: column;
-            }
+      #logo:hover img {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
 
-            #logo:hover img {
-              background: rgba(0, 0, 0, 0.2);
-              color: var(--nuxeo-sidebar-menu-hover);
-            }
+      #logo:hover img {
+        filter: brightness(110%);
+        -webkit-filter: brightness(110%);
+      }
 
-            #logo:hover img {
-              filter: brightness(110%);
-              -webkit-filter: brightness(110%);
-            }
+      /* Apply margin-top: auto to all settings and then reset them, except the first one */
+      #menu > .settings {
+        margin-top: auto;
+      }
 
-            /* Apply margin-top: auto to all settings and then reset them, except the first one */
-            #menu > .settings {
-              margin-top: auto;
-            }
+      #menu > .settings ~ .settings {
+        margin: 0;
+        order: 1;
+      }
+      #drawer {
+        width: var(--nuxeo-sidebar-width); /* same as main drawer width */
+        box-sizing: border-box; /* ensures padding doesn't increase width */
+      }
 
-            #menu > .settings ~ .settings {
-              margin: 0;
-              order: 1;
-            }
-            #drawer {
-              width: var(--nuxeo-sidebar-width); /* same as main drawer width */
-              box-sizing: border-box; /* ensures padding doesn't increase width */
-              overflow: hidden;
-            }
+      #drawer-pages {
+        width: 100%; /* take full width of drawer-content */
+      }
+      @media (max-width: 1024px), (max-height: 700px) {
+        #drawer .toggle {
+          display: none;
+        }
+      }
 
-            #drawer-pages {
-              width: 100%; /* take full width of drawer-content */
-            }
-            @media (max-width: 1024px), (max-height: 700px) {
-              #drawer .toggle {
-                display: none;
-              }
-            }
+      #drawer {
+        overflow: visible;
+        width: 100%;
+        position: relative;
+        transition: width 0.3s ease, /* smooth expand/collapse */ opacity 0.2s ease; /* optional fade */
+        // opacity: 0;
+      }
 
-            /* drawer */
-            #drawer {
-              overflow: auto;
-              width: 100%;
-            }
+      #drawer .toggle {
+        position: absolute;
+        right: -16px;
+        top: 0;
+        width: 16px;
+        height: 100%;
+        cursor: pointer;
+      }
 
-            #drawer {
-              width: 350px;      /* fixed secondary menu width */
-              max-width: 0;      /* initially hidden */
-              overflow: hidden;
-              transition: max-width 0.3s ease; /* smooth open/close */
-              position: relative;
+      :host([dir='rtl']) #drawer .toggle {
+        left: -16px;
+        right: auto;
+      }
 
-            }
+      #drawer .toggle iron-icon {
+        visibility: hidden;
+        color: var(--nuxeo-drawer-background);
+        background-color: var(--nuxeo-drawer-text);
+        width: 16px;
+        height: 48px;
+        top: calc(50% - 24px);
+        opacity: 0.6;
+      }
 
-            #drawer.opened {
-               max-width: 350px;
-            }
+      #drawer:hover .toggle iron-icon,
+      #drawer .toggle:hover iron-icon {
+        visibility: visible !important;
+      }
 
-            #drawer .toggle {
-              position: absolute;
-              right: -16px;
-              top: 0;
-              width: 16px;
-              height: 100%;
-              cursor: pointer;
-            }
+      #drawer iron-pages {
+        @apply --layout-vertical;
+        color: var(--nuxeo-drawer-text);
+        width: calc(100% - var(--nuxeo-sidebar-width));
+        height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        margin-left: var(--nuxeo-sidebar-width);
+        background-color: var(--nuxeo-drawer-background);
+      }
 
-            :host([dir='rtl']) #drawer .toggle {
-              left: -16px;
-              right: auto;
-            }
+      :host([dir='rtl']) #drawer iron-pages {
+        margin-right: var(--nuxeo-sidebar-width);
+        margin-left: 0;
+      }
 
-            #drawer .toggle iron-icon {
-              visibility: hidden;
-              color: var(--nuxeo-drawer-background);
-              background-color: var(--nuxeo-drawer-text);
-              width: 16px;
-              height: 48px;
-              top: calc(50% - 24px);
-              opacity: 0.6;
-            }
+      #drawer nuxeo-menu-item:hover,
+      #drawer list-item:hover {
+        @apply --nuxeo-block-hover;
+      }
 
-            #drawer:hover .toggle iron-icon,
-            #drawer .toggle:hover iron-icon {
-              visibility: visible;
-            }
+      #drawer .list-item.selected,
+      #drawer nuxeo-menu-item.iron-selected,
+      #drawer .list-item:focus,
+      #drawer nuxeo-menu-item:focus,
+      #drawer .list-item.selected:focus,
+      #drawer nuxeo-menu-item.iron-selected:focus {
+        @apply --nuxeo-block-selected;
+      }
 
-            #drawer iron-pages {
-              @apply --layout-vertical;
-              color: var(--nuxeo-drawer-text);
-              width: calc(100% - var(--nuxeo-sidebar-width));
-              height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
-              margin-left: var(--nuxeo-sidebar-width);
-              background-color: var(--nuxeo-drawer-background);
-            }
+      #drawer nuxeo-menu-item {
+        @apply --nuxeo-sidebar-item-theme;
+        --nuxeo-menu-item-link {
+          @apply --nuxeo-sidebar-item-link;
+        }
+      }
 
-            :host([dir='rtl']) #drawer iron-pages {
-              margin-right: var(--nuxeo-sidebar-width);
-              margin-left: 0;
-            }
+      #drawer .profile nuxeo-menu-item:last-of-type {
+        @apply --layout-vertical;
+        border: none;
+        justify-content: flex-end;
+      }
 
-            #drawer nuxeo-menu-item:hover,
-            #drawer list-item:hover {
-              @apply --nuxeo-block-hover;
-            }
+      #drawerToggle {
+        position: absolute;
+        top: 5px;
+        left: 6px;
+        z-index: 99;
+        background-color: var(--nuxeo-drawer-background);
+      }
 
-            #drawer .list-item.selected,
-            #drawer nuxeo-menu-item.iron-selected,
-            #drawer .list-item:focus,
-            #drawer nuxeo-menu-item:focus,
-            #drawer .list-item.selected:focus,
-            #drawer nuxeo-menu-item.iron-selected:focus {
-              @apply --nuxeo-block-selected;
-            }
+      #drawerToggle svg,
+      #drawerToggle g,
+      #drawerToggle path {
+        tabindex: -1;
+      }
 
-            #drawer nuxeo-menu-item {
-              @apply --nuxeo-sidebar-item-theme;
-              --nuxeo-menu-item-link {
-                @apply --nuxeo-sidebar-item-link;
-              }
-            }
+      :host([dir='rtl']) #drawerToggle {
+        right: 6px;
+      }
 
-            #drawer .profile nuxeo-menu-item:last-of-type {
-              @apply --layout-vertical;
-              border: none;
-              justify-content: flex-end;
-            }
+      nuxeo-document-create-button.admin {
+        display: none;
+      }
 
-            #drawerToggle {
-              position: absolute;
-              top: 5px;
-              left: 6px;
-              z-index: 99;
-              background-color: var(--nuxeo-drawer-background);
-            }
+      #snackbarPanel {
+        position: absolute;
+        bottom: 0;
+        left: 0px;
+        display: flex;
+        flex-direction: column-reverse;
+        margin-left: 50px;
+      }
 
-            #drawerToggle svg,
-            #drawerToggle g,
-            #drawerToggle path {
-              tabindex: -1;
-            }
+      :host([dir='rtl']) #snackbarPanel {
+        left: auto;
+        right: 0px;
+        margin-right: 50px;
+        margin-left: 0px;
+      }
 
-            :host([dir='rtl']) #drawerToggle {
-              right: 6px;
-            }
+      mwc-snackbar {
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+        z-index: 103;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+        --mdc-typography-body2-font-size: 14px;
+      }
 
-            nuxeo-document-create-button.admin {
-              display: none;
-            }
+      :host([dir='rtl']) mwc-snackbar {
+        right: 0 !important;
+        left: auto !important;
+      }
 
-            #snackbarPanel {
-              position: absolute;
-              bottom: 0;
-              left: 0px;
-              display: flex;
-              flex-direction: column-reverse;
-              margin-left: 50px;
-            }
+      .skip-link {
+        position: absolute;
+        top: -40px; /* keep it off-screen initially */
+        left: 0;
+        background: lightgrey;
+        border: 1px dotted gray;
+        color: #000;
+        padding: 8px 16px;
+        z-index: 1000;
+        text-decoration: none;
+        transition: top 0.2s ease;
+      }
 
-            :host([dir='rtl']) #snackbarPanel {
-              left: auto;
-              right: 0px;
-              margin-right: 50px;
-              margin-left: 0px;
-            }
+      .skip-link:focus {
+        top: 0; /* slide down into view */
+      }
 
-            mwc-snackbar {
-              position: relative !important;
-              left: 0 !important;
-              top: 0 !important;
-              z-index: 103;
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              color: white;
-              --mdc-typography-body2-font-size: 14px;
-            }
+      .skip-link:hover {
+        outline: none;
+        text-decoration: none;
+      }
 
-            :host([dir='rtl']) mwc-snackbar {
-              right: 0 !important;
-              left: auto !important;
-            }
-
-            .skip-link {
-              position: absolute;
-              top: -40px; /* keep it off-screen initially */
-              left: 0;
-              background: lightgrey;
-              border: 1px dotted gray;
-              color: #000;
-              padding: 8px 16px;
-              z-index: 1000;
-              text-decoration: none;
-              transition: top 0.2s ease;
-            }
-
-            .skip-link:focus {
-              top: 0; /* slide down into view */
-            }
-
-            .skip-link:hover {
-              outline: none;
-              text-decoration: none;
-            }
-
-              #drawer iron-pages {
+      #drawer iron-pages {
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
         min-width: 0; /* prevents shrinking to 0 */
         min-height: 0;
-      }
-
-      #drawer iron-pages > * {
-        display: none;       /* hide all by default */
-        flex: 1 1 auto;      /* allow content to fill */
-        min-width: 0;
-        min-height: 0;
-      }
-
-      #drawer iron-pages > [visible] {
-        display: flex;       /* show active one */
       }
     </style>
 
@@ -795,7 +764,7 @@ Polymer({
     });
 
     // NXP-25311: stop loading bar if an error occurs
-    window.onerror = function () {
+    window.onerror = function() {
       this.loading = false;
     }.bind(this);
 
@@ -1538,7 +1507,7 @@ Polymer({
         Performance.markUnique('nuxeo-app.page-changed');
       }
       // add performance listener to current page to track the last dom-change event
-      this.__performanceListener = function () {
+      this.__performanceListener = function() {
         const name = `${el.tagName.toLocaleLowerCase()}.dom-changed`;
         // a measure will be performed from the last page switch or, if this is the first page load,
         // from when navigation started to the current moment
