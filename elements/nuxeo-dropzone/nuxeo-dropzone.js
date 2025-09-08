@@ -393,6 +393,15 @@ Polymer({
       type: String,
       computed: 'formatPropertyXpath(xpath)',
     },
+
+    /**
+     * If false (default), each upload will re-upload all files (previous + new).
+     * If true, only new files are uploaded.
+     */
+    replaceMode: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   listeners: {
@@ -566,10 +575,19 @@ Polymer({
 
   _upload(files) {
     if (files && files.length > 0) {
+      const newFiles = Array.prototype.slice.call(files);
+
       if (this.multiple) {
-        const newFiles = Array.prototype.slice.call(files);
-        this.uploadedFiles = this.uploadedFiles.concat(newFiles);
-        this.uploadFiles(newFiles);
+        if (this.replaceMode) {
+          // only upload new files
+          this.uploadedFiles = this.uploadedFiles.concat(newFiles);
+          this.uploadFiles(newFiles);
+        } else {
+          // upload all files (previous + new)
+          const allFiles = this.uploadedFiles.concat(newFiles);
+          this.uploadedFiles = allFiles;
+          this.uploadFiles(allFiles);
+        }
       } else {
         this.uploadedFiles = Array.prototype.slice.call(files);
         this.uploadFiles(files);
