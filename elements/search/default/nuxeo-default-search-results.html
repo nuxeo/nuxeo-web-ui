@@ -264,6 +264,7 @@ limitations under the License.
       },
 
       _handleKeydown(e) {
+        const elem = e.currentTarget;
         const index = parseInt(e.currentTarget.getAttribute('index'), 10);
         const totalItems = this.nxProvider.resultsCount;
         let newIndex = index;
@@ -279,27 +280,19 @@ limitations under the License.
             break;
           case 'Enter':
           case ' ':
-            e.preventDefault();
+            // e.preventDefault();
             if (typeof e.currentTarget.handleClick === 'function') {
-              // 🔑 delegate to child’s click handler
-              e.currentTarget.handleClick({
-                type: 'keydown',
-                ctrlKey: e.ctrlKey,
-                shiftKey: e.shiftKey,
-                metaKey: e.metaKey,
-                button: 0, // left mouse button equivalent
-                detail: { sourceEvent: e },
-              });
+              e.currentTarget._onCheckBoxTap(e);
             }
             return;
           default:
             return;
         }
 
-        this._focusGridItem(newIndex);
+        this._focusGridItem(newIndex, elem);
       },
-      _focusGridItem(index) {
-       //  console.log(element);
+      _focusGridItem(index, element) {
+        //  console.log(element);
         const focusElem = element && element.tagName.toLowerCase();
         const items = this.shadowRoot.querySelectorAll(focusElem);
         if (items[index]) {
