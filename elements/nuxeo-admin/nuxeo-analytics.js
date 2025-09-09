@@ -49,7 +49,7 @@ Polymer({
         <span class="flex">[[i18n('analytics.heading')]]</span>
       </div>
       <div slot="tabs">
-        <paper-listbox selected="{{selected}}" attr-for-selected="name">
+        <paper-listbox selected="{{selected}}" attr-for-selected="name" role="tablist">
           <nuxeo-slot name="ANALYTICS_ITEMS"></nuxeo-slot>
         </paper-listbox>
       </div>
@@ -79,7 +79,8 @@ Polymer({
       e.preventDefault();
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
         e.preventDefault();
-        return;
+        e.stopImmediatePropagation();
+        return false;
       }
       if (e.key === 'ArrowLeft') {
         listbox.selectPrevious();
