@@ -79,6 +79,7 @@ Polymer({
           uploaded-message="[[i18n('documentAttachments.upload.uploaded')]]"
           message="[[i18n('documentAttachments.upload.add')]]"
           drag-content-message="[[i18n('documentAttachments.upload.drop')]]"
+          replace-mode
         >
         </nuxeo-dropzone>
       </template>
