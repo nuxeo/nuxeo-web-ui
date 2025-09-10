@@ -171,7 +171,7 @@ jobs:
           SAUCE_USERNAME: nuxeo-web-ui
           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
         run: npm run test
-        
+
       - name: 'Update settings.xml with server configuration'
         run: |
           echo '<settings>
