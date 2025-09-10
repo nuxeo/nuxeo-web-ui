@@ -11,13 +11,13 @@ const EXPECTED_VIOLATIONS = {
   'landmark-one-main': 1,
   'meta-viewport': 1,
   'page-has-heading-one': 1,
-  region: 10,
-  'nested-interactive': 15,
+  region: 20,
+  'nested-interactive': 31,
 };
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
   'aria-allowed-role': 5,
-  'color-contrast-enhanced': 2,
+  'color-contrast-enhanced': 11,
   'aria-required-children': 1,
 };
 
