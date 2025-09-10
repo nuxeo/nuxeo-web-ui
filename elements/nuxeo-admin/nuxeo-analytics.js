@@ -28,7 +28,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 /**
 `nuxeo-analytics`
-@group nuxeo UI
+@group Nuxeo UI
 @element nuxeo-analytics
 */
 Polymer({
@@ -49,7 +49,7 @@ Polymer({
         <span class="flex">[[i18n('analytics.heading')]]</span>
       </div>
       <div slot="tabs">
-        <paper-listbox selected="{{selected}}" attr-for-selected="name" role="tablist">
+        <paper-listbox selected="{{selected}}" attr-for-selected="name">
           <nuxeo-slot name="ANALYTICS_ITEMS"></nuxeo-slot>
         </paper-listbox>
       </div>
@@ -70,35 +70,39 @@ Polymer({
     visible: Boolean,
     selected: String,
   },
-
   ready() {
     if (super.ready) super.ready();
     const listbox = this.$$('paper-listbox');
 
-    listbox.addEventListener('keydown', (e) => {
-      e.preventDefault();
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        return false;
-      }
-      if (e.key === 'ArrowLeft') {
-        listbox.selectPrevious();
-        listbox.selectedItem.focus();
-      } else if (e.key === 'ArrowRight') {
-        listbox.selectNext();
-        listbox.selectedItem.focus();
-      }
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        // eslint-disable-next-line prefer-destructuring
-        const selectedItem = listbox.selectedItem;
-        if (selectedItem) {
-          const name = selectedItem.getAttribute('name');
-          this.set('selected', name);
-          this.set('visible', true);
+    listbox.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
         }
-      }
-    });
+
+        if (e.key === 'ArrowLeft') {
+          listbox.selectPrevious();
+          listbox.selectedItem.focus();
+        } else if (e.key === 'ArrowRight') {
+          listbox.selectNext();
+          listbox.selectedItem.focus();
+        }
+
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          // eslint-disable-next-line prefer-destructuring
+          const selectedItem = listbox.selectedItem;
+          if (selectedItem) {
+            const name = selectedItem.getAttribute('name');
+            this.set('selected', name);
+            this.set('visible', true);
+          }
+        }
+      },
+      true,
+    );
   },
 });
