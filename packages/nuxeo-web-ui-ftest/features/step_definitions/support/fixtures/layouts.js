@@ -119,12 +119,14 @@ global.fieldRegistry.register(
 global.fieldRegistry.register(
   'nuxeo-date-picker',
   async (element) => {
-    const customInput = await element.$('custom-date-picker input');
+    const customInput = await element.$('custom-date-picker #dateInput');
     const value = await customInput.getValue();
-    return moment(value, global.dateFormat).format(global.dateFormat);
+    // Parse the value and format it using the expected format
+    const parsedDate = moment(value);
+    return parsedDate.isValid() ? parsedDate.format(global.dateFormat) : value;
   },
   async (element, value) => {
-    const customInput = await element.$('custom-date-picker input');
+    const customInput = await element.$('custom-date-picker #dateInput');
 
     // Wait for the element to be visible and scroll into view
     await customInput.waitForVisible();
@@ -136,6 +138,60 @@ global.fieldRegistry.register(
       const clearButton = await element.$(
         'custom-date-picker button[aria-label*="clear"], custom-date-picker .clear-button',
       );
+      if (await clearButton.isExisting()) {
+        await clearButton.waitForVisible();
+        await clearButton.click();
+      } else {
+        // Clear by selecting all and deleting using JavaScript
+        await browser.execute((inputEl) => {
+          inputEl.focus();
+          inputEl.select();
+          inputEl.value = '';
+          inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+          inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+        }, customInput);
+      }
+    }
+
+    // Set the new value using JavaScript to avoid click interception
+    await browser.execute(
+      (inputEl, newValue) => {
+        inputEl.focus();
+        inputEl.value = newValue;
+        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+        inputEl.dispatchEvent(new Event('blur', { bubbles: true }));
+      },
+      customInput,
+      value,
+    );
+
+    // Wait a moment for any validation to complete
+    await driver.pause(500);
+  },
+);
+
+// Add specific handler for custom-date-picker element
+global.fieldRegistry.register(
+  'custom-date-picker',
+  async (element) => {
+    const customInput = await element.$('#dateInput');
+    const value = await customInput.getValue();
+    // Parse the value and format it using the expected format
+    const parsedDate = moment(value);
+    return parsedDate.isValid() ? parsedDate.format(global.dateFormat) : value;
+  },
+  async (element, value) => {
+    const customInput = await element.$('#dateInput');
+
+    // Wait for the element to be visible and scroll into view
+    await customInput.waitForVisible();
+    await customInput.scrollIntoView();
+
+    // Clear existing value if any
+    const currentValue = await customInput.getValue();
+    if (currentValue) {
+      const clearButton = await element.$('button[aria-label*="clear"], .clear-button');
       if (await clearButton.isExisting()) {
         await clearButton.waitForVisible();
         await clearButton.click();
