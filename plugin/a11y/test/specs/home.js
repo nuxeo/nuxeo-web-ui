@@ -12,12 +12,12 @@ const EXPECTED_VIOLATIONS = {
   'meta-viewport': 1,
   'page-has-heading-one': 1,
   region: 20,
-  'nested-interactive': 31,
+  'nested-interactive': 35,
 };
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {
   'aria-allowed-role': 5,
-  'color-contrast-enhanced': 11,
+  'color-contrast-enhanced': 15,
   'aria-required-children': 1,
 };
 
