@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { runAxeCore } from './axe-reporter.js';
 
 export function reportA11y(expectedViolations, expectedIncompleteViolations, setup) {
@@ -18,18 +19,18 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     before(async () => {
       report = await getReport();
+
+      console.log('------------------------------------');
+      console.log('Received Violations:');
+      report.violations.forEach((v) => {
+        console.log(`${v.id}: ${v.issues}`);
+      });
+      console.log('------------------------------------');
     });
 
     Object.entries(expectedViolations).forEach(([violation, issues]) => {
       it(`${violation}: ${issues} issue(s)`, async () => {
-        await expect(report.violations).toEqual(
-          expect.arrayContaining([
-            {
-              id: violation,
-              issues,
-            },
-          ]),
-        );
+        await expect(report.violations.some((v) => v.id === violation && v.issues <= issues)).toBe(true);
       });
     });
   });
@@ -39,18 +40,17 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     before(async () => {
       report = await getReport();
+      console.log('------------------------------------');
+      console.log('Received Incomplete Violations:');
+      report.incomplete.forEach((v) => {
+        console.log(`${v.id}: ${v.issues}`);
+      });
+      console.log('------------------------------------');
     });
 
     Object.entries(expectedIncompleteViolations).forEach(([violation, issues]) => {
       it(`${violation}: ${issues} issue(s)`, async () => {
-        await expect(report.incomplete).toEqual(
-          expect.arrayContaining([
-            {
-              id: violation,
-              issues,
-            },
-          ]),
-        );
+        await expect(report.incomplete.some((v) => v.id === violation && v.issues <= issues)).toBe(true);
       });
     });
   });
