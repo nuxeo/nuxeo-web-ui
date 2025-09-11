@@ -74,6 +74,22 @@ Polymer({
     if (super.ready) super.ready();
     const listbox = this.$$('paper-listbox');
 
+    function updateFocus(item) {
+      if (!item) return;
+      Array.from(item.parentElement.children).forEach((child) => {
+        child.setAttribute('tabindex', '-1');
+      });
+      item.setAttribute('tabindex', '0');
+      item.focus();
+    }
+
+    listbox.addEventListener('click', (e) => {
+      const item = e.target.closest('[name]');
+      if (item) {
+        updateFocus(item);
+      }
+    });
+
     listbox.addEventListener(
       'keydown',
       (e) => {
@@ -84,11 +100,17 @@ Polymer({
         }
 
         if (e.key === 'ArrowLeft') {
+          e.preventDefault();
           listbox.selectPrevious();
-          listbox.selectedItem.focus();
+          if (listbox.selectedItem) {
+            updateFocus(listbox.selectedItem);
+          }
         } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
           listbox.selectNext();
-          listbox.selectedItem.focus();
+          if (listbox.selectedItem) {
+            updateFocus(listbox.selectedItem);
+          }
         }
 
         if (e.key === 'Enter' || e.key === ' ') {
