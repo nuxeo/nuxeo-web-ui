@@ -785,29 +785,31 @@ Polymer({
 
   skipLinkEvent() {
     const { skipLink, mainContent } = this.$;
-    let keyboardUsed = false;
+    let skipLinkActivated = true; // only active once after load/top
 
     const handleFirstTab = (e) => {
-      if (!keyboardUsed && e.key === 'Tab') {
-        keyboardUsed = true;
+      if (skipLinkActivated && e.key === 'Tab') {
+        skipLinkActivated = false; // deactivate until page cycle resets
         e.preventDefault();
         skipLink.focus({ preventScroll: true });
-        document.removeEventListener('keydown', handleFirstTab);
       }
     };
 
-    // Attach listener once DOM is ready
-    const attachTabListener = () => document.addEventListener('keydown', handleFirstTab);
+    // Activate skip link only once after load
+    const attachTabListener = () => {
+      document.addEventListener('keydown', handleFirstTab);
+    };
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', attachTabListener);
     } else {
       attachTabListener();
     }
 
-    // Reset keyboard state when mouse is used
-    document.addEventListener('mousedown', () => {
-      keyboardUsed = false;
-      attachTabListener();
+    // Re-arm skip link when focus is cycled back to body/top
+    document.addEventListener('focusin', (e) => {
+      if (e.target === document.body || e.target === skipLink) {
+        skipLinkActivated = true;
+      }
     });
 
     // Helper to focus main content
@@ -823,7 +825,6 @@ Polymer({
     });
     skipLink.addEventListener('click', activateMainContent);
   },
-
   _checkRtl() {
     const dir = document.documentElement.getAttribute('dir');
     this._isRTL = dir === 'rtl';
