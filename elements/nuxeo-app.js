@@ -375,7 +375,7 @@ Polymer({
       }
     </style>
 
-    <a href="#main-content" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
+    <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
@@ -481,7 +481,7 @@ Polymer({
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout id="mainContent" tabindex="-1">
+      <app-header-layout tabindex="-1">
         <app-header reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button
@@ -495,7 +495,7 @@ Polymer({
           </app-toolbar>
         </app-header>
 
-        <main>
+        <main id="mainContent" tabindex="-1">
           <nuxeo-suggester id="suggester" tabindex="0"></nuxeo-suggester>
           <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot name="PAGES" model="[[actionContext]]"></nuxeo-slot>
