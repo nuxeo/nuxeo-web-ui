@@ -128,7 +128,6 @@ Polymer({
     if (!this.hasAttribute('dir')) {
       const direction = document.documentElement.getAttribute('dir');
       this.setAttribute('dir', direction);
-      // dummy comment
     }
   },
 });
