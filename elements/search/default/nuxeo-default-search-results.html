@@ -265,34 +265,45 @@ limitations under the License.
 
       _handleKeydown(e) {
         const elem = e.currentTarget;
-        const index = parseInt(e.currentTarget.getAttribute('index'), 10);
-        const totalItems = this.nxProvider.resultsCount;
+        const index = parseInt(elem.getAttribute('index'), 10);
+        const total = this.nxProvider?.resultsCount || 0;
         let newIndex = index;
 
         switch (e.key) {
           case 'ArrowRight':
           case 'ArrowDown':
-            if (index < totalItems - 1) newIndex = index + 1;
+            if (index < total - 1) newIndex = index + 1;
             break;
+
           case 'ArrowLeft':
           case 'ArrowUp':
             if (index > 0) newIndex = index - 1;
             break;
+
           case 'Enter':
+            e.stopPropagation();
+            this._triggerItemToggle(elem, e);
+            return;
+
           case ' ':
-            // e.preventDefault();
-            if (typeof e.currentTarget.handleClick === 'function') {
-              e.currentTarget._onCheckBoxTap(e);
-            }
+            e.preventDefault(); // stop page scroll
+            e.stopPropagation();
+            this._triggerItemToggle(elem, e);
             return;
           default:
             return;
         }
-
         this._focusGridItem(newIndex, elem);
       },
+
+      _triggerItemToggle(elem, e) {
+        elem._onCheckBoxTap({
+          type: 'tap',
+          detail: { sourceEvent: e },
+        });
+      },
+
       _focusGridItem(index, element) {
-        //  console.log(element);
         const focusElem = element && element.tagName.toLowerCase();
         const items = this.shadowRoot.querySelectorAll(focusElem);
         if (items[index]) {
