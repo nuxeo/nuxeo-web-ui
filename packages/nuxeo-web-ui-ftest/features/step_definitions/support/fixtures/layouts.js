@@ -118,17 +118,110 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-date-picker',
-  (element) => moment(element.$('vaadin-date-picker input').getValue(), global.dateFormat).format(global.dateFormat),
+  async (element) => {
+    const customInput = await element.$('custom-date-picker #dateInput');
+    const value = await customInput.getValue();
+    // Parse the value and format it using the expected format
+    const parsedDate = moment(value);
+    return parsedDate.isValid() ? parsedDate.format(global.dateFormat) : value;
+  },
   async (element, value) => {
-    const date = await element.$('vaadin-date-picker input');
-    if (await date.getValue()) {
-      const ele = await date.$('div[part="clear-button"]');
-      await ele.click();
+    const customInput = await element.$('custom-date-picker #dateInput');
+
+    // Wait for the element to be visible and scroll into view
+    await customInput.waitForVisible();
+    await customInput.scrollIntoView();
+
+    // Clear existing value if any
+    const currentValue = await customInput.getValue();
+    if (currentValue) {
+      const clearButton = await element.$(
+        'custom-date-picker button[aria-label*="clear"], custom-date-picker .clear-button',
+      );
+      if (await clearButton.isExisting()) {
+        await clearButton.waitForVisible();
+        await clearButton.click();
+      } else {
+        // Clear by selecting all and deleting using JavaScript
+        await browser.execute((inputEl) => {
+          inputEl.focus();
+          inputEl.select();
+          inputEl.value = '';
+          inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+          inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+        }, customInput);
+      }
     }
-    await date.click();
-    const keys = await moment(value, global.dateFormat).format('L');
-    await driver.keys(keys);
-    await driver.keys('Enter');
+
+    // Set the new value using JavaScript to avoid click interception
+    await browser.execute(
+      (inputEl, newValue) => {
+        inputEl.focus();
+        inputEl.value = newValue;
+        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+        inputEl.dispatchEvent(new Event('blur', { bubbles: true }));
+      },
+      customInput,
+      value,
+    );
+
+    // Wait a moment for any validation to complete
+    await driver.pause(500);
+  },
+);
+
+// Add specific handler for custom-date-picker element
+global.fieldRegistry.register(
+  'custom-date-picker',
+  async (element) => {
+    const customInput = await element.$('#dateInput');
+    const value = await customInput.getValue();
+    // Parse the value and format it using the expected format
+    const parsedDate = moment(value);
+    return parsedDate.isValid() ? parsedDate.format(global.dateFormat) : value;
+  },
+  async (element, value) => {
+    const customInput = await element.$('#dateInput');
+
+    // Wait for the element to be visible and scroll into view
+    await customInput.waitForVisible();
+    await customInput.scrollIntoView();
+
+    // Clear existing value if any
+    const currentValue = await customInput.getValue();
+    if (currentValue) {
+      const clearButton = await element.$('button[aria-label*="clear"], .clear-button');
+      if (await clearButton.isExisting()) {
+        await clearButton.waitForVisible();
+        await clearButton.click();
+      } else {
+        // Clear by selecting all and deleting using JavaScript
+        await browser.execute((inputEl) => {
+          inputEl.focus();
+          inputEl.select();
+          inputEl.value = '';
+          inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+          inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+        }, customInput);
+      }
+    }
+
+    // Set the new value using JavaScript to avoid click interception
+    await browser.execute(
+      (inputEl, newValue) => {
+        inputEl.focus();
+        inputEl.value = newValue;
+        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+        inputEl.dispatchEvent(new Event('blur', { bubbles: true }));
+      },
+      customInput,
+      value,
+    );
+
+    // Wait a moment for any validation to complete
+    await driver.pause(500);
   },
 );
 global.fieldRegistry.register(
