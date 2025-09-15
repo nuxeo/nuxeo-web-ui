@@ -13,7 +13,6 @@ const EXPECTED_VIOLATIONS = {
   'page-has-heading-one': 1,
   region: 20,
   'nested-interactive': 35,
-  'skip-link': 2,
 };
 
 const EXPECTED_INCOMPLETE_VIOLATIONS = {

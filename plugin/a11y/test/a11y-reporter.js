@@ -19,7 +19,6 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     before(async () => {
       report = await getReport();
-
       console.log('------------------------------------');
       console.log('Received Violations:');
       report.violations.forEach((v) => {
