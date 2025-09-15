@@ -27,24 +27,33 @@ limitations under the License.
       .er {
         color: red;
         font-size: 12px;
-        margin-top: 4px;
+        margin-bottom: 10px;
+      }
+
+      #inputElem {
+        margin-bottom: 0px;
+        padding-bottom: 0px;
+      }
+      .inputclass {
+        margin-bottom: 12px;
       }
     </style>
-
-    <nuxeo-input
-      role="widget"
-      label="[[i18n('title')]]"
-      name="title"
-      value="{{document.properties.dc:title}}"
-      autofocus
-      required
-      id="inputElem"
-      on-input="_showError"
-    >
-    </nuxeo-input>
-    <template is="dom-if" if="[[isVisible]]">
-      <p class="er">Title cannot be blank</p>
-    </template>
+    <div class="inputclass">
+      <nuxeo-input
+        role="widget"
+        label="[[i18n('title')]]"
+        name="title"
+        value="{{document.properties.dc:title}}"
+        autofocus
+        required
+        id="inputElem"
+        on-input="_showError"
+      >
+      </nuxeo-input>
+      <template is="dom-if" if="[[isVisible]]">
+        <div class="er">[[i18n('title.err')]]</div>
+      </template>
+    </div>
     <nuxeo-textarea
       role="widget"
       label="[[i18n('label.description')]]"
@@ -123,10 +132,15 @@ limitations under the License.
         formats: Array,
       },
       _showError() {
+        const elem = this.$.inputElem;
         const inputelem = this.$.inputElem.value || '';
         this.set('isVisible', inputelem.trim() === '');
+        if (this.isVisible) {
+          elem.setAttribute('invalid');
+        } else {
+          elem.removeAttribute('invalid');
+        }
       },
-
       ready() {
         this.formats = [
           { id: 'text/html', label: this.formatMimeType('text/html') },
