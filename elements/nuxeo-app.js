@@ -375,7 +375,7 @@ Polymer({
       }
     </style>
 
-    <a href="#main-content" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
+    <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
@@ -481,7 +481,7 @@ Polymer({
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout id="mainContent" tabindex="-1">
+      <app-header-layout>
         <app-header reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button
@@ -495,7 +495,7 @@ Polymer({
           </app-toolbar>
         </app-header>
 
-        <main>
+        <main id="mainContent" tabindex="-1">
           <nuxeo-suggester id="suggester" tabindex="0"></nuxeo-suggester>
           <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot name="PAGES" model="[[actionContext]]"></nuxeo-slot>
@@ -785,29 +785,31 @@ Polymer({
 
   skipLinkEvent() {
     const { skipLink, mainContent } = this.$;
-    let keyboardUsed = false;
+    let skipLinkActivated = true; // only active once after load/top
 
     const handleFirstTab = (e) => {
-      if (!keyboardUsed && e.key === 'Tab') {
-        keyboardUsed = true;
+      if (skipLinkActivated && e.key === 'Tab') {
+        skipLinkActivated = false; // deactivate until page cycle resets
         e.preventDefault();
         skipLink.focus({ preventScroll: true });
-        document.removeEventListener('keydown', handleFirstTab);
       }
     };
 
-    // Attach listener once DOM is ready
-    const attachTabListener = () => document.addEventListener('keydown', handleFirstTab);
+    // Activate skip link only once after load
+    const attachTabListener = () => {
+      document.addEventListener('keydown', handleFirstTab);
+    };
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', attachTabListener);
     } else {
       attachTabListener();
     }
 
-    // Reset keyboard state when mouse is used
-    document.addEventListener('mousedown', () => {
-      keyboardUsed = false;
-      attachTabListener();
+    // Re-arm skip link when focus is cycled back to body/top
+    document.addEventListener('focusin', (e) => {
+      if (e.target === document.body || e.target === skipLink) {
+        skipLinkActivated = true;
+      }
     });
 
     // Helper to focus main content
