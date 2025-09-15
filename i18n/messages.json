@@ -1421,6 +1421,7 @@
   "threeDViewLayout.upload.tooltip": "Upload 3D",
   "threeDViewLayout.uploaded.messaged": "3D uploaded",
   "title": "Title",
+  "title.err":"You must enter a title to proceed",
   "ui.label.quickFilters.approved": "Approved",
   "ui.label.quickFilters.mostRecent": "Most Recent",
   "ui.label.quickFilters.noFolder": "No Containers",
