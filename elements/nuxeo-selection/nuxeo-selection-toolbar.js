@@ -66,6 +66,10 @@ Polymer({
         color: var(--nuxeo-selection-toolbar-text, #fff);
         @apply --nuxeo-selection-toolbar;
       }
+      .selection {
+        display: flex;
+        align-content: center;
+      }
 
       .actions {
         @apply --layout-horizontal;
@@ -102,6 +106,25 @@ Polymer({
       a:hover {
         color: var(--nuxeo-selection-toolbar-link-hover, #66ffff);
       }
+      .shortcut-hint kbd {
+        background-color: #e0e7ff; /* light blue background */
+        border: 1px solid #94a3b8; /* subtle border */
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-family: monospace;
+        font-size: 0.85em;
+        box-shadow: inset 0 -1px 0 #94a3b8;
+        color: black;
+      }
+
+      .shortcut-hint {
+        margin-left: 2em;
+        font-style: italic;
+        color: var(--nuxeo-selection-toolbar-link, #fff);
+      }
+      :host(:focus-within) .shortcut-hint {
+        display: none;
+      }
     </style>
 
     <div class="horizontal center layout" id="content">
@@ -124,6 +147,10 @@ Polymer({
           <a class="selectionLink" on-tap="clearSelection" href="#">
             <span>[[i18n('command.clear')]]</span>
           </a>
+          <!-- show keyboard shortcut hint only when using keyboard -->
+          <template is="dom-if" if="[[lastInputKeyboard]]">
+            <span class="shortcut-hint" aria-hidden="true" inner-h-t-m-l="[[_computeShortcutHint()]]"></span>
+          </template>
         </div>
         <div class="actions">
           <slot></slot>
@@ -172,6 +199,10 @@ Polymer({
       type: Boolean,
       value: false,
     },
+    lastInputKeyboard: {
+      type: Boolean,
+      value: false,
+    },
     /**
      * XXX - workaround: resultCounts is used to display the number of selected items (instead of selectedItems.length)
      * to support paginable elements that don't know the total number of items.
@@ -186,6 +217,20 @@ Polymer({
 
   _observeSelectedItems() {
     this.hidden = !this.selectedItems || this.selectedItems.length === 0;
+  },
+
+  _computeShortcutHint() {
+    let isMac = false;
+
+    if (navigator.userAgentData && navigator.userAgentData.platform) {
+      isMac = navigator.userAgentData.platform.toLowerCase().includes('mac');
+    } else {
+      isMac = /mac/i.test(navigator.userAgent);
+    }
+
+    const keys = isMac ? '<kbd>Command</kbd> + <kbd>.</kbd>' : '<kbd>Ctrl</kbd> + <kbd>.</kbd>';
+
+    return `Use ${keys} to navigate to the toolbar`;
   },
 
   toogleSelectedItemsPopup(e) {
@@ -210,8 +255,8 @@ Polymer({
   clearSelection(e) {
     e.preventDefault();
     this.fire('clear-selected-items');
+    this.$.selectionToolbar.focus();
   },
-
   ready() {
     const dialog = this.$$('#selectedItemsPopup');
     if (dialog) {
@@ -221,5 +266,35 @@ Polymer({
         }
       });
     }
+
+    // input-mode tracking
+    document.addEventListener('keydown', () => {
+      this.lastInputKeyboard = true;
+    });
+    document.addEventListener('mousedown', () => {
+      this.lastInputKeyboard = false;
+    });
+    document.addEventListener('touchstart', () => {
+      this.lastInputKeyboard = false;
+    });
+
+    // Ctrl+. toggle: table -> toolbar
+    document.addEventListener('keydown', (e) => {
+      if (!e.ctrlKey) return;
+      const isPeriod = e.key === '.' || e.code === 'Period';
+      if (!isPeriod) return;
+
+      e.preventDefault();
+
+      const toolbar = this.$.selectionToolbar;
+      const inToolbar = toolbar.contains(document.activeElement);
+
+      if (!inToolbar) {
+        const firstFocusable = toolbar.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
+        if (firstFocusable) {
+          firstFocusable.focus();
+        }
+      }
+    });
   },
 });
