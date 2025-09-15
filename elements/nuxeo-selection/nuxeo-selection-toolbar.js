@@ -228,9 +228,10 @@ Polymer({
       isMac = /mac/i.test(navigator.userAgent);
     }
 
-    const keys = isMac ? '<kbd>Command</kbd> + <kbd>.</kbd>' : '<kbd>Ctrl</kbd> + <kbd>.</kbd>';
+    const key = isMac ? 'Command' : 'Ctrl';
+    const message = this.i18n('selectionToolbar.hint.message', { key });
 
-    return `Use ${keys} to navigate to the toolbar`;
+    return message;
   },
 
   toogleSelectedItemsPopup(e) {
