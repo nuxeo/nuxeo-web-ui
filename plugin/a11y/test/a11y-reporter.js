@@ -30,7 +30,8 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     Object.entries(expectedViolations).forEach(([violation, issues]) => {
       it(`${violation}: ${issues} issue(s)`, async () => {
-        await expect(report.violations.some((v) => v.id === violation && v.issues <= issues)).toBe(true);
+        const found = report.violations.find((v) => v.id === violation);
+        await expect(!found || found.issues <= issues).toBe(true);
       });
     });
   });
@@ -50,7 +51,8 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     Object.entries(expectedIncompleteViolations).forEach(([violation, issues]) => {
       it(`${violation}: ${issues} issue(s)`, async () => {
-        await expect(report.incomplete.some((v) => v.id === violation && v.issues <= issues)).toBe(true);
+        const found = report.incomplete.find((v) => v.id === violation);
+        await expect(!found || found.issues <= issues).toBe(true);
       });
     });
   });
