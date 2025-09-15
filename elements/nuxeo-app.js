@@ -375,9 +375,7 @@ Polymer({
       }
     </style>
 
-    <header role="banner">
-      <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
-    </header>
+    <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
 
     <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
@@ -483,7 +481,7 @@ Polymer({
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout tabindex="-1">
+      <app-header-layout>
         <app-header reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button
@@ -827,6 +825,7 @@ Polymer({
     });
     skipLink.addEventListener('click', activateMainContent);
   },
+
   _checkRtl() {
     const dir = document.documentElement.getAttribute('dir');
     this._isRTL = dir === 'rtl';

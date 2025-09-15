@@ -19,6 +19,7 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     before(async () => {
       report = await getReport();
+
       console.log('------------------------------------');
       console.log('Received Violations:');
       report.violations.forEach((v) => {
@@ -29,8 +30,7 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     Object.entries(expectedViolations).forEach(([violation, issues]) => {
       it(`${violation}: ${issues} issue(s)`, async () => {
-        const found = report.violations.find((v) => v.id === violation);
-        await expect(!found || found.issues <= issues).toBe(true);
+        await expect(report.violations.some((v) => v.id === violation && v.issues <= issues)).toBe(true);
       });
     });
   });
@@ -50,8 +50,7 @@ export function reportA11y(expectedViolations, expectedIncompleteViolations, set
 
     Object.entries(expectedIncompleteViolations).forEach(([violation, issues]) => {
       it(`${violation}: ${issues} issue(s)`, async () => {
-        const found = report.incomplete.find((v) => v.id === violation);
-        await expect(!found || found.issues <= issues).toBe(true);
+        await expect(report.incomplete.some((v) => v.id === violation && v.issues <= issues)).toBe(true);
       });
     });
   });
