@@ -373,6 +373,12 @@ Polymer({
         outline: none;
         text-decoration: none;
       }
+
+      /* Add visible focus indicator for Safari */
+      main:focus {
+        outline: 2px solid #0a84ff; /* Safari fallback */
+        outline-offset: -3px;
+      }
     </style>
 
     <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
@@ -780,8 +786,8 @@ Polymer({
   },
 
   logoToMenuNavigation() {
-    const {logo} = this.$;
-    const {menu} = this.$;
+    const { logo } = this.$;
+    const { menu } = this.$;
     logo.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
