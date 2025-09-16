@@ -70,4 +70,61 @@ Polymer({
     visible: Boolean,
     selected: String,
   },
+  ready() {
+    if (super.ready) super.ready();
+    const listbox = this.$$('paper-listbox');
+
+    function updateFocus(item) {
+      if (!item) return;
+      Array.from(item.parentElement.children).forEach((child) => {
+        child.setAttribute('tabindex', '-1');
+      });
+      item.setAttribute('tabindex', '0');
+      item.focus();
+    }
+
+    listbox.addEventListener('click', (e) => {
+      const item = e.target.closest('[name]');
+      if (item) {
+        updateFocus(item);
+      }
+    });
+
+    listbox.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          listbox.selectPrevious();
+          if (listbox.selectedItem) {
+            updateFocus(listbox.selectedItem);
+          }
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          listbox.selectNext();
+          if (listbox.selectedItem) {
+            updateFocus(listbox.selectedItem);
+          }
+        }
+
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          // eslint-disable-next-line prefer-destructuring
+          const selectedItem = listbox.selectedItem;
+          if (selectedItem) {
+            const name = selectedItem.getAttribute('name');
+            this.set('selected', name);
+            this.set('visible', true);
+          }
+        }
+      },
+      true,
+    );
+  },
 });
