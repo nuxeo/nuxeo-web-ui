@@ -408,7 +408,7 @@ Polymer({
       >
         <div role="list">
           <!-- logo -->
-          <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection" tabindex="-1">
+          <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
             <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
           </a>
 
