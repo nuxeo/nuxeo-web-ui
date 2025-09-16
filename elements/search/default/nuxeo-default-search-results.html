@@ -262,7 +262,6 @@ limitations under the License.
         this._lastIndex = this.nxProvider.resultsCount;
         return tabindex.toString();
       },
-
       _handleKeydown(e) {
         const elem = e.currentTarget;
         const index = parseInt(elem.getAttribute('index'), 10);
@@ -290,10 +289,12 @@ limitations under the License.
             e.stopPropagation();
             this._triggerItemToggle(elem, e);
             return;
+
           default:
             return;
         }
-        this._focusGridItem(newIndex, elem);
+
+        this._focusGridItem(newIndex);
       },
 
       _triggerItemToggle(elem, e) {
@@ -303,9 +304,8 @@ limitations under the License.
         });
       },
 
-      _focusGridItem(index, element) {
-        const focusElem = element && element.tagName.toLowerCase();
-        const items = this.shadowRoot.querySelectorAll(focusElem);
+      _focusGridItem(index) {
+        const items = this.shadowRoot.querySelectorAll('nuxeo-document-list-item');
         if (items[index]) {
           items[index].focus();
         }
