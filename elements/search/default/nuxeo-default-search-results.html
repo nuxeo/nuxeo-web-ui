@@ -262,24 +262,28 @@ limitations under the License.
         this._lastIndex = this.nxProvider.resultsCount;
         return tabindex.toString();
       },
+
       _handleKeydown(e) {
         const elem = e.currentTarget;
-        const index = parseInt(elem.getAttribute('index'), 10);
+        const currentIndex = parseInt(elem.getAttribute('index'), 10);
         const total = this.nxProvider?.resultsCount || 0;
-        let newIndex = index;
+        let newIndex = currentIndex;
 
         switch (e.key) {
           case 'ArrowRight':
           case 'ArrowDown':
-            if (index < total - 1) newIndex = index + 1;
+            e.stopPropagation();
+            if (currentIndex < total - 1) newIndex = currentIndex + 1;
             break;
 
           case 'ArrowLeft':
           case 'ArrowUp':
-            if (index > 0) newIndex = index - 1;
+            e.stopPropagation();
+            if (currentIndex > 0) newIndex = currentIndex - 1;
             break;
 
           case 'Enter':
+            e.preventDefault();
             e.stopPropagation();
             this._triggerItemToggle(elem, e);
             return;
@@ -294,20 +298,70 @@ limitations under the License.
             return;
         }
 
-        this._focusGridItem(newIndex);
+        this._focusItem(newIndex, elem);
       },
 
       _triggerItemToggle(elem, e) {
+        const checkbox = elem.querySelector('nuxeo-data-table-checkbox');
+        if (checkbox) {
+          // Create a synthetic event object that matches what _onCheckBoxTap expects
+          const fakeEvent = {
+            target: checkbox,
+            srcElement: checkbox,
+            shiftKey: e.shiftKey,
+            model: e.model.index, // ✅ provide model.index
+          };
+
+          this._onCheckBoxTap(fakeEvent);
+        } else if (elem._onCheckBoxTap) {
         elem._onCheckBoxTap({
           type: 'tap',
           detail: { sourceEvent: e },
         });
+      }
       },
 
-      _focusGridItem(index) {
-        const items = this.shadowRoot.querySelectorAll('nuxeo-document-list-item');
+      _focusItem(index, elem) {
+        if (!elem) return;
+
+        const tag = elem.tagName.toLowerCase();
+
+        let selector;
+        let container;
+
+        if (tag === 'nuxeo-document-list-item') {
+          // List view
+          selector = 'nuxeo-document-list-item';
+          container = this.shadowRoot;
+        } else if (tag === 'nuxeo-document-grid-thumbnail') {
+          // Grid view
+          selector = 'nuxeo-document-grid-thumbnail';
+          container = this.shadowRoot;
+        } else if (tag === 'nuxeo-data-table-row') {
+          // Table view
+          selector = 'nuxeo-data-table-row';
+          container = elem.closest('nuxeo-data-table');
+        } else {
+          return;
+        }
+
+        if (!container) return;
+
+        // Table rows may render lazily → async lookup
+        if (tag === 'nuxeo-data-table-row') {
+          setTimeout(() => {
+            const targetRow = container.querySelector(`${selector}[index="${index}"]`);
+            if (targetRow) {
+              targetRow.focus({ preventScroll: true });
+            }
+          }, 50);
+          return;
+        }
+
+        // Grid/List → sync lookup
+        const items = container.querySelectorAll(selector);
         if (items[index]) {
-          items[index].focus();
+          items[index].focus({ preventScroll: true });
         }
       },
     });
