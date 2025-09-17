@@ -54,6 +54,7 @@ limitations under the License.
             index="[[index]]"
             on-navigate="_navigate"
             selected-items="[[selectedItems]]"
+            on-keydown="_handleKeydown"
           >
           </nuxeo-document-grid-thumbnail>
         </template>
@@ -67,6 +68,7 @@ limitations under the License.
         selection-enabled
         on-row-clicked="_navigate"
         caption-text="[[i18n('table.caption.defaultSearchResults')]]"
+        on-keydown="_handleKeydown"
       >
         <nuxeo-data-table-column
           name="[[i18n('label.dublincore.title')]]"
@@ -204,10 +206,12 @@ limitations under the License.
       >
         <template>
           <nuxeo-document-list-item
+            tabindex$="{{_computeTabAndLastIndex(index)}}"
             selected$="{{selected}}"
             doc="[[item]]"
             index="[[index]]"
             on-navigate="_navigate"
+            on-keydown="_handleKeydown"
             selected-items="[[selectedItems]]"
           >
           </nuxeo-document-list-item>
@@ -258,6 +262,104 @@ limitations under the License.
         const tabindex = index + 1;
         this._lastIndex = this.nxProvider.resultsCount;
         return tabindex.toString();
+      },
+
+      _handleKeydown(e) {
+        const elem = e.target.closest('nuxeo-data-table-row, nuxeo-document-list-item, nuxeo-document-grid-thumbnail');
+        if (!elem) return;
+
+        const tag = elem.tagName.toLowerCase();
+        const currentIndex = parseInt(elem.getAttribute('index'), 10);
+        const total = this.nxProvider?.resultsCount || 0;
+        let newIndex = currentIndex;
+
+        switch (e.key) {
+          case 'ArrowRight':
+          case 'ArrowDown':
+            e.stopPropagation();
+            if (currentIndex < total - 1) newIndex = currentIndex + 1;
+            break;
+
+          case 'ArrowLeft':
+          case 'ArrowUp':
+            e.stopPropagation();
+            if (currentIndex > 0) newIndex = currentIndex - 1;
+            break;
+
+          case 'Enter':
+          case ' ':
+            e.preventDefault();
+            e.stopPropagation();
+            if (tag === 'nuxeo-data-table-row') {
+              this._triggerRowCheckbox(elem, currentIndex, e);
+            } else {
+              this._triggerItemToggle(elem, e);
+            }
+            return;
+
+          default:
+            return;
+        }
+        this._focusItem(newIndex, elem);
+      },
+
+      _triggerRowCheckbox(row, index, e) {
+        if (!row) return;
+
+        const checkbox = row.querySelector('nuxeo-data-table-checkbox');
+        const fakeEvent = {
+          target: checkbox,
+          srcElement: checkbox,
+          shiftKey: e.shiftKey,
+          model: { index },
+        };
+
+        e.currentTarget._onCheckBoxTap(fakeEvent);
+        if (e.key === 'Enter') {
+          checkbox.click();
+        }
+      },
+
+      _triggerItemToggle(elem, e) {
+        if (typeof elem._onCheckBoxTap === 'function') {
+          elem._onCheckBoxTap({
+            type: 'tap',
+            detail: { sourceEvent: e },
+          });
+        }
+      },
+
+      _focusItem(index, elem) {
+        if (index < 0) return;
+
+        let container;
+
+        const selector = elem.tagName.toLowerCase();
+        if (!selector) return;
+
+        if (selector === 'nuxeo-document-list-item' || selector === 'nuxeo-document-grid-thumbnail') {
+          container = this.shadowRoot;
+        } else {
+          container = elem.closest('nuxeo-data-table');
+        }
+
+        // Virtual scroller (iron-list or table)
+        const list = container.querySelector('iron-list, nuxeo-data-table');
+
+        // Ensure item is rendered
+        if (list && typeof list.scrollToIndex === 'function') {
+          list.scrollToIndex(index);
+        }
+
+        // Focus after render
+        setTimeout(() => {
+          const target = container.querySelector(`${selector}[index="${index}"]`);
+          if (target) {
+            target.focus({ preventScroll: false }); // allow scroll into view
+            // ensure it's fully visible
+            target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          }
+        }, 0);
       },
     });
   </script>

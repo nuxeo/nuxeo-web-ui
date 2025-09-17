@@ -212,7 +212,7 @@ Polymer({
         <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" tabindex="0">
+        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown" tabindex="0">
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
@@ -265,6 +265,7 @@ Polymer({
 
     index: {
       type: Number,
+      reflectToAttribute: true,
     },
   },
 
@@ -323,5 +324,13 @@ Polymer({
 
   _computeTitle(doc) {
     return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
+  },
+
+  _handleKeydown(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.handleClick(e);
+    }
   },
 });
