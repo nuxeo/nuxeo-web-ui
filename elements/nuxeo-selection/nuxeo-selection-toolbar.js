@@ -220,18 +220,18 @@ Polymer({
   },
 
   _computeShortcutHint() {
-    let isMac = false;
+    let platform = '';
 
-    if (navigator.userAgentData && navigator.userAgentData.platform) {
-      isMac = navigator.userAgentData.platform.toLowerCase().includes('mac');
+    if (navigator.userAgentData?.platform) {
+      platform = navigator.userAgentData.platform.toLowerCase();
     } else {
-      isMac = /mac/i.test(navigator.userAgent);
+      platform = navigator.userAgent.toLowerCase();
     }
 
+    const isMac = platform.includes('mac'); // stricter detection
     const key = isMac ? 'Command' : 'Ctrl';
-    const message = this.i18n('selectionToolbar.hint.message', { key });
 
-    return message;
+    return this.i18n('selectionToolbar.hint.message', key);
   },
 
   toogleSelectedItemsPopup(e) {
