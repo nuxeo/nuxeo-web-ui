@@ -300,12 +300,7 @@ limitations under the License.
           default:
             return;
         }
-
-        if (tag === 'nuxeo-data-table-row') {
-          this._focusTableRow(newIndex, elem);
-        } else {
-          this._focusItem(newIndex, elem);
-        }
+        this._focusItem(newIndex, elem);
       },
 
       _triggerRowCheckbox(row, index, e) {
@@ -320,19 +315,11 @@ limitations under the License.
         };
 
         e.currentTarget._onCheckBoxTap(fakeEvent);
+        if (e.key === 'Enter') {
+          checkbox.click();
+        }
       },
 
-      _focusTableRow(index, row) {
-        const table = row.closest('nuxeo-data-table');
-        if (!table) return;
-
-        setTimeout(() => {
-          const targetRow = table.querySelector(`nuxeo-data-table-row[index="${index}"]`);
-          if (targetRow) {
-            targetRow.focus({ preventScroll: true });
-          }
-        }, 50);
-      },
       _triggerItemToggle(elem, e) {
         if (typeof elem._onCheckBoxTap === 'function') {
           elem._onCheckBoxTap({
@@ -343,44 +330,36 @@ limitations under the License.
       },
 
       _focusItem(index, elem) {
-        if (!elem) return;
+        if (index < 0) return;
 
-        const tag = elem.tagName.toLowerCase();
-        let selector; let container;
+        let container;
 
-        if (tag === 'nuxeo-document-list-item') {
-          selector = 'nuxeo-document-list-item';
+        const selector = elem.tagName.toLowerCase();
+        if (!selector) return;
+
+        if (selector === 'nuxeo-document-list-item' || selector === 'nuxeo-document-grid-thumbnail') {
           container = this.shadowRoot;
-        } else if (tag === 'nuxeo-document-grid-thumbnail') {
-          selector = 'nuxeo-document-grid-thumbnail';
-          container = this.shadowRoot;
-        } else if (tag === 'nuxeo-data-table-row') {
-          selector = 'nuxeo-data-table-row';
-          container = elem.closest('nuxeo-data-table');
         } else {
-          return;
+          container = elem.closest('nuxeo-data-table');
         }
 
-        if (!container) return;
+        // Virtual scroller (iron-list or table)
+        const list = container.querySelector('iron-list, nuxeo-data-table');
 
-        // async lookup for table rows
-        if (tag === 'nuxeo-data-table-row') {
-          setTimeout(() => {
-            const target = container.querySelector(`${selector}[index="${index}"]`);
-            if (target) {
-              target.focus();
-              target.scrollIntoView({ block: 'nearest' });
-            }
-          }, 50);
-          return;
+        // Ensure item is rendered
+        if (list && typeof list.scrollToIndex === 'function') {
+          list.scrollToIndex(index);
         }
 
-        // sync for list/grid
-        const items = container.querySelectorAll(selector);
-        if (items[index]) {
-          items[index].focus();
-          items[index].scrollIntoView({ block: 'nearest' });
-        }
+        // Focus after render
+        setTimeout(() => {
+          const target = container.querySelector(`${selector}[index="${index}"]`);
+          if (target) {
+            target.focus({ preventScroll: false }); // allow scroll into view
+            // ensure it's fully visible
+            target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          }
+        }, 0);
       },
     });
   </script>
