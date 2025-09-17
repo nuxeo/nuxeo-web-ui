@@ -191,6 +191,26 @@ Polymer({
       .vignette {
         display: flex;
       }
+
+      /* apply hover styles when host is focused (or any child is focused) */
+      .listBox:hover,
+      :host(:focus) .listBox,
+      :host(:focus-within) .listBox {
+        border: 2px solid var(--nuxeo-link-hover-color);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+      }
+
+      /* make title color match hover when host/child focused */
+      .listBox:hover .title,
+      :host(:focus) .listBox .title,
+      :host(:focus-within) .listBox .title {
+        color: var(--nuxeo-link-hover-color);
+      }
+
+      .listBox:focus-visible {
+        outline: none !important; /* override default outline */
+        box-shadow: none !important;
+      }
     </style>
 
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
