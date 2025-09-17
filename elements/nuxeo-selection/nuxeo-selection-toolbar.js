@@ -228,7 +228,7 @@ Polymer({
       platform = navigator.userAgent.toLowerCase();
     }
 
-    const isMac = platform.includes('mac'); // stricter detection
+    const isMac = platform.includes('mac');
     const key = isMac ? 'Command' : 'Ctrl';
 
     return this.i18n('selectionToolbar.hint.message', key);
@@ -279,9 +279,17 @@ Polymer({
       this.lastInputKeyboard = false;
     });
 
-    // Ctrl+. toggle: table -> toolbar
+    // Detect if user is on Mac (once)
+    const isMac =
+      (navigator.userAgentData && navigator.userAgentData.platform?.toLowerCase().includes('mac')) ||
+      /mac/i.test(navigator.userAgent);
+
+    // Command/Ctrl + . toggle: table -> toolbar
     document.addEventListener('keydown', (e) => {
-      if (!e.ctrlKey) return;
+      // On Mac, use Command (metaKey); otherwise use Ctrl
+      const modifierPressed = isMac ? e.metaKey : e.ctrlKey;
+      if (!modifierPressed) return;
+
       const isPeriod = e.key === '.' || e.code === 'Period';
       if (!isPeriod) return;
 
