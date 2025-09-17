@@ -219,21 +219,6 @@ Polymer({
     this.hidden = !this.selectedItems || this.selectedItems.length === 0;
   },
 
-  // _computeShortcutHint() {
-  //   let isMac = false;
-
-  //   if (navigator.userAgentData && navigator.userAgentData.platform) {
-  //     isMac = navigator.userAgentData.platform.toLowerCase().includes('mac');
-  //   } else {
-  //     isMac = /mac/i.test(navigator.userAgent);
-  //   }
-
-  //   const key = isMac ? 'Command' : 'Ctrl';
-  //   const message = this.i18n('selectionToolbar.hint.message', { key });
-
-  //   return message;
-  // },
-
   _computeShortcutHint() {
     let platform = '';
 
@@ -243,7 +228,7 @@ Polymer({
       platform = navigator.userAgent.toLowerCase();
     }
 
-    const isMac = platform.includes('mac'); // stricter detection
+    const isMac = platform.includes('mac');
     const key = isMac ? 'Command' : 'Ctrl';
 
     return this.i18n('selectionToolbar.hint.message', key);
