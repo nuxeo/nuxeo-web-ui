@@ -809,10 +809,7 @@ Polymer({
       const lastItem = items[items.length - 1];
       const active = e.target;
 
-      if (e.key === 'ArrowUp' && active === firstItem) {
-        e.preventDefault();
-        logo.focus();
-      } else if (e.key === 'ArrowDown' && active === lastItem) {
+      if ((e.key === 'ArrowUp' && active === firstItem) || (e.key === 'ArrowDown' && active === lastItem)) {
         e.preventDefault();
         logo.focus();
       }
