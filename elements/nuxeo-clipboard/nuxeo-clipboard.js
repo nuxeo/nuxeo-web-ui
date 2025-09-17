@@ -152,11 +152,7 @@ Polymer({
         empty-label-when-filtered="[[i18n('clipboard.empty')]]"
       >
         <template>
-          <div
-            tabindex$="{{_computeTabAndLastIndex(index)}}"
-            class$="[[_computedClass(selected)]]"
-            on-keydown="_handleKeyNav"
-          >
+          <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
             <div class="list-item-box">
               <div class="list-item-info">
                 <div class="list-item-thumbnail">
@@ -343,11 +339,5 @@ Polymer({
       }
       this._remove(evt);
     }
-  },
-
-  _computeTabAndLastIndex(index) {
-    const tabindex = index + 1;
-    this._lastIndex = this.nxProvider.resultsCount;
-    return tabindex.toString();
   },
 });
