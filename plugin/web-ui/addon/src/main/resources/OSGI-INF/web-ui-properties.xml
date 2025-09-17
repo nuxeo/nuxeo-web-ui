@@ -33,6 +33,9 @@
     <!-- First Day Of Week -->
     <property name="org.nuxeo.web.ui.firstDayOfWeek"></property>
 
+  <!-- Server provided name demo (set in nuxeo.conf as org.nuxeo.web.ui.name) -->
+  <property name="org.nuxeo.web.ui.document_type.order">${org.nuxeo.web.ui.document_type.order:=rakesh,madhur,nishant,john}</property>
+
     <!-- S3 Direct upload -->
     <property name="org.nuxeo.web.ui.s3.useDirectUpload">${nuxeo.s3storage.useDirectUpload:=false}</property>
     

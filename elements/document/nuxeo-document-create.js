@@ -318,6 +318,7 @@ Polymer({
   init(typeId) {
     this._clear();
     if (typeId) {
+      console.log("UI Config",Nuxeo.UI.config)
       const typeObj = this.subtypes.find((type) => type.id === typeId);
       if (typeObj) {
         this.selectedDocType = typeObj;
