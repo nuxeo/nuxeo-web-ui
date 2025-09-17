@@ -68,6 +68,7 @@ limitations under the License.
         selection-enabled
         on-row-clicked="_navigate"
         caption-text="[[i18n('table.caption.defaultSearchResults')]]"
+        on-keydown="_handleKeydown"
       >
         <nuxeo-data-table-column
           name="[[i18n('label.dublincore.title')]]"
@@ -264,7 +265,10 @@ limitations under the License.
       },
 
       _handleKeydown(e) {
-        const elem = e.currentTarget;
+        const elem = e.target.closest('nuxeo-data-table-row, nuxeo-document-list-item, nuxeo-document-grid-thumbnail');
+        if (!elem) return;
+
+        const tag = elem.tagName.toLowerCase();
         const currentIndex = parseInt(elem.getAttribute('index'), 10);
         const total = this.nxProvider?.resultsCount || 0;
         let newIndex = currentIndex;
@@ -283,62 +287,74 @@ limitations under the License.
             break;
 
           case 'Enter':
+          case ' ':
             e.preventDefault();
             e.stopPropagation();
-            this._triggerItemToggle(elem, e);
-            return;
-
-          case ' ':
-            e.preventDefault(); // stop page scroll
-            e.stopPropagation();
-            this._triggerItemToggle(elem, e);
+            if (tag === 'nuxeo-data-table-row') {
+              this._triggerRowCheckbox(elem, currentIndex, e);
+            } else {
+              this._triggerItemToggle(elem, e);
+            }
             return;
 
           default:
             return;
         }
 
-        this._focusItem(newIndex, elem);
+        if (tag === 'nuxeo-data-table-row') {
+          this._focusTableRow(newIndex, elem);
+        } else {
+          this._focusItem(newIndex, elem);
+        }
       },
 
-      _triggerItemToggle(elem, e) {
-        const checkbox = elem.querySelector('nuxeo-data-table-checkbox');
-        if (checkbox) {
-          // Create a synthetic event object that matches what _onCheckBoxTap expects
-          const fakeEvent = {
-            target: checkbox,
-            srcElement: checkbox,
-            shiftKey: e.shiftKey,
-            model: e.model.index, // ✅ provide model.index
-          };
+      _triggerRowCheckbox(row, index, e) {
+        if (!row) return;
 
-          this._onCheckBoxTap(fakeEvent);
-        } else if (elem._onCheckBoxTap) {
-        elem._onCheckBoxTap({
-          type: 'tap',
-          detail: { sourceEvent: e },
-        });
-      }
+        const checkbox = row.querySelector('nuxeo-data-table-checkbox');
+        const fakeEvent = {
+          target: checkbox,
+          srcElement: checkbox,
+          shiftKey: e.shiftKey,
+          model: { index },
+        };
+
+        e.currentTarget._onCheckBoxTap(fakeEvent);
+      },
+
+      _focusTableRow(index, row) {
+        const table = row.closest('nuxeo-data-table');
+        if (!table) return;
+
+        setTimeout(() => {
+          const targetRow = table.querySelector(`nuxeo-data-table-row[index="${index}"]`);
+          if (targetRow) {
+            targetRow.focus({ preventScroll: true });
+          }
+        }, 50);
+      },
+      _triggerItemToggle(elem, e) {
+        if (typeof elem._onCheckBoxTap === 'function') {
+          elem._onCheckBoxTap({
+            type: 'tap',
+            detail: { sourceEvent: e },
+          });
+        }
       },
 
       _focusItem(index, elem) {
         if (!elem) return;
 
         const tag = elem.tagName.toLowerCase();
-
-        let selector;
-        let container;
+        let selector; let container;
 
         if (tag === 'nuxeo-document-list-item') {
-          // List view
           selector = 'nuxeo-document-list-item';
           container = this.shadowRoot;
         } else if (tag === 'nuxeo-document-grid-thumbnail') {
-          // Grid view
           selector = 'nuxeo-document-grid-thumbnail';
           container = this.shadowRoot;
         } else if (tag === 'nuxeo-data-table-row') {
-          // Table view
           selector = 'nuxeo-data-table-row';
           container = elem.closest('nuxeo-data-table');
         } else {
@@ -347,21 +363,23 @@ limitations under the License.
 
         if (!container) return;
 
-        // Table rows may render lazily → async lookup
+        // async lookup for table rows
         if (tag === 'nuxeo-data-table-row') {
           setTimeout(() => {
-            const targetRow = container.querySelector(`${selector}[index="${index}"]`);
-            if (targetRow) {
-              targetRow.focus({ preventScroll: true });
+            const target = container.querySelector(`${selector}[index="${index}"]`);
+            if (target) {
+              target.focus();
+              target.scrollIntoView({ block: 'nearest' });
             }
           }, 50);
           return;
         }
 
-        // Grid/List → sync lookup
+        // sync for list/grid
         const items = container.querySelectorAll(selector);
         if (items[index]) {
-          items[index].focus({ preventScroll: true });
+          items[index].focus();
+          items[index].scrollIntoView({ block: 'nearest' });
         }
       },
     });
