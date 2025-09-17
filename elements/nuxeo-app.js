@@ -373,6 +373,12 @@ Polymer({
         outline: none;
         text-decoration: none;
       }
+
+      /* Add visible focus indicator for Safari */
+      main:focus {
+        outline: 2px solid #0a84ff; /* Safari fallback */
+        outline-offset: -3px;
+      }
     </style>
 
     <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
@@ -737,6 +743,7 @@ Polymer({
   ],
 
   ready() {
+    this.logoToMenuNavigation();
     this.skipLinkEvent();
     this._checkRtl();
 
@@ -775,6 +782,40 @@ Polymer({
     Performance.mark('nuxeo-app.ready');
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
+    });
+  },
+
+  logoToMenuNavigation() {
+    const { logo } = this.$;
+    const { menu } = this.$;
+    logo.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const firstItem = menu.querySelector('nuxeo-menu-icon, [name]');
+        if (firstItem) {
+          firstItem.focus();
+        }
+      }
+    });
+
+    menu.addEventListener('keydown', (e) => {
+      const items = Array.from(menu.querySelectorAll('nuxeo-menu-icon, [name]')).filter(
+        (el) => !el.hasAttribute('hidden'),
+      );
+
+      if (!items.length) return;
+
+      const firstItem = items[0];
+      const lastItem = items[items.length - 1];
+      const active = e.target;
+
+      if (e.key === 'ArrowUp' && active === firstItem) {
+        e.preventDefault();
+        logo.focus();
+      } else if (e.key === 'ArrowDown' && active === lastItem) {
+        e.preventDefault();
+        logo.focus();
+      }
     });
   },
 

@@ -274,7 +274,7 @@ Polymer({
             empty-label-when-filtered="[[i18n('collections.members.empty')]]"
           >
             <template>
-              <div tabindex$="0" class$="[[_computedClass(selected)]]">
+              <div tabindex$="{{_computeTabAndLastIndex(index)}}" class$="[[_computedClass(selected)]]">
                 <div class="list-item-box">
                   <div class="list-item-info horizontal layout center">
                     <div class="vertical layout center">
@@ -535,5 +535,11 @@ Polymer({
 
   _handleKeyNav(e) {
     handleVerticalKeyNavigation(e, '.list-item');
+  },
+
+  _computeTabAndLastIndex(index) {
+    const tabindex = index + 1;
+    this._lastIndex = this.nxProvider.resultsCount;
+    return tabindex.toString();
   },
 });
