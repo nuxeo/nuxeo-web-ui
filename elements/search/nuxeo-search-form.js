@@ -44,6 +44,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import { handleVerticalKeyNavigation } from '../common-utils.js';
 
 /**
  `nuxeo-search-form`
@@ -345,11 +346,7 @@ Polymer({
             select-on-tap
           >
             <template>
-              <div
-                tabindex$="{{_computeTabAndLastIndex(index)}}"
-                class$="[[_computedClass(selected)]]"
-                index="[[index]]"
-              >
+              <div tabindex="0" class$="[[_computedClass(selected)]]" index="[[index]]" on-keydown="_handleKeyNav">
                 <div class="list-item-box">
                   <div class="list-item-info" role="listitem" aria-selected="true">
                     <div class="vertical layout center">
@@ -1067,5 +1064,9 @@ Polymer({
     const tabindex = index + 1;
     this._lastIndex = this.nxProvider.resultsCount;
     return tabindex.toString();
+  },
+
+  _handleKeyNav(e) {
+    handleVerticalKeyNavigation(e, '.list-item');
   },
 });
