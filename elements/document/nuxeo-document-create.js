@@ -60,6 +60,15 @@ Polymer({
         @apply --layout-flex;
       }
 
+      .document-type-order {
+        background-color: var(--nuxeo-box);
+        padding: 8px 16px;
+        margin: 8px 0;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        color: var(--nuxeo-text-default);
+      }
+
       .typeSelection {
         margin: 1rem 0;
         @apply --layout-wrap;
@@ -195,6 +204,9 @@ Polymer({
             ></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
           </div>
+          <div class="document-type-order" hidden$="[[!_hasDocumentTypeOrder(documentTypeOrder)]]">
+            [[_formatDocumentTypeOrder(documentTypeOrder)]]
+          </div>
           <paper-dialog-scrollable>
             <div name="typeSelection" class="typeSelection">
               <template is="dom-repeat" items="[[subtypes]]" as="type">
@@ -306,6 +318,11 @@ Polymer({
       type: Boolean,
       value: false,
       readOnly: true,
+    },
+
+    documentTypeOrder: {
+      type: String,
+      computed: '_computeDocumentTypeOrder()',
     },
   },
 
@@ -427,5 +444,35 @@ Polymer({
 
   _canCreate() {
     return this.canCreate && !this.creating;
+  },
+
+  /**
+   * Compute the document type order from configuration
+   * @returns {string} The configured document type order
+   */
+  _computeDocumentTypeOrder() {
+    return String(Nuxeo.UI.config.document_type.order || '');
+  },
+
+  /**
+   * Check if there is a document type order configured
+   * @param {string} order - The document type order string
+   * @returns {boolean} True if there is a configured order
+   */
+  _hasDocumentTypeOrder(order) {
+    return Boolean(order && order.trim());
+  },
+
+  /**
+   * Format the document type order for display
+   * @param {string} order - The document type order string
+   * @returns {string} Formatted string for display
+   */
+  _formatDocumentTypeOrder(order) {
+    if (!order) {
+      return '';
+    }
+    const types = order.split(',').map(type => type.trim()).filter(Boolean);
+    return types.length ? 'Document Type Order: ' + types.join(' → ') : '';
   },
 });
