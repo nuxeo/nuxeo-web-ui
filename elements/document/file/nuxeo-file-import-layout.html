@@ -29,9 +29,12 @@ limitations under the License.
       role="widget"
       label="[[i18n('title')]]"
       name="title"
+      id="inputElem"
       value="{{document.properties.dc:title}}"
       autofocus
       required
+      error-message="[[i18n('title.err')]]"
+      on-value-changed="_validateOnChange"
     >
     </nuxeo-input>
 
@@ -98,6 +101,14 @@ limitations under the License.
          * @doctype File
          */
         document: Object,
+      },
+
+      validate() {
+        return this.$.inputElem.validate();
+      },
+
+      _validateOnChange() {
+        this.$.inputElem.validate();
       },
     });
   </script>

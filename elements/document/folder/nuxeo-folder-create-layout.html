@@ -24,16 +24,6 @@ limitations under the License.
 <dom-module id="nuxeo-folder-create-layout">
   <template>
     <style include="nuxeo-styles">
-      .er {
-        color: red;
-        font-size: 12px;
-        margin-bottom: 10px;
-      }
-
-      #inputElem {
-        margin-bottom: 0px;
-        padding-bottom: 0px;
-      }
       .inputclass {
         margin-bottom: 12px;
       }
@@ -47,12 +37,10 @@ limitations under the License.
         autofocus
         required
         id="inputElem"
-        on-input="_showError"
+        error-message="[[i18n('title.err')]]"
+        on-value-changed="_validateOnChange"
       >
       </nuxeo-input>
-      <template is="dom-if" if="[[isVisible]]">
-        <div class="er">[[i18n('title.err')]]</div>
-      </template>
     </div>
     <nuxeo-textarea
       role="widget"
@@ -117,20 +105,13 @@ limitations under the License.
          * @doctype Folder
          */
         document: Object,
-        isVisible: {
-          type: Boolean,
-          value: false,
-        },
       },
-      _showError() {
-        const elem = this.$.inputElem;
-        const inputelem = this.$.inputElem.value || '';
-        this.set('isVisible', inputelem.trim() === '');
-        if (this.isVisible) {
-          elem.setAttribute('invalid');
-        } else {
-          elem.removeAttribute('invalid');
-        }
+      validate() {
+        return this.$.inputElem.validate();
+      },
+
+      _validateOnChange() {
+        this.$.inputElem.validate();
       },
     });
   </script>
