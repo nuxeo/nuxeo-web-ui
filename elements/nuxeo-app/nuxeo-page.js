@@ -111,7 +111,7 @@ Polymer({
     </style>
 
     <div class="page">
-      <div class="toolbar" id="toolbar" role="banner">
+      <div class="toolbar" id="toolbar">
         <slot id="header" slot="header" name="header"></slot>
       </div>
       <div id="tabs" role="navigation">
