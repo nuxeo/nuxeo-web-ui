@@ -209,7 +209,7 @@ Polymer({
           </div>
           <paper-dialog-scrollable>
             <div name="typeSelection" class="typeSelection">
-              <template is="dom-repeat" items="[[subtypes]]" as="type">
+              <template is="dom-repeat" items="[[_getSortedSubtypes(subtypes, documentTypeOrder)]]" as="type">
                 <paper-button
                   noink
                   name$="[[type.type]]"
@@ -474,5 +474,50 @@ Polymer({
     }
     const types = order.split(',').map(type => type.trim()).filter(Boolean);
     return types.length ? 'Document Type Order: ' + types.join(' → ') : '';
+  },
+
+  /**
+   * Sort subtypes based on document type order configuration
+   * Handles three cases:
+   * 1. Types in order config but not in subtypes are ignored
+   * 2. Types in both order config and subtypes are sorted according to config
+   * 3. Types only in subtypes are added at the end in their original order
+   * @param {Array} subtypes - Array of available document types
+   * @param {string} orderConfig - Comma-separated string of ordered type names
+   * @returns {Array} Sorted array of document types
+   */
+  _getSortedSubtypes(subtypes, orderConfig) {
+    if (!subtypes || !subtypes.length) {
+      return [];
+    }
+
+    if (!orderConfig) {
+      return subtypes;
+    }
+
+    // Create a map of type ID to subtype object for easier lookup
+    const subtypeMap = new Map(subtypes.map(type => [type.id, type]));
+
+    // Get ordered type IDs from config
+    const orderedTypeIds = orderConfig.split(',')
+      .map(id => id.trim())
+      .filter(Boolean);
+
+    // First, add types that are both in order config and subtypes (in order)
+    const sortedTypes = orderedTypeIds
+      .map(id => subtypeMap.get(id))
+      .filter(Boolean); // Remove undefined (types in config but not in subtypes)
+
+    // Create a set of processed type IDs
+    const processedTypeIds = new Set(sortedTypes.map(type => type.id));
+
+    // Add remaining types that weren't in the order config
+    subtypes.forEach(type => {
+      if (!processedTypeIds.has(type.id)) {
+        sortedTypes.push(type);
+      }
+    });
+
+    return sortedTypes;
   },
 });
