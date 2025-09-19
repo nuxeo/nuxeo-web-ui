@@ -286,10 +286,13 @@ limitations under the License.
             if (currentIndex > 0) newIndex = currentIndex - 1;
             break;
 
-          case 'Enter':
           case ' ':
-            e.preventDefault();
+          case 'Enter':
             e.stopPropagation();
+            if (e.key === ' ') {
+              e.preventDefault(); // prevent page from scrolling
+            }
+
             if (tag === 'nuxeo-data-table-row') {
               this._triggerRowCheckbox(elem, currentIndex, e);
             } else {
