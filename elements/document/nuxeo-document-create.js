@@ -60,15 +60,6 @@ Polymer({
         @apply --layout-flex;
       }
 
-      .document-type-order {
-        background-color: var(--nuxeo-box);
-        padding: 8px 16px;
-        margin: 8px 0;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        color: var(--nuxeo-text-default);
-      }
-
       .typeSelection {
         margin: 1rem 0;
         @apply --layout-wrap;
@@ -203,9 +194,6 @@ Polymer({
               always-float-label
             ></nuxeo-path-suggestion>
             <span class$="horizontal layout [[_formatErrorMessage(errorMessage)]]">[[errorMessage]]</span>
-          </div>
-          <div class="document-type-order" hidden$="[[!_hasDocumentTypeOrder(documentTypeOrder)]]">
-            [[_formatDocumentTypeOrder(documentTypeOrder)]]
           </div>
           <paper-dialog-scrollable>
             <div name="typeSelection" class="typeSelection">
@@ -455,69 +443,55 @@ Polymer({
   },
 
   /**
-   * Check if there is a document type order configured
-   * @param {string} order - The document type order string
-   * @returns {boolean} True if there is a configured order
-   */
-  _hasDocumentTypeOrder(order) {
-    return Boolean(order && order.trim());
-  },
-
-  /**
-   * Format the document type order for display
-   * @param {string} order - The document type order string
-   * @returns {string} Formatted string for display
-   */
-  _formatDocumentTypeOrder(order) {
-    if (!order) {
-      return '';
-    }
-    const types = order.split(',').map(type => type.trim()).filter(Boolean);
-    return types.length ? 'Document Type Order: ' + types.join(' → ') : '';
-  },
-
-  /**
-   * Sort subtypes based on document type order configuration
-   * Handles three cases:
-   * 1. Types in order config but not in subtypes are ignored
-   * 2. Types in both order config and subtypes are sorted according to config
-   * 3. Types only in subtypes are added at the end in their original order
    * @param {Array} subtypes - Array of available document types
    * @param {string} orderConfig - Comma-separated string of ordered type names
    * @returns {Array} Sorted array of document types
    */
   _getSortedSubtypes(subtypes, orderConfig) {
-    if (!subtypes || !subtypes.length) {
+    if (!Array.isArray(subtypes)) {
       return [];
     }
-
-    if (!orderConfig) {
-      return subtypes;
+    const subtypesCopy = [...subtypes];
+    if (!orderConfig || typeof orderConfig !== 'string') {
+      return subtypesCopy;
     }
-
-    // Create a map of type ID to subtype object for easier lookup
-    const subtypeMap = new Map(subtypes.map(type => [type.id, type]));
-
-    // Get ordered type IDs from config
-    const orderedTypeIds = orderConfig.split(',')
-      .map(id => id.trim())
-      .filter(Boolean);
-
-    // First, add types that are both in order config and subtypes (in order)
-    const sortedTypes = orderedTypeIds
-      .map(id => subtypeMap.get(id))
-      .filter(Boolean); // Remove undefined (types in config but not in subtypes)
-
-    // Create a set of processed type IDs
-    const processedTypeIds = new Set(sortedTypes.map(type => type.id));
-
-    // Add remaining types that weren't in the order config
-    subtypes.forEach(type => {
-      if (!processedTypeIds.has(type.id)) {
-        sortedTypes.push(type);
-      }
-    });
-
-    return sortedTypes;
+    try {
+      const subtypeMap = new Map(
+        subtypesCopy.map(type => [type.id.toLowerCase(), type])
+      );
+      const orderedTypeIds = [...new Set( 
+        orderConfig
+          .split(',')
+          .map(id => id.trim().toLowerCase()) 
+          .filter(Boolean) 
+      )];
+      const sortedTypes = [];
+      const processedIds = new Set();
+      const priorityTypes = ['workspace', 'folder'];
+      priorityTypes.forEach(priorityType => {
+        const type = subtypeMap.get(priorityType);
+        if (type) {
+          sortedTypes.push(type);
+          processedIds.add(type.id.toLowerCase());
+        }
+      });
+      orderedTypeIds.forEach(configId => {
+        const type = subtypeMap.get(configId);
+        if (type && !processedIds.has(configId)) {
+          sortedTypes.push(type);
+          processedIds.add(configId);
+        }
+      });
+      subtypesCopy.forEach(type => {
+        const lowerId = type.id.toLowerCase();
+        if (!processedIds.has(lowerId)) {
+          sortedTypes.push(type);
+          processedIds.add(lowerId);
+        }
+      });
+      return sortedTypes;
+    } catch (error) {
+      return subtypesCopy;
+    }
   },
 });
