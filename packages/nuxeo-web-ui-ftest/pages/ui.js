@@ -204,18 +204,17 @@ export default class UI extends BasePage {
     dropdown.click(`#dropdown #contentWrapper div paper-menu div paper-icon-item[name="${selection}"]`);
   }
 
-  async waitForToastNotVisible(timeout = 5000) {
-    await driver.waitUntil(
-      async () => {
-        const mwcSnackbars = await driver.$$('mwc-snackbar');
-        const openStates = await Promise.all(mwcSnackbars.map((toast) => toast.getAttribute('open')));
-        return !openStates.some(Boolean);
-      },
-      {
-        timeout,
-        timeoutMsg: 'Toast notification is still visible after timeout',
-      },
-    );
+  async waitForToastNotVisible() {
+    const mwcsnackbar = await driver.elements('mwc-snackbar');
+    let found = true;
+    for (let i = 0; i < mwcsnackbar.length; i++) {
+      const isAttrPresent = await mwcsnackbar[i].getAttribute('open');
+      if (isAttrPresent) {
+        found = false;
+        break;
+      }
+    }
+    return found;
   }
 
   async getToastDismissButton() {
