@@ -24,17 +24,6 @@ limitations under the License.
 <dom-module id="nuxeo-audio-create-layout">
   <template>
     <style include="nuxeo-styles">
-      .er {
-        color: red;
-        font-size: 12px;
-        margin-top: 12px;
-        margin-bottom: 10px;
-      }
-
-      #inputElem {
-        margin-bottom: 0px;
-        padding-bottom: 0px;
-      }
       .inputclass {
         margin-bottom: 12px;
       }
@@ -46,14 +35,12 @@ limitations under the License.
         name="title"
         value="{{document.properties.dc:title}}"
         id="inputElem"
-        on-input="_showError"
+        error-message="[[i18n('title.err')]]"
+        on-value-changed="_validateOnChange"
         autofocus
         required
       >
       </nuxeo-input>
-      <template is="dom-if" if="[[isVisible]]">
-        <span class="er" aria-label="[[i18n('title.err')]]">[[i18n('title.err')]]</span>
-      </template>
     </div>
     <nuxeo-textarea
       role="widget"
@@ -123,20 +110,14 @@ limitations under the License.
          * @doctype Audio
          */
         document: Object,
-        isVisible: {
-          type: Boolean,
-          value: false,
-        },
       },
-      _showError() {
-        const elem = this.$.inputElem;
-        const inputelem = this.$.inputElem.value || '';
-        this.set('isVisible', inputelem.trim() === '');
-        if (this.isVisible) {
-          elem.setAttribute('invalid');
-        } else {
-          elem.removeAttribute('invalid');
-        }
+
+      validate() {
+        return this.$.inputElem.validate();
+      },
+
+      _validateOnChange() {
+        this.$.inputElem.validate();
       },
     });
   </script>

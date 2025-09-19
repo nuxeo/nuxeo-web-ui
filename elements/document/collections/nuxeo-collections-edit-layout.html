@@ -32,6 +32,8 @@ limitations under the License.
       value="{{document.properties.dc:title}}"
       autofocus
       required
+      on-input="_validateTitle"
+      id="title"
     >
     </nuxeo-input>
 
@@ -97,6 +99,21 @@ limitations under the License.
          * @doctype Collections
          */
         document: Object,
+      },
+      _validateTitle() {
+        const titleInput = this.$.title;
+        if (!titleInput.value || !titleInput.value.trim()) {
+          titleInput.invalid = true;
+          titleInput.errorMessage = this.i18n('title.err');
+        } else {
+          titleInput.invalid = false;
+          titleInput.errorMessage = '';
+        }
+      },
+
+      validate() {
+        this._validateTitle();
+        return !this.$.title.invalid;
       },
     });
   </script>
