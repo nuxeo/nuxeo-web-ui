@@ -51,7 +51,21 @@ export default class Vocabulary extends BasePage {
     const deleteButton = await this.el.element(selector);
     await deleteButton.scrollIntoView(selector);
     await deleteButton.click();
-    await driver.alertAccept();
+    // Wait until the alert actually exists
+    await browser.waitUntil(
+      async () => {
+        try {
+          await browser.getAlertText();
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      { timeout: 5000, interval: 200, timeoutMsg: 'Expected alert to appear after clicking delete' },
+    );
+
+    // Now safely accept it
+    await browser.acceptAlert();
   }
 
   async editEntry(index, label) {

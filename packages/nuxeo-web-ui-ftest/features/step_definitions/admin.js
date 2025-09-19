@@ -21,10 +21,8 @@ Then('I cannot see the administration button', async function() {
 // XXX: this.ui.drawer.administration.click()
 When('I click {string} in the administration menu', async (text) => {
   const el = await driver.$(`nuxeo-menu-item[name="${text}"]`);
-  setTimeout(async () => {
-    await el.waitForVisible();
-    el.click();
-  }, 4000);
+  await el.waitForDisplayed({ timeout: 5000 });
+  await el.click();
 });
 
 Then('I can see the analytics page', async function() {
