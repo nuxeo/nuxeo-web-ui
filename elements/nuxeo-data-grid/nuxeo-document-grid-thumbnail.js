@@ -302,6 +302,14 @@ Polymer({
     }
   },
 
+  _handleKeydown(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.handleClick(e);
+    }
+  },
+
   _onCheckBoxTap(e) {
     // WEBUI-1262 : prevents checkbox selection during tab navigation
     if (e.type === 'tap' || (e.key !== 'Tab' && e.key !== 'Shift')) {
@@ -324,13 +332,5 @@ Polymer({
 
   _computeTitle(doc) {
     return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
-  },
-
-  _handleKeydown(e) {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      e.stopPropagation();
-      this.handleClick(e);
-    }
   },
 });

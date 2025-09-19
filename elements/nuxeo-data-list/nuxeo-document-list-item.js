@@ -207,7 +207,13 @@ Polymer({
         color: var(--nuxeo-link-hover-color);
       }
 
-      .listBox:focus-visible {
+      :host(:focus-within) .listBox .actions,
+      :host(:focus-within) .listBox .select,
+      :host(:focus-within) [selection-mode] .select {
+        display: block;
+      }
+
+      :host(:focus-visible) {
         outline: none !important; /* override default outline */
         box-shadow: none !important;
       }
@@ -215,11 +221,11 @@ Polymer({
 
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
-        <div class="vignette thumbnailContainer" on-tap="handleClick">
+        <div class="vignette thumbnailContainer" on-tap="handleClick" on-keydown="_handleKeydown">
           <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
         </div>
-        <div class="dataContainer flex" on-tap="handleClick">
-          <div class="horizontal layout center">
+        <div class="dataContainer flex" on-tap="handleClick" on-keydown="_handleKeydown">
+          <div class="horizontal layout center" tabindex="0">
             <a class="title flex">
               <div class="title">[[doc.title]]</div>
             </a>
@@ -237,6 +243,7 @@ Polymer({
             icon="icons:check"
             title="[[_computeTitle(doc)]]"
             on-tap="_onCheckBoxTap"
+            on-keydown="_handleKeydown"
           ></paper-icon-button>
         </div>
       </div>
@@ -322,5 +329,14 @@ Polymer({
 
   _computeTitle(doc) {
     return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
+  },
+
+  _handleKeydown(e) {
+    if (e.key === 'Enter') {
+      e.stopPropagation();
+      if (e.currentTarget.tagName.toLowerCase() !== 'paper-icon-button') {
+        e.currentTarget.click();
+      }
+    }
   },
 });
