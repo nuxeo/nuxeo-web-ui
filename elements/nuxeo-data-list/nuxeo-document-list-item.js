@@ -334,7 +334,9 @@ Polymer({
   _handleKeydown(e) {
     if (e.key === 'Enter') {
       e.stopPropagation();
-      e.currentTarget.click();
+      if (e.currentTarget.tagName.toLowerCase() !== 'paper-icon-button') {
+        e.currentTarget.click();
+      }
     }
   },
 });
