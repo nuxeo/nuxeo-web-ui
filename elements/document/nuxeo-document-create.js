@@ -451,47 +451,46 @@ Polymer({
     if (!Array.isArray(subtypes)) {
       return [];
     }
+
     const subtypesCopy = [...subtypes];
-    if (!orderConfig || typeof orderConfig !== 'string') {
+
+    if (!orderConfig || typeof orderConfig !== 'string' || !orderConfig.trim()) {
       return subtypesCopy;
     }
+
     try {
-      const subtypeMap = new Map(
+      const typeMap = new Map(
         subtypesCopy.map(type => [type.id.toLowerCase(), type])
       );
-      const orderedTypeIds = [...new Set( 
-        orderConfig
-          .split(',')
-          .map(id => id.trim().toLowerCase()) 
-          .filter(Boolean) 
-      )];
-      const sortedTypes = [];
-      const processedIds = new Set();
-      const priorityTypes = ['workspace', 'folder'];
-      priorityTypes.forEach(priorityType => {
-        const type = subtypeMap.get(priorityType);
-        if (type) {
-          sortedTypes.push(type);
-          processedIds.add(type.id.toLowerCase());
-        }
-      });
-      orderedTypeIds.forEach(configId => {
-        const type = subtypeMap.get(configId);
-        if (type && !processedIds.has(configId)) {
-          sortedTypes.push(type);
-          processedIds.add(configId);
-        }
-      });
+
+      const processedTypes = new Set();
+      const result = [];
+
+      orderConfig.split(',')
+        .map(id => id.trim())
+        .filter(Boolean)
+        .forEach(configType => {
+          const normalizedType = configType.toLowerCase();
+          const type = typeMap.get(normalizedType);
+          
+          if (type && !processedTypes.has(normalizedType)) {
+            result.push(type);
+            processedTypes.add(normalizedType);
+          }
+        });
+
       subtypesCopy.forEach(type => {
-        const lowerId = type.id.toLowerCase();
-        if (!processedIds.has(lowerId)) {
-          sortedTypes.push(type);
-          processedIds.add(lowerId);
+        const normalizedType = type.id.toLowerCase();
+        if (!processedTypes.has(normalizedType)) {
+          result.push(type);
+          processedTypes.add(normalizedType);
         }
       });
-      return sortedTypes;
+
+      return result;
+
     } catch (error) {
-      return subtypesCopy;
+      return subtypesCopy; // Return original order on error
     }
   },
 });
