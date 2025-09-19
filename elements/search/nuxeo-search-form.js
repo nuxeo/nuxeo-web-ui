@@ -704,8 +704,14 @@ Polymer({
 
   displayQueueAndNavigateToFirst() {
     this.displayQueue(0);
+    this.async(() => {
+      const filterBtn = this.shadowRoot.querySelector('#toogleFilter');
+      if (filterBtn) {
+        filterBtn.focus({ preventScroll: false });
+        filterBtn.scrollIntoView({ block: 'nearest' });
+      }
+    }, 1);
   },
-
   displayQueue(index) {
     this.queue = true;
     if (this.visible) {
