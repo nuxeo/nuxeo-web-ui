@@ -1773,17 +1773,6 @@ Polymer({
     return Object.keys(obj).length === 0;
   },
 
-  _focusFirstMenuItem() {
-    const drawer = this.$.drawerMenu;
-    if (!drawer) {
-      return;
-    }
-    const firstItem = drawer.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
-    if (firstItem) {
-      //  firstItem.focus();
-    }
-  },
-
   _updateIsNarrow() {
     this.isNarrow = window.innerWidth <= 720;
   },

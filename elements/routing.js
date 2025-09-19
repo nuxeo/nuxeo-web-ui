@@ -25,11 +25,6 @@ page.base(app.baseUrl.replace(/\/$/, ''));
 // Middleware
 function scrollToTop(ctx, next) {
   next();
-  requestAnimationFrame(() => {
-    if (app && typeof app._focusFirstMenuItem === 'function') {
-      app._focusFirstMenuItem();
-    }
-  });
 }
 
 function createUrlFromString(str) {
@@ -75,11 +70,6 @@ function _routeAdmin(selectedAdminTab, errorPath, routeData) {
 // Routes
 page('*', scrollToTop, (ctx, next) => {
   next();
-  requestAnimationFrame(() => {
-    if (app && typeof app._focusFirstMenuItem === 'function') {
-      app._focusFirstMenuItem();
-    }
-  });
 });
 
 page('/', () => {
