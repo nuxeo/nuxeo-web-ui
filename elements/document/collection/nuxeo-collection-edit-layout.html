@@ -23,20 +23,25 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-collection-edit-layout">
   <template>
-    <style include="nuxeo-styles"></style>
-
-    <nuxeo-input
-      role="widget"
-      label="[[i18n('title')]]"
-      name="title"
-      value="{{document.properties.dc:title}}"
-      autofocus
-      required
-      id="title"
-      on-input="_validateTitle"
-    >
-    </nuxeo-input>
-
+    <style include="nuxeo-styles">
+      .inputclass {
+        margin-bottom: 12px;
+      }
+    </style>
+    <div class="inputclass">
+      <nuxeo-input
+        role="widget"
+        label="[[i18n('title')]]"
+        name="title"
+        value="{{document.properties.dc:title}}"
+        autofocus
+        required
+        id="inputElem"
+        error-message="[[i18n('title.err')]]"
+        on-value-changed="_validateOnChange"
+      >
+      </nuxeo-input>
+    </div>
     <nuxeo-textarea
       role="widget"
       label="[[i18n('label.description')]]"
@@ -101,20 +106,12 @@ limitations under the License.
          */
         document: Object,
       },
-      _validateTitle() {
-        const titleInput = this.$.title;
-        if (!titleInput.value || !titleInput.value.trim()) {
-          titleInput.invalid = true;
-          titleInput.errorMessage = this.i18n('title.err');
-        } else {
-          titleInput.invalid = false;
-          titleInput.errorMessage = '';
-        }
+      validate() {
+        return this.$.inputElem.validate();
       },
 
-      validate() {
-        this._validateTitle();
-        return !this.$.title.invalid;
+      _validateOnChange() {
+        this.$.inputElem.validate();
       },
     });
   </script>
