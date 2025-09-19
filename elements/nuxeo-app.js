@@ -754,7 +754,7 @@ Polymer({
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
 
     this.$.drawerPanel.addEventListener('opened-changed', () => {
-      this.$.drawerPanel.parentElement.notifyResize();
+      window.dispatchEvent(new Event('resize'));
     });
 
     const { toast } = this.$;
@@ -1771,17 +1771,6 @@ Polymer({
    */
   _isEmpty(obj) {
     return Object.keys(obj).length === 0;
-  },
-
-  _focusFirstMenuItem() {
-    const drawer = this.$.drawerMenu;
-    if (!drawer) {
-      return;
-    }
-    const firstItem = drawer.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
-    if (firstItem) {
-      firstItem.focus();
-    }
   },
 
   _updateIsNarrow() {
