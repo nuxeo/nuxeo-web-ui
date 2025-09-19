@@ -118,6 +118,8 @@ Polymer({
           // eslint-disable-next-line prefer-destructuring
           const selectedItem = listbox.selectedItem;
           if (selectedItem) {
+            const name = selectedItem.getAttribute('name');
+            this.set('selected', name);
             this.set('visible', true);
           }
         }
