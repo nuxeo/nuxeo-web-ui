@@ -205,16 +205,16 @@ export default class UI extends BasePage {
   }
 
   async waitForToastNotVisible() {
-    const mwcsnackbar = await driver.elements('mwc-snackbar');
+    const mwcSnackbars = await driver.$$('mwc-snackbar');
     let found = true;
-    for (let i = 0; i < mwcsnackbar.length; i++) {
-      const toast = await mwcsnackbar[i];
-      const isAttrPresent = await toast.getAttribute('open');
-      if (isAttrPresent) {
-        found = false;
-        break;
-      }
-    }
+    await Promise.all(
+      mwcSnackbars.map(async (toast) => {
+        const isAttrPresent = await toast.getAttribute('open');
+        if (isAttrPresent) {
+          found = false;
+        }
+      }),
+    );
     return found;
   }
 
