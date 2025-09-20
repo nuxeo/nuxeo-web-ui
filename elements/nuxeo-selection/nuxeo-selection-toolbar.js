@@ -297,11 +297,13 @@ Polymer({
 
       const toolbar = this.$.selectionToolbar;
       const inToolbar = toolbar.contains(document.activeElement);
+      const focusableElements = toolbar.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])');
 
       if (!inToolbar) {
-        const firstFocusable = toolbar.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
-        if (firstFocusable) {
-          firstFocusable.focus();
+        if (this.selectAllActive) {
+          focusableElements[1].focus();
+        } else {
+          focusableElements[0].focus();
         }
       }
     });
