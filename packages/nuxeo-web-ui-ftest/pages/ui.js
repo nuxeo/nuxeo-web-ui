@@ -207,9 +207,7 @@ export default class UI extends BasePage {
   async waitForToastNotVisible() {
     const mwcsnackbar = await driver.$$('mwc-snackbar');
     if (mwcsnackbar.length === 0) return true;
-
     const openStates = await Promise.all(mwcsnackbar.map((bar) => bar.getAttribute('open')));
-
     return !openStates.some(Boolean);
   }
 
