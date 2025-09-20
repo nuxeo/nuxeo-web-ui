@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
 @license
 ©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
@@ -302,11 +301,9 @@ Polymer({
 
       if (!inToolbar) {
         if (this.selectAllActive) {
-          focusableElements[1].focus(); // focus second element
-          console.log(toolbar, inToolbar, focusableElements[1], this.selectAllActive, 'focus all');
+          focusableElements[1].focus();
         } else {
-          focusableElements[0].focus(); // focus first element
-          console.log(toolbar, inToolbar, focusableElements[0], this.selectAllActive, 'focus');
+          focusableElements[0].focus();
         }
       }
     });
