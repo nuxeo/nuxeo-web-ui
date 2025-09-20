@@ -13,7 +13,7 @@ When('I open the spreadsheet', async function() {
   const iframe = await buttonEle.element('#iframe');
   await iframe.waitForExist();
   const browserEle = await browser.el;
-  await browserEle.switchFrame(iframe);
+  await browserEle.switchToFrame(iframe);
   this.spreadsheet = await new Spreadsheet();
 });
 
@@ -67,7 +67,7 @@ When('I close the spreadsheet', async function() {
   const spreadsheet = await this.spreadsheet;
   if (spreadsheet) {
     await spreadsheet.close();
-    await browser.switchFrame(null);
+    await browser.switchToFrame(null);
   } else {
     throw new Error('Error: Spreadsheet does not exist!!');
   }
