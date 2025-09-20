@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
 @license
 ©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
@@ -297,11 +298,15 @@ Polymer({
 
       const toolbar = this.$.selectionToolbar;
       const inToolbar = toolbar.contains(document.activeElement);
+      const focusableElements = toolbar.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])');
 
       if (!inToolbar) {
-        const firstFocusable = toolbar.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
-        if (firstFocusable) {
-          firstFocusable.focus();
+        if (this.selectAllActive) {
+          focusableElements[1].focus(); // focus second element
+          console.log(toolbar, inToolbar, focusableElements[1], this.selectAllActive, 'focus all');
+        } else {
+          focusableElements[0].focus(); // focus first element
+          console.log(toolbar, inToolbar, focusableElements[0], this.selectAllActive, 'focus');
         }
       }
     });
