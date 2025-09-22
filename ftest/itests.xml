@@ -20,6 +20,8 @@
     </copy>
   </target>
 
+ <property name="batch" value="1"/>
+ <property name="totalBatches" value="3"/>
   <target name="run-tests" depends="_init">
     <condition property="cmd.npm" value="npm.cmd" else="npm">
       <os family="windows"/>
@@ -30,7 +32,12 @@
     <exec executable="${cmd.npm}" dir="../" failonerror="true">
       <env key="NUXEO_PACKAGES" value="nuxeo-csv"/>
       <arg value="run" />
-      <arg value="ftest" />
+      <arg value="ftest:batch" />
+      <arg value="--" />
+      <arg value="--batch" />
+      <arg value="${batch}" />
+      <arg value="--totalBatches" />
+      <arg value="${totalBatches}" />
     </exec>
   </target>
 
