@@ -114,11 +114,7 @@ export const config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
-  specs: [
-    process.env.SPECS
-      ? process.env.SPECS.split(',').map((s) => path.resolve(process.cwd(), s.trim()))
-      : path.join(process.cwd(), './features/*.feature'),
-  ],
+  specs: [process.env.SPECS ? process.env.SPECS.split(',') : path.join(process.cwd(), './features/*.feature')],
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],
