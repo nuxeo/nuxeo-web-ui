@@ -267,17 +267,19 @@ Polymer({
         }
       });
     }
-
-    // input-mode tracking
-    document.addEventListener('keydown', () => {
+    this._onKeydown = () => {
       this.lastInputKeyboard = true;
-    });
-    document.addEventListener('mousedown', () => {
+    };
+    this._onMousedown = () => {
       this.lastInputKeyboard = false;
-    });
-    document.addEventListener('touchstart', () => {
+    };
+    this._onTouchstart = () => {
       this.lastInputKeyboard = false;
-    });
+    };
+
+    document.addEventListener('keydown', this._onKeydown);
+    document.addEventListener('mousedown', this._onMousedown);
+    document.addEventListener('touchstart', this._onTouchstart);
 
     // Detect if user is on Mac (once)
     const isMac =
@@ -307,5 +309,16 @@ Polymer({
         }
       }
     });
+  },
+
+  disconnectedCallback() {
+    if (super.disconnectedCallback) {
+      super.disconnectedCallback();
+    }
+
+    // remove listeners to avoid memory leaks
+    document.removeEventListener('keydown', this._onKeydown);
+    document.removeEventListener('mousedown', this._onMousedown);
+    document.removeEventListener('touchstart', this._onTouchstart);
   },
 });
