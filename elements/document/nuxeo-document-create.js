@@ -197,7 +197,7 @@ Polymer({
           </div>
           <paper-dialog-scrollable>
             <div name="typeSelection" class="typeSelection">
-              <template is="dom-repeat" items="[[subtypes]]" as="type">
+              <template is="dom-repeat" items="[[_getSortedSubtypes(subtypes, documentTypeOrder)]]" as="type">
                 <paper-button
                   noink
                   name$="[[type.type]]"
@@ -306,6 +306,11 @@ Polymer({
       type: Boolean,
       value: false,
       readOnly: true,
+    },
+
+    documentTypeOrder: {
+      type: String,
+      computed: '_computeDocumentTypeOrder()',
     },
   },
 
@@ -426,5 +431,63 @@ Polymer({
 
   _canCreate() {
     return this.canCreate && !this.creating;
+  },
+
+  /**
+   * Compute the document type order from configuration
+   * @returns {string} The configured document type order
+   */
+  _computeDocumentTypeOrder() {
+    return String(Nuxeo.UI.config.document_type.order || '');
+  },
+
+  /**
+   * @param {Array} subtypes - Array of available document types
+   * @param {string} orderConfig - Comma-separated string of ordered type names
+   * @returns {Array} Sorted array of document types
+   */
+  _getSortedSubtypes(subtypes, orderConfig) {
+    if (!Array.isArray(subtypes)) {
+      return [];
+    }
+
+    const subtypesCopy = [...subtypes];
+
+    if (!orderConfig || typeof orderConfig !== 'string' || !orderConfig.trim()) {
+      return subtypesCopy;
+    }
+
+    try {
+      const typeMap = new Map(subtypesCopy.map((type) => [type.id.toLowerCase(), type]));
+
+      const processedTypes = new Set();
+      const result = [];
+
+      orderConfig
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean)
+        .forEach((configType) => {
+          const normalizedType = configType.toLowerCase();
+          const type = typeMap.get(normalizedType);
+
+          if (type && !processedTypes.has(normalizedType)) {
+            result.push(type);
+            processedTypes.add(normalizedType);
+          }
+        });
+
+      subtypesCopy.forEach((type) => {
+        const normalizedType = type.id.toLowerCase();
+        if (!processedTypes.has(normalizedType)) {
+          result.push(type);
+          processedTypes.add(normalizedType);
+        }
+      });
+
+      return result;
+    } catch (error) {
+      return subtypesCopy;
+    }
   },
 });
