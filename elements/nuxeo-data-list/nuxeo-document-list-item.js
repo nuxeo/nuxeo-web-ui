@@ -191,15 +191,41 @@ Polymer({
       .vignette {
         display: flex;
       }
+
+      /* apply hover styles when host is focused (or any child is focused) */
+      .listBox:hover,
+      :host(:focus) .listBox,
+      :host(:focus-within) .listBox {
+        border: 2px solid var(--nuxeo-link-hover-color);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+      }
+
+      /* make title color match hover when host/child focused */
+      .listBox:hover .title,
+      :host(:focus) .listBox .title,
+      :host(:focus-within) .listBox .title {
+        color: var(--nuxeo-link-hover-color);
+      }
+
+      :host(:focus-within) .listBox .actions,
+      :host(:focus-within) .listBox .select,
+      :host(:focus-within) [selection-mode] .select {
+        display: block;
+      }
+
+      :host(:focus-visible) {
+        outline: none !important; /* override default outline */
+        box-shadow: none !important;
+      }
     </style>
 
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
-        <div class="vignette thumbnailContainer" on-tap="handleClick">
+        <div class="vignette thumbnailContainer" on-tap="handleClick" on-keydown="_handleKeydown">
           <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
         </div>
-        <div class="dataContainer flex" on-tap="handleClick">
-          <div class="horizontal layout center">
+        <div class="dataContainer flex" on-tap="handleClick" on-keydown="_handleKeydown">
+          <div class="horizontal layout center" tabindex="0">
             <a class="title flex">
               <div class="title">[[doc.title]]</div>
             </a>
@@ -217,6 +243,7 @@ Polymer({
             icon="icons:check"
             title="[[_computeTitle(doc)]]"
             on-tap="_onCheckBoxTap"
+            on-keydown="_handleKeydown"
           ></paper-icon-button>
         </div>
       </div>
@@ -250,6 +277,7 @@ Polymer({
 
     index: {
       type: Number,
+      reflectToAttribute: true,
     },
   },
 
@@ -301,5 +329,14 @@ Polymer({
 
   _computeTitle(doc) {
     return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
+  },
+
+  _handleKeydown(e) {
+    if (e.key === 'Enter') {
+      e.stopPropagation();
+      if (e.currentTarget.tagName.toLowerCase() !== 'paper-icon-button') {
+        e.currentTarget.click();
+      }
+    }
   },
 });
