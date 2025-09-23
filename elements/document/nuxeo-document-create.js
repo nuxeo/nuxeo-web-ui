@@ -454,11 +454,10 @@ Polymer({
       return [];
     }
 
-    let subtypesCopy;
+    const subtypesCopy = [...subtypes];
     if (!orderConfig || typeof orderConfig !== 'string' || !orderConfig.trim()) {
       return subtypes;
     }
-    subtypesCopy = [...subtypes];
 
     if (!orderConfig || typeof orderConfig !== 'string' || !orderConfig.trim()) {
       return subtypesCopy;
