@@ -345,7 +345,11 @@ Polymer({
             select-on-tap
           >
             <template>
-              <div tabindex$="{{tabIndex}}" class$="[[_computedClass(selected)]]">
+              <div
+                tabindex$="{{_computeTabAndLastIndex(index)}}"
+                class$="[[_computedClass(selected)]]"
+                index="[[index]]"
+              >
                 <div class="list-item-box">
                   <div class="list-item-info" role="listitem" aria-selected="true">
                     <div class="vertical layout center">
@@ -1057,5 +1061,11 @@ Polymer({
     if (this.displayAutoControl) {
       return 'display-auto-control';
     }
+  },
+
+  _computeTabAndLastIndex(index) {
+    const tabindex = index + 1;
+    this._lastIndex = this.nxProvider.resultsCount;
+    return tabindex.toString();
   },
 });
