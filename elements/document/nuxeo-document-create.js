@@ -445,7 +445,8 @@ Polymer({
 
   /**
    * @param {Array} subtypes - Array of available document types
-   * @param {string} orderConfig - Comma-separated string of document type IDs that defines the order in which they should appear
+   * @param {string} orderConfig - Comma-separated string of document type IDs
+   *   that defines the order in which they should appear
    * @returns {Array} Sorted array of document types
    */
   _getSortedSubtypes(subtypes, orderConfig) {
