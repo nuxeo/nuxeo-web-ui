@@ -380,13 +380,13 @@ Polymer({
         outline-offset: -3px;
       }
     </style>
+    <header role="banner">
+      <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
 
-    <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
+      <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
-    <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
-
-    <nuxeo-expired-session message="[[i18n('app.expiredSession.message')]]"></nuxeo-expired-session>
-
+      <nuxeo-expired-session message="[[i18n('app.expiredSession.message')]]"></nuxeo-expired-session>
+    </header>
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"></nuxeo-document>
@@ -405,87 +405,88 @@ Polymer({
 
     <app-drawer-layout id="drawerPanel" fullbleed responsive-width="720px">
       <!-- Drawer -->
-      <app-drawer
-        id="drawerMenu"
-        swipe-open
-        align$="[[_drawerAlign(_isRTL)]]"
-        opened="{{drawerOpened}}"
-        hidden$="[[isDrawerHidden(isNarrow, drawerOpened)]]"
-      >
-        <div role="list">
-          <!-- logo -->
-          <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
-            <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
-          </a>
+      <aside>
+        <app-drawer
+          id="drawerMenu"
+          swipe-open
+          align$="[[_drawerAlign(_isRTL)]]"
+          opened="{{drawerOpened}}"
+          hidden$="[[isDrawerHidden(isNarrow, drawerOpened)]]"
+        >
+          <div role="list">
+            <!-- logo -->
+            <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
+              <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
+            </a>
 
-          <!-- menu -->
-          <paper-listbox
-            id="menu"
-            selected="{{selectedTab}}"
-            attr-for-selected="name"
-            selected-class="selected"
-            on-iron-activate="_toggleDrawer"
-            aria-label$="[[i18n('app.drawer')]]"
-            aria-expanded="[[drawerOpened]]"
-            on-keyup="_toggleDrawer"
-          >
-            <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-            <nuxeo-menu-icon
-              name="administration"
-              icon="nuxeo:admin"
-              label="app.administration"
-              class="settings"
-              hidden$="[[!hasAdministrationPermissions(currentUser)]]"
-            ></nuxeo-menu-icon>
-            <nuxeo-menu-icon
-              name="profile"
-              src="[[currentUser.contextParameters.userprofile.avatar.data]]"
-              icon="nuxeo:user-settings"
-              label="app.account"
-              class="settings"
-            ></nuxeo-menu-icon>
-          </paper-listbox>
-
-          <!-- drawer content -->
-          <div id="drawer" style="width: {{drawerWidth}}">
-            <iron-pages
-              id="drawer-pages"
-              selected="[[selectedTab]]"
+            <!-- menu -->
+            <paper-listbox
+              id="menu"
+              selected="{{selectedTab}}"
               attr-for-selected="name"
-              selected-attribute="visible"
-              on-iron-items-changed="_updateSearch"
+              selected-class="selected"
+              on-iron-activate="_toggleDrawer"
+              aria-label$="[[i18n('app.drawer')]]"
+              aria-expanded="[[drawerOpened]]"
+              on-keyup="_toggleDrawer"
             >
-              <nuxeo-slot name="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
+              <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
+              <nuxeo-menu-icon
+                name="administration"
+                icon="nuxeo:admin"
+                label="app.administration"
+                class="settings"
+                hidden$="[[!hasAdministrationPermissions(currentUser)]]"
+              ></nuxeo-menu-icon>
+              <nuxeo-menu-icon
+                name="profile"
+                src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+                icon="nuxeo:user-settings"
+                label="app.account"
+                class="settings"
+              ></nuxeo-menu-icon>
+            </paper-listbox>
 
-              <template is="dom-if" if="[[hasAdministrationPermissions(currentUser)]]">
-                <div name="administration">
-                  <div class="header">
-                    <h5>[[i18n('app.administration')]]</h5>
+            <!-- drawer content -->
+            <div id="drawer" style="width: {{drawerWidth}}">
+              <iron-pages
+                id="drawer-pages"
+                selected="[[selectedTab]]"
+                attr-for-selected="name"
+                selected-attribute="visible"
+                on-iron-items-changed="_updateSearch"
+              >
+                <nuxeo-slot name="DRAWER_PAGES" model="[[actionContext]]"></nuxeo-slot>
+
+                <template is="dom-if" if="[[hasAdministrationPermissions(currentUser)]]">
+                  <div name="administration">
+                    <div class="header">
+                      <h5>[[i18n('app.administration')]]</h5>
+                    </div>
+                    <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
+                      <nuxeo-slot name="ADMINISTRATION_MENU" model="[[actionContext]]"></nuxeo-slot>
+                    </iron-selector>
                   </div>
-                  <iron-selector selected="{{selectedAdminTab}}" attr-for-selected="name">
-                    <nuxeo-slot name="ADMINISTRATION_MENU" model="[[actionContext]]"></nuxeo-slot>
+                </template>
+
+                <div name="profile" class="layout vertical">
+                  <div class="header">
+                    <h5>[[_displayUser(currentUser)]]</h5>
+                  </div>
+                  <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
+                    <nuxeo-slot name="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
+                    <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout(url)]]"></nuxeo-menu-item>
                   </iron-selector>
                 </div>
-              </template>
+              </iron-pages>
 
-              <div name="profile" class="layout vertical">
-                <div class="header">
-                  <h5>[[_displayUser(currentUser)]]</h5>
-                </div>
-                <iron-selector selected="{{selectedProfileTab}}" attr-for-selected="name">
-                  <nuxeo-slot name="USER_MENU" model="[[actionContext]]"></nuxeo-slot>
-                  <nuxeo-menu-item name="logout" label="app.user.signOut" link="[[_logout(url)]]"></nuxeo-menu-item>
-                </iron-selector>
+              <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
+                <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
               </div>
-            </iron-pages>
-
-            <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
-              <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
             </div>
           </div>
-        </div>
-      </app-drawer>
-
+        </app-drawer>
+      </aside>
       <!-- Main content -->
       <app-header-layout>
         <app-header reveals effects="waterfall">
