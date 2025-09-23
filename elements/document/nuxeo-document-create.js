@@ -438,12 +438,15 @@ Polymer({
    * @returns {string} The configured document type order
    */
   _computeDocumentTypeOrder() {
-    return String(Nuxeo.UI.config.document_type.order || '');
+    return Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.document_type && Nuxeo.UI.config.document_type.order
+      ? String(Nuxeo.UI.config.document_type.order)
+      : '';
   },
 
   /**
    * @param {Array} subtypes - Array of available document types
-   * @param {string} orderConfig - Comma-separated string of ordered type names
+   * @param {string} orderConfig - Comma-separated string of document type IDs
+   *   that defines the order in which they should appear
    * @returns {Array} Sorted array of document types
    */
   _getSortedSubtypes(subtypes, orderConfig) {
@@ -451,7 +454,11 @@ Polymer({
       return [];
     }
 
-    const subtypesCopy = [...subtypes];
+    let subtypesCopy;
+    if (!orderConfig || typeof orderConfig !== 'string' || !orderConfig.trim()) {
+      return subtypes;
+    }
+    subtypesCopy = [...subtypes];
 
     if (!orderConfig || typeof orderConfig !== 'string' || !orderConfig.trim()) {
       return subtypesCopy;
