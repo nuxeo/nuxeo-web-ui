@@ -32,6 +32,9 @@ limitations under the License.
       value="{{document.properties.dc:title}}"
       autofocus
       required
+      id="inputElem"
+      error-message="[[i18n('title.err')]]"
+      on-value-changed="_validateOnChange"
     >
     </nuxeo-input>
 
@@ -98,6 +101,13 @@ limitations under the License.
          * @doctype Audio
          */
         document: Object,
+      },
+      validate() {
+        return this.$.inputElem.validate();
+      },
+
+      _validateOnChange() {
+        this.$.inputElem.validate();
       },
     });
   </script>
