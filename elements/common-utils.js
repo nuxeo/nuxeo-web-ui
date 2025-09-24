@@ -18,9 +18,7 @@ limitations under the License.
 
 export function handleVerticalKeyNavigation(e, itemSelector) {
   const { key } = e;
-  if (key !== 'ArrowDown' && key !== 'ArrowUp') {
-    return;
-  }
+  if (key !== 'ArrowDown' && key !== 'ArrowUp') return;
 
   e.preventDefault();
   e.stopPropagation();
@@ -30,7 +28,27 @@ export function handleVerticalKeyNavigation(e, itemSelector) {
   const currentIndex = Array.from(items).indexOf(e.currentTarget);
   const nextIndex = key === 'ArrowDown' ? currentIndex + 1 : currentIndex - 1;
 
-  if (nextIndex >= 0 && nextIndex < items.length) {
+  if (nextIndex < 0) return;
+
+  // Case 1: nextIndex is still inside currently rendered items
+  if (nextIndex < items.length) {
     items[nextIndex].focus();
+    return;
+  }
+
+  // Case 2: need to ask iron-list for more
+  const scrollItem = rootNode.querySelectorAll('nuxeo-data-list');
+  if (scrollItem && typeof scrollItem[0].scrollToIndex === 'function') {
+    scrollItem[0].scrollToIndex(nextIndex);
+
+    // Wait for iron-list to render the new item
+    requestAnimationFrame(() => {
+      const updatedItems = rootNode.querySelectorAll(itemSelector);
+      const nextItem = updatedItems[0];
+      if (nextItem) {
+        nextItem.focus();
+        nextItem.scrollIntoView({ block: 'nearest' });
+      }
+    });
   }
 }
