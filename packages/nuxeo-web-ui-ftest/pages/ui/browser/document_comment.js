@@ -28,7 +28,7 @@ export default class DocumentComment {
 
   get replyButton() {
     return (async () => {
-      const replyButton = await this._el.element('.text iron-icon[name="reply"]');
+      const replyButton = await this._el.element('.text paper-icon-button[name="reply"]');
       return replyButton;
     })();
   }
