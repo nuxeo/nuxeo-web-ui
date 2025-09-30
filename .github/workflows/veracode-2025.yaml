@@ -74,6 +74,7 @@ jobs:
           pushd packages/nuxeo-web-ui-ftest
           npm install
           popd
+          
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2
         with:
