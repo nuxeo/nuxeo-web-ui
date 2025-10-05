@@ -23,16 +23,24 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-picturebook-edit-layout">
   <template>
-    <style include="nuxeo-styles"></style>
-    <nuxeo-input
-      role="widget"
-      value="{{document.properties.dc:title}}"
-      label="Title"
-      type="text"
-      required="true"
-      name="title"
-    ></nuxeo-input>
-
+    <style include="nuxeo-styles">
+      .inputclass {
+        margin-bottom: 12px;
+      }
+    </style>
+    <div class="inputclass">
+      <nuxeo-input
+        role="widget"
+        value="{{document.properties.dc:title}}"
+        label="Title"
+        type="text"
+        required="true"
+        name="title"
+        id="inputElem"
+        error-message="[[i18n('title.err')]]"
+        on-value-changed="_validateOnChange"
+      ></nuxeo-input>
+    </div>
     <nuxeo-input
       role="widget"
       value="{{document.properties.dc:description}}"
@@ -53,6 +61,13 @@ limitations under the License.
         document: {
           type: Object,
         },
+      },
+      validate() {
+        return this.$.inputElem.validate();
+      },
+
+      _validateOnChange() {
+        this.$.inputElem.validate();
       },
     });
   </script>

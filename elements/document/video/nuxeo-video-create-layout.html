@@ -23,18 +23,25 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-video-create-layout">
   <template>
-    <style include="nuxeo-styles"></style>
-
-    <nuxeo-input
-      role="widget"
-      label="[[i18n('title')]]"
-      name="title"
-      value="{{document.properties.dc:title}}"
-      autofocus
-      required
-    >
-    </nuxeo-input>
-
+    <style include="nuxeo-styles">
+      .inputclass {
+        margin-bottom: 12px;
+      }
+    </style>
+    <div class="inputclass">
+      <nuxeo-input
+        role="widget"
+        label="[[i18n('title')]]"
+        name="title"
+        value="{{document.properties.dc:title}}"
+        autofocus
+        required
+        id="inputElem"
+        error-message="[[i18n('title.err')]]"
+        on-value-changed="_validateOnChange"
+      >
+      </nuxeo-input>
+    </div>
     <nuxeo-textarea
       role="widget"
       label="[[i18n('label.description')]]"
@@ -105,6 +112,14 @@ limitations under the License.
          * @doctype Video
          */
         document: Object,
+      },
+
+      validate() {
+        return this.$.inputElem.validate();
+      },
+
+      _validateOnChange() {
+        this.$.inputElem.validate();
       },
     });
   </script>

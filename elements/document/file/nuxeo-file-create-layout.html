@@ -23,17 +23,26 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-file-create-layout">
   <template>
-    <style include="nuxeo-styles"></style>
+    <style include="nuxeo-styles">
+      .inputclass {
+        margin-bottom: 12px;
+      }
+    </style>
 
-    <nuxeo-input
-      role="widget"
-      label="[[i18n('title')]]"
-      name="title"
-      value="{{document.properties.dc:title}}"
-      autofocus
-      required
-    >
-    </nuxeo-input>
+    <div class="inputclass">
+      <nuxeo-input
+        role="widget"
+        label="[[i18n('title')]]"
+        name="title"
+        id="inputElem"
+        value="{{document.properties.dc:title}}"
+        autofocus
+        required
+        error-message="[[i18n('title.err')]]"
+        on-value-changed="_validateOnChange"
+      >
+      </nuxeo-input>
+    </div>
 
     <nuxeo-textarea
       role="widget"
@@ -105,6 +114,14 @@ limitations under the License.
          * @doctype File
          */
         document: Object,
+      },
+
+      validate() {
+        return this.$.inputElem.validate();
+      },
+
+      _validateOnChange() {
+        this.$.inputElem.validate();
       },
     });
   </script>
