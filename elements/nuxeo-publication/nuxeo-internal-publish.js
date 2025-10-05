@@ -168,7 +168,7 @@ Polymer({
 
     selectedRendition: {
       type: String,
-      value: 'none',
+      value: 'default',
     },
 
     _isDisable: {
