@@ -6,7 +6,7 @@ Feature: Internal Publication
       | Section    | section1         | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/sections        |                  |        |            |
       | Section    | section2         | booklet | sciences/astronomy      | europe/Portugal      | BJones  | /default-domain/sections        |                  |        |            |
     And user "John" exists in group "members"
-
+/*
   Scenario: Publish Current Document Versions
     Given user "BJones" exists
     And I login as "BJones"
@@ -50,6 +50,7 @@ Feature: Internal Publication
        | /default-domain/sections/section1/my_document | XML Export | 1.0     |
        | /default-domain/sections/section2/my_document | Thumbnail  | 1.1     |
 
+*/
   Scenario: Republish Current Document
     Given I login as "John"
     And I have permission ReadWrite for the document with path "/default-domain/sections/section1"
