@@ -18,11 +18,17 @@ on:
 jobs:
   # in uses, cannot use environment variable for {owner}/{repo} nor matrix strategy variable for {ref}
   # thus hardcoding them
+  call-workflow-in-lts-2021:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@maintenance-3.0.x
+    secrets: inherit
+    needs: crowdin
+
   call-workflow-in-lts-2025:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@lts-2025
     secrets: inherit
-    needs: crowdin
+    needs: call-workflow-in-lts-2021
 
   crowdin:
     runs-on: ubuntu-latest
@@ -32,11 +38,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: maintenance-3.1.x
-
-      # dynamically generate a new branch name for each run
-      - name: Set Dynamic Branch Name
-        id: branch
-        run: echo "BRANCH_NAME=crowdin-translations-update-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
 
       - name: Crowdin Action
         id: crowdin-sync
@@ -57,16 +58,15 @@ jobs:
           # Auto-approve reference sentences we are pushing (english)
           auto_approve_imported: true
 
-          # dynamically use new branch name for PR
-          localization_branch_name: ${{ env.BRANCH_NAME }}
+          # Name of the branch where to merge the translations
+          localization_branch_name: crowdin-translations-sync-lts-2023
           pull_request_base_branch_name: maintenance-3.1.x
           create_pull_request: true
-          # include branch name in title and body
-          pull_request_title: 'New Crowdin translations by GitHub Action (${{ env.BRANCH_NAME }})'
-          pull_request_body: 'New Crowdin pull request with translations (${{ env.BRANCH_NAME }})'
+          pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
+          pull_request_body: 'New Crowdin pull request with translations lts 2023'
 
-          # make commit message dynamic
-          commit_message: 'Automatic update of translations from Crowdin (${{ env.BRANCH_NAME }})'
+          # The commit message
+          commit_message: 'Automatic update of translations from Crowdin lts 2023'
 
           # Automatically download all the new translations
           download_translations: true
