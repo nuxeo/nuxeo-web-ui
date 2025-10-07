@@ -33,7 +33,7 @@ jobs:
         with:
           ref: maintenance-3.1.x
 
-      # ✅ Added step: dynamically generate a new branch name for each run
+      # dynamically generate a new branch name for each run
       - name: Set Dynamic Branch Name
         id: branch
         run: echo "BRANCH_NAME=crowdin-translations-update-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
@@ -57,15 +57,15 @@ jobs:
           # Auto-approve reference sentences we are pushing (english)
           auto_approve_imported: true
 
-          # ✅ Updated: dynamically use new branch name for PR
+          # dynamically use new branch name for PR
           localization_branch_name: ${{ env.BRANCH_NAME }}
           pull_request_base_branch_name: maintenance-3.1.x
           create_pull_request: true
-          # ✅ Updated: include branch name in title and body
+          # include branch name in title and body
           pull_request_title: 'New Crowdin translations by GitHub Action (${{ env.BRANCH_NAME }})'
           pull_request_body: 'New Crowdin pull request with translations (${{ env.BRANCH_NAME }})'
 
-          # ✅ Updated: make commit message dynamic
+          # make commit message dynamic
           commit_message: 'Automatic update of translations from Crowdin (${{ env.BRANCH_NAME }})'
 
           # Automatically download all the new translations
