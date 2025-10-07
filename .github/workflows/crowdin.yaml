@@ -33,6 +33,11 @@ jobs:
         with:
           ref: maintenance-3.1.x
 
+      # ✅ Added step: dynamically generate a new branch name for each run
+      - name: Set Dynamic Branch Name
+        id: branch
+        run: echo "BRANCH_NAME=crowdin-translations-update-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+
       - name: Crowdin Action
         id: crowdin-sync
         uses: crowdin/github-action@1.5.2
@@ -52,15 +57,16 @@ jobs:
           # Auto-approve reference sentences we are pushing (english)
           auto_approve_imported: true
 
-          # Name of the branch where to merge the translations
-          localization_branch_name: crowdin-translations-update-lts-2023
+          # ✅ Updated: dynamically use new branch name for PR
+          localization_branch_name: ${{ env.BRANCH_NAME }}
           pull_request_base_branch_name: maintenance-3.1.x
           create_pull_request: true
-          pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
-          pull_request_body: 'New Crowdin pull request with translations lts 2023'
+          # ✅ Updated: include branch name in title and body
+          pull_request_title: 'New Crowdin translations by GitHub Action (${{ env.BRANCH_NAME }})'
+          pull_request_body: 'New Crowdin pull request with translations (${{ env.BRANCH_NAME }})'
 
-          # The commit message
-          commit_message: 'Automatic update of translations from Crowdin lts 2023'
+          # ✅ Updated: make commit message dynamic
+          commit_message: 'Automatic update of translations from Crowdin (${{ env.BRANCH_NAME }})'
 
           # Automatically download all the new translations
           download_translations: true
