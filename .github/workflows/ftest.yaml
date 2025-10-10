@@ -164,4 +164,3 @@ jobs:
           path: |
             plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
             plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
-            
