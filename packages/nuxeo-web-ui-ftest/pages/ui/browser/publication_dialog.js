@@ -9,6 +9,8 @@ export default class PublicationDialog extends BasePage {
     await fixtures.layouts.setValue(targetSelect, target);
     // set rendition
     if (rendition) {
+      const checkbox = await this.el.$('.renditionSelection');
+      checkbox.click();
       const renditionSelect = await this.el.$('#rendition');
       await fixtures.layouts.setValue(renditionSelect, rendition);
     }
