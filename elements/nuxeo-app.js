@@ -374,10 +374,24 @@ Polymer({
         text-decoration: none;
       }
 
-      /* Add visible focus indicator for Safari */
-      main:focus {
-        outline: 2px solid #0a84ff; /* Safari fallback */
+      main {
+        outline: none;
+      }
+
+      main:focus-visible {
+        outline: 2px solid #0a84ff;
         outline-offset: -3px;
+      }
+
+      /* Safari fallback */
+      main:focus {
+        outline: 2px solid #0a84ff;
+        outline-offset: -3px;
+      }
+
+      /* Hide Safari fallback outline unless keyboard tabbing */
+      main:not(.user-is-tabbing):focus {
+        outline: none;
       }
     </style>
     <header role="banner">
@@ -749,6 +763,20 @@ Polymer({
     this._checkRtl();
 
     this._updateIsNarrow();
+
+    const main = this.$.mainContent;
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab' && main) {
+        main.classList.add('user-is-tabbing');
+      }
+    });
+
+    window.addEventListener('mousedown', () => {
+      if (main) {
+        main.classList.remove('user-is-tabbing');
+      }
+    });
+
     window.addEventListener('resize', this._updateIsNarrow.bind(this));
 
     this.$.drawerMenu.opened = false; // close
