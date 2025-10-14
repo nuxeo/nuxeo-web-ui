@@ -24,7 +24,7 @@ jobs:
     secrets: inherit
     needs: crowdin
 
-  crowdin:
+    crowdin:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,41 +33,56 @@ jobs:
         with:
           ref: maintenance-3.1.x
 
-      - name: Crowdin Action
+      # 🔍 Add GitHub debug logging
+      - name: Enable debug logging
+        run: |
+          echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
+          echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
+          echo "CROWDIN_DEBUG=true" >> $GITHUB_ENV
+          echo "NODE_DEBUG=crowdin,request" >> $GITHUB_ENV
+
+      - name: Crowdin Action (with debug)
         id: crowdin-sync
         uses: crowdin/github-action@1.5.2
         with:
-          # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
           skip_ref_checkout: true
 
-          # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
-          # Load external configuration file (to support translation rename)
+
           config: crowdin-conf.yml
-
-          # Upload sources for translation
           upload_sources: true
-
-          # Auto-approve reference sentences we are pushing (english)
           auto_approve_imported: true
 
-          # Name of the branch where to merge the translations
-          localization_branch_name: crowdin-translations-sync-lts-2023
+          # ✅ Keep your existing branch name
+          localization_branch_name: crowdin-translations-update-lts-2023
           pull_request_base_branch_name: maintenance-3.1.x
           create_pull_request: true
           pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
-          pull_request_body: 'New Crowdin pull request with translations lts 2023'
+          pull_request_body: |
+            Automated Crowdin sync triggered by GitHub Actions.
 
-          # The commit message
+            Debug Info:
+            - GitHub Run ID: ${{ github.run_id }}
+            - Workflow Actor: ${{ github.actor }}
+            - Event: ${{ github.event_name }}
+            - Ref: ${{ github.ref }}
+
           commit_message: 'Automatic update of translations from Crowdin lts 2023'
-
-          # Automatically download all the new translations
           download_translations: true
+          verbose: true
 
-          # User properties
           github_user_name: nuxeo-webui-jx-bot
           github_user_email: webui@hyland.com
 
         env:
           GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+
+      # 🧾 Add post-step logging to confirm what happened
+      - name: Log Crowdin PR outputs
+        if: always()
+        run: |
+          echo "Crowdin Action Outputs:"
+          echo "  PR URL: ${{ steps.crowdin-sync.outputs.pull_request_url }}"
+          echo "  Commit SHA: ${{ steps.crowdin-sync.outputs.commit_sha }}"
+          echo "  Branch: crowdin-translations-update-lts-2023"
