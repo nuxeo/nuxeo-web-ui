@@ -1,4 +1,4 @@
-# Workflow that syncronizes translations from Crowdin
+# Workflow that synchronizes translations from Crowdin
 name: Crowdin Sync
 
 on:
@@ -33,54 +33,83 @@ jobs:
         with:
           ref: maintenance-3.1.x
 
-      # Add GitHub debug logging
-      - name: Enable debug logging
+      - name: Debug - Show current branch and environment
         run: |
-          echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
-          echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
-          echo "CROWDIN_DEBUG=true" >> $GITHUB_ENV
-          echo "NODE_DEBUG=crowdin,request" >> $GITHUB_ENV
+          echo "Current branch:"
+          git branch
+          echo "Git status:"
+          git status
+          echo "Git remote:"
+          git remote -v
+          echo "GitHub Actor: $GITHUB_ACTOR"
+          echo "Event name: $GITHUB_EVENT_NAME"
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Ref: $GITHUB_REF"
+          if [ -n "${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}" ]; then
+            echo "Token present: Yes"
+          else
+            echo "Token present: No"
+          fi
 
-      - name: Crowdin Action (with debug)
+      - name: Crowdin Action
         id: crowdin-sync
         uses: crowdin/github-action@1.5.2
         with:
+          # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
           skip_ref_checkout: true
 
+          # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
+          # Upload sources for translation
           upload_sources: true
+
+          # Auto-approve reference sentences we are pushing (english)
           auto_approve_imported: true
 
+          # Name of the branch where to merge the translations
           localization_branch_name: crowdin-translations-update-lts-2023
           pull_request_base_branch_name: maintenance-3.1.x
           create_pull_request: true
           pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
-          pull_request_body: |
-            Automated Crowdin sync triggered by GitHub Actions.
+          pull_request_body: 'New Crowdin pull request with translations lts 2023'
 
-            Debug Info:
-            - GitHub Run ID: ${{ github.run_id }}
-            - Workflow Actor: ${{ github.actor }}
-            - Event: ${{ github.event_name }}
-            - Ref: ${{ github.ref }}
-
+          # The commit message
           commit_message: 'Automatic update of translations from Crowdin lts 2023'
-          download_translations: true
-          verbose: true
 
+          # Automatically download all the new translations
+          download_translations: true
+
+          # User properties
           github_user_name: nuxeo-webui-jx-bot
           github_user_email: webui@hyland.com
 
         env:
           GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
 
-      # Add post-step logging 
-      - name: Log Crowdin PR outputs
+      - name: Debug - Inspect Crowdin PR creation
         if: always()
         run: |
-          echo "Crowdin Action Outputs:"
-          echo "  PR URL: ${{ steps.crowdin-sync.outputs.pull_request_url }}"
-          echo "  Commit SHA: ${{ steps.crowdin-sync.outputs.commit_sha }}"
-          echo "  Branch: crowdin-translations-update-lts-2023"
+          echo "Checking for PR creation..."
+          echo "Crowdin Output (if log file exists):"
+          cat $GITHUB_WORKSPACE/.crowdin.log 2>/dev/null || echo "No .crowdin.log found"
+          echo "Checking for uncommitted changes:"
+          git status
+          echo "Last commits:"
+          git log -3 --oneline
+          echo "Checking recent PRs mentioning Crowdin:"
+          if command -v gh >/dev/null 2>&1; then
+            gh pr list --search "Crowdin" --limit 5
+          else
+            echo "GitHub CLI (gh) not available in runner."
+          fi
+
+      - name: Debug - Show Crowdin Action outputs
+        if: always()
+        run: |
+          echo "Crowdin Action step outputs:"
+          echo "---------------------------------"
+          echo "PR URL: ${{ steps.crowdin-sync.outputs.pull_request_url }}"
+          echo "Branch: ${{ steps.crowdin-sync.outputs.branch_name }}"
+          echo "---------------------------------"
