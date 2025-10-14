@@ -95,7 +95,7 @@ Feature: Internal Publication
 #    And I can unpublish the document
 #    And I can see the document has 1 children
 
-  @config('selection.selectAllEnabled','true')
+#  @config('selection.selectAllEnabled','true')
 #  Scenario: Publish All Documents
 #    Given I login as "John"
 #    And I have the following documents
@@ -134,7 +134,7 @@ Feature: Internal Publication
       | path                                          | rendition | version |
       | /default-domain/sections/section1/my_document |           | 0.1     |
 
-  @config('selection.selectAllEnabled','true')
+#  @config('selection.selectAllEnabled','true')
 #  Scenario: Unselect some documents and publish selected documents
 #    Given I login as "John"
 #    And I have the following documents
