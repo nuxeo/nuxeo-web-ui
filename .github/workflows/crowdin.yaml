@@ -50,7 +50,6 @@ jobs:
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
-          config: crowdin-conf.yml
           upload_sources: true
           auto_approve_imported: true
 
