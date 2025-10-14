@@ -24,7 +24,7 @@ jobs:
     secrets: inherit
     needs: crowdin
 
-    crowdin:
+  crowdin:
     runs-on: ubuntu-latest
 
     steps:
