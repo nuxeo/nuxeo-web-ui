@@ -111,7 +111,7 @@ Polymer({
       </template>
 
       <div class="horizontal layout flex">
-        <paper-checkbox checked="{{showRendition}}" class="renditionSelection">Renditions </paper-checkbox>
+        <paper-checkbox checked="{{showRendition}}" class="renditionSelection">Show renditions </paper-checkbox>
         <template is="dom-if" if="[[showRendition]]">
           <nuxeo-select
             id="rendition"
