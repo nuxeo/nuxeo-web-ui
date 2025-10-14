@@ -18,17 +18,11 @@ on:
 jobs:
   # in uses, cannot use environment variable for {owner}/{repo} nor matrix strategy variable for {ref}
   # thus hardcoding them
-  call-workflow-in-lts-2021:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@maintenance-3.0.x
-    secrets: inherit
-    needs: crowdin
-
   call-workflow-in-lts-2025:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@lts-2025
     secrets: inherit
-    needs: call-workflow-in-lts-2021
+    needs: crowdin
 
   crowdin:
     runs-on: ubuntu-latest
@@ -59,7 +53,7 @@ jobs:
           auto_approve_imported: true
 
           # Name of the branch where to merge the translations
-          localization_branch_name: crowdin-translations-update-lts-2023
+          localization_branch_name: crowdin-translations-sync-lts-2023
           pull_request_base_branch_name: maintenance-3.1.x
           create_pull_request: true
           pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
