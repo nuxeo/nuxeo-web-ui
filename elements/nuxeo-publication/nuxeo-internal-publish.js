@@ -72,6 +72,10 @@ Polymer({
         padding-left: 8px;
         margin-bottom: 8px;
       }
+      .renditionSelection {
+        margin-right: 3em;
+        margin-top: 1.5em;
+      }
     </style>
 
     <nuxeo-operation-button
@@ -107,17 +111,20 @@ Polymer({
       </template>
 
       <div class="horizontal layout flex">
-        <nuxeo-select
-          id="rendition"
-          label="[[i18n('publication.internal.renditons.label')]]"
-          placeholder="[[i18n('publication.internal.renditons.placeholder')]]"
-          selected="{{selectedRendition}}"
-          attr-for-selected="name"
-        >
-          <template is="dom-repeat" items="[[_computeRenditionOptions(document, i18n)]]" as="rendition">
-            <paper-item name$="[[rendition.id]]">[[rendition.label]]</paper-item>
-          </template>
-        </nuxeo-select>
+        <paper-checkbox checked="{{showRendition}}" class="renditionSelection">Show renditions </paper-checkbox>
+        <template is="dom-if" if="[[showRendition]]">
+          <nuxeo-select
+            id="rendition"
+            label="[[i18n('publication.internal.renditons.label')]]"
+            placeholder="[[i18n('publication.internal.renditons.placeholder')]]"
+            selected="{{selectedRendition}}"
+            attr-for-selected="name"
+          >
+            <template is="dom-repeat" items="[[_computeRenditionOptions(document, i18n)]]" as="rendition">
+              <paper-item name$="[[rendition.id]]">[[rendition.label]]</paper-item>
+            </template>
+          </nuxeo-select>
+        </template>
         <template is="dom-if" if="[[!_isMultiple]]">
           <div class="versions">
             <label>[[i18n('documentInfo.version')]]</label>
@@ -179,6 +186,10 @@ Polymer({
     _isMultiple: {
       type: Boolean,
       computed: '_computeMultiple(document, documents.length)',
+    },
+    showRendition: {
+      type: Boolean,
+      value: false,
     },
 
     targetFormatter: {
