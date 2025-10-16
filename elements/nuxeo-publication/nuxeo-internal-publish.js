@@ -235,7 +235,7 @@ Polymer({
     };
     if (this.selectedRendition === 'default') {
       parameters.defaultRendition = true;
-    } else if (this.selectedRendition !== 'none') {
+    } else {
       parameters.renditionName = this.selectedRendition;
     }
     return parameters;
