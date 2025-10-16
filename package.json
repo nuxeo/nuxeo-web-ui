@@ -106,7 +106,7 @@
   "dependencies": {
     "@material/mwc-snackbar": "^0.26.1",
     "@nuxeo/chart-elements": "^4.0.0-nx.1",
-    "@nuxeo/moment": "^2.24.0-nx.0",
+    "@nuxeo/moment": "2.30.1-nx.1",
     "@nuxeo/nuxeo-dataviz-elements": "~2025.8.0-rc",
     "@nuxeo/nuxeo-elements": "~2025.8.0-rc",
     "@nuxeo/nuxeo-ui-elements": "~2025.8.0-rc",
