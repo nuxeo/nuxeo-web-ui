@@ -228,7 +228,7 @@ Then('I can publish selection to {string}', async function(target) {
   await browser.waitForVisible();
   const selectionToolBar = await browser.selectionToolbar;
   const dialog = await selectionToolBar.publishDialog;
-  await dialog.publish(target);
+  await dialog.publish(target, 'None');
   // HACK because publishing all documents is asynchronous
   await driver.pause(1000);
 });
