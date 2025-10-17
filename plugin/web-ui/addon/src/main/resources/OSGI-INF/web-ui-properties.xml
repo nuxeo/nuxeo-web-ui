@@ -61,7 +61,7 @@
   
   <!-- Control eval allowed in CSP, default is true  -->
   <property name="org.nuxeo.web.ui.expressions.eval">${org.nuxeo.web.ui.expressions.eval:=true}</property>
-  <!--                               -->
-  <property name="org.nuxeo.web.ui.permissions.externalUsers.allowed">${org.nuxeo.permissions.externalUsers.allowed:=true}</property>
+  <!-- Control external permissions  -->
+ <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
   </extension>
 </component>
