@@ -114,8 +114,7 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
-    
-     
+
       - name: 'Update settings.xml with server configuration'
         run: |
           echo '<settings>
@@ -133,16 +132,6 @@ jobs:
           RUN_ALL: false
           BAIL: 0
         run: mvn -ntp install -Pftest -DskipInstall
-
-      - name: Zip current folder
-        run: |
-          zip -r current-folder.zip .
-      - name: Upload current folder artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: current-folder
-          path: current-folder.zip
-            
 
       - name: Archive cucumber reports
         if: ${{ always() }}
