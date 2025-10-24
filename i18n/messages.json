@@ -1,5 +1,7 @@
 {
   "activity.addedToCollection": "added to collection",
+  "activity.createNewUser": "create new user",
+  "activity.deleteUser": "delete user",
   "activity.afterMakeRecord": "Declared as a record",
   "activity.afterRemoveLegalHold": "Legal Hold removed",
   "activity.afterSetLegalHold": "Legal Hold applied",
