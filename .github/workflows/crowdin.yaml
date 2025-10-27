@@ -8,13 +8,13 @@ on:
 
   # Sync when a commit is done on maintenance-3.1.x
   push:
-    branches: ["maintenance-3.1.x"]
+    branches: ['maintenance-3.1.x']
     paths:
       - 'i18n/messages.json'
 
   # Manually trigger the workflow
   workflow_dispatch:
-  
+
 jobs:
   # in uses, cannot use environment variable for {owner}/{repo} nor matrix strategy variable for {ref}
   # thus hardcoding them

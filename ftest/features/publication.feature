@@ -57,7 +57,7 @@ Feature: Internal Publication
     When I browse to the document
     Then I can perform the following publications
       | target            | rendition | version | override |
-      | section1          |           |         |          |
+      | section1          | None      |         |          |
     And I can navigate to publication pill
     And I can see the document has 1 publications
     And I can see the document has the following publication
@@ -94,6 +94,7 @@ Feature: Internal Publication
     And I cannot see to publication pill
     And I can unpublish the document
     And I can see the document has 1 children
+  
 
   @config('selection.selectAllEnabled','true')
   Scenario: Publish All Documents
@@ -124,7 +125,7 @@ Feature: Internal Publication
     When I browse to the document
     Then I can perform the following publications
       | target            | rendition | version | override |
-      | section1          |           |         |          |
+      | section1          | None      |         |          |
     When I logout
     And I login as "Susan"
     When I browse to the document
