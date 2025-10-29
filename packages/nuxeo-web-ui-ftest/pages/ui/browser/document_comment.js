@@ -75,12 +75,20 @@ export default class DocumentComment {
   }
 
   async reply(text) {
-    const replyButton = await this.replyButton;
-    const thread = await this.thread;
-    await replyButton.waitForVisible();
+    const replyButton = await this.el.$('.text iron-icon[name="reply"]');
+
+    await replyButton.waitForDisplayed({ timeout: 30000 });
+
     await replyButton.scrollIntoView();
+
+    await browser.pause(300);
+
     await replyButton.click();
-    await thread.waitForVisible();
+
+    const thread = await this.el.$('.thread');
+    await thread.waitForDisplayed({ timeout: 15000 });
+
+    // Type the reply
     await thread.writeComment(text);
   }
 }
