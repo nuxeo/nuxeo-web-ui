@@ -8,13 +8,13 @@ on:
 
   # Sync when a commit is done on maintenance-3.1.x
   push:
-    branches: ['maintenance-3.1.x']
+    branches: ["maintenance-3.1.x"]
     paths:
       - 'i18n/messages.json'
 
   # Manually trigger the workflow
   workflow_dispatch:
-
+  
 jobs:
   # in uses, cannot use environment variable for {owner}/{repo} nor matrix strategy variable for {ref}
   # thus hardcoding them
@@ -35,7 +35,7 @@ jobs:
 
       - name: Crowdin Action
         id: crowdin-sync
-        uses: crowdin/github-action@v2.12.0
+        uses: crowdin/github-action@1.5.2
         with:
           # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
           skip_ref_checkout: true
@@ -71,9 +71,3 @@ jobs:
 
         env:
           GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
-
-      - name: List translation files
-        run: | 
-          echo "Listing updated files:"
-          git status
-          ls -R i18n/
