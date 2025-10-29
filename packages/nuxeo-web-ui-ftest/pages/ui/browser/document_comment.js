@@ -28,8 +28,9 @@ export default class DocumentComment {
 
   get replyButton() {
     return (async () => {
-      const replyButton = await this._el.element('.text paper-icon-button[name="reply"]');
-      return replyButton;
+      const button = await this._el.$('.text paper-icon-button[name="reply"]');
+      await button.waitForDisplayed({ timeout: 20000 });
+      return button;
     })();
   }
 
@@ -75,12 +76,11 @@ export default class DocumentComment {
   }
 
   async reply(text) {
-    const replyButton = await this.replyButton;
+    const replyButton = await this.replyButton; // already waited for visibility
     const thread = await this.thread;
-    await replyButton.waitForVisible();
     await replyButton.scrollIntoView();
     await replyButton.click();
-    await thread.waitForVisible();
+    await thread.waitForDisplayed({ timeout: 10000 });
     await thread.writeComment(text);
   }
 }
