@@ -76,11 +76,16 @@ export default class DocumentComment {
   }
 
   async reply(text) {
-    const replyButton = await this.replyButton; // already waited for visibility
+    const replyButton = await this.replyButton;
     const thread = await this.thread;
+
+    await replyButton.waitForDisplayed({ timeout: 20000 });
     await replyButton.scrollIntoView();
     await replyButton.click();
-    await thread.waitForDisplayed({ timeout: 10000 });
+
+    // ✅ Wait for the actual WebdriverIO element inside DocumentCommentThread
+    await thread.el.waitForDisplayed({ timeout: 20000 });
+
     await thread.writeComment(text);
   }
 }
