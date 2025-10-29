@@ -17823,7 +17823,7 @@ WalkontableViewport.prototype.resetSettings = function () {
 
             if (precision) {
                 if (precision.indexOf('[') > -1) {
-                    precision = precision.replace(']', '');
+                    precision = precision.replace(/]/g, '');
                     precision = precision.split('[');
                     d = toFixed(value, (precision[0].length + precision[1].length), roundingFunction, precision[1].length);
                 } else {
