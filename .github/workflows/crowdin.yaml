@@ -70,6 +70,9 @@ jobs:
           github_user_name: nuxeo-webui-jx-bot
           github_user_email: webui@hyland.com
 
+        env:
+          GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+
       - name: List translation files
         run: | 
           echo "Listing updated files:"
