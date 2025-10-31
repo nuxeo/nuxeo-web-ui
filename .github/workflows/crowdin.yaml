@@ -47,6 +47,7 @@ jobs:
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          github_token: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
           # Load external configuration file (to support translation rename)
           config: crowdin-conf.yml
 
@@ -72,9 +73,6 @@ jobs:
           # User properties
           github_user_name: nuxeo-webui-jx-bot
           github_user_email: webui@hyland.com
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
 
       - name: List translation files
         run: | 
