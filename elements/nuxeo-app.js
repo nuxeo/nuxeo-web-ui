@@ -114,6 +114,9 @@ Polymer({
         --app-header-background-rear-layer: {
           -webkit-overflow-scrolling: auto;
         }
+        position: absolute;
+        top: var(--nuxeo-app-top, 0px);
+        width: 100%;
       }
 
       /* Layout base */
@@ -354,7 +357,7 @@ Polymer({
 
       .skip-link {
         position: absolute;
-        top: -40px;
+        top: calc(-40px - var(--nuxeo-app-top));
         left: 0;
         background: lightgrey;
         border: 1px dotted gray;
