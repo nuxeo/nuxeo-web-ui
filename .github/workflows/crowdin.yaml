@@ -39,6 +39,7 @@ jobs:
         with:
           # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
           skip_ref_checkout: true
+          verbose: true
 
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
@@ -71,6 +72,7 @@ jobs:
           github_user_email: webui@hyland.com
 
         env:
+          ACTIONS_STEP_DEBUG: true
           GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
 
       - name: List translation files
