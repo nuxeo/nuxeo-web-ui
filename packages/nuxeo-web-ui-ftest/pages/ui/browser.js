@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop */
+/* eslint-disable no-await-in-loop */ 
 import BasePage from '../base.js';
 import DocumentPage from './browser/document_page.js';
 import CollapsibleDocumentPage from './browser/collapsible_document_page.js';
