@@ -39,14 +39,11 @@ jobs:
         with:
           # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
           skip_ref_checkout: true
-          verbose: true
 
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
-          token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
-          github_token: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
-          # Load external configuration file (to support translation rename)
-          config: crowdin-conf.yml
+          token: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+      
 
           # Upload sources for translation
           upload_sources: true
