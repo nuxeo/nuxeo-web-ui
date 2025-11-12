@@ -173,6 +173,10 @@ Polymer({
         margin: 0.1em 0.2em 0 1.1em;
         font-weight: 500;
       }
+      #actionsDropdown {
+        width: 82%;
+        padding: 19px 0 0 0;
+      }
 
       #actionsDropdown > .iron-selected {
         background-color: #6e6e6e;
@@ -279,12 +283,16 @@ Polymer({
           params="[[_computeSavedSearchesParams(provider)]]"
         ></nuxeo-search>
         <template is="dom-if" if="[[!onlyQueue]]">
-          <nuxeo-select id="actionsDropdown" selected="{{selectedSearchIdx}}">
-            <paper-item>[[i18n('searchForm.searchFilters')]]</paper-item>
-            <template is="dom-repeat" items="[[_searches]]" as="search">
-              <paper-item>[[search.title]]</paper-item>
-            </template>
-          </nuxeo-select>
+          <nuxeo-selectivity
+            id="actionsDropdown"
+            placeholder="[[i18n('searchForm.searchFilters')]]"
+            data="[[_searches]]"
+            value="{{selectedSearch}}"
+            min-chars="0"
+            search
+            value-key="id"
+            label-key="title"
+          ></nuxeo-selectivity>
           <template is="dom-if" if="[[queue]]">
             <paper-icon-button
               class="switch"
@@ -659,6 +667,7 @@ Polymer({
     '_resetResults(provider, params.*, _quickFilters.*, query)',
     '_paramsChanged(params.*)',
     '_visibleChanged(auto, visible)',
+    '_selectedSearchChanged(selectedSearch)',
   ],
 
   listeners: {
@@ -796,12 +805,46 @@ Polymer({
     this.dirty = false;
   },
 
-  _selectedSearchChanged() {
-    if (this.selectedSearch) {
-      this.params = this._mutateParams(this.selectedSearch.params);
+  _selectedSearchChanged(selectedSearch) {
+    // Case 1: No selection or no searches loaded yet
+    if (!selectedSearch) {
+      this.selectedSearchIdx = 0;
+      return;
+    }
+
+    // Case 2: Handle array (when selectivity returns array of IDs or objects)
+    if (selectedSearch && typeof selectedSearch !== 'object') {
+      const selected = selectedSearch;
+      if (selected) {
+        const idx = this._searches.findIndex((s) => s.id === selectedSearch);
+        if (idx !== -1) {
+          this.selectedSearch = this._searches[idx];
+          this.selectedSearchIdx = idx + 1;
+        }
+      } else if (typeof selected === 'string') {
+        // Sometimes selectivity might return plain ID string
+        const idx = this._searches.findIndex((s) => s.id === selected);
+        if (idx !== -1) {
+          this.selectedSearch = this._searches[idx];
+          this.selectedSearchIdx = idx + 1;
+        }
+      }
+      return;
+    }
+
+    // Case 3: When selectedSearch is a full object with params — trigger fetch
+    if (selectedSearch && typeof selectedSearch === 'object' && selectedSearch.params) {
+      const idx = this._searches.findIndex((s) => s.id === selectedSearch.id);
+      if (idx !== -1 && this.selectedSearchIdx !== idx + 1) {
+        this.selectedSearchIdx = idx + 1;
+      }
+
+      this.params = this._mutateParams(selectedSearch.params);
       this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
-      this.form.searchTerm = this.searchTerm;
-      this._fetch(this.$.provider);
+
+      if (this.form) {
+        this.form.searchTerm = this.searchTerm;
+      }
     }
   },
 
