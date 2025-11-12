@@ -35,7 +35,7 @@ jobs:
 
       - name: Crowdin Action
         id: crowdin-sync
-        uses: crowdin/github-action@1.5.2
+        uses: crowdin/github-action@v2.12.0
         with:
           # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
           skip_ref_checkout: true
@@ -70,4 +70,5 @@ jobs:
           github_user_email: webui@hyland.com
 
         env:
+          ACTIONS_STEP_DEBUG: true
           GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
