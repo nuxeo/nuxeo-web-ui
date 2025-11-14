@@ -286,12 +286,9 @@ Polymer({
           <nuxeo-selectivity
             id="actionsDropdown"
             placeholder="[[i18n('searchForm.searchFilters')]]"
-            data="[[_searches]]"
+            data="[[_computeData(_searches)]]"
             value="{{selectedSearch}}"
             min-chars="0"
-            search
-            value-key="id"
-            label-key="title"
           ></nuxeo-selectivity>
           <template is="dom-if" if="[[queue]]">
             <paper-icon-button
@@ -806,46 +803,47 @@ Polymer({
   },
 
   _selectedSearchChanged(selectedSearch) {
-    // Case 1: No selection or no searches loaded yet
+    // Case 1: No selection
     if (!selectedSearch) {
       this.selectedSearchIdx = 0;
-      return;
     }
 
-    // Case 2: Handle array (when selectivity returns array of IDs or objects)
-    if (selectedSearch && typeof selectedSearch !== 'object') {
-      const selected = selectedSearch;
-      if (selected) {
-        const idx = this._searches.findIndex((s) => s.id === selectedSearch);
-        if (idx !== -1) {
-          this.selectedSearch = this._searches[idx];
-          this.selectedSearchIdx = idx + 1;
-        }
-      } else if (typeof selected === 'string') {
-        // Sometimes selectivity might return plain ID string
-        const idx = this._searches.findIndex((s) => s.id === selected);
-        if (idx !== -1) {
-          this.selectedSearch = this._searches[idx];
-          this.selectedSearchIdx = idx + 1;
-        }
+    // Case 2: selectedSearch is NOT an object (string or ID)
+    else if (typeof selectedSearch !== 'object') {
+      const id = typeof selectedSearch === 'string' ? selectedSearch : selectedSearch?.id || selectedSearch;
+
+      const idx = this._searches.findIndex((s) => s.id === id);
+      if (idx !== -1) {
+        this.selectedSearch = this._searches[idx];
+        this.selectedSearchIdx = idx + 1;
       }
-      return;
     }
 
-    // Case 3: When selectedSearch is a full object with params — trigger fetch
-    if (selectedSearch && typeof selectedSearch === 'object' && selectedSearch.params) {
+    // Case 3: selectedSearch is an object with params
+    else if (selectedSearch.params) {
       const idx = this._searches.findIndex((s) => s.id === selectedSearch.id);
       if (idx !== -1 && this.selectedSearchIdx !== idx + 1) {
         this.selectedSearchIdx = idx + 1;
       }
 
       this.params = this._mutateParams(selectedSearch.params);
-      this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
+      this.searchTerm = this.params?.ecm_fulltext?.replace(/\*/g, '') || '';
 
       if (this.form) {
         this.form.searchTerm = this.searchTerm;
       }
     }
+  },
+
+  _computeData(searches) {
+    return searches.map((item) => {
+      return {
+        id: item.id,
+        title: item.title,
+        text: item.title,
+        displaytext: item.title,
+      };
+    });
   },
 
   _isSavedSearch() {
