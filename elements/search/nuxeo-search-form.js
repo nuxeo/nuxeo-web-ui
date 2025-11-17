@@ -908,7 +908,6 @@ Polymer({
   },
 
   saveAs() {
-    this.$$('#actionsDropdown').close();
     this._savedSearchTitle = '';
     this.$.saveDialog.open();
     this._saveAs = true;
@@ -924,18 +923,15 @@ Polymer({
 
   rename() {
     this._renaming = true;
-    this.$$('#actionsDropdown').close();
     this.$.renameDialog.open();
     this.$.savedSearchRenameTitle.value = this.selectedSearch.title;
   },
 
   share() {
-    this.$$('#actionsDropdown').close();
     this.$.shareDialog.open();
   },
 
   delete() {
-    this.$$('#actionsDropdown').close();
     this.$.deleteDialog.open();
   },
 
