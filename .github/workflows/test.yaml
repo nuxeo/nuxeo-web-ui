@@ -43,22 +43,8 @@ jobs:
           npm cache clean --force
           npm install
 
-      # - name: Curl SauceLabs
-      #   continue-on-error: true
-      #   run: |
-      #     curl -I https://saucelabs.com/rest/v1
-      #     curl -I https://api.us-west-1.saucelabs.com/rest/v1
-      #     curl -I https://api.us-east-1.saucelabs.com/rest/v1
-
       - name: Unit tests
-        continue-on-error: true
         env:
           SAUCE_USERNAME: nuxeo-web-ui
           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
         run: npm run test
-
-      - name: Output Log
-        run: |
-          echo "===== SAUCE LOG START ====="
-          cat sauce.log || echo "sauce.log not found"
-          echo "===== SAUCE LOG END ====="

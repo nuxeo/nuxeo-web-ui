@@ -9,10 +9,12 @@ const customLaunchers = {
     base: 'ChromeHeadless',
     flags: ['--disable-gpu', '--no-sandbox'],
   },
-  FirefoxHeadless: {
-    base: 'Firefox',
-    flags: ['-headless'],
-  },
+  // Firefox is normally not present on Self-hosted runners.
+  // Can switch this ON when Github Runners are used.
+  // FirefoxHeadless: {
+  //   base: 'Firefox',
+  //   flags: ['-headless'],
+  // },
 };
 
 // if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
