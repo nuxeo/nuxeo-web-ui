@@ -49,9 +49,13 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
 
 module.exports = (config) => {
   const sauceLabs = {
+    testName: 'Nuxeo Web UI Tests',
+    region: 'us-west-1', // force old DC
     startConnect: true,
     connectOptions: {
+      doctor: false, // prevent proxy auto-detect bug
       logfile: 'sauce.log',
+      restUrl: 'https://saucelabs.com/rest/v1', // override failing API endpoint
     },
   };
   if (config.record) {
