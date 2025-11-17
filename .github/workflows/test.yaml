@@ -43,12 +43,19 @@ jobs:
           npm cache clean --force
           npm install
 
+      - name: Check tools
+        run: |
+          which curl || echo "curl not found"
+          which tar || echo "tar not found"
+          which bzip2 || echo "bzip2 not found"
+          uname -a
+
       - name: Install Firefox manually
         run: |
           echo "Downloading Firefox..."
-          wget -q https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US -O firefox.tar.bz2
+          curl -L "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US" -o firefox.tar.bz2
           tar xjf firefox.tar.bz2
-          mv firefox ~/firefox
+          mv firefox "$HOME/firefox"
           echo "FIREFOX_BIN=$HOME/firefox/firefox" >> $GITHUB_ENV
 
       - name: Unit tests
