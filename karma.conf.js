@@ -4,7 +4,7 @@ const coverage = process.argv.find((arg) => arg.includes('coverage'));
 
 const reporters = coverage ? ['mocha', 'coverage-istanbul'] : ['mocha'];
 
-let customLaunchers = {
+const customLaunchers = {
   ChromeHeadlessNoSandbox: {
     base: 'ChromeHeadless',
     flags: ['--disable-gpu', '--no-sandbox'],
@@ -15,46 +15,40 @@ let customLaunchers = {
   },
 };
 
-if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-  customLaunchers = {
-    sl_latest_chrome: {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 10',
-      version: 'latest',
-    },
-    sl_latest_edge: {
-      base: 'SauceLabs',
-      browserName: 'microsoftedge',
-      platform: 'Windows 10',
-      version: 'latest',
-    },
-    sl_latest_firefox: {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      platform: 'Windows 10',
-      version: '98.0',
-      geckodriverVersion: '0.30.0',
-    },
-    sl_latest_safari: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'macOS 12',
-      version: 'latest',
-    },
-  };
+// if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
+//   customLaunchers = {
+//     sl_latest_chrome: {
+//       base: 'SauceLabs',
+//       browserName: 'chrome',
+//       platform: 'Windows 10',
+//       version: 'latest',
+//     },
+//     sl_latest_edge: {
+//       base: 'SauceLabs',
+//       browserName: 'microsoftedge',
+//       platform: 'Windows 10',
+//       version: 'latest',
+//     },
+//     sl_latest_firefox: {
+//       base: 'SauceLabs',
+//       browserName: 'firefox',
+//       platform: 'Windows 10',
+//       version: '98.0',
+//       geckodriverVersion: '0.30.0',
+//     },
+//     sl_latest_safari: {
+//       base: 'SauceLabs',
+//       browserName: 'safari',
+//       platform: 'macOS 12',
+//       version: 'latest',
+//     },
+//   };
 
-  reporters.push('saucelabs');
-}
+//   reporters.push('saucelabs');
+// }
 
 module.exports = (config) => {
-  const sauceLabs = {
-    testName: 'Nuxeo Web UI Tests',
-    startConnect: true,
-    connectOptions: {
-      tunnelDomains: [], // disables REST /tunnels check
-    },
-  };
+  const sauceLabs = {};
   if (config.record) {
     sauceLabs.recordVideo = true;
   } else if (config.sauceRunName) {
