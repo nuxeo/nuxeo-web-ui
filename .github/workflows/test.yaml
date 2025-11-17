@@ -43,12 +43,12 @@ jobs:
           npm cache clean --force
           npm install
 
-      - name: Curl SauceLabs
-        continue-on-error: true
-        run: |
-          curl -I https://saucelabs.com/rest/v1
-          curl -I https://api.us-west-1.saucelabs.com/rest/v1
-          curl -I https://api.us-east-1.saucelabs.com/rest/v1
+      # - name: Curl SauceLabs
+      #   continue-on-error: true
+      #   run: |
+      #     curl -I https://saucelabs.com/rest/v1
+      #     curl -I https://api.us-west-1.saucelabs.com/rest/v1
+      #     curl -I https://api.us-east-1.saucelabs.com/rest/v1
 
       - name: Unit tests
         continue-on-error: true
