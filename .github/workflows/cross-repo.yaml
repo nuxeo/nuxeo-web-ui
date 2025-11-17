@@ -11,7 +11,7 @@ on:
         required: true
       sauce_labs:
         description: 'Run unit tests on Sauce Labs?'
-        default: true
+        default: false
         type: boolean
         required: false
       skip_ftests:
