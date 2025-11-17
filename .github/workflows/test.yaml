@@ -48,3 +48,9 @@ jobs:
           SAUCE_USERNAME: nuxeo-web-ui
           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
         run: npm run test
+
+      - name: Output Log
+        run: |
+          echo "===== SAUCE LOG START ====="
+          cat sauce.log || echo "sauce.log not found"
+          echo "===== SAUCE LOG END ====="

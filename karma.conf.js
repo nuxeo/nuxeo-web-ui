@@ -48,7 +48,12 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
 }
 
 module.exports = (config) => {
-  const sauceLabs = {};
+  const sauceLabs = {
+    startConnect: true,
+    connectOptions: {
+      logfile: 'sauce.log',
+    },
+  };
   if (config.record) {
     sauceLabs.recordVideo = true;
   } else if (config.sauceRunName) {
