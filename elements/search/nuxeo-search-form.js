@@ -799,7 +799,7 @@ Polymer({
   _selectedSearchChanged() {
     if (this.selectedSearch) {
       this.params = this._mutateParams(this.selectedSearch.params);
-      this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
+      this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
       this.form.searchTerm = this.searchTerm;
       this._fetch(this.$.provider);
     }
@@ -859,7 +859,7 @@ Polymer({
       _el.searchId = this.selectedSearch.id;
       _el.get().then((response) => {
         this.params = this._mutateParams(response.params);
-        this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace('*', '') : '';
+        this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
         this.form.searchTerm = this.searchTerm;
         this.dirty = false;
       });

@@ -1,4 +1,4 @@
-# Workflow that synchronizes translations from Crowdin
+# Workflow that syncronizes translations from Crowdin
 name: Crowdin Sync
 
 on:
@@ -8,13 +8,13 @@ on:
 
   # Sync when a commit is done on maintenance-3.1.x
   push:
-    branches: ['maintenance-3.1.x']
+    branches: ["maintenance-3.1.x"]
     paths:
       - 'i18n/messages.json'
 
   # Manually trigger the workflow
   workflow_dispatch:
-
+  
 jobs:
   # in uses, cannot use environment variable for {owner}/{repo} nor matrix strategy variable for {ref}
   # thus hardcoding them
@@ -33,24 +33,6 @@ jobs:
         with:
           ref: maintenance-3.1.x
 
-      - name: Debug - Show current branch and environment
-        run: |
-          echo "Current branch:"
-          git branch
-          echo "Git status:"
-          git status
-          echo "Git remote:"
-          git remote -v
-          echo "GitHub Actor: $GITHUB_ACTOR"
-          echo "Event name: $GITHUB_EVENT_NAME"
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "Ref: $GITHUB_REF"
-          if [ -n "${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}" ]; then
-            echo "Token present: Yes"
-          else
-            echo "Token present: No"
-          fi
-
       - name: Crowdin Action
         id: crowdin-sync
         uses: crowdin/github-action@1.5.2
@@ -61,6 +43,8 @@ jobs:
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          # Load external configuration file (to support translation rename)
+          config: crowdin-conf.yml
 
           # Upload sources for translation
           upload_sources: true
@@ -87,29 +71,3 @@ jobs:
 
         env:
           GITHUB_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
-
-      - name: Debug - Inspect Crowdin PR creation
-        if: always()
-        run: |
-          echo "Checking for PR creation..."
-          echo "Crowdin Output (if log file exists):"
-          cat $GITHUB_WORKSPACE/.crowdin.log 2>/dev/null || echo "No .crowdin.log found"
-          echo "Checking for uncommitted changes:"
-          git status
-          echo "Last commits:"
-          git log -3 --oneline
-          echo "Checking recent PRs mentioning Crowdin:"
-          if command -v gh >/dev/null 2>&1; then
-            gh pr list --search "Crowdin" --limit 5
-          else
-            echo "GitHub CLI (gh) not available in runner."
-          fi
-
-      - name: Debug - Show Crowdin Action outputs
-        if: always()
-        run: |
-          echo "Crowdin Action step outputs:"
-          echo "---------------------------------"
-          echo "PR URL: ${{ steps.crowdin-sync.outputs.pull_request_url }}"
-          echo "Branch: ${{ steps.crowdin-sync.outputs.branch_name }}"
-          echo "---------------------------------"
