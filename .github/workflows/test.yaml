@@ -43,8 +43,14 @@ jobs:
           npm cache clean --force
           npm install
 
+      - name: Install Firefox
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox
+
       - name: Unit tests
-        env:
-          SAUCE_USERNAME: nuxeo-web-ui
-          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        # Disabling SauceLabs. Karma is not compatible with SauceLabs v4
+        # env:
+        #   SAUCE_USERNAME: nuxeo-web-ui
+        #   SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
         run: npm run test
