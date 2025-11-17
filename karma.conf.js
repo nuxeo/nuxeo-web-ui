@@ -50,7 +50,10 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
 module.exports = (config) => {
   const sauceLabs = {
     testName: 'Nuxeo Web UI Tests',
-    region: 'us-west-1',
+    startConnect: true,
+    connectOptions: {
+      tunnelDomains: [], // disables REST /tunnels check
+    },
   };
   if (config.record) {
     sauceLabs.recordVideo = true;
