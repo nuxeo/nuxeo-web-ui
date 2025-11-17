@@ -46,10 +46,9 @@ jobs:
       - name: Curl SauceLabs
         continue-on-error: true
         run: |
-          nc -zv ondemand.saucelabs.com 443
-          nc -zv ondemand.saucelabs.com 80
-          nc -zv ondemand.saucelabs.com 5000
-          nc -zv ondemand.saucelabs.com 5001
+          curl -I https://saucelabs.com/rest/v1
+          curl -I https://api.us-west-1.saucelabs.com/rest/v1
+          curl -I https://api.us-east-1.saucelabs.com/rest/v1
 
       - name: Unit tests
         continue-on-error: true
