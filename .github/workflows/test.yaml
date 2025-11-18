@@ -48,7 +48,8 @@ jobs:
           npm install
 
       - name: Unit tests
-        env:
-          SAUCE_USERNAME: nuxeo-web-ui
-          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        # Disabling SauceLabs. Karma is not compatible with SauceLabs v4
+        # env:
+        #   SAUCE_USERNAME: nuxeo-web-ui
+        #   SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
         run: npm run test
