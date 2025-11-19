@@ -109,13 +109,10 @@ When('I browse to the saved search', function() {
 Then('I can see that my saved search "{word}" on "{word}" is selected', async function(savedSearchName, searchName) {
   const ui = await this.ui;
   const searchForm = await ui.searchForm(searchName);
-  const menuButton = await searchForm.menuButton;
-  await menuButton.waitForDisplayed();
-  const savedSearch = await searchForm.getSavedSearch(savedSearchName);
-  const savedSearchExist = await savedSearch.waitForExist();
-  savedSearchExist.should.be.true;
-  const classAttr = await savedSearch.getAttribute('class');
-  classAttr.should.include('iron-selected');
+  const isSelected = await searchForm.isSavedSearchSelected(savedSearchName);
+  if (!isSelected) {
+    throw new Error(`Expected saved search "${savedSearchName}" to be selected`);
+  }
 });
 
 When(/^I clear the (.+) search on (.+)$/, async function(searchType, searchName) {
