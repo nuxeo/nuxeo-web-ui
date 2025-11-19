@@ -30,7 +30,7 @@ export default class Search extends Results {
   get menuButton() {
     return (async () => {
       const ele = await this.el;
-      return ele.element('#menuButton');
+      return ele.element('.selectivity-single-select');
     })();
   }
 
@@ -59,6 +59,19 @@ export default class Search extends Results {
 
   get permissionsView() {
     return new DocumentPermissions(`${this._selector} nuxeo-document-permissions`);
+  }
+
+  async isSavedSearchSelected(savedSearchName) {
+    const ele = await this.el;
+
+    // Look for the visible selected value rendered by selectivity
+    const valueEl = await ele.$('.selectivity-single-select .value');
+
+    await valueEl.waitForDisplayed();
+
+    const text = await valueEl.getText();
+
+    return text.trim() === savedSearchName;
   }
 
   async getSavedSearch(savedSearchName) {
