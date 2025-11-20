@@ -936,6 +936,16 @@ Polymer({
   },
 
   _saveSearch() {
+    // Ensure input fields commit their current values before proceeding.
+    // Some input components only update their bound properties after a 'change' event,
+    // so we dispatch it programmatically to guarantee the latest value is captured.
+    if (this.$.savedSearchTitle) {
+      this.$.savedSearchTitle.dispatchEvent(new Event('change'));
+    }
+    if (this.$.savedSearchRenameTitle) {
+      this.$.savedSearchRenameTitle.dispatchEvent(new Event('change'));
+    }
+
     const _el = this.$['saved-search'];
     // save a new search
     if (this.selectedSearchIdx === 0 || this._saveAs) {
