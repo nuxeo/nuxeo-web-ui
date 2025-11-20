@@ -16,19 +16,24 @@ export default class Login {
     await submitButton.click();
   }
 
-  static get() {
-    return (async () => {
-      const baseUrl = process.env.NUXEO_URL || '';
-      await driver.pause(1000);
-      const loginUrl = baseUrl ? `${baseUrl}/logout` : 'logout';
+  static async get() {
+    const baseUrl = process.env.NUXEO_URL || '';
+    const loginUrl = baseUrl ? `${baseUrl}/logout` : 'logout';
 
-      await browser.url(loginUrl);
-      await driver.pause(4000);
+    await browser.url(loginUrl);
 
-      // wait for login form to appear
-      await $('#username').waitForDisplayed({ timeout: 15000 });
+    // Wait until browser is idle and page is ready
+    await browser.waitUntil(
+      async () => {
+        const ready = await browser.execute(() => document.readyState);
+        return ready === 'complete';
+      },
+      { timeout: 20000, timeoutMsg: 'Page did not reach readyState complete' },
+    );
 
-      return new this();
-    })();
+    // wait for login form to appear
+    await $('#username').waitForDisplayed({ timeout: 30000 });
+
+    return new this();
   }
 }
