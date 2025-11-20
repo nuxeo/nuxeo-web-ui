@@ -19,9 +19,11 @@ export default class Login {
   static get() {
     return (async () => {
       const baseUrl = process.env.NUXEO_URL || '';
+      await driver.pause(1000);
       const loginUrl = baseUrl ? `${baseUrl}/logout` : 'logout';
 
       await browser.url(loginUrl);
+      await driver.pause(4000);
 
       // wait for login form to appear
       await $('#username').waitForDisplayed({ timeout: 15000 });
