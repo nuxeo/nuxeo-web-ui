@@ -31,10 +31,11 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
-import * as jsondiffpatch from 'jsondiffpatch/dist/jsondiffpatch.esm.js';
+import { create } from 'jsondiffpatch';
 import { _fetchSchemas } from '../fetch-schemas.js';
 
 let _customLoadPromise;
+const jsondiffpatch = create();
 
 /**
 `nuxeo-diff`
