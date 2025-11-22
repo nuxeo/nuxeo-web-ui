@@ -959,15 +959,22 @@ Polymer({
       };
       _el.post().then((search) => {
         const { id } = search;
+        console.log(
+          'Saved search created with id:',
+          search,
+          this.selectedSearchIdx,
+          this._searches,
+          this.selecctedSearch,
+        );
         this.$.saveDialog.close();
         this.selectedSearch = search;
         this.$['saved-searches'].get().then(() => {
-          console.log('Saved search created with id:', search, this._searches);
           this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
         });
       });
     } else {
       // update an existing search
+      console.log('Updating saved search with id:', this.selectedSearch);
       _el.searchId = this.selectedSearch.id;
       _el.data = this.selectedSearch;
       if (this._renaming) {
@@ -981,8 +988,6 @@ Polymer({
           this.$.renameDialog.close();
           this.$['saved-searches'].get().then(() => {
             this.set(`_searches.${this.selectedSearchIdx - 1}.title`, _el.data.title);
-            console.log('Saved search created with id:', this._searches);
-
             // hack required to update the paper-input inside the paper-dropdown-menu
             const idx = this.selectedSearchIdx;
             this.selectedSearchIdx = 0;
