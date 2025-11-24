@@ -109,8 +109,12 @@ export default class UI extends BasePage {
     return (async () => {
       await url(process.env.NUXEO_URL ? '' : 'ui');
       if (!(await global.locale)) {
-        await $('nuxeo-app').isExisting();
-        const locale = await browser.execute(async () => (await window.nuxeo.I18n.language) || 'en');
+        await $('nuxeo-app').waitForDisplayed({ timeout: 60000 });
+        await browser.waitUntil(async () => browser.execute(() => !!window.nuxeo), {
+          timeout: 30000,
+          timeoutMsg: 'window.nuxeo not available',
+        });
+        const locale = await browser.execute(() => window.nuxeo.I18n.language || 'en');
         if (locale) {
           global.locale = locale;
           await moment.locale(global.locale);
