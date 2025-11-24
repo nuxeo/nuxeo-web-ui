@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, Then, When } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers.js';
@@ -213,28 +214,64 @@ Then(/^I save my search as "(.+)"$/, async function(searchName) {
 });
 
 Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username) {
+  console.log('Step: Starting share search flow');
+  console.log('Input searchName:', searchName, 'username:', username);
+
   const savedSearch = await this.ui.searchResults;
+  console.log('savedSearch loaded');
+
   const savedSearchButton = await savedSearch.savedSearchActionButton;
+  console.log('savedSearchButton fetched');
+
   await savedSearchButton.waitForVisible();
+  console.log('savedSearchButton is visible');
   await savedSearchButton.click();
+  console.log('Clicked savedSearchButton');
+
   const shareActionButton = await savedSearch.shareAction;
+  console.log('shareActionButton fetched');
+
   await shareActionButton.waitForVisible();
+  console.log('shareActionButton is visible');
   await shareActionButton.click();
+  console.log('Clicked shareActionButton');
+
   const searchForm = await this.ui.searchForm(searchName);
+  console.log('searchForm fetched for:', searchName);
+
   const permissionView = await searchForm.permissionsView;
+  console.log('permissionView loaded');
+
   const permissionButton = await permissionView.newPermissionButton;
+  console.log('permissionButton fetched');
+
   await permissionButton.waitForVisible();
+  console.log('permissionButton visible');
   await permissionButton.click();
+  console.log('Clicked permissionButton');
+
+  console.log('Setting permissions for:', username);
   await permissionView.setPermissions(username, {
     permission: 'Read',
     timeFrame: 'permanent',
     notify: false,
   });
+  console.log('Permissions set');
+
   const createPermissionButton = await permissionView.createPermissionButton;
+  console.log('createPermissionButton fetched');
+
   await createPermissionButton.waitForVisible();
+  console.log('createPermissionButton visible');
   await createPermissionButton.click();
+  console.log('Clicked createPermissionButton');
+
   const permissionVisible = await permissionView.permission('Read', username, 'permanent');
+  console.log('Checking if permission is visible');
+
   const isVisible = await permissionVisible.waitForVisible();
+  console.log('Final permission visible:', isVisible);
+
   isVisible.should.be.true;
 });
 
@@ -261,10 +298,22 @@ When(/^I perform a QuickSearch for (.+)/, async function(searchTerm) {
 });
 
 Then(/^I can see (\d+) QuickSearch results$/, async function(numberOfResults) {
+  console.log('Step: Checking QuickSearch results');
+  console.log('Expected numberOfResults:', numberOfResults);
+
   const quickSearch = await this.ui.quickSearch;
+  console.log('quickSearch component loaded');
+
   await driver.pause(1000);
+  console.log('Paused for 1 second to allow results to load');
+
   const result = await quickSearch.quickSearchResultsCount();
+  console.log('Actual quickSearch results count:', result);
+
   if (result !== numberOfResults) {
+    console.error(`Mismatch! Expected: ${numberOfResults}, but Found: ${result}`);
     throw new Error(`Expecting to get ${numberOfResults} results but found ${result}`);
   }
+
+  console.log('Result count matches expected value');
 });
