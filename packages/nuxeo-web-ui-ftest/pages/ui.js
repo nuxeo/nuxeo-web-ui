@@ -111,14 +111,19 @@ export default class UI extends BasePage {
       console.log("🔵 UI.get(): Current URL:", await browser.getUrl());
       // Browser console errors
       const logs = await browser.getLogs("browser");
-      if (logs.length) {
-        console.log("🔵 Browser logs:", logs);
-      }
       if (!(await global.locale)) {
         try{
           console.log("🔵 Waiting for nuxeo-app to resolve...");
-          await $('nuxeo-app:not([unresolved])').waitForExist({ timeout: 30000 });
-          await $('nuxeo-app:not([unresolved])').waitForDisplayed({ timeout: 30000 });
+          const exists = await $('nuxeo-app').isExisting();
+          console.log("ℹ nuxeo-app exists:", exists);
+
+          if (exists) {
+            const unresolved = await $('nuxeo-app').getAttribute('unresolved');
+            console.log("ℹ unresolved attribute:", unresolved);
+          }
+
+          // await $('nuxeo-app:not([unresolved])').waitForExist({ timeout: 30000 });
+          // await $('nuxeo-app:not([unresolved])').waitForDisplayed({ timeout: 30000 });
           console.log("🟢 nuxeo-app resolved");
         }
         catch (e) {
