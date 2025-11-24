@@ -108,8 +108,26 @@ export default class UI extends BasePage {
   static get() {
     return (async () => {
       await url(process.env.NUXEO_URL ? '' : 'ui');
+      console.log("🔵 UI.get(): Current URL:", await browser.getUrl());
+      // Browser console errors
+      const logs = await browser.getLogs("browser");
+      if (logs.length) {
+        console.log("🔵 Browser logs:", logs);
+      }
       if (!(await global.locale)) {
-        await $('nuxeo-app:not([unresolved])').waitForVisible();
+        try{
+          console.log("🔵 Waiting for nuxeo-app to resolve...");
+          await $('nuxeo-app:not([unresolved])').waitForExist({ timeout: 30000 });
+          await $('nuxeo-app:not([unresolved])').waitForDisplayed({ timeout: 30000 });
+          console.log("🟢 nuxeo-app resolved");
+        }
+        catch (e) {
+          console.log("❌ nuxeo-app never resolved — dumping DOM…");
+          const html = await browser.execute(() => document.body.innerHTML);
+          console.log(html.slice(0, 8000)); // avoid huge logs
+          throw e;
+        }
+        
         const locale = await browser.execute(async () => (await window.nuxeo.I18n.language) || 'en');
         if (locale) {
           global.locale = locale;
