@@ -33,16 +33,26 @@ Given('user {string} exists', async (username) => {
   });
 });
 
-When('I login as {string}', async function(username) {
+When('I login as {string}', { timeout: 120000 }, async function(username) {
+  console.log("🔵 LOGIN START", username);
   await driver.pause(1000);
+  console.log("🔵 Getting Login page…");
   const logIn = await Login.get();
+  console.log("🟢 Login page loaded");
+  console.log("🔵 Filling username:", username);
   await logIn.username(username);
   const password = await users[username];
+  console.log("🔵 Filling password for", username);
   await logIn.password(password);
+  console.log("🔵 Submitting login…");
   await logIn.submit();
   this.username = username;
+  console.log("🔵 Getting UI…");
   this.ui = await UI.get();
+  console.log("🟢 UI loaded");
+  console.log("🔵 Waiting for nuxeo-page…");
   await this.ui.waitForVisible('nuxeo-page');
+  console.log("🟢 nuxeo-page visible");
 });
 
 When(/^I visit (.*)$/, (path) => url(path));

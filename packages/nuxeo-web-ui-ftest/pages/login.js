@@ -20,6 +20,7 @@ export default class Login {
     const baseUrl = process.env.NUXEO_URL || '';
     const loginUrl = baseUrl ? `${baseUrl}/logout` : 'logout';
 
+    console.log("🔵 Navigating to login:", loginUrl);
     await browser.url(loginUrl);
 
     // Wait until browser is idle and page is ready
@@ -32,7 +33,9 @@ export default class Login {
     );
 
     // wait for login form to appear
+    console.log("🔵 Waiting for #username");
     await $('#username').waitForDisplayed({ timeout: 30000 });
+    console.log("🟢 Login screen ready");
 
     return new this();
   }
