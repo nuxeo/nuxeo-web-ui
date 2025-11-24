@@ -35,7 +35,6 @@ Given('user {string} exists', async (username) => {
 
 When('I login as {string}', async function(username) {
   await driver.pause(1000);
-  console.log('🔵 Login::start', username);
   const logIn = await Login.get();
   await logIn.username(username);
   const password = await users[username];
@@ -44,7 +43,6 @@ When('I login as {string}', async function(username) {
   this.username = username;
   this.ui = await UI.get();
   await this.ui.waitForVisible('nuxeo-page');
-  console.log('🔵 Login::end');
 });
 
 When(/^I visit (.*)$/, (path) => url(path));

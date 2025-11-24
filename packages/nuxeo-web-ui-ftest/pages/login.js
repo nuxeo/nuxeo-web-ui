@@ -22,8 +22,6 @@ export default class Login {
 
     await browser.url(loginUrl);
 
-    const logs = await browser.getLogs('browser');
-
     // Wait until browser is idle and page is ready
     await browser.waitUntil(
       async () => {
@@ -34,13 +32,7 @@ export default class Login {
     );
 
     // wait for login form to appear
-    try {
-      await $('#username').waitForDisplayed({ timeout: 30000 });
-    } catch (e) {
-      await browser.saveScreenshot('./error_login.png');
-      console.log('🛑 Screenshot taken for login failure');
-      throw e;
-    }
+    await $('#username').waitForDisplayed({ timeout: 30000 });
 
     return new this();
   }
