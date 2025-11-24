@@ -142,6 +142,7 @@ Polymer({
   },
 
   _saveSearch() {
+    console.log('saving search', this.searchForm);
     this.searchForm.save();
   },
 
