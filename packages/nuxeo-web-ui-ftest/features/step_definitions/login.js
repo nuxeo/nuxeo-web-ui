@@ -35,14 +35,21 @@ Given('user {string} exists', async (username) => {
 
 When('I login as {string}', async function(username) {
   await driver.pause(1000);
+  console.log('🔵 Login::start', username);
   const logIn = await Login.get();
+  console.log('🟢 Login page loaded');
   await logIn.username(username);
+  console.log('🟢 Username entered');
   const password = await users[username];
   await logIn.password(password);
+  console.log('🟢 Password entered');
   await logIn.submit();
+  console.log('🟢 Submit clicked');
   this.username = username;
   this.ui = await UI.get();
+  console.log('🟢 UI.get() complete — waiting for nuxeo-page');
   await this.ui.waitForVisible('nuxeo-page');
+  console.log('🟢 nuxeo-page visible');
 });
 
 When(/^I visit (.*)$/, (path) => url(path));

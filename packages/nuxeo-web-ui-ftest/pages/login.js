@@ -19,8 +19,13 @@ export default class Login {
   static async get() {
     const baseUrl = process.env.NUXEO_URL || '';
     const loginUrl = baseUrl ? `${baseUrl}/logout` : 'logout';
+    console.log('🔵 Navigating to login URL:', loginUrl);
 
     await browser.url(loginUrl);
+    console.log('🟢 Browser URL loaded');
+
+    const logs = await browser.getLogs('browser');
+    console.log('📜 Browser console logs:', logs);
 
     // Wait until browser is idle and page is ready
     await browser.waitUntil(
@@ -31,8 +36,17 @@ export default class Login {
       { timeout: 20000, timeoutMsg: 'Page did not reach readyState complete' },
     );
 
+    console.log('🔵 Waiting for #username field');
+
     // wait for login form to appear
-    await $('#username').waitForDisplayed({ timeout: 30000 });
+    try {
+      await $('#username').waitForDisplayed({ timeout: 30000 });
+    } catch (e) {
+      await browser.saveScreenshot('./error_login.png');
+      console.log('🛑 Screenshot taken for login failure');
+      throw e;
+    }
+    console.log('🟢 #username visible');
 
     return new this();
   }
