@@ -792,10 +792,14 @@ Polymer({
   },
 
   _selectedSearchIdxChanged() {
-    if (this._isSavedSearch()) {
-      this.isSavedSearch = true;
-      this.selectedSearch = this._searches[this.selectedSearchIdx - 1];
-      this.params = this._mutateParams(this.selectedSearch.params, true);
+    // Convert index → object
+    const idx = this.selectedSearchIdx - 1;
+    const search = this._searches?.[idx] || null;
+
+    if (search) {
+      this.isSavedSearch = this._isSavedSearch();
+      this.selectedSearch = search;
+      this.params = this._mutateParams(search.params, true);
       this._navigateToResults();
     } else {
       this._clear();
@@ -807,32 +811,34 @@ Polymer({
     // Case 1: No selection
     if (!selectedSearch) {
       this.selectedSearchIdx = 0;
+      return;
     }
 
-    // Case 2: selectedSearch is NOT an object (string or ID)
-    else if (typeof selectedSearch !== 'object') {
-      const id = typeof selectedSearch === 'string' ? selectedSearch : selectedSearch?.id || selectedSearch;
+    // Extract ID (works for object or string)
+    const id = typeof selectedSearch === 'string' ? selectedSearch : selectedSearch?.id;
 
-      const idx = this._searches.findIndex((s) => s.id === id);
-      if (idx !== -1) {
-        this.selectedSearch = this._searches[idx];
-        this.selectedSearchIdx = idx + 1;
-      }
+    // Find index in saved searches
+    const idx = this._searches.findIndex((s) => s.id === id);
+
+    if (idx === -1) {
+      // No match — treat as "no selection"
+      this.selectedSearchIdx = 0;
+      return;
     }
 
-    // Case 3: selectedSearch is an object with params
-    else if (selectedSearch.params) {
-      const idx = this._searches.findIndex((s) => s.id === selectedSearch.id);
-      if (idx !== -1 && this.selectedSearchIdx !== idx + 1) {
-        this.selectedSearchIdx = idx + 1;
-      }
+    // Update index (add 1, because legacy system used 1-based index)
+    if (this.selectedSearchIdx !== idx + 1) {
+      this.selectedSearchIdx = idx + 1;
+    }
 
-      this.params = this._mutateParams(selectedSearch.params);
-      this.searchTerm = this.params?.ecm_fulltext?.replace(/\*/g, '') || '';
+    // Populate params
+    const search = this._searches[idx];
+    this.params = this._mutateParams(search.params);
+    this.searchTerm = this.params?.ecm_fulltext?.replace(/\*/g, '') || '';
 
-      if (this.form) {
-        this.form.searchTerm = this.searchTerm;
-      }
+    // Ensure form stays synced
+    if (this.form) {
+      this.form.searchTerm = this.searchTerm;
     }
   },
 
@@ -937,17 +943,8 @@ Polymer({
   },
 
   _saveSearch() {
-    // Ensure input fields commit their current values before proceeding.
-    // Some input components only update their bound properties after a 'change' event,
-    // so we dispatch it programmatically to guarantee the latest value is captured.
-    if (this.$.savedSearchTitle) {
-      this.$.savedSearchTitle.dispatchEvent(new Event('change'));
-    }
-    if (this.$.savedSearchRenameTitle) {
-      this.$.savedSearchRenameTitle.dispatchEvent(new Event('change'));
-    }
-
     const _el = this.$['saved-search'];
+
     // save a new search
     if (this.selectedSearchIdx === 0 || this._saveAs) {
       _el.searchId = '';
@@ -957,24 +954,32 @@ Polymer({
         params: this.params,
         title: this._savedSearchTitle,
       };
+
       _el.post().then((search) => {
-        const { id } = search;
-        console.log(
-          'Saved search created with id:',
-          search,
-          this.selectedSearchIdx,
-          this._searches,
-          this.selecctedSearch,
-        );
+        const { id, title } = search;
+
         this.$.saveDialog.close();
-        this.selectedSearch = search;
+
+        // ❗ MUST use object format expected by nuxeo-selectivity
+        this.selectedSearch = {
+          id,
+          title,
+          text: title,
+          displaytext: title,
+        };
+
+        // refresh saved searches
         this.$['saved-searches'].get().then(() => {
-          this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
+          const idx = this._searches.findIndex((s) => s.id === id);
+
+          // legacy index +1 logic
+          this.selectedSearchIdx = idx !== -1 ? idx + 1 : 0;
         });
       });
-    } else {
-      // update an existing search
-      console.log('Updating saved search with id:', this.selectedSearch);
+    }
+
+    // update existing search (unchanged)
+    else {
       _el.searchId = this.selectedSearch.id;
       _el.data = this.selectedSearch;
       if (this._renaming) {
