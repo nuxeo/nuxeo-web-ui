@@ -154,7 +154,7 @@ export const config = {
   sync: true,
   //
   // Level of logging verbosity: trace | debug | info | warn | error | silent
-  logLevel: 'debug',
+  logLevel: 'error',
   //
   // Enables colors for log output.
   coloredLogs: true,
