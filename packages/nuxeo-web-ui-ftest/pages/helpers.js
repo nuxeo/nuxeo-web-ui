@@ -7,12 +7,24 @@ const _flushProperties = () => {
 
 const refresh = async () => {
   await driver.refresh();
+  await waitForNuxeo();
   await _flushProperties();
 };
 
 const url = async (...args) => {
   await driver.url(...args);
+  await waitForNuxeo();
   _flushProperties();
+};
+
+const waitForNuxeo = async () => {
+  await driver.waitUntil(
+    () => driver.execute(() => window.Nuxeo !== undefined),
+    {
+      timeout: 30000,
+      timeoutMsg: 'Nuxeo global object did not appear'
+    }
+  );
 };
 
 const clickActionMenu = async (menu, selector) => {
