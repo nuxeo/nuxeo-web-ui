@@ -218,13 +218,13 @@ Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username)
   console.log('Input searchName:', searchName, 'username:', username);
 
   const savedSearch = await this.ui.searchResults;
-  console.log('savedSearch loaded');
+  console.log('savedSearch loaded', this.ui);
 
   const savedSearchButton = await savedSearch.savedSearchActionButton;
-  console.log('savedSearchButton fetched');
+  console.log('savedSearchButton fetched', savedSearch);
 
   await savedSearchButton.waitForVisible();
-  console.log('savedSearchButton is visible');
+  console.log('savedSearchButton is visible', savedSearchButton);
   await savedSearchButton.click();
   console.log('Clicked savedSearchButton');
 
