@@ -19,9 +19,9 @@ export default class Login {
   static async get() {
     const baseUrl = process.env.NUXEO_URL || '';
     
-    // console.log("🔵 FORCING CLEAN SESSION");
-    // await browser.deleteCookies();
-    // await browser.reloadSession();
+    console.log("🔵 FORCING CLEAN SESSION");
+    await browser.deleteCookies();
+    await browser.reloadSession();
 
     const loginUrl = baseUrl ? `${baseUrl}/logout` : 'logout';
 
