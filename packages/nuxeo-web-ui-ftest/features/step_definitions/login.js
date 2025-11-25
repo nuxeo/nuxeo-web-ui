@@ -48,8 +48,6 @@ When('I login as {string}', { timeout: 120000 }, async function(username) {
   await logIn.submit();
   await browser.pause(2000);
   console.log("🔵 After login, URL is:", await browser.getUrl());
-  await browser.saveScreenshot(`./screenshots/login_after_submit_${username}.png`);
-  console.log(`📸 Screenshot taken after login of ${username}`);  
   this.username = username;
   console.log("🔵 Getting UI…");
   this.ui = await UI.get();
