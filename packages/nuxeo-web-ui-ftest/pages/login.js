@@ -30,11 +30,12 @@ export default class Login {
 
     // Wait until browser is idle and page is ready
     await browser.waitUntil(
-      async () => {
-        const ready = await browser.execute(() => document.readyState);
-        return ready === 'complete';
-      },
-      { timeout: 20000, timeoutMsg: 'Page did not reach readyState complete' },
+      async () => !(await $$('nuxeo-app')).length,
+      {
+        timeout: 10000,
+        interval: 200,
+        timeoutMsg: 'nuxeo-app did not unload after logout'
+      }
     );
 
     // wait for login form to appear
