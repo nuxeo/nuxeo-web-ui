@@ -12,7 +12,10 @@ Then('I can see the administration menu', async function() {
 
 Then('I cannot see the administration button', async function() {
   const button = await this.ui.adminButton;
-  await button.waitForExist({ reverse: true, timeout: 5000 });
+  const isVisible = await button.isVisible();
+  if (isVisible) {
+    throw new Error('Expected administration button to not be visible');
+  }
 });
 
 // XXX: this.ui.drawer.administration.click()
