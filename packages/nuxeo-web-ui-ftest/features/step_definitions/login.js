@@ -53,7 +53,7 @@ When('I login as {string}', { timeout: 120000 }, async function(username) {
   this.ui = await UI.get();
   console.log("🟢 UI loaded");
   console.log("🔵 Waiting for nuxeo-page…");
-  await $('nuxeo-page').waitForDisplayed({ timeout: 30000 });
+  this.ui.browser.waitForVisible('nuxeo-page');
   console.log("🟢 nuxeo-page visible");
 });
 
