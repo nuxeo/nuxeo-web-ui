@@ -34,6 +34,13 @@ export default class Search extends Results {
     })();
   }
 
+  get nuxeoSelect() {
+    return (async () => {
+      const ele = await this.el;
+      return ele.element('#actionsDropdown');
+    })();
+  }
+
   get savedSearchActionButton() {
     return driver.element('nuxeo-saved-search-actions paper-icon-button');
   }
@@ -69,14 +76,52 @@ export default class Search extends Results {
 
   async getSavedSearch(savedSearchName) {
     const selector = await this._selector;
-    const els = await driver.elements(`${selector} #actionsDropdown paper-item`);
-    if (els.length > 1) {
-      return $(els[1]);
+
+    // <nuxeo-search>
+    const root = await $(selector);
+
+    // step 1: wait for dropdown host
+    const actionsDropdown = await root.shadow$('#actionsDropdown');
+    await actionsDropdown.waitForExist();
+
+    // step 2: wait for its internal shadow to render
+    await browser.waitUntil(
+      async () => {
+        const container = await actionsDropdown.shadow$('div.selectivity-single-select');
+        return container.isExisting();
+      },
+      {
+        timeout: 5000,
+      },
+    );
+
+    // step 3: now wait for items inside the shadow DOM
+    await browser.waitUntil(
+      async () => {
+        const items = await actionsDropdown.shadow$$('div.selectivity-result-item');
+        return items.length > 0;
+      },
+      {
+        timeout: 5000,
+      },
+    );
+
+    // step 4: finally read them
+    const items = await actionsDropdown.shadow$$('div.selectivity-result-item');
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      // eslint-disable-next-line no-await-in-loop
+      const text = await item.getText();
+      // eslint-disable-next-line no-await-in-loop
+      const className = await item.getAttribute('class');
+
+      if (text === savedSearchName && className.includes('highlight')) {
+        return item;
+      }
     }
-    const ele = await this.el;
-    const dropdownList = await ele.elements('#actionsDropdown paper-item');
-    const dropdownElenent = await dropdownList.find(async (e) => (await e.getText()) === savedSearchName);
-    return dropdownElenent;
+
+    return undefined;
   }
 
   async enterInput(text) {
