@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
 @license
 ©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
@@ -290,10 +289,7 @@ Polymer({
             data="[[_computeData(_searches)]]"
             value="{{selectedSearch}}"
             min-chars="0"
-            on-selected-changed="_selectedSearchValueChanged"
-          >
-          </nuxeo-selectivity>
-
+          ></nuxeo-selectivity>
           <template is="dom-if" if="[[queue]]">
             <paper-icon-button
               class="switch"
@@ -791,30 +787,6 @@ Polymer({
         this.results.reset();
         this._fetch(this.results).then(this._navigateToResults.bind(this));
       });
-    }
-  },
-
-  _selectedSearchValueChanged(e) {
-    console.log('selectedSearchValueChanged called', e);
-    const { value } = e.detail; // value selected in nuxeo-selectivity
-
-    if (!value) {
-      this.selectedSearchIdx = 0;
-      this.selectedSearch = null;
-      return;
-    }
-
-    // Find the index in _searches
-    const idx = this._searches.findIndex((s) => s.id === value.id || s.id === value);
-
-    if (idx !== -1) {
-      this.selectedSearchIdx = idx + 1; // keep legacy 1-based logic
-      this.selectedSearch = this._searches[idx];
-      this.params = this._mutateParams(this.selectedSearch.params, true);
-      this._navigateToResults();
-    } else {
-      this.selectedSearchIdx = 0;
-      this.selectedSearch = null;
     }
   },
 

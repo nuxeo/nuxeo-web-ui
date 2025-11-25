@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
 @license
 ©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
@@ -114,8 +113,6 @@ Polymer({
 
   _searchFormChanged(form, oldForm) {
     this._dirty = this.searchForm && this.searchForm.dirty;
-    console.log('form', form, 'oldform', oldForm);
-    console.log('search form changed', this.searchForm);
     if (this.searchForm) {
       this.searchForm.addEventListener('dirty-changed', () => {
         this._dirty = this.searchForm.dirty;
@@ -142,7 +139,6 @@ Polymer({
   },
 
   _saveSearch() {
-    console.log('saving search', this.searchForm);
     this.searchForm.save();
   },
 
@@ -171,7 +167,6 @@ Polymer({
   },
 
   _showOtherSearchActions() {
-    console.log(this._isSearchFormVisible, this.isSavedSearch, this._hasPermissions());
     return this._isSearchFormVisible && this.isSavedSearch && this._hasPermissions();
   },
 
