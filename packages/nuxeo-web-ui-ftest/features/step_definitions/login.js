@@ -35,25 +35,33 @@ Given('user {string} exists', async (username) => {
 
 When('I login as {string}', { timeout: 120000 }, async function(username) {
   console.log("🔵 LOGIN START", username);
-  await driver.pause(1000);
+  // Ensure clean browser state on every login
+  await browser.reloadSession();
+  console.log("🔵 Session reloaded");
+
   console.log("🔵 Getting Login page…");
   const logIn = await Login.get();
   console.log("🟢 Login page loaded");
+
   console.log("🔵 Filling username:", username);
   await logIn.username(username);
+  
   const password = await users[username];
   console.log("🔵 Filling password for", username);
   await logIn.password(password);
+
   console.log("🔵 Submitting login…");
   await logIn.submit();
-  await browser.pause(2000);
+
   console.log("🔵 After login, URL is:", await browser.getUrl());
+
   this.username = username;
   console.log("🔵 Getting UI…");
   this.ui = await UI.get();
   console.log("🟢 UI loaded");
+
   console.log("🔵 Waiting for nuxeo-page…");
-  this.ui.browser.waitForVisible('nuxeo-page');
+  await this.ui.waitForVisible('nuxeo-page');
   console.log("🟢 nuxeo-page visible");
 });
 
