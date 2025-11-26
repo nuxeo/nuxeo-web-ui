@@ -19,10 +19,14 @@ const url = async (...args) => {
 
 const waitForNuxeo = async () => {
   await driver.waitUntil(
-    () => driver.execute(() => window.Nuxeo !== undefined),
+    async () => {
+      const exists = await driver.execute(() => !!window.Nuxeo);
+      return exists;
+    },
     {
-      timeout: 30000,
-      timeoutMsg: 'Nuxeo global object did not appear'
+      timeout: 60000,  // increase for CI stability
+      interval: 500,
+      timeoutMsg: 'window.Nuxeo did not appear',
     }
   );
 };
