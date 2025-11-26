@@ -36,7 +36,7 @@ Given('user {string} exists', async (username) => {
 When('I login as {string}', { timeout: 120000 }, async function(username) {
   console.log("🔵 LOGIN START", username);
   // Ensure clean browser state on every login
-  await browser.reloadSession();
+  await browser.deleteCookies();
   console.log("🔵 Session reloaded");
 
   console.log("🔵 Getting Login page…");
