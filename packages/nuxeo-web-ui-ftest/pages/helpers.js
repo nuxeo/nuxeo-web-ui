@@ -5,6 +5,32 @@ const _flushProperties = () => {
   }, global.config || []);
 };
 
+const waitForNuxeo = async () => {
+  await driver.waitUntil(
+    async () => {
+      const url = await driver.getUrl();
+
+      // If stuck on login page, fail immediately — Nuxeo will never load
+      if (url.includes('login.jsp')) {
+        return false;
+      }
+
+      // Only check Nuxeo after UI is loading
+      if (!url.includes('/ui')) {
+        return false;
+      }
+
+      // Ensure Nuxeo and UI.config exist
+      return driver.execute(() => window.Nuxeo && window.Nuxeo.UI && window.Nuxeo.UI.config);
+    },
+    {
+      timeout: 60000,
+      interval: 300,
+      timeoutMsg: 'Nuxeo UI did not initialize — still stuck on login page or UI did not bootstrap',
+    },
+  );
+};
+
 const refresh = async () => {
   await driver.refresh();
   await waitForNuxeo();
@@ -24,42 +50,11 @@ const url = async (...args) => {
       timeout: 30000,
       interval: 250,
       timeoutMsg: 'Navigation stayed on login.jsp — login may have failed',
-    }
+    },
   );
 
   await waitForNuxeo();
   _flushProperties();
-};
-
-const waitForNuxeo = async () => {
-  await driver.waitUntil(
-    async () => {
-      const url = await driver.getUrl();
-
-      console.log("URL : ", url);
-      // If stuck on login page, fail immediately — Nuxeo will never load
-      if (url.includes('login.jsp')) {
-        return false;
-      }
-
-      // Only check Nuxeo after UI is loading
-      if (!url.includes('/ui')) {
-        return false;
-      }
-
-      // Ensure Nuxeo and UI.config exist
-      return await driver.execute(() => {
-        return window.Nuxeo 
-            && window.Nuxeo.UI 
-            && window.Nuxeo.UI.config;
-      });
-    },
-    {
-      timeout: 60000,
-      interval: 300,
-      timeoutMsg: 'Nuxeo UI did not initialize — still stuck on login page or UI did not bootstrap',
-    }
-  );
 };
 
 const clickActionMenu = async (menu, selector) => {

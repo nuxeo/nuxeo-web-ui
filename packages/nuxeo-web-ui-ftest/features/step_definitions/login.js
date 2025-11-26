@@ -34,26 +34,14 @@ Given('user {string} exists', async (username) => {
 });
 
 When('I login as {string}', { timeout: 120000 }, async function(username) {
-  console.log("🔵 LOGIN START", username);
   // Ensure clean browser state on every login
   await browser.deleteCookies();
-  console.log("🔵 Session reloaded");
 
-  console.log("🔵 Getting Login page…");
   const logIn = await Login.get();
-  console.log("🟢 Login page loaded");
-
-  console.log("🔵 Filling username:", username);
   await logIn.username(username);
-  
   const password = await users[username];
-  console.log("🔵 Filling password for", username);
   await logIn.password(password);
-
-  console.log("🔵 Submitting login…");
   await logIn.submit();
-
-  console.log("🔵 Waiting for redirect to UI…");
 
   await browser.waitUntil(
     async () => {
@@ -63,20 +51,14 @@ When('I login as {string}', { timeout: 120000 }, async function(username) {
     {
       timeout: 30000,
       interval: 200,
-      timeoutMsg: 'UI did not load after login — still stuck on login.jsp'
-    }
+      timeoutMsg: 'UI did not load after login — still stuck on login.jsp',
+    },
   );
 
-  console.log("🟢 Redirected to UI:", await browser.getUrl());
-
   this.username = username;
-  console.log("🔵 Getting UI…");
   this.ui = await UI.get();
-  console.log("🟢 UI loaded");
 
-  console.log("🔵 Waiting for nuxeo-page…");
   await this.ui.waitForVisible('nuxeo-page');
-  console.log("🟢 nuxeo-page visible");
 });
 
 When(/^I visit (.*)$/, (path) => url(path));

@@ -107,31 +107,21 @@ export default class UI extends BasePage {
 
   static get() {
     return (async () => {
-      console.log("🔵 Navigating to UI");
       await url(process.env.NUXEO_URL ? '' : 'ui');
       if (!(await global.locale)) {
-        console.log("🔵 Waiting for nuxeo-app");
         await $('nuxeo-app').waitForDisplayed({ timeout: 60000 });
-        console.log("🔵 Waiting for nuxeo-app to become visible…");
-        await browser.waitUntil(
-          async () => $('nuxeo-app').then(el => el.isDisplayed()),
-          {
-            timeout: 60000,
-            interval: 300,
-            timeoutMsg: 'nuxeo-app exists but never became visible'
-          }
-        );
+        await browser.waitUntil(async () => $('nuxeo-app').then((el) => el.isDisplayed()), {
+          timeout: 60000,
+          interval: 300,
+          timeoutMsg: 'nuxeo-app exists but never became visible',
+        });
 
-        console.log("🟢 nuxeo-app displayed");
-        console.log("🔵 Waiting for window.nuxeo");
         await browser.waitUntil(async () => browser.execute(() => !!window.nuxeo), {
           timeout: 30000,
           timeoutMsg: 'window.nuxeo not available',
         });
-        console.log("🟢 window.nuxeo ready");
 
         const locale = await browser.execute(() => window.nuxeo.I18n.language || 'en');
-        console.log("🟢 locale:", locale);
         if (locale) {
           global.locale = locale;
           await moment.locale(global.locale);
