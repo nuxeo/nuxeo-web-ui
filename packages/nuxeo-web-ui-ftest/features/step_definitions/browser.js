@@ -161,6 +161,15 @@ Then('I can see the {string} child document is at position {int}', async functio
   }
 });
 
+Then('I can see the {string} child document is present', async function(title) {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const index = await browser.indexOfChild(title);
+  if (index < 0) {
+    throw new Error(`${title} child document not present`);
+  }
+});
+
 When('I sort the content by {string} in {string} order', async function(field, order) {
   const browser = await this.ui.browser;
   await browser.waitForVisible();
