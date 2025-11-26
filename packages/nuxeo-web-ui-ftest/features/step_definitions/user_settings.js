@@ -83,8 +83,10 @@ Then('I cannot see authorized application', async function() {
 Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
   const authPage = await this.ui.userAuthorizedApps;
   await authPage.waitForVisible();
-  const apps = await authPage.getApps();
-  await browser.waitUntil(() => apps.length > 0);
+  await browser.waitUntil(async () => {
+    const apps = await authPage.getApps();
+    return apps.length > 0;
+  });
   const appRevoke = await authPage.getApps(appName);
   appRevoke.length.should.equal(1);
   const app = await appRevoke[0];
