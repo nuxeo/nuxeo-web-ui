@@ -173,6 +173,10 @@ Polymer({
         margin: 0.1em 0.2em 0 1.1em;
         font-weight: 500;
       }
+      #actionsDropdown {
+        width: 82%;
+        padding: 19px 0 0 0;
+      }
 
       #actionsDropdown > .iron-selected {
         background-color: #6e6e6e;
@@ -279,12 +283,13 @@ Polymer({
           params="[[_computeSavedSearchesParams(provider)]]"
         ></nuxeo-search>
         <template is="dom-if" if="[[!onlyQueue]]">
-          <nuxeo-select id="actionsDropdown" selected="{{selectedSearchIdx}}">
-            <paper-item>[[i18n('searchForm.searchFilters')]]</paper-item>
-            <template is="dom-repeat" items="[[_searches]]" as="search">
-              <paper-item>[[search.title]]</paper-item>
-            </template>
-          </nuxeo-select>
+          <nuxeo-selectivity
+            id="actionsDropdown"
+            placeholder="[[i18n('searchForm.searchFilters')]]"
+            data="[[_computeData(_searches)]]"
+            value="{{selectedSearch}}"
+            min-chars="0"
+          ></nuxeo-selectivity>
           <template is="dom-if" if="[[queue]]">
             <paper-icon-button
               class="switch"
@@ -659,6 +664,7 @@ Polymer({
     '_resetResults(provider, params.*, _quickFilters.*, query)',
     '_paramsChanged(params.*)',
     '_visibleChanged(auto, visible)',
+    '_selectedSearchChanged(selectedSearch)',
   ],
 
   listeners: {
@@ -785,10 +791,14 @@ Polymer({
   },
 
   _selectedSearchIdxChanged() {
-    if (this._isSavedSearch()) {
-      this.isSavedSearch = true;
-      this.selectedSearch = this._searches[this.selectedSearchIdx - 1];
-      this.params = this._mutateParams(this.selectedSearch.params, true);
+    // Convert index → object
+    const idx = this.selectedSearchIdx - 1;
+    const search = this._searches?.[idx] || null;
+
+    if (search) {
+      this.isSavedSearch = this._isSavedSearch();
+      this.selectedSearch = search;
+      this.params = this._mutateParams(search.params, true);
       this._navigateToResults();
     } else {
       this._clear();
@@ -796,13 +806,50 @@ Polymer({
     this.dirty = false;
   },
 
-  _selectedSearchChanged() {
-    if (this.selectedSearch) {
-      this.params = this._mutateParams(this.selectedSearch.params);
-      this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
-      this.form.searchTerm = this.searchTerm;
-      this._fetch(this.$.provider);
+  _selectedSearchChanged(selectedSearch) {
+    // Case 1: No selection
+    if (!selectedSearch) {
+      this.selectedSearchIdx = 0;
+      return;
     }
+
+    // Extract ID (works for object or string)
+    const id = typeof selectedSearch === 'string' ? selectedSearch : selectedSearch?.id;
+
+    // Find index in saved searches
+    const idx = this._searches.findIndex((s) => s.id === id);
+
+    if (idx === -1) {
+      // No match — treat as "no selection"
+      this.selectedSearchIdx = 0;
+      return;
+    }
+
+    // Update index (add 1, because legacy system used 1-based index)
+    if (this.selectedSearchIdx !== idx + 1) {
+      this.selectedSearchIdx = idx + 1;
+    }
+
+    // Populate params
+    const search = this._searches[idx];
+    this.params = this._mutateParams(search.params);
+    this.searchTerm = this.params?.ecm_fulltext?.replace(/\*/g, '') || '';
+
+    // Ensure form stays synced
+    if (this.form) {
+      this.form.searchTerm = this.searchTerm;
+    }
+  },
+
+  _computeData(searches) {
+    return searches.map((item) => {
+      return {
+        id: item.id,
+        title: item.title,
+        text: item.title,
+        displaytext: item.title,
+      };
+    });
   },
 
   _isSavedSearch() {
@@ -867,7 +914,6 @@ Polymer({
   },
 
   saveAs() {
-    this.$$('#actionsDropdown').close();
     this._savedSearchTitle = '';
     this.$.saveDialog.open();
     this._saveAs = true;
@@ -883,23 +929,21 @@ Polymer({
 
   rename() {
     this._renaming = true;
-    this.$$('#actionsDropdown').close();
     this.$.renameDialog.open();
     this.$.savedSearchRenameTitle.value = this.selectedSearch.title;
   },
 
   share() {
-    this.$$('#actionsDropdown').close();
     this.$.shareDialog.open();
   },
 
   delete() {
-    this.$$('#actionsDropdown').close();
     this.$.deleteDialog.open();
   },
 
   _saveSearch() {
     const _el = this.$['saved-search'];
+
     // save a new search
     if (this.selectedSearchIdx === 0 || this._saveAs) {
       _el.searchId = '';
@@ -909,16 +953,32 @@ Polymer({
         params: this.params,
         title: this._savedSearchTitle,
       };
+
       _el.post().then((search) => {
-        const { id } = search;
+        const { id, title } = search;
+
         this.$.saveDialog.close();
-        this.selectedSearch = search;
+
+        // ❗ MUST use object format expected by nuxeo-selectivity
+        this.selectedSearch = {
+          id,
+          title,
+          text: title,
+          displaytext: title,
+        };
+
+        // refresh saved searches
         this.$['saved-searches'].get().then(() => {
-          this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
+          const idx = this._searches.findIndex((s) => s.id === id);
+
+          // legacy index +1 logic
+          this.selectedSearchIdx = idx !== -1 ? idx + 1 : 0;
         });
       });
-    } else {
-      // update an existing search
+    }
+
+    // update existing search (unchanged)
+    else {
       _el.searchId = this.selectedSearch.id;
       _el.data = this.selectedSearch;
       if (this._renaming) {
