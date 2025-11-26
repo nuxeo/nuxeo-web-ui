@@ -109,13 +109,15 @@ When('I browse to the saved search', function() {
 Then('I can see that my saved search "{word}" on "{word}" is selected', async function(savedSearchName, searchName) {
   const ui = await this.ui;
   const searchForm = await ui.searchForm(searchName);
-  const menuButton = await searchForm.menuButton;
-  await menuButton.waitForDisplayed();
+  const dropdownBtn = await searchForm.nuxeoSelect;
+  await dropdownBtn.click();
+  const dropdown = dropdownBtn.shadow$('div.selectivity-dropdown');
+  await dropdown.waitForExist();
   const savedSearch = await searchForm.getSavedSearch(savedSearchName);
   const savedSearchExist = await savedSearch.waitForExist();
   savedSearchExist.should.be.true;
   const classAttr = await savedSearch.getAttribute('class');
-  classAttr.should.include('iron-selected');
+  classAttr.should.include('highlight');
 });
 
 When(/^I clear the (.+) search on (.+)$/, async function(searchType, searchName) {
@@ -238,9 +240,10 @@ Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username)
 
 Then(/^I can view my saved search "(.+)" on "(.+)"$/, async function(savedSearchName, searchName) {
   const searchForm = await this.ui.searchForm(searchName);
-  const menuButton = await searchForm.menuButton;
-  await menuButton.waitForVisible();
-  await menuButton.click();
+  const dropdownBtn = await searchForm.nuxeoSelect;
+  await dropdownBtn.click();
+  const dropdown = dropdownBtn.shadow$('div.selectivity-dropdown');
+  await dropdown.waitForExist();
   const savedSearch = await searchForm.getSavedSearch(savedSearchName);
   const savedSearchExist = await savedSearch.waitForExist();
   savedSearchExist.should.be.true;
