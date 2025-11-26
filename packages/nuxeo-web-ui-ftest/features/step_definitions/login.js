@@ -53,7 +53,21 @@ When('I login as {string}', { timeout: 120000 }, async function(username) {
   console.log("🔵 Submitting login…");
   await logIn.submit();
 
-  console.log("🔵 After login, URL is:", await browser.getUrl());
+  console.log("🔵 Waiting for redirect to UI…");
+
+  await browser.waitUntil(
+    async () => {
+      const u = await browser.getUrl();
+      return !u.includes('login.jsp') && u.includes('/ui');
+    },
+    {
+      timeout: 30000,
+      interval: 200,
+      timeoutMsg: 'UI did not load after login — still stuck on login.jsp'
+    }
+  );
+
+  console.log("🟢 Redirected to UI:", await browser.getUrl());
 
   this.username = username;
   console.log("🔵 Getting UI…");
