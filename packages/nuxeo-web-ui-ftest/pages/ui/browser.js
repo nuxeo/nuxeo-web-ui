@@ -288,19 +288,19 @@ export default class Browser extends BasePage {
     await this.waitForChildren();
     const result = await driver.waitUntil(
       async () => {
-        const rowTemp = await this.rows; // re-query every retry
-        for (let i = 0; i < rowTemp.length; i++) {
-          const row = await rowTemp[i];
-          const ele = await row.$('nuxeo-data-table-cell a.title');
-          const exists = await ele.isExisting();
-          if (exists) {
-            const eleText = (await ele.getText()).trim();
-            if (eleText && eleText === title) {
-              return { index: i }; // wrap to avoid falsy 0
+        // re-query rows every time
+        const rows = await this.el.$$('nuxeo-data-table-row');
+        for (let i = 0; i < rows.length; i++) {
+          const cell = await rows[i].$('nuxeo-data-table-cell a.title');
+
+          if (await cell.isExisting()) {
+            const text = (await cell.getText()).trim();
+            if (text === title) {
+              return { index: i }; // truthy
             }
           }
         }
-        return false;
+        return false; // continue retry
       },
       {
         timeout: 20000,
