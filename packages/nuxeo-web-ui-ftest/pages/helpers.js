@@ -20,13 +20,25 @@ const url = async (...args) => {
 const waitForNuxeo = async () => {
   await driver.waitUntil(
     async () => {
-      const exists = await driver.execute(() => !!window.Nuxeo);
-      return exists;
+      const url = await driver.getUrl();
+
+      // Only check Nuxeo after UI is loading
+      console.log("URL : ", url);
+      if (!url.includes('/ui')) {
+        return false;
+      }
+
+      // Ensure Nuxeo and UI.config exist
+      return await driver.execute(() => {
+        return window.Nuxeo 
+            && window.Nuxeo.UI 
+            && window.Nuxeo.UI.config;
+      });
     },
     {
-      timeout: 60000,  // increase for CI stability
-      interval: 500,
-      timeoutMsg: 'window.Nuxeo did not appear',
+      timeout: 60000,
+      interval: 300,
+      timeoutMsg: 'window.Nuxeo.UI.config did not appear',
     }
   );
 };
