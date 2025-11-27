@@ -1,6 +1,6 @@
 export default class Spreadsheet {
   constructor() {
-    driver.waitUntil(() => driver.execute(() => window.spreadheet));
+    driver.waitUntil(() => driver.execute(() => window.spreadsheet));
   }
 
   element(...params) {
