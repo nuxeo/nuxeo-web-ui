@@ -1,6 +1,9 @@
 export default class Spreadsheet {
-  constructor() {
-    driver.waitUntil(() => driver.execute(() => window.spreadsheet));
+  async init() {
+    await driver.waitUntil(async () => driver.execute(() => !!window.spreadsheet), {
+      timeout: 5000,
+      timeoutMsg: 'Spreadsheet not initialized',
+    });
   }
 
   element(...params) {
