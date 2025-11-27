@@ -10,9 +10,9 @@ Feature: CSV Import
     When I click the Create Document button
     And I go to the importCSV tab
     And I import the csv-import-sample.csv file
-    Then I can see the "my_folder" child document is present
+    Then I can see the "my_folder" child document is at position 1
     When I navigate to "my_folder" child
-    Then I can see the "file1" child document is present
+    Then I can see the "file1" child document is at position 1
     When I navigate to "file1" child
     Then I can see File metadata with the following properties:
       | name         | value                                 |

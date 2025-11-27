@@ -289,7 +289,7 @@ export default class Browser extends BasePage {
     const result = await driver.waitUntil(
       async () => {
         // re-query rows every time
-        const rows = await this.el.$$('nuxeo-data-table-row');
+        const rows = await this.el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
         for (let i = 0; i < rows.length; i++) {
           const cell = await rows[i].$('nuxeo-data-table-cell a.title');
 
