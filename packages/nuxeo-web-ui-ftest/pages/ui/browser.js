@@ -286,25 +286,33 @@ export default class Browser extends BasePage {
 
   async indexOfChild(title) {
     await this.waitForChildren();
+    const table = await this.el.$('nuxeo-data-table[name="table"]');
+
     const result = await driver.waitUntil(
       async () => {
-        // re-query rows every time
-        const rows = await this.el.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+        // check visible rows first
+        const rows = await this.rows;
+
         for (let i = 0; i < rows.length; i++) {
           const cell = await rows[i].$('nuxeo-data-table-cell a.title');
-
           if (await cell.isExisting()) {
             const text = (await cell.getText()).trim();
             if (text === title) {
-              return { index: i }; // truthy
+              return { index: i };
             }
           }
         }
-        return false; // continue retry
+
+        // scroll table to render more rows
+        await driver.execute((tableEl) => {
+          tableEl.scrollTop += 300; // scroll chunk
+        }, table);
+
+        return false;
       },
       {
         timeout: 20000,
-        interval: 500,
+        interval: 300,
         timeoutMsg: `${title} child document not found within 20s`,
       },
     );
