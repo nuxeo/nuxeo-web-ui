@@ -4,7 +4,6 @@ import Spreadsheet from '../../pages/spreadsheet.js';
 
 When('I open the spreadsheet', async function() {
   const result = await this.ui.results;
-  const browser = await this.ui.browser;
   const actions = await result.actions;
   const buttonEle = await actions.element('nuxeo-spreadsheet-button');
   await buttonEle.click();
@@ -12,8 +11,8 @@ When('I open the spreadsheet', async function() {
   await dialog.waitForVisible();
   const iframe = await buttonEle.element('#iframe');
   await iframe.waitForExist();
-  const browserEle = await browser.el;
-  await browserEle.switchFrame(iframe);
+
+  await driver.switchFrame(iframe);
   // Initialize spreadsheet safely (constructor should NOT be async)
   const sheet = new Spreadsheet();
   await sheet.init(); // recommended: async init()
@@ -67,7 +66,7 @@ When('I save the spreadsheet', async function() {
 });
 
 When('I close the spreadsheet', async function() {
-  const {spreadsheet} = this;
+  const { spreadsheet } = this;
   if (spreadsheet) {
     await spreadsheet.close();
     await browser.switchFrame(null);
