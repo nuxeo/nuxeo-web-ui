@@ -127,7 +127,8 @@ export default class Browser extends BasePage {
   get rows() {
     return (async () => {
       const currentPage = await this.currentPage;
-      return currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+      const table = await currentPage.$('nuxeo-data-table[name="table"]');
+      return table.shadow$$('nuxeo-data-table-row:not([header])');
     })();
   }
 
