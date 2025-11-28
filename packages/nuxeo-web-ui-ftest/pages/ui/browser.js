@@ -125,23 +125,13 @@ export default class Browser extends BasePage {
   }
 
   get rows() {
-  return (async () => {
-    const currentPage = await this.currentPage;
-    const table = await currentPage.$('nuxeo-data-table[name="table"]');
-
-    const items = await table.shadow$('#items');
-
-    await browser.waitUntil(async () => {
-      const rows = await items.$$('nuxeo-data-table-row:not([header])');
-      return rows.length > 0;
-    }, {
-      timeout: 10000,
-      timeoutMsg: 'No rows found in table'
-    });
-
-    return items.$$('nuxeo-data-table-row:not([header])');
-  })();
-}
+    return (async () => {
+      await driver.pause(3000);
+      const currentPage = await this.currentPage;
+      const rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+      return rowsTemp;
+    })();
+  }
 
   async waitForChildren(minCount = 1) {
     const currentPage = await this.currentPage;
@@ -302,7 +292,6 @@ export default class Browser extends BasePage {
       async () => {
         // check visible rows first
         const rows = await this.rows;
-        console.log(`🟦 Visible rows: ${rows.length}`);
 
         for (let i = 0; i < rows.length; i++) {
           const cell = await rows[i].$('nuxeo-data-table-cell a.title');
