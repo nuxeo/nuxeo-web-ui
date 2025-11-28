@@ -126,9 +126,19 @@ export default class Browser extends BasePage {
 
   get rows() {
     return (async () => {
-      await driver.pause(3000);
       const currentPage = await this.currentPage;
-      const rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+      const maxRetries = 6; // 20 retries
+      const pauseMs = 500; // 0.5s per retry
+      let rowsTemp = [];
+
+      for (let i = 0; i < maxRetries; i++) {
+        rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+        if (rowsTemp && rowsTemp.length > 0) {
+          return rowsTemp;
+        }
+        await driver.pause(pauseMs);
+      }
+      // return empty if still nothing
       return rowsTemp;
     })();
   }
@@ -292,7 +302,6 @@ export default class Browser extends BasePage {
       async () => {
         // check visible rows first
         const rows = await this.rows;
-
         for (let i = 0; i < rows.length; i++) {
           const cell = await rows[i].$('nuxeo-data-table-cell a.title');
           if (await cell.isExisting()) {
