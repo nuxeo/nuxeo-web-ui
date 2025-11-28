@@ -126,10 +126,8 @@ export default class Browser extends BasePage {
 
   get rows() {
     return (async () => {
-      await driver.pause(1000);
       const currentPage = await this.currentPage;
-      const rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
-      return rowsTemp;
+      return currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
     })();
   }
 
