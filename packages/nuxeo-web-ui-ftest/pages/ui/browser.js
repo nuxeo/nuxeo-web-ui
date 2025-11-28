@@ -125,12 +125,23 @@ export default class Browser extends BasePage {
   }
 
   get rows() {
-    return (async () => {
-      const currentPage = await this.currentPage;
-      const table = await currentPage.$('nuxeo-data-table[name="table"]');
-      return table.shadow$$('nuxeo-data-table-row:not([header])');
-    })();
-  }
+  return (async () => {
+    const currentPage = await this.currentPage;
+    const table = await currentPage.$('nuxeo-data-table[name="table"]');
+
+    const items = await table.shadow$('#items');
+
+    await browser.waitUntil(async () => {
+      const rows = await items.$$('nuxeo-data-table-row:not([header])');
+      return rows.length > 0;
+    }, {
+      timeout: 10000,
+      timeoutMsg: 'No rows found in table'
+    });
+
+    return items.$$('nuxeo-data-table-row:not([header])');
+  })();
+}
 
   async waitForChildren(minCount = 1) {
     const currentPage = await this.currentPage;
@@ -287,9 +298,6 @@ export default class Browser extends BasePage {
     await this.waitForChildren();
     const table = await this.el.$('nuxeo-data-table[name="table"]');
 
-    const SCROLL_STEP = 300;
-    const RENDER_DELAY = 80; // iron-list renders slowly sometimes
-
     const result = await driver.waitUntil(
       async () => {
         // check visible rows first
@@ -305,16 +313,11 @@ export default class Browser extends BasePage {
             }
           }
         }
-        // Force iron-list to flush DOM
-        await driver.pause(RENDER_DELAY);
-        
-        // Scroll and retry
-        await driver.execute((el, step) => {
-          el.scrollTop = el.scrollTop + step;
-        }, table, SCROLL_STEP);
 
-        const scrollTop = await driver.execute(el => el.scrollTop, table);
-        console.log(`🟨 Scrolled → new scrollTop = ${scrollTop}`);
+        // scroll table to render more rows
+        await driver.execute((tableEl) => {
+          tableEl.scrollTop += 300; // scroll chunk
+        }, table);
 
         return false;
       },
