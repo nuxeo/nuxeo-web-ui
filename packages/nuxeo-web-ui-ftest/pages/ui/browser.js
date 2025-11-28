@@ -286,10 +286,14 @@ export default class Browser extends BasePage {
     await this.waitForChildren();
     const table = await this.el.$('nuxeo-data-table[name="table"]');
 
+    const SCROLL_STEP = 300;
+    const RENDER_DELAY = 80; // iron-list renders slowly sometimes
+
     const result = await driver.waitUntil(
       async () => {
         // check visible rows first
         const rows = await this.rows;
+        console.log(`🟦 Visible rows: ${rows.length}`);
 
         for (let i = 0; i < rows.length; i++) {
           const cell = await rows[i].$('nuxeo-data-table-cell a.title');
@@ -300,11 +304,16 @@ export default class Browser extends BasePage {
             }
           }
         }
+        // Force iron-list to flush DOM
+        await driver.pause(RENDER_DELAY);
+        
+        // Scroll and retry
+        await driver.execute((el, step) => {
+          el.scrollTop = el.scrollTop + step;
+        }, table, SCROLL_STEP);
 
-        // scroll table to render more rows
-        await driver.execute((tableEl) => {
-          tableEl.scrollTop += 300; // scroll chunk
-        }, table);
+        const scrollTop = await driver.execute(el => el.scrollTop, table);
+        console.log(`🟨 Scrolled → new scrollTop = ${scrollTop}`);
 
         return false;
       },
