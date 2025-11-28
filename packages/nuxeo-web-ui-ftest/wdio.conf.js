@@ -223,7 +223,7 @@ export const config = {
     failFast: !process.env.RUN_ALL,
     // <string[]> (type[:path]) specify the output format, optionally supply PATH
     // to redirect formatter output (repeatable)
-    format: ['pretty', './timing-formatter.js'],
+    format: ['pretty'],
     // <boolean> hide step definition snippets for pending steps
     snippets: true,
     // <boolean> hide source uris

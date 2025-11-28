@@ -127,7 +127,7 @@ export default class Browser extends BasePage {
   get rows() {
     return (async () => {
       const currentPage = await this.currentPage;
-      const maxRetries = 6; // 20 retries
+      const maxRetries = 20; // 20 retries
       const pauseMs = 500; // 0.5s per retry
       let rowsTemp = [];
 

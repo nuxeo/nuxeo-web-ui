@@ -145,10 +145,6 @@ Polymer({
         overflow: auto;
       }
 
-      #test {
-        position: fixed;
-      }
-
       /* logo */
       #logo {
         position: fixed;
