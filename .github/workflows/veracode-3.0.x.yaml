@@ -3,7 +3,8 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-# This workflow will initiate a Veracode Static Analysis Pipeline scan, return a results.json and convert to SARIF for upload as a code scanning alert
+# This workflow will initiate a Veracode Static Analysis Pipeline scan, return a
+# results.json and convert to SARIF for upload as a code scanning alert
  
 name: Veracode Maintenance 3.0.x
 
@@ -15,19 +16,32 @@ env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ 'maintenance-3.0.x' }}
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# A workflow run is made up of one or more jobs that can run sequentially or in
+# parallel
 permissions:
   contents: read
 
 jobs:
-  # This workflow contains a job to build and submit pipeline scan, you will need to customize the build process accordingly and make sure the artifact you build is used as the file input to the pipeline scan file parameter
+  # This workflow contains a job to build and submit pipeline scan, you will
+  # need to customize the build process accordingly and make sure the artifact
+  # you build is used as the file input to the pipeline scan file parameter
   sast-scan-build:
     # The type of runner that the job will run on
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-    runs-on: [self-hosted, master]
+    # The type of runner that the job will run on
+    runs-on:
+      group: medium-4cpu-runners
+    steps:
+    - uses: catchpoint/workflow-telemetry-action@v2
+      with:
+        comment_on_pr: false
+
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access
+    # it and copies all sources into ZIP file for submitting for analysis.
+    # Replace this section with your applications build steps
     steps:
 
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
@@ -38,11 +52,12 @@ jobs:
     - uses: actions/setup-node@v1
       with:
           registry-url: ${{ env.NPM_REPOSITORY }}
+          always-auth: true
           node-version: 18
           scope: '@nuxeo'
 
     - uses: actions/setup-java@v2
-      with: 
+      with:
           distribution: 'zulu'
           java-version: '11'
 
@@ -87,19 +102,9 @@ jobs:
           popd
           popd
 
-    - name: add .npmrc
-      run: |
-        pushd /tmp/_temp/
-        rm .npmrc
-        touch .npmrc
-        popd
-        echo '
-          packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
-          @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
-          always-auth=true
-        ' >> /tmp/_temp/.npmrc
-
     - name: Link elements to Web UI
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       run: |
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
@@ -122,8 +127,8 @@ jobs:
         rm -rf node_modules
         rm -rf packages/nuxeo-designer-catalog/node_modules
         rm -rf packages/nuxeo-web-ui-ftest/node_modules
-        rm -rf plugin/a11y/node_modules 
-       
+        rm -rf plugin/a11y/node_modules
+
     - name: Delete Test Folders
       run: |
         rm -rf nuxeo-elements/testing-helpers/
@@ -148,7 +153,7 @@ jobs:
       with:
         name: nuxeo-web-ui
         path: nuxeo-web-ui.zip
-  
+
   sast-scan:
     needs: sast-scan-build
     permissions:
