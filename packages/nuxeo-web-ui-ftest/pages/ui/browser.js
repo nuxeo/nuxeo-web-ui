@@ -136,10 +136,8 @@ export default class Browser extends BasePage {
         rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
         console.log(`[rows] Found ${rowsTemp.length} rows`);
         if (rowsTemp && rowsTemp.length > 0) {
-          console.log(`[rows] Returning ${rowsTemp.length} rows`);
           return rowsTemp;
         }
-        console.log(`[rows] No rows yet → pause ${pauseMs}ms`);
         await driver.pause(pauseMs);
       }
       // return empty if still nothing
@@ -300,7 +298,6 @@ export default class Browser extends BasePage {
   }
 
   async indexOfChild(title) {
-    console.log(`[indexOfChild] Searching for "${title}"`);
     await this.waitForChildren();
     const table = await this.el.$('nuxeo-data-table[name="table"]');
 
@@ -308,22 +305,15 @@ export default class Browser extends BasePage {
       async () => {
         // check visible rows first
         const rows = await this.rows;
-        console.log(`[indexOfChild] Checking ${rows.length} rows`);
         for (let i = 0; i < rows.length; i++) {
           const cell = await rows[i].$('nuxeo-data-table-cell a.title');
           if (await cell.isExisting()) {
             const text = (await cell.getText()).trim();
-            console.log(`[indexOfChild] Row ${i}: text="${text}"`);
             if (text === title) {
-              console.log(`[indexOfChild] MATCH at index ${i}`);
               return { index: i };
             }
           }
-          else {
-            console.log(`[indexOfChild] Row ${i}: title cell does not exist`);
-          }
         }
-        console.log(`[indexOfChild] Not found yet, continue waiting`);
         return false;
       },
       {
