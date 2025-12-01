@@ -296,7 +296,6 @@ export default class Browser extends BasePage {
 
   async indexOfChild(title) {
     await this.waitForChildren();
-    const table = await this.el.$('nuxeo-data-table[name="table"]');
 
     const result = await driver.waitUntil(
       async () => {
@@ -311,12 +310,6 @@ export default class Browser extends BasePage {
             }
           }
         }
-
-        // scroll table to render more rows
-        await driver.execute((tableEl) => {
-          tableEl.scrollTop += 300; // scroll chunk
-        }, table);
-
         return false;
       },
       {
