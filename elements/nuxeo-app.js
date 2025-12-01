@@ -782,7 +782,7 @@ Polymer({
     this.$.drawerMenu.opened = false; // close
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
 
-    this.$.drawerPanel.addEventListener('opened-changed', () => {
+    this.$.drawerPanel.addEventListener('transitionend', () => {
       window.dispatchEvent(new Event('resize'));
     });
 
@@ -811,6 +811,11 @@ Polymer({
     Performance.mark('nuxeo-app.ready');
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
+    });
+
+    const {drawer} = this.$;
+    drawer.addEventListener('transitionend', () => {
+      window.dispatchEvent(new Event('resize'));
     });
   },
 
@@ -1264,7 +1269,6 @@ Polymer({
     drawerMenu.removeAttribute('opened');
     this.selectedTab = '';
   },
-
   _fetchTaskCount() {
     this.$.tasksProvider.fetch().then((response) => {
       this.taskCount = response.resultsCount;
