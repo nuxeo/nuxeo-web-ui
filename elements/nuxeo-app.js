@@ -813,7 +813,7 @@ Polymer({
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
     });
 
-    const {drawer} = this.$;
+    const { drawer } = this.$;
     drawer.addEventListener('transitionend', () => {
       window.dispatchEvent(new Event('resize'));
     });
