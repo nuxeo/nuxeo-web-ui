@@ -1,5 +1,7 @@
 {
   "activity.addedToCollection": "tillagd i samlingen",
+  "activity.createNewUser": "create new user",
+  "activity.deleteUser": "delete user",
   "activity.afterMakeRecord": "Deklarerad som en post",
   "activity.afterRemoveLegalHold": "Arkiveringsskyldighet borttagen",
   "activity.afterSetLegalHold": "Ansökan om arkiveringsskyldighet",

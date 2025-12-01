@@ -1,5 +1,7 @@
 {
   "activity.addedToCollection": "コレクションに追加",
+  "activity.createNewUser": "create new user",
+  "activity.deleteUser": "delete user",
   "activity.afterMakeRecord": "レコードとして宣言",
   "activity.afterRemoveLegalHold": "法的保持を削除しました",
   "activity.afterSetLegalHold": "法的保留が適用されました",

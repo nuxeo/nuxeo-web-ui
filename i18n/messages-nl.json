@@ -1,5 +1,7 @@
 {
   "activity.addedToCollection": "aan collectie toegevoegd",
+  "activity.createNewUser": "create new user",
+  "activity.deleteUser": "delete user",
   "activity.afterMakeRecord": "Verklaard als een record",
   "activity.afterRemoveLegalHold": "Juridisch vasthouden verwijderd",
   "activity.afterSetLegalHold": "Juridisch vasthouden toegepast",
