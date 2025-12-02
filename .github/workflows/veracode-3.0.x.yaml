@@ -8,7 +8,6 @@
 name: Veracode Maintenance 3.0.x
 
 on:
-  workflow_dispatch:          # enables manual runs from GitHub UI
   workflow_dispatch:         # enables manual runs from GitHub UI
 
 env:
