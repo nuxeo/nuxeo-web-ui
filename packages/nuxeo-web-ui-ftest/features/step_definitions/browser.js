@@ -161,6 +161,15 @@ Then('I can see the {string} child document is at position {int}', async functio
   }
 });
 
+Then('I can see the {string} child document is present', async function(title) {
+  const browser = await this.ui.browser;
+  await browser.waitForVisible();
+  const index = await browser.indexOfChild(title);
+  if (index < 0) {
+    throw new Error(`${title} child document not present`);
+  }
+});
+
 When('I sort the content by {string} in {string} order', async function(field, order) {
   const browser = await this.ui.browser;
   await browser.waitForVisible();
@@ -168,6 +177,7 @@ When('I sort the content by {string} in {string} order', async function(field, o
 });
 
 Then('I can see {int} document(s)', async function(numberOfResults) {
+  await driver.pause(2000);
   const browser = await this.ui.browser;
   const uiResult = await browser.results;
   const displayMode = await uiResult.displayMode;
@@ -263,8 +273,6 @@ Then(/^I can perform the following publications$/, async function(table) {
 Then('I can delete all the documents from the {string} collection', async function(name) {
   const browser = await this.ui.browser;
   await browser.removeSelectionFromCollection(name);
-  // HACK - because the delete all is async
-  await driver.pause(1000);
 });
 
 Then('I can see the browser title as {string}', async (title) => {

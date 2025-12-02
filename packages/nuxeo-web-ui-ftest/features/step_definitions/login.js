@@ -33,15 +33,31 @@ Given('user {string} exists', async (username) => {
   });
 });
 
-When('I login as {string}', async function(username) {
-  await driver.pause(1000);
+When('I login as {string}', { timeout: 120000 }, async function(username) {
+  // Ensure clean browser state on every login
+  await browser.deleteCookies();
+
   const logIn = await Login.get();
   await logIn.username(username);
   const password = await users[username];
   await logIn.password(password);
   await logIn.submit();
+
+  await browser.waitUntil(
+    async () => {
+      const u = await browser.getUrl();
+      return !u.includes('login.jsp') && u.includes('/ui');
+    },
+    {
+      timeout: 30000,
+      interval: 200,
+      timeoutMsg: 'UI did not load after login — still stuck on login.jsp',
+    },
+  );
+
   this.username = username;
   this.ui = await UI.get();
+
   await this.ui.waitForVisible('nuxeo-page');
 });
 

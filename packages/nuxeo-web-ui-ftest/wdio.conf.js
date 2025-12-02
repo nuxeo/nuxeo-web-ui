@@ -78,7 +78,7 @@ switch (capability.browserName) {
   // no default
 }
 
-const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 24000;
+const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 40000;
 
 // Allow overriding driver version
 const drivers = {};

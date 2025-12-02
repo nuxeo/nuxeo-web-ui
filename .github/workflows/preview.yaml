@@ -169,7 +169,7 @@ jobs:
 
           # ensure the deployment is restarted to pull the new preview image
           kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
-          
+
           echo "url=\"https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com\"" >> $GITHUB_OUTPUT
 
       - uses: actions/github-script@0.9.0

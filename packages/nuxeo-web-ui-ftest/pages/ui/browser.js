@@ -126,9 +126,19 @@ export default class Browser extends BasePage {
 
   get rows() {
     return (async () => {
-      await driver.pause(1000);
       const currentPage = await this.currentPage;
-      const rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+      const maxRetries = 20; // 20 retries
+      const pauseMs = 500; // 0.5s per retry
+      let rowsTemp = [];
+
+      for (let i = 0; i < maxRetries; i++) {
+        rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
+        if (rowsTemp && rowsTemp.length > 0) {
+          return rowsTemp;
+        }
+        await driver.pause(pauseMs);
+      }
+      // return empty if still nothing
       return rowsTemp;
     })();
   }
@@ -286,25 +296,31 @@ export default class Browser extends BasePage {
 
   async indexOfChild(title) {
     await this.waitForChildren();
+    const table = await this.el.$('nuxeo-data-table[name="table"]');
     const result = await driver.waitUntil(
       async () => {
-        const rowTemp = await this.rows; // re-query every retry
-        for (let i = 0; i < rowTemp.length; i++) {
-          const row = await rowTemp[i];
-          const ele = await row.$('nuxeo-data-table-cell a.title');
-          const exists = await ele.isExisting();
-          if (exists) {
-            const eleText = (await ele.getText()).trim();
-            if (eleText && eleText === title) {
-              return { index: i }; // wrap to avoid falsy 0
+        // check visible rows first
+        const rows = await this.rows;
+        for (let i = 0; i < rows.length; i++) {
+          const cell = await rows[i].$('nuxeo-data-table-cell a.title');
+          if (await cell.isExisting()) {
+            const text = (await cell.getText()).trim();
+            if (text === title) {
+              return { index: i };
             }
           }
         }
+
+        // scroll table to render more rows
+        await driver.execute((tableEl) => {
+          tableEl.scrollTop += 300; // scroll chunk
+        }, table);
+
         return false;
       },
       {
         timeout: 20000,
-        interval: 500,
+        interval: 300,
         timeoutMsg: `${title} child document not found within 20s`,
       },
     );

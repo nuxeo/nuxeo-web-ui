@@ -1,11 +1,13 @@
 export default class Login {
   async username(username) {
     const inputUserName = await $('#username');
+    await inputUserName.waitForDisplayed({ timeout: 10000 });
     await inputUserName.setValue(username);
   }
 
   async password(password) {
     const inputPassword = await $('#password');
+    await inputPassword.waitForDisplayed({ timeout: 10000 });
     await inputPassword.setValue(password);
   }
 
@@ -14,13 +16,21 @@ export default class Login {
     await submitButton.click();
   }
 
-  static get() {
-    return (async () => {
-      const baseUrl = process.env.NUXEO_URL || '';
-      await driver.pause(1000);
-      await browser.url(baseUrl ? `${baseUrl}/logout` : 'logout');
-      await driver.pause(4000);
-      return new this();
-    })();
+  static async get() {
+    const baseUrl = process.env.NUXEO_URL || '';
+    const loginUrl = baseUrl ? `${baseUrl}/logout` : 'logout';
+    await browser.url(loginUrl);
+
+    // Wait until browser is idle and page is ready
+    await browser.waitUntil(async () => !(await browser.$$('nuxeo-app')).length, {
+      timeout: 10000,
+      interval: 200,
+      timeoutMsg: 'nuxeo-app did not unload after logout',
+    });
+
+    // wait for login form to appear
+    await $('#username').waitForDisplayed({ timeout: 30000 });
+
+    return new this();
   }
 }
