@@ -8,6 +8,12 @@ on:
   # Manually trigger the workflow
   workflow_dispatch:
 
+<<<<<<< Updated upstream
+=======
+permissions:
+  contents: write
+
+>>>>>>> Stashed changes
 jobs:
   lint:
     uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@maintenance-3.1.x

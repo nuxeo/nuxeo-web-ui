@@ -15,6 +15,10 @@ on:
         type: boolean
         required: false
 
+permissions:
+  contents: write
+  releases: write
+
 jobs:
   promote:
     runs-on: ubuntu-latest
