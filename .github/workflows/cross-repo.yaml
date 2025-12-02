@@ -44,6 +44,9 @@ on:
         type: string
         required: false
 
+permissions:
+  contents: read
+
 env:
   REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/

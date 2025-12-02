@@ -21,6 +21,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 env:
   ARTIFACT_ID: view-designer-catalog
   GROUP_ID: org.nuxeo.web.ui.studio
