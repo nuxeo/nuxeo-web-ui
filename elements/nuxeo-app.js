@@ -810,7 +810,7 @@ Polymer({
     });
 
     // fire resize event during drawer animation for elements that need to adapt to size changes (nuxeo-data-table etc)
-    const {drawer} = this.$;
+    const { drawer } = this.$;
     drawer.addEventListener('transitionrun', () => {
       this._resizeDuringAnimation();
     });
@@ -834,7 +834,7 @@ Polymer({
     this._resizeLoop = requestAnimationFrame(loop);
 
     // stop loop after animation completes, cleanup and do one final resize
-    const {drawer} = this.$;
+    const { drawer } = this.$;
     drawer.addEventListener(
       'transitionend',
       () => {
