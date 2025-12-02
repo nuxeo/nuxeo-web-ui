@@ -1,5 +1,7 @@
 {
   "activity.addedToCollection": "Zur Sammlung hinzugefügt",
+  "activity.createNewUser": "create new user",
+  "activity.deleteUser": "delete user",
   "activity.afterMakeRecord": "Als Datensatz deklariert",
   "activity.afterRemoveLegalHold": "Gesetzliche Aufbewahrung entfernt",
   "activity.afterSetLegalHold": "Gesetzliche Aufbewahrung angewendet",

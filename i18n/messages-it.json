@@ -1,5 +1,7 @@
 {
   "activity.addedToCollection": "aggiunto/i alla raccolta",
+  "activity.createNewUser": "create new user",
+  "activity.deleteUser": "delete user",
   "activity.afterMakeRecord": "Dichiarato come record",
   "activity.afterRemoveLegalHold": "Sospensione legale rimossa",
   "activity.afterSetLegalHold": "Sospensione legale applicata",

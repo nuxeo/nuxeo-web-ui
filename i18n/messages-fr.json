@@ -1,5 +1,7 @@
 {
   "activity.addedToCollection": "a ajouté le document à une collection",
+  "activity.createNewUser": "create new user",
+  "activity.deleteUser": "delete user",
   "activity.afterMakeRecord": "Déclaré comme archive",
   "activity.afterRemoveLegalHold": "Conservation légale supprimée",
   "activity.afterSetLegalHold": "Conservation légale appliquée",
