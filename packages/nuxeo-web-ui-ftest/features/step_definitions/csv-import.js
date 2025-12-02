@@ -19,8 +19,6 @@ When(/^I import the (.+) file$/, async function(file) {
   await importcb.click();
   const importSuccess = await dialog.importSuccess;
   await importSuccess.waitForVisible();
-  // Wait for a moment to let the process complete
-  driver.pause(2000);
   const importCloseButton = await dialog.importCloseButton;
   const closeButton = await importCloseButton.waitForVisible();
   closeButton.should.be.true;
