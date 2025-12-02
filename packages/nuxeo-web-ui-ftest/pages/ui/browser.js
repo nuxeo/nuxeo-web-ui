@@ -132,16 +132,13 @@ export default class Browser extends BasePage {
       let rowsTemp = [];
 
       for (let i = 0; i < maxRetries; i++) {
-        console.log(`[rows] Attempt ${i + 1}/${maxRetries}`);
         rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
-        console.log(`[rows] Found ${rowsTemp.length} rows`);
         if (rowsTemp && rowsTemp.length > 0) {
           return rowsTemp;
         }
         await driver.pause(pauseMs);
       }
       // return empty if still nothing
-      console.log(`[rows] Finished retries, returning empty array`);
       return rowsTemp;
     })();
   }
@@ -299,7 +296,6 @@ export default class Browser extends BasePage {
 
   async indexOfChild(title) {
     await this.waitForChildren();
-    const table = await this.el.$('nuxeo-data-table[name="table"]');
 
     const result = await driver.waitUntil(
       async () => {
@@ -322,7 +318,6 @@ export default class Browser extends BasePage {
         timeoutMsg: `${title} child document not found within 20s`,
       },
     );
-    console.log(`[indexOfChild] Returning index ${result.index}`);
     return result.index; // unwrap and return the number
   }
 
