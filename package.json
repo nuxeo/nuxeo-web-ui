@@ -182,11 +182,11 @@
     "extend": "^3.0.2",
     "fs-extra": "^10.0.0",
     "jquery": "^3.3.1",
-    "jsondiffpatch": "^0.3.11",
+    "jsondiffpatch": "^0.7.3",
     "jsplumb": "2.13.0",
     "lit-element": "^3.2.2",
     "nuxeo": "^4.0.3",
-    "select2": "~3.5.1",
+    "select2": "~4.0.13",
     "three": "^0.177.0",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1"
