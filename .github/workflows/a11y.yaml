@@ -29,8 +29,11 @@ env:
 
 jobs:
   a11y:
-    runs-on: [self-hosted, master]
+    runs-on: ubuntu-latest
     steps:
+      - uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
       - uses: actions/checkout@v2
         with:
           ref: ${{ env.BRANCH_NAME }}

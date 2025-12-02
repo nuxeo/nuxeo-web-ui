@@ -58,19 +58,23 @@ jobs:
   build:
     name: Build
     needs: id
-    runs-on: [ self-hosted, master ]
+    runs-on: ubuntu-latest
     steps:
+      - uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
       - name: Build parameters
         run: echo '${{ toJSON(github.event.inputs) }}'
 
       - uses: actions/setup-node@v3
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
+          always-auth: true
           scope: '@nuxeo'
           node-version: 22
-      
+
       - uses: actions/setup-java@v2
-        with: 
+        with:
           distribution: 'zulu'
           java-version: '17'
 
@@ -142,19 +146,9 @@ jobs:
           popd
           popd
 
-      - name: Add .npmrc
-        run: |
-          pushd /tmp/_temp/
-          rm .npmrc
-          touch .npmrc
-          popd
-          echo '
-           packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
-           @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
-           always-auth=true
-          ' >> /tmp/_temp/.npmrc
-
       - name: Link elements to Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
@@ -183,23 +177,23 @@ jobs:
                 </server>
               </servers>
               </settings>' > ~/.m2/settings.xml
-              
+
       - name: Nuxeo package build and Ftests
         env:
           RUN_ALL: ${{ github.event.inputs.run_all }}
           BAIL: ${{ github.event.inputs.bail }}
-        run: | 
+        run: |
           profiles=()
           if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
-          then 
-            profiles+=('ftest') 
+          then
+            profiles+=('ftest')
           fi
           if ${{ github.event.inputs.generate_metrics }}
-          then 
-            profiles+=('metrics') 
+          then
+            profiles+=('metrics')
           fi
           active_profiles=""
-          if [ ${#profiles[@]} -gt 0 ] 
+          if [ ${#profiles[@]} -gt 0 ]
           then
             active_profiles="-P$(printf -v active_profiles '%s,' "${profiles[@]}" && echo "${active_profiles%,}")"
           fi

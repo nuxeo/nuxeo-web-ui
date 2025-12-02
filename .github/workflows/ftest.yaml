@@ -18,7 +18,7 @@ on:
       PACKAGES_AUTH_USER:
         description: 'PACKAGES_AUTH_USER'
         required: true
-      PACKAGES_AUTH_TOKEN: 
+      PACKAGES_AUTH_TOKEN:
         description: 'PACKAGES_AUTH_TOKEN'
         required: true
 
@@ -26,25 +26,40 @@ env:
   REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
-
+  NODE_OPTIONS: "--max-old-space-size=2048"
 jobs:
   ftests:
-    runs-on: [ self-hosted, master ]
+    runs-on:
+      group: medium-4cpu-runners
     steps:
-      - uses: actions/checkout@v2
+      - uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
+      - uses: actions/checkout@v5
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
+          always-auth: true
           scope: '@nuxeo'
           node-version: 22
 
-      - uses: actions/setup-java@v2
-        with: 
+      - uses: actions/setup-java@v5
+        with:
           distribution: 'zulu'
           java-version: '17'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
+          sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
+          npm install -g bower
+          npm install -g gulp-cli
+        env:
+          DEBIAN_FRONTEND: noninteractive
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
@@ -96,19 +111,9 @@ jobs:
           popd
           popd
 
-      - name: Add .npmrc
-        run: |
-          pushd /tmp/_temp/
-          rm .npmrc
-          touch .npmrc
-          popd
-          echo '
-           packages.nuxeo.com/repository/npm-public/:_auth=${NODE_AUTH_TOKEN}
-           @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
-           always-auth=true
-          ' >> /tmp/_temp/.npmrc
-
       - name: Link elements to Web UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
@@ -131,7 +136,12 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
-        run: mvn -ntp install -Pftest -DskipInstall
+        uses: ./.github/actions/xvfb-record
+        with:
+          test_command: mvn -ntp install -Pftest -DskipInstall
+          timeout_minutes: 120
+          record_video: ${{ contains(github.event.pull_request.labels.*.name, 'video') }}
+          max_attempts: 3
 
       - name: Archive cucumber reports
         if: ${{ always() }}
