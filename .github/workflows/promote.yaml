@@ -17,8 +17,6 @@ on:
 
 permissions:
   contents: write
-  releases: write
-
 jobs:
   promote:
     runs-on: ubuntu-latest
