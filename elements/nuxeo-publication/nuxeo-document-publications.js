@@ -94,7 +94,7 @@ Polymer({
       provider="nxql_search"
       params="[[_computeParams(_src)]]"
       sort='{"dc:modified": "desc", "uid:major_version": "desc", "uid:minor_version": "desc"}'
-      enrichers="thumbnail, permissions"
+      enrichers="thumbnail, permissions, audit"
       headers='{"fetch-document": "properties", "translate-directoryEntry": "label"}'
       schemas="dublincore,common,uid,rendition"
     >
@@ -135,14 +135,12 @@ Polymer({
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('publication.publisher')]]" flex="40">
           <template>
-            <!-- TODO check it is indeed the publisher, might be the dc:publisher field -->
-            <nuxeo-user-tag user="[[item.properties.dc:lastContributor]]"></nuxeo-user-tag>
+            <nuxeo-user-tag user="[[_getPublisher(item)]]"></nuxeo-user-tag>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('publication.publishDate')]]" flex="30">
           <template>
-            <!-- TODO check it is indeed the publish date -->
-            <nuxeo-date datetime="[[item.properties.dc:modified]]"></nuxeo-date>
+            <nuxeo-date datetime="[[_getPublishDate(item)]]"></nuxeo-date>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column flex="10">
@@ -310,5 +308,44 @@ Polymer({
       return 'left-ellipsis';
     }
     return 'right-ellipsis';
+  },
+  _getPublisher(item) {
+    if (item && item.contextParameters && item.contextParameters.audit) {
+      const { audit } = item.contextParameters;
+      const createdEvent = audit.find((event) => event.eventId === 'documentCreated');
+      if (createdEvent && createdEvent.principalName) {
+        return createdEvent.principalName;
+      }
+    }
+
+    if (item && item.properties && item.properties['dc:publisher']) {
+      return item.properties['dc:publisher'];
+    }
+
+    if (item && item.properties) {
+      return item.properties['dc:lastContributor'];
+    }
+    return null;
+  },
+
+  _getPublishDate(item) {
+    // Get the publish date from audit logs - find the "documentCreated" event for the proxy
+    if (item && item.contextParameters && item.contextParameters.audit) {
+      const { audit } = item.contextParameters;
+      // Find the documentCreated event (the first event when the proxy was created)
+      const createdEvent = audit.find((event) => event.eventId === 'documentCreated');
+      if (createdEvent && createdEvent.eventDate) {
+        return createdEvent.eventDate;
+      }
+    }
+    // Fallback: try dc:publishDate if it exists
+    if (item && item.properties && item.properties['dc:publishDate']) {
+      return item.properties['dc:publishDate'];
+    }
+    // Last fallback: use dc:created (when the proxy was created)
+    if (item && item.properties) {
+      return item.properties['dc:created'];
+    }
+    return null;
   },
 });
