@@ -139,7 +139,7 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/xvfb-record@OPSEXP-3640
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@OPSEXP-3640
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
