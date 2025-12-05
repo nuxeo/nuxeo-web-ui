@@ -141,7 +141,7 @@ jobs:
           BAIL: 0
         uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@OPSEXP-3640
         with:
-          test_command: mvn -ntp install -Pftest -DskipInstall
+          test_command: test_command
           timeout_minutes: 120
           video_name: ${{ contains(github.event.pull_request.labels.*.name, 'video')  && 'ftest-video' || '' }}
           max_attempts: 3
