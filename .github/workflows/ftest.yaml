@@ -143,7 +143,7 @@ jobs:
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
-          record_video: ${{ contains(github.event.pull_request.labels.*.name, 'video') }}
+          video_name: ${{ contains(github.event.pull_request.labels.*.name, 'video')  && 'ftest-video' || '' }}
           max_attempts: 3
 
       - name: Archive cucumber reports
