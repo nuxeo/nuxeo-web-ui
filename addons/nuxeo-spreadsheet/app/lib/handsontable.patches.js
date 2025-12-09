@@ -56,11 +56,20 @@ Handsontable.DataMap.prototype.set = function(row, prop, value, source) {
     let i;
     let ilen;
     for (i = 0, ilen = sliced.length - 1; i < ilen; i++) {
+      // Prevent prototype pollution
+      if (sliced[i] === '__proto__' || sliced[i] === 'constructor') {
+        // Do not assign dangerous property, abort
+        return;
+      }
       // NXP-28923 - if (typeof out[sliced[i]] === 'undefined'){
       if (out[sliced[i]] == null) {
         out[sliced[i]] = {};
       }
       out = out[sliced[i]];
+    }
+    // Prevent prototype pollution at assignment as well
+    if (sliced[i] === '__proto__' || sliced[i] === 'constructor') {
+      return;
     }
     out[sliced[i]] = value;
   } else if (typeof prop === 'function') {
