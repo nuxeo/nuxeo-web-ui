@@ -4737,11 +4737,27 @@ Handsontable.helper.toString = function (obj) {
       var sliced = prop.split(".");
       var out = this.dataSource[row];
       for (var i = 0, ilen = sliced.length - 1; i < ilen; i++) {
-
+        // Block prototype-polluting keys
+        if (
+          sliced[i] === '__proto__' ||
+          sliced[i] === 'constructor' ||
+          sliced[i] === 'prototype'
+        ) {
+          // Skip this assignment, or optionally throw an error.
+          return;
+        }
         if (typeof out[sliced[i]] === 'undefined'){
           out[sliced[i]] = {};
         }
         out = out[sliced[i]];
+      }
+      // Also block at the leaf before assignment
+      if (
+        sliced[i] === '__proto__' ||
+        sliced[i] === 'constructor' ||
+        sliced[i] === 'prototype'
+      ) {
+        return;
       }
       out[sliced[i]] = value;
     }
