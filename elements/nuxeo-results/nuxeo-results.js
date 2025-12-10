@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
 @license
 ©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
@@ -432,11 +433,17 @@ Polymer({
 
   _displayQuickFilters() {
     // XXX check previous view properties for compatibility
-    return (
-      this.view &&
-      !this.view.handlesFiltering &&
-      (this.view.hasAttribute('display-quick-filters') || this.displayQuickFilters)
-    );
+    console.log(this.view);
+    console.log(this.displayQuickFilters);
+    console.log(this.nxProvider);
+
+    if (!this.view) {
+      return false; // wait for view
+    }
+    console.log(this.view.hasAttribute('display-quick-filters'));
+    console.log(!this.view.handlesFiltering);
+
+    return !this.view.handlesFiltering && (this.view.hasAttribute('display-quick-filters') || this.displayQuickFilters);
   },
 
   _displayDelegatedAction() {
@@ -752,6 +759,7 @@ Polymer({
   },
 
   _quickFiltersChanged(e) {
+    console.log('quick filters changed', e, this.nxProvider);
     if (this.nxProvider && e.detail.value) {
       this.quickFilters = this.nxProvider.quickFilters;
     }
