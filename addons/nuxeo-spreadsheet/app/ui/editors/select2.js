@@ -33,29 +33,30 @@ class Select2Editor extends Handsontable.editors.Select2Editor {
     // https://github.com/nuxeo/nuxeo-features/blob/master/nuxeo-platform-ui-select2/src/main/resources/web/nuxeo.war/scripts/select2/nuxeo-select2.js
     // https://github.com/nuxeo/nuxeo-features/blob/master/nuxeo-platform-ui-select2/src/main/java/org/nuxeo/ecm/platform/ui/select2/Select2ActionsBean.java
     this.options = {
-      query: (q) => {
-        this.query(connection, widget.properties, q.term).then((results) => {
-          q.callback({ results });
-        });
+      ajax: {
+        transport: (params, success, failure) => {
+          this.query(connection, widget.properties, params.data.term)
+            .then(success)
+            .catch(failure);
+        },
+        processResults: (results) => {
+          return { results };
+        },
       },
       dropdownAutoWidth: true,
       allowClear: true,
       width: 'resolve',
       minimumInputLength: cellProperties.minimumInputLength || 0,
-      formatResult: this.resultFormatter.bind(this),
-      formatSelection: this.selectionFormatter.bind(this),
+      templateResult: this.resultFormatter.bind(this),
+      templateSelection: this.selectionFormatter.bind(this),
       multiple: isMultiple,
       placeholder: 'Select a value',
-      initSelection: this.initSelection(isMultiple).bind(this),
       id: this.getEntryId,
     };
   }
 
   open() {
     super.open();
-    this.$textarea.on('selected', this.onSelected.bind(this));
-    this.$textarea.on('select2-selected', this.onSelected.bind(this));
-    this.$textarea.on('select2-removed', this.onRemoved.bind(this));
   }
 
   onSelected() {
