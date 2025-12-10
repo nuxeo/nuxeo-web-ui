@@ -782,10 +782,6 @@ Polymer({
     this.$.drawerMenu.opened = false; // close
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
 
-    this.$.drawerPanel.addEventListener('opened-changed', () => {
-      window.dispatchEvent(new Event('resize'));
-    });
-
     const { toast } = this.$;
     // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
     // HACK - hardcode the fixed width for the internal panel
@@ -812,6 +808,43 @@ Polymer({
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
     });
+
+    // fire resize event during drawer animation for elements that need to adapt to size changes (nuxeo-data-table etc)
+    const { drawer } = this.$;
+    drawer.addEventListener('transitionrun', () => {
+      this._resizeDuringAnimation();
+    });
+    drawer.addEventListener('transitionstart', () => {
+      this._resizeDuringAnimation();
+    });
+  },
+
+  _resizeDuringAnimation() {
+    // continuously fire resize during animation
+    if (this._resizeLoop) {
+      cancelAnimationFrame(this._resizeLoop);
+    }
+
+    const loop = () => {
+      window.dispatchEvent(new Event('resize'));
+      this._resizeLoop = requestAnimationFrame(loop);
+    };
+
+    // start loop
+    this._resizeLoop = requestAnimationFrame(loop);
+
+    // stop loop after animation completes, cleanup and do one final resize
+    const { drawer } = this.$;
+    drawer.addEventListener(
+      'transitionend',
+      () => {
+        cancelAnimationFrame(this._resizeLoop);
+        this._resizeLoop = null;
+        // one final resize to settle everything
+        window.dispatchEvent(new Event('resize'));
+      },
+      { once: true },
+    );
   },
 
   logoToMenuNavigation() {
@@ -1264,7 +1297,6 @@ Polymer({
     drawerMenu.removeAttribute('opened');
     this.selectedTab = '';
   },
-
   _fetchTaskCount() {
     this.$.tasksProvider.fetch().then((response) => {
       this.taskCount = response.resultsCount;
