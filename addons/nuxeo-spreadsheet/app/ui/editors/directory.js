@@ -74,31 +74,100 @@ class DirectoryEditor extends Select2Editor {
 
   // create directory entries again on save
   saveValue(val, ctrlDown) {
-    let value = val[0][0];
+    // Defensive logging — remove after you confirm behavior
+    const incoming = val && val[0] && val[0][0];
 
-    if (value) {
-      // if we are working with directoryEntries lets build them for saving
-      if (this._isDirectoryEntry) {
-        value = value.split(',').map((id) => {
-          return {
-            'entity-type': 'directoryEntry',
-            directoryName: this.directoryName,
-            id,
-            properties: {
-              id,
-            },
-          };
-        });
-        // unwrap the map result if not multiple
-        if (!this.column.multiple) {
-          value = value[0];
-        }
-      }
-    } else {
+    let value = incoming;
+
+    // Normalize empty/falsey
+    if (!value) {
       value = this.column.multiple ? [] : null;
+      return super.saveValue([[value]], ctrlDown);
     }
 
+    // If items already look like directoryEntry objects, just pass through (but preserve single/multi)
+    const looksLikeDirectoryEntry = (item) =>
+      item && (item['entity-type'] === 'directoryEntry' || !!item.directoryName || !!item.properties);
+
+    if (this._isDirectoryEntry) {
+      // Normalize value into array of ids first
+      let ids = [];
+
+      if (Array.isArray(value)) {
+        // Could be array of strings or array of directoryEntry objects
+        if (value.length && looksLikeDirectoryEntry(value[0])) {
+          // Already directoryEntry objects — keep but ensure shape & unwrap for single
+          const entries = value.map((e) => {
+            return {
+              'entity-type': 'directoryEntry',
+              directoryName: this.directoryName,
+              id: e.id || (e.properties && e.properties.id) || e.properties?.id,
+              properties: { id: e.id || (e.properties && e.properties.id) || e.properties?.id },
+            };
+          });
+          value = this.column.multiple ? entries : entries[0] || null;
+          return super.saveValue([[value]], ctrlDown);
+        }
+        // Array of id strings (normal case)
+        ids = value;
+      } else if (typeof value === 'string') {
+        // comma-separated string or single id
+        ids = value.includes(',')
+          ? value
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [value];
+      } else if (typeof value === 'object') {
+        // Single directoryEntry-like object
+        if (looksLikeDirectoryEntry(value)) {
+          const entry = {
+            'entity-type': 'directoryEntry',
+            directoryName: this.directoryName,
+            id: value.id || value.properties?.id,
+            properties: { id: value.id || value.properties?.id },
+          };
+          value = this.column.multiple ? [entry] : entry;
+          return super.saveValue([[value]], ctrlDown);
+        }
+        // unknown object shape — try to extract id
+        const maybeId = value.id || value.properties?.id;
+        if (maybeId) ids = [maybeId];
+        else ids = [];
+      } else {
+        // fallback
+        ids = [];
+      }
+
+      // Build directoryEntry objects from ids
+      const entries = ids.map((id) => {
+        return {
+          'entity-type': 'directoryEntry',
+          directoryName: this.directoryName,
+          id,
+          properties: { id },
+        };
+      });
+
+      if (!this.column.multiple) {
+        value = entries[0] || null;
+      } else {
+        value = entries;
+      }
+    }
     super.saveValue([[value]], ctrlDown);
+  }
+
+  getValue() {
+    let data = [];
+
+    if (this.$textarea?.data('select2')) {
+      data = this.$textarea.select2('data') || [];
+    }
+
+    const ids = data.map((d) => d.computedId || d.id);
+
+    return this.cellProperties.multiple ? ids : ids[0] || '';
   }
 
   query(connection, properties, term) {
@@ -114,7 +183,23 @@ class DirectoryEditor extends Select2Editor {
   // When a dbl10n entry is selected we'll cache the labels to be used
   // by our renderer
   onSelected(evt) {
-    this.cellLabels[evt.choice.computedId] = evt.choice.absoluteLabel;
+    const data = evt.params?.data;
+    if (!data) return;
+
+    const id = data.computedId || data.id;
+    if (!id) return;
+
+    // Prefer full labels, never downgrade
+    const existing = this.cellLabels[id];
+
+    const fullLabel = data.absoluteLabel || data.displayLabel || data.text;
+
+    // Only overwrite if:
+    // - label does not exist yet, OR
+    // - new label is more complete (contains '/')
+    if (!existing || (fullLabel && fullLabel.includes('/') && !existing.includes('/'))) {
+      this.cellLabels[id] = fullLabel;
+    }
   }
 
   get cellMeta() {
@@ -183,7 +268,7 @@ function DirectoryRenderer(instance, td, row, col, prop, value, cellProperties) 
     const labels = instance.getCellMeta(row, col)._labels;
     arguments[5] = value
       .map((v) => {
-        const key = v.properties ? v.properties.id : v;
+        const key = v.computedId || v.properties?.id || v.id || v;
         return labels && labels[key] ? labels[key] : getEntryLabel(v, lang);
       })
       .join(','); // jshint ignore:line
