@@ -6,9 +6,7 @@
     "nuxeo-web-ui-ftest": "./bin/nuxeo-web-ui-ftest.js"
   },
   "scripts": {
-    "postinstall": "check-engine --ignore",
-    "publish:snapshot": "npm --registry=https://mavenin.nuxeo.com/nexus/repository/npmjs-nuxeo/ publish --tag SNAPSHOT",
-    "publish:release": "npm --registry=https://registry.npmjs.org/ publish"
+    "postinstall": "check-engine --ignore"
   },
   "license": "Apache-2.0",
   "engines": {
