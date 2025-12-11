@@ -9,14 +9,17 @@ Select2Editor.prototype.prepare = function(td, row, col, prop, value, cellProper
   if (this.cellProperties.select2Options) {
     this.options = $.extend(this.options, cellProperties.select2Options);
   }
+  // DEFAULT — keep dropdown open for multiselect
+  if (this.cellProperties.multiple) {
+    this.options.closeOnSelect = false;
+  }
 };
 
 Select2Editor.prototype.createElements = function() {
   this.$body = $(document.body);
   this.wtDom = Handsontable.Dom;
 
-  this.TEXTAREA = document.createElement('input');
-  this.TEXTAREA.setAttribute('type', 'text');
+  this.TEXTAREA = document.createElement('select');
   this.$textarea = $(this.TEXTAREA);
 
   this.wtDom.addClass(this.TEXTAREA, 'handsontableInput');
@@ -50,14 +53,6 @@ Select2Editor.prototype.createElements = function() {
   });
 };
 
-const onSelect2Changed = function() {
-  this.close();
-  this.finishEditing();
-};
-const onSelect2Closed = function() {
-  this.close();
-  this.finishEditing();
-};
 const onBeforeKeyDown = function onBeforeKeyDown(event) {
   const instance = this;
   const that = instance.getActiveEditor();
@@ -110,6 +105,7 @@ const onBeforeKeyDown = function onBeforeKeyDown(event) {
 };
 
 Select2Editor.prototype.open = function() {
+  this.instance.listen(false); // disable HOT auto-close behavior
   this.refreshDimensions();
   this.textareaParentStyle.display = 'block';
   this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
@@ -120,28 +116,112 @@ Select2Editor.prototype.open = function() {
     'min-width': $(this.TD).width(),
   });
 
-  // display the list
-  this.$textarea.show();
+  const isMultiple = !!(this.cellProperties && this.cellProperties.multiple);
 
-  this.$textarea
-    .select2(this.options)
-    .on('change', onSelect2Changed.bind(this))
-    .on('select2-close', onSelect2Closed.bind(this));
+  this.TEXTAREA.multiple = isMultiple;
+
+  // clear previous options
+  this.$textarea.find('option').remove();
+
+  // ensure cellLabels exists
+  if (!this.cellLabels) this.cellLabels = {};
+
+  let value = this.originalValue;
+  // prepopulate options with correct text
+  if (value != null) {
+    const values = Array.isArray(value) ? value : [value];
+
+    values.forEach((v) => {
+      if (v == null) return;
+
+      // Resolve label
+      let text = this.getSelectionText(v);
+
+      // Fallback: try Select2 option list
+      if ((!text || text === v) && this.options.data) {
+        const found = this.options.data.find((o) => o.id === v);
+        if (found) {
+          text = found.text;
+          this.cellLabels[v] = found.text;
+        }
+      }
+
+      // Create option
+      const opt = new Option(text, v, true, true);
+      this.$textarea.append(opt);
+    });
+  }
+
+  this.$textarea.select2(this.options);
+
+  // remove any previously attached handlers in this namespace
+  this.$textarea.off('.htSelect2');
+
+  this.$textarea.on('select2:select.htSelect2', (e) => {
+    try {
+      if (typeof this.onSelected === 'function') {
+        this.onSelected(e);
+      }
+      if (!this.cellProperties.multiple) {
+        this.finishEditing();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  this.$textarea.on('select2:unselect.htSelect2', (e) => {
+    try {
+      if (typeof this.onRemoved === 'function') {
+        this.onRemoved(e);
+      }
+      if (!this.cellProperties.multiple) {
+        this.finishEditing();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+};
+
+Select2Editor.prototype.getSelectionText = function(value) {
+  if (this.cellLabels && this.cellLabels[value]) {
+    return this.cellLabels[value];
+  }
+  return value || '';
 };
 
 Select2Editor.prototype.close = function() {
   this.instance.listen();
-  this.instance.removeHook('beforeKeyDown', onBeforeKeyDown);
-  this.$textarea.off();
-  this.$textarea.hide();
+  // Remove hooks only if they exist
+  if (this.instance) {
+    this.instance.removeHook('beforeKeyDown', onBeforeKeyDown);
+  }
+  if (this.$textarea) {
+    this.$textarea.off('.htSelect2');
+    this.$textarea.hide();
+  }
+  this.isFinished = true;
   Handsontable.editors.TextEditor.prototype.close.apply(this, arguments);
 };
 
 Select2Editor.prototype.val = function(value) {
-  if (typeof value == 'undefined') {
-    return this.$textarea.val();
+  if (value === undefined) {
+    const v = this.$textarea.val();
+    let result = [];
+    if (Array.isArray(v)) {
+      result = v;
+    } else if (v) {
+      result = [v];
+    }
+    return result;
   }
-  this.$textarea.val(value);
+
+  if (Array.isArray(value)) {
+    this.$textarea.val(value).trigger('change');
+  } else {
+    this.$textarea.val([value]).trigger('change');
+  }
 };
 
 Select2Editor.prototype.focus = function() {
@@ -160,9 +240,11 @@ Select2Editor.prototype.beginEditing = function(...params) {
   Handsontable.editors.TextEditor.prototype.beginEditing.apply(this, params);
 };
 
-Select2Editor.prototype.finishEditing = function(...params) {
+Select2Editor.prototype.finishEditing = function() {
   this.instance.listen();
-  return Handsontable.editors.TextEditor.prototype.finishEditing.apply(this, params);
+  this.isFinished = true;
+
+  return Handsontable.editors.TextEditor.prototype.finishEditing.call(this, false);
 };
 
 Handsontable.editors.Select2Editor = Select2Editor;

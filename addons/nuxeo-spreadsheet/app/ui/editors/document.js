@@ -20,11 +20,28 @@ import { Query } from '../../nuxeo/rpc/query';
 
 class DocumentEditor extends Select2Editor {
   prepare(row, col, prop, td, originalValue, cellProperties) {
-    // flatten our values to a list of ids
+    // cache multiple flag (same as directory/user)
+    this._multiple = !!cellProperties.multiple;
+
     const value = Array.isArray(originalValue)
-      ? originalValue.map((u) => this.getEntryId(u))
-      : this.getEntryId(originalValue);
+      ? originalValue.map((v) => this.prepareEntity(v))
+      : this.prepareEntity(originalValue);
+
     super.prepare(row, col, prop, td, value, cellProperties);
+  }
+
+  prepareEntity(entity) {
+    if (!entity) {
+      return;
+    }
+
+    // normalize document uid
+    const uid = entity.uid || entity.id || entity;
+
+    // cache label for rendering
+    this.cellLabels[uid] = this.cellLabels[uid] || entity.title || entity.text || uid;
+
+    return uid;
   }
 
   query(connection, properties, term) {
@@ -40,32 +57,68 @@ class DocumentEditor extends Select2Editor {
   }
 
   formatter(doc) {
-    return doc.text || doc.title;
+    return doc.title || doc.text || doc.id;
   }
 
-  getEntryId(item) {
-    return item && (item.uid || item.id);
+  onSelected(evt) {
+    const data = evt?.params?.data;
+    if (!data || !data.id) return;
+
+    const uid = data.id;
+
+    const label = data.title || data.text || uid;
+
+    // never downgrade labels
+    if (!this.cellLabels[uid]) {
+      this.cellLabels[uid] = label;
+    }
   }
 
-  // create documents again on save
-  saveValue(val, ctrlDown) {
-    let value = val[0][0];
-    if (value) {
-      value = value.split(',').map((uid) => {
+  getValue() {
+    let data = [];
+
+    if (this.$textarea?.data('select2')) {
+      data = this.$textarea.select2('data') || [];
+    }
+
+    const ids = data.map((d) => d.id).filter(Boolean);
+
+    return this._multiple ? ids : ids[0] || '';
+  }
+
+  saveValue(_val, ctrlDown) {
+    let data = [];
+
+    // ✅ authoritative source (same fix as user.js)
+    if (this.$textarea?.data('select2')) {
+      data = this.$textarea.select2('data') || [];
+    }
+
+    const ids = data.map((d) => d.id).filter(Boolean);
+
+    let value;
+
+    if (!ids.length) {
+      value = this._multiple ? [] : null;
+    } else {
+      const entries = ids.map((uid) => {
         return {
           'entity-type': 'document',
           uid,
         };
       });
-      // unwrap the map result if not muliple
-      if (!this.cellProperties.multiple) {
-        value = value[0];
-      }
-    } else {
-      value = this.cellProperties.multiple ? [] : null;
+      value = this._multiple ? entries : entries[0];
     }
 
     super.saveValue([[value]], ctrlDown);
+  }
+
+  get cellMeta() {
+    return this.instance.getCellMeta(this.row, this.col);
+  }
+
+  get cellLabels() {
+    return (this.cellMeta._labels = this.cellMeta._labels || {});
   }
 }
 
@@ -74,8 +127,17 @@ function DocumentRenderer(instance, td, row, col, prop, value, cellProperties) {
     if (!Array.isArray(value)) {
       value = [value];
     }
-    arguments[5] = value.map((d) => d.uid).join(','); // jshint ignore:line
+
+    const labels = instance.getCellMeta(row, col)._labels || {};
+
+    arguments[5] = value
+      .map((v) => {
+        const uid = v.uid || v.id || v;
+        return labels[uid] || uid;
+      })
+      .join(','); // jshint ignore:line
   }
+
   cellProperties.defaultRenderer.apply(this, arguments);
 }
 
