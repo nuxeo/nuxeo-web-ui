@@ -39,7 +39,7 @@ jobs:
 
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
           npm version $VERSION --no-git-tag-version
@@ -77,7 +77,7 @@ jobs:
       - name: Publish Nuxeo Web UI FTest ${{ env.VERSION }}
         if: ${{ github.event.inputs.dryRun == 'false' }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           pushd packages/nuxeo-web-ui-ftest/
           npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
@@ -142,7 +142,7 @@ jobs:
 
       - name: Align ${{ github.event.inputs.referenceBranch }} branch on next version ${{ env.NEW_VERSION }}-SNAPSHOT
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           echo "OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
 
@@ -155,7 +155,7 @@ jobs:
 
       - if: ${{ github.event.inputs.referenceBranch == 'master' }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           NEW_ELEMENTS_VERSION="^$NEW_VERSION-rc"
           npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="^"
@@ -165,7 +165,7 @@ jobs:
 
       - if: ${{ github.event.inputs.referenceBranch != 'master' }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           NEW_ELEMENTS_VERSION="~$NEW_VERSION-rc"
           npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
