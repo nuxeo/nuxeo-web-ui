@@ -85,6 +85,7 @@ module.exports = (pkg, sourcePaths, libraries, pkgManagement, callback) => {
                         return p;
                       })(element.path)
                     : element.path;
+              } else {
                 elPath = element.path.replace(`/${componentDir}`, '');
               }
 
