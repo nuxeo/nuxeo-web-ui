@@ -18,22 +18,19 @@ Then('I can see the video storyboard', async function() {
       if (!(await page.isVisible())) {
         return false;
       }
-      const videoViewer = await page.el.element('nuxeo-video-viewer');
-      if (!(await videoViewer.isVisible())) {
+      const videoViewer = await page.el.$('nuxeo-video-viewer');
+      if (!(await videoViewer.isDisplayed())) {
         return false;
       }
-      const storyBoard = await videoViewer.element('#storyboard');
+      const storyBoard = await videoViewer.$('#storyboard');
       if (!(await storyBoard.isExisting())) {
         return false;
       }
-      if (!(await storyBoard.isVisible())) {
-        await driver.execute(async () => Nuxeo.UI.app.refresh());
-        await driver.pause(1000);
-        return false;
-      }
-      return true;
+      const { height } = await storyBoard.getSize();
+      return height > 0;
     },
     {
+      interval: 500,
       timeoutMsg: 'I cannot see the video storyboard',
     },
   );
