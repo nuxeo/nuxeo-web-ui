@@ -25,22 +25,15 @@ Then('I can see the video storyboard', async function() {
         console.log('Viewer is not displayed yet');
         return false;
       }
-      const storyBoard = await videoViewer.$('#storyboard');
-      if (!(await storyBoard.isExisting())) {
-        console.log('Storyboard does not exist yet');
-        return false;
-      }
-      if (!(await storyBoard.isVisible())) {
-        console.log('Storyboard is not visible yet.. Refreshing');
-        await driver.execute(async () => Nuxeo.UI.app.refresh());
-        await driver.pause(1000);
-        return false;
-      }
-      console.log('FOUND !!!!');
+
+      const shadowRoot = await videoViewer.shadow$('div#container');
+      const storyBoard = await shadowRoot.$('#storyboard');
+
+      return storyBoard.isDisplayed();
       /* eslint-enable no-console */
-      return true;
     },
     {
+      interval: 500,
       timeoutMsg: 'I cannot see the video storyboard',
     },
   );
