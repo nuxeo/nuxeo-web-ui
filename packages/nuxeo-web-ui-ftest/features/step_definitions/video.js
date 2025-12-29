@@ -29,12 +29,16 @@ Then('I can see the video storyboard', async function() {
       }
 
       const thumbnails = await videoViewer.shadow$('#thumbnails');
+      console.log('Printing children');
 
-      if (!(await thumbnails.isExisting())) {
-        return false;
+      const children = await thumbnails.$$('*');
+      /* eslint-disable no-restricted-syntax, no-await-in-loop */
+      for (const c of children) {
+        const size = await c.getSize();
+        console.log('child', c.selector, 'size', size);
+        if (size.height > 0) return true;
       }
-      const { height } = await thumbnails.getSize();
-      return height > 0;
+      /* eslint-enable no-restricted-syntax, no-await-in-loop */
     },
     {
       interval: 500,
