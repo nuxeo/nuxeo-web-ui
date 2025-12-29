@@ -284,7 +284,6 @@ export default class Browser extends BasePage {
 
   async indexOfChild(title) {
     await this.waitForChildren();
-    const table = await this.el.$('nuxeo-data-table[name="table"]');
     const result = await driver.waitUntil(
       async () => {
         // check visible rows first
