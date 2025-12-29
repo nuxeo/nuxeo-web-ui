@@ -4,18 +4,20 @@ import { Then } from '@cucumber/cucumber';
 Then('I can see the video conversions panel', async function() {
   const uiBrowser = await this.ui.browser;
   const page = await uiBrowser.documentPage(this.doc.type);
-  page.waitForVisible();
+  await page.waitForVisible();
   const element = await page.el.$('nuxeo-video-conversions');
   const elementVisible = await element.waitForVisible();
   await elementVisible.should.be.true;
 });
 
 Then('I can see the video storyboard', async function() {
+  /* eslint-disable no-console */
+  console.log('Starting test for video.feature');
   await driver.waitUntil(
     async () => {
       const uiBrowser = await this.ui.browser;
       const page = await uiBrowser.documentPage(this.doc.type);
-      /* eslint-disable no-console */
+
       if (!(await page.isVisible())) {
         console.log('Page is not visible yet');
         return false;
@@ -26,15 +28,14 @@ Then('I can see the video storyboard', async function() {
         return false;
       }
 
-      const shadowRoot = await videoViewer.shadow$('div#container');
-      const storyBoard = await shadowRoot.$('#storyboard');
+      const storyBoard = await videoViewer.shadow$('#storyboard');
 
       return storyBoard.isDisplayed();
-      /* eslint-enable no-console */
     },
     {
       interval: 500,
       timeoutMsg: 'I cannot see the video storyboard',
     },
   );
+  /* eslint-enable no-console */
 });
