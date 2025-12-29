@@ -288,7 +288,6 @@ export default class Browser extends BasePage {
       async () => {
         // check visible rows first
         const rows = await this.rows;
-        console.log('[DEBUG] rows count:', rows.length);
         for (let i = 0; i < rows.length; i++) {
           const cell = await rows[i].$('nuxeo-data-table-cell a.title');
           if (await cell.isExisting()) {
