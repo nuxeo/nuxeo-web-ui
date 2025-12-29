@@ -28,13 +28,17 @@ Then('I can see the video storyboard', async function() {
         return false;
       }
 
-      const storyBoard = await videoViewer.shadow$('#storyboard');
+      const thumbnails = await videoViewer.shadow$('#thumbnails');
 
-      return storyBoard.isDisplayed();
+      if (!(await thumbnails.isExisting())) {
+        return false;
+      }
+      const { height } = await thumbnails.getSize();
+      return height > 0;
     },
     {
       interval: 500,
-      timeoutMsg: 'I cannot see the video storyboard',
+      timeoutMsg: 'I cannot see the video storyboard thumbnails',
     },
   );
   /* eslint-enable no-console */
