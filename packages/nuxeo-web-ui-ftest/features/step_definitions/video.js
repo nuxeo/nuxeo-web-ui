@@ -38,10 +38,9 @@ Then('I can see the video storyboard', async function() {
           await driver.execute(async () => Nuxeo.UI.app.refresh());
           await driver.pause(5000);
           return false;
-        } 
-          console.warn('Storyboard is not existing yet after refresh.');
-          return true;
-        
+        }
+        console.warn('Storyboard is not existing yet after refresh.');
+        return true;
       }
       return true;
     },
