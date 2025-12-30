@@ -30,18 +30,14 @@ Then('I can see the video storyboard', async function() {
         return false;
       }
 
-      const thumbnails = await videoViewer.shadow$('#thumbnails');
-      if (!(await thumbnails.isExisting())) {
-        console.log('Thumbnails not existing yet. Refreshing after 10 sec');
-        await driver.pause(10000);
-        console.log('Refreshing...');
+      const storyboard = await videoViewer.shadow$('#storyboard');
+      if (!(await storyboard.isExisting())) {
+        console.log('Storyboard is not existing yet.. Refreshing page');
         await driver.execute(async () => Nuxeo.UI.app.refresh());
-        console.log('Waiting for page to load...');
         await driver.pause(2000);
         return false;
       }
 
-      console.log('Found thumbnails!!');
       return true;
     },
     {
