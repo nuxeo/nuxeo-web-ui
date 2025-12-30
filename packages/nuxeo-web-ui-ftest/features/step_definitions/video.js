@@ -29,6 +29,10 @@ Then('I can see the video storyboard', async function() {
       }
 
       const thumbnails = await videoViewer.shadow$('#thumbnails');
+      if (!(await thumbnails.isExisting())) {
+        console.log('thumbnails not found yet');
+        return false;
+      }
       console.log('Printing children');
 
       const children = await thumbnails.$$('*');
