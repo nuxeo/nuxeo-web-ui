@@ -11,22 +11,18 @@ Then('I can see the video conversions panel', async function() {
 });
 
 Then('I can see the video storyboard', async function() {
-  /* eslint-disable no-console */
   let refreshedOnce = false;
-  console.log('Starting test for video.feature');
   await driver.waitUntil(
     async () => {
       const uiBrowser = await this.ui.browser;
       const page = await uiBrowser.documentPage(this.doc.type);
 
       if (!(await page.isVisible())) {
-        console.error('Page is not visible yet');
         return false;
       }
 
       const videoViewer = await page.el.$('nuxeo-video-viewer');
       if (!(await videoViewer.isDisplayed())) {
-        console.error('Viewer is not displayed yet');
         return false;
       }
 
@@ -34,12 +30,11 @@ Then('I can see the video storyboard', async function() {
       if (!(await storyboard.isExisting())) {
         if (!refreshedOnce) {
           refreshedOnce = true;
-          console.log('Storyboard is not existing yet.. Refreshing page');
           await driver.execute(async () => Nuxeo.UI.app.refresh());
           await driver.pause(5000);
           return false;
         }
-        console.warn('Storyboard is not existing yet after refresh.');
+        console.warn('Storyboard is not existing yet even after refreshing page.');
         return true;
       }
       return true;
@@ -49,5 +44,4 @@ Then('I can see the video storyboard', async function() {
       timeoutMsg: 'I cannot see the video storyboard',
     },
   );
-  /* eslint-enable no-console */
 });
