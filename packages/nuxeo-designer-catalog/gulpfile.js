@@ -125,6 +125,7 @@ const checkoutCatalog = () => {
           log('git checkout nuxeo-web-ui ', platform);
           const folder = path.join(base, platform, application);
           const version = branch || platform;
+          log('checkout version', version);
           git.fetch('origin', '--tags', { cwd: folder }, () => {
             git.checkout(version, { quiet: true, cwd: folder }, (err) => {
               if (err) {
