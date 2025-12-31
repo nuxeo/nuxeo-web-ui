@@ -127,19 +127,7 @@ export default class Browser extends BasePage {
   get rows() {
     return (async () => {
       const currentPage = await this.currentPage;
-      const maxRetries = 20; // 20 retries
-      const pauseMs = 500; // 0.5s per retry
-      let rowsTemp = [];
-
-      for (let i = 0; i < maxRetries; i++) {
-        rowsTemp = await currentPage.elements('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
-        if (rowsTemp && rowsTemp.length > 0) {
-          return rowsTemp;
-        }
-        await driver.pause(pauseMs);
-      }
-      // return empty if still nothing
-      return rowsTemp;
+      return currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
     })();
   }
 
@@ -147,7 +135,7 @@ export default class Browser extends BasePage {
     const currentPage = await this.currentPage;
     await driver.waitUntil(
       async () => {
-        const rows = await currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row');
+        const rows = await currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
         return rows.length >= minCount;
       },
       {
@@ -296,7 +284,6 @@ export default class Browser extends BasePage {
 
   async indexOfChild(title) {
     await this.waitForChildren();
-    const table = await this.el.$('nuxeo-data-table[name="table"]');
     const result = await driver.waitUntil(
       async () => {
         // check visible rows first
@@ -310,17 +297,11 @@ export default class Browser extends BasePage {
             }
           }
         }
-
-        // scroll table to render more rows
-        await driver.execute((tableEl) => {
-          tableEl.scrollTop += 300; // scroll chunk
-        }, table);
-
         return false;
       },
       {
         timeout: 20000,
-        interval: 300,
+        interval: 500,
         timeoutMsg: `${title} child document not found within 20s`,
       },
     );
