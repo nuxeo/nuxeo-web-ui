@@ -86,6 +86,12 @@ jobs:
       - name: Install libxml2-utils (xmllint)
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
+      - name: Setup parameters (pull_request)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "WEBUI_REF=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+          echo "TARGET_PLATFORM=2023.0" >> $GITHUB_ENV
+
       - name: Setup parameters (release)
         if: github.event_name == 'release'
         working-directory: packages/nuxeo-designer-catalog
@@ -132,6 +138,7 @@ jobs:
           path: packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}/${{ env.CATALOG_NAME }}
 
       - name: Upload catalog
+        if: github.event_name != 'pull_request'
         working-directory: packages/nuxeo-designer-catalog
         run: |
           MVN_REPO_ID=maven-public-releases
