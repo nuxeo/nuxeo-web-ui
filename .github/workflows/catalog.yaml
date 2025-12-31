@@ -3,6 +3,9 @@
 name: Designer Catalog Generator
 
 on:
+  pull_request:
+    branches:
+      - maintenance-3.1.x
   workflow_dispatch:
     inputs:
       target_platform:
