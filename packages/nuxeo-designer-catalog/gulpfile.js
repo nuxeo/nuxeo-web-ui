@@ -125,21 +125,23 @@ const checkoutCatalog = () => {
           log('git checkout nuxeo-web-ui ', platform);
           const folder = path.join(base, platform, application);
           const version = branch || platform;
-          git.checkout(version, { quiet: true, cwd: folder }, (err) => {
-            if (err) {
-              log(err);
-              reject();
-            }
+          git.fetch('origin', '--tags', { cwd: folder }, () => {
+            git.checkout(version, { quiet: true, cwd: folder }, (err) => {
+              if (err) {
+                log(err);
+                reject();
+              }
 
-            // remove all git related files, except the HEAD file (useful to get the branch of the checkout)
-            del([
-              path.join(folder, '.git', '*'),
-              `!${path.join(folder, '.git', 'HEAD')}`,
-              path.join(folder, '.gitignore'),
-            ]);
+              // remove all git related files, except the HEAD file (useful to get the branch of the checkout)
+              del([
+                path.join(folder, '.git', '*'),
+                `!${path.join(folder, '.git', 'HEAD')}`,
+                path.join(folder, '.gitignore'),
+              ]);
 
-            log('git checkout finished for nuxeo-web-ui ', platform);
-            resolve();
+              log('git checkout finished for nuxeo-web-ui ', platform);
+              resolve();
+            });
           });
         }),
     ),
@@ -151,6 +153,13 @@ const generateCatalog = () => {
   const application = 'nuxeo-web-ui';
   const targetPlatforms = getTargetPlatforms(base);
 
+  // check if a specific branch or tag was specified on the command line
+  let branch;
+  const i = process.argv.indexOf('--webui-branch');
+  if (i > -1) {
+    branch = process.argv[i + 1];
+  }
+
   const catalogGenerators = targetPlatforms.map(
     (platform) =>
       function() {
@@ -159,6 +168,7 @@ const generateCatalog = () => {
           const catalogCallback = (pkgManager) =>
             function() {
               log('generate catalog for nuxeo-web-ui ', platform);
+              const version = branch || platform;
               execCatalogTask({
                 application,
                 destDir: path.join(base, platform),
@@ -166,7 +176,7 @@ const generateCatalog = () => {
                 catalogPath: path.join(base, platform, '/catalog-packages.json'),
                 root: path.join(base, platform, application),
                 url: webUiRepositoryUrl,
-                branch: gitBranch(path.join(base, platform, application)),
+                branch: version,
                 pkgManagement: pkgManager,
               })
                 .on('error', reject)

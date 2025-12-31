@@ -87,13 +87,13 @@ jobs:
         if: github.event_name == 'release'
         working-directory: packages/nuxeo-designer-catalog
         run: |
-          echo "BRANCH_NAME=v${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
+          echo "WEBUI_REF=v${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
           echo "TARGET_PLATFORM=2023.0" >> $GITHUB_ENV
 
       - name: Setup parameters (workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'
         run: |
-          echo "BRANCH_NAME=${{ github.event.inputs.branch_name }}" >> $GITHUB_ENV
+          echo "WEBUI_REF=${{ github.event.inputs.branch_name }}" >> $GITHUB_ENV
           echo "TARGET_PLATFORM=${{ github.event.inputs.target_platform }}" >> $GITHUB_ENV
 
       - name: Install dependencies
@@ -105,18 +105,21 @@ jobs:
       - name: Generate catalog
         working-directory: packages/nuxeo-designer-catalog
         run: |
-          gulp catalog --tp $TARGET_PLATFORM --webui-branch $BRANCH_NAME
+          gulp catalog --tp $TARGET_PLATFORM --webui-branch $WEBUI_REF
           gulp hints --tp $TARGET_PLATFORM
 
       - name: Bundle the catalog
         run: |
-          sudo chmod +r pom.xml
-          CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)${{ github.event.inputs.classifier }}
-          pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
+          WEBUI_POM="packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}/nuxeo-web-ui/pom.xml"
+          echo "Reading version from $WEBUI_POM"
+          CATALOG_VERSION=$(xmllint \
+            --xpath "//*[local-name()='project']/*[local-name()='version']/text()" \
+            "$WEBUI_POM")${{ github.event.inputs.classifier }}
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
-          CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
-          echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
-          zip -q -r $CATALOG_NAME nuxeo-web-ui data hints catalog.json
+          pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
+            CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
+            echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
+            zip -q -r $CATALOG_NAME nuxeo-web-ui data hints catalog.json
           popd
 
       - name: Archive catalog
