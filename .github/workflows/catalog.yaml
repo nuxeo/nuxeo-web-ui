@@ -110,13 +110,16 @@ jobs:
 
       - name: Bundle the catalog
         run: |
-          sudo chmod +r pom.xml
-          CATALOG_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)${{ github.event.inputs.classifier }}
-          pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
+          WEBUI_POM="packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}/nuxeo-web-ui/pom.xml"
+          echo "Reading version from $WEBUI_POM"
+          CATALOG_VERSION=$(xmllint \
+            --xpath "//*[local-name()='project']/*[local-name()='version']/text()" \
+            "$WEBUI_POM")${{ github.event.inputs.classifier }}
           echo "CATALOG_VERSION=$CATALOG_VERSION" >> $GITHUB_ENV
-          CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
-          echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
-          zip -q -r $CATALOG_NAME nuxeo-web-ui data hints catalog.json
+          pushd packages/nuxeo-designer-catalog/data/applications/nuxeo/${{ env.TARGET_PLATFORM }}
+            CATALOG_NAME=$ARTIFACT_ID-$CATALOG_VERSION.zip
+            echo "CATALOG_NAME=$CATALOG_NAME" >> $GITHUB_ENV
+            zip -q -r $CATALOG_NAME nuxeo-web-ui data hints catalog.json
           popd
 
       - name: Archive catalog
