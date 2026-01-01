@@ -31,7 +31,7 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
-  browserVersion: 'latest',
+  browserVersion: '135.0.7049.114',
   'wdio:enforceWebDriverClassic': true,
 };
 
@@ -114,7 +114,7 @@ export const config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
-  specs: ['../../ftest/features/cloud.feature'],
+  specs: [path.join(process.cwd(), './features/*.feature')],
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],

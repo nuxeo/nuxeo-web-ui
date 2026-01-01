@@ -48,20 +48,10 @@ Then('I can see the nuxeo-oauth2-consumed-tokens table', async function() {
 });
 
 Then('I can add the following provider:', async function(provider) {
-  console.log('STEP: start add provider');
-
-  const administration = this.ui.administration;
-  console.log('STEP: got administration');
-
-  const cloudServicesEle = administration.cloudServices;
-  console.log('STEP: got cloud services');
-
-  await cloudServicesEle.waitForVisible({ timeout: 15000 });
-  console.log('STEP: cloud services visible');
-
+  const administration = await this.ui.administration;
+  const cloudServicesEle = await administration.cloudServices;
+  await cloudServicesEle.waitForVisible();
   await cloudServicesEle.addProvider(provider);
-  console.log('STEP: provider added');
-
   global.providers[provider.rows()[0][1]] = {
     serviceName: provider.rows()[0][1],
   };
