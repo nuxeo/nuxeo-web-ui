@@ -146,7 +146,7 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
-          HEADLESS: ${{ !contains(github.event.pull_request.labels.*.name, 'video') && 'true' || '' }}
+          HEADLESS: ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
           BROWSER_BINARY: ${{ steps.chrome.outputs.chrome-path }}
         uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v10.5.0
         with:

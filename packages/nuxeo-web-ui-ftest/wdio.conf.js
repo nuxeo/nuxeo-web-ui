@@ -48,7 +48,7 @@ switch (capability.browserName) {
       '--disable-renderer-backgrounding',
     ];
 
-    if (process.env.HEADLESS) {
+    if (process.env.HEADLESS === 'true') {
       options.args.push('--window-size=1920,1080');
       options.args.push('--headless=new');
       options.args.push('--disable-gpu');
