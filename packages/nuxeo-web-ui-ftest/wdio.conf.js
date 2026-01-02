@@ -31,7 +31,6 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
-  browserVersion: '135.0.7049.114',
   'wdio:enforceWebDriverClassic': true,
 };
 
@@ -39,12 +38,19 @@ const options = {};
 
 switch (capability.browserName) {
   case 'chrome':
-    options.args = ['--no-sandbox'];
+    options.args = [
+      '--no-sandbox', // required in CI containers
+      '--disable-infobars',
+      '--disable-notifications',
+      '--disable-extensions',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding',
+    ];
 
     if (process.env.HEADLESS) {
       options.args.push('--window-size=1920,1080');
-      options.args.push('--single-process');
-      options.args.push('--headless');
+      options.args.push('--headless=new');
       options.args.push('--disable-gpu');
       options.args.push('--disable-dev-shm-usage');
     }
@@ -56,6 +62,9 @@ switch (capability.browserName) {
       prefs: {
         profile: {
           password_manager_leak_detection: false,
+          default_content_setting_values: {
+            notifications: 2,
+          },
         },
       },
     };

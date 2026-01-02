@@ -38,6 +38,12 @@ jobs:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
+
+      - name: Install latest chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: latest
+
       - uses: actions/checkout@v6
         with:
           ref: ${{ env.BRANCH_NAME }}
