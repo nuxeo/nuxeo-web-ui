@@ -40,6 +40,7 @@ jobs:
           comment_on_pr: false
 
       - name: Install latest chrome
+        id: chrome
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: latest
@@ -145,6 +146,8 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
+          HEADLESS: ${{ !contains(github.event.pull_request.labels.*.name, 'video') && 'true' || '' }}
+          BROWSER_BINARY: ${{ steps.chrome.outputs.chrome-path }}
         uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v10.5.0
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall

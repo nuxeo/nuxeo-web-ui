@@ -258,7 +258,10 @@ export const config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  // onPrepare: () => {},
+  onPrepare: () => {
+    // eslint-disable-next-line no-console
+    console.log(`Starting ftests in ${process.env.HEADLESS ? 'HEADLESS' : 'HEADFUL'} mode`);
+  },
   //
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
