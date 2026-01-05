@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
 @license
 ©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
@@ -1183,7 +1182,6 @@ Polymer({
         currentDocument: this.targetPath,
       },
     };
-
     const doLocal = this.batchId && this.localFiles && this.localFiles.length > 0;
     const doRemote = this.remoteFiles && this.remoteFiles.length > 0;
     if (doLocal && doRemote) {
