@@ -1229,7 +1229,7 @@ Polymer({
     let message;
     if (error instanceof Error) {
       // Native JS Error (e.g. fetch/network errors)
-      message = error.message != null ? error.message.toString() : '';
+      message = error.message != null ? error.message.toString() : ''; 
     } else if (typeof error === 'string') {
       // Promise rejected with a plain string
       message = error;
