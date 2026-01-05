@@ -39,12 +39,6 @@ jobs:
         with:
           comment_on_pr: false
 
-      - name: Pre-check
-        run: |
-        echo "PR Label : ${{ github.event.pull_request.labels.*.name }}"
-        echo "Video Label Present: ${{ contains(github.event.pull_request.labels.*.name, 'video') }}"
-        echo "Full check value : ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}"
-
       - name: Install latest chrome
         id: chrome
         uses: browser-actions/setup-chrome@v1
