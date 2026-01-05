@@ -31,6 +31,7 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
+  browserVersion: '135.0.7049.114',
   'wdio:enforceWebDriverClassic': true,
 };
 
