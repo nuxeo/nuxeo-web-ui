@@ -259,8 +259,10 @@ export const config = {
   //
   // Gets executed once before all workers get launched.
   onPrepare: () => {
-    // eslint-disable-next-line no-console
-    console.log(`Starting ftests in ${process.env.HEADLESS ? 'HEADLESS' : 'HEADFUL'} mode`);
+    /* eslint-disable no-console */
+    console.log(`HEADLESS raw value = "${process.env.HEADLESS}"`);
+    console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
+    /* eslint-enable no-console */
   },
   //
   // Gets executed before test execution begins. At this point you can access all global
