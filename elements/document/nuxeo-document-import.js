@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
 @license
 ©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
@@ -891,7 +892,17 @@ Polymer({
   },
 
   _canImport() {
-    return (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles) && this.canCreate && !this._creating;
+    const allFiles = this._getAllFiles() || [];
+    const hasAnyFiles = allFiles.length > 0;
+    if (!hasAnyFiles) {
+      this.hasLocalFilesUploaded = false;
+    }
+    return (
+      hasAnyFiles &&
+      (this.hasLocalFiles ? this.hasLocalFilesUploaded : this.hasRemoteFiles) &&
+      this.canCreate &&
+      !this._creating
+    );
   },
 
   _isUploadingOrImporting() {
@@ -1172,6 +1183,7 @@ Polymer({
         currentDocument: this.targetPath,
       },
     };
+
     const doLocal = this.batchId && this.localFiles && this.localFiles.length > 0;
     const doRemote = this.remoteFiles && this.remoteFiles.length > 0;
     if (doLocal && doRemote) {
@@ -1216,7 +1228,18 @@ Polymer({
   _handleError(error) {
     this.set('_creating', false);
     this.set('_importErrorMessage', this.i18n('documentImport.error.importFailed'));
-    const message = error.message || (error.detail && error.detail.error);
+    let message;
+    if (error instanceof Error) {
+      // Native JS Error (e.g. fetch/network errors)
+      message = error.message.toString();
+    } else if (typeof error === 'string') {
+      // Promise rejected with a plain string
+      message = error;
+    } else {
+      // Backend error payload
+      message = error?.message || (error?.detail && error.detail.error);
+    }
+
     this.notify({ message: `${this.i18n('label.error').toUpperCase()}: ${message}` });
   },
 
