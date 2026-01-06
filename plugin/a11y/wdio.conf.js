@@ -26,7 +26,7 @@ const capability = {
   maxInstances: 1,
   browserName: 'chrome',
   acceptInsecureCerts: true,
-  browserVersion: '135.0.7049.114',
+  browserVersion: 'latest',
 };
 const options = {
   args: ['--no-sandbox'],
@@ -111,7 +111,7 @@ export const config = {
   // Define all options that are relevant for the WebdriverIO instance here
   //
   // Level of logging verbosity: trace | debug | info | warn | error | silent
-  logLevel: 'info',
+  logLevel: 'warn',
   //
   // Set specific log levels per logger
   // loggers:
