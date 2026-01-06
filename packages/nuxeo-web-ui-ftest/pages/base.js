@@ -16,53 +16,35 @@ export default class BasePage {
   /**
    * Central hardened click (Chrome 143+ safe)
    */
-  async click(options = {}) {
-    const { timeout = browser.options.waitForTimeout || 5000, retries = 2, scrollBlock = 'center' } = options;
+  async click() {
+    const elem = this.el; // this.el is always a WDIO element
 
-    const element = this.el;
+    await elem.waitForExist();
+    await elem.waitForDisplayed();
 
-    await element.waitForDisplayed({ timeout });
+    // Scroll into view (critical for Chrome 145)
+    await elem.scrollIntoView({ block: 'center', inline: 'center' });
 
-    const attemptClick = async (attempt) => {
-      try {
-        // Scroll into view
-        await element.scrollIntoView({
-          block: scrollBlock,
-          inline: 'center',
-        });
+    // Wait until element has real size (WDIO v9-safe)
+    await browser.waitUntil(
+      async () => {
+        const size = await elem.getSize();
+        return size.width > 0 && size.height > 0;
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: 'Element has zero size, cannot click',
+      },
+    );
 
-        // Flush Polymer safely
-        await browser.execute(() => {
-          if (window.Polymer && typeof window.Polymer.flush === 'function') {
-            window.Polymer.flush();
-          }
-        });
-
-        // Ensure truly visible
-        await browser.waitUntil(async () => this.isTrulyVisible(element), { timeout });
-
-        // Ensure enabled
-        await browser.waitUntil(
-          async () => {
-            const disabled =
-              (await element.getAttribute('disabled')) === 'true' ||
-              (await element.getAttribute('aria-disabled')) === 'true';
-            return !disabled;
-          },
-          { timeout },
-        );
-
-        await element.click();
-      } catch (err) {
-        if (attempt >= retries) {
-          throw err;
-        }
-        await browser.pause(100);
-        return attemptClick(attempt + 1);
+    // Flush Polymer DOM updates if present
+    await browser.execute(() => {
+      if (window.Polymer?.dom?.flush) {
+        window.Polymer.dom.flush();
       }
-    };
+    });
 
-    return attemptClick(0);
+    await elem.click();
   }
 
   isVisible(...args) {
