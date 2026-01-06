@@ -23,11 +23,11 @@ export default class DocumentPage extends BasePage {
   }
 
   get previewButton() {
-    return this.el.element('nuxeo-preview-button');
+    return new BasePage(`${this._selector} nuxeo-preview-button`);
   }
 
   get downloadButton() {
-    return this.el.$('nuxeo-download-button');
+    return new BasePage(`${this._selector} nuxeo-download-button`);
   }
 
   get versionInfoBar() {
@@ -37,17 +37,11 @@ export default class DocumentPage extends BasePage {
   }
 
   get restoreVersionButton() {
-    return (async () => {
-      const versionInfoBar = await this.versionInfoBar;
-      return versionInfoBar.element('nuxeo-restore-version-button');
-    })();
+    return new BasePage(`${this._selector} #versionInfoBar nuxeo-restore-version-button`);
   }
 
   get restoreVersionButtonConfirm() {
-    return (async () => {
-      const versionInfoBar = await this.versionInfoBar;
-      return versionInfoBar.element('nuxeo-restore-version-button paper-button[dialog-confirm]');
-    })();
+    return new BasePage(`${this._selector} #versionInfoBar nuxeo-restore-version-button paper-button[dialog-confirm]`);
   }
 
   get info() {
@@ -63,11 +57,11 @@ export default class DocumentPage extends BasePage {
   }
 
   get processWorkflowButton() {
-    return this.el.element('nuxeo-document-info-bar .task paper-button');
+    return new BasePage(`${this._selector} nuxeo-document-info-bar .task paper-button`);
   }
 
   get abandonWorkflowButton() {
-    return this.el.element('nuxeo-document-info-bar .workflow paper-button');
+    return new BasePage(`${this._selector} nuxeo-document-info-bar .workflow paper-button`);
   }
 
   get comments() {
