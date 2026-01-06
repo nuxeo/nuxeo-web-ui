@@ -38,11 +38,12 @@ jobs:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
-      - uses: actions/checkout@v5
+
+      - uses: actions/checkout@v6
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
@@ -87,7 +88,7 @@ jobs:
           popd
 
       - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
@@ -139,6 +140,7 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
+          HEADLESS: ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
         uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v10.5.0
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
@@ -148,21 +150,21 @@ jobs:
 
       - name: Archive cucumber reports
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cucumber-reports
           path: ftest/target/cucumber-reports/
 
       - name: Archive screenshots
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: screenshots
           path: ftest/target/screenshots/
 
       - name: Archive logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: logs
           path: |
@@ -171,7 +173,7 @@ jobs:
 
       - name: Archive packages-ftest
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: packages-ftest
           path: |
