@@ -136,6 +136,7 @@ Polymer({
         flex-direction: column;
         background: var(--nuxeo-page-background);
         height: 100%;
+        overflow: hidden;
       }
 
       main {
