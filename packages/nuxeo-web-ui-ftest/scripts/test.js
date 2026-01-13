@@ -78,8 +78,8 @@ if (argv.watch) {
   args.push('--watch');
 }
 
-if (argv.headless) {
-  process.env.HEADLESS = true;
+if (process.env.HEADLESS === undefined) {
+  process.env.HEADLESS = argv.headless ? 'true' : 'false';
 }
 
 if (argv.tags) {
