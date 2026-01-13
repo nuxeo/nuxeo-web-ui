@@ -1,59 +1,92 @@
 /* eslint-disable no-console */
 import { runAxeCore } from './axe-reporter.js';
 
-export function reportA11y(expectedViolations, expectedIncompleteViolations, setup) {
-  let _report;
-  const getReport = async () => {
-    if (_report) {
-      return _report;
+function formatLine(id, count, threshold) {
+  const passed = count <= threshold;
+  const symbol = passed ? '✓' : '✗';
+
+  return {
+    passed,
+    line: `${symbol} ${id.padEnd(30)} ${count} / ${threshold}`,
+  };
+}
+
+function logAndCollectFailures(title, actualList, expectedMap) {
+  console.log('------------------------------------');
+  console.log(title);
+  console.log('------------------------------------');
+
+  const actualById = Object.fromEntries(actualList.map((v) => [v.id, v.issues]));
+
+  const failures = [];
+
+  Object.entries(expectedMap).forEach(([id, threshold]) => {
+    const count = actualById[id] ?? 0;
+    const { passed, line } = formatLine(id, count, threshold);
+
+    console.log(line);
+
+    if (!passed) {
+      failures.push(`${id} (${count} > ${threshold})`);
     }
-    await setup();
-    await browser.setTimeout({ script: 240000 });
-    await browser.pause(3000);
-    _report = await runAxeCore();
-    return _report;
+  });
+
+  if (failures.length) {
+    console.log('\nFAILED RULES:');
+    failures.forEach((f) => console.log(`- ${f}`));
+  }
+
+  console.log('------------------------------------');
+
+  return failures;
+}
+
+export function reportA11y(expectedViolations, expectedIncompleteViolations, setup) {
+  let reportPromise;
+
+  const getReport = async () => {
+    if (!reportPromise) {
+      reportPromise = (async () => {
+        await setup();
+        await browser.setTimeout({ script: 240000 });
+        await browser.pause(3000);
+        return runAxeCore();
+      })();
+    }
+    return reportPromise;
   };
 
-  context('Violations', () => {
-    let report;
+  context('Accessibility Violations', () => {
+    let failures = [];
 
     before(async () => {
-      report = await getReport();
-
-      console.log('------------------------------------');
-      console.log('Received Violations:');
-      report.violations.forEach((v) => {
-        console.log(`${v.id}: ${v.issues}`);
-      });
-      console.log('------------------------------------');
+      const report = await getReport();
+      failures = logAndCollectFailures('Received Violations', report.violations, expectedViolations);
     });
 
-    Object.entries(expectedViolations).forEach(([violation, issues]) => {
-      it(`${violation}: ${issues} issue(s)`, async () => {
-        const found = report.violations.find((v) => v.id === violation);
-        await expect(!found || found.issues <= issues).toBe(true);
-      });
+    it('meets accessibility violation thresholds', () => {
+      if (failures.length) {
+        throw new Error(`Accessibility violations exceeded thresholds:\n${failures.join('\n')}`);
+      }
     });
   });
 
-  context('Incomplete violations', () => {
-    let report;
+  context('Accessibility Incomplete Violations', () => {
+    let failures = [];
 
     before(async () => {
-      report = await getReport();
-      console.log('------------------------------------');
-      console.log('Received Incomplete Violations:');
-      report.incomplete.forEach((v) => {
-        console.log(`${v.id}: ${v.issues}`);
-      });
-      console.log('------------------------------------');
+      const report = await getReport();
+      failures = logAndCollectFailures(
+        'Received Incomplete violations',
+        report.incomplete,
+        expectedIncompleteViolations,
+      );
     });
 
-    Object.entries(expectedIncompleteViolations).forEach(([violation, issues]) => {
-      it(`${violation}: ${issues} issue(s)`, async () => {
-        const found = report.incomplete.find((v) => v.id === violation);
-        await expect(!found || found.issues <= issues).toBe(true);
-      });
+    it('meets accessibility incomplete thresholds', () => {
+      if (failures.length) {
+        throw new Error(`Accessibility incomplete violations exceeded thresholds:\n${failures.join('\n')}`);
+      }
     });
   });
 }
