@@ -154,10 +154,27 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
         run: |
-          git checkout -b designer-catalog-update-$CATALOG_VERSION
-          git pull
+          BRANCH=designer-catalog-update-$CATALOG_VERSION
+          git fetch origin
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            echo "Branch exists. Checking out and pulling..."
+            git checkout "$BRANCH"
+            git pull origin "$BRANCH"
+          else
+            echo "Branch does not exist. Creating new branch from master..."
+            git checkout master
+            git pull origin master
+            git checkout -b "$BRANCH"
+          fi
+
           mvn versions:set-property -Dproperty=view.designer.catalog.2023.0 -DnewVersion=$CATALOG_VERSION
           git add .
-          git commit -m "Update Designer catalog with version $CATALOG_VERSION"
-          git push origin designer-catalog-update-$CATALOG_VERSION
-          gh pr create --base master --fill
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update Designer catalog with version $CATALOG_VERSION"
+            git push origin "$BRANCH"
+          fi
+         
+          gh pr create --base master --fill || echo "PR already exists"
