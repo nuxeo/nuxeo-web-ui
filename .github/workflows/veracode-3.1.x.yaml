@@ -176,7 +176,7 @@ jobs:
           pwd
 
       - name: Veracode Upload And Scan
-        uses: veracode/veracode-uploadandscan-action@0.2.6
+        uses: veracode/veracode-uploadandscan-action@0.2.11
         with:
           version: 'Nuxeo WebUI - LTS2023 - ${{ github.run_id }}'
           appname: 'Nuxeo Web UI'
