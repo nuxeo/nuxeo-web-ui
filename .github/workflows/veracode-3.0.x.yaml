@@ -136,7 +136,9 @@ jobs:
         rm -rf packages/nuxeo-web-ui-ftest/
 
     - name: Install zip
-      run: apt-get install zip
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y zip
 
     - name: Zip nuxeo-web-ui
       run: |
@@ -169,7 +171,7 @@ jobs:
           pwd
 
       - name: Veracode Upload And Scan
-        uses: veracode/veracode-uploadandscan-action@0.2.6
+        uses: veracode/veracode-uploadandscan-action@0.2.11
         with:
           appname: 'Nuxeo Web UI'
           createprofile: false
