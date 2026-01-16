@@ -10,9 +10,6 @@ name: Veracode Maintenance 3.1.x
 on:
   schedule:
     - cron: '30 17 * * *'  # 5:30 PM UTC daily
-  pull_request:
-    branches:
-      - maintenance-3.1.x
   workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:

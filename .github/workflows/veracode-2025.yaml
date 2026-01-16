@@ -11,9 +11,6 @@ name: Veracode LTS-2025
 on:
   schedule:
     - cron: '0 19 * * *'   # 7:00 PM UTC daily
-  pull_request:
-    branches:
-      - maintenance-3.1.x
   workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:
