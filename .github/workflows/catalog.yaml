@@ -42,6 +42,9 @@ env:
 jobs:
   catalog:
     runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'release' ||
+      startsWith(github.event.release.tag_name, 'v3.1.')
     steps:
       - uses: actions/checkout@v5
 
