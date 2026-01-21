@@ -104,10 +104,13 @@ jobs:
 
           echo "CLASSIFIER=${{ github.event.inputs.classifier }}" >> $GITHUB_ENV
 
+      - name: Debug catalog context
+        run: |
           echo "==== CATALOG DEBUG ===="
           echo "Debug only:  $DEBUG_ONLY"
           echo "WebUI ref:   $WEBUI_REF"
           echo "Platform:    $TARGET_PLATFORM"
+          echo "Classifier:  $CLASSIFIER"
           echo "======================="
 
       - name: Install dependencies
