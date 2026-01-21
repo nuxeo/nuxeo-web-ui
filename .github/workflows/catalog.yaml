@@ -4,19 +4,13 @@ name: Designer Catalog Generator
 on:
   workflow_dispatch:
     inputs:
-      catalog_mode:
-        description: 'Catalog type to generate'
-        type: choice
-        default: snapshot
-        options: [snapshot, stable]
+      webui_ref:
+        description: 'Web UI branch or tag (e.g. maintenance-3.1.x or v3.1.5)'
+        default: 'maintenance-3.1.x'
         required: true
       target_platform:
         description: 'The Nuxeo server target platform to build the catalog for.'
         default: '2023.0'
-        required: true
-      webui_ref:
-        description: 'Web UI branch or tag (e.g. maintenance-3.1.x or v3.1.5)'
-        default: 'maintenance-3.1.x'
         required: true
       debug_only:
         description: 'Run catalog generation without publishing or generating PRs'
@@ -99,12 +93,10 @@ jobs:
       - name: Normalize execution context
         run: |
           if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "CATALOG_MODE=stable" >> $GITHUB_ENV
             echo "DEBUG_ONLY=false" >> $GITHUB_ENV
             echo "WEBUI_REF=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
             echo "TARGET_PLATFORM=2023.0" >> $GITHUB_ENV
           else
-            echo "CATALOG_MODE=${{ github.event.inputs.catalog_mode }}" >> $GITHUB_ENV
             echo "DEBUG_ONLY=${{ github.event.inputs.debug_only }}" >> $GITHUB_ENV
             echo "WEBUI_REF=${{ github.event.inputs.webui_ref }}" >> $GITHUB_ENV
             echo "TARGET_PLATFORM=${{ github.event.inputs.target_platform }}" >> $GITHUB_ENV
@@ -113,7 +105,6 @@ jobs:
           echo "CLASSIFIER=${{ github.event.inputs.classifier }}" >> $GITHUB_ENV
 
           echo "==== CATALOG DEBUG ===="
-          echo "Mode:        $CATALOG_MODE"
           echo "Debug only:  $DEBUG_ONLY"
           echo "WebUI ref:   $WEBUI_REF"
           echo "Platform:    $TARGET_PLATFORM"
@@ -155,7 +146,7 @@ jobs:
         if: env.DEBUG_ONLY != 'true'
         working-directory: packages/nuxeo-designer-catalog
         run: |
-          if [[ "$CATALOG_MODE" == "snapshot" ]]; then
+          if [[ $CATALOG_VERSION == *-SNAPSHOT ]]; then
             MVN_REPO_ID=maven-public-snapshots
             MVN_REPO_URL=https://packages.nuxeo.com/repository/maven-public-snapshots/
           else
