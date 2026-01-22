@@ -26,15 +26,20 @@ const capability = {
   maxInstances: 1,
   browserName: 'chrome',
   acceptInsecureCerts: true,
-  browserVersion: 'latest',
+  browserVersion: 'stable',
 };
 const options = {
-  args: ['--no-sandbox'],
+  args: [
+    '--no-sandbox',
+    '--disable-background-networking',
+    '--disable-background-timer-throttling',
+    '--disable-backgrounding-occluded-windows',
+    '--disable-renderer-backgrounding',
+  ],
 };
 if (process.env.HEADLESS) {
   options.args.push('--window-size=1920,1080');
-  options.args.push('--single-process');
-  options.args.push('--headless');
+  options.args.push('--headless=new');
   options.args.push('--disable-gpu');
   options.args.push('--disable-dev-shm-usage');
 }
@@ -226,7 +231,9 @@ export const config = {
    */
   before() {
     // XXX not doing this affects the count for 'color-contrast' violations locally
-    browser.maximizeWindow();
+    if (!process.env.HEADLESS) {
+      browser.maximizeWindow();
+    }
   },
   /**
    * Runs before a WebdriverIO command gets executed.
