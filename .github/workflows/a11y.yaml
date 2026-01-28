@@ -49,6 +49,14 @@ jobs:
           node-version: 22
           scope: '@nuxeo'
 
+      - name: Debug auth user (first/last 6 chars)
+        run: |
+          val="$PACKAGES_AUTH_USER"
+          echo "First 6: ${val:0:6}"
+          echo "Last 6:  ${val: -6}"
+        env:
+          PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
+
       - name: Install Web UI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
