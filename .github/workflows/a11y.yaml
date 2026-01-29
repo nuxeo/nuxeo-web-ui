@@ -34,7 +34,6 @@ env:
 
 jobs:
   a11y:
-    # allow dependabot + same-repo PRs only
     if: |
       github.event_name == 'workflow_call' ||
       (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
