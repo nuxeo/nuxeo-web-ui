@@ -1,12 +1,17 @@
 name: Functional tests
 
 on:
+  # Human/internal PRs
   pull_request:
     branches:
       - maintenance-3.1.x
+  # Dependabot PRs only
   pull_request_target:
     branches:
       - maintenance-3.1.x
+    # Only run for dependabot PRs
+    types: [opened, synchronize]
+
   workflow_dispatch:
   workflow_call:
     inputs:
