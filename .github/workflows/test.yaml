@@ -15,7 +15,7 @@ on:
       NPM_PACKAGES_TOKEN:
         required: true
       SAUCE_ACCESS_KEY:
-        required: true
+        required: false
 
 permissions:
   contents: read
