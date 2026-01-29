@@ -1,7 +1,7 @@
 name: Functional tests
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - maintenance-3.1.x
   workflow_call:
@@ -25,12 +25,16 @@ permissions:
 env:
   REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.event.pull_request.head.ref || 'maintenance-3.1.x' }}
   NODE_OPTIONS: "--max-old-space-size=2048"
 
 jobs:
   ftests:
-    if: github.actor != 'dependabot[bot]'
+    if: >
+      github.actor == 'dependabot[bot]' ||
+      github.event_name == 'workflow_call' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+
     runs-on:
       group: medium-4cpu-runners
 
