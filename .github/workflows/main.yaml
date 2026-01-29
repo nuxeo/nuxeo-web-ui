@@ -29,8 +29,8 @@ jobs:
     uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
-      PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
+      REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+      REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
     with:
       branch: lts-2025
 
@@ -38,8 +38,8 @@ jobs:
     uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      PACKAGES_AUTH_USER: ${{ secrets.PACKAGES_AUTH_USER }}
-      PACKAGES_AUTH_TOKEN: ${{ secrets.PACKAGES_AUTH_TOKEN }}
+      REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+      REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
     with:
       branch: lts-2025
 
@@ -124,8 +124,8 @@ jobs:
               <servers>
                 <server>
                   <id>maven-internal</id>
-                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                  <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
+                  <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
                 </server>
               </servers>
               </settings>' > ~/.m2/settings.xml
