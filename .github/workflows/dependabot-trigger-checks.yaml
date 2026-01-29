@@ -21,7 +21,6 @@ jobs:
 
   test:
     if: github.actor == 'dependabot[bot]'
-    needs: lint
     uses: ./.github/workflows/test.yaml
     with:
       branch: ${{ github.event.pull_request.head.ref }}
@@ -30,7 +29,6 @@ jobs:
 
   a11y:
     if: github.actor == 'dependabot[bot]'
-    needs: test
     uses: ./.github/workflows/a11y.yaml
     with:
       branch: ${{ github.event.pull_request.head.ref }}
@@ -41,7 +39,6 @@ jobs:
 
   ftests:
     if: github.actor == 'dependabot[bot]'
-    needs: a11y
     uses: ./.github/workflows/ftest.yaml
     with:
       branch: ${{ github.event.pull_request.head.ref }}
