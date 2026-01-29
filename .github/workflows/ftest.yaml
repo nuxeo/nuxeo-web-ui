@@ -1,9 +1,14 @@
 name: Functional tests
 
 on:
+  pull_request:
+    branches:
+      - maintenance-3.1.x
+
   pull_request_target:
     branches:
       - maintenance-3.1.x
+
   workflow_call:
     inputs:
       branch:
@@ -30,10 +35,11 @@ env:
 
 jobs:
   ftests:
-    if: >
-      github.actor == 'dependabot[bot]' ||
+    if: |
       github.event_name == 'workflow_call' ||
-      github.event.pull_request.head.repo.full_name == github.repository
+      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository)
 
     runs-on:
       group: medium-4cpu-runners

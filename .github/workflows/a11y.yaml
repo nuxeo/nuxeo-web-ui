@@ -1,6 +1,10 @@
 name: A11y
 
 on:
+  pull_request:
+    branches:
+      - maintenance-3.1.x
+
   pull_request_target:
     branches:
       - maintenance-3.1.x
@@ -31,10 +35,11 @@ env:
 jobs:
   a11y:
     # allow dependabot + same-repo PRs only
-    if: >
-      github.actor == 'dependabot[bot]' ||
-      github.event.pull_request.head.repo.full_name == github.repository ||
-      github.event_name == 'workflow_call'
+    if: |
+      github.event_name == 'workflow_call' ||
+      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository)
 
     runs-on: ubuntu-latest
 
