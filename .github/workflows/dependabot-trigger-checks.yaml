@@ -10,7 +10,7 @@ permissions:
 jobs:
   lint:
     if: github.actor == 'dependabot[bot]'
-    uses: nuxeo/ui-team-gh-actions/.github/workflows/lint.yaml@lts-2025
+    uses: nuxeo/ui-team-gh-actions/.github/workflows/lint.yaml@main
     with:
       branch: ${{ github.event.pull_request.head.ref }}
     secrets:
@@ -19,7 +19,7 @@ jobs:
   test:
     if: github.actor == 'dependabot[bot]'
     needs: lint
-    uses: nuxeo/ui-team-gh-actions/.github/workflows/test.yaml@lts-2025
+    uses: nuxeo/ui-team-gh-actions/.github/workflows/test.yaml@main
     with:
       branch: ${{ github.event.pull_request.head.ref }}
     secrets:
@@ -28,7 +28,7 @@ jobs:
   a11y:
     if: github.actor == 'dependabot[bot]'
     needs: test
-    uses: nuxeo/ui-team-gh-actions/.github/workflows/a11y.yaml@lts-2025
+    uses: nuxeo/ui-team-gh-actions/.github/workflows/a11y.yaml@main
     with:
       branch: ${{ github.event.pull_request.head.ref }}
     secrets:
@@ -39,7 +39,7 @@ jobs:
   ftests:
     if: github.actor == 'dependabot[bot]'
     needs: a11y
-    uses: nuxeo/ui-team-gh-actions/.github/workflows/ftest.yaml@lts-2025
+    uses: nuxeo/ui-team-gh-actions/.github/workflows/ftest.yaml@main
     with:
       branch: ${{ github.event.pull_request.head.ref }}
     secrets:
