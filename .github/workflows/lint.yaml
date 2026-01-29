@@ -22,8 +22,8 @@ env:
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
 jobs:
-  if: github.actor != 'dependabot[bot]'
   lint:
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

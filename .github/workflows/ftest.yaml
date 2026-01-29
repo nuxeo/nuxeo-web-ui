@@ -29,8 +29,8 @@ env:
   NODE_OPTIONS: "--max-old-space-size=2048"
 
 jobs:
-  if: github.actor != 'dependabot[bot]'
   ftests:
+    if: github.actor != 'dependabot[bot]'
     runs-on:
       group: medium-4cpu-runners
 

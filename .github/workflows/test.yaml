@@ -24,8 +24,8 @@ env:
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
 jobs:
-  if: github.actor != 'dependabot[bot]'
   unit-test:
+    if: github.actor != 'dependabot[bot]'
     runs-on:
       group: medium-4cpu-runners
     steps:
