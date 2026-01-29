@@ -4,6 +4,10 @@ on:
   pull_request:
     branches:
       - maintenance-3.1.x
+  pull_request_target:
+    branches:
+      - maintenance-3.1.x
+  workflow_dispatch:
   workflow_call:
     inputs:
       branch:
@@ -13,13 +17,10 @@ on:
         required: false
     secrets:
       NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
         required: true
-      PACKAGES_AUTH_USER:
-        description: 'PACKAGES_AUTH_USER'
+      REPOSITORY_MANAGER_USERNAME:
         required: true
-      PACKAGES_AUTH_TOKEN:
-        description: 'PACKAGES_AUTH_TOKEN'
+      REPOSITORY_MANAGER_PASSWORD:
         required: true
 
 permissions:
@@ -37,9 +38,15 @@ jobs:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
-      - uses: actions/checkout@v6
+
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: >-
+            ${{ github.event_name == 'pull_request_target'
+                && github.actor == 'dependabot[bot]'
+                && github.event.pull_request.head.sha
+                || env.BRANCH_NAME }}
 
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
@@ -67,14 +74,14 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: 'Update settings.xml with server configuration'
+      - name: Update settings.xml with server configuration
         run: |
           echo '<settings>
               <servers>
                 <server>
                   <id>maven-internal</id>
-                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                  <username>${{ secrets.REPOSITORY_MANAGER_USERNAME || "" }}</username>
+                  <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD || "" }}</password>
                 </server>
               </servers>
               </settings>' > ~/.m2/settings.xml
