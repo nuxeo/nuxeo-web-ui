@@ -7,19 +7,16 @@ on:
   workflow_call:
     inputs:
       branch:
-        description: 'The current branch'
+        description: 'Branch to build'
         default: maintenance-3.1.x
         type: string
         required: false
     secrets:
       NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
         required: true
-      PACKAGES_AUTH_USER:
-        description: 'PACKAGES_AUTH_USER'
+      REPOSITORY_MANAGER_USERNAME:
         required: true
-      PACKAGES_AUTH_TOKEN:
-        description: 'PACKAGES_AUTH_TOKEN'
+      REPOSITORY_MANAGER_PASSWORD:
         required: true
 
 permissions:
@@ -30,16 +27,19 @@ env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
   NODE_OPTIONS: "--max-old-space-size=2048"
+
 jobs:
   ftests:
     runs-on:
       group: medium-4cpu-runners
+
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
 
-      - uses: actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -101,15 +101,12 @@ jobs:
           pushd core
           echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
-
           pushd ui
           echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
-
           pushd dataviz
           echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
-
           pushd testing-helpers
           echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
@@ -124,14 +121,14 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
 
-      - name: 'Update settings.xml with server configuration'
+      - name: Update settings.xml with server configuration
         run: |
           echo '<settings>
               <servers>
                 <server>
                   <id>maven-internal</id>
-                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                  <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
+                  <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
                 </server>
               </servers>
               </settings>' > ~/.m2/settings.xml

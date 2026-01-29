@@ -71,18 +71,18 @@ jobs:
               </server>
               <server>
                 <id>maven-internal</id>
-                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
+                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
               </server>
               <server>
                 <id>maven-public-releases</id>
-                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
+                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
               </server>
               <server>
                 <id>maven-public-snapshots</id>
-                <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
+                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
+                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
               </server>
             </servers>
           </settings>' > ~/.m2/settings.xml
