@@ -30,6 +30,7 @@ env:
 
 jobs:
   ftests:
+    if: github.actor != 'dependabot[bot]'
     runs-on:
       group: medium-4cpu-runners
 

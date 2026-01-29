@@ -25,6 +25,7 @@ env:
 
 jobs:
   unit-test:
+    if: github.actor != 'dependabot[bot]'
     runs-on:
       group: medium-4cpu-runners
     steps:
