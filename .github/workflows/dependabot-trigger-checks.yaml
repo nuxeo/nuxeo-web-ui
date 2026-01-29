@@ -2,6 +2,9 @@ name: Dependabot PR Checks
 
 on:
   pull_request:
+    branches:
+      - maintenance-3.1.x
+      - lts-2025
     types: [opened, synchronize]
 
 permissions:
@@ -10,7 +13,7 @@ permissions:
 jobs:
   lint:
     if: github.actor == 'dependabot[bot]'
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@main
+    uses: ./.github/workflows/lint.yaml
     with:
       branch: ${{ github.event.pull_request.head.ref }}
     secrets:
@@ -19,7 +22,7 @@ jobs:
   test:
     if: github.actor == 'dependabot[bot]'
     needs: lint
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@main
+    uses: ./.github/workflows/test.yaml
     with:
       branch: ${{ github.event.pull_request.head.ref }}
     secrets:
@@ -28,7 +31,7 @@ jobs:
   a11y:
     if: github.actor == 'dependabot[bot]'
     needs: test
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@main
+    uses: ./.github/workflows/a11y.yaml
     with:
       branch: ${{ github.event.pull_request.head.ref }}
     secrets:
@@ -39,7 +42,7 @@ jobs:
   ftests:
     if: github.actor == 'dependabot[bot]'
     needs: a11y
-    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@main
+    uses: ./.github/workflows/ftest.yaml
     with:
       branch: ${{ github.event.pull_request.head.ref }}
     secrets:
