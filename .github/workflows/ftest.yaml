@@ -1,22 +1,14 @@
 name: Functional tests
 
 on:
-  # Human/internal PRs
   pull_request:
     branches:
       - maintenance-3.1.x
-  # Dependabot PRs only
-  pull_request_target:
-    branches:
-      - maintenance-3.1.x
-    # Only run for dependabot PRs
-    types: [opened, synchronize]
-
   workflow_dispatch:
   workflow_call:
     inputs:
       branch:
-        description: 'The current branch'
+        description: 'Branch to build'
         default: maintenance-3.1.x
         type: string
         required: false
@@ -50,11 +42,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: >-
-            ${{ github.event_name == 'pull_request_target'
-                && github.actor == 'dependabot[bot]'
-                && github.event.pull_request.head.sha
-                || env.BRANCH_NAME }}
+          ref: ${{ env.BRANCH_NAME }}
 
       - uses: actions/setup-node@v6
         with:
@@ -114,15 +102,12 @@ jobs:
           pushd core
           echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
-
           pushd ui
           echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
-
           pushd dataviz
           echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd
-
           pushd testing-helpers
           echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
           popd

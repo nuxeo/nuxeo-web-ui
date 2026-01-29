@@ -7,13 +7,12 @@ on:
   workflow_call:
     inputs:
       branch:
-        description: 'The current branch'
+        description: 'Branch to lint'
         default: maintenance-3.1.x
         type: string
         required: false
     secrets:
       NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
         required: true
 
 permissions:

@@ -7,16 +7,14 @@ on:
   workflow_call:
     inputs:
       branch:
-        description: 'The current branch'
+        description: 'Branch to test'
         default: maintenance-3.1.x
         type: string
         required: false
     secrets:
       NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
         required: true
       SAUCE_ACCESS_KEY:
-        description: 'SAUCE_ACCESS_KEY'
         required: true
 
 permissions:
@@ -33,6 +31,7 @@ jobs:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
+
       - uses: actions/checkout@v6
         with:
           ref: ${{ env.BRANCH_NAME }}
