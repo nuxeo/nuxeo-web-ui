@@ -18,7 +18,7 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      suffix: "[lts-2025]"
+      prefix: "[lts-2025]"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -26,4 +26,4 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      suffix: "[lts-2025]"
+      prefix: "[lts-2025]"
