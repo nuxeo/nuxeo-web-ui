@@ -118,7 +118,7 @@ jobs:
           password: ${{ secrets.GKE_SA_KEY }}
 
       - name: Build and push server image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: server
           pull: true
@@ -127,7 +127,7 @@ jobs:
           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
 
       - name: Build and push image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: .
           pull: true
