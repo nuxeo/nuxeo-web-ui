@@ -4,6 +4,11 @@ on:
   pull_request:
     branches:
       - lts-2025
+
+  pull_request_target:
+    branches:
+      - lts-2025
+
   workflow_call:
     inputs:
       branch:
@@ -25,10 +30,16 @@ permissions:
 env:
   REFERENCE_BRANCH: lts-2025
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
+  BRANCH_NAME: ${{ github.head_ref || github.event.pull_request.head.ref || inputs.branch }}
 
 jobs:
   a11y:
+    if: |
+      github.event_name == 'workflow_call' ||
+      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository)
+
     runs-on: ubuntu-latest
 
     steps:
@@ -53,7 +64,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm cache clean -f 
+          npm cache clean --force
           npm install
           pushd packages/nuxeo-web-ui-ftest
           npm install
@@ -80,7 +91,7 @@ jobs:
               </settings>' > ~/.m2/settings.xml
 
       - name: Web UI build
-        run: mvn -B -ntp install -X
+        run: mvn -B -ntp install
 
       - name: A11y checks
         run: mvn -B -ntp -f plugin/a11y install
