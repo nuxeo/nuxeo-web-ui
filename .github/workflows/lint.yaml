@@ -3,12 +3,13 @@ name: Lint
 on:
   pull_request:
     branches:
+      - maintenance-3.1.x
       - lts-2025
+
   workflow_call:
     inputs:
       branch:
         description: 'Branch to lint'
-        default: lts-2025
         type: string
         required: false
     secrets:
@@ -19,11 +20,12 @@ permissions:
   contents: read
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.ref_name }}
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v6
         with:

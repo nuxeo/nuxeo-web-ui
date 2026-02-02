@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: write
+
 jobs:
   promote:
     runs-on: ubuntu-latest
@@ -34,7 +35,7 @@ jobs:
 
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
-      # Extract VERSION from the new format 2025.x.0-rc.y to get 2025.x.0
+      # Extract VERSION from x.y.z-rc.n → x.y.z
       - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -E 's/-rc\.[0-9]+//')" >> $GITHUB_ENV
 
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
@@ -48,10 +49,8 @@ jobs:
           popd
 
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_VERSION"'/'"$VERSION"'/g' {} \;
-          # XXX: undo the padded lock (see WEBUI-140)
           sed -i -e 's/<webui.package.version>.*<\/webui.package.version>/<webui.package.version>${project.version}<\/webui.package.version>/g' plugin/web-ui/marketplace/pom.xml
 
-          # align on same promoted version of elements
           npm i @nuxeo/nuxeo-elements@$VERSION --save-exact
           npm i @nuxeo/nuxeo-dataviz-elements@$VERSION --save-exact
           npm i @nuxeo/nuxeo-ui-elements@$VERSION --save-exact
@@ -88,8 +87,14 @@ jobs:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
-          PADDED=$(printf '%03d' $(echo ${{ github.event.inputs.version }} | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
-          PADDED_VERSION=$(echo ${{ github.event.inputs.version }} | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
+          VERSION_INPUT='${{ github.event.inputs.version }}'
+          # Validate version format: e.g. 3.1.2-rc.2 or 2025.1.0-rc.2
+          if ! echo "$VERSION_INPUT" | grep -Eq '^[0-9]{1,4}\.[0-9]+\.[0-9]+-rc\.[0-9]+$'; then
+            echo "Error: invalid version format '$VERSION_INPUT'. Expected format like 3.1.2-rc.2 or 2025.1.0-rc.2"
+            exit 1
+          fi
+          PADDED=$(printf '%03d' "$(echo "$VERSION_INPUT" | sed -r 's/.*-rc\.([0-9]+)/\1/g')")
+          PADDED_VERSION=$(echo "$VERSION_INPUT" | sed -E "s/(.*-rc\.)[0-9]+/\1$PADDED/")
           curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=$PADDED_VERSION"
           # Extract and remove RC from package.xml
           unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
@@ -134,18 +139,19 @@ jobs:
           token: ${{ secrets.GIT_ADMIN_TOKEN }}
           ref: ${{ github.event.inputs.referenceBranch }}
 
-      - if: ${{ github.event.inputs.referenceBranch == 'master' }}
-        run: echo "NEW_VERSION=$(npx semver -i minor $VERSION)" >> $GITHUB_ENV
+      - name: Compute next version
+        run: |
+          if [[ "${{ github.event.inputs.referenceBranch }}" == "maintenance-3.1.x" ]]; then
+            echo "NEW_VERSION=$(npx semver -i patch $VERSION)" >> $GITHUB_ENV
+          else
+            echo "NEW_VERSION=$(npx semver -i minor $VERSION)" >> $GITHUB_ENV
+          fi
 
-      - if: ${{ github.event.inputs.referenceBranch != 'master' }}
-        run: echo "NEW_VERSION=$(npx semver -i minor $VERSION)" >> $GITHUB_ENV
-
-      - name: Align ${{ github.event.inputs.referenceBranch }} branch on next version ${{ env.NEW_VERSION }}-SNAPSHOT
+      - name: Align branch on next SNAPSHOT
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          echo "OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
-
+          OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')
           # bump version to next SNAPSHOT and align on the corresponding Elements release candidate
           NEW_SNAPSHOT=$NEW_VERSION-SNAPSHOT
           npm version $NEW_SNAPSHOT --no-git-tag-version
@@ -153,32 +159,17 @@ jobs:
           npm version $NEW_SNAPSHOT --no-git-tag-version
           popd
 
-      - if: ${{ github.event.inputs.referenceBranch == 'master' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          NEW_ELEMENTS_VERSION="^$NEW_VERSION-rc"
-          npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="^"
-          npm i @nuxeo/nuxeo-dataviz-elements@$NEW_ELEMENTS_VERSION --save-prefix="^"
-          npm i @nuxeo/nuxeo-ui-elements@$NEW_ELEMENTS_VERSION --save-prefix="^"
-          npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="^"
-
-      - if: ${{ github.event.inputs.referenceBranch != 'master' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
           NEW_ELEMENTS_VERSION="~$NEW_VERSION-rc"
-          npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
-          npm i @nuxeo/nuxeo-dataviz-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
-          npm i @nuxeo/nuxeo-ui-elements@$NEW_ELEMENTS_VERSION --save-prefix="~"
-          npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="~"
+          if [[ "${{ github.event.inputs.referenceBranch }}" == "master" ]]; then
+            NEW_ELEMENTS_VERSION="^$NEW_VERSION-rc"
+          fi
 
-      - run: |
-          NEW_SNAPSHOT="$NEW_VERSION-SNAPSHOT"
+          npm i @nuxeo/nuxeo-elements@$NEW_ELEMENTS_VERSION --save-prefix="${NEW_ELEMENTS_VERSION:0:1}"
+          npm i @nuxeo/nuxeo-dataviz-elements@$NEW_ELEMENTS_VERSION --save-prefix="${NEW_ELEMENTS_VERSION:0:1}"
+          npm i @nuxeo/nuxeo-ui-elements@$NEW_ELEMENTS_VERSION --save-prefix="${NEW_ELEMENTS_VERSION:0:1}"
+          npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="${NEW_ELEMENTS_VERSION:0:1}"
 
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_SNAPSHOT"'/'"$NEW_SNAPSHOT"'/g' {} \;
-
-          # commit and push
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
 
       - if: ${{ github.event.inputs.dryRun == 'false' }}

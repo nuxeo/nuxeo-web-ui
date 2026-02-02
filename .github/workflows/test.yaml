@@ -3,12 +3,13 @@ name: Test
 on:
   pull_request:
     branches:
+      - maintenance-3.1.x
       - lts-2025
+
   workflow_call:
     inputs:
       branch:
         description: 'Branch to test'
-        default: lts-2025
         type: string
         required: false
     secrets:
@@ -21,12 +22,13 @@ permissions:
   contents: read
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.ref_name }}
 
 jobs:
   unit-test:
     runs-on:
-      group: medium-4cpu-runners  
+      group: medium-4cpu-runners
+
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -42,15 +44,13 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
-      - name: delete cache
-        run: npm cache clean -f
+      - name: Clean npm cache
+        run: npm cache clean --force
 
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          npm cache clean --force
-          npm install
+        run: npm install
 
       - name: Unit tests
         # Disabling SauceLabs. Karma is not compatible with SauceLabs v4
