@@ -4,11 +4,12 @@ on:
   pull_request:
     branches:
       - maintenance-3.1.x
+      - lts-2025
+
   workflow_call:
     inputs:
       branch:
         description: 'Branch to lint'
-        default: maintenance-3.1.x
         type: string
         required: false
     secrets:
@@ -19,11 +20,12 @@ permissions:
   contents: read
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.base_ref }}
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v6
         with:

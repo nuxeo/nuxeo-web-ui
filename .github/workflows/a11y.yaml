@@ -4,16 +4,17 @@ on:
   pull_request:
     branches:
       - maintenance-3.1.x
+      - lts-2025
 
   pull_request_target:
     branches:
       - maintenance-3.1.x
+      - lts-2025
 
   workflow_call:
     inputs:
       branch:
         description: 'Branch to build'
-        default: maintenance-3.1.x
         type: string
         required: false
     secrets:
@@ -28,7 +29,6 @@ permissions:
   contents: read
 
 env:
-  REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || github.event.pull_request.head.ref || inputs.branch }}
 
@@ -38,9 +38,13 @@ jobs:
       github.event_name == 'workflow_call' ||
       (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
       (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' &&
-      github.event.pull_request.head.repo.full_name == github.repository)
+       github.event.pull_request.head.repo.full_name == github.repository)
 
     runs-on: ubuntu-latest
+
+    env:
+      REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch }}
+      JAVA_VERSION: ${{ github.base_ref == 'lts-2025' && '21' || '17' }}
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
@@ -76,7 +80,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Update settings.xml with server configuration
         run: |
