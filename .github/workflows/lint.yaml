@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.base_ref }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.ref_name }}
 
 jobs:
   lint:

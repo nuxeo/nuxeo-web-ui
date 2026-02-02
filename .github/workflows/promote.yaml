@@ -87,8 +87,14 @@ jobs:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
-          PADDED=$(printf '%03d' $(echo ${{ github.event.inputs.version }} | sed -r s/.*-rc\.([0-9]+)/\\1/g))
-          PADDED_VERSION=$(echo ${{ github.event.inputs.version }} | sed -E "s/(.*-rc\.)[0-9]+/\\1$PADDED/")
+          VERSION_INPUT='${{ github.event.inputs.version }}'
+          # Validate version format: e.g. 3.1.2-rc.2 or 2025.1.0-rc.2
+          if ! echo "$VERSION_INPUT" | grep -Eq '^[0-9]{1,4}\.[0-9]+\.[0-9]+-rc\.[0-9]+$'; then
+            echo "Error: invalid version format '$VERSION_INPUT'. Expected format like 3.1.2-rc.2 or 2025.1.0-rc.2"
+            exit 1
+          fi
+          PADDED=$(printf '%03d' "$(echo "$VERSION_INPUT" | sed -r 's/.*-rc\.([0-9]+)/\1/g')")
+          PADDED_VERSION=$(echo "$VERSION_INPUT" | sed -E "s/(.*-rc\.)[0-9]+/\1$PADDED/")
           curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=$PADDED_VERSION"
           # Extract and remove RC from package.xml
           unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip

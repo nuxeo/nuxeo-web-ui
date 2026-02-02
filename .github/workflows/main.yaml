@@ -159,7 +159,7 @@ jobs:
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
           PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
-          curl -u "${{ secrets.CONNECT_PREPROD_AUTH }}" \
+          curl -fS -u "${{ secrets.CONNECT_PREPROD_AUTH }}" \
                -F package=@$PACKAGE \
                "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
 
