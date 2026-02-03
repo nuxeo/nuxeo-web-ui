@@ -29,7 +29,7 @@ permissions:
   contents: read
 
 env:
-  REFERENCE_BRANCH: ${{ startsWith(inputs.branch || github.head_ref || github.event.pull_request.base.ref, 'lts-') && 'lts-2025' || 'maintenance-3.1.x' }}
+  REFERENCE_BRANCH: ${{ startsWith(inputs.branch || github.event.pull_request.base.ref || github.ref_name, 'lts-') && 'lts-2025' || 'maintenance-3.1.x' }}
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.event.pull_request.head.ref }}
   NODE_OPTIONS: "--max-old-space-size=2048"
