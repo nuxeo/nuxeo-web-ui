@@ -46,7 +46,7 @@ permissions:
 
 env:
   # Decide reference branch dynamically
-  REFERENCE_BRANCH: ${{ startsWith(github.event.inputs.branch_name, 'lts-') && 'lts-2025' || 'maintenance-3.1.x' }}
+  REFERENCE_BRANCH: lts-2025
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
@@ -80,7 +80,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: ${{ startsWith(github.event.inputs.branch_name, 'lts-') && '21' || '17' }}
+          java-version: 21
 
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a

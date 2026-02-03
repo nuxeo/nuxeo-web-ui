@@ -44,7 +44,14 @@ jobs:
 
     env:
       REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch }}
-      JAVA_VERSION: ${{ github.base_ref == 'lts-2025' && '21' || '17' }}
+      # Branch → Java version mapping
+      JAVA_VERSION_MAP: >-
+        {"lts-2025":"21","maintenance-3.1.x":"17","default":"17"}
+
+      # Pick Java version from map, fallback to default
+      JAVA_VERSION: >-
+        ${{ fromJson(env.JAVA_VERSION_MAP)[env.REFERENCE_BRANCH]
+            || fromJson(env.JAVA_VERSION_MAP).default }}
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
