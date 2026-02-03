@@ -33,14 +33,6 @@ env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.event.pull_request.head.ref }}
   NODE_OPTIONS: "--max-old-space-size=2048"
-  # Branch → Java version mapping
-  JAVA_VERSION_MAP: >-
-    {"lts-2025":"21","maintenance-3.1.x":"17","default":"17"}
-
-  # Pick Java version from map, fallback to default
-  JAVA_VERSION: >-
-    ${{ fromJson(env.JAVA_VERSION_MAP)[env.REFERENCE_BRANCH]
-        || fromJson(env.JAVA_VERSION_MAP).default }}
 
 jobs:
   ftests:
@@ -69,6 +61,14 @@ jobs:
           always-auth: true
           scope: '@nuxeo'
           node-version: 22
+
+      - name: Resolve Java version
+        run: |
+          MAP='{"lts-2025":"21","maintenance-3.1.x":"17","default":"17"}'
+          BRANCH="${REFERENCE_BRANCH}"
+
+          JAVA=$(echo "$MAP" | jq -r --arg b "$BRANCH" '.[$b] // .default')
+          echo "JAVA_VERSION=$JAVA" >> $GITHUB_ENV
 
       - uses: actions/setup-java@v5
         with:
