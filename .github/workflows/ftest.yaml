@@ -120,7 +120,7 @@ jobs:
           pushd nuxeo-elements
           for d in core ui dataviz testing-helpers; do
             pushd $d
-            echo "ELEMENTS_$(echo $d | tr a-z A-Z)=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+            echo "ELEMENTS_$(echo $d | tr 'a-z-' 'A-Z_')=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
             popd
           done
           popd
