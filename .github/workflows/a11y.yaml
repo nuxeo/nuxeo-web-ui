@@ -35,54 +35,39 @@ env:
 
 jobs:
   a11y:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_call' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
     runs-on: ubuntu-latest
-
     steps:
-      - name: Set run flag
-        run: |
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ] || [ "$GITHUB_EVENT_NAME" = "workflow_call" ] || ( [ "$GITHUB_EVENT_NAME" = "pull_request_target" ] && [ "$GITHUB_ACTOR" = "dependabot[bot]" ] ); then
-            echo "run=true" >> $GITHUB_ENV
-          else
-            echo "run=false" >> $GITHUB_ENV
-          fi
-
       - name: Debug
-        if: env.run == 'true'
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
           echo "Run flag: ${{ env.run }}"
 
       - uses: catchpoint/workflow-telemetry-action@v2
-        if: env.run == 'true'
         with:
           comment_on_pr: false
 
       - name: Checkout code
-        if: env.run == 'true'
         uses: actions/checkout@v6
         with:
           ref: ${{ env.BRANCH_NAME }}
 
       - name: Run git config
-        if: env.run == 'true'
         run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - uses: actions/setup-node@v6
-        if: env.run == 'true'
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           node-version: 22
           scope: '@nuxeo'
 
       - uses: actions/setup-java@v5
-        if: env.run == 'true'
         with:
           distribution: 'zulu'
           java-version: 17
 
       - name: Install Web UI
-        if: env.run == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
@@ -96,7 +81,6 @@ jobs:
           popd
 
       - name: Update settings.xml with server configuration
-        if: env.run == 'true'
         run: |
           echo '<settings>
               <servers>
@@ -109,9 +93,7 @@ jobs:
               </settings>' > ~/.m2/settings.xml
 
       - name: Web UI build
-        if: env.run == 'true'
         run: mvn -B -ntp install
 
       - name: A11y checks
-        if: env.run == 'true'
         run: mvn -B -ntp -f plugin/a11y install
