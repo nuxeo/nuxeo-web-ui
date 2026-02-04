@@ -149,6 +149,12 @@ Polymer({
       this.$.doc.data = this.document;
       action = this.$.doc.post();
     } else {
+      // ✅ CLEANUP multinumber:nums before sending
+      if (this._dirtyProperties && Array.isArray(this._dirtyProperties['multinumber:nums'])) {
+        this._dirtyProperties['multinumber:nums'] = this._dirtyProperties['multinumber:nums']
+          .map(Number) // convert everything to number
+          .filter((n) => !Number.isNaN(n)); // keep only valid numbers
+      }
       // edit
       this.$.doc.data = {
         'entity-type': 'document',
