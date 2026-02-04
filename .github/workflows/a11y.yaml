@@ -34,9 +34,14 @@ env:
 
 jobs:
   a11y:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_call' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
     runs-on: ubuntu-latest
-
     steps:
+      - name: Debug
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
@@ -46,7 +51,8 @@ jobs:
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
+      - name: Run git config
+        run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - uses: actions/setup-node@v6
         with:
