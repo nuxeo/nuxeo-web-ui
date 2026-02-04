@@ -38,7 +38,7 @@ jobs:
   ftests:
     runs-on:
       group: medium-4cpu-runners
-    if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
+    if: github.event_name != 'pull_request_target' || github.actor == 'dependabot[bot]'
 
     steps:
       - name: Debug
