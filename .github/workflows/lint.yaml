@@ -3,7 +3,6 @@ name: Lint
 on:
   pull_request:
     branches:
-      - maintenance-3.1.x
       - lts-2025
 
   workflow_call:
@@ -20,7 +19,7 @@ permissions:
   contents: read
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.ref_name }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
 
 jobs:
   lint:

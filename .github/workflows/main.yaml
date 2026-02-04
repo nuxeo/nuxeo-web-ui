@@ -3,7 +3,6 @@ name: Main
 on:
   push:
     branches:
-      - maintenance-3.1.x
       - lts-2025
   workflow_dispatch:
 
@@ -12,43 +11,40 @@ permissions:
 
 jobs:
   lint:
-    uses: ./.github/workflows/lint.yaml
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/lint.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
 
   test:
-    uses: ./.github/workflows/test.yaml
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/test.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
     with:
-      branch: ${{ github.ref_name }}
+      branch: lts-2025
 
   a11y:
-    uses: ./.github/workflows/a11y.yaml
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/a11y.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
       REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
     with:
-      branch: ${{ github.ref_name }}
+      branch: lts-2025
 
   ftest:
-    uses: ./.github/workflows/ftest.yaml
+    uses: nuxeo/nuxeo-web-ui/.github/workflows/ftest.yaml@lts-2025
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
       REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
     with:
-      branch: ${{ github.ref_name }}
+      branch: lts-2025
 
   build:
     needs: [lint, test, a11y, ftest]
     runs-on:
       group: medium-4cpu-runners
-
-    env:
-      BRANCH_NAME: ${{ github.ref_name }}
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
@@ -64,26 +60,10 @@ jobs:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
-      - name: Resolve branch-dependent config
-        run: |
-          MAP='{"lts-2025":"21","maintenance-3.1.x":"17","default":"17"}'
-          BRANCH="${BRANCH_NAME}"
-
-          JAVA=$(echo "$MAP" | jq -r --arg b "$BRANCH" '.[$b] // .default')
-
-          if [[ "$BRANCH" == lts-* ]]; then
-            ELEMENTS_PATTERN='202[0-9]\.[0-9]+\.[0-9]+-rc\.[0-9]+$'
-          else
-            ELEMENTS_PATTERN='3\.1\.[0-9]+-rc\.[0-9]+$'
-          fi
-
-          echo "JAVA_VERSION=$JAVA" >> $GITHUB_ENV
-          echo "ELEMENTS_PATTERN=$ELEMENTS_PATTERN" >> $GITHUB_ENV
-
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: 21
 
       - name: Prepare environment
         run: |
@@ -93,7 +73,7 @@ jobs:
         run: |
           git fetch origin --tags
           RC_VERSION=$(git tag --sort=taggerdate --list "v${PACKAGE_VERSION/-SNAPSHOT}*" | tail -1 | tr -d '\n')
-          echo "VERSION=$(npx semver -i prerelease --preid rc ${RC_VERSION:-$PACKAGE_VERSION})" >> $GITHUB_ENV
+          echo "VERSION=$(npx semver -i prerelease --preid rc ${RC_VERSION:-$PACKAGE_VERSION}  | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Update versions
         env:
@@ -101,6 +81,7 @@ jobs:
         run: |
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$PACKAGE_VERSION"'/'"$VERSION"'/g' {} \;
 
+          # set padded version to build package for connect preprod
           PADDED=$(printf '%03d' $(echo $VERSION | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
           PADDED_VERSION=$(echo $VERSION | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
           echo "PADDED_VERSION=$PADDED_VERSION" >> $GITHUB_ENV
@@ -108,19 +89,19 @@ jobs:
 
           npm version ${VERSION} --no-git-tag-version
 
-          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
-            | jq -r '.[]' \
-            | grep -E "${{ env.ELEMENTS_PATTERN }}" \
-            | sort -V | tail -n1)
+          # Get latest UI Elements version
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
 
           echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
 
+          # Update package.json dependencies and devDependencies
           jq --arg ver "~$ELEMENTS_VERSION" '
             .dependencies."@nuxeo/nuxeo-dataviz-elements" = $ver |
             .dependencies."@nuxeo/nuxeo-elements" = $ver |
             .dependencies."@nuxeo/nuxeo-ui-elements" = $ver |
             .devDependencies."@nuxeo/testing-helpers" = $ver
           ' package.json > tmp.json && mv tmp.json package.json
+          echo "Updated all Nuxeo dependencies to version $ELEMENTS_VERSION"
 
           pushd packages/nuxeo-web-ui-ftest
           npm version ${VERSION} --no-git-tag-version

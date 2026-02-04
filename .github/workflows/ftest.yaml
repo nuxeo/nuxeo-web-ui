@@ -3,12 +3,10 @@ name: Functional tests
 on:
   pull_request:
     branches:
-      - maintenance-3.1.x
       - lts-2025
 
   pull_request_target:
     branches:
-      - maintenance-3.1.x
       - lts-2025
 
   workflow_call:
@@ -29,9 +27,9 @@ permissions:
   contents: read
 
 env:
-  REFERENCE_BRANCH: ${{ startsWith(inputs.branch || github.event.pull_request.base.ref || github.ref_name, 'lts-') && 'lts-2025' || 'maintenance-3.1.x' }}
+  REFERENCE_BRANCH: lts-2025
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.event.pull_request.head.ref }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.event.pull_request.head.ref || 'lts-2025' }}
   NODE_OPTIONS: "--max-old-space-size=2048"
 
 jobs:
@@ -62,18 +60,10 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
-      - name: Resolve Java version
-        run: |
-          MAP='{"lts-2025":"21","maintenance-3.1.x":"17","default":"17"}'
-          BRANCH="${REFERENCE_BRANCH}"
-
-          JAVA=$(echo "$MAP" | jq -r --arg b "$BRANCH" '.[$b] // .default')
-          echo "JAVA_VERSION=$JAVA" >> $GITHUB_ENV
-
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: 21
 
       - name: Install dependencies
         env:
