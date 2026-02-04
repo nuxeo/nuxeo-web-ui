@@ -36,6 +36,10 @@ env:
 jobs:
   a11y:
     runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') ||
+      github.event_name == 'workflow_call'
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2

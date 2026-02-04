@@ -3,7 +3,10 @@ name: Main
 on:
   push:
     branches:
-      - maintenance-3.1.x
+      - maintenance-3.1.x  # Adjust for lts-2025 if needed
+  pull_request:
+    branches:
+      - maintenance-3.1.x  # Adjust for lts-2025 if needed
   workflow_dispatch:
 
 permissions:
@@ -143,6 +146,7 @@ jobs:
             plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
 
       - name: Tag
+        if: github.event_name != 'pull_request'  # Skip on PR
         run: |
           git add package-lock.json packages/nuxeo-web-ui-ftest/package-lock.json
           git commit -a -m "Release ${VERSION}"
@@ -150,6 +154,7 @@ jobs:
           git push origin v${VERSION}
 
       - name: Publish Nuxeo packages
+        if: github.event_name != 'pull_request'  # Skip on PR
         env:
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
         run: |
@@ -159,6 +164,7 @@ jobs:
                "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
 
       - name: Publish Web UI FTest framework
+        if: github.event_name != 'pull_request'  # Skip on PR
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
