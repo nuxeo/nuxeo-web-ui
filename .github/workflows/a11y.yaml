@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
-          echo "Run flag: ${{ env.run }}"
+          echo "Run flag: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_call' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') }}"
 
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
