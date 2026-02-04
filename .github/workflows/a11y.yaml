@@ -34,15 +34,14 @@ env:
 
 jobs:
   a11y:
-    if: |
-      github.event_name == 'workflow_call' ||
-      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
-      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' &&
-      github.event.pull_request.head.repo.full_name == github.repository)
-
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_call' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
     runs-on: ubuntu-latest
-
     steps:
+      - name: Debug
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
@@ -52,13 +51,19 @@ jobs:
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
+      - name: Run git config
+        run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - uses: actions/setup-node@v6
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           node-version: 22
           scope: '@nuxeo'
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: 21
 
       - name: Install Web UI
         env:
@@ -72,11 +77,6 @@ jobs:
           pushd packages/nuxeo-designer-catalog
           npm install
           popd
-
-      - uses: actions/setup-java@v5
-        with:
-          distribution: 'zulu'
-          java-version: '21'
 
       - name: Update settings.xml with server configuration
         run: |

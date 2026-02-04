@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - lts-2025
+
   workflow_call:
     inputs:
       branch:
@@ -26,7 +27,8 @@ env:
 jobs:
   unit-test:
     runs-on:
-      group: medium-4cpu-runners  
+      group: medium-4cpu-runners
+
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -42,15 +44,13 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
-      - name: delete cache
-        run: npm cache clean -f
+      - name: Clean npm cache
+        run: npm cache clean --force
 
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          npm cache clean --force
-          npm install
+        run: npm install
 
       - name: Unit tests
         # Disabling SauceLabs. Karma is not compatible with SauceLabs v4
