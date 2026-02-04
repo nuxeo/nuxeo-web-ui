@@ -5,15 +5,16 @@ on:
     types: [closed, unlabeled]
     branches:
       - maintenance-3.1.x
-      - lts-2025
 
   workflow_dispatch:
     inputs:
       branch_name:
         description: 'The name of the branch to preview.'
+        default: 'maintenance-3.1.x'
         required: true
       caller_id:
         description: 'run identifier'
+        default: 'maintenance-3.1.x'
         type: string
         required: false
 

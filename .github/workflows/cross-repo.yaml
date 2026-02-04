@@ -7,6 +7,7 @@ on:
     inputs:
       branch_name:
         description: 'The name of the branch to build.'
+        default: 'maintenance-3.1.x'
         required: true
       sauce_labs:
         description: 'Run unit tests on Sauce Labs?'
@@ -39,13 +40,14 @@ on:
         required: false
       caller_id:
         description: 'run identifier'
+        default: 'maintenance-3.1.x'
+        type: string
         required: false
 
 permissions:
   contents: read
 
 env:
-  # Decide reference branch dynamically
   REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
@@ -76,7 +78,6 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
-      # Java version depends on branch
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'

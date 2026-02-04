@@ -4,17 +4,16 @@ on:
   pull_request:
     branches:
       - maintenance-3.1.x
-      - lts-2025
 
   pull_request_target:
     branches:
       - maintenance-3.1.x
-      - lts-2025
 
   workflow_call:
     inputs:
       branch:
         description: 'Branch to build'
+        default: maintenance-3.1.x
         type: string
         required: false
     secrets:
@@ -29,9 +28,9 @@ permissions:
   contents: read
 
 env:
+  REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || github.event.pull_request.head.ref || inputs.branch }}
-  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch }}
 
 jobs:
   a11y:
@@ -61,18 +60,10 @@ jobs:
           node-version: 22
           scope: '@nuxeo'
 
-      - name: Resolve Java version
-        run: |
-          MAP='{"lts-2025":"21","maintenance-3.1.x":"17","default":"17"}'
-          BRANCH="${REFERENCE_BRANCH}"
-
-          JAVA=$(echo "$MAP" | jq -r --arg b "$BRANCH" '.[$b] // .default')
-          echo "JAVA_VERSION=$JAVA" >> $GITHUB_ENV
-
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: 17
 
       - name: Install Web UI
         env:

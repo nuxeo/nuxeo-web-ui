@@ -5,7 +5,6 @@ on:
     types: [opened, synchronize, reopened, labeled]
     branches:
       - maintenance-3.1.x
-      - lts-2025
 
   workflow_dispatch:
     inputs:
@@ -15,7 +14,7 @@ on:
         required: true
       caller_id:
         description: 'run identifier'
-        default: 'manual'
+        default: 'maintenance-3.1.x'
         type: string
         required: false
 
@@ -58,10 +57,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "BRANCH_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
-            echo "DEFAULT_BRANCH=${{ github.base_ref }}" >> $GITHUB_ENV
           else
             echo "BRANCH_NAME=${{ github.event.inputs.branch_name }}" >> $GITHUB_ENV
-            echo "DEFAULT_BRANCH=${{ github.event.inputs.branch_name }}" >> $GITHUB_ENV
           fi
 
       - name: Determine nuxeo-web-ui branch to use
@@ -70,7 +67,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-web-ui
           branch: ${{ env.BRANCH_NAME }}
-          default-branch: ${{ env.DEFAULT_BRANCH }}
+          default-branch: maintenance-3.1.x
 
       - uses: actions/checkout@v3
         with:
@@ -87,7 +84,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-elements
           branch: ${{ env.BRANCH_NAME }}
-          default-branch: ${{ env.DEFAULT_BRANCH }}
+          default-branch: maintenance-3.1.x
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v2
@@ -145,6 +142,16 @@ jobs:
           location: ${{ env.GKE_ZONE }}
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials: ${{ secrets.GKE_SA_KEY }}
+
+      - name: Check preview namespace
+        id: preview_ns
+        run: |
+          echo "exists=$(kubectl get namespace ${PREVIEW_NAMESPACE})" >> $GITHUB_OUTPUT
+
+      - name: Create preview namespace
+        if: ${{ !steps.preview_ns.outputs.exists }}
+        run: |
+          kubectl create namespace ${PREVIEW_NAMESPACE}
 
       - name: Install preview
         id: preview
