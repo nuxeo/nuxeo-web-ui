@@ -36,43 +36,53 @@ env:
 jobs:
   a11y:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request_target' || github.actor == 'dependabot[bot]'
 
     steps:
+      - name: Set run flag
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ] || [ "$GITHUB_EVENT_NAME" = "workflow_call" ] || ( [ "$GITHUB_EVENT_NAME" = "pull_request_target" ] && [ "$GITHUB_ACTOR" = "dependabot[bot]" ] ); then
+            echo "run=true" >> $GITHUB_ENV
+          else
+            echo "run=false" >> $GITHUB_ENV
+          fi
+
       - name: Debug
+        if: env.run == 'true'
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
-          echo "Condition result: ${{ github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call' }}"
+          echo "Run flag: ${{ env.run }}"
+
       - uses: catchpoint/workflow-telemetry-action@v2
+        if: env.run == 'true'
         with:
           comment_on_pr: false
 
       - name: Checkout code
-        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
+        if: env.run == 'true'
         uses: actions/checkout@v6
         with:
           ref: ${{ env.BRANCH_NAME }}
 
       - name: Run git config
-        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
+        if: env.run == 'true'
         run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
       - uses: actions/setup-node@v6
-        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
+        if: env.run == 'true'
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           node-version: 22
           scope: '@nuxeo'
 
       - uses: actions/setup-java@v5
-        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
+        if: env.run == 'true'
         with:
           distribution: 'zulu'
           java-version: 17
 
       - name: Install Web UI
-        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
+        if: env.run == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
@@ -86,7 +96,7 @@ jobs:
           popd
 
       - name: Update settings.xml with server configuration
-        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
+        if: env.run == 'true'
         run: |
           echo '<settings>
               <servers>
@@ -99,9 +109,9 @@ jobs:
               </settings>' > ~/.m2/settings.xml
 
       - name: Web UI build
-        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
+        if: env.run == 'true'
         run: mvn -B -ntp install
 
       - name: A11y checks
-        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
+        if: env.run == 'true'
         run: mvn -B -ntp -f plugin/a11y install
