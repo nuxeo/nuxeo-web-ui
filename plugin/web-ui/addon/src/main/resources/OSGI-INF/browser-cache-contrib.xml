@@ -9,10 +9,15 @@
       <!-- if url contains a timestamp param: approximately one year -->
       <pattern>${org.nuxeo.ecm.contextPath}/ui/.*\\?.*ts=.+</pattern>
     </filterConfig>
+    <!-- NO CACHE for i18n -->
+    <filterConfig name="no_cache_i18n" cached="false" cacheTime="0">
+      <pattern>/nuxeo/ui/i18n/.*</pattern>
+    </filterConfig>
     <filterConfig name="ui_static" cached="true" cacheTime="86400">
       <!-- For other web ui resources: trade off between agressive caching and HF applying within 24 hours -->
       <!-- Exclude JS and HTML files due to: https://jira.nuxeo.com/browse/NXP-25595 -->
       <pattern>${org.nuxeo.ecm.contextPath}/ui/.*\.(?!(html|js|jsp)$).*</pattern>
+      <excludePattern>/nuxeo/ui/i18n/.*</excludePattern>
     </filterConfig>
   </extension>
 
