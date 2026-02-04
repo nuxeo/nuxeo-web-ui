@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to promote (e.g.: 3.1.2-rc.2 or 2025.1.0-rc.2)'
+        description: 'Version to promote (e.g.: 2025.1.0-rc.2)'
         required: true
       referenceBranch:
         description: 'Branch to be updated after the promotion'
         required: true
-        default: 'maintenance-3.1.x'
+        default: 'lts-2025'
       dryRun:
         description: 'Run the workflow without pushing code or publishing artifacts'
         type: boolean
@@ -89,7 +89,7 @@ jobs:
         run: |
           VERSION_INPUT='${{ github.event.inputs.version }}'
           # Validate version format: e.g. 3.1.2-rc.2 or 2025.1.0-rc.2
-          if ! echo "$VERSION_INPUT" | grep -Eq '^[0-9]{1,4}\.[0-9]+\.[0-9]+-rc\.[0-9]+$'; then
+          if ! echo "$VERSION_INPUT" | grep -Eq '^([0-9]{1,2}|[0-9]{4})\.[0-9]+\.[0-9]+-rc\.[0-9]+$'; then
             echo "Error: invalid version format '$VERSION_INPUT'. Expected format like 3.1.2-rc.2 or 2025.1.0-rc.2"
             exit 1
           fi

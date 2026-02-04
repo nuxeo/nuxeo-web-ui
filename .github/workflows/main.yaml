@@ -49,8 +49,6 @@ jobs:
 
     env:
       BRANCH_NAME: ${{ github.ref_name }}
-      JAVA_VERSION: ${{ github.ref_name == 'lts-2025' && '21' || '17' }}
-      ELEMENTS_PATTERN: ${{ github.ref_name == 'lts-2025' && '2025\\.[0-9]+\\.[0-9]+-rc\\.[0-9]+$' || '3\\.1\\.[0-9]+-rc\\.[0-9]+$' }}
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
@@ -65,6 +63,22 @@ jobs:
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
+
+      - name: Resolve branch-dependent config
+        run: |
+          MAP='{"lts-2025":"21","maintenance-3.1.x":"17","default":"17"}'
+          BRANCH="${BRANCH_NAME}"
+
+          JAVA=$(echo "$MAP" | jq -r --arg b "$BRANCH" '.[$b] // .default')
+
+          if [[ "$BRANCH" == lts-* ]]; then
+            ELEMENTS_PATTERN='202[0-9]\.[0-9]+\.[0-9]+-rc\.[0-9]+$'
+          else
+            ELEMENTS_PATTERN='3\.1\.[0-9]+-rc\.[0-9]+$'
+          fi
+
+          echo "JAVA_VERSION=$JAVA" >> $GITHUB_ENV
+          echo "ELEMENTS_PATTERN=$ELEMENTS_PATTERN" >> $GITHUB_ENV
 
       - uses: actions/setup-java@v4
         with:

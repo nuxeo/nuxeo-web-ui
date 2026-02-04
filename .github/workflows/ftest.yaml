@@ -29,7 +29,7 @@ permissions:
   contents: read
 
 env:
-  REFERENCE_BRANCH: ${{ startsWith(inputs.branch || github.head_ref || github.event.pull_request.base.ref, 'lts-') && 'lts-2025' || 'maintenance-3.1.x' }}
+  REFERENCE_BRANCH: ${{ startsWith(inputs.branch || github.event.pull_request.base.ref || github.ref_name, 'lts-') && 'lts-2025' || 'maintenance-3.1.x' }}
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.event.pull_request.head.ref }}
   NODE_OPTIONS: "--max-old-space-size=2048"
@@ -62,10 +62,18 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
+      - name: Resolve Java version
+        run: |
+          MAP='{"lts-2025":"21","maintenance-3.1.x":"17","default":"17"}'
+          BRANCH="${REFERENCE_BRANCH}"
+
+          JAVA=$(echo "$MAP" | jq -r --arg b "$BRANCH" '.[$b] // .default')
+          echo "JAVA_VERSION=$JAVA" >> $GITHUB_ENV
+
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: ${{ startsWith(env.BRANCH_NAME, 'lts-') && '21' || '17' }}
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Install dependencies
         env:
@@ -112,7 +120,7 @@ jobs:
           pushd nuxeo-elements
           for d in core ui dataviz testing-helpers; do
             pushd $d
-            echo "ELEMENTS_$(echo $d | tr a-z A-Z)=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+            echo "ELEMENTS_$(echo $d | tr 'a-z-' 'A-Z_')=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
             popd
           done
           popd

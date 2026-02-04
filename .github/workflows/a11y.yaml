@@ -31,6 +31,7 @@ permissions:
 env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   BRANCH_NAME: ${{ github.head_ref || github.event.pull_request.head.ref || inputs.branch }}
+  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch }}
 
 jobs:
   a11y:
@@ -41,10 +42,6 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository)
 
     runs-on: ubuntu-latest
-
-    env:
-      REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch }}
-      JAVA_VERSION: ${{ github.base_ref == 'lts-2025' && '21' || '17' }}
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
@@ -64,6 +61,19 @@ jobs:
           node-version: 22
           scope: '@nuxeo'
 
+      - name: Resolve Java version
+        run: |
+          MAP='{"lts-2025":"21","maintenance-3.1.x":"17","default":"17"}'
+          BRANCH="${REFERENCE_BRANCH}"
+
+          JAVA=$(echo "$MAP" | jq -r --arg b "$BRANCH" '.[$b] // .default')
+          echo "JAVA_VERSION=$JAVA" >> $GITHUB_ENV
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+
       - name: Install Web UI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
@@ -76,11 +86,6 @@ jobs:
           pushd packages/nuxeo-designer-catalog
           npm install
           popd
-
-      - uses: actions/setup-java@v5
-        with:
-          distribution: 'zulu'
-          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Update settings.xml with server configuration
         run: |
