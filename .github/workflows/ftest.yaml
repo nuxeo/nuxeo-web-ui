@@ -36,10 +36,17 @@ env:
 
 jobs:
   ftests:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_call' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
     runs-on:
       group: medium-4cpu-runners
 
     steps:
+      - name: Debug
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Condition result: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_call' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') }}"
+
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
