@@ -34,12 +34,6 @@ env:
 
 jobs:
   a11y:
-    if: |
-      github.event_name == 'workflow_call' ||
-      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
-      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' &&
-       github.event.pull_request.head.repo.full_name == github.repository)
-
     runs-on: ubuntu-latest
 
     steps:
