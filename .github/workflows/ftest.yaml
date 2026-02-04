@@ -8,6 +8,7 @@ on:
   pull_request_target:
     branches:
       - maintenance-3.1.x
+      - lts-2025
 
   workflow_call:
     inputs:
@@ -39,7 +40,7 @@ jobs:
       github.event_name == 'workflow_call' ||
       (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
       (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' &&
-      github.event.pull_request.head.repo.full_name == github.repository)
+       github.event.pull_request.head.repo.full_name == github.repository)
 
     runs-on:
       group: medium-4cpu-runners
@@ -64,17 +65,17 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: 17
 
       - name: Install dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt-get update
           sudo apt-get install -y imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
           sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
           npm install -g bower
           npm install -g gulp-cli
-        env:
-          DEBIAN_FRONTEND: noninteractive
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
@@ -109,18 +110,11 @@ jobs:
       - name: Pack Elements modules
         run: |
           pushd nuxeo-elements
-          pushd core
-          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-          pushd ui
-          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-          pushd dataviz
-          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-          pushd testing-helpers
-          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
+          for d in core ui dataviz testing-helpers; do
+            pushd $d
+            echo "ELEMENTS_$(echo $d | tr 'a-z-' 'A-Z_')=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+            popd
+          done
           popd
 
       - name: Link elements to Web UI
@@ -130,7 +124,7 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
 
       - name: Update settings.xml with server configuration
         run: |
@@ -149,29 +143,29 @@ jobs:
           RUN_ALL: false
           BAIL: 0
           HEADLESS: ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v10.5.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v11.0.0
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
-          video_name: ${{ contains(github.event.pull_request.labels.*.name, 'video')  && 'ftest-video' || '' }}
+          video_name: ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'ftest-video' || '' }}
           max_attempts: 3
 
       - name: Archive cucumber reports
-        if: ${{ always() }}
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: cucumber-reports
           path: ftest/target/cucumber-reports/
 
       - name: Archive screenshots
-        if: ${{ failure() }}
+        if: failure()
         uses: actions/upload-artifact@v6
         with:
           name: screenshots
           path: ftest/target/screenshots/
 
       - name: Archive logs
-        if: ${{ always() }}
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: logs
@@ -180,7 +174,7 @@ jobs:
             **/nxserver/config/distribution.properties
 
       - name: Archive packages-ftest
-        if: ${{ always() }}
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: packages-ftest

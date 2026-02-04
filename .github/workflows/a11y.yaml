@@ -8,6 +8,7 @@ on:
   pull_request_target:
     branches:
       - maintenance-3.1.x
+      - lts-2025
 
   workflow_call:
     inputs:
@@ -38,7 +39,7 @@ jobs:
       github.event_name == 'workflow_call' ||
       (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
       (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' &&
-      github.event.pull_request.head.repo.full_name == github.repository)
+       github.event.pull_request.head.repo.full_name == github.repository)
 
     runs-on: ubuntu-latest
 
@@ -60,6 +61,11 @@ jobs:
           node-version: 22
           scope: '@nuxeo'
 
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
       - name: Install Web UI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
@@ -72,11 +78,6 @@ jobs:
           pushd packages/nuxeo-designer-catalog
           npm install
           popd
-
-      - uses: actions/setup-java@v5
-        with:
-          distribution: 'zulu'
-          java-version: '17'
 
       - name: Update settings.xml with server configuration
         run: |
