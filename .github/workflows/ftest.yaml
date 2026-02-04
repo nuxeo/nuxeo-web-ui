@@ -13,6 +13,7 @@ on:
     inputs:
       branch:
         description: 'Branch to build'
+        default: lts-2025
         type: string
         required: false
     secrets:
