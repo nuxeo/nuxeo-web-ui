@@ -39,6 +39,11 @@ jobs:
     if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call'
 
     steps:
+      - name: Debug
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Condition result: ${{ github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') || github.event_name == 'workflow_call' }}"
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
