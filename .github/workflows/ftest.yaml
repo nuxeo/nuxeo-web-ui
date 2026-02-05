@@ -9,6 +9,7 @@ on:
   pull_request_target:
     branches:
       - maintenance-3.1.x
+      - lts-2025
 
   workflow_call:
     inputs:
@@ -28,13 +29,9 @@ permissions:
   contents: read
 
 env:
-  # Head branch (what we test)
-  BRANCH_NAME: ${{ github.head_ref || github.event.pull_request.head.ref || inputs.branch }}
-  # Base branch (what we target)
-  REFERENCE_BRANCH: ${{ github.base_ref || github.event.pull_request.base.ref || inputs.branch }}
-
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   NODE_OPTIONS: "--max-old-space-size=2048"
+  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
 
 jobs:
   ftests:
@@ -52,8 +49,8 @@ jobs:
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
-          echo "Base branch: ${{ env.REFERENCE_BRANCH }}"
-          echo "Head branch: ${{ env.BRANCH_NAME }}"
+          echo "Base branch: ${{ github.base_ref }}"
+          echo "Ref: ${{ github.ref }}"
 
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -62,7 +59,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: >-
+            ${{
+              github.event_name == 'pull_request_target'
+                && github.event.pull_request.head.sha
+                || github.ref
+            }}
 
       - uses: actions/setup-node@v6
         with:
@@ -71,18 +73,10 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
-      - name: Resolve Java version
-        run: |
-          if [[ "${REFERENCE_BRANCH}" == lts-* ]]; then
-            echo "JAVA_VERSION=21" >> $GITHUB_ENV
-          else
-            echo "JAVA_VERSION=17" >> $GITHUB_ENV
-          fi
-
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: ${{ github.base_ref == 'lts-2025' && 21 || 17 }}
 
       - name: Install dependencies
         env:
@@ -91,16 +85,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
           sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
-          npm install -g bower
-          npm install -g gulp-cli
+          npm install -g bower gulp-cli
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
         run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo "branch=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
-          else
+          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.REFERENCE_BRANCH }}; then
             echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=maintenance-3.1.x" >> $GITHUB_OUTPUT
           fi
 
       - name: Install Web UI
@@ -143,7 +136,7 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
 
-      - name: Update settings.xml with server configuration
+      - name: Update settings.xml
         run: |
           echo '<settings>
             <servers>
