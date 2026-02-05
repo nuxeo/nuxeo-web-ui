@@ -11,7 +11,7 @@ updates:
     schedule:
       interval: "weekly"
 
-  # LTS-2025 branch 
+  # LTS-2025 branch
   - package-ecosystem: "npm"
     directory: "/"
     target-branch: "lts-2025"
