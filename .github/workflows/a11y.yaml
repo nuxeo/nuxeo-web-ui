@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug 
+      - name: Debug
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
