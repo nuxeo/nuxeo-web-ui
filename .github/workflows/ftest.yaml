@@ -3,19 +3,21 @@ name: Functional tests
 on:
   pull_request:
     branches:
+      - maintenance-3.1.x
       - lts-2025
 
   pull_request_target:
     branches:
+      - maintenance-3.1.x
       - lts-2025
 
   workflow_call:
     inputs:
       branch:
         description: 'Branch to build'
-        default: lts-2025
         type: string
         required: false
+        default: ''
     secrets:
       NPM_PACKAGES_TOKEN:
         required: true
@@ -28,18 +30,18 @@ permissions:
   contents: read
 
 env:
-  REFERENCE_BRANCH: lts-2025
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.event.pull_request.head.ref || 'lts-2025' }}
   NODE_OPTIONS: "--max-old-space-size=2048"
+  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
 
 jobs:
   ftests:
     if: |
       github.event_name == 'push' ||
       github.event_name == 'workflow_call' ||
-      (github.event_name == 'pull_request' &&  github.actor != 'dependabot[bot]')||
+      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
       (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
+
     runs-on:
       group: medium-4cpu-runners
 
@@ -48,6 +50,8 @@ jobs:
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
+          echo "Base branch: ${{ github.base_ref }}"
+          echo "Ref: ${{ github.ref }}"
 
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -56,7 +60,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: >-
+            ${{
+              github.event_name == 'pull_request_target'
+                && github.event.pull_request.head.sha
+                || github.ref
+            }}
 
       - uses: actions/setup-node@v6
         with:
@@ -68,7 +77,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: 21
+          java-version: ${{ github.base_ref == 'lts-2025' && 21 || 17 }}
 
       - name: Install dependencies
         env:
@@ -77,16 +86,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
           sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
-          npm install -g bower
-          npm install -g gulp-cli
+          npm install -g bower gulp-cli
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
         run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo "branch=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
-          else
+          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.REFERENCE_BRANCH }}; then
             echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.base_ref || env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Install Web UI
@@ -129,17 +137,17 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
 
-      - name: Update settings.xml with server configuration
+      - name: Update settings.xml
         run: |
           echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
-                  <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
+            <servers>
+              <server>
+                <id>maven-internal</id>
+                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
+                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>' > ~/.m2/settings.xml
 
       - name: Functional tests
         env:
