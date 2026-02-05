@@ -4,16 +4,17 @@ on:
   pull_request:
     branches:
       - maintenance-3.1.x
+      - lts-2025
 
   pull_request_target:
     branches:
       - maintenance-3.1.x
+      - lts-2025
 
   workflow_call:
     inputs:
       branch:
         description: 'Branch to build'
-        default: maintenance-3.1.x
         type: string
         required: false
     secrets:
@@ -28,23 +29,26 @@ permissions:
   contents: read
 
 env:
-  REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || github.event.pull_request.head.ref || inputs.branch }}
+  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
 
 jobs:
   a11y:
     if: |
       github.event_name == 'push' ||
       github.event_name == 'workflow_call' ||
-      (github.event_name == 'pull_request' &&  github.actor != 'dependabot[bot]')||
+      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
       (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Debug
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
+          echo "Base branch: ${{ github.base_ref }}"
+          echo "Ref: ${{ github.ref }}"
 
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -53,7 +57,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: >-
+            ${{
+              github.event_name == 'pull_request_target'
+                && github.event.pull_request.head.sha
+                || github.ref
+            }}
 
       - name: Run git config
         run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
@@ -67,7 +76,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: 17
+          java-version: ${{ github.base_ref == 'lts-2025' && 21 || 17 }}
 
       - name: Install Web UI
         env:
@@ -82,17 +91,17 @@ jobs:
           npm install
           popd
 
-      - name: Update settings.xml with server configuration
+      - name: Update settings.xml
         run: |
           echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
-                  <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
+            <servers>
+              <server>
+                <id>maven-internal</id>
+                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
+                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>' > ~/.m2/settings.xml
 
       - name: Web UI build
         run: mvn -B -ntp install
