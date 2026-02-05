@@ -9,6 +9,7 @@ on:
   pull_request_target:
     branches:
       - maintenance-3.1.x
+      - lts-2025
 
   workflow_call:
     inputs:
@@ -28,12 +29,8 @@ permissions:
   contents: read
 
 env:
-  # Branch we are testing (head)
-  BRANCH_NAME: ${{ github.head_ref || github.event.pull_request.head.ref || inputs.branch }}
-  # Branch we are targeting (base)
-  REFERENCE_BRANCH: ${{ github.base_ref || github.event.pull_request.base.ref || inputs.branch }}
-
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
 
 jobs:
   a11y:
@@ -50,8 +47,8 @@ jobs:
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
-          echo "Base branch: ${{ env.REFERENCE_BRANCH }}"
-          echo "Head branch: ${{ env.BRANCH_NAME }}"
+          echo "Base branch: ${{ github.base_ref }}"
+          echo "Ref: ${{ github.ref }}"
 
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -60,7 +57,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: >-
+            ${{
+              github.event_name == 'pull_request_target'
+                && github.event.pull_request.head.sha
+                || github.ref
+            }}
 
       - name: Run git config
         run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
@@ -71,18 +73,10 @@ jobs:
           node-version: 22
           scope: '@nuxeo'
 
-      - name: Resolve Java version
-        run: |
-          if [[ "${REFERENCE_BRANCH}" == lts-* ]]; then
-            echo "JAVA_VERSION=21" >> $GITHUB_ENV
-          else
-            echo "JAVA_VERSION=17" >> $GITHUB_ENV
-          fi
-
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: ${{ github.base_ref == 'lts-2025' && 21 || 17 }}
 
       - name: Install Web UI
         env:
@@ -97,7 +91,7 @@ jobs:
           npm install
           popd
 
-      - name: Update settings.xml with server configuration
+      - name: Update settings.xml
         run: |
           echo '<settings>
             <servers>
