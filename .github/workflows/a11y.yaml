@@ -3,17 +3,17 @@ name: A11y
 on:
   pull_request:
     branches:
+      - maintenance-3.1.x
       - lts-2025
 
   pull_request_target:
     branches:
-      - lts-2025
+      - maintenance-3.1.x
 
   workflow_call:
     inputs:
       branch:
         description: 'Branch to build'
-        default: lts-2025
         type: string
         required: false
     secrets:
@@ -28,23 +28,30 @@ permissions:
   contents: read
 
 env:
-  REFERENCE_BRANCH: lts-2025
-  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  # Branch we are testing (head)
   BRANCH_NAME: ${{ github.head_ref || github.event.pull_request.head.ref || inputs.branch }}
+  # Branch we are targeting (base)
+  REFERENCE_BRANCH: ${{ github.base_ref || github.event.pull_request.base.ref || inputs.branch }}
+
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
   a11y:
     if: |
       github.event_name == 'push' ||
       github.event_name == 'workflow_call' ||
-      (github.event_name == 'pull_request' &&  github.actor != 'dependabot[bot]')||
+      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
       (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
+
     runs-on: ubuntu-latest
+
     steps:
-      - name: Debug 
+      - name: Debug
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
+          echo "Base branch: ${{ env.REFERENCE_BRANCH }}"
+          echo "Head branch: ${{ env.BRANCH_NAME }}"
 
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -64,10 +71,18 @@ jobs:
           node-version: 22
           scope: '@nuxeo'
 
+      - name: Resolve Java version
+        run: |
+          if [[ "${REFERENCE_BRANCH}" == lts-* ]]; then
+            echo "JAVA_VERSION=21" >> $GITHUB_ENV
+          else
+            echo "JAVA_VERSION=17" >> $GITHUB_ENV
+          fi
+
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: 21
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Install Web UI
         env:
@@ -85,14 +100,14 @@ jobs:
       - name: Update settings.xml with server configuration
         run: |
           echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
-                  <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
+            <servers>
+              <server>
+                <id>maven-internal</id>
+                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
+                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>' > ~/.m2/settings.xml
 
       - name: Web UI build
         run: mvn -B -ntp install
