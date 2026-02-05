@@ -17,6 +17,7 @@ on:
         description: 'Branch to build'
         type: string
         required: false
+        default: ''
     secrets:
       NPM_PACKAGES_TOKEN:
         required: true
@@ -93,7 +94,7 @@ jobs:
           if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.REFERENCE_BRANCH }}; then
             echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
           else
-            echo "branch=maintenance-3.1.x" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.base_ref || env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Install Web UI
