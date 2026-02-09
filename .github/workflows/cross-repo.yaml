@@ -4,7 +4,7 @@ name: Cross repo check
 
 on:
   workflow_dispatch:
-    inputs: &common_inputs
+    inputs:
       branch_name:
         description: 'The name of the branch to build.'
         default: 'maintenance-3.1.x'
@@ -45,9 +45,6 @@ on:
         default: 'maintenance-3.1.x'
         type: string
         required: false
-
-  workflow_call:
-    inputs: *common_inputs
 
 permissions:
   contents: read
