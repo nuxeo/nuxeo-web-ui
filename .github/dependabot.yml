@@ -1,0 +1,30 @@
+version: 2
+# Updated to trigger Dependabot re-runs
+updates:
+  # Default branch (maintenance-3.1.x)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # LTS-2025 branch
+  - package-ecosystem: "npm"
+    directory: "/"
+    target-branch: "lts-2025"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "[lts-2025]"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "lts-2025"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "[lts-2025]"
