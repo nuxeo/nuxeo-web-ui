@@ -3,44 +3,69 @@ name: Functional tests
 on:
   pull_request:
     branches:
+      - maintenance-3.1.x
       - lts-2025
+
+  pull_request_target:
+    branches:
+      - maintenance-3.1.x
+      - lts-2025
+
   workflow_call:
     inputs:
       branch:
-        description: 'The current branch'
-        default: lts-2025
+        description: 'Branch to build'
         type: string
         required: false
+        default: ''
     secrets:
       NPM_PACKAGES_TOKEN:
-        description: 'NPM_PACKAGES_TOKEN'
         required: true
-      PACKAGES_AUTH_USER:
-        description: 'PACKAGES_AUTH_USER'
+      REPOSITORY_MANAGER_USERNAME:
         required: true
-      PACKAGES_AUTH_TOKEN:
-        description: 'PACKAGES_AUTH_TOKEN'
+      REPOSITORY_MANAGER_PASSWORD:
         required: true
 
 permissions:
   contents: read
 
 env:
-  REFERENCE_BRANCH: lts-2025
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
   NODE_OPTIONS: "--max-old-space-size=2048"
+  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
+
 jobs:
   ftests:
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_call' ||
+      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
+
     runs-on:
       group: medium-4cpu-runners
+
     steps:
+      - name: Debug
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Base branch: ${{ github.base_ref }}"
+          echo "Ref: ${{ github.ref }}"
+
       - uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
-      - uses: actions/checkout@v6
+
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: >-
+            ${{
+              github.event_name == 'pull_request_target'
+                && github.event.pull_request.head.sha
+                || github.ref
+            }}
 
       - uses: actions/setup-node@v6
         with:
@@ -50,34 +75,33 @@ jobs:
           node-version: 22
 
       - uses: actions/setup-java@v5
-        with: 
+        with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
 
       - name: Install dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt-get update
           sudo apt-get install -y imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
           sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
-          npm install -g bower
-          npm install -g gulp-cli
-        env:
-          DEBIAN_FRONTEND: noninteractive
+          npm install -g bower gulp-cli
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
         run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.BRANCH_NAME }}; then
-            echo "branch=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
-          else
+          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.REFERENCE_BRANCH }}; then
             echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.base_ref || env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Install Web UI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm cache clean -f
+          npm cache clean --force
           npm install
           pushd packages/nuxeo-web-ui-ftest
           npm install
@@ -97,21 +121,11 @@ jobs:
       - name: Pack Elements modules
         run: |
           pushd nuxeo-elements
-          pushd core
-          echo "ELEMENTS_CORE=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-
-          pushd ui
-          echo "ELEMENTS_UI=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-
-          pushd dataviz
-          echo "ELEMENTS_DATAVIZ=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
-
-          pushd testing-helpers
-          echo "ELEMENTS_HELPERS=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
-          popd
+          for d in core ui dataviz testing-helpers; do
+            pushd $d
+            echo "ELEMENTS_$(echo $d | tr 'a-z-' 'A-Z_')=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+            popd
+          done
           popd
 
       - name: Link elements to Web UI
@@ -121,19 +135,19 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
 
-      - name: 'Update settings.xml with server configuration'
+      - name: Update settings.xml
         run: |
           echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.PACKAGES_AUTH_USER }}</username>
-                  <password>${{ secrets.PACKAGES_AUTH_TOKEN }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
+            <servers>
+              <server>
+                <id>maven-internal</id>
+                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
+                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>' > ~/.m2/settings.xml
 
       - name: Functional tests
         env:
@@ -144,25 +158,25 @@ jobs:
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
-          video_name: ${{ contains(github.event.pull_request.labels.*.name, 'video')  && 'ftest-video' || '' }}
+          video_name: ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'ftest-video' || '' }}
           max_attempts: 3
 
       - name: Archive cucumber reports
-        if: ${{ always() }}
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: cucumber-reports
           path: ftest/target/cucumber-reports/
 
       - name: Archive screenshots
-        if: ${{ failure() }}
+        if: failure()
         uses: actions/upload-artifact@v6
         with:
           name: screenshots
           path: ftest/target/screenshots/
 
       - name: Archive logs
-        if: ${{ always() }}
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: logs
@@ -171,7 +185,7 @@ jobs:
             **/nxserver/config/distribution.properties
 
       - name: Archive packages-ftest
-        if: ${{ always() }}
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: packages-ftest
