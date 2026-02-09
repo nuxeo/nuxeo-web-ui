@@ -2,47 +2,55 @@
 # but to be called from the Elements repository cross repo check instead.
 name: Cross repo check
 
+# Define inputs once
+x-inputs: &common_inputs
+  branch_name:
+    description: 'The name of the branch to build.'
+    default: 'maintenance-3.1.x'
+    required: true
+  sauce_labs:
+    description: 'Run unit tests on Sauce Labs?'
+    default: false
+    type: boolean
+    required: false
+  skip_ftests:
+    description: 'Skip functional tests?'
+    type: boolean
+    required: false
+  skip_a11y:
+    description: 'Skip accessibility tests?'
+    type: boolean
+    required: false
+  skip_unit_tests:
+    description: 'Skip unit tests?'
+    type: boolean
+    required: false
+  generate_metrics:
+    description: 'Generate metrics report?'
+    type: boolean
+    required: false
+  run_all:
+    description: 'Skip fail fast premise?'
+    type: boolean
+    required: false
+  bail:
+    description: 'Number of failed features to stop test runner (0 means not applicable).'
+    default: 0
+    required: false
+  caller_id:
+    description: 'run identifier'
+    default: 'maintenance-3.1.x'
+    type: string
+    required: false
+
 on:
   workflow_dispatch:
-    inputs:
-      branch_name:
-        description: 'The name of the branch to build.'
-        default: 'maintenance-3.1.x'
-        required: true
-      sauce_labs:
-        description: 'Run unit tests on Sauce Labs?'
-        default: false
-        type: boolean
-        required: false
-      skip_ftests:
-        description: 'Skip functional tests?'
-        type: boolean
-        required: false
-      skip_a11y:
-        description: 'Skip accessibility tests?'
-        type: boolean
-        required: false
-      skip_unit_tests:
-        description: 'Skip unit tests?'
-        type: boolean
-        required: false
-      generate_metrics:
-        description: 'Generate metrics report?'
-        type: boolean
-        required: false
-      run_all:
-        description: 'Skip fail fast premise?'
-        type: boolean
-        required: false
-      bail:
-        description: 'Number of failed features to stop test runner (0 means not applicable).'
-        default: 0
-        required: false
-      caller_id:
-        description: 'run identifier'
-        default: 'maintenance-3.1.x'
-        type: string
-        required: false
+    inputs: *common_inputs
+
+  workflow_call:
+    inputs: *common_inputs
+  
+      
 
 permissions:
   contents: read
