@@ -76,7 +76,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: ${{ github.base_ref == 'lts-2025' && 21 || 17 }}
+          java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
 
       - name: Install Web UI
         env:

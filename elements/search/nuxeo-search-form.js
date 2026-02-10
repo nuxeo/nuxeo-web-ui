@@ -176,6 +176,10 @@ Polymer({
       #actionsDropdown {
         width: 82%;
         padding: 19px 0 0 0;
+        --selectivity-dropdown-min-width: auto;
+        --selectivity-dropdown-max-width: 100%;
+        --selectivity-result-item-white-space: normal;
+        --selectivity-result-item-word-wrap: break-word;
       }
 
       #actionsDropdown > .iron-selected {
