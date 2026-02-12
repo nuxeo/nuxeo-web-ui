@@ -576,6 +576,26 @@ Polymer({
   _upload(files) {
     if (files && files.length > 0) {
       const newFiles = Array.prototype.slice.call(files);
+      if (this.accept) {
+        const allowedExtensions = this.accept.split(',').map((ext) => ext.trim().toLowerCase());
+
+        const invalidFiles = newFiles.filter((file) => {
+          const fileName = file.name.toLowerCase();
+          return !allowedExtensions.some((ext) => fileName.endsWith(ext));
+        });
+
+        if (invalidFiles.length > 0) {
+          this._errorMessage = `Invalid file type. Only ${this.accept} files are allowed.`;
+          this.invalid = true;
+          this.notify({
+            message: this._errorMessage,
+            duration: 4000,
+          });
+          return;
+        }
+        this.invalid = false;
+        this._errorMessage = '';
+      }
 
       if (this.multiple) {
         if (this.replaceMode) {
@@ -583,13 +603,12 @@ Polymer({
           this.uploadedFiles = this.uploadedFiles.concat(newFiles);
           this.uploadFiles(newFiles);
         } else {
-          // upload all files (previous + new)
           const allFiles = this.uploadedFiles.concat(newFiles);
           this.uploadedFiles = allFiles;
           this.uploadFiles(allFiles);
         }
       } else {
-        this.uploadedFiles = newFiles;
+        this.uploadedFiles = Array.prototype.slice.call(files);
         this.uploadFiles(files);
       }
     }
