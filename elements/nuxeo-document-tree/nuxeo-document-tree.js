@@ -87,7 +87,7 @@ Polymer({
       a {
         @apply --nuxeo-link;
         color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
-        font-weight: (var(--sat-drawer-item-font-weight));
+        font-weight: var(--sat-drawer-item-font-weight);
         font-size: var(--sat-drawer-item-font-size);
         line-height: var(--sat-drawer-item-line-height);
         letter-spacing: var(--sat-drawer-item-letter-spacing);
@@ -117,7 +117,7 @@ Polymer({
       a:visited,
       a:focus {
         color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
-        font-weight: (var(--sat-drawer-item-font-weight));
+        font-weight: var(--sat-drawer-item-font-weight);
         font-size: var(--sat-drawer-item-font-size);
         line-height: var(--sat-drawer-item-line-height);
         letter-spacing: var(--sat-drawer-item-letter-spacing);
