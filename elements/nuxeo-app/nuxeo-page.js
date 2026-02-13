@@ -45,6 +45,7 @@ Polymer({
         position: relative;
         overflow-y: auto;
         padding: 16px 16px 0 16px;
+        background-color: var(--sat-drawer-content-background);
       }
 
       .toolbar {
@@ -53,8 +54,8 @@ Polymer({
         @apply --layout-center;
         height: var(--nuxeo-drawer-header-height);
         color: var(--nuxeo-app-header);
-        background: var(--nuxeo-app-header-background);
-        box-shadow: var(--nuxeo-app-header-box-shadow);
+        background: var(--sat-app-header-box-background-color, var(--nuxeo-app-header-background));
+        box-shadow: var(--sat-app-header-box-shadow, var(--nuxeo-app-header-box-shadow));
         overflow-x: auto;
       }
 

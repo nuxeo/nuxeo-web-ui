@@ -86,28 +86,54 @@ Polymer({
 
       a {
         @apply --nuxeo-link;
+        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        font-weight: (var(--sat-drawer-item-font-weight));
+        font-size: var(--sat-drawer-item-font-size);
+        line-height: var(--sat-drawer-item-line-height);
+        letter-spacing: var(--sat-drawer-item-letter-spacing);
       }
 
       a:hover {
         @apply --nuxeo-link-hover-color;
       }
 
+      /* Highlight the currently selected/active node */
+      #content:has(a.selected) {
+        background-color: var(--sat-drawer-item-selected-background);
+        border-radius: 54px;
+        min-height: 25px;
+        padding: 5px 0;
+      }
+
+      nuxeo-tree-node {
+        padding-top: 14px;
+      }
+
+      nuxeo-tree {
+        margin-left: 18px;
+      }
       #root a,
       a:active,
       a:visited,
       a:focus {
-        color: var(--nuxeo-drawer-text);
+        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        font-weight: (var(--sat-drawer-item-font-weight));
+        font-size: var(--sat-drawer-item-font-size);
+        line-height: var(--sat-drawer-item-line-height);
+        letter-spacing: var(--sat-drawer-item-letter-spacing);
       }
 
       iron-icon {
-        opacity: 0.7;
-        width: 1.3rem;
-        margin-right: -1.6em;
-        margin-top: -0.07rem;
+        opacity: 1;
+        width: 1.8rem;
+        height: 1.8rem;
+        margin-right: -1.4em;
+        margin-top: 0rem;
+        margin-left: -0.2em;
       }
 
       :host([dir='rtl']) iron-icon {
-        margin-right: 0;
+        margin-right: 10em;
       }
 
       [toggle] {
@@ -127,18 +153,18 @@ Polymer({
       }
 
       .parents + nuxeo-tree {
-        padding: 6px 5px;
+        padding: 0;
       }
 
       .parents > nuxeo-tree {
-        padding: 4px 5px;
+        padding: 0;
       }
 
       .parents a {
         @apply --layout-horizontal;
-        padding: 0.35em;
+        padding-top: 12px;
+        margin-left: 18px;
         color: var(--nuxeo-drawer-text);
-        border-bottom: 1px solid var(--nuxeo-border);
       }
 
       .parents span {
@@ -151,6 +177,7 @@ Polymer({
 
       .parent {
         padding: 0.12em 0 0;
+        color: var(--sat-drawer-item-font-color);
       }
 
       paper-spinner {
@@ -169,6 +196,7 @@ Polymer({
 
       .header h5 {
         margin: 0;
+        @apply --sat-header-h5;
       }
 
       .loaddata {
@@ -197,12 +225,18 @@ Polymer({
 
     <div class="content" role="tree">
       <div class="parents" hidden$="[[_noPermission]]">
-        <a href$="[[urlFor('document', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
+        <a
+          href$="[[urlFor('document', '/')]]"
+          class="layout horizontal"
+          hidden$="[[_hideRoot(document)]]"
+          on-click="_handleNodeClick"
+          data-path="/"
+        >
           <span aria-hidden="true"><iron-icon icon="[[toggleChevronIcon]]"></iron-icon></span>
           <span class="parent">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
-          <a href$="[[urlFor(item)]]">
+          <a href$="[[urlFor(item)]]" on-click="_handleNodeClick" data-path$="[[item.path]]">
             <span><iron-icon icon="[[toggleChevronIcon]]"></iron-icon></span>
             <span class="parent">[[item.title]]</span>
           </a>
@@ -227,8 +261,8 @@ Polymer({
                 <span class="loaddata" aria-live="polite">[[_loading(loading)]]</span>
               </template>
             </template>
-            <span class="node-name flex">
-              <a href$="[[urlFor(item)]]">[[_title(item)]]</a>
+            <span class$="node-name flex [[_leafClass(isLeaf)]]">
+              <a href$="[[urlFor(item)]]" on-click="_handleNodeClick" data-path$="[[item.path]]">[[_title(item)]]</a>
             </span>
           </div>
         </template>
@@ -287,6 +321,13 @@ Polymer({
   },
 
   observers: ['_fetchDocument(docPath, visible)'],
+
+  attached() {
+    // Restore selection highlighting after component is attached
+    this.async(() => {
+      this._updateSelectionHighlight();
+    }, 0);
+  },
 
   ready() {
     if (!this.hasAttribute('dir')) {
@@ -391,6 +432,10 @@ Polymer({
 
         if (doc.type === 'Root') {
           this.docPath = doc.path;
+          // Update selection highlight when document changes
+          this.async(() => {
+            this._updateSelectionHighlight();
+          }, 0);
           return;
         }
 
@@ -404,12 +449,20 @@ Polymer({
           }
         }
       }
+      // Update selection highlight when current document changes
+      this.async(() => {
+        this._updateSelectionHighlight();
+      }, 0);
     }
   },
 
   _documentChanged() {
     if (this.document && this.hasFacet(this.document, 'Folderish')) {
       this.$.tree.style.display = 'block';
+      // Update selection when tree data loads
+      this.async(() => {
+        this._updateSelectionHighlight();
+      }, 0);
     }
   },
 
@@ -437,5 +490,72 @@ Polymer({
   removeDocuments(documents) {
     const uids = documents.map((doc) => doc.uid);
     this.$.tree.removeNodes(uids);
+  },
+
+  _leafClass(isLeaf) {
+    return isLeaf ? 'leaf' : '';
+  },
+
+  /**
+   * Handle node click to update selection highlighting
+   */
+  _handleNodeClick(e) {
+    const clickedLink = e.currentTarget;
+    const clickedPath = clickedLink.getAttribute('data-path');
+
+    // Store the selected path for persistence
+    if (clickedPath) {
+      sessionStorage.setItem('nuxeo-tree-selected-path', clickedPath);
+    }
+
+    // Update highlight immediately
+    this._updateSelectionHighlight(clickedPath);
+  },
+
+  /**
+   * Update the selection highlighting in the tree
+   * Only one node should be highlighted at a time
+   */
+  _updateSelectionHighlight(selectedPath) {
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      // Determine which path should be highlighted
+      const pathToHighlight =
+        selectedPath ||
+        sessionStorage.getItem('nuxeo-tree-selected-path') ||
+        (this.currentDocument && this.currentDocument.path);
+
+      if (!pathToHighlight) return;
+
+      // Get all links in the tree (both in nuxeo-tree and parents)
+      const allLinks = this.shadowRoot.querySelectorAll('a[data-path], .parents a');
+
+      // Remove 'selected' class from all links
+      allLinks.forEach((link) => {
+        link.classList.remove('selected');
+      });
+
+      // Add 'selected' class to the matching link - EXACT match only
+      allLinks.forEach((link) => {
+        const linkPath = link.getAttribute('data-path');
+        // Only match if paths are EXACTLY the same
+        if (linkPath && linkPath === pathToHighlight) {
+          link.classList.add('selected');
+        }
+      });
+
+      // Also check dynamically loaded tree nodes
+      const treeElement = this.$.tree;
+      if (treeElement && treeElement.shadowRoot) {
+        const treeLinks = treeElement.shadowRoot.querySelectorAll('a[data-path]');
+        treeLinks.forEach((link) => {
+          link.classList.remove('selected');
+          const linkPath = link.getAttribute('data-path');
+          if (linkPath === pathToHighlight) {
+            link.classList.add('selected');
+          }
+        });
+      }
+    });
   },
 });

@@ -44,6 +44,10 @@ Polymer({
         outline: auto;
       }
 
+      #button {
+        display: inline-block;
+      }
+
       :host(.selected) paper-icon-button {
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-menu-hover);
@@ -74,10 +78,63 @@ Polymer({
       paper-icon-button path {
         tabindex: -1;
       }
+
+      #button button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--nuxeo-sidebar-menu);
+        height: 48px;
+        padding: 12px 13px;
+        width: var(--nuxeo-sidebar-width);
+        cursor: pointer;
+        background: transparent;
+        border: none;
+        outline: none;
+      }
+
+      #button button:hover {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      :host(.selected) #button button {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      #button button svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+
+      #button button svg path {
+        fill: currentColor;
+      }
+
+      :host(.selected) paper-icon-button {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
     </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
-      <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip" tabindex="-1"></paper-icon-button>
+      <div id="button">
+        <template is="dom-if" if="[[!svgIcon]]">
+          <paper-icon-button
+            noink
+            icon="[[icon]]"
+            src="[[src]]"
+            name$="[[name]]"
+            aria-labelledby="tooltip"
+            tabindex="-1"
+          ></paper-icon-button>
+        </template>
+        <template is="dom-if" if="[[svgIcon]]">
+          <button aria-labelledby="tooltip" tabindex="-1" inner-h-t-m-l="[[svgIcon]]"></button>
+        </template>
+      </div>
       <nuxeo-tooltip
         for="button"
         position="[[_tooltipPosition]]"
@@ -112,6 +169,14 @@ Polymer({
     },
 
     src: {
+      type: String,
+      value: '',
+    },
+
+    /**
+     * Inline SVG icon markup
+     */
+    svgIcon: {
       type: String,
       value: '',
     },

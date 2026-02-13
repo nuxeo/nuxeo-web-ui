@@ -1406,6 +1406,7 @@
   "themes.dark": "Dark",
   "themes.default": "Nuxeo",
   "themes.kawaii": "Kawaii",
+  "themes.satori": "Satori",
   "themes.light": "Light",
   "threeDViewLayout.delete.confirm.message": "Do you really want to delete this 3D content?",
   "threeDViewLayout.delete.tooltip": "Delete 3D Content",
@@ -1531,5 +1532,6 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading": "Average Task Duration per User",
   "workflowAnalytics.averageTaskDurationPerUser.user": "User",
   "workflowAnalytics.averageWorkflowDuration.heading": "Average Workflow Duration",
-  "workflowAnalytics.workflowInitiators.heading": "Workflow Initiators"
+  "workflowAnalytics.workflowInitiators.heading": "Workflow Initiators",
+  "documentCreateShortcut.createWithType": "Create"
 }

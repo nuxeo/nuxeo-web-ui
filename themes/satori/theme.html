@@ -36,13 +36,13 @@ limitations under the License.
       --nuxeo-app-header: var(--nuxeo-text-default);
       --nuxeo-app-header-background: #fff;
       --nuxeo-app-header-pill: #ecf3f7;
-      --nuxeo-app-header-pill-hover: var(--nuxeo-primary-color);
-      --nuxeo-app-header-pill-active: var(--nuxeo-secondary-color);
+      --nuxeo-app-header-pill-hover: var(--mat-sys-primary);
+      --nuxeo-app-header-pill-active: var(--mat-sys-secondary);
 
       /* App Sidebar + Drawer*/
-      --nuxeo-sidebar-background: #060826;
-      --nuxeo-sidebar-menu: rgba(255, 255, 255, 0.5);
-      --nuxeo-sidebar-menu-hover: rgba(255, 255, 255, 1);
+      --nuxeo-sidebar-background: var(--mat-sys-primary);
+      --nuxeo-sidebar-menu: var(--mat-sys-on-primary);
+      --nuxeo-sidebar-menu-hover: var(--mat-sys-on-primary);
       --nuxeo-badge-background: #fb6107;
       --nuxeo-drawer-header: var(--nuxeo-text-default);
       --nuxeo-drawer-text: var(--nuxeo-text-default);
@@ -167,6 +167,38 @@ limitations under the License.
       --nuxeo-diff-added-color: #b4efcb;
       --nuxeo-diff-deleted-color: #e6b1b1;
       --nuxeo-diff-label-color: #d4d4d9;
+
+      /* ----------------Satori-specific variables start--------------------- */
+      /* Home Dashboard Header */
+      --sat-home-header-font-weight: 500;
+      --sat-home-header-font-size: 26px;
+      --sat-home-header-color: #474551;
+      --sat-app-header-box-shadow: #f4f3f7;
+      --sat-app-header-box-background-color: #f4f3f7;
+
+      /* Browse Drawer Content */
+      --sat-drawer-content-background: #f4f3f7;
+      --sat-drawer-item-font-weight: 500;
+      --sat-drawer-item-font-size: 14px;
+      --sat-drawer-item-line-height: 20px;
+      --sat-drawer-item-letter-spacing: 0.1px;
+      --sat-drawer-item-font-color: #1a1c1e;
+      --sat-drawer-item-selected-background: #e2dfff;
+
+      /*Create Button*/
+      --sat-document-create-button-background: #e2dfff;
+      --sat-document-create-button-hover-background: #b6b0f1;
+      /* This is not from satori*/
+      --sat-document-create-button-width: 56px;
+      --sat-document-create-button-height: 56px;
+      --sat-document-create-button-box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+
+      /* Global Header H5 Mixin - Apply with @apply --sat-header-h5; */
+      --sat-header-h5: {
+        font-weight: var(--sat-home-header-font-weight);
+        font-size: var(--sat-home-header-font-size);
+        color: var(--sat-home-header-color);
+      }
     }
   </style>
 </custom-style>
