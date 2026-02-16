@@ -222,7 +222,7 @@ Polymer({
   _computeShortcutHint() {
     let platform = '';
 
-    if (navigator.userAgentData?.platform) {
+    if (navigator.userAgentData && navigator.userAgentData.platform) {
       platform = navigator.userAgentData.platform.toLowerCase();
     } else {
       platform = navigator.userAgent.toLowerCase();
@@ -283,7 +283,9 @@ Polymer({
 
     // Detect if user is on Mac (once)
     const isMac =
-      (navigator.userAgentData && navigator.userAgentData.platform?.toLowerCase().includes('mac')) ||
+      (navigator.userAgentData &&
+        navigator.userAgentData.platform &&
+        navigator.userAgentData.platform.toLowerCase().includes('mac')) ||
       /mac/i.test(navigator.userAgent);
 
     // Command/Ctrl + . toggle: table -> toolbar
