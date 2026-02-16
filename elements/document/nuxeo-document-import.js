@@ -1235,7 +1235,7 @@ Polymer({
       message = error;
     } else {
       // Backend error payload
-      message = error?.message || (error?.detail && error.detail.error);
+      message = (error && error.message) || (error && error.detail && error.detail.error);
     }
 
     this.notify({ message: `${this.i18n('label.error').toUpperCase()}: ${message}` });
