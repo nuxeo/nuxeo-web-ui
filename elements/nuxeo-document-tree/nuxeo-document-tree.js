@@ -324,9 +324,7 @@ Polymer({
 
   attached() {
     // Restore selection highlighting after component is attached
-    this.async(() => {
-      this._updateSelectionHighlight();
-    }, 0);
+    this._debounceHighlightUpdate();
   },
 
   ready() {
@@ -433,9 +431,7 @@ Polymer({
         if (doc.type === 'Root') {
           this.docPath = doc.path;
           // Update selection highlight when document changes
-          this.async(() => {
-            this._updateSelectionHighlight();
-          }, 0);
+          this._debounceHighlightUpdate();
           return;
         }
 
@@ -450,9 +446,7 @@ Polymer({
         }
       }
       // Update selection highlight when current document changes
-      this.async(() => {
-        this._updateSelectionHighlight();
-      }, 0);
+      this._debounceHighlightUpdate();
     }
   },
 
@@ -460,9 +454,7 @@ Polymer({
     if (this.document && this.hasFacet(this.document, 'Folderish')) {
       this.$.tree.style.display = 'block';
       // Update selection when tree data loads
-      this.async(() => {
-        this._updateSelectionHighlight();
-      }, 0);
+      this._debounceHighlightUpdate();
     }
   },
 
@@ -505,11 +497,20 @@ Polymer({
 
     // Store the selected path for persistence
     if (clickedPath) {
-      sessionStorage.setItem('nuxeo-tree-selected-path', clickedPath);
+      sessionStorage.setItem('nuxeo.tree.selectedPath', clickedPath);
     }
 
-    // Update highlight immediately
-    this._updateSelectionHighlight(clickedPath);
+    // Update highlight with debouncing
+    this._debounceHighlightUpdate(clickedPath);
+  },
+
+  /**
+   * Debounced highlight update to prevent race conditions
+   */
+  _debounceHighlightUpdate(selectedPath) {
+    this.__highlightDebouncer = Debouncer.debounce(this.__highlightDebouncer, timeOut.after(50), () => {
+      this._updateSelectionHighlight(selectedPath);
+    });
   },
 
   /**
@@ -517,45 +518,42 @@ Polymer({
    * Only one node should be highlighted at a time
    */
   _updateSelectionHighlight(selectedPath) {
-    // Use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
-      // Determine which path should be highlighted
-      const pathToHighlight =
-        selectedPath ||
-        sessionStorage.getItem('nuxeo-tree-selected-path') ||
-        (this.currentDocument && this.currentDocument.path);
+    // Determine which path should be highlighted
+    const pathToHighlight =
+      selectedPath ||
+      sessionStorage.getItem('nuxeo.tree.selectedPath') ||
+      (this.currentDocument && this.currentDocument.path);
 
-      if (!pathToHighlight) return;
+    if (!pathToHighlight) return;
 
-      // Get all links in the tree (both in nuxeo-tree and parents)
-      const allLinks = this.shadowRoot.querySelectorAll('a[data-path], .parents a');
+    // Get all links in the tree (both in nuxeo-tree and parents)
+    const allLinks = this.shadowRoot.querySelectorAll('a[data-path], .parents a');
 
-      // Remove 'selected' class from all links
-      allLinks.forEach((link) => {
+    // Remove 'selected' class from all links
+    allLinks.forEach((link) => {
+      link.classList.remove('selected');
+    });
+
+    // Add 'selected' class to the matching link - EXACT match only
+    allLinks.forEach((link) => {
+      const linkPath = link.getAttribute('data-path');
+      // Only match if paths are EXACTLY the same
+      if (linkPath && linkPath === pathToHighlight) {
+        link.classList.add('selected');
+      }
+    });
+
+    // Also check dynamically loaded tree nodes
+    const treeElement = this.$.tree;
+    if (treeElement && treeElement.shadowRoot) {
+      const treeLinks = treeElement.shadowRoot.querySelectorAll('a[data-path]');
+      treeLinks.forEach((link) => {
         link.classList.remove('selected');
-      });
-
-      // Add 'selected' class to the matching link - EXACT match only
-      allLinks.forEach((link) => {
         const linkPath = link.getAttribute('data-path');
-        // Only match if paths are EXACTLY the same
-        if (linkPath && linkPath === pathToHighlight) {
+        if (linkPath === pathToHighlight) {
           link.classList.add('selected');
         }
       });
-
-      // Also check dynamically loaded tree nodes
-      const treeElement = this.$.tree;
-      if (treeElement && treeElement.shadowRoot) {
-        const treeLinks = treeElement.shadowRoot.querySelectorAll('a[data-path]');
-        treeLinks.forEach((link) => {
-          link.classList.remove('selected');
-          const linkPath = link.getAttribute('data-path');
-          if (linkPath === pathToHighlight) {
-            link.classList.add('selected');
-          }
-        });
-      }
-    });
+    }
   },
 });

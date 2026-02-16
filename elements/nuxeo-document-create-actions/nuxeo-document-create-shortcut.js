@@ -55,7 +55,7 @@ Polymer({
         font-size: 14px;
         font-weight: 500;
         line-height: 20px;
-        color: #3e3b92;
+        color: var(--sat-create-button-shortcut-label-color, var(--nuxeo-button-primary-text));
         white-space: nowrap;
         letter-spacing: 0.1px;
       }
@@ -69,13 +69,23 @@ Polymer({
         justify-content: center;
         flex-shrink: 0;
       }
+
+      .shortcut-icon img {
+        width: 24px;
+        height: 24px;
+      }
+
+      .shortcut-icon img[src=''],
+      .shortcut-icon img:not([src]) {
+        display: none;
+      }
     </style>
 
     <div class="shortcut-container" on-tap="_tap">
       <div class="shortcut-icon">
-        <img src="[[icon]]" alt="[[label]]" />
+        <img src="[[icon]]" alt="[[label]]" aria-hidden="true" on-error="_handleImageError" />
       </div>
-      <span class="shortcut-label">[[i18n('documentCreateShortcut.createWithType', i18n(label))]]</span>
+      <span class="shortcut-label">[[i18n(label)]]</span>
     </div>
   `,
 
@@ -86,6 +96,11 @@ Polymer({
     type: String,
     icon: String,
     label: String,
+  },
+
+  _handleImageError(e) {
+    // Hide the image if it fails to load
+    e.target.style.display = 'none';
   },
 
   _tap() {

@@ -115,11 +115,18 @@ Polymer({
         </div>
       </div>
 
-      <button id="createBtn" noink on-tap="_displayWizard" aria-labelledby="createBtnTooltip">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <button type="button" id="createBtn" on-tap="_displayWizard" aria-labelledby="createBtnTooltip">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
           <path
             d="M18.9775 10.9873H12.9944L12.9915 5.00818C12.9915 4.45847 12.5446 4.01233 11.9939 4.01233C11.4433 4.01233 10.9964 4.45847 10.9964 5.00818L10.9994 10.9873H5.0124C4.46178 10.9873 4.01489 11.4334 4.01489 11.9831C4.01489 12.5328 4.46178 12.979 5.0124 12.979H11.0004L11.0034 18.9501C11.0034 19.4998 11.4503 19.9459 12.0009 19.9459C12.5516 19.9459 12.9984 19.4998 12.9984 18.9501L12.9954 12.979H18.9775C19.5281 12.979 19.975 12.5328 19.975 11.9831C19.975 11.4334 19.5281 10.9873 18.9775 10.9873Z"
-            fill="#3E3B92"
+            fill="var(--sat-create-button-shortcut-label-color, var(--nuxeo-button-primary-text))"
           />
         </svg>
       </button>
