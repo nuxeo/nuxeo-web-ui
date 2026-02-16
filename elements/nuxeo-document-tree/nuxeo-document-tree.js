@@ -86,7 +86,12 @@ Polymer({
 
       a {
         @apply --nuxeo-link;
-        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        color: var(--nuxeo-drawer-text);
+      }
+
+      /* Satori theme: Apply Satori font styling */
+      :host(.satori-theme) a {
+        color: var(--sat-drawer-item-font-color);
         font-weight: var(--sat-drawer-item-font-weight);
         font-size: var(--sat-drawer-item-font-size);
         line-height: var(--sat-drawer-item-line-height);
@@ -97,26 +102,34 @@ Polymer({
         @apply --nuxeo-link-hover-color;
       }
 
-      /* Highlight the currently selected/active node */
-      #content:has(a.selected) {
+      /* Satori theme: Highlight the currently selected/active node */
+      :host(.satori-theme) #content:has(a.selected) {
         background-color: var(--sat-drawer-item-selected-background);
         border-radius: 54px;
-        min-height: 25px;
-        padding: 5px 0;
+        padding: 8px 0px;
+        font-weight: 600 !important;
       }
-
-      nuxeo-tree-node {
+      /* Satori theme: Adjust tree node spacing */
+      :host(.satori-theme) nuxeo-tree-node {
         padding-top: 14px;
       }
 
-      nuxeo-tree {
+      :host(.satori-theme) nuxeo-tree {
         margin-left: 18px;
       }
       #root a,
       a:active,
       a:visited,
       a:focus {
-        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        color: var(--nuxeo-drawer-text);
+      }
+
+      /* Satori theme: Apply Satori font styling to link states */
+      :host(.satori-theme) #root a,
+      :host(.satori-theme) a:active,
+      :host(.satori-theme) a:visited,
+      :host(.satori-theme) a:focus {
+        color: var(--sat-drawer-item-font-color);
         font-weight: var(--sat-drawer-item-font-weight);
         font-size: var(--sat-drawer-item-font-size);
         line-height: var(--sat-drawer-item-line-height);
@@ -124,6 +137,14 @@ Polymer({
       }
 
       iron-icon {
+        opacity: 0.7;
+        width: 1.3rem;
+        margin-right: -1.6em;
+        margin-top: -0.07rem;
+      }
+
+      /* Satori theme: Adjust icon size and positioning */
+      :host(.satori-theme) iron-icon {
         opacity: 1;
         width: 1.8rem;
         height: 1.8rem;
@@ -133,6 +154,10 @@ Polymer({
       }
 
       :host([dir='rtl']) iron-icon {
+        margin-right: 0;
+      }
+
+      :host([dir='rtl'].satori-theme) iron-icon {
         margin-right: 10em;
       }
 
@@ -153,18 +178,38 @@ Polymer({
       }
 
       .parents + nuxeo-tree {
+        padding: 6px 5px;
+      }
+
+      /* Satori theme: Remove extra padding */
+      :host(.satori-theme) .parents + nuxeo-tree {
         padding: 0;
       }
 
       .parents > nuxeo-tree {
+        padding: 4px 5px;
+      }
+
+      /* Satori theme: Remove extra padding */
+      :host(.satori-theme) .parents > nuxeo-tree {
         padding: 0;
       }
 
       .parents a {
         @apply --layout-horizontal;
-        padding-top: 12px;
-        margin-left: 18px;
+        padding: 0.35em;
         color: var(--nuxeo-drawer-text);
+        border-bottom: 1px solid var(--nuxeo-border);
+      }
+
+      /* Satori theme: Adjust parent link styling */
+      :host(.satori-theme) .parents a {
+        padding-top: 12px;
+        padding-bottom: 0;
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 18px;
+        border-bottom: none;
       }
 
       .parents span {
@@ -177,6 +222,10 @@ Polymer({
 
       .parent {
         padding: 0.12em 0 0;
+      }
+
+      /* Satori theme: Apply Satori color to parent */
+      :host(.satori-theme) .parent {
         color: var(--sat-drawer-item-font-color);
       }
 
@@ -196,6 +245,10 @@ Polymer({
 
       .header h5 {
         margin: 0;
+      }
+
+      /* Satori theme: Apply Satori header styling */
+      :host(.satori-theme) .header h5 {
         @apply --sat-header-h5;
       }
 
@@ -333,6 +386,13 @@ Polymer({
       this.setAttribute('dir', direction);
     }
     this._checkRtl();
+
+    // Check if Satori theme is active and add class
+    this._checkTheme();
+    window.addEventListener('theme-changed', () => {
+      this._checkTheme();
+    });
+
     window.addEventListener('nuxeo-documents-deleted', (e) => {
       if (e.detail.documents) {
         this.removeDocuments(e.detail.documents);
@@ -370,6 +430,15 @@ Polymer({
   _checkRtl() {
     const dir = document.documentElement.getAttribute('dir');
     this._isRtl = dir === 'rtl';
+  },
+
+  _checkTheme() {
+    const theme = localStorage.getItem('theme') || 'default';
+    if (theme === 'satori') {
+      this.classList.add('satori-theme');
+    } else {
+      this.classList.remove('satori-theme');
+    }
   },
 
   _onRtlChange() {
@@ -516,8 +585,13 @@ Polymer({
   /**
    * Update the selection highlighting in the tree
    * Only one node should be highlighted at a time
+   * Only applies when Satori theme is active
    */
   _updateSelectionHighlight(selectedPath) {
+    // Only apply selection highlighting for Satori theme
+    const isSatoriTheme = this.classList.contains('satori-theme');
+    if (!isSatoriTheme) return;
+
     // Determine which path should be highlighted
     const pathToHighlight =
       selectedPath ||
