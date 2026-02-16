@@ -21,7 +21,7 @@
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@nuxeo/testing-helpers": "~2025.13.0-rc",
     "@open-wc/eslint-config": "^0.3.0",
-    "@open-wc/karma-esm": "^2.13.21",
+    "@open-wc/karma-esm": "^4.0.0",
     "@open-wc/prettier-config": "^0.1.0",
     "@open-wc/webpack-import-meta-loader": "^0.2.1",
     "@wdio/cli": "^9.12.2",
