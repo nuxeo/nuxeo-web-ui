@@ -121,19 +121,7 @@ Polymer({
 
     <a href$="[[_href(urlFor, route, link)]]">
       <div id="button">
-        <template is="dom-if" if="[[!svgIcon]]">
-          <paper-icon-button
-            noink
-            icon="[[icon]]"
-            src="[[src]]"
-            name$="[[name]]"
-            aria-labelledby="tooltip"
-            tabindex="-1"
-          ></paper-icon-button>
-        </template>
-        <template is="dom-if" if="[[svgIcon]]">
-          <button aria-labelledby="tooltip" tabindex="-1" inner-h-t-m-l="[[svgIcon]]"></button>
-        </template>
+        <button aria-labelledby="tooltip" tabindex="-1" inner-h-t-m-l="[[svgIcon]]"></button>
       </div>
       <nuxeo-tooltip
         for="button"

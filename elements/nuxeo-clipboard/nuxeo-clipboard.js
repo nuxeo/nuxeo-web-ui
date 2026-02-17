@@ -126,6 +126,10 @@ Polymer({
         text-align: center;
         font-size: 1rem;
       }
+
+      .header h5 {
+        @apply --sat-header-h5;
+      }
     </style>
 
     <nuxeo-document-storage id="storage" name="nuxeo-clipboard" documents="{{documents}}"></nuxeo-document-storage>

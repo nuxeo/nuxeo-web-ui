@@ -39,6 +39,10 @@ Polymer({
         @apply --layout-vertical;
       }
 
+      .header h5 {
+        @apply --sat-header-h5;
+      }
+
       nuxeo-data-list {
         display: block;
         position: relative;
