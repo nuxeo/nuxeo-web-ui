@@ -176,6 +176,10 @@ Polymer({
       #actionsDropdown {
         width: 82%;
         padding: 19px 0 0 0;
+        --selectivity-dropdown-min-width: auto;
+        --selectivity-dropdown-max-width: 100%;
+        --selectivity-result-item-white-space: normal;
+        --selectivity-result-item-word-wrap: break-word;
       }
 
       #actionsDropdown > .iron-selected {
@@ -798,7 +802,8 @@ Polymer({
     if (search) {
       this.isSavedSearch = this._isSavedSearch();
       this.selectedSearch = search;
-      this.params = this._mutateParams(search.params, true);
+      const clonedParams = JSON.parse(JSON.stringify(search.params));
+      this.params = this._mutateParams(clonedParams);
       this._navigateToResults();
     } else {
       this._clear();
@@ -832,7 +837,8 @@ Polymer({
 
     // Populate params
     const search = this._searches[idx];
-    this.params = this._mutateParams(search.params);
+    const clonedParams = JSON.parse(JSON.stringify(search.params));
+    this.params = this._mutateParams(clonedParams);
     this.searchTerm = this.params?.ecm_fulltext?.replace(/\*/g, '') || '';
 
     // Ensure form stays synced
@@ -905,7 +911,9 @@ Polymer({
       const _el = this.$['saved-search'];
       _el.searchId = this.selectedSearch.id;
       _el.get().then((response) => {
-        this.params = this._mutateParams(response.params);
+        const clonedParams = JSON.parse(JSON.stringify(response.params));
+        this.params = this._mutateParams(clonedParams);
+
         this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
         this.form.searchTerm = this.searchTerm;
         this.dirty = false;
@@ -985,7 +993,7 @@ Polymer({
         _el.data.title = this.$.savedSearchRenameTitle.value;
         _el.data.params = this._mutateParams(_el.data.params);
       } else {
-        _el.data.params = this.params;
+        _el.data.params = this._mutateParams(this.params, true);
       }
       _el.put().then(() => {
         if (this._renaming) {
