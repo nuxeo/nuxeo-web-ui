@@ -45,7 +45,7 @@ function isTrustedDomain(path) {
   const isValidUrl = trustedDomainList.some((url) => {
     const updatedUrl = createUrlFromString(url);
     const { hostname: currentUrlHostName } = new URL(updatedUrl);
-    return currentUrlHostName?.toLowerCase() === userHostName?.toLowerCase();
+    return currentUrlHostName && userHostName && currentUrlHostName.toLowerCase() === userHostName.toLowerCase();
   });
   return isValidUrl;
 }
