@@ -68,6 +68,7 @@ Polymer({
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
       }
 
       .shortcut-icon img {

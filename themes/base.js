@@ -135,6 +135,12 @@ const template = html`
           text-overflow: ellipsis;
           color: var(--nuxeo-drawer-header);
         }
+        /* Responsive adjustments for dashboard header title */
+        @media (max-width: 720px) {
+          .header {
+            padding-left: 48px;
+          }
+        }
 
         /* layouts */
         div[role='widget'] > div.multiline {

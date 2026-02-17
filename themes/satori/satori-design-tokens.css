@@ -334,4 +334,8 @@
   /* User Avatar */
   --sat-profile-avatar-bg: rgba(255, 255, 255, 0.15);
 
+  /*Font Styles*/
+  --sat-font-family-primary: 'Figtree';
+  --sat-font-family-secondary: 'Noto Sans';
+
 }

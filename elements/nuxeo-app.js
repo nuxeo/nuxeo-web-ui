@@ -362,6 +362,11 @@ Polymer({
         background-color: var(--nuxeo-drawer-background);
       }
 
+      /* Satori theme: Remove background from drawer toggle */
+      :host([_is-satori-theme]) #drawerToggle {
+        background-color: transparent;
+      }
+
       #drawerToggle svg,
       #drawerToggle g,
       #drawerToggle path {
@@ -792,6 +797,11 @@ Polymer({
       value: false,
       reflectToAttribute: true,
     },
+    _isSatoriTheme: {
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true,
+    },
   },
 
   listeners: {
@@ -840,6 +850,7 @@ Polymer({
     this.logoToMenuNavigation();
     this.skipLinkEvent();
     this._checkRtl();
+    this._updateThemeFlag();
 
     this._updateIsNarrow();
 
@@ -1235,6 +1246,11 @@ Polymer({
       return `${baseUrl}themes/${theme}/logo.svg`;
     }
     return `${baseUrl}themes/${theme}/logo.png`;
+  },
+
+  _updateThemeFlag() {
+    const theme = localStorage.getItem('theme') || 'default';
+    this.set('_isSatoriTheme', theme === 'satori');
   },
 
   _userInitials(user) {
@@ -1645,6 +1661,7 @@ Polymer({
   },
 
   _themeChanged() {
+    this._updateThemeFlag();
     this._toast(this.i18n('themes.applying'));
     window.location.reload();
   },

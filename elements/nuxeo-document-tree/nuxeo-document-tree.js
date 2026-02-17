@@ -134,6 +134,7 @@ Polymer({
         font-size: var(--sat-drawer-item-font-size);
         line-height: var(--sat-drawer-item-line-height);
         letter-spacing: var(--sat-drawer-item-letter-spacing);
+        font-family: var(--sat-font-family-secondary);
       }
 
       iron-icon {
