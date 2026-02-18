@@ -120,7 +120,7 @@ Polymer({
     </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
-      <button id="button" aria-labelledby="tooltip" tabindex="-1" inner-h-t-m-l="[[svgIcon]]"></button>
+      <button id="button" type="button" tabindex="-1" inner-h-t-m-l="[[svgIcon]]"></button>
       <nuxeo-tooltip
         for="button"
         position="[[_tooltipPosition]]"
