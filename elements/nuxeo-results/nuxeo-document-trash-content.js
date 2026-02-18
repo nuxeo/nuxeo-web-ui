@@ -151,6 +151,8 @@ Polymer({
         icon="nuxeo:view-list"
         class="results"
         settings-enabled
+        column-resize-enabled
+        column-reorder-enabled
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
