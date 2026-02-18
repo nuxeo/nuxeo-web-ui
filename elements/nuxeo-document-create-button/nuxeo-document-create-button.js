@@ -115,7 +115,7 @@ Polymer({
         </div>
       </div>
 
-      <button type="button" id="createBtn" on-tap="_displayWizard" aria-labelledby="createBtnTooltip">
+      <button type="button" id="createBtn" on-tap="_displayWizard">
         <svg
           width="24"
           height="24"
