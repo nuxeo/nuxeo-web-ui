@@ -270,7 +270,7 @@ limitations under the License.
 
         const tag = elem.tagName.toLowerCase();
         const currentIndex = parseInt(elem.getAttribute('index'), 10);
-        const total = this.nxProvider?.resultsCount || 0;
+        const total = (this.nxProvider && this.nxProvider.resultsCount) || 0;
         let newIndex = currentIndex;
 
         switch (e.key) {
