@@ -526,6 +526,7 @@
   "dropzone.abort": "Przerwij przesyłanie pliku",
   "dropzone.add": "Prześlij główny plik",
   "dropzone.invalid.error": "Nieprawidłowa zawartość",
+  "dropzone.invalid.file": "Only {0} files are allowed",
   "dropzone.invalid.uploading": "Przesyłanie pliku w toku",
   "dropzone.dropFile": "Upuść plik",
   "dropzone.toast.error": "Przesyłanie nie powiodło się: {0}",

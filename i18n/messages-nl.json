@@ -526,6 +526,7 @@
   "dropzone.abort": "Het uploaden van bestanden afbreken",
   "dropzone.add": "Een bestand toevoegen",
   "dropzone.invalid.error": "Ongeldige inhoud",
+  "dropzone.invalid.file": "Only {0} files are allowed",
   "dropzone.invalid.uploading": "Bestandsupload in afwachting van",
   "dropzone.dropFile": "Uw bestand hier neerzetten",
   "dropzone.toast.error": "Upload mislukt: {0}",

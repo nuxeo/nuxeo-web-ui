@@ -267,6 +267,14 @@ Polymer({
       value: false,
     },
     /**
+     * This property defines the file types that the dropzone should accept,
+     *  using the same syntax as the `accept` attribute of the native file input.
+     */
+    accept: {
+      type: String,
+      value: '',
+    },
+    /**
      * Key where the blob content will be stored when using blob lists.
      * For example on files schema `files:files` is used to store blobs, each blob being stored in `file` key.
      * In this specific case value-key='file'.
@@ -565,7 +573,11 @@ Polymer({
   },
 
   _uploadInputFiles(e) {
-    this._upload(e.target.files);
+    this.files = Array.from(e.target.files || []);
+
+    if (this.validate()) {
+      this._upload(e.target.files);
+    }
   },
 
   _filesChanged() {
@@ -576,27 +588,6 @@ Polymer({
   _upload(files) {
     if (files && files.length > 0) {
       const newFiles = Array.prototype.slice.call(files);
-      if (this.accept) {
-        const allowedExtensions = this.accept.split(',').map((ext) => ext.trim().toLowerCase());
-
-        const invalidFiles = newFiles.filter((file) => {
-          const fileName = file.name.toLowerCase();
-          return !allowedExtensions.some((ext) => fileName.endsWith(ext));
-        });
-
-        if (invalidFiles.length > 0) {
-          this._errorMessage = `Invalid file type. Only ${this.accept} files are allowed.`;
-          this.invalid = true;
-          this.notify({
-            message: this._errorMessage,
-            duration: 4000,
-          });
-          return;
-        }
-        this.invalid = false;
-        this._errorMessage = '';
-      }
-
       if (this.multiple) {
         if (this.replaceMode) {
           this.uploadedFiles = this.uploadedFiles.concat(newFiles);
@@ -626,7 +617,11 @@ Polymer({
   _drop(e) {
     e.preventDefault();
     this._setDraggingFiles(false);
-    this._upload(e.dataTransfer.files);
+    const droppedFiles = Array.from(e.dataTransfer.files || []);
+    this.files = droppedFiles;
+    if (this.validate()) {
+      this._upload(e.dataTransfer.files);
+    }
   },
 
   _computeMessage() {
@@ -675,9 +670,29 @@ Polymer({
       this._errorMessage = this.i18n('dropzone.invalid.error');
       return false;
     }
+    if (this.accept && this.files && this.files.length > 0) {
+      const accepted = this.accept.split(',').map((a) => a.trim().toLowerCase());
+
+      const invalidFile = this.files.find((file) => {
+        const name = file.name || '';
+        const extension = `.${name
+          .split('.')
+          .pop()
+          .toLowerCase()}`;
+        const mime = (file.type || '').toLowerCase();
+
+        return !accepted.includes(extension) && !accepted.includes(mime);
+      });
+
+      if (invalidFile) {
+        this._errorMessage = this.i18n('dropzone.invalid.file', this.accept);
+        return false;
+      }
+    }
     if (!this.required) {
       return true;
     }
+
     return this.files && this.files.length > 0;
   },
 
