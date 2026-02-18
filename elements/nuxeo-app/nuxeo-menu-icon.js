@@ -79,7 +79,7 @@ Polymer({
         tabindex: -1;
       }
 
-      #button button {
+      #button {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -93,23 +93,23 @@ Polymer({
         outline: none;
       }
 
-      #button button:hover {
+      #button:hover {
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-menu-hover);
       }
 
-      :host(.selected) #button button {
+      :host(.selected) #button {
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-menu-hover);
       }
 
-      #button button svg {
+      #button svg {
         width: 24px;
         height: 24px;
         fill: currentColor;
       }
 
-      #button button svg path {
+      #button svg path {
         fill: currentColor;
       }
 
@@ -120,9 +120,7 @@ Polymer({
     </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
-      <div id="button">
-        <button aria-labelledby="tooltip" tabindex="-1" inner-h-t-m-l="[[svgIcon]]"></button>
-      </div>
+      <button id="button" aria-labelledby="tooltip" tabindex="-1" inner-h-t-m-l="[[svgIcon]]"></button>
       <nuxeo-tooltip
         for="button"
         position="[[_tooltipPosition]]"
