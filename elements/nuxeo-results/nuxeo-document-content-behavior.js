@@ -153,7 +153,7 @@ export const DocumentContentBehavior = [
     _dragoverImport(e) {
       // Only react to file drag - added to prevent import functionality
       // from being triggered during column reordering in content view table
-      if (!e.dataTransfer || !Array.from(e.dataTransfer.types).includes('Files')) {
+      if (!this._isFileDrag(e)) {
         return;
       }
 
