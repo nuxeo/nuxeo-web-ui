@@ -35,26 +35,59 @@ Polymer({
         display: inline-block;
       }
 
-      #createBtn {
-        color: var(--nuxeo-button-primary-text);
-        --paper-fab-background: var(--nuxeo-button-primary);
-        --paper-fab-keyboard-focus-background: var(--nuxeo-button-primary-focus);
+      .shortcut-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 16px;
+        background-color: var(--sat-document-create-button-background, var(--nuxeo-button-primary));
+        transition: background-color 0.2s ease;
+        box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
       }
 
-      paper-fab:hover,
-      paper-fab:focus {
-        background-color: var(--nuxeo-button-primary-focus);
+      .shortcut-container:hover {
+        background-color: var(--sat-document-create-button-hover-background, var(--nuxeo-button-primary-focus));
       }
 
-      paper-fab {
-        --paper-fab-iron-icon: {
-          filter: brightness(100);
-        }
+      .shortcut-label {
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 20px;
+        color: var(--sat-create-button-shortcut-label-color, var(--nuxeo-button-primary-text));
+        white-space: nowrap;
+        letter-spacing: 0.1px;
+      }
+
+      /* Icon styling - simple image without background */
+      .shortcut-icon {
+        height: 40px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
+      }
+
+      .shortcut-icon img {
+        width: 24px;
+        height: 24px;
+      }
+
+      .shortcut-icon img[src=''],
+      .shortcut-icon img:not([src]) {
+        display: none;
       }
     </style>
 
-    <paper-fab mini noink id="createBtn" src="[[icon]]" on-tap="_tap"></paper-fab>
-    <nuxeo-tooltip for="createBtn" position="left">[[i18n(label)]]</nuxeo-tooltip>
+    <div class="shortcut-container" on-tap="_tap">
+      <div class="shortcut-icon">
+        <img src="[[icon]]" alt="[[label]]" aria-hidden="true" on-error="_handleImageError" />
+      </div>
+      <span class="shortcut-label">[[i18n(label)]]</span>
+    </div>
   `,
 
   is: 'nuxeo-document-create-shortcut',
@@ -64,6 +97,11 @@ Polymer({
     type: String,
     icon: String,
     label: String,
+  },
+
+  _handleImageError(e) {
+    // Hide the image if it fails to load
+    e.target.style.display = 'none';
   },
 
   _tap() {

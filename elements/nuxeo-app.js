@@ -116,6 +116,62 @@ Polymer({
         }
       }
 
+      /* Profile avatar with initials */
+      .profile-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--nuxeo-sidebar-menu);
+        padding: 12px 13px;
+        width: var(--nuxeo-sidebar-width);
+        cursor: pointer;
+        background: transparent;
+        border: none;
+        outline: none;
+        text-decoration: none;
+        box-sizing: border-box;
+      }
+
+      .profile-avatar:hover {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      :host([sidebar-expanded]) .profile-avatar:hover,
+      .profile-avatar.selected {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      .profile-initials {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--sat-profile-avatar-bg);
+        color: var(--nuxeo-sidebar-menu);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        flex-shrink: 0;
+      }
+
+      .profile-avatar-image {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
+      .profile-avatar-label {
+        display: none;
+      }
+
       /* Layout base */
       app-drawer-layout {
         display: flex;
@@ -263,7 +319,7 @@ Polymer({
         width: calc(100% - var(--nuxeo-sidebar-width));
         height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         margin-left: var(--nuxeo-sidebar-width);
-        background-color: var(--nuxeo-drawer-background);
+        background-color: var(--sat-drawer-content-background, var(--nuxeo-drawer-background));
       }
 
       :host([dir='rtl']) #drawer iron-pages {
@@ -303,7 +359,14 @@ Polymer({
         top: 5px;
         left: 6px;
         z-index: 99;
-        background-color: var(--nuxeo-drawer-background);
+        background-color: var(--sat-drawer-toggle-bg, var(--nuxeo-drawer-background));
+      }
+
+      .header h5 {
+        font-weight: var(--sat-home-header-font-weight);
+        font-size: var(--sat-home-header-font-size);
+        color: var(--sat-home-header-color, var(--nuxeo-drawer-text));
+        font-family: var(--sat-font-family-primary);
       }
 
       #drawerToggle svg,
@@ -448,18 +511,38 @@ Polymer({
               <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
               <nuxeo-menu-icon
                 name="administration"
-                icon="nuxeo:admin"
                 label="app.administration"
                 class="settings"
                 hidden$="[[!hasAdministrationPermissions(currentUser)]]"
+                icon="images/icons/administration.svg"
               ></nuxeo-menu-icon>
-              <nuxeo-menu-icon
+              <a
                 name="profile"
-                src="[[currentUser.contextParameters.userprofile.avatar.data]]"
-                icon="nuxeo:user-settings"
-                label="app.account"
-                class="settings"
-              ></nuxeo-menu-icon>
+                class="settings profile-avatar"
+                href="[[urlFor('page', 'profile')]]"
+                id="profileWrapper"
+                role="option"
+              >
+                <template is="dom-if" if="[[currentUser.contextParameters.userprofile.avatar.data]]">
+                  <img
+                    class="profile-avatar-image"
+                    src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+                    alt="[[_displayUser(currentUser)]]"
+                  />
+                </template>
+                <template is="dom-if" if="[[!currentUser.contextParameters.userprofile.avatar.data]]">
+                  <span class="profile-initials">[[_userInitials(currentUser)]]</span>
+                </template>
+              </a>
+              <nuxeo-tooltip
+                for="profileWrapper"
+                position="right"
+                offset="0"
+                animation-delay="0"
+                id="profileTooltip"
+                tabindex="-1"
+                >[[i18n('app.account')]]</nuxeo-tooltip
+              >
             </paper-listbox>
 
             <!-- drawer content -->
@@ -1152,7 +1235,46 @@ Polymer({
   },
 
   _logo(baseUrl) {
-    return `${baseUrl}themes/${localStorage.getItem('theme') || 'default'}/logo.png`;
+    return `${baseUrl}themes/${localStorage.getItem('theme') || 'default'}/logo.svg`;
+  },
+
+  _userInitials(user) {
+    if (!user) {
+      return '';
+    }
+    const firstName = user.properties && user.properties.firstName ? user.properties.firstName.trim() : '';
+    const lastName = user.properties && user.properties.lastName ? user.properties.lastName.trim() : '';
+
+    // Case 1: Both first and last name - use first letter of each
+    if (firstName && lastName) {
+      return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+    }
+
+    // Case 2: Only first name with 2+ characters - use first two
+    if (firstName && firstName.length >= 2) {
+      return firstName.substring(0, 2).toUpperCase();
+    }
+
+    // Case 3: Only first name with 1 character
+    if (firstName) {
+      return firstName.charAt(0).toUpperCase();
+    }
+
+    // Case 4: Only last name
+    if (lastName && lastName.length >= 2) {
+      return lastName.substring(0, 2).toUpperCase();
+    }
+
+    if (lastName) {
+      return lastName.charAt(0).toUpperCase();
+    }
+
+    // Fallback to user id first two characters
+    if (user.id) {
+      return user.id.substring(0, 2).toUpperCase();
+    }
+
+    return '??';
   },
 
   showHome(e) {

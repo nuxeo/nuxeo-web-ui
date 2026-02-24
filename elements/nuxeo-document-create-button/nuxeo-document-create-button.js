@@ -36,6 +36,33 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style>
+      /* Button styling */
+      #createBtn {
+        width: var(--sat-document-create-button-width, 56px);
+        height: var(--sat-document-create-button-height, 56px);
+        border-radius: 16px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        color: var(--nuxeo-button-primary-text);
+        box-shadow: var(--sat-document-create-button-box-shadow);
+        background: var(--sat-document-create-button-background, var(--nuxeo-button-primary));
+      }
+
+      #createBtn:hover,
+      #createBtn:focus {
+        background-color: var(--sat-document-create-button-hover-background, var(--nuxeo-button-primary-focus));
+      }
+
+      #createBtn svg {
+        width: 24px;
+        height: 24px;
+        display: block;
+      }
+
       paper-fab {
         width: var(--nuxeo-document-create-button-width, 56px);
         height: var(--nuxeo-document-create-button-height, 56px);
@@ -88,13 +115,9 @@ Polymer({
         </div>
       </div>
 
-      <paper-fab
-        id="createBtn"
-        noink
-        icon="nuxeo:add"
-        on-tap="_displayWizard"
-        aria-labelledby="createBtnTooltip"
-      ></paper-fab>
+      <button type="button" id="createBtn" on-tap="_displayWizard">
+        <img src="images/icons/add.svg" alt="" aria-hidden="true" style="width: 24px; height: 24px; display: block;" />
+      </button>
       <!-- nuxeo-tooltip does not play nice (in shadycss) when attached to elements that are position: absolute -->
       <paper-tooltip for="createBtn" position="left" id="createBtnTooltip"
         >[[i18n('documentCreateButton.tooltip')]]</paper-tooltip

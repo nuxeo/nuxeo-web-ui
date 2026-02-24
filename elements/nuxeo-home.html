@@ -29,11 +29,13 @@ limitations under the License.
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
+        background-color: var(--sat-drawer-content-background);
       }
 
       nuxeo-card {
         min-width: 25em;
         width: 49%;
+        border-radius: 12px;
       }
 
       @media (max-width: 1024px) {
@@ -95,6 +97,18 @@ limitations under the License.
         outline: 0;
       }
 
+      .header {
+        @apply --sat-header-h5;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .header-logo {
+        margin-left: auto;
+        margin-right: 58px;
+      }
+
       .task-name {
         font-weight: bold;
       }
@@ -107,9 +121,12 @@ limitations under the License.
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-page>
-      <div slot="header">
+      <div slot="header" class="header">
         <nuxeo-repositories></nuxeo-repositories>
         [[i18n('home.dashboard')]]
+        <div class="header-logo">
+          <img src="images/hyland-wordmark.svg" alt="Hyland" width="110" height="20" />
+        </div>
       </div>
       <div>
         <section name="dashboard" class="dashboard">

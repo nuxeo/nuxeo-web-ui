@@ -173,6 +173,10 @@ Polymer({
         @apply --layout-flex;
         @apply --layout-horizontal;
       }
+
+      .collection-header {
+        @apply --sat-header-h5;
+      }
     </style>
 
     <nuxeo-operation op="Collection.RemoveFromCollection" id="removeFromCollectionOp"></nuxeo-operation>
@@ -193,7 +197,7 @@ Polymer({
         >
       </template>
       <template is="dom-if" if="[[!_isDisplayMembers]]">
-        <h5>[[i18n('collections.heading')]]</h5>
+        <h5 class="collection-header">[[i18n('collections.heading')]]</h5>
       </template>
     </div>
 
