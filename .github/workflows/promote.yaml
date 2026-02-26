@@ -22,13 +22,13 @@ jobs:
   promote:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
         with:
           ref: v${{ github.event.inputs.version }}
           token: ${{ secrets.GIT_ADMIN_TOKEN }}
@@ -129,7 +129,7 @@ jobs:
           CONNECT_URL: https://connect.nuxeo.com/nuxeo
         run: curl -i -u "${{ secrets.CONNECT_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_URL/site/marketplace/upload?batch=true"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
         with:
           token: ${{ secrets.GIT_ADMIN_TOKEN }}
           ref: ${{ github.event.inputs.referenceBranch }}
