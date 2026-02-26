@@ -147,7 +147,11 @@ jobs:
       - name: Check preview namespace
         id: preview_ns
         run: |
-          echo "exists=$(kubectl get namespace ${PREVIEW_NAMESPACE})" >> $GITHUB_OUTPUT
+          if kubectl get namespace "${PREVIEW_NAMESPACE}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create preview namespace
         if: ${{ !steps.preview_ns.outputs.exists }}
