@@ -18,7 +18,7 @@ on:
         type: string
         required: false
     secrets:
-      NPM_PACKAGES_TOKEN:
+      NPM_PACKAGES_TOKEN_TEMP:
         required: true
       REPOSITORY_MANAGER_USERNAME:
         required: true
@@ -80,7 +80,7 @@ jobs:
 
       - name: Install Web UI
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN_TEMP }}
         run: |
           npm cache clean --force
           npm install
