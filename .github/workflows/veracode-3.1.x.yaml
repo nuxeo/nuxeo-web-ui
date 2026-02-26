@@ -42,11 +42,11 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access
     # it and copies all sources into ZIP file for submitting for analysis.
     # Replace this section with your applications build steps
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
       with:
           ref: ${{ env.BRANCH_NAME }}
 
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v6
       with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
@@ -75,7 +75,7 @@ jobs:
           npm install
           popd
     - name: Checkout the nuxeo-elements repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
       with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
@@ -148,7 +148,7 @@ jobs:
         zip -r nuxeo-web-ui.zip *
 
     - name: Upload ZIP as artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: nuxeo-web-ui
         path: nuxeo-web-ui.zip
@@ -162,7 +162,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: nuxeo-web-ui
           path: .
