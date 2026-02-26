@@ -98,9 +98,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ nuxeo-elements/core
-          npm install --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ nuxeo-elements/ui
-          npm install --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ nuxeo-elements/dataviz
+          npm config set @nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/
+          npm install @nuxeo/nuxeo-elements
+          npm install @nuxeo/nuxeo-ui-elements
+          npm install @nuxeo/nuxeo-dataviz-elements
           npm install
 
       - name: Webpack build
