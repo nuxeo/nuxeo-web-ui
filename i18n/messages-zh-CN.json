@@ -526,6 +526,7 @@
   "dropzone.abort": "中止文件上传",
   "dropzone.add": "添加文件",
   "dropzone.invalid.error": "内容无效",
+  "dropzone.invalid.file": "Only {0} files are allowed",
   "dropzone.invalid.uploading": "待上传文件",
   "dropzone.dropFile": "拖放您的文件",
   "dropzone.toast.error": "上传失败：{0}",
