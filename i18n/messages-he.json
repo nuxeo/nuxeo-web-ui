@@ -526,6 +526,7 @@
   "dropzone.abort": "ביטול העלאת הקובץ",
   "dropzone.add": "העלאת הקובץ הראשי",
   "dropzone.invalid.error": "תוכן לא חוקי",
+  "dropzone.invalid.file": "Only {0} files are allowed",
   "dropzone.invalid.uploading": "העלאת הקובץ בהמתנה",
   "dropzone.dropFile": "שחרר את הקובץ שלך",
   "dropzone.toast.error": "ההעלאה נכשלה: {0}",

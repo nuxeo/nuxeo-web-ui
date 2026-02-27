@@ -526,6 +526,7 @@
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "Adicionar ficheiro",
   "dropzone.invalid.error": "Invalid content",
+  "dropzone.invalid.file": "Only {0} files are allowed",
   "dropzone.invalid.uploading": "File upload pending",
   "dropzone.dropFile": "Drop your file",
   "dropzone.toast.error": "Upload failed: {0}",
