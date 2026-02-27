@@ -69,7 +69,7 @@ jobs:
           branch: ${{ env.BRANCH_NAME }}
           default-branch: lts-2025
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
@@ -87,7 +87,7 @@ jobs:
           default-branch: lts-2025
 
       - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
