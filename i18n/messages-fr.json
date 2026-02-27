@@ -526,6 +526,7 @@
   "dropzone.abort": "Annuler le téléchargement",
   "dropzone.add": "Ajouter un fichier principal",
   "dropzone.invalid.error": "Contenu non valide.",
+  "dropzone.invalid.file": "Only {0} files are allowed",
   "dropzone.invalid.uploading": "Ajout du fichier en attente",
   "dropzone.dropFile": "Déposez votre fichier",
   "dropzone.toast.error": "Échec du chargement : {0}",
