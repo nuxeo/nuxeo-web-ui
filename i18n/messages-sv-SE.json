@@ -526,6 +526,7 @@
   "dropzone.abort": "Avbryt filuppladdning",
   "dropzone.add": "Lägg till en fil",
   "dropzone.invalid.error": "Ogiltigt innehåll",
+  "dropzone.invalid.file": "Only {0} files are allowed",
   "dropzone.invalid.uploading": "Fil uppladdning väntar",
   "dropzone.dropFile": "Släpp din fil här",
   "dropzone.toast.error": "Uppladdning misslyckades: {0}",
