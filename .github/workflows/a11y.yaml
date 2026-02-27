@@ -6,11 +6,6 @@ on:
       - maintenance-3.1.x
       - lts-2025
 
-  pull_request_target:
-    branches:
-      - maintenance-3.1.x
-      - lts-2025
-
   workflow_call:
     inputs:
       branch:
@@ -30,16 +25,9 @@ permissions:
 
 env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
-  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
 
 jobs:
   a11y:
-    if: |
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_call' ||
-      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
-      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
-
     runs-on: ubuntu-latest
 
     steps:
@@ -56,13 +44,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          ref: >-
-            ${{
-              github.event_name == 'pull_request_target'
-                && github.event.pull_request.head.sha
-                || github.ref
-            }}
 
       - name: Run git config
         run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
