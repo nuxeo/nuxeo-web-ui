@@ -6,11 +6,6 @@ on:
       - maintenance-3.1.x
       - lts-2025
 
-  pull_request_target:
-    branches:
-      - maintenance-3.1.x
-      - lts-2025
-
   workflow_call:
     inputs:
       branch:
@@ -36,12 +31,6 @@ env:
 
 jobs:
   ftests:
-    if: |
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_call' ||
-      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
-      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
-
     runs-on:
       group: medium-4cpu-runners
 
@@ -59,13 +48,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          ref: >-
-            ${{
-              github.event_name == 'pull_request_target'
-                && github.event.pull_request.head.sha
-                || github.ref
-            }}
 
       - uses: actions/setup-node@v6
         with:
@@ -153,12 +135,12 @@ jobs:
         env:
           RUN_ALL: false
           BAIL: 0
-          HEADLESS: ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
+          HEADLESS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
         uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v12.11.0
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
-          video_name: ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'ftest-video' || '' }}
+          video_name: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'ftest-video' || '' }}
           max_attempts: 3
 
       - name: Archive cucumber reports
