@@ -46,7 +46,7 @@ jobs:
       with:
           ref: ${{ env.BRANCH_NAME }}
 
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v6
       with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true

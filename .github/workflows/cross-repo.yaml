@@ -71,7 +71,7 @@ jobs:
       - name: Build parameters
         run: echo '${{ toJSON(github.event.inputs) }}'
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
