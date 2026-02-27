@@ -69,7 +69,7 @@ jobs:
           branch: ${{ env.BRANCH_NAME }}
           default-branch: maintenance-3.1.x
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
@@ -87,7 +87,7 @@ jobs:
           default-branch: maintenance-3.1.x
 
       - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
