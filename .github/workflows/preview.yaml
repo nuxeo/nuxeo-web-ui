@@ -143,20 +143,6 @@ jobs:
           project_id: ${{ secrets.GKE_PROJECT }}
           credentials: ${{ secrets.GKE_SA_KEY }}
 
-      - name: Check preview namespace
-        id: preview_ns
-        run: |
-          if kubectl get namespace "${PREVIEW_NAMESPACE}" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create preview namespace
-        if: ${{ !steps.preview_ns.outputs.exists }}
-        run: |
-          kubectl create namespace ${PREVIEW_NAMESPACE}
-
       - name: Install preview
         id: preview
         working-directory: ./charts/preview
@@ -171,11 +157,14 @@ jobs:
           # update helm deps
           helm dependency update .
 
-          # install
-          helm upgrade --install --namespace ${PREVIEW_NAMESPACE} ${PREVIEW_NAMESPACE} .
+          helm upgrade --install \
+            --namespace ${PREVIEW_NAMESPACE} \
+            --create-namespace \
+            ${PREVIEW_NAMESPACE} .
 
           # ensure the deployment is restarted to pull the new preview image
           kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
+
           echo "url=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_OUTPUT
           echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
 
