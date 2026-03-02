@@ -60,7 +60,7 @@ jobs:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: 21
@@ -135,7 +135,7 @@ jobs:
           mvn -B -nsu -ntp -f plugin/itests/marketplace install
 
       - name: Archive packages
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: packages
           path: |
