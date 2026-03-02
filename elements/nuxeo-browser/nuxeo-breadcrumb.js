@@ -60,7 +60,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             font-family: 'Figtree';
             font-style: normal;
             font-weight: 400;
-            font-size: 19px;
+            font-size: 17px;
           }
 
           .current {

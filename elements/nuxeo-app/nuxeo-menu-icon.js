@@ -48,11 +48,6 @@ Polymer({
         display: inline-block;
       }
 
-      :host(.selected) paper-icon-button {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
-      }
-
       paper-badge {
         --paper-badge-background: var(--nuxeo-badge-background);
         --paper-badge-margin-left: -24px;
