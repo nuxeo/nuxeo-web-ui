@@ -1076,16 +1076,13 @@ Polymer({
       if (this.docIdx > -1) {
         this._storeFile(this.docIdx);
       }
-      const previousFile = this._getCurrentFile();
       this.docIdx = index;
       const currentFile = this._getCurrentFile();
-      if (currentFile.checked) {
-        // load the file's own data
+      if (currentFile.checked && currentFile.docData) {
+        // load the file's own stored data
         await this._loadFile(currentFile.docData);
-      } else if (previousFile) {
-        // load the previous file's data
-        await this._loadFile(previousFile.docData, currentFile.name);
       } else {
+        // load empty properties with just the current file name as title (do not reuse previous file's metadata)
         await this._loadFile({}, currentFile.name);
       }
       if (currentFile.error) {
