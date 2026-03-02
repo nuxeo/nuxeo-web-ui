@@ -56,7 +56,7 @@ jobs:
       - name: Set branch name
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "BRANCH_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
+            echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
           else
             echo "BRANCH_NAME=${{ github.event.inputs.branch_name }}" >> $GITHUB_ENV
           fi
