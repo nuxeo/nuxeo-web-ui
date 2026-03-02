@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
@@ -69,7 +69,7 @@ jobs:
           branch: ${{ env.BRANCH_NAME }}
           default-branch: lts-2025
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
@@ -87,7 +87,7 @@ jobs:
           default-branch: lts-2025
 
       - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
@@ -98,26 +98,26 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install nuxeo-elements/core
-          npm install nuxeo-elements/ui
-          npm install nuxeo-elements/dataviz
+          npm install ./nuxeo-elements/core
+          npm install ./nuxeo-elements/ui
+          npm install ./nuxeo-elements/dataviz
           npm install
 
       - name: Webpack build
         run: npm run build
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.DOCKER_REGISTRY }}
           username: _json_key
           password: ${{ secrets.GKE_SA_KEY }}
 
       - name: Build and push server image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: server
           pull: true
@@ -126,7 +126,7 @@ jobs:
           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
 
       - name: Build and push image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: .
           pull: true
@@ -146,7 +146,11 @@ jobs:
       - name: Check preview namespace
         id: preview_ns
         run: |
-          echo "exists=$(kubectl get namespace ${PREVIEW_NAMESPACE})" >> $GITHUB_OUTPUT
+          if kubectl get namespace "${PREVIEW_NAMESPACE}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create preview namespace
         if: ${{ !steps.preview_ns.outputs.exists }}

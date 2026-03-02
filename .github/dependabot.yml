@@ -10,6 +10,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      gha:
+        patterns:
+          - "*"
 
   # LTS-2025 branch
   - package-ecosystem: "npm"
@@ -27,3 +31,7 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "[lts-2025]"
+    groups:
+      gha:
+        patterns:
+          - "*"
