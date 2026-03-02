@@ -401,14 +401,9 @@ Polymer({
       type: String,
       computed: 'formatPropertyXpath(xpath)',
     },
-
-    /**
-     * If false (default), each upload will re-upload all files (previous + new).
-     * If true, only new files are uploaded.
-     */
-    replaceMode: {
-      type: Boolean,
-      value: false,
+    _allUploadedFiles: {
+      type: Array,
+      value: () => [],
     },
   },
 
@@ -454,6 +449,13 @@ Polymer({
         this.value = [];
       }
       this.push('value', ...value);
+      const successfulFiles = this.files.filter((f) => !f.error);
+
+      // accumulate uploader-managed objects
+      this._allUploadedFiles = [...this._allUploadedFiles, ...successfulFiles];
+
+      // restore cumulative list into files
+      this.set('files', [...this._allUploadedFiles]);
     } else {
       this.set('value', value);
     }
@@ -529,6 +531,7 @@ Polymer({
   _deleteFile(e) {
     if (this.multiple && Array.isArray(this.value)) {
       this.value.splice(this.value.length - this.files.length + e.model.itemsIndex, 1);
+      this.splice('_allUploadedFiles', e.model.itemsIndex, 1);
       this.splice('files', e.model.itemsIndex, 1);
       if (this.uploadedFiles) {
         const fileToRemove = this.uploadedFiles[e.model.itemsIndex];
@@ -570,6 +573,9 @@ Polymer({
       this.$.input.value = '';
       this.files = [];
     }
+    if (this.multiple) {
+      this._allUploadedFiles = [];
+    }
   },
 
   _uploadInputFiles(e) {
@@ -589,14 +595,9 @@ Polymer({
     if (files && files.length > 0) {
       const newFiles = Array.prototype.slice.call(files);
       if (this.multiple) {
-        if (this.replaceMode) {
-          this.uploadedFiles = this.uploadedFiles.concat(newFiles);
-          this.uploadFiles(newFiles);
-        } else {
-          const allFiles = this.uploadedFiles.concat(newFiles);
-          this.uploadedFiles = allFiles;
-          this.uploadFiles(allFiles);
-        }
+        const allFiles = this.uploadedFiles.concat(newFiles);
+        this.uploadedFiles = allFiles;
+        this.uploadFiles(newFiles);
       } else {
         this.uploadedFiles = Array.prototype.slice.call(files);
         this.uploadFiles(files);
