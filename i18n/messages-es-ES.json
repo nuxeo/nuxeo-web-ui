@@ -526,6 +526,7 @@
   "dropzone.abort": "Abordar la subida de archivos",
   "dropzone.add": "Añadir un archivo",
   "dropzone.invalid.error": "Contenido no válido",
+  "dropzone.invalid.file": "Only {0} files are allowed",
   "dropzone.invalid.uploading": "Carga de archivo pendiente",
   "dropzone.dropFile": "Soltar su archivo",
   "dropzone.toast.error": "Carga Fallida: {0}",
