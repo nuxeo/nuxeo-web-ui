@@ -223,10 +223,16 @@ Polymer({
 
   async _srcOrIcon() {
     if (this.src && this.src.length > 0) {
-      this.$.button.icon = '';
-      this.$.button.src = this.src;
+      // Load external SVG file from src
+      try {
+        const response = await fetch(this.src);
+        const svgText = await response.text();
+        this.svgIcon = svgText;
+      } catch (error) {
+        console.error('Failed to load SVG from src:', this.src, error);
+      }
     } else if (this.icon && this.icon.endsWith('.svg')) {
-      // Fetch SVG file and set as svgIcon
+      // Fetch SVG file from icon path and set as svgIcon
       try {
         const response = await fetch(this.icon);
         const svgText = await response.text();
@@ -234,8 +240,18 @@ Polymer({
       } catch (error) {
         console.error('Failed to load SVG icon:', this.icon, error);
       }
-    } else if (!this.$.button.src || this.$.button.src.length === 0) {
-      this.$.button.icon = this.icon;
+    } else if (this.icon && this.icon.includes(':')) {
+      // Handle iron-icon format (e.g., "icons:menu", "hardware:laptop")
+      // Get the icon from the iconset and convert to SVG
+      const iconElement = document.createElement('iron-icon');
+      iconElement.icon = this.icon;
+      // Wait for icon to load
+      await iconElement.updateComplete;
+      // Extract the SVG from iron-icon
+      const svg = iconElement.querySelector('svg');
+      if (svg) {
+        this.svgIcon = svg.outerHTML;
+      }
     }
   },
 

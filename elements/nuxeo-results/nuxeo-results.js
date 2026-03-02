@@ -154,6 +154,7 @@ Polymer({
         opacity: 0.8;
         margin-right: 16px;
         transition: opacity 100ms ease-in-out;
+        padding-left: 4px;
       }
 
       paper-icon-button[selected] {

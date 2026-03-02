@@ -85,6 +85,10 @@ Polymer({
         overflow: hidden;
       }
 
+      .main nuxeo-document-view {
+        margin-right: 0;
+      }
+
       :host([opened]) .main {
         padding-right: 16px;
       }
