@@ -178,7 +178,7 @@
     "@wdio/allure-reporter": "^9.12.2",
     "@webcomponents/html-imports": "^1.2.0",
     "aws-sdk": "^2.420.0",
-    "dotenv": "^8.0.0",
+    "dotenv": "^17.3.1",
     "es6-promise": "^4.0.0",
     "extend": "^3.0.2",
     "fs-extra": "^10.0.0",
