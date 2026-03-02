@@ -526,6 +526,7 @@
   "dropzone.abort": "ファイルのアップロードを中止",
   "dropzone.add": "ファイルを追加",
   "dropzone.invalid.error": "無効なコンテンツ",
+  "dropzone.invalid.file": "Only {0} files are allowed",
   "dropzone.invalid.uploading": "ファイルのアップロード保留中",
   "dropzone.dropFile": "ここにファイルをドロップ",
   "dropzone.toast.error": "アップロードに失敗しました: {0}",
