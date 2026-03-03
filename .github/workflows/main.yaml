@@ -68,18 +68,10 @@ jobs:
           restore-keys: |
             npm-${{ runner.os }}-
 
-      - uses: actions/setup-java@v4
+      - name: Setup Maven build
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@main
         with:
-          distribution: 'zulu'
-          java-version: 17
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-${{ runner.os }}-
+          java-version: '17'
 
       - name: Purge cached Nuxeo artifacts
         run: rm -rf ~/.m2/repository/org/nuxeo
@@ -140,20 +132,10 @@ jobs:
         run: |
           npm update @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers
 
-      - name: Configure Maven
-        run: |
-          mkdir -p ~/.m2
-          echo '<settings>
-            <servers>
-              <server>
-                <id>maven-internal</id>
-                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
-                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
-              </server>
-            </servers>
-          </settings>' > ~/.m2/settings.xml
-
       - name: Build packages
+        env:
+          MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
         run: |
           mvn -ntp install -DskipInstall
           mvn -B -nsu -ntp -f plugin/itests/addon install
