@@ -60,10 +60,29 @@ jobs:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
 
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'packages/nuxeo-web-ui-ftest/package-lock.json', 'packages/nuxeo-designer-catalog/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 17
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-${{ runner.os }}-
+
+      - name: Purge cached Nuxeo artifacts
+        run: rm -rf ~/.m2/repository/org/nuxeo
 
       - name: Prepare environment
         run: |
@@ -114,6 +133,12 @@ jobs:
           npm install
           (cd packages/nuxeo-web-ui-ftest && npm install)
           (cd packages/nuxeo-designer-catalog && npm install)
+
+      - name: Update @nuxeo packages to latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm update @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers
 
       - name: Configure Maven
         run: |
