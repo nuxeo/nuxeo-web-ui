@@ -105,6 +105,8 @@ Polymer({
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
+        column-resize-enabled
+        column-reorder-enabled
         on-row-clicked="_navigate"
         caption-text="[[i18n('documentContentView.datatable.heading')]]"
       >
