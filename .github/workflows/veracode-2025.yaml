@@ -53,11 +53,6 @@ jobs:
           node-version: 18
           scope: '@nuxeo'
 
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
         run: |
@@ -108,18 +103,6 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
-      - name: 'Update settings.xml with server configuration'
-        run: |
-          echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
-                  <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
-
       - name: Delete Node Modules
         run: |
           rm -rf node_modules
