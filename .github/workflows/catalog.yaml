@@ -51,7 +51,7 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.9.0
         with:
-          java-version: '17'
+          java-version: ${{ contains(github.event.inputs.webui_ref || github.ref_name, '2025') && '21' || '17' }}
 
       - name: Install libxml2-utils
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils

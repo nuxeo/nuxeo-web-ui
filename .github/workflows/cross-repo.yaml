@@ -83,7 +83,7 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.9.0
         with:
-          java-version: '17'
+          java-version: ${{ github.event.inputs.branch_name == 'lts-2025' && '21' || '17' }}
 
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
