@@ -102,12 +102,6 @@ jobs:
           npm install
           popd
 
-      - name: Update @nuxeo packages to latest
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          npm update @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers
-
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v6
         with:
