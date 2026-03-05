@@ -22,7 +22,7 @@ permissions:
   contents: read
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
 jobs:
   unit-test:
@@ -44,13 +44,24 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
-      - name: Clean npm cache
-        run: npm cache clean --force
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'packages/nuxeo-web-ui-ftest/package-lock.json', 'packages/nuxeo-designer-catalog/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
 
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: npm install
+
+      - name: Update @nuxeo packages to latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm update @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers
 
       - name: Unit tests
         # Disabling SauceLabs. Karma is not compatible with SauceLabs v4
