@@ -1,0 +1,56 @@
+name: CLA
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, closed, synchronize]
+
+# yamllint disable rule:line-length
+# Permissions required by contributor-assistant/github-action
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  statuses: write
+
+env:
+  CLA_URL: 'https://cla-assistant.io/nuxeo/nuxeo-web-ui'
+
+jobs:
+  CLAAssistant:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CLA Assistant
+        # yamllint disable-line rule:line-length
+        if: (github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA') || github.event_name == 'pull_request_target'
+        uses: contributor-assistant/github-action@v2.6.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path-to-signatures: 'signatures/version1/cla.json'
+          path-to-document: ${{ env.CLA_URL }}
+          branch: 'main'
+          allowlist: dependabot[bot],copilot-swe-agent[bot]
+
+  cla-bot-exemption:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request_target' &&
+      (github.actor == 'dependabot[bot]' || github.actor == 'copilot-swe-agent[bot]')
+    steps:
+      - name: Mark license/cla as passed for exempt bots
+        uses: actions/github-script@v7
+        env:
+          CLA_URL: ${{ env.CLA_URL }}
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: 'success',
+              context: 'license/cla',
+              description: 'CLA not required for bot accounts',
+              target_url: process.env.CLA_URL,
+            });
