@@ -126,12 +126,6 @@ jobs:
           (cd packages/nuxeo-web-ui-ftest && npm install)
           (cd packages/nuxeo-designer-catalog && npm install)
 
-      - name: Update @nuxeo packages to latest
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          npm update @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers
-
       - name: Build packages
         env:
           MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
