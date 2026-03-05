@@ -49,11 +49,5 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: npm install
 
-      - name: Update @nuxeo packages to latest
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: |
-          npm update @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers
-
       - name: Lint
         run: npm run lint
