@@ -40,7 +40,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'packages/nuxeo-web-ui-ftest/package-lock.json', 'packages/nuxeo-designer-catalog/package-lock.json') }}
+          key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
           restore-keys: |
             npm-${{ runner.os }}-
 
