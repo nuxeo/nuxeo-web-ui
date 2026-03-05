@@ -78,11 +78,6 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
-      - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.9.0
-        with:
-          java-version: '21'
-
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         id: pick_nuxeo_web_ui_branch
@@ -104,6 +99,11 @@ jobs:
         with:
           repository: nuxeo/nuxeo-web-ui
           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
+
+      - name: Setup Maven build
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.9.0
+        with:
+          java-version: '21'
 
       - name: Install Web UI
         env:
