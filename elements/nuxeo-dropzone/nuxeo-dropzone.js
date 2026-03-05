@@ -595,8 +595,7 @@ Polymer({
     if (files && files.length > 0) {
       const newFiles = Array.prototype.slice.call(files);
       if (this.multiple) {
-        const allFiles = this.uploadedFiles.concat(newFiles);
-        this.uploadedFiles = allFiles;
+        this.uploadedFiles = this.uploadedFiles.concat(newFiles);
         this.uploadFiles(newFiles);
       } else {
         this.uploadedFiles = Array.prototype.slice.call(files);
