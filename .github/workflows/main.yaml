@@ -136,7 +136,7 @@ jobs:
           mvn -B -nsu -ntp -f plugin/itests/marketplace install
 
       - name: Archive packages
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: packages
           path: |
