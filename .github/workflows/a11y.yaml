@@ -54,16 +54,26 @@ jobs:
           node-version: 22
           scope: '@nuxeo'
 
-      - uses: actions/setup-java@v5
+      - name: Setup Maven build
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.9.0
         with:
-          distribution: 'zulu'
           java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
+
+      - name: Purge cached Nuxeo artifacts
+        run: rm -rf ~/.m2/repository/org/nuxeo
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
 
       - name: Install Web UI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm cache clean --force
           npm install
           pushd packages/nuxeo-web-ui-ftest
           npm install
@@ -72,20 +82,30 @@ jobs:
           npm install
           popd
 
-      - name: Update settings.xml
+      - name: Ensure latest @nuxeo RC packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          echo '<settings>
-            <servers>
-              <server>
-                <id>maven-internal</id>
-                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
-                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
-              </server>
-            </servers>
-          </settings>' > ~/.m2/settings.xml
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
+            | jq -r '.[]' \
+            | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
+            | sort -V | tail -n1)
+          echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
+
+          npm install \
+            @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
 
       - name: Web UI build
+        env:
+          MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
         run: mvn -B -ntp install
 
       - name: A11y checks
+        env:
+          MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
         run: mvn -B -ntp -f plugin/a11y install
