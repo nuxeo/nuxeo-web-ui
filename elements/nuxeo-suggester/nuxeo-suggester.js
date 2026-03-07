@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
-
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@polymer/iron-selector/iron-selector.js';
@@ -279,23 +278,43 @@ Polymer({
     ></nuxeo-operation>
 
     <div hidden$="[[!toggled]]">
-      <div id="suggester">
+      <div id="suggester" tabindex="-1">
         <div class="fade" on-tap="toggle"></div>
         <div id="searchBar">
           <paper-input
             noink
             id="searchInput"
             value="{{searchTerm}}"
-            type="search"
+            type="text"
             auto-focus
             label="[[i18n('suggester.label')]]"
             no-label-float
+            on-keydown="_handleInputKeydown"
           ></paper-input>
+          <paper-icon-button
+            id="clearButton"
+            icon="icons:clear"
+            aria-label="[[i18n('suggester.clearSearch')]]"
+            tabindex="0"
+            hidden$="[[!searchTerm]]"
+            on-click="_clearSearch"
+            on-keydown="_clearSearchKey"
+          >
+          </paper-icon-button>
         </div>
-        <div id="results" hidden$="[[!_canShowResults(searchTerm, items, items.splices)]]">
+        <div id="results" role="listbox" hidden$="[[!_canShowResults(searchTerm, items, items.splices)]]">
           <iron-selector id="selector">
-            <template is="dom-repeat" items="{{items}}">
-              <a class="item" href$="[[_getUrl(item, false, urlFor)]]" on-click="_itemClicked">
+            <template is="dom-repeat" items="{{items}}" index-as="index" initial-count="[[items.length]]">
+              <a
+                class="item"
+                href$="[[_getUrl(item, false, urlFor)]]"
+                on-click="_itemClicked"
+                tabindex="0"
+                role="option"
+                aria-label$="[[_resultAnnouncement(item.label, index, items.length)]]"
+                on-focus="_resultFocused"
+                on-keydown="_handleResultTab"
+              >
                 <div class="thumbnailContainer">
                   <iron-icon
                     src="[[_getThumbnail(item)]]"
@@ -317,6 +336,7 @@ Polymer({
         </div>
       </div>
     </div>
+
     <paper-icon-button
       noink
       id="searchButton"
@@ -325,7 +345,8 @@ Polymer({
       on-tap="toggle"
       aria-label$="[[i18n('pickerSearch.title')]]"
       aria-expanded="[[toggled]]"
-    ></paper-icon-button>
+    >
+    </paper-icon-button>
 
     <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>
@@ -360,6 +381,7 @@ Polymer({
     },
     items: {
       type: Array,
+      observer: '_itemsChanged',
     },
   },
 
@@ -369,7 +391,74 @@ Polymer({
       this.setAttribute('dir', direction);
     }
   },
+  _itemsChanged() {
+    this.async(() => {
+      const items = this.shadowRoot.querySelectorAll('#results a.item');
 
+      if (items.length) {
+        // no auto selection or focus
+        this.$.selector.selected = -1;
+      }
+    });
+  },
+  _handleInputKeydown(e) {
+    if (e.key !== 'Tab' || e.shiftKey) {
+      return;
+    }
+
+    // If there is text, tab should go to clear button
+    if (this.searchTerm && this.searchTerm.length > 0) {
+      e.preventDefault();
+      this.$.clearButton.focus();
+    }
+  },
+  _clearSearch() {
+    this.searchTerm = '';
+    this.items = [];
+    this.$.searchInput.focus();
+  },
+  _clearSearchKey(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._clearSearch();
+    }
+  },
+  _resultAnnouncement(label, index, total) {
+    if (!label || total === undefined) {
+      return label;
+    }
+    return `${label} ${index + 1} out of ${total} results`;
+  },
+  _resultFocused(e) {
+    const { index } = e.model;
+    this.$.selector.selected = index;
+  },
+  _handleResultTab(e) {
+    if (e.key !== 'Tab') {
+      return;
+    }
+
+    const items = this.shadowRoot.querySelectorAll('#results a.item');
+    const currentIndex = this.$.selector.selected;
+
+    if (!e.shiftKey) {
+      const nextIndex = currentIndex + 1;
+
+      if (nextIndex < items.length) {
+        e.preventDefault();
+        this.$.selector.selected = nextIndex;
+        items[nextIndex].focus();
+      }
+    } else {
+      const prevIndex = currentIndex - 1;
+
+      if (prevIndex >= 0) {
+        e.preventDefault();
+        this.$.selector.selected = prevIndex;
+        items[prevIndex].focus();
+      }
+    }
+  },
   toggle() {
     this.toggled = !this.toggled;
     this.searchTerm = '';
@@ -442,17 +531,49 @@ Polymer({
     }
     return url;
   },
+  _updateTabIndex(index) {
+    const items = this.shadowRoot.querySelectorAll('#results a.item');
 
-  _upPressed(e) {
-    e.detail.keyboardEvent.preventDefault();
-    this.$.selector.selectPrevious();
+    items.forEach((el, i) => {
+      el.setAttribute('tabindex', i === index ? '0' : '-1');
+    });
   },
 
   _downPressed(e) {
     e.detail.keyboardEvent.preventDefault();
-    this.$.selector.selectNext();
-  },
 
+    const { items } = this.$.selector;
+
+    if (!items || !items.length) {
+      return;
+    }
+
+    let index = this.$.selector.selected;
+
+    if (index === -1) {
+      index = 0;
+    } else {
+      index = Math.min(index + 1, items.length - 1);
+    }
+
+    this.$.selector.selected = index;
+    items[index].focus();
+  },
+  _upPressed(e) {
+    e.detail.keyboardEvent.preventDefault();
+
+    const items = this.shadowRoot.querySelectorAll('#results a.item');
+
+    let index = this.$.selector.selected;
+
+    index = index > 0 ? index - 1 : 0;
+
+    this.$.selector.selected = index;
+
+    this._updateTabIndex(index);
+
+    items[index].focus();
+  },
   _enterPressed(e) {
     if (this.$.selector.items.length > 0) {
       e.detail.keyboardEvent.preventDefault();
