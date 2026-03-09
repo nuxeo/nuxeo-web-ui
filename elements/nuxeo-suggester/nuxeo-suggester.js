@@ -278,7 +278,7 @@ Polymer({
     ></nuxeo-operation>
 
     <div hidden$="[[!toggled]]">
-      <div id="suggester" tabindex="-1">
+      <div id="suggester">
         <div class="fade" on-tap="toggle"></div>
         <div id="searchBar">
           <paper-input
@@ -295,7 +295,6 @@ Polymer({
             id="clearButton"
             icon="icons:clear"
             aria-label="[[i18n('suggester.clearSearch')]]"
-            tabindex="0"
             hidden$="[[!searchTerm]]"
             on-click="_clearSearch"
             on-keydown="_clearSearchKey"
@@ -309,11 +308,9 @@ Polymer({
                 class="item"
                 href$="[[_getUrl(item, false, urlFor)]]"
                 on-click="_itemClicked"
-                tabindex="0"
                 role="option"
                 aria-label$="[[_resultAnnouncement(item.label, index, items.length)]]"
                 on-focus="_resultFocused"
-                on-keydown="_handleResultTab"
               >
                 <div class="thumbnailContainer">
                   <iron-icon
@@ -347,7 +344,8 @@ Polymer({
       aria-expanded="[[toggled]]"
     >
     </paper-icon-button>
-
+    <nuxeo-keys target="[[target]]" keys="tab" on-pressed="_tabPressed"></nuxeo-keys>
+    <nuxeo-keys target="[[target]]" keys="shift+tab" on-pressed="_shiftTabPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="enter" on-pressed="_enterPressed"></nuxeo-keys>
@@ -401,6 +399,66 @@ Polymer({
       }
     });
   },
+  _tabPressed(e) {
+    const { items } = this.$.selector;
+
+    if (!items || !items.length) {
+      return;
+    }
+
+    const active = this.shadowRoot.activeElement;
+
+    // Only control tab when focus is on a result
+    if (!active || !active.classList.contains('item')) {
+      return;
+    }
+
+    e.detail.keyboardEvent.preventDefault();
+
+    const index = this.$.selector.selected;
+    const nextIndex = index + 1;
+
+    if (nextIndex < items.length) {
+      this.$.selector.selected = nextIndex;
+      items[nextIndex].focus();
+    }
+  },
+
+  _shiftTabPressed(e) {
+    const { items } = this.$.selector;
+
+    if (!items || !items.length) {
+      return;
+    }
+
+    const active = e.detail.keyboardEvent.target;
+
+    if (!active.classList.contains('item')) {
+      return;
+    }
+
+    const index = this.$.selector.selected;
+
+    // Move inside results
+    if (index > 0) {
+      e.detail.keyboardEvent.preventDefault();
+
+      const prevIndex = index - 1;
+      this.$.selector.selected = prevIndex;
+      items[prevIndex].focus();
+    } else {
+      e.detail.keyboardEvent.preventDefault();
+
+      const closeBtn = this.shadowRoot.querySelector('paper-icon-button[dialog-dismiss]');
+      const searchBtn = this.shadowRoot.querySelector('#searchButton'); // adjust if different
+
+      if (searchBtn) {
+        searchBtn.focus();
+      } else if (closeBtn) {
+        closeBtn.focus();
+      }
+    }
+  },
   _handleInputKeydown(e) {
     if (e.key !== 'Tab' || e.shiftKey) {
       return;
@@ -433,32 +491,7 @@ Polymer({
     const { index } = e.model;
     this.$.selector.selected = index;
   },
-  _handleResultTab(e) {
-    if (e.key !== 'Tab') {
-      return;
-    }
 
-    const items = this.shadowRoot.querySelectorAll('#results a.item');
-    const currentIndex = this.$.selector.selected;
-
-    if (!e.shiftKey) {
-      const nextIndex = currentIndex + 1;
-
-      if (nextIndex < items.length) {
-        e.preventDefault();
-        this.$.selector.selected = nextIndex;
-        items[nextIndex].focus();
-      }
-    } else {
-      const prevIndex = currentIndex - 1;
-
-      if (prevIndex >= 0) {
-        e.preventDefault();
-        this.$.selector.selected = prevIndex;
-        items[prevIndex].focus();
-      }
-    }
-  },
   toggle() {
     this.toggled = !this.toggled;
     this.searchTerm = '';

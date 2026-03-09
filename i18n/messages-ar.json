@@ -1334,6 +1334,7 @@
   "spreadsheet.rowsSaved": "تم حفظ الصفوف",
   "spreadsheet.autoSave": "يتم حفظ كل تغيير تلقائيًا",
   "suggester.label": "جارٍ البحث عن مستندات أو مستخدمين أو مجموعات...",
+  "suggester.clearSearch":"Clear search",
   "table.caption.numberOfFilters": "عدد الفلاتر",
   "table.caption.mostPopularSearches": "عمليات البحث الأكثر شيوعًا",
   "table.caption.numberOfPages": "عدد الصفحات",
