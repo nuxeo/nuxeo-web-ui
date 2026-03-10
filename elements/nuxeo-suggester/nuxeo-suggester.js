@@ -344,8 +344,7 @@ Polymer({
       aria-expanded="[[toggled]]"
     >
     </paper-icon-button>
-    <nuxeo-keys target="[[target]]" keys="tab" on-pressed="_tabPressed"></nuxeo-keys>
-    <nuxeo-keys target="[[target]]" keys="shift+tab" on-pressed="_shiftTabPressed"></nuxeo-keys>
+
     <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="enter" on-pressed="_enterPressed"></nuxeo-keys>
@@ -399,66 +398,7 @@ Polymer({
       }
     });
   },
-  _tabPressed(e) {
-    const { items } = this.$.selector;
 
-    if (!items || !items.length) {
-      return;
-    }
-
-    const active = this.shadowRoot.activeElement;
-
-    // Only control tab when focus is on a result
-    if (!active || !active.classList.contains('item')) {
-      return;
-    }
-
-    e.detail.keyboardEvent.preventDefault();
-
-    const index = this.$.selector.selected;
-    const nextIndex = index + 1;
-
-    if (nextIndex < items.length) {
-      this.$.selector.selected = nextIndex;
-      items[nextIndex].focus();
-    }
-  },
-
-  _shiftTabPressed(e) {
-    const { items } = this.$.selector;
-
-    if (!items || !items.length) {
-      return;
-    }
-
-    const active = e.detail.keyboardEvent.target;
-
-    if (!active.classList.contains('item')) {
-      return;
-    }
-
-    const index = this.$.selector.selected;
-
-    // Move inside results
-    if (index > 0) {
-      e.detail.keyboardEvent.preventDefault();
-
-      const prevIndex = index - 1;
-      this.$.selector.selected = prevIndex;
-      items[prevIndex].focus();
-    } else {
-      e.detail.keyboardEvent.preventDefault();
-
-      const closeBtn = this.shadowRoot.querySelector('paper-icon-button[dialog-dismiss]');
-      const searchBtn = this.shadowRoot.querySelector('#searchButton'); // adjust if different
-
-      if (searchBtn) {
-        searchBtn.focus();
-      } else if (closeBtn) {
-        closeBtn.focus();
-      }
-    }
-  },
   _handleInputKeydown(e) {
     if (e.key !== 'Tab' || e.shiftKey) {
       return;
@@ -595,16 +535,21 @@ Polymer({
   _upPressed(e) {
     e.detail.keyboardEvent.preventDefault();
 
-    const items = this.shadowRoot.querySelectorAll('#results a.item');
+    const { items } = this.$.selector;
+
+    if (!items || !items.length) {
+      return;
+    }
 
     let index = this.$.selector.selected;
 
-    index = index > 0 ? index - 1 : 0;
+    if (index === -1) {
+      index = 0;
+    } else {
+      index = Math.max(index - 1, 0);
+    }
 
     this.$.selector.selected = index;
-
-    this._updateTabIndex(index);
-
     items[index].focus();
   },
   _enterPressed(e) {
