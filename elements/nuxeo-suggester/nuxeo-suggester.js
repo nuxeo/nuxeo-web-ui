@@ -345,8 +345,8 @@ Polymer({
     >
     </paper-icon-button>
 
-    <nuxeo-keys target="[[target]]" keys="up" on-pressed="_upPressed"></nuxeo-keys>
-    <nuxeo-keys target="[[target]]" keys="down" on-pressed="_downPressed"></nuxeo-keys>
+    <nuxeo-keys target="[[target]]" keys="up" on-pressed="_handleArrowNavigation"></nuxeo-keys>
+    <nuxeo-keys target="[[target]]" keys="down" on-pressed="_handleArrowNavigation"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="enter" on-pressed="_enterPressed"></nuxeo-keys>
     <nuxeo-keys target="[[target]]" keys="esc" on-pressed="closeResults"></nuxeo-keys>
   `,
@@ -504,15 +504,8 @@ Polymer({
     }
     return url;
   },
-  _updateTabIndex(index) {
-    const items = this.shadowRoot.querySelectorAll('#results a.item');
 
-    items.forEach((el, i) => {
-      el.setAttribute('tabindex', i === index ? '0' : '-1');
-    });
-  },
-
-  _downPressed(e) {
+  _handleArrowNavigation(e) {
     e.detail.keyboardEvent.preventDefault();
 
     const { items } = this.$.selector;
@@ -521,37 +514,21 @@ Polymer({
       return;
     }
 
+    const { key } = e.detail.keyboardEvent;
     let index = this.$.selector.selected;
 
     if (index === -1) {
       index = 0;
-    } else {
+    } else if (key === 'ArrowDown') {
       index = Math.min(index + 1, items.length - 1);
-    }
-
-    this.$.selector.selected = index;
-    items[index].focus();
-  },
-  _upPressed(e) {
-    e.detail.keyboardEvent.preventDefault();
-
-    const { items } = this.$.selector;
-
-    if (!items || !items.length) {
-      return;
-    }
-
-    let index = this.$.selector.selected;
-
-    if (index === -1) {
-      index = 0;
-    } else {
+    } else if (key === 'ArrowUp') {
       index = Math.max(index - 1, 0);
     }
 
     this.$.selector.selected = index;
     items[index].focus();
   },
+
   _enterPressed(e) {
     if (this.$.selector.items.length > 0) {
       e.detail.keyboardEvent.preventDefault();
