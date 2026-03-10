@@ -1044,6 +1044,11 @@ Polymer({
       properties['dc:title'] = title;
     }
     this._docProperties = properties;
+    // When loading a file with no saved metadata, clear the form first so the layout
+    // does not briefly show or retain the previous file's properties (WEBUI-149).
+    if (!docData || Object.keys(docData).length === 0) {
+      this.document = null;
+    }
     return this._updateDocument();
   },
 
@@ -1078,11 +1083,12 @@ Polymer({
       }
       this.docIdx = index;
       const currentFile = this._getCurrentFile();
-      if (currentFile.checked && currentFile.docData) {
-        // load the file's own stored data
+      // Only load from this file's own stored docData; never reuse another file's metadata (WEBUI-149).
+      const hasOwnDocData =
+        currentFile.docData && currentFile.docData.document && Object.keys(currentFile.docData).length > 0;
+      if (currentFile.checked && hasOwnDocData) {
         await this._loadFile(currentFile.docData);
       } else {
-        // load empty properties with just the current file name as title (do not reuse previous file's metadata)
         await this._loadFile({}, currentFile.name);
       }
       if (currentFile.error) {
