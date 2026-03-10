@@ -56,12 +56,13 @@ limitations under the License.
         max-width: var(--nuxeo-browser-actions-menu-max-width, 240px);
       }
 
-      /* Apply border-radius to tabs when viewing folders (document listing) */
+      /* Apply styles only when viewing folders (document listing) */
       :host([document-facets~='Folderish']) nuxeo-page,
       :host([document-facets~='Collection']) nuxeo-page {
         --nuxeo-page-tabs-border-radius: 16px 16px 0 0;
         --nuxeo-page-main-section-padding: 16px 16px 0 16px;
         --nuxeo-page-content-padding: 0;
+        --nuxeo-page-border-bottom: 10px; /* Add order bottom only on document listing page*/
       }
 
       /* Apply background color to tabs when viewing individual documents (NOT folders) */
