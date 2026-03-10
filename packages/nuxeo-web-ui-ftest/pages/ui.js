@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop */
+/* eslint-disable no-await-in-loop, no-console */
 import Browser from './ui/browser.js';
 import CreateDialog from './ui/create_dialog.js';
 import Drawer from './ui/drawer.js';
