@@ -252,6 +252,8 @@ export default class UI extends BasePage {
         }
 
         snackBarText = await snackBar.getText();
+        console.log('Toast text:', JSON.stringify(snackBarText));
+        console.log('Trimmed message:', JSON.stringify(trimmedMessage));
         return snackBarText === trimmedMessage;
       },
       {
