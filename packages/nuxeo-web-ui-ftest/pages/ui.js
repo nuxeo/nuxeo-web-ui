@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop, no-console */
+/* eslint-disable no-await-in-loop */
 import Browser from './ui/browser.js';
 import CreateDialog from './ui/create_dialog.js';
 import Drawer from './ui/drawer.js';
@@ -252,8 +252,6 @@ export default class UI extends BasePage {
         }
 
         snackBarText = await snackBar.getText();
-        console.log('Toast text:', JSON.stringify(snackBarText));
-        console.log('Trimmed message:', JSON.stringify(trimmedMessage));
         return snackBarText === trimmedMessage;
       },
       {
