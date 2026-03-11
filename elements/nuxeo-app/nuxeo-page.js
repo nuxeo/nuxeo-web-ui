@@ -53,8 +53,8 @@ Polymer({
         padding: var(--nuxeo-page-main-section-padding);
         display: flex;
         flex-direction: column;
-        height: 100%;
-        overflow: hidden;
+        flex: 1 1 auto;
+        min-height: 0; /* Important for flex children with overflow */
         margin-bottom: var(--nuxeo-page-border-bottom, 0);
       }
 
