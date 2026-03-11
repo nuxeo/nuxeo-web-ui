@@ -1334,6 +1334,7 @@
   "spreadsheet.rowsSaved": "filas guardadas",
   "spreadsheet.autoSave": "Cada cambio se guarda automáticamente",
   "suggester.label": "Búsqueda por documentos, usuarios, grupos...",
+  "suggester.clearSearch":"Clear search",
   "table.caption.numberOfFilters": "Número de filtros",
   "table.caption.mostPopularSearches": "Búsquedas más populares",
   "table.caption.numberOfPages": "Número de páginas",

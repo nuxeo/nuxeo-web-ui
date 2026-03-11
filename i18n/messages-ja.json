@@ -1334,6 +1334,7 @@
   "spreadsheet.rowsSaved": "行が保存されました",
   "spreadsheet.autoSave": "それぞれの変更が自動的に保存されます",
   "suggester.label": "文書、ユーザ、グループを検索...",
+  "suggester.clearSearch":"Clear search",
   "table.caption.numberOfFilters": "フィルター数",
   "table.caption.mostPopularSearches": "いちばん人気のある検索",
   "table.caption.numberOfPages": "ページ数",
