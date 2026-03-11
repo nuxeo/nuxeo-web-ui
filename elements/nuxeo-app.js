@@ -514,7 +514,7 @@ Polymer({
                 label="app.administration"
                 class="settings"
                 hidden$="[[!hasAdministrationPermissions(currentUser)]]"
-                icon="images/icons/administration.svg"
+                icon="nuxeo:admin"
               ></nuxeo-menu-icon>
               <a
                 name="profile"

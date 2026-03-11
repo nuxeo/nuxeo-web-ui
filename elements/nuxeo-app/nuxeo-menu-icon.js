@@ -44,15 +44,6 @@ Polymer({
         outline: auto;
       }
 
-      #button {
-        display: inline-block;
-      }
-
-      :host(.selected) paper-icon-button {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
-      }
-
       paper-badge {
         --paper-badge-background: var(--nuxeo-badge-background);
         --paper-badge-margin-left: -24px;
@@ -79,40 +70,6 @@ Polymer({
         tabindex: -1;
       }
 
-      #button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--nuxeo-sidebar-menu);
-        height: 48px;
-        padding: 12px 13px;
-        width: var(--nuxeo-sidebar-width);
-        cursor: pointer;
-        background: transparent;
-        border: none;
-        outline: none;
-      }
-
-      #button:hover {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
-      }
-
-      :host(.selected) #button {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
-      }
-
-      #button svg {
-        width: 24px;
-        height: 24px;
-        fill: currentColor;
-      }
-
-      #button svg path {
-        fill: currentColor;
-      }
-
       :host(.selected) paper-icon-button {
         background: rgba(0, 0, 0, 0.2);
         color: var(--nuxeo-sidebar-menu-hover);
@@ -120,13 +77,7 @@ Polymer({
     </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
-      <button
-        id="button"
-        type="button"
-        tabindex="-1"
-        inner-h-t-m-l="[[svgIcon]]"
-        aria-label$="[[i18n(label)]]"
-      ></button>
+      <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip" tabindex="-1"></paper-icon-button>
       <nuxeo-tooltip for="button" position="[[_tooltipPosition]]" offset="0" animation-delay="0" id="tooltip"
         >[[i18n(label)]]</nuxeo-tooltip
       >
@@ -155,14 +106,6 @@ Polymer({
     },
 
     src: {
-      type: String,
-      value: '',
-    },
-
-    /**
-     * Inline SVG icon markup
-     */
-    svgIcon: {
       type: String,
       value: '',
     },
@@ -221,19 +164,10 @@ Polymer({
     }
   },
 
-  async _srcOrIcon() {
+  _srcOrIcon() {
     if (this.src && this.src.length > 0) {
       this.$.button.icon = '';
       this.$.button.src = this.src;
-    } else if (this.icon && this.icon.endsWith('.svg')) {
-      // Fetch SVG file and set as svgIcon
-      try {
-        const response = await fetch(this.icon);
-        const svgText = await response.text();
-        this.svgIcon = svgText;
-      } catch (error) {
-        console.error('Failed to load SVG icon:', this.icon, error);
-      }
     } else if (!this.$.button.src || this.$.button.src.length === 0) {
       this.$.button.icon = this.icon;
     }

@@ -474,12 +474,7 @@
 
 <nuxeo-slot-content name="browseDrawerItem" slot="DRAWER_ITEMS" order="10">
   <template>
-    <nuxeo-menu-icon
-      name="browser"
-      label="app.browse"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.03 6.99108L11.59 6.96108L10.19 4.88008C9.82 4.33008 9.21 4.00008 8.55 4.00008H4.01C2.91 3.99008 2.02 4.88008 2.02 5.99108L2 12.8281C2 12.9651 2.004 13.2081 2.004 13.2991L2 17.9861C2 19.0961 2.89 19.9991 3.98 19.9991H20.01C21.1 19.9991 22 19.1091 22 17.9981V12.9631H22.01V8.99108C22.01 7.89008 21.13 7.00008 20.03 6.99008V6.99108ZM4 6.00108H8.55L9.95 8.08208C10.32 8.63208 10.93 8.96208 11.59 8.96208L20.03 8.99208V11.0031H4V6.00108ZM20.02 17.9891H4V13.0141L20.01 12.9671H20.02V17.9891Z" fill="currentColor"/></svg>'
-    >
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon name="browser" icon="nuxeo:browse" label="app.browse"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="browseDrawerPage" slot="DRAWER_PAGES">
@@ -495,12 +490,7 @@
 
 <nuxeo-slot-content name="recentsDrawerItem" slot="DRAWER_ITEMS" order="20">
   <template>
-    <nuxeo-menu-icon
-      name="recents"
-      label="app.recentlyViewed"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.964 11.616V8.027C12.964 7.475 12.516 7.027 11.964 7.027C11.412 7.027 10.964 7.475 10.964 8.027V12.444L14.093 15.573C14.288 15.768 14.544 15.866 14.8 15.866C15.056 15.866 15.312 15.768 15.507 15.573C15.898 15.182 15.898 14.55 15.507 14.159L12.964 11.616Z" fill="white"/><path d="M12 2C6.486 2 2 6.486 2 12C2 17.514 6.486 22 12 22C17.514 22 22 17.514 22 12C22 6.486 17.514 2 12 2ZM12 20C7.589 20 4 16.411 4 12C4 7.589 7.589 4 12 4C16.411 4 20 7.589 20 12C20 16.411 16.411 20 12 20Z" fill="white"/></svg>'
-    >
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon name="recents" icon="nuxeo:recent" label="app.recentlyViewed"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="recentsDrawerPage" slot="DRAWER_PAGES">
@@ -516,12 +506,7 @@
 
 <nuxeo-slot-content name="defaultSearchMenuButton" slot="DRAWER_ITEMS" order="30">
   <template>
-    <nuxeo-menu-icon
-      name="defaultSearch"
-      label="app.search"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15L19 20L20.49 18.49L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" fill="currentColor"/></svg>'
-    >
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon name="defaultSearch" icon="nuxeo:search" label="app.search"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="defaultSearchMenuPage" slot="DRAWER_PAGES">
@@ -537,13 +522,7 @@
 </nuxeo-slot-content>
 <nuxeo-slot-content name="expiredSearchMenuButton" slot="DRAWER_ITEMS" order="40">
   <template>
-    <nuxeo-menu-icon
-      name="expiredSearch"
-      label="app.expiredSearch"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 22L17.99 16L14 12L17.99 7.99L18 2H6V8L10 12L6 15.99V22H18ZM8 7.5V4H16V7.5L12 11.5L8 7.5Z" fill="white"/></svg>'
-    >
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon name="expiredSearch" icon="nuxeo:expired" label="app.expiredSearch"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="expiredSearchMenuPage" slot="DRAWER_PAGES">
@@ -562,22 +541,7 @@
 
 <nuxeo-slot-content name="damSearchMenuButtons" slot="DRAWER_ITEMS" order="45">
   <template>
-    <nuxeo-menu-icon
-      id="assetsSearchButton"
-      name="assetsSearch"
-      label="dam.assets.heading"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12.9945 8.4647H8.00482V9.46055H12.9945V8.4647Z" fill="white"/>
-        <path d="M10.9998 11.4523H8.00482V12.4481H10.9998V11.4523Z" fill="white"/>
-        <path d="M10.9988 14.4976H8.00981V15.4934H10.9988V14.4976Z" fill="white"/>
-        <path d="M6.01812 4.01624H14.9892V7.99566H17.9812L17.9862 10.9832H19.9809L19.9759 7.99566C19.9759 7.99566 19.9759 7.59134 19.7575 7.06254C19.5391 6.53375 17.8366 4.01225 17.0876 3.0164C16.3386 2.02055 14.9882 2.02454 14.9882 2.02454H6.01812C4.92104 2.02454 4.02344 2.9208 4.02344 4.01624V19.9498C4.02344 21.0453 4.92104 21.9415 6.01812 21.9415L10.9998 21.9376V19.9498H6.01812V4.01624Z" fill="white"/>
-        <path d="M15.4869 12.9779H14.9882C14.7128 12.9779 14.4895 13.2008 14.4895 13.4758V13.9737C14.4895 14.2487 14.7128 14.4717 14.9882 14.4717H15.4869C15.7623 14.4717 15.9855 14.2487 15.9855 13.9737V13.4758C15.9855 13.2008 15.7623 12.9779 15.4869 12.9779Z" fill="white"/>
-        <path d="M21.4719 12.9769H17.4816C17.2061 12.9769 16.9829 13.1998 16.9829 13.4748V13.9728C16.9829 14.2477 17.2061 14.4707 17.4816 14.4707H21.4719C21.7473 14.4707 21.9706 14.2477 21.9706 13.9728V13.4748C21.9706 13.1998 21.7473 12.9769 21.4719 12.9769Z" fill="white"/>
-        <path d="M15.4869 15.9654H14.9882C14.7128 15.9654 14.4895 16.1884 14.4895 16.4634V16.9613C14.4895 17.2363 14.7128 17.4592 14.9882 17.4592H15.4869C15.7623 17.4592 15.9855 17.2363 15.9855 16.9613V16.4634C15.9855 16.1884 15.7623 15.9654 15.4869 15.9654Z" fill="white"/>
-        <path d="M21.4719 15.9565H17.4816C17.2061 15.9565 16.9829 16.1794 16.9829 16.4544V16.9523C16.9829 17.2273 17.2061 17.4503 17.4816 17.4503H21.4719C21.7473 17.4503 21.9706 17.2273 21.9706 16.9523V16.4544C21.9706 16.1794 21.7473 15.9565 21.4719 15.9565Z" fill="white"/>
-        <path d="M15.4869 18.953H14.9882C14.7128 18.953 14.4895 19.1759 14.4895 19.4509V19.9489C14.4895 20.2238 14.7128 20.4468 14.9882 20.4468H15.4869C15.7623 20.4468 15.9855 20.2238 15.9855 19.9489V19.4509C15.9855 19.1759 15.7623 18.953 15.4869 18.953Z" fill="white"/>
-        <path d="M21.4719 18.946H17.4816C17.2061 18.946 16.9829 19.169 16.9829 19.444V19.9419C16.9829 20.2169 17.2061 20.4398 17.4816 20.4398H21.4719C21.7473 20.4398 21.9706 20.2169 21.9706 19.9419V19.444C21.9706 19.169 21.7473 18.946 21.4719 18.946Z" fill="white"/></svg>'
-    >
+    <nuxeo-menu-icon id="assetsSearchButton" name="assetsSearch" icon="nuxeo:asset" label="dam.assets.heading">
     </nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
@@ -596,14 +560,7 @@
 
 <nuxeo-slot-content name="tasksDrawerItem" slot="DRAWER_ITEMS" order="50">
   <template>
-    <nuxeo-menu-icon
-      name="tasks"
-      id="menuTasks"
-      label="app.tasks"
-      badge="[[taskCount]]"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22 7.53503H13V9.53503H22V7.53503ZM22 15.535H13V17.535H22V15.535ZM5.54 11.535L2 7.99503L3.41 6.58503L5.53 8.70503L9.77 4.46503L11.18 5.87503L5.54 11.535ZM5.54 19.535L2 15.995L3.41 14.585L5.53 16.705L9.77 12.465L11.18 13.875L5.54 19.535Z" fill="white"/></svg>'
-    >
+    <nuxeo-menu-icon name="tasks" id="menuTasks" icon="nuxeo:tasks" label="app.tasks" badge="[[taskCount]]">
     </nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
@@ -615,13 +572,7 @@
 
 <nuxeo-slot-content name="favoritesDrawerItem" slot="DRAWER_ITEMS" order="60">
   <template>
-    <nuxeo-menu-icon
-      name="favorites"
-      label="app.favorites"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8.85002 16.825L12 14.925L15.15 16.85L14.325 13.25L17.1 10.85L13.45 10.525L12 7.12501L10.55 10.5L6.90001 10.825L9.67501 13.25L8.85002 16.825ZM12 17.275L7.85002 19.775C7.66668 19.8917 7.47501 19.9417 7.27501 19.925C7.07501 19.9083 6.90002 19.8417 6.75002 19.725C6.60001 19.6083 6.48335 19.4625 6.40002 19.2875C6.31668 19.1125 6.30002 18.9167 6.35002 18.7L7.45002 13.975L3.77502 10.8C3.60835 10.65 3.50418 10.4792 3.46252 10.2875C3.42085 10.0958 3.43335 9.90835 3.50002 9.72501C3.56668 9.54168 3.66668 9.39168 3.80002 9.27501C3.93335 9.15835 4.11668 9.08335 4.35002 9.05001L9.20002 8.62501L11.075 4.17501C11.1583 3.97501 11.2875 3.82501 11.4625 3.72501C11.6375 3.62501 11.8167 3.57501 12 3.57501C12.1833 3.57501 12.3625 3.62501 12.5375 3.72501C12.7125 3.82501 12.8417 3.97501 12.925 4.17501L14.8 8.62501L19.65 9.05001C19.8833 9.08335 20.0667 9.15835 20.2 9.27501C20.3333 9.39168 20.4333 9.54168 20.5 9.72501C20.5667 9.90835 20.5792 10.0958 20.5375 10.2875C20.4958 10.4792 20.3917 10.65 20.225 10.8L16.55 13.975L17.65 18.7C17.7 18.9167 17.6833 19.1125 17.6 19.2875C17.5167 19.4625 17.4 19.6083 17.25 19.725C17.1 19.8417 16.925 19.9083 16.725 19.925C16.525 19.9417 16.3333 19.8917 16.15 19.775L12 17.275Z" fill="white"/></svg>'
-    >
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon name="favorites" icon="nuxeo:favorites" label="app.favorites"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="favoritesDrawerPage" slot="DRAWER_PAGES">
@@ -632,13 +583,7 @@
 
 <nuxeo-slot-content name="collectionsDrawerItem" slot="DRAWER_ITEMS" order="70">
   <template>
-    <nuxeo-menu-icon
-      name="collections"
-      label="app.collections"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 18L7.8 19.8C7.13333 20.0833 6.5 20.0292 5.9 19.6375C5.3 19.2458 5 18.6917 5 17.975V5C5 4.45 5.19583 3.97917 5.5875 3.5875C5.97917 3.19583 6.45 3 7 3H17C17.55 3 18.0208 3.19583 18.4125 3.5875C18.8042 3.97917 19 4.45 19 5V17.975C19 18.6917 18.7 19.2458 18.1 19.6375C17.5 20.0292 16.8667 20.0833 16.2 19.8L12 18ZM12 15.8L17 17.95V5H7V17.95L12 15.8ZM12 5H7H17H12Z" fill="white"/></svg>'
-    >
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon name="collections" icon="nuxeo:collections" label="app.collections"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="collectionsDrawerPage" slot="DRAWER_PAGES">
@@ -649,16 +594,7 @@
 
 <nuxeo-slot-content name="personalWorkspaceDrawerItem" slot="DRAWER_ITEMS" order="80">
   <template>
-    <nuxeo-menu-icon
-      name="personalWorkspace"
-      label="app.personalSpace"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M9.99999 12.9749H4.01495C3.46433 12.9749 3.01744 13.4211 3.01744 13.9708V19.9459C3.01744 20.4956 3.46433 20.9417 4.01495 20.9417H9.99999C10.5506 20.9417 10.9975 20.4956 10.9975 19.9459V13.9708C10.9975 13.4211 10.5506 12.9749 9.99999 12.9749ZM9.00248 18.95H5.01245V14.9666H9.00248V18.95Z" fill="white"/>
-        <path d="M4.01495 10.9763H9.99001C10.7471 10.9763 11.2309 10.1238 10.8718 9.42075L7.88427 3.56514C7.69575 3.19469 7.34861 3.00946 7.00248 3.00946C6.65634 3.00946 6.30921 3.19469 6.12068 3.56514L3.13315 9.42075C2.77405 10.1238 3.25784 10.9763 4.01495 10.9763ZM7.00248 6.22506L8.40996 8.98456H5.594L7.00248 6.22506Z" fill="white"/>
-        <path d="M16.9825 10.9832C19.186 10.9832 20.9726 9.19967 20.9726 6.99983C20.9726 4.8 19.186 3.01643 16.9825 3.01643C14.779 3.01643 12.9925 4.8 12.9925 6.99983C12.9925 9.19967 14.779 10.9832 16.9825 10.9832ZM16.9825 5.00813C18.0828 5.00813 18.9775 5.90141 18.9775 6.99983C18.9775 8.09826 18.0828 8.99154 16.9825 8.99154C15.8823 8.99154 14.9875 8.09826 14.9875 6.99983C14.9875 5.90141 15.8823 5.00813 16.9825 5.00813Z" fill="white"/>
-        <path d="M19.975 15.9625H17.98V13.9708C17.98 13.4201 17.5332 12.9749 16.9825 12.9749C16.4319 12.9749 15.985 13.4201 15.985 13.9708V15.9625H13.99C13.4394 15.9625 12.9925 16.4076 12.9925 16.9583C12.9925 17.509 13.4394 17.9542 13.99 17.9542H15.985V19.9459C15.985 20.4966 16.4319 20.9417 16.9825 20.9417C17.5332 20.9417 17.98 20.4966 17.98 19.9459V17.9542H19.975C20.5267 17.9542 20.9726 17.509 20.9726 16.9583C20.9726 16.4076 20.5267 15.9625 19.975 15.9625Z" fill="white"/></svg>'
-    >
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon name="personalWorkspace" icon="nuxeo:user-space" label="app.personalSpace"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="personalWorkspaceDrawerPage" slot="DRAWER_PAGES">
@@ -674,13 +610,7 @@
 
 <nuxeo-slot-content name="clipboardDrawerItem" slot="DRAWER_ITEMS" order="90">
   <template>
-    <nuxeo-menu-icon
-      name="clipboard"
-      label="app.clipboard"
-      badge="[[clipboardDocCount]]"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M19 3H14.82C14.4 1.84 13.3 1 12 1C10.7 1 9.6 1.84 9.18 3H5C3.9 3 3 3.9 3 5V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V5C21 3.9 20.1 3 19 3ZM12 3C12.55 3 13 3.45 13 4C13 4.55 12.55 5 12 5C11.45 5 11 4.55 11 4C11 3.45 11.45 3 12 3ZM19 21H5V5H7V8H17V5H19V21Z" fill="white"/></svg>'
-    >
+    <nuxeo-menu-icon name="clipboard" icon="nuxeo:clipboard" label="app.clipboard" badge="[[clipboardDocCount]]">
     </nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
@@ -692,17 +622,7 @@
 
 <nuxeo-slot-content name="trashMenuButton" slot="DRAWER_ITEMS" order="100">
   <template>
-    <nuxeo-menu-icon
-      name="trash"
-      label="app.trashSearch"
-      svg-icon='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18.9777 5.00812H15.9852V4.01227C15.9852 2.91385 15.0904 2.02057 13.9902 2.02057H10.0002C8.89992 2.02057 8.00516 2.91385 8.00516 4.01227V5.00812H5.01264C4.46202 5.00812 4.01514 5.45327 4.01514 6.00397C4.01514 6.55468 4.46202 6.99982 5.01264 6.99982H18.9777C19.5294 6.99982 19.9752 6.55468 19.9752 6.00397C19.9752 5.45327 19.5294 5.00812 18.9777 5.00812ZM10.0002 4.01227H13.9902V5.00812H10.0002V4.01227Z" fill="white"/>
-        <path d="M18.07 7.99966C17.5214 7.94488 17.0356 8.35418 16.9867 8.9009L15.9852 19.9459L8.00117 19.8553L7.00367 8.9009C6.95379 8.35418 6.47499 7.94688 5.92037 7.99966C5.37175 8.04945 4.96676 8.53343 5.01663 9.08215L6.01015 19.9459C6.01015 21.0443 6.90491 21.9376 8.00516 21.9376H15.9852C17.0855 21.9376 17.9802 21.0443 17.9762 20.0365L18.9737 9.08215C19.0236 8.53343 18.6196 8.04945 18.07 7.99966Z" fill="white"/>
-        <path d="M10.0271 18.487V9.5243C10.0271 9.24945 9.80367 9.02638 9.52835 9.02638C9.25304 9.02638 9.0296 9.24945 9.0296 9.5243V18.487C9.0296 18.7618 9.25304 18.9849 9.52835 18.9849C9.80367 18.9849 10.0271 18.7618 10.0271 18.487Z" fill="white"/>
-        <path d="M12.4989 18.487V9.5243C12.4989 9.24945 12.2755 9.02638 12.0002 9.02638C11.7249 9.02638 11.5014 9.24945 11.5014 9.5243V18.487C11.5014 18.7618 11.7249 18.9849 12.0002 18.9849C12.2755 18.9849 12.4989 18.7618 12.4989 18.487Z" fill="white"/>
-        <path d="M14.9947 18.487V9.5243C14.9947 9.24945 14.7712 9.02638 14.4959 9.02638C14.2206 9.02638 13.9972 9.24945 13.9972 9.5243V18.487C13.9972 18.7618 14.2206 18.9849 14.4959 18.9849C14.7712 18.9849 14.9947 18.7618 14.9947 18.487Z" fill="white"/></svg>'
-    >
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon name="trash" icon="nuxeo:delete" label="app.trashSearch"></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="trashMenuPage" slot="DRAWER_PAGES">
