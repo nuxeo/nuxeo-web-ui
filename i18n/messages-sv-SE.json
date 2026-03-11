@@ -1334,6 +1334,7 @@
   "spreadsheet.rowsSaved": "rader sparade",
   "spreadsheet.autoSave": "Varje ändring sparas automatiskt",
   "suggester.label": "Sök efter dokument, användare, grupper...",
+  "suggester.clearSearch":"Clear search",
   "table.caption.numberOfFilters": "Antal filter",
   "table.caption.mostPopularSearches": "Mest populära sökningar",
   "table.caption.numberOfPages": "Antal sidor",

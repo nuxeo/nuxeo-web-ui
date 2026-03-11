@@ -1334,6 +1334,7 @@
   "spreadsheet.rowsSaved": "שורות נשמרו",
   "spreadsheet.autoSave": "כל שינוי נשמר באופן אוטומטי",
   "suggester.label": "חפש מסמכים, משתמשים או קבוצות.",
+  "suggester.clearSearch":"Clear search",
   "table.caption.numberOfFilters": "מספר מסננים",
   "table.caption.mostPopularSearches": "החיפושים הפופולריים ביותר",
   "table.caption.numberOfPages": "מספר עמודים",
