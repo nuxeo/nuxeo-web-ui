@@ -44,6 +44,11 @@ Polymer({
         outline: auto;
       }
 
+      :host(.selected) paper-icon-button {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
       paper-badge {
         --paper-badge-background: var(--nuxeo-badge-background);
         --paper-badge-margin-left: -24px;
@@ -69,16 +74,17 @@ Polymer({
       paper-icon-button path {
         tabindex: -1;
       }
-
-      :host(.selected) paper-icon-button {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
-      }
     </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
       <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip" tabindex="-1"></paper-icon-button>
-      <nuxeo-tooltip for="button" position="[[_tooltipPosition]]" offset="0" animation-delay="0" id="tooltip"
+      <nuxeo-tooltip
+        for="button"
+        position="[[_tooltipPosition]]"
+        offset="0"
+        animation-delay="0"
+        id="tooltip"
+        tabindex="-1"
         >[[i18n(label)]]</nuxeo-tooltip
       >
       <template is="dom-if" if="[[badge]]">
