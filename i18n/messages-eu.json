@@ -1334,6 +1334,7 @@
   "spreadsheet.rowsSaved": "errenkada gordeta",
   "spreadsheet.autoSave": "Aldaketa bakoitza automatikoki gordetzen da",
   "suggester.label": "Bilatu dokumentuak, erabiltzaileak edo taldeak...",
+  "suggester.clearSearch":"Clear search",
   "table.caption.numberOfFilters": "Iragazki kopurua",
   "table.caption.mostPopularSearches": "Bilaketa erabilienak",
   "table.caption.numberOfPages": "Orri kopurua",
