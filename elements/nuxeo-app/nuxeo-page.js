@@ -45,7 +45,7 @@ Polymer({
         flex: 1 1 auto;
         position: relative;
         overflow-y: auto;
-        padding: var(--nuxeo-page-content-padding, 16px);
+        padding: var(--nuxeo-page-content-padding, 16px 16px 0px 16px);
         background-color: var(--sat-drawer-content-background, var(--nuxeo-app-content-background));
       }
 
@@ -55,7 +55,7 @@ Polymer({
         flex-direction: column;
         flex: 1 1 auto;
         min-height: 0; /* Important for flex children with overflow */
-        margin-bottom: var(--nuxeo-page-border-bottom, 0);
+        margin-bottom: var(--nuxeo-page-margin-bottom, 0);
       }
 
       .toolbar {
