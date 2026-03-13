@@ -78,7 +78,7 @@ Polymer({
     </style>
 
     <div class="shortcut-container" role="button" tabindex="0" on-keydown="_handleKeydown" on-tap="_tap">
-      <paper-fab mini noink id="createBtn" src="[[icon]]" on-tap="_tap"></paper-fab>
+      <paper-fab mini noink id="createBtn" src="[[icon]]"></paper-fab>
       <span class="shortcut-label">[[i18n(label)]]</span>
     </div>
 
