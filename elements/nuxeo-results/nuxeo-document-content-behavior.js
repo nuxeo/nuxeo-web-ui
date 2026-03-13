@@ -151,23 +151,44 @@ export const DocumentContentBehavior = [
     },
 
     _dragoverImport(e) {
+      // Only react to file drag - added to prevent import functionality
+      // from being triggered during column reordering in content view table
+      if (!this._isFileDrag(e)) {
+        return;
+      }
+
       e.preventDefault();
-      this.notify({ message: this.i18n('documentContentView.drag.import'), duration: 0 });
+      this.notify({
+        message: this.i18n('documentContentView.drag.import'),
+        duration: 0,
+      });
       this._toggleDragging(true);
     },
 
-    _dragleaveImport() {
+    _dragleaveImport(e) {
+      if (!this._isFileDrag(e)) {
+        return;
+      }
+
       this.notify({ close: true });
       this._toggleDragging(false);
     },
 
     _dropImport(e) {
+      if (!this._isFileDrag(e)) {
+        return;
+      }
+
       e.preventDefault();
       this.notify({ close: true });
       this._toggleDragging(false);
+
       this.fire('create-document', { files: e.dataTransfer.files });
     },
 
+    _isFileDrag(e) {
+      return e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files');
+    },
     _toggleDragging(flag) {
       const { view } = this;
       if (view) {

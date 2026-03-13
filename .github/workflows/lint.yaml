@@ -37,6 +37,14 @@ jobs:
           node-version: 22
           scope: '@nuxeo'
 
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}

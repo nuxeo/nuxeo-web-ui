@@ -38,12 +38,6 @@ env:
 
 jobs:
   ftests:
-    if: |
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_call' ||
-      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]') ||
-      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]')
-
     runs-on:
       group: medium-4cpu-runners
 
@@ -61,13 +55,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          ref: >-
-            ${{
-              github.event_name == 'pull_request_target'
-                && github.event.pull_request.head.sha
-                || github.ref
-            }}
 
       - uses: actions/setup-node@v6
         with:
@@ -76,10 +63,21 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
-      - uses: actions/setup-java@v5
+      - name: Setup Maven build
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.9.0
         with:
-          distribution: 'zulu'
           java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
+
+      - name: Purge cached Nuxeo artifacts
+        run: rm -rf ~/.m2/repository/org/nuxeo
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
 
       - name: Install dependencies
         env:
@@ -103,7 +101,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm cache clean --force
           npm install
           pushd packages/nuxeo-web-ui-ftest
           npm install
@@ -139,47 +136,37 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
 
-      - name: Update settings.xml
-        run: |
-          echo '<settings>
-            <servers>
-              <server>
-                <id>maven-internal</id>
-                <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
-                <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
-              </server>
-            </servers>
-          </settings>' > ~/.m2/settings.xml
-
       - name: Functional tests
         env:
+          MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
           RUN_ALL: false
           BAIL: 0
-          HEADLESS: ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v11.0.0
+          HEADLESS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v15.6.2
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
-          video_name: ${{ contains(github.event.pull_request.labels.*.name, 'video') && 'ftest-video' || '' }}
+          video_name: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'ftest-video' || '' }}
           max_attempts: 3
 
       - name: Archive cucumber reports
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: cucumber-reports
           path: ftest/target/cucumber-reports/
 
       - name: Archive screenshots
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: screenshots
           path: ftest/target/screenshots/
 
       - name: Archive logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: logs
           path: |
@@ -188,7 +175,7 @@ jobs:
 
       - name: Archive packages-ftest
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: packages-ftest
           path: |

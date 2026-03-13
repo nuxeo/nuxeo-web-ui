@@ -42,21 +42,16 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can
       # access it and copies all sources into ZIP file for submitting for
       # analysis. Replace this section with your applications build steps
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v6
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
           node-version: 18
           scope: '@nuxeo'
-
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '11'
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
@@ -76,7 +71,7 @@ jobs:
           popd
           
       - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
@@ -108,18 +103,6 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
-      - name: 'Update settings.xml with server configuration'
-        run: |
-          echo '<settings>
-              <servers>
-                <server>
-                  <id>maven-internal</id>
-                  <username>${{ secrets.REPOSITORY_MANAGER_USERNAME }}</username>
-                  <password>${{ secrets.REPOSITORY_MANAGER_PASSWORD }}</password>
-                </server>
-              </servers>
-              </settings>' > ~/.m2/settings.xml
-
       - name: Delete Node Modules
         run: |
           rm -rf node_modules
@@ -149,7 +132,7 @@ jobs:
           zip -r nuxeo-web-ui.zip *
 
       - name: Upload ZIP as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nuxeo-web-ui
           path: nuxeo-web-ui.zip
@@ -163,7 +146,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: nuxeo-web-ui
           path: .
