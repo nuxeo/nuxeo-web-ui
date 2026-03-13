@@ -82,11 +82,18 @@ Polymer({
       }
     </style>
 
-    <div class="shortcut-container" on-tap="_tap">
+    <div
+      class="shortcut-container"
+      on-tap="_tap"
+      on-keydown="_handleKeydown"
+      role="button"
+      tabindex="0"
+      aria-label$="[[i18n(label)]]"
+    >
       <div class="shortcut-icon">
-        <img src="[[icon]]" alt="[[label]]" aria-hidden="true" on-error="_handleImageError" />
+        <img src="[[icon]]" alt="" aria-hidden="true" on-error="_handleImageError" />
       </div>
-      <span class="shortcut-label">[[i18n(label)]]</span>
+      <span class="shortcut-label" aria-hidden="true">[[i18n(label)]]</span>
     </div>
   `,
 
@@ -102,6 +109,14 @@ Polymer({
   _handleImageError(e) {
     // Hide the image if it fails to load
     e.target.style.display = 'none';
+  },
+
+  _handleKeydown(e) {
+    // Handle Enter and Space keys for keyboard accessibility
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._tap();
+    }
   },
 
   _tap() {

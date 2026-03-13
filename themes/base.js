@@ -434,6 +434,10 @@ const template = html`
           font-family: var(--nuxeo-app-font);
         }
 
+        --iron-data-table-row: {
+          border-bottom: none;
+        }
+
         --paper-tooltip: {
           font-size: 1rem;
           font-family: var(--nuxeo-app-font);

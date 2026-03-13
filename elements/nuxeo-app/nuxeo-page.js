@@ -45,8 +45,17 @@ Polymer({
         flex: 1 1 auto;
         position: relative;
         overflow-y: auto;
-        padding: 16px 16px 0 16px;
-        background-color: var(--sat-drawer-content-background);
+        padding: var(--nuxeo-page-content-padding, 16px 16px 2px 16px);
+        background-color: var(--sat-drawer-content-background, var(--nuxeo-app-content-background));
+      }
+
+      .main-section-container {
+        padding: var(--nuxeo-page-main-section-padding);
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0; /* Important for flex children with overflow */
+        margin-bottom: var(--nuxeo-page-margin-bottom, 0);
       }
 
       .toolbar {
@@ -66,13 +75,11 @@ Polymer({
 
       #tabs {
         flex: 0 0 auto;
-        background: var(--nuxeo-app-header-background);
-        box-shadow: var(--nuxeo-app-header-box-shadow);
+        background: var(--nuxeo-page-tabs-background, var(--nuxeo-app-header-background));
         margin-top: 1px;
         overflow-x: auto;
         z-index: 1;
-        // margin-left: 16px;
-        // margin-right: 16px;
+        border-radius: var(--nuxeo-page-tabs-border-radius, 0);
       }
 
       :host([dir='rtl']) #tabs {
@@ -118,11 +125,13 @@ Polymer({
       <div class="toolbar" id="toolbar">
         <slot id="header" slot="header" name="header"></slot>
       </div>
-      <div id="tabs" role="navigation">
-        <slot name="tabs"></slot>
-      </div>
-      <div id="content">
-        <slot></slot>
+      <div class="main-section-container">
+        <div id="tabs" role="navigation">
+          <slot name="tabs"></slot>
+        </div>
+        <div id="content">
+          <slot></slot>
+        </div>
       </div>
     </div>
   `,
