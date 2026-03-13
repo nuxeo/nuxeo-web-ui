@@ -19,6 +19,7 @@
     "form-data": "4.0.4"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@nuxeo/testing-helpers": "~3.1.28-rc",
     "@open-wc/eslint-config": "^12.0.3",
@@ -32,7 +33,7 @@
     "check-engine": "^1.10.0",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^6.2.1",
-    "cross-env": "^7.0.3",
+    "css-loader": "^5.0.0",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-html": "^8.1.2",
@@ -90,8 +91,8 @@
     "fix:cropper": "replace '/node_modules/cropperjs/dist/cropper.css' 'vendor/cropperjs/dist/cropper.css' dist/*.js",
     "fix:fonts": "replace '\\.\\./fonts' './fonts' dist/*.js",
     "build:analyze": "webpack --env production --analyze",
-    "lint:eslint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint --ext .js,.html .",
-    "format:eslint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint --ext .js,.html . --fix",
+    "lint:eslint": "eslint .",
+    "format:eslint": "eslint . --fix",
     "lint:prettier": "prettier \"**/*.{js,html}\" --list-different || (echo '↑↑ these files are not prettier formatted ↑↑' && exit 1)",
     "format:prettier": "prettier \"**/*.{js,html}\" --write",
     "lint": " npm run lint:eslint && npm run lint:prettier",
@@ -201,7 +202,7 @@
   "lint-staged": {
     "*.{js,html}": [
       "prettier --write",
-      "cross-env ESLINT_USE_FLAT_CONFIG=false eslint --fix"
+      "eslint --fix"
     ]
   }
 }
