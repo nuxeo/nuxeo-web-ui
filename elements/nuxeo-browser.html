@@ -154,6 +154,8 @@ limitations under the License.
       _documentChanged() {
         if (this.document && this.document.facets) {
           this.setAttribute('document-facets', this.document.facets.join(' '));
+        } else {
+          this.removeAttribute('document-facets');
         }
       },
 
