@@ -141,7 +141,7 @@ Polymer({
       }
 
       :host([dir='rtl']) iron-icon {
-        margin-right: 10em;
+        margin-right: 0;
       }
 
       [toggle] {
