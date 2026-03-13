@@ -57,7 +57,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
             width: 100%;
             white-space: nowrap;
             overflow: hidden;
-            font-family: var(--sat-font-family-primary, 'Figtree');
+            font-family: var(--sat-font-family-secondary, 'Figtree');
             font-style: normal;
             font-weight: 400;
             font-size: 17px;
