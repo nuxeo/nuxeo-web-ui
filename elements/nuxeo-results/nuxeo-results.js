@@ -785,7 +785,12 @@ Polymer({
       // ---- global level ----
       if (this.useGlobalResultsPrefs) {
         this._debounceSave('_prefsSaveDebouncer', () => {
-          this.saveGlobalResultsPrefs(this.view.settings).catch(() => {});
+          this.saveGlobalResultsPrefs(this.view.settings).catch((error) => {
+            // log the error instead of silently swallowing it
+            // so failures in saving global results preferences are visible
+            // eslint-disable-next-line no-console
+            console.warn('Failed to save global results preferences', error);
+          });
         });
       }
 
@@ -793,7 +798,14 @@ Polymer({
       if (this.useDocResultsPrefs && this.document && this.document.path) {
         const docKey = this._getDocResultsPrefsKey();
         this._debounceSave('_docPrefsSaveDebouncer', () => {
-          this.saveDocPrefs(this.document.path, docKey, this.view.settings).catch(() => {});
+          this.saveDocPrefs(this.document.path, docKey, this.view.settings).catch((error) => {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to save document results preferences', {
+              path: this.document && this.document.path,
+              key: docKey,
+              error,
+            });
+          });
         });
       }
     }
