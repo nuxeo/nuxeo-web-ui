@@ -39,6 +39,7 @@ limitations under the License.
       nx-provider="[[nxProvider]]"
       selected-items="{{selectedItems}}"
       display-quick-filters
+      use-global-results-prefs
     >
       <nuxeo-data-grid
         name="grid"
@@ -70,7 +71,6 @@ limitations under the License.
         column-reorder-enabled
         on-row-clicked="_navigate"
         caption-text="[[i18n('nxqlSearch.heading')]]"
-        use-global-results-prefs
       >
         <nuxeo-data-table-column
           name="[[i18n('label.dublincore.title')]]"
