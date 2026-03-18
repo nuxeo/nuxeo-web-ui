@@ -410,7 +410,9 @@ Polymer({
     globalResultsPrefs: {
       type: Object,
       notify: true,
-      value: () => {return {}},
+      value: () => {
+        return {};
+      },
     },
     _prefsSaveDebouncer: Object,
   },
@@ -444,12 +446,14 @@ Polymer({
       this.unlisten(this.view, 'selected-items-changed', '_selectedItemsChanged');
       this.unlisten(this.view, 'settings-changed', '_saveViewSettings');
     }
-    this.columns = [];
-    this.view = null;
 
+    // flush pending debounced preference save BEFORE clearing the view
     if (this._prefsSaveDebouncer && this._prefsSaveDebouncer.flush) {
       this._prefsSaveDebouncer.flush();
     }
+
+    this.columns = [];
+    this.view = null;
   },
 
   _displayQuickFilters() {
