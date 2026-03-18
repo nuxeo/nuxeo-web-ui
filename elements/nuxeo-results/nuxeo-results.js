@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved.
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -401,6 +401,9 @@ Polymer({
       value: 0,
     },
 
+    // -------------------------
+    // Global results prefs
+    // -------------------------
     useGlobalResultsPrefs: {
       type: Boolean,
       value: false,
@@ -414,7 +417,9 @@ Polymer({
         return {};
       },
     },
+
     _prefsSaveDebouncer: Object,
+
     _connectedUser: {
       type: Object,
     },
@@ -423,23 +428,15 @@ Polymer({
       type: String,
     },
 
+    // -------------------------
+    // Doc-level results prefs
+    // -------------------------
     // enable/disable doc-level preferences (opt-in)
     useDocResultsPrefs: {
       type: Boolean,
       value: false,
     },
 
-    docResultsPrefs: {
-      type: Object,
-      value: null,
-    },
-
-    _docPrefsKey: {
-      type: String,
-      value: '',
-    },
-
-    _saveDocPrefsDebouncer: Object,
     _docPrefsSaveDebouncer: Object,
   },
 
@@ -447,11 +444,13 @@ Polymer({
     '_selectAllChanged(view)',
     '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
+
+    // global prefs
     '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, nxProvider, _connectedUserId)',
     '_applyGlobalResultsPrefs(useGlobalResultsPrefs, globalResultsPrefs, view)',
-    '_maybeLoadDocResultsPrefs(useDocResultsPrefs, document, _connectedUserId)',
-    '_applyDocResultsPrefs(useDocResultsPrefs, docResultsPrefs, view)',
-    '_maybeApplyDocResultsPrefs(document, view)',
+
+    // doc prefs (enricher-based)
+    '_maybeApplyDocResultsPrefs(useDocResultsPrefs, document, view)',
   ],
 
   listeners: {
@@ -484,6 +483,9 @@ Polymer({
     // flush pending debounced preference save BEFORE clearing the view
     if (this._prefsSaveDebouncer && this._prefsSaveDebouncer.flush) {
       this._prefsSaveDebouncer.flush();
+    }
+    if (this._docPrefsSaveDebouncer && this._docPrefsSaveDebouncer.flush) {
+      this._docPrefsSaveDebouncer.flush();
     }
 
     this.columns = [];
@@ -721,7 +723,7 @@ Polymer({
   },
 
   saveSettings() {
-    if (this.name && this._localStorageName) {
+    if (this.name) {
       this.$.prefStorage.save();
     }
   },
@@ -780,15 +782,15 @@ Polymer({
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
 
-      // ---- global level (existing) ----
+      // ---- global level ----
       if (this.useGlobalResultsPrefs) {
         this._debounceSave('_prefsSaveDebouncer', () => {
           this.saveGlobalResultsPrefs(this.view.settings).catch(() => {});
         });
       }
 
-      // ---- doc level (via PUT /path/<doc>/@preferences) ----
-      if (this.document && this.document.path) {
+      // ---- doc level ----
+      if (this.useDocResultsPrefs && this.document && this.document.path) {
         const docKey = this._getDocResultsPrefsKey();
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           this.saveDocPrefs(this.document.path, docKey, this.view.settings).catch(() => {});
@@ -852,6 +854,11 @@ Polymer({
 
   _getUserId() {
     return this._connectedUserId || null;
+  },
+
+  _cacheKey(userId, providerName) {
+    // stable cache key: user + provider
+    return `${userId}::${providerName}`;
   },
 
   // ------------------------------
@@ -934,9 +941,6 @@ Polymer({
     };
     await this.$.prefsResource.put();
   },
-  /**
-   * Apply prefs safely to the current view (prevents saving while restoring).
-   */
 
   async _maybeLoadGlobalResultsPrefs(enabled, nxProvider, connectedUserId) {
     if (!enabled) {
@@ -1011,8 +1015,8 @@ Polymer({
     return 'nuxeo.webui.searchResults.docResultsTable';
   },
 
-  _maybeApplyDocResultsPrefs(document, view) {
-    if (!document || !view) {
+  _maybeApplyDocResultsPrefs(enabled, document, view) {
+    if (!enabled || !document || !view) {
       return;
     }
 
