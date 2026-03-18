@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved.
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,8 +34,10 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 
 const hasSelectAllEnabled = config.get('selection.selectAllEnabled', false);
+const __globalResultsPrefsCache = new Map();
 
 /**
 An element to display results from a page provider.
@@ -59,6 +61,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 @group Nuxeo UI
 @element nuxeo-results
 */
+
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
@@ -171,6 +174,7 @@ Polymer({
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
+    <nuxeo-resource id="prefsResource"></nuxeo-resource>
 
     <div class="main">
       <nuxeo-selection-toolbar
@@ -396,12 +400,57 @@ Polymer({
       type: Number,
       value: 0,
     },
+
+    // -------------------------
+    // Global results prefs
+    // -------------------------
+    useGlobalResultsPrefs: {
+      type: Boolean,
+      value: false,
+    },
+
+    // parsed object you can bind to (columns order/sizes/sort etc.)
+    globalResultsPrefs: {
+      type: Object,
+      notify: true,
+      value: () => {
+        return {};
+      },
+    },
+
+    _prefsSaveDebouncer: Object,
+
+    _connectedUser: {
+      type: Object,
+    },
+
+    _connectedUserId: {
+      type: String,
+    },
+
+    // -------------------------
+    // Doc-level results prefs
+    // -------------------------
+    // enable/disable doc-level preferences (opt-in)
+    useDocResultsPrefs: {
+      type: Boolean,
+      value: false,
+    },
+
+    _docPrefsSaveDebouncer: Object,
   },
 
   observers: [
     '_selectAllChanged(view)',
     '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
+
+    // global prefs
+    '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, nxProvider, _connectedUserId)',
+    '_applyGlobalResultsPrefs(useGlobalResultsPrefs, globalResultsPrefs, view)',
+
+    // doc prefs (enricher-based)
+    '_maybeApplyDocResultsPrefs(useDocResultsPrefs, document, view)',
   ],
 
   listeners: {
@@ -409,7 +458,11 @@ Polymer({
   },
 
   ready() {
-    this.$.nxcon.connect().then(this._updateStorage.bind(this));
+    this.$.nxcon.connect().then((user) => {
+      this._connectedUser = user;
+      this._connectedUserId = user && (user.id || user.uid || user.username);
+      this._updateStorage();
+    });
   },
 
   get items() {
@@ -426,6 +479,15 @@ Polymer({
       this.unlisten(this.view, 'selected-items-changed', '_selectedItemsChanged');
       this.unlisten(this.view, 'settings-changed', '_saveViewSettings');
     }
+
+    // flush pending debounced preference save BEFORE clearing the view
+    if (this._prefsSaveDebouncer && this._prefsSaveDebouncer.flush) {
+      this._prefsSaveDebouncer.flush();
+    }
+    if (this._docPrefsSaveDebouncer && this._docPrefsSaveDebouncer.flush) {
+      this._docPrefsSaveDebouncer.flush();
+    }
+
     this.columns = [];
     this.view = null;
   },
@@ -716,6 +778,33 @@ Polymer({
     if (this.view.settings && !this._isRestoring) {
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
+
+      // ---- global level ----
+      if (this.useGlobalResultsPrefs) {
+        this._debounceSave('_prefsSaveDebouncer', () => {
+          this.saveGlobalResultsPrefs(this.view.settings).catch((error) => {
+            // log the error instead of silently swallowing it
+            // so failures in saving global results preferences are visible
+            // eslint-disable-next-line no-console
+            console.warn('Failed to save global results preferences', error);
+          });
+        });
+      }
+
+      // ---- doc level ----
+      if (this.useDocResultsPrefs && this.document && this.document.path) {
+        const docKey = this._getDocResultsPrefsKey();
+        this._debounceSave('_docPrefsSaveDebouncer', () => {
+          this.saveDocPrefs(this.document.path, docKey, this.view.settings).catch((error) => {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to save document results preferences', {
+              path: this.document && this.document.path,
+              key: docKey,
+              error,
+            });
+          });
+        });
+      }
     }
   },
 
@@ -766,5 +855,236 @@ Polymer({
       this._excludedDocs = e.detail.value.length;
     }
     this.$.toolbar._resultsCount = this.resultsCount - this._excludedDocs;
+  },
+
+  _getProviderName(nxProvider) {
+    return nxProvider && (nxProvider.provider || (nxProvider.getAttribute && nxProvider.getAttribute('provider')));
+  },
+
+  _getUserId() {
+    return this._connectedUserId || null;
+  },
+
+  _cacheKey(userId, providerName) {
+    // stable cache key: user + provider
+    return `${userId}::${providerName}`;
+  },
+
+  // ------------------------------
+  // Preference plumbing (generic)
+  // ------------------------------
+
+  _prefAcceptHeaders() {
+    return { accept: 'text/plain,application/json' };
+  },
+
+  _parsePrefValue(raw) {
+    // raw is typically: { entity-type: "preference", id: "...", value: "<json-string>" }
+    if (!raw || !raw.value) {
+      return {};
+    }
+    try {
+      return JSON.parse(raw.value);
+    } catch (e) {
+      // tolerate legacy/plain values
+      return {};
+    }
+  },
+
+  /**
+   * Configure prefsResource for /me/preferences/<key> GET/PUT.
+   * This is your current "global" transport.
+   */
+  _configureMePreferencesResource(prefKey) {
+    this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
+    this.$.prefsResource.params = null;
+    this.$.prefsResource.enrichers = {};
+    this.$.prefsResource.headers = this._prefAcceptHeaders();
+    this.$.prefsResource.data = null;
+  },
+
+  /**
+   * GET preference object from /me/preferences/<key>
+   */
+  async _getMePreference(prefKey) {
+    this._configureMePreferencesResource(prefKey);
+    this.$.prefsResource.contentType = 'application/json';
+    const raw = await this.$.prefsResource.get();
+    return this._parsePrefValue(raw);
+  },
+
+  /**
+   * PUT preference object to /me/preferences/<key>
+   * Uses text/plain payload (same as your current implementation).
+   */
+  async _putMePreference(prefKey, obj) {
+    const payload = JSON.stringify(obj || {});
+    this._configureMePreferencesResource(prefKey);
+    this.$.prefsResource.contentType = 'text/plain';
+    this.$.prefsResource.data = payload;
+    await this.$.prefsResource.put();
+  },
+
+  /**
+   * Configure prefsResource for /path/<docPath>/@preferences PUT.
+   * This is your doc-level transport.
+   */
+  _configureDocPreferencesResource(docPath) {
+    const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
+    this.$.prefsResource.path = `/path/${normalized}/@preferences`;
+    this.$.prefsResource.params = null;
+    this.$.prefsResource.enrichers = {};
+    this.$.prefsResource.headers = { accept: 'application/json' };
+  },
+
+  /**
+   * PUT document preference (key/value) to /path/<docPath>/@preferences
+   * Value is stored as JSON string (consistent with /me/preferences usage).
+   */
+  async _putDocPreference(docPath, key, obj) {
+    this._configureDocPreferencesResource(docPath);
+    this.$.prefsResource.contentType = 'application/json';
+    this.$.prefsResource.data = {
+      'entity-type': 'userPreferences',
+      preferences: { key, value: JSON.stringify(obj || {}) },
+    };
+    await this.$.prefsResource.put();
+  },
+
+  async _maybeLoadGlobalResultsPrefs(enabled, nxProvider, connectedUserId) {
+    if (!enabled) {
+      return;
+    }
+
+    const providerName = this._getProviderName(nxProvider);
+    if (!providerName) {
+      return;
+    }
+
+    const userId = connectedUserId || this._getUserId();
+    if (!userId) {
+      return;
+    }
+
+    const cacheKey = this._cacheKey(userId, providerName);
+    const cached = __globalResultsPrefsCache.get(cacheKey);
+    if (cached) {
+      this.globalResultsPrefs = cached;
+      return;
+    }
+
+    try {
+      const parsed = await this._getMePreference(providerName);
+      __globalResultsPrefsCache.set(cacheKey, parsed);
+      this.globalResultsPrefs = parsed;
+    } catch (e) {
+      const empty = {};
+      __globalResultsPrefsCache.set(cacheKey, empty);
+      this.globalResultsPrefs = empty;
+    }
+  },
+
+  async saveGlobalResultsPrefs(prefsObj) {
+    const providerName = this._getProviderName(this.nxProvider);
+    if (!providerName) {
+      throw new Error('Cannot save global results prefs: missing nxProvider.provider');
+    }
+
+    const userId = this._getUserId();
+    if (!userId) {
+      throw new Error('Cannot save global results prefs: missing user id');
+    }
+
+    await this._putMePreference(providerName, prefsObj);
+
+    const cacheKey = this._cacheKey(userId, providerName);
+    __globalResultsPrefsCache.set(cacheKey, prefsObj || {});
+    this.globalResultsPrefs = prefsObj || {};
+  },
+
+  _applyGlobalResultsPrefs(enabled, prefs, view) {
+    if (!enabled || !view || !prefs || Object.keys(prefs).length === 0) {
+      return;
+    }
+    this._applyPrefsToView(view, prefs);
+  },
+
+  async saveDocPrefs(docPath, key, value) {
+    if (!docPath) {
+      throw new Error('Cannot save doc prefs: missing docPath');
+    }
+    if (!key) {
+      throw new Error('Cannot save doc prefs: missing key');
+    }
+    await this._putDocPreference(docPath, key, value);
+  },
+
+  _getDocResultsPrefsKey() {
+    // one stable key for doc-level "results table prefs" stored on each folder/doc
+    return 'nuxeo.webui.searchResults.docResultsTable';
+  },
+
+  _maybeApplyDocResultsPrefs(enabled, document, view) {
+    if (!enabled || !document || !view) {
+      return;
+    }
+
+    const key = this._getDocResultsPrefsKey();
+    const prefs = this._getDocPrefsFromEnricher(document, key);
+
+    if (!prefs) {
+      return;
+    }
+
+    this._applyPrefsToView(view, prefs);
+  },
+
+  _applyPrefsToView(view, prefs) {
+    if (!view || !prefs) {
+      return;
+    }
+    this._isRestoring = true;
+    try {
+      view.settings = prefs;
+    } finally {
+      this._isRestoring = false;
+    }
+  },
+
+  _debounceSave(debouncerField, fn, wait = 300) {
+    this[debouncerField] = Debouncer.debounce(this[debouncerField], timeOut.after(wait), fn);
+  },
+
+  _getDocPrefsFromEnricher(doc, prefKey) {
+    const prefsMap =
+      doc &&
+      doc.contextParameters &&
+      doc.contextParameters.userPreferences &&
+      doc.contextParameters.userPreferences.preferences;
+
+    if (!prefsMap || typeof prefsMap !== 'object') {
+      return null;
+    }
+
+    const rawValue = prefsMap[prefKey];
+    if (!rawValue) {
+      return null;
+    }
+
+    // stored as JSON string (recommended)
+    if (typeof rawValue === 'string') {
+      try {
+        return JSON.parse(rawValue);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // if backend ever returns already-parsed object
+    if (typeof rawValue === 'object') {
+      return rawValue;
+    }
+
+    return null;
   },
 });
