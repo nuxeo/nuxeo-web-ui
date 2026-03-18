@@ -153,7 +153,6 @@ Polymer({
         settings-enabled
         column-resize-enabled
         column-reorder-enabled
-        use-doc-results-prefs
         empty-label="[[emptyLabel]]"
         empty-label-when-filtered="[[emptyLabelWhenFiltered]]"
         selection-enabled
