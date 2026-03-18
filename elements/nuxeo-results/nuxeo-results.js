@@ -60,7 +60,7 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 @element nuxeo-results
 */
 
-// const __globalResultsPrefsCache = new Map();
+const __globalResultsPrefsCache = new Map();
 
 Polymer({
   _template: html`
@@ -266,10 +266,6 @@ Polymer({
   is: 'nuxeo-results',
   behaviors: [RoutingBehavior, FormatBehavior],
 
-  statics: {
-    __globalResultsPrefsCache: new Map(), // cacheKey -> parsed object
-  },
-
   properties: {
     /**
      * the page provider to display results for
@@ -409,10 +405,7 @@ Polymer({
       type: Boolean,
       value: false,
     },
-    // provider name to scope prefs (e.g. "default_search", "expired_search", ...)
-    providerName: {
-      type: String,
-    },
+
     // parsed object you can bind to (columns order/sizes/sort etc.)
     globalResultsPrefs: {
       type: Object,
@@ -425,7 +418,7 @@ Polymer({
     '_selectAllChanged(view)',
     '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
-    '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, providerName, user)',
+    '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, nxProvider)',
   ],
 
   listeners: {
@@ -743,6 +736,9 @@ Polymer({
     if (this.view.settings && !this._isRestoring) {
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
+      if (this.useGlobalResultsPrefs) {
+        this.saveGlobalResultsPrefs(this.view.settings).catch(() => {});
+      }
     }
   },
 
@@ -795,6 +791,10 @@ Polymer({
     this.$.toolbar._resultsCount = this.resultsCount - this._excludedDocs;
   },
 
+  _getProviderName(nxProvider) {
+    return nxProvider && (nxProvider.provider || (nxProvider.getAttribute && nxProvider.getAttribute('provider')));
+  },
+
   _getUserId() {
     // In many layouts, `user` is available (like in nuxeo-web-ui-bundle slot templates).
     // If not available in your usage, pass user into <nuxeo-results user="[[user]]"> from the parent.
@@ -809,10 +809,12 @@ Polymer({
     return `${userId}::${providerName}`;
   },
 
-  async _maybeLoadGlobalResultsPrefs(enabled, providerName) {
+  async _maybeLoadGlobalResultsPrefs(enabled, nxProvider) {
     if (!enabled) {
       return;
     }
+
+    const providerName = this._getProviderName(nxProvider);
     if (!providerName) {
       return;
     }
@@ -823,7 +825,7 @@ Polymer({
     }
 
     const cacheKey = this._cacheKey(userId, providerName);
-    const cached = this.constructor.__globalResultsPrefsCache.get(cacheKey);
+    const cached = __globalResultsPrefsCache.get(cacheKey);
     if (cached) {
       this.globalResultsPrefs = cached;
       return;
@@ -832,7 +834,6 @@ Polymer({
     const prefKey = this._buildGlobalResultsPrefsKey(providerName);
 
     try {
-      // GET /api/v1/me/preferences/<prefKey>
       this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
       this.$.prefsResource.params = null;
       this.$.prefsResource.enrichers = {};
@@ -840,15 +841,14 @@ Polymer({
       this.$.prefsResource.contentType = 'application/json';
       this.$.prefsResource.data = null;
 
-      const raw = await this.$.prefsResource.get(); // usually text/plain
+      const raw = await this.$.prefsResource.get();
       const parsed = raw ? JSON.parse(raw) : {};
 
-      this.constructor.__globalResultsPrefsCache.set(cacheKey, parsed);
+      __globalResultsPrefsCache.set(cacheKey, parsed);
       this.globalResultsPrefs = parsed;
     } catch (e) {
-      // Common case: 404 => no prefs saved yet
       const empty = {};
-      this.constructor.__globalResultsPrefsCache.set(cacheKey, empty);
+      __globalResultsPrefsCache.set(cacheKey, empty);
       this.globalResultsPrefs = empty;
     }
   },
@@ -861,18 +861,19 @@ Polymer({
    * - update this.globalResultsPrefs
    */
   async saveGlobalResultsPrefs(prefsObj) {
-    if (!this.providerName) {
-      throw new Error('Cannot save global results prefs: missing providerName');
+    const providerName = this._getProviderName(this.nxProvider);
+    if (!providerName) {
+      throw new Error('Cannot save global results prefs: missing nxProvider.provider');
     }
+
     const userId = this._getUserId();
     if (!userId) {
       throw new Error('Cannot save global results prefs: missing user id');
     }
 
     const payload = JSON.stringify(prefsObj || {});
-    const prefKey = this._buildGlobalResultsPrefsKey(this.providerName);
+    const prefKey = this._buildGlobalResultsPrefsKey(providerName);
 
-    // PUT /api/v1/me/preferences/<prefKey>  body: text/plain
     this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
     this.$.prefsResource.params = null;
     this.$.prefsResource.enrichers = {};
@@ -882,8 +883,8 @@ Polymer({
 
     await this.$.prefsResource.put();
 
-    const cacheKey = this._cacheKey(userId, this.providerName);
-    this.constructor.__globalResultsPrefsCache.set(cacheKey, prefsObj || {});
+    const cacheKey = this._cacheKey(userId, providerName);
+    __globalResultsPrefsCache.set(cacheKey, prefsObj || {});
     this.globalResultsPrefs = prefsObj || {};
   },
 
