@@ -34,8 +34,10 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 
 const hasSelectAllEnabled = config.get('selection.selectAllEnabled', false);
+const __globalResultsPrefsCache = new Map();
 
 /**
 An element to display results from a page provider.
@@ -59,8 +61,6 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 @group Nuxeo UI
 @element nuxeo-results
 */
-
-const __globalResultsPrefsCache = new Map();
 
 Polymer({
   _template: html`
@@ -412,6 +412,7 @@ Polymer({
       notify: true,
       value: () => {return {}},
     },
+    _prefsSaveDebouncer: Object,
   },
 
   observers: [
@@ -445,6 +446,10 @@ Polymer({
     }
     this.columns = [];
     this.view = null;
+
+    if (this._prefsSaveDebouncer && this._prefsSaveDebouncer.flush) {
+      this._prefsSaveDebouncer.flush();
+    }
   },
 
   _displayQuickFilters() {
@@ -737,7 +742,9 @@ Polymer({
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
       if (this.useGlobalResultsPrefs) {
-        this.saveGlobalResultsPrefs(this.view.settings).catch(() => {});
+        this._prefsSaveDebouncer = Debouncer.debounce(this._prefsSaveDebouncer, timeOut.after(300), () => {
+          this.saveGlobalResultsPrefs(this.view.settings).catch(() => {});
+        });
       }
     }
   },
@@ -796,9 +803,8 @@ Polymer({
   },
 
   _getUserId() {
-    // In many layouts, `user` is available (like in nuxeo-web-ui-bundle slot templates).
-    // If not available in your usage, pass user into <nuxeo-results user="[[user]]"> from the parent.
-    return (this.user && (this.user.id || this.user.uid || this.user.username)) || null;
+    const u = this.$ && this.$.nxcon && this.$.nxcon.user;
+    return (u && (u.id || u.uid || u.username)) || null;
   },
 
   _buildGlobalResultsPrefsKey(providerName) {
