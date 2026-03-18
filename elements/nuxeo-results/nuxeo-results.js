@@ -429,6 +429,7 @@ Polymer({
     '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
     '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, nxProvider, _connectedUserId)',
+    '_applyGlobalResultsPrefs(useGlobalResultsPrefs, globalResultsPrefs, view)',
   ],
 
   listeners: {
@@ -935,5 +936,21 @@ Polymer({
     };
 
     await this.$.prefsResource.put();
+  },
+
+  _applyGlobalResultsPrefs(enabled, prefs, view) {
+    if (!enabled || !view || !prefs) {
+      return;
+    }
+
+    // avoid triggering server save while applying restored settings
+    this._isRestoring = true;
+    try {
+      // only apply if the view supports settings
+      // (nuxeo-data-table does, grid might not)
+      view.settings = prefs;
+    } finally {
+      this._isRestoring = false;
+    }
   },
 });
