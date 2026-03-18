@@ -422,6 +422,25 @@ Polymer({
     _connectedUserId: {
       type: String,
     },
+
+    // enable/disable doc-level preferences (opt-in)
+    useDocResultsPrefs: {
+      type: Boolean,
+      value: false,
+    },
+
+    docResultsPrefs: {
+      type: Object,
+      value: null,
+    },
+
+    _docPrefsKey: {
+      type: String,
+      value: '',
+    },
+
+    _saveDocPrefsDebouncer: Object,
+    _docPrefsSaveDebouncer: Object,
   },
 
   observers: [
@@ -430,6 +449,9 @@ Polymer({
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
     '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, nxProvider, _connectedUserId)',
     '_applyGlobalResultsPrefs(useGlobalResultsPrefs, globalResultsPrefs, view)',
+    '_maybeLoadDocResultsPrefs(useDocResultsPrefs, document, _connectedUserId)',
+    '_applyDocResultsPrefs(useDocResultsPrefs, docResultsPrefs, view)',
+    '_maybeApplyDocResultsPrefs(document, view)',
   ],
 
   listeners: {
@@ -757,9 +779,19 @@ Polymer({
     if (this.view.settings && !this._isRestoring) {
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
+
+      // ---- global level (existing) ----
       if (this.useGlobalResultsPrefs) {
-        this._prefsSaveDebouncer = Debouncer.debounce(this._prefsSaveDebouncer, timeOut.after(300), () => {
+        this._debounceSave('_prefsSaveDebouncer', () => {
           this.saveGlobalResultsPrefs(this.view.settings).catch(() => {});
+        });
+      }
+
+      // ---- doc level (via PUT /path/<doc>/@preferences) ----
+      if (this.document && this.document.path) {
+        const docKey = this._getDocResultsPrefsKey();
+        this._debounceSave('_docPrefsSaveDebouncer', () => {
+          this.saveDocPrefs(this.document.path, docKey, this.view.settings).catch(() => {});
         });
       }
     }
@@ -822,9 +854,89 @@ Polymer({
     return this._connectedUserId || null;
   },
 
-  _cacheKey(userId, providerName) {
-    return `${userId}::${providerName}`;
+  // ------------------------------
+  // Preference plumbing (generic)
+  // ------------------------------
+
+  _prefAcceptHeaders() {
+    return { accept: 'text/plain,application/json' };
   },
+
+  _parsePrefValue(raw) {
+    // raw is typically: { entity-type: "preference", id: "...", value: "<json-string>" }
+    if (!raw || !raw.value) {
+      return {};
+    }
+    try {
+      return JSON.parse(raw.value);
+    } catch (e) {
+      // tolerate legacy/plain values
+      return {};
+    }
+  },
+
+  /**
+   * Configure prefsResource for /me/preferences/<key> GET/PUT.
+   * This is your current "global" transport.
+   */
+  _configureMePreferencesResource(prefKey) {
+    this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
+    this.$.prefsResource.params = null;
+    this.$.prefsResource.enrichers = {};
+    this.$.prefsResource.headers = this._prefAcceptHeaders();
+    this.$.prefsResource.data = null;
+  },
+
+  /**
+   * GET preference object from /me/preferences/<key>
+   */
+  async _getMePreference(prefKey) {
+    this._configureMePreferencesResource(prefKey);
+    this.$.prefsResource.contentType = 'application/json';
+    const raw = await this.$.prefsResource.get();
+    return this._parsePrefValue(raw);
+  },
+
+  /**
+   * PUT preference object to /me/preferences/<key>
+   * Uses text/plain payload (same as your current implementation).
+   */
+  async _putMePreference(prefKey, obj) {
+    const payload = JSON.stringify(obj || {});
+    this._configureMePreferencesResource(prefKey);
+    this.$.prefsResource.contentType = 'text/plain';
+    this.$.prefsResource.data = payload;
+    await this.$.prefsResource.put();
+  },
+
+  /**
+   * Configure prefsResource for /path/<docPath>/@preferences PUT.
+   * This is your doc-level transport.
+   */
+  _configureDocPreferencesResource(docPath) {
+    const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
+    this.$.prefsResource.path = `/path/${normalized}/@preferences`;
+    this.$.prefsResource.params = null;
+    this.$.prefsResource.enrichers = {};
+    this.$.prefsResource.headers = { accept: 'application/json' };
+  },
+
+  /**
+   * PUT document preference (key/value) to /path/<docPath>/@preferences
+   * Value is stored as JSON string (consistent with /me/preferences usage).
+   */
+  async _putDocPreference(docPath, key, obj) {
+    this._configureDocPreferencesResource(docPath);
+    this.$.prefsResource.contentType = 'application/json';
+    this.$.prefsResource.data = {
+      'entity-type': 'userPreferences',
+      preferences: [{ key, value: JSON.stringify(obj || {}) }],
+    };
+    await this.$.prefsResource.put();
+  },
+  /**
+   * Apply prefs safely to the current view (prevents saving while restoring).
+   */
 
   async _maybeLoadGlobalResultsPrefs(enabled, nxProvider, connectedUserId) {
     if (!enabled) {
@@ -836,7 +948,6 @@ Polymer({
       return;
     }
 
-    // IMPORTANT: wait until nxcon.connect() has resolved
     const userId = connectedUserId || this._getUserId();
     if (!userId) {
       return;
@@ -849,19 +960,8 @@ Polymer({
       return;
     }
 
-    const prefKey = providerName;
-
     try {
-      this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
-      this.$.prefsResource.params = null;
-      this.$.prefsResource.enrichers = {};
-      this.$.prefsResource.headers = { accept: 'text/plain,application/json' };
-      this.$.prefsResource.contentType = 'application/json';
-      this.$.prefsResource.data = null;
-
-      const raw = await this.$.prefsResource.get();
-      const parsed = raw && raw.value ? JSON.parse(raw.value) : {};
-
+      const parsed = await this._getMePreference(providerName);
       __globalResultsPrefsCache.set(cacheKey, parsed);
       this.globalResultsPrefs = parsed;
     } catch (e) {
@@ -871,13 +971,6 @@ Polymer({
     }
   },
 
-  /**
-   * Call this when the user changes table settings (columns order/sizes/sort).
-   * It will:
-   * - PUT to /me/preferences/<key>
-   * - update in-memory cache
-   * - update this.globalResultsPrefs
-   */
   async saveGlobalResultsPrefs(prefsObj) {
     const providerName = this._getProviderName(this.nxProvider);
     if (!providerName) {
@@ -889,29 +982,20 @@ Polymer({
       throw new Error('Cannot save global results prefs: missing user id');
     }
 
-    const payload = JSON.stringify(prefsObj || {});
-    const prefKey = providerName;
-
-    this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
-    this.$.prefsResource.params = null;
-    this.$.prefsResource.enrichers = {};
-    this.$.prefsResource.headers = { accept: 'text/plain,application/json' };
-    this.$.prefsResource.contentType = 'text/plain';
-    this.$.prefsResource.data = payload;
-
-    await this.$.prefsResource.put();
+    await this._putMePreference(providerName, prefsObj);
 
     const cacheKey = this._cacheKey(userId, providerName);
     __globalResultsPrefsCache.set(cacheKey, prefsObj || {});
     this.globalResultsPrefs = prefsObj || {};
   },
 
-  /**
-   * Document-specific SAVE (no fetch here).
-   * Use this for browse/document-content when you want to persist something per doc path.
-   *
-   * PUT /api/v1/path/<docPath>/@preferences
-   */
+  _applyGlobalResultsPrefs(enabled, prefs, view) {
+    if (!enabled || !view || !prefs) {
+      return;
+    }
+    this._applyPrefsToView(view, prefs);
+  },
+
   async saveDocPrefs(docPath, key, value) {
     if (!docPath) {
       throw new Error('Cannot save doc prefs: missing docPath');
@@ -919,38 +1003,75 @@ Polymer({
     if (!key) {
       throw new Error('Cannot save doc prefs: missing key');
     }
-
-    const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
-
-    // store JSON as text (consistent with /me/preferences strategy)
-    const payloadValue = typeof value === 'string' ? value : JSON.stringify(value ?? {});
-
-    this.$.prefsResource.path = `/path/${normalized}/@preferences`;
-    this.$.prefsResource.params = null;
-    this.$.prefsResource.enrichers = {};
-    this.$.prefsResource.headers = { accept: 'application/json' };
-    this.$.prefsResource.contentType = 'application/json';
-    this.$.prefsResource.data = {
-      'entity-type': 'userPreferences',
-      preferences: [{ key, value: payloadValue }],
-    };
-
-    await this.$.prefsResource.put();
+    await this._putDocPreference(docPath, key, value);
   },
 
-  _applyGlobalResultsPrefs(enabled, prefs, view) {
-    if (!enabled || !view || !prefs) {
+  _getDocResultsPrefsKey() {
+    // one stable key for doc-level "results table prefs" stored on each folder/doc
+    return 'nuxeo.webui.searchResults.docResultsTable';
+  },
+
+  _maybeApplyDocResultsPrefs(document, view) {
+    if (!document || !view) {
       return;
     }
 
-    // avoid triggering server save while applying restored settings
+    const key = this._getDocResultsPrefsKey();
+    const prefs = this._getDocPrefsFromEnricher(document, key);
+
+    if (!prefs) {
+      return;
+    }
+
+    this._applyPrefsToView(view, prefs);
+  },
+
+  _applyPrefsToView(view, prefs) {
+    if (!view || !prefs) {
+      return;
+    }
     this._isRestoring = true;
     try {
-      // only apply if the view supports settings
-      // (nuxeo-data-table does, grid might not)
       view.settings = prefs;
     } finally {
       this._isRestoring = false;
     }
+  },
+
+  _debounceSave(debouncerField, fn, wait = 300) {
+    this[debouncerField] = Debouncer.debounce(this[debouncerField], timeOut.after(wait), fn);
+  },
+
+  _getDocPrefsFromEnricher(doc, prefKey) {
+    const prefsMap =
+      doc &&
+      doc.contextParameters &&
+      doc.contextParameters.userPreferences &&
+      doc.contextParameters.userPreferences.preferences;
+
+    if (!prefsMap || typeof prefsMap !== 'object') {
+      return null;
+    }
+
+    const rawValue = prefsMap[prefKey];
+    if (!rawValue) {
+      return null;
+    }
+
+    // stored as JSON string (recommended)
+    if (typeof rawValue === 'string') {
+      try {
+        return JSON.parse(rawValue);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // if backend ever returns already-parsed object
+    if (typeof rawValue === 'object') {
+      return rawValue;
+    }
+
+    return null;
   },
 });
