@@ -723,7 +723,7 @@ Polymer({
   },
 
   saveSettings() {
-    if (this.name) {
+    if (this.name && this._localStorageName) {
       this.$.prefStorage.save();
     }
   },
