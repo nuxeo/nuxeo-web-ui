@@ -937,7 +937,7 @@ Polymer({
     this.$.prefsResource.contentType = 'application/json';
     this.$.prefsResource.data = {
       'entity-type': 'userPreferences',
-      preferences: [{ key, value: JSON.stringify(obj || {}) }],
+      preferences: { key, value: JSON.stringify(obj || {}) },
     };
     await this.$.prefsResource.put();
   },
