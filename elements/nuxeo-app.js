@@ -1026,7 +1026,10 @@ Polymer({
     this.$.doc.headers = this._computeHeaders();
     this.$.doc.enrichers = this._computeEnrichers();
 
-    this.$.doc.enrichers = this._computeDocumentEnrichersForPage(docParam.page);
+    const page = docParam && docParam.page ? docParam.page : this.page;
+    if (page) {
+      this.$.doc.enrichers = this._computeDocumentEnrichersForPage(page);
+    }
 
     return this.$.doc.get().then((doc) => {
       if (this.docId && doc.facets.includes('SavedSearch')) {
