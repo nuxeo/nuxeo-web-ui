@@ -1827,7 +1827,7 @@ Polymer({
     if (!list.includes(v)) {
       list.push(v);
     }
-    return list.join(', ');
+    return list.join(',');
   },
 
   _computeDocumentEnrichersForPage(page) {
