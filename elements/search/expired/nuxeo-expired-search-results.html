@@ -33,6 +33,7 @@ limitations under the License.
       display-quick-filters
       display-sort
       sort-options="[[sortOptions]]"
+      use-global-results-prefs
     >
       <nuxeo-data-grid
         name="grid"
@@ -66,7 +67,6 @@ limitations under the License.
         selection-enabled
         on-row-clicked="_navigate"
         caption-text="[[i18n('expiredSearch.expiredDocuments')]]"
-        use-global-results-prefs
       >
         <nuxeo-data-table-column
           name="[[i18n('label.dublincore.title')]]"
