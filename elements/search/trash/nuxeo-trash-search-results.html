@@ -34,6 +34,7 @@ limitations under the License.
       display-sort
       action-context="{{actionContext}}"
       sort-options="[[sortOptions]]"
+      use-global-results-prefs
     >
       <nuxeo-actions-menu slot="selectionActions">
         <nuxeo-slot name="TRASH_RESULTS_SELECTION_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
@@ -69,7 +70,6 @@ limitations under the License.
         selection-enabled
         on-row-clicked="_navigate"
         caption-text="[[i18n('table.caption.trashSearchResults')]]"
-        use-global-results-prefs
       >
         <nuxeo-data-table-column
           name="[[i18n('label.dublincore.title')]]"
