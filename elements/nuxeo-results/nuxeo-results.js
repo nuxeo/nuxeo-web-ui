@@ -59,6 +59,9 @@ a `selectedItems` property and expose a small API (`clearSelection()`, `selectIt
 @group Nuxeo UI
 @element nuxeo-results
 */
+
+// const __globalResultsPrefsCache = new Map();
+
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
@@ -171,6 +174,7 @@ Polymer({
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
+    <nuxeo-resource id="prefsResource"></nuxeo-resource>
 
     <div class="main">
       <nuxeo-selection-toolbar
@@ -261,6 +265,10 @@ Polymer({
 
   is: 'nuxeo-results',
   behaviors: [RoutingBehavior, FormatBehavior],
+
+  statics: {
+    __globalResultsPrefsCache: new Map(), // cacheKey -> parsed object
+  },
 
   properties: {
     /**
@@ -396,12 +404,28 @@ Polymer({
       type: Number,
       value: 0,
     },
+
+    useGlobalResultsPrefs: {
+      type: Boolean,
+      value: false,
+    },
+    // provider name to scope prefs (e.g. "default_search", "expired_search", ...)
+    providerName: {
+      type: String,
+    },
+    // parsed object you can bind to (columns order/sizes/sort etc.)
+    globalResultsPrefs: {
+      type: Object,
+      notify: true,
+      value: () => {return {}},
+    },
   },
 
   observers: [
     '_selectAllChanged(view)',
     '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
+    '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, providerName, user)',
   ],
 
   listeners: {
@@ -769,5 +793,129 @@ Polymer({
       this._excludedDocs = e.detail.value.length;
     }
     this.$.toolbar._resultsCount = this.resultsCount - this._excludedDocs;
+  },
+
+  _getUserId() {
+    // In many layouts, `user` is available (like in nuxeo-web-ui-bundle slot templates).
+    // If not available in your usage, pass user into <nuxeo-results user="[[user]]"> from the parent.
+    return (this.user && (this.user.id || this.user.uid || this.user.username)) || null;
+  },
+
+  _buildGlobalResultsPrefsKey(providerName) {
+    return `nuxeo.webui.searchResults.${providerName}`;
+  },
+
+  _cacheKey(userId, providerName) {
+    return `${userId}::${providerName}`;
+  },
+
+  async _maybeLoadGlobalResultsPrefs(enabled, providerName) {
+    if (!enabled) {
+      return;
+    }
+    if (!providerName) {
+      return;
+    }
+
+    const userId = this._getUserId();
+    if (!userId) {
+      return;
+    }
+
+    const cacheKey = this._cacheKey(userId, providerName);
+    const cached = this.constructor.__globalResultsPrefsCache.get(cacheKey);
+    if (cached) {
+      this.globalResultsPrefs = cached;
+      return;
+    }
+
+    const prefKey = this._buildGlobalResultsPrefsKey(providerName);
+
+    try {
+      // GET /api/v1/me/preferences/<prefKey>
+      this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
+      this.$.prefsResource.params = null;
+      this.$.prefsResource.enrichers = {};
+      this.$.prefsResource.headers = { accept: 'text/plain,application/json' };
+      this.$.prefsResource.contentType = 'application/json';
+      this.$.prefsResource.data = null;
+
+      const raw = await this.$.prefsResource.get(); // usually text/plain
+      const parsed = raw ? JSON.parse(raw) : {};
+
+      this.constructor.__globalResultsPrefsCache.set(cacheKey, parsed);
+      this.globalResultsPrefs = parsed;
+    } catch (e) {
+      // Common case: 404 => no prefs saved yet
+      const empty = {};
+      this.constructor.__globalResultsPrefsCache.set(cacheKey, empty);
+      this.globalResultsPrefs = empty;
+    }
+  },
+
+  /**
+   * Call this when the user changes table settings (columns order/sizes/sort).
+   * It will:
+   * - PUT to /me/preferences/<key>
+   * - update in-memory cache
+   * - update this.globalResultsPrefs
+   */
+  async saveGlobalResultsPrefs(prefsObj) {
+    if (!this.providerName) {
+      throw new Error('Cannot save global results prefs: missing providerName');
+    }
+    const userId = this._getUserId();
+    if (!userId) {
+      throw new Error('Cannot save global results prefs: missing user id');
+    }
+
+    const payload = JSON.stringify(prefsObj || {});
+    const prefKey = this._buildGlobalResultsPrefsKey(this.providerName);
+
+    // PUT /api/v1/me/preferences/<prefKey>  body: text/plain
+    this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
+    this.$.prefsResource.params = null;
+    this.$.prefsResource.enrichers = {};
+    this.$.prefsResource.headers = { accept: 'text/plain,application/json' };
+    this.$.prefsResource.contentType = 'text/plain';
+    this.$.prefsResource.data = payload;
+
+    await this.$.prefsResource.put();
+
+    const cacheKey = this._cacheKey(userId, this.providerName);
+    this.constructor.__globalResultsPrefsCache.set(cacheKey, prefsObj || {});
+    this.globalResultsPrefs = prefsObj || {};
+  },
+
+  /**
+   * Document-specific SAVE (no fetch here).
+   * Use this for browse/document-content when you want to persist something per doc path.
+   *
+   * PUT /api/v1/path/<docPath>/@preferences
+   */
+  async saveDocPrefs(docPath, key, value) {
+    if (!docPath) {
+      throw new Error('Cannot save doc prefs: missing docPath');
+    }
+    if (!key) {
+      throw new Error('Cannot save doc prefs: missing key');
+    }
+
+    const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
+
+    // store JSON as text (consistent with /me/preferences strategy)
+    const payloadValue = typeof value === 'string' ? value : JSON.stringify(value ?? {});
+
+    this.$.prefsResource.path = `/path/${normalized}/@preferences`;
+    this.$.prefsResource.params = null;
+    this.$.prefsResource.enrichers = {};
+    this.$.prefsResource.headers = { accept: 'application/json' };
+    this.$.prefsResource.contentType = 'application/json';
+    this.$.prefsResource.data = {
+      'entity-type': 'userPreferences',
+      preferences: [{ key, value: payloadValue }],
+    };
+
+    await this.$.prefsResource.put();
   },
 });
