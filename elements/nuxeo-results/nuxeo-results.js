@@ -1006,7 +1006,7 @@ Polymer({
   },
 
   _applyGlobalResultsPrefs(enabled, prefs, view) {
-    if (!enabled || !view || !prefs) {
+    if (!enabled || !view || !prefs || Object.keys(prefs).length === 0) {
       return;
     }
     this._applyPrefsToView(view, prefs);
