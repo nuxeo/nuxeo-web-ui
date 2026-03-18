@@ -415,13 +415,20 @@ Polymer({
       },
     },
     _prefsSaveDebouncer: Object,
+    _connectedUser: {
+      type: Object,
+    },
+
+    _connectedUserId: {
+      type: String,
+    },
   },
 
   observers: [
     '_selectAllChanged(view)',
     '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
-    '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, nxProvider)',
+    '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, nxProvider, _connectedUserId)',
   ],
 
   listeners: {
@@ -429,7 +436,11 @@ Polymer({
   },
 
   ready() {
-    this.$.nxcon.connect().then(this._updateStorage.bind(this));
+    this.$.nxcon.connect().then((user) => {
+      this._connectedUser = user;
+      this._connectedUserId = user && (user.id || user.uid || user.username);
+      this._updateStorage.bind(this);
+    });
   },
 
   get items() {
@@ -807,19 +818,14 @@ Polymer({
   },
 
   _getUserId() {
-    const u = this.$ && this.$.nxcon && this.$.nxcon.user;
-    return (u && (u.id || u.uid || u.username)) || null;
-  },
-
-  _buildGlobalResultsPrefsKey(providerName) {
-    return `nuxeo.webui.searchResults.${providerName}`;
+    return this._connectedUserId || null;
   },
 
   _cacheKey(userId, providerName) {
     return `${userId}::${providerName}`;
   },
 
-  async _maybeLoadGlobalResultsPrefs(enabled, nxProvider) {
+  async _maybeLoadGlobalResultsPrefs(enabled, nxProvider, connectedUserId) {
     if (!enabled) {
       return;
     }
@@ -829,7 +835,8 @@ Polymer({
       return;
     }
 
-    const userId = this._getUserId();
+    // IMPORTANT: wait until nxcon.connect() has resolved
+    const userId = connectedUserId || this._getUserId();
     if (!userId) {
       return;
     }
@@ -841,7 +848,7 @@ Polymer({
       return;
     }
 
-    const prefKey = this._buildGlobalResultsPrefsKey(providerName);
+    const prefKey = providerName;
 
     try {
       this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
@@ -852,7 +859,7 @@ Polymer({
       this.$.prefsResource.data = null;
 
       const raw = await this.$.prefsResource.get();
-      const parsed = raw ? JSON.parse(raw) : {};
+      const parsed = raw && raw.value ? JSON.parse(raw.value) : {};
 
       __globalResultsPrefsCache.set(cacheKey, parsed);
       this.globalResultsPrefs = parsed;
@@ -882,7 +889,7 @@ Polymer({
     }
 
     const payload = JSON.stringify(prefsObj || {});
-    const prefKey = this._buildGlobalResultsPrefsKey(providerName);
+    const prefKey = providerName;
 
     this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
     this.$.prefsResource.params = null;
