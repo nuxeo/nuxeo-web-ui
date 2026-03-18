@@ -108,6 +108,7 @@ Polymer({
       display-sort
       action-context="{{actionContext}}"
       sort-options="[[sortOptions]]"
+      use-doc-results-prefs
     >
       <div slot="actions">
         <template is="dom-if" if="[[hasPermission(document, 'RemoveChildren')]]">
