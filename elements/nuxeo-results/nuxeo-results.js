@@ -461,7 +461,7 @@ Polymer({
     this.$.nxcon.connect().then((user) => {
       this._connectedUser = user;
       this._connectedUserId = user && (user.id || user.uid || user.username);
-      this._updateStorage.bind(this);
+      this._updateStorage();
     });
   },
 
