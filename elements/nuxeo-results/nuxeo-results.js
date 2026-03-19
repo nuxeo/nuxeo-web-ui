@@ -878,16 +878,56 @@ Polymer({
   },
 
   _parsePrefValue(raw) {
-    // raw is typically: { entity-type: "preference", id: "...", value: "<json-string>" }
-    if (!raw || !raw.value) {
+    if (!raw) {
       return {};
     }
-    try {
-      return JSON.parse(raw.value);
-    } catch (e) {
-      // tolerate legacy/plain values
+
+    // 1) Standard Nuxeo preference entity: { "entity-type": "preference", "value": "<json-string>" }
+    if (Object.prototype.hasOwnProperty.call(raw, 'value')) {
+      const v = raw.value;
+
+      // value already parsed object
+      if (v && typeof v === 'object') {
+        return v;
+      }
+
+      // value is JSON string
+      if (typeof v === 'string') {
+        const s = v.trim();
+        if (!s) {
+          return {};
+        }
+        try {
+          return JSON.parse(s);
+        } catch (e) {
+          // tolerate legacy/plain values
+          return {};
+        }
+      }
+
+      // value is something else (number/bool/etc.)
       return {};
     }
+
+    // 2) Some servers might return the object directly (already parsed)
+    if (typeof raw === 'object') {
+      return raw;
+    }
+
+    // 3) Or return a plain JSON string
+    if (typeof raw === 'string') {
+      const s = raw.trim();
+      if (!s) {
+        return {};
+      }
+      try {
+        return JSON.parse(s);
+      } catch (e) {
+        return {};
+      }
+    }
+
+    return {};
   },
 
   /**
@@ -973,13 +1013,13 @@ Polymer({
       this.globalPrefs = cached;
       return;
     }
-
     try {
       const parsed = await this._getGlobalPreference(providerName);
       __globalPrefsCache.set(cacheKey, parsed);
       this.globalPrefs = parsed;
     } catch (e) {
       const empty = {};
+      __globalPrefsCache.set(cacheKey, empty); // add this line
       this.globalPrefs = empty;
     }
   },
@@ -1099,7 +1139,11 @@ Polymer({
 
   _computeDocPrefsAvailable(document) {
     const prefsMap = this._getDocPrefsMap(document);
-    return Boolean(prefsMap && typeof prefsMap === 'object');
+    if (!prefsMap || typeof prefsMap !== 'object') {
+      return false;
+    }
+    const key = this._getDocResultsPrefsKey();
+    return Boolean(prefsMap[key]);
   },
 
   _computeShouldUseDocPrefs(docPrefsAvailable) {
