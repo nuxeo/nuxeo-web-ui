@@ -1022,7 +1022,7 @@ Polymer({
 
   _getDocResultsPrefsKey() {
     // one stable key for doc-level "results table prefs" stored on each folder/doc
-    return 'nuxeo.webui.searchResults.docResultsTable';
+    return 'documentPrefs';
   },
 
   _applyDocPrefs(enabled, document, view) {
