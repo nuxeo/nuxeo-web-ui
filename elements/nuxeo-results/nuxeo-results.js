@@ -984,7 +984,6 @@ Polymer({
       this.globalResultsPrefs = empty;
     }
   },
-  },
 
   async saveGlobalResultsPrefs(prefsObj) {
     const providerName = this._getProviderName(this.nxProvider);
