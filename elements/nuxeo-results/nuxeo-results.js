@@ -979,9 +979,9 @@ Polymer({
       this.globalResultsPrefs = parsed;
     } catch (e) {
       const empty = {};
-      __globalResultsPrefsCache.set(cacheKey, empty);
       this.globalResultsPrefs = empty;
     }
+  },
   },
 
   async saveGlobalResultsPrefs(prefsObj) {
