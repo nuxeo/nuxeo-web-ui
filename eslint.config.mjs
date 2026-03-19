@@ -69,6 +69,8 @@ export default [
     rules: {
       'no-only-tests/no-only-tests': 'error',
 
+      'new-cap': ['error', { capIsNewExceptions: ['Polymer'] }],
+
       // Keep the upgrade low-churn: these "newer" recommended rules would
       // otherwise force unrelated code changes across the repo.
       'no-constant-binary-expression': 'off',

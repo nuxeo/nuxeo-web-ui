@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['**/*.js'],
+    files: ['packages/nuxeo-web-ui-ftest/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -37,21 +37,21 @@ export default [
   },
 
   {
-    files: ['features/step_definitions/*.js'],
+    files: ['packages/nuxeo-web-ui-ftest/features/step_definitions/*.js'],
     rules: {
       'no-unused-expressions': 'off',
     },
   },
 
   {
-    files: ['features/step_definitions/support/fixtures/localstorage.js'],
+    files: ['packages/nuxeo-web-ui-ftest/features/step_definitions/support/fixtures/localstorage.js'],
     rules: {
       'no-redeclare': 'off',
     },
   },
 
   {
-    files: ['pages/ui.js'],
+    files: ['packages/nuxeo-web-ui-ftest/pages/ui.js'],
     rules: {
       'no-redeclare': 'off',
     },
