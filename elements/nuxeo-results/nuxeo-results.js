@@ -944,9 +944,11 @@ Polymer({
   async _putDocPreference(docPath, key, obj) {
     this._configureDocPreferencesResource(docPath);
     this.$.prefsResource.contentType = 'application/json';
+    const prefs = {};
+    prefs[key] = JSON.stringify(obj || {});
     this.$.prefsResource.data = {
       'entity-type': 'userPreferences',
-      preferences: { key, value: JSON.stringify(obj || {}) },
+      preferences: prefs,
     };
     await this.$.prefsResource.put();
   },
