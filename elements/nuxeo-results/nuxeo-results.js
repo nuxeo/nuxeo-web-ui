@@ -401,14 +401,6 @@ Polymer({
       value: 0,
     },
 
-    // -------------------------
-    // Global results prefs
-    // -------------------------
-    useGlobalPrefs: {
-      type: Boolean,
-      value: false,
-    },
-
     // parsed object you can bind to (columns order/sizes/sort etc.)
     globalPrefs: {
       type: Object,
@@ -428,16 +420,25 @@ Polymer({
       type: String,
     },
 
+    _docPrefsSaveDebouncer: Object,
+
     // -------------------------
-    // Doc-level results prefs
+    // Preferences (auto decision)
     // -------------------------
-    // enable/disable doc-level preferences (opt-in)
-    useDocumentPrefs: {
+    _docPrefsAvailable: {
       type: Boolean,
-      value: false,
+      computed: '_computeDocPrefsAvailable(document)',
     },
 
-    _docPrefsSaveDebouncer: Object,
+    _shouldUseDocPrefs: {
+      type: Boolean,
+      computed: '_computeShouldUseDocPrefs(_docPrefsAvailable)',
+    },
+
+    _shouldUseGlobalPrefs: {
+      type: Boolean,
+      computed: '_computeShouldUseGlobalPrefs(_docPrefsAvailable, nxProvider)',
+    },
   },
 
   observers: [
@@ -445,12 +446,12 @@ Polymer({
     '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
 
-    // global prefs
-    '_loadGlobalPrefs(useGlobalPrefs, nxProvider, _connectedUserId)',
-    '_applyGlobalPrefs(useGlobalPrefs, globalPrefs, view)',
+    // global prefs (auto)
+    '_loadGlobalPrefs(_shouldUseGlobalPrefs, nxProvider, _connectedUserId)',
+    '_applyGlobalPrefs(_shouldUseGlobalPrefs, globalPrefs, view)',
 
-    // doc prefs (enricher-based)
-    '_applyDocPrefs(useDocumentPrefs, document, view)',
+    // doc prefs (auto, enricher-based)
+    '_applyDocPrefs(_shouldUseDocPrefs, document, view)',
   ],
 
   listeners: {
@@ -779,20 +780,18 @@ Polymer({
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
 
-      // ---- global level ----
-      if (this.useGlobalPrefs) {
+      // ---- global level (auto) ----
+      if (this._shouldUseGlobalPrefs) {
         this._debounceSave('_prefsSaveDebouncer', () => {
           this.saveGlobalResultsPrefs(this.view.settings).catch((error) => {
-            // log the error instead of silently swallowing it
-            // so failures in saving global results preferences are visible
             // eslint-disable-next-line no-console
             console.warn('Failed to save global results preferences', error);
           });
         });
       }
 
-      // ---- doc level ----
-      if (this.useDocumentPrefs && this.document && this.document.path) {
+      // ---- doc level (auto) ----
+      if (this._shouldUseDocPrefs && this.document && this.document.path) {
         const docKey = this._getDocResultsPrefsKey();
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           this.saveDocPrefs(this.document.path, docKey, this.view.settings).catch((error) => {
@@ -1087,5 +1086,31 @@ Polymer({
     }
 
     return null;
+  },
+
+  _getDocPrefsMap(document) {
+    return (
+      document &&
+      document.contextParameters &&
+      document.contextParameters.userPreferences &&
+      document.contextParameters.userPreferences.preferences
+    );
+  },
+
+  _computeDocPrefsAvailable(document) {
+    const prefsMap = this._getDocPrefsMap(document);
+    return Boolean(prefsMap && typeof prefsMap === 'object');
+  },
+
+  _computeShouldUseDocPrefs(docPrefsAvailable) {
+    return Boolean(docPrefsAvailable);
+  },
+
+  _computeShouldUseGlobalPrefs(docPrefsAvailable, nxProvider) {
+    // prefer doc prefs when available, otherwise use global when provider exists
+    if (docPrefsAvailable) {
+      return false;
+    }
+    return Boolean(this._getProviderName(nxProvider));
   },
 });

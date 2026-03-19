@@ -108,7 +108,6 @@ Polymer({
       display-quick-filters
       display-sort="[[_canSort(document, sortOptions)]]"
       sort-options="[[sortOptions]]"
-      use-document-prefs
     >
       <!-- Grid view -->
       <nuxeo-data-grid
