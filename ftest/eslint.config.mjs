@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['ftest/**/*.js'],
+    files: ['**/*.js'],
     languageOptions: {
       globals: {
         ...globals.browser,

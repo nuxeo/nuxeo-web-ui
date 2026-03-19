@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['addons/nuxeo-spreadsheet/app/**/*.js'],
+    files: ['app/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -27,7 +27,7 @@ export default [
   },
 
   {
-    files: ['addons/nuxeo-spreadsheet/webpack.config.js'],
+    files: ['webpack.config.js'],
     languageOptions: {
       globals: {
         ...globals.node,

@@ -133,7 +133,7 @@ export default [
         ...globals.node,
       },
       parserOptions: {
-        sourceType: 'script',
+        sourceType: 'module',
       },
     },
   },
@@ -145,7 +145,7 @@ export default [
         ...globals.node,
       },
       parserOptions: {
-        sourceType: 'script',
+        sourceType: 'module',
       },
     },
     rules: {

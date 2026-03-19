@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['plugin/a11y/test/**/*.js', 'plugin/a11y/test/specs/**/*.js', 'plugin/a11y/test/**/*.spec.js'],
+    files: ['test/**/*.js', 'test/specs/**/*.js', 'test/**/*.spec.js'],
     languageOptions: {
       globals: {
         ...globals.mocha,
@@ -13,7 +13,7 @@ export default [
   },
 
   {
-    files: ['plugin/a11y/wdio.conf.js', 'plugin/a11y/getDriverVersion.js'],
+    files: ['wdio.conf.js', 'getDriverVersion.js'],
     languageOptions: {
       globals: {
         ...globals.node,
