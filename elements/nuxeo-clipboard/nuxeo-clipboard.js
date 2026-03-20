@@ -60,7 +60,6 @@ Polymer({
       .list-item {
         cursor: pointer;
         padding: 1em;
-        border-bottom: 1px solid var(--nuxeo-border);
       }
 
       .list-item:hover {

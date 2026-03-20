@@ -346,6 +346,7 @@ Polymer({
         --nuxeo-menu-item-link {
           @apply --nuxeo-sidebar-item-link;
         }
+        border: none !important;
       }
 
       #drawer .profile nuxeo-menu-item:last-of-type {
