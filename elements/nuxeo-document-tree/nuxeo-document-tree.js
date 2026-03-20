@@ -341,6 +341,30 @@ Polymer({
   attached() {
     // Restore selection highlighting after component is attached
     this._debounceHighlightUpdate();
+
+    // Listen for browser back/forward button navigation
+    this._boundPopStateHandler = this._handlePopState.bind(this);
+    window.addEventListener('popstate', this._boundPopStateHandler);
+
+    // Listen for location changes (Polymer routing)
+    this._boundLocationChangedHandler = this._handleLocationChanged.bind(this);
+    window.addEventListener('location-changed', this._boundLocationChangedHandler);
+
+    // Set up observer for dynamically loaded tree nodes
+    this._setupTreeObserver();
+  },
+
+  detached() {
+    // Clean up event listeners
+    if (this._boundPopStateHandler) {
+      window.removeEventListener('popstate', this._boundPopStateHandler);
+    }
+    if (this._boundLocationChangedHandler) {
+      window.removeEventListener('location-changed', this._boundLocationChangedHandler);
+    }
+    if (this._treeObserver) {
+      this._treeObserver.disconnect();
+    }
   },
 
   ready() {
@@ -446,8 +470,10 @@ Polymer({
 
         if (doc.type === 'Root') {
           this.docPath = doc.path;
+          // Update sessionStorage to sync with current document
+          sessionStorage.setItem('nuxeo.tree.selectedPath', doc.path);
           // Update selection highlight when document changes
-          this._debounceHighlightUpdate();
+          this._retryHighlightUpdate(doc.path);
           return;
         }
 
@@ -461,16 +487,20 @@ Polymer({
           }
         }
       }
-      // Update selection highlight when current document changes
-      this._debounceHighlightUpdate();
+      // Update sessionStorage to sync with current document (important for back button)
+      if (doc.path) {
+        sessionStorage.setItem('nuxeo.tree.selectedPath', doc.path);
+      }
+      // Update selection highlight when current document changes with retry logic
+      this._retryHighlightUpdate(doc.path);
     }
   },
 
   _documentChanged() {
     if (this.document && this.hasFacet(this.document, 'Folderish')) {
       this.$.tree.style.display = 'block';
-      // Update selection when tree data loads
-      this._debounceHighlightUpdate();
+      // Update selection when tree data loads with retry for async rendering
+      this._retryHighlightUpdate();
     }
   },
 
@@ -521,6 +551,47 @@ Polymer({
   },
 
   /**
+   * Handle browser back/forward button navigation
+   */
+  _handlePopState() {
+    // When user uses back/forward button, update highlight after a short delay
+    // to allow currentDocument to be updated first
+    this._retryHighlightUpdate();
+  },
+
+  /**
+   * Handle location change events from routing
+   */
+  _handleLocationChanged() {
+    // Update highlight when route changes
+    this._retryHighlightUpdate();
+  },
+
+  /**
+   * Setup MutationObserver to watch for dynamically added tree nodes
+   */
+  _setupTreeObserver() {
+    if (this._treeObserver) {
+      return;
+    }
+
+    // Observe changes to the tree structure
+    this._treeObserver = new MutationObserver(() => {
+      // When tree nodes are added, update highlighting
+      this._debounceHighlightUpdate();
+    });
+
+    // Start observing the tree container
+    const treeContainer = this.shadowRoot.querySelector('.content');
+    if (treeContainer) {
+      this._treeObserver.observe(treeContainer, {
+        childList: true,
+        subtree: true,
+      });
+    }
+  },
+
+  /**
    * Debounced highlight update to prevent race conditions
    */
   _debounceHighlightUpdate(selectedPath) {
@@ -530,17 +601,39 @@ Polymer({
   },
 
   /**
+   * Retry highlight update with delays to handle async tree rendering
+   * This is important for browser back/forward navigation and dynamic content
+   */
+  _retryHighlightUpdate(selectedPath, attempt = 0) {
+    const maxAttempts = 10;
+    const delay = attempt === 0 ? 100 : 200;
+
+    this.__retryDebouncer = Debouncer.debounce(this.__retryDebouncer, timeOut.after(delay), () => {
+      const result = this._updateSelectionHighlight(selectedPath);
+
+      // If no element was highlighted and we haven't exceeded max attempts, retry
+      if (!result && attempt < maxAttempts) {
+        this._retryHighlightUpdate(selectedPath, attempt + 1);
+      }
+    });
+  },
+
+  /**
    * Update the selection highlighting in the tree
    * Only one node should be highlighted at a time
+   * Returns true if an element was highlighted, false otherwise
    */
   _updateSelectionHighlight(selectedPath) {
     // Determine which path should be highlighted
+    // Priority: explicit path > currentDocument > sessionStorage
     const pathToHighlight =
       selectedPath ||
-      sessionStorage.getItem('nuxeo.tree.selectedPath') ||
-      (this.currentDocument && this.currentDocument.path);
+      (this.currentDocument && this.currentDocument.path) ||
+      sessionStorage.getItem('nuxeo.tree.selectedPath');
 
-    if (!pathToHighlight) return;
+    if (!pathToHighlight) return false;
+
+    let highlighted = false;
 
     // Get all links in the tree (both in nuxeo-tree and parents)
     const allLinks = this.shadowRoot.querySelectorAll('a[data-path], .parents a');
@@ -556,20 +649,44 @@ Polymer({
       // Only match if paths are EXACTLY the same
       if (linkPath && linkPath === pathToHighlight) {
         link.classList.add('selected');
+        highlighted = true;
       }
     });
 
-    // Also check dynamically loaded tree nodes
+    // Also check dynamically loaded tree nodes in shadow DOM
     const treeElement = this.$.tree;
-    if (treeElement && treeElement.shadowRoot) {
-      const treeLinks = treeElement.shadowRoot.querySelectorAll('a[data-path]');
-      treeLinks.forEach((link) => {
-        link.classList.remove('selected');
-        const linkPath = link.getAttribute('data-path');
-        if (linkPath === pathToHighlight) {
-          link.classList.add('selected');
+    if (treeElement) {
+      // Check both shadow DOM and light DOM for tree nodes
+      const checkTreeLinks = (root) => {
+        if (!root) return;
+        const treeLinks = root.querySelectorAll('a[data-path]');
+        treeLinks.forEach((link) => {
+          link.classList.remove('selected');
+          const linkPath = link.getAttribute('data-path');
+          if (linkPath === pathToHighlight) {
+            link.classList.add('selected');
+            highlighted = true;
+          }
+        });
+      };
+
+      // Check shadow DOM
+      if (treeElement.shadowRoot) {
+        checkTreeLinks(treeElement.shadowRoot);
+      }
+
+      // Check light DOM
+      checkTreeLinks(treeElement);
+
+      // Check nested tree nodes that might have their own shadow DOMs
+      const nestedTrees = treeElement.querySelectorAll('nuxeo-tree-node');
+      nestedTrees.forEach((node) => {
+        if (node.shadowRoot) {
+          checkTreeLinks(node.shadowRoot);
         }
       });
     }
+
+    return highlighted;
   },
 });

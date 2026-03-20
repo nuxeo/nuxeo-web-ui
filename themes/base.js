@@ -189,6 +189,116 @@ const template = html`
           url('../fonts/Inter-Bold.woff?v=3.13') format('woff');
       }
 
+      /* Figtree font family */
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 300;
+        font-display: swap;
+        src: url('../fonts/figtree-latin-300-normal.woff2') format('woff2'),
+          url('../fonts/figtree-latin-300-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('../fonts/figtree-latin-400-normal.woff2') format('woff2'),
+          url('../fonts/figtree-latin-400-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/figtree-latin-500-normal.woff2') format('woff2'),
+          url('../fonts/figtree-latin-500-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('../fonts/figtree-latin-600-normal.woff2') format('woff2'),
+          url('../fonts/figtree-latin-600-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('../fonts/figtree-latin-700-normal.woff2') format('woff2'),
+          url('../fonts/figtree-latin-700-normal.woff') format('woff');
+      }
+
+      /* Noto Sans font family */
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 300;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-300-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-300-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-400-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-400-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-500-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-500-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-600-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-600-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-700-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-700-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 800;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-800-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-800-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 900;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-900-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-900-normal.woff') format('woff');
+      }
+
       html {
         font-weight: 400;
         font-size: 13px;
