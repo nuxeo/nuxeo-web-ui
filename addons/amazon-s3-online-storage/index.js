@@ -16,7 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
-import AWS from 'aws-sdk';
+import { S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
 import uuid from 'uuid/v4';
 
 let _resource;
@@ -62,46 +63,47 @@ class S3Provider {
 
   _upload(file, callback) {
     return new Promise((resolve, reject) => {
-      file.managedUpload = this.uploader.upload({
-        Key: this.extraInfo.baseKey.replace(/^\/+/g, '').concat(uuid()),
-        ContentType: file.type,
-        Body: file,
+      const key = this.extraInfo.baseKey.replace(/^\/+/, '').concat(uuid());
+      file.managedUpload = new Upload({
+        client: this.uploader,
+        params: {
+          Bucket: this.extraInfo.bucket,
+          Key: key,
+          ContentType: file.type,
+          Body: file,
+        },
       });
       this._startKeepAlive();
+      file.managedUpload.on('httpUploadProgress', (evt) => {
+        if (typeof callback === 'function') {
+          callback({ type: 'uploadProgress', fileIdx: file.index, progress: (evt.loaded / evt.total) * 100 });
+        }
+      });
       file.managedUpload
-        .on('httpUploadProgress', (evt) => {
-          if (typeof callback === 'function') {
-            callback({ type: 'uploadProgress', fileIdx: file.index, progress: (evt.loaded / evt.total) * 100 });
-          }
-        })
-        .send((error, data) => {
+        .done()
+        .then((data) => {
           this._stopKeepAlive();
-          if (error === null) {
-            file.managedUpload = null;
-            this._resource(['upload', this.batchId, file.index, 'complete'].join('/'), {
-              name: file.name,
-              fileSize: file.size,
-              key: data.Key,
-              bucket: data.Bucket,
-              etag: data.ETag,
-            })
-              .post()
-              .then(() => {
-                if (typeof callback === 'function') {
-                  callback({ type: 'uploadCompleted', fileIdx: file.index });
-                }
-                resolve();
-              })
-              .catch((err) => {
-                if (typeof callback === 'function') {
-                  callback({ type: 'uploadInterrupted', file, error: err.message || err });
-                }
-                reject(err);
-              });
-          } else {
-            callback({ type: 'uploadInterrupted', file, error });
-            reject(error);
+          file.managedUpload = null;
+          return this._resource(['upload', this.batchId, file.index, 'complete'].join('/'), {
+            name: file.name,
+            fileSize: file.size,
+            key: data.Key,
+            bucket: data.Bucket,
+            etag: data.ETag,
+          }).post();
+        })
+        .then(() => {
+          if (typeof callback === 'function') {
+            callback({ type: 'uploadCompleted', fileIdx: file.index });
           }
+          resolve();
+        })
+        .catch((error) => {
+          this._stopKeepAlive();
+          if (typeof callback === 'function') {
+            callback({ type: 'uploadInterrupted', file, error });
+          }
+          reject(error);
         });
     });
   }
@@ -115,11 +117,11 @@ class S3Provider {
   }
 
   _initCredentials(options) {
-    const credentials = new AWS.Credentials(
-      options.awsSecretKeyId,
-      options.awsSecretAccessKey,
-      options.awsSessionToken,
-    );
+    const credentials = {
+      accessKeyId: options.awsSecretKeyId,
+      secretAccessKey: options.awsSecretAccessKey,
+      sessionToken: options.awsSessionToken,
+    };
     credentials.expireTime = new Date(options.expiration);
     credentials.refresh = (cb) =>
       this._resource(`upload/${this.batchId}/refreshToken`)
@@ -131,12 +133,12 @@ class S3Provider {
           credentials.expireTime = new Date(response.expiration);
           cb();
         });
-    AWS.config.update({
+    this.s3Config = {
       credentials,
       region: options.region,
-      s3ForcePathStyle: options.usePathStyleAccess || false,
+      forcePathStyle: options.usePathStyleAccess || false,
       useAccelerateEndpoint: options.useS3Accelerate || false,
-    });
+    };
   }
 
   _newBatch() {
@@ -146,19 +148,25 @@ class S3Provider {
         this.batchId = response.batchId;
         this.extraInfo = response.extraInfo;
         this._initCredentials(response.extraInfo);
-        this.uploader = new AWS.S3({
-          params: {
-            Bucket: this.extraInfo.bucket,
-          },
-          endpoint: this.extraInfo.endpoint || null,
-          computeChecksums: true,
-          httpOptions: {
-            timeout:
-              Number(Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.s3 && Nuxeo.UI.config.s3.timeout) || 0,
-          },
-          correctClockSkew: true,
+        this.uploader = new S3Client({
+          ...this.s3Config,
+          endpoint: this.extraInfo.endpoint || undefined,
         });
       });
+  }
+
+  _refreshBatchInfo() {
+    const credentials = this.s3Config && this.s3Config.credentials;
+    if (!credentials || typeof credentials.refresh !== 'function') {
+      return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        credentials.refresh(() => resolve());
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 
   _handleUploadError(error, callback) {
@@ -260,11 +268,5 @@ if (
   Nuxeo.UI.config.s3 &&
   String(Nuxeo.UI.config.s3.useDirectUpload) === 'true'
 ) {
-  // https://github.com/aws/aws-sdk-js/issues/1895
-  AWS.util.update(AWS.S3.prototype, {
-    reqRegionForNetworkingError(req, done) {
-      return done();
-    },
-  });
   UploaderBehavior.defaultProvider = 's3';
 }
