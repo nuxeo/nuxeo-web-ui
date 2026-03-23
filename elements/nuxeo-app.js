@@ -542,8 +542,8 @@ Polymer({
                 animation-delay="0"
                 id="profileTooltip"
                 tabindex="-1"
-                >[[i18n('app.account')]]</nuxeo-tooltip
-              >
+                >[[i18n('app.account')]]
+              </nuxeo-tooltip>
             </paper-listbox>
 
             <!-- drawer content -->
