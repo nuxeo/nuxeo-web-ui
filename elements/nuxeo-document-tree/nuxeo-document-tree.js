@@ -102,7 +102,7 @@ Polymer({
       /* Highlight the currently selected/active node */
       #content:has(a.selected) {
         background-color: var(--sat-drawer-item-selected-background);
-        border-radius: 54px;
+        border-radius: 20px;
         padding: 8px 0px;
         font-weight: 600 !important;
       }
