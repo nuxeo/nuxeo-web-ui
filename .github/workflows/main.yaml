@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - maintenance-3.1.x
-      - WEBUI-1935-POC-REBRANDING
   workflow_dispatch:
 
 permissions:
