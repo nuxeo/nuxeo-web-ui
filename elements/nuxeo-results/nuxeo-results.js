@@ -366,7 +366,7 @@ Polymer({
      *   {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
      *   {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true}
      * ]
-     * ``
+     * ```
      */
     sortOptions: {
       type: Array,
@@ -459,6 +459,7 @@ Polymer({
     // global prefs (auto)
     '_loadGlobalPrefs(_shouldUseGlobalPrefs, nxProvider, _connectedUserId)',
     '_applyGlobalPrefs(_shouldUseGlobalPrefs, globalPrefs, view, displayMode)',
+    '_connectedUserChanged(_connectedUserId)',
   ],
 
   listeners: {
@@ -781,7 +782,6 @@ Polymer({
 
   _saveViewSettings() {
     if (this.view.settings && !this._isRestoring) {
-      // only persist server prefs for table view
       const isSettingsView = this.displayMode === 'table';
 
       // ---- doc level (content views) ----
@@ -807,21 +807,6 @@ Polymer({
           this.saveGlobalResultsPrefs(this.view.settings).catch((error) => {
             // eslint-disable-next-line no-console
             console.warn('Failed to save global results preferences', error);
-          });
-        });
-      }
-
-      // ---- doc level (content views) ----
-      if (isSettingsView && this._shouldUseDocPrefs && this.document && this.document.path) {
-        const docKey = this._getDocResultsPrefsKey();
-        this._debounceSave('_docPrefsSaveDebouncer', () => {
-          this.saveDocPrefs(this.document.path, docKey, this.view.settings).catch((error) => {
-            // eslint-disable-next-line no-console
-            console.warn('Failed to save document results preferences', {
-              path: this.document && this.document.path,
-              key: docKey,
-              error,
-            });
           });
         });
       }
@@ -967,12 +952,14 @@ Polymer({
   // Returns a cached in-flight promise for GET /me/preferences so multiple loads share one request per session.
   async _getAllGlobalPreferencesOnce() {
     if (!__allGlobalPrefsPromise) {
-      __allGlobalPrefsPromise = this._getAllGlobalPreferences().catch((e) => {
-        __allGlobalPrefsPromise = null; // reset so a later attempt can retry
-        throw e;
-      });
+      __allGlobalPrefsPromise = this._getAllGlobalPreferences();
     }
-    return __allGlobalPrefsPromise;
+    try {
+      return await __allGlobalPrefsPromise;
+    } catch (e) {
+      __allGlobalPrefsPromise = null;
+      throw e;
+    }
   },
 
   // Configures the nuxeo-resource instance to PUT a single global preference key at /me/preferences/<key>.
@@ -1241,5 +1228,21 @@ Polymer({
       return false;
     }
     return Boolean(this._getProviderName(nxProvider));
+  },
+
+  _connectedUserChanged(newUserId, oldUserId) {
+    // Clear cached promises and prefs when user changes (logout/login, impersonation, etc.)
+    if (newUserId !== oldUserId && oldUserId) {
+      if (__allGlobalPrefsPromise || __globalPrefsCache.size > 0 || __docPrefsCache.size > 0) {
+        // eslint-disable-next-line no-console
+        console.debug('[nuxeo-results] Clearing preference caches due to user change:', {
+          from: oldUserId,
+          to: newUserId,
+        });
+        __allGlobalPrefsPromise = null;
+        __globalPrefsCache.clear();
+        __docPrefsCache.clear();
+      }
+    }
   },
 });
