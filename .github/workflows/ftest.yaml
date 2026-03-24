@@ -66,7 +66,7 @@ jobs:
         run: rm -rf ~/.m2/repository/org/nuxeo
 
       - name: Cache npm dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
@@ -137,7 +137,7 @@ jobs:
           RUN_ALL: false
           BAIL: 0
           HEADLESS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v15.6.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v15.11.0
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
