@@ -360,6 +360,13 @@ Polymer({
     },
     /**
      * List of properties available to sort the result list.
+     * It should be formatted as a JSON array of objects like:
+     * ```
+     * [
+     *   {field: 'dc:title', label: this.i18n('searchResults.sort.field.title'), order: 'asc'},
+     *   {field: 'dc:created', label: this.i18n('searchResults.sort.field.created'), order: 'asc', selected: true}
+     * ]
+     * ``
      */
     sortOptions: {
       type: Array,
@@ -401,7 +408,7 @@ Polymer({
       value: 0,
     },
 
-    // parsed object you can bind to (columns order/sizes/sort etc.)
+    // parsed object to bind to (columns order/sizes/sort etc.)
     globalPrefs: {
       type: Object,
       notify: true,
@@ -736,7 +743,6 @@ Polymer({
   _refreshDisplay(e) {
     this.refresh();
     // keep compatibility with previous behavior, as we don't need it for select all
-
     if (this.selectedItems && this.selectedItems.length > 0 && !this.selectAllActive) {
       const tmp = this.selectedItems.slice();
       this.selectedItems = [];
@@ -779,7 +785,7 @@ Polymer({
       const isSettingsView = this.displayMode === 'table';
 
       // ---- doc level (content views) ----
-      // IMPORTANT: doc context wins; if we have a document.path, always save via @preferences and skip global prefs
+      // doc context wins; if we have a document.path, always save via @preferences and skip global prefs
       if (isSettingsView && this.document && this.document.path) {
         const docKey = this._getDocResultsPrefsKey();
         this._debounceSave('_docPrefsSaveDebouncer', () => {
@@ -989,7 +995,7 @@ Polymer({
 
   // Loads global preferences for the current provider from the /me/preferences map and caches them per user+provider.
   async _loadGlobalPrefs(enabled, nxProvider, connectedUserId) {
-    // HARD GUARD: never use global prefs when we are in document context (browse/collections)
+    // never use global prefs when we are in document context (browse/collections)
     if (this.document && this.document.path) {
       this.globalPrefs = {};
       return;
@@ -1059,7 +1065,7 @@ Polymer({
 
   // Applies global prefs to the table view only (avoids applying to other display modes).
   _applyGlobalPrefs(enabled, prefs, view, displayMode) {
-    // HARD GUARD: never apply global prefs when we are in document context
+    // never apply global prefs when we are in document context
     if (this.document && this.document.path) {
       return;
     }
