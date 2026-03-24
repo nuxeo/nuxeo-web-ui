@@ -443,7 +443,6 @@ Polymer({
 
   observers: [
     '_selectAllChanged(view)',
-    '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
 
     // global prefs (auto)
@@ -459,10 +458,11 @@ Polymer({
   },
 
   ready() {
+    console.log(Object.fromEntries(__globalPrefsCache.entries()));
+
     this.$.nxcon.connect().then((user) => {
       this._connectedUser = user;
       this._connectedUserId = user && (user.id || user.uid || user.username);
-      this._updateStorage();
     });
   },
 
@@ -777,8 +777,8 @@ Polymer({
 
   _saveViewSettings() {
     if (this.view.settings && !this._isRestoring) {
-      this.set(`_settings.${this.displayMode}`, this.view.settings);
-      this.saveSettings();
+      // this.set(`_settings.${this.displayMode}`, this.view.settings);
+      // this.saveSettings();
 
       // ---- global level (auto) ----
       if (this._shouldUseGlobalPrefs) {
