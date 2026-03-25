@@ -1569,7 +1569,31 @@ Polymer({
       document.parentRef = this.parent.uid;
       const forceRemount = this._loadingEmptyFile || this.customizing;
       if (forceRemount) {
+        const layoutRegistered = !!customElements.get(`nuxeo-${document.type.toLowerCase()}-import-layout`);
         this.document = null;
+        if (!layoutRegistered) {
+          // Layout not yet registered; wait for it to load before clearing _initializingDoc
+          const promise = new Promise((resolve) => {
+            this._layout_changed = (e) => {
+              if (e.detail.element) {
+                this.removeEventListener('document-layout-changed', this._layout_changed);
+                resolve(e);
+              }
+            };
+            this.addEventListener('document-layout-changed', this._layout_changed);
+          });
+          this.async(() => {
+            this.document = document;
+            if (this._loadingEmptyFile) {
+              this._loadingEmptyFile = false;
+            }
+          });
+          return promise.then((e) => {
+            if (e.detail.element) {
+              this._initializingDoc = false;
+            }
+          });
+        }
         return new Promise((resolve) => {
           this.async(() => {
             this.document = document;
