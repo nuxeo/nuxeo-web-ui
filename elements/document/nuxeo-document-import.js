@@ -1607,6 +1607,7 @@ Polymer({
       }
       // disable controls while the layout loads
       if (
+        forceRemount ||
         !this.document ||
         (this.document.type !== document.type &&
           !customElements.get(`nuxeo-${document.type.toLowerCase()}-import-layout`))
@@ -1620,7 +1621,18 @@ Polymer({
           };
           this.addEventListener('document-layout-changed', this._layout_changed);
         });
-        this.document = document;
+        if (forceRemount) {
+          // Use async so Polymer processes the null → document transition as two separate updates,
+          // triggering a full layout remount via the dom-if restamp
+          this.async(() => {
+            this.document = document;
+            if (this._loadingEmptyFile) {
+              this._loadingEmptyFile = false;
+            }
+          });
+        } else {
+          this.document = document;
+        }
         return promise.then((e) => {
           if (e.detail.element) {
             this._initializingDoc = false;
