@@ -517,13 +517,7 @@ Polymer({
                 hidden$="[[!hasAdministrationPermissions(currentUser)]]"
                 icon="nuxeo:admin"
               ></nuxeo-menu-icon>
-              <a
-                name="profile"
-                class="settings profile-avatar"
-                href="[[urlFor('page', 'profile')]]"
-                id="profileWrapper"
-                role="option"
-              >
+              <a name="profile" class="settings profile-avatar" id="profileWrapper" role="option">
                 <template is="dom-if" if="[[currentUser.contextParameters.userprofile.avatar.data]]">
                   <img
                     class="profile-avatar-image"
