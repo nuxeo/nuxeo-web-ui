@@ -37,7 +37,14 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 
 const hasSelectAllEnabled = config.get('selection.selectAllEnabled', false);
-const __globalResultsPrefsCache = new Map();
+
+// global (search provider) prefs cache
+const __globalPrefsCache = new Map();
+// session-only GET /me/preferences promise
+let __allGlobalPrefsPromise = null;
+
+// doc prefs cache
+const __docPrefsCache = new Map();
 
 /**
 An element to display results from a page provider.
@@ -174,7 +181,7 @@ Polymer({
     </style>
 
     <nuxeo-connection id="nxcon"></nuxeo-connection>
-    <nuxeo-resource id="prefsResource"></nuxeo-resource>
+    <nuxeo-resource id="preferences"></nuxeo-resource>
 
     <div class="main">
       <nuxeo-selection-toolbar
@@ -401,16 +408,17 @@ Polymer({
       value: 0,
     },
 
-    // -------------------------
-    // Global results prefs
-    // -------------------------
-    useGlobalResultsPrefs: {
-      type: Boolean,
-      value: false,
+    // parsed object to bind to (columns order/sizes/sort etc.)
+    globalPrefs: {
+      type: Object,
+      notify: true,
+      value: () => {
+        return {};
+      },
     },
 
-    // parsed object you can bind to (columns order/sizes/sort etc.)
-    globalResultsPrefs: {
+    // doc-level prefs applied to the view
+    docPrefs: {
       type: Object,
       notify: true,
       value: () => {
@@ -420,37 +428,38 @@ Polymer({
 
     _prefsSaveDebouncer: Object,
 
-    _connectedUser: {
-      type: Object,
-    },
-
     _connectedUserId: {
       type: String,
     },
 
+    _docPrefsSaveDebouncer: Object,
+
     // -------------------------
-    // Doc-level results prefs
+    // Preferences (auto decision)
     // -------------------------
-    // enable/disable doc-level preferences (opt-in)
-    useDocResultsPrefs: {
+    _shouldUseDocPrefs: {
       type: Boolean,
-      value: false,
+      computed: '_computeShouldUseDocPrefs(document)',
     },
 
-    _docPrefsSaveDebouncer: Object,
+    _shouldUseGlobalPrefs: {
+      type: Boolean,
+      computed: '_computeShouldUseGlobalPrefs(document, nxProvider)',
+    },
   },
 
   observers: [
     '_selectAllChanged(view)',
-    '_updateStorage(name)',
     '_updateActionContext(displayMode, nxProvider.*, nxProvider.sort.*, selectedItems, columns.*, document, view.*)',
 
-    // global prefs
-    '_maybeLoadGlobalResultsPrefs(useGlobalResultsPrefs, nxProvider, _connectedUserId)',
-    '_applyGlobalResultsPrefs(useGlobalResultsPrefs, globalResultsPrefs, view)',
+    // doc prefs (auto)
+    '_loadDocPrefs(_shouldUseDocPrefs, document, _connectedUserId)',
+    '_applyDocPrefs(_shouldUseDocPrefs, docPrefs, view)',
 
-    // doc prefs (enricher-based)
-    '_maybeApplyDocResultsPrefs(useDocResultsPrefs, document, view)',
+    // global prefs (auto)
+    '_loadGlobalPrefs(_shouldUseGlobalPrefs, nxProvider, _connectedUserId)',
+    '_applyGlobalPrefs(_shouldUseGlobalPrefs, globalPrefs, view, displayMode)',
+    '_connectedUserChanged(_connectedUserId)',
   ],
 
   listeners: {
@@ -459,9 +468,8 @@ Polymer({
 
   ready() {
     this.$.nxcon.connect().then((user) => {
-      this._connectedUser = user;
       this._connectedUserId = user && (user.id || user.uid || user.username);
-      this._updateStorage();
+      //   this._updateStorage();
     });
   },
 
@@ -652,7 +660,6 @@ Polymer({
       }
       this.push('_displayModes', { name, icon });
     });
-
     // if current selected display mode is not available use the first one
     if (!hasDisplayMode) {
       this.displayMode = this._displayModes[0] && this._displayModes[0].name;
@@ -736,7 +743,6 @@ Polymer({
 
   _refreshDisplay(e) {
     this.refresh();
-
     // keep compatibility with previous behavior, as we don't need it for select all
     if (this.selectedItems && this.selectedItems.length > 0 && !this.selectAllActive) {
       const tmp = this.selectedItems.slice();
@@ -776,23 +782,11 @@ Polymer({
 
   _saveViewSettings() {
     if (this.view.settings && !this._isRestoring) {
-      this.set(`_settings.${this.displayMode}`, this.view.settings);
-      this.saveSettings();
+      const isSettingsView = this.displayMode === 'table';
 
-      // ---- global level ----
-      if (this.useGlobalResultsPrefs) {
-        this._debounceSave('_prefsSaveDebouncer', () => {
-          this.saveGlobalResultsPrefs(this.view.settings).catch((error) => {
-            // log the error instead of silently swallowing it
-            // so failures in saving global results preferences are visible
-            // eslint-disable-next-line no-console
-            console.warn('Failed to save global results preferences', error);
-          });
-        });
-      }
-
-      // ---- doc level ----
-      if (this.useDocResultsPrefs && this.document && this.document.path) {
+      // ---- doc level (content views) ----
+      // doc context wins; if we have a document.path, always save via @preferences and skip global prefs
+      if (isSettingsView && this.document && this.document.path) {
         const docKey = this._getDocResultsPrefsKey();
         this._debounceSave('_docPrefsSaveDebouncer', () => {
           this.saveDocPrefs(this.document.path, docKey, this.view.settings).catch((error) => {
@@ -802,6 +796,17 @@ Polymer({
               key: docKey,
               error,
             });
+          });
+        });
+        return;
+      }
+
+      // ---- global level (search providers) ----
+      if (isSettingsView && this._shouldUseGlobalPrefs) {
+        this._debounceSave('_prefsSaveDebouncer', () => {
+          this.saveGlobalResultsPrefs(this.view.settings).catch((error) => {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to save global results preferences', error);
           });
         });
       }
@@ -866,124 +871,165 @@ Polymer({
   },
 
   _cacheKey(userId, providerName) {
-    // stable cache key: user + provider
     return `${userId}::${providerName}`;
+  },
+
+  _docCacheKey(userId, docPath, prefKey) {
+    return `${userId}::${docPath}::${prefKey}`;
   },
 
   // ------------------------------
   // Preference plumbing (generic)
   // ------------------------------
 
+  // Returns Accept headers allowing both JSON (preferred) and legacy text/plain preference responses.
   _prefAcceptHeaders() {
-    return { accept: 'text/plain,application/json' };
+    return { accept: 'application/json,text/plain' };
   },
 
-  _parsePrefValue(raw) {
-    // raw is typically: { entity-type: "preference", id: "...", value: "<json-string>" }
-    if (!raw || !raw.value) {
+  // Parses a single preference value from the /me/preferences map (usually a JSON string) into an object.
+  _parsePrefMapValue(value) {
+    if (!value) return {};
+    if (typeof value === 'object') return value;
+    if (typeof value !== 'string') return {};
+    const s = value.trim();
+    if (!s) return {};
+    try {
+      return JSON.parse(s);
+    } catch (e) {
       return {};
+    }
+  },
+
+  // Creates a JSON-safe deep copy of an object to avoid mutating cached/shared preference references.
+  _deepClone(obj) {
+    try {
+      return JSON.parse(JSON.stringify(obj || {}));
+    } catch (e) {
+      return {};
+    }
+  },
+
+  // Applies preferences to the current view.settings while marking _isRestoring to prevent triggering saves.
+  _applyPrefsToView(view, prefs) {
+    if (!view || !prefs) {
+      return;
+    }
+    this._isRestoring = true;
+    try {
+      view.settings = this._deepClone(prefs);
+    } finally {
+      this._isRestoring = false;
+    }
+  },
+
+  // Debounces preference-saving calls (e.g., while the user is resizing/reordering columns).
+  _debounceSave(debouncerField, fn, wait = 300) {
+    this[debouncerField] = Debouncer.debounce(this[debouncerField], timeOut.after(wait), fn);
+  },
+
+  // ------------------------------
+  // Global prefs (/me/preferences) - ONLY for search providers
+  // ------------------------------
+
+  // Configures the nuxeo-resource instance to GET the full global preferences map from /me/preferences.
+  _configureAllGlobalPreferencesResource() {
+    this.$.preferences.path = '/me/preferences';
+    this.$.preferences.params = null;
+    this.$.preferences.enrichers = {};
+    this.$.preferences.headers = this._prefAcceptHeaders();
+    this.$.preferences.data = null;
+  },
+
+  // Fetches all global preferences once from the server and returns the raw preferences map { key: value, ... }.
+  async _getAllGlobalPreferences() {
+    this._configureAllGlobalPreferencesResource();
+    this.$.preferences.contentType = 'application/json';
+    const raw = await this.$.preferences.get();
+    return (raw && raw.preferences) || {};
+  },
+
+  // Returns a cached in-flight promise for GET /me/preferences so multiple loads share one request per session.
+  async _getAllGlobalPreferencesOnce() {
+    if (!__allGlobalPrefsPromise) {
+      __allGlobalPrefsPromise = this._getAllGlobalPreferences();
     }
     try {
-      return JSON.parse(raw.value);
+      return await __allGlobalPrefsPromise;
     } catch (e) {
-      // tolerate legacy/plain values
-      return {};
+      __allGlobalPrefsPromise = null;
+      throw e;
     }
   },
 
-  /**
-   * Configure prefsResource for /me/preferences/<key> GET/PUT.
-   * This is your current "global" transport.
-   */
-  _configureMePreferencesResource(prefKey) {
-    this.$.prefsResource.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
-    this.$.prefsResource.params = null;
-    this.$.prefsResource.enrichers = {};
-    this.$.prefsResource.headers = this._prefAcceptHeaders();
-    this.$.prefsResource.data = null;
+  // Configures the nuxeo-resource instance to PUT a single global preference key at /me/preferences/<key>.
+  _configureGlobalPreferencesResource(prefKey) {
+    this.$.preferences.path = `/me/preferences/${encodeURIComponent(prefKey)}`;
+    this.$.preferences.params = null;
+    this.$.preferences.enrichers = {};
+    this.$.preferences.headers = this._prefAcceptHeaders();
+    this.$.preferences.data = null;
   },
 
-  /**
-   * GET preference object from /me/preferences/<key>
-   */
-  async _getMePreference(prefKey) {
-    this._configureMePreferencesResource(prefKey);
-    this.$.prefsResource.contentType = 'application/json';
-    const raw = await this.$.prefsResource.get();
-    return this._parsePrefValue(raw);
-  },
-
-  /**
-   * PUT preference object to /me/preferences/<key>
-   * Uses text/plain payload (same as your current implementation).
-   */
-  async _putMePreference(prefKey, obj) {
+  // Saves (PUT) a single global preference object under /me/preferences/<key> using a text/plain JSON payload.
+  async _putGlobalPreference(prefKey, obj) {
     const payload = JSON.stringify(obj || {});
-    this._configureMePreferencesResource(prefKey);
-    this.$.prefsResource.contentType = 'text/plain';
-    this.$.prefsResource.data = payload;
-    await this.$.prefsResource.put();
+    this._configureGlobalPreferencesResource(prefKey);
+    this.$.preferences.contentType = 'text/plain';
+    this.$.preferences.data = payload;
+    await this.$.preferences.put();
   },
 
-  /**
-   * Configure prefsResource for /path/<docPath>/@preferences PUT.
-   * This is your doc-level transport.
-   */
-  _configureDocPreferencesResource(docPath) {
-    const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
-    this.$.prefsResource.path = `/path/${normalized}/@preferences`;
-    this.$.prefsResource.params = null;
-    this.$.prefsResource.enrichers = {};
-    this.$.prefsResource.headers = { accept: 'application/json' };
-  },
+  // Loads global preferences for the current provider from the /me/preferences map and caches them per user+provider.
+  async _loadGlobalPrefs(enabled, nxProvider, connectedUserId) {
+    // never use global prefs when we are in document context (browse/collections)
+    if (this.document && this.document.path) {
+      this.globalPrefs = {};
+      return;
+    }
 
-  /**
-   * PUT document preference (key/value) to /path/<docPath>/@preferences
-   * Value is stored as JSON string (consistent with /me/preferences usage).
-   */
-  async _putDocPreference(docPath, key, obj) {
-    this._configureDocPreferencesResource(docPath);
-    this.$.prefsResource.contentType = 'application/json';
-    this.$.prefsResource.data = {
-      'entity-type': 'userPreferences',
-      preferences: { key, value: JSON.stringify(obj || {}) },
-    };
-    await this.$.prefsResource.put();
-  },
-
-  async _maybeLoadGlobalResultsPrefs(enabled, nxProvider, connectedUserId) {
     if (!enabled) {
+      this.globalPrefs = {};
       return;
     }
 
     const providerName = this._getProviderName(nxProvider);
     if (!providerName) {
+      this.globalPrefs = {};
       return;
     }
 
     const userId = connectedUserId || this._getUserId();
     if (!userId) {
+      this.globalPrefs = {};
       return;
     }
 
     const cacheKey = this._cacheKey(userId, providerName);
-    const cached = __globalResultsPrefsCache.get(cacheKey);
-    if (cached) {
-      this.globalResultsPrefs = cached;
+
+    if (__globalPrefsCache.has(cacheKey)) {
+      this.globalPrefs = __globalPrefsCache.get(cacheKey);
       return;
     }
 
     try {
-      const parsed = await this._getMePreference(providerName);
-      __globalResultsPrefsCache.set(cacheKey, parsed);
-      this.globalResultsPrefs = parsed;
+      const prefsMap = await this._getAllGlobalPreferencesOnce();
+
+      if (!Object.prototype.hasOwnProperty.call(prefsMap, providerName)) {
+        const empty = {};
+        __globalPrefsCache.set(cacheKey, empty);
+        this.globalPrefs = empty;
+        return;
+      }
+      const parsed = this._parsePrefMapValue(prefsMap[providerName]);
+      __globalPrefsCache.set(cacheKey, parsed);
+      this.globalPrefs = parsed;
     } catch (e) {
-      const empty = {};
-      __globalResultsPrefsCache.set(cacheKey, empty);
-      this.globalResultsPrefs = empty;
+      this.globalPrefs = {};
     }
   },
 
+  // Persists global results prefs for the current provider (PUT) and updates in-session cache/state immediately.
   async saveGlobalResultsPrefs(prefsObj) {
     const providerName = this._getProviderName(this.nxProvider);
     if (!providerName) {
@@ -995,20 +1041,67 @@ Polymer({
       throw new Error('Cannot save global results prefs: missing user id');
     }
 
-    await this._putMePreference(providerName, prefsObj);
+    const cloned = this._deepClone(prefsObj);
+
+    await this._putGlobalPreference(providerName, cloned);
 
     const cacheKey = this._cacheKey(userId, providerName);
-    __globalResultsPrefsCache.set(cacheKey, prefsObj || {});
-    this.globalResultsPrefs = prefsObj || {};
+    __globalPrefsCache.set(cacheKey, cloned);
+    this.globalPrefs = cloned;
   },
 
-  _applyGlobalResultsPrefs(enabled, prefs, view) {
-    if (!enabled || !view || !prefs || Object.keys(prefs).length === 0) {
+  // Applies global prefs to the table view only (avoids applying to other display modes).
+  _applyGlobalPrefs(enabled, prefs, view, displayMode) {
+    // never apply global prefs when we are in document context
+    if (this.document && this.document.path) {
       return;
     }
+    if (!enabled || displayMode !== 'table') {
+      return;
+    }
+    if (!view || !prefs || Object.keys(prefs).length === 0) {
+      return;
+    }
+
     this._applyPrefsToView(view, prefs);
   },
 
+  // ------------------------------
+  // Doc prefs (/path/.../@preferences) - ONLY for document context
+  // ------------------------------
+
+  // Configures the nuxeo-resource instance to PUT doc-level preferences to /path/<docPath>/@preferences.
+  _configureDocPreferencesResource(docPath) {
+    const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
+    const encodedPath = normalized
+      .split('/')
+      .map((segment) => encodeURIComponent(segment))
+      .join('/');
+    this.$.preferences.path = `/path/${encodedPath}/@preferences`;
+    this.$.preferences.params = null;
+    this.$.preferences.enrichers = {};
+    this.$.preferences.headers = { accept: 'application/json' };
+    this.$.preferences.data = null;
+  },
+
+  // Saves (PUT) one doc preference key by sending a userPreferences payload to /path/<docPath>/@preferences.
+  async _putDocPreference(docPath, key, obj) {
+    this._configureDocPreferencesResource(docPath);
+    this.$.preferences.contentType = 'application/json';
+
+    const prefs = {};
+    // store as JSON string so it matches enricher map format (string -> parse)
+    prefs[key] = JSON.stringify(obj || {});
+
+    this.$.preferences.data = {
+      'entity-type': 'userPreferences',
+      preferences: prefs,
+    };
+
+    await this.$.preferences.put();
+  },
+
+  // Persists doc-level results prefs (PUT) and updates in-session cache/state so the UI reflects it immediately.
   async saveDocPrefs(docPath, key, value) {
     if (!docPath) {
       throw new Error('Cannot save doc prefs: missing docPath');
@@ -1016,45 +1109,29 @@ Polymer({
     if (!key) {
       throw new Error('Cannot save doc prefs: missing key');
     }
-    await this._putDocPreference(docPath, key, value);
+    const userId = this._getUserId();
+    if (!userId) {
+      throw new Error('Cannot save doc prefs: missing user id');
+    }
+
+    const cloned = this._deepClone(value);
+
+    await this._putDocPreference(docPath, key, cloned);
+
+    // update in-session cache
+    const cacheKey = this._docCacheKey(userId, docPath, key);
+    __docPrefsCache.set(cacheKey, cloned);
+    this.docPrefs = cloned;
   },
 
+  // Returns the stable preference key used to store/retrieve results table prefs on a document.
   _getDocResultsPrefsKey() {
-    // one stable key for doc-level "results table prefs" stored on each folder/doc
-    return 'nuxeo.webui.searchResults.docResultsTable';
+    const n = this.name || 'nuxeo-results';
+    const mode = this.displayMode || 'table';
+    return `documentPrefs.${n}.${mode}`;
   },
 
-  _maybeApplyDocResultsPrefs(enabled, document, view) {
-    if (!enabled || !document || !view) {
-      return;
-    }
-
-    const key = this._getDocResultsPrefsKey();
-    const prefs = this._getDocPrefsFromEnricher(document, key);
-
-    if (!prefs) {
-      return;
-    }
-
-    this._applyPrefsToView(view, prefs);
-  },
-
-  _applyPrefsToView(view, prefs) {
-    if (!view || !prefs) {
-      return;
-    }
-    this._isRestoring = true;
-    try {
-      view.settings = prefs;
-    } finally {
-      this._isRestoring = false;
-    }
-  },
-
-  _debounceSave(debouncerField, fn, wait = 300) {
-    this[debouncerField] = Debouncer.debounce(this[debouncerField], timeOut.after(wait), fn);
-  },
-
+  // Extracts and parses doc prefs from the userPreferences document enricher (no additional HTTP call).
   _getDocPrefsFromEnricher(doc, prefKey) {
     const prefsMap =
       doc &&
@@ -1086,5 +1163,86 @@ Polymer({
     }
 
     return null;
+  },
+
+  // Loads doc prefs from in-session cache or from the document enricher (defaults if none exist).
+  _loadDocPrefs(enabled, document, connectedUserId) {
+    if (!enabled) {
+      this.docPrefs = {};
+      return;
+    }
+    if (!document || !document.path) {
+      this.docPrefs = {};
+      return;
+    }
+
+    const userId = connectedUserId || this._getUserId();
+    if (!userId) {
+      this.docPrefs = {};
+      return;
+    }
+
+    const prefKey = this._getDocResultsPrefsKey();
+    const cacheKey = this._docCacheKey(userId, document.path, prefKey);
+
+    if (__docPrefsCache.has(cacheKey)) {
+      this.docPrefs = __docPrefsCache.get(cacheKey);
+      return;
+    }
+
+    // read from document enricher if present; no extra GET needed
+    const enricherPrefs = this._getDocPrefsFromEnricher(document, prefKey);
+    if (enricherPrefs) {
+      __docPrefsCache.set(cacheKey, enricherPrefs);
+      this.docPrefs = enricherPrefs;
+      return;
+    }
+
+    // no prefs on backend yet -> defaults
+    this.docPrefs = {};
+  },
+
+  // Applies doc prefs to the current view settings (only when prefs exist).
+  _applyDocPrefs(enabled, prefs, view) {
+    if (!enabled || !view) {
+      return;
+    }
+    if (!prefs || Object.keys(prefs).length === 0) {
+      return;
+    }
+    this._applyPrefsToView(view, prefs);
+  },
+
+  // -------------------------
+  // Mode decision functions
+  // -------------------------
+
+  // Doc prefs are used for any browse/document context (including Collections), regardless of provider presence.
+  _computeShouldUseDocPrefs(document) {
+    return Boolean(document && document.path);
+  },
+
+  // Global prefs are ONLY for non-document contexts (e.g. search pages), so require "no document".
+  _computeShouldUseGlobalPrefs(document, nxProvider) {
+    if (document && document.path) {
+      return false;
+    }
+    return Boolean(this._getProviderName(nxProvider));
+  },
+
+  _connectedUserChanged(newUserId, oldUserId) {
+    // Clear cached promises and prefs when user changes (logout/login, impersonation, etc.)
+    if (newUserId !== oldUserId && oldUserId) {
+      if (__allGlobalPrefsPromise || __globalPrefsCache.size > 0 || __docPrefsCache.size > 0) {
+        // eslint-disable-next-line no-console
+        console.debug('[nuxeo-results] Clearing preference caches due to user change:', {
+          from: oldUserId,
+          to: newUserId,
+        });
+        __allGlobalPrefsPromise = null;
+        __globalPrefsCache.clear();
+        __docPrefsCache.clear();
+      }
+    }
   },
 });

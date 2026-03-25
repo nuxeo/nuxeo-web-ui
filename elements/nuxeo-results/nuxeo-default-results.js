@@ -68,6 +68,7 @@ Polymer({
     <nuxeo-results
       id="results"
       display-mode="table"
+      document="[[document]]"
       name="[[name]]"
       nx-provider="[[nxProvider]]"
       selected-items="{{selectedItems}}"
@@ -252,7 +253,7 @@ Polymer({
     nxProvider: Object,
 
     name: String,
-
+    document: Object,
     selectedItems: {
       type: Array,
       notify: true,

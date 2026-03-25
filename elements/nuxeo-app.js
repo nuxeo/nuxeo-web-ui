@@ -1024,12 +1024,9 @@ Polymer({
     this.docId = docParam.uid;
     this.docPath = docParam.path;
     this.$.doc.headers = this._computeHeaders();
-    this.$.doc.enrichers = this._computeEnrichers();
-
-    const page = docParam && docParam.page ? docParam.page : this.page;
-    if (page) {
-      this.$.doc.enrichers = this._computeDocumentEnrichersForPage(page);
-    }
+    const page = (docParam && docParam.page) || 'browse';
+    // compute enrichers for the intended target page
+    this.$.doc.enrichers = this._computeDocumentEnrichersForPage(page);
 
     return this.$.doc.get().then((doc) => {
       if (this.docId && doc.facets.includes('SavedSearch')) {
@@ -1833,9 +1830,8 @@ Polymer({
   _computeDocumentEnrichersForPage(page) {
     const base = config.get('enrichers') || {};
 
-    // IMPORTANT: clone so we don't mutate the global config enrichers object
+    // clone so we don't mutate the global config enrichers object
     const enrichers = { ...base };
-
     // preserve existing document/blob enrichers, only append when needed
     if (page === 'browse') {
       enrichers.document = this._appendEnricher(enrichers.document, 'userPreferences');
