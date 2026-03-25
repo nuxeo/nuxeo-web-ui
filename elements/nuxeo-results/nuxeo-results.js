@@ -469,7 +469,7 @@ Polymer({
   ready() {
     this.$.nxcon.connect().then((user) => {
       this._connectedUserId = user && (user.id || user.uid || user.username);
-      //   this._updateStorage();
+      this._updateStorage();
     });
   },
 
@@ -686,8 +686,9 @@ Polymer({
   },
 
   _updateStorage() {
-    if (this.$.nxcon.user && this.name) {
-      this._localStorageName = `${this.$.nxcon.user.id}-nuxeo-results-${this.name}`;
+    const userId = this.$.nxcon.user?.id || this.$.nxcon.user?.uid || this.$.nxcon.user?.username;
+    if (userId && this.name) {
+      this._localStorageName = `${userId}-nuxeo-results-${this.name}`;
     }
   },
 
@@ -782,21 +783,33 @@ Polymer({
 
   _saveViewSettings() {
     if (this.view.settings && !this._isRestoring) {
+      this.set('_settings.displayMode', this.displayMode);
+      this.saveSettings();
+
       const isSettingsView = this.displayMode === 'table';
 
       // ---- doc level (content views) ----
-      // doc context wins; if we have a document.path, always save via @preferences and skip global prefs
       if (isSettingsView && this.document && this.document.path) {
         const docKey = this._getDocResultsPrefsKey();
         this._debounceSave('_docPrefsSaveDebouncer', () => {
-          this.saveDocPrefs(this.document.path, docKey, this.view.settings).catch((error) => {
-            // eslint-disable-next-line no-console
-            console.warn('Failed to save document results preferences', {
-              path: this.document && this.document.path,
-              key: docKey,
-              error,
+          // Save to backend (primary)
+          this.saveDocPrefs(this.document.path, docKey, this.view.settings)
+            .then(() => {
+              // Sync to localStorage on success (fallback cache)
+              this.set(`_settings.${this.displayMode}`, this.view.settings);
+              this.saveSettings();
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.warn('Failed to save document results preferences to backend, syncing to localStorage only', {
+                path: this.document && this.document.path,
+                key: docKey,
+                error,
+              });
+              // Fallback: save to localStorage even if backend fails
+              this.set(`_settings.${this.displayMode}`, this.view.settings);
+              this.saveSettings();
             });
-          });
         });
         return;
       }
@@ -804,12 +817,28 @@ Polymer({
       // ---- global level (search providers) ----
       if (isSettingsView && this._shouldUseGlobalPrefs) {
         this._debounceSave('_prefsSaveDebouncer', () => {
-          this.saveGlobalResultsPrefs(this.view.settings).catch((error) => {
-            // eslint-disable-next-line no-console
-            console.warn('Failed to save global results preferences', error);
-          });
+          // Save to backend (primary)
+          this.saveGlobalResultsPrefs(this.view.settings)
+            .then(() => {
+              // Sync to localStorage on success (fallback cache)
+              this.set(`_settings.${this.displayMode}`, this.view.settings);
+              this.saveSettings();
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.warn('Failed to save global results preferences to backend, syncing to localStorage only', error);
+              // Fallback: save to localStorage even if backend fails
+              this.set(`_settings.${this.displayMode}`, this.view.settings);
+              this.saveSettings();
+            });
         });
+        return;
       }
+
+      // ---- localStorage only (anonymous users, no backend prefs available) ----
+      // This branch runs when neither doc nor global prefs are applicable
+      this.set(`_settings.${this.displayMode}`, this.view.settings);
+      this.saveSettings();
     }
   },
 
@@ -945,8 +974,13 @@ Polymer({
   async _getAllGlobalPreferences() {
     this._configureAllGlobalPreferencesResource();
     this.$.preferences.contentType = 'application/json';
-    const raw = await this.$.preferences.get();
-    return (raw && raw.preferences) || {};
+    try {
+      const raw = await this.$.preferences.get();
+      return (raw && raw.preferences) || {};
+    } catch (error) {
+      console.error('[nuxeo-results] Failed to fetch global preferences', error);
+      return {}; // ← graceful degradation
+    }
   },
 
   // Returns a cached in-flight promise for GET /me/preferences so multiple loads share one request per session.
@@ -1059,11 +1093,28 @@ Polymer({
     if (!enabled || displayMode !== 'table') {
       return;
     }
-    if (!view || !prefs || Object.keys(prefs).length === 0) {
+
+    if (!view) {
       return;
     }
 
-    this._applyPrefsToView(view, prefs);
+    // Fallback chain: backend prefs → localStorage → table defaults
+    let settingsToApply = null;
+
+    // 1. Primary: backend prefs (from globalPrefs property)
+    if (prefs && Object.keys(prefs).length > 0) {
+      settingsToApply = prefs;
+    }
+    // 2. Fallback: localStorage (synced copy)
+    else if (this._settings && this._settings[displayMode]) {
+      settingsToApply = this._settings[displayMode];
+    }
+    // 3. Final fallback: table defaults (do nothing, let view use its defaults)
+    else {
+      return;
+    }
+
+    this._applyPrefsToView(view, settingsToApply);
   },
 
   // ------------------------------
@@ -1207,12 +1258,24 @@ Polymer({
     if (!enabled || !view) {
       return;
     }
-    if (!prefs || Object.keys(prefs).length === 0) {
+
+    // Fallback chain: backend prefs → localStorage → table defaults
+    let settingsToApply = null;
+
+    // 1. Primary: backend doc prefs (from docPrefs property)
+    if (prefs && Object.keys(prefs).length > 0) {
+      settingsToApply = prefs;
+    }
+    // 2. Fallback: localStorage (synced copy)
+    else if (this._settings && this._settings[this.displayMode]) {
+      settingsToApply = this._settings[this.displayMode];
+    }
+    // 3. Final fallback: table defaults (do nothing, let view use its defaults)
+    else {
       return;
     }
-    this._applyPrefsToView(view, prefs);
+    this._applyPrefsToView(view, settingsToApply);
   },
-
   // -------------------------
   // Mode decision functions
   // -------------------------
