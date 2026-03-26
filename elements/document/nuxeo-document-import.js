@@ -32,7 +32,6 @@ import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-operation.js';
-import { config } from '@nuxeo/nuxeo-elements';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
@@ -807,11 +806,6 @@ Polymer({
     },
 
     _importWithPropertiesError: String,
-
-    _loadingEmptyFile: {
-      type: Boolean,
-      value: false,
-    },
   },
 
   listeners: {
@@ -1027,32 +1021,16 @@ Polymer({
 
   _loadFile(docData, title) {
     let properties = {};
-    const hasDocData = docData && Object.keys(docData).length > 0;
-    if (hasDocData) {
+    if (docData && Object.keys(docData).length > 0) {
       this.targetPath = docData.parent;
       this.selectedDocType = this._importDocTypes.find((type) => type.id === docData.type.id);
       ({ properties } = JSON.parse(JSON.stringify(docData.document)));
-    } else {
-      this._loadingEmptyFile = true;
     }
     if (title) {
       properties['dc:title'] = title;
     }
     this._docProperties = properties;
-    const updatePromise = this._updateDocument();
-    if (!hasDocData && updatePromise) {
-      return updatePromise.then(
-        (result) => result,
-        (err) => {
-          this._loadingEmptyFile = false;
-          throw err;
-        },
-      );
-    }
-    if (!hasDocData) {
-      this._loadingEmptyFile = false;
-    }
-    return updatePromise;
+    return this._updateDocument();
   },
 
   _nextFile() {
@@ -1081,19 +1059,25 @@ Polymer({
     if (!this._isValidFileIndex(index)) {
       throw new Error(`invalid file index: ${index}`);
     } else if (this.docIdx !== index && (this.docIdx < 0 || this._validate())) {
-      const previousIndex = this.docIdx;
-      const targetFile = this._getFile(index);
-      const willLoadEmpty = !(targetFile && targetFile.checked && targetFile.docData);
-      if (willLoadEmpty) {
-        this._loadingEmptyFile = true;
+      if (this.docIdx > -1) {
+        this._storeFile(this.docIdx);
       }
-      if (previousIndex > -1) {
-        this._storeFile(previousIndex);
-      }
+      const previousFile = this._getCurrentFile();
       this.docIdx = index;
       const currentFile = this._getCurrentFile();
-      if (currentFile.checked && currentFile.docData) {
+      if (currentFile.checked) {
+        // load the file's own data
         await this._loadFile(currentFile.docData);
+      } else if (previousFile && previousFile.docData) {
+        // preserve type and parent from the previous file, but start with clean properties
+        await this._loadFile(
+          {
+            parent: previousFile.docData.parent,
+            type: previousFile.docData.type,
+            document: { properties: {} },
+          },
+          currentFile.name,
+        );
       } else {
         await this._loadFile({}, currentFile.name);
       }
@@ -1170,7 +1154,6 @@ Polymer({
     this._docProperties = {};
     this._creating = false;
     this._initializingDoc = false;
-    this._loadingEmptyFile = false;
     this._importWithPropertiesError = '';
     this._importErrorMessage = '';
     this.$.uploadFiles.value = '';
@@ -1420,38 +1403,6 @@ Polymer({
     return this._docProperties;
   },
 
-  /**
-   * Override behavior's newDocument so that when loading a file with no saved data,
-   * we return a fresh document with only dc:title set. This prevents Nature, Subjects,
-   * Coverage, etc. from being copied from the first document or server defaults.
-   * When _loadingEmptyFile we do not mutate the fetched doc (it may be cached).
-   */
-  newDocument(type, properties) {
-    const { resource } = this;
-    resource.path = `path/${this.targetPath}/@emptyWithDefault`;
-    resource.params = { type: this.selectedDocType.type };
-    resource.headers = {
-      properties: '*',
-      'fetch-document': 'properties',
-      'translate-directoryEntry': 'label',
-    };
-    resource.enrichers = config.get('enrichers', {});
-    return resource.get().then((doc) => {
-      if (this._loadingEmptyFile) {
-        const title = (properties && properties['dc:title']) || (doc.properties && doc.properties['dc:title']) || '';
-        const freshDoc = JSON.parse(JSON.stringify(doc));
-        freshDoc.properties = { 'dc:title': title };
-        return freshDoc;
-      }
-      if (properties && Object.keys(properties).length > 0) {
-        const freshDoc = JSON.parse(JSON.stringify(doc));
-        freshDoc.properties = JSON.parse(JSON.stringify(properties));
-        return freshDoc;
-      }
-      return doc;
-    });
-  },
-
   _computedCheckItem(e) {
     if (e.base && e.base.checked) {
       return 'icons:check-circle';
@@ -1549,13 +1500,8 @@ Polymer({
 
   /**
    * Retrieves and creates the layout for the current document type.
-   * When called with 2 args it is from the behavior's observer (selectedDocType, parent).
-   * Skip observer updates while loading empty file so Next/Previous don't get overwritten by cached doc.
    */
   _updateDocument() {
-    if (arguments.length === 2 && this._loadingEmptyFile) {
-      return;
-    }
     this._initializingDoc = true;
     if (!this._isValidType(this.selectedDocType) || !this.parent) {
       this.document = null;
@@ -1567,13 +1513,8 @@ Polymer({
 
     return this.newDocument(this.selectedDocType.type, this._getDocumentProperties()).then((document) => {
       document.parentRef = this.parent.uid;
-      const forceRemount = this._loadingEmptyFile || this.customizing;
-      if (forceRemount) {
-        this.document = null;
-      }
       // disable controls while the layout loads
       if (
-        forceRemount ||
         !this.document ||
         (this.document.type !== document.type &&
           !customElements.get(`nuxeo-${document.type.toLowerCase()}-import-layout`))
@@ -1587,18 +1528,7 @@ Polymer({
           };
           this.addEventListener('document-layout-changed', this._layout_changed);
         });
-        if (forceRemount) {
-          // Use async so Polymer processes the null → document transition as two separate updates,
-          // triggering a full layout remount via the dom-if restamp
-          this.async(() => {
-            this.document = document;
-            if (this._loadingEmptyFile) {
-              this._loadingEmptyFile = false;
-            }
-          });
-        } else {
-          this.document = document;
-        }
+        this.document = document;
         return promise.then((e) => {
           if (e.detail.element) {
             this._initializingDoc = false;
