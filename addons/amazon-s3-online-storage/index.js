@@ -131,7 +131,7 @@ class S3Provider {
           credentials.secretAccessKey = response.awsSecretAccessKey;
           credentials.sessionToken = response.awsSessionToken;
           credentials.expireTime = new Date(response.expiration);
-          cb();
+          if (typeof cb === 'function') cb();
         });
     this.s3Config = {
       credentials,
@@ -160,13 +160,7 @@ class S3Provider {
     if (!credentials || typeof credentials.refresh !== 'function') {
       return Promise.resolve();
     }
-    return new Promise((resolve, reject) => {
-      try {
-        credentials.refresh(() => resolve());
-      } catch (err) {
-        reject(err);
-      }
-    });
+    return credentials.refresh();
   }
 
   _handleUploadError(error, callback) {
