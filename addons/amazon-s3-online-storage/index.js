@@ -117,24 +117,31 @@ class S3Provider {
   }
 
   _initCredentials(options) {
-    const credentials = {
+    // Mutable state holding the current token set
+    this._currentCredentials = {
       accessKeyId: options.awsSecretKeyId,
       secretAccessKey: options.awsSecretAccessKey,
       sessionToken: options.awsSessionToken,
+      expiration: new Date(options.expiration),
     };
-    credentials.expireTime = new Date(options.expiration);
-    credentials.refresh = (cb) =>
-      this._resource(`upload/${this.batchId}/refreshToken`)
-        .post()
-        .then((response) => {
-          credentials.accessKeyId = response.awsSecretKeyId;
-          credentials.secretAccessKey = response.awsSecretAccessKey;
-          credentials.sessionToken = response.awsSessionToken;
-          credentials.expireTime = new Date(response.expiration);
-          if (typeof cb === 'function') cb();
-        });
+
+    // Async credential provider — SDK v3 calls this before each request
+    // and caches the result until `expiration` is reached
+    const credentialProvider = async () => {
+      if (this._currentCredentials.expiration && new Date() >= this._currentCredentials.expiration) {
+        const response = await this._resource(`upload/${this.batchId}/refreshToken`).post();
+        this._currentCredentials = {
+          accessKeyId: response.awsSecretKeyId,
+          secretAccessKey: response.awsSecretAccessKey,
+          sessionToken: response.awsSessionToken,
+          expiration: new Date(response.expiration),
+        };
+      }
+      return this._currentCredentials;
+    };
+
     this.s3Config = {
-      credentials,
+      credentials: credentialProvider,
       region: options.region,
       forcePathStyle: options.usePathStyleAccess || false,
       useAccelerateEndpoint: options.useS3Accelerate || false,
@@ -156,11 +163,22 @@ class S3Provider {
   }
 
   _refreshBatchInfo() {
-    const credentials = this.s3Config && this.s3Config.credentials;
-    if (!credentials || typeof credentials.refresh !== 'function') {
+    if (!this._currentCredentials || !this._currentCredentials.expiration) {
       return Promise.resolve();
     }
-    return credentials.refresh();
+    if (new Date() < this._currentCredentials.expiration) {
+      return Promise.resolve();
+    }
+    return this._resource(`upload/${this.batchId}/refreshToken`)
+      .post()
+      .then((response) => {
+        this._currentCredentials = {
+          accessKeyId: response.awsSecretKeyId,
+          secretAccessKey: response.awsSecretAccessKey,
+          sessionToken: response.awsSessionToken,
+          expiration: new Date(response.expiration),
+        };
+      });
   }
 
   _handleUploadError(error, callback) {
