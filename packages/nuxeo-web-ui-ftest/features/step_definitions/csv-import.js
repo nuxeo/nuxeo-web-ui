@@ -6,7 +6,7 @@ import { When } from '@cucumber/cucumber';
  *
  * @deprecated since 3.0.3. Please use "I upload the (.+) on the tab content page" located in create_dialog.js
  * */
-When(/^I import the (.+) file$/, async function(file) {
+When(/^I import the (.+) file$/, async function (file) {
   const dialog = await this.ui.createDialog;
   await dialog.waitForVisible();
   await dialog.setFileToImport(file);
@@ -25,7 +25,7 @@ When(/^I import the (.+) file$/, async function(file) {
   await importCloseButton.click();
 });
 
-When('I can see that the csv file is imported with no errors', function() {
+When('I can see that the csv file is imported with no errors', function () {
   const dialog = this.ui.createDialog;
   dialog.waitForVisible();
   dialog.selectedCSVToImport.waitForVisible().should.be.true;

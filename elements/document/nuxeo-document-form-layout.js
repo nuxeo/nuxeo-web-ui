@@ -88,9 +88,7 @@ Polymer({
             disabled$="[[saving]]"
             aria-label$="[[i18n('command.save')]]"
           >
-            <template is="dom-if" if="[[!saving]]">
-              [[i18n('command.save')]]
-            </template>
+            <template is="dom-if" if="[[!saving]]"> [[i18n('command.save')]] </template>
             <template is="dom-if" if="[[saving]]">
               <span class="saving-label">[[i18n('command.save')]]</span>
               <paper-spinner-lite active></paper-spinner-lite>

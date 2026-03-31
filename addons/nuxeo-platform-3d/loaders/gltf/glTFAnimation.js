@@ -2,15 +2,15 @@
  * @author Tony Parisi / http://www.tonyparisi.com/
  */
 
-let glTFAnimator = (function() {
+let glTFAnimator = (function () {
   var animators = [];
 
   return {
-    add: function(animator) {
+    add: function (animator) {
       animators.push(animator);
     },
 
-    remove: function(animator) {
+    remove: function (animator) {
       var i = animators.indexOf(animator);
 
       if (i !== -1) {
@@ -18,7 +18,7 @@ let glTFAnimator = (function() {
       }
     },
 
-    update: function() {
+    update: function () {
       for (var i = 0; i < animators.length; i++) {
         animators[i].update();
       }
@@ -27,7 +27,7 @@ let glTFAnimator = (function() {
 })();
 
 // Construction/initialization
-let glTFAnimation = function(interps) {
+let glTFAnimation = function (interps) {
   this.running = false;
   this.loop = false;
   this.duration = 0;
@@ -39,7 +39,7 @@ let glTFAnimation = function(interps) {
   }
 };
 
-glTFAnimation.prototype.createInterpolators = function(interps) {
+glTFAnimation.prototype.createInterpolators = function (interps) {
   var i,
     len = interps.length;
   for (i = 0; i < len; i++) {
@@ -50,7 +50,7 @@ glTFAnimation.prototype.createInterpolators = function(interps) {
 };
 
 // Start/stop
-glTFAnimation.prototype.play = function() {
+glTFAnimation.prototype.play = function () {
   if (this.running) return;
 
   this.startTime = Date.now();
@@ -58,13 +58,13 @@ glTFAnimation.prototype.play = function() {
   glTFAnimator.add(this);
 };
 
-glTFAnimation.prototype.stop = function() {
+glTFAnimation.prototype.stop = function () {
   this.running = false;
   glTFAnimator.remove(this);
 };
 
 // Update - drive key frame evaluation
-glTFAnimation.prototype.update = function() {
+glTFAnimation.prototype.update = function () {
   if (!this.running) return;
 
   var now = Date.now();
@@ -92,7 +92,7 @@ glTFAnimation.prototype.update = function() {
 
 //Interpolator class
 //Construction/initialization
-let glTFInterpolator = function(param) {
+let glTFInterpolator = function (param) {
   this.keys = param.keys;
   this.values = param.values;
   this.count = param.count;
@@ -132,7 +132,7 @@ let glTFInterpolator = function(param) {
 };
 
 //Interpolation and tweening methods
-glTFInterpolator.prototype.interp = function(t) {
+glTFInterpolator.prototype.interp = function (t) {
   var i, j;
   if (t == this.keys[0]) {
     if (this.isRot) {
@@ -196,7 +196,7 @@ glTFInterpolator.prototype.interp = function(t) {
   }
 };
 
-glTFInterpolator.prototype.copyValue = function(target) {
+glTFInterpolator.prototype.copyValue = function (target) {
   if (this.isRot) {
     target.copy(this.quat3);
   } else {

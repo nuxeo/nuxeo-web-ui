@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Then, When } from '@cucumber/cucumber';
 
-When('I click the preview button', async function() {
+When('I click the preview button', async function () {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const buttonEle = await page.previewButton;
@@ -9,7 +9,7 @@ When('I click the preview button', async function() {
   await buttonEle.click();
 });
 
-When('I click the preview button for the attachment', async function() {
+When('I click the preview button for the attachment', async function () {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const attachEle = await page.metadata.attachments;
@@ -18,7 +18,7 @@ When('I click the preview button for the attachment', async function() {
   await buttonEle.click();
 });
 
-Then(/^I can see the inline ([-\w]+) previewer$/, async function(viewerType) {
+Then(/^I can see the inline ([-\w]+) previewer$/, async function (viewerType) {
   const uiBrowser = await this.ui.browser;
   const page = await uiBrowser.documentPage(this.doc.type);
   await page.waitForVisible();

@@ -1,13 +1,13 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, Then, When } from '@cucumber/cucumber';
 
-Given('I am on vocabulary page', async function() {
+Given('I am on vocabulary page', async function () {
   const administration = await this.ui.administration;
   const vocabularyPage = await administration.goToVocabularyManagement();
   return vocabularyPage;
 });
 
-When('I select {string} vocabulary', async function(name) {
+When('I select {string} vocabulary', async function (name) {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;
@@ -15,7 +15,7 @@ When('I select {string} vocabulary', async function(name) {
   await vocabularyManagement.vocabulary(name);
 });
 
-Then('I can add {string} entry', async function(id) {
+Then('I can add {string} entry', async function (id) {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;
@@ -23,7 +23,7 @@ Then('I can add {string} entry', async function(id) {
   await vocabularyManagement.addNewEntry(id, id);
 });
 
-Then('I can see the vocabulary table', async function() {
+Then('I can see the vocabulary table', async function () {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;
@@ -32,7 +32,7 @@ Then('I can see the vocabulary table', async function() {
   isVocabularyTableVisible.should.be.true;
 });
 
-Then('I have a non empty table', async function() {
+Then('I have a non empty table', async function () {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;
@@ -41,7 +41,7 @@ Then('I have a non empty table', async function() {
   isVocabularyTableFilled.should.be.true;
 });
 
-Then('I can see {string} entry', async function(name) {
+Then('I can see {string} entry', async function (name) {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;
@@ -50,7 +50,7 @@ Then('I can see {string} entry', async function(name) {
   hasEntry.should.be.true;
 });
 
-Then('I cannot see {string} entry', async function(name) {
+Then('I cannot see {string} entry', async function (name) {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;
@@ -59,7 +59,7 @@ Then('I cannot see {string} entry', async function(name) {
   hasNoEntry.should.be.true;
 });
 
-Then('I can delete entry with index {int}', async function(index) {
+Then('I can delete entry with index {int}', async function (index) {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;
@@ -67,7 +67,7 @@ Then('I can delete entry with index {int}', async function(index) {
   await vocabularyManagement.deleteEntry(index);
 });
 
-Then('I can edit entry with index {int} and new label {string}', async function(index, label) {
+Then('I can edit entry with index {int} and new label {string}', async function (index, label) {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;
@@ -75,7 +75,7 @@ Then('I can edit entry with index {int} and new label {string}', async function(
   await vocabularyManagement.editEntry(index, label);
 });
 
-Then('I can see edit dialog', async function() {
+Then('I can see edit dialog', async function () {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;
@@ -84,7 +84,7 @@ Then('I can see edit dialog', async function() {
   hasEditDialog.should.be.true;
 });
 
-Then('I can see create dialog', async function() {
+Then('I can see create dialog', async function () {
   const administration = await this.ui.administration;
   await administration.waitForVisible();
   const vocabularyManagement = await administration.vocabularyManagement;

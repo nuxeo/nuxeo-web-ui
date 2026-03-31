@@ -109,9 +109,7 @@ if (process.env.DRIVER_VERSION == null) {
   const chromePath = chromeLauncher.Launcher.getFirstInstallation();
   let version;
   try {
-    version = execSync(`"${chromePath}" --version`)
-      .toString()
-      .trim();
+    version = execSync(`"${chromePath}" --version`).toString().trim();
   } catch (e) {
     console.error('unable to get Chrome version: ', e);
   }

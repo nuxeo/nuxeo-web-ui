@@ -31,7 +31,7 @@ import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import 'jsplumb/dist/js/jsplumb.js'; /* global jsPlumb jsPlumbUtil */
 
 (() => {
-  const nxFlowchart = function(params, ...args) {
+  const nxFlowchart = function (params, ...args) {
     params = params || {};
     const _super = jsPlumb.Connectors.AbstractConnector.apply(this, args);
     this.type = 'nxFlowchart';

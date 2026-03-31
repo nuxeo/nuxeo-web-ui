@@ -90,9 +90,7 @@ class NuxeoBulkWidget extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
       <div class="header">
         <label for="options">[[label]]</label>
         <nuxeo-select selected="{{updateMode}}" attr-for-selected="id" id="options">
-          <paper-item id="keep" label="[[i18n('bulkWidget.mode.keep')]]">
-            [[i18n('bulkWidget.mode.keep')]]
-          </paper-item>
+          <paper-item id="keep" label="[[i18n('bulkWidget.mode.keep')]]"> [[i18n('bulkWidget.mode.keep')]] </paper-item>
           <paper-item id="replace" label="[[i18n('bulkWidget.mode.replace')]]">
             [[i18n('bulkWidget.mode.replace')]]
           </paper-item>

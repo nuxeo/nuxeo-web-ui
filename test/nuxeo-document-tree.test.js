@@ -211,9 +211,7 @@ suite('nuxeo-document-tree', () => {
   async function setupFixture() {
     // create the document tree
     documentTree = await fixture(
-      html`
-        <nuxeo-document-tree .router=${router} .document=${rootDocument} visible></nuxeo-document-tree>
-      `,
+      html` <nuxeo-document-tree .router=${router} .document=${rootDocument} visible></nuxeo-document-tree> `,
       true,
     );
     await flush();

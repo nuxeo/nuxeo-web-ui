@@ -5,7 +5,7 @@
  * @param {Number} row
  * @param {Number} prop
  */
-Handsontable.DataMap.prototype.get = function(row, prop) {
+Handsontable.DataMap.prototype.get = function (row, prop) {
   row = Handsontable.hooks.execute(this.instance, 'modifyRow', row);
   if (typeof prop === 'string' && prop.indexOf('.') > -1) {
     const sliced = prop.split('.');
@@ -48,7 +48,7 @@ Handsontable.DataMap.prototype.get = function(row, prop) {
  * @param {String} value
  * @param {String} [source] Optional. Source of hook runner.
  */
-Handsontable.DataMap.prototype.set = function(row, prop, value, source) {
+Handsontable.DataMap.prototype.set = function (row, prop, value, source) {
   row = Handsontable.hooks.execute(this.instance, 'modifyRow', row, source || 'datamapGet');
   if (typeof prop === 'string' && prop.indexOf('.') > -1) {
     const sliced = prop.split('.');

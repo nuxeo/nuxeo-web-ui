@@ -86,11 +86,7 @@ suite('nuxeo-document-activity', () => {
 
   setup(async () => {
     server = await login();
-    element = await fixture(
-      html`
-        <nuxeo-document-activity .document=${document}></nuxeo-document-activity>
-      `,
-    );
+    element = await fixture(html` <nuxeo-document-activity .document=${document}></nuxeo-document-activity> `);
   });
 
   teardown(() => {

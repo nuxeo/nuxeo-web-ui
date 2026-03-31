@@ -3,7 +3,7 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers.js';
 
-Given('I have a {word} document', async function(docType) {
+Given('I have a {word} document', async function (docType) {
   docType = docType || 'File';
   const doc = await fixtures.documents.init(docType);
   // create the document
@@ -13,37 +13,37 @@ Given('I have a {word} document', async function(docType) {
   return createDoc;
 });
 
-Given(/^I have a document imported from file "(.+)"$/, function(mimeType) {
+Given(/^I have a document imported from file "(.+)"$/, function (mimeType) {
   return fixtures.documents.import(this.doc, fixtures.blobs.mimeTypeBlobs[mimeType]).then((d) => {
     this.doc = d;
   });
 });
 
-Given(/^I have permission (\w+) for this document$/, async function(permission) {
+Given(/^I have permission (\w+) for this document$/, async function (permission) {
   const setPermission = await fixtures.documents.setPermissions(this.doc, permission, this.username).then((d) => {
     this.doc = d;
   });
   return setPermission;
 });
 
-Given(/^I have permission (\w+) for the document with path "(.+)"$/, async function(permission, path) {
+Given(/^I have permission (\w+) for the document with path "(.+)"$/, async function (permission, path) {
   const setPermission = await fixtures.documents.setPermissions(path, permission, this.username).then((d) => {
     this.doc = d;
   });
   return setPermission;
 });
 
-Given(/^I have the following permissions to the documents$/, function(table) {
+Given(/^I have the following permissions to the documents$/, function (table) {
   return Promise.all(table.rows().map((row) => fixtures.documents.setPermissions(row[1], row[0], this.username)));
 });
 
-Given(/^This document has a (major|minor) version$/, function(versionType) {
+Given(/^This document has a (major|minor) version$/, function (versionType) {
   return fixtures.documents.createVersion(this.doc, versionType).then((d) => {
     this.doc = d;
   });
 });
 
-Given(/^I have a document added to "([^"]*)" collection$/, async function(colName) {
+Given(/^I have a document added to "([^"]*)" collection$/, async function (colName) {
   const docFile = fixtures.documents.init('File');
   // create the document
   const doc = await fixtures.documents.create(this.doc.path, docFile);
@@ -51,7 +51,7 @@ Given(/^I have a document added to "([^"]*)" collection$/, async function(colNam
   this.doc = updatedDoc;
 });
 
-Given(/^This document has a "([^"]*)" workflow running$/, async function(workflowName) {
+Given(/^This document has a "([^"]*)" workflow running$/, async function (workflowName) {
   const workflow = await fixtures.workflows.start(this.doc, workflowName, this.username).then((workflowInstance) => {
     this.workflowInstance = workflowInstance;
   });
@@ -60,7 +60,7 @@ Given(/^This document has a "([^"]*)" workflow running$/, async function(workflo
 
 Given(
   /^The workflow running for this document will proceed with "([^"]*)" action and the following variables:$/,
-  async function(action, table) {
+  async function (action, table) {
     this.workflowInstance.should.not.be.undefined;
     return this.workflowInstance.fetchTasks().then((tasks) => {
       tasks.entries.length.should.be.equal(1);
@@ -86,17 +86,17 @@ Given(
   },
 );
 
-Given(/^This document has file "(.+)" for content$/, async function(file) {
+Given(/^This document has file "(.+)" for content$/, async function (file) {
   const contentEle = await fixtures.blobs.get(file);
   return fixtures.documents.attach(this.doc, contentEle);
 });
 
-Given(/^This document has file "(.+)" for attachment/, async function(file) {
+Given(/^This document has file "(.+)" for attachment/, async function (file) {
   const blobFile = await fixtures.blobs.get(file);
   return fixtures.documents.attach(this.doc, blobFile, true);
 });
 
-Given(/^I have a (.+) Note$/, async function(format) {
+Given(/^I have a (.+) Note$/, async function (format) {
   const doc = await fixtures.documents.init('Note');
   doc.properties['note:mime_type'] = fixtures.notes.formats[format].mimetype;
   doc.properties['note:note'] = fixtures.notes.formats[format].content;
@@ -105,25 +105,25 @@ Given(/^I have a (.+) Note$/, async function(format) {
   });
 });
 
-When(/^I browse to the document$/, async function() {
+When(/^I browse to the document$/, async function () {
   await driver.pause(1000);
   const path = await this.doc.path;
   const browser = await this.ui.browser;
   await browser.browseTo(path);
 });
 
-When(/^I browse to the "(.*)" document page$/, async function(page) {
+When(/^I browse to the "(.*)" document page$/, async function (page) {
   const browser = await this.ui.browser;
   await browser.browseTo(`${this.doc.path}?p=${page}`);
 });
 
-When(/^I browse to the document with path "(.+)"$/, async function(path) {
+When(/^I browse to the document with path "(.+)"$/, async function (path) {
   await driver.pause(1000);
   const browser = await this.ui.browser;
   await browser.browseTo(path);
 });
 
-Then('I navigate to {string} child', async function(title) {
+Then('I navigate to {string} child', async function (title) {
   const browser = await this.ui.browser;
   const child = await browser.clickChild(title);
   if (!child) {
@@ -131,11 +131,11 @@ Then('I navigate to {string} child', async function(title) {
   }
 });
 
-When(/^I start a (.+)$/, async function(workflow) {
+When(/^I start a (.+)$/, async function (workflow) {
   await this.ui.browser.startWorkflow(workflow);
 });
 
-When(/^I click the process button$/, async function() {
+When(/^I click the process button$/, async function () {
   const documentPage = await this.ui.browser.documentPage();
   const documentPageInfo = await documentPage.info;
   await documentPageInfo.waitForVisible();
@@ -144,18 +144,18 @@ When(/^I click the process button$/, async function() {
   await processButton.click();
 });
 
-Then(/^I can't view the document$/, async function() {
+Then(/^I can't view the document$/, async function () {
   url(`#!/browse${this.doc.path}`);
   const breadcumbEle = await this.ui.browser.breadcrumb;
   const isVisible = await breadcumbEle.waitForVisible(browser.options.waitforTimeout, true);
   isVisible.should.be.true;
 });
 
-Then("I can see the document's title", function() {
+Then("I can see the document's title", function () {
   this.ui.browser.title.waitForVisible();
 });
 
-Then(/I can see (.+) metadata with the following properties:/, async function(docType, table) {
+Then(/I can see (.+) metadata with the following properties:/, async function (docType, table) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage(docType);
   await docPage.waitForVisible();
@@ -176,13 +176,13 @@ Then(/I can see (.+) metadata with the following properties:/, async function(do
   }
 });
 
-Then(/^I can't edit the document metadata$/, async function() {
+Then(/^I can't edit the document metadata$/, async function () {
   const editButtonEle = await this.ui.browser.editButton;
   const isVisible = await editButtonEle.waitForVisible(browser.options.waitforTimeout, true);
   isVisible.should.be.true;
 });
 
-Then(/^I can edit the (.*) metadata$/, async function(docType) {
+Then(/^I can edit the (.*) metadata$/, async function (docType) {
   const browser = await this.ui.browser;
   const browserEditButton = await browser.editButton;
   await browserEditButton.waitForVisible();
@@ -195,7 +195,7 @@ Then(/^I can edit the (.*) metadata$/, async function(docType) {
   await driver.waitForExist('iron-overlay-backdrop', driver.options.waitForTimeout, true);
 });
 
-Then(/^I can edit the following properties in the (.+) metadata:$/, async function(docType, table) {
+Then(/^I can edit the following properties in the (.+) metadata:$/, async function (docType, table) {
   const browser = await this.ui.browser;
   const button = await browser.editButton;
   await button.waitForVisible();
@@ -207,7 +207,7 @@ Then(/^I can edit the following properties in the (.+) metadata:$/, async functi
   await form.save();
 });
 
-Then(/^I can't edit the Note$/, async function() {
+Then(/^I can't edit the Note$/, async function () {
   const browser = await this.ui.browser;
   const page = await browser.documentPage(this.doc.type);
   const view = await page.view;
@@ -216,7 +216,7 @@ Then(/^I can't edit the Note$/, async function() {
   await editButtonEle.waitForVisible(driver.options.waitforTimeout, true);
 });
 
-Then(/^I can edit the (.*) Note$/, async function(format) {
+Then(/^I can edit the (.*) Note$/, async function (format) {
   const page = await this.ui.browser.documentPage(this.doc.type);
   const view = await page.view;
   await view.waitForVisible();
@@ -271,12 +271,12 @@ Then(/^I can edit the (.*) Note$/, async function(format) {
   }
 });
 
-Then('I add the document to the {string} collection', async function(name) {
+Then('I add the document to the {string} collection', async function (name) {
   const browser = await this.ui.browser;
   await browser.addToCollection(name);
 });
 
-Then('I can see the document belongs to the {string} collection', async function(name) {
+Then('I can see the document belongs to the {string} collection', async function (name) {
   await driver.pause(1000);
   const browser = await this.ui.browser;
   const hasCollection = await browser.hasCollection(name);
@@ -285,12 +285,12 @@ Then('I can see the document belongs to the {string} collection', async function
   }
 });
 
-Then('I can delete the document from the {string} collection', async function(name) {
+Then('I can delete the document from the {string} collection', async function (name) {
   const deleteCollection = await this.ui.browser;
   await deleteCollection.removeFromCollection(name);
 });
 
-Then('I can see the document does not belong to the {string} collection', async function(name) {
+Then('I can see the document does not belong to the {string} collection', async function (name) {
   const browserEle = await this.ui.browser;
   const doesNotHaveCollection = await browserEle.doesNotHaveCollection(name);
   if (!doesNotHaveCollection) {
@@ -298,12 +298,12 @@ Then('I can see the document does not belong to the {string} collection', async 
   }
 });
 
-Then('I add the document to the favorites', async function() {
+Then('I add the document to the favorites', async function () {
   const browser = await this.ui.browser;
   await browser.addToFavorites();
 });
 
-Then('I can see the document has {int} children', async function(nb) {
+Then('I can see the document has {int} children', async function (nb) {
   await driver.pause(1000);
   const browser = await this.ui.browser;
   const countOut = await browser.waitForNbChildren(nb);
@@ -312,7 +312,7 @@ Then('I can see the document has {int} children', async function(nb) {
   }
 });
 
-Then(/^I can see a process is running in the document$/, async function() {
+Then(/^I can see a process is running in the document$/, async function () {
   const documentPage = await this.ui.browser.documentPage();
   // check info bar in the document is visible
   const infoBar = await documentPage.infoBar;
@@ -329,7 +329,7 @@ Then(/^I can see a process is running in the document$/, async function() {
   await documentPageInfo.$('[name="process"]').waitForVisible();
 });
 
-Then(/^I can see a process is not running in the document$/, async function() {
+Then(/^I can see a process is not running in the document$/, async function () {
   const documentPage = await this.ui.browser.documentPage();
   // check info bar in the document is not visible
   const infoBar = await documentPage.infoBar;
@@ -337,13 +337,13 @@ Then(/^I can see a process is not running in the document$/, async function() {
   isVisible.should.be.false;
 });
 
-Then(/^I cannot start a workflow$/, async function() {
+Then(/^I cannot start a workflow$/, async function () {
   const button = await this.ui.browser.startWorkflowButton;
   const isButtonExisting = await button.isExisting();
   isButtonExisting.should.be.false;
 });
 
-Then(/^I can abandon the workflow$/, async function() {
+Then(/^I can abandon the workflow$/, async function () {
   const documentPage = await this.ui.browser.documentPage();
   const abandonWorkflowButton = await documentPage.abandonWorkflowButton;
   await abandonWorkflowButton.waitForDisplayed();
@@ -373,13 +373,13 @@ Then(/^I can abandon the workflow$/, async function() {
   await fixtures.workflows.removeInstance(this.workflowInstance.id);
 });
 
-Then(/^I can see the document is a publication$/, async function() {
+Then(/^I can see the document is a publication$/, async function () {
   const browser = await this.ui.browser;
   const infoBar = await browser.publicationInfobar;
   await infoBar.waitForVisible();
 });
 
-Then(/^I can unpublish the document$/, async function() {
+Then(/^I can unpublish the document$/, async function () {
   const browser = await this.ui.browser;
   const infoBar = await browser.publicationInfobar;
   const unpublishButton = await infoBar.element('nuxeo-unpublish-button');
@@ -390,7 +390,7 @@ Then(/^I can unpublish the document$/, async function() {
   await unpublishConfirm.click();
 });
 
-Then('I can see {int} validation error(s) in the {string} edit form', async function(nbErrors, docType) {
+Then('I can see {int} validation error(s) in the {string} edit form', async function (nbErrors, docType) {
   const browser = await this.ui.browser;
   const form = await browser.editForm(docType);
   await form.waitForVisible();
@@ -407,7 +407,7 @@ Then('I can see {int} validation error(s) in the {string} edit form', async func
   );
 });
 
-Then('I can see the {string} error message in the {string} edit form', async function(message, docType) {
+Then('I can see the {string} error message in the {string} edit form', async function (message, docType) {
   const browser = await this.ui.browser;
   try {
     const form = await browser.editForm(docType);

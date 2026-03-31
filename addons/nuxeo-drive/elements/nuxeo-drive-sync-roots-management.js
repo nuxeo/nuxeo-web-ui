@@ -84,9 +84,7 @@ Polymer({
     <nuxeo-operation id="disable" op="NuxeoDrive.SetSynchronization" params='{"enable": false}'></nuxeo-operation>
 
     <template is="dom-if" if="[[_empty(roots)]]">
-      <div class="emptyResult">
-        [[i18n('driveSyncRootsManagement.roots.empty')]]
-      </div>
+      <div class="emptyResult">[[i18n('driveSyncRootsManagement.roots.empty')]]</div>
     </template>
 
     <template is="dom-if" if="[[!_empty(roots)]]">

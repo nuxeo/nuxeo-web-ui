@@ -142,8 +142,8 @@ Polymer({
   },
 
   load() {
-    const onLoadFromSrc = function(src) {
-      return function(gltf) {
+    const onLoadFromSrc = function (src) {
+      return function (gltf) {
         if (src !== this.src) {
           return;
         }
@@ -154,8 +154,8 @@ Polymer({
       }.bind(this);
     }.bind(this);
 
-    const onProgressFromTS = function(timestamp) {
-      return function(event) {
+    const onProgressFromTS = function (timestamp) {
+      return function (event) {
         if (timestamp !== this.latestLoadTS) {
           return;
         }
@@ -362,7 +362,7 @@ Polymer({
     matrix.multiplyScalar(scale);
     object.applyMatrix4(matrix);
 
-    const prepare = function(obj, hasShadow) {
+    const prepare = function (obj, hasShadow) {
       if (obj.geometry) {
         obj.castShadow = hasShadow;
         obj.geometry.computeFaceNormals();
