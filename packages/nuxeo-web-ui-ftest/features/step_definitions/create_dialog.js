@@ -4,13 +4,13 @@ import { Then, When } from '@cucumber/cucumber';
 let currentDocType;
 let selectedTabName;
 
-When('I click the Create Document button', async function() {
+When('I click the Create Document button', async function () {
   const createBtn = await this.ui.createButton;
   await createBtn.waitForVisible();
   await createBtn.click();
 });
 
-Then('I click the Create button to finish the import', async function() {
+Then('I click the Create button to finish the import', async function () {
   const createDialog = await this.ui.createDialog;
   const importButton = await createDialog.importCreateButton;
   await importButton.waitForVisible();
@@ -21,14 +21,14 @@ Then('I click the Create button to finish the import', async function() {
   await driver.pause(1000); // XXX just give it some time to the server to do the conversions
 });
 
-Then(/^I go to the (.+) tab$/, async function(name) {
+Then(/^I go to the (.+) tab$/, async function (name) {
   const dialog = await this.ui.createDialog;
   await dialog.waitForVisible();
   const importTab = await dialog.importTab(name);
   await importTab.click();
 });
 
-Then(/^I can see the (.+) tab content$/, async function(name) {
+Then(/^I can see the (.+) tab content$/, async function (name) {
   const dialog = await this.ui.createDialog;
   await dialog.waitForVisible();
   const importPage = await dialog.importPage(name);
@@ -36,7 +36,7 @@ Then(/^I can see the (.+) tab content$/, async function(name) {
   selectedTabName = name;
 });
 
-Then(/^I upload the (.+) on the tab content page$/, async function(file) {
+Then(/^I upload the (.+) on the tab content page$/, async function (file) {
   const dialog = await this.ui.createDialog;
   await dialog.waitForVisible();
   await dialog.upload(file, selectedTabName);
@@ -44,7 +44,7 @@ Then(/^I upload the (.+) on the tab content page$/, async function(file) {
   await fileToImport.waitForVisible();
 });
 
-Then('I upload the following files on the tab content page:', async function(table) {
+Then('I upload the following files on the tab content page:', async function (table) {
   const dialog = await this.ui.createDialog;
   await dialog.waitForVisible();
   const rows = await table.rows();
@@ -57,7 +57,7 @@ Then('I upload the following files on the tab content page:', async function(tab
   return docs;
 });
 
-When('I select {word} from the Document Type menu', async function(docType) {
+When('I select {word} from the Document Type menu', async function (docType) {
   const createDialogElem = await this.ui.createDialog;
   await createDialogElem.waitForVisible();
   const docCreateElem = await createDialogElem.documentCreate;
@@ -67,7 +67,7 @@ When('I select {word} from the Document Type menu', async function(docType) {
   currentDocType = docType;
 });
 
-When('I create a document with the following properties:', async function(table) {
+When('I create a document with the following properties:', async function (table) {
   const createDialogElem = await this.ui.createDialog;
   const docCreateEle = await createDialogElem.documentCreate;
   const layout = await docCreateEle.layout(currentDocType);
@@ -85,7 +85,7 @@ When('I create a document with the following properties:', async function(table)
   this.doc = { type: currentDocType, title };
 });
 
-Then('I see the {word} page', async function(docType) {
+Then('I see the {word} page', async function (docType) {
   const ele = await this.ui.browser;
   await ele.waitForNotVisible('iron-overlay-backdrop');
   const docPage = await ele.documentPage(docType);
@@ -93,7 +93,7 @@ Then('I see the {word} page', async function(docType) {
   await docPageView.waitForVisible();
 });
 
-Then(/^I can see that a document of the type (.+) and title (.+) is created$/, async function(docType, title) {
+Then(/^I can see that a document of the type (.+) and title (.+) is created$/, async function (docType, title) {
   const browser = await this.ui.browser;
   await browser.waitForNotVisible('iron-overlay-backdrop');
   const documentPage = await browser.documentPage(docType);

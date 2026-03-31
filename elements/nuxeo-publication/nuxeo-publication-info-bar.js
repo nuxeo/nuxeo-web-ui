@@ -56,9 +56,7 @@ Polymer({
     <div class="layout horizontal" hidden$="[[loadingSrc]]">
       <iron-icon icon="icons:info"></iron-icon>
       <div>
-        <a href$="[[_srcUrl(_src)]]" disabled$="[[_srcDeleted]]">
-          [[_infoLabel(_srcDeleted, document)]]
-        </a>
+        <a href$="[[_srcUrl(_src)]]" disabled$="[[_srcDeleted]]"> [[_infoLabel(_srcDeleted, document)]] </a>
       </div>
     </div>
     <nuxeo-unpublish-button document="[[document]]"></nuxeo-unpublish-button>

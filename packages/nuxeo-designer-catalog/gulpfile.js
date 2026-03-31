@@ -162,11 +162,11 @@ const generateCatalog = () => {
 
   const catalogGenerators = targetPlatforms.map(
     (platform) =>
-      function() {
+      function () {
         return new Promise((resolve, reject) => {
           // callback to generate the catalog
           const catalogCallback = (pkgManager) =>
-            function() {
+            function () {
               log('generate catalog for nuxeo-web-ui ', platform);
               const version = branch || platform;
               execCatalogTask({
@@ -204,7 +204,7 @@ const cleanupCatalog = () => {
 
   const catalogCleanUp = targetPlatforms.map(
     (platform) =>
-      function() {
+      function () {
         return new Promise((resolve) => {
           log('clean up catalog files for nuxeo-web-ui ', platform);
           const appBase = path.join(base, platform, application);

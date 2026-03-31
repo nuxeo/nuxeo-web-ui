@@ -58,7 +58,7 @@ export const Performance = {
     // based on https://github.com/matthewhudson/current-device/blob/master/src/index.js
     // returns “phone”, “tablet”, or “desktop”
     ua = (ua || this.getUserAgent()).toLowerCase();
-    const find = function(str) {
+    const find = function (str) {
       return ua.indexOf(str) !== -1;
     };
 

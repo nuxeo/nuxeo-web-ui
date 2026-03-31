@@ -76,9 +76,7 @@ Polymer({
       <div class="item">
         <label>[[i18n('documentInfo.publications')]]</label>
         <div>
-          <a href$="[[_urlForPub(document)]]">
-            [[document.contextParameters.publications.resultsCount]]
-          </a>
+          <a href$="[[_urlForPub(document)]]"> [[document.contextParameters.publications.resultsCount]] </a>
         </div>
       </div>
     </template>

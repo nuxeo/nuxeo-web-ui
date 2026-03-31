@@ -33,7 +33,7 @@ Given('user {string} exists', async (username) => {
   });
 });
 
-When('I login as {string}', { timeout: 120000 }, async function(username) {
+When('I login as {string}', { timeout: 120000 }, async function (username) {
   // Ensure clean browser state on every login
   await browser.deleteCookies();
 
@@ -65,7 +65,7 @@ When(/^I visit (.*)$/, (path) => url(path));
 
 When('I logout', async () => Login.get());
 
-Then('I am logged in as {string}', async function(username) {
+Then('I am logged in as {string}', async function (username) {
   const drawer = await this.ui.drawer;
   const profileEle = await drawer.open('profile');
   const headerEle = await profileEle.element('.header');

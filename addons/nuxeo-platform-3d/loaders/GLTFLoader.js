@@ -2,20 +2,20 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-let GLTFLoader = function(manager) {
+let GLTFLoader = function (manager) {
   this.manager = manager !== undefined ? manager : THREE.DefaultLoadingManager;
 };
 
 GLTFLoader.prototype = {
   constructor: GLTFLoader,
 
-  load: function(url, onLoad, onProgress, onError) {
+  load: function (url, onLoad, onProgress, onError) {
     var scope = this;
 
     var loader = new THREE.FileLoader(scope.manager);
     loader.load(
       url,
-      function(text) {
+      function (text) {
         onLoad(scope.parse(JSON.parse(text)));
       },
       onProgress,
@@ -23,11 +23,11 @@ GLTFLoader.prototype = {
     );
   },
 
-  setCrossOrigin: function(value) {
+  setCrossOrigin: function (value) {
     this.crossOrigin = value;
   },
 
-  parse: function(json) {
+  parse: function (json) {
     function stringToArrayBuffer(string) {
       var bytes = atob(string);
       var buffer = new ArrayBuffer(bytes.length);

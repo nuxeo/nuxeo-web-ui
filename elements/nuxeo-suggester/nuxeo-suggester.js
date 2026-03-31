@@ -39,7 +39,7 @@ export const _Suggester = {};
  * { id: String, startsWith: Boolean, searchTerm: String, suggestion: Object, run: Function }
  * Here, suggestion must have and id, icon and label.
  */
-_Suggester.addCommand = function(command) {
+_Suggester.addCommand = function (command) {
   if (!command) {
     return;
   }

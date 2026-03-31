@@ -85,11 +85,7 @@ suite('nuxeo-breadcrumb', () => {
 
   setup(async () => {
     server = await login();
-    breadcrumb = await fixture(
-      html`
-        <nuxeo-breadcrumb .document=${document} .router=${router}></nuxeo-breadcrumb>
-      `,
-    );
+    breadcrumb = await fixture(html` <nuxeo-breadcrumb .document=${document} .router=${router}></nuxeo-breadcrumb> `);
   });
 
   teardown(() => {
@@ -120,9 +116,7 @@ suite('nuxeo-breadcrumb', () => {
     setup(async () => {
       server = await login();
       breadcrumb = await fixture(
-        html`
-          <nuxeo-breadcrumb .document=${document2} .router=${router}></nuxeo-breadcrumb>
-        `,
+        html` <nuxeo-breadcrumb .document=${document2} .router=${router}></nuxeo-breadcrumb> `,
       );
     });
 

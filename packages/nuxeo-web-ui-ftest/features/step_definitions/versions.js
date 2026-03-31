@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { When } from '@cucumber/cucumber';
 
-When(/^I can see the version info bar with text "(.*)"$/, async function(text) {
+When(/^I can see the version info bar with text "(.*)"$/, async function (text) {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const versionInfoBar = await page.versionInfoBar;
@@ -10,7 +10,7 @@ When(/^I can see the version info bar with text "(.*)"$/, async function(text) {
   versionInfoBarText.should.equal(text);
 });
 
-When(/^The document is unversioned$/, async function() {
+When(/^The document is unversioned$/, async function () {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   await page.versions.waitForVisible();
@@ -18,7 +18,7 @@ When(/^The document is unversioned$/, async function() {
   await createVersionBtn.waitForVisible();
 });
 
-When(/^I click the Create Version button$/, async function() {
+When(/^I click the Create Version button$/, async function () {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   await page.versions.waitForVisible();
@@ -27,7 +27,7 @@ When(/^I click the Create Version button$/, async function() {
   await createVersionBtn.click();
 });
 
-When(/^The create version dialog appears$/, async function() {
+When(/^The create version dialog appears$/, async function () {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   await page.versions.waitForVisible();
@@ -37,7 +37,7 @@ When(/^The create version dialog appears$/, async function() {
   await pageVersionDialog.waitForVisible('paper-button[dialog-confirm]');
 });
 
-When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, async function(v1, v2, v3, v4) {
+When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, async function (v1, v2, v3, v4) {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   await page.versions.waitForVisible();
@@ -51,7 +51,7 @@ When(/^Version options (\d+)\.(\d+) and (\d+)\.(\d+) are presented$/, async func
   dialogMajorText.should.equal(`${v3}.${v4}`);
 });
 
-When(/^I create a (major|minor) version$/, async function(versionType) {
+When(/^I create a (major|minor) version$/, async function (versionType) {
   const browser = await this.ui.browser;
   const page = await browser.documentPage(this.doc.type);
   await page.waitForVisible();
@@ -78,7 +78,7 @@ When(/^I create a (major|minor) version$/, async function(versionType) {
   await dialogConfirmBtn.click();
 });
 
-When(/^The document version is ([^"]*)$/, async function(label) {
+When(/^The document version is ([^"]*)$/, async function (label) {
   await driver.pause(1000);
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
@@ -91,7 +91,7 @@ When(/^The document version is ([^"]*)$/, async function(label) {
   }
 });
 
-When(/^I click the versions list$/, async function() {
+When(/^I click the versions list$/, async function () {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const versions = await page.versions;
@@ -103,7 +103,7 @@ When(/^I click the versions list$/, async function() {
   await versionsListItems.waitForVisible();
 });
 
-When(/^I click the versions list at index (\d+)$/, async function(index) {
+When(/^I click the versions list at index (\d+)$/, async function (index) {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const versions = await page.versions;
@@ -115,7 +115,7 @@ When(/^I click the versions list at index (\d+)$/, async function(index) {
   await versions.listItem(index).click();
 });
 
-When(/^Versions item index at (\d+) is ([^"]*)$/, async function(index, text) {
+When(/^Versions item index at (\d+) is ([^"]*)$/, async function (index, text) {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const versions = await page.versions;
@@ -125,7 +125,7 @@ When(/^Versions item index at (\d+) is ([^"]*)$/, async function(index, text) {
   listItemTitleText.should.equals(text);
 });
 
-When(/^Versions count is (\d+)$/, async function(count) {
+When(/^Versions count is (\d+)$/, async function (count) {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const versions = await page.versions;
@@ -134,7 +134,7 @@ When(/^Versions count is (\d+)$/, async function(count) {
   listCount.should.equal(count);
 });
 
-When(/^I click the Create Version button in versions list$/, async function() {
+When(/^I click the Create Version button in versions list$/, async function () {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const versions = await page.versions;
@@ -145,7 +145,7 @@ When(/^I click the Create Version button in versions list$/, async function() {
   await listCreateVersionButton.click();
 });
 
-When(/^I can restore version$/, async function() {
+When(/^I can restore version$/, async function () {
   const page = await this.ui.browser.documentPage(this.doc.type);
   await page.waitForVisible();
   const restoreVersionButton = await page.restoreVersionButton;

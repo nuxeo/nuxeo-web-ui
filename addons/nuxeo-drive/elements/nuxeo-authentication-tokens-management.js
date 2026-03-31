@@ -97,9 +97,7 @@ Polymer({
 
     <template is="dom-if" if="[[_empty(tokens)]]">
       <div class="table-row">
-        <div class="emptyResult">
-          [[i18n('authenticationTokensManagement.empty')]]
-        </div>
+        <div class="emptyResult">[[i18n('authenticationTokensManagement.empty')]]</div>
       </div>
     </template>
 

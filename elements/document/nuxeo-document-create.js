@@ -273,9 +273,7 @@ Polymer({
             disabled$="[[!_canCreate(canCreate,creating)]]"
             aria-label$="[[i18n('command.create')]]"
           >
-            <template is="dom-if" if="[[!creating]]">
-              [[i18n('command.create')]]
-            </template>
+            <template is="dom-if" if="[[!creating]]"> [[i18n('command.create')]] </template>
             <template is="dom-if" if="[[creating]]">
               <span class="importing-label">[[i18n('documentImport.creating')]]</span>
               <paper-spinner-lite active></paper-spinner-lite>
