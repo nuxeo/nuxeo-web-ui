@@ -797,7 +797,7 @@ Polymer({
   _selectedSearchIdxChanged() {
     // Convert index → object
     const idx = this.selectedSearchIdx - 1;
-    const search = this._searches?.[idx] || null;
+    const search = (this._searches && this._searches[idx]) || null;
 
     if (search) {
       this.isSavedSearch = this._isSavedSearch();
@@ -819,7 +819,7 @@ Polymer({
     }
 
     // Extract ID (works for object or string)
-    const id = typeof selectedSearch === 'string' ? selectedSearch : selectedSearch?.id;
+    const id = typeof selectedSearch === 'string' ? selectedSearch : selectedSearch && selectedSearch.id;
 
     // Find index in saved searches
     const idx = this._searches.findIndex((s) => s.id === id);
@@ -839,7 +839,7 @@ Polymer({
     const search = this._searches[idx];
     const clonedParams = JSON.parse(JSON.stringify(search.params));
     this.params = this._mutateParams(clonedParams);
-    this.searchTerm = this.params?.ecm_fulltext?.replace(/\*/g, '') || '';
+    this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
 
     // Ensure form stays synced
     if (this.form) {

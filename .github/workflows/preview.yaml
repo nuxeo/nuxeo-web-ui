@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
@@ -56,10 +56,12 @@ jobs:
       - name: Set branch name
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "BRANCH_NAME=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
+            RAW_BRANCH="${GITHUB_HEAD_REF}"
           else
-            echo "BRANCH_NAME=${{ github.event.inputs.branch_name }}" >> $GITHUB_ENV
+            RAW_BRANCH="${{ github.event.inputs.branch_name }}"
           fi
+          echo "BRANCH_NAME=$RAW_BRANCH" >> $GITHUB_ENV
+          echo "BRANCH_NAME_SANITIZED=$(echo $RAW_BRANCH | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
@@ -69,14 +71,14 @@ jobs:
           branch: ${{ env.BRANCH_NAME }}
           default-branch: lts-2025
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
       - name: Prepare environment
         run: |
-          echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME" >> $GITHUB_ENV
-          echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')))" >> $GITHUB_ENV
+          echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME_SANITIZED" >> $GITHUB_ENV
+          echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME_SANITIZED)))" >> $GITHUB_ENV
 
       - name: Determine nuxeo-elements branch to use
         id: pick_nuxeo_elements_branch
@@ -87,7 +89,7 @@ jobs:
           default-branch: lts-2025
 
       - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
@@ -98,26 +100,26 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install nuxeo-elements/core
-          npm install nuxeo-elements/ui
-          npm install nuxeo-elements/dataviz
+          npm install ./nuxeo-elements/core
+          npm install ./nuxeo-elements/ui
+          npm install ./nuxeo-elements/dataviz
           npm install
 
       - name: Webpack build
         run: npm run build
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.DOCKER_REGISTRY }}
           username: _json_key
           password: ${{ secrets.GKE_SA_KEY }}
 
       - name: Build and push server image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v7
         with:
           context: server
           pull: true
@@ -126,7 +128,7 @@ jobs:
           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
 
       - name: Build and push image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v7
         with:
           context: .
           pull: true
@@ -135,23 +137,17 @@ jobs:
           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
           build-args: SERVER_IMAGE=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+
       - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v0.2.1
+        uses: google-github-actions/get-gke-credentials@v3.0.0
         with:
           cluster_name: ${{ env.GKE_CLUSTER }}
           location: ${{ env.GKE_ZONE }}
           project_id: ${{ secrets.GKE_PROJECT }}
-          credentials: ${{ secrets.GKE_SA_KEY }}
-
-      - name: Check preview namespace
-        id: preview_ns
-        run: |
-          echo "exists=$(kubectl get namespace ${PREVIEW_NAMESPACE})" >> $GITHUB_OUTPUT
-
-      - name: Create preview namespace
-        if: ${{ !steps.preview_ns.outputs.exists }}
-        run: |
-          kubectl create namespace ${PREVIEW_NAMESPACE}
 
       - name: Install preview
         id: preview
@@ -167,20 +163,23 @@ jobs:
           # update helm deps
           helm dependency update .
 
-          # install
-          helm upgrade --install --namespace ${PREVIEW_NAMESPACE} ${PREVIEW_NAMESPACE} .
+          helm upgrade --install \
+            --namespace ${PREVIEW_NAMESPACE} \
+            --create-namespace \
+            ${PREVIEW_NAMESPACE} .
 
           # ensure the deployment is restarted to pull the new preview image
           kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
+
           echo "url=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_OUTPUT
           echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
 
-      - uses: actions/github-script@0.9.0
+      - uses: actions/github-script@v8.0.0
         if: github.event_name == 'pull_request'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.issues.createComment({
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
