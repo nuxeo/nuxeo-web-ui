@@ -425,7 +425,7 @@ Polymer({
   /* DOM-repeat filters and sort functions */
 
   _filterUid(uid) {
-    return function(document) {
+    return function (document) {
       return document.uid !== uid;
     };
   },

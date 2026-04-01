@@ -377,9 +377,11 @@ global.fieldRegistry.register(
 fixtures.layouts = {
   getValue: async (element) => {
     const fieldType = await element.getTagName();
-    return (global.fieldRegistry.contains(fieldType)
-      ? await global.fieldRegistry.getValFunc(fieldType)
-      : global.fieldRegistry.getValFunc('generic'))(element);
+    return (
+      global.fieldRegistry.contains(fieldType)
+        ? await global.fieldRegistry.getValFunc(fieldType)
+        : global.fieldRegistry.getValFunc('generic')
+    )(element);
   },
   setValue: async (element, value) => {
     const fieldType = await element.getTagName();

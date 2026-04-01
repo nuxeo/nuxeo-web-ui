@@ -21,11 +21,7 @@ import '../elements/document/nuxeo-picture-formats.js';
 suite('nuxeo-picture-formats', () => {
   let element;
   setup(async () => {
-    element = await fixture(
-      html`
-        <nuxeo-picture-formats></nuxeo-picture-formats>
-      `,
-    );
+    element = await fixture(html` <nuxeo-picture-formats></nuxeo-picture-formats> `);
   });
 
   suite('additional formats or renditions', () => {

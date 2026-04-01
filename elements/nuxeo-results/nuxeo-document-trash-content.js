@@ -229,9 +229,7 @@ Polymer({
           field="versionLabel"
           hidden
         >
-          <template>
-            [[formatVersion(item)]]
-          </template>
+          <template> [[formatVersion(item)]] </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column
           name="[[i18n('documentContentView.datatable.header.created')]]"

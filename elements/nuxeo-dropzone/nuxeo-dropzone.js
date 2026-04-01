@@ -675,10 +675,7 @@ Polymer({
 
       const invalidFile = this.files.find((file) => {
         const name = file.name || '';
-        const extension = `.${name
-          .split('.')
-          .pop()
-          .toLowerCase()}`;
+        const extension = `.${name.split('.').pop().toLowerCase()}`;
         const mime = (file.type || '').toLowerCase();
 
         return !accepted.includes(extension) && !accepted.includes(mime);

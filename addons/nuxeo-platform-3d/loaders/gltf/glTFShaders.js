@@ -2,15 +2,15 @@
  * @author Tony Parisi / http://www.tonyparisi.com/
  */
 
-let glTFShaders = (function() {
+let glTFShaders = (function () {
   var shaders = [];
 
   return {
-    add: function(shader) {
+    add: function (shader) {
       shaders.push(shader);
     },
 
-    remove: function(shader) {
+    remove: function (shader) {
       var i = shaders.indexOf(shader);
 
       if (i !== -1) {
@@ -18,18 +18,18 @@ let glTFShaders = (function() {
       }
     },
 
-    removeAll: function(shader) {
+    removeAll: function (shader) {
       // probably want to clean up the shaders, too, but not for now
       shaders = [];
     },
 
-    bindShaderParameters: function(scene) {
+    bindShaderParameters: function (scene) {
       for (var i = 0; i < shaders.length; i++) {
         shaders[i].bindParameters(scene);
       }
     },
 
-    update: function(scene, camera) {
+    update: function (scene, camera) {
       for (var i = 0; i < shaders.length; i++) {
         shaders[i].update(scene, camera);
       }
@@ -38,7 +38,7 @@ let glTFShaders = (function() {
 })();
 
 // Construction/initialization
-let glTFShader = function(material, params, object, scene) {
+let glTFShader = function (material, params, object, scene) {
   this.material = material;
   this.parameters = params.technique.parameters;
   this.uniforms = params.technique.uniforms;
@@ -49,7 +49,7 @@ let glTFShader = function(material, params, object, scene) {
 };
 
 // bindParameters - connect the uniform values to their source parameters
-glTFShader.prototype.bindParameters = function(scene) {
+glTFShader.prototype.bindParameters = function (scene) {
   function findObject(o, p) {
     if (o.glTFID == param.node) {
       p.sourceObject = o;
@@ -66,7 +66,7 @@ glTFShader.prototype.bindParameters = function(scene) {
       };
 
       if (param.node) {
-        scene.traverse(function(o) {
+        scene.traverse(function (o) {
           findObject(o, p);
         });
       } else {
@@ -79,7 +79,7 @@ glTFShader.prototype.bindParameters = function(scene) {
 };
 
 // Update - update all the uniform values
-glTFShader.prototype.update = function(scene, camera) {
+glTFShader.prototype.update = function (scene, camera) {
   // update scene graph
 
   scene.updateMatrixWorld();

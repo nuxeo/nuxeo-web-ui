@@ -2,14 +2,14 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Then, When } from '@cucumber/cucumber';
 
-When('I click remove button for {string} document', async function(title) {
+When('I click remove button for {string} document', async function (title) {
   const drawer = await this.ui.drawer;
   const clipboard = await drawer.clipboard;
   await clipboard.waitForVisible();
   await clipboard.removeItem(title);
 });
 
-When('I click the clipboard move action', async function() {
+When('I click the clipboard move action', async function () {
   const drawer = await this.ui.drawer;
   const clipboard = await drawer.clipboard;
   const isClipboarVisible = await clipboard.isVisible();
@@ -20,7 +20,7 @@ When('I click the clipboard move action', async function() {
   await clipboard.move();
 });
 
-When('I click the clipboard paste action', async function() {
+When('I click the clipboard paste action', async function () {
   const drawer = await this.ui.drawer;
   const clipboard = await drawer.clipboard;
   const isClipboarVisible = await clipboard.isVisible();
@@ -31,7 +31,7 @@ When('I click the clipboard paste action', async function() {
   await clipboard.paste();
 });
 
-Then('I can see the clipboard has {string} document', async function(title) {
+Then('I can see the clipboard has {string} document', async function (title) {
   const drawer = await this.ui.drawer;
   const clipboardEle = await drawer.clipboard;
   await clipboardEle.waitForVisible();
@@ -44,7 +44,7 @@ Then('I can see the clipboard has {string} document', async function(title) {
   return found;
 });
 
-Then('I can see the clipboard has {int} item(s)', async function(nb) {
+Then('I can see the clipboard has {int} item(s)', async function (nb) {
   const drawer = await this.ui.drawer;
   const clipboard = await drawer.clipboard;
   await clipboard.waitForVisible();
@@ -53,7 +53,7 @@ Then('I can see the clipboard has {int} item(s)', async function(nb) {
     throw new Error(`Expected clipboard count to be ${nb} but found ${nbItems}`);
   }
 });
-Then('I can see clipboard actions disabled', async function() {
+Then('I can see clipboard actions disabled', async function () {
   const drawer = await this.ui.drawer;
   const clipboard = await drawer.clipboard;
   const isClipboardVisible = await clipboard.isVisible();

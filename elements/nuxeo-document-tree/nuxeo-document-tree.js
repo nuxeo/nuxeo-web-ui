@@ -310,7 +310,7 @@ Polymer({
     window.addEventListener('document-created', this._fetchDocument.bind(this));
 
     this.controller = {
-      getChildren: function(node, page) {
+      getChildren: function (node, page) {
         this.$.children.params = [node.uid];
         this.$.children.page = page;
         return this.$.children.fetch().then((data) => {

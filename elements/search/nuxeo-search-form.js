@@ -565,7 +565,7 @@ Polymer({
     paramMutator: {
       type: Function,
       value() {
-        return function(params, modifyPayload = false) {
+        return function (params, modifyPayload = false) {
           const result = {};
           if (params) {
             // filter null values
