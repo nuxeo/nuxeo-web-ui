@@ -49,7 +49,7 @@ Polymer({
         display: block;
         --paper-input-container-underline: {
           display: none;
-        }
+        };
       }
 
       nuxeo-object-diff[unified] ~ nuxeo-object-diff[unified],

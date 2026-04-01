@@ -91,10 +91,10 @@ Polymer({
       paper-textarea {
         --paper-input-container-underline: {
           border-bottom: none 0;
-        }
+        };
         --paper-input-container-underline-focus: {
           border-bottom: none 0;
-        }
+        };
       }
     </style>
 

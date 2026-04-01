@@ -64,11 +64,11 @@ class NuxeoBulkWidget extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
           /* disable underline */
           --paper-input-container-underline: {
             display: none;
-          }
+          };
           /* disable underline (focused) */
           --paper-input-container-underline-focus: {
             display: none;
-          }
+          };
           /* remove padding on the paper-dropdown-menu */
           --nuxeo-select-dropdown-menu-padding: 0;
           /* remove padding on the paper-input */
@@ -77,11 +77,11 @@ class NuxeoBulkWidget extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
           --paper-input-container-input: {
             font-size: 12px;
             text-align: end;
-          }
+          };
           /* tweak text inside paper-items */
           --paper-item: {
             font-size: 12px;
-          }
+          };
         }
         paper-item[disabled] {
           @apply --nx-button-text-disabled;

@@ -385,9 +385,11 @@ fixtures.layouts = {
   },
   setValue: async (element, value) => {
     const fieldType = await element.getTagName();
-    await (global.fieldRegistry.contains(fieldType)
-      ? global.fieldRegistry.setValFunc(fieldType)
-      : global.fieldRegistry.setValFunc('generic'))(element, value);
+    await (
+      global.fieldRegistry.contains(fieldType)
+        ? global.fieldRegistry.setValFunc(fieldType)
+        : global.fieldRegistry.setValFunc('generic')
+    )(element, value);
   },
   page: {
     Note: 'nuxeo-document-page',
