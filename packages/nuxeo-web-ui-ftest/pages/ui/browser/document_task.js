@@ -39,10 +39,12 @@ export default class DocumentTask extends BasePage {
   }
 
   async actorExists(element, actor) {
-    const users = await element.elements('nuxeo-user-tag .tag a');
+    const users = await element.elements(
+      'nuxeo-user-tag .username-container, nuxeo-group-tag .tag a, nuxeo-group-tag .tag span',
+    );
     for (let i = 0; i < users.length; i++) {
       // eslint-disable-next-line no-await-in-loop
-      const user = await users[i].getText();
+      const user = (await users[i].getText()).trim();
       if (user === actor) {
         return true;
       }
