@@ -30,9 +30,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 @element nuxeo-document-view
 */
 Polymer({
-  _template: html`
-    <nuxeo-document-layout document="[[document]]" layout="view"></nuxeo-document-layout>
-  `,
+  _template: html` <nuxeo-document-layout document="[[document]]" layout="view"></nuxeo-document-layout> `,
 
   is: 'nuxeo-document-view',
   importMeta: import.meta,

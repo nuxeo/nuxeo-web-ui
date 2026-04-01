@@ -21,11 +21,7 @@ import '../elements/nuxeo-document-actions/nuxeo-replace-blob-button';
 suite('nuxeo-replace-blob-button', () => {
   let element;
   setup(async () => {
-    element = await fixture(
-      html`
-        <nuxeo-replace-blob-button></nuxeo-replace-blob-button>
-      `,
-    );
+    element = await fixture(html` <nuxeo-replace-blob-button></nuxeo-replace-blob-button> `);
     sinon.stub(element, 'hasPermission').returns(true);
     sinon.stub(element, 'isImmutable').returns(false);
     sinon.stub(element, 'hasType').returns(false);

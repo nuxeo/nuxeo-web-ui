@@ -35,9 +35,7 @@ class Select2Editor extends Handsontable.editors.Select2Editor {
     this.options = {
       ajax: {
         transport: (params, success, failure) => {
-          this.query(connection, widget.properties, params.data.term)
-            .then(success)
-            .catch(failure);
+          this.query(connection, widget.properties, params.data.term).then(success).catch(failure);
         },
         processResults: (results) => {
           return { results };

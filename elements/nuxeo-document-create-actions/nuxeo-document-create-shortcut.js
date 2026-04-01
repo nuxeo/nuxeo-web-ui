@@ -49,7 +49,7 @@ Polymer({
       paper-fab {
         --paper-fab-iron-icon: {
           filter: brightness(100);
-        }
+        };
       }
     </style>
 

@@ -21,11 +21,7 @@ import '../elements/nuxeo-document-attachments/nuxeo-document-attachments';
 suite('nuxeo-document-attachments', () => {
   let element;
   setup(async () => {
-    element = await fixture(
-      html`
-        <nuxeo-document-attachments></nuxeo-document-attachments>
-      `,
-    );
+    element = await fixture(html` <nuxeo-document-attachments></nuxeo-document-attachments> `);
     sinon.stub(element, 'hasPermission').returns(true);
     sinon.stub(element, 'isImmutable').returns(false);
     sinon.stub(element, 'hasType').returns(false);

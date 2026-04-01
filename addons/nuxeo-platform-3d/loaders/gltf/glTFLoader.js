@@ -6,7 +6,7 @@ import { GLTFLoaderUtils } from './glTFLoaderUtils.js';
 import { glTFParser } from './glTF-parser.js';
 import { glTFShader, glTFShaders } from './glTFShaders.js';
 
-let glTFLoader = function() {
+let glTFLoader = function () {
   this.meshesRequested = 0;
   this.meshesLoaded = 0;
   this.pendingMeshes = [];
@@ -24,7 +24,7 @@ let glTFLoader = function() {
 glTFLoader.prototype = new THREE.Loader();
 glTFLoader.prototype.constructor = glTFLoader;
 
-glTFLoader.prototype.load = function(url, callback) {
+glTFLoader.prototype.load = function (url, callback) {
   var theLoader = this;
   // Utilities
 
@@ -175,10 +175,10 @@ glTFLoader.prototype.load = function(url, callback) {
 
     var isDataUriRegex = /^data:/;
 
-    var loadImage = function(url, success, error) {
+    var loadImage = function (url, success, error) {
       var image = new Image();
 
-      image.onload = function() {
+      image.onload = function () {
         success(image);
       };
 
@@ -256,7 +256,7 @@ glTFLoader.prototype.load = function(url, callback) {
       var texture = new THREE.Texture();
       var blob = decodeDataUri(dataUriRegexResult, 'blob');
       var blobUrl = window.URL.createObjectURL(blob);
-      loadImage(blobUrl, function(img) {
+      loadImage(blobUrl, function (img) {
         texture.image = img;
         texture.needsUpdate = true;
       });
@@ -307,7 +307,7 @@ glTFLoader.prototype.load = function(url, callback) {
 
   // Geometry processing
 
-  var ClassicGeometry = function() {
+  var ClassicGeometry = function () {
     this.geometry = new THREE.BufferGeometry();
     this.totalAttributes = 0;
     this.loadedAttributes = 0;
@@ -322,7 +322,7 @@ glTFLoader.prototype.load = function(url, callback) {
 
   ClassicGeometry.prototype.constructor = ClassicGeometry;
 
-  ClassicGeometry.prototype.buildBufferGeometry = function() {
+  ClassicGeometry.prototype.buildBufferGeometry = function () {
     // Build indexed mesh
     var geometry = this.geometry;
     geometry.setIndex(new THREE.BufferAttribute(this.indexArray, 1));
@@ -338,7 +338,7 @@ glTFLoader.prototype.load = function(url, callback) {
     geometry.computeBoundingSphere();
   };
 
-  ClassicGeometry.prototype.checkFinished = function() {
+  ClassicGeometry.prototype.checkFinished = function () {
     if (this.indexArray && this.loadedAttributes === this.totalAttributes) {
       this.buildBufferGeometry();
 
@@ -351,18 +351,18 @@ glTFLoader.prototype.load = function(url, callback) {
   };
 
   // Delegate for processing index buffers
-  var IndicesDelegate = function() {};
+  var IndicesDelegate = function () {};
 
-  IndicesDelegate.prototype.handleError = function(errorCode, info) {
+  IndicesDelegate.prototype.handleError = function (errorCode, info) {
     // FIXME: report error
     console.log('ERROR(IndicesDelegate):' + errorCode + ':' + info);
   };
 
-  IndicesDelegate.prototype.convert = function(resource, ctx) {
+  IndicesDelegate.prototype.convert = function (resource, ctx) {
     return new Uint16Array(resource, 0, ctx.indices.count);
   };
 
-  IndicesDelegate.prototype.resourceAvailable = function(glResource, ctx) {
+  IndicesDelegate.prototype.resourceAvailable = function (glResource, ctx) {
     var geometry = ctx.geometry;
     geometry.indexArray = glResource;
     geometry.checkFinished();
@@ -371,24 +371,24 @@ glTFLoader.prototype.load = function(url, callback) {
 
   var indicesDelegate = new IndicesDelegate();
 
-  var IndicesContext = function(indices, geometry) {
+  var IndicesContext = function (indices, geometry) {
     this.indices = indices;
     this.geometry = geometry;
   };
 
   // Delegate for processing vertex attribute buffers
-  var VertexAttributeDelegate = function() {};
+  var VertexAttributeDelegate = function () {};
 
-  VertexAttributeDelegate.prototype.handleError = function(errorCode, info) {
+  VertexAttributeDelegate.prototype.handleError = function (errorCode, info) {
     // FIXME: report error
     console.log('ERROR(VertexAttributeDelegate):' + errorCode + ':' + info);
   };
 
-  VertexAttributeDelegate.prototype.convert = function(resource, ctx) {
+  VertexAttributeDelegate.prototype.convert = function (resource, ctx) {
     return resource;
   };
 
-  VertexAttributeDelegate.prototype.bufferResourceAvailable = function(glResource, ctx) {
+  VertexAttributeDelegate.prototype.bufferResourceAvailable = function (glResource, ctx) {
     var geom = ctx.geometry;
     var attribute = ctx.attribute;
     var semantic = ctx.semantic;
@@ -424,7 +424,7 @@ glTFLoader.prototype.load = function(url, callback) {
     }
   };
 
-  VertexAttributeDelegate.prototype.resourceAvailable = function(glResource, ctx) {
+  VertexAttributeDelegate.prototype.resourceAvailable = function (glResource, ctx) {
     this.bufferResourceAvailable(glResource, ctx);
 
     var geom = ctx.geometry;
@@ -435,22 +435,22 @@ glTFLoader.prototype.load = function(url, callback) {
 
   var vertexAttributeDelegate = new VertexAttributeDelegate();
 
-  var VertexAttributeContext = function(attribute, semantic, geometry) {
+  var VertexAttributeContext = function (attribute, semantic, geometry) {
     this.attribute = attribute;
     this.semantic = semantic;
     this.geometry = geometry;
   };
 
-  var Mesh = function() {
+  var Mesh = function () {
     this.primitives = [];
     this.materialsPending = [];
     this.loadedGeometry = 0;
     this.onCompleteCallbacks = [];
   };
 
-  Mesh.prototype.addPrimitive = function(geometry, material) {
+  Mesh.prototype.addPrimitive = function (geometry, material) {
     var self = this;
-    geometry.onload = function() {
+    geometry.onload = function () {
       self.loadedGeometry++;
       self.checkComplete();
     };
@@ -462,25 +462,25 @@ glTFLoader.prototype.load = function(url, callback) {
     });
   };
 
-  Mesh.prototype.onComplete = function(callback) {
+  Mesh.prototype.onComplete = function (callback) {
     this.onCompleteCallbacks.push(callback);
     //this.checkComplete();
   };
 
-  Mesh.prototype.checkComplete = function() {
+  Mesh.prototype.checkComplete = function () {
     var self = this;
     if (this.onCompleteCallbacks.length && this.primitives.length == this.loadedGeometry) {
-      this.onCompleteCallbacks.forEach(function(callback) {
+      this.onCompleteCallbacks.forEach(function (callback) {
         callback(self);
       });
       this.onCompleteCallbacks = [];
     }
   };
 
-  Mesh.prototype.attachToNode = function(threeNode) {
+  Mesh.prototype.attachToNode = function (threeNode) {
     // Assumes that the geometry is complete
     var that = this;
-    this.primitives.forEach(function(primitive) {
+    this.primitives.forEach(function (primitive) {
       /*if(!primitive.mesh) {
 				primitive.mesh = new THREE.Mesh(primitive.geometry, primitive.material);
 			}*/
@@ -505,19 +505,19 @@ glTFLoader.prototype.load = function(url, callback) {
   };
 
   // Delayed-loaded material
-  var Material = function(params) {
+  var Material = function (params) {
     this.params = params;
   };
 
   // Delegate for processing animation parameter buffers
-  var AnimationParameterDelegate = function() {};
+  var AnimationParameterDelegate = function () {};
 
-  AnimationParameterDelegate.prototype.handleError = function(errorCode, info) {
+  AnimationParameterDelegate.prototype.handleError = function (errorCode, info) {
     // FIXME: report error
     console.log('ERROR(AnimationParameterDelegate):' + errorCode + ':' + info);
   };
 
-  AnimationParameterDelegate.prototype.convert = function(resource, ctx) {
+  AnimationParameterDelegate.prototype.convert = function (resource, ctx) {
     var parameter = ctx.parameter;
 
     var glResource = null;
@@ -535,7 +535,7 @@ glTFLoader.prototype.load = function(url, callback) {
     return glResource;
   };
 
-  AnimationParameterDelegate.prototype.resourceAvailable = function(glResource, ctx) {
+  AnimationParameterDelegate.prototype.resourceAvailable = function (glResource, ctx) {
     var animation = ctx.animation;
     var parameter = ctx.parameter;
     parameter.data = glResource;
@@ -545,13 +545,13 @@ glTFLoader.prototype.load = function(url, callback) {
 
   var animationParameterDelegate = new AnimationParameterDelegate();
 
-  var AnimationParameterContext = function(parameter, animation) {
+  var AnimationParameterContext = function (parameter, animation) {
     this.parameter = parameter;
     this.animation = animation;
   };
 
   // Animations
-  var Animation = function() {
+  var Animation = function () {
     // create Three.js keyframe here
     this.totalParameters = 0;
     this.loadedParameters = 0;
@@ -562,13 +562,13 @@ glTFLoader.prototype.load = function(url, callback) {
 
   Animation.prototype.constructor = Animation;
 
-  Animation.prototype.handleParameterLoaded = function(parameter) {
+  Animation.prototype.handleParameterLoaded = function (parameter) {
     this.parameters[parameter.name] = parameter;
     this.loadedParameters++;
     this.checkFinished();
   };
 
-  Animation.prototype.checkFinished = function() {
+  Animation.prototype.checkFinished = function () {
     if (this.loadedParameters === this.totalParameters) {
       // Build animation
       this.finishedLoading = true;
@@ -580,14 +580,14 @@ glTFLoader.prototype.load = function(url, callback) {
   };
 
   // Delegate for processing inverse bind matrices buffer
-  var InverseBindMatricesDelegate = function() {};
+  var InverseBindMatricesDelegate = function () {};
 
-  InverseBindMatricesDelegate.prototype.handleError = function(errorCode, info) {
+  InverseBindMatricesDelegate.prototype.handleError = function (errorCode, info) {
     // FIXME: report error
     console.log('ERROR(InverseBindMatricesDelegate):' + errorCode + ':' + info);
   };
 
-  InverseBindMatricesDelegate.prototype.convert = function(resource, ctx) {
+  InverseBindMatricesDelegate.prototype.convert = function (resource, ctx) {
     var parameter = ctx.parameter;
 
     var glResource = null;
@@ -602,7 +602,7 @@ glTFLoader.prototype.load = function(url, callback) {
     return glResource;
   };
 
-  InverseBindMatricesDelegate.prototype.resourceAvailable = function(glResource, ctx) {
+  InverseBindMatricesDelegate.prototype.resourceAvailable = function (glResource, ctx) {
     var skin = ctx.skin;
     skin.inverseBindMatrices = glResource;
     return true;
@@ -610,24 +610,24 @@ glTFLoader.prototype.load = function(url, callback) {
 
   var inverseBindMatricesDelegate = new InverseBindMatricesDelegate();
 
-  var InverseBindMatricesContext = function(param, skin) {
+  var InverseBindMatricesContext = function (param, skin) {
     this.parameter = param;
     this.skin = skin;
   };
 
   // Delegate for processing shaders from external files
-  var ShaderDelegate = function() {};
+  var ShaderDelegate = function () {};
 
-  ShaderDelegate.prototype.handleError = function(errorCode, info) {
+  ShaderDelegate.prototype.handleError = function (errorCode, info) {
     // FIXME: report error
     console.log('ERROR(ShaderDelegate):' + errorCode + ':' + info);
   };
 
-  ShaderDelegate.prototype.convert = function(resource, ctx) {
+  ShaderDelegate.prototype.convert = function (resource, ctx) {
     return resource;
   };
 
-  ShaderDelegate.prototype.resourceAvailable = function(data, ctx) {
+  ShaderDelegate.prototype.resourceAvailable = function (data, ctx) {
     theLoader.shadersLoaded++;
     theLoader.shaders[ctx.id] = data;
     return true;
@@ -635,24 +635,24 @@ glTFLoader.prototype.load = function(url, callback) {
 
   var shaderDelegate = new ShaderDelegate();
 
-  var ShaderContext = function(id, path) {
+  var ShaderContext = function (id, path) {
     this.id = id;
     this.uri = path;
   };
 
   // Resource management
 
-  var ResourceEntry = function(entryID, object, description) {
+  var ResourceEntry = function (entryID, object, description) {
     this.entryID = entryID;
     this.object = object;
     this.description = description;
   };
 
-  var Resources = function() {
+  var Resources = function () {
     this._entries = {};
   };
 
-  Resources.prototype.setEntry = function(entryID, object, description) {
+  Resources.prototype.setEntry = function (entryID, object, description) {
     if (!entryID) {
       console.error('No EntryID provided, cannot store', description);
       return;
@@ -665,17 +665,17 @@ glTFLoader.prototype.load = function(url, callback) {
     this._entries[entryID] = new ResourceEntry(entryID, object, description);
   };
 
-  Resources.prototype.getEntry = function(entryID) {
+  Resources.prototype.getEntry = function (entryID) {
     return this._entries[entryID];
   };
 
-  Resources.prototype.clearEntries = function() {
+  Resources.prototype.clearEntries = function () {
     this._entries = {};
   };
 
-  var LoadDelegate = function() {};
+  var LoadDelegate = function () {};
 
-  LoadDelegate.prototype.loadCompleted = function(callback, obj) {
+  LoadDelegate.prototype.loadCompleted = function (callback, obj) {
     callback.call(Window, obj);
   };
 
@@ -684,7 +684,7 @@ glTFLoader.prototype.load = function(url, callback) {
   var ThreeGLTFLoader = Object.create(glTFParser, {
     load: {
       enumerable: true,
-      value: function(userInfo, options) {
+      value: function (userInfo, options) {
         this.resources = new Resources();
         this.cameras = [];
         this.lights = [];
@@ -716,7 +716,7 @@ glTFLoader.prototype.load = function(url, callback) {
     // Implement WebGLTFLoader handlers
 
     handleBuffer: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         this.resources.setEntry(entryID, null, description);
         description.type = 'ArrayBuffer';
         return true;
@@ -724,7 +724,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleBufferView: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         this.resources.setEntry(entryID, null, description);
 
         var buffer = this.resources.getEntry(description.buffer);
@@ -737,7 +737,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleShader: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         this.resources.setEntry(entryID, null, description);
         var shaderRequest = {
           id: entryID,
@@ -754,14 +754,14 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleProgram: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         this.resources.setEntry(entryID, null, description);
         return true;
       },
     },
 
     handleTechnique: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         description.refCount = 0;
         this.resources.setEntry(entryID, null, description);
         return true;
@@ -769,7 +769,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     createShaderParams: {
-      value: function(materialId, values, params, programID, technique) {
+      value: function (materialId, values, params, programID, technique) {
         var program = this.resources.getEntry(programID);
 
         params.uniforms = {};
@@ -909,7 +909,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     threeJSMaterialType: {
-      value: function(materialId, material, params) {
+      value: function (materialId, material, params) {
         var extensions = material.extensions;
         var khr_material = extensions ? extensions.KHR_materials_common : null;
 
@@ -1017,7 +1017,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleMaterial: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         var params = {};
 
         var materialType = this.threeJSMaterialType(entryID, description, params);
@@ -1031,7 +1031,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleMesh: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         var mesh = new Mesh();
         this.resources.setEntry(entryID, mesh, description);
         var primitivesDescription = description.primitives;
@@ -1053,7 +1053,7 @@ glTFLoader.prototype.load = function(url, callback) {
             var allAttributes = Object.keys(primitiveDescription.attributes);
 
             // count them first, async issues otherwise
-            allAttributes.forEach(function(semantic) {
+            allAttributes.forEach(function (semantic) {
               geometry.totalAttributes++;
             }, this);
 
@@ -1075,7 +1075,7 @@ glTFLoader.prototype.load = function(url, callback) {
               indicesContext: indicesContext,
             };
 
-            theLoader.scheduleLoad(function(data) {
+            theLoader.scheduleLoad(function (data) {
               var alreadyProcessedIndices = GLTFLoaderUtils.getBuffer(
                 data.indicesObject,
                 data.indicesDelegate,
@@ -1088,7 +1088,7 @@ glTFLoader.prototype.load = function(url, callback) {
             }, loaddata);
 
             // Load Vertex Attributes
-            allAttributes.forEach(function(semantic) {
+            allAttributes.forEach(function (semantic) {
               var attribute;
               var attributeID = primitiveDescription.attributes[semantic];
               var attributeEntry = this.resources.getEntry(attributeID);
@@ -1126,7 +1126,7 @@ glTFLoader.prototype.load = function(url, callback) {
                 attribContext: attribContext,
               };
 
-              theLoader.scheduleLoad(function(data) {
+              theLoader.scheduleLoad(function (data) {
                 var alreadyProcessedAttribute = GLTFLoaderUtils.getBuffer(
                   data.attributeObject,
                   data.vertexAttributeDelegate,
@@ -1145,7 +1145,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleCamera: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         var camera;
         if (description.type == 'perspective') {
           var znear = description.perspective.znear;
@@ -1197,7 +1197,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleLight: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         var light = null;
         var type = description.type;
         if (type && description[type]) {
@@ -1234,7 +1234,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     addPendingMesh: {
-      value: function(mesh, threeNode) {
+      value: function (mesh, threeNode) {
         theLoader.pendingMeshes.push({
           mesh: mesh,
           node: threeNode,
@@ -1243,7 +1243,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleNode: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         var threeNode = null;
         if (description.jointName) {
           threeNode = new THREE.Bone();
@@ -1307,10 +1307,10 @@ glTFLoader.prototype.load = function(url, callback) {
             skinEntry = this.resources.getEntry(description.skin);
           }
 
-          description.meshes.forEach(function(meshID) {
+          description.meshes.forEach(function (meshID) {
             var meshEntry = this.resources.getEntry(meshID);
             theLoader.meshesRequested++;
-            meshEntry.object.onComplete(function(mesh) {
+            meshEntry.object.onComplete(function (mesh) {
               self.addPendingMesh(mesh, threeNode);
               description.meshInstances[meshID] = meshEntry.object;
               if (skinEntry) {
@@ -1350,7 +1350,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleExtension: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         // console.log("Extension", entryID, description);
 
         switch (entryID) {
@@ -1368,14 +1368,14 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     buildNodeHirerachy: {
-      value: function(nodeEntryId, parentThreeNode) {
+      value: function (nodeEntryId, parentThreeNode) {
         var nodeEntry = this.resources.getEntry(nodeEntryId);
         var threeNode = nodeEntry.object;
         parentThreeNode.add(threeNode);
 
         var children = nodeEntry.description.children;
         if (children) {
-          children.forEach(function(childID) {
+          children.forEach(function (childID) {
             this.buildNodeHirerachy(childID, threeNode);
           }, this);
         }
@@ -1385,12 +1385,12 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     buildSkin: {
-      value: function(node) {
+      value: function (node) {
         var glTF = node.glTF;
         var skin = glTF.instanceSkin;
         var skeletons = glTF.skeletons;
         if (skin) {
-          skeletons.forEach(function(skeleton) {
+          skeletons.forEach(function (skeleton) {
             var nodeEntry = this.resources.getEntry(skeleton);
             if (nodeEntry) {
               var rootSkeleton = nodeEntry.object;
@@ -1401,7 +1401,7 @@ glTFLoader.prototype.load = function(url, callback) {
               for (meshID in glTF.meshInstances) {
                 var mesh = glTF.meshInstances[meshID];
                 var threeMesh = null;
-                mesh.primitives.forEach(function(primitive) {
+                mesh.primitives.forEach(function (primitive) {
                   var material = primitive.material;
                   var materialParams = material.params;
                   if (!(material instanceof THREE.Material)) {
@@ -1498,12 +1498,12 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     buildSkins: {
-      value: function(node) {
+      value: function (node) {
         if (node.glTF && node.glTF.instanceSkin) this.buildSkin(node);
 
         var children = node.children;
         if (children) {
-          children.forEach(function(child) {
+          children.forEach(function (child) {
             this.buildSkins(child);
           }, this);
         }
@@ -1511,19 +1511,19 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     createMeshAnimations: {
-      value: function(root) {
+      value: function (root) {
         this.buildSkins(root);
       },
     },
 
     handleScene: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         if (!description.nodes) {
           console.log('ERROR: invalid file required nodes property is missing from scene');
           return false;
         }
 
-        description.nodes.forEach(function(nodeUID) {
+        description.nodes.forEach(function (nodeUID) {
           this.buildNodeHirerachy(nodeUID, userInfo.rootObj);
         }, this);
 
@@ -1538,14 +1538,14 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleImage: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         this.resources.setEntry(entryID, null, description);
         return true;
       },
     },
 
     addNodeAnimationChannel: {
-      value: function(name, channel, interp) {
+      value: function (name, channel, interp) {
         if (!this.nodeAnimationChannels) this.nodeAnimationChannels = {};
 
         if (!this.nodeAnimationChannels[name]) {
@@ -1557,7 +1557,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     createAnimations: {
-      value: function() {
+      value: function () {
         for (var name in this.nodeAnimationChannels) {
           var nodeAnimationChannels = this.nodeAnimationChannels[name];
           var i,
@@ -1574,7 +1574,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     buildAnimation: {
-      value: function(animation) {
+      value: function (animation) {
         var interps = [];
         var i,
           len = animation.channels.length;
@@ -1611,12 +1611,12 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleAnimation: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         var self = this;
         theLoader.animationsRequested++;
         var animation = new Animation();
         animation.name = entryID;
-        animation.onload = function() {
+        animation.onload = function () {
           // self.buildAnimation(animation);
           theLoader.animationsLoaded++;
           theLoader.animations.push(animation);
@@ -1635,13 +1635,13 @@ glTFLoader.prototype.load = function(url, callback) {
 
         // Load parameter buffers
         var params = Object.keys(parameters);
-        params.forEach(function(param) {
+        params.forEach(function (param) {
           // async help
           animation.totalParameters++;
         }, this);
 
         var params = Object.keys(parameters);
-        params.forEach(function(param) {
+        params.forEach(function (param) {
           var parameter = parameters[param];
           var accessor = this.resources.getEntry(parameter);
           if (!accessor) debugger;
@@ -1665,7 +1665,7 @@ glTFLoader.prototype.load = function(url, callback) {
             paramContext: paramContext,
           };
 
-          theLoader.scheduleLoad(function(data) {
+          theLoader.scheduleLoad(function (data) {
             var alreadyProcessedAttribute = GLTFLoaderUtils.getBuffer(
               data.paramObject,
               data.animationParameterDelegate,
@@ -1683,7 +1683,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleAccessor: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         // Save attribute entry
         this.resources.setEntry(entryID, description, description);
         return true;
@@ -1691,7 +1691,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleSkin: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         // Save skin entry
 
         var skin = {};
@@ -1742,7 +1742,7 @@ glTFLoader.prototype.load = function(url, callback) {
           context: context,
         };
 
-        theLoader.scheduleLoad(function(data) {
+        theLoader.scheduleLoad(function (data) {
           var alreadyProcessedAttribute = GLTFLoaderUtils.getBuffer(
             data.paramObject,
             data.inverseBindMatricesDelegate,
@@ -1762,7 +1762,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleSampler: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         // Save attribute entry
         this.resources.setEntry(entryID, description, description);
         return true;
@@ -1770,7 +1770,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleTexture: {
-      value: function(entryID, description, userInfo) {
+      value: function (entryID, description, userInfo) {
         // Save attribute entry
         this.resources.setEntry(entryID, null, description);
         return true;
@@ -1778,7 +1778,7 @@ glTFLoader.prototype.load = function(url, callback) {
     },
 
     handleError: {
-      value: function(msg) {
+      value: function (msg) {
         throw new Error(msg);
         return true;
       },
@@ -1791,10 +1791,10 @@ glTFLoader.prototype.load = function(url, callback) {
 
     delegate: {
       enumerable: true,
-      get: function() {
+      get: function () {
         return this._delegate;
       },
-      set: function(value) {
+      set: function (value) {
         this._delegate = value;
       },
     },
@@ -1802,7 +1802,7 @@ glTFLoader.prototype.load = function(url, callback) {
 
   // Loader
 
-  var Context = function(rootObj, callback) {
+  var Context = function (rootObj, callback) {
     this.rootObj = rootObj;
     this.callback = callback;
   };
@@ -1813,7 +1813,7 @@ glTFLoader.prototype.load = function(url, callback) {
 
   var loader = Object.create(ThreeGLTFLoader);
   loader.initWithPath(url);
-  loader.load(new Context(rootObj, function(obj) {}), null);
+  loader.load(new Context(rootObj, function (obj) {}), null);
 
   this.loader = loader;
   this.callback = callback;
@@ -1821,18 +1821,18 @@ glTFLoader.prototype.load = function(url, callback) {
   return rootObj;
 };
 
-glTFLoader.prototype.scheduleLoad = function(loadFn, data) {
+glTFLoader.prototype.scheduleLoad = function (loadFn, data) {
   this.loadRequests.push({ fn: loadFn, data: data });
 };
 
-glTFLoader.prototype.loadAllAssets = function() {
+glTFLoader.prototype.loadAllAssets = function () {
   for (var i = 0, len = this.loadRequests.length; i < len; i++) {
     var request = this.loadRequests[i];
     request.fn(request.data);
   }
 };
 
-glTFLoader.prototype.callLoadedCallback = function() {
+glTFLoader.prototype.callLoadedCallback = function () {
   var result = {
     scene: this.rootObj,
     cameras: this.loader.cameras,
@@ -1843,7 +1843,7 @@ glTFLoader.prototype.callLoadedCallback = function() {
   this.callback(result);
 };
 
-glTFLoader.prototype.checkComplete = function() {
+glTFLoader.prototype.checkComplete = function () {
   if (
     this.meshesLoaded == this.meshesRequested &&
     this.shadersLoaded == this.shadersRequested &&

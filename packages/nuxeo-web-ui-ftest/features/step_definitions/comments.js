@@ -2,7 +2,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, When, Then } from '@cucumber/cucumber';
 
-Given('I have the following comment thread:', function(table) {
+Given('I have the following comment thread:', function (table) {
   /*
    * Since we faced some issues with timestamps created server side when fire requests, we decided to fire them
    * sequentially. After correcting bug reported by NXP-26202 this method should be changed to:
@@ -29,7 +29,7 @@ Given(/([^\s']+)(?:'s)? comment "(.*)" has the following replies:/, async (user,
   }
 });
 
-When(/I edit ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, async function(user, text, newText) {
+When(/I edit ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, async function (user, text, newText) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -40,7 +40,7 @@ When(/I edit ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, a
   await currentComments.waitForNotVisible('.input-area iron-icon[name="submit"]');
 });
 
-When(/I expand the reply thread for ([^\s']+)(?:'s)? comment "(.*)"/, async function(user, text) {
+When(/I expand the reply thread for ([^\s']+)(?:'s)? comment "(.*)"/, async function (user, text) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -52,7 +52,7 @@ When(/I expand the reply thread for ([^\s']+)(?:'s)? comment "(.*)"/, async func
   await summaryLink.click();
 });
 
-When('I load all comments', async function() {
+When('I load all comments', async function () {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -63,7 +63,7 @@ When('I load all comments', async function() {
   await link.click();
 });
 
-When(/I load all replies for ([^\s']+)(?:'s)? comment "(.*)"/, async function(user, text) {
+When(/I load all replies for ([^\s']+)(?:'s)? comment "(.*)"/, async function (user, text) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -77,7 +77,7 @@ When(/I load all replies for ([^\s']+)(?:'s)? comment "(.*)"/, async function(us
   await link.click();
 });
 
-When(/I remove ([^\s']+)(?:'s)? comment "(.*)"/, async function(user, text) {
+When(/I remove ([^\s']+)(?:'s)? comment "(.*)"/, async function (user, text) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -87,7 +87,7 @@ When(/I remove ([^\s']+)(?:'s)? comment "(.*)"/, async function(user, text) {
   return remove;
 });
 
-When(/I reply to ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, async function(user, text, reply) {
+When(/I reply to ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"/, async function (user, text, reply) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -97,7 +97,7 @@ When(/I reply to ([^\s']+)(?:'s)? comment "(.*)" with the following text: "(.*)"
   return replyComment;
 });
 
-When('I write a comment with the following text: {string}', async function(comment) {
+When('I write a comment with the following text: {string}', async function (comment) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -105,7 +105,7 @@ When('I write a comment with the following text: {string}', async function(comme
   return currentComments.writeComment(comment);
 });
 
-Then('I can see the comment thread has {int} visible item(s)', async function(nb) {
+Then('I can see the comment thread has {int} visible item(s)', async function (nb) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -114,7 +114,7 @@ Then('I can see the comment thread has {int} visible item(s)', async function(nb
   nbItemLength.should.be.equals(nb);
 });
 
-Then('I can see the comment thread has a total of {int} item(s) to be loaded', async function(total) {
+Then('I can see the comment thread has a total of {int} item(s) to be loaded', async function (total) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -125,7 +125,7 @@ Then('I can see the comment thread has a total of {int} item(s) to be loaded', a
   linkText.should.be.equals(`View all ${total} comments`);
 });
 
-Then("I can see document's comment thread", async function() {
+Then("I can see document's comment thread", async function () {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -135,7 +135,7 @@ Then("I can see document's comment thread", async function() {
 
 Then(
   /I can see the reply thread for ([^\s']+)(?:'s)? comment "(.*)" has a total of (\d+) items to be loaded/,
-  async function(user, text, total) {
+  async function (user, text, total) {
     const browser = await this.ui.browser;
     const docPage = await browser.documentPage();
     const currentComments = await docPage.comments;
@@ -151,7 +151,7 @@ Then(
   },
 );
 
-Then(/I can see ([^\s']+)(?:'s)? comment: "(.*)"/, async function(user, text) {
+Then(/I can see ([^\s']+)(?:'s)? comment: "(.*)"/, async function (user, text) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -160,7 +160,7 @@ Then(/I can see ([^\s']+)(?:'s)? comment: "(.*)"/, async function(user, text) {
   return comment;
 });
 
-Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has (\d+) visible replies/, async function(user, text, nb) {
+Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has (\d+) visible replies/, async function (user, text, nb) {
   const browser = await this.ui.browser;
   const docPage = await browser.documentPage();
   const currentComments = await docPage.comments;
@@ -172,35 +172,37 @@ Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has (\d+) visible replies/, asyn
   nbItemLength.should.be.equals(nb);
 });
 
-Then(/I can see ([^\s']+)(?:'s)? comment "(.*)" has a reply thread with (\d+) replies/, async function(user, text, nb) {
-  const browser = await this.ui.browser;
-  const docPage = await browser.documentPage();
-  const currentComments = await docPage.comments;
-  await currentComments.waitForVisible();
-  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
-  const summaryLink = await comment.summaryLink;
-  await summaryLink.waitForVisible();
-  const summaryText = await summaryLink.getText();
-  summaryText.should.be.equals(`${nb} Replies`);
-});
+Then(
+  /I can see ([^\s']+)(?:'s)? comment "(.*)" has a reply thread with (\d+) replies/,
+  async function (user, text, nb) {
+    const browser = await this.ui.browser;
+    const docPage = await browser.documentPage();
+    const currentComments = await docPage.comments;
+    await currentComments.waitForVisible();
+    const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+    const summaryLink = await comment.summaryLink;
+    await summaryLink.waitForVisible();
+    const summaryText = await summaryLink.getText();
+    summaryText.should.be.equals(`${nb} Replies`);
+  },
+);
 
-Then(/I (can|cannot) see the extended options available for ([^\s']+)(?:'s)? comment: "(.*)"/, async function(
-  option,
-  user,
-  text,
-) {
-  option.should.to.be.oneOf(['can', 'cannot'], 'An unknown option was passed as argument');
-  const browser = await this.ui.browser;
-  const docPage = await browser.documentPage();
-  const currentComments = await docPage.comments;
-  await currentComments.waitForVisible();
-  const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
-  const commentOptions = await comment.options;
-  if (option === 'can') {
-    const commentOptionsVisible = await commentOptions.isVisible();
-    commentOptionsVisible.should.be.true;
-  } else {
-    const commentOptionsExist = await commentOptions.isExisting();
-    commentOptionsExist.should.be.false;
-  }
-});
+Then(
+  /I (can|cannot) see the extended options available for ([^\s']+)(?:'s)? comment: "(.*)"/,
+  async function (option, user, text) {
+    option.should.to.be.oneOf(['can', 'cannot'], 'An unknown option was passed as argument');
+    const browser = await this.ui.browser;
+    const docPage = await browser.documentPage();
+    const currentComments = await docPage.comments;
+    await currentComments.waitForVisible();
+    const comment = await currentComments.getComment(text, user === 'my' ? this.username : user);
+    const commentOptions = await comment.options;
+    if (option === 'can') {
+      const commentOptionsVisible = await commentOptions.isVisible();
+      commentOptionsVisible.should.be.true;
+    } else {
+      const commentOptionsExist = await commentOptions.isExisting();
+      commentOptionsExist.should.be.false;
+    }
+  },
+);
