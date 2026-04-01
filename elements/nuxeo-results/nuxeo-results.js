@@ -446,6 +446,11 @@ Polymer({
       type: Boolean,
       computed: '_computeShouldUseGlobalPrefs(document, nxProvider)',
     },
+
+    __hasBackendDocPrefs: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   observers: [
@@ -494,6 +499,11 @@ Polymer({
     }
     if (this._docPrefsSaveDebouncer && this._docPrefsSaveDebouncer.flush) {
       this._docPrefsSaveDebouncer.flush();
+    }
+
+    // Flush apply debouncer
+    if (this._applyDocPrefsDebouncer && this._applyDocPrefsDebouncer.flush) {
+      this._applyDocPrefsDebouncer.flush();
     }
 
     this.columns = [];
@@ -1177,9 +1187,8 @@ Polymer({
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
   _getDocResultsPrefsKey() {
-    const n = this.name || 'nuxeo-results';
-    const mode = this.displayMode || 'table';
-    return `documentPrefs.${n}.${mode}`;
+    const n = this.document.uid || 'nuxeo-results';
+    return `documentPrefs.${n}`;
   },
 
   // Extracts and parses doc prefs from the userPreferences document enricher (no additional HTTP call).
@@ -1218,6 +1227,7 @@ Polymer({
 
   // Loads doc prefs from in-session cache or from the document enricher (defaults if none exist).
   _loadDocPrefs(enabled, document, connectedUserId) {
+    this.__hasBackendDocPrefs = false;
     if (!enabled) {
       this.docPrefs = {};
       return;
@@ -1237,43 +1247,62 @@ Polymer({
     const cacheKey = this._docCacheKey(userId, document.path, prefKey);
 
     if (__docPrefsCache.has(cacheKey)) {
-      this.docPrefs = __docPrefsCache.get(cacheKey);
+      const cached = __docPrefsCache.get(cacheKey);
+      this.docPrefs = cached;
+      // Mark that we have backend prefs if cache has data
+      this.__hasBackendDocPrefs = Object.keys(cached).length > 0;
       return;
     }
 
-    // read from document enricher if present; no extra GET needed
+    // read from document enricher if present
     const enricherPrefs = this._getDocPrefsFromEnricher(document, prefKey);
     if (enricherPrefs) {
       __docPrefsCache.set(cacheKey, enricherPrefs);
       this.docPrefs = enricherPrefs;
+      this.__hasBackendDocPrefs = true;
       return;
     }
 
     // no prefs on backend yet -> defaults
     this.docPrefs = {};
+    this.__hasBackendDocPrefs = false;
   },
 
-  // Applies doc prefs to the current view settings (only when prefs exist).
   _applyDocPrefs(enabled, prefs, view) {
+    // Debounce to prevent multiple rapid observer calls
+    this._applyDocPrefsDebouncer = Debouncer.debounce(this._applyDocPrefsDebouncer, timeOut.after(25), () => {
+      this._applyDocPrefsImpl(enabled, prefs, view);
+    });
+  },
+
+  _applyDocPrefsImpl(enabled, prefs, view) {
     if (!enabled || !view) {
       return;
+    }
+
+    // If backend prefs were already applied, only re-apply if docPrefs actually changed
+    if (this.__hasBackendDocPrefs && this._lastAppliedDocPrefs === prefs) {
+      return; // Skip redundant application
     }
 
     // Fallback chain: backend prefs → localStorage → table defaults
     let settingsToApply = null;
 
-    // 1. Primary: backend doc prefs (from docPrefs property)
     if (prefs && Object.keys(prefs).length > 0) {
       settingsToApply = prefs;
-    }
-    // 2. Fallback: localStorage (synced copy)
-    else if (this._settings && this._settings[this.displayMode]) {
-      settingsToApply = this._settings[this.displayMode];
-    }
-    // 3. Final fallback: table defaults (do nothing, let view use its defaults)
-    else {
+      this.__hasBackendDocPrefs = true;
+      this._lastAppliedDocPrefs = prefs;
+    } else if (this._settings && this._settings[this.displayMode]) {
+      // Only use localStorage if we never had backend prefs
+      if (!this.__hasBackendDocPrefs) {
+        settingsToApply = this._settings[this.displayMode];
+      } else {
+        return; // Keep current backend prefs, don't override with localStorage
+      }
+    } else {
       return;
     }
+
     this._applyPrefsToView(view, settingsToApply);
   },
   // -------------------------
