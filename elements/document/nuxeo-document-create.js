@@ -52,7 +52,7 @@ Polymer({
         --paper-dialog-scrollable: {
           padding: 0;
           overflow-x: hidden;
-        }
+        };
       }
 
       paper-dialog-scrollable {
@@ -86,7 +86,9 @@ Polymer({
         color: var(--nuxeo-link-hover-color);
         filter: brightness(102%);
         -webkit-filter: brightness(102%);
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 -3px 0 var(--nuxeo-link-hover-color) inset;
+        box-shadow:
+          0 0 10px rgba(0, 0, 0, 0.3),
+          0 -3px 0 var(--nuxeo-link-hover-color) inset;
       }
 
       .typeIcon {
