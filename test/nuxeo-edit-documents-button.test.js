@@ -139,17 +139,15 @@ suite('nuxeo-edit-documents-button', () => {
 
   const buildButton = async (layoutId = 'default') => {
     const documents = ['the content of this array is irrelevant'];
-    const actionButton = await fixture(
-      html`
-        <nuxeo-edit-documents-button
-          href-base="${baseUrl}"
-          layout="${layoutId}"
-          .documents="${documents}"
-          ._fetchSchemas="${schemas}"
-        >
-        </nuxeo-edit-documents-button>
-      `,
-    );
+    const actionButton = await fixture(html`
+      <nuxeo-edit-documents-button
+        href-base="${baseUrl}"
+        layout="${layoutId}"
+        .documents="${documents}"
+        ._fetchSchemas="${schemas}"
+      >
+      </nuxeo-edit-documents-button>
+    `);
     const bulkLayout = actionButton.$$('nuxeo-layout');
     if (!bulkLayout.element) {
       await waitForLayoutLoad(bulkLayout);

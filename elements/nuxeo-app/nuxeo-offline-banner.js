@@ -44,7 +44,10 @@ Polymer({
         visibility: hidden;
         transform: translateY(calc(- (100% + var(--nuxeo-app-top, 0))));
         transition-duration: 0.5s;
-        transition-property: visibility, -webkit-transform, opacity;
+        transition-property:
+          visibility,
+          -webkit-transform,
+          opacity;
         transition-property: visibility, transform, opacity;
         will-change: transform;
       }
