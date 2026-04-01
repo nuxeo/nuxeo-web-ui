@@ -113,7 +113,7 @@ Polymer({
       :host {
         --app-header-background-rear-layer: {
           -webkit-overflow-scrolling: auto;
-        }
+        };
       }
 
       /* Layout base */

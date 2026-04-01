@@ -53,8 +53,12 @@ Polymer({
         background-color: var(--nuxeo-box);
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
         padding: 0;
-        filter: 0.1s ease-out, filter 0.1s ease-out;
-        -webkit-filter: 0.1s ease-out, filter 0.1s ease-out;
+        filter:
+          0.1s ease-out,
+          filter 0.1s ease-out;
+        -webkit-filter:
+          0.1s ease-out,
+          filter 0.1s ease-out;
         border: 2px solid transparent;
       }
 

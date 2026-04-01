@@ -73,15 +73,15 @@ Polymer({
           color: var(--nuxeo-quicksearch-text);
           font-size: 1rem;
           font-family: var(--nuxeo-app-font);
-        }
+        };
 
         --paper-input-container-underline: {
           background-color: transparent;
-        }
+        };
 
         --paper-input-container-underline-focus: {
           background-color: transparent;
-        }
+        };
 
         --paper-input-container-label: {
           color: var(--nuxeo-text-default);
@@ -89,14 +89,14 @@ Polymer({
           font-family: var(--nuxeo-app-font);
           line-height: unset;
           padding-left: 5px;
-        }
+        };
 
         --paper-input-container-label-focus: {
           color: #e8e8e8;
           font-size: 1rem;
           line-height: unset;
           padding-left: 5px;
-        }
+        };
       }
 
       .input-content.paper-input-container label {
@@ -244,7 +244,7 @@ Polymer({
           padding-left: 0px;
           padding-right: 8px;
           left: -3px !important;
-        }
+        };
       }
 
       @media (max-width: 1024px) {
