@@ -22,7 +22,7 @@ import moment from '@nuxeo/moment';
  */
 export const ChartDataBehavior = {
   _labels(data) {
-    return data.map(function(entry) {
+    return data.map(function (entry) {
       if (Array.isArray(entry.value)) {
         return entry.value.map(this._labels.bind(this));
       }
@@ -34,7 +34,7 @@ export const ChartDataBehavior = {
   },
   _values(data) {
     return [
-      data.map(function(entry) {
+      data.map(function (entry) {
         if (Array.isArray(entry.value)) {
           return entry.value.map(this._values.bind(this));
         }
@@ -44,12 +44,7 @@ export const ChartDataBehavior = {
   },
   _extendEndDate(date) {
     if (date && moment) {
-      return this._formatDate(
-        moment(date)
-          .add(1, 'days')
-          .subtract(1, 'ms')
-          .toJSON(),
-      );
+      return this._formatDate(moment(date).add(1, 'days').subtract(1, 'ms').toJSON());
     }
     return date;
   },

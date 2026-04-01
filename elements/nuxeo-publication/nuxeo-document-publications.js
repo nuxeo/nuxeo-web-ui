@@ -128,9 +128,7 @@ Polymer({
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('publication.rendition')]]" flex="10">
           <template>
-            <span class="uppercase ellipsis rendition">
-              [[formatRendition(item.properties.rend:renditionName)]]
-            </span>
+            <span class="uppercase ellipsis rendition"> [[formatRendition(item.properties.rend:renditionName)]] </span>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('publication.publisher')]]" flex="40">
@@ -203,8 +201,7 @@ Polymer({
     if (this._src) {
       const { uid } = this._src;
       return {
-        queryParams: `${'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0' +
-          'AND (rend:sourceVersionableId = "'}${uid}" OR ecm:proxyVersionableId = "${uid}")`,
+        queryParams: `${'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0 AND (rend:sourceVersionableId = "'}${uid}" OR ecm:proxyVersionableId = "${uid}")`,
       };
     }
   },
@@ -298,7 +295,7 @@ Polymer({
         this.notify({ message: this.i18n('publication.unpublish.all.success') });
         this._fetchPublications();
       })
-      .catch(function() {
+      .catch(() => {
         this.notify({ message: this.i18n('publication.unpublish.all.error') });
       });
   },

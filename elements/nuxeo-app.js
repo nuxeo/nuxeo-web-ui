@@ -799,7 +799,7 @@ Polymer({
     });
 
     // NXP-25311: stop loading bar if an error occurs
-    window.onerror = function() {
+    window.onerror = function () {
       this.loading = false;
     }.bind(this);
 
@@ -1613,7 +1613,7 @@ Polymer({
         Performance.markUnique('nuxeo-app.page-changed');
       }
       // add performance listener to current page to track the last dom-change event
-      this.__performanceListener = function() {
+      this.__performanceListener = function () {
         const name = `${el.tagName.toLocaleLowerCase()}.dom-changed`;
         // a measure will be performed from the last page switch or, if this is the first page load,
         // from when navigation started to the current moment

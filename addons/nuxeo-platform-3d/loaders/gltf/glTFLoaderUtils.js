@@ -22,7 +22,7 @@ let GLTFLoaderUtils = Object.create(Object, {
 
   // initialization
   init: {
-    value: function() {
+    value: function () {
       this._streams = {};
       this._streamsStatus = {};
       this._resources = {};
@@ -33,14 +33,14 @@ let GLTFLoaderUtils = Object.create(Object, {
   //manage entries
   _containsResource: {
     enumerable: false,
-    value: function(resourceID) {
+    value: function (resourceID) {
       return this._resources[resourceID] ? true : false;
     },
   },
 
   _storeResource: {
     enumerable: false,
-    value: function(resourceID, resource) {
+    value: function (resourceID, resource) {
       if (!resourceID) {
         console.log('ERROR: entry does not contain id, cannot store');
         return;
@@ -56,13 +56,13 @@ let GLTFLoaderUtils = Object.create(Object, {
 
   _getResource: {
     enumerable: false,
-    value: function(resourceID) {
+    value: function (resourceID) {
       return this._resources[resourceID];
     },
   },
 
   _loadStream: {
-    value: function(path, type, delegate) {
+    value: function (path, type, delegate) {
       var dataUriRegex = /^data:(.*?)(;base64)?,(.*)$/;
 
       function decodeDataUriText(isBase64, data) {
@@ -134,7 +134,7 @@ let GLTFLoaderUtils = Object.create(Object, {
 
       //if this is not specified, 1 "big blob" scenes fails to load.
       xhr.setRequestHeader('If-Modified-Since', 'Sat, 01 Jan 1970 00:00:00 GMT');
-      xhr.onload = function(e) {
+      xhr.onload = function (e) {
         if (xhr.status == 200 || xhr.status == 206) {
           delegate.streamAvailable(path, xhr.response);
         } else {
@@ -149,7 +149,7 @@ let GLTFLoaderUtils = Object.create(Object, {
   requested: { value: 0, writable: true },
 
   _handleRequest: {
-    value: function(request) {
+    value: function (request) {
       var resourceStatus = this._resourcesStatus[request.id];
       if (resourceStatus) {
         this._resourcesStatus[request.id]++;
@@ -168,10 +168,10 @@ let GLTFLoaderUtils = Object.create(Object, {
       var self = this;
       var processResourceDelegate = {};
 
-      processResourceDelegate.streamAvailable = function(path, res_) {
+      processResourceDelegate.streamAvailable = function (path, res_) {
         var streamStatus = self._streamsStatus[path];
         var requests = streamStatus.requests;
-        requests.forEach(function(req_) {
+        requests.forEach(function (req_) {
           var subArray = res_.slice(req_.range[0], req_.range[1]);
           var convertedResource = req_.delegate.convert(subArray, req_.ctx);
           self._storeResource(req_.id, convertedResource);
@@ -182,7 +182,7 @@ let GLTFLoaderUtils = Object.create(Object, {
         delete self._streamsStatus[path];
       };
 
-      processResourceDelegate.handleError = function(errorCode, info) {
+      processResourceDelegate.handleError = function (errorCode, info) {
         request.delegate.handleError(errorCode, info);
       };
 
@@ -191,7 +191,7 @@ let GLTFLoaderUtils = Object.create(Object, {
   },
 
   _elementSizeForGLType: {
-    value: function(componentType, type) {
+    value: function (componentType, type) {
       var nElements = 0;
       switch (type) {
         case 'SCALAR':
@@ -235,7 +235,7 @@ let GLTFLoaderUtils = Object.create(Object, {
   },
 
   _handleWrappedBufferViewResourceLoading: {
-    value: function(wrappedBufferView, delegate, ctx) {
+    value: function (wrappedBufferView, delegate, ctx) {
       var bufferView = wrappedBufferView.bufferView;
       var buffer = bufferView.buffer;
       var byteOffset = wrappedBufferView.byteOffset + bufferView.description.byteOffset;
@@ -260,7 +260,7 @@ let GLTFLoaderUtils = Object.create(Object, {
   },
 
   getBuffer: {
-    value: function(wrappedBufferView, delegate, ctx) {
+    value: function (wrappedBufferView, delegate, ctx) {
       var savedBuffer = this._getResource(wrappedBufferView.id);
       if (false) {
         // savedBuffer) {
@@ -274,7 +274,7 @@ let GLTFLoaderUtils = Object.create(Object, {
   },
 
   getFile: {
-    value: function(request, delegate, ctx) {
+    value: function (request, delegate, ctx) {
       request.delegate = delegate;
       request.ctx = ctx;
 

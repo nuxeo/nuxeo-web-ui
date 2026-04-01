@@ -77,7 +77,7 @@ export const LiveConnectBehavior = {
 
     let listener;
     if (typeof settings.onMessageReceive === 'function') {
-      listener = function(event) {
+      listener = function (event) {
         settings.onMessageReceive(event);
       };
       window.addEventListener('message', listener);

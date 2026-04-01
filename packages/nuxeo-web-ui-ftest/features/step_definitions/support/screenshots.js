@@ -3,7 +3,7 @@ import * as mkdirp from 'mkdirp';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { After, Status } from '@cucumber/cucumber';
 
-After(async function(scenario) {
+After(async function (scenario) {
   const { status } = scenario.result;
   if (process.env.SCREENSHOTS_PATH && status === Status.FAILED) {
     mkdirp.sync(process.env.SCREENSHOTS_PATH);

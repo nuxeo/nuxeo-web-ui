@@ -382,7 +382,7 @@ class Spreadsheet {
 }
 
 // Renderers
-const ReadOnlyRenderer = function(instance, td) {
+const ReadOnlyRenderer = function (instance, td) {
   Handsontable.renderers.TextRenderer.apply(this, arguments);
   td.style.color = 'green';
   td.style.background = '#CEC';

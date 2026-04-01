@@ -22,7 +22,5 @@ module.exports = (imports) => {
 
   deps = deps || {};
 
-  return _(deps)
-    .keys()
-    .value();
+  return _(deps).keys().value();
 };

@@ -57,9 +57,7 @@ Polymer({
               <span class="segment">
                 <template is="dom-repeat" items="[[_segmentOc(segment)]]" as="segmentOc">
                   [[_preSegment(segmentOc)]]
-                  <em>
-                    [[_segment(segmentOc)]]
-                  </em>
+                  <em> [[_segment(segmentOc)]] </em>
                   [[_postSegment(segmentOc)]]
                 </template>
               </span>

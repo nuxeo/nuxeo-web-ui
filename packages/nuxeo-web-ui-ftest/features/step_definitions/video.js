@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Then } from '@cucumber/cucumber';
 
-Then('I can see the video conversions panel', async function() {
+Then('I can see the video conversions panel', async function () {
   const uiBrowser = await this.ui.browser;
   const page = await uiBrowser.documentPage(this.doc.type);
   await page.waitForVisible();
@@ -10,7 +10,7 @@ Then('I can see the video conversions panel', async function() {
   await elementVisible.should.be.true;
 });
 
-Then('I can see the video storyboard', async function() {
+Then('I can see the video storyboard', async function () {
   let refreshedOnce = false;
   await driver.waitUntil(
     async () => {

@@ -18,7 +18,7 @@ limitations under the License.
 const url = `themes/${localStorage.getItem('theme') || 'default'}/theme.html`;
 const xhr = new XMLHttpRequest();
 xhr.open('HEAD', url, false);
-xhr.onreadystatechange = function() {
+xhr.onreadystatechange = function () {
   if (xhr.readyState === 4) {
     if (xhr.status === 404) {
       console.warn(`"${localStorage.getItem('theme')}" theme not found, fallback to "default".`);
