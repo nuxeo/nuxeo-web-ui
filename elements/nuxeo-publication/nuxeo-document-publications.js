@@ -201,9 +201,7 @@ Polymer({
     if (this._src) {
       const { uid } = this._src;
       return {
-        queryParams: `${
-          'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0' + 'AND (rend:sourceVersionableId = "'
-        }${uid}" OR ecm:proxyVersionableId = "${uid}")`,
+        queryParams: `${'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0 AND (rend:sourceVersionableId = "'}${uid}" OR ecm:proxyVersionableId = "${uid}")`,
       };
     }
   },
@@ -297,7 +295,7 @@ Polymer({
         this.notify({ message: this.i18n('publication.unpublish.all.success') });
         this._fetchPublications();
       })
-      .catch(function () {
+      .catch(() => {
         this.notify({ message: this.i18n('publication.unpublish.all.error') });
       });
   },
