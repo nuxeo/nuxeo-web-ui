@@ -7,7 +7,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,11 @@ import * as chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
+chai.config.includeStack = true;
+
 chai.use(sinonChai);
 
-// Match the globals previously provided by karma-sinon-chai.
+// Match the globals previously provided by legacy Karma test setup.
 globalThis.chai = chai;
 globalThis.sinon = sinon;
 

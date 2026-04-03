@@ -139,9 +139,6 @@ module.exports = (config) => {
         ui: 'tdd',
         timeout: 3000,
       },
-      chai: {
-        includeStack: true,
-      },
     },
   });
 };
