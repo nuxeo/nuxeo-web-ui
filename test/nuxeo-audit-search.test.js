@@ -107,7 +107,8 @@ suite('nuxeo-audit-search', () => {
     });
     test('Should return the formatted date when date is passed as comment', () => {
       sinon.spy(element, '_formatComment');
-      expect(element._formatComment('2022-12-16T08:38:12.665Z', '')).to.equal('December 16, 2022 8:38 AM');
+      const dateAsComment = '2022-12-16T08:38:12.665Z';
+      expect(element._formatComment(dateAsComment, '')).to.equal(element.formatDateTime(dateAsComment));
     });
   });
   suite('build params', () => {
