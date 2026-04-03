@@ -73,6 +73,10 @@ module.exports = (config) => {
     },
     files: [
       {
+        pattern: 'test/setup.js',
+        type: 'module',
+      },
+      {
         pattern: `test/*${config.grep || '*.test.js'}`,
         type: 'module',
       },
@@ -88,7 +92,7 @@ module.exports = (config) => {
       // fallback: resolve any karma- plugins
       'karma-*',
     ],
-    frameworks: ['esm', 'mocha', 'sinon-chai', 'source-map-support'],
+    frameworks: ['esm', 'mocha', 'source-map-support'],
     esm: {
       // prevent auto loading of polyfills
       compatibility: 'none',
