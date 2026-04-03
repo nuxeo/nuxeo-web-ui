@@ -24,9 +24,9 @@ import './nuxeo-drive-icons.js';
 window.nuxeo = window.nuxeo || {};
 const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
 
-class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavior], PolymerElement) {
+class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBehavior], PolymerElement) {
   static get is() {
-    return 'nuxeo-drive-upload-button';
+    return 'nuxeo-drive-download-button';
   }
 
   static get properties() {
@@ -57,9 +57,10 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
             id="driveBtn"
             aria-labelledby="label"
           ></paper-icon-button>
-          <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveUploadButton.tooltip')]]</span>
-          <nuxeo-tooltip>[[i18n('driveUploadButton.tooltip')]]</nuxeo-tooltip>
+          <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveDownloadButton.tooltip')]]</span>
+          <nuxeo-tooltip>[[i18n('driveDownloadButton.tooltip')]]</nuxeo-tooltip>
         </div>
+     
 
       <nuxeo-dialog id="dialog" with-backdrop>
         <div class="vertical layout">
@@ -71,7 +72,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
         </div>
       </nuxeo-dialog>
 
-      <paper-toast id="toast">[[i18n('driveUpload.directTransfer.failed')]]</paper-toast>
+      <paper-toast id="toast">[[i18n('driveDownload.directTransfer.failed')]]</paper-toast>
     `;
   }
 
@@ -115,4 +116,4 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   }
 }
 
-customElements.define(NuxeoDriveUploadButton.is, NuxeoDriveUploadButton);
+customElements.define(NuxeoDriveDownloadButton.is, NuxeoDriveDownloadButton);

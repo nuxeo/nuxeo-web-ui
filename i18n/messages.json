@@ -512,6 +512,8 @@
   "driveEditButton.tooltip": "Open with Nuxeo Drive",
   "driveUploadButton.tooltip": "Upload with Nuxeo Drive",
   "driveUpload.directTransfer.failed": "An error occured while trying to upload the document with Nuxeo Drive.",
+  "driveDownloadButton.tooltip": "Download with Nuxeo Drive",
+  "driveDownload.directTransfer.failed": "An error occured while trying to download the document with Nuxeo Drive.",
   "drivePage.heading": "Nuxeo Drive",
   "drivePage.packages": "Packages",
   "drivePage.roots": "Synchronization Roots",
