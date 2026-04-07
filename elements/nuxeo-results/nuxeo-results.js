@@ -933,8 +933,14 @@ Polymer({
     if (typeof value !== 'string') return {};
     const s = value.trim();
     if (!s) return {};
+
     try {
-      return JSON.parse(s);
+      // Decode HTML entities before parsing
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = s;
+      const decoded = textarea.value;
+      const parsed = JSON.parse(decoded);
+      return parsed;
     } catch (e) {
       return {};
     }
@@ -1187,7 +1193,7 @@ Polymer({
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
   _getDocResultsPrefsKey() {
-    const n = this.document.uid || 'nuxeo-results';
+    const n = this.name || this.document.uid || 'nuxeo-results';
     return `documentPrefs.${n}`;
   },
 
@@ -1208,16 +1214,20 @@ Polymer({
       return null;
     }
 
-    // stored as JSON string (recommended)
     if (typeof rawValue === 'string') {
       try {
-        return JSON.parse(rawValue);
+        // Decode HTML entities before parsing
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = rawValue;
+        const decoded = textarea.value;
+
+        const parsed = JSON.parse(decoded);
+        return parsed;
       } catch (e) {
         return null;
       }
     }
 
-    // if backend ever returns already-parsed object
     if (typeof rawValue === 'object') {
       return rawValue;
     }
