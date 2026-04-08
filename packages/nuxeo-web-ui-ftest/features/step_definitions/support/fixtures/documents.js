@@ -4,7 +4,7 @@ import documentService from '../services/documentService.js';
 
 fixtures.documents = documentService;
 
-Before(function() {
+Before(function () {
   return documentService.getDocument('/default-domain').then((doc) => {
     this.doc = doc;
   });

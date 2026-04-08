@@ -218,9 +218,7 @@ Polymer({
   },
 
   ready() {
-    this.startDate = moment()
-      .subtract(1, 'month')
-      .format('YYYY-MM-DD');
+    this.startDate = moment().subtract(1, 'month').format('YYYY-MM-DD');
     this.endDate = moment().format('YYYY-MM-DD');
   },
 

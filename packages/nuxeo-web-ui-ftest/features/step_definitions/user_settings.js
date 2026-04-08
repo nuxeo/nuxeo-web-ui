@@ -7,16 +7,16 @@ Given(/^the following OAuth2 providers exist$/, async (table) => {
   Promise.all(table.rows().map(async (row) => fixtures.oauth2Providers.create(row[0])));
 });
 
-Given(/^I have tokens for the following OAuth2 providers$/, function(table) {
+Given(/^I have tokens for the following OAuth2 providers$/, function (table) {
   return Promise.all(table.rows().map((row) => fixtures.oauth2Providers.createToken(row[0], this.username)));
 });
 
-When(/^I am on user cloud services page$/, async function() {
+When(/^I am on user cloud services page$/, async function () {
   const cloudServicesEle = await this.ui.goToUserCloudServices();
   return cloudServicesEle;
 });
 
-Then(/^I can only see (\d+) provider token[s]? that belong[s]? to me$/, async function(numberOfTokens) {
+Then(/^I can only see (\d+) provider token[s]? that belong[s]? to me$/, async function (numberOfTokens) {
   const cloudService = await this.ui.userCloudServices;
   await cloudService.waitForVisible();
   const tokenEle = await cloudService.getTokens(this.username);
@@ -25,7 +25,7 @@ Then(/^I can only see (\d+) provider token[s]? that belong[s]? to me$/, async fu
   }
 });
 
-Then(/^I can delete token for provider "(.+)" that belongs to me$/, async function(provider) {
+Then(/^I can delete token for provider "(.+)" that belongs to me$/, async function (provider) {
   const cloudServicePage = await this.ui.userCloudServices;
   await cloudServicePage.waitForVisible();
   const tokenEle = await cloudServicePage.getTokens(this.username, provider);
@@ -45,15 +45,15 @@ Given(/^the following OAuth2 clients exist$/, async (table) =>
   Promise.all(table.rows().map(async (row) => fixtures.oauth2Clients.create(row[0]))),
 );
 
-Given(/^I have tokens for the following OAuth2 clients$/, async function(table) {
+Given(/^I have tokens for the following OAuth2 clients$/, async function (table) {
   return Promise.all(table.rows().map(async (row) => fixtures.oauth2Clients.createToken(row[0], this.username)));
 });
 
-When(/^I am on user authorized applications page$/, async function() {
+When(/^I am on user authorized applications page$/, async function () {
   await this.ui.goToUserAuthorizedApps();
 });
 
-Then(/^I can see "(.+)" as an authorized application$/, function(application) {
+Then(/^I can see "(.+)" as an authorized application$/, function (application) {
   this.ui.userAuthorizedApps.waitForVisible();
   let tokens;
   driver.waitUntil(() => {
@@ -62,7 +62,7 @@ Then(/^I can see "(.+)" as an authorized application$/, function(application) {
   });
 });
 
-Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberOfApps) {
+Then(/^I can only see (\d+) authorized application[s]?$/, async function (numberOfApps) {
   await driver.pause(3000);
   const authPage = await this.ui.userAuthorizedApps;
   await authPage.waitForVisible();
@@ -72,7 +72,7 @@ Then(/^I can only see (\d+) authorized application[s]?$/, async function(numberO
   }
 });
 
-Then('I cannot see authorized application', async function() {
+Then('I cannot see authorized application', async function () {
   const ui = await this.ui;
   const apps = await ui.emptyAuthorizedApps;
   await driver.pause(1500);
@@ -80,7 +80,7 @@ Then('I cannot see authorized application', async function() {
   await apps.waitForDisplayed();
 });
 
-Then(/^I can revoke access for "(.+)" application$/, async function(appName) {
+Then(/^I can revoke access for "(.+)" application$/, async function (appName) {
   const authPage = await this.ui.userAuthorizedApps;
   await authPage.waitForVisible();
   await browser.waitUntil(async () => {

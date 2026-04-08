@@ -504,10 +504,7 @@ Polymer({
     return new Promise((resolve, error) => {
       this._fetchDebouncer = Debouncer.debounce(this._fetchDebouncer, timeOut.after(100), () => {
         if (this.view) {
-          this.view
-            .fetch()
-            .then(resolve)
-            .catch(error);
+          this.view.fetch().then(resolve).catch(error);
         } else {
           resolve();
         }

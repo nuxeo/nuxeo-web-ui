@@ -49,7 +49,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
             -webkit-overflow-scrolling: auto;
             max-width: 500px;
             max-height: 150px;
-          }
+          };
         }
       </style>
 

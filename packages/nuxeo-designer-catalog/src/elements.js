@@ -145,11 +145,8 @@ module.exports = (imports) => {
         data.push(chunk);
         done();
       },
-      function(done) {
-        const sortedData = _(data)
-          .flatten()
-          .sortBy('name')
-          .value();
+      function (done) {
+        const sortedData = _(data).flatten().sortBy('name').value();
         this.push(sortedData);
         done();
       },

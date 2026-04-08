@@ -124,9 +124,7 @@ Polymer({
             <template is="dom-repeat" items="[[colDef]]" as="col">
               <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
                 <template>
-                  <template is="dom-if" if="[[!_entryActions(column.key)]]">
-                    [[_value(index, column.key)]]
-                  </template>
+                  <template is="dom-if" if="[[!_entryActions(column.key)]]"> [[_value(index, column.key)]] </template>
                   <template is="dom-if" if="[[_entryActions(column.key)]]">
                     <paper-icon-button
                       id="edit-button-[[index]]"
@@ -453,7 +451,7 @@ Polymer({
         schemaDataCache[schema] = fields;
         return fields;
       })
-      .catch(function(error) {
+      .catch(function (error) {
         this.notify({ message: this.i18n('vocabularyManagement.cannotGetSchema') });
         if (error.status !== 404) {
           throw error;

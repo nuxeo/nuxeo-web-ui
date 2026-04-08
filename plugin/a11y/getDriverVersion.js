@@ -5,9 +5,7 @@ import fetch from 'node-fetch';
 const chromePath = chromeLauncher.Launcher.getFirstInstallation();
 let version;
 try {
-  version = execSync(`"${chromePath}" --version`)
-    .toString()
-    .trim();
+  version = execSync(`"${chromePath}" --version`).toString().trim();
 } catch (e) {
   console.error('unable to get Chrome version: ', e);
 }

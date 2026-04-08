@@ -59,7 +59,7 @@ Polymer({
         --paper-dialog-scrollable: {
           padding: 0;
           overflow-x: hidden;
-        }
+        };
       }
 
       paper-spinner-lite {
@@ -419,9 +419,7 @@ Polymer({
           <template is="dom-if" if="[[!hasFiles]]">
             <div class="vertical layout center center-justified flex">
               <div class="dropzone-label horizontal layout center center-justified">
-                <button class="link" on-click="_showUploadDialog">
-                  [[i18n('documentImportForm.clickOrDrop')]]
-                </button>
+                <button class="link" on-click="_showUploadDialog">[[i18n('documentImportForm.clickOrDrop')]]</button>
               </div>
               <span hidden$="[[!_hasVisibleContributions]]">[[i18n('documentImportForm.linkFilesFrom')]]</span>
               <div class="importActions horizontal layout wrap">
@@ -441,17 +439,11 @@ Polymer({
                     <div class="file-to-import horizontal layout" error$="{{file.error}}">
                       <div class="vertical layout flex">
                         <div class="horizontal layout">
-                          <div class="name" title="[[file.name]]">
-                            [[file.name]]
-                          </div>
-                          <span class="size">
-                            [[formatSize(file.size)]]
-                          </span>
+                          <div class="name" title="[[file.name]]">[[file.name]]</div>
+                          <span class="size"> [[formatSize(file.size)]] </span>
                         </div>
                         <template is="dom-if" if="[[file.providerName]]">
-                          <div class="provider">
-                            [[file.providerName]]
-                          </div>
+                          <div class="provider">[[file.providerName]]</div>
                         </template>
                         <template is="dom-if" if="[[_displayProgressBar(file.*)]]">
                           <paper-progress indeterminate="[[!hasProgress()]]" value="[[file.progress]]"></paper-progress>
@@ -479,16 +471,10 @@ Polymer({
                     <div class="file-to-import horizontal layout" error$="{{file.error}}">
                       <div class="vertical layout flex">
                         <div class="horizontal layout center">
-                          <div class="name" title="[[file.name]]">
-                            [[file.name]]
-                          </div>
-                          <span class="size">
-                            [[formatSize(file.size)]]
-                          </span>
+                          <div class="name" title="[[file.name]]">[[file.name]]</div>
+                          <span class="size"> [[formatSize(file.size)]] </span>
                         </div>
-                        <div class="provider">
-                          [[file.providerName]]
-                        </div>
+                        <div class="provider">[[file.providerName]]</div>
                       </div>
                       <div class="horizontal layout center">
                         <paper-icon-button
@@ -854,7 +840,7 @@ Polymer({
   _observeFiles(changeRecord) {
     if (changeRecord) {
       if (changeRecord.path === 'files.splices' && changeRecord.value && changeRecord.value.indexSplices) {
-        changeRecord.value.indexSplices.forEach(function(s) {
+        changeRecord.value.indexSplices.forEach(function (s) {
           for (let i = 0; i < s.addedCount; i++) {
             const index = s.index + i;
             this.push('localFiles', this.files[index]);
@@ -1082,9 +1068,17 @@ Polymer({
       if (currentFile.checked) {
         // load the file's own data
         await this._loadFile(currentFile.docData);
-      } else if (previousFile) {
+      } else if (previousFile && previousFile.docData) {
         // load the previous file's data
-        await this._loadFile(previousFile.docData, currentFile.name);
+        // preserve type and parent from the previous file, but start with clean properties
+        await this._loadFile(
+          {
+            parent: previousFile.docData.parent,
+            type: previousFile.docData.type,
+            document: { properties: {} },
+          },
+          currentFile.name,
+        );
       } else {
         await this._loadFile({}, currentFile.name);
       }
@@ -1280,10 +1274,11 @@ Polymer({
         index = i - self.localFiles.length;
       }
       promises.push(
-        (function(indexesToRemove, idx) {
-          return (arr[idx].docData && arr[idx].checked && !arr[idx].error
-            ? self._processFileWithMetadata(arr[idx])
-            : Promise.resolve({ 'entity-type': 'Documents', entries: [] })
+        (function (indexesToRemove, idx) {
+          return (
+            arr[idx].docData && arr[idx].checked && !arr[idx].error
+              ? self._processFileWithMetadata(arr[idx])
+              : Promise.resolve({ 'entity-type': 'Documents', entries: [] })
           )
             .then((result) => {
               indexesToRemove.push(idx);
