@@ -465,6 +465,9 @@ Polymer({
     '_loadGlobalPrefs(_shouldUseGlobalPrefs, nxProvider, _connectedUserId)',
     '_applyGlobalPrefs(_shouldUseGlobalPrefs, globalPrefs, view, displayMode)',
     '_connectedUserChanged(_connectedUserId)',
+
+    // Update localStorage key when name changes (different documents have different names)
+    '_updateStorage(name, _connectedUserId)',
   ],
 
   listeners: {
@@ -1193,8 +1196,10 @@ Polymer({
 
   // Returns the stable preference key used to store/retrieve results table prefs on a document.
   _getDocResultsPrefsKey() {
-    const n = this.name || this.document.uid || 'nuxeo-results';
-    return `documentPrefs.${n}`;
+    // Use this.name as primary identifier (includes context like -trashed suffix)
+    // Fall back to document.uid if name not available
+    const docId = this.name || this.document?.uid || 'nuxeo-results';
+    return `documentPrefs.${docId}`;
   },
 
   // Extracts and parses doc prefs from the userPreferences document enricher (no additional HTTP call).
@@ -1237,13 +1242,14 @@ Polymer({
 
   // Loads doc prefs from in-session cache or from the document enricher (defaults if none exist).
   _loadDocPrefs(enabled, document, connectedUserId) {
+    // Reset state when loading new doc prefs
     this.__hasBackendDocPrefs = false;
+    this.docPrefs = {}; // Clear current prefs immediately to prevent stale data
+
     if (!enabled) {
-      this.docPrefs = {};
       return;
     }
     if (!document || !document.path) {
-      this.docPrefs = {};
       return;
     }
 
@@ -1290,18 +1296,12 @@ Polymer({
       return;
     }
 
-    // If backend prefs were already applied, only re-apply if docPrefs actually changed
-    if (this.__hasBackendDocPrefs && this._lastAppliedDocPrefs === prefs) {
-      return; // Skip redundant application
-    }
-
     // Fallback chain: backend prefs → localStorage → table defaults
     let settingsToApply = null;
 
     if (prefs && Object.keys(prefs).length > 0) {
       settingsToApply = prefs;
       this.__hasBackendDocPrefs = true;
-      this._lastAppliedDocPrefs = prefs;
     } else if (this._settings && this._settings[this.displayMode]) {
       // Only use localStorage if we never had backend prefs
       if (!this.__hasBackendDocPrefs) {
