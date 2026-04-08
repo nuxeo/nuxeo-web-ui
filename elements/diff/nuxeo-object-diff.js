@@ -33,7 +33,7 @@ Diff.registry = {
  * @param {string} id - The element id.
  * @param {Object} rules - A set of rules, following the format: `{type: 'type', property: 'propertname'}`.
  */
-Diff.registerElement = function(id, rules) {
+Diff.registerElement = function (id, rules) {
   if (rules.type) {
     if (!Diff.registry.types) {
       Diff.registry.types = {};
@@ -51,7 +51,7 @@ Diff.registerElement = function(id, rules) {
 /**
  * Retrieves a custom element for a given set of rules, or the default element if none is found.
  */
-Diff.getElement = function(rules) {
+Diff.getElement = function (rules) {
   let id = null;
   if (Diff.registry.properties && rules.property) {
     id = Diff.registry.properties[rules.property];

@@ -287,17 +287,11 @@ Polymer({
                   <div class="file-to-import horizontal layout">
                     <div class="vertical layout flex">
                       <div class="horizontal layout">
-                        <div class="name">
-                          [[file.name]]
-                        </div>
-                        <span class="size">
-                          [[formatSize(file.size)]]
-                        </span>
+                        <div class="name">[[file.name]]</div>
+                        <span class="size"> [[formatSize(file.size)]] </span>
                       </div>
                       <template is="dom-if" if="[[file.providerName]]">
-                        <div class="provider">
-                          [[file.providerName]]
-                        </div>
+                        <div class="provider">[[file.providerName]]</div>
                       </template>
                       <template is="dom-if" if="[[complete]]">
                         <div class="complete">
@@ -414,9 +408,7 @@ Polymer({
         </div>
 
         <div class="buttons horizontal end-justified layout">
-          <paper-button noink on-tap="_clear" disabled$="[[!_hasResult]]">
-            [[i18n('csv.import.new')]]
-          </paper-button>
+          <paper-button noink on-tap="_clear" disabled$="[[!_hasResult]]"> [[i18n('csv.import.new')]] </paper-button>
           <paper-button dialog-dismiss on-tap="_close" class="primary">[[i18n('command.close')]]</paper-button>
         </div>
       </div>

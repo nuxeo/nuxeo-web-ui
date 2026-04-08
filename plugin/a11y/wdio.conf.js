@@ -48,9 +48,7 @@ capability['goog:chromeOptions'] = options;
 // Allow overriding driver version
 if (!process.env.DRIVER_VERSION) {
   try {
-    process.env.DRIVER_VERSION = execSync('node getDriverVersion.js')
-      .toString()
-      .trim();
+    process.env.DRIVER_VERSION = execSync('node getDriverVersion.js').toString().trim();
   } catch (e) {
     console.error('unable to get Chrome version: ', e);
   }

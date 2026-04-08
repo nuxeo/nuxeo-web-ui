@@ -184,18 +184,12 @@ function buildGridStyle(grid, validate = true) {
   const css = `
 :host {
   display: grid;
-  grid-template-columns: ${cGrid.templateColumns ||
-    (cGrid.columns && cGrid.columns > 1
-      ? Array(cGrid.columns)
-          .fill('1fr')
-          .join(' ')
-      : 'auto')};
-  grid-template-rows: ${cGrid.templateRows ||
-    (cGrid.rows && cGrid.rows > 1
-      ? Array(cGrid.rows)
-          .fill('auto')
-          .join(' ')
-      : 'auto')};
+  grid-template-columns: ${
+    cGrid.templateColumns || (cGrid.columns && cGrid.columns > 1 ? Array(cGrid.columns).fill('1fr').join(' ') : 'auto')
+  };
+  grid-template-rows: ${
+    cGrid.templateRows || (cGrid.rows && cGrid.rows > 1 ? Array(cGrid.rows).fill('auto').join(' ') : 'auto')
+  };
   ${cGrid.gap ? `grid-gap: ${cGrid.gap}` : ''};
   ${cGrid.columnGap ? `grid-column-gap: ${cGrid.columnGap};` : ''}
   ${cGrid.rowGap ? `grid-row-gap: ${cGrid.rowGap};` : ''}

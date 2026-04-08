@@ -85,11 +85,7 @@ suite('nuxeo-breadcrumb', () => {
 
   setup(async () => {
     server = await login();
-    breadcrumb = await fixture(
-      html`
-        <nuxeo-breadcrumb .document=${document} .router=${router}></nuxeo-breadcrumb>
-      `,
-    );
+    breadcrumb = await fixture(html` <nuxeo-breadcrumb .document=${document} .router=${router}></nuxeo-breadcrumb> `);
   });
 
   teardown(() => {
@@ -119,11 +115,9 @@ suite('nuxeo-breadcrumb', () => {
     };
     setup(async () => {
       server = await login();
-      breadcrumb = await fixture(
-        html`
-          <nuxeo-breadcrumb .document=${document2} .router=${router}></nuxeo-breadcrumb>
-        `,
-      );
+      breadcrumb = await fixture(html`
+        <nuxeo-breadcrumb .document=${document2} .router=${router}></nuxeo-breadcrumb>
+      `);
     });
 
     test('Should display a breadcrumb when document does not have breadcrumb entries', async () => {
@@ -163,13 +157,11 @@ suite('nuxeo-breadcrumb', () => {
 
   suite('Space adjustment', () => {
     setup(async () => {
-      breadcrumb = await fixture(
-        html`
-          <div id="container" style="max-width: 200px">
-            <nuxeo-breadcrumb .document=${document} .router=${router}></nuxeo-breadcrumb>
-          </div>
-        `,
-      );
+      breadcrumb = await fixture(html`
+        <div id="container" style="max-width: 200px">
+          <nuxeo-breadcrumb .document=${document} .router=${router}></nuxeo-breadcrumb>
+        </div>
+      `);
     });
 
     test('Should add ellipsis to ancestors when parent is smaller than nuxeo-breadcrumb', async () => {

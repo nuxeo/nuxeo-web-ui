@@ -116,7 +116,7 @@ limitations under the License.
         const top = window.screenY + window.outerHeight / 2 - settings.height / 2;
 
         if (typeof settings.onMessageReceive === 'function') {
-          listener = function(event) {
+          listener = function (event) {
             settings.onMessageReceive(event);
           };
           window.addEventListener('message', listener);

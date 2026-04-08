@@ -12,7 +12,7 @@
     "chalk": "^2.4.1",
     "cleankill": "^2.0.0",
     "sauce-connect-launcher": "^1.2.4",
-    "uuid": "^3.3.2",
+    "uuid": "^13.0.0",
     "webdriverio": "^4.13.0"
   }
 }

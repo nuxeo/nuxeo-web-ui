@@ -18,7 +18,7 @@ limitations under the License.
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 let _resource;
 
