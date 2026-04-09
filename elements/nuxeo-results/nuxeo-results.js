@@ -544,10 +544,6 @@ Polymer({
         this.set('_settings.displayMode', this.displayMode);
         this.saveSettings();
         view.settings = this._settings[this.displayMode];
-        // Trigger resize to ensure column widths are applied
-        if (view.notifyResize) {
-          view.notifyResize();
-        }
       }
       // restore selection
       if (this.selectedItems) {
@@ -565,6 +561,12 @@ Polymer({
       // update view
       this.reset();
       this.fetch();
+      // Trigger resize after fetch to ensure column widths are applied
+      this.async(() => {
+        if (view.notifyResize) {
+          view.notifyResize();
+        }
+      });
       this.fire('search-results-view', { view, name: this.name });
     }
   },
@@ -588,10 +590,6 @@ Polymer({
       view.nxProvider = this.nxProvider;
       if (this._settings && view.settings) {
         view.settings = this._settings[name];
-        // Trigger resize to ensure column widths are applied
-        if (view.notifyResize) {
-          view.notifyResize();
-        }
       }
       if (name === this.displayMode) {
         hasDisplayMode = true;
@@ -660,10 +658,12 @@ Polymer({
       }
       if (this._settings[this.displayMode] && this.view) {
         this.view.settings = this._settings[this.displayMode];
-        // Trigger resize to ensure column widths are applied
-        if (this.view.notifyResize) {
-          this.view.notifyResize();
-        }
+        // Trigger resize after a short delay to ensure column widths are applied
+        this.async(() => {
+          if (this.view && this.view.notifyResize) {
+            this.view.notifyResize();
+          }
+        });
       }
     }
     this._isRestoring = false;
