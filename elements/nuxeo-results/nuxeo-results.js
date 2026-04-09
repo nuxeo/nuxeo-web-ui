@@ -958,14 +958,66 @@ Polymer({
     }
   },
 
-  // Applies preferences to the current view.settings while marking _isRestoring to prevent triggering saves.
+  // Applies preferences to view by either clearing to defaults or applying saved settings.
+  // Note: view.settings is a JS getter/setter, not a Polymer property, so we handle empty case explicitly.
   _applyPrefsToView(view, prefs) {
-    if (!view || !prefs) {
+    if (!view) {
       return;
     }
+
     this._isRestoring = true;
     try {
-      view.settings = this._deepClone(prefs);
+      const newSettings = this._deepClone(prefs || {});
+      const isEmpty = Object.keys(newSettings).length === 0;
+
+      if (isEmpty && view.columns) {
+        // Clear settings by resetting each column to its original defaults
+        // This approach is future-proof: to add support for new customizable column properties,
+        // just update the two sections marked with "EXTEND HERE" below.
+
+        /**
+         * Returns the default value for a given column property.
+         *
+         * EXTEND HERE: When adding support for new customizable column properties
+         * (e.g., minWidth, maxWidth, align), add a new case statement below.
+         */
+        const getDefaultValue = (column, idx, prop) => {
+          switch (prop) {
+            case 'hidden':
+              return column.hiddenBack || false;
+            case 'order':
+              return idx;
+            case 'width':
+              return null;
+            default:
+              return null;
+          }
+        };
+
+        /**
+         * EXTEND HERE: If adding support for new customizable properties,
+         * add the property name to this array (e.g., 'minWidth', 'align').
+         */
+        const customizableProps = ['hidden', 'order', 'width'];
+
+        // Reset all customizable properties to their defaults
+        view.columns.forEach((column, idx) => {
+          customizableProps.forEach((prop) => {
+            const defaultValue = getDefaultValue(column, idx, prop);
+            if (column[prop] !== defaultValue) {
+              view.set(`columns.${idx}.${prop}`, defaultValue);
+            }
+          });
+        });
+
+        // Clear sort order
+        if (view.sortOrder && view.sortOrder.length > 0) {
+          view.sortOrder = [];
+        }
+      } else {
+        // Apply settings via the setter
+        view.settings = newSettings;
+      }
     } finally {
       this._isRestoring = false;
     }
@@ -1242,20 +1294,16 @@ Polymer({
 
   // Loads doc prefs from in-session cache or from the document enricher (defaults if none exist).
   _loadDocPrefs(enabled, document, connectedUserId) {
-    // Reset state when loading new doc prefs
+    // Reset state and trigger observer with empty prefs first
     this.__hasBackendDocPrefs = false;
-    this.docPrefs = {}; // Clear current prefs immediately to prevent stale data
+    this.docPrefs = {};
 
-    if (!enabled) {
-      return;
-    }
-    if (!document || !document.path) {
+    if (!enabled || !document || !document.path) {
       return;
     }
 
     const userId = connectedUserId || this._getUserId();
     if (!userId) {
-      this.docPrefs = {};
       return;
     }
 
@@ -1276,12 +1324,7 @@ Polymer({
       __docPrefsCache.set(cacheKey, enricherPrefs);
       this.docPrefs = enricherPrefs;
       this.__hasBackendDocPrefs = true;
-      return;
     }
-
-    // no prefs on backend yet -> defaults
-    this.docPrefs = {};
-    this.__hasBackendDocPrefs = false;
   },
 
   _applyDocPrefs(enabled, prefs, view) {
@@ -1304,13 +1347,9 @@ Polymer({
       this.__hasBackendDocPrefs = true;
     } else if (this._settings && this._settings[this.displayMode]) {
       // Only use localStorage if we never had backend prefs
-      if (!this.__hasBackendDocPrefs) {
-        settingsToApply = this._settings[this.displayMode];
-      } else {
-        return; // Keep current backend prefs, don't override with localStorage
-      }
+      settingsToApply = this.__hasBackendDocPrefs ? {} : this._settings[this.displayMode];
     } else {
-      return;
+      settingsToApply = {};
     }
 
     this._applyPrefsToView(view, settingsToApply);
