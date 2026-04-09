@@ -1068,9 +1068,16 @@ Polymer({
       if (currentFile.checked) {
         // load the file's own data
         await this._loadFile(currentFile.docData);
-      } else if (previousFile) {
-        // load the previous file's data
-        await this._loadFile(previousFile.docData, currentFile.name);
+      } else if (previousFile && previousFile.docData) {
+        // preserve type and parent from the previous file, but start with clean properties
+        await this._loadFile(
+          {
+            parent: previousFile.docData.parent,
+            type: previousFile.docData.type,
+            document: { properties: {} },
+          },
+          currentFile.name,
+        );
       } else {
         await this._loadFile({}, currentFile.name);
       }

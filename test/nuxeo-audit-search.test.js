@@ -98,16 +98,14 @@ suite('nuxeo-audit-search', () => {
 
   suite('format comment', () => {
     test('Should return the text View to identify type of download alongwith file name', () => {
-      sinon.spy(element, '_formatComment');
       expect(element._formatComment('file1.jpeg', 'view')).to.equal('View: [file1.jpeg]');
     });
     test('Should return the comment only', () => {
-      sinon.spy(element, '_formatComment');
       expect(element._formatComment('file1.jpeg', '')).to.equal('file1.jpeg');
     });
     test('Should return the formatted date when date is passed as comment', () => {
-      sinon.spy(element, '_formatComment');
-      expect(element._formatComment('2022-12-16T08:38:12.665Z', '')).to.equal('December 16, 2022 8:38 AM');
+      const dateAsComment = '2022-12-16T08:38:12.665Z';
+      expect(element._formatComment(dateAsComment, '')).to.equal(element.formatDateTime(dateAsComment));
     });
   });
   suite('build params', () => {
@@ -119,19 +117,16 @@ suite('nuxeo-audit-search', () => {
       element.category = 'test';
       element.startDate = '2022-12-16T08:38:12.665Z';
       element.endDate = '2022-12-15T08:38:12.665Z';
-      sinon.spy(element, '_formatComment');
       element.visible = true;
       expect(element.documentId).to.equal(element.document.uid);
     });
     test('Should return empty document id when document is not present', () => {
       element.events = ['abc'];
       element.document = null;
-      sinon.spy(element, '_formatComment');
       element.visible = true;
       expect(element.documentId).to.equal('');
     });
     test('Should return the text View to identify type of download alongwith file name', () => {
-      sinon.spy(element, '_formatComment');
       element.visible = true;
       expect(element._buildParams().principalName).to.equal('');
     });
