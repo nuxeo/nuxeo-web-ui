@@ -412,12 +412,34 @@ Polymer({
     this.$.nxcon.connect().then(this._updateStorage.bind(this));
   },
 
+  /**
+   * Documents currently rendered in the active results view (used for selection and actions).
+   *
+   * Resolution order:
+   * 1. `view.items` when the view already exposes a plain array (e.g. data table, grid).
+   * 2. Otherwise `view.$.list.items` when the view delegates to an internal `iron-list`.
+   *
+   * Right after navigation or refresh, `view` may exist while `$` / `$.list` are not ready yet, or
+   * reading `items` can throw inside iron-list. Those cases return `[]` so observers and toolbars
+   * do not break (WEBUI-1553).
+   */
   get items() {
-    if (this.view && this.view.items) {
-      return this.view.items;
+    if (!this.view) {
+      return [];
     }
-    // XXX: this.view.items is not working
-    return this.view && this.view.$.list ? this.view.$.list.items : [];
+    try {
+      if (Array.isArray(this.view.items)) {
+        return this.view.items;
+      }
+      if (this.view.$ && this.view.$.list) {
+        const listItems = this.view.$.list.items;
+        return Array.isArray(listItems) ? listItems : [];
+      }
+    } catch (e) {
+      /* Unsafe read during attach/refresh; treat as no rows yet */
+      return [];
+    }
+    return [];
   },
 
   detached() {
@@ -503,7 +525,7 @@ Polymer({
   fetch() {
     return new Promise((resolve, error) => {
       this._fetchDebouncer = Debouncer.debounce(this._fetchDebouncer, timeOut.after(100), () => {
-        if (this.view) {
+        if (this.view && typeof this.view.fetch === 'function') {
           this.view.fetch().then(resolve).catch(error);
         } else {
           resolve();
@@ -514,7 +536,10 @@ Polymer({
 
   reset() {
     if (this.view) {
-      this.view.reset();
+      // Guard: only call reset if view exists and method is available (WEBUI-1553)
+      if (typeof this.view.reset === 'function') {
+        this.view.reset();
+      }
     }
   },
 
@@ -558,7 +583,7 @@ Polymer({
       this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
       this.listen(view, '_excluded-items-changed', '_excludedDocsChanged');
       view.nxProvider = this.nxProvider;
-      // update view
+      // update view - now safe as reset/fetch have defensive checks
       this.reset();
       this.fetch();
       this.fire('search-results-view', { view, name: this.name });
@@ -623,16 +648,38 @@ Polymer({
   },
 
   _updateActionContext() {
-    this.actionContext = {
-      baseUrl: this.$.nxcon.url,
-      displayMode: this.displayMode,
-      nxProvider: this.nxProvider,
-      selectedItems: this.selectedItems,
-      items: this.items,
-      columns: this.columns,
-      document: this.document,
-      selection: this.view && this.view.selectAllActive ? this.view : this.selectedItems,
-    };
+    if (!this.view) {
+      return;
+    }
+
+    /* Verify at least one path in get items() will return real data.
+     * Must match the two resolution paths:
+     * 1. Direct items array exists, OR
+     * 2. Iron-list with both shadow DOM ($) and list ready
+     * This prevents setting actionContext with empty items during timing window when view.$
+     * exists but view.$.list is still undefined, which can cause action button flicker (WEBUI-1553).
+     */
+    const hasItems = Array.isArray(this.view.items);
+    const hasList = this.view.$ && this.view.$.list;
+
+    if (!hasItems && !hasList) {
+      return;
+    }
+
+    try {
+      this.actionContext = {
+        baseUrl: this.$.nxcon.url,
+        displayMode: this.displayMode,
+        nxProvider: this.nxProvider,
+        selectedItems: this.selectedItems,
+        items: this.items,
+        columns: this.columns,
+        document: this.document,
+        selection: this.view && this.view.selectAllActive ? this.view : this.selectedItems,
+      };
+    } catch (e) {
+      /* Observer must not throw or selection toolbar stops updating for the rest of the session */
+    }
   },
 
   _clearSelectedItems() {
@@ -699,13 +746,21 @@ Polymer({
   clearSelection() {
     this._excludedDocs = -1;
     this.selectAllActive = false;
-    this.view.clearSelection();
+    // Guard: only call view method if view is ready (WEBUI-1553)
+    if (this.view && typeof this.view.clearSelection === 'function') {
+      this.view.clearSelection();
+    }
   },
 
   selectItems(items) {
     this.clearSelection();
-    this.view.selectItems(items);
-    this.view.notifyResize();
+    // Guard: only call view methods if view is ready (WEBUI-1553)
+    if (this.view && typeof this.view.selectItems === 'function') {
+      this.view.selectItems(items);
+    }
+    if (this.view && typeof this.view.notifyResize === 'function') {
+      this.view.notifyResize();
+    }
   },
 
   refresh() {
