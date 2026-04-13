@@ -145,6 +145,7 @@ class S3Provider {
       region: options.region,
       forcePathStyle: options.usePathStyleAccess || false,
       useAccelerateEndpoint: options.useS3Accelerate || false,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
     };
   }
 
