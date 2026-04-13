@@ -79,9 +79,13 @@ Then(/^I can see that "([^"]*)" belongs to (\w+) actors$/, async function (user,
   const documentTaskView = await browser.documentTaskView;
   await documentTaskView.waitForVisible();
   const actorsSelector = `${option === 'delegated' ? '#delegatedActors' : '#assignedActors'}`;
-  await documentTaskView.waitForVisible(`${actorsSelector} nuxeo-tags`);
+  const actorsTags = await documentTaskView.el.element(`${actorsSelector} nuxeo-tags`);
+  await actorsTags.waitForVisible();
   // Wait for nuxeo-user-tag inner content to render (depends on async _currentUser from nuxeo-connection)
-  await documentTaskView.waitForVisible(`${actorsSelector} nuxeo-user-tag .tag .username-container`);
+  const usernameContainer = await documentTaskView.el.element(
+    `${actorsSelector} nuxeo-user-tag .tag .username-container`,
+  );
+  await usernameContainer.waitForVisible();
   const actorsElement =
     option === 'delegated' ? await documentTaskView.delegatedActors : await documentTaskView.assignedActors;
   const result = await documentTaskView.actorExists(actorsElement, user);
