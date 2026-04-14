@@ -18,7 +18,7 @@
     "marked": "^4.0.17"
   },
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
+    "@eslint/js": "^10.0.1",
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@nuxeo/testing-helpers": "~2025.15.0-rc",
     "@open-wc/karma-esm": "^4.0.0",
