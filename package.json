@@ -22,7 +22,7 @@
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@nuxeo/testing-helpers": "~2025.15.0-rc",
     "@open-wc/karma-esm": "^4.0.0",
-    "@open-wc/webpack-import-meta-loader": "^0.2.1",
+    "@open-wc/webpack-import-meta-loader": "^0.4.7",
     "@wdio/cli": "^9.12.2",
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "babel-plugin-transform-rename-import": "^2.3.0",
