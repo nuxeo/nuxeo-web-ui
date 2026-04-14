@@ -648,35 +648,29 @@ Polymer({
   },
 
   _updateActionContext() {
-    if (!this.view) {
-      return;
-    }
-
-    /* Verify at least one path in get items() will return real data.
-     * Must match the two resolution paths:
-     * 1. Direct items array exists, OR
-     * 2. Iron-list with both shadow DOM ($) and list ready
-     * This prevents setting actionContext with empty items during timing window when view.$
-     * exists but view.$.list is still undefined, which can cause action button flicker (WEBUI-1553).
+    /* Always publish the base action context so slots receive a model even during
+     * the timing window where items are not ready yet; only resolve items once
+     * one of the supported data paths is available to avoid flicker (WEBUI-1553).
      */
-    const hasItems = Array.isArray(this.view.items);
-    const hasList = this.view.$ && this.view.$.list;
-
-    if (!hasItems && !hasList) {
-      return;
-    }
-
     try {
-      this.actionContext = {
+      const hasItems = this.view && Array.isArray(this.view.items);
+      const hasList = this.view && this.view.$ && this.view.$.list;
+
+      const actionContext = {
         baseUrl: this.$.nxcon.url,
         displayMode: this.displayMode,
         nxProvider: this.nxProvider,
         selectedItems: this.selectedItems,
-        items: this.items,
         columns: this.columns,
         document: this.document,
         selection: this.view && this.view.selectAllActive ? this.view : this.selectedItems,
       };
+
+      if (hasItems || hasList) {
+        actionContext.items = this.items;
+      }
+
+      this.actionContext = actionContext;
     } catch (e) {
       /* Observer must not throw or selection toolbar stops updating for the rest of the session */
     }
