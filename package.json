@@ -19,7 +19,7 @@
     "form-data": "4.0.4"
   },
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
+    "@eslint/js": "^10.0.1",
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
     "@nuxeo/testing-helpers": "~3.1.30-rc",
     "@open-wc/karma-esm": "^4.0.0",
