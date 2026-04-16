@@ -490,7 +490,7 @@ Polymer({
    *
    * Right after navigation or refresh, `view` may exist while `$` / `$.list` are not ready yet, or
    * reading `items` can throw inside iron-list. Those cases return `[]` so observers and toolbars
-   * do not break (WEBUI-1553).
+   * do not break.
    */
   get items() {
     if (!this.view) {
@@ -619,7 +619,7 @@ Polymer({
 
   reset() {
     if (this.view) {
-      // Guard: only call reset if view exists and method is available (WEBUI-1553)
+      // Guard: only call reset if view exists and method is available.
       if (typeof this.view.reset === 'function') {
         this.view.reset();
       }
@@ -733,7 +733,7 @@ Polymer({
   _updateActionContext() {
     /* Always publish the base action context so slots receive a model even during
      * the timing window where items are not ready yet; only resolve items once
-     * one of the supported data paths is available to avoid flicker (WEBUI-1553).
+     * one of the supported data paths is available to avoid flicker.
      */
     try {
       const hasItems = this.view && Array.isArray(this.view.items);
@@ -822,7 +822,7 @@ Polymer({
   clearSelection() {
     this._excludedDocs = -1;
     this.selectAllActive = false;
-    // Guard: only call view method if view is ready (WEBUI-1553)
+    // Guard: only call view method if view is ready.
     if (this.view && typeof this.view.clearSelection === 'function') {
       this.view.clearSelection();
     }
@@ -830,7 +830,7 @@ Polymer({
 
   selectItems(items) {
     this.clearSelection();
-    // Guard: only call view methods if view is ready (WEBUI-1553)
+    // Guard: only call view methods if view is ready.
     if (this.view && typeof this.view.selectItems === 'function') {
       this.view.selectItems(items);
     }
