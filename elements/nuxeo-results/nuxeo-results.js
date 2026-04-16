@@ -734,6 +734,12 @@ Polymer({
     /* Always publish the base action context so slots receive a model even during
      * the timing window where items are not ready yet; only resolve items once
      * one of the supported data paths is available to avoid flicker.
+     *
+     * Note: During view initialization, this.items may temporarily return [] even when
+     * hasList is true (iron-list not fully ready). This is acceptable because:
+     * 1. The observer watches view.* and will fire again when items become available
+     * 2. We listen to 'items-changed' event which fires when items are ready (line 581)
+     * 3. The temporary [] is quickly replaced, and actions/toolbar update naturally
      */
     try {
       const hasItems = this.view && Array.isArray(this.view.items);
