@@ -18,13 +18,12 @@ limitations under the License.
 import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import './nuxeo-drive-icons.js';
 
 window.nuxeo = window.nuxeo || {};
 const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
 
-class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBehavior], PolymerElement) {
+class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerElement) {
   static get is() {
     return 'nuxeo-drive-download-button';
   }
