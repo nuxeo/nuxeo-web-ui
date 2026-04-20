@@ -18,6 +18,7 @@ limitations under the License.
 import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { isPageProviderDisplayBehavior } from '../../../elements/select-all-helpers.js';
 import './nuxeo-drive-icons.js';
 
 window.nuxeo = window.nuxeo || {};
@@ -50,7 +51,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       <style include="nuxeo-action-button-styles"></style>
 
       <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
-      <div class="action" on-tap="_download">
+      <div class="action" on-tap="_download" hidden$="[[!_isAvailable(documents.splices)]]">
         <paper-icon-button noink icon="nuxeo-drive:download" id="driveBtn" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveDownloadButton.tooltip')]]</span>
         <nuxeo-tooltip>[[i18n('driveDownloadButton.tooltip')]]</nuxeo-tooltip>
@@ -68,6 +69,10 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
 
       <paper-toast id="toast"></paper-toast>
     `;
+  }
+
+  _isAvailable() {
+    return !isPageProviderDisplayBehavior(this.documents);
   }
 
   _download() {
