@@ -577,7 +577,7 @@ Polymer({
                     let output = item.id ? item.id : item;
                     while (item && item.properties && item.properties.parent) {
                       const parent = item.properties.parent;
-                      const parentId = typeof parent === 'string' ? parent : parent.id ?? parent?.properties?.id;
+                      const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
                       if (!parentId) break;
                       output = `${parentId}`.concat('/', `${output}`);
                       item = typeof parent === 'string' ? null : parent;
@@ -590,7 +590,7 @@ Polymer({
                   let entry = value;
                   while (entry && entry.properties && entry.properties.parent) {
                     const parent = entry.properties.parent;
-                    const parentId = typeof parent === 'string' ? parent : parent.id ?? parent?.properties?.id;
+                    const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
                     if (!parentId) break;
                     output = `${parentId}`.concat('/', `${output}`);
                     entry = typeof parent === 'string' ? null : parent;
