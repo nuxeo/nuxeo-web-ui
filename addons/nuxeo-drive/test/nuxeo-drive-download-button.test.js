@@ -15,7 +15,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html } from '@nuxeo/testing-helpers';
+import { fixture, flush, html } from '@nuxeo/testing-helpers';
+import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
 
 // Setup i18n keys used by the component
@@ -54,23 +55,13 @@ suite('nuxeo-drive-download-button', () => {
     });
 
     test('returns false when documents is a page-provider display element (select-all active)', () => {
-      // Simulate the view element that nuxeo-results passes when selectAllActive is true.
-      // isPageProviderDisplayBehavior checks: el.behaviors, el.selectAllActive, and PageProviderDisplayBehavior membership.
-      // We stub a minimal object that satisfies the check.
-      const { PageProviderDisplayBehavior } = window.nuxeo || {};
-      // If PageProviderDisplayBehavior is not available in the test env, skip gracefully
-      if (!PageProviderDisplayBehavior) {
-        // Manually build a stub that mimics what isPageProviderDisplayBehavior checks
-        const viewStub = {
-          selectAllActive: true,
-          behaviors: [],
-        };
-        // isPageProviderDisplayBehavior will return false because behaviors array doesn't contain
-        // the required behaviors — so _isAvailable should return true (not hidden).
-        // The real-world case where selectAllActive=true AND behaviors match will return false.
-        // This test documents the contract: non-array documents should not crash.
-        expect(element._isAvailable.call({ documents: viewStub })).to.be.true;
-      }
+      // Build a stub that satisfies isPageProviderDisplayBehavior:
+      // it checks el.selectAllActive === true AND el.behaviors includes all PageProviderDisplayBehavior entries.
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+      };
+      expect(element._isAvailable.call({ documents: viewStub })).to.be.false;
     });
   });
 
@@ -84,7 +75,7 @@ suite('nuxeo-drive-download-button', () => {
 
     test('action div is visible when documents is a plain array', async () => {
       element.documents = [{ uid: 'doc-1' }];
-      await element.updateComplete;
+      await flush();
       const actionDiv = element.shadowRoot.querySelector('.action');
       expect(actionDiv).to.exist;
       // hidden$ binding: hidden attribute should NOT be set
@@ -96,7 +87,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element, '_isAvailable').returns(false);
       // Re-trigger the binding by setting documents
       element.documents = [];
-      await element.updateComplete;
+      await flush();
       const actionDiv = element.shadowRoot.querySelector('.action');
       expect(actionDiv).to.exist;
       expect(actionDiv.hasAttribute('hidden')).to.be.true;
