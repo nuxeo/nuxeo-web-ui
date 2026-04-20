@@ -20,7 +20,7 @@ limitations under the License.
  * Unit tests for nuxeo-search-form paramMutator logic (WEBUI-1934).
  *
  * Two end-to-end tests covering the major fix scenarios:
- *  1. Single-select hierarchical vocabulary → path reconstructed (e.g. "bankN1/normalCard")
+ *  1. Single-select hierarchical vocabulary → path reconstructed (e.g. "parent/child")
  *  2. Multi-select hierarchical vocabulary → each item reconstructed to path string
  */
 
@@ -40,33 +40,31 @@ suite('nuxeo-search-form — paramMutator (WEBUI-1934)', () => {
     // Before the fix: the raw object was passed through, giving 0 results on reload.
     // After the fix: the path string "bankN1/normalCard" is reconstructed for the server query.
     const savedSearchParams = {
-      'dc:title': 'My Invoice Search',
-      'invoice:cardType': {
-        id: 'normalCard',
+      'dc:title': 'My Saved Search',
+      'my:vocabField': {
+        id: 'childItem',
         properties: {
-          label: 'Normal Card',
+          label: 'Child Item',
           parent: {
-            id: 'bankN1',
-            properties: { label: 'Bank N1' },
+            id: 'parentCategory',
+            properties: { label: 'Parent Category' },
           },
         },
       },
       ecm_fulltext: '',
-      'cvd:contentViewName': 'invoice_search',
+      'cvd:contentViewName': 'my_search',
     };
 
     const result = mutate(savedSearchParams, true);
 
     expect(result).to.not.have.property('dc:title');
-    expect(result['invoice:cardType']).to.equal('bankN1/normalCard');
+    expect(result['my:vocabField']).to.equal('parentCategory/childItem');
     expect(result.ecm_fulltext).to.equal('');
-    expect(result['cvd:contentViewName']).to.equal('invoice_search');
+    expect(result['cvd:contentViewName']).to.equal('my_search');
   });
 
   test('multi-select hierarchical vocab: each item reconstructed to path string; modifyPayload=false is a no-op', () => {
     // Simulates saved search params for a multi-select hierarchical vocab field.
-    // Also guards against the modifyPayload=true regression introduced by WEBUI-941:
-    // without modifyPayload=true the array items would not be transformed at all.
     const savedSearchParams = {
       'invoice:cardType': [
         {
