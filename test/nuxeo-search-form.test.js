@@ -63,7 +63,7 @@ suite('nuxeo-search-form — paramMutator (WEBUI-1934)', () => {
     expect(result.ecm_fulltext).to.equal('');
     expect(result['cvd:contentViewName']).to.equal('my_search');
 
-    // Defensive parent shapes (Copilot review comment #1):
+    // Defensive parent shapes: verify string and nested-object parent id variants
     // (a) properties.parent is a plain string id
     const stringParent = { id: 'child', properties: { parent: 'parentStringId' } };
     expect(mutate({ 'my:field': stringParent }, true)['my:field']).to.equal('parentStringId/child');
@@ -102,7 +102,7 @@ suite('nuxeo-search-form — paramMutator (WEBUI-1934)', () => {
     const resultNoModify = mutate(savedSearchParams, false);
     expect(resultNoModify['my:vocabField']).to.deep.equal(savedSearchParams['my:vocabField']);
 
-    // Defensive parent shapes in array items (Copilot review comment #1):
+    // Defensive parent shapes in array items: verify string and nested-object parent id variants
     // (a) properties.parent is a plain string id
     const stringParentArray = [{ id: 'child', properties: { parent: 'parentStringId' } }];
     expect(mutate({ 'my:field': stringParentArray }, true)['my:field']).to.deep.equal(['parentStringId/child']);
