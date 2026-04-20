@@ -23,6 +23,7 @@ import './nuxeo-drive-icons.js';
 
 window.nuxeo = window.nuxeo || {};
 const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
+const MAX_DIRECT_DOWNLOAD_DOCS = 25;
 
 class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerElement) {
   static get is() {
@@ -83,8 +84,8 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       return;
     }
 
-    if (uids.length > 25) {
-      this._showError(this.i18n('driveDownload.tooManyDocuments', 25));
+    if (uids.length > MAX_DIRECT_DOWNLOAD_DOCS) {
+      this._showError(this.i18n('driveDownload.tooManyDocuments', MAX_DIRECT_DOWNLOAD_DOCS));
       return;
     }
 
