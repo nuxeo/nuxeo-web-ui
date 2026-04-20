@@ -19,6 +19,7 @@ import './elements/nuxeo-drive-sync-toggle-button.js';
 import './elements/nuxeo-drive-edit-button.js';
 import './elements/nuxeo-drive-page.js';
 import './elements/nuxeo-drive-upload-button.js';
+import './elements/nuxeo-drive-download-button.js';
 
 import html from './nuxeo-drive.html';
 
