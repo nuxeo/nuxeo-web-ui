@@ -245,5 +245,102 @@ suite('nuxeo-drive-download-button', () => {
       // The toast should not have been opened at this point (no guard condition triggered)
       expect(toastStub.open).to.not.have.been.called;
     });
+
+    test('calls window.open with directDownloadUrl when a valid Drive token exists', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }, { uid: 'doc-uid-2' }];
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+      const openStub = sinon.stub(window, 'open');
+
+      element._download();
+      // Let the promise chain resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(openStub).to.have.been.calledOnce;
+      const calledUrl = openStub.firstCall.args[0];
+      expect(calledUrl).to.match(/^nxdrive:\/\/direct-download\/[A-Za-z0-9_-]+$/);
+      expect(openStub.firstCall.args[1]).to.equal('_top');
+    });
+
+    test('opens Drive install dialog when no Drive token is found', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
+      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(dialogToggleStub).to.have.been.calledOnce;
+      expect(toastStub.open).to.not.have.been.called;
+    });
+
+    test('shows directTransfer.failed error when token.get rejects', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.include('error occurred');
+    });
+
+    test('folder UID is collected as a single item (folder = one ID)', () => {
+      // Folders are treated as a single document ID — no enumeration of contents
+      element.documents = [{ uid: 'folder-uid-1' }, { uid: 'folder-uid-2' }];
+      const uids = element._getSelectedDocumentUids();
+      expect(uids).to.deep.equal(['folder-uid-1', 'folder-uid-2']);
+      expect(uids).to.have.length(2);
+    });
+
+    test('mixed selection of documents and folders produces all UIDs in the URL', () => {
+      element.documents = [
+        { uid: 'doc-uid-1' },
+        { uid: 'folder-uid-1' },
+        { uid: 'doc-uid-2' },
+        { uid: 'folder-uid-2' },
+      ];
+      const url = element._buildOriginalUrl();
+      expect(url).to.include('doc-uid-1');
+      expect(url).to.include('folder-uid-1');
+      expect(url).to.include('doc-uid-2');
+      expect(url).to.include('folder-uid-2');
+    });
+
+    test('single document action (via document property) triggers download with correct UID', async () => {
+      element.documents = [];
+      element.document = { uid: 'single-doc-uid' };
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+      const openStub = sinon.stub(window, 'open');
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(openStub).to.have.been.calledOnce;
+      // Verify the UID is encoded in the compressed URL by checking the uncompressed URL
+      const originalUrl = element._buildOriginalUrl();
+      expect(originalUrl).to.include('single-doc-uid');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _buildOriginalUrl — server info
+  // ---------------------------------------------------------------------------
+  suite('_buildOriginalUrl — server info', () => {
+    test('URL contains a server/host segment after the direct-download scheme', () => {
+      element.documents = [{ uid: '00000000-0000-0000-0000-000000000001' }];
+      const url = element._buildOriginalUrl();
+      // Format: nxdrive://direct-download/<scheme>/<host>/.../<uid>
+      // After stripping the nxdrive://direct-download/ prefix there should be at least 2 more segments
+      const path = url.replace('nxdrive://direct-download/', '');
+      const segments = path.split('/');
+      expect(segments.length).to.be.at.least(2);
+    });
+
+    test('URL uses direct-download keyword, not direct-upload', () => {
+      element.documents = [{ uid: '00000000-0000-0000-0000-000000000001' }];
+      const url = element._buildOriginalUrl();
+      expect(url).to.include('direct-download');
+      expect(url).to.not.include('direct-upload');
+    });
   });
 });
