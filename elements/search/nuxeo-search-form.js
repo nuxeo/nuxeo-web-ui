@@ -576,8 +576,11 @@ Polymer({
                   result[param] = value.map((item) => {
                     let output = item.id ? item.id : item;
                     while (item && item.properties && item.properties.parent) {
-                      output = `${item.properties.parent.id}`.concat('/', `${output}`);
-                      item = item.properties.parent;
+                      const parent = item.properties.parent;
+                      const parentId = typeof parent === 'string' ? parent : parent.id ?? parent?.properties?.id;
+                      if (!parentId) break;
+                      output = `${parentId}`.concat('/', `${output}`);
+                      item = typeof parent === 'string' ? null : parent;
                     }
                     return output;
                   });
@@ -586,8 +589,11 @@ Polymer({
                   let output = value.id;
                   let entry = value;
                   while (entry && entry.properties && entry.properties.parent) {
-                    output = `${entry.properties.parent.id}`.concat('/', `${output}`);
-                    entry = entry.properties.parent;
+                    const parent = entry.properties.parent;
+                    const parentId = typeof parent === 'string' ? parent : parent.id ?? parent?.properties?.id;
+                    if (!parentId) break;
+                    output = `${parentId}`.concat('/', `${output}`);
+                    entry = typeof parent === 'string' ? null : parent;
                   }
                   result[param] = output;
                 } else {
