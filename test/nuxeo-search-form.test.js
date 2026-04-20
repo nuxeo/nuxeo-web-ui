@@ -19,9 +19,10 @@ limitations under the License.
 /**
  * Unit tests for nuxeo-search-form paramMutator logic (WEBUI-1934).
  *
- * Two end-to-end tests covering the major fix scenarios:
+ * Tests covering:
  *  1. Single-select hierarchical vocabulary → path reconstructed (e.g. "parent/child")
  *  2. Multi-select hierarchical vocabulary → each item reconstructed to path string
+ *  3. Defensive parent shapes: string parent id and parent.properties.id
  */
 
 import { fixture, html } from '@nuxeo/testing-helpers';
@@ -61,9 +62,18 @@ suite('nuxeo-search-form — paramMutator (WEBUI-1934)', () => {
     expect(result['my:vocabField']).to.equal('parentCategory/childItem');
     expect(result.ecm_fulltext).to.equal('');
     expect(result['cvd:contentViewName']).to.equal('my_search');
+
+    // Defensive parent shapes (Copilot review comment #1):
+    // (a) properties.parent is a plain string id
+    const stringParent = { id: 'child', properties: { parent: 'parentStringId' } };
+    expect(mutate({ 'my:field': stringParent }, true)['my:field']).to.equal('parentStringId/child');
+
+    // (b) properties.parent is an object whose id is under parent.properties.id
+    const nestedIdParent = { id: 'child', properties: { parent: { properties: { id: 'nestedParentId' } } } };
+    expect(mutate({ 'my:field': nestedIdParent }, true)['my:field']).to.equal('nestedParentId/child');
   });
 
-  test('multi-select hierarchical vocab: each item reconstructed to path string; modifyPayload=false is a no-op', () => {
+  test('multi-select hierarchical vocab: each item reconstructed to path string; vocab objects without modifyPayload are not converted to path strings', () => {
     // Simulates saved search params for a multi-select hierarchical vocab field.
     const savedSearchParams = {
       'my:vocabField': [
@@ -91,5 +101,14 @@ suite('nuxeo-search-form — paramMutator (WEBUI-1934)', () => {
     // Without modifyPayload (regression guard: objects must NOT be transformed)
     const resultNoModify = mutate(savedSearchParams, false);
     expect(resultNoModify['my:vocabField']).to.deep.equal(savedSearchParams['my:vocabField']);
+
+    // Defensive parent shapes in array items (Copilot review comment #1):
+    // (a) properties.parent is a plain string id
+    const stringParentArray = [{ id: 'child', properties: { parent: 'parentStringId' } }];
+    expect(mutate({ 'my:field': stringParentArray }, true)['my:field']).to.deep.equal(['parentStringId/child']);
+
+    // (b) properties.parent is an object whose id is under parent.properties.id
+    const nestedIdArray = [{ id: 'child', properties: { parent: { properties: { id: 'nestedParentId' } } } }];
+    expect(mutate({ 'my:field': nestedIdArray }, true)['my:field']).to.deep.equal(['nestedParentId/child']);
   });
 });
