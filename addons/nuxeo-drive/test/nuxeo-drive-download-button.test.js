@@ -335,6 +335,5 @@ suite('nuxeo-drive-download-button', () => {
       const segments = path.split('/');
       expect(segments.length).to.be.at.least(2);
     });
-
   });
 });
