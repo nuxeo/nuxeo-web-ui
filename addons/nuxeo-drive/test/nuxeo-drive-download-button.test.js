@@ -236,14 +236,18 @@ suite('nuxeo-drive-download-button', () => {
     });
 
     test('shows tooManyDocuments error when more than 25 documents are selected', async () => {
-      element.documents = Array.from({ length: 26 }, (_, i) => ({ uid: `uid-${i}` }));
+      element.documents = Array.from({ length: 26 }, (_, i) => {
+        return { uid: `uid-${i}` };
+      });
       element._download();
       expect(toastStub.open).to.have.been.calledOnce;
       expect(toastStub.text).to.include('25');
     });
 
     test('does not show error when exactly 25 documents are selected', () => {
-      element.documents = Array.from({ length: 25 }, (_, i) => ({ uid: `uid-${i}` }));
+      element.documents = Array.from({ length: 25 }, (_, i) => {
+        return { uid: `uid-${i}` };
+      });
       // Stub token.get to prevent real network call; stub window.open before _download is called
       sinon.stub(element.$.token, 'get').returns(new Promise(() => {})); // never resolves — prevents window.open
       element._download();
