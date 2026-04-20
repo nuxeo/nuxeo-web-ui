@@ -79,7 +79,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       return;
     }
 
-    if (uids.length > 2) {
+    if (uids.length > 25) {
       this._showError(this.i18n('driveDownload.tooManyDocuments', 25));
       return;
     }

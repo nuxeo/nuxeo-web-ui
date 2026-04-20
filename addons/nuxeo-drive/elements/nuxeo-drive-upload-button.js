@@ -49,7 +49,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
 
       <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
 
-      
+      <template is="dom-if" if="[[_isAvailable(document)]]">
         <div class="action" on-tap="_go">
           <paper-icon-button
             noink
@@ -60,6 +60,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
           <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveUploadButton.tooltip')]]</span>
           <nuxeo-tooltip>[[i18n('driveUploadButton.tooltip')]]</nuxeo-tooltip>
         </div>
+      </template>
 
       <nuxeo-dialog id="dialog" with-backdrop>
         <div class="vertical layout">
