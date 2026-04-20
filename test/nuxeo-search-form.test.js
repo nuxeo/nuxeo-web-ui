@@ -38,7 +38,7 @@ suite('nuxeo-search-form — paramMutator (WEBUI-1934)', () => {
   test('single-select hierarchical vocab: reconstructs full parent/child path and strips dc:title', () => {
     // Simulates saved search params returned by REST API for a single-select hierarchical vocab field.
     // Before the fix: the raw object was passed through, giving 0 results on reload.
-    // After the fix: the path string "bankN1/normalCard" is reconstructed for the server query.
+    // After the fix: the path string "parentCategory/childItem" is reconstructed for the server query.
     const savedSearchParams = {
       'dc:title': 'My Saved Search',
       'my:vocabField': {
@@ -66,19 +66,19 @@ suite('nuxeo-search-form — paramMutator (WEBUI-1934)', () => {
   test('multi-select hierarchical vocab: each item reconstructed to path string; modifyPayload=false is a no-op', () => {
     // Simulates saved search params for a multi-select hierarchical vocab field.
     const savedSearchParams = {
-      'invoice:cardType': [
+      'my:vocabField': [
         {
-          id: 'normalCard',
+          id: 'childItem1',
           properties: {
-            label: 'Normal Card',
-            parent: { id: 'bankN1', properties: { label: 'Bank N1' } },
+            label: 'Child Item 1',
+            parent: { id: 'parentCategory1', properties: { label: 'Parent Category 1' } },
           },
         },
         {
-          id: 'goldCard',
+          id: 'childItem2',
           properties: {
-            label: 'Gold Card',
-            parent: { id: 'bankN2', properties: { label: 'Bank N2' } },
+            label: 'Child Item 2',
+            parent: { id: 'parentCategory2', properties: { label: 'Parent Category 2' } },
           },
         },
       ],
@@ -86,10 +86,10 @@ suite('nuxeo-search-form — paramMutator (WEBUI-1934)', () => {
 
     // With modifyPayload=true (correct caller behaviour)
     const result = mutate(savedSearchParams, true);
-    expect(result['invoice:cardType']).to.deep.equal(['bankN1/normalCard', 'bankN2/goldCard']);
+    expect(result['my:vocabField']).to.deep.equal(['parentCategory1/childItem1', 'parentCategory2/childItem2']);
 
     // Without modifyPayload (regression guard: objects must NOT be transformed)
     const resultNoModify = mutate(savedSearchParams, false);
-    expect(resultNoModify['invoice:cardType']).to.deep.equal(savedSearchParams['invoice:cardType']);
+    expect(resultNoModify['my:vocabField']).to.deep.equal(savedSearchParams['my:vocabField']);
   });
 });
