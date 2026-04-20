@@ -50,11 +50,11 @@ suite('nuxeo-collections — WEBUI-1823: no hardcoded sort on user_collections p
   setup(async () => {
     server = await login();
     // Stub the user_collections page provider endpoint (no sortBy/sortOrder in URL)
-    server.respondWith(
-      'GET',
-      /\/api\/v1\/search\/pp\/user_collections\/execute/,
-      [200, jsonHeader, emptyPageProviderResponse],
-    );
+    server.respondWith('GET', /\/api\/v1\/search\/pp\/user_collections\/execute/, [
+      200,
+      jsonHeader,
+      emptyPageProviderResponse,
+    ]);
     // Stub the Operation.RemoveFromCollection (required by nuxeo-operation import)
     server.respondWith('POST', '/api/v1/automation/Collection.RemoveFromCollection', [
       200,
