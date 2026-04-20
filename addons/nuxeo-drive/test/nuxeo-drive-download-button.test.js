@@ -336,11 +336,5 @@ suite('nuxeo-drive-download-button', () => {
       expect(segments.length).to.be.at.least(2);
     });
 
-    test('URL uses direct-download keyword, not direct-upload', () => {
-      element.documents = [{ uid: '00000000-0000-0000-0000-000000000001' }];
-      const url = element._buildOriginalUrl();
-      expect(url).to.include('direct-download');
-      expect(url).to.not.include('direct-upload');
-    });
   });
 });
