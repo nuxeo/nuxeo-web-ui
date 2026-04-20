@@ -75,7 +75,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     const uids = this._getSelectedDocumentUids();
 
     if (uids.length === 0) {
-      this._showError('No documents selected for download');
+      this._showError(this.i18n('driveDownload.noDocumentsSelected'));
       return;
     }
 
