@@ -126,8 +126,6 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
 
   _buildOriginalUrl() {
     const uids = this._getSelectedDocumentUids();
-
-    // Remove trailing slash from baseUrl before processing
     const cleanBaseUrl = baseUrl.split('/ui/')[0].replace(/\/$/, '');
     const serverPath = cleanBaseUrl.replace('://', '/');
     const uuidStr = uids.join(' | ');
@@ -142,10 +140,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
 
     const segments = firstPart.split('/');
     const scheme = segments[0] === 'https' ? 1 : 0;
-    // FIX: server is everything between scheme and last segment (the UUID)
-    // e.g. ["https", "server.com", "nuxeo", "UUID"] → server = "server.com/nuxeo"
     const server = segments.slice(1, -1).join('/');
-    // FIX: UUID is always the last segment, not segments[2]
     const firstUuid = segments[segments.length - 1].replace(/-/g, '');
 
     const allUuidHex = [firstUuid];
