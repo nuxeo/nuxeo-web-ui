@@ -565,6 +565,21 @@ Polymer({
     paramMutator: {
       type: Function,
       value() {
+        // Walks the parent chain of a vocabulary entry and reconstructs the full hierarchical path string.
+        // Handles properties.parent as a string id, an object with .id, or an object with .properties.id.
+        function toHierarchicalPath(entry) {
+          let output = entry.id;
+          let current = entry;
+          while (current && current.properties && current.properties.parent) {
+            const parent = current.properties.parent;
+            const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
+            if (!parentId) break;
+            output = `${parentId}`.concat('/', `${output}`);
+            current = typeof parent === 'string' ? null : parent;
+          }
+          return output;
+        }
+
         return function (params, modifyPayload = false) {
           const result = {};
           if (params) {
@@ -573,29 +588,12 @@ Polymer({
               const value = params[param];
               if (value !== null && param !== 'dc:title') {
                 if (modifyPayload && Array.isArray(value)) {
-                  result[param] = value.map((item) => {
-                    let output = item.id ? item.id : item;
-                    while (item && item.properties && item.properties.parent) {
-                      const parent = item.properties.parent;
-                      const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
-                      if (!parentId) break;
-                      output = `${parentId}`.concat('/', `${output}`);
-                      item = typeof parent === 'string' ? null : parent;
-                    }
-                    return output;
-                  });
+                  result[param] = value.map((item) =>
+                    item && item.id && item.properties ? toHierarchicalPath(item) : item,
+                  );
                 } else if (modifyPayload && value && typeof value === 'object' && value.id && value.properties) {
-                  // Single-select hierarchical vocabulary: reconstruct full path (e.g. "bankN1/normalCard")
-                  let output = value.id;
-                  let entry = value;
-                  while (entry && entry.properties && entry.properties.parent) {
-                    const parent = entry.properties.parent;
-                    const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
-                    if (!parentId) break;
-                    output = `${parentId}`.concat('/', `${output}`);
-                    entry = typeof parent === 'string' ? null : parent;
-                  }
-                  result[param] = output;
+                  // Single-select hierarchical vocabulary: reconstruct full path (e.g. "parent/child")
+                  result[param] = toHierarchicalPath(value);
                 } else {
                   result[param] = typeof value === 'boolean' ? value.toString() : value;
                 }
