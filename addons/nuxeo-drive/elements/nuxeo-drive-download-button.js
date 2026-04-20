@@ -32,12 +32,12 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
   static get properties() {
     return {
       document: Object,
-      
+
       documents: {
         type: Array,
         value: () => [],
       },
-      
+
       showLabel: {
         type: Boolean,
         reflectToAttribute: true,
@@ -51,7 +51,6 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       <style include="nuxeo-action-button-styles"></style>
 
       <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
-
       <div class="action" on-tap="_download">
         <paper-icon-button noink icon="nuxeo-drive:download" id="driveBtn" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveDownloadButton.tooltip')]]</span>
@@ -72,27 +71,15 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     `;
   }
 
-  _isAvailable(doc) {
-    if (!doc) return false;
-    return (
-      this.hasPermission &&
-      this.hasFacet &&
-      this.isProxy &&
-      this.hasPermission(doc, 'Write') &&
-      this.hasFacet(doc, 'Folderish') &&
-      !this.isProxy(doc)
-    );
-  }
-
   _download() {
     const uids = this._getSelectedDocumentUids();
-    
+
     if (uids.length === 0) {
       this._showError('No documents selected for download');
       return;
     }
-    
-    if (uids.length > 25) {
+
+    if (uids.length > 2) {
       this._showError(this.i18n('driveDownload.tooManyDocuments', 25));
       return;
     }
@@ -101,13 +88,13 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       .get()
       .then((response) => {
         const tokens = response.entries.map((token) => token.id);
-        
+
         if (!tokens || !tokens.length) {
           this.$.dialog.toggle();
           return;
         }
-        
-       window.open(this.directDownloadUrl, '_top');
+
+        window.open(this.directDownloadUrl, '_top');
       })
       .catch(() => {
         this._showError(this.i18n('driveDownload.directTransfer.failed'));
@@ -123,11 +110,11 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     if (this.documents && this.documents.length > 0) {
       return this.documents.map((doc) => doc.uid);
     }
-    
+
     if (this.document && this.document.uid) {
       return [this.document.uid];
     }
-    
+
     return [];
   }
 
@@ -137,14 +124,14 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     return compressedUrl;
   }
 
- _buildOriginalUrl() {
+  _buildOriginalUrl() {
     const uids = this._getSelectedDocumentUids();
-    
+
     // Remove trailing slash from baseUrl before processing
     const cleanBaseUrl = baseUrl.split('/ui/')[0].replace(/\/$/, '');
     const serverPath = cleanBaseUrl.replace('://', '/');
     const uuidStr = uids.join(' | ');
-    
+
     return `nxdrive://direct-download/${serverPath}/${uuidStr}`;
   }
 
@@ -152,7 +139,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     const path = originalUrl.replace('nxdrive://direct-download/', '');
     const parts = path.split(' | ');
     const firstPart = parts[0];
-    
+
     const segments = firstPart.split('/');
     const scheme = segments[0] === 'https' ? 1 : 0;
     // FIX: server is everything between scheme and last segment (the UUID)
@@ -160,38 +147,32 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior, FiltersBeha
     const server = segments.slice(1, -1).join('/');
     // FIX: UUID is always the last segment, not segments[2]
     const firstUuid = segments[segments.length - 1].replace(/-/g, '');
-    
+
     const allUuidHex = [firstUuid];
     for (let i = 1; i < parts.length; i++) {
-        allUuidHex.push(parts[i].trim().replace(/-/g, ''));
+      allUuidHex.push(parts[i].trim().replace(/-/g, ''));
     }
-    
+
     const uuidBinary = [];
-    allUuidHex.forEach(hexStr => {
-        for (let i = 0; i < hexStr.length; i += 2) {
-            uuidBinary.push(parseInt(hexStr.substr(i, 2), 16));
-        }
+    allUuidHex.forEach((hexStr) => {
+      for (let i = 0; i < hexStr.length; i += 2) {
+        uuidBinary.push(parseInt(hexStr.substr(i, 2), 16));
+      }
     });
-    
+
     const serverBytes = new TextEncoder().encode(server);
-    const payload = new Uint8Array([
-        scheme,
-        serverBytes.length,
-        ...serverBytes,
-        allUuidHex.length,
-        ...uuidBinary
-    ]);
-    
+    const payload = new Uint8Array([scheme, serverBytes.length, ...serverBytes, allUuidHex.length, ...uuidBinary]);
+
     const b64 = this._base64UrlSafeEncode(payload);
     return `nxdrive://direct-download/${b64}`;
   }
 
   _base64UrlSafeEncode(bytes) {
     let binary = '';
-    bytes.forEach(byte => {
-        binary += String.fromCharCode(byte);
+    bytes.forEach((byte) => {
+      binary += String.fromCharCode(byte);
     });
-    
+
     let b64 = btoa(binary);
     return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }

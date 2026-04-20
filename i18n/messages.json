@@ -513,7 +513,7 @@
   "driveUploadButton.tooltip": "Upload with Nuxeo Drive",
   "driveUpload.directTransfer.failed": "An error occured while trying to upload the document with Nuxeo Drive.",
   "driveDownloadButton.tooltip": "Download with Nuxeo Drive",
-  "driveDownload.directTransfer.failed": "An error occured while trying to download the document with Nuxeo Drive.",
+  "driveDownload.directTransfer.failed": "An error occurred while trying to download the document with Nuxeo Drive.",
   "driveDownload.tooManyDocuments": "You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.",
   "drivePage.heading": "Nuxeo Drive",
   "drivePage.packages": "Packages",
