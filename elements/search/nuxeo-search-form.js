@@ -581,6 +581,15 @@ Polymer({
                     }
                     return output;
                   });
+                } else if (modifyPayload && value && typeof value === 'object' && value.id && value.properties) {
+                  // Single-select hierarchical vocabulary: reconstruct full path (e.g. "bankN1/normalCard")
+                  let output = value.id;
+                  let entry = value;
+                  while (entry && entry.properties && entry.properties.parent) {
+                    output = `${entry.properties.parent.id}`.concat('/', `${output}`);
+                    entry = entry.properties.parent;
+                  }
+                  result[param] = output;
                 } else {
                   result[param] = typeof value === 'boolean' ? value.toString() : value;
                 }
@@ -803,7 +812,7 @@ Polymer({
       this.isSavedSearch = this._isSavedSearch();
       this.selectedSearch = search;
       const clonedParams = JSON.parse(JSON.stringify(search.params));
-      this.params = this._mutateParams(clonedParams);
+      this.params = this._mutateParams(clonedParams, true);
       this._navigateToResults();
     } else {
       this._clear();
@@ -838,7 +847,7 @@ Polymer({
     // Populate params
     const search = this._searches[idx];
     const clonedParams = JSON.parse(JSON.stringify(search.params));
-    this.params = this._mutateParams(clonedParams);
+    this.params = this._mutateParams(clonedParams, true);
     this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
 
     // Ensure form stays synced
@@ -912,7 +921,7 @@ Polymer({
       _el.searchId = this.selectedSearch.id;
       _el.get().then((response) => {
         const clonedParams = JSON.parse(JSON.stringify(response.params));
-        this.params = this._mutateParams(clonedParams);
+        this.params = this._mutateParams(clonedParams, true);
 
         this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
         this.form.searchTerm = this.searchTerm;
