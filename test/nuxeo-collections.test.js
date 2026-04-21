@@ -95,9 +95,15 @@ suite('nuxeo-collections — WEBUI-1823: no hardcoded sort on user_collections p
     ppRequests.forEach((req) => {
       const decodedUrl = decodeURIComponent(req.url);
       expect(decodedUrl).to.include('searchTerm', `Request URL should contain searchTerm param: ${req.url}`);
-      expect(decodedUrl).to.include('"searchTerm":"%"', `Request URL should contain expected searchTerm value: ${req.url}`);
+      expect(decodedUrl).to.include(
+        '"searchTerm":"%"',
+        `Request URL should contain expected searchTerm value: ${req.url}`,
+      );
       expect(decodedUrl).to.include('user', `Request URL should contain user param: ${req.url}`);
-      expect(decodedUrl).to.include('"user":"$currentUser"', `Request URL should contain expected user value: ${req.url}`);
+      expect(decodedUrl).to.include(
+        '"user":"$currentUser"',
+        `Request URL should contain expected user value: ${req.url}`,
+      );
     });
   });
 });
