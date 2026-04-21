@@ -49,7 +49,8 @@ suite('nuxeo-collections — WEBUI-1823: no hardcoded sort on user_collections p
 
   setup(async () => {
     server = await login();
-    // Stub the user_collections page provider endpoint (no sortBy/sortOrder in URL)
+    // Stub the user_collections page provider endpoint generally;
+    // the absence of sortBy/sortOrder is enforced by the assertions in each test.
     server.respondWith('GET', /\/api\/v1\/search\/pp\/user_collections\/execute/, [
       200,
       jsonHeader,
@@ -90,9 +91,13 @@ suite('nuxeo-collections — WEBUI-1823: no hardcoded sort on user_collections p
 
     expect(ppRequests).to.have.length.greaterThan(0, 'Expected at least one request to user_collections provider');
 
-    // The params '{"searchTerm":"%","user": "$currentUser"}' should be passed as namedParameters
+    // The params '{"searchTerm":"%","user":"$currentUser"}' should be passed as namedParameters
     ppRequests.forEach((req) => {
-      expect(req.url).to.include('searchTerm', `Request URL should contain searchTerm param: ${req.url}`);
+      const decodedUrl = decodeURIComponent(req.url);
+      expect(decodedUrl).to.include('searchTerm', `Request URL should contain searchTerm param: ${req.url}`);
+      expect(decodedUrl).to.include('"searchTerm":"%"', `Request URL should contain expected searchTerm value: ${req.url}`);
+      expect(decodedUrl).to.include('user', `Request URL should contain user param: ${req.url}`);
+      expect(decodedUrl).to.include('"user":"$currentUser"', `Request URL should contain expected user value: ${req.url}`);
     });
   });
 });
