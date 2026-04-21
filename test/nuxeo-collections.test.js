@@ -91,19 +91,13 @@ suite('nuxeo-collections — WEBUI-1823: no hardcoded sort on user_collections p
 
     expect(ppRequests).to.have.length.greaterThan(0, 'Expected at least one request to user_collections provider');
 
-    // The params '{"searchTerm":"%","user":"$currentUser"}' should be passed as namedParameters
+    // The params '{"searchTerm":"%","user":"$currentUser"}' are serialised as query string params
     ppRequests.forEach((req) => {
       const decodedUrl = decodeURIComponent(req.url);
-      expect(decodedUrl).to.include('searchTerm', `Request URL should contain searchTerm param: ${req.url}`);
-      expect(decodedUrl).to.include(
-        '"searchTerm":"%"',
-        `Request URL should contain expected searchTerm value: ${req.url}`,
-      );
-      expect(decodedUrl).to.include('user', `Request URL should contain user param: ${req.url}`);
-      expect(decodedUrl).to.include(
-        '"user":"$currentUser"',
-        `Request URL should contain expected user value: ${req.url}`,
-      );
+      expect(decodedUrl).to.include('searchTerm=', `Request URL should contain searchTerm param: ${req.url}`);
+      expect(decodedUrl).to.include('searchTerm=%', `Request URL should contain expected searchTerm value: ${req.url}`);
+      expect(decodedUrl).to.include('user=', `Request URL should contain user param: ${req.url}`);
+      expect(decodedUrl).to.include('user=$currentUser', `Request URL should contain expected user value: ${req.url}`);
     });
   });
 });
