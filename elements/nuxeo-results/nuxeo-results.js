@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-localstorage/iron-localstorage.js';
 import '@polymer/iron-pages/iron-pages.js';
+import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
@@ -172,10 +173,6 @@ Polymer({
       nuxeo-actions-menu {
         height: 100%;
         max-width: var(--nuxeo-results-selection-actions-menu-max-width, 280px);
-      }
-
-      nuxeo-quick-filters {
-        margin-right: 16px;
       }
 
       .quickFilters {
@@ -919,7 +916,10 @@ Polymer({
   },
 
   _quickFilterLabel(filter) {
-    return this.i18n(`ui.label.quickFilters.${filter && filter.name}`);
+    if (!filter || !filter.name) {
+      return '';
+    }
+    return this.i18n(`ui.label.quickFilters.${filter.name}`);
   },
 
   _toggleQuickFilter(e) {
