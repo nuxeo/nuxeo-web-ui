@@ -230,7 +230,14 @@ Polymer({
           <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
             <div class="quickFilters">
               <template is="dom-repeat" items="[[quickFilters]]" as="filter" index-as="index">
-                <paper-button noink class="quickFilter" active$="[[filter.active]]" on-click="_toggleQuickFilter">
+                <paper-button
+                  noink
+                  toggles
+                  class="quickFilter"
+                  active$="[[filter.active]]"
+                  aria-pressed$="[[filter.active]]"
+                  on-tap="_toggleQuickFilter"
+                >
                   [[_quickFilterLabel(filter)]]
                 </paper-button>
               </template>
