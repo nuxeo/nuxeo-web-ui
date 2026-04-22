@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-localstorage/iron-localstorage.js';
 import '@polymer/iron-pages/iron-pages.js';
+import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
@@ -26,7 +27,6 @@ import { config } from '@nuxeo/nuxeo-elements';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-actions-menu.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-sort-select.js';
 import '../nuxeo-selection/nuxeo-selection-toolbar.js';
@@ -175,8 +175,30 @@ Polymer({
         max-width: var(--nuxeo-results-selection-actions-menu-max-width, 280px);
       }
 
-      nuxeo-quick-filters {
+      .quickFilters {
         margin-right: 16px;
+      }
+
+      .quickFilter {
+        background-color: var(--nuxeo-pill-filter-background, #fff);
+        color: var(--nuxeo-pill-text, #666);
+        border-radius: 3em;
+        box-shadow: none;
+        font-size: 1rem;
+        padding: 0.2em 0.7em 0.3em;
+        margin: 0.1em 0.1em 0.1em 0;
+        text-transform: none;
+      }
+
+      .quickFilter:focus-visible {
+        background-color: var(--nuxeo-buttons-focus, rgba(0, 0, 0, 0.3));
+        color: var(--nuxeo-button-primary-text, #ffffff);
+      }
+
+      .quickFilter[active] {
+        box-shadow: none;
+        background-color: var(--nuxeo-pill-filter-background-active, #00adff);
+        color: var(--nuxeo-pill-text-active, #fff);
       }
     </style>
 
@@ -206,10 +228,13 @@ Polymer({
             [[_resultsCountLabel]]
           </span>
           <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
-            <nuxeo-quick-filters
-              quick-filters="{{quickFilters}}"
-              on-quick-filters-changed="fetch"
-            ></nuxeo-quick-filters>
+            <div class="quickFilters">
+              <template is="dom-repeat" items="[[quickFilters]]" as="filter" index-as="index">
+                <paper-button noink class="quickFilter" active$="[[filter.active]]" on-click="_toggleQuickFilter">
+                  [[_quickFilterLabel(filter)]]
+                </paper-button>
+              </template>
+            </div>
           </template>
 
           <div class="rightHand">
@@ -888,6 +913,29 @@ Polymer({
     if (this.nxProvider && e.detail.value) {
       this.quickFilters = this.nxProvider.quickFilters;
     }
+  },
+
+  _quickFilterLabel(filter) {
+    if (!filter || !filter.name) {
+      return '';
+    }
+    return this.i18n(`ui.label.quickFilters.${filter.name}`);
+  },
+
+  _toggleQuickFilter(e) {
+    const index = e && e.model && e.model.index;
+    if (!Array.isArray(this.quickFilters) || typeof index !== 'number' || !this.quickFilters[index]) {
+      return;
+    }
+
+    this.set(`quickFilters.${index}.active`, !this.quickFilters[index].active);
+
+    // Keep provider and local state aligned before fetching to avoid first-click state rollbacks.
+    if (this.nxProvider) {
+      this.nxProvider.quickFilters = this.quickFilters;
+    }
+
+    this.fetch();
   },
 
   _isChecked(selectAllActive, _excludedDocs) {
