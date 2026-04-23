@@ -1,6 +1,23 @@
 const path = require('path');
 
 const coverage = process.argv.find((arg) => arg.includes('coverage'));
+const coverageSourceFiles = coverage
+  ? [
+      {
+        // Serve all source modules so coverage can resolve every app element (see test/coverage-helpers/coverage-app-modules.test.js).
+        pattern: 'elements/**/*.js',
+        type: 'module',
+        included: false,
+        watched: false,
+      },
+      {
+        pattern: 'addons/**/elements/**/*.js',
+        type: 'module',
+        included: false,
+        watched: false,
+      },
+    ]
+  : [];
 
 const reporters = coverage ? ['mocha', 'coverage-istanbul'] : ['mocha'];
 
@@ -76,12 +93,19 @@ module.exports = (config) => {
         pattern: 'test/setup.js',
         type: 'module',
       },
+      ...coverageSourceFiles,
       {
         pattern: `test/*${config.grep || '*.test.js'}`,
         type: 'module',
       },
       {
         pattern: `addons/*/test/*${config.grep || '*.test.js'}`,
+        type: 'module',
+      },
+      // After all other tests: bulk-import every app module for honest aggregate coverage
+      // (see scripts/generate-coverage-imports.js). Must not run first or it pollutes globals.
+      {
+        pattern: 'test/coverage-helpers/coverage-app-modules.test.js',
         type: 'module',
       },
     ],
@@ -98,7 +122,12 @@ module.exports = (config) => {
       compatibility: 'none',
       coverage,
       // if you are using 'bare module imports' you will need this option
-      nodeResolve: true,
+      nodeResolve: {
+        // Dedupe all common packages to prevent duplicate registrations
+        // when using symlinked packages (nuxeo-elements)
+        dedupe: (importee) =>
+          importee.startsWith('@polymer/') || importee.startsWith('@nuxeo/') || importee.startsWith('@webcomponents/'),
+      },
       // needed for npm link or lerna support
       preserveSymlinks: true,
     },
@@ -130,7 +159,7 @@ module.exports = (config) => {
       reports: ['html', 'lcovonly', 'text-summary'],
       dir: path.join(__dirname, 'coverage'),
       combineBrowserReports: true,
-      skipFilesWithNoCoverage: true,
+      skipFilesWithNoCoverage: false,
     },
 
     client: {
