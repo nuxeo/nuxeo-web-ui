@@ -51,11 +51,11 @@ Polymer({
           0px 4px 8px 3px rgba(0, 0, 0, 0.15),
           0px 1px 3px rgba(0, 0, 0, 0.3)
         );
-      };
+      }
 
       .shortcut-container:hover {
         background-color: var(--sat-document-create-button-hover-background, var(--nuxeo-button-primary-focus));
-      };
+      }
 
       paper-fab {
         width: 40px;
@@ -64,7 +64,7 @@ Polymer({
         --paper-fab-background: transparent;
         --paper-fab-keyboard-focus-background: transparent;
         box-shadow: none;
-      };
+      }
 
       .shortcut-label {
         font-size: 14px;
@@ -74,7 +74,7 @@ Polymer({
         white-space: nowrap;
         letter-spacing: 0.1px;
         font-family: var(--sat-font-family-secondary, var(--nuxeo-app-font));
-      };
+      }
     </style>
 
     <div class="shortcut-container" role="button" tabindex="0" on-keydown="_handleKeydown" on-tap="_tap">
