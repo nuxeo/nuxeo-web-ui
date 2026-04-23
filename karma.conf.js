@@ -19,6 +19,17 @@ const coverageSourceFiles = coverage
     ]
   : [];
 
+// Only when running with --coverage: element sources are served and Istanbul runs.
+// Omit this suite for plain `karma start` / `test:watch` so dynamic imports resolve.
+const coverageAppModuleTestFile = coverage
+  ? [
+      {
+        pattern: 'test/coverage-helpers/coverage-app-modules.test.js',
+        type: 'module',
+      },
+    ]
+  : [];
+
 const reporters = coverage ? ['mocha', 'coverage-istanbul'] : ['mocha'];
 
 let customLaunchers = {
@@ -102,12 +113,8 @@ module.exports = (config) => {
         pattern: `addons/*/test/*${config.grep || '*.test.js'}`,
         type: 'module',
       },
-      // After all other tests: bulk-import every app module for honest aggregate coverage
-      // (see scripts/generate-coverage-imports.js). Must not run first or it pollutes globals.
-      {
-        pattern: 'test/coverage-helpers/coverage-app-modules.test.js',
-        type: 'module',
-      },
+      // After all other tests: bulk-import app modules for aggregate coverage (coverage mode only).
+      ...coverageAppModuleTestFile,
     ],
     plugins: [
       // load plugin
