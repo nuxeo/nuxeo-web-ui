@@ -48,7 +48,7 @@
 
 */
 var global = window;
-(function(root, factory) {
+(function (root, factory) {
   if (typeof exports === 'object') {
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like enviroments that support module.exports,
@@ -56,14 +56,14 @@ var global = window;
     factory(module.exports);
   } else if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define([], function() {
+    define([], function () {
       return factory(root);
     });
   } else {
     // Browser globals
     factory(root);
   }
-})(this, function(root) {
+})(this, function (root) {
   'use strict';
 
   var categoriesDepsOrder = [
@@ -92,10 +92,10 @@ var global = window;
     _rootDescription: { value: null, writable: true },
 
     rootDescription: {
-      set: function(value) {
+      set: function (value) {
         this._rootDescription = value;
       },
-      get: function() {
+      get: function () {
         return this._rootDescription;
       },
     },
@@ -104,7 +104,7 @@ var global = window;
 
     //detect absolute path following the same protocol than window.location
     _isAbsolutePath: {
-      value: function(path) {
+      value: function (path) {
         var isAbsolutePathRegExp = new RegExp('^' + window.location.protocol, 'i');
 
         return path.match(isAbsolutePathRegExp) ? true : false;
@@ -112,7 +112,7 @@ var global = window;
     },
 
     resolvePathIfNeeded: {
-      value: function(path) {
+      value: function (path) {
         if (this._isAbsolutePath(path)) {
           return path;
         }
@@ -127,12 +127,12 @@ var global = window;
     },
 
     _resolvePathsForCategories: {
-      value: function(categories) {
-        categories.forEach(function(category) {
+      value: function (categories) {
+        categories.forEach(function (category) {
           var descriptions = this.json[category];
           if (descriptions) {
             var descriptionKeys = Object.keys(descriptions);
-            descriptionKeys.forEach(function(descriptionKey) {
+            descriptionKeys.forEach(function (descriptionKey) {
               var description = descriptions[descriptionKey];
               description.uri = this.resolvePathIfNeeded(description.uri);
             }, this);
@@ -148,10 +148,10 @@ var global = window;
 
     json: {
       enumerable: true,
-      get: function() {
+      get: function () {
         return this._json;
       },
-      set: function(value) {
+      set: function (value) {
         if (this._json !== value) {
           this._json = value;
           this._resolvePathsForCategories(['buffers', 'shaders', 'images', 'videos']);
@@ -165,7 +165,7 @@ var global = window;
     },
 
     getEntryDescription: {
-      value: function(entryID, entryType) {
+      value: function (entryID, entryType) {
         var entries = null;
 
         var category = entryType;
@@ -180,7 +180,7 @@ var global = window;
     },
 
     _stepToNextCategory: {
-      value: function() {
+      value: function () {
         this._state.categoryIndex = this.getNextCategoryIndex(this._state.categoryIndex + 1);
         if (this._state.categoryIndex !== -1) {
           this._state.categoryState.index = 0;
@@ -193,7 +193,7 @@ var global = window;
 
     _stepToNextDescription: {
       enumerable: false,
-      value: function() {
+      value: function () {
         var categoryState = this._state.categoryState;
         var keys = categoryState.keys;
         if (!keys) {
@@ -211,13 +211,13 @@ var global = window;
     },
 
     hasCategory: {
-      value: function(category) {
+      value: function (category) {
         return this.rootDescription[category] ? true : false;
       },
     },
 
     _handleState: {
-      value: function() {
+      value: function () {
         var methodForType = {
           buffers: this.handleBuffer,
           bufferViews: this.handleBufferView,
@@ -284,7 +284,7 @@ var global = window;
 
     _loadJSONIfNeeded: {
       enumerable: true,
-      value: function(callback) {
+      value: function (callback) {
         var self = this;
         //FIXME: handle error
         if (!this._json) {
@@ -293,7 +293,7 @@ var global = window;
           this.baseURL = i !== 0 ? jsonPath.substring(0, i + 1) : '';
           var jsonfile = new XMLHttpRequest();
           jsonfile.open('GET', jsonPath, true);
-          jsonfile.onreadystatechange = function() {
+          jsonfile.onreadystatechange = function () {
             if (jsonfile.readyState == 4) {
               if (jsonfile.status == 200) {
                 self.json = JSON.parse(jsonfile.responseText);
@@ -314,7 +314,7 @@ var global = window;
 
     /* load JSON and assign it as description to the reader */
     _buildLoader: {
-      value: function(callback) {
+      value: function (callback) {
         var self = this;
         function JSONReady(json) {
           self.rootDescription = json;
@@ -328,7 +328,7 @@ var global = window;
     _state: { value: null, writable: true },
 
     _getEntryType: {
-      value: function(entryID) {
+      value: function (entryID) {
         var rootKeys = categoriesDepsOrder;
         for (var i = 0; i < rootKeys.length; i++) {
           var rootValues = this.rootDescription[rootKeys[i]];
@@ -341,7 +341,7 @@ var global = window;
     },
 
     getNextCategoryIndex: {
-      value: function(currentIndex) {
+      value: function (currentIndex) {
         for (var i = currentIndex; i < categoriesDepsOrder.length; i++) {
           if (this.hasCategory(categoriesDepsOrder[i])) {
             return i;
@@ -354,7 +354,7 @@ var global = window;
 
     load: {
       enumerable: true,
-      value: function(userInfo, options) {
+      value: function (userInfo, options) {
         var self = this;
         this._buildLoader(function loaderReady(reader) {
           var startCategory = self.getNextCategoryIndex.call(self, 0);
@@ -372,7 +372,7 @@ var global = window;
     },
 
     initWithPath: {
-      value: function(path) {
+      value: function (path) {
         this._path = path;
         this._json = null;
         return this;
@@ -384,7 +384,7 @@ var global = window;
 
     //to be invoked by subclass, so that ids can be ensured to not overlap
     loaderContext: {
-      value: function() {
+      value: function () {
         if (typeof this._knownURLs[this._path] === 'undefined') {
           this._knownURLs[this._path] = Object.keys(this._knownURLs).length;
         }
@@ -393,7 +393,7 @@ var global = window;
     },
 
     initWithJSON: {
-      value: function(json, baseURL) {
+      value: function (json, baseURL) {
         this.json = json;
         this.baseURL = baseURL;
         if (!baseURL) {

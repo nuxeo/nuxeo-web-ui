@@ -58,7 +58,7 @@ jobs:
           node-version: 22
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.9.0
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.0
         with:
           java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
 

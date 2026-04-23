@@ -1,25 +1,25 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Then, When } from '@cucumber/cucumber';
 
-When(/^I select user from the dropdown menu$/, async function() {
+When(/^I select user from the dropdown menu$/, async function () {
   const dropdownEle = await this.ui.user.dropdown;
   await dropdownEle.waitForVisible();
   const itemEle = await this.ui.user.userItem;
   await itemEle.click();
 });
 
-When(/^I can see the new user form$/, async function() {
+When(/^I can see the new user form$/, async function () {
   const formEle = await this.ui.user.createUserForm;
   await formEle.waitForVisible();
 });
 
-Then(/^I can create a user with the following properties:$/, async function(table) {
+Then(/^I can create a user with the following properties:$/, async function (table) {
   await this.ui.user.fillMultipleValues(table, this.ui.user.createUserDialog);
   const buttonEle = await this.ui.user.createUserButton;
   await buttonEle.click();
 });
 
-Then(/^I can search for the user "([^"]*)"$/, async function(username) {
+Then(/^I can search for the user "([^"]*)"$/, async function (username) {
   await this.ui.user.searchFor(username);
   await this.ui.user.waitForVisible('nuxeo-card[name="users"] .table nuxeo-user-tag');
   const groupEle = await this.ui.group.el.$('nuxeo-card[name="users"] .table nuxeo-user-tag');
@@ -31,7 +31,7 @@ Then(/^I can search for the user "([^"]*)"$/, async function(username) {
   isVisible.should.be.true;
 });
 
-Then(/^I can see the user has the email "([^"]*)"$/, async function(userEmail) {
+Then(/^I can see the user has the email "([^"]*)"$/, async function (userEmail) {
   const user = await this.ui.user.el.element('nuxeo-view-user [name="email"]');
   const ele = await user.element('span');
   const emailText = await ele.getText();
@@ -40,7 +40,7 @@ Then(/^I can see the user has the email "([^"]*)"$/, async function(userEmail) {
   }
 });
 
-Then(/^I can edit the user "([^"]*)" with the following properties:$/, async function(username, table) {
+Then(/^I can edit the user "([^"]*)" with the following properties:$/, async function (username, table) {
   const user = await this.ui.user;
   await user.searchFor(username);
   const resultEle = await user.searchResult(username);
@@ -53,7 +53,7 @@ Then(/^I can edit the user "([^"]*)" with the following properties:$/, async fun
   await dialogButton.click();
 });
 
-Then(/^I can delete the user "([^"]*)"$/, async function(username) {
+Then(/^I can delete the user "([^"]*)"$/, async function (username) {
   await this.ui.user.searchFor(username);
   const result = await this.ui.user.searchResult(username);
   await result.click();

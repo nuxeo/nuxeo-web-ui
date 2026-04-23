@@ -138,18 +138,18 @@ Polymer({
   },
 
   ready() {
-    this._onkeypress = function(e) {
+    this._onkeypress = function (e) {
       if (e.key === 'Escape') {
         this._off();
       }
     }.bind(this);
-    this._onpointerout = function() {
+    this._onpointerout = function () {
       this._unknownLocation = true;
     }.bind(this);
-    this._ondblclick = function() {
+    this._ondblclick = function () {
       this._off();
     }.bind(this);
-    this._onpointermove = function(e) {
+    this._onpointermove = function (e) {
       if (this._idleTimeout) {
         clearTimeout(this._idleTimeout);
       }

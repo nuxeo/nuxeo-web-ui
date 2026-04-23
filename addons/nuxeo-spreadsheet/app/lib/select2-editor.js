@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 const Select2Editor = Handsontable.editors.TextEditor.prototype.extend();
 
-Select2Editor.prototype.prepare = function(td, row, col, prop, value, cellProperties) {
+Select2Editor.prototype.prepare = function (td, row, col, prop, value, cellProperties) {
   Handsontable.editors.TextEditor.prototype.prepare.apply(this, arguments);
 
   this.options = {};
@@ -15,7 +15,7 @@ Select2Editor.prototype.prepare = function(td, row, col, prop, value, cellProper
   }
 };
 
-Select2Editor.prototype.createElements = function() {
+Select2Editor.prototype.createElements = function () {
   this.$body = $(document.body);
   this.wtDom = Handsontable.Dom;
 
@@ -104,7 +104,7 @@ const onBeforeKeyDown = function onBeforeKeyDown(event) {
   }
 };
 
-Select2Editor.prototype.open = function() {
+Select2Editor.prototype.open = function () {
   this.instance.listen(false); // disable HOT auto-close behavior
   this.refreshDimensions();
   this.textareaParentStyle.display = 'block';
@@ -184,14 +184,14 @@ Select2Editor.prototype.open = function() {
   });
 };
 
-Select2Editor.prototype.getSelectionText = function(value) {
+Select2Editor.prototype.getSelectionText = function (value) {
   if (this.cellLabels && this.cellLabels[value]) {
     return this.cellLabels[value];
   }
   return value || '';
 };
 
-Select2Editor.prototype.close = function() {
+Select2Editor.prototype.close = function () {
   this.instance.listen();
   // Remove hooks only if they exist
   if (this.instance) {
@@ -205,7 +205,7 @@ Select2Editor.prototype.close = function() {
   Handsontable.editors.TextEditor.prototype.close.apply(this, arguments);
 };
 
-Select2Editor.prototype.val = function(value) {
+Select2Editor.prototype.val = function (value) {
   if (value === undefined) {
     const v = this.$textarea.val();
     let result = [];
@@ -224,14 +224,14 @@ Select2Editor.prototype.val = function(value) {
   }
 };
 
-Select2Editor.prototype.focus = function() {
+Select2Editor.prototype.focus = function () {
   this.instance.listen();
 
   // DO NOT CALL THE BASE TEXTEDITOR FOCUS METHOD HERE, IT CAN MAKE THIS EDITOR BEHAVE POORLY AND HAS NO PURPOSE WITHIN THE CONTEXT OF THIS EDITOR
   // Handsontable.editors.TextEditor.prototype.focus.apply(this, arguments);
 };
 
-Select2Editor.prototype.beginEditing = function(...params) {
+Select2Editor.prototype.beginEditing = function (...params) {
   const { onBeginEditing } = this.instance.getSettings();
   if (onBeginEditing && onBeginEditing() === false) {
     return;
@@ -240,7 +240,7 @@ Select2Editor.prototype.beginEditing = function(...params) {
   Handsontable.editors.TextEditor.prototype.beginEditing.apply(this, params);
 };
 
-Select2Editor.prototype.finishEditing = function() {
+Select2Editor.prototype.finishEditing = function () {
   this.instance.listen();
   this.isFinished = true;
 

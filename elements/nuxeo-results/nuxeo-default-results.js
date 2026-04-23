@@ -68,6 +68,7 @@ Polymer({
     <nuxeo-results
       id="results"
       display-mode="table"
+      document="[[document]]"
       name="[[name]]"
       nx-provider="[[nxProvider]]"
       selected-items="{{selectedItems}}"
@@ -160,9 +161,7 @@ Polymer({
           field="versionLabel"
           hidden
         >
-          <template>
-            [[formatVersion(item)]]
-          </template>
+          <template> [[formatVersion(item)]] </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column
           name="[[i18n('documentContentView.datatable.header.created')]]"
@@ -233,9 +232,7 @@ Polymer({
             </template>
             <template is="dom-if" if="[[isFavorite(item)]]">
               <iron-icon id="favorite" icon="nuxeo:favorites"></iron-icon>
-              <nuxeo-tooltip for="favorite">
-                [[i18n('documentContentView.datatable.flags.favorite')]]
-              </nuxeo-tooltip>
+              <nuxeo-tooltip for="favorite"> [[i18n('documentContentView.datatable.flags.favorite')]] </nuxeo-tooltip>
             </template>
             <template is="dom-if" if="[[_contentStoredInColdStorage(item)]]">
               <iron-icon id="coldStorage" icon="nuxeo:coldstorage"></iron-icon>
@@ -256,6 +253,7 @@ Polymer({
     nxProvider: Object,
 
     name: String,
+    document: Object,
 
     selectedItems: {
       type: Array,

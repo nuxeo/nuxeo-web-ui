@@ -44,26 +44,26 @@ Polymer({
         --nuxeo-tree-theme: {
           padding: 1em;
           color: var(--nuxeo-drawer-text);
-        }
+        };
         --nuxeo-tree-node-theme: {
           min-height: 24px;
-        }
+        };
         --nuxeo-tree-children-theme: {
           padding-left: 1em;
-        }
+        };
         --nuxeo-tree-node-more-theme: {
           line-height: 1.3em;
           display: inline-block;
           vertical-align: text-top;
           margin-left: 1.3em;
           word-break: break-word;
-        }
+        };
       }
 
       :host([dir='rtl']) {
         --nuxeo-tree-children-theme: {
           padding-right: 1em;
-        }
+        };
       }
 
       .content {
@@ -389,7 +389,7 @@ Polymer({
     window.addEventListener('document-created', this._fetchDocument.bind(this));
 
     this.controller = {
-      getChildren: function(node, page) {
+      getChildren: function (node, page) {
         this.$.children.params = [node.uid];
         this.$.children.page = page;
         return this.$.children.fetch().then((data) => {

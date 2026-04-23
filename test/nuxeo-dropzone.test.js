@@ -21,11 +21,7 @@ import '../elements/nuxeo-dropzone/nuxeo-dropzone';
 suite('nuxeo-dropzone', () => {
   let element;
   setup(async () => {
-    element = await fixture(
-      html`
-        <nuxeo-dropzone></nuxeo-dropzone>
-      `,
-    );
+    element = await fixture(html` <nuxeo-dropzone></nuxeo-dropzone> `);
   });
 
   suite('should return whether property is under retention', () => {

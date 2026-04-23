@@ -1,11 +1,11 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Then, When } from '@cucumber/cucumber';
 
-When('I click the View Tasks Dashboard link', async function() {
+When('I click the View Tasks Dashboard link', async function () {
   const dashboardLink = await this.ui.drawer.tasks.dashboardLink;
   await dashboardLink.click();
 });
-When(/^I (\w+) the task for following actors:$/, async function(option, table) {
+When(/^I (\w+) the task for following actors:$/, async function (option, table) {
   option.should.to.be.oneOf(['delegate', 'reassign'], 'An unknown type was passed as argument');
 
   if (option === 'delegate') {
@@ -29,25 +29,25 @@ When(/^I (\w+) the task for following actors:$/, async function(option, table) {
   await driver.waitForExist('iron-overlay-backdrop', 5000, true);
 });
 
-Then('I can see the list of tasks', async function() {
+Then('I can see the list of tasks', async function () {
   const ui = await this.ui;
   const drawer = await ui.drawer;
   const task = await drawer.tasks.waitForVisible();
   task.should.be.true;
 });
-Then('I can see the View Tasks Dashboard link', async function() {
+Then('I can see the View Tasks Dashboard link', async function () {
   const dashboardLink = await this.ui.drawer.tasks.dashboardLink;
   const output = await dashboardLink.waitForVisible();
   output.should.be.true;
 });
-Then('I can see the Tasks Dashboard', async function() {
+Then('I can see the Tasks Dashboard', async function () {
   const taskVisible = await this.ui.tasks.waitForVisible();
   taskVisible.should.be.true;
 });
-Then(/^I can process the workflow$/, async function() {
+Then(/^I can process the workflow$/, async function () {
   await this.ui.browser.documentTaskView.waitForVisible();
 });
-Then(/^I can see the (\w+) option available$/, async function(option) {
+Then(/^I can see the (\w+) option available$/, async function (option) {
   option.should.to.be.oneOf(['delegate', 'reassign'], 'An unknown type was passed as argument');
   if (option === 'delegate') {
     const delegateOption = await this.ui.browser.documentTaskView.delegateOption;
@@ -59,7 +59,7 @@ Then(/^I can see the (\w+) option available$/, async function(option) {
     reassignOptionVisible.should.be.true;
   }
 });
-Then(/^I can't see the (\w+) option available$/, async function(option) {
+Then(/^I can't see the (\w+) option available$/, async function (option) {
   option.should.to.be.oneOf(['delegate', 'reassign'], 'An unknown type was passed as argument');
   if (option === 'delegate') {
     const delegateOption = await this.ui.browser.documentTaskView.delegateOption;
@@ -71,23 +71,27 @@ Then(/^I can't see the (\w+) option available$/, async function(option) {
     reassignOptionVisible.should.be.false;
   }
 });
-Then(/^I can see that "([^"]*)" belongs to (\w+) actors$/, async function(user, option) {
+Then(/^I can see that "([^"]*)" belongs to (\w+) actors$/, async function (user, option) {
   option.should.to.be.oneOf(['delegated', 'assigned'], 'An unknown type was passed as argument');
 
   // Workaround to WDIO limitation
   const browser = await this.ui.browser;
   const documentTaskView = await browser.documentTaskView;
   await documentTaskView.waitForVisible();
-  await documentTaskView.waitForVisible(
-    `${option === 'delegated' ? '#delegatedActors' : '#assignedActors'} nuxeo-tags`,
+  const actorsSelector = `${option === 'delegated' ? '#delegatedActors' : '#assignedActors'}`;
+  const actorsTags = await documentTaskView.el.element(`${actorsSelector} nuxeo-tags`);
+  await actorsTags.waitForVisible();
+  // Wait for nuxeo-user-tag inner content to render (depends on async _currentUser from nuxeo-connection)
+  const usernameContainer = await documentTaskView.el.element(
+    `${actorsSelector} nuxeo-user-tag .tag .username-container`,
   );
-  const delegatedActors = await documentTaskView.delegatedActors;
-  const assignedActors = await documentTaskView.assignedActors;
-  const actorsElement = option === 'delegated' ? delegatedActors : assignedActors;
+  await usernameContainer.waitForVisible();
+  const actorsElement =
+    option === 'delegated' ? await documentTaskView.delegatedActors : await documentTaskView.assignedActors;
   const result = await documentTaskView.actorExists(actorsElement, user);
   result.should.be.true;
 });
-Then('I can see the my task list has {int} item(s)', async function(nb) {
+Then('I can see the my task list has {int} item(s)', async function (nb) {
   const ui = await this.ui;
   const drawer = await ui.drawer;
   await drawer.tasks.waitForVisible();
@@ -96,6 +100,6 @@ Then('I can see the my task list has {int} item(s)', async function(nb) {
     throw new Error(`Expected task count ${nb} but found ${result}`);
   }
 });
-Then('I can perform the {string} task action', async function(name) {
+Then('I can perform the {string} task action', async function (name) {
   await this.ui.browser.documentTaskView.performAction(name);
 });

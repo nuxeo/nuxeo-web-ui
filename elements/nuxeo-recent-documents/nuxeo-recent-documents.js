@@ -101,9 +101,7 @@ Polymer({
           <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
             <div class="list-item-info">
               <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
-              <div class="list-item-title">
-                [[_title(document)]]
-              </div>
+              <div class="list-item-title">[[_title(document)]]</div>
             </div>
           </div>
         </template>

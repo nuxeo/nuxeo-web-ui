@@ -258,9 +258,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
     const end = this._hasValidDate(this.endDate) && Date.parse(this.endDate);
     const refresh = !start || !end || start < end;
     if (start && end && start > end) {
-      this.startDate = moment(end)
-        .subtract(7, 'day')
-        .format('YYYY-MM-DD');
+      this.startDate = moment(end).subtract(7, 'day').format('YYYY-MM-DD');
     }
 
     if (refresh) {

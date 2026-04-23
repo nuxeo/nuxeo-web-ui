@@ -21,11 +21,7 @@ import '../elements/nuxeo-document-blob/nuxeo-document-blob.js';
 suite('nuxeo-document-blob', () => {
   let element;
   setup(async () => {
-    element = await fixture(
-      html`
-        <nuxeo-document-blob></nuxeo-document-blob>
-      `,
-    );
+    element = await fixture(html` <nuxeo-document-blob></nuxeo-document-blob> `);
   });
 
   suite('fetch document blob url', () => {

@@ -19,7 +19,7 @@ function findDeep(selector, multiple, baseElement, filterBy) {
   function collectAllElementsDeep(sel = null) {
     const allElements = [];
 
-    const findAllElements = function(nodes) {
+    const findAllElements = function (nodes) {
       for (let i = 0; i < nodes.length; i++) {
         const el = nodes[i];
         allElements.push(el);
@@ -134,7 +134,7 @@ export default class {
       throw new Error('A WebdriverIO instance is needed to initialise wdio-webcomponents');
     }
 
-    browser.addCommand('shadowExecute', function(arg1, arg2) {
+    browser.addCommand('shadowExecute', function (arg1, arg2) {
       if (typeof arg1 === 'function') {
         const elem = this.shadowElement();
         return this.execute(arg1, elem);
@@ -160,7 +160,7 @@ export default class {
       true,
     );
 
-    browser.addCommand('scrollIntoView', function(selector) {
+    browser.addCommand('scrollIntoView', function (selector) {
       return this.shadowExecute(selector, (element) =>
         (Array.isArray(element) && element.length > 0 ? element[0] : element).scrollIntoView(),
       );

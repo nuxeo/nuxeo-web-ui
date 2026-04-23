@@ -161,9 +161,7 @@ Polymer({
                 <div class="list-item-thumbnail">
                   <nuxeo-document-thumbnail document="[[document]]"></nuxeo-document-thumbnail>
                 </div>
-                <div class="list-item-title">
-                  [[_title(document)]]
-                </div>
+                <div class="list-item-title">[[_title(document)]]</div>
                 <iron-icon
                   class="remove"
                   icon="nuxeo:remove"
@@ -178,9 +176,7 @@ Polymer({
         </template>
       </nuxeo-data-list>
 
-      <div class="tip">
-        [[i18n('clipboard.tip')]]
-      </div>
+      <div class="tip">[[i18n('clipboard.tip')]]</div>
 
       <div class="toolbar">
         <div class="actions">

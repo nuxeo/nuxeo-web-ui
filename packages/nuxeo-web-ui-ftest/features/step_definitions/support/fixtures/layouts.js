@@ -377,15 +377,19 @@ global.fieldRegistry.register(
 fixtures.layouts = {
   getValue: async (element) => {
     const fieldType = await element.getTagName();
-    return (global.fieldRegistry.contains(fieldType)
-      ? await global.fieldRegistry.getValFunc(fieldType)
-      : global.fieldRegistry.getValFunc('generic'))(element);
+    return (
+      global.fieldRegistry.contains(fieldType)
+        ? await global.fieldRegistry.getValFunc(fieldType)
+        : global.fieldRegistry.getValFunc('generic')
+    )(element);
   },
   setValue: async (element, value) => {
     const fieldType = await element.getTagName();
-    await (global.fieldRegistry.contains(fieldType)
-      ? global.fieldRegistry.setValFunc(fieldType)
-      : global.fieldRegistry.setValFunc('generic'))(element, value);
+    await (
+      global.fieldRegistry.contains(fieldType)
+        ? global.fieldRegistry.setValFunc(fieldType)
+        : global.fieldRegistry.setValFunc('generic')
+    )(element, value);
   },
   page: {
     Note: 'nuxeo-document-page',

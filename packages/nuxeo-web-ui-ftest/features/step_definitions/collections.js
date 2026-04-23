@@ -1,14 +1,14 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Then } from '@cucumber/cucumber';
 
-Then('I can see the {string} collection', async function(name) {
+Then('I can see the {string} collection', async function (name) {
   const collection = await this.ui.drawer.collections.waitForHasCollection(name);
   if (!collection) {
     throw new Error(`Expected I can not click on the ${name} collection`);
   }
 });
 
-Then('I can click on the {string} collection', async function(name) {
+Then('I can click on the {string} collection', async function (name) {
   const myCollection = await this.ui.drawer;
   const collectionsEle = await myCollection.collections;
   const selectEle = await collectionsEle.select(name);
@@ -17,7 +17,7 @@ Then('I can click on the {string} collection', async function(name) {
   }
 });
 
-Then('I can see that the document belongs to the collection', async function() {
+Then('I can see that the document belongs to the collection', async function () {
   const browser = await this.ui.browser;
   const hasChild = await browser.waitForHasChild(this.doc);
   if (!hasChild) {
@@ -25,7 +25,7 @@ Then('I can see that the document belongs to the collection', async function() {
   }
 });
 
-Then('I can click the document in the collection', async function() {
+Then('I can click the document in the collection', async function () {
   const browserEle = await this.ui.browser;
   const clickDocument = await browserEle.clickChild(this.doc.title);
   if (!clickDocument) {
@@ -33,7 +33,7 @@ Then('I can click the document in the collection', async function() {
   }
 });
 
-Then('I can see the collection is in queue mode', async function() {
+Then('I can see the collection is in queue mode', async function () {
   const drawerEle = await this.ui.drawer;
   const collectionsEle = await drawerEle.collections;
   const isQueueModeEle = await collectionsEle.isQueueMode;
@@ -42,7 +42,7 @@ Then('I can see the collection is in queue mode', async function() {
   }
 });
 
-Then('I can see the collection queue has the document', async function() {
+Then('I can see the collection queue has the document', async function () {
   const drawerEle = await this.ui.drawer;
   const collectionsEle = await drawerEle.collections;
   const hasMemberEle = await collectionsEle.waitForHasMember(this.doc);
@@ -51,7 +51,7 @@ Then('I can see the collection queue has the document', async function() {
   }
 });
 
-Then('I can remove the document from the collection queue', async function() {
+Then('I can remove the document from the collection queue', async function () {
   const draweerEle = await this.ui.drawer;
   const collectionsEle = await draweerEle.collections;
   const removeMemberEle = await collectionsEle.removeMember(this.doc);
@@ -60,7 +60,7 @@ Then('I can remove the document from the collection queue', async function() {
   }
 });
 
-Then('I can see the collection queue does not have the document', async function() {
+Then('I can see the collection queue does not have the document', async function () {
   const drawerEle = await this.ui.drawer;
   const collectionsEle = await drawerEle.collections;
   const hasMemberEle = await collectionsEle.waitForHasMember(this.doc, true);

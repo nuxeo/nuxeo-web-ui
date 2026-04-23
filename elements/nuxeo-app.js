@@ -113,7 +113,7 @@ Polymer({
       :host {
         --app-header-background-rear-layer: {
           -webkit-overflow-scrolling: auto;
-        }
+        };
       }
 
       /* Profile avatar with initials */
@@ -911,7 +911,7 @@ Polymer({
     });
 
     // NXP-25311: stop loading bar if an error occurs
-    window.onerror = function() {
+    window.onerror = function () {
       this.loading = false;
     }.bind(this);
 
@@ -1136,7 +1136,10 @@ Polymer({
     this.docId = docParam.uid;
     this.docPath = docParam.path;
     this.$.doc.headers = this._computeHeaders();
-    this.$.doc.enrichers = this._computeEnrichers();
+    const page = (docParam && docParam.page) || 'browse';
+    // compute enrichers for the intended target page
+    this.$.doc.enrichers = this._computeDocumentEnrichersForPage(page);
+
     return this.$.doc.get().then((doc) => {
       if (this.docId && doc.facets.includes('SavedSearch')) {
         this._routedSearch = doc;
@@ -1158,7 +1161,7 @@ Polymer({
   },
 
   load(page, uid, path, action) {
-    this._loadDocument({ uid, path })
+    this._loadDocument({ uid, path, page })
       .then((doc) => {
         if (doc) {
           this.docAction = action;
@@ -1764,7 +1767,7 @@ Polymer({
         Performance.markUnique('nuxeo-app.page-changed');
       }
       // add performance listener to current page to track the last dom-change event
-      this.__performanceListener = function() {
+      this.__performanceListener = function () {
         const name = `${el.tagName.toLocaleLowerCase()}.dom-changed`;
         // a measure will be performed from the last page switch or, if this is the first page load,
         // from when navigation started to the current moment
@@ -1946,6 +1949,46 @@ Polymer({
         });
       }
     }
+  },
+
+  _appendEnricher(listOrCsv, value) {
+    const v = (value || '').trim();
+    if (!v) {
+      return listOrCsv;
+    }
+
+    // Array case (your current config.get('enrichers').document is an array)
+    if (Array.isArray(listOrCsv)) {
+      const list = listOrCsv.map((e) => (e ? String(e).trim() : '')).filter(Boolean);
+      if (!list.includes(v)) {
+        list.push(v);
+      }
+      return list;
+    }
+
+    // String case
+    const list = (listOrCsv || '')
+      .split(',')
+      .map((e) => e && e.trim())
+      .filter(Boolean);
+
+    if (!list.includes(v)) {
+      list.push(v);
+    }
+    return list.join(',');
+  },
+
+  _computeDocumentEnrichersForPage(page) {
+    const base = config.get('enrichers') || {};
+
+    // clone so we don't mutate the global config enrichers object
+    const enrichers = { ...base };
+    // preserve existing document/blob enrichers, only append when needed
+    if (page === 'browse') {
+      enrichers.document = this._appendEnricher(enrichers.document, 'userPreferences');
+    }
+
+    return enrichers;
   },
 
   _computeEnrichers() {

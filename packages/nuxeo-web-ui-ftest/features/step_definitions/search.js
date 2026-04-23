@@ -2,13 +2,13 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers.js';
 
-Then('I can see the {string} search panel', function(name) {
+Then('I can see the {string} search panel', function (name) {
   this.ui.drawer._search(name).waitForVisible();
 });
-Then('I can see the search results', function() {
+Then('I can see the search results', function () {
   this.ui.search.waitForVisible().should.be.true;
 });
-Then('I cannot see the search results', function() {
+Then('I cannot see the search results', function () {
   this.ui.search.waitForVisible(browser.options.waitforTimeout, true).should.be.true;
 });
 
@@ -82,7 +82,7 @@ Given(/^I have the following documents$/, async (table) => {
 
 Given(
   'I have a saved search named "{word}", for the "{word}" page provider, with the following parameters',
-  async function(searchName, pageProvider, table) {
+  async function (searchName, pageProvider, table) {
     const hashes = await table.hashes();
     hashes.forEach((kv) => {
       kv.value = JSON.parse(kv.value);
@@ -98,15 +98,15 @@ Given(
   },
 );
 
-Given('I have permission {word} for this saved search', function(permission) {
+Given('I have permission {word} for this saved search', function (permission) {
   return fixtures.savedSearches.setPermissions(this.savedSearch, permission, this.username);
 });
 
-When('I browse to the saved search', function() {
+When('I browse to the saved search', function () {
   url(`#!/doc/${this.savedSearch.id}`);
 });
 
-Then('I can see that my saved search "{word}" on "{word}" is selected', async function(savedSearchName, searchName) {
+Then('I can see that my saved search "{word}" on "{word}" is selected', async function (savedSearchName, searchName) {
   const ui = await this.ui;
   const searchForm = await ui.searchForm(searchName);
   const dropdownBtn = await searchForm.nuxeoSelect;
@@ -120,27 +120,27 @@ Then('I can see that my saved search "{word}" on "{word}" is selected', async fu
   classAttr.should.include('highlight');
 });
 
-When(/^I clear the (.+) search on (.+)$/, async function(searchType, searchName) {
+When(/^I clear the (.+) search on (.+)$/, async function (searchType, searchName) {
   const searchForm = await this.ui.searchForm(searchName);
   await searchForm.waitForVisible();
   await searchForm.search(searchType);
 });
 
-When(/^I perform a (.+) search for (.+) on (.+)$/, async function(searchType, searchTerm, searchName) {
+When(/^I perform a (.+) search for (.+) on (.+)$/, async function (searchType, searchTerm, searchName) {
   const searchForm = await this.ui.searchForm(searchName);
   await searchForm.waitForVisible();
   await driver.pause(1000);
   await searchForm.search(searchType, searchTerm);
 });
 
-When('I switch to filter view', async function() {
+When('I switch to filter view', async function () {
   await driver.pause(1000);
   const filterView = await this.ui.filterView;
   await filterView.click();
   await driver.pause(1000);
 });
 
-Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
+Then(/^I can see (\d+) search results$/, async function (numberOfResults) {
   await driver.pause(2000);
   const uiResult = await this.ui.results;
   const displayMode = await uiResult.displayMode;
@@ -167,7 +167,7 @@ Then(/^I can see (\d+) search results$/, async function(numberOfResults) {
   }
 });
 
-Then(/^I can see more than (\d+) search results$/, async function(minNumberOfResults) {
+Then(/^I can see more than (\d+) search results$/, async function (minNumberOfResults) {
   await driver.pause(1000);
   const results = await this.ui.results;
   const displayMode = await results.displayMode;
@@ -178,7 +178,7 @@ Then(/^I can see more than (\d+) search results$/, async function(minNumberOfRes
   throw new Error(`Expecting to get more than ${minNumberOfResults} but found ${output}`);
 });
 
-Then('I edit the results columns to show {string}', async function(heading) {
+Then('I edit the results columns to show {string}', async function (heading) {
   const result = await this.ui.results;
   const actions = await result.actions;
   await actions.waitForVisible();
@@ -200,7 +200,7 @@ Then('I edit the results columns to show {string}', async function(heading) {
   isColumnExist.should.be.true;
 });
 
-Then(/^I save my search as "(.+)"$/, async function(searchName) {
+Then(/^I save my search as "(.+)"$/, async function (searchName) {
   const searchResults = await this.ui.searchResults;
   const saveAsButton = await searchResults.saveSearchAsButton;
   await saveAsButton.waitForVisible();
@@ -212,7 +212,7 @@ Then(/^I save my search as "(.+)"$/, async function(searchName) {
   await confirmSaveButton.click();
 });
 
-Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username) {
+Then(/^I share my "(.+)" search with (.+)/, async function (searchName, username) {
   const savedSearch = await this.ui.searchResults;
   const savedSearchButton = await savedSearch.savedSearchActionButton;
   await savedSearchButton.waitForVisible();
@@ -238,7 +238,7 @@ Then(/^I share my "(.+)" search with (.+)/, async function(searchName, username)
   isVisible.should.be.true;
 });
 
-Then(/^I can view my saved search "(.+)" on "(.+)"$/, async function(savedSearchName, searchName) {
+Then(/^I can view my saved search "(.+)" on "(.+)"$/, async function (savedSearchName, searchName) {
   const searchForm = await this.ui.searchForm(searchName);
   const dropdownBtn = await searchForm.nuxeoSelect;
   await dropdownBtn.click();
@@ -249,18 +249,18 @@ Then(/^I can view my saved search "(.+)" on "(.+)"$/, async function(savedSearch
   savedSearchExist.should.be.true;
 });
 
-When(/^I click the QuickSearch button$/, async function() {
+When(/^I click the QuickSearch button$/, async function () {
   const button = await this.ui.searchButton;
   await button.waitForVisible();
   await button.click();
 });
 
-When(/^I perform a QuickSearch for (.+)/, async function(searchTerm) {
+When(/^I perform a QuickSearch for (.+)/, async function (searchTerm) {
   const quickSearch = await this.ui.quickSearch;
   await quickSearch.enterInput(searchTerm);
 });
 
-Then(/^I can see (\d+) QuickSearch results$/, async function(numberOfResults) {
+Then(/^I can see (\d+) QuickSearch results$/, async function (numberOfResults) {
   const quickSearch = await this.ui.quickSearch;
   await driver.pause(1000);
   const result = await quickSearch.quickSearchResultsCount();

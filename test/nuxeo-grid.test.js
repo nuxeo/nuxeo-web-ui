@@ -27,15 +27,13 @@ suite('nuxeo-grid', () => {
 
   setup(async () => {
     sinon.spy(console, 'warn');
-    grid = await fixture(
-      html`
-        <nuxeo-grid>
-          <div id="top"></div>
-          <div id="main"></div>
-          <div id="side"></div>
-        </nuxeo-grid>
-      `,
-    );
+    grid = await fixture(html`
+      <nuxeo-grid>
+        <div id="top"></div>
+        <div id="main"></div>
+        <div id="side"></div>
+      </nuxeo-grid>
+    `);
   });
 
   teardown(() => {

@@ -62,7 +62,7 @@ function setupUI() {
     });
   });
 
-  $('input[name=autosave]').click(function() {
+  $('input[name=autosave]').click(function () {
     sheet.autosave = $(this).is(':checked');
     if (sheet.autosave) {
       log.default(i18n('autoSave'));
