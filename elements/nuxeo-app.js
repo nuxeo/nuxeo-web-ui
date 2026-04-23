@@ -230,28 +230,54 @@ Polymer({
         left: auto;
       }
 
-      /* menu */
-      #menu {
-        @apply --nuxeo-sidebar;
+      /* Scrollable menu container */
+      #menuContainer {
         position: fixed;
+        top: calc(53px + var(--nuxeo-app-top, 0));
         width: var(--nuxeo-sidebar-width);
-        height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        height: calc(100vh - 53px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         z-index: 100;
-        padding: 0;
-        padding-top: 54px;
         overflow: auto;
+        background-color: var(--nuxeo-sidebar-background);
         display: flex;
         flex-direction: column;
       }
 
-      #logo:hover img {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
+      :host([dir='ltr']) #menuContainer {
+        left: 0;
       }
 
-      #logo:hover img {
-        filter: brightness(110%);
-        -webkit-filter: brightness(110%);
+      :host([dir='rtl']) #menuContainer {
+        right: 0;
+      }
+
+      .home-link {
+        position: relative;
+        width: var(--nuxeo-sidebar-width);
+        background-color: var(--nuxeo-sidebar-background);
+        display: block;
+        text-decoration: none;
+        outline: none;
+        margin-top: 16px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+
+      /* menu */
+      #menu {
+        @apply --nuxeo-sidebar;
+        position: relative;
+        width: var(--nuxeo-sidebar-width);
+        z-index: 100;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      .home-link:focus-visible {
+        outline: auto;
       }
 
       /* Apply margin-top: auto to all settings and then reset them, except the first one */
@@ -494,51 +520,59 @@ Polymer({
         >
           <div role="list">
             <!-- logo -->
-            <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
+            <div id="logo">
               <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
-            </a>
+            </div>
 
-            <!-- menu -->
-            <paper-listbox
-              id="menu"
-              selected="{{selectedTab}}"
-              attr-for-selected="name"
-              selected-class="selected"
-              on-iron-activate="_toggleDrawer"
-              aria-label$="[[i18n('app.drawer')]]"
-              aria-expanded="[[drawerOpened]]"
-              on-keyup="_toggleDrawer"
-            >
-              <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-              <nuxeo-menu-icon
-                name="administration"
-                label="app.administration"
-                class="settings"
-                hidden$="[[!hasAdministrationPermissions(currentUser)]]"
-                icon="nuxeo:admin"
-              ></nuxeo-menu-icon>
-              <a name="profile" class="settings profile-avatar" id="profileWrapper" role="option">
-                <template is="dom-if" if="[[currentUser.contextParameters.userprofile.avatar.data]]">
-                  <img
-                    class="profile-avatar-image"
-                    src="[[currentUser.contextParameters.userprofile.avatar.data]]"
-                    alt="[[_displayUser(currentUser)]]"
-                  />
-                </template>
-                <template is="dom-if" if="[[!currentUser.contextParameters.userprofile.avatar.data]]">
-                  <span class="profile-initials">[[_userInitials(currentUser)]]</span>
-                </template>
+            <!-- Scrollable menu container -->
+            <div id="menuContainer">
+              <!-- home icon (outside paper-listbox to prevent drawer opening) -->
+              <a href$="[[urlFor('home')]]" on-click="_resetTaskSelection" class="home-link">
+                <nuxeo-menu-icon name="home" icon="nuxeo:home" label="app.home"></nuxeo-menu-icon>
               </a>
-              <nuxeo-tooltip
-                for="profileWrapper"
-                position="right"
-                offset="0"
-                animation-delay="0"
-                id="profileTooltip"
-                tabindex="-1"
-                >[[i18n('app.account')]]
-              </nuxeo-tooltip>
-            </paper-listbox>
+
+              <!-- menu -->
+              <paper-listbox
+                id="menu"
+                selected="{{selectedTab}}"
+                attr-for-selected="name"
+                selected-class="selected"
+                on-iron-activate="_toggleDrawer"
+                aria-label$="[[i18n('app.drawer')]]"
+                aria-expanded="[[drawerOpened]]"
+                on-keyup="_toggleDrawer"
+              >
+                <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
+                <nuxeo-menu-icon
+                  name="administration"
+                  label="app.administration"
+                  class="settings"
+                  hidden$="[[!hasAdministrationPermissions(currentUser)]]"
+                  icon="nuxeo:admin"
+                ></nuxeo-menu-icon>
+                <a name="profile" class="settings profile-avatar" id="profileWrapper" role="option">
+                  <template is="dom-if" if="[[currentUser.contextParameters.userprofile.avatar.data]]">
+                    <img
+                      class="profile-avatar-image"
+                      src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+                      alt="[[_displayUser(currentUser)]]"
+                    />
+                  </template>
+                  <template is="dom-if" if="[[!currentUser.contextParameters.userprofile.avatar.data]]">
+                    <span class="profile-initials">[[_userInitials(currentUser)]]</span>
+                  </template>
+                </a>
+                <nuxeo-tooltip
+                  for="profileWrapper"
+                  position="right"
+                  offset="0"
+                  animation-delay="0"
+                  id="profileTooltip"
+                  tabindex="-1"
+                  >[[i18n('app.account')]]
+                </nuxeo-tooltip>
+              </paper-listbox>
+            </div>
 
             <!-- drawer content -->
             <div id="drawer" style="width: {{drawerWidth}}">
