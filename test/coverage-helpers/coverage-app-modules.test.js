@@ -18,13 +18,18 @@ limitations under the License.
 
 import { coverageModulePaths } from '../coverage-imports-data.js';
 
-// Loaded last by karma.conf.js (see `files` order). Importing all app modules up front
-// would mutate globals (I18n, XHR, etc.) and break suites that expect a clean shell.
+// Only registered by Karma when argv includes --coverage (see karma.conf.js). Loaded last
+// in `files` so bulk imports do not run first and pollute globals (I18n, XHR, etc.).
 
 suite('Coverage: materialize all app modules for Istanbul', function () {
   this.timeout(0);
 
   test('dynamically import every listed module so unexecuted code counts toward total coverage', async function () {
+    if (coverageModulePaths.length === 0) {
+      expect.fail(
+        'test/coverage-imports-data.js has no paths. Run: node scripts/generate-coverage-imports.js (or npm run update-coverage-imports). npm test runs the generator automatically.',
+      );
+    }
     const root = new URL('../../', import.meta.url);
     const failures = [];
     await Promise.all(
