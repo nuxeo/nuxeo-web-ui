@@ -4,7 +4,7 @@
 
 - **Node.js** ≥ 18
 - **npm** (bundled with Node — no yarn or pnpm)
-- **Maven** and the appropriate **Java** version for marketplace builds (check the CI workflows or the upstream `nuxeo-parent` POM for the required version)
+- **Maven** and **Java 17** for marketplace builds
 - A running **Nuxeo Server** at `localhost:8080` for development and functional testing
 
 ## Getting Started
@@ -184,7 +184,7 @@ mvn clean install -Pftest         # Build + functional tests
 mvn clean install -Pa11y          # Build + accessibility tests
 ```
 
-Requires the Java version specified in the project POM.
+Requires Java version 17.
 
 ## Docker Development
 
