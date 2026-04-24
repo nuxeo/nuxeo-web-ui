@@ -4,7 +4,7 @@
 
 - **Node.js** ≥ 18
 - **npm** (bundled with Node — no yarn or pnpm)
-- **Maven** and the appropriate **Java** version for marketplace builds (check `pom.xml` for the required version)
+- **Maven** and the appropriate **Java** version for marketplace builds (check the CI workflows or the upstream `nuxeo-parent` POM for the required version)
 - A running **Nuxeo Server** at `localhost:8080` for development and functional testing
 
 ## Getting Started
@@ -147,7 +147,7 @@ npm run ftest:watch       # Re-runs @watch-tagged scenarios on change
 ```
 
 - Feature files: `ftest/features/*.feature` (Gherkin syntax)
-- Step definitions: `packages/nuxeo-web-ui-ftest/features/`
+- Step definitions: `packages/nuxeo-web-ui-ftest/features/step_definitions/`
 - Page objects: `packages/nuxeo-web-ui-ftest/pages/`
 
 ## Working with nuxeo-elements Locally
