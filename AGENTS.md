@@ -110,7 +110,7 @@ npm run ftest:dev           # Against localhost:8080 + localhost:5000
 - Framework: WebdriverIO 9 + Cucumber
 - Feature files: `ftest/features/*.feature`
 - Page objects: `packages/nuxeo-web-ui-ftest/pages/`
-- Step defs: `packages/nuxeo-web-ui-ftest/features/`
+- Step defs: `packages/nuxeo-web-ui-ftest/features/step_definitions/`
 
 ## CI Workflow
 
