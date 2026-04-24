@@ -118,7 +118,7 @@ Polymer({
 
 ### Data Access Layer
 
-All server communication goes through declarative Nuxeo Elements — never raw `fetch()` or `XMLHttpRequest`:
+In UI components and application code, server communication should go through declarative Nuxeo Elements rather than calling REST endpoints with raw `fetch()` or `XMLHttpRequest` directly:
 
 | Element | Purpose |
 |---|---|
@@ -153,7 +153,8 @@ Client-side routing uses `@nuxeo/page` (a fork of page.js) in hashbang mode:
 | `/doc/:repo?/:id` | `nuxeo-browser` | Direct document access by ID |
 | `/search/:name` | `nuxeo-search-page` | Named search forms |
 | `/admin/:tab?` | `nuxeo-admin` | Admin console (requires admin/powerusers) |
-| `/tasks/:repo?/:id?` | `nuxeo-tasks` | Workflow task view |
+| `/tasks` | `nuxeo-tasks` | Workflow task list |
+| `/tasks/:repo?/:id/` | `nuxeo-tasks` | Workflow task view by ID |
 | `/diff/:id1/:id2` | `nuxeo-diff-page` | Side-by-side comparison |
 | `/user/:id` | → admin redirect | User management |
 | `/group/:id` | → admin redirect | Group management |
@@ -198,7 +199,7 @@ addons/
 └── nuxeo-wopi/                  → Office Online integration
 ```
 
-Addon loading is controlled by the `NUXEO_PACKAGES` environment variable. Webpack dynamically imports them at boot time after the main bundle is loaded.
+Addon loading is a two-step process. During the build, webpack injects `Nuxeo.UI.bundles` from the `NUXEO_PACKAGES` environment variable and copies addon resources (HTML layouts, images, i18n) to the output. At runtime, `index.js` dynamically imports the bundles listed in `Nuxeo.UI.bundles` and always appends `nuxeo-spreadsheet`. If `NUXEO_PACKAGES` is unset or empty, `Nuxeo.UI.bundles` is `[]` and only `nuxeo-spreadsheet` is imported, though all addon resources are still copied to the build.
 
 ## Theming
 

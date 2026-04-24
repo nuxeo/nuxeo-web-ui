@@ -10,9 +10,10 @@ Each addon lives in `addons/<addon-name>/` with an `index.js` entry point that i
 
 ## Loading
 
-- All addons are bundled by default unless `NUXEO_PACKAGES` env var restricts the list
-- Entry points are imported via dynamic `import()` in the app bootstrap (`index.js`)
-- Addon elements register themselves on import (side-effect imports)
+- Addon entry points are imported from `Nuxeo.UI.bundles`, which is populated from the `NUXEO_PACKAGES` env var (space/comma separated)
+- `nuxeo-spreadsheet` is always imported regardless of `NUXEO_PACKAGES`
+- If `NUXEO_PACKAGES` is unset or empty, no addon entry points are imported (except spreadsheet), but all addon resources (HTML, images, i18n) are still copied to the build
+- Addon elements register themselves on import (side-effect imports); copying resources alone does not load an addon
 
 ## Available Addons
 
@@ -23,9 +24,18 @@ Each addon lives in `addons/<addon-name>/` with an `index.js` entry point that i
 - `nuxeo-imap-connector` — Email connector
 - `nuxeo-liveconnect` — Cloud storage providers (Google Drive, Dropbox, Box, OneDrive)
 - `nuxeo-platform-3d` — 3D model viewer
-- `nuxeo-spreadsheet` — Spreadsheet-style bulk editing
-- `nuxeo-template-rendering` — Template-based document generation
-- `nuxeo-wopi` — Microsoft Office Online integration
+- `nuxeo-spreadsheet` — Inline spreadsheet editing
+- `nuxeo-template-rendering` — Document template generation
+- `nuxeo-wopi` — Office Online editing
+
+## Addon Contents
+
+Addons can include:
+- `index.js` — JS entry point (dynamically imported)
+- `*.html` — HTML imports for Polymer elements
+- `elements/` — Additional web components
+- `images/` — Icons and assets
+- `i18n/` — Addon-specific translations (merged by `scripts/merge-messages.js`)
 
 ## Conventions
 
