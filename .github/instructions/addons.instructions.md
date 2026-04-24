@@ -23,7 +23,7 @@ Each addon lives in `addons/<name>/` with an `index.js` entry point. Addons are 
 
 ## Loading
 
-Controlled by `NUXEO_PACKAGES` env var (space/comma separated). If unset, ALL addons are bundled.
+Controlled by `NUXEO_PACKAGES` env var (space/comma separated). This populates `Nuxeo.UI.bundles`, which `index.js` uses to dynamically import addon entry points. `nuxeo-spreadsheet` is always imported regardless. If `NUXEO_PACKAGES` is unset or empty, no addon entry points are imported (except spreadsheet), but all addon resources (HTML, images, i18n) are still copied to the build.
 
 Addons can include:
 - `index.js` — JS entry point (dynamically imported)
