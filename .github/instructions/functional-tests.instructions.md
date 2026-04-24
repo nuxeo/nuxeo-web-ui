@@ -13,7 +13,6 @@ WebdriverIO 9 + Cucumber (Gherkin).
 - Feature files: `ftest/features/*.feature`
 - Step definitions: `packages/nuxeo-web-ui-ftest/features/step_definitions/`
 - Page objects: `packages/nuxeo-web-ui-ftest/pages/`
-- Hooks: `packages/nuxeo-web-ui-ftest/features/hooks/`
 
 ## Running
 
@@ -26,7 +25,7 @@ npm run ftest:watch    # Reruns @watch-tagged scenarios on change
 ## Patterns
 
 - Page objects inherit from the base page class
-- Steps use Cucumber expressions, not regex
+- Steps use Cucumber expressions and may also use regex literals in existing step definitions
 - Use `@watch` tag during development for fast iteration
 - Requires a running Nuxeo Server instance
 
