@@ -98,9 +98,9 @@ scripts/              → Build helpers (link-nuxeo-elements.js, merge-messages.
 ### Functional Tests
 
 - Framework: WebdriverIO 9 + Cucumber (Gherkin)
-- Feature files: `ftest/features/*.feature` (45 scenarios)
+- Feature files: `ftest/features/*.feature`
 - Page objects: `packages/nuxeo-web-ui-ftest/pages/`
-- Step definitions: `packages/nuxeo-web-ui-ftest/features/`
+- Step definitions: `packages/nuxeo-web-ui-ftest/features/step_definitions/`
 - Requires a running Nuxeo server (Docker or local)
 - Dev mode: `npm run ftest:dev` (expects Nuxeo at `localhost:8080`, UI at `localhost:5000`)
 
