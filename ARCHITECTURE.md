@@ -280,7 +280,7 @@ Environment variables control deployment:
 Workflow orchestration in `.github/workflows/main.yaml`:
 
 ```
-Push to the main branch triggers:
+Push to the lts-2023 branch triggers:
   lint    → ESLint + Prettier check
   test    → Karma unit tests
   a11y    → Accessibility tests
