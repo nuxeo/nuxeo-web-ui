@@ -124,7 +124,7 @@ PRs run lint and test workflows automatically.
 - `.html` files contain real Polymer components with inline JS — don't treat them as static HTML.
 - The `NUXEO_PACKAGES` env var controls which addons are bundled. If unset, ALL addons are included.
 - `@nuxeo` npm packages come from `https://packages.nuxeo.com/repository/npm-public/`, not npmjs.org.
-- Maven build requires the Java version specified in `pom.xml` (check the `nuxeo-parent` POM for the exact version).
+- Maven build requires **Java 17**.
 
 ## Environment Variables
 

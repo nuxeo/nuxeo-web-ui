@@ -43,7 +43,7 @@ Nuxeo Web UI is a single-page application (SPA) that serves as the standard user
 | Unit Testing | Karma + Mocha + Chai + Sinon | Various |
 | Functional Testing | WebdriverIO 9 + Cucumber | ^9.12 |
 | Linting | ESLint 9 (flat config) + Prettier | ^9.0 / ^3.8 |
-| Java Build | Maven | See `pom.xml` |
+| Java Build | Maven | Java 17 |
 | Deployment | Docker (Nginx + Nuxeo) | — |
 
 ## Boot Sequence
