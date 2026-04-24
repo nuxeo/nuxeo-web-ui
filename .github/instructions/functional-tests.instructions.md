@@ -10,8 +10,8 @@ WebdriverIO 9 + Cucumber (Gherkin).
 
 ## Structure
 
-- Feature files: `ftest/features/*.feature` (45 scenarios)
-- Step definitions: `packages/nuxeo-web-ui-ftest/features/`
+- Feature files: `ftest/features/*.feature`
+- Step definitions: `packages/nuxeo-web-ui-ftest/features/step_definitions/`
 - Page objects: `packages/nuxeo-web-ui-ftest/pages/`
 - WDIO config: `packages/nuxeo-web-ui-ftest/wdio.conf.js`
 - Custom plugins: `wdio-shadow-plugin.js` (Shadow DOM support), `wdio-compat-plugin.js`
