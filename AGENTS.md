@@ -114,7 +114,7 @@ npm run ftest:dev           # Against localhost:8080 + localhost:5000
 
 ## CI Workflow
 
-Push to the main branch triggers: **lint → test → a11y → ftest → build** (all must pass).
+Push to the `lts-2025` branch triggers: **lint → test → a11y → ftest → build** (all must pass).
 
 PRs run lint and test workflows automatically.
 

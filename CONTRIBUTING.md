@@ -34,7 +34,7 @@ nuxeo.cors.urls=*
 
 ### Making Changes
 
-1. Create a feature branch from the current main branch
+1. Create a feature branch from the branch `lts-2025`
 2. Edit components in `elements/`
 3. The webpack dev server hot-reloads changes
 4. Format and lint before committing:
@@ -203,14 +203,14 @@ This starts:
 
 ## Branch Strategy
 
-- The main development branch is the long-lived branch for the current LTS version (e.g., `lts-2025`, `maintenance-3.1.x`)
-- Feature branches are created from and merged back to the main branch
+- The main development branch is the long-lived branch for the current LTS version `lts-2025`)
+- Feature branches are created from and merged back to the `lts-2025` branch
 - PRs trigger lint and test workflows automatically
 - PRs tagged `preview` get ephemeral preview environments
 
 ## CI/CD
 
-GitHub Actions run on every push to the main branch and on PRs:
+GitHub Actions run on every push to the `lts-2025` branch and on PRs:
 
 1. **Lint** — ESLint + Prettier
 2. **Test** — Karma unit tests
