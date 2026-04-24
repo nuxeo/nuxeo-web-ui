@@ -105,11 +105,42 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
           return;
         }
 
-        window.open(this.directDownloadUrl, '_top');
+        this._openDriveUrl(this.directDownloadUrl);
       })
       .catch(() => {
         this._showError(this.i18n('driveDownload.directTransfer.failed'));
       });
+  }
+
+  /**
+   * Invokes a nxdrive:// URL and detects whether the Drive desktop app
+   * handled it by listening for a window blur event (the browser loses focus
+   * when the OS hands off the protocol to a native app).
+   *
+   * If the window does not blur within DRIVE_OPEN_TIMEOUT_MS it is safe to
+   * assume no app is registered for the nxdrive:// scheme, so we show the
+   * "Download Nuxeo Drive Client" install dialog instead of failing silently.
+   */
+  _openDriveUrl(url) {
+    let appOpened = false;
+
+    const onBlur = () => {
+      appOpened = true;
+    };
+    window.addEventListener('blur', onBlur, { once: true });
+
+    // Use location.href so the browser's protocol-handler machinery fires in
+    // the current tab context (same behaviour as existing Drive actions).
+    window.location.href = url;
+
+    setTimeout(() => {
+      window.removeEventListener('blur', onBlur);
+      if (!appOpened) {
+        // nxdrive:// was not handled — Drive is not installed or not configured
+        // on this machine. Show the install/configure dialog.
+        this.$.dialog.toggle();
+      }
+    }, NuxeoDriveDownloadButton.DRIVE_OPEN_TIMEOUT_MS);
   }
 
   _showError(message) {
@@ -192,5 +223,9 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 }
+
+// How long (ms) to wait for the browser window to blur after invoking the
+// nxdrive:// URL before concluding that no Drive app is installed/registered.
+NuxeoDriveDownloadButton.DRIVE_OPEN_TIMEOUT_MS = 1500;
 
 customElements.define(NuxeoDriveDownloadButton.is, NuxeoDriveDownloadButton);
