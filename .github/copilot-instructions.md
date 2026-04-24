@@ -8,7 +8,7 @@ Nuxeo Web UI is the standard web application for the Nuxeo content services plat
 - **Node**: ≥ 18
 - **Build**: Webpack 5
 - **Package manager**: npm (no yarn/pnpm)
-- **Java**: Maven wraps the frontend build for marketplace packaging (version defined in `pom.xml`)
+- **Java**: 21 (Maven wraps the frontend build for marketplace packaging)
 
 ## Repository Layout
 
