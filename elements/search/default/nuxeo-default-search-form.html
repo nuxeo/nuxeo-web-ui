@@ -48,21 +48,20 @@ limitations under the License.
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div role="widget">
-      <label>[[i18n('defaultSearch.authors')]]</label>
+    <div role="group" aria-labelledby="authorsLabel">
+      <label id="authorsLabel">[[i18n('defaultSearch.authors')]]</label>
       <nuxeo-dropdown-aggregation
         placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
         multiple="true"
         name="authors"
-        aria-label$="[[i18n('defaultSearch.authors')]]"
       >
       </nuxeo-dropdown-aggregation>
     </div>
 
-    <div role="widget">
-      <label>[[i18n('defaultSearch.collections')]]</label>
+    <div role="group" aria-labelledby="collectionsLabel">
+      <label id="collectionsLabel">[[i18n('defaultSearch.collections')]]</label>
       <template is="dom-if" if="[[_checkForCollectionTitle(params)]]">
         <nuxeo-selectivity
           operation="User.GetCollections"
@@ -71,21 +70,19 @@ limitations under the License.
           value="{{params.ecm_collections}}"
           multiple="true"
           name="collections"
-          aria-label$="[[i18n('defaultSearch.collections')]]"
         >
         </nuxeo-selectivity>
       </template>
     </div>
 
-    <div role="widget">
-      <label>[[i18n('defaultSearch.tags')]]</label>
+    <div role="group" aria-labelledby="tagsLabel">
+      <label id="tagsLabel">[[i18n('defaultSearch.tags')]]</label>
       <nuxeo-tag-suggestion
         min-chars="1"
         placeholder="[[i18n('defaultSearch.tags.placeholder')]]"
         value="{{params.ecm_tags}}"
         multiple="true"
         name="tags"
-        aria-label$="[[i18n('defaultSearch.tags')]]"
       >
       </nuxeo-tag-suggestion>
     </div>
