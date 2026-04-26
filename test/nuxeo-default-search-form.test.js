@@ -29,10 +29,15 @@ limitations under the License.
 let tmpl;
 
 suiteSetup(async () => {
-  const response = await fetch('/elements/search/default/nuxeo-default-search-form.html');
+  const url = '/elements/search/default/nuxeo-default-search-form.html';
+  const selector = 'dom-module#nuxeo-default-search-form template';
+  const response = await fetch(url);
+  expect(response.ok, `Failed to fetch ${url}: ${response.status} ${response.statusText}`).to.be.true;
   const text = await response.text();
   const doc = new DOMParser().parseFromString(text, 'text/html');
-  tmpl = doc.querySelector('dom-module#nuxeo-default-search-form template');
+  const parsedTemplate = doc.querySelector(selector);
+  expect(parsedTemplate, `Template not found for selector "${selector}" in ${url}`).to.not.be.null;
+  tmpl = parsedTemplate;
 });
 
 suite('nuxeo-default-search-form', () => {
@@ -69,5 +74,3 @@ suite('nuxeo-default-search-form', () => {
     expect(selectivity.hasAttribute('aria-label'), 'aria-label should be removed').to.be.false;
   });
 });
-
-
