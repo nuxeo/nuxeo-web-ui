@@ -54,6 +54,8 @@ Polymer({
         <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
+
+    <paper-toast id="toast"></paper-toast>
   `,
 
   is: 'nuxeo-drive-edit-button',
@@ -80,14 +82,24 @@ Polymer({
   },
 
   _go() {
-    this.$.token.get().then((response) => {
-      const tokens = response.entries.map((token) => token.id);
-      if (!tokens || !tokens.length) {
-        this.$.dialog.toggle();
-        return;
-      }
-      this._openDriveUrl(this.driveEditURL);
-    });
+    this.$.token
+      .get()
+      .then((response) => {
+        const tokens = response.entries.map((token) => token.id);
+        if (!tokens || !tokens.length) {
+          this.$.dialog.toggle();
+          return;
+        }
+        this._openDriveUrl(this.driveEditURL);
+      })
+      .catch(() => {
+        this._showError(this.i18n('driveEditButton.directTransfer.failed'));
+      });
+  },
+
+  _showError(message) {
+    this.$.toast.text = message;
+    this.$.toast.open();
   },
 
   /**
