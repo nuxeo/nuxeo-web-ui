@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`. The main development branch is the current branch you are working on (check `pom.xml` for the exact version).
+This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`. The main development branch is `lts-2025` for the current LTS line (check `pom.xml` if that changes in future LTS cycles).
 
 ## Build & Validate
 
