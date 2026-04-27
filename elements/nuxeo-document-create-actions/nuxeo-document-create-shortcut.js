@@ -17,11 +17,9 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
-import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
-import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-fab/paper-fab.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -37,51 +35,25 @@ Polymer({
         display: inline-block;
       }
 
-      .shortcut-container {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        cursor: pointer;
-        padding: 4px 6px;
-        border-radius: 16px;
-        background-color: var(--sat-document-create-button-background, var(--nuxeo-button-primary));
-        transition: background-color 0.2s ease;
-        box-shadow: var(
-          --sat-document-create-button-box-shadow,
-          0px 4px 8px 3px rgba(0, 0, 0, 0.15),
-          0px 1px 3px rgba(0, 0, 0, 0.3)
-        );
+      #createBtn {
+        color: var(--nuxeo-button-primary-text);
+        --paper-fab-background: var(--nuxeo-button-primary);
+        --paper-fab-keyboard-focus-background: var(--nuxeo-button-primary-focus);
       }
 
-      .shortcut-container:hover {
-        background-color: var(--sat-document-create-button-hover-background, var(--nuxeo-button-primary-focus));
+      paper-fab:hover,
+      paper-fab:focus {
+        background-color: var(--nuxeo-button-primary-focus);
       }
 
       paper-fab {
-        width: 40px;
-        height: 40px;
-        color: var(--sat-document-create-button-icon-color, var(--nuxeo-button-primary-text));
-        --paper-fab-background: transparent;
-        --paper-fab-keyboard-focus-background: transparent;
-        box-shadow: none;
-      }
-
-      .shortcut-label {
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 20px;
-        color: var(--sat-create-button-shortcut-label-color, var(--nuxeo-button-primary-text));
-        white-space: nowrap;
-        letter-spacing: 0.1px;
-        font-family: var(--sat-font-family-secondary, var(--nuxeo-app-font));
+        --paper-fab-iron-icon: {
+          filter: brightness(100);
+        };
       }
     </style>
 
-    <div class="shortcut-container" role="button" tabindex="0" on-keydown="_handleKeydown" on-tap="_tap">
-      <paper-fab mini noink id="createBtn" src="[[icon]]"></paper-fab>
-      <span class="shortcut-label">[[i18n(label)]]</span>
-    </div>
-
+    <paper-fab mini noink id="createBtn" src="[[icon]]" on-tap="_tap"></paper-fab>
     <nuxeo-tooltip for="createBtn" position="left">[[i18n(label)]]</nuxeo-tooltip>
   `,
 
@@ -92,13 +64,6 @@ Polymer({
     type: String,
     icon: String,
     label: String,
-  },
-
-  _handleKeydown(e) {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      this._tap();
-    }
   },
 
   _tap() {

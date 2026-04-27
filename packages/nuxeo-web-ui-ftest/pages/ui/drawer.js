@@ -74,10 +74,7 @@ export default class Drawer extends BasePage {
     const isVisible = await section.isVisible();
     if (!isVisible) {
       const menu = await this.menu;
-      // The profile avatar was rebranded from <nuxeo-menu-icon name='profile'> to
-      // <a class="profile-avatar" id="profileWrapper">; all other items remain nuxeo-menu-icon.
-      const selector = name === 'profile' ? '#profileWrapper' : `nuxeo-menu-icon[name='${name}']`;
-      const buttonToclick = await menu.$(selector);
+      const buttonToclick = await menu.$(`nuxeo-menu-icon[name='${name}']`);
       await buttonToclick.click();
     }
     return section;

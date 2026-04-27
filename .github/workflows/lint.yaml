@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - lts-2025
-      - lts-2025-WEBUI-1935-POC-REBRANDING
 
   workflow_call:
     inputs:

@@ -36,9 +36,6 @@ Polymer({
         display: block;
         border-top: 1px solid var(--nuxeo-border);
       }
-      .header h5 {
-        @apply --sat-header-h5;
-      }
     </style>
 
     <div class="header">
