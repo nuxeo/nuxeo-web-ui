@@ -82,6 +82,7 @@
   "app.expiredSearch": "Expired",
   "app.expiredSession.message": "Your session has expired! Click here to login again.",
   "app.favorites": "Favorites",
+  "app.home": "Home",
   "app.homeNotFound": "Home layout not found",
   "app.nxqlSearch": "NXQL Search",
   "app.offlineBanner.message": "Your network is unavailable. Please check your connection.",
