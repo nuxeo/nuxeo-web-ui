@@ -264,12 +264,13 @@ suite('nuxeo-drive-download-button', () => {
     test('opens Drive install dialog when no Drive token is found', async () => {
       element.documents = [{ uid: 'doc-uid-1' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+      const toggleSpy = sinon.spy();
+      element.$.dialog.toggle = toggleSpy;
 
       element._download();
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(dialogToggleStub).to.have.been.calledOnce;
+      expect(toggleSpy).to.have.been.calledOnce;
       expect(toastStub.open).to.not.have.been.called;
     });
 

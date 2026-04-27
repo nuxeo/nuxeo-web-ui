@@ -510,6 +510,7 @@
   "driveDesktopPackages.platform": "Platform",
   "driveEditButton.dialog.heading": "Download Nuxeo Drive Client",
   "driveEditButton.tooltip": "Open with Nuxeo Drive",
+  "driveEditButton.directTransfer.failed": "An error occurred while trying to open the document with Nuxeo Drive.",
   "driveUploadButton.tooltip": "Upload with Nuxeo Drive",
   "driveUpload.directTransfer.failed": "An error occurred while trying to upload the document with Nuxeo Drive.",
   "driveDownloadButton.tooltip": "Download with Nuxeo Drive",

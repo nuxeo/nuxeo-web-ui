@@ -72,7 +72,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
         </div>
       </nuxeo-dialog>
 
-      <paper-toast id="toast">[[i18n('driveUpload.directTransfer.failed')]]</paper-toast>
+      <paper-toast id="toast"></paper-toast>
     `;
   }
 
@@ -98,12 +98,49 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
           this.$.dialog.toggle();
           return;
         }
-        window.open(this.directTransferUrl, '_top');
+        this._openDriveUrl(this.directTransferUrl);
       })
       .catch((error) => {
         console.error('Token fetch failed:', error);
-        this.$.toast.toggle();
+        this._showError(this.i18n('driveUpload.directTransfer.failed'));
       });
+  }
+
+  /**
+   * Invokes a nxdrive:// URL and detects whether the Drive desktop app
+   * handled it by listening for a window blur event (the browser loses focus
+   * when the OS hands off the protocol to a native app).
+   *
+   * If the window does not blur within DRIVE_OPEN_TIMEOUT_MS it is safe to
+   * assume no app is registered for the nxdrive:// scheme, so we show the
+   * "Download Nuxeo Drive Client" install dialog instead of failing silently.
+   */
+  _openDriveUrl(url) {
+    let appOpened = false;
+
+    const onBlur = () => {
+      appOpened = true;
+    };
+    window.addEventListener('blur', onBlur, { once: true });
+
+    this._navigate(url);
+
+    setTimeout(() => {
+      window.removeEventListener('blur', onBlur);
+      if (!appOpened) {
+        this.$.dialog.toggle();
+      }
+    }, NuxeoDriveUploadButton.DRIVE_OPEN_TIMEOUT_MS);
+  }
+
+  // Extracted to allow easy stubbing in tests without touching window.location
+  _navigate(url) {
+    window.location.href = url;
+  }
+
+  _showError(message) {
+    this.$.toast.text = message;
+    this.$.toast.open();
   }
 
   get directTransferUrl() {
@@ -115,5 +152,9 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
     return finalUrl;
   }
 }
+
+// How long (ms) to wait for the browser window to blur after invoking the
+// nxdrive:// URL before concluding that no Drive app is installed/registered.
+NuxeoDriveUploadButton.DRIVE_OPEN_TIMEOUT_MS = 1500;
 
 customElements.define(NuxeoDriveUploadButton.is, NuxeoDriveUploadButton);
