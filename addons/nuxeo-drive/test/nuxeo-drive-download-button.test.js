@@ -382,19 +382,18 @@ suite('nuxeo-drive-download-button', () => {
       expect(toastStub.open).to.not.have.been.called;
     });
 
-    test('calls window.open with directDownloadUrl when a valid Drive token exists', async () => {
+    test('calls _openDriveUrl with directDownloadUrl when a valid Drive token exists', async () => {
       element.documents = [{ uid: 'doc-uid-1' }, { uid: 'doc-uid-2' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openStub = sinon.stub(window, 'open');
+      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
 
       element._download();
       // Let the promise chain resolve
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(openStub).to.have.been.calledOnce;
-      const calledUrl = openStub.firstCall.args[0];
+      expect(openDriveUrlStub).to.have.been.calledOnce;
+      const calledUrl = openDriveUrlStub.firstCall.args[0];
       expect(calledUrl).to.match(/^nxdrive:\/\/direct-download\/[A-Za-z0-9_-]+$/);
-      expect(openStub.firstCall.args[1]).to.equal('_top');
     });
 
     test('opens Drive install dialog when no Drive token is found', async () => {
@@ -446,13 +445,13 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = [];
       element.document = { uid: 'single-doc-uid' };
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openStub = sinon.stub(window, 'open');
+      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
 
       element._download();
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(openStub).to.have.been.calledOnce;
-      // Verify the UID is encoded in the compressed URL by checking the uncompressed URL
+      expect(openDriveUrlStub).to.have.been.calledOnce;
+      // Verify the UID is encoded in the URL built for the download flow
       const originalUrl = element._buildOriginalUrl();
       expect(originalUrl).to.include('single-doc-uid');
     });
