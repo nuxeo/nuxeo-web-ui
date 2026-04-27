@@ -113,10 +113,6 @@ Polymer({
         margin: 0;
         background-color: transparent;
       }
-
-      .header h5 {
-        @apply --sat-header-h5;
-      }
     </style>
 
     <nuxeo-operation id="removeFromFavOp" op="Document.RemoveFromFavorites"></nuxeo-operation>

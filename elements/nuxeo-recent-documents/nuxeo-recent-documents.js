@@ -39,10 +39,6 @@ Polymer({
         @apply --layout-vertical;
       }
 
-      .header h5 {
-        @apply --sat-header-h5;
-      }
-
       nuxeo-data-list {
         display: block;
         position: relative;
@@ -52,7 +48,7 @@ Polymer({
       .list-item {
         cursor: pointer;
         padding: 1em;
-        border-bottom: none;
+        border-bottom: 1px solid var(--nuxeo-border);
       }
 
       .list-item-title {

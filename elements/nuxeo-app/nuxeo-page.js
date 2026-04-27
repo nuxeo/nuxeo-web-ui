@@ -38,24 +38,13 @@ Polymer({
         height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         display: flex;
         flex-direction: column;
-        background-color: var(--sat-drawer-content-background);
       }
 
       #content {
         flex: 1 1 auto;
         position: relative;
         overflow-y: auto;
-        padding: var(--nuxeo-page-content-padding, 16px 16px 2px 16px);
-        background-color: var(--sat-drawer-content-background, var(--nuxeo-app-content-background));
-      }
-
-      .main-section-container {
-        padding: var(--nuxeo-page-main-section-padding);
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0; /* Important for flex children with overflow */
-        margin-bottom: var(--nuxeo-page-margin-bottom, 0);
+        padding: 16px 16px 0 16px;
       }
 
       .toolbar {
@@ -64,8 +53,8 @@ Polymer({
         @apply --layout-center;
         height: var(--nuxeo-drawer-header-height);
         color: var(--nuxeo-app-header);
-        background: var(--sat-app-header-box-background-color, var(--nuxeo-app-header-background));
-        box-shadow: var(--sat-app-header-box-shadow, var(--nuxeo-app-header-box-shadow));
+        background: var(--nuxeo-app-header-background);
+        box-shadow: var(--nuxeo-app-header-box-shadow);
         overflow-x: auto;
       }
 
@@ -75,11 +64,11 @@ Polymer({
 
       #tabs {
         flex: 0 0 auto;
-        background: var(--nuxeo-page-tabs-background, var(--nuxeo-app-header-background));
+        background: var(--nuxeo-app-header-background);
+        box-shadow: var(--nuxeo-app-header-box-shadow);
         margin-top: 1px;
         overflow-x: auto;
         z-index: 1;
-        border-radius: var(--nuxeo-page-tabs-border-radius, 0);
       }
 
       :host([dir='rtl']) #tabs {
@@ -125,13 +114,11 @@ Polymer({
       <div class="toolbar" id="toolbar">
         <slot id="header" slot="header" name="header"></slot>
       </div>
-      <div class="main-section-container">
-        <div id="tabs" role="navigation">
-          <slot name="tabs"></slot>
-        </div>
-        <div id="content">
-          <slot></slot>
-        </div>
+      <div id="tabs" role="navigation">
+        <slot name="tabs"></slot>
+      </div>
+      <div id="content">
+        <slot></slot>
       </div>
     </div>
   `,
