@@ -60,7 +60,6 @@ Polymer({
       .list-item {
         cursor: pointer;
         padding: 1em;
-        border-bottom: 1px solid var(--nuxeo-border);
       }
 
       .list-item:hover {
@@ -125,6 +124,10 @@ Polymer({
         padding: 8px;
         text-align: center;
         font-size: 1rem;
+      }
+
+      .header h5 {
+        @apply --sat-header-h5;
       }
     </style>
 

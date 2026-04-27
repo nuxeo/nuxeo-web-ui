@@ -7,7 +7,7 @@ on:
 
   # Sync when a commit is done on the reference branches
   push:
-    branches: ["lts-2025"]
+    branches: ["lts-2025", "lts-2025-WEBUI-1935-POC-REBRANDING"]
     paths:
       - 'i18n/messages.json'
 

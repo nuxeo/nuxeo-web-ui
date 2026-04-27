@@ -55,6 +55,21 @@ limitations under the License.
         height: 100%;
         max-width: var(--nuxeo-browser-actions-menu-max-width, 240px);
       }
+
+      /* Apply styles only when viewing folders (document listing) */
+      :host([document-facets~='Folderish']) nuxeo-page,
+      :host([document-facets~='Collection']) nuxeo-page {
+        --nuxeo-page-tabs-border-radius: 16px 16px 0 0;
+        --nuxeo-page-main-section-padding: 16px 16px 0 16px;
+        --nuxeo-page-content-padding: 0;
+        --nuxeo-page-margin-bottom: 10px; /* Add margin bottom only on document listing page*/
+      }
+
+      /* Apply background color to tabs when viewing individual documents (NOT folders) */
+      :host(:not([document-facets~='Folderish']):not([document-facets~='Collection'])) nuxeo-page {
+        --nuxeo-page-tabs-background: var(--sat-page-tabs-background-default);
+        --nuxeo-page-content-padding: 16px 16px 0 16px;
+      }
     </style>
 
     <!-- Main content -->
@@ -100,6 +115,7 @@ limitations under the License.
       properties: {
         document: {
           type: Object,
+          observer: '_documentChanged',
         },
         selectedTab: {
           type: String,
@@ -133,6 +149,14 @@ limitations under the License.
 
       _documentUpdated() {
         this.fire('document-updated');
+      },
+
+      _documentChanged() {
+        if (this.document && this.document.facets) {
+          this.setAttribute('document-facets', this.document.facets.join(' '));
+        } else {
+          this.removeAttribute('document-facets');
+        }
       },
 
       download() {
