@@ -1,5 +1,10 @@
 # Nuxeo Web UI — Copilot Instructions
 
+## Source of Truth
+
+- Use `AGENTS.md` as the authoritative source for build/validate order, coding patterns, and common pitfalls.
+- This file provides Copilot-focused context and quick references; when guidance differs, follow `AGENTS.md`.
+
 ## Project Overview
 
 Nuxeo Web UI is the standard web application for the Nuxeo content services platform, built with **Polymer 3** (mostly legacy `Polymer({…})` factory pattern) and backed by the **@nuxeo/nuxeo-elements** library of web components. Licensed Apache 2.0, owned by Hyland Software.
@@ -71,7 +76,7 @@ scripts/              → Build helpers (link-nuxeo-elements.js, merge-messages.
 - **ESLint**: Flat config (`eslint.config.mjs`), `eslint-plugin-html` for `.html` files, `eslint-plugin-wc` for web component rules
 - **Max line length**: 120 characters
 - **`Polymer` global**: Declared as `readonly` in ESLint; `Nuxeo` is `writable`
-- Always run `npm run format` before committing (enforced by husky + lint-staged)
+- Run `npm run format` before committing (enforced by husky + lint-staged).
 
 ### Naming
 
@@ -122,7 +127,7 @@ This symlinks:
 
 ## CI / GitHub Actions
 
-- **Workflows**: lint → test → a11y → ftest → build (sequential gates)
+- **Main branch flow (`lts-2023`)**: lint → test → a11y → ftest → build (sequential gates)
 - **Preview**: PRs tagged `preview` get ephemeral environments (cross-repo with nuxeo-elements)
 - **Registry**: `@nuxeo` packages come from `https://packages.nuxeo.com/repository/npm-public/`
 
