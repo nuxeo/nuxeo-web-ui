@@ -184,7 +184,7 @@ mvn clean install -Pftest         # Build + functional tests
 mvn clean install -Pa11y          # Build + accessibility tests
 ```
 
-Requires Java version 17.
+Requires Java version 21.
 
 ## Docker Development
 
@@ -203,7 +203,7 @@ This starts:
 
 ## Branch Strategy
 
-- The main development branch is the long-lived branch for the current LTS version `lts-2025`)
+- The main development branch is the long-lived branch for the current LTS version `lts-2025`
 - Feature branches are created from and merged back to the `lts-2025` branch
 - PRs trigger lint and test workflows automatically
 - PRs tagged `preview` get ephemeral preview environments
