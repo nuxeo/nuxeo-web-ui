@@ -108,29 +108,71 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
 
   /**
    * Invokes a nxdrive:// URL and detects whether the Drive desktop app
-   * handled it by listening for a window blur event (the browser loses focus
-   * when the OS hands off the protocol to a native app).
+   * handled it using a blur + debounce heuristic.
    *
-   * If the window does not blur within DRIVE_OPEN_TIMEOUT_MS it is safe to
-   * assume no app is registered for the nxdrive:// scheme, so we show the
-   * "Download Nuxeo Drive Client" install dialog instead of failing silently.
+   * Chrome fires a window blur event even when no protocol handler is
+   * registered (the browser briefly shows a permission/protocol prompt).
+   * However, if no app opens, the window regains focus almost immediately.
+   * When Drive DOES open, the window stays blurred (Drive is in foreground).
+   *
+   * Strategy:
+   *  - On blur: start a short debounce timer (BLUR_DEBOUNCE_MS).
+   *  - If focus returns before the debounce fires → false positive, ignore.
+   *  - If the debounce fires while still blurred → Drive opened; mark as
+   *    handled and auto-dismiss any false-alarm dialog.
+   *  - If neither blur nor debounce triggers within DRIVE_OPEN_TIMEOUT_MS →
+   *    Drive is not installed; show the install dialog.
    */
   _openDriveUrl(url) {
     let appOpened = false;
+    let dialogShown = false;
+    let blurDebounceTimer = null;
+
+    const cleanup = () => {
+      clearTimeout(blurDebounceTimer);
+      window.removeEventListener('blur', onBlur);
+      window.removeEventListener('focus', onFocus);
+    };
+
+    const onFocus = () => {
+      // Focus returned quickly after blur — Chrome false-positive, no Drive handler.
+      clearTimeout(blurDebounceTimer);
+    };
 
     const onBlur = () => {
-      appOpened = true;
+      blurDebounceTimer = setTimeout(() => {
+        // Still blurred after debounce — Drive really opened.
+        appOpened = true;
+        window.removeEventListener('focus', onFocus);
+        if (dialogShown) {
+          // Dialog was a false alarm (slow system) — auto-dismiss it.
+          this.$.dialog.toggle();
+          dialogShown = false;
+          cleanup();
+        }
+      }, NuxeoDriveUploadButton.BLUR_DEBOUNCE_MS);
+
+      window.addEventListener('focus', onFocus, { once: true });
     };
+
     window.addEventListener('blur', onBlur, { once: true });
 
     window.location.href = url;
 
+    // Primary timeout: show install dialog if Drive hasn't been detected yet.
     setTimeout(() => {
-      window.removeEventListener('blur', onBlur);
       if (!appOpened) {
+        dialogShown = true;
         this.$.dialog.toggle();
+        // Keep blur+focus listeners alive so auto-dismiss still works if Drive
+        // opens late (slow system hit the timeout but Drive is still launching).
+      } else {
+        cleanup();
       }
     }, NuxeoDriveUploadButton.DRIVE_OPEN_TIMEOUT_MS);
+
+    // Hard-cap: give up listening after an extended window.
+    setTimeout(cleanup, NuxeoDriveUploadButton.DRIVE_OPEN_TIMEOUT_MS + 3000);
   }
 
   _showError(message) {
@@ -148,8 +190,12 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   }
 }
 
-// How long (ms) to wait for the browser window to blur after invoking the
-// nxdrive:// URL before concluding that no Drive app is installed/registered.
+// How long (ms) to wait for a window blur event (Drive app opening) before
+// concluding Drive is not installed and showing the install dialog.
 NuxeoDriveUploadButton.DRIVE_OPEN_TIMEOUT_MS = 1500;
+
+// How long (ms) the window must stay blurred before we treat it as Drive
+// having opened (vs. a Chrome false-positive blur from the protocol prompt).
+NuxeoDriveUploadButton.BLUR_DEBOUNCE_MS = 300;
 
 customElements.define(NuxeoDriveUploadButton.is, NuxeoDriveUploadButton);

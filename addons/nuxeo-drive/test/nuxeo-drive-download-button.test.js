@@ -399,6 +399,7 @@ suite('nuxeo-drive-download-button', () => {
     test('opens Drive install dialog when no Drive token is found', async () => {
       element.documents = [{ uid: 'doc-uid-1' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [] });
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
       const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
 
       element._download();
@@ -454,6 +455,77 @@ suite('nuxeo-drive-download-button', () => {
       // Verify the UID is encoded in the URL built for the download flow
       const originalUrl = element._buildOriginalUrl();
       expect(originalUrl).to.include('single-doc-uid');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _openDriveUrl — Drive detection (blur + debounce heuristic)
+  // ---------------------------------------------------------------------------
+  suite('_openDriveUrl — Drive detection (blur + debounce heuristic)', () => {
+    let clock;
+    let dialogToggleStub;
+
+    setup(() => {
+      clock = sinon.useFakeTimers();
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+      dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+    });
+
+    teardown(() => {
+      clock.restore();
+      sinon.restore();
+    });
+
+    test('opens install dialog after timeout when no blur fires (Drive not installed)', () => {
+      element._openDriveUrl('nxdrive://direct-download/abc123');
+
+      clock.tick(1500);
+
+      expect(dialogToggleStub).to.have.been.calledOnce;
+    });
+
+    test('does not open dialog when blur fires and stays (Drive opened normally)', () => {
+      element._openDriveUrl('nxdrive://direct-download/abc123');
+
+      window.dispatchEvent(new Event('blur'));
+      clock.tick(300); // debounce fires
+      clock.tick(1500); // primary timeout — appOpened already true
+
+      expect(dialogToggleStub).to.not.have.been.called;
+    });
+
+    test('ignores blur when focus returns quickly (Chrome false-positive)', () => {
+      element._openDriveUrl('nxdrive://direct-download/abc123');
+
+      window.dispatchEvent(new Event('blur'));
+      window.dispatchEvent(new Event('focus')); // returns before debounce
+      clock.tick(300);
+      clock.tick(1500);
+
+      expect(dialogToggleStub).to.have.been.calledOnce;
+    });
+
+    test('auto-dismisses dialog when Drive responds after the timeout (slow system)', () => {
+      element._openDriveUrl('nxdrive://direct-download/abc123');
+
+      clock.tick(1500);
+      expect(dialogToggleStub).to.have.been.calledOnce;
+
+      window.dispatchEvent(new Event('blur'));
+      clock.tick(300); // debounce fires
+
+      expect(dialogToggleStub).to.have.been.calledTwice;
+    });
+
+    test('cleans up listeners after hard-cap timeout', () => {
+      const removeSpy = sinon.spy(window, 'removeEventListener');
+
+      element._openDriveUrl('nxdrive://direct-download/abc123');
+
+      clock.tick(1500 + 3000);
+
+      expect(removeSpy.called).to.be.true;
+      removeSpy.restore();
     });
   });
 
