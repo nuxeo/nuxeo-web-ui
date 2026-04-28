@@ -1,0 +1,80 @@
+name: SonarQube
+
+on:
+  push:
+    branches:
+      - maintenance-3.1.x
+      - lts-2025
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - maintenance-3.1.x
+      - lts-2025
+
+  workflow_call:
+    inputs:
+      branch:
+        description: 'Branch to analyze'
+        type: string
+        required: false
+    secrets:
+      NPM_PACKAGES_TOKEN:
+        required: true
+      REPOSITORY_MANAGER_USERNAME:
+        required: true
+      REPOSITORY_MANAGER_PASSWORD:
+        required: true
+      SONAR_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  sonar:
+    name: Build and analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Run git config
+        run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
+
+      - name: Setup Maven build
+        # Uses nuxeo/gh-build-tools to configure Maven settings.xml with
+        # credentials for packages.nuxeo.com (MVN_REPO_USERNAME / MVN_REPO_PASSWORD).
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.0
+        with:
+          java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
+
+      - name: Purge cached Nuxeo artifacts
+        run: rm -rf ~/.m2/repository/org/nuxeo
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Maven packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+        run: mvn -B -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=nuxeo_nuxeo-web-ui -DskipTests
