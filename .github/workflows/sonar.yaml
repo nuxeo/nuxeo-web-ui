@@ -73,4 +73,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
-        run: mvn -B -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=nuxeo_nuxeo-web-ui Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+        run: mvn -B -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=nuxeo_nuxeo-web-ui -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
