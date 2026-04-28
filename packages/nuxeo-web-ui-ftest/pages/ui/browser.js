@@ -132,9 +132,9 @@ export default class Browser extends BasePage {
   }
 
   async waitForChildren(minCount = 1) {
-    const currentPage = await this.currentPage;
     await driver.waitUntil(
       async () => {
+        const currentPage = await this.currentPage;
         const rows = await currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
         return rows.length >= minCount;
       },
