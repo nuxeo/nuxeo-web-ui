@@ -16,7 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import { fixture, html, flush } from '@nuxeo/testing-helpers';
-import '../elements/nuxeo-grid/nuxeo-grid';
+import '../elements/nuxeo-grid/nuxeo-grid.js';
 
 function getStyle(grid) {
   return grid.shadowRoot.querySelector('style').innerText;

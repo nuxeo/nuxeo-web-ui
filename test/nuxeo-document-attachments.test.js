@@ -16,7 +16,7 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
  limitations under the License.
  */
 import { fixture, html } from '@nuxeo/testing-helpers';
-import '../elements/nuxeo-document-attachments/nuxeo-document-attachments';
+import '../elements/nuxeo-document-attachments/nuxeo-document-attachments.js';
 
 suite('nuxeo-document-attachments', () => {
   let element;
@@ -47,6 +47,36 @@ suite('nuxeo-document-attachments', () => {
     test('when xpath =  checkext:multiple, for dropzone', () => {
       element.xpath = 'checkext:multiple';
       expect(element._isDropzoneAvailable(document)).to.eql(false);
+    });
+  });
+
+  suite('helpers', () => {
+    test('returns empty files list when attachments are not set', () => {
+      expect(element._computeFiles()).to.eql([]);
+    });
+
+    test('detects whether attachments list has files', () => {
+      expect(element._hasFiles([{ file: { name: 'a.txt' } }])).to.eql(true);
+      expect(element._hasFiles([])).to.eql(false);
+      expect(element._hasFiles(null)).to.eql(null);
+    });
+
+    test('computes blob xpath for default and custom list properties', () => {
+      expect(element._computeBlobXpath('files:files', 2)).to.eql('files:files/2/file');
+      expect(element._computeBlobXpath('custom:attachments', 1)).to.eql('custom:attachments/1');
+    });
+
+    test('computes file wrapper key depending on xpath', () => {
+      element.xpath = 'files:files';
+      expect(element._getFileValue()).to.eql('file');
+
+      element.xpath = 'custom:attachments';
+      expect(element._getFileValue()).to.eql('');
+    });
+
+    test('keeps dropzone available for writable documents', () => {
+      const doc = { uid: 'doc-1' };
+      expect(element._isDropzoneAvailable(doc)).to.eql(true);
     });
   });
 });
