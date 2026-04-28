@@ -42,6 +42,8 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     setup(() => {
       toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
+      // Ensure toggle exists as own property so sinon can stub it
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
     });
 
     teardown(() => {
@@ -75,6 +77,8 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     setup(() => {
       toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
+      // Ensure toggle exists as own property so sinon can stub it
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
     });
 
     teardown(() => {
@@ -121,36 +125,84 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     });
   });
 
-  suite('_openDriveUrl — Drive not installed (no blur)', () => {
+  suite('_openDriveUrl — Drive detection (blur + debounce heuristic)', () => {
+    let clock;
+    let dialogToggleStub;
+
+    setup(() => {
+      clock = sinon.useFakeTimers();
+      // Ensure toggle exists as own property so sinon can stub it
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+      dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+    });
+
     teardown(() => {
+      clock.restore();
       sinon.restore();
     });
 
-    test('opens install dialog after timeout when no blur fires', async () => {
-      const clock = sinon.useFakeTimers();
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-
+    test('opens install dialog after timeout when no blur fires (Drive not installed)', () => {
       element._openDriveUrl('nxdrive://direct-transfer/localhost/some-path');
 
-      // No blur event fired — Drive not installed
+      // No blur fired at all — Drive is not installed
       clock.tick(1500);
 
       expect(dialogToggleStub).to.have.been.calledOnce;
-      clock.restore();
     });
 
-    test('does not open dialog if blur fires before timeout (Drive handled the URL)', async () => {
-      const clock = sinon.useFakeTimers();
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+    test('does not open dialog when blur fires and stays (Drive opened normally)', () => {
+      element._openDriveUrl('nxdrive://direct-transfer/localhost/some-path');
+
+      // Blur fires and window stays blurred (Drive took focus — no focus event returns)
+      window.dispatchEvent(new Event('blur'));
+      clock.tick(300); // debounce fires — Drive confirmed
+      clock.tick(1500); // primary timeout — but appOpened is already true
+
+      expect(dialogToggleStub).to.not.have.been.called;
+    });
+
+    test('ignores blur when focus returns quickly (Chrome false-positive)', () => {
+      element._openDriveUrl('nxdrive://direct-transfer/localhost/some-path');
+
+      // Blur fires but focus returns immediately (Chrome protocol prompt, no Drive handler)
+      window.dispatchEvent(new Event('blur'));
+      window.dispatchEvent(new Event('focus')); // returns before debounce fires
+      clock.tick(300); // debounce would have fired — but was cancelled by focus
+
+      // Now the full timeout fires — Drive was not detected
+      clock.tick(1500);
+
+      expect(dialogToggleStub).to.have.been.calledOnce;
+    });
+
+    test('auto-dismisses dialog when Drive responds after the timeout (slow system)', () => {
+      element._openDriveUrl('nxdrive://direct-transfer/localhost/some-path');
+
+      // Timeout fires first — dialog shown as false alarm
+      clock.tick(1500);
+      expect(dialogToggleStub).to.have.been.calledOnce;
+
+      // Drive opens late — blur fires and stays (within the hard-cap window)
+      window.dispatchEvent(new Event('blur'));
+      clock.tick(300); // debounce fires
+
+      // Dialog should have been toggled a second time (auto-dismiss)
+      expect(dialogToggleStub).to.have.been.calledTwice;
+    });
+
+    test('cleans up listeners after hard-cap timeout', () => {
+      const addSpy = sinon.spy(window, 'addEventListener');
+      const removeSpy = sinon.spy(window, 'removeEventListener');
 
       element._openDriveUrl('nxdrive://direct-transfer/localhost/some-path');
 
-      // Simulate blur — Drive app took focus
-      window.dispatchEvent(new Event('blur'));
-      clock.tick(1500);
+      clock.tick(1500 + 3000);
 
-      expect(dialogToggleStub).to.not.have.been.called;
-      clock.restore();
+      // removeEventListener should have been called for blur and focus listeners
+      expect(removeSpy.called).to.be.true;
+
+      addSpy.restore();
+      removeSpy.restore();
     });
   });
 
