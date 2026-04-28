@@ -42,6 +42,7 @@ suite('nuxeo-drive-edit-button — error handling', () => {
     setup(() => {
       toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
     });
 
     teardown(() => {
@@ -75,6 +76,7 @@ suite('nuxeo-drive-edit-button — error handling', () => {
     setup(() => {
       toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
     });
 
     teardown(() => {
@@ -123,36 +125,78 @@ suite('nuxeo-drive-edit-button — error handling', () => {
     });
   });
 
-  suite('_openDriveUrl — Drive not installed (no blur)', () => {
+  suite('_openDriveUrl — Drive detection (blur + debounce heuristic)', () => {
+    const DRIVE_URL = 'nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/doc-uid-1/filename/test.docx/downloadUrl/nxfile/default/doc-uid-1/file:content/test.docx';
+    let clock;
+    let dialogToggleStub;
+
+    setup(() => {
+      clock = sinon.useFakeTimers();
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+      dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+    });
+
     teardown(() => {
+      clock.restore();
       sinon.restore();
     });
 
-    test('opens install dialog after timeout when no blur fires', () => {
-      const clock = sinon.useFakeTimers();
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+    test('opens install dialog after timeout when no blur fires (Drive not installed)', () => {
+      element._openDriveUrl(DRIVE_URL);
 
-      element._openDriveUrl('nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/doc-uid-1/filename/test.docx/downloadUrl/nxfile/default/doc-uid-1/file:content/test.docx');
-
-      // No blur event — Drive not installed
+      // No blur fired at all — Drive is not installed
       clock.tick(1500);
 
       expect(dialogToggleStub).to.have.been.calledOnce;
-      clock.restore();
     });
 
-    test('does not open dialog if blur fires before timeout (Drive handled the URL)', () => {
-      const clock = sinon.useFakeTimers();
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+    test('does not open dialog when blur fires and stays (Drive opened normally)', () => {
+      element._openDriveUrl(DRIVE_URL);
 
-      element._openDriveUrl('nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/doc-uid-1/filename/test.docx/downloadUrl/nxfile/default/doc-uid-1/file:content/test.docx');
-
-      // Simulate blur — Drive app took focus
+      // Blur fires and window stays blurred (Drive took focus — no focus event returns)
       window.dispatchEvent(new Event('blur'));
-      clock.tick(1500);
+      clock.tick(300); // debounce fires — Drive confirmed
+      clock.tick(1500); // primary timeout fires — but appOpened is already true
 
       expect(dialogToggleStub).to.not.have.been.called;
-      clock.restore();
+    });
+
+    test('ignores blur when focus returns quickly (Chrome false-positive)', () => {
+      element._openDriveUrl(DRIVE_URL);
+
+      // Blur fires but focus returns before debounce (Chrome protocol prompt, no Drive)
+      window.dispatchEvent(new Event('blur'));
+      window.dispatchEvent(new Event('focus'));
+      clock.tick(300); // debounce would have fired — but was cancelled by focus
+
+      clock.tick(1500); // primary timeout fires
+      expect(dialogToggleStub).to.have.been.calledOnce;
+    });
+
+    test('auto-dismisses dialog when Drive responds after the timeout (slow system)', () => {
+      element._openDriveUrl(DRIVE_URL);
+
+      // Timeout fires first — false-alarm dialog shown
+      clock.tick(1500);
+      expect(dialogToggleStub).to.have.been.calledOnce;
+
+      // Drive opens late — blur fires and stays
+      window.dispatchEvent(new Event('blur'));
+      clock.tick(300); // debounce fires
+
+      // Second toggle = auto-dismiss
+      expect(dialogToggleStub).to.have.been.calledTwice;
+    });
+
+    test('cleans up listeners after hard-cap timeout', () => {
+      const removeSpy = sinon.spy(window, 'removeEventListener');
+
+      element._openDriveUrl(DRIVE_URL);
+
+      clock.tick(1500 + 3000); // hard-cap fires
+
+      expect(removeSpy.called).to.be.true;
+      removeSpy.restore();
     });
   });
 
