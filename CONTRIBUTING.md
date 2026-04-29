@@ -141,7 +141,7 @@ Available globals: `expect`, `assert`, `sinon`, `should` (configured in `test/se
 ### Functional Tests
 
 ```bash
-npm run ftest             # Headless (CI mode, needs Nuxeo server via Docker)
+npm run ftest             # Headless (CI-friendly; needs a reachable Nuxeo server)
 npm run ftest:dev         # Against local servers (Nuxeo:8080, UI:5000)
 npm run ftest:watch       # Re-runs @watch-tagged scenarios on change
 ```
