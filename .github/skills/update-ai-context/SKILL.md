@@ -38,6 +38,11 @@ evolves with the codebase.
 | `.github/instructions/addons.instructions.md` | `addons/**` | Addon structure, loading, conventions |
 | `.github/instructions/unit-tests.instructions.md` | `test/**/*.test.js,test/**/*.js` | Unit test framework, structure, rules |
 | `.github/instructions/functional-tests.instructions.md` | `ftest/**,packages/nuxeo-web-ui-ftest/**` | Functional test framework, conventions |
+| `.github/instructions/i18n.instructions.md` | `i18n/**` | i18n file structure, key conventions, merge build |
+| `.github/instructions/themes.instructions.md` | `themes/**` | Theme structure, CSS custom properties, base styles |
+| `.github/instructions/document-layouts.instructions.md` | `elements/document/**` | Document type layout naming, LayoutBehavior, modes |
+| `.github/instructions/search-layouts.instructions.md` | `elements/search/**` | Search form/results naming, aggregations, page providers |
+| `.github/instructions/build-config.instructions.md` | `webpack.config.js,eslint.config.mjs,karma.conf.js,prettier.config.js` | Build toolchain conventions |
 
 ### Tier 3: Skills (invoked on demand for specific tasks)
 
