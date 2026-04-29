@@ -141,7 +141,7 @@ Available globals: `expect`, `assert`, `sinon`, `should` (configured in `test/se
 ### Functional Tests
 
 ```bash
-npm run ftest             # Headless (CI mode, needs Nuxeo server via Docker)
+npm run ftest             # Headless (CI-friendly; needs a reachable Nuxeo server)
 npm run ftest:dev         # Against local servers (Nuxeo:8080, UI:5000)
 npm run ftest:watch       # Re-runs @watch-tagged scenarios on change
 ```
@@ -152,22 +152,18 @@ npm run ftest:watch       # Re-runs @watch-tagged scenarios on change
 
 ## Working with nuxeo-elements Locally
 
-To develop against a local checkout of the `nuxeo-elements` sibling repo:
+To develop against a local checkout of the `nuxeo-elements` sibling repo, manually create symlinks:
 
 ```bash
 # Default: expects ../nuxeo-elements as sibling directory
-node scripts/link-nuxeo-elements.js
-
-# Or specify a custom path
-NUXEO_ELEMENTS_DIR=/path/to/nuxeo-elements node scripts/link-nuxeo-elements.js
+rm -rf node_modules/@nuxeo/nuxeo-ui-elements && ln -s "../../../nuxeo-elements/ui" node_modules/@nuxeo/nuxeo-ui-elements
+rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s "../../../nuxeo-elements/dataviz" node_modules/@nuxeo/nuxeo-dataviz-elements
+rm -rf node_modules/@nuxeo/nuxeo-elements && ln -s "../../../nuxeo-elements/core" node_modules/@nuxeo/nuxeo-elements
 ```
 
-This creates symlinks:
-- `node_modules/@nuxeo/nuxeo-ui-elements` → `nuxeo-elements/ui`
-- `node_modules/@nuxeo/nuxeo-dataviz-elements` → `nuxeo-elements/dataviz`
-- `node_modules/@nuxeo/nuxeo-elements` → `nuxeo-elements/core`
+For custom paths, use absolute paths instead. See `.github/skills/link-nuxeo-elements/SKILL.md` for full details.
 
-**Important**: `npm install` overwrites these symlinks. Re-run the link script after any install.
+**Important**: `npm install` overwrites these symlinks. Re-create them after any install.
 
 ## Building for Production
 

@@ -41,7 +41,7 @@ packages/
   nuxeo-designer-catalog/ → Design element catalog builder
 plugin/               → Maven sub-modules (web-ui addon/marketplace, itests, a11y, metrics)
 server/               → Nginx configs for Docker-based deployment
-scripts/              → Build helpers (link-nuxeo-elements.js, merge-messages.js)
+scripts/              → Build helpers (merge-messages.js, test-runner.js)
 ```
 
 ## Commands
@@ -59,7 +59,7 @@ scripts/              → Build helpers (link-nuxeo-elements.js, merge-messages.
 | Bundle analysis | `npm run build:analyze` | Webpack bundle analyzer |
 | Maven full build | `mvn clean install` | Builds marketplace ZIP |
 | Maven + ftests | `mvn clean install -Pftest` | Builds + runs functional tests |
-| Link nuxeo-elements | `node scripts/link-nuxeo-elements.js` | Symlinks `node_modules/@nuxeo/*` → sibling `nuxeo-elements` repo |
+| Link nuxeo-elements | See `.github/skills/link-nuxeo-elements/SKILL.md` | Manual symlinks for `node_modules/@nuxeo/*` → sibling `nuxeo-elements` repo |
 
 ## Coding Conventions
 
@@ -111,19 +111,17 @@ scripts/              → Build helpers (link-nuxeo-elements.js, merge-messages.
 
 ## Local Development with nuxeo-elements
 
-When developing against a local `nuxeo-elements` checkout:
+When developing against a local `nuxeo-elements` checkout, manually create symlinks to replace the registry packages:
 
 ```sh
-# Sibling repo expected at NUXEO_ELEMENTS_DIR
-node scripts/link-nuxeo-elements.js
+rm -rf node_modules/@nuxeo/nuxeo-ui-elements && ln -s "../../../nuxeo-elements/ui" node_modules/@nuxeo/nuxeo-ui-elements
+rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s "../../../nuxeo-elements/dataviz" node_modules/@nuxeo/nuxeo-dataviz-elements
+rm -rf node_modules/@nuxeo/nuxeo-elements && ln -s "../../../nuxeo-elements/core" node_modules/@nuxeo/nuxeo-elements
 ```
 
-This symlinks:
-- `node_modules/@nuxeo/nuxeo-ui-elements` → `NUXEO_ELEMENTS_DIR/ui`
-- `node_modules/@nuxeo/nuxeo-dataviz-elements` → `NUXEO_ELEMENTS_DIR/dataviz`
-- `node_modules/@nuxeo/nuxeo-elements` → `NUXEO_ELEMENTS_DIR/core`
+See `.github/skills/link-nuxeo-elements/SKILL.md` for full details and custom path instructions.
 
-**Warning**: `npm install` replaces these symlinks. Re-run the link script after any install.
+**Warning**: `npm install` replaces these symlinks. Re-create them after any install.
 
 ## CI / GitHub Actions
 

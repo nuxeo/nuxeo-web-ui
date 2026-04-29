@@ -10,9 +10,9 @@ Always follow this sequence when making changes:
 
 ```bash
 npm install                  # Install dependencies (Node ≥ 18)
+npm run format               # Auto-fix formatting (Prettier → ESLint)
 npm run lint                 # ESLint + Prettier check — must pass
 npm test                     # Karma unit tests — must pass
-npm run format               # Auto-fix formatting (Prettier → ESLint)
 ```
 
 - `npm run lint` runs both `eslint` and `prettier --list-different`.
@@ -120,7 +120,7 @@ PRs run lint and test workflows automatically.
 
 ## Common Pitfalls
 
-- `npm install` **replaces** nuxeo-elements symlinks. Re-run `node scripts/link-nuxeo-elements.js` after install if developing locally against a sibling nuxeo-elements repo.
+- `npm install` **replaces** nuxeo-elements symlinks. Re-create them manually after install if developing locally against a sibling `nuxeo-elements` repo (see `.github/skills/link-nuxeo-elements/SKILL.md` for the procedure).
 - `.html` files contain real Polymer components with inline JS — don't treat them as static HTML.
 - The `NUXEO_PACKAGES` env var controls which addon JS bundles are imported at runtime via `Nuxeo.UI.bundles`. If unset, addon resources are still copied to the build but no addon entry points are imported (except `nuxeo-spreadsheet`, which is always loaded).
 - `@nuxeo` npm packages come from `https://packages.nuxeo.com/repository/npm-public/`, not npmjs.org.
@@ -132,5 +132,5 @@ PRs run lint and test workflows automatically.
 |---|---|---|
 | `NUXEO_URL` | `/nuxeo` | Server URL in the app |
 | `NUXEO_HOST` | `localhost:8080` | Dev proxy target |
-| `NUXEO_PACKAGES` | (all addons) | Addons to bundle |
+| `NUXEO_PACKAGES` | empty (no addon entry points imported; `nuxeo-spreadsheet` always loaded) | Addon JS entry points to import at runtime via `Nuxeo.UI.bundles` |
 | `NUXEO_ELEMENTS_DIR` | `../nuxeo-elements` | Sibling repo path for linking |
