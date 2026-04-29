@@ -15,6 +15,7 @@
 
   <properties>
     <nuxeo.target.version>2023.*</nuxeo.target.version>
+    <sonar.organization>nuxeo</sonar.organization>
   </properties>
 
   <modules>
