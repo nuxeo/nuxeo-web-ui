@@ -49,18 +49,21 @@ When('I login as {string}', { timeout: 120000 }, async function (username) {
       if (u.includes('/ui') && !u.includes('login.jsp')) {
         return true;
       }
-      // If still on login page, the submit may not have gone through — retry it
+      // If still on login page, re-fill credentials and resubmit
       if (u.includes('login.jsp')) {
-        const submitBtn = await $('[name="Submit"]');
-        if (await submitBtn.isExisting()) {
-          await submitBtn.click();
+        try {
+          await logIn.username(username);
+          await logIn.password(password);
+          await logIn.submit();
+        } catch (e) {
+          // page may have navigated away during retry — ignore
         }
       }
       return false;
     },
     {
       timeout: 30000,
-      interval: 1000,
+      interval: 2000,
       timeoutMsg: 'UI did not load after login — still stuck on login.jsp',
     },
   );

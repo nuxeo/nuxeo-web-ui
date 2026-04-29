@@ -267,11 +267,18 @@ export const config = {
     // eslint-disable-next-line no-console
     console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
 
-    // Strip file:// prefix from spec paths in all WDIO output lines
+    // Strip file:// prefix and suppress original PASSED/FAILED lines (replaced with timed versions)
     const originalWrite = process.stdout.write.bind(process.stdout);
+    // eslint-disable-next-line no-control-regex
+    const ansiRegex = /\x1b\[[0-9;]*m/g;
     process.stdout.write = (chunk, ...args) => {
       if (typeof chunk === 'string') {
         chunk = chunk.replace(/file:\/\//g, '');
+        // Suppress WDIO's PASSED/FAILED lines — onWorkerEnd prints them with timing
+        const plain = chunk.replace(ansiRegex, '');
+        if (/\[\d+-\d+\] (?:PASSED|FAILED) in .* - /.test(plain) && !plain.includes('(')) {
+          return true;
+        }
       }
       return originalWrite(chunk, ...args);
     };
@@ -286,10 +293,7 @@ export const config = {
       const specNames = specs.map((s) => s.replace(process.cwd(), '').replace(/^file:\/\//, '')).join(', ');
       const browserName = process.env.BROWSER || 'chrome';
       const status = exitCode === 0 ? '\x1b[1;32mPASSED\x1b[0m' : '\x1b[1;31mFAILED\x1b[0m';
-      // Overwrite the PASSED/FAILED line printed by WDIO interface to append timing
-      process.stdout.write(
-        `\x1b[1A\x1b[2K[${cid}] ${status} in ${browserName} - ${specNames} \x1b[1m( ${elapsed}s )\x1b[0m\n`,
-      );
+      process.stdout.write(`[${cid}] ${status} in ${browserName} - ${specNames} \x1b[1m( ${elapsed}s )\x1b[0m\n`);
       _featureResults.push({ feature: specNames, status: exitCode === 0 ? 'PASSED' : 'FAILED', elapsed });
       _workerStartTimes.delete(cid);
     }
