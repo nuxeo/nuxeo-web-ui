@@ -10,6 +10,21 @@ export default class {
 
     // Add commands to the browser scope.
     browser.addCommand('alertAccept', async function () {
+      await this.waitUntil(
+        async () => {
+          try {
+            await this.getAlertText();
+            return true;
+          } catch (e) {
+            return false;
+          }
+        },
+        {
+          timeout: 10000,
+          interval: 500,
+          timeoutMsg: 'Expected confirmation alert did not appear',
+        },
+      );
       return this.acceptAlert();
     });
 

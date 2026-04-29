@@ -21,8 +21,15 @@ export default class BasePage {
     return this.el.isVisible(...args);
   }
 
-  waitForVisible(...args) {
-    return this.el.waitForVisible(...args);
+  async waitForVisible(...args) {
+    if (typeof args[0] === 'string') {
+      // Child selector — delegate to element-level custom waitForVisible
+      return this.el.waitForVisible(...args);
+    }
+    // Self — use built-in waitForDisplayed to avoid WDIO v9 crash
+    // when the element does not yet exist (custom commands eagerly resolve)
+    const [timeout, reverse = false] = args;
+    return this.el.waitForDisplayed({ timeout, reverse });
   }
 
   async waitForNotVisible(selector) {
