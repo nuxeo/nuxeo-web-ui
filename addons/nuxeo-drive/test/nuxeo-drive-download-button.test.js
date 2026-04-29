@@ -30,6 +30,8 @@ window.nuxeo.I18n.en['driveDownload.tooManyDocuments'] =
   'You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.';
 window.nuxeo.I18n.en['driveDownload.directTransfer.failed'] =
   'An error occurred while trying to download the document with Nuxeo Drive.';
+window.nuxeo.I18n.en['driveDownload.serverUrlTooLong'] =
+  'The server URL is too long to generate a Nuxeo Drive download link.';
 window.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
 window.nuxeo.I18n.en['command.close'] = 'Close';
 
@@ -49,19 +51,29 @@ suite('nuxeo-drive-download-button', () => {
       expect(element._isAvailable()).to.be.true;
     });
 
-    test('returns true when documents array is empty', () => {
+    test('returns false when documents array is empty', () => {
       element.documents = [];
-      expect(element._isAvailable()).to.be.true;
+      expect(element._isAvailable()).to.be.false;
     });
 
-    test('returns false when documents is a page-provider display element (select-all active)', () => {
-      // Build a stub that satisfies isPageProviderDisplayBehavior:
-      // it checks el.selectAllActive === true AND el.behaviors includes all PageProviderDisplayBehavior entries.
+    test('returns true when select-all is active and the view has items', () => {
       const viewStub = {
         selectAllActive: true,
         behaviors: [...PageProviderDisplayBehavior],
+        items: [{ uid: 'doc-1' }, { uid: 'doc-2' }],
       };
-      expect(element._isAvailable.call({ documents: viewStub })).to.be.false;
+      element.documents = viewStub;
+      expect(element._isAvailable()).to.be.true;
+    });
+
+    test('returns false when select-all is active but the view has no items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [],
+      };
+      element.documents = viewStub;
+      expect(element._isAvailable()).to.be.false;
     });
   });
 
@@ -119,6 +131,30 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = [{ uid: 'from-array' }];
       element.document = { uid: 'from-document' };
       expect(element._getSelectedDocumentUids()).to.deep.equal(['from-array']);
+    });
+
+    test('returns UIDs from view items when select-all is active', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [{ uid: 'select-all-uid-1' }, { uid: 'select-all-uid-2' }, { uid: 'select-all-uid-3' }],
+      };
+      element.documents = viewStub;
+      expect(element._getSelectedDocumentUids()).to.deep.equal([
+        'select-all-uid-1',
+        'select-all-uid-2',
+        'select-all-uid-3',
+      ]);
+    });
+
+    test('returns empty array when select-all is active but view has no items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [],
+      };
+      element.documents = viewStub;
+      expect(element._getSelectedDocumentUids()).to.deep.equal([]);
     });
   });
 
@@ -226,6 +262,50 @@ suite('nuxeo-drive-download-button', () => {
       expect(toastStub.text).to.include('No documents selected');
     });
 
+    test('triggers download for all items in view when select-all is active', async () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [{ uid: 'sa-uid-1' }, { uid: 'sa-uid-2' }, { uid: 'sa-uid-3' }],
+      };
+      element.documents = viewStub;
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+      const openStub = sinon.stub(window, 'open');
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(toastStub.open).to.not.have.been.called;
+      expect(openStub).to.have.been.calledOnce;
+      expect(openStub.firstCall.args[1]).to.equal('_top');
+    });
+
+    test('shows noDocumentsSelected error when select-all is active but view has no items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [],
+      };
+      element.documents = viewStub;
+      element._download();
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.include('No documents selected');
+    });
+
+    test('shows tooManyDocuments error when select-all yields more than 25 items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: Array.from({ length: 26 }, (_, i) => {
+          return { uid: `sa-uid-${i}` };
+        }),
+      };
+      element.documents = viewStub;
+      element._download();
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.include('25');
+    });
+
     test('shows tooManyDocuments error when more than 25 documents are selected', async () => {
       element.documents = Array.from({ length: 26 }, (_, i) => {
         return { uid: `uid-${i}` };
@@ -244,6 +324,96 @@ suite('nuxeo-drive-download-button', () => {
       element._download();
       // The toast should not have been opened at this point (no guard condition triggered)
       expect(toastStub.open).to.not.have.been.called;
+    });
+
+    test('calls window.open with directDownloadUrl when a valid Drive token exists', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }, { uid: 'doc-uid-2' }];
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+      const openStub = sinon.stub(window, 'open');
+
+      element._download();
+      // Let the promise chain resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(openStub).to.have.been.calledOnce;
+      const calledUrl = openStub.firstCall.args[0];
+      expect(calledUrl).to.match(/^nxdrive:\/\/direct-download\/[A-Za-z0-9_-]+$/);
+      expect(openStub.firstCall.args[1]).to.equal('_top');
+    });
+
+    test('opens Drive install dialog when no Drive token is found', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
+      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(dialogToggleStub).to.have.been.calledOnce;
+      expect(toastStub.open).to.not.have.been.called;
+    });
+
+    test('shows directTransfer.failed error when token.get rejects', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.include('error occurred');
+    });
+
+    test('folder UID is collected as a single item (folder = one ID)', () => {
+      // Folders are treated as a single document ID — no enumeration of contents
+      element.documents = [{ uid: 'folder-uid-1' }, { uid: 'folder-uid-2' }];
+      const uids = element._getSelectedDocumentUids();
+      expect(uids).to.deep.equal(['folder-uid-1', 'folder-uid-2']);
+      expect(uids).to.have.length(2);
+    });
+
+    test('mixed selection of documents and folders produces all UIDs in the URL', () => {
+      element.documents = [
+        { uid: 'doc-uid-1' },
+        { uid: 'folder-uid-1' },
+        { uid: 'doc-uid-2' },
+        { uid: 'folder-uid-2' },
+      ];
+      const url = element._buildOriginalUrl();
+      expect(url).to.include('doc-uid-1');
+      expect(url).to.include('folder-uid-1');
+      expect(url).to.include('doc-uid-2');
+      expect(url).to.include('folder-uid-2');
+    });
+
+    test('single document action (via document property) triggers download with correct UID', async () => {
+      element.documents = [];
+      element.document = { uid: 'single-doc-uid' };
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+      const openStub = sinon.stub(window, 'open');
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(openStub).to.have.been.calledOnce;
+      // Verify the UID is encoded in the compressed URL by checking the uncompressed URL
+      const originalUrl = element._buildOriginalUrl();
+      expect(originalUrl).to.include('single-doc-uid');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _buildOriginalUrl — server info
+  // ---------------------------------------------------------------------------
+  suite('_buildOriginalUrl — server info', () => {
+    test('URL contains a server/host segment after the direct-download scheme', () => {
+      element.documents = [{ uid: '00000000-0000-0000-0000-000000000001' }];
+      const url = element._buildOriginalUrl();
+      // Format: nxdrive://direct-download/<scheme>/<host>/.../<uid>
+      // After stripping the nxdrive://direct-download/ prefix there should be at least 2 more segments
+      const path = url.replace('nxdrive://direct-download/', '');
+      const segments = path.split('/');
+      expect(segments.length).to.be.at.least(2);
     });
   });
 });

@@ -23,6 +23,7 @@ import './nuxeo-drive-icons.js';
 
 window.nuxeo = window.nuxeo || {};
 const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
+const MAX_DIRECT_DOWNLOAD_DOCS = 25;
 
 class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerElement) {
   static get is() {
@@ -51,7 +52,11 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       <style include="nuxeo-action-button-styles"></style>
 
       <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
-      <div class="action" on-tap="_download" hidden$="[[!_isAvailable(documents.splices)]]">
+      <div
+        class="action"
+        on-tap="_download"
+        hidden$="[[!_isAvailable(documents.splices, documents.items.splices, documents.items.length)]]"
+      >
         <paper-icon-button noink icon="nuxeo-drive:download" id="driveBtn" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveDownloadButton.tooltip')]]</span>
         <nuxeo-tooltip>[[i18n('driveDownloadButton.tooltip')]]</nuxeo-tooltip>
@@ -72,7 +77,9 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
   }
 
   _isAvailable() {
-    return !isPageProviderDisplayBehavior(this.documents);
+    return isPageProviderDisplayBehavior(this.documents)
+      ? this.documents.items && this.documents.items.length > 0
+      : this.documents && this.documents.length > 0;
   }
 
   _download() {
@@ -83,8 +90,8 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       return;
     }
 
-    if (uids.length > 25) {
-      this._showError(this.i18n('driveDownload.tooManyDocuments', 25));
+    if (uids.length > MAX_DIRECT_DOWNLOAD_DOCS) {
+      this._showError(this.i18n('driveDownload.tooManyDocuments', MAX_DIRECT_DOWNLOAD_DOCS));
       return;
     }
 
@@ -111,6 +118,10 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
   }
 
   _getSelectedDocumentUids() {
+    if (isPageProviderDisplayBehavior(this.documents)) {
+      return (this.documents.items || []).map((doc) => doc.uid);
+    }
+
     if (this.documents && this.documents.length > 0) {
       return this.documents.map((doc) => doc.uid);
     }
@@ -160,6 +171,11 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     });
 
     const serverBytes = new TextEncoder().encode(server);
+    if (serverBytes.length > 255) {
+      const msg = this.i18n('driveDownload.serverUrlTooLong');
+      this._showError(msg);
+      throw new Error(msg);
+    }
     const payload = new Uint8Array([scheme, serverBytes.length, ...serverBytes, allUuidHex.length, ...uuidBinary]);
 
     const b64 = this._base64UrlSafeEncode(payload);

@@ -516,6 +516,7 @@
   "driveDownload.directTransfer.failed": "An error occurred while trying to download the document with Nuxeo Drive.",
   "driveDownload.noDocumentsSelected": "No documents selected for download.",
   "driveDownload.tooManyDocuments": "You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.",
+  "driveDownload.serverUrlTooLong": "The server URL is too long to generate a Nuxeo Drive download link.",
   "drivePage.heading": "Nuxeo Drive",
   "drivePage.packages": "Packages",
   "drivePage.roots": "Synchronization Roots",
