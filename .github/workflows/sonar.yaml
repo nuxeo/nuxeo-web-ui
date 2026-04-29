@@ -18,6 +18,8 @@ on:
         type: string
         required: false
     secrets:
+      NPM_PACKAGES_TOKEN:
+        required: false
       REPOSITORY_MANAGER_USERNAME:
         required: true
       REPOSITORY_MANAGER_PASSWORD:
@@ -41,18 +43,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.branch }}
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Run git config
         run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          node-version: 22
+          scope: '@nuxeo'
+
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.0
         with:
           java-version: '17'
-
-      - name: Purge cached Nuxeo artifacts
-        run: rm -rf ~/.m2/repository/org/nuxeo
 
       - name: Cache SonarQube packages
         uses: actions/cache@v5
@@ -68,9 +75,13 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Purge cached Nuxeo artifacts
+        run: rm -rf ~/.m2/repository/org/nuxeo
+
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
-        run: mvn -B -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=nuxeo_nuxeo-web-ui -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: mvn -B -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=nuxeo_nuxeo-web-ui -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
