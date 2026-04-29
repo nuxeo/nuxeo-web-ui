@@ -52,7 +52,11 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       <style include="nuxeo-action-button-styles"></style>
 
       <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
-      <div class="action" on-tap="_download" hidden$="[[!_isAvailable(documents.splices, documents.items.splices, documents.items.length)]]">
+      <div
+        class="action"
+        on-tap="_download"
+        hidden$="[[!_isAvailable(documents.splices, documents.items.splices, documents.items.length)]]"
+      >
         <paper-icon-button noink icon="nuxeo-drive:download" id="driveBtn" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveDownloadButton.tooltip')]]</span>
         <nuxeo-tooltip>[[i18n('driveDownloadButton.tooltip')]]</nuxeo-tooltip>
