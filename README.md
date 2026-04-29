@@ -57,7 +57,7 @@ nuxeo.cors.urls=*
 docker-compose up --build
 ```
 
-This starts an Nginx proxy, Nuxeo Server, and Web UI. The application will be available at http://localhost:8080/nuxeo/ui.
+This starts an Nginx proxy, Nuxeo Server, and Web UI. The application will be available at http://localhost:8080/.
 
 ### CI
 
