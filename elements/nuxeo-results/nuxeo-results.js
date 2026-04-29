@@ -481,12 +481,34 @@ Polymer({
     });
   },
 
+  /**
+   * Documents currently rendered in the active results view (used for selection and actions).
+   *
+   * Resolution order:
+   * 1. `view.items` when the view already exposes a plain array (e.g. data table, grid).
+   * 2. Otherwise `view.$.list.items` when the view delegates to an internal `iron-list`.
+   *
+   * Right after navigation or refresh, `view` may exist while `$` / `$.list` are not ready yet, or
+   * reading `items` can throw inside iron-list. Those cases return `[]` so observers and toolbars
+   * do not break.
+   */
   get items() {
-    if (this.view && this.view.items) {
-      return this.view.items;
+    if (!this.view) {
+      return [];
     }
-    // XXX: this.view.items is not working
-    return this.view && this.view.$.list ? this.view.$.list.items : [];
+    try {
+      if (Array.isArray(this.view.items)) {
+        return this.view.items;
+      }
+      if (this.view.$ && this.view.$.list) {
+        const listItems = this.view.$.list.items;
+        return Array.isArray(listItems) ? listItems : [];
+      }
+    } catch (e) {
+      /* Unsafe read during attach/refresh; treat as no rows yet */
+      return [];
+    }
+    return [];
   },
 
   detached() {
@@ -586,7 +608,7 @@ Polymer({
   fetch() {
     return new Promise((resolve, error) => {
       this._fetchDebouncer = Debouncer.debounce(this._fetchDebouncer, timeOut.after(100), () => {
-        if (this.view) {
+        if (this.view && typeof this.view.fetch === 'function') {
           this.view.fetch().then(resolve).catch(error);
         } else {
           resolve();
@@ -597,7 +619,10 @@ Polymer({
 
   reset() {
     if (this.view) {
-      this.view.reset();
+      // Guard: only call reset if view exists and method is available.
+      if (typeof this.view.reset === 'function') {
+        this.view.reset();
+      }
     }
   },
 
@@ -641,7 +666,7 @@ Polymer({
       this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
       this.listen(view, '_excluded-items-changed', '_excludedDocsChanged');
       view.nxProvider = this.nxProvider;
-      // update view
+      // update view - now safe as reset/fetch have defensive checks
       this.reset();
       this.fetch();
       this.fire('search-results-view', { view, name: this.name });
@@ -706,16 +731,38 @@ Polymer({
   },
 
   _updateActionContext() {
-    this.actionContext = {
-      baseUrl: this.$.nxcon.url,
-      displayMode: this.displayMode,
-      nxProvider: this.nxProvider,
-      selectedItems: this.selectedItems,
-      items: this.items,
-      columns: this.columns,
-      document: this.document,
-      selection: this.view && this.view.selectAllActive ? this.view : this.selectedItems,
-    };
+    /* Always publish the base action context so slots receive a model even during
+     * the timing window where items are not ready yet; only resolve items once
+     * one of the supported data paths is available to avoid flicker.
+     *
+     * Note: During view initialization, this.items may temporarily return [] even when
+     * hasList is true (iron-list not fully ready). This is acceptable because:
+     * 1. The observer watches view.* and will fire again when items become available
+     * 2. We listen to 'items-changed' event which fires when items are ready (line 581)
+     * 3. The temporary [] is quickly replaced, and actions/toolbar update naturally
+     */
+    try {
+      const hasItems = this.view && Array.isArray(this.view.items);
+      const hasList = this.view && this.view.$ && this.view.$.list;
+
+      const actionContext = {
+        baseUrl: this.$.nxcon.url,
+        displayMode: this.displayMode,
+        nxProvider: this.nxProvider,
+        selectedItems: this.selectedItems,
+        columns: this.columns,
+        document: this.document,
+        selection: this.view && this.view.selectAllActive ? this.view : this.selectedItems,
+      };
+
+      if (hasItems || hasList) {
+        actionContext.items = this.items;
+      }
+
+      this.actionContext = actionContext;
+    } catch (e) {
+      /* Observer must not throw or selection toolbar stops updating for the rest of the session */
+    }
   },
 
   _clearSelectedItems() {
@@ -781,13 +828,21 @@ Polymer({
   clearSelection() {
     this._excludedDocs = -1;
     this.selectAllActive = false;
-    this.view.clearSelection();
+    // Guard: only call view method if view is ready.
+    if (this.view && typeof this.view.clearSelection === 'function') {
+      this.view.clearSelection();
+    }
   },
 
   selectItems(items) {
     this.clearSelection();
-    this.view.selectItems(items);
-    this.view.notifyResize();
+    // Guard: only call view methods if view is ready.
+    if (this.view && typeof this.view.selectItems === 'function') {
+      this.view.selectItems(items);
+    }
+    if (this.view && typeof this.view.notifyResize === 'function') {
+      this.view.notifyResize();
+    }
   },
 
   refresh() {
