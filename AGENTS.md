@@ -23,7 +23,7 @@ npm test                     # Karma unit tests — must pass
 ## Project Structure
 
 ```
-index.js              → Bootstrap (promise chain: app → bundle → routing → addons)
+index.js              → Bootstrap (promise chain: disableRobotoFont → setupRTLSupport → loadApp → loadLegacy → loadBundle → setupApp → loadRouting → loadAddons)
 elements/             → ALL Polymer web components live here
   nuxeo-app.js        → Root element
   routing.js          → Client-side router (@nuxeo/page, hashbang)
@@ -133,4 +133,3 @@ PRs run lint and test workflows automatically.
 | `NUXEO_URL` | `/nuxeo` | Server URL in the app |
 | `NUXEO_HOST` | `localhost:8080` | Dev proxy target |
 | `NUXEO_PACKAGES` | empty (no addon entry points imported; `nuxeo-spreadsheet` always loaded) | Addon JS entry points to import at runtime via `Nuxeo.UI.bundles` |
-| `NUXEO_ELEMENTS_DIR` | `../nuxeo-elements` | Sibling repo path for linking |

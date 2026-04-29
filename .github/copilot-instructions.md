@@ -18,7 +18,7 @@ Nuxeo Web UI is the standard web application for the Nuxeo content services plat
 ## Repository Layout
 
 ```
-index.js              → App bootstrap (loads nuxeo-app.js → bundle → routing → addons)
+index.js              → App bootstrap (eagerly loads legacy.js → nuxeo-app.js → bundle, initializes RTL/Roboto handling, then routing/addons; see ARCHITECTURE.md boot sequence)
 index.html            → SPA shell
 elements/             → All Polymer web components
   nuxeo-app.js        → Root application element
@@ -136,7 +136,7 @@ See `.github/skills/link-nuxeo-elements/SKILL.md` for full details and custom pa
 | `NUXEO_URL` | Nuxeo server URL for Web UI (default: `/nuxeo`) |
 | `NUXEO_HOST` | Dev server proxy target (default: `localhost:8080`) |
 | `NUXEO_PACKAGES` | Space/comma-separated list of addon packages to bundle |
-| `NUXEO_ELEMENTS_DIR` | Override path to sibling nuxeo-elements repo |
+| `NUXEO_ELEMENTS_DIR` | Convenience shell variable for the manual nuxeo-elements symlink procedure; not read by the app/build tooling |
 | `NUXEO_WEB_UI_VERSION` | Docker image version tag |
 | `NUXEO_VERSION` | Nuxeo server Docker image version |
 | `NUXEO_DEV_MODE` | Enable Nuxeo dev mode in Docker |
