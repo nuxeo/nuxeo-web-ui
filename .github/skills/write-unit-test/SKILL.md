@@ -45,13 +45,14 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
  limitations under the License.
  */
 import { fixture, html } from '@nuxeo/testing-helpers';
-import '../elements/<path>/nuxeo-<element-name>.js';
+import '../elements/<path>/nuxeo-my-element.js';
 
-suite('nuxeo-<element-name>', () => {
+// Replace 'nuxeo-my-element' with the actual element name under test
+suite('nuxeo-my-element', () => {
   let element;
 
   setup(async () => {
-    element = await fixture(html`<nuxeo-<element-name>></nuxeo-<element-name>>`);
+    element = await fixture(html`<nuxeo-my-element></nuxeo-my-element>`);
   });
 
   test('should initialize with default properties', () => {
@@ -64,9 +65,10 @@ suite('nuxeo-<element-name>', () => {
 
 ```javascript
 import { fixture, html } from '@nuxeo/testing-helpers';
-import '../elements/<path>/nuxeo-<element-name>.js';
+import '../elements/<path>/nuxeo-my-element.js';
 
-suite('nuxeo-<element-name>', () => {
+// Replace 'nuxeo-my-element' with the actual element name under test
+suite('nuxeo-my-element', () => {
   let element;
   const document = {
     'entity-type': 'document',
@@ -89,7 +91,7 @@ suite('nuxeo-<element-name>', () => {
   };
 
   setup(async () => {
-    element = await fixture(html`<nuxeo-<element-name> .document="${document}"></nuxeo-<element-name>>`);
+    element = await fixture(html`<nuxeo-my-element .document="${document}"></nuxeo-my-element>`);
   });
 
   test('should display document title', () => {
@@ -102,13 +104,14 @@ suite('nuxeo-<element-name>', () => {
 
 ```javascript
 import { fixture, html } from '@nuxeo/testing-helpers';
-import '../elements/<path>/nuxeo-<element-name>.js';
+import '../elements/<path>/nuxeo-my-element.js';
 
-suite('nuxeo-<element-name>', () => {
+// Replace 'nuxeo-my-element' with the actual element name under test
+suite('nuxeo-my-element', () => {
   let element;
 
   setup(async () => {
-    element = await fixture(html`<nuxeo-<element-name>></nuxeo-<element-name>>`);
+    element = await fixture(html`<nuxeo-my-element></nuxeo-my-element>`);
     // Stub behavior methods
     sinon.stub(element, 'hasPermission').returns(true);
     sinon.stub(element, 'isImmutable').returns(false);
@@ -134,16 +137,16 @@ suite('nuxeo-<element-name>', () => {
 
 ```javascript
 import { fixture, html, login, waitForEvent } from '@nuxeo/testing-helpers';
-import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
-import '../elements/<path>/nuxeo-<element-name>.js';
+import '../elements/<path>/nuxeo-my-element.js';
 
-suite('nuxeo-<element-name>', () => {
+// Replace 'nuxeo-my-element' with the actual element name under test
+suite('nuxeo-my-element', () => {
   let server;
   let element;
 
   setup(async () => {
     server = await login();
-    element = await fixture(html`<nuxeo-<element-name>></nuxeo-<element-name>>`);
+    element = await fixture(html`<nuxeo-my-element></nuxeo-my-element>`);
   });
 
   test('should fetch data from server', async () => {

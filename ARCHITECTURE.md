@@ -150,7 +150,7 @@ Client-side routing uses `@nuxeo/page` (a fork of page.js) in hashbang mode:
 | `/` | → `/home` | Redirect to dashboard |
 | `/home` | `nuxeo-home` | User dashboard |
 | `/browse/*path` | `nuxeo-browser` | Document tree browsing |
-| `/doc/:repo?/:id` | `nuxeo-browser` | Direct document access by ID |
+| `/doc/:repo?/:id/` | `nuxeo-browser` | Direct document access by ID |
 | `/search/:name` | `nuxeo-search-page` | Named search forms |
 | `/admin/:tab?` | `nuxeo-admin` | Admin console (requires admin/powerusers) |
 | `/tasks` | `nuxeo-tasks` | Workflow task list |
