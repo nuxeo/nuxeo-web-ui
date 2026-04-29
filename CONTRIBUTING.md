@@ -34,7 +34,7 @@ nuxeo.cors.urls=*
 
 ### Making Changes
 
-1. Create a feature branch from the branch `lts-2023`
+1. Create a feature branch from `maintenance-3.1.x`
 2. Edit components in `elements/`
 3. The webpack dev server hot-reloads changes
 4. Format and lint before committing:
@@ -152,22 +152,18 @@ npm run ftest:watch       # Re-runs @watch-tagged scenarios on change
 
 ## Working with nuxeo-elements Locally
 
-To develop against a local checkout of the `nuxeo-elements` sibling repo:
+To develop against a local checkout of the `nuxeo-elements` sibling repo, manually create symlinks:
 
 ```bash
 # Default: expects ../nuxeo-elements as sibling directory
-node scripts/link-nuxeo-elements.js
-
-# Or specify a custom path
-NUXEO_ELEMENTS_DIR=/path/to/nuxeo-elements node scripts/link-nuxeo-elements.js
+rm -rf node_modules/@nuxeo/nuxeo-ui-elements && ln -s "../../../nuxeo-elements/ui" node_modules/@nuxeo/nuxeo-ui-elements
+rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s "../../../nuxeo-elements/dataviz" node_modules/@nuxeo/nuxeo-dataviz-elements
+rm -rf node_modules/@nuxeo/nuxeo-elements && ln -s "../../../nuxeo-elements/core" node_modules/@nuxeo/nuxeo-elements
 ```
 
-This creates symlinks:
-- `node_modules/@nuxeo/nuxeo-ui-elements` → `nuxeo-elements/ui`
-- `node_modules/@nuxeo/nuxeo-dataviz-elements` → `nuxeo-elements/dataviz`
-- `node_modules/@nuxeo/nuxeo-elements` → `nuxeo-elements/core`
+For custom paths, use absolute paths instead. See `.github/skills/link-nuxeo-elements/SKILL.md` for full details.
 
-**Important**: `npm install` overwrites these symlinks. Re-run the link script after any install.
+**Important**: `npm install` overwrites these symlinks. Re-create them after any install.
 
 ## Building for Production
 
@@ -203,14 +199,14 @@ This starts:
 
 ## Branch Strategy
 
-- The main development branch is the long-lived branch for the current LTS version `lts-2023`
-- Feature branches are created from and merged back to the `lts-2023` branch
+- The main development branch is `maintenance-3.1.x` (the long-lived branch for the current LTS version)
+- Feature branches are created from and merged back to `maintenance-3.1.x`
 - PRs trigger lint and test workflows automatically
 - PRs tagged `preview` get ephemeral preview environments
 
 ## CI/CD
 
-GitHub Actions run on every push to the `lts-2023` branch and on PRs:
+GitHub Actions run on every push to the `maintenance-3.1.x` branch and on PRs:
 
 1. **Lint** — ESLint + Prettier
 2. **Test** — Karma unit tests

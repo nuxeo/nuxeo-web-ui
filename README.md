@@ -30,7 +30,7 @@ nuxeo.cors.urls=*
 
 | Variable | Used by | Description | Default |
 |---|---|---|---|
-| `NUXEO_PACKAGES` | Webpack, Docker | List of addon packages to enable | (all addons) |
+| `NUXEO_PACKAGES` | Webpack, Docker | Addon packages whose bundles are loaded at runtime | empty (no addon bundles loaded; resources are still copied) |
 | `NUXEO_URL` | Webpack | URL to connect to Nuxeo server | `/nuxeo` |
 | `NUXEO_HOST` | Webpack | Nuxeo host address for dev server proxy | `localhost:8080` |
 | `NUXEO_WEB_UI_VERSION` | Docker Compose | Version of Web UI image to build/start | |

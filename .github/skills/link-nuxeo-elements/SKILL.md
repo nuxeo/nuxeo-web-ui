@@ -44,7 +44,7 @@ Repositories/
 ### Default (sibling directory at `../nuxeo-elements`)
 
 ```bash
-ELEMENTS_DIR="../nuxeo-elements"
+NUXEO_ELEMENTS_DIR="../nuxeo-elements"
 rm -rf node_modules/@nuxeo/nuxeo-ui-elements && ln -s "../../../nuxeo-elements/ui" node_modules/@nuxeo/nuxeo-ui-elements
 rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s "../../../nuxeo-elements/dataviz" node_modules/@nuxeo/nuxeo-dataviz-elements
 rm -rf node_modules/@nuxeo/nuxeo-elements && ln -s "../../../nuxeo-elements/core" node_modules/@nuxeo/nuxeo-elements
@@ -55,10 +55,10 @@ rm -rf node_modules/@nuxeo/nuxeo-elements && ln -s "../../../nuxeo-elements/core
 If the `nuxeo-elements` repo is at a non-default location, use absolute paths:
 
 ```bash
-ELEMENTS_DIR="/path/to/nuxeo-elements"
-rm -rf node_modules/@nuxeo/nuxeo-ui-elements && ln -s "$ELEMENTS_DIR/ui" node_modules/@nuxeo/nuxeo-ui-elements
-rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s "$ELEMENTS_DIR/dataviz" node_modules/@nuxeo/nuxeo-dataviz-elements
-rm -rf node_modules/@nuxeo/nuxeo-elements && ln -s "$ELEMENTS_DIR/core" node_modules/@nuxeo/nuxeo-elements
+NUXEO_ELEMENTS_DIR="/path/to/nuxeo-elements"
+rm -rf node_modules/@nuxeo/nuxeo-ui-elements && ln -s "$NUXEO_ELEMENTS_DIR/ui" node_modules/@nuxeo/nuxeo-ui-elements
+rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s "$NUXEO_ELEMENTS_DIR/dataviz" node_modules/@nuxeo/nuxeo-dataviz-elements
+rm -rf node_modules/@nuxeo/nuxeo-elements && ln -s "$NUXEO_ELEMENTS_DIR/core" node_modules/@nuxeo/nuxeo-elements
 ```
 
 ### Verify symlinks are in place

@@ -93,7 +93,7 @@ Users can switch themes from their profile settings.
 Web UI supports 16 languages out of the box:
 Arabic, Chinese (Simplified), Czech, Dutch, Basque, English, French, German, Hebrew, Indonesian, Italian, Japanese, Polish, Portuguese, Spanish, Swedish.
 
-RTL (right-to-left) support is automatically enabled for Arabic, Hebrew, Farsi, and Urdu.
+RTL (right-to-left) support is automatically enabled for RTL locales. This includes bundled translations such as Arabic and Hebrew, as well as locales like Farsi and Urdu where text direction is detected even though full UI translations are not bundled out of the box.
 
 ## Platform Integration
 

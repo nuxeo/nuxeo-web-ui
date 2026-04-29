@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`. The main development branch is `lts-2023` for the current LTS line (check `pom.xml` if that changes in future LTS cycles).
+This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`. The main development branch is `maintenance-3.1.x` for the current LTS line (check `pom.xml` if that changes in future LTS cycles).
 
 ## Build & Validate
 
@@ -114,13 +114,13 @@ npm run ftest:dev           # Against localhost:8080 + localhost:5000
 
 ## CI Workflow
 
-Push to the `lts-2023` branch triggers: **lint → test → a11y → ftest → build** (all must pass).
+Push to the `maintenance-3.1.x` branch triggers: **lint → test → a11y → ftest → build** (all must pass).
 
 PRs run lint and test workflows automatically.
 
 ## Common Pitfalls
 
-- `npm install` **replaces** nuxeo-elements symlinks. Re-run `node scripts/link-nuxeo-elements.js` after install if developing locally against a sibling nuxeo-elements repo.
+- `npm install` **replaces** nuxeo-elements symlinks. Re-create them manually after install if developing locally against a sibling `nuxeo-elements` repo (see `.github/skills/link-nuxeo-elements/SKILL.md` for the procedure).
 - `.html` files contain real Polymer components with inline JS — don't treat them as static HTML.
 - The `NUXEO_PACKAGES` env var controls which addon JS bundles are imported at runtime via `Nuxeo.UI.bundles`. If unset, addon resources are still copied to the build but no addon entry points are imported (except `nuxeo-spreadsheet`, which is always loaded).
 - `@nuxeo` npm packages come from `https://packages.nuxeo.com/repository/npm-public/`, not npmjs.org.
