@@ -172,8 +172,9 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
 
     const serverBytes = new TextEncoder().encode(server);
     if (serverBytes.length > 255) {
-      this._showError(this.i18n('driveDownload.serverUrlTooLong'));
-      throw new Error(`Server URL is too long to encode (${serverBytes.length} bytes, max 255).`);
+      const msg = this.i18n('driveDownload.serverUrlTooLong');
+      this._showError(msg);
+      throw new Error(msg);
     }
     const payload = new Uint8Array([scheme, serverBytes.length, ...serverBytes, allUuidHex.length, ...uuidBinary]);
 
