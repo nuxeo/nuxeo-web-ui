@@ -49,19 +49,29 @@ suite('nuxeo-drive-download-button', () => {
       expect(element._isAvailable()).to.be.true;
     });
 
-    test('returns true when documents array is empty', () => {
+    test('returns false when documents array is empty', () => {
       element.documents = [];
-      expect(element._isAvailable()).to.be.true;
+      expect(element._isAvailable()).to.be.false;
     });
 
-    test('returns false when documents is a page-provider display element (select-all active)', () => {
-      // Build a stub that satisfies isPageProviderDisplayBehavior:
-      // it checks el.selectAllActive === true AND el.behaviors includes all PageProviderDisplayBehavior entries.
+    test('returns true when select-all is active and the view has items', () => {
       const viewStub = {
         selectAllActive: true,
         behaviors: [...PageProviderDisplayBehavior],
+        items: [{ uid: 'doc-1' }, { uid: 'doc-2' }],
       };
-      expect(element._isAvailable.call({ documents: viewStub })).to.be.false;
+      element.documents = viewStub;
+      expect(element._isAvailable()).to.be.true;
+    });
+
+    test('returns false when select-all is active but the view has no items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [],
+      };
+      element.documents = viewStub;
+      expect(element._isAvailable()).to.be.false;
     });
   });
 
@@ -98,8 +108,7 @@ suite('nuxeo-drive-download-button', () => {
   // _getSelectedDocumentUids
   // ---------------------------------------------------------------------------
   suite('_getSelectedDocumentUids', () => {
-    test('returns UIDs from documents array when populated', () => {
-      element.documents = [{ uid: 'aaa-111' }, { uid: 'bbb-222' }, { uid: 'ccc-333' }];
+    test('returns UIDs from documents array when populated', () => {      element.documents = [{ uid: 'aaa-111' }, { uid: 'bbb-222' }, { uid: 'ccc-333' }];
       expect(element._getSelectedDocumentUids()).to.deep.equal(['aaa-111', 'bbb-222', 'ccc-333']);
     });
 
@@ -119,6 +128,30 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = [{ uid: 'from-array' }];
       element.document = { uid: 'from-document' };
       expect(element._getSelectedDocumentUids()).to.deep.equal(['from-array']);
+    });
+
+    test('returns UIDs from view items when select-all is active', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [{ uid: 'select-all-uid-1' }, { uid: 'select-all-uid-2' }, { uid: 'select-all-uid-3' }],
+      };
+      element.documents = viewStub;
+      expect(element._getSelectedDocumentUids()).to.deep.equal([
+        'select-all-uid-1',
+        'select-all-uid-2',
+        'select-all-uid-3',
+      ]);
+    });
+
+    test('returns empty array when select-all is active but view has no items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [],
+      };
+      element.documents = viewStub;
+      expect(element._getSelectedDocumentUids()).to.deep.equal([]);
     });
   });
 
@@ -224,6 +257,48 @@ suite('nuxeo-drive-download-button', () => {
       element._download();
       expect(toastStub.open).to.have.been.calledOnce;
       expect(toastStub.text).to.include('No documents selected');
+    });
+
+    test('triggers download for all items in view when select-all is active', async () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [{ uid: 'sa-uid-1' }, { uid: 'sa-uid-2' }, { uid: 'sa-uid-3' }],
+      };
+      element.documents = viewStub;
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+      const openStub = sinon.stub(window, 'open');
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(toastStub.open).to.not.have.been.called;
+      expect(openStub).to.have.been.calledOnce;
+      expect(openStub.firstCall.args[1]).to.equal('_top');
+    });
+
+    test('shows noDocumentsSelected error when select-all is active but view has no items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [],
+      };
+      element.documents = viewStub;
+      element._download();
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.include('No documents selected');
+    });
+
+    test('shows tooManyDocuments error when select-all yields more than 25 items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: Array.from({ length: 26 }, (_, i) => ({ uid: `sa-uid-${i}` })),
+      };
+      element.documents = viewStub;
+      element._download();
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.include('25');
     });
 
     test('shows tooManyDocuments error when more than 25 documents are selected', async () => {
