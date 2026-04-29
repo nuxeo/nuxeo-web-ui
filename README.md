@@ -61,7 +61,7 @@ This starts an Nginx proxy, Nuxeo Server, and Web UI. The application will be av
 
 ### CI
 
-CI is built on [GitHub Actions](https://github.com/features/actions) with workflows for linting, testing, accessibility checks, functional tests, and building the marketplace package. PRs tagged `preview` get ephemeral preview environments with cross-repo support for [nuxeo-elements](https://github.com/nuxeo/nuxeo-elements).
+CI is built on [GitHub Actions](https://github.com/features/actions) with workflows for linting, testing, accessibility checks, functional tests, SonarCloud quality scan, and building the marketplace package. PRs tagged `preview` get ephemeral preview environments with cross-repo support for [nuxeo-elements](https://github.com/nuxeo/nuxeo-elements).
 
 ### Contributing
 

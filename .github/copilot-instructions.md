@@ -18,7 +18,7 @@ Nuxeo Web UI is the standard web application for the Nuxeo content services plat
 ## Repository Layout
 
 ```
-index.js              → App bootstrap (eagerly loads legacy.js → nuxeo-app.js → bundle, initializes RTL/Roboto handling, then routing/addons; see ARCHITECTURE.md boot sequence)
+index.js              → App bootstrap (disableRobotoFont → setupRTLSupport → loadApp (nuxeo-app.js) → loadLegacy → loadBundle → setupApp → loadRouting → loadAddons; see ARCHITECTURE.md boot sequence)
 index.html            → SPA shell
 elements/             → All Polymer web components
   nuxeo-app.js        → Root application element
@@ -125,7 +125,7 @@ See `.github/skills/link-nuxeo-elements/SKILL.md` for full details and custom pa
 
 ## CI / GitHub Actions
 
-- **Main branch flow (`lts-2025`)**: lint → test → a11y → ftest → build (sequential gates)
+- **Main branch flow (`lts-2025`)**: lint → test → a11y → ftest → sonar → build (sequential gates)
 - **Preview**: PRs tagged `preview` get ephemeral environments (cross-repo with nuxeo-elements)
 - **Registry**: `@nuxeo` packages come from `https://packages.nuxeo.com/repository/npm-public/`
 

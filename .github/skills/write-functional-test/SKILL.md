@@ -160,13 +160,13 @@ const button = await $('nuxeo-app').$('paper-button.primary');
 
 Check these files before writing new steps — many common actions already exist:
 
-- `step_definitions/document.js` — Document CRUD, browse, permissions
-- `step_definitions/search.js` — Search actions
-- `step_definitions/browser.js` — Navigation, breadcrumb
-- `step_definitions/collection.js` — Collection management
-- `step_definitions/workflow.js` — Workflow actions
-- `step_definitions/login.js` — Authentication
-- `step_definitions/home.js` — Home page actions
+- `packages/nuxeo-web-ui-ftest/features/step_definitions/document.js` — Document CRUD, browse, permissions
+- `packages/nuxeo-web-ui-ftest/features/step_definitions/search.js` — Search actions
+- `packages/nuxeo-web-ui-ftest/features/step_definitions/browser.js` — Navigation, breadcrumb
+- `packages/nuxeo-web-ui-ftest/features/step_definitions/collections.js` — Collection management
+- `packages/nuxeo-web-ui-ftest/features/step_definitions/tasks.js` — Workflow/task actions
+- `packages/nuxeo-web-ui-ftest/features/step_definitions/login.js` — Authentication
+- `packages/nuxeo-web-ui-ftest/features/step_definitions/home.js` — Home page actions
 
 ## Running
 

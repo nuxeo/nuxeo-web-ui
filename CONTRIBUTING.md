@@ -106,7 +106,7 @@ Add English keys to `i18n/messages.json`:
 }
 ```
 
-Translations for other languages go in `i18n/messages-<locale>.json`.
+Translations for other languages are managed by Crowdin — do not edit `i18n/messages-<locale>.json` files manually.
 
 ## Testing
 
@@ -212,7 +212,8 @@ GitHub Actions run on every push to the `lts-2025` branch and on PRs:
 2. **Test** — Karma unit tests
 3. **A11y** — Accessibility tests
 4. **FTest** — WebdriverIO functional tests
-5. **Build** — Maven marketplace package (only after all above pass)
+5. **Sonar** — SonarCloud quality/security scan
+6. **Build** — Maven marketplace package (only after all above pass)
 
 ## npm Registry
 
