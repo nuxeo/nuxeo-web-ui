@@ -32,10 +32,14 @@ class DocumentHelper {
             .delete(docUid)
             .catch((e) => {
               const { status, statusText, url } = e.response;
+              // 404 means the document was already deleted (e.g. parent cascade) — ignore it
+              if (status === 404) {
+                return;
+              }
               console.error(`${status} ${statusText} ${url}`);
-              // in case of a conflict
+              // in case of a conflict, retry
               if (status === 409) {
-                throw e; // let's retry this
+                throw e;
               }
             }),
         ),
