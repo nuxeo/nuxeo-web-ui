@@ -16,7 +16,7 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
  limitations under the License.
  */
 import { fixture, html } from '@nuxeo/testing-helpers';
-import '../elements/nuxeo-document-actions/nuxeo-replace-blob-button';
+import '../elements/nuxeo-document-actions/nuxeo-replace-blob-button.js';
 
 suite('nuxeo-replace-blob-button', () => {
   let element;
@@ -69,6 +69,28 @@ suite('nuxeo-replace-blob-button', () => {
     test('when xpath =  file:content, for document viewer', () => {
       element.xpath = 'file:content';
       expect(element._isAvailable(document)).to.eql(false);
+    });
+  });
+
+  suite('helpers', () => {
+    test('normalizes indexed xpath for wildcard retention check', () => {
+      expect(element._transformXpathRegex('files:files/*/file', 'files:files/2/file')).to.eql(true);
+      expect(element._transformXpathRegex('files:files/*/file', 'files:files/2/name')).to.eql(false);
+      expect(element._transformXpathRegex('files:files/2/file', 'files:files/2/file')).to.eql(true);
+    });
+
+    test('finds root property when xpath points to array item', () => {
+      const properties = {
+        'files:files': [{ file: { 'upload-batch': 'batch-1' } }],
+      };
+      const root = element._getRootProperty(['files:files', '0', 'file'], properties);
+      expect(root).to.eql('files:files');
+    });
+
+    test('falls back to full path when no array exists', () => {
+      const properties = { 'file:content': { name: 'report.pdf' } };
+      const root = element._getRootProperty(['file:content', 'name'], properties);
+      expect(root).to.eql('file:content.name');
     });
   });
 });
