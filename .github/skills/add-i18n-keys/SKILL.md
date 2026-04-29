@@ -2,9 +2,9 @@
 name: add-i18n-keys
 description: Add or update internationalization (i18n) message keys for Nuxeo Web UI.
   Use this skill when the user wants to add translations, localization strings, message
-  keys, or labels. Updates i18n/messages.json (English) and stubs entries across all
-  16 locale files. Also use when the user mentions adding labels, text strings, or
-  translated content to the UI.
+  keys, or labels. Updates i18n/messages.json (English only); other locale files are
+  managed by Crowdin and should not be modified manually. Also use when the user
+  mentions adding labels, text strings, or translated content to the UI.
 ---
 
 # Add i18n Keys
@@ -17,7 +17,7 @@ Add internationalization message keys to Nuxeo Web UI. The primary file is
 1. Determine the message key name (follow existing naming conventions)
 2. Determine the English value
 3. Add to `i18n/messages.json`
-4. Optionally stub the key in other locale files (with the English value as placeholder)
+4. Do **not** modify other locale files — translations are managed by Crowdin
 
 ## File Locations
 
@@ -80,7 +80,7 @@ this.i18n('myComponent.title')
 - **Always add to `i18n/messages.json` first** — this is the source of truth
 - Keys are sorted alphabetically in the JSON files — insert in the correct position
 - The JSON files are flat objects (no nesting) — keys use dot notation
-- Values are plain strings — no HTML, no interpolation
+- Values are plain strings — no HTML; positional placeholders like `{0}`, `{1}`, etc. are allowed; do not use unsupported templating syntax
 - For addon-specific translations, use the addon's own `i18n/` directory instead
 - At build time, `scripts/merge-messages.js` merges addon + nuxeo-ui-elements messages
   into `.tmp/i18n/`
@@ -90,8 +90,7 @@ this.i18n('myComponent.title')
 1. Open `i18n/messages.json`
 2. Find the correct alphabetical position
 3. Insert the key-value pair
-4. For other locales, add the same key with the English value as a placeholder
-   (translators will update later)
+4. Do **not** modify other locale files — Crowdin handles translations automatically
 
 Example — adding keys for a new "contracts" feature:
 

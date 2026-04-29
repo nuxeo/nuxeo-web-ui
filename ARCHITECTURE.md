@@ -227,7 +227,7 @@ Base styles are in `themes/base.js` and `themes/loader.js` handles dynamic theme
 ### Development
 
 ```
-npm start → webpack-dev-server → proxies API to NUXEO_HOST:8080
+npm start → webpack-dev-server → proxies /nuxeo to NUXEO_HOST (default localhost:8080)
 ```
 
 ### Production
