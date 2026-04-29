@@ -294,7 +294,9 @@ suite('nuxeo-drive-download-button', () => {
       const viewStub = {
         selectAllActive: true,
         behaviors: [...PageProviderDisplayBehavior],
-        items: Array.from({ length: 26 }, (_, i) => ({ uid: `sa-uid-${i}` })),
+        items: Array.from({ length: 26 }, (_, i) => {
+          return { uid: `sa-uid-${i}` };
+        }),
       };
       element.documents = viewStub;
       element._download();
