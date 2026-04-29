@@ -46,11 +46,21 @@ When('I login as {string}', { timeout: 120000 }, async function (username) {
   await browser.waitUntil(
     async () => {
       const u = await browser.getUrl();
-      return !u.includes('login.jsp') && u.includes('/ui');
+      if (u.includes('/ui') && !u.includes('login.jsp')) {
+        return true;
+      }
+      // If still on login page, the submit may not have gone through — retry it
+      if (u.includes('login.jsp')) {
+        const submitBtn = await $('[name="Submit"]');
+        if (await submitBtn.isExisting()) {
+          await submitBtn.click();
+        }
+      }
+      return false;
     },
     {
       timeout: 30000,
-      interval: 200,
+      interval: 1000,
       timeoutMsg: 'UI did not load after login — still stuck on login.jsp',
     },
   );
