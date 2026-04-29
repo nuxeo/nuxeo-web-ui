@@ -108,7 +108,8 @@ suite('nuxeo-drive-download-button', () => {
   // _getSelectedDocumentUids
   // ---------------------------------------------------------------------------
   suite('_getSelectedDocumentUids', () => {
-    test('returns UIDs from documents array when populated', () => {      element.documents = [{ uid: 'aaa-111' }, { uid: 'bbb-222' }, { uid: 'ccc-333' }];
+    test('returns UIDs from documents array when populated', () => {
+      element.documents = [{ uid: 'aaa-111' }, { uid: 'bbb-222' }, { uid: 'ccc-333' }];
       expect(element._getSelectedDocumentUids()).to.deep.equal(['aaa-111', 'bbb-222', 'ccc-333']);
     });
 
