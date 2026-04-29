@@ -37,6 +37,9 @@ const capability = {
   acceptInsecureCerts: true,
   browserVersion: '135.0.7049.114',
   'wdio:enforceWebDriverClassic': true,
+  // Prevent ChromeDriver from auto-dismissing native dialogs (window.confirm, window.alert)
+  // so that tests can explicitly accept/dismiss them via alertAccept/alertDismiss.
+  unhandledPromptBehavior: 'ignore',
 };
 
 const options = {};

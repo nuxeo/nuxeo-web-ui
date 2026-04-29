@@ -13,7 +13,7 @@ export default class {
       await this.waitUntil(
         async () => {
           try {
-            await this.getAlertText();
+            await this.acceptAlert();
             return true;
           } catch (e) {
             return false;
@@ -25,7 +25,6 @@ export default class {
           timeoutMsg: 'Expected confirmation alert did not appear',
         },
       );
-      return this.acceptAlert();
     });
 
     browser.addCommand('alertDismiss', async function () {
