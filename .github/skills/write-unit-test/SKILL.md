@@ -91,7 +91,7 @@ suite('nuxeo-my-element', () => {
   };
 
   setup(async () => {
-    element = await fixture(html`<nuxeo-my-element .document="${document}"></nuxeo-my-element>`);
+    element = await fixture(html`<nuxeo-my-element .document=${document}></nuxeo-my-element>`);
   });
 
   test('should display document title', () => {
@@ -176,7 +176,7 @@ suite('nuxeo-my-element', () => {
 - **Use `suite`/`test`** (Mocha TDD interface), not `describe`/`it`
 - **Use `setup`/`teardown`**, not `beforeEach`/`afterEach`
 - **Async setup**: `setup(async () => { element = await fixture(…) })`
-- **Property binding in fixtures**: use `.property="${value}"` syntax in template literals
+- **Property binding in fixtures**: use `.property=${value}` syntax in template literals so objects/functions are passed correctly
 - **Sinon stubs**: Stub behavior methods (`hasPermission`, `isTrashed`, etc.) in setup
 - **Event testing**: Use `sinon.spy` or `waitForEvent` for async events
 - **Run tests**: `npm test` (single run) or `npm run test:watch` (watch mode)
