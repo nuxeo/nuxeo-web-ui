@@ -155,9 +155,9 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       window.addEventListener('focus', onFocus, { once: true });
     };
 
-    window.addEventListener('blur', onBlur, { once: true });
+    window.addEventListener('blur', onBlur);
 
-    window.location.href = url;
+    this._navigate(url);
 
     // Primary timeout: show install dialog if Drive hasn't been detected yet.
     setTimeout(() => {
@@ -178,6 +178,10 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   _showError(message) {
     this.$.toast.text = message;
     this.$.toast.open();
+  }
+
+  _navigate(url) {
+    window.location.href = url;
   }
 
   get directTransferUrl() {
