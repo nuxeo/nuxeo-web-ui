@@ -131,6 +131,8 @@ suite('nuxeo-drive-upload-button — error handling', () => {
 
     setup(() => {
       clock = sinon.useFakeTimers();
+      // Stub _navigate so no real protocol navigation happens in Karma
+      sinon.stub(element, '_navigate');
       // Ensure toggle exists as own property so sinon can stub it
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
       dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
@@ -188,6 +190,21 @@ suite('nuxeo-drive-upload-button — error handling', () => {
 
       // Dialog should have been toggled a second time (auto-dismiss)
       expect(dialogToggleStub).to.have.been.calledTwice;
+    });
+
+    test('detects Drive on second blur when first was a Chrome false-positive', () => {
+      element._openDriveUrl('nxdrive://direct-transfer/localhost/some-path');
+
+      // First blur is a Chrome false-positive — focus returns quickly
+      window.dispatchEvent(new Event('blur'));
+      window.dispatchEvent(new Event('focus')); // cancels debounce
+
+      // Drive opens — second blur fires and stays
+      window.dispatchEvent(new Event('blur'));
+      clock.tick(300); // debounce fires — Drive confirmed
+      clock.tick(1500); // primary timeout — appOpened already true
+
+      expect(dialogToggleStub).to.not.have.been.called;
     });
 
     test('cleans up listeners after hard-cap timeout', () => {
