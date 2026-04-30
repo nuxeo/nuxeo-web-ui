@@ -72,7 +72,6 @@ import './search/nuxeo-search-form.js';
 // import './nuxeo-admin/nuxeo-user-group-management-page.js';
 import './nuxeo-mobile/nuxeo-mobile-banner.js';
 import './nuxeo-cloud-services/nuxeo-oauth2-consumed-tokens.js';
-import '../addons/nuxeo-drive/index.js';
 import { setPassiveTouchGestures } from '@polymer/polymer/lib/utils/settings.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
