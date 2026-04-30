@@ -80,7 +80,6 @@ import { dom } from '@polymer/polymer/lib/legacy/polymer.dom.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
-import '../addons/nuxeo-drive/index.js';
 
 import { Performance } from './performance.js';
 
