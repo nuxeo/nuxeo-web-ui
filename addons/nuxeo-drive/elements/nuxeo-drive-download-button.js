@@ -161,11 +161,10 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       window.addEventListener('focus', onFocus, { once: true });
     };
 
-    window.addEventListener('blur', onBlur, { once: true });
+    window.addEventListener('blur', onBlur);
 
-    // Use location.href so the browser's protocol-handler machinery fires in
-    // the current tab context (same behaviour as existing Drive actions).
-    window.location.href = url;
+    // Use _navigate so tests can stub out the protocol-handler navigation.
+    this._navigate(url);
 
     // Primary timeout: show install dialog if Drive hasn't been detected yet.
     setTimeout(() => {
@@ -181,6 +180,10 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
 
     // Hard-cap: give up listening after an extended window.
     setTimeout(cleanup, NuxeoDriveDownloadButton.DRIVE_OPEN_TIMEOUT_MS + 3000);
+  }
+
+  _navigate(url) {
+    window.location.href = url;
   }
 
   _showError(message) {
