@@ -126,12 +126,15 @@ suite('nuxeo-drive-edit-button — error handling', () => {
   });
 
   suite('_openDriveUrl — Drive detection (blur + debounce heuristic)', () => {
-    const DRIVE_URL = 'nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/doc-uid-1/filename/test.docx/downloadUrl/nxfile/default/doc-uid-1/file:content/test.docx';
+    const DRIVE_URL =
+      'nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/doc-uid-1/filename/test.docx/downloadUrl/nxfile/default/doc-uid-1/file:content/test.docx';
     let clock;
     let dialogToggleStub;
 
     setup(() => {
       clock = sinon.useFakeTimers();
+      // Stub _navigate so no real protocol navigation happens in Karma
+      sinon.stub(element, '_navigate');
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
       dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
     });
@@ -186,6 +189,21 @@ suite('nuxeo-drive-edit-button — error handling', () => {
 
       // Second toggle = auto-dismiss
       expect(dialogToggleStub).to.have.been.calledTwice;
+    });
+
+    test('detects Drive on second blur when first was a Chrome false-positive', () => {
+      element._openDriveUrl(DRIVE_URL);
+
+      // First blur is a Chrome false-positive — focus returns quickly
+      window.dispatchEvent(new Event('blur'));
+      window.dispatchEvent(new Event('focus')); // cancels debounce
+
+      // Drive opens — second blur fires and stays
+      window.dispatchEvent(new Event('blur'));
+      clock.tick(300); // debounce fires — Drive confirmed
+      clock.tick(1500); // primary timeout — appOpened already true
+
+      expect(dialogToggleStub).to.not.have.been.called;
     });
 
     test('cleans up listeners after hard-cap timeout', () => {

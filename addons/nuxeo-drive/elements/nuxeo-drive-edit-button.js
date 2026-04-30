@@ -155,9 +155,9 @@ Polymer({
       window.addEventListener('focus', onFocus, { once: true });
     };
 
-    window.addEventListener('blur', onBlur, { once: true });
+    window.addEventListener('blur', onBlur);
 
-    window.location.href = url;
+    this._navigate(url);
 
     // Primary timeout: show install dialog if Drive hasn't been detected yet.
     setTimeout(() => {
@@ -173,6 +173,10 @@ Polymer({
 
     // Hard-cap: give up listening after an extended window.
     setTimeout(cleanup, DRIVE_OPEN_TIMEOUT_MS + 3000);
+  },
+
+  _navigate(url) {
+    window.location.href = url;
   },
 
   get driveEditURL() {
