@@ -248,6 +248,8 @@ suite('nuxeo-drive-download-button', () => {
     setup(() => {
       toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
+      // Stub _navigate so no real protocol navigation happens in Karma
+      sinon.stub(element, '_navigate');
     });
 
     teardown(() => {
@@ -270,14 +272,13 @@ suite('nuxeo-drive-download-button', () => {
       };
       element.documents = viewStub;
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openStub = sinon.stub(window, 'open');
 
       element._download();
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(toastStub.open).to.not.have.been.called;
-      expect(openStub).to.have.been.calledOnce;
-      expect(openStub.firstCall.args[1]).to.equal('_top');
+      expect(element._navigate).to.have.been.calledOnce;
+      expect(element._navigate.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-download\//);
     });
 
     test('shows noDocumentsSelected error when select-all is active but view has no items', () => {
@@ -319,8 +320,8 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = Array.from({ length: 25 }, (_, i) => {
         return { uid: `uid-${i}` };
       });
-      // Stub token.get to prevent real network call; stub window.open before _download is called
-      sinon.stub(element.$.token, 'get').returns(new Promise(() => {})); // never resolves — prevents window.open
+      // Stub token.get to prevent real network call — promise never resolves so _navigate is never reached
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
       element._download();
       // The toast should not have been opened at this point (no guard condition triggered)
       expect(toastStub.open).to.not.have.been.called;
@@ -412,6 +413,8 @@ suite('nuxeo-drive-download-button', () => {
 
     setup(() => {
       clock = sinon.useFakeTimers();
+      // Stub _navigate so no real protocol navigation happens in Karma
+      sinon.stub(element, '_navigate');
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
       dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
     });
@@ -460,6 +463,21 @@ suite('nuxeo-drive-download-button', () => {
       clock.tick(300); // debounce fires
 
       expect(dialogToggleStub).to.have.been.calledTwice;
+    });
+
+    test('detects Drive on second blur when first was a Chrome false-positive', () => {
+      element._openDriveUrl('nxdrive://direct-download/abc123');
+
+      // First blur is a Chrome false-positive — focus returns quickly
+      window.dispatchEvent(new Event('blur'));
+      window.dispatchEvent(new Event('focus')); // cancels debounce
+
+      // Drive opens — second blur fires and stays
+      window.dispatchEvent(new Event('blur'));
+      clock.tick(300); // debounce fires — Drive confirmed
+      clock.tick(1500); // primary timeout — appOpened already true
+
+      expect(dialogToggleStub).to.not.have.been.called;
     });
 
     test('cleans up listeners after hard-cap timeout', () => {
