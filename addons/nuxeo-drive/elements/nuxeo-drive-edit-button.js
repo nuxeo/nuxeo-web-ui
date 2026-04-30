@@ -22,6 +22,10 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
+// How long (ms) to wait for the browser window to blur after invoking the
+// nxdrive:// URL before concluding that no Drive app is installed/registered.
+const DRIVE_OPEN_TIMEOUT_MS = 1500;
+
 /**
 `nuxeo-drive-edit-button`
 @group Nuxeo UI
@@ -50,6 +54,8 @@ Polymer({
         <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
+
+    <paper-toast id="toast"></paper-toast>
   `,
 
   is: 'nuxeo-drive-edit-button',
@@ -76,14 +82,51 @@ Polymer({
   },
 
   _go() {
-    this.$.token.get().then((response) => {
-      const tokens = response.entries.map((token) => token.id);
-      if (!tokens || !tokens.length) {
+    this.$.token
+      .get()
+      .then((response) => {
+        const tokens = response.entries.map((token) => token.id);
+        if (!tokens || !tokens.length) {
+          this.$.dialog.toggle();
+          return;
+        }
+        this._openDriveUrl(this.driveEditURL);
+      })
+      .catch(() => {
+        this._showError(this.i18n('driveEditButton.directTransfer.failed'));
+      });
+  },
+
+  _showError(message) {
+    this.$.toast.text = message;
+    this.$.toast.open();
+  },
+
+  /**
+   * Invokes a nxdrive:// URL and detects whether the Drive desktop app
+   * handled it by listening for a window blur event (the browser loses focus
+   * when the OS hands off the protocol to a native app).
+   *
+   * If the window does not blur within DRIVE_OPEN_TIMEOUT_MS it is safe to
+   * assume no app is registered for the nxdrive:// scheme, so we show the
+   * "Download Nuxeo Drive Client" install dialog instead of failing silently.
+   */
+  _openDriveUrl(url) {
+    let appOpened = false;
+
+    const onBlur = () => {
+      appOpened = true;
+    };
+    window.addEventListener('blur', onBlur, { once: true });
+
+    window.location.href = url;
+
+    setTimeout(() => {
+      window.removeEventListener('blur', onBlur);
+      if (!appOpened) {
         this.$.dialog.toggle();
-        return;
       }
-      window.open(this.driveEditURL, '_top');
-    });
+    }, DRIVE_OPEN_TIMEOUT_MS);
   },
 
   get driveEditURL() {
