@@ -156,6 +156,33 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = viewStub;
       expect(element._getSelectedDocumentUids()).to.deep.equal([]);
     });
+
+    test('returns UIDs from selectedItems (not items) when select-all is active and some items are deselected', () => {
+      // Simulates: select-all on 36 docs, then deselect 14 → 22 remain selected.
+      // selectAllActive stays true; selectedItems reflects the actual selection.
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: Array.from({ length: 36 }, (_, i) => {return { uid: `uid-${i}` }}),
+        selectedItems: Array.from({ length: 22 }, (_, i) => {return { uid: `uid-${i}` }}),
+      };
+      element.documents = viewStub;
+      const uids = element._getSelectedDocumentUids();
+      expect(uids).to.have.length(22);
+      expect(uids[0]).to.equal('uid-0');
+      expect(uids[21]).to.equal('uid-21');
+    });
+
+    test('falls back to items when select-all is active and selectedItems is absent', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [{ uid: 'item-uid-1' }, { uid: 'item-uid-2' }],
+        // no selectedItems property
+      };
+      element.documents = viewStub;
+      expect(element._getSelectedDocumentUids()).to.deep.equal(['item-uid-1', 'item-uid-2']);
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -304,6 +331,27 @@ suite('nuxeo-drive-download-button', () => {
       element._download();
       expect(toastStub.open).to.have.been.calledOnce;
       expect(toastStub.text).to.include('25');
+    });
+
+    test('succeeds after deselecting items so count drops to ≤ 25, even though selectAllActive stays true', async () => {
+      // Simulates the bug fix: select-all on 36 docs → deselect 13 → 23 selectedItems.
+      // selectAllActive remains true but selectedItems has only 23 entries.
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: Array.from({ length: 36 }, (_, i) => {return { uid: `uid-${i}` }}),
+        selectedItems: Array.from({ length: 23 }, (_, i) => {return { uid: `uid-${i}` }}),
+      };
+      element.documents = viewStub;
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+      const openStub = sinon.stub(window, 'open');
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(toastStub.open).to.not.have.been.called;
+      expect(openStub).to.have.been.calledOnce;
+      expect(openStub.firstCall.args[1]).to.equal('_top');
     });
 
     test('shows tooManyDocuments error when more than 25 documents are selected', async () => {
