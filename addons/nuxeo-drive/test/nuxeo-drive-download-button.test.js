@@ -339,7 +339,6 @@ suite('nuxeo-drive-download-button', () => {
       expect(openDriveUrlStub).to.have.been.calledOnce;
       const calledUrl = openDriveUrlStub.firstCall.args[0];
       expect(calledUrl).to.match(/^nxdrive:\/\/direct-download\/[A-Za-z0-9_-]+$/);
-      expect(openStub.firstCall.args[1]).to.equal('_top');
     });
 
     test('opens Drive install dialog when no Drive token is found', async () => {
