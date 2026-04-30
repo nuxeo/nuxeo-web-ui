@@ -40,21 +40,26 @@ When('I login as {string}', { timeout: 120000 }, async function (username) {
   const logIn = await Login.get();
   await logIn.username(username);
   const password = await users[username];
+  if (!password) {
+    throw new Error(`No password found for user "${username}" — was the user created before login?`);
+  }
   await logIn.password(password);
   await logIn.submit();
 
+  let lastSubmitTime = Date.now();
   await browser.waitUntil(
     async () => {
       const u = await browser.getUrl();
       if (u.includes('/ui') && !u.includes('login.jsp')) {
         return true;
       }
-      // If still on login page, re-fill credentials and resubmit
-      if (u.includes('login.jsp')) {
+      // Only retry submission if still on login.jsp and enough time has passed since last submit
+      if (u.includes('login.jsp') && Date.now() - lastSubmitTime > 5000) {
         try {
           await logIn.username(username);
           await logIn.password(password);
           await logIn.submit();
+          lastSubmitTime = Date.now();
         } catch (e) {
           // page may have navigated away during retry — ignore
         }
@@ -62,9 +67,9 @@ When('I login as {string}', { timeout: 120000 }, async function (username) {
       return false;
     },
     {
-      timeout: 30000,
+      timeout: 45000,
       interval: 2000,
-      timeoutMsg: 'UI did not load after login — still stuck on login.jsp',
+      timeoutMsg: `UI did not load after login as "${username}" — still stuck on login.jsp`,
     },
   );
 
