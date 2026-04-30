@@ -163,8 +163,12 @@ suite('nuxeo-drive-download-button', () => {
       const viewStub = {
         selectAllActive: true,
         behaviors: [...PageProviderDisplayBehavior],
-        items: Array.from({ length: 36 }, (_, i) => {return { uid: `uid-${i}` }}),
-        selectedItems: Array.from({ length: 22 }, (_, i) => {return { uid: `uid-${i}` }}),
+        items: Array.from({ length: 36 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
+        selectedItems: Array.from({ length: 22 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
       };
       element.documents = viewStub;
       const uids = element._getSelectedDocumentUids();
@@ -339,8 +343,12 @@ suite('nuxeo-drive-download-button', () => {
       const viewStub = {
         selectAllActive: true,
         behaviors: [...PageProviderDisplayBehavior],
-        items: Array.from({ length: 36 }, (_, i) => {return { uid: `uid-${i}` }}),
-        selectedItems: Array.from({ length: 23 }, (_, i) => {return { uid: `uid-${i}` }}),
+        items: Array.from({ length: 36 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
+        selectedItems: Array.from({ length: 23 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
       };
       element.documents = viewStub;
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
