@@ -3,9 +3,24 @@ import BasePage from '../../base.js';
 
 export default class DocumentLayout extends BasePage {
   async getField(field) {
-    await driver.waitForExist(this._selector);
-    const ele = await this.el;
-    const result = await ele.$(`[name="${field}"]`);
+    let result;
+    await driver.waitUntil(
+      async () => {
+        try {
+          const ele = await $(this._selector);
+          if (!(await ele.isExisting())) return false;
+          result = await ele.$(`[name="${field}"]`);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      {
+        timeout: 10000,
+        interval: 500,
+        timeoutMsg: `Layout "${this._selector}" or field "${field}" not found`,
+      },
+    );
     return result;
   }
 
