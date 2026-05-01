@@ -1,3 +1,9 @@
+// Set public path dynamically so @open-wc/webpack-import-meta-loader 0.4.x
+// constructs correct import.meta.url values for the deployment prefix (e.g. /nuxeo/ui/).
+// Must be set before any other module is evaluated.
+// eslint-disable-next-line camelcase, no-undef
+__webpack_public_path__ = window.location.pathname.replace(/\/$/, '') + '/';
+
 import { config } from '@nuxeo/nuxeo-elements';
 import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
