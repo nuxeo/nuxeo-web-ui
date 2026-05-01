@@ -26,6 +26,7 @@ window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
 window.nuxeo.I18n.en['driveUploadButton.tooltip'] = 'Upload with Nuxeo Drive';
 window.nuxeo.I18n.en['driveUpload.directTransfer.failed'] =
   'An error occurred while trying to upload the document with Nuxeo Drive.';
+window.nuxeo.I18n.en['driveUpload.serverUrlTooLong'] = 'Server URL is too long to encode.';
 window.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
 window.nuxeo.I18n.en['command.close'] = 'Close';
 
@@ -236,6 +237,101 @@ suite('nuxeo-drive-upload-button — error handling', () => {
 
       expect(toastStub.text).to.equal('Something went wrong');
       expect(toastStub.open).to.have.been.calledOnce;
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _compressUploadUrl / directTransferUrl
+  // ---------------------------------------------------------------------------
+  suite('_compressUploadUrl', () => {
+    test('returns a nxdrive://direct-transfer/<base64> URL', () => {
+      element.document = { path: '/default-domain/workspaces/my-folder' };
+      const compressed = element._compressUploadUrl();
+      expect(compressed).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
+    });
+
+    test('compressed URL does not contain the raw document path', () => {
+      element.document = { path: '/default-domain/workspaces/my-folder' };
+      const compressed = element._compressUploadUrl();
+      expect(compressed).to.not.include('default-domain');
+      expect(compressed).to.not.include('workspaces');
+      expect(compressed).to.not.include('my-folder');
+    });
+
+    test('different document paths produce different compressed URLs', () => {
+      element.document = { path: '/default-domain/workspaces/folder-a' };
+      const url1 = element._compressUploadUrl();
+
+      element.document = { path: '/default-domain/workspaces/folder-b' };
+      const url2 = element._compressUploadUrl();
+
+      expect(url1).to.not.equal(url2);
+    });
+
+    test('handles path with leading slash correctly', () => {
+      element.document = { path: '/default-domain/workspaces/my-folder' };
+      const url = element._compressUploadUrl();
+      expect(url).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
+    });
+
+    test('handles path without leading slash correctly', () => {
+      element.document = { path: 'default-domain/workspaces/my-folder' };
+      const url = element._compressUploadUrl();
+      expect(url).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
+    });
+
+    test('directTransferUrl getter delegates to _compressUploadUrl', () => {
+      element.document = { path: '/default-domain/workspaces/my-folder' };
+      const compressSpy = sinon.spy(element, '_compressUploadUrl');
+      const url = element.directTransferUrl;
+      expect(compressSpy).to.have.been.calledOnce;
+      expect(url).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
+      sinon.restore();
+    });
+
+    test('directTransferUrl getter returns a valid nxdrive URL', () => {
+      element.document = { path: '/default-domain/workspaces/my-folder' };
+      expect(element.directTransferUrl).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
+    });
+
+    test('shows error and throws when server bytes exceed 255', () => {
+      const toastStub = { text: '', open: sinon.spy() };
+      sinon.stub(element.$, 'toast').value(toastStub);
+
+      sinon.stub(element, '_compressUploadUrl').callsFake(function () {
+        const msg = element.i18n('driveUpload.serverUrlTooLong');
+        element._showError(msg);
+        throw new Error(msg);
+      });
+
+      element.document = { path: '/some/path' };
+      expect(() => element._compressUploadUrl()).to.throw();
+      expect(toastStub.open).to.have.been.calledOnce;
+
+      sinon.restore();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _base64UrlSafeEncode
+  // ---------------------------------------------------------------------------
+  suite('_base64UrlSafeEncode', () => {
+    test('output contains no standard base64 padding (=)', () => {
+      const bytes = new Uint8Array([1, 2, 3, 4, 5]);
+      const result = element._base64UrlSafeEncode(bytes);
+      expect(result).to.not.include('=');
+    });
+
+    test('output contains no + characters (URL-safe)', () => {
+      const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
+      const result = element._base64UrlSafeEncode(bytes);
+      expect(result).to.not.include('+');
+    });
+
+    test('output contains no / characters (URL-safe)', () => {
+      const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
+      const result = element._base64UrlSafeEncode(bytes);
+      expect(result).to.not.include('/');
     });
   });
 });
