@@ -72,7 +72,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
         </div>
       </nuxeo-dialog>
 
-      <paper-toast id="toast">[[i18n('driveUpload.directTransfer.failed')]]</paper-toast>
+      <paper-toast id="toast"></paper-toast>
     `;
   }
 
@@ -98,22 +98,132 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
           this.$.dialog.toggle();
           return;
         }
-        window.open(this.directTransferUrl, '_top');
+        this._openDriveUrl(this.directTransferUrl);
       })
       .catch((error) => {
         console.error('Token fetch failed:', error);
-        this.$.toast.toggle();
+        this._showError(this.i18n('driveUpload.directTransfer.failed'));
       });
   }
 
+  /**
+   * Invokes a nxdrive:// URL and detects whether the Drive desktop app
+   * handled it using a blur + debounce heuristic.
+   *
+   * Chrome fires a window blur event even when no protocol handler is
+   * registered (the browser briefly shows a permission/protocol prompt).
+   * However, if no app opens, the window regains focus almost immediately.
+   * When Drive DOES open, the window stays blurred (Drive is in foreground).
+   *
+   * Strategy:
+   *  - On blur: start a short debounce timer (BLUR_DEBOUNCE_MS).
+   *  - If focus returns before the debounce fires → false positive, ignore.
+   *  - If the debounce fires while still blurred → Drive opened; mark as
+   *    handled and auto-dismiss any false-alarm dialog.
+   *  - If neither blur nor debounce triggers within DRIVE_OPEN_TIMEOUT_MS →
+   *    Drive is not installed; show the install dialog.
+   */
+  _openDriveUrl(url) {
+    let appOpened = false;
+    let dialogShown = false;
+    let blurDebounceTimer = null;
+
+    const cleanup = () => {
+      clearTimeout(blurDebounceTimer);
+      window.removeEventListener('blur', onBlur);
+      window.removeEventListener('focus', onFocus);
+    };
+
+    const onFocus = () => {
+      // Focus returned quickly after blur — Chrome false-positive, no Drive handler.
+      clearTimeout(blurDebounceTimer);
+    };
+
+    const onBlur = () => {
+      blurDebounceTimer = setTimeout(() => {
+        // Still blurred after debounce — Drive really opened.
+        appOpened = true;
+        window.removeEventListener('focus', onFocus);
+        if (dialogShown) {
+          // Dialog was a false alarm (slow system) — auto-dismiss it.
+          this.$.dialog.toggle();
+          dialogShown = false;
+          cleanup();
+        }
+      }, NuxeoDriveUploadButton.BLUR_DEBOUNCE_MS);
+
+      window.addEventListener('focus', onFocus, { once: true });
+    };
+
+    window.addEventListener('blur', onBlur);
+
+    this._navigate(url);
+
+    // Primary timeout: show install dialog if Drive hasn't been detected yet.
+    setTimeout(() => {
+      if (!appOpened) {
+        dialogShown = true;
+        this.$.dialog.toggle();
+        // Keep blur+focus listeners alive so auto-dismiss still works if Drive
+        // opens late (slow system hit the timeout but Drive is still launching).
+      } else {
+        cleanup();
+      }
+    }, NuxeoDriveUploadButton.DRIVE_OPEN_TIMEOUT_MS);
+
+    // Hard-cap: give up listening after an extended window.
+    setTimeout(cleanup, NuxeoDriveUploadButton.DRIVE_OPEN_TIMEOUT_MS + 3000);
+  }
+
+  _showError(message) {
+    this.$.toast.text = message;
+    this.$.toast.open();
+  }
+
+  _navigate(url) {
+    window.location.href = url;
+  }
+
   get directTransferUrl() {
-    const finalUrl = [
-      'nxdrive://direct-transfer',
-      baseUrl.split('/ui/')[0].replace('://', '/'),
-      this.document.path.slice(1),
-    ].join('/');
-    return finalUrl;
+    return this._compressUploadUrl();
+  }
+
+  _compressUploadUrl() {
+    const cleanBaseUrl = baseUrl.split('/ui/')[0].replace(/\/$/, '');
+    const isHttps = cleanBaseUrl.startsWith('https') ? 1 : 0;
+    const serverHost = cleanBaseUrl.replace('://', '/').split('/').slice(1).join('/');
+
+    const serverBytes = new TextEncoder().encode(serverHost);
+    if (serverBytes.length > 255) {
+      const msg = this.i18n('driveUpload.serverUrlTooLong');
+      this._showError(msg);
+      throw new Error(msg);
+    }
+
+    const docPath = this.document.path.startsWith('/') ? this.document.path.slice(1) : this.document.path;
+    const pathBytes = new TextEncoder().encode(docPath);
+
+    const payload = new Uint8Array([isHttps, serverBytes.length, ...serverBytes, ...pathBytes]);
+    const b64 = this._base64UrlSafeEncode(payload);
+    return `nxdrive://direct-transfer/${b64}`;
+  }
+
+  _base64UrlSafeEncode(bytes) {
+    let binary = '';
+    bytes.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+    let b64 = btoa(binary);
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 }
+
+// How long (ms) to wait for a window blur event (Drive app opening) before
+// concluding Drive is not installed and showing the install dialog.
+NuxeoDriveUploadButton.DRIVE_OPEN_TIMEOUT_MS = 1500;
+
+// How long (ms) the window must stay blurred before we treat it as Drive
+// having opened (vs. a Chrome false-positive blur from the protocol prompt).
+NuxeoDriveUploadButton.BLUR_DEBOUNCE_MS = 300;
 
 customElements.define(NuxeoDriveUploadButton.is, NuxeoDriveUploadButton);

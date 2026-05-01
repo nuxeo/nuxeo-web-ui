@@ -22,6 +22,14 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 
+// How long (ms) to wait for a window blur event (Drive app opening) before
+// concluding Drive is not installed and showing the install dialog.
+const DRIVE_OPEN_TIMEOUT_MS = 1500;
+
+// How long (ms) the window must stay blurred before we treat it as Drive
+// having opened (vs. a Chrome false-positive blur from the protocol prompt).
+const BLUR_DEBOUNCE_MS = 300;
+
 /**
 `nuxeo-drive-edit-button`
 @group Nuxeo UI
@@ -50,6 +58,8 @@ Polymer({
         <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
+
+    <paper-toast id="toast"></paper-toast>
   `,
 
   is: 'nuxeo-drive-edit-button',
@@ -76,14 +86,97 @@ Polymer({
   },
 
   _go() {
-    this.$.token.get().then((response) => {
-      const tokens = response.entries.map((token) => token.id);
-      if (!tokens || !tokens.length) {
+    this.$.token
+      .get()
+      .then((response) => {
+        const tokens = response.entries.map((token) => token.id);
+        if (!tokens || !tokens.length) {
+          this.$.dialog.toggle();
+          return;
+        }
+        this._openDriveUrl(this.driveEditURL);
+      })
+      .catch(() => {
+        this._showError(this.i18n('driveEditButton.directTransfer.failed'));
+      });
+  },
+
+  _showError(message) {
+    this.$.toast.text = message;
+    this.$.toast.open();
+  },
+
+  /**
+   * Invokes a nxdrive:// URL and detects whether the Drive desktop app
+   * handled it using a blur + debounce heuristic.
+   *
+   * Chrome fires a window blur event even when no protocol handler is
+   * registered (the browser briefly shows a permission/protocol prompt).
+   * However, if no app opens, the window regains focus almost immediately.
+   * When Drive DOES open, the window stays blurred (Drive is in foreground).
+   *
+   * Strategy:
+   *  - On blur: start a short debounce timer (BLUR_DEBOUNCE_MS).
+   *  - If focus returns before the debounce fires → false positive, ignore.
+   *  - If the debounce fires while still blurred → Drive opened; mark as
+   *    handled and auto-dismiss any false-alarm dialog.
+   *  - If neither blur nor debounce triggers within DRIVE_OPEN_TIMEOUT_MS →
+   *    Drive is not installed; show the install dialog.
+   */
+  _openDriveUrl(url) {
+    let appOpened = false;
+    let dialogShown = false;
+    let blurDebounceTimer = null;
+
+    const cleanup = () => {
+      clearTimeout(blurDebounceTimer);
+      window.removeEventListener('blur', onBlur);
+      window.removeEventListener('focus', onFocus);
+    };
+
+    const onFocus = () => {
+      // Focus returned quickly after blur — Chrome false-positive, no Drive handler.
+      clearTimeout(blurDebounceTimer);
+    };
+
+    const onBlur = () => {
+      blurDebounceTimer = setTimeout(() => {
+        // Still blurred after debounce — Drive really opened.
+        appOpened = true;
+        window.removeEventListener('focus', onFocus);
+        if (dialogShown) {
+          // Dialog was a false alarm (slow system) — auto-dismiss it.
+          this.$.dialog.toggle();
+          dialogShown = false;
+          cleanup();
+        }
+      }, BLUR_DEBOUNCE_MS);
+
+      window.addEventListener('focus', onFocus, { once: true });
+    };
+
+    window.addEventListener('blur', onBlur);
+
+    this._navigate(url);
+
+    // Primary timeout: show install dialog if Drive hasn't been detected yet.
+    setTimeout(() => {
+      if (!appOpened) {
+        dialogShown = true;
         this.$.dialog.toggle();
-        return;
+        // Keep blur+focus listeners alive so auto-dismiss still works if Drive
+        // opens late (slow system hit the timeout but Drive is still launching).
+      } else {
+        cleanup();
       }
-      window.open(this.driveEditURL, '_top');
-    });
+    }, DRIVE_OPEN_TIMEOUT_MS);
+
+    // Hard-cap: give up listening after an extended window.
+    setTimeout(cleanup, DRIVE_OPEN_TIMEOUT_MS + 3000);
+  },
+
+  _navigate(url) {
+    window.location.href = url;
   },
 
   get driveEditURL() {
