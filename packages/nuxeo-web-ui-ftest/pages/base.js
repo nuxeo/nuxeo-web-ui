@@ -44,6 +44,7 @@ export default class BasePage {
         timeoutMsg: `Element "${this._selector}" not visible after ${timeout}ms`,
       },
     );
+    return true;
   }
 
   async waitForNotVisible(selector) {
