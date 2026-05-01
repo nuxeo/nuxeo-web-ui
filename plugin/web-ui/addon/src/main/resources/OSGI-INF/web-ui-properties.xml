@@ -65,7 +65,7 @@
   <!-- Specify the order of document types using a comma-separated list of their id -->
   <property name="org.nuxeo.web.ui.document_type.order">${org.nuxeo.web.ui.document_type.order:=}</property>
 
- <!-- Control external permissions  -->
+  <!-- Control external permissions  -->
  <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
   </extension>
 </component>

@@ -88,7 +88,7 @@ jobs:
         run: |
           ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
             | jq -r '.[]' \
-            | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
+            | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" \
             | sort -V | tail -n1)
           echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
 

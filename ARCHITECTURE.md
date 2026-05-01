@@ -43,7 +43,7 @@ Nuxeo Web UI is a single-page application (SPA) that serves as the standard user
 | Unit Testing | Karma + Mocha + Chai + Sinon | Various |
 | Functional Testing | WebdriverIO 9 + Cucumber | ^9.12 |
 | Linting | ESLint 9 (flat config) + Prettier | ^9.0 / ^3.8 |
-| Java Build | Maven | Java 21 |
+| Java Build | Maven | Java 17 |
 | Deployment | Docker (Nginx + Nuxeo) | — |
 
 ## Boot Sequence
@@ -281,7 +281,7 @@ Environment variables control deployment:
 Workflow orchestration in `.github/workflows/main.yaml`:
 
 ```
-Push to the lts-2025 branch triggers:
+Push to the maintenance-3.1.x branch triggers:
   lint    → ESLint + Prettier check
   test    → Karma unit tests
   a11y    → Accessibility tests

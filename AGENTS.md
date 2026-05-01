@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`. The main development branch is `lts-2025` for LTS-2025.
+This is a Polymer 3 web application (SPA) for the Nuxeo content services platform. Code ownership: `@nuxeo/ui`. The main development branch is `maintenance-3.1.x` for LTS-2023.
 
 ## Build & Validate
 
@@ -114,7 +114,7 @@ npm run ftest:dev           # Against localhost:8080 + localhost:5000
 
 ## CI Workflow
 
-Push to the `lts-2025` branch triggers: **lint → test → a11y → ftest → sonar → build** (all must pass).
+Push to the `maintenance-3.1.x` branch triggers: **lint → test → a11y → ftest → sonar → build** (all must pass).
 
 PRs run lint and test workflows automatically.
 
@@ -124,7 +124,7 @@ PRs run lint and test workflows automatically.
 - `.html` files contain real Polymer components with inline JS — don't treat them as static HTML.
 - The `NUXEO_PACKAGES` env var controls which addon JS bundles are imported at runtime via `Nuxeo.UI.bundles`. If unset, addon resources are still copied to the build but no addon entry points are imported (except `nuxeo-spreadsheet`, which is always loaded).
 - `@nuxeo` npm packages come from `https://packages.nuxeo.com/repository/npm-public/`, not npmjs.org.
-- Maven build requires **Java 21**.
+- Maven build requires **Java 17**.
 
 ## Environment Variables
 

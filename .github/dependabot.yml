@@ -1,4 +1,5 @@
 version: 2
+# Updated to trigger Dependabot re-runs
 updates:
   # Default branch (maintenance-3.1.x)
   - package-ecosystem: "npm"

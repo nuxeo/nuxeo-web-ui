@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.nuxeo.web.ui</groupId>
     <artifactId>nuxeo-web-ui-parent</artifactId>
-    <version>2025.15.0-SNAPSHOT</version>
+    <version>3.1.30-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
@@ -33,8 +33,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>jakarta.inject</groupId>
-      <artifactId>jakarta.inject-api</artifactId>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

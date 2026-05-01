@@ -11,6 +11,10 @@ name: Veracode LTS-2025
 on:
   schedule:
     - cron: '0 19 * * *'   # 7:00 PM UTC daily
+<<<<<<<< HEAD:.github/workflows/veracode-lts-2025.yaml
+========
+  workflow_dispatch:          # enables manual runs from GitHub UI
+>>>>>>>> origin/maintenance-3.1.x:.github/workflows/veracode-2025.yaml
 
 env:
   REFERENCE_BRANCH: lts-2025
@@ -27,7 +31,6 @@ jobs:
   # need to customize the build process accordingly and make sure the artifact
   # you build is used as the file input to the pipeline scan file parameter
   sast-scan-build:
-    # The type of runner that the job will run on
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
@@ -69,7 +72,11 @@ jobs:
           pushd packages/nuxeo-web-ui-ftest
           npm install
           popd
+<<<<<<<< HEAD:.github/workflows/veracode-lts-2025.yaml
 
+========
+          
+>>>>>>>> origin/maintenance-3.1.x:.github/workflows/veracode-2025.yaml
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v6
         with:
@@ -103,6 +110,7 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+<<<<<<<< HEAD:.github/workflows/veracode-lts-2025.yaml
 
       - name: Delete Node Modules
         run: |
@@ -127,6 +135,31 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends zip
 
+========
+      - name: Delete Node Modules
+        run: |
+          rm -rf node_modules
+          rm -rf packages/nuxeo-designer-catalog/node_modules
+          rm -rf packages/nuxeo-web-ui-ftest/node_modules
+          rm -rf plugin/a11y/node_modules
+
+      - name: Delete Test Folders
+        run: |
+          rm -rf nuxeo-elements/testing-helpers/
+          rm -rf nuxeo-elements/ui/test/
+          rm -rf nuxeo-elements/storybook/
+          rm -rf ftest/
+          rm -rf plugin/
+          rm -rf scripts/
+          rm -rf test/
+          rm -rf packages/nuxeo-web-ui-ftest/
+
+      - name: Install zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends zip
+
+>>>>>>>> origin/maintenance-3.1.x:.github/workflows/veracode-2025.yaml
       - name: Zip nuxeo-web-ui
         run: |
           echo nuxeo-web-ui-${{ steps.get-tag.outputs.TAG }}.zip

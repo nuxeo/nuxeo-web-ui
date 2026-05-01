@@ -5,12 +5,12 @@ on:
   workflow_dispatch:
     inputs:
       webui_ref:
-        description: 'Web UI branch or tag (e.g. lts-2025 or v2025.1.0)'
-        default: 'lts-2025'
+        description: 'Web UI branch or tag (e.g. maintenance-3.1.x or v3.1.5)'
+        default: 'maintenance-3.1.x'
         required: true
       target_platform:
         description: 'The Nuxeo server target platform to build the catalog for.'
-        default: '2025.0'
+        default: '2023.0'
         required: true
       debug_only:
         description: 'Run catalog generation without publishing or generating PRs'
@@ -51,7 +51,7 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.0
         with:
-          java-version: '21'
+          java-version: '17'
 
       - name: Install libxml2-utils
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils

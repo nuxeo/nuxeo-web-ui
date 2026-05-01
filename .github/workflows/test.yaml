@@ -3,13 +3,13 @@ name: Test
 on:
   pull_request:
     branches:
-      - lts-2025
+      - maintenance-3.1.x
 
   workflow_call:
     inputs:
       branch:
         description: 'Branch to test'
-        default: lts-2025
+        default: maintenance-3.1.x
         type: string
         required: false
     secrets:
@@ -22,7 +22,7 @@ permissions:
   contents: read
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
 jobs:
   unit-test:
@@ -63,7 +63,7 @@ jobs:
         run: |
           ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
             | jq -r '.[]' \
-            | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
+            | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" \
             | sort -V | tail -n1)
           echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
 

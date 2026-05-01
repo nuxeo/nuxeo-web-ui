@@ -273,6 +273,7 @@ Then(/^I can perform the following publications$/, async function (table) {
 Then('I can delete all the documents from the {string} collection', async function (name) {
   const browser = await this.ui.browser;
   await browser.removeSelectionFromCollection(name);
+  // HACK - because the delete all is async
 });
 
 Then('I can see the browser title as {string}', async (title) => {

@@ -3,7 +3,7 @@ name: Main
 on:
   push:
     branches:
-      - lts-2025
+      - maintenance-3.1.x
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
     with:
-      branch: lts-2025
+      branch: maintenance-3.1.x
 
   a11y:
     uses: ./.github/workflows/a11y.yaml
@@ -30,7 +30,17 @@ jobs:
       REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
       REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
     with:
-      branch: lts-2025
+      branch: maintenance-3.1.x
+
+  sonar:
+    uses: ./.github/workflows/sonar.yaml
+    secrets:
+      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+      REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    with:
+      branch: maintenance-3.1.x
 
   ftest:
     uses: ./.github/workflows/ftest.yaml
@@ -39,10 +49,10 @@ jobs:
       REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
       REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
     with:
-      branch: lts-2025
+      branch: maintenance-3.1.x
 
   build:
-    needs: [lint, test, a11y, ftest]
+    needs: [lint, test, a11y, ftest, sonar]
     runs-on:
       group: medium-4cpu-runners
 
@@ -71,7 +81,7 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.0
         with:
-          java-version: '21'
+          java-version: '17'
 
       - name: Purge cached Nuxeo artifacts
         run: rm -rf ~/.m2/repository/org/nuxeo
@@ -101,7 +111,7 @@ jobs:
           npm version ${VERSION} --no-git-tag-version
 
           # Get latest UI Elements version
-          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
 
           echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
 

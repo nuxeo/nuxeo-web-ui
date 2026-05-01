@@ -7,7 +7,8 @@ on:
     inputs:
       branch_name:
         description: 'The name of the branch to build.'
-        default: 'lts-2025'
+        default: 'maintenance-3.1.x'
+        type: string
         required: true
       sauce_labs:
         description: 'Run unit tests on Sauce Labs?'
@@ -37,10 +38,11 @@ on:
       bail:
         description: 'Number of failed features to stop test runner (0 means not applicable).'
         default: 0
+        type: number
         required: false
       caller_id:
         description: 'run identifier'
-        default: 'lts-2025'
+        default: 'maintenance-3.1.x'
         type: string
         required: false
 
@@ -48,7 +50,7 @@ permissions:
   contents: read
 
 env:
-  REFERENCE_BRANCH: lts-2025
+  REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
@@ -103,7 +105,7 @@ jobs:
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.0
         with:
-          java-version: '21'
+          java-version: '17'
 
       - name: Install Web UI
         env:

@@ -4,17 +4,17 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-      - lts-2025
+      - maintenance-3.1.x
 
   workflow_dispatch:
     inputs:
       branch_name:
         description: 'The name of the branch to preview.'
-        default: 'lts-2025'
+        default: 'maintenance-3.1.x'
         required: true
       caller_id:
         description: 'run identifier'
-        default: 'lts-2025'
+        default: 'maintenance-3.1.x'
         type: string
         required: false
 
@@ -69,7 +69,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-web-ui
           branch: ${{ env.BRANCH_NAME }}
-          default-branch: lts-2025
+          default-branch: maintenance-3.1.x
 
       - uses: actions/checkout@v6
         with:
@@ -86,7 +86,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-elements
           branch: ${{ env.BRANCH_NAME }}
-          default-branch: lts-2025
+          default-branch: maintenance-3.1.x
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v6

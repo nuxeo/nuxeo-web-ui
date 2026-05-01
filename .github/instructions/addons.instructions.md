@@ -6,29 +6,24 @@ applyTo: "addons/**"
 
 ## Structure
 
-Each addon lives in `addons/<addon-name>/` with an `index.js` entry point that is dynamically loaded by the main app.
-
-## Loading
-
-- Addon entry points are imported from `Nuxeo.UI.bundles`, which is populated from the `NUXEO_PACKAGES` env var (space/comma separated)
-- `nuxeo-spreadsheet` is always imported regardless of `NUXEO_PACKAGES`
-- If `NUXEO_PACKAGES` is unset or empty, no addon entry points are imported (except spreadsheet), but all addon resources (HTML, images, i18n) are still copied to the build
-- Addon elements register themselves on import (side-effect imports); copying resources alone does not load an addon
+Each addon lives in `addons/<name>/` with an `index.js` entry point. Addons are dynamically imported at boot time.
 
 ## Available Addons
 
 - `amazon-s3-online-storage` — S3 direct upload
 - `easyshare` — Public sharing links
 - `nuxeo-csv` — CSV bulk import
-- `nuxeo-drive` — Desktop sync integration
-- `nuxeo-imap-connector` — Email connector
-- `nuxeo-liveconnect` — Cloud storage providers (Google Drive, Dropbox, Box, OneDrive)
+- `nuxeo-drive` — Desktop sync client
+- `nuxeo-imap-connector` — Email integration
+- `nuxeo-liveconnect` — Cloud file providers (Google Drive, Box, Dropbox, OneDrive)
 - `nuxeo-platform-3d` — 3D model viewer
 - `nuxeo-spreadsheet` — Inline spreadsheet editing
 - `nuxeo-template-rendering` — Document template generation
 - `nuxeo-wopi` — Office Online editing
 
-## Addon Contents
+## Loading
+
+Controlled by `NUXEO_PACKAGES` env var (space/comma separated). This populates `Nuxeo.UI.bundles`, which `index.js` uses to dynamically import addon entry points. `nuxeo-spreadsheet` is always imported regardless. If `NUXEO_PACKAGES` is unset or empty, no addon entry points are imported (except spreadsheet), but all addon resources (HTML, images, i18n) are still copied to the build.
 
 Addons can include:
 - `index.js` — JS entry point (dynamically imported)
@@ -39,6 +34,6 @@ Addons can include:
 
 ## Conventions
 
-- Follow the same Polymer legacy patterns as `elements/`
-- Addon elements use `nuxeo-` prefix
-- Each addon should be self-contained and not depend on other addons
+- Follow the same Polymer patterns as `elements/`
+- Add i18n keys to the addon's own `i18n/` directory, not the root `i18n/`
+- Addon elements should use `nuxeo-` prefix like all other elements
