@@ -127,6 +127,11 @@ const common = merge([
     output: {
       filename: '[name].bundle.js',
       path: TARGET,
+      // Force root-relative URLs for @open-wc/webpack-import-meta-loader 0.4.x.
+      // The loader uses __webpack_public_path__ to build import.meta.url; the default
+      // 'auto' would prepend the deployment prefix (e.g. /nuxeo/ui/) and break Polymer's
+      // resolveUrl() for dynamically loaded layout HTML files.
+      publicPath: '',
     },
     mode: ENV,
     module: {
