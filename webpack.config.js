@@ -1,4 +1,4 @@
-const { resolve, join, sep } = require('path');
+const { resolve, join, sep, relative, isAbsolute } = require('path');
 const { existsSync, readdirSync } = require('fs');
 const { merge } = require('webpack-merge');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -22,13 +22,11 @@ const tmp = [{ from: `.tmp`, to: join(TARGET, sep) }];
 const polyfills = [
   {
     from: 'node_modules/@webcomponents/webcomponentsjs/webcomponents-*.{js,map}',
-    to: join(TARGET, 'vendor/webcomponentsjs'),
-    flatten: true,
+    to: join(TARGET, 'vendor/webcomponentsjs', '[name][ext]'),
   },
   {
     from: 'node_modules/@webcomponents/webcomponentsjs/bundles/*.{js,map}',
-    to: join(TARGET, 'vendor/webcomponentsjs/bundles'),
-    flatten: true,
+    to: join(TARGET, 'vendor/webcomponentsjs/bundles', '[name][ext]'),
   },
   {
     from: 'node_modules/@webcomponents/html-imports/html-imports.min.js',
@@ -92,16 +90,20 @@ if (BUNDLES.length) {
 const addons = (BUNDLES.length ? BUNDLES : ALL_ADDONS).map((p) => {
   return {
     from: `addons/${p}/**/*`,
-    to: TARGET,
     globOptions: { ignore: ['*.js', '**/node_modules/**', 'package*.*'] },
     // strip addon folder, copy everything over
-    transformPath: (path) => {
-      path = path.replace(/^addons\/([^/]*)\//, '');
-      // prepend elements/ when in dev mode (except images)
-      if (ENV === 'development' && !path.startsWith('images/')) {
-        path = `elements/${path}`;
+    to({ absoluteFilename }) {
+      let relativePath = relative(resolve(`addons/${p}`), absoluteFilename)
+        .split(sep)
+        .join('/');
+      if (isAbsolute(relativePath) || relativePath.startsWith('..')) {
+        throw new Error(`Unexpected addon file path: ${absoluteFilename}`);
       }
-      return path;
+      // prepend elements/ when in dev mode (except images)
+      if (ENV === 'development' && !relativePath.startsWith('images/')) {
+        relativePath = `elements/${relativePath}`;
+      }
+      return join(TARGET, relativePath);
     },
     force: true,
   };
@@ -110,7 +112,7 @@ const addons = (BUNDLES.length ? BUNDLES : ALL_ADDONS).map((p) => {
 const common = merge([
   {
     entry: {
-      main: './index.js',
+      main: ['./public-path.js', './index.js'],
     },
     resolve: {
       extensions: ['.js', '.html'],
@@ -125,6 +127,11 @@ const common = merge([
     output: {
       filename: '[name].bundle.js',
       path: TARGET,
+      // Force root-relative URLs for @open-wc/webpack-import-meta-loader 0.4.x.
+      // The loader uses __webpack_public_path__ to build import.meta.url; the default
+      // 'auto' would prepend the deployment prefix (e.g. /nuxeo/ui/) and break Polymer's
+      // resolveUrl() for dynamically loaded layout HTML files.
+      publicPath: '',
     },
     mode: ENV,
     module: {
@@ -132,7 +139,7 @@ const common = merge([
         // fix import.meta
         {
           test: /\.js$/,
-          loader: require.resolve('@open-wc/webpack-import-meta-loader/webpack-import-meta-loader.js'),
+          loader: require.resolve('@open-wc/webpack-import-meta-loader'),
         },
         {
           test: /\.html$/,
