@@ -336,6 +336,30 @@ suite('nuxeo-drive-download-button', () => {
       expect(toastStub.text).to.include('25');
     });
 
+    test('succeeds after deselecting items so count drops to ≤ 25, even though selectAllActive stays true', async () => {
+      // Simulates the bug fix: select-all on 36 docs → deselect 13 → 23 selectedItems.
+      // selectAllActive remains true but selectedItems has only 23 entries.
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: Array.from({ length: 36 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
+        selectedItems: Array.from({ length: 23 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
+      };
+      element.documents = viewStub;
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(toastStub.open).to.not.have.been.called;
+      expect(element._navigate).to.have.been.calledOnce;
+      expect(element._navigate.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-download\//);
+    });
+
     test('shows tooManyDocuments error when more than 25 documents are selected', async () => {
       element.documents = Array.from({ length: 26 }, (_, i) => {
         return { uid: `uid-${i}` };
@@ -354,30 +378,6 @@ suite('nuxeo-drive-download-button', () => {
       element._download();
       // The toast should not have been opened at this point (no guard condition triggered)
       expect(toastStub.open).to.not.have.been.called;
-    });
-
-    test('succeeds after deselecting items so count drops to ≤ 25, even though selectAllActive stays true', async () => {
-      // Simulates the bug fix: select-all on 36 docs → deselect 13 → 23 selectedItems.
-      // selectAllActive remains true but selectedItems has only 23 entries.
-      const viewStub = {
-        selectAllActive: true,
-        behaviors: [...PageProviderDisplayBehavior],
-        items: Array.from({ length: 36 }, (_, i) => {
-          return { uid: `uid-${i}` };
-        }),
-        selectedItems: Array.from({ length: 23 }, (_, i) => {
-          return { uid: `uid-${i}` };
-        }),
-      };
-      element.documents = viewStub;
-      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
-
-      element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(toastStub.open).to.not.have.been.called;
-      expect(openDriveUrlStub).to.have.been.calledOnce;
     });
 
     test('calls _openDriveUrl with directDownloadUrl when a valid Drive token exists', async () => {
