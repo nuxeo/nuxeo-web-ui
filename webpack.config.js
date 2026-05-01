@@ -1,4 +1,4 @@
-const { resolve, join, sep } = require('path');
+const { resolve, join, sep, relative, isAbsolute } = require('path');
 const { existsSync, readdirSync } = require('fs');
 const { merge } = require('webpack-merge');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -93,10 +93,12 @@ const addons = (BUNDLES.length ? BUNDLES : ALL_ADDONS).map((p) => {
     globOptions: { ignore: ['*.js', '**/node_modules/**', 'package*.*'] },
     // strip addon folder, copy everything over
     to({ absoluteFilename }) {
-      let relativePath = absoluteFilename
-        .replace(resolve(`addons/${p}`) + sep, '')
+      let relativePath = relative(resolve(`addons/${p}`), absoluteFilename)
         .split(sep)
         .join('/');
+      if (isAbsolute(relativePath) || relativePath.startsWith('..')) {
+        throw new Error(`Unexpected addon file path: ${absoluteFilename}`);
+      }
       // prepend elements/ when in dev mode (except images)
       if (ENV === 'development' && !relativePath.startsWith('images/')) {
         relativePath = `elements/${relativePath}`;
