@@ -112,7 +112,7 @@ const addons = (BUNDLES.length ? BUNDLES : ALL_ADDONS).map((p) => {
 const common = merge([
   {
     entry: {
-      main: './index.js',
+      main: ['./public-path.js', './index.js'],
     },
     resolve: {
       extensions: ['.js', '.html'],
