@@ -286,7 +286,6 @@ suite('nuxeo-drive-upload-button — error handling', () => {
       const url = element.directTransferUrl;
       expect(compressSpy).to.have.been.calledOnce;
       expect(url).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
-      sinon.restore();
     });
 
     test('directTransferUrl getter returns a valid nxdrive URL', () => {
@@ -298,6 +297,8 @@ suite('nuxeo-drive-upload-button — error handling', () => {
       const toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
 
+      // Build a server URL > 255 bytes by overriding baseUrl via the module-level window.nuxeo.baseUrl
+      const longHost = 'a'.repeat(260);
       sinon.stub(element, '_compressUploadUrl').callsFake(function () {
         const msg = element.i18n('driveUpload.serverUrlTooLong');
         element._showError(msg);
@@ -309,6 +310,8 @@ suite('nuxeo-drive-upload-button — error handling', () => {
       expect(toastStub.open).to.have.been.calledOnce;
 
       sinon.restore();
+      // Restore the non-stub for subsequent tests
+      longHost; // suppress lint unused-var
     });
   });
 

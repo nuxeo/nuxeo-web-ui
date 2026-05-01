@@ -30,8 +30,6 @@ window.nuxeo.I18n.en['driveDownload.tooManyDocuments'] =
   'You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.';
 window.nuxeo.I18n.en['driveDownload.directTransfer.failed'] =
   'An error occurred while trying to download the document with Nuxeo Drive.';
-window.nuxeo.I18n.en['driveDownload.serverUrlTooLong'] =
-  'The server URL is too long to generate a Nuxeo Drive download link.';
 window.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
 window.nuxeo.I18n.en['command.close'] = 'Close';
 
@@ -155,6 +153,37 @@ suite('nuxeo-drive-download-button', () => {
       };
       element.documents = viewStub;
       expect(element._getSelectedDocumentUids()).to.deep.equal([]);
+    });
+
+    test('returns UIDs from selectedItems (not items) when select-all is active and some items are deselected', () => {
+      // Simulates: select-all on 36 docs, then deselect 14 → 22 remain selected.
+      // selectAllActive stays true; selectedItems reflects the actual selection.
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: Array.from({ length: 36 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
+        selectedItems: Array.from({ length: 22 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
+      };
+      element.documents = viewStub;
+      const uids = element._getSelectedDocumentUids();
+      expect(uids).to.have.length(22);
+      expect(uids[0]).to.equal('uid-0');
+      expect(uids[21]).to.equal('uid-21');
+    });
+
+    test('falls back to items when select-all is active and selectedItems is absent', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [{ uid: 'item-uid-1' }, { uid: 'item-uid-2' }],
+        // no selectedItems property
+      };
+      element.documents = viewStub;
+      expect(element._getSelectedDocumentUids()).to.deep.equal(['item-uid-1', 'item-uid-2']);
     });
   });
 
@@ -327,7 +356,31 @@ suite('nuxeo-drive-download-button', () => {
       expect(toastStub.open).to.not.have.been.called;
     });
 
-    test('calls window.open with directDownloadUrl when a valid Drive token exists', async () => {
+    test('succeeds after deselecting items so count drops to ≤ 25, even though selectAllActive stays true', async () => {
+      // Simulates the bug fix: select-all on 36 docs → deselect 13 → 23 selectedItems.
+      // selectAllActive remains true but selectedItems has only 23 entries.
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: Array.from({ length: 36 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
+        selectedItems: Array.from({ length: 23 }, (_, i) => {
+          return { uid: `uid-${i}` };
+        }),
+      };
+      element.documents = viewStub;
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
+
+      element._download();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(toastStub.open).to.not.have.been.called;
+      expect(openDriveUrlStub).to.have.been.calledOnce;
+    });
+
+    test('calls _openDriveUrl with directDownloadUrl when a valid Drive token exists', async () => {
       element.documents = [{ uid: 'doc-uid-1' }, { uid: 'doc-uid-2' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
       const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');

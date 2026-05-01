@@ -78,7 +78,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
 
   _isAvailable() {
     return isPageProviderDisplayBehavior(this.documents)
-      ? this.documents.items && this.documents.items.length > 0
+      ? (this.documents.selectedItems || this.documents.items || []).length > 0
       : this.documents && this.documents.length > 0;
   }
 
@@ -193,7 +193,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
 
   _getSelectedDocumentUids() {
     if (isPageProviderDisplayBehavior(this.documents)) {
-      return (this.documents.items || []).map((doc) => doc.uid);
+      return (this.documents.selectedItems || this.documents.items || []).map((doc) => doc.uid);
     }
 
     if (this.documents && this.documents.length > 0) {
