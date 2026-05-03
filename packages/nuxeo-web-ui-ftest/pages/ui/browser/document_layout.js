@@ -9,7 +9,11 @@ export default class DocumentLayout extends BasePage {
         try {
           const ele = await $(this._selector);
           if (!(await ele.isExisting())) return false;
-          result = await ele.$(`[name="${field}"]`);
+          // Use a combined selector to avoid calling $ on a potentially stale element
+          // which causes WDIO v9 implicitWait to throw synchronously
+          const child = await $(`${this._selector} [name="${field}"]`);
+          if (!(await child.isExisting())) return false;
+          result = child;
           return true;
         } catch (e) {
           return false;
