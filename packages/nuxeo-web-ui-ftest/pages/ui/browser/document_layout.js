@@ -29,15 +29,18 @@ export default class DocumentLayout extends BasePage {
   /**
    * Safely perform an action on a field element, re-fetching it to avoid stale references.
    * Wraps the action in waitUntil to handle timing issues where the DOM re-renders.
+   * @param {string} field - field name
+   * @param {Function} action - action to perform on the element
+   * @param {boolean} requireVisible - whether the element must be displayed (for interactions like click/setValue)
    */
-  async _safeFieldAction(field, action) {
+  async _safeFieldAction(field, action, requireVisible = false) {
     const selector = `${this._selector} [name="${field}"]`;
     await driver.waitUntil(
       async () => {
         try {
           const el = await $(selector);
           if (!(await el.isExisting())) return false;
-          if (!(await el.isDisplayed())) return false;
+          if (requireVisible && !(await el.isDisplayed())) return false;
           await action(el);
           return true;
         } catch (e) {
@@ -61,9 +64,13 @@ export default class DocumentLayout extends BasePage {
   }
 
   async setFieldValue(field, value) {
-    await this._safeFieldAction(field, async (el) => {
-      await fixtures.layouts.setValue(el, value);
-    });
+    await this._safeFieldAction(
+      field,
+      async (el) => {
+        await fixtures.layouts.setValue(el, value);
+      },
+      true,
+    );
   }
 
   async fillMultipleValues(table) {
@@ -71,10 +78,14 @@ export default class DocumentLayout extends BasePage {
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const fieldName = row[0];
-      await this._safeFieldAction(fieldName, async (el) => {
-        await el.scrollIntoView();
-        await fixtures.layouts.setValue(el, row[1]);
-      });
+      await this._safeFieldAction(
+        fieldName,
+        async (el) => {
+          await el.scrollIntoView();
+          await fixtures.layouts.setValue(el, row[1]);
+        },
+        true,
+      );
     }
   }
 }
