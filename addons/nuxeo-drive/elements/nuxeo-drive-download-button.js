@@ -55,7 +55,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       <div
         class="action"
         on-tap="_download"
-        hidden$="[[!_isAvailable(documents.splices, documents.items.splices, documents.items.length)]]"
+        hidden$="[[!_isAvailable(documents.splices, documents.items.splices, documents.items.length, documents.selectedItems.splices, documents.selectedItems.length)]]"
       >
         <paper-icon-button noink icon="nuxeo-drive:download" id="driveBtn" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveDownloadButton.tooltip')]]</span>
@@ -107,8 +107,8 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
 
         window.open(this.directDownloadUrl, '_top');
       })
-      .catch(() => {
-        this._showError(this.i18n('driveDownload.directTransfer.failed'));
+      .catch((err) => {
+        this._showError(err && err.userMessage ? err.userMessage : this.i18n('driveDownload.directTransfer.failed'));
       });
   }
 
@@ -172,9 +172,10 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
 
     const serverBytes = new TextEncoder().encode(server);
     if (serverBytes.length > 255) {
-      const msg = this.i18n('driveDownload.serverUrlTooLong');
-      this._showError(msg);
-      throw new Error(msg);
+      const userMessage = this.i18n('driveDownload.serverUrlTooLong');
+      const err = new Error(this.i18n('driveDownload.serverUrlTooLong'));
+      err.userMessage = userMessage;
+      throw err;
     }
     const payload = new Uint8Array([scheme, serverBytes.length, ...serverBytes, allUuidHex.length, ...uuidBinary]);
 
