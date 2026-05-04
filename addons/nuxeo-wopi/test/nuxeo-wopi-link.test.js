@@ -52,7 +52,7 @@ suite('nuxeo-wopi-link', () => {
   suite('_isAvailable', () => {
     test('should return true when url is set', () => {
       element.document = { uid: '1' };
-      element.blob = { wopi: { edit: 'http://example.com/wopi', view: 'http://view.com' } };
+      element.blob = { wopi: { edit: 'https://example.com/wopi', view: 'https://view.com' } };
       expect(element._isAvailable()).to.be.true;
     });
 
@@ -66,19 +66,19 @@ suite('nuxeo-wopi-link', () => {
   suite('_wopiURL', () => {
     test('should return edit URL when user has WriteProperties', () => {
       const doc = { uid: '1' };
-      const blob = { wopi: { edit: 'http://edit.com', view: 'http://view.com' } };
+      const blob = { wopi: { edit: 'https://edit.com', view: 'https://view.com' } };
       element.document = doc;
       element.blob = blob;
       element.hasPermission.withArgs(doc, 'WriteProperties').returns(true);
-      expect(element._wopiURL()).to.equal('http://edit.com');
+      expect(element._wopiURL()).to.equal('https://edit.com');
     });
 
     test('should return view URL when user lacks WriteProperties', () => {
       const doc = { uid: '1' };
-      const blob = { wopi: { edit: 'http://edit.com', view: 'http://view.com' } };
+      const blob = { wopi: { edit: 'https://edit.com', view: 'https://view.com' } };
       element.document = doc;
       element.blob = blob;
-      expect(element._wopiURL()).to.equal('http://view.com');
+      expect(element._wopiURL()).to.equal('https://view.com');
     });
 
     test('should return null when blob has no wopi info', () => {
