@@ -49,9 +49,9 @@ export default class BasePage {
 
   async waitForNotVisible(selector) {
     if (selector) {
-      const ele = await this.el.$(...[selector].filter(Boolean).concat([browser.options.waitForTimeout, true]));
-      const isSelectorVisible = await this.waitForVisible(ele);
-      return isSelectorVisible;
+      const ele = await this.el.$(selector);
+      await ele.waitForDisplayed({ timeout: browser.options.waitforTimeout, reverse: true });
+      return true;
     }
     return false;
   }

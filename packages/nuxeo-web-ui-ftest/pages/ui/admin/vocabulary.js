@@ -58,8 +58,12 @@ export default class Vocabulary extends BasePage {
           await driver.getAlertText();
           return true;
         } catch (e) {
-          // Alert not present — click (again) and keep waiting
-          await deleteButton.click();
+          // Alert not present — retry the click and keep waiting
+          try {
+            await deleteButton.click();
+          } catch (clickError) {
+            // Ignore transient click failures so waitUntil can retry
+          }
           return false;
         }
       },
