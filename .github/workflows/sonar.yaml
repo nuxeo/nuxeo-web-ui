@@ -78,7 +78,9 @@ jobs:
       - name: Install npm dependencies
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: npm ci
+        # npm install is required (not npm ci) because the preinstall script runs
+        # npm install in sub-packages that do not have a package-lock.json
+        run: npm install
         working-directory: ${{ github.workspace }}
 
       - name: Run unit tests with coverage
