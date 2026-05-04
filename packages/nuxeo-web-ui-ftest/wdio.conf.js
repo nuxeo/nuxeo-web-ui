@@ -272,6 +272,7 @@ export const config = {
 
     // Strip file:// prefix and suppress original PASSED/FAILED lines (replaced with timed versions)
     const originalWrite = process.stdout.write.bind(process.stdout);
+    global._originalStdoutWrite = originalWrite;
     // eslint-disable-next-line no-control-regex
     const ansiRegex = /\x1b\[[0-9;]*m/g;
     process.stdout.write = (chunk, ...args) => {
@@ -365,6 +366,10 @@ export const config = {
   // Gets executed after all workers got shut down and the process is about to exit. It is not
   // possible to defer the end of the process using a promise.
   onComplete: async () => {
+    // Restore original stdout.write patched in onPrepare
+    if (global._originalStdoutWrite) {
+      process.stdout.write = global._originalStdoutWrite;
+    }
     if (_featureResults.length > 0) {
       const divider = '='.repeat(80);
       const header = `\x1b[1m${'Feature'.padEnd(50)} ${'Status'.padEnd(10)} Time\x1b[0m`;
