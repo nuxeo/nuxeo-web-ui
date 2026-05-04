@@ -982,11 +982,11 @@ Polymer({
       if (e.shiftKey && (atFirst || onOverlayHost)) {
         e.preventDefault();
         overlay._focusedChild = last;
-        last.focus();
+        last.focus({ preventScroll: true });
       } else if (!e.shiftKey && atLast) {
         e.preventDefault();
         overlay._focusedChild = first;
-        first.focus();
+        first.focus({ preventScroll: true });
       }
     };
     document.addEventListener('keydown', enforceModalTabWrap, true);
