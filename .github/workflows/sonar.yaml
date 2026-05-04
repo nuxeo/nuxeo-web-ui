@@ -61,7 +61,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         # npm install is required (not npm ci) because the preinstall script runs
         # npm install in sub-packages that do not have a package-lock.json
-        run: npm install
+        run: npm install # NOSONAR
         working-directory: ${{ github.workspace }}
 
       - name: Run unit tests with coverage
