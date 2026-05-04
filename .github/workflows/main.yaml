@@ -41,8 +41,16 @@ jobs:
     with:
       branch: lts-2025
 
+  sonar:
+    uses: ./.github/workflows/sonar.yaml
+    secrets:
+      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    with:
+      branch: lts-2025
+
   build:
-    needs: [lint, test, a11y, ftest]
+    needs: [lint, test, a11y, ftest, sonar]
     runs-on:
       group: medium-4cpu-runners
 
