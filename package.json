@@ -108,8 +108,9 @@
     "ftest:dev": "node scripts/test-runner.js --nuxeoUrl=http://localhost:8080/nuxeo --url=http://localhost:5000/",
     "ftest:watch": "node scripts/test-runner.js --nuxeoUrl=http://localhost:8080/nuxeo  --url=http://localhost:5000/ --tags='@watch' --debug",
     "update-coverage-imports": "node scripts/generate-coverage-imports.js",
-    "test": "npm run update-coverage-imports && karma start --coverage",
-    "test:watch": "karma start --auto-watch=true --single-run=false"
+    "update-test-load-all": "node scripts/generate-test-load-all.js",
+    "test": "npm run update-coverage-imports && npm run update-test-load-all && karma start --coverage",
+    "test:watch": "npm run update-coverage-imports && npm run update-test-load-all && karma start --auto-watch=true --single-run=false"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1003.0",

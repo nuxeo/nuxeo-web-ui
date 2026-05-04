@@ -74,7 +74,7 @@ jobs:
             @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
 
       - name: Unit tests
-        # package.json "test": runs generate-coverage-imports.js then `karma start --coverage` (Istanbul).
+        # npm test: update-coverage-imports (coverage-imports-data.js) + update-test-load-all (load-all-tests.js), then karma --coverage.
         # Disabling SauceLabs. Karma is not compatible with SauceLabs v4
         # env:
         #   SAUCE_USERNAME: nuxeo-web-ui
