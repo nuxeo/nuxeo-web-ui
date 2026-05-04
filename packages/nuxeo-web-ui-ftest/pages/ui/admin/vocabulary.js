@@ -70,7 +70,8 @@ export default class Vocabulary extends BasePage {
       },
     );
 
-    await driver.alertAccept();
+    // Alert is confirmed present — accept it directly (no retry needed)
+    await driver.acceptAlert();
   }
 
   async editEntry(index, label) {

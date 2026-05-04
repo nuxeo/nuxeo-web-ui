@@ -5,7 +5,7 @@ class DocumentHelper {
     this.liveDocuments = [];
   }
 
-  _retry(fn, retries = 3, interval = 100) {
+  _retry(fn, retries = 5, interval = 500) {
     return new Promise((resolve, reject) =>
       fn()
         .then(resolve)
@@ -31,14 +31,15 @@ class DocumentHelper {
             .repository()
             .delete(docUid)
             .catch((e) => {
+              if (!e.response) throw e;
               const { status, statusText, url } = e.response;
               // 404 means the document was already deleted (e.g. parent cascade) — ignore it
               if (status === 404) {
                 return;
               }
               console.error(`${status} ${statusText} ${url}`);
-              // in case of a conflict, retry
-              if (status === 409) {
+              // Retry on conflict or server errors
+              if (status === 409 || status >= 500) {
                 throw e;
               }
             }),
