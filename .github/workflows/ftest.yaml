@@ -57,7 +57,7 @@ jobs:
           node-version: 22
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.0
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
         with:
           java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
 
@@ -136,7 +136,7 @@ jobs:
           RUN_ALL: false
           BAIL: 0
           HEADLESS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v15.12.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v17.6.1
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
