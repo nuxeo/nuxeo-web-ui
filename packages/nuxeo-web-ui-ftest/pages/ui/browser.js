@@ -132,15 +132,26 @@ export default class Browser extends BasePage {
   }
 
   async waitForChildren(minCount = 1) {
-    const currentPage = await this.currentPage;
     await driver.waitUntil(
       async () => {
+        const currentPage = await this.currentPage;
+        // Ensure the data table is not in a loading state before counting rows
+        const table = await currentPage.$('nuxeo-data-table[name="table"]');
+        if (await table.isExisting()) {
+          const loading = await driver.execute((el) => el.loading, table);
+          if (loading) return false;
+        }
         const rows = await currentPage.$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])');
-        return rows.length >= minCount;
+        if (rows.length >= minCount) return true;
+        // Trigger a refresh if no rows found — the page provider may not have auto-refreshed
+        await driver.execute((el) => {
+          if (el && el.fetch) el.fetch();
+        }, table);
+        return false;
       },
       {
         timeout: 20000,
-        interval: 500,
+        interval: 1000,
         timeoutMsg: `Expected at least ${minCount} child rows to be loaded`,
       },
     );

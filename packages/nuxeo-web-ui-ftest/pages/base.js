@@ -21,8 +21,30 @@ export default class BasePage {
     return this.el.isVisible(...args);
   }
 
-  waitForVisible(...args) {
-    return this.el.waitForVisible(...args);
+  async waitForVisible(...args) {
+    if (typeof args[0] === 'string') {
+      // Child selector — delegate to element-level custom waitForVisible
+      return this.el.waitForVisible(...args);
+    }
+    // Self — use waitUntil with isExisting guard to prevent WDIO v9 process crash
+    // when the element does not yet exist (implicitWait throws unhandled errors)
+    const [timeout = 10000] = args;
+    await driver.waitUntil(
+      async () => {
+        try {
+          const el = await $(this._selector);
+          return (await el.isExisting()) && (await el.isDisplayed());
+        } catch (e) {
+          return false;
+        }
+      },
+      {
+        timeout,
+        interval: 500,
+        timeoutMsg: `Element "${this._selector}" not visible after ${timeout}ms`,
+      },
+    );
+    return true;
   }
 
   async waitForNotVisible(selector) {
