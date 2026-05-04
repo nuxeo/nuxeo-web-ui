@@ -116,8 +116,8 @@ suite('nuxeo-document-import-csv', () => {
 
   suite('_computeImportDocTypes', () => {
     test('should filter out blacklisted types', () => {
-      window.nuxeo = window.nuxeo || {};
-      window.nuxeo.importBlacklist = ['Blacklisted'];
+      globalThis.nuxeo = globalThis.nuxeo || {};
+      globalThis.nuxeo.importBlacklist = ['Blacklisted'];
       element.subtypes = [
         { type: 'File', facets: [] },
         { type: 'Blacklisted', facets: [] },
