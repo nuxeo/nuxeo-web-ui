@@ -42,34 +42,19 @@ suite('nuxeo-tasks-list', () => {
     });
   });
 
-  suite('_ensureTaskParams / fetch (WEBUI-1686)', () => {
-    test('fetch sets userId before calling list fetch when params were cleared', async () => {
-      element.$.tasksProvider.params = {};
-      sinon.stub(element.$.nx, 'connect').resolves({ id: 'expected-user' });
+  suite('fetch', () => {
+    test('delegates full reload to the data list fetch when no offset', async () => {
       sinon.stub(element.$.list, 'fetch').resolves();
       await element.fetch();
-      expect(element.$.tasksProvider.params.userId).to.equal('expected-user');
       expect(element.$.list.fetch).to.have.been.calledOnce;
-      element.$.nx.connect.restore();
       element.$.list.fetch.restore();
     });
 
-    test('fetch waits for connect when userId is not set yet', async () => {
-      element.$.tasksProvider.params = {};
-      let resolveConnect;
-      const connectPromise = new Promise((r) => {
-        resolveConnect = r;
-      });
-      sinon.stub(element.$.nx, 'connect').returns(connectPromise);
-      const listFetch = sinon.stub(element.$.list, 'fetch').resolves();
-      const done = element.fetch();
-      expect(listFetch).to.not.have.been.called;
-      resolveConnect({ id: 'delayed-user' });
-      await done;
-      expect(element.$.tasksProvider.params.userId).to.equal('delayed-user');
-      expect(listFetch).to.have.been.calledOnce;
-      element.$.nx.connect.restore();
-      element.$.list.fetch.restore();
+    test('delegates range load to the data list _fetchRange when offset is set', async () => {
+      sinon.stub(element.$.list, '_fetchRange').resolves();
+      await element.fetch(20, 40);
+      expect(element.$.list._fetchRange).to.have.been.calledOnceWith(20, 60, false);
+      element.$.list._fetchRange.restore();
     });
   });
 });
