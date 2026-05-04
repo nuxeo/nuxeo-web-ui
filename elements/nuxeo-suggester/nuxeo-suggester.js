@@ -274,7 +274,8 @@ Polymer({
       id="op"
       op="Search.SuggestersLauncher"
       response="{{items}}"
-      params='{"searchTerm":"[[sanitizedSearchTerm]]"}'
+      params="{}"
+      params.searchTerm="[[sanitizedSearchTerm]]"
     ></nuxeo-operation>
 
     <div hidden$="[[!toggled]]">
@@ -483,7 +484,7 @@ Polymer({
   },
 
   _sanitizeSearchTerm(term) {
-    return (term || '').replace(/"/g, ' ').trim();
+    return (term || '').replace(/"/g, encodeURIComponent('"')).trim();
   },
 
   _canShowResults() {
