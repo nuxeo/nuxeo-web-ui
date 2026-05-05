@@ -44,10 +44,69 @@ suite('nuxeo-favorites', () => {
 
   suite('_selectedFavoriteChanged', () => {
     test('should not navigate when doc is falsy', () => {
-      // _selectedFavoriteChanged guards with if(doc) — null should be a no-op
-      // We can't easily test the positive case due to RoutingBehavior requiring router config
       element._selectedFavoriteChanged(null);
-      // No error = success (navigateTo was not called)
+    });
+  });
+
+  suite('_visibleChanged', () => {
+    test('should call _refresh when visible and no favorite', () => {
+      element.favorite = null;
+      element.visible = true;
+      sinon.stub(element, '_refresh');
+      element._visibleChanged();
+      expect(element._refresh).to.have.been.calledOnce;
+      element._refresh.restore();
+    });
+
+    test('should not call _refresh when not visible', () => {
+      element.visible = false;
+      sinon.stub(element, '_refresh');
+      element._visibleChanged();
+      expect(element._refresh).to.not.have.been.called;
+      element._refresh.restore();
+    });
+  });
+
+  suite('_fetchFavorite', () => {
+    test('should return cached favorite if already set', async () => {
+      const fav = { uid: 'fav1' };
+      element.favorite = fav;
+      const result = await element._fetchFavorite();
+      expect(result).to.equal(fav);
+    });
+
+    test('should execute operation and cache result', async () => {
+      element.favorite = null;
+      const resp = { uid: 'fav1', title: 'My Favorites' };
+      sinon.stub(element.$.fetchFavOp, 'execute').resolves(resp);
+      const result = await element._fetchFavorite();
+      expect(result).to.equal(resp);
+      expect(element.favorite).to.equal(resp);
+    });
+
+    test('should set favorite to null on 204 response', async () => {
+      element.favorite = null;
+      sinon.stub(element.$.fetchFavOp, 'execute').resolves({ status: 204 });
+      const result = await element._fetchFavorite();
+      expect(result).to.be.null;
+      expect(element.favorite).to.be.null;
+    });
+  });
+
+  suite('_removeFromFavorites', () => {
+    test('should execute operation and fire event', async () => {
+      const stub = sinon.stub(element.$.removeFromFavOp, 'execute').resolves();
+      const listener = sinon.spy();
+      element.addEventListener('removed-from-favorites', listener);
+      const evt = {
+        stopImmediatePropagation: sinon.spy(),
+        model: { favorite: { uid: 'doc1' } },
+      };
+      element._removeFromFavorites(evt);
+      expect(evt.stopImmediatePropagation).to.have.been.calledOnce;
+      expect(element.$.removeFromFavOp.input).to.equal('doc1');
+      await stub.returnValues[0];
+      expect(listener).to.have.been.calledOnce;
     });
   });
 });

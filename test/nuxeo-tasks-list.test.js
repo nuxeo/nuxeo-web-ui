@@ -57,4 +57,60 @@ suite('nuxeo-tasks-list', () => {
       element.$.list._fetchRange.restore();
     });
   });
+
+  suite('_selectionChanged', () => {
+    test('should not navigate when noNavigation is true', () => {
+      element.noNavigation = true;
+      element._selection = { id: 't1' };
+      const nav = sinon.stub(element, 'navigateTo');
+      element._selectionChanged();
+      expect(nav).to.not.have.been.called;
+      nav.restore();
+    });
+
+    test('should not navigate when _selection is null', () => {
+      element._selection = null;
+      const nav = sinon.stub(element, 'navigateTo');
+      element._selectionChanged();
+      expect(nav).to.not.have.been.called;
+      nav.restore();
+    });
+  });
+
+  suite('_currentChanged', () => {
+    test('should return early when same task id', () => {
+      const task = { id: 't1' };
+      element.$.list.items = [task];
+      sinon.stub(element.$.list, 'selectItem');
+      element._currentChanged(task, task);
+      expect(element.$.list.selectItem).to.not.have.been.called;
+      element.$.list.selectItem.restore();
+    });
+
+    test('should select matching task from list items', () => {
+      const task = { id: 't1' };
+      element.$.list.items = [task];
+      sinon.stub(element.$.list, 'selectItem');
+      element._currentChanged(task, null);
+      expect(element.$.list.selectItem).to.have.been.calledWith(task);
+      element.$.list.selectItem.restore();
+    });
+
+    test('should deselect old task when newVal is null', () => {
+      const oldTask = { id: 't1' };
+      element.$.list.items = [oldTask];
+      sinon.stub(element.$.list, 'deselectItem');
+      element._currentChanged(null, oldTask);
+      expect(element.$.list.deselectItem).to.have.been.calledWith(oldTask);
+      element.$.list.deselectItem.restore();
+    });
+  });
+
+  suite('_ensureTaskParams', () => {
+    test('should resolve immediately when params already have userId', async () => {
+      element.$.tasksProvider.params = { userId: 'admin' };
+      await element._ensureTaskParams();
+      expect(element.$.tasksProvider.params.userId).to.equal('admin');
+    });
+  });
 });

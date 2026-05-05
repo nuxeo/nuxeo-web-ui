@@ -113,4 +113,130 @@ suite('nuxeo-document-create', () => {
     expect(label).to.equal('documentCreationForm.newDoc.heading');
     element._getTypeLabel.restore();
   });
+
+  suite('init', () => {
+    test('should clear and set selectedDocType when typeId matches a subtype', () => {
+      element.subtypes = [
+        { id: 'File', type: 'File' },
+        { id: 'Folder', type: 'Folder' },
+      ];
+      element.stage = 'edit';
+      element.init('File');
+      expect(element.stage).to.equal('choose');
+      expect(element.selectedDocType).to.deep.equal({ id: 'File', type: 'File' });
+    });
+
+    test('should clear without setting selectedDocType when typeId does not match', () => {
+      element.subtypes = [{ id: 'File', type: 'File' }];
+      element.stage = 'edit';
+      element.init('Unknown');
+      expect(element.stage).to.equal('choose');
+      expect(element.selectedDocType).to.deep.equal({});
+    });
+
+    test('should just clear when no typeId is provided', () => {
+      element.stage = 'edit';
+      element.selectedDocType = { id: 'File' };
+      element.init();
+      expect(element.stage).to.equal('choose');
+      expect(element.selectedDocType).to.deep.equal({});
+    });
+  });
+
+  suite('_back', () => {
+    test('should clear and fire show-tabs event', () => {
+      const fireSpy = sinon.spy(element, 'fire');
+      element.stage = 'edit';
+      element.selectedDocType = { id: 'File' };
+      element._back();
+      expect(element.stage).to.equal('choose');
+      expect(fireSpy).to.have.been.calledWith('nx-creation-wizard-show-tabs');
+      fireSpy.restore();
+    });
+  });
+
+  suite('_cancel', () => {
+    test('should clear, unset document, and fire show-tabs event', () => {
+      const fireSpy = sinon.spy(element, 'fire');
+      element.stage = 'edit';
+      element.document = { type: 'File' };
+      element._cancel();
+      expect(element.stage).to.equal('choose');
+      expect(element.document).to.be.undefined;
+      expect(fireSpy).to.have.been.calledWith('nx-creation-wizard-show-tabs');
+      fireSpy.restore();
+    });
+  });
+
+  suite('_selectType', () => {
+    test('should set selectedDocType and fire hide-tabs event', () => {
+      const fireSpy = sinon.spy(element, 'fire');
+      const type = { id: 'Note', type: 'Note' };
+      element._selectType({ model: { type } });
+      expect(element.selectedDocType).to.deep.equal(type);
+      expect(fireSpy).to.have.been.calledWith('nx-creation-wizard-hide-tabs');
+      fireSpy.restore();
+    });
+  });
+
+  suite('_getSortedSubtypes (edge cases)', () => {
+    test('should handle duplicate types in orderConfig', () => {
+      const subtypes = [
+        { id: 'File', type: 'File' },
+        { id: 'Folder', type: 'Folder' },
+      ];
+      const sorted = element._getSortedSubtypes(subtypes, 'File,File,Folder');
+      expect(sorted.map((s) => s.id)).to.deep.equal(['File', 'Folder']);
+    });
+
+    test('should ignore unknown types in orderConfig', () => {
+      const subtypes = [
+        { id: 'File', type: 'File' },
+        { id: 'Folder', type: 'Folder' },
+      ];
+      const sorted = element._getSortedSubtypes(subtypes, 'Unknown,File');
+      expect(sorted.map((s) => s.id)).to.deep.equal(['File', 'Folder']);
+    });
+
+    test('should handle whitespace-only orderConfig', () => {
+      const subtypes = [{ id: 'File' }, { id: 'Folder' }];
+      expect(element._getSortedSubtypes(subtypes, '   ')).to.equal(subtypes);
+    });
+
+    test('should handle non-string orderConfig by returning original array', () => {
+      const subtypes = [{ id: 'File' }, { id: 'Folder' }];
+      expect(element._getSortedSubtypes(subtypes, 123)).to.equal(subtypes);
+    });
+
+    test('should handle orderConfig with trailing commas', () => {
+      const subtypes = [
+        { id: 'File', type: 'File' },
+        { id: 'Folder', type: 'Folder' },
+      ];
+      const sorted = element._getSortedSubtypes(subtypes, 'Folder,,File,');
+      expect(sorted.map((s) => s.id)).to.deep.equal(['Folder', 'File']);
+    });
+
+    test('should place unmentioned subtypes after ordered ones', () => {
+      const subtypes = [
+        { id: 'File', type: 'File' },
+        { id: 'Folder', type: 'Folder' },
+        { id: 'Picture', type: 'Picture' },
+        { id: 'Note', type: 'Note' },
+      ];
+      const sorted = element._getSortedSubtypes(subtypes, 'Note');
+      expect(sorted[0].id).to.equal('Note');
+      expect(sorted).to.have.length(4);
+    });
+  });
+
+  suite('_visibleOnStage (edge cases)', () => {
+    test('should disable both suggesters when not visible', () => {
+      element.visible = false;
+      element.stage = 'choose';
+      element._visibleOnStage();
+      expect(element.$.pathSuggesterChoose.disabled).to.be.true;
+      expect(element.$.pathSuggesterEdit.disabled).to.be.true;
+    });
+  });
 });

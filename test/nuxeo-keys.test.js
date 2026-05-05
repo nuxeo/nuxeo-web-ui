@@ -81,5 +81,55 @@ suite('nuxeo-keys', () => {
     test('should return empty string for null key', () => {
       expect(element._transformKey(null)).to.equal('');
     });
+
+    test('should return empty string for undefined key', () => {
+      expect(element._transformKey(undefined)).to.equal('');
+    });
+  });
+
+  suite('_keysPressed', () => {
+    test('should not fire pressed for input elements when not invasive', () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      const listener = sinon.spy();
+      element.addEventListener('pressed', listener);
+      const kbEvt = new KeyboardEvent('keydown', { key: 'c', bubbles: true });
+      Object.defineProperty(kbEvt, 'composedPath', { value: () => [input] });
+      element._keysPressed({
+        detail: { keyboardEvent: kbEvt },
+        preventDefault: sinon.spy(),
+      });
+      expect(listener).to.not.have.been.called;
+      document.body.removeChild(input);
+    });
+
+    test('should not fire pressed for textarea elements when not invasive', () => {
+      const textarea = document.createElement('textarea');
+      document.body.appendChild(textarea);
+      const listener = sinon.spy();
+      element.addEventListener('pressed', listener);
+      const kbEvt = new KeyboardEvent('keydown', { key: 'c', bubbles: true });
+      Object.defineProperty(kbEvt, 'composedPath', { value: () => [textarea] });
+      element._keysPressed({
+        detail: { keyboardEvent: kbEvt },
+        preventDefault: sinon.spy(),
+      });
+      expect(listener).to.not.have.been.called;
+      document.body.removeChild(textarea);
+    });
+
+    test('should prevent default for dialog elements', () => {
+      const dialog = document.createElement('nuxeo-dialog');
+      document.body.appendChild(dialog);
+      const preventSpy = sinon.spy();
+      const kbEvt = new KeyboardEvent('keydown', { key: 'c', bubbles: true });
+      Object.defineProperty(kbEvt, 'composedPath', { value: () => [dialog] });
+      element._keysPressed({
+        detail: { keyboardEvent: kbEvt },
+        preventDefault: preventSpy,
+      });
+      expect(preventSpy).to.have.been.calledOnce;
+      document.body.removeChild(dialog);
+    });
   });
 });

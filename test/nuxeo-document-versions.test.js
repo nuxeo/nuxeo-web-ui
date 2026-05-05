@@ -94,4 +94,85 @@ suite('nuxeo-document-versions', () => {
       expect(element._labelTitle(null)).to.equal('');
     });
   });
+
+  suite('_labelLatest', () => {
+    test('should include latest label when not checked out', () => {
+      const doc = {
+        isCheckedOut: false,
+        properties: { 'uid:major_version': 1, 'uid:minor_version': 0 },
+      };
+      const result = element._labelLatest(doc);
+      expect(result).to.include('versions.latest');
+      expect(result).to.include('versions.version');
+    });
+
+    test('should include unversionedChanges label when checked out', () => {
+      const doc = {
+        isCheckedOut: true,
+        properties: { 'uid:major_version': 1, 'uid:minor_version': 0 },
+      };
+      const result = element._labelLatest(doc);
+      expect(result).to.include('versions.unversionedChanges');
+    });
+
+    test('should return empty string and hide list when doc is null', () => {
+      sinon.stub(element, '_hideList');
+      expect(element._labelLatest(null)).to.equal('');
+      expect(element._hideList).to.have.been.calledOnce;
+      element._hideList.restore();
+    });
+  });
+
+  suite('_labelModified', () => {
+    test('should return i18n modified string', () => {
+      const doc = { properties: { 'dc:modified': '2024-01-01', 'dc:lastContributor': 'admin' } };
+      const result = element._labelModified(doc);
+      expect(result).to.include('versions.modified');
+    });
+  });
+
+  suite('_labelCreate', () => {
+    test('should return unversioned label when not versionable', () => {
+      const doc = { uid: '1' };
+      element.isVersion.returns(false);
+      element.hasFacet.withArgs(doc, 'Versionable').returns(false);
+      const label = element._labelCreate(doc);
+      expect(label).to.include('versions.unversioned');
+    });
+
+    test('should return unversioned label when no WriteVersion permission', () => {
+      const doc = { uid: '1' };
+      element.hasFacet.withArgs(doc, 'Versionable').returns(true);
+      element.hasPermission.withArgs(doc, 'WriteVersion').returns(false);
+      const label = element._labelCreate(doc);
+      expect(label).to.include('versions.unversioned');
+    });
+  });
+
+  suite('_showList and _hideList', () => {
+    test('_showList should call list.open', () => {
+      sinon.stub(element.$.list, 'open');
+      element._showList();
+      expect(element.$.list.open).to.have.been.calledOnce;
+      element.$.list.open.restore();
+    });
+
+    test('_hideList should call list.close', () => {
+      sinon.stub(element.$.list, 'close');
+      element._hideList();
+      expect(element.$.list.close).to.have.been.calledOnce;
+      element.$.list.close.restore();
+    });
+  });
+
+  suite('_query', () => {
+    test('should set query string and reset page', () => {
+      sinon.stub(element.$.scrollThreshold, 'clearTriggers');
+      sinon.stub(element.$.provider, 'fetch').resolves({ entries: [] });
+      Object.defineProperty(element.$.provider, 'isNextPageAvailable', { value: false, configurable: true });
+      element._query('abc123');
+      expect(element.query).to.include('abc123');
+      expect(element.page).to.be.above(0);
+    });
+  });
 });

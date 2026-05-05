@@ -41,4 +41,45 @@ suite('nuxeo-analytics', () => {
       expect(element).to.have.property('selected');
     });
   });
+
+  suite('ready', () => {
+    test('should have set up a paper-listbox', () => {
+      const listbox = element.$$('paper-listbox');
+      expect(listbox).to.exist;
+    });
+  });
+
+  suite('keyboard navigation (via listbox)', () => {
+    test('should prevent ArrowUp default', () => {
+      const listbox = element.$$('paper-listbox');
+      const event = new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true });
+      const prevented = !listbox.dispatchEvent(event);
+      expect(prevented).to.be.true;
+    });
+
+    test('should prevent ArrowDown default', () => {
+      const listbox = element.$$('paper-listbox');
+      const event = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true });
+      const prevented = !listbox.dispatchEvent(event);
+      expect(prevented).to.be.true;
+    });
+
+    test('should call selectPrevious on ArrowLeft', () => {
+      const listbox = element.$$('paper-listbox');
+      sinon.spy(listbox, 'selectPrevious');
+      const event = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true });
+      listbox.dispatchEvent(event);
+      expect(listbox.selectPrevious).to.have.been.calledOnce;
+      listbox.selectPrevious.restore();
+    });
+
+    test('should call selectNext on ArrowRight', () => {
+      const listbox = element.$$('paper-listbox');
+      sinon.spy(listbox, 'selectNext');
+      const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+      listbox.dispatchEvent(event);
+      expect(listbox.selectNext).to.have.been.calledOnce;
+      listbox.selectNext.restore();
+    });
+  });
 });

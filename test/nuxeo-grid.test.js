@@ -19,7 +19,7 @@ import { fixture, html, flush } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-grid/nuxeo-grid.js';
 
 function getStyle(grid) {
-  return grid.shadowRoot.querySelector('style').innerText;
+  return grid.shadowRoot.querySelector('style').textContent;
 }
 
 suite('nuxeo-grid', () => {
@@ -96,6 +96,9 @@ suite('nuxeo-grid', () => {
     main.setAttribute('data-row-span', '2');
 
     await flush();
+    // Reset the spy after mutations settle so intermediate observer-triggered
+    // warnings (from partial attribute state) don't cause a false negative.
+    console.warn.resetHistory();
     const expected = `:host {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -233,6 +236,7 @@ suite('nuxeo-grid', () => {
     grid.templateColumns = '1fr 300px auto';
     grid.templateRows = '2fr auto 200px';
     await flush();
+    console.warn.resetHistory();
     const expected = `:host {
   display: grid;
   grid-template-columns: 1fr 300px auto;
@@ -283,6 +287,7 @@ suite('nuxeo-grid', () => {
     grid.templateRows = '2fr auto 200px';
     grid.columnspan = '1';
     await flush();
+    console.warn.resetHistory();
     const expected = `:host {
   display: grid;
   grid-template-columns: 1fr 300px auto;

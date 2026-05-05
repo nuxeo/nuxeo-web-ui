@@ -61,4 +61,67 @@ suite('nuxeo-versions-diff-button', () => {
       expect(element._computeLabel()).to.include('versionsDiffButton.tooltip');
     });
   });
+
+  suite('_doDiff', () => {
+    test('should fire nuxeo-diff-documents when versions >= 2', async () => {
+      element.document = {
+        uid: 'd1',
+        isCheckedOut: false,
+        properties: { 'uid:major_version': 1, 'uid:minor_version': 0 },
+      };
+      const versions = {
+        entries: [
+          { uid: 'v1', properties: { 'uid:major_version': 0, 'uid:minor_version': 1 } },
+          { uid: 'v2', properties: { 'uid:major_version': 1, 'uid:minor_version': 0 } },
+        ],
+      };
+      const opStub = { execute: sinon.stub().resolves(versions) };
+      sinon.stub(element, '$$').returns(opStub);
+      const listener = sinon.spy();
+      element.addEventListener('nuxeo-diff-documents', listener);
+      element._doDiff();
+      await opStub.execute.returnValues[0];
+      expect(listener).to.have.been.calledOnce;
+      expect(listener.firstCall.args[0].detail.documents).to.have.length(2);
+    });
+
+    test('should notify when fewer than 2 versions', async () => {
+      element.document = {
+        uid: 'd1',
+        isCheckedOut: false,
+        properties: { 'uid:major_version': 1, 'uid:minor_version': 0 },
+      };
+      const versions = {
+        entries: [{ uid: 'v1', properties: { 'uid:major_version': 1, 'uid:minor_version': 0 } }],
+      };
+      const opStub = { execute: sinon.stub().resolves(versions) };
+      sinon.stub(element, '$$').returns(opStub);
+      const notifySpy = sinon.stub(element, 'notify');
+      element._doDiff();
+      await opStub.execute.returnValues[0];
+      expect(notifySpy).to.have.been.calledOnce;
+    });
+
+    test('should prepend checked-out document to versions', async () => {
+      element.document = {
+        uid: 'd1',
+        isCheckedOut: true,
+        properties: { 'uid:major_version': 1, 'uid:minor_version': 0 },
+      };
+      const versions = {
+        entries: [
+          { uid: 'v1', properties: { 'uid:major_version': 0, 'uid:minor_version': 1 } },
+          { uid: 'v2', properties: { 'uid:major_version': 1, 'uid:minor_version': 0 } },
+        ],
+      };
+      const opStub = { execute: sinon.stub().resolves(versions) };
+      sinon.stub(element, '$$').returns(opStub);
+      const listener = sinon.spy();
+      element.addEventListener('nuxeo-diff-documents', listener);
+      element._doDiff();
+      await opStub.execute.returnValues[0];
+      const docs = listener.firstCall.args[0].detail.documents;
+      expect(docs[0].uid).to.equal('d1');
+    });
+  });
 });

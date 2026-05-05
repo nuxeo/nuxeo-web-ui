@@ -109,4 +109,108 @@ suite('nuxeo-add-to-collection-documents-button', () => {
       expect(element.description).to.equal('');
     });
   });
+
+  suite('_resultAndSelectionFormatter', () => {
+    test('should escape HTML for regular entries', () => {
+      const result = element._resultAndSelectionFormatter({ id: 'col-1', displayLabel: '<b>Col</b>' });
+      expect(result).to.not.contain('<b>');
+    });
+
+    test('should use title when displayLabel is absent', () => {
+      const result = element._resultAndSelectionFormatter({ id: 'col-1', title: 'My Collection' });
+      expect(result).to.include('My Collection');
+    });
+
+    test('should return raw label for new entry (id === -1)', () => {
+      const result = element._resultAndSelectionFormatter({ id: -1, displayLabel: '<em>New</em>' });
+      expect(result).to.equal('<em>New</em>');
+    });
+  });
+
+  suite('_execute', () => {
+    test('should toggle dialog', () => {
+      sinon.stub(element.$.dialog, 'toggle');
+      element._execute();
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
+    });
+  });
+
+  suite('_toggleDialog', () => {
+    test('should toggle dialog', () => {
+      sinon.stub(element.$.dialog, 'toggle');
+      element._toggleDialog();
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
+    });
+  });
+
+  suite('_isHidden', () => {
+    test('should return false when documents have no NotCollectionMember facet', () => {
+      element.documents = [
+        { uid: 'doc1', facets: [] },
+        { uid: 'doc2', facets: [] },
+      ];
+      expect(element._isHidden()).to.be.false;
+    });
+
+    test('should return true when any document has NotCollectionMember facet', () => {
+      element.hasFacet.restore();
+      sinon.stub(element, 'hasFacet').callsFake((doc, facet) => facet === 'NotCollectionMember' && doc.uid === 'doc2');
+      element.documents = [{ uid: 'doc1' }, { uid: 'doc2' }];
+      expect(element._isHidden()).to.be.true;
+    });
+
+    test('should return true when documents is empty', () => {
+      element.documents = [];
+      expect(element._isHidden()).to.be.true;
+    });
+
+    test('should return true when documents is null', () => {
+      element.documents = null;
+      expect(element._isHidden()).to.be.true;
+    });
+  });
+
+  suite('add', () => {
+    test('should call _addToCollection directly when collection is not new', () => {
+      element.collection = 'existing-col-id';
+      sinon.stub(element, '_addToCollection');
+      element.add();
+      expect(element._addToCollection).to.have.been.calledOnce;
+    });
+
+    test('should create collection then add when collection is new', async () => {
+      element.collection = -1;
+      element.description = 'New collection desc';
+      const createOp = { input: null, params: null, execute: sinon.stub().resolves({ uid: 'new-col-uid' }) };
+      sinon.stub(element, '$$').returns(createOp);
+      element.$.nxSelect = { selectedItem: { displayLabel: 'My New Col' } };
+      sinon.stub(element, '_addToCollection');
+      await element.add();
+      expect(createOp.params).to.deep.equal({ name: 'My New Col', description: 'New collection desc' });
+      expect(element.collection).to.equal('new-col-uid');
+      expect(element._addToCollection).to.have.been.calledOnce;
+    });
+  });
+
+  suite('_addToCollection', () => {
+    test('should set input, params and fire event for regular documents', async () => {
+      element.documents = [{ uid: 'doc1' }, { uid: 'doc2' }];
+      element.collection = 'col-123';
+      const parentExecute = sinon.stub(Nuxeo.OperationButton.prototype, '_execute').resolves();
+      sinon.stub(element, 'fire');
+      sinon.stub(element, '_resetPopup');
+      sinon.stub(element, '_toggleDialog');
+      element._addToCollection();
+      await parentExecute.firstCall.returnValue;
+      expect(element.input).to.equal(element.documents);
+      expect(element.params).to.deep.equal({ collection: 'col-123' });
+      expect(element.fire).to.have.been.calledWith('added-to-collection', {
+        docIds: ['doc1', 'doc2'],
+        collectionId: 'col-123',
+      });
+      expect(element._resetPopup).to.have.been.calledOnce;
+      expect(element._toggleDialog).to.have.been.calledOnce;
+      parentExecute.restore();
+    });
+  });
 });
