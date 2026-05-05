@@ -5,20 +5,18 @@ class DocumentHelper {
     this.liveDocuments = [];
   }
 
-  _retry(fn, retries = 3, interval = 100) {
+  _retry(fn, retries = 5, interval = 500) {
     return new Promise((resolve, reject) =>
       fn()
         .then(resolve)
-        .catch(
-          (error) =>
-            setTimeout(() => {
-              if (retries === 0) {
-                reject(error);
-                return;
-              }
-              this._retry(fn, --retries, interval).then(resolve, reject);
-            }),
-          interval,
+        .catch((error) =>
+          setTimeout(() => {
+            if (retries === 0) {
+              reject(error);
+              return;
+            }
+            this._retry(fn, --retries, interval).then(resolve, reject);
+          }, interval),
         ),
     );
   }
@@ -31,11 +29,16 @@ class DocumentHelper {
             .repository()
             .delete(docUid)
             .catch((e) => {
+              if (!e.response) throw e;
               const { status, statusText, url } = e.response;
+              // 404 means the document was already deleted (e.g. parent cascade) — ignore it
+              if (status === 404) {
+                return;
+              }
               console.error(`${status} ${statusText} ${url}`);
-              // in case of a conflict
-              if (status === 409) {
-                throw e; // let's retry this
+              // Retry on conflict or server errors
+              if (status === 409 || status >= 500) {
+                throw e;
               }
             }),
         ),
@@ -44,7 +47,11 @@ class DocumentHelper {
       .then(() => {
         this.liveDocuments = [];
       })
-      .catch(console.error);
+      .catch((e) => {
+        console.error(e);
+        // Clear liveDocuments even on failure to prevent re-deleting in subsequent After hooks
+        this.liveDocuments = [];
+      });
   }
 
   init(type = 'File', title = 'my document') {
