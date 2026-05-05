@@ -18,10 +18,9 @@ let glTFLoader = function () {
   this.shaders = {};
   this.loadRequests = [];
   glTFShaders.removeAll();
-  THREE.Loader.call(this);
 };
 
-glTFLoader.prototype = new THREE.Loader();
+glTFLoader.prototype = Object.create(glTFParser);
 glTFLoader.prototype.constructor = glTFLoader;
 
 glTFLoader.prototype.load = function (url, callback) {
@@ -1173,7 +1172,7 @@ glTFLoader.prototype.load = function (url, callback) {
           }
 
           if (xfov) {
-            xfov = THREE.Math.radToDeg(xfov);
+            xfov = THREE.MathUtils.radToDeg(xfov);
 
             camera = new THREE.PerspectiveCamera(xfov, aspect_ratio, znear, zfar);
           }
