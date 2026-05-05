@@ -274,5 +274,180 @@ suite('DiffBehavior', () => {
       const result = ctx._getArrayDelta(delta, ['existing'], ['existing', 'added']);
       expect(result.some((d) => d.change === 'added')).to.be.true;
     });
+
+    test('should mark modified items when delta entry is an object', () => {
+      const delta = { _t: 'a', 0: { name: ['old', 'new'] } };
+      const result = ctx._getArrayDelta(delta, [{ name: 'old' }], [{ name: 'new' }]);
+      expect(result.some((d) => d.change === 'modified')).to.be.true;
+    });
+
+    test('should skip deleted items when hideDeletions is true', () => {
+      const delta = { _t: 'a', _0: ['removed', 0, 0] };
+      const result = ctx._getArrayDelta(delta, ['removed', 'kept'], ['kept'], false, true);
+      expect(result.every((d) => d.change !== 'deleted')).to.be.true;
+    });
+
+    test('should skip added items when hideAdditions is true', () => {
+      const delta = { _t: 'a', 1: ['added'] };
+      const result = ctx._getArrayDelta(delta, ['existing'], ['existing', 'added'], true, false);
+      expect(result.every((d) => d.change !== 'added')).to.be.true;
+    });
+
+    test('should handle null newValue gracefully', () => {
+      const delta = { _t: 'a', _0: ['removed', 0, 0] };
+      const result = ctx._getArrayDelta(delta, ['removed', 'kept'], null);
+      expect(result).to.be.an('array');
+      expect(result.some((d) => d.change === 'deleted')).to.be.true;
+      expect(result.find((d) => d.change === 'deleted').newValue).to.be.null;
+    });
+  });
+
+  suite('_computeType', () => {
+    test('should resolve type from schema fields', () => {
+      ctx.type = 'string';
+      ctx._computeType('title', { fields: { title: 'text' } }, null, null);
+      expect(ctx.set).to.have.been.calledWith('type', 'text');
+    });
+
+    test('should resolve nested type object from schema', () => {
+      ctx.type = 'string';
+      ctx._computeType('title', { fields: { title: { type: 'text' } } }, null, null);
+      expect(ctx.set).to.have.been.calledWith('type', 'text');
+    });
+
+    test('should infer entity type from originalValue object', () => {
+      ctx.type = 'string';
+      ctx._computeType('creator', { fields: {} }, null, { 'entity-type': 'user' });
+      expect(ctx.set).to.have.been.calledWith('type', 'user');
+    });
+
+    test('should infer entity type from originalValue array', () => {
+      ctx.type = 'string[]';
+      ctx._computeType('subjects', { fields: {} }, null, [{ 'entity-type': 'directoryEntry' }]);
+      expect(ctx.set).to.have.been.calledWith('type', 'directoryEntry[]');
+    });
+
+    test('should infer entity type from delta for string type', () => {
+      ctx.type = 'string';
+      ctx._computeType('creator', { fields: {} }, [{ 'entity-type': 'user' }], null);
+      expect(ctx.set).to.have.been.calledWith('type', 'user');
+    });
+
+    test('should infer entity type from delta for string[] type', () => {
+      ctx.type = 'string[]';
+      const delta = { 0: [{ 'entity-type': 'directoryEntry' }] };
+      ctx._computeType('subjects', { fields: {} }, delta, []);
+      expect(ctx.set).to.have.been.calledWith('type', 'directoryEntry[]');
+    });
+
+    test('should keep type as-is when no schema or entity-type can be inferred', () => {
+      ctx.type = 'date';
+      ctx._computeType(null, null, null, null);
+      expect(ctx.set).to.have.been.calledWith('type', 'date');
+    });
+  });
+
+  suite('_computeDefaultClass', () => {
+    test('should return simple for simple delta', () => {
+      expect(ctx._computeDefaultClass(['added'], undefined)).to.equal('simple');
+    });
+
+    test('should return complex for object delta', () => {
+      expect(ctx._computeDefaultClass([{ nested: true }], undefined)).to.equal('complex');
+    });
+
+    test('should return simple for simple originalValue when no delta', () => {
+      expect(ctx._computeDefaultClass(undefined, 'text')).to.equal('simple');
+    });
+
+    test('should return complex for object originalValue when no delta', () => {
+      expect(ctx._computeDefaultClass(undefined, { nested: true })).to.equal('complex');
+    });
+  });
+
+  suite('_computeArrayClass', () => {
+    test('should return simple when delta is falsy and originalValue is simple', () => {
+      expect(ctx._computeArrayClass(undefined, 'text', null, false, false)).to.equal('simple');
+    });
+
+    test('should return simple when delta produces empty array', () => {
+      expect(ctx._computeArrayClass({ _t: 'a' }, [], [], false, false)).to.equal('simple');
+    });
+
+    test('should derive class from first array delta item', () => {
+      const delta = { _t: 'a', _0: ['removed', 0, 0] };
+      const result = ctx._computeArrayClass(delta, ['removed'], [], false, false);
+      expect(result).to.be.oneOf(['simple', 'complex']);
+    });
+  });
+
+  suite('_isSimpleDelta', () => {
+    test('should return true for addition of a primitive', () => {
+      expect(ctx._isSimpleDelta(['hello'])).to.be.true;
+    });
+
+    test('should return false for addition of an object', () => {
+      expect(ctx._isSimpleDelta([{ complex: true }])).to.be.false;
+    });
+
+    test('should return true for modification of primitives', () => {
+      expect(ctx._isSimpleDelta(['old', 'new'])).to.be.true;
+    });
+
+    test('should return true for deletion of a primitive', () => {
+      expect(ctx._isSimpleDelta(['removed', 0, 0])).to.be.true;
+    });
+  });
+
+  suite('_unwrapDelta (additional cases)', () => {
+    test('should unwrap modification to old value or new value', () => {
+      expect(ctx._unwrapDelta([null, 'new'])).to.equal('new');
+    });
+
+    test('should unwrap array inner changes', () => {
+      const delta = { _t: 'a', 0: ['value'] };
+      expect(ctx._unwrapDelta(delta)).to.equal('value');
+    });
+
+    test('should unwrap array inner changes when value is not array', () => {
+      const delta = { _t: 'a', 0: { nested: true } };
+      expect(ctx._unwrapDelta(delta)).to.deep.equal({ nested: true });
+    });
+
+    test('should return delta as-is when it matches no pattern', () => {
+      expect(ctx._unwrapDelta('plain')).to.equal('plain');
+    });
+  });
+
+  suite('_getTextDiff', () => {
+    test('should return undefined when text is falsy', () => {
+      expect(ctx._getTextDiff(null, 'original', false, false)).to.be.undefined;
+    });
+
+    test('should return undefined when originalValue is falsy', () => {
+      expect(ctx._getTextDiff(['@@ -1,3 +1,3 @@\n-old\n+new\n'], null, false, false)).to.be.undefined;
+    });
+
+    test('should produce diff with additions and deletions', () => {
+      const text = ['@@ -1,1 +1,1 @@\n-old\n+new\n'];
+      const result = ctx._getTextDiff(text, 'old', false, false);
+      expect(result).to.be.a('string');
+      expect(result).to.contain('<span class="deleted">old</span>');
+      expect(result).to.contain('<span class="added">new</span>');
+    });
+
+    test('should hide deletions when hideDeletions is true', () => {
+      const text = ['@@ -1,1 +1,1 @@\n-old\n+new\n'];
+      const result = ctx._getTextDiff(text, 'old', false, true);
+      expect(result).to.not.contain('<span class="deleted">');
+      expect(result).to.contain('<span class="added">new</span>');
+    });
+
+    test('should hide additions when hideAdditions is true', () => {
+      const text = ['@@ -1,1 +1,1 @@\n-old\n+new\n'];
+      const result = ctx._getTextDiff(text, 'old', true, false);
+      expect(result).to.contain('<span class="deleted">old</span>');
+      expect(result).to.not.contain('<span class="added">');
+    });
   });
 });

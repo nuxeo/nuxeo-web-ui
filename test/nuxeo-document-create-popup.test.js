@@ -117,5 +117,41 @@ suite('nuxeo-document-create-popup', () => {
       element._parentPathChanged({ detail: { isValidTargetPath: false, parentPath: '/new' } });
       expect(element.parentPath).to.equal('/existing');
     });
+
+    test('should update parentPath and suggesterChildren for valid target path', () => {
+      element.parent = null;
+      sinon.stub(element.$.defaultDoc, 'get').resolves();
+      element._parentPathChanged({
+        detail: { isValidTargetPath: true, parentPath: '/new/path', suggesterChildren: ['File'] },
+      });
+      expect(element.parentPath).to.equal('/new/path');
+      expect(element.suggesterChildren).to.deep.equal(['File']);
+    });
+
+    test('should not update when new path matches existing parent path', () => {
+      element.parent = { uid: '1', path: '/same/path', contextParameters: {} };
+      element.parentPath = '/same/path';
+      const getSpy = sinon.spy(element.$.defaultDoc, 'get');
+      element._parentPathChanged({ detail: { isValidTargetPath: true, parentPath: '/same/path/' } });
+      expect(getSpy).to.not.have.been.called;
+    });
+  });
+
+  suite('_close', () => {
+    test('should toggle dialog and restore tabs when dialog is open', () => {
+      element.$.createDocDialog.opened = true;
+      sinon.stub(element.$.createDocDialog, 'toggle');
+      element._showTabs = false;
+      element._close();
+      expect(element.$.createDocDialog.toggle).to.have.been.calledOnce;
+      expect(element._showTabs).to.be.true;
+    });
+
+    test('should do nothing when dialog is already closed', () => {
+      element.$.createDocDialog.opened = false;
+      sinon.stub(element.$.createDocDialog, 'toggle');
+      element._close();
+      expect(element.$.createDocDialog.toggle).to.not.have.been.called;
+    });
   });
 });

@@ -48,4 +48,62 @@ suite('nuxeo-recent-documents', () => {
       expect(element._computedClass(true)).to.equal('list-item selected');
     });
   });
+
+  suite('_title', () => {
+    test('should return a value (via i18n) for Root type', () => {
+      const result = element._title({ type: 'Root', title: 'Main' });
+      expect(result).to.be.a('string');
+    });
+
+    test('should return title for non-Root types', () => {
+      expect(element._title({ type: 'File', title: 'My File' })).to.equal('My File');
+    });
+
+    test('should return undefined for null document', () => {
+      expect(element._title(null)).to.be.undefined;
+    });
+  });
+
+  suite('_selectedRecentChanged', () => {
+    test('should not throw when doc is null', () => {
+      expect(() => element._selectedRecentChanged(null)).to.not.throw();
+    });
+  });
+
+  suite('_addOrUpdateStorage', () => {
+    test('should call add when doc is not in storage', () => {
+      sinon.stub(element, 'contains').returns(false);
+      const addSpy = sinon.stub(element, 'add');
+      const updateSpy = sinon.stub(element, 'update');
+      element._addOrUpdateStorage({ uid: '1' });
+      expect(addSpy).to.have.been.calledOnce;
+      expect(updateSpy).to.not.have.been.called;
+    });
+
+    test('should call update when doc is already in storage', () => {
+      sinon.stub(element, 'contains').returns(true);
+      const addSpy = sinon.stub(element, 'add');
+      const updateSpy = sinon.stub(element, 'update');
+      element._addOrUpdateStorage({ uid: '1' });
+      expect(updateSpy).to.have.been.calledOnce;
+      expect(addSpy).to.not.have.been.called;
+    });
+  });
+
+  suite('_currentDocumentChanged', () => {
+    test('should not process trashed documents', () => {
+      element.isTrashed.returns(true);
+      const spy = sinon.stub(element, '_addOrUpdateStorage');
+      element._currentDocumentChanged({ uid: '1' });
+      expect(spy).to.not.have.been.called;
+    });
+
+    test('should call _addOrUpdateStorage when documents list exists', () => {
+      element.documents = [];
+      sinon.stub(element, 'contains').returns(false);
+      const addSpy = sinon.stub(element, 'add');
+      element._currentDocumentChanged({ uid: '1', type: 'File' });
+      expect(addSpy).to.have.been.calledOnce;
+    });
+  });
 });

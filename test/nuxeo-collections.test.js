@@ -128,4 +128,256 @@ suite('nuxeo-collections', () => {
     fetchSpy.restore();
     displaySpy.restore();
   });
+
+  test('loadCollection does nothing when collection uid does not match', () => {
+    element.selectedCollection = { uid: 'c1' };
+    const resetSpy = sinon.spy(element.$.membersList, 'reset');
+    element.loadCollection({ uid: 'other' });
+    expect(resetSpy).to.not.have.been.called;
+    resetSpy.restore();
+  });
+
+  test('loadCollection does nothing when no selected collection', () => {
+    element.selectedCollection = null;
+    const resetSpy = sinon.spy(element.$.membersList, 'reset');
+    element.loadCollection({ uid: 'c1' });
+    expect(resetSpy).to.not.have.been.called;
+    resetSpy.restore();
+  });
+
+  suite('keyboard navigation', () => {
+    function makeEvent() {
+      return { detail: { keyboardEvent: { preventDefault: sinon.spy() } } };
+    }
+
+    test('_navigateOnRight displays members when a collection is selected', () => {
+      element._isDisplayMembers = false;
+      element.selectedCollection = { uid: 'c1' };
+      element.$.membersList.items = [{ uid: 'm1' }];
+      sinon.stub(element.$.membersList, 'selectIndex');
+      const fireSpy = sinon.spy(element.$.membersList, 'fire');
+
+      const e = makeEvent();
+      element._navigateOnRight(e);
+
+      expect(e.detail.keyboardEvent.preventDefault).to.have.been.calledOnce;
+      expect(element._isDisplayMembers).to.be.true;
+      expect(fireSpy).to.have.been.calledWith('iron-resize');
+      expect(element.$.membersList.selectIndex).to.have.been.calledWith(0);
+      expect(element._tmpJustRight).to.be.true;
+
+      element.$.membersList.selectIndex.restore();
+      fireSpy.restore();
+    });
+
+    test('_navigateOnRight does nothing when already displaying members', () => {
+      element._isDisplayMembers = true;
+      const e = makeEvent();
+      element._navigateOnRight(e);
+      expect(e.detail.keyboardEvent.preventDefault).to.not.have.been.called;
+    });
+
+    test('_navigateOnRight sets tmpJustRight even without selected collection', () => {
+      element._isDisplayMembers = false;
+      element.selectedCollection = null;
+      const e = makeEvent();
+      element._navigateOnRight(e);
+      expect(e.detail.keyboardEvent.preventDefault).to.have.been.calledOnce;
+      expect(element._tmpJustRight).to.be.true;
+    });
+
+    test('_navigateOnLeft goes back to collections when displaying members', () => {
+      element._isDisplayMembers = true;
+      sinon.stub(element, 'displayCollections');
+      const fireSpy = sinon.spy(element.$.collectionsList, 'fire');
+
+      const e = makeEvent();
+      element._navigateOnLeft(e);
+
+      expect(e.detail.keyboardEvent.preventDefault).to.have.been.calledOnce;
+      expect(element.displayCollections).to.have.been.calledOnce;
+      expect(fireSpy).to.have.been.calledWith('iron-resize');
+      expect(element._tmpJustLeft).to.be.true;
+
+      element.displayCollections.restore();
+      fireSpy.restore();
+    });
+
+    test('_navigateOnLeft sets tmpJustLeft without preventing default when not in members', () => {
+      element._isDisplayMembers = false;
+      const e = makeEvent();
+      element._navigateOnLeft(e);
+      expect(e.detail.keyboardEvent.preventDefault).to.not.have.been.called;
+      expect(element._tmpJustLeft).to.be.true;
+    });
+
+    test('_navigateOnDown selects next member when displaying members and just navigated right', () => {
+      element._isDisplayMembers = true;
+      element._tmpJustRight = true;
+      sinon.stub(element.$.membersList, 'selectNext');
+
+      const e = makeEvent();
+      element._navigateOnDown(e);
+
+      expect(e.detail.keyboardEvent.preventDefault).to.have.been.calledOnce;
+      expect(element.$.membersList.selectNext).to.have.been.calledOnce;
+      expect(element._tmpJustRight).to.be.false;
+
+      element.$.membersList.selectNext.restore();
+    });
+
+    test('_navigateOnDown prevents default in members view even without tmpJustRight', () => {
+      element._isDisplayMembers = true;
+      element._tmpJustRight = false;
+      const e = makeEvent();
+      element._navigateOnDown(e);
+      expect(e.detail.keyboardEvent.preventDefault).to.have.been.calledOnce;
+    });
+
+    test('_navigateOnDown selects next collection when not in members and just navigated left', () => {
+      element._isDisplayMembers = false;
+      element._tmpJustLeft = true;
+      sinon.stub(element.$.collectionsList, 'selectNext');
+
+      const e = makeEvent();
+      element._navigateOnDown(e);
+
+      expect(e.detail.keyboardEvent.preventDefault).to.have.been.calledOnce;
+      expect(element.$.collectionsList.selectNext).to.have.been.calledOnce;
+      expect(element._tmpJustLeft).to.be.false;
+
+      element.$.collectionsList.selectNext.restore();
+    });
+
+    test('_navigateOnUp selects previous member when in members view and just navigated right', () => {
+      element._isDisplayMembers = true;
+      element._tmpJustRight = true;
+      sinon.stub(element.$.membersList, 'selectPrevious');
+
+      const e = makeEvent();
+      element._navigateOnUp(e);
+
+      expect(e.detail.keyboardEvent.preventDefault).to.have.been.calledOnce;
+      expect(element.$.membersList.selectPrevious).to.have.been.calledOnce;
+      expect(element._tmpJustRight).to.be.false;
+
+      element.$.membersList.selectPrevious.restore();
+    });
+
+    test('_navigateOnUp does nothing in members view without tmpJustRight', () => {
+      element._isDisplayMembers = true;
+      element._tmpJustRight = false;
+      const e = makeEvent();
+      element._navigateOnUp(e);
+      expect(e.detail.keyboardEvent.preventDefault).to.not.have.been.called;
+    });
+
+    test('_navigateOnUp selects previous collection when not in members and just navigated left', () => {
+      element._isDisplayMembers = false;
+      element._tmpJustLeft = true;
+      sinon.stub(element.$.collectionsList, 'selectPrevious');
+
+      const e = makeEvent();
+      element._navigateOnUp(e);
+
+      expect(e.detail.keyboardEvent.preventDefault).to.have.been.calledOnce;
+      expect(element.$.collectionsList.selectPrevious).to.have.been.calledOnce;
+      expect(element._tmpJustLeft).to.be.false;
+
+      element.$.collectionsList.selectPrevious.restore();
+    });
+  });
+
+  suite('_observeIsDisplayMembers', () => {
+    test('sets slide-from-right animation and page 1 when displaying members', () => {
+      element._isDisplayMembers = true;
+      element._observeIsDisplayMembers();
+      expect(element._entryAnimation).to.equal('slide-from-right-animation');
+      expect(element._exitAnimation).to.equal('slide-left-animation');
+      expect(element._selectedPage).to.equal(1);
+    });
+
+    test('sets slide-from-left animation and page 0 when displaying collections', () => {
+      element._isDisplayMembers = false;
+      element.selectedCollection = { uid: 'c1' };
+      const fireSpy = sinon.spy(element, 'fire');
+      element._observeIsDisplayMembers();
+      expect(element._entryAnimation).to.equal('slide-from-left-animation');
+      expect(element._exitAnimation).to.equal('slide-right-animation');
+      expect(element._selectedPage).to.equal(0);
+      expect(fireSpy).to.have.been.calledWith('navigate', { doc: element.selectedCollection });
+      fireSpy.restore();
+    });
+
+    test('does not fire navigate when no selectedCollection on collections view', () => {
+      element._isDisplayMembers = false;
+      element.selectedCollection = null;
+      const fireSpy = sinon.spy(element, 'fire');
+      element._observeIsDisplayMembers();
+      expect(fireSpy).to.not.have.been.calledWith('navigate');
+      fireSpy.restore();
+    });
+  });
+
+  test('_selectedCollectionChanged fires navigate event for collection', () => {
+    const fireSpy = sinon.spy(element, 'fire');
+    element._selectedCollectionChanged({ uid: 'c1', title: 'My Collection' });
+    expect(fireSpy).to.have.been.calledWith('navigate', sinon.match({ doc: { uid: 'c1', title: 'My Collection' } }));
+    fireSpy.restore();
+  });
+
+  test('_selectedCollectionChanged does nothing for falsy collection', () => {
+    const fireSpy = sinon.spy(element, 'fire');
+    element._selectedCollectionChanged(null);
+    expect(fireSpy).to.not.have.been.called;
+    fireSpy.restore();
+  });
+
+  test('_selectedMemberChanged does nothing for falsy doc', () => {
+    expect(() => element._selectedMemberChanged(null)).to.not.throw();
+    expect(() => element._selectedMemberChanged(undefined)).to.not.throw();
+  });
+
+  test('_refreshCollections resets and fetches the collections list', () => {
+    const resetSpy = sinon.spy(element.$.collectionsList, 'reset');
+    const fetchSpy = sinon.spy(element.$.collectionsList, 'fetch');
+    element._refreshCollections();
+    expect(resetSpy).to.have.been.calledOnce;
+    expect(fetchSpy).to.have.been.calledOnce;
+    resetSpy.restore();
+    fetchSpy.restore();
+  });
+
+  test('displayMembers without index just sets _isDisplayMembers', () => {
+    element._isDisplayMembers = false;
+    element.displayMembers();
+    expect(element._isDisplayMembers).to.be.true;
+  });
+
+  test('displayMembers does not select index when collection uid does not match', () => {
+    element.selectedCollection = { uid: 'c1' };
+    const selectSpy = sinon.stub(element.$.membersList, 'selectIndex');
+    element.displayMembers({ uid: 'different' }, 0);
+    expect(element._isDisplayMembers).to.be.true;
+    expect(selectSpy).to.not.have.been.called;
+    selectSpy.restore();
+  });
+
+  test('_removeFromMembers selects last item when removing the last element', () => {
+    element.$.membersList.items = [{ uid: 'a' }, { uid: 'b' }];
+    const selectSpy = sinon.stub(element.$.membersList, 'selectIndex');
+    sinon.spy(element.$.membersList, 'splice');
+    element._removeFromMembers('b');
+    expect(selectSpy).to.have.been.calledWith(0);
+    selectSpy.restore();
+    element.$.membersList.splice.restore();
+  });
+
+  test('_removeFromMembers does nothing when uid is not found', () => {
+    element.$.membersList.items = [{ uid: 'a' }];
+    const spliceSpy = sinon.spy(element.$.membersList, 'splice');
+    element._removeFromMembers('nonexistent');
+    expect(spliceSpy).to.not.have.been.called;
+    spliceSpy.restore();
+  });
 });
