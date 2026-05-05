@@ -163,7 +163,14 @@ Then(/^I can see (\d+) search results$/, async function (numberOfResults) {
           if (!(await outLabel.isExisting()) || !(await outLabel.isDisplayed())) return false;
           const outText = await outLabel.getText();
           const outResult = parseInt(outText, 10);
-          return outResult === numberOfResults;
+          if (outResult === numberOfResults) return true;
+          // Count doesn't match yet — trigger a page provider refresh for ES indexing lag
+          const el = await uiResult.el;
+          await driver.execute((r) => {
+            const pp = r && r.querySelector('nuxeo-page-provider');
+            if (pp && pp.fetch) pp.fetch();
+          }, el);
+          return false;
         } catch (e) {
           return false;
         }
