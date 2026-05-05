@@ -26,7 +26,8 @@ jobs:
           ref: lts-2025
 
       - name: Crowdin Action
-        uses: crowdin/github-action@v2.16.0
+        id: crowdin-sync
+        uses: crowdin/github-action@v2.16.2
         with:
           # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
           skip_ref_checkout: true
