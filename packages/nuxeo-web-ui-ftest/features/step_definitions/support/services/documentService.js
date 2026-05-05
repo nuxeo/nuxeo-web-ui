@@ -9,16 +9,14 @@ class DocumentHelper {
     return new Promise((resolve, reject) =>
       fn()
         .then(resolve)
-        .catch(
-          (error) =>
-            setTimeout(() => {
-              if (retries === 0) {
-                reject(error);
-                return;
-              }
-              this._retry(fn, --retries, interval).then(resolve, reject);
-            }),
-          interval,
+        .catch((error) =>
+          setTimeout(() => {
+            if (retries === 0) {
+              reject(error);
+              return;
+            }
+            this._retry(fn, --retries, interval).then(resolve, reject);
+          }, interval),
         ),
     );
   }
@@ -49,7 +47,11 @@ class DocumentHelper {
       .then(() => {
         this.liveDocuments = [];
       })
-      .catch(console.error);
+      .catch((e) => {
+        console.error(e);
+        // Clear liveDocuments even on failure to prevent re-deleting in subsequent After hooks
+        this.liveDocuments = [];
+      });
   }
 
   init(type = 'File', title = 'my document') {
