@@ -240,7 +240,6 @@ Polymer({
     spot.target.position.set(0, 0, 0);
     spot.shadow.camera.far = 10;
     spot.castShadow = true;
-    spot.shadow.darkness = 0.001;
     spot.shadow.bias = 0.01;
     spot.shadow.mapSize.width = 1024;
     spot.shadow.mapSize.height = 1024;
@@ -254,8 +253,7 @@ Polymer({
 
     // enable shadows
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMapSoft = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     dom(this.$.threed).appendChild(this.renderer.domElement);
   },
 
