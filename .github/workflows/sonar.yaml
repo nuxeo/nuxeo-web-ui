@@ -16,7 +16,7 @@ on:
         required: false
     secrets:
       NPM_PACKAGES_TOKEN:
-        required: false
+        required: true
       SONAR_TOKEN:
         required: true
 
@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package.json') }}
           restore-keys: ${{ runner.os }}-node-
 
       - name: Install npm dependencies
@@ -62,6 +62,23 @@ jobs:
         # npm install is required (not npm ci) because the preinstall script runs
         # npm install in sub-packages that do not have a package-lock.json
         run: npm install
+        working-directory: ${{ github.workspace }}
+
+      - name: Ensure latest @nuxeo RC packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
+            | jq -r '.[]' \
+            | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" \
+            | sort -V | tail -n1)
+          echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
+
+          npm install \
+            @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
         working-directory: ${{ github.workspace }}
 
       - name: Run unit tests with coverage
