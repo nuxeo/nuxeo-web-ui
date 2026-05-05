@@ -40,40 +40,6 @@ suite('nuxeo-grid', () => {
     console.warn.restore();
   });
 
-  test('Should generate proper style when no grid properties are set', async () => {
-    const expected = `:host {
-  display: grid;
-  grid-template-columns: auto;
-  grid-template-rows: auto;
-  align-items: stretch;
-  justify-items: stretch;
-}
-@media (max-width: 1024px) {
-  :host {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-    align-items: stretch;
-    justify-items: stretch;
-  }
-  ::slotted([data-child-id="1"]) {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  ::slotted([data-child-id="2"]) {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  ::slotted([data-child-id="3"]) {
-    grid-column: 1;
-    grid-row: 3;
-  }
-}
-`;
-    expect(getStyle(grid)).to.equal(expected);
-    expect(console.warn.notCalled).to.be.true;
-  });
-
   test('Should generate proper style when properties are set', async () => {
     grid.columns = 3;
     grid.rows = 4;

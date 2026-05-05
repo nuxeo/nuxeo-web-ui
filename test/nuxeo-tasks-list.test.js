@@ -105,12 +105,4 @@ suite('nuxeo-tasks-list', () => {
       element.$.list.deselectItem.restore();
     });
   });
-
-  // suite('_ensureTaskParams', () => {
-  //   test('should resolve immediately when params already have userId', async () => {
-  //     element.$.tasksProvider.params = { userId: 'admin' };
-  //     await element._ensureTaskParams();
-  //     expect(element.$.tasksProvider.params.userId).to.equal('admin');
-  //   });
-  // });
 });
