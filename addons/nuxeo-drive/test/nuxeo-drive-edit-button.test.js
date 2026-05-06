@@ -22,15 +22,15 @@ import '../elements/nuxeo-drive-edit-button.js';
 HTMLAnchorElement.prototype.click = function () {};
 
 // Setup i18n keys used by the component
-window.nuxeo = window.nuxeo || {};
-window.nuxeo.I18n = window.nuxeo.I18n || {};
-window.nuxeo.I18n.language = 'en';
-window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
-window.nuxeo.I18n.en['driveEditButton.tooltip'] = 'Open with Nuxeo Drive';
-window.nuxeo.I18n.en['driveEditButton.directTransfer.failed'] =
+globalThis.nuxeo = globalThis.nuxeo || {};
+globalThis.nuxeo.I18n = globalThis.nuxeo.I18n || {};
+globalThis.nuxeo.I18n.language = 'en';
+globalThis.nuxeo.I18n.en = globalThis.nuxeo.I18n.en || {};
+globalThis.nuxeo.I18n.en['driveEditButton.tooltip'] = 'Open with Nuxeo Drive';
+globalThis.nuxeo.I18n.en['driveEditButton.directTransfer.failed'] =
   'An error occurred while trying to open the document with Nuxeo Drive.';
-window.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
-window.nuxeo.I18n.en['command.close'] = 'Close';
+globalThis.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
+globalThis.nuxeo.I18n.en['command.close'] = 'Close';
 
 suite('nuxeo-drive-edit-button — error handling', () => {
   let element;
