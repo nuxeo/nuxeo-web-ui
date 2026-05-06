@@ -87,6 +87,38 @@ suite('nuxeo-collection-move-up-action', () => {
       expect(element._computeLabel()).to.equal('collections.moveUp');
     });
   });
+
+  suite('moveUp', () => {
+    test('should do nothing when members is null', () => {
+      element.members = null;
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveUp();
+      expect(fireSpy).to.not.have.been.called;
+    });
+
+    test('should do nothing when member is first in allMembers', () => {
+      element.allMembers = [{ uid: 'a' }, { uid: 'b' }];
+      element.members = [{ uid: 'a' }];
+      element.collection = { uid: 'col1' };
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveUp();
+      expect(fireSpy).to.not.have.been.called;
+    });
+
+    test('should execute move operation when member can move up', async () => {
+      element.allMembers = [{ uid: 'a' }, { uid: 'b' }, { uid: 'c' }];
+      element.members = [{ uid: 'b' }];
+      element.collection = { uid: 'col1' };
+      const executeStub = sinon.stub(element.$.moveUpOp, 'execute').returns(Promise.resolve());
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveUp();
+      await executeStub.returnValues[0];
+      expect(element.$.moveUpOp.input).to.equal('col1');
+      expect(element.$.moveUpOp.params.member1).to.equal('a');
+      expect(element.$.moveUpOp.params.member2).to.equal('b');
+      expect(fireSpy).to.have.been.calledWith('refresh-display');
+    });
+  });
 });
 
 suite('nuxeo-collection-move-down-action', () => {
@@ -119,6 +151,38 @@ suite('nuxeo-collection-move-down-action', () => {
       element.allMembers = [{ uid: 'a' }, { uid: 'b' }];
       element.members = [{ uid: 'a' }];
       expect(element._isAvailable()).to.be.true;
+    });
+  });
+
+  suite('moveDown', () => {
+    test('should do nothing when members is null', () => {
+      element.members = null;
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveDown();
+      expect(fireSpy).to.not.have.been.called;
+    });
+
+    test('should do nothing when member is last in allMembers', () => {
+      element.allMembers = [{ uid: 'a' }, { uid: 'b' }];
+      element.members = [{ uid: 'b' }];
+      element.collection = { uid: 'col1' };
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveDown();
+      expect(fireSpy).to.not.have.been.called;
+    });
+
+    test('should execute move operation when member can move down', async () => {
+      element.allMembers = [{ uid: 'a' }, { uid: 'b' }, { uid: 'c' }];
+      element.members = [{ uid: 'b' }];
+      element.collection = { uid: 'col1' };
+      const executeStub = sinon.stub(element.$.moveDownOp, 'execute').returns(Promise.resolve());
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveDown();
+      await executeStub.returnValues[0];
+      expect(element.$.moveDownOp.input).to.equal('col1');
+      expect(element.$.moveDownOp.params.member1).to.equal('c');
+      expect(element.$.moveDownOp.params.member2).to.equal('b');
+      expect(fireSpy).to.have.been.calledWith('refresh-display');
     });
   });
 });
@@ -155,6 +219,38 @@ suite('nuxeo-collection-move-top-action', () => {
       expect(element._isAvailable()).to.be.true;
     });
   });
+
+  suite('moveUp (move to top)', () => {
+    test('should do nothing when members is null', () => {
+      element.members = null;
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveUp();
+      expect(fireSpy).to.not.have.been.called;
+    });
+
+    test('should do nothing when member is already first in allMembers', () => {
+      element.allMembers = [{ uid: 'a' }, { uid: 'b' }];
+      element.members = [{ uid: 'a' }];
+      element.collection = { uid: 'col1' };
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveUp();
+      expect(fireSpy).to.not.have.been.called;
+    });
+
+    test('should execute move operation to top when member can move', async () => {
+      element.allMembers = [{ uid: 'a' }, { uid: 'b' }, { uid: 'c' }];
+      element.members = [{ uid: 'c' }];
+      element.collection = { uid: 'col1' };
+      const executeStub = sinon.stub(element.$.moveTopOp, 'execute').returns(Promise.resolve());
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveUp();
+      await executeStub.returnValues[0];
+      expect(element.$.moveTopOp.input).to.equal('col1');
+      expect(element.$.moveTopOp.params.member1).to.equal('a');
+      expect(element.$.moveTopOp.params.member2).to.equal('c');
+      expect(fireSpy).to.have.been.calledWith('refresh-display');
+    });
+  });
 });
 
 suite('nuxeo-collection-move-bottom-action', () => {
@@ -187,6 +283,38 @@ suite('nuxeo-collection-move-bottom-action', () => {
       element.allMembers = [{ uid: 'a' }, { uid: 'b' }];
       element.members = [{ uid: 'a' }];
       expect(element._isAvailable()).to.be.true;
+    });
+  });
+
+  suite('moveBottom', () => {
+    test('should do nothing when members is null', () => {
+      element.members = null;
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveBottom();
+      expect(fireSpy).to.not.have.been.called;
+    });
+
+    test('should do nothing when member is already last in allMembers', () => {
+      element.allMembers = [{ uid: 'a' }, { uid: 'b' }];
+      element.members = [{ uid: 'b' }];
+      element.collection = { uid: 'col1' };
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveBottom();
+      expect(fireSpy).to.not.have.been.called;
+    });
+
+    test('should execute move operation to bottom when member can move', async () => {
+      element.allMembers = [{ uid: 'a' }, { uid: 'b' }, { uid: 'c' }];
+      element.members = [{ uid: 'a' }];
+      element.collection = { uid: 'col1' };
+      const executeStub = sinon.stub(element.$.moveBottomOp, 'execute').returns(Promise.resolve());
+      const fireSpy = sinon.spy(element, 'fire');
+      element.moveBottom();
+      await executeStub.returnValues[0];
+      expect(element.$.moveBottomOp.input).to.equal('col1');
+      expect(element.$.moveBottomOp.params.member1).to.equal('c');
+      expect(element.$.moveBottomOp.params.member2).to.equal('a');
+      expect(fireSpy).to.have.been.calledWith('refresh-display');
     });
   });
 });

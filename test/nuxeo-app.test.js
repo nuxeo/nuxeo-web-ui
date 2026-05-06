@@ -353,4 +353,307 @@ suite('nuxeo-app', () => {
     app._toast.restore();
     app.fire.restore();
   });
+
+  test('show sets page and routeParams', () => {
+    app.show('browse', 'someRoute');
+    expect(app.page).to.equal('browse');
+    expect(app.routeParams).to.equal('someRoute');
+  });
+
+  test('showError sets loading to false and configures error element', () => {
+    app.loading = true;
+    app.showError(404, 'Not Found', '/some/url');
+    expect(app.loading).to.be.false;
+    expect(app.$.error.code).to.equal(404);
+    expect(app.$.error.message).to.equal('Not Found');
+    expect(app.$.error.url).to.equal('/some/url');
+    expect(app.page).to.equal('error');
+  });
+
+  test('_defineTaskAndNavigate sets currentTask and shows tasks page', () => {
+    const task = { id: 't1', name: 'Review' };
+    app._defineTaskAndNavigate(task);
+    expect(app.currentTask).to.equal(task);
+    expect(app.page).to.equal('tasks');
+  });
+
+  test('_defineTaskAndNavigate works with undefined task', () => {
+    app._defineTaskAndNavigate();
+    expect(app.currentTask).to.be.undefined;
+    expect(app.page).to.equal('tasks');
+  });
+
+  test('_directionChanged sets drawer alignment for RTL', () => {
+    app._directionChanged(true);
+    expect(app.$.drawerPanel.getAttribute('align')).to.equal('end');
+    expect(app.toggleChevronIcon).to.equal('icons:chevron-right');
+  });
+
+  test('_directionChanged sets drawer alignment for LTR', () => {
+    app._directionChanged(false);
+    expect(app.$.drawerPanel.getAttribute('align')).to.equal('start');
+    expect(app.toggleChevronIcon).to.equal('icons:chevron-left');
+  });
+
+  test('_documentRemovedFromCollection toasts', () => {
+    sinon.stub(app, '_toast');
+    app._documentRemovedFromCollection();
+    expect(app._toast).to.have.been.calledWith('app.document.removedFromCollection');
+    app._toast.restore();
+  });
+
+  test('_documentRemovedFromClipboard toasts', () => {
+    sinon.stub(app, '_toast');
+    app._documentRemovedFromClipboard();
+    expect(app._toast).to.have.been.calledWith('app.document.removedFromClipboard');
+    app._toast.restore();
+  });
+
+  test('_documentAddedToFavorites toasts', () => {
+    sinon.stub(app, '_toast');
+    app._documentAddedToFavorites();
+    expect(app._toast).to.have.been.calledWith('app.document.addedToFavorites');
+    app._toast.restore();
+  });
+
+  test('_documentRemovedFromFavorites toasts', () => {
+    sinon.stub(app, '_toast');
+    app._documentRemovedFromFavorites();
+    expect(app._toast).to.have.been.calledWith('app.document.removedFromFavorites');
+    app._toast.restore();
+  });
+
+  test('_documentSubscribed toasts', () => {
+    sinon.stub(app, '_toast');
+    app._documentSubscribed();
+    expect(app._toast).to.have.been.calledWith('app.document.subscribed');
+    app._toast.restore();
+  });
+
+  test('_documentUnsubscribed toasts', () => {
+    sinon.stub(app, '_toast');
+    app._documentUnsubscribed();
+    expect(app._toast).to.have.been.calledWith('app.document.unsubscribed');
+    app._toast.restore();
+  });
+
+  test('_documentLocked toasts and fires document-updated', () => {
+    sinon.stub(app, '_toast');
+    sinon.stub(app, 'fire');
+    app._documentLocked();
+    expect(app._toast).to.have.been.calledWith('app.document.locked');
+    expect(app.fire).to.have.been.calledWith('document-updated');
+    app._toast.restore();
+    app.fire.restore();
+  });
+
+  test('_documentUnlocked toasts and fires document-updated', () => {
+    sinon.stub(app, '_toast');
+    sinon.stub(app, 'fire');
+    app._documentUnlocked();
+    expect(app._toast).to.have.been.calledWith('app.document.unlocked');
+    expect(app.fire).to.have.been.calledWith('document-updated');
+    app._toast.restore();
+    app.fire.restore();
+  });
+
+  test('_onAddedToClipboard toasts plural for multiple docs', () => {
+    sinon.stub(app, '_toast');
+    app._onAddedToClipboard({ detail: { docIds: ['1', '2'] } });
+    expect(app._toast).to.have.been.calledWith('app.documents.addedToClipboard');
+    app._toast.restore();
+  });
+
+  test('_onAddedToClipboard toasts singular for single doc', () => {
+    sinon.stub(app, '_toast');
+    app._onAddedToClipboard({ detail: {} });
+    expect(app._toast).to.have.been.calledWith('app.document.addedToClipboard');
+    app._toast.restore();
+  });
+
+  test('_onAddToClipboard adds documents to clipboard', () => {
+    const addSpy = sinon.spy();
+    app.clipboard = { add: addSpy };
+    const docs = [{ uid: '1' }, { uid: '2' }];
+    app._onAddToClipboard({ detail: { documents: docs } });
+    expect(addSpy).to.have.been.calledWith(docs);
+  });
+
+  test('_onAddToClipboard does nothing without documents', () => {
+    const addSpy = sinon.spy();
+    app.clipboard = { add: addSpy };
+    app._onAddToClipboard({ detail: {} });
+    expect(addSpy).to.not.have.been.called;
+  });
+
+  test('_onClipboardAction fires document-updated', () => {
+    sinon.stub(app, 'fire');
+    app._onClipboardAction({ detail: { operation: 'Document.Copy', documents: [] } });
+    expect(app.fire).to.have.been.calledWith('document-updated');
+    app.fire.restore();
+  });
+
+  test('_workflowTaskAssigned calls loadTask with currentTaskId', () => {
+    sinon.stub(app, 'loadTask');
+    app.currentTaskId = 'task-42';
+    app._workflowTaskAssigned();
+    expect(app.loadTask).to.have.been.calledWith('task-42');
+    app.loadTask.restore();
+  });
+
+  test('_documentsUntrashed handles empty detail for bulk', () => {
+    sinon.stub(app, '_refreshCollections');
+    sinon.stub(app, '_refreshSearch');
+    app._documentsUntrashed({ detail: {} });
+    expect(app._refreshCollections).to.have.been.called;
+    expect(app._refreshSearch).to.have.been.called;
+    app._refreshCollections.restore();
+    app._refreshSearch.restore();
+  });
+
+  test('_documentsUntrashed toasts success for non-empty detail', () => {
+    sinon.stub(app, '_toast');
+    sinon.stub(app, 'hasFacet').returns(false);
+    sinon.stub(app, '_refreshSearch');
+    app._documentsUntrashed({ detail: { documents: [{ uid: '1' }] } });
+    expect(app._toast).to.have.been.calledWith('app.documents.untrashed.success');
+    app._toast.restore();
+    app.hasFacet.restore();
+    app._refreshSearch.restore();
+  });
+
+  test('_documentsUntrashed toasts error when error present', () => {
+    sinon.stub(app, '_toast');
+    sinon.stub(app, '_refreshSearch');
+    app._documentsUntrashed({ detail: { error: true, documents: [] } });
+    expect(app._toast).to.have.been.calledWith('app.documents.untrashed.error');
+    app._toast.restore();
+    app._refreshSearch.restore();
+  });
+
+  test('_documentsDeleted handles empty detail for bulk delete', () => {
+    sinon.stub(app, '_refreshCollections');
+    sinon.stub(app, '_refreshSearch');
+    app._documentsDeleted({ detail: {} });
+    expect(app._refreshCollections).to.have.been.called;
+    expect(app._refreshSearch).to.have.been.called;
+    app._refreshCollections.restore();
+    app._refreshSearch.restore();
+  });
+
+  test('_documentsDeleted notifies success for non-empty detail', () => {
+    sinon.stub(app, '_removeFromClipboard');
+    sinon.stub(app, '_removeFromRecentlyViewed');
+    sinon.stub(app, '_notify');
+    sinon.stub(app, 'hasFacet').returns(false);
+    sinon.stub(app, '_refreshSearch');
+    const docs = [{ uid: '1' }];
+    app._documentsDeleted({ detail: { documents: docs } });
+    expect(app._removeFromClipboard).to.have.been.calledWith(docs);
+    expect(app._removeFromRecentlyViewed).to.have.been.calledWith(docs);
+    expect(app._notify).to.have.been.called;
+    app._removeFromClipboard.restore();
+    app._removeFromRecentlyViewed.restore();
+    app._notify.restore();
+    app.hasFacet.restore();
+    app._refreshSearch.restore();
+  });
+
+  test('_refreshSearch sets searchForm from $$ lookup', () => {
+    sinon.stub(app, '$$').returns(null);
+    app.searchName = 'default';
+    app._refreshSearch();
+    expect(app.searchForm).to.be.null;
+    app.$$.restore();
+  });
+
+  test('_refreshCollections refreshes when form is visible', () => {
+    const refreshSpy = sinon.spy();
+    sinon.stub(app, '$$').returns({ visible: true, _refreshCollections: refreshSpy });
+    app._refreshCollections();
+    expect(refreshSpy).to.have.been.called;
+    app.$$.restore();
+  });
+
+  test('_refreshCollections does nothing when form is not visible', () => {
+    sinon.stub(app, '$$').returns({ visible: false, _refreshCollections: sinon.spy() });
+    app._refreshCollections();
+    app.$$.restore();
+  });
+
+  test('_refreshCollections does nothing when form not found', () => {
+    sinon.stub(app, '$$').returns(null);
+    app._refreshCollections();
+    app.$$.restore();
+  });
+
+  test('showDiff sets page to diff and docIds', () => {
+    app.showDiff('id1', 'id2');
+    expect(app.page).to.equal('diff');
+    expect(app.$.diff.docIds).to.deep.equal(['id1', 'id2']);
+  });
+
+  test('_diffDocuments sets diff docIds from event documents', () => {
+    Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+    app._diffDocuments({ detail: { documents: [{ uid: 'a' }, { uid: 'b' }] } });
+    expect(app.$.diff.docIds).to.deep.equal(['a', 'b']);
+  });
+
+  suite('_updateTitle', () => {
+    test('does nothing when page is falsy', () => {
+      const origTitle = document.title;
+      app.page = '';
+      app._updateTitle();
+      expect(document.title).to.equal(origTitle);
+    });
+
+    test('sets title for browse page with document', () => {
+      sinon.stub(app, 'hasFacet').returns(false);
+      app.page = 'browse';
+      app.currentDocument = { title: 'My Doc', type: 'File' };
+      app.productName = 'Nuxeo';
+      app._updateTitle();
+      expect(document.title).to.include('My Doc');
+      expect(document.title).to.include('Nuxeo');
+      app.hasFacet.restore();
+    });
+
+    test('sets title for admin page', () => {
+      app.page = 'admin';
+      app.selectedAdminTab = 'users';
+      app.productName = 'Nuxeo';
+      app._updateTitle();
+      expect(document.title).to.include('app.title.admin.users');
+      expect(document.title).to.include('app.title.admin');
+    });
+
+    test('sets title for default page', () => {
+      app.page = 'home';
+      app.productName = 'Nuxeo';
+      app._updateTitle();
+      expect(document.title).to.include('app.title.home');
+    });
+  });
+
+  test('_showSearchResults navigates to search', () => {
+    Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+    const target = { searchName: 'default_search' };
+    app._showSearchResults({ composedPath: () => [target] });
+    expect(app.navigateTo).to.have.been.calledWith('search', 'default_search');
+  });
+
+  test('loadTask with empty id calls _defineTaskAndNavigate with no arg', () => {
+    sinon.stub(app, '_defineTaskAndNavigate');
+    app.loadTask('');
+    expect(app._defineTaskAndNavigate).to.have.been.calledOnce;
+    expect(app._defineTaskAndNavigate.firstCall.args).to.be.empty;
+    app._defineTaskAndNavigate.restore();
+  });
+
+  test('loadTask with null id calls _defineTaskAndNavigate with no arg', () => {
+    sinon.stub(app, '_defineTaskAndNavigate');
+    app.loadTask(null);
+    expect(app._defineTaskAndNavigate).to.have.been.calledOnce;
+    app._defineTaskAndNavigate.restore();
+  });
 });

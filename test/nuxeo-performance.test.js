@@ -351,4 +351,196 @@ suite('Performance', () => {
       expect(result).to.have.property('userAgent');
     });
   });
+
+  suite('branch coverage: paint and timing fallbacks', () => {
+    test('getFirstPaint returns null when no first-paint entry', () => {
+      if (typeof PerformancePaintTiming === 'undefined') {
+        return;
+      }
+      const stub = sinon.stub(performance, 'getEntriesByType').callsFake((type) => {
+        if (type === 'paint') {
+          return [{ name: 'first-contentful-paint', startTime: 12 }];
+        }
+        return [];
+      });
+      expect(NuxeoPerf.getFirstPaint()).to.be.null;
+      stub.restore();
+    });
+
+    test('getFirstPaint uses non-blank paint timing when paint API missing', () => {
+      const had = window.PerformancePaintTiming;
+      try {
+        delete window.PerformancePaintTiming;
+        const origTiming = performance.timing;
+        Object.defineProperty(performance, 'timing', {
+          configurable: true,
+          value: {
+            timeToNonBlankPaint: 900,
+            fetchStart: 100,
+            msFirstPaint: undefined,
+          },
+        });
+        expect(NuxeoPerf.getFirstPaint()).to.equal(800);
+        Object.defineProperty(performance, 'timing', { configurable: true, value: origTiming });
+      } finally {
+        if (had !== undefined) {
+          window.PerformancePaintTiming = had;
+        }
+      }
+    });
+
+    test('getFirstPaint uses msFirstPaint when timeToNonBlankPaint missing', () => {
+      const had = window.PerformancePaintTiming;
+      try {
+        delete window.PerformancePaintTiming;
+        const origTiming = performance.timing;
+        Object.defineProperty(performance, 'timing', {
+          configurable: true,
+          value: {
+            timeToNonBlankPaint: undefined,
+            fetchStart: 50,
+            msFirstPaint: 750,
+          },
+        });
+        expect(NuxeoPerf.getFirstPaint()).to.equal(700);
+        Object.defineProperty(performance, 'timing', { configurable: true, value: origTiming });
+      } finally {
+        if (had !== undefined) {
+          window.PerformancePaintTiming = had;
+        }
+      }
+    });
+
+    test('getFirstContentfulPaint returns null when paint timing type missing', () => {
+      const had = window.PerformancePaintTiming;
+      try {
+        delete window.PerformancePaintTiming;
+        expect(NuxeoPerf.getFirstContentfulPaint()).to.be.null;
+      } finally {
+        if (had !== undefined) {
+          window.PerformancePaintTiming = had;
+        }
+      }
+    });
+
+    test('getFirstContentfulPaint returns null when no fcp entry', () => {
+      if (typeof PerformancePaintTiming === 'undefined') {
+        return;
+      }
+      const stub = sinon.stub(performance, 'getEntriesByType').callsFake((type) => {
+        if (type === 'paint') {
+          return [{ name: 'first-paint', startTime: 1 }];
+        }
+        return [];
+      });
+      expect(NuxeoPerf.getFirstContentfulPaint()).to.be.null;
+      stub.restore();
+    });
+  });
+
+  suite('branch coverage: performance guards', () => {
+    test('getOnLoad returns null when timing missing', () => {
+      const origTiming = performance.timing;
+      Object.defineProperty(performance, 'timing', { configurable: true, value: undefined });
+      expect(NuxeoPerf.getOnLoad()).to.be.null;
+      Object.defineProperty(performance, 'timing', { configurable: true, value: origTiming });
+    });
+
+    test('getDomContentLoaded returns null when timing missing', () => {
+      const origTiming = performance.timing;
+      Object.defineProperty(performance, 'timing', { configurable: true, value: undefined });
+      expect(NuxeoPerf.getDomContentLoaded()).to.be.null;
+      Object.defineProperty(performance, 'timing', { configurable: true, value: origTiming });
+    });
+
+    test('getUserTiming returns null when PerformanceMark missing', () => {
+      const had = window.PerformanceMark;
+      try {
+        delete window.PerformanceMark;
+        expect(NuxeoPerf.getUserTiming()).to.be.null;
+      } finally {
+        if (had !== undefined) {
+          window.PerformanceMark = had;
+        }
+      }
+    });
+
+    test('getResources returns null when PerformanceResourceTiming missing', () => {
+      const had = window.PerformanceResourceTiming;
+      try {
+        delete window.PerformanceResourceTiming;
+        expect(NuxeoPerf.getResources()).to.be.null;
+      } finally {
+        if (had !== undefined) {
+          window.PerformanceResourceTiming = had;
+        }
+      }
+    });
+
+    test('getEffectiveConnectionType reads mozConnection', () => {
+      const origConn = navigator.connection;
+      const origMoz = navigator.mozConnection;
+      const origWebkit = navigator.webkitConnection;
+      try {
+        delete navigator.connection;
+        delete navigator.webkitConnection;
+        Object.defineProperty(navigator, 'mozConnection', {
+          configurable: true,
+          value: { effectiveType: '4g' },
+        });
+        expect(NuxeoPerf.getEffectiveConnectionType()).to.equal('4g');
+      } finally {
+        if (origConn !== undefined) {
+          Object.defineProperty(navigator, 'connection', { configurable: true, value: origConn });
+        } else {
+          delete navigator.connection;
+        }
+        if (origMoz !== undefined) {
+          Object.defineProperty(navigator, 'mozConnection', { configurable: true, value: origMoz });
+        } else {
+          delete navigator.mozConnection;
+        }
+        if (origWebkit !== undefined) {
+          Object.defineProperty(navigator, 'webkitConnection', { configurable: true, value: origWebkit });
+        }
+      }
+    });
+  });
+
+  suite('branch coverage: mark and measure guards', () => {
+    test('mark is no-op when performance.mark missing', () => {
+      const orig = performance.mark;
+      Object.defineProperty(performance, 'mark', { configurable: true, value: undefined });
+      expect(() => NuxeoPerf.mark('x')).to.not.throw();
+      Object.defineProperty(performance, 'mark', { configurable: true, value: orig });
+    });
+
+    test('clearMarks is no-op when clearMarks missing', () => {
+      const orig = performance.clearMarks;
+      Object.defineProperty(performance, 'clearMarks', { configurable: true, value: undefined });
+      expect(() => NuxeoPerf.clearMarks('x')).to.not.throw();
+      Object.defineProperty(performance, 'clearMarks', { configurable: true, value: orig });
+    });
+
+    test('measure is no-op when measure missing', () => {
+      const orig = performance.measure;
+      Object.defineProperty(performance, 'measure', { configurable: true, value: undefined });
+      expect(() => NuxeoPerf.measure('m')).to.not.throw();
+      Object.defineProperty(performance, 'measure', { configurable: true, value: orig });
+    });
+
+    test('clearMeasures uses clearMeasures when available', () => {
+      const origClear = performance.clearMeasures;
+      const wrongOrig = performance.clearMarks;
+      Object.defineProperty(performance, 'clearMeasures', {
+        configurable: true,
+        value: sinon.stub(),
+      });
+      Object.defineProperty(performance, 'clearMarks', { configurable: true, value: undefined });
+      NuxeoPerf.clearMeasures('z');
+      expect(performance.clearMeasures).to.not.have.been.called;
+      Object.defineProperty(performance, 'clearMeasures', { configurable: true, value: origClear });
+      Object.defineProperty(performance, 'clearMarks', { configurable: true, value: wrongOrig });
+    });
+  });
 });
