@@ -18,23 +18,21 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
+import { setupI18n, addOpenDriveUrlSuite } from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
 
 // Setup i18n keys used by the component
-window.nuxeo = window.nuxeo || {};
-window.nuxeo.I18n = window.nuxeo.I18n || {};
-window.nuxeo.I18n.language = 'en';
-window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
-window.nuxeo.I18n.en['driveDownloadButton.tooltip'] = 'Download with Nuxeo Drive';
-window.nuxeo.I18n.en['driveDownload.noDocumentsSelected'] = 'No documents selected for download.';
-window.nuxeo.I18n.en['driveDownload.tooManyDocuments'] =
-  'You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.';
-window.nuxeo.I18n.en['driveDownload.directTransfer.failed'] =
-  'An error occurred while trying to download the document with Nuxeo Drive.';
-window.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
-window.nuxeo.I18n.en['command.close'] = 'Close';
+setupI18n({
+  'driveDownloadButton.tooltip': 'Download with Nuxeo Drive',
+  'driveDownload.noDocumentsSelected': 'No documents selected for download.',
+  'driveDownload.tooManyDocuments':
+    'You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.',
+  'driveDownload.directTransfer.failed': 'An error occurred while trying to download the document with Nuxeo Drive.',
+  'driveEditButton.dialog.heading': 'Download Nuxeo Drive Client',
+  'command.close': 'Close',
+});
 
 suite('nuxeo-drive-download-button', () => {
   let element;
@@ -436,27 +434,7 @@ suite('nuxeo-drive-download-button', () => {
   // _openDriveUrl — wires the shared openDriveUrl with the element's dialog toggle
   // The blur/debounce detection logic itself is tested in nuxeo-drive-protocol-handler.test.js
   // ---------------------------------------------------------------------------
-  suite('_openDriveUrl', () => {
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('delegates to the shared openDriveUrl and passes dialog toggle as callback', () => {
-      const clock = sinon.useFakeTimers();
-      try {
-        element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-        const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-        // Verify the element's _openDriveUrl wires up to the dialog correctly
-        // by checking the toggle is callable (the shared module is tested separately).
-        expect(() => element._openDriveUrl('nxdrive://direct-download/abc123')).to.not.throw();
-        // Advance the protocol timeout without waiting in real time.
-        clock.tick(1600);
-        expect(dialogToggleStub).to.have.been.calledOnce;
-      } finally {
-        clock.restore();
-      }
-    });
-  });
+  addOpenDriveUrlSuite(() => element, 'nxdrive://direct-download/abc123');
 
   // ---------------------------------------------------------------------------
   // _buildOriginalUrl — server info
