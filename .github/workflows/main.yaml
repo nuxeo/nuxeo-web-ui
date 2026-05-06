@@ -36,8 +36,6 @@ jobs:
     uses: ./.github/workflows/sonar.yaml
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
-      REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     with:
       branch: maintenance-3.1.x
