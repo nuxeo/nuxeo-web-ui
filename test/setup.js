@@ -46,6 +46,47 @@ chai.use(sinonChai);
 globalThis.chai = chai;
 globalThis.sinon = sinon;
 
+// Sinon ≥ 11 rejects stubbing non-configurable accessors (common on Polymer / Nuxeo.Element:
+// `i18n`, `navigateTo`, etc.). Shadow the property with a configurable own data property whose
+// value is an anonymous `sinon.stub()` so existing patterns keep working:
+// `sinon.stub(el, 'i18n').callsFake(fn)` and `const s = sinon.stub(el, 'navigateTo')`.
+(function patchSinonStubForNonConfigurableProps() {
+  const origStub = sinon.stub.bind(sinon);
+  const isNonConfigurableStubError = (err) =>
+    err instanceof TypeError &&
+    (String(err.message).includes('non-configurable') || String(err.message).includes('non configurable'));
+
+  sinon.stub = function stubPatched(obj, prop, ...rest) {
+    if (rest.length > 0) {
+      return origStub(obj, prop, ...rest);
+    }
+    try {
+      return origStub(obj, prop);
+    } catch (err) {
+      if (!isNonConfigurableStubError(err) || obj == null || typeof prop !== 'string') {
+        throw err;
+      }
+      const fake = sinon.stub();
+      Object.defineProperty(obj, prop, {
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: fake,
+      });
+      const innerRestore = typeof fake.restore === 'function' ? fake.restore.bind(fake) : () => {};
+      fake.restore = () => {
+        try {
+          delete obj[prop];
+        } catch (_) {
+          /* ignore */
+        }
+        innerRestore();
+      };
+      return fake;
+    }
+  };
+})();
+
 // Common assertion entry points used throughout the test suite.
 globalThis.expect = chai.expect;
 globalThis.assert = chai.assert;
