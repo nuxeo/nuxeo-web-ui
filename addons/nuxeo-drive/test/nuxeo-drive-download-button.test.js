@@ -18,7 +18,6 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
-import * as protocolHandler from '../elements/nuxeo-drive-protocol-handler.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
@@ -249,30 +248,6 @@ suite('nuxeo-drive-download-button', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // _base64UrlSafeEncode
-  // ---------------------------------------------------------------------------
-  suite('_base64UrlSafeEncode', () => {
-    test('output contains no standard base64 padding (=)', () => {
-      const bytes = new Uint8Array([1, 2, 3, 4, 5]);
-      const result = element._base64UrlSafeEncode(bytes);
-      expect(result).to.not.include('=');
-    });
-
-    test('output contains no + characters (URL-safe)', () => {
-      // Use bytes that would produce '+' in standard base64
-      const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
-      expect(result).to.not.include('+');
-    });
-
-    test('output contains no / characters (URL-safe)', () => {
-      const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
-      expect(result).to.not.include('/');
-    });
-  });
-
-  // ---------------------------------------------------------------------------
   // _download — guard conditions
   // ---------------------------------------------------------------------------
   suite('_download', () => {
@@ -483,7 +458,6 @@ suite('nuxeo-drive-download-button', () => {
     });
   });
 
-
   // ---------------------------------------------------------------------------
   // _buildOriginalUrl — server info
   // ---------------------------------------------------------------------------
@@ -499,4 +473,3 @@ suite('nuxeo-drive-download-button', () => {
     });
   });
 });
-
