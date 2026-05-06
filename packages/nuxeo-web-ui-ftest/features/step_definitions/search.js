@@ -283,9 +283,19 @@ When(/^I perform a QuickSearch for (.+)/, async function (searchTerm) {
 
 Then(/^I can see (\d+) QuickSearch results$/, async function (numberOfResults) {
   const quickSearch = await this.ui.quickSearch;
-  await driver.pause(1000);
-  const result = await quickSearch.quickSearchResultsCount();
-  if (result !== numberOfResults) {
-    throw new Error(`Expecting to get ${numberOfResults} results but found ${result}`);
-  }
+  await driver.waitUntil(
+    async () => {
+      try {
+        const result = await quickSearch.quickSearchResultsCount();
+        return result === numberOfResults;
+      } catch (e) {
+        return false;
+      }
+    },
+    {
+      timeout: 20000,
+      interval: 2000,
+      timeoutMsg: `Expecting to get ${numberOfResults} QuickSearch results but count never matched`,
+    },
+  );
 });
