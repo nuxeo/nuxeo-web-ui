@@ -565,6 +565,21 @@ Polymer({
     paramMutator: {
       type: Function,
       value() {
+        // Walks the parent chain of a vocabulary entry and reconstructs the full hierarchical path string.
+        // Handles properties.parent as a string id, an object with .id, or an object with .properties.id.
+        function toHierarchicalPath(entry) {
+          let output = entry.id;
+          let current = entry;
+          while (current && current.properties && current.properties.parent) {
+            const parent = current.properties.parent;
+            const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
+            if (!parentId) break;
+            output = `${parentId}`.concat('/', `${output}`);
+            current = typeof parent === 'string' ? null : parent;
+          }
+          return output;
+        }
+
         return function (params, modifyPayload = false) {
           const result = {};
           if (params) {
@@ -573,14 +588,12 @@ Polymer({
               const value = params[param];
               if (value !== null && param !== 'dc:title') {
                 if (modifyPayload && Array.isArray(value)) {
-                  result[param] = value.map((item) => {
-                    let output = item.id ? item.id : item;
-                    while (item && item.properties && item.properties.parent) {
-                      output = `${item.properties.parent.id}`.concat('/', `${output}`);
-                      item = item.properties.parent;
-                    }
-                    return output;
-                  });
+                  result[param] = value.map((item) =>
+                    item && item.id && item.properties ? toHierarchicalPath(item) : item,
+                  );
+                } else if (modifyPayload && value && typeof value === 'object' && value.id && value.properties) {
+                  // Single-select hierarchical vocabulary: reconstruct full path (e.g. "parent/child")
+                  result[param] = toHierarchicalPath(value);
                 } else {
                   result[param] = typeof value === 'boolean' ? value.toString() : value;
                 }
@@ -803,7 +816,7 @@ Polymer({
       this.isSavedSearch = this._isSavedSearch();
       this.selectedSearch = search;
       const clonedParams = JSON.parse(JSON.stringify(search.params));
-      this.params = this._mutateParams(clonedParams);
+      this.params = this._mutateParams(clonedParams, true);
       this._navigateToResults();
     } else {
       this._clear();
@@ -838,7 +851,7 @@ Polymer({
     // Populate params
     const search = this._searches[idx];
     const clonedParams = JSON.parse(JSON.stringify(search.params));
-    this.params = this._mutateParams(clonedParams);
+    this.params = this._mutateParams(clonedParams, true);
     this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
 
     // Ensure form stays synced
@@ -912,7 +925,7 @@ Polymer({
       _el.searchId = this.selectedSearch.id;
       _el.get().then((response) => {
         const clonedParams = JSON.parse(JSON.stringify(response.params));
-        this.params = this._mutateParams(clonedParams);
+        this.params = this._mutateParams(clonedParams, true);
 
         this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
         this.form.searchTerm = this.searchTerm;
