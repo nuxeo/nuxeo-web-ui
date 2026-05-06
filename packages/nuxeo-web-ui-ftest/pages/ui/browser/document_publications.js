@@ -69,22 +69,6 @@ export default class DocumentPublications extends BasePage {
     const pubRowEle = await pubRow.$('paper-button.republish');
     await pubRowEle.click();
     try {
-      // Try waiting briefly to give the alert time to appear
-      await browser.waitUntil(
-        async () => {
-          try {
-            await driver.getAlertText();
-            return true;
-          } catch {
-            return false;
-          }
-        },
-        {
-          timeout: 2000,
-          timeoutMsg: 'Alert did not appear in time',
-        },
-      );
-      // Accept the alert if still present
       await driver.alertAccept();
     } catch (err) {
       console.warn(' No alert present or alert disappeared too quickly:', err.message);

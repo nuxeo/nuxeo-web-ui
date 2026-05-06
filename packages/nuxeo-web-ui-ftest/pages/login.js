@@ -13,6 +13,7 @@ export default class Login {
 
   async submit() {
     const submitButton = await $('[name="Submit"]');
+    await submitButton.waitForClickable({ timeout: 10000 });
     await submitButton.click();
   }
 

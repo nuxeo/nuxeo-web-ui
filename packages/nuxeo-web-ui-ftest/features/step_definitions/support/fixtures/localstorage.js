@@ -5,7 +5,9 @@ import { After } from '@cucumber/cucumber';
 // cleans up local storage fo the current user
 After({ tags: '@cleanupLocalStorage' }, () =>
   browser.execute(() => {
-    const username = document.querySelector('nuxeo-app').currentUser.id;
+    const app = document.querySelector('nuxeo-app');
+    if (!app || !app.currentUser) return;
+    const username = app.currentUser.id;
     Object.keys(localStorage).forEach((storage) => {
       if (storage.startsWith(`${username}-`)) {
         localStorage.removeItem(storage);
