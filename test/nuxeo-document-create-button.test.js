@@ -39,31 +39,58 @@ suite('nuxeo-document-create-button', () => {
   });
 
   suite('_canCreateIn', () => {
-    test('should return true when AddChildren permission exists', () => {
-      const doc = { uid: '1', contextParameters: { permissions: ['AddChildren', 'Read'] } };
+    test('should return true when document has AddChildren permission', () => {
+      const doc = { contextParameters: { permissions: ['AddChildren', 'Read'] } };
       expect(element._canCreateIn(doc)).to.be.true;
     });
 
-    test('should return false when no AddChildren permission', () => {
-      const doc = { uid: '1', contextParameters: { permissions: ['Read'] } };
+    test('should return false when document does not have AddChildren permission', () => {
+      const doc = { contextParameters: { permissions: ['Read'] } };
       expect(element._canCreateIn(doc)).to.be.false;
     });
 
-    test('should return false when no contextParameters', () => {
-      expect(element._canCreateIn({ uid: '1' })).to.be.false;
+    test('should return false when document is null', () => {
+      expect(element._canCreateIn(null)).to.be.false;
     });
 
-    test('should return false when null document', () => {
-      expect(element._canCreateIn(null)).to.be.false;
+    test('should return false when contextParameters is missing', () => {
+      const doc = {};
+      expect(element._canCreateIn(doc)).to.be.false;
+    });
+
+    test('should return false when permissions is missing', () => {
+      const doc = { contextParameters: {} };
+      expect(element._canCreateIn(doc)).to.be.false;
     });
   });
 
-  suite('_showShortcuts and _hideShortcuts', () => {
+  suite('_actionContext', () => {
+    test('should return object with hostVisible and subtypes', () => {
+      element.shortcutsVisible = true;
+      element.subtypes = ['File', 'Note'];
+      const context = element._actionContext();
+      expect(context.hostVisible).to.be.true;
+      expect(context.subtypes).to.deep.equal(['File', 'Note']);
+    });
+
+    test('should reflect shortcutsVisible as false', () => {
+      element.shortcutsVisible = false;
+      element.subtypes = [];
+      const context = element._actionContext();
+      expect(context.hostVisible).to.be.false;
+      expect(context.subtypes).to.deep.equal([]);
+    });
+  });
+
+  suite('_showShortcuts', () => {
     test('should set shortcutsVisible to true', () => {
+      element.shortcutsVisible = false;
       element._showShortcuts();
       expect(element.shortcutsVisible).to.be.true;
     });
+  });
 
+  suite('_hideShortcuts', () => {
     test('should set shortcutsVisible to false', () => {
       element.shortcutsVisible = true;
       element._hideShortcuts();
@@ -71,15 +98,77 @@ suite('nuxeo-document-create-button', () => {
     });
   });
 
+  suite('_displayWizard', () => {
+    test('should fire create-document when element is not hidden', () => {
+      element.hidden = false;
+      const fireSpy = sinon.spy(element, 'fire');
+      const event = { preventDefault: sinon.spy(), detail: { type: 'File' } };
+      element._displayWizard(event);
+      expect(event.preventDefault).to.have.been.called;
+      expect(fireSpy).to.have.been.calledWith('create-document', { type: 'File' });
+    });
+
+    test('should not fire create-document when element is hidden', () => {
+      element.hidden = true;
+      const fireSpy = sinon.spy(element, 'fire');
+      const event = { preventDefault: sinon.spy(), detail: {} };
+      element._displayWizard(event);
+      expect(event.preventDefault).to.have.been.called;
+      expect(fireSpy).to.not.have.been.called;
+    });
+  });
+
   suite('_animateOpen', () => {
-    test('should return open when shortcutsVisible', () => {
+    test('should return open when shortcutsVisible is true', () => {
       element.shortcutsVisible = true;
       expect(element._animateOpen()).to.equal('open');
     });
 
-    test('should return empty string when not visible', () => {
+    test('should return empty string when shortcutsVisible is false', () => {
       element.shortcutsVisible = false;
       expect(element._animateOpen()).to.equal('');
+    });
+  });
+
+  suite('_parentChanged', () => {
+    test('should filter subtypes based on permissions and HiddenInCreation facet', () => {
+      element.parent = {
+        contextParameters: {
+          permissions: ['AddChildren'],
+          subtypes: [
+            { type: 'File', facets: [] },
+            { type: 'Hidden', facets: ['HiddenInCreation'] },
+            { type: 'Note', facets: [] },
+          ],
+        },
+      };
+      element._parentChanged();
+      expect(element.subtypes).to.deep.equal(['file', 'note']);
+    });
+
+    test('should set empty subtypes when no AddChildren permission', () => {
+      element.parent = {
+        contextParameters: {
+          permissions: ['Read'],
+          subtypes: [{ type: 'File', facets: [] }],
+        },
+      };
+      element._parentChanged();
+      expect(element.subtypes).to.deep.equal([]);
+    });
+
+    test('should call defaultDoc.get when parent lacks contextParameters', () => {
+      const getStub = sinon.stub(element.$.defaultDoc, 'get');
+      element.parent = { path: '/some/path' };
+      element._parentChanged();
+      expect(getStub).to.have.been.called;
+    });
+
+    test('should do nothing when parent is null', () => {
+      const getStub = sinon.stub(element.$.defaultDoc, 'get');
+      element.parent = null;
+      element._parentChanged();
+      expect(getStub).to.not.have.been.called;
     });
   });
 });

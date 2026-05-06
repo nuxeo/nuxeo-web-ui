@@ -72,4 +72,78 @@ suite('LiveConnectBehavior', () => {
       expect(() => behavior.openPicker()).to.throw('not implemented');
     });
   });
+
+  suite('openPopup', () => {
+    test('should open a window with correct parameters', () => {
+      const fakePopup = { closed: true };
+      const openStub = sinon.stub(window, 'open').returns(fakePopup);
+      behavior.openPopup('https://auth.example.com', {});
+      expect(openStub).to.have.been.calledWith('https://auth.example.com', 'popup', sinon.match.string);
+      openStub.restore();
+    });
+
+    test('should use default settings when no options given', () => {
+      const fakePopup = { closed: true };
+      const openStub = sinon.stub(window, 'open').returns(fakePopup);
+      behavior.openPopup('https://auth.example.com');
+      expect(openStub).to.have.been.called;
+      const args = openStub.firstCall.args[2];
+      expect(args).to.include('width=1000');
+      expect(args).to.include('height=650');
+      openStub.restore();
+    });
+
+    test('should add message listener when onMessageReceive is provided', () => {
+      const fakePopup = { closed: true };
+      sinon.stub(window, 'open').returns(fakePopup);
+      const addListenerSpy = sinon.spy(window, 'addEventListener');
+      behavior.openPopup('https://auth.example.com', { onMessageReceive: sinon.spy() });
+      expect(addListenerSpy).to.have.been.calledWith('message', sinon.match.func);
+      addListenerSpy.restore();
+      window.open.restore();
+    });
+  });
+
+  suite('updateProviderInfo', () => {
+    test('should throw when oauth2 element is missing', () => {
+      behavior.$ = {};
+      expect(() => behavior.updateProviderInfo()).to.throw('Missing OAuth2 resource');
+    });
+
+    test('should set path and fetch provider info', async () => {
+      const response = {
+        clientId: 'client-123',
+        authorizationURL: 'https://auth.url',
+        isAuthorized: true,
+        userId: 'user@test.com',
+        isAvailable: true,
+      };
+      const getStub = sinon.stub().returns(Promise.resolve(response));
+      behavior.$ = { oauth2: { path: '', get: getStub } };
+      behavior.providerId = 'googledrive';
+      await behavior.updateProviderInfo();
+      expect(behavior.$.oauth2.path).to.equal('oauth2/provider/googledrive');
+      expect(behavior.clientId).to.equal('client-123');
+      expect(behavior.authorizationURL).to.equal('https://auth.url');
+      expect(behavior.isUserAuthorized).to.be.true;
+      expect(behavior.userId).to.equal('user@test.com');
+      expect(behavior.isAvailable).to.be.true;
+    });
+  });
+
+  suite('getToken', () => {
+    test('should throw when oauth2 element is missing', () => {
+      behavior.$ = {};
+      expect(() => behavior.getToken()).to.throw('Missing OAuth2 resource');
+    });
+
+    test('should set token path and call get', () => {
+      const getStub = sinon.stub().returns(Promise.resolve({ token: 'abc' }));
+      behavior.$ = { oauth2: { path: '', get: getStub } };
+      behavior.providerId = 'box';
+      behavior.getToken();
+      expect(behavior.$.oauth2.path).to.equal('oauth2/provider/box/token');
+      expect(getStub).to.have.been.called;
+    });
+  });
 });
