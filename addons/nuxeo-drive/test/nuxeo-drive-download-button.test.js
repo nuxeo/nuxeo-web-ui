@@ -18,6 +18,10 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
+import * as protocolHandler from '../elements/nuxeo-drive-protocol-handler.js';
+
+// Prevent nxdrive:// anchor clicks from triggering a Karma page reload
+HTMLAnchorElement.prototype.click = function () {};
 
 // Setup i18n keys used by the component
 window.nuxeo = window.nuxeo || {};
@@ -277,8 +281,8 @@ suite('nuxeo-drive-download-button', () => {
     setup(() => {
       toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
-      // Stub _navigate so no real protocol navigation happens in Karma
-      sinon.stub(element, '_navigate');
+      // Stub _openDriveUrl to prevent real protocol navigation in Karma.
+      sinon.stub(element, '_openDriveUrl');
     });
 
     teardown(() => {
@@ -306,8 +310,8 @@ suite('nuxeo-drive-download-button', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(toastStub.open).to.not.have.been.called;
-      expect(element._navigate).to.have.been.calledOnce;
-      expect(element._navigate.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-download\//);
+      expect(element._openDriveUrl).to.have.been.calledOnce;
+      expect(element._openDriveUrl.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-download\//);
     });
 
     test('shows noDocumentsSelected error when select-all is active but view has no items', () => {
@@ -339,14 +343,13 @@ suite('nuxeo-drive-download-button', () => {
       };
       element.documents = viewStub;
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openStub = sinon.stub(window, 'open');
 
       element._download();
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(toastStub.open).to.not.have.been.called;
-      expect(openStub).to.have.been.calledOnce;
-      expect(openStub.firstCall.args[1]).to.equal('_top');
+      expect(element._openDriveUrl).to.have.been.calledOnce;
+      expect(element._openDriveUrl.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-download\//);
     });
 
     test('shows tooManyDocuments error when more than 25 documents are selected', async () => {
@@ -372,14 +375,12 @@ suite('nuxeo-drive-download-button', () => {
     test('calls _openDriveUrl with directDownloadUrl when a valid Drive token exists', async () => {
       element.documents = [{ uid: 'doc-uid-1' }, { uid: 'doc-uid-2' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
 
       element._download();
-      // Let the promise chain resolve
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(openDriveUrlStub).to.have.been.calledOnce;
-      const calledUrl = openDriveUrlStub.firstCall.args[0];
+      expect(element._openDriveUrl).to.have.been.calledOnce;
+      const calledUrl = element._openDriveUrl.firstCall.args[0];
       expect(calledUrl).to.match(/^nxdrive:\/\/direct-download\/[A-Za-z0-9_-]+$/);
     });
 
@@ -433,12 +434,11 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = [];
       element.document = { uid: 'single-doc-uid' };
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
 
       element._download();
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(openDriveUrlStub).to.have.been.calledOnce;
+      expect(element._openDriveUrl).to.have.been.calledOnce;
       // Verify the UID is encoded in the URL built for the download flow
       const originalUrl = element._buildOriginalUrl();
       expect(originalUrl).to.include('single-doc-uid');
@@ -446,189 +446,31 @@ suite('nuxeo-drive-download-button', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // _openDriveUrl — Drive detection (blur + debounce heuristic)
+  // _openDriveUrl — wires the shared openDriveUrl with the element's dialog toggle
+  // The blur/debounce detection logic itself is tested in nuxeo-drive-protocol-handler.test.js
   // ---------------------------------------------------------------------------
-  suite('_openDriveUrl — Drive detection (blur + debounce heuristic)', () => {
-    let clock;
-    let dialogToggleStub;
-
-    setup(() => {
-      clock = sinon.useFakeTimers();
-      // Stub _navigate so no real protocol navigation happens in Karma
-      sinon.stub(element, '_navigate');
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-      dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-    });
-
+  suite('_openDriveUrl', () => {
     teardown(() => {
-      // Advance past hard-cap to ensure cleanup() fires and all window listeners are removed
-      clock.tick(10000);
-      clock.restore();
       sinon.restore();
     });
 
-    test('opens install dialog after timeout when no blur fires (Drive not installed)', () => {
-      element._openDriveUrl('nxdrive://direct-download/abc123');
-
-      clock.tick(1500);
-
-      expect(dialogToggleStub).to.have.been.calledOnce;
-    });
-
-    test('does not open dialog when blur fires and stays (Drive opened normally)', () => {
-      element._openDriveUrl('nxdrive://direct-download/abc123');
-
-      window.dispatchEvent(new Event('blur'));
-      clock.tick(300); // debounce fires
-      clock.tick(1500); // primary timeout — appOpened already true
-
-      expect(dialogToggleStub).to.not.have.been.called;
-    });
-
-    test('ignores blur when focus returns quickly (transient browser/OS dialog)', () => {
-      element._openDriveUrl('nxdrive://direct-download/abc123');
-
-      window.dispatchEvent(new Event('blur'));
-      window.dispatchEvent(new Event('focus')); // returns before debounce
-      clock.tick(300);
-      clock.tick(1500);
-
-      // Focus returned before debounce → onFocus fired → appOpened=true → primary timeout suppressed
-      expect(dialogToggleStub).to.not.have.been.called;
-    });
-
-    test('auto-dismisses dialog when Drive responds after the timeout (slow system)', () => {
-      element._openDriveUrl('nxdrive://direct-download/abc123');
-
-      clock.tick(1500);
-      expect(dialogToggleStub).to.have.been.calledOnce;
-
-      window.dispatchEvent(new Event('blur'));
-      clock.tick(300); // debounce fires
-
-      expect(dialogToggleStub).to.have.been.calledTwice;
-    });
-
-    test('detects Drive on second blur when first was a transient browser/OS dialog', () => {
-      element._openDriveUrl('nxdrive://direct-download/abc123');
-
-      // First blur is transient (browser/OS prompt cancelled) — focus returns quickly
-      window.dispatchEvent(new Event('blur'));
-      window.dispatchEvent(new Event('focus')); // cancels debounce
-
-      // Drive opens — second blur fires and stays
-      window.dispatchEvent(new Event('blur'));
-      clock.tick(300); // debounce fires — Drive confirmed
-      clock.tick(1500); // primary timeout — appOpened already true
-
-      expect(dialogToggleStub).to.not.have.been.called;
-    });
-
-    test('cleans up listeners after hard-cap timeout', () => {
-      const removeSpy = sinon.spy(window, 'removeEventListener');
-
-      element._openDriveUrl('nxdrive://direct-download/abc123');
-
-      clock.tick(1500 + 3000);
-
-      expect(removeSpy.called).to.be.true;
-      removeSpy.restore();
-    });
-
-    test('shows install dialog when OS protocol dialog is dismissed (Drive not installed, tokens exist)', () => {
-      // Scenario: Drive is uninstalled but server tokens remain. The OS shows a
-      // protocol-handler confirmation dialog — window blurs, debounce fires
-      // (appOpened=true), then focus returns when the user dismisses the OS dialog.
-      element._openDriveUrl('nxdrive://direct-download/abc123');
-
-      // OS protocol dialog opens — window blurs and stays blurred past debounce
-      window.dispatchEvent(new Event('blur'));
-      clock.tick(300); // debounce fires → appOpened=true, onFocusAfterOpened registered
-
-      // User dismisses the OS "file not found" dialog — window regains focus
-      window.dispatchEvent(new Event('focus'));
-
-      // Install dialog must now be shown
-      expect(dialogToggleStub).to.have.been.calledOnce;
-    });
-
-    test('does not double-show install dialog when OS dialog dismissed after primary timeout', () => {
-      // Slow system: primary timeout fires first (dialogShown=true), then the OS
-      // dialog is dismissed. onFocusAfterOpened should not toggle a second time
-      // because dialogShown is already true.
-      element._openDriveUrl('nxdrive://direct-download/abc123');
-
-      // Primary timeout fires before any blur
-      clock.tick(1500);
-      expect(dialogToggleStub).to.have.been.calledOnce;
-
-      // OS dialog then blurs the window and focus returns
-      window.dispatchEvent(new Event('blur'));
-      clock.tick(300); // debounce → appOpened=true
-      window.dispatchEvent(new Event('focus'));
-
-      // Should still be only one toggle (auto-dismiss path, not a second open)
-      expect(dialogToggleStub).to.have.been.calledTwice; // second call = auto-dismiss
-    });
-
-    suite('Firefox behaviour (no blur when Drive is absent)', () => {
-      let originalUserAgent;
-
-      setup(() => {
-        originalUserAgent = Object.getOwnPropertyDescriptor(Navigator.prototype, 'userAgent');
-        Object.defineProperty(navigator, 'userAgent', {
-          value: 'Mozilla/5.0 (X11; Linux x86_64; rv:115.0) Gecko/20100101 Firefox/115.0',
-          configurable: true,
-        });
-      });
-
-      teardown(() => {
-        if (originalUserAgent) {
-          Object.defineProperty(Navigator.prototype, 'userAgent', originalUserAgent);
-        } else {
-          delete navigator.userAgent;
-        }
-      });
-
-      test('shows install dialog via primary timeout when no blur fires (Firefox, Drive absent)', () => {
-        element._openDriveUrl('nxdrive://direct-download/abc123');
-
-        clock.tick(1500);
-
+    test('delegates to the shared openDriveUrl and passes dialog toggle as callback', () => {
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+      // Verify the element's _openDriveUrl wires up to the dialog correctly
+      // by checking the toggle is callable (the shared module is tested separately).
+      expect(() => element._openDriveUrl('nxdrive://direct-download/abc123')).to.not.throw();
+      // Give the primary timeout a chance to fire and clean up.
+      return new Promise((resolve) => setTimeout(resolve, 1600)).then(() => {
         expect(dialogToggleStub).to.have.been.calledOnce;
-      });
-
-      test('does not show install dialog when blur fires and stays (Firefox, Drive opened)', () => {
-        element._openDriveUrl('nxdrive://direct-download/abc123');
-
-        window.dispatchEvent(new Event('blur'));
-        clock.tick(300); // debounce fires
-        clock.tick(1500); // primary timeout — appOpened already true
-
-        expect(dialogToggleStub).to.not.have.been.called;
-      });
-
-      test('does not show install dialog when focus returns after blur debounce (Firefox — no onFocusAfterOpened)', () => {
-        // In Firefox, onFocusAfterOpened must NOT be registered after blur+debounce,
-        // because Firefox fires blur when Drive IS installed (not when it is absent).
-        // Focus returning after debounce means the user came back from Drive — no dialog.
-        element._openDriveUrl('nxdrive://direct-download/abc123');
-
-        window.dispatchEvent(new Event('blur'));
-        clock.tick(300); // debounce fires
-        window.dispatchEvent(new Event('focus')); // user returns from Drive
-
-        clock.tick(1500); // primary timeout — appOpened already true
-
-        expect(dialogToggleStub).to.not.have.been.called;
       });
     });
   });
 
   // ---------------------------------------------------------------------------
-  // _navigate
+  // navigateTo (moved to shared module — tested via protocolHandler.navigateTo)
   // ---------------------------------------------------------------------------
-  suite('_navigate', () => {
+  suite('navigateTo', () => {
     teardown(() => {
       sinon.restore();
     });
@@ -637,7 +479,7 @@ suite('nuxeo-drive-download-button', () => {
       const appendSpy = sinon.spy(document.body, 'appendChild');
       const removeSpy = sinon.spy(document.body, 'removeChild');
 
-      element._navigate('nxdrive://direct-download/abc123');
+      protocolHandler.navigateTo('nxdrive://direct-download/abc123');
 
       expect(appendSpy).to.have.been.calledOnce;
       const anchor = appendSpy.firstCall.args[0];
@@ -649,13 +491,13 @@ suite('nuxeo-drive-download-button', () => {
 
     test('does not modify window.location', () => {
       const before = window.location.href;
-      element._navigate('nxdrive://direct-download/abc123');
+      protocolHandler.navigateTo('nxdrive://direct-download/abc123');
       expect(window.location.href).to.equal(before);
     });
 
     test('anchor has aria-hidden and tabindex=-1 (accessible)', () => {
       const appendSpy = sinon.spy(document.body, 'appendChild');
-      element._navigate('nxdrive://direct-download/abc123');
+      protocolHandler.navigateTo('nxdrive://direct-download/abc123');
       const anchor = appendSpy.firstCall.args[0];
       expect(anchor.getAttribute('aria-hidden')).to.equal('true');
       expect(anchor.getAttribute('tabindex')).to.equal('-1');
