@@ -144,7 +144,7 @@ glTFInterpolator.prototype.interp = function (t) {
     if (this.isRot) {
       this.quat1.set(this.originalValue.x, this.originalValue.y, this.originalValue.z, this.originalValue.w);
       this.quat2.set(this.values[0], this.values[1], this.values[2], this.values[3]);
-      THREE.Quaternion.slerp(this.quat1, this.quat2, this.quat3, t / this.keys[0]);
+      this.quat3.slerpQuaternions(this.quat1, this.quat2, t / this.keys[0]);
     } else {
       this.vec3.set(this.originalValue.x, this.originalValue.y, this.originalValue.z);
       this.vec2.set(this.values[0], this.values[1], this.values[2]);
@@ -180,7 +180,7 @@ glTFInterpolator.prototype.interp = function (t) {
             this.values[(i + 1) * 4 + 2],
             this.values[(i + 1) * 4 + 3],
           );
-          THREE.Quaternion.slerp(this.quat1, this.quat2, this.quat3, (t - key1) / (key2 - key1));
+          this.quat3.slerpQuaternions(this.quat1, this.quat2, (t - key1) / (key2 - key1));
         } else {
           this.vec3.set(this.values[i * 3], this.values[i * 3 + 1], this.values[i * 3 + 2]);
           this.vec2.set(this.values[(i + 1) * 3], this.values[(i + 1) * 3 + 1], this.values[(i + 1) * 3 + 2]);
