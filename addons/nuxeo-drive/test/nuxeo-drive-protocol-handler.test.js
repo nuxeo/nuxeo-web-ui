@@ -223,33 +223,42 @@ suite('nuxeo-drive-protocol-handler', () => {
 // navigateTo — tested separately (no fake timers needed)
 // ---------------------------------------------------------------------------
 suite('navigateTo', () => {
-  teardown(() => {
-    sinon.restore();
+  let appendSpy;
+  let anchor;
+
+  setup(() => {
+    appendSpy = sinon.spy(document.body, 'appendChild');
   });
 
+  teardown(() => {
+    sinon.restore();
+    appendSpy = null;
+    anchor = null;
+  });
+
+  /**
+   * Calls navigateTo and captures the anchor element appended to the body.
+   */
+  function navigate(url) {
+    navigateTo(url);
+    anchor = appendSpy.firstCall.args[0];
+  }
+
   test('appends a hidden anchor to document.body, clicks it, then removes it', () => {
-    const appendSpy = sinon.spy(document.body, 'appendChild');
-
-    navigateTo('nxdrive://test/url');
-
+    navigate('nxdrive://test/url');
     expect(appendSpy).to.have.been.calledOnce;
-    const anchor = appendSpy.firstCall.args[0];
     expect(anchor.tagName).to.equal('A');
     // anchor.remove() is used (preferred over parentNode.removeChild); verify it is no longer in the DOM
     expect(document.body.contains(anchor)).to.be.false;
   });
 
   test('anchor href contains the given URL', () => {
-    const appendSpy = sinon.spy(document.body, 'appendChild');
-    navigateTo('nxdrive://direct-download/abc123');
-    const anchor = appendSpy.firstCall.args[0];
+    navigate('nxdrive://direct-download/abc123');
     expect(anchor.href).to.include('nxdrive');
   });
 
   test('anchor is aria-hidden and not in tab order', () => {
-    const appendSpy = sinon.spy(document.body, 'appendChild');
-    navigateTo('nxdrive://test/url');
-    const anchor = appendSpy.firstCall.args[0];
+    navigate('nxdrive://test/url');
     expect(anchor.getAttribute('aria-hidden')).to.equal('true');
     expect(anchor.getAttribute('tabindex')).to.equal('-1');
   });
