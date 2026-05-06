@@ -318,6 +318,18 @@ suite('nuxeo-drive-download-button', () => {
       const viewStub = {
         selectAllActive: true,
         behaviors: [...PageProviderDisplayBehavior],
+        items: [],
+      };
+      element.documents = viewStub;
+      element._download();
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.include('No documents selected');
+    });
+
+    test('shows tooManyDocuments error when select-all yields more than 25 items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
         items: Array.from({ length: 26 }, (_, i) => {
           return { uid: `sa-uid-${i}` };
         }),
@@ -471,42 +483,6 @@ suite('nuxeo-drive-download-button', () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // navigateTo (moved to shared module — tested via protocolHandler.navigateTo)
-  // ---------------------------------------------------------------------------
-  suite('navigateTo', () => {
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('appends an anchor to document.body, clicks it, then removes it', () => {
-      const appendSpy = sinon.spy(document.body, 'appendChild');
-      const removeSpy = sinon.spy(document.body, 'removeChild');
-
-      protocolHandler.navigateTo('nxdrive://direct-download/abc123');
-
-      expect(appendSpy).to.have.been.calledOnce;
-      const anchor = appendSpy.firstCall.args[0];
-      expect(anchor.tagName).to.equal('A');
-      expect(anchor.href).to.include('nxdrive');
-      expect(removeSpy).to.have.been.calledOnce;
-      expect(removeSpy.firstCall.args[0]).to.equal(anchor);
-    });
-
-    test('does not modify window.location', () => {
-      const before = window.location.href;
-      protocolHandler.navigateTo('nxdrive://direct-download/abc123');
-      expect(window.location.href).to.equal(before);
-    });
-
-    test('anchor has aria-hidden and tabindex=-1 (accessible)', () => {
-      const appendSpy = sinon.spy(document.body, 'appendChild');
-      protocolHandler.navigateTo('nxdrive://direct-download/abc123');
-      const anchor = appendSpy.firstCall.args[0];
-      expect(anchor.getAttribute('aria-hidden')).to.equal('true');
-      expect(anchor.getAttribute('tabindex')).to.equal('-1');
-    });
-  });
 
   // ---------------------------------------------------------------------------
   // _buildOriginalUrl — server info
@@ -523,3 +499,4 @@ suite('nuxeo-drive-download-button', () => {
     });
   });
 });
+
