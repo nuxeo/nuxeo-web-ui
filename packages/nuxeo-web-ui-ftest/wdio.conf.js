@@ -15,6 +15,10 @@ if (process.env.CUCUMBER_REQUIRES) {
 }
 
 const reporters = ['spec'];
+
+const _workerStartTimes = new Map();
+const _featureResults = [];
+
 if (process.env.CUCUMBER_REPORT_PATH) {
   reporters.push([
     'cucumberjs-json',
@@ -33,6 +37,9 @@ const capability = {
   acceptInsecureCerts: true,
   browserVersion: '135.0.7049.114',
   'wdio:enforceWebDriverClassic': true,
+  // Prevent ChromeDriver from auto-dismissing native dialogs (window.confirm, window.alert)
+  // so that tests can explicitly accept/dismiss them via alertAccept/alertDismiss.
+  unhandledPromptBehavior: 'ignore',
 };
 
 const options = {};
@@ -260,9 +267,40 @@ export const config = {
   //
   // Gets executed once before all workers get launched.
   onPrepare: () => {
-    /* eslint-disable no-console */
+    // eslint-disable-next-line no-console
     console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
-    /* eslint-enable no-console */
+
+    // Strip file:// prefix and suppress original PASSED/FAILED lines (replaced with timed versions)
+    const originalWrite = process.stdout.write.bind(process.stdout);
+    global._originalStdoutWrite = originalWrite;
+    // eslint-disable-next-line no-control-regex
+    const ansiRegex = /\x1b\[[0-9;]*m/g;
+    process.stdout.write = (chunk, ...args) => {
+      if (typeof chunk === 'string') {
+        chunk = chunk.replace(/file:\/\//g, '');
+        // Suppress WDIO's PASSED/FAILED lines — onWorkerEnd prints them with timing
+        const plain = chunk.replace(ansiRegex, '');
+        if (/\[\d+-\d+\] (?:PASSED|FAILED) in .* - /.test(plain) && !plain.includes('(')) {
+          return true;
+        }
+      }
+      return originalWrite(chunk, ...args);
+    };
+  },
+  onWorkerStart: (cid) => {
+    _workerStartTimes.set(cid, Date.now());
+  },
+  onWorkerEnd: (cid, exitCode, specs) => {
+    const start = _workerStartTimes.get(cid);
+    if (start) {
+      const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+      const specNames = specs.map((s) => s.replace(process.cwd(), '').replace(/^file:\/\//, '')).join(', ');
+      const browserName = process.env.BROWSER || 'chrome';
+      const status = exitCode === 0 ? '\x1b[1;32mPASSED\x1b[0m' : '\x1b[1;31mFAILED\x1b[0m';
+      process.stdout.write(`[${cid}] ${status} in ${browserName} - ${specNames} \x1b[1m( ${elapsed}s )\x1b[0m\n`);
+      _featureResults.push({ feature: specNames, status: exitCode === 0 ? 'PASSED' : 'FAILED', elapsed });
+      _workerStartTimes.delete(cid);
+    }
   },
   //
   // Gets executed before test execution begins. At this point you can access all global
@@ -328,6 +366,45 @@ export const config = {
   // Gets executed after all workers got shut down and the process is about to exit. It is not
   // possible to defer the end of the process using a promise.
   onComplete: async () => {
+    // Restore original stdout.write patched in onPrepare
+    if (global._originalStdoutWrite) {
+      process.stdout.write = global._originalStdoutWrite;
+    }
+    if (_featureResults.length > 0) {
+      const divider = '='.repeat(80);
+      const header = `\x1b[1m${'Feature'.padEnd(50)} ${'Status'.padEnd(10)} Time\x1b[0m`;
+      const totalTime = _featureResults.reduce((sum, r) => sum + parseFloat(r.elapsed), 0).toFixed(1);
+      const passed = _featureResults.filter((r) => r.status === 'PASSED').length;
+      const failed = _featureResults.filter((r) => r.status === 'FAILED').length;
+      // eslint-disable-next-line no-console
+      console.log(`\n${divider}`);
+      // eslint-disable-next-line no-console
+      console.log('\x1b[1m  FEATURE TIMING SUMMARY\x1b[0m');
+      // eslint-disable-next-line no-console
+      console.log(`${divider}`);
+      // eslint-disable-next-line no-console
+      console.log(header);
+      // eslint-disable-next-line no-console
+      console.log('-'.repeat(80));
+      _featureResults
+        .sort((a, b) => parseFloat(b.elapsed) - parseFloat(a.elapsed))
+        .forEach((r) => {
+          const statusColor = r.status === 'PASSED' ? '\x1b[32m' : '\x1b[31m';
+          const timeStr = `${r.elapsed}s`;
+          // eslint-disable-next-line no-console
+          console.log(
+            `${r.feature.padEnd(50)} ${statusColor}${r.status}\x1b[0m${' '.repeat(10 - r.status.length)} \x1b[1m${timeStr}\x1b[0m`,
+          );
+        });
+      // eslint-disable-next-line no-console
+      console.log('-'.repeat(80));
+      // eslint-disable-next-line no-console
+      console.log(
+        `\x1b[1mTotal: ${_featureResults.length} features | \x1b[32m${passed} passed\x1b[0m\x1b[1m | \x1b[31m${failed} failed\x1b[0m\x1b[1m | ${totalTime}s\x1b[0m`,
+      );
+      // eslint-disable-next-line no-console
+      console.log(`${divider}\n`);
+    }
     if (process.env.CUCUMBER_REPORT_PATH) {
       // Generate the report when it all tests are done
       htmlReporter.generate({
