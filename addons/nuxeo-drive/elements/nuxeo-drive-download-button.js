@@ -19,6 +19,7 @@ import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { isPageProviderDisplayBehavior } from '../../../elements/select-all-helpers.js';
+import { openDriveUrl } from './nuxeo-drive-protocol-handler.js';
 import './nuxeo-drive-icons.js';
 
 window.nuxeo = window.nuxeo || {};
@@ -115,102 +116,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
   // Invokes a nxdrive:// URL; shows the install dialog if Drive did not handle it.
   // Chrome/Edge/Safari: blur+debounce heuristic. Firefox: primary timeout only (no blur when Drive absent).
   _openDriveUrl(url) {
-    let appOpened = false;
-    let dialogShown = false;
-    let blurDebounceTimer = null;
-    let hardCapTimer = null;
-    let debounceSettledAt = null;
-
-    // Firefox never fires blur when Drive is absent, so onFocusAfterOpened must be
-    // skipped for Firefox to avoid showing the install dialog when the user later
-    // switches back to the browser after Drive opened successfully.
-    const isFirefox = /firefox|fxios/i.test(navigator.userAgent);
-
-    const cleanup = () => {
-      clearTimeout(blurDebounceTimer);
-      clearTimeout(hardCapTimer);
-      window.removeEventListener('blur', onBlur);
-      window.removeEventListener('focus', onFocus);
-      window.removeEventListener('focus', onFocusAfterOpened);
-    };
-
-    // Chrome/Edge/Safari only: called when focus returns after the blur debounce.
-    // Quick return (< DRIVE_OPEN_TIMEOUT_MS) → OS "no handler" dialog dismissed → show install dialog.
-    // Slow return (≥ DRIVE_OPEN_TIMEOUT_MS) → user switched back from Drive → suppress / auto-dismiss.
-    const onFocusAfterOpened = () => {
-      const elapsed = debounceSettledAt !== null ? Date.now() - debounceSettledAt : Infinity;
-      if (elapsed < NuxeoDriveDownloadButton.DRIVE_OPEN_TIMEOUT_MS) {
-        if (!dialogShown) {
-          dialogShown = true;
-          this.$.dialog.toggle();
-        }
-      } else if (dialogShown) {
-        this.$.dialog.toggle();
-        dialogShown = false;
-      }
-      cleanup();
-    };
-
-    // Focus returned quickly (< BLUR_DEBOUNCE_MS) — Drive handled the URL as a
-    // background app and immediately returned focus. Mark handled so the primary
-    // timeout does not show the install dialog.
-    const onFocus = () => {
-      clearTimeout(blurDebounceTimer);
-      appOpened = true;
-      if (dialogShown) {
-        this.$.dialog.toggle();
-        dialogShown = false;
-      }
-    };
-
-    const onBlur = () => {
-      blurDebounceTimer = setTimeout(() => {
-        appOpened = true;
-        debounceSettledAt = Date.now();
-        window.removeEventListener('focus', onFocus);
-        if (!isFirefox) {
-          window.addEventListener('focus', onFocusAfterOpened, { once: true });
-        }
-        if (dialogShown) {
-          // Primary timeout fired before the blur debounce — auto-dismiss since
-          // a blur confirms Drive (or an OS dialog) was involved.
-          this.$.dialog.toggle();
-          dialogShown = false;
-          window.removeEventListener('blur', onBlur);
-          window.removeEventListener('focus', onFocusAfterOpened);
-          clearTimeout(hardCapTimer);
-          hardCapTimer = setTimeout(cleanup, 10000);
-        }
-      }, NuxeoDriveDownloadButton.BLUR_DEBOUNCE_MS);
-
-      window.addEventListener('focus', onFocus, { once: true });
-    };
-
-    window.addEventListener('blur', onBlur);
-
-    this._navigate(url);
-
-    // Primary timeout: main "not installed" path for Firefox (no blur fires),
-    // and fallback for Chrome/Safari if the OS dialog was never dismissed.
-    setTimeout(() => {
-      if (!appOpened) {
-        dialogShown = true;
-        this.$.dialog.toggle();
-      }
-    }, NuxeoDriveDownloadButton.DRIVE_OPEN_TIMEOUT_MS);
-
-    hardCapTimer = setTimeout(cleanup, NuxeoDriveDownloadButton.DRIVE_OPEN_TIMEOUT_MS + 3000);
-  }
-
-  _navigate(url) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.style.cssText = 'display:none;position:absolute;left:-9999px;';
-    a.setAttribute('aria-hidden', 'true');
-    a.setAttribute('tabindex', '-1');
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    openDriveUrl(url, () => this.$.dialog.toggle());
   }
 
   _showError(message) {
@@ -274,7 +180,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     const serverBytes = new TextEncoder().encode(server);
     if (serverBytes.length > 255) {
       const userMessage = this.i18n('driveDownload.serverUrlTooLong');
-      const err = new Error(this.i18n('driveDownload.serverUrlTooLong'));
+      const err = new Error(userMessage);
       err.userMessage = userMessage;
       throw err;
     }
@@ -294,11 +200,5 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 }
-
-// How long (ms) to wait for window.blur before concluding Drive is not installed.
-NuxeoDriveDownloadButton.DRIVE_OPEN_TIMEOUT_MS = 1500;
-
-// How long (ms) the window must stay blurred to be treated as Drive having opened.
-NuxeoDriveDownloadButton.BLUR_DEBOUNCE_MS = 300;
 
 customElements.define(NuxeoDriveDownloadButton.is, NuxeoDriveDownloadButton);
