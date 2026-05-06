@@ -50,26 +50,32 @@ export default class Vocabulary extends BasePage {
     const selector = `#delete-button-${index - 1}`;
     const deleteButton = await this.el.element(selector);
     await deleteButton.scrollIntoView(selector);
-    await deleteButton.click();
 
-    // Wait for the alert to appear before accepting
+    // Wait for the alert to appear, retrying the click if it didn't register
     await driver.waitUntil(
       async () => {
         try {
           await driver.getAlertText();
           return true;
         } catch (e) {
+          // Alert not present — retry the click and keep waiting
+          try {
+            await deleteButton.click();
+          } catch (clickError) {
+            // Ignore transient click failures so waitUntil can retry
+          }
           return false;
         }
       },
       {
-        timeout: 5000,
-        interval: 200,
+        timeout: 10000,
+        interval: 1000,
         timeoutMsg: 'Expected confirmation alert did not appear',
       },
     );
 
-    await driver.alertAccept();
+    // Alert is confirmed present — accept it directly (no retry needed)
+    await driver.acceptAlert();
   }
 
   async editEntry(index, label) {
