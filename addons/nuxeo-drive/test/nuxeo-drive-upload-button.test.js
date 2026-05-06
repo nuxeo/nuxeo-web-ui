@@ -3,7 +3,8 @@
 ©2023 Hyland Software, Inc. and its affiliates. All rights reserved.
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
-Licensed under the Apache License, Version 2.0 (the "License");
+Licensed under the Apache Licen        // Build a server URL > 255 bytes by overriding baseUrl via the module-level window.nuxeo.baseUrl
+        sinon.stub(element, '_compressUploadUrl').callsFake(function () { Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
@@ -22,16 +23,16 @@ import '../elements/nuxeo-drive-upload-button.js';
 HTMLAnchorElement.prototype.click = function () {};
 
 // Setup i18n keys used by the component
-window.nuxeo = window.nuxeo || {};
-window.nuxeo.I18n = window.nuxeo.I18n || {};
-window.nuxeo.I18n.language = 'en';
-window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
-window.nuxeo.I18n.en['driveUploadButton.tooltip'] = 'Upload with Nuxeo Drive';
-window.nuxeo.I18n.en['driveUpload.directTransfer.failed'] =
+globalThis.nuxeo = globalThis.nuxeo || {};
+globalThis.nuxeo.I18n = globalThis.nuxeo.I18n || {};
+globalThis.nuxeo.I18n.language = 'en';
+globalThis.nuxeo.I18n.en = globalThis.nuxeo.I18n.en || {};
+globalThis.nuxeo.I18n.en['driveUploadButton.tooltip'] = 'Upload with Nuxeo Drive';
+globalThis.nuxeo.I18n.en['driveUpload.directTransfer.failed'] =
   'An error occurred while trying to upload the document with Nuxeo Drive.';
-window.nuxeo.I18n.en['driveUpload.serverUrlTooLong'] = 'Server URL is too long to encode.';
-window.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
-window.nuxeo.I18n.en['command.close'] = 'Close';
+globalThis.nuxeo.I18n.en['driveUpload.serverUrlTooLong'] = 'Server URL is too long to encode.';
+globalThis.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
+globalThis.nuxeo.I18n.en['command.close'] = 'Close';
 
 suite('nuxeo-drive-upload-button — error handling', () => {
   let element;
@@ -223,8 +224,6 @@ suite('nuxeo-drive-upload-button — error handling', () => {
       const toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
 
-      // Build a server URL > 255 bytes by overriding baseUrl via the module-level window.nuxeo.baseUrl
-      const longHost = 'a'.repeat(260);
       sinon.stub(element, '_compressUploadUrl').callsFake(function () {
         const msg = element.i18n('driveUpload.serverUrlTooLong');
         element._showError(msg);
@@ -236,12 +235,8 @@ suite('nuxeo-drive-upload-button — error handling', () => {
       expect(toastStub.open).to.have.been.calledOnce;
 
       sinon.restore();
-      // Restore the non-stub for subsequent tests
-      longHost; // suppress lint unused-var
     });
-  });
-
-  // ---------------------------------------------------------------------------
+  }); // ---------------------------------------------------------------------------
   // _base64UrlSafeEncode
   // ---------------------------------------------------------------------------
   suite('_base64UrlSafeEncode', () => {

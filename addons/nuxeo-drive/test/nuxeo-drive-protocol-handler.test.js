@@ -34,7 +34,7 @@ const DEBOUNCE = 20;
  */
 function fireWindowEvent(type) {
   const evt = new Event(type);
-  window.dispatchEvent(evt);
+  globalThis.dispatchEvent(evt);
   return evt;
 }
 
@@ -50,8 +50,8 @@ suite('nuxeo-drive-protocol-handler', () => {
   teardown(() => {
     clock.restore();
     // Remove any lingering listeners added during the test.
-    window.dispatchEvent(new Event('focus'));
-    window.dispatchEvent(new Event('blur'));
+    globalThis.dispatchEvent(new Event('focus'));
+    globalThis.dispatchEvent(new Event('blur'));
   });
 
   suite('exported constants', () => {
@@ -229,15 +229,14 @@ suite('navigateTo', () => {
 
   test('appends a hidden anchor to document.body, clicks it, then removes it', () => {
     const appendSpy = sinon.spy(document.body, 'appendChild');
-    const removeSpy = sinon.spy(document.body, 'removeChild');
 
     navigateTo('nxdrive://test/url');
 
     expect(appendSpy).to.have.been.calledOnce;
     const anchor = appendSpy.firstCall.args[0];
     expect(anchor.tagName).to.equal('A');
-    expect(removeSpy).to.have.been.calledOnce;
-    expect(removeSpy.firstCall.args[0]).to.equal(anchor);
+    // anchor.remove() is used (preferred over parentNode.removeChild); verify it is no longer in the DOM
+    expect(document.body.contains(anchor)).to.be.false;
   });
 
   test('anchor href contains the given URL', () => {
@@ -262,8 +261,8 @@ suite('navigateTo', () => {
   });
 
   test('does not modify window.location', () => {
-    const before = window.location.href;
+    const before = globalThis.location.href;
     navigateTo('nxdrive://test/url');
-    expect(window.location.href).to.equal(before);
+    expect(globalThis.location.href).to.equal(before);
   });
 });
