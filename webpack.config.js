@@ -146,6 +146,9 @@ const common = merge([
           exclude: /index\.html$/,
           use: {
             loader: 'html-loader',
+            options: {
+              sources: false,
+            },
           },
         },
         {
