@@ -41,34 +41,38 @@ suiteSetup(async () => {
 });
 
 suite('nuxeo-default-search-form', () => {
-  // Each entry: [labelId, child selector]
+  // Each entry: [legendText, child selector]
   const groups = [
-    ['authorsLabel', 'nuxeo-dropdown-aggregation[name="authors"]'],
-    ['collectionsLabel', null], // child is inside a nested dom-if template
-    ['tagsLabel', 'nuxeo-tag-suggestion[name="tags"]'],
+    ['authors', 'nuxeo-dropdown-aggregation[name="authors"]'],
+    ['collections', null], // child is inside a nested dom-if template
+    ['tags', 'nuxeo-tag-suggestion[name="tags"]'],
   ];
 
-  groups.forEach(([labelId, childSelector]) => {
-    test(`${labelId}: wrapper uses role="group" labelled by a matching label id`, () => {
-      const group = tmpl.content.querySelector(`div[aria-labelledby="${labelId}"]`);
-      expect(group, `div[aria-labelledby="${labelId}"] not found`).to.not.be.null;
-      expect(group.getAttribute('role')).to.equal('group');
-      expect(group.querySelector(`label#${labelId}`), `label#${labelId} not found`).to.not.be.null;
+  groups.forEach(([name, childSelector]) => {
+    test(`${name}: wrapper uses a fieldset with a legend`, () => {
+      const fieldsets = tmpl.content.querySelectorAll('fieldset');
+      const fieldset = Array.from(fieldsets).find((fs) => {
+        const legend = fs.querySelector('legend');
+        return legend && legend.textContent.includes(`defaultSearch.${name}`);
+      });
+      expect(fieldset, `fieldset with legend for "${name}" not found`).to.not.be.null;
     });
 
     if (childSelector) {
-      test(`${labelId}: child input has no redundant aria-label`, () => {
-        const group = tmpl.content.querySelector(`div[aria-labelledby="${labelId}"]`);
-        const child = group.querySelector(childSelector);
+      test(`${name}: child input has no redundant aria-label`, () => {
+        const fieldsets = tmpl.content.querySelectorAll('fieldset');
+        const fieldset = Array.from(fieldsets).find((fs) => fs.querySelector(childSelector));
+        const child = fieldset.querySelector(childSelector);
         expect(child, `${childSelector} not found`).to.not.be.null;
         expect(child.hasAttribute('aria-label'), 'aria-label should be removed').to.be.false;
       });
     }
   });
 
-  test('collectionsLabel: nuxeo-selectivity inside dom-if has no redundant aria-label', () => {
-    const group = tmpl.content.querySelector('div[aria-labelledby="collectionsLabel"]');
-    const innerTmpl = group.querySelector('template');
+  test('collections: nuxeo-selectivity inside dom-if has no redundant aria-label', () => {
+    const fieldsets = tmpl.content.querySelectorAll('fieldset');
+    const fieldset = Array.from(fieldsets).find((fs) => fs.querySelector('template'));
+    const innerTmpl = fieldset.querySelector('template');
     const selectivity = innerTmpl.content.querySelector('nuxeo-selectivity[name="collections"]');
     expect(selectivity, 'nuxeo-selectivity[name="collections"] not found').to.not.be.null;
     expect(selectivity.hasAttribute('aria-label'), 'aria-label should be removed').to.be.false;
