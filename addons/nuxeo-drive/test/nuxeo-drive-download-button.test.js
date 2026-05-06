@@ -18,7 +18,7 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
-import { setupI18n, addOpenDriveUrlSuite } from './nuxeo-drive-test-helpers.js';
+import { setupI18n, nextTick, addOpenDriveUrlSuite } from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
@@ -280,7 +280,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(toastStub.open).to.not.have.been.called;
       expect(element._openDriveUrl).to.have.been.calledOnce;
@@ -330,7 +330,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(toastStub.open).to.not.have.been.called;
       expect(element._openDriveUrl).to.have.been.calledOnce;
@@ -362,7 +362,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(element._openDriveUrl).to.have.been.calledOnce;
       const calledUrl = element._openDriveUrl.firstCall.args[0];
@@ -376,7 +376,7 @@ suite('nuxeo-drive-download-button', () => {
       const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(dialogToggleStub).to.have.been.calledOnce;
       expect(toastStub.open).to.not.have.been.called;
@@ -387,7 +387,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(toastStub.open).to.have.been.calledOnce;
       expect(toastStub.text).to.include('error occurred');
@@ -421,7 +421,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(element._openDriveUrl).to.have.been.calledOnce;
       // Verify the UID is encoded in the URL built for the download flow

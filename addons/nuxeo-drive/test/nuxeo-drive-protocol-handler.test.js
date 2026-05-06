@@ -54,6 +54,17 @@ suite('nuxeo-drive-protocol-handler', () => {
     globalThis.dispatchEvent(new Event('blur'));
   });
 
+  /** Convenience: start a Drive URL open with test-sized timeouts. */
+  function openDrive() {
+    openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+  }
+
+  /** Convenience: fire blur and let the debounce settle. */
+  function fireBlurDebounce() {
+    fireWindowEvent('blur');
+    clock.tick(DEBOUNCE);
+  }
+
   suite('exported constants', () => {
     test('DRIVE_OPEN_TIMEOUT_MS is a positive number', () => {
       expect(DRIVE_OPEN_TIMEOUT_MS).to.be.a('number').and.to.be.above(0);
@@ -67,7 +78,7 @@ suite('nuxeo-drive-protocol-handler', () => {
 
   suite('primary timeout path (Firefox / Drive truly absent)', () => {
     test('shows install dialog when no blur fires within timeoutMs', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
       expect(toggle).not.to.have.been.called;
 
       clock.tick(TIMEOUT);
@@ -76,7 +87,7 @@ suite('nuxeo-drive-protocol-handler', () => {
     });
 
     test('does not show dialog again if already shown', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
       clock.tick(TIMEOUT);
       expect(toggle).to.have.been.calledOnce;
 
@@ -88,10 +99,9 @@ suite('nuxeo-drive-protocol-handler', () => {
 
   suite('blur + quick focus return (Chrome/Edge/Safari — Drive absent)', () => {
     test('shows install dialog when focus returns quickly after debounce settles', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE); // debounce settles — debounceSettledAt recorded
+      fireBlurDebounce(); // debounce settles — debounceSettledAt recorded
       fireWindowEvent('focus'); // quick return (0ms elapsed since debounce settled, < TIMEOUT)
 
       expect(toggle).to.have.been.calledOnce;
@@ -100,10 +110,9 @@ suite('nuxeo-drive-protocol-handler', () => {
     test('does not show dialog when focus returns slowly (Drive is installed)', () => {
       // Blur fires → debounce settles (appOpened=true) → primary timer finds appOpened=true, no show().
       // Slow focus return → onFocusAfterOpened → elapsed >= TIMEOUT → hide() but dialogShown=false → no-op.
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE); // debounce settles, appOpened=true, onFocusAfterOpened registered
+      fireBlurDebounce(); // debounce settles, appOpened=true, onFocusAfterOpened registered
       clock.tick(TIMEOUT); // primary fires but appOpened=true → no show(); elapsed from debounce >= TIMEOUT
       fireWindowEvent('focus'); // slow return → hide() is a no-op since dialogShown=false
 
@@ -113,7 +122,7 @@ suite('nuxeo-drive-protocol-handler', () => {
 
   suite('blur + quick focus during debounce (Drive opened as background app)', () => {
     test('does not show dialog when focus fires before debounce settles', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
       fireWindowEvent('blur');
       clock.tick(DEBOUNCE / 2); // still within debounce window
@@ -126,15 +135,14 @@ suite('nuxeo-drive-protocol-handler', () => {
 
   suite('primary timeout fires before blur (race condition)', () => {
     test('dismisses dialog when blur arrives after primary timeout', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
       // Primary timeout fires first.
       clock.tick(TIMEOUT);
       expect(toggle).to.have.been.calledOnce; // dialog shown
 
       // Then blur arrives.
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE);
+      fireBlurDebounce();
 
       // Blur confirms Drive/OS dialog was involved → dismiss.
       expect(toggle).to.have.been.calledTwice;
@@ -144,13 +152,12 @@ suite('nuxeo-drive-protocol-handler', () => {
   suite('show() called when dialog already visible — no double toggle', () => {
     test('show() is idempotent: second call while dialogShown is true does not call toggle again', () => {
       // Primary timeout fires → show() called (dialogShown becomes true).
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
       clock.tick(TIMEOUT);
       expect(toggle).to.have.been.calledOnce; // first show
 
       // Simulate blur arriving after the primary timeout fired (dialogShown already true).
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE);
+      fireBlurDebounce();
 
       // Blur fires hide() (dialogShown → false) then re-registers onFocusAfterOpened.
       // No extra show() should have occurred at this point.
@@ -162,7 +169,7 @@ suite('nuxeo-drive-protocol-handler', () => {
     test('primary timeout fires and shows dialog when no blur occurs (Firefox-like behavior)', () => {
       // On Firefox, blur never fires when the protocol handler is absent.
       // Simulate this: open the URL, no blur, let the primary timeout expire.
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
       // No blur dispatched — primary timeout fires.
       clock.tick(TIMEOUT);
@@ -179,10 +186,9 @@ suite('nuxeo-drive-protocol-handler', () => {
     test('Chrome path registers onFocusAfterOpened; quick focus return shows dialog', () => {
       // On Chrome/Edge/Safari (non-Firefox), blur fires and onFocusAfterOpened IS registered.
       // Quick focus return (< timeoutMs elapsed since debounce settled) → show().
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE); // debounce settles
+      fireBlurDebounce(); // debounce settles
       fireWindowEvent('focus'); // immediately return → elapsed ≈ 0 < TIMEOUT → show()
 
       expect(toggle).to.have.been.calledOnce;
@@ -191,14 +197,13 @@ suite('nuxeo-drive-protocol-handler', () => {
 
   suite('cleanup — no lingering listeners after completion', () => {
     test('hardCap timer removes all listeners even if the user never refocuses', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
       // Hard cap fires at timeoutMs + 3000ms (using proportional ms here).
       clock.tick(TIMEOUT + 3000);
 
       // Any subsequent blur/focus should have no effect.
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE);
+      fireBlurDebounce();
       fireWindowEvent('focus');
 
       expect(toggle).to.have.been.calledOnce; // only the primary timeout show
