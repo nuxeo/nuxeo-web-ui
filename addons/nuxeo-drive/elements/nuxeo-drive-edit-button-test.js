@@ -212,11 +212,13 @@ suite('nuxeo-drive-edit-button — error handling', () => {
   // _isAvailable — branch coverage
   // ---------------------------------------------------------------------------
   suite('_isAvailable', () => {
-    const baseDoc = () => ({
-      uid: 'doc-1',
-      facets: [],
-      contextParameters: { permissions: ['Write', 'Read'] },
-    });
+    const baseDoc = () => {
+      return {
+        uid: 'doc-1',
+        facets: [],
+        contextParameters: { permissions: ['Write', 'Read'] },
+      };
+    };
 
     const blobWithNoAppLinks = { data: 'http://localhost/nxfile/default/doc-1/file:content/test.docx', appLinks: [] };
 
