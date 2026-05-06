@@ -96,10 +96,6 @@ suite('nuxeo-dropzone', () => {
   });
 
   suite('validity checks', () => {
-    setup(() => {
-      sinon.stub(element, 'i18n').callsFake((key, value) => (value ? `${key}:${value}` : key));
-    });
-
     test('invalid while uploading', () => {
       element.uploading = true;
       element.files = [];

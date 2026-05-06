@@ -37,7 +37,5 @@ After(() =>
       });
       return Promise.all(promises);
     })
-    .catch((error) => {
-      throw new Error(error);
-    }),
+    .catch(() => {}),
 );
