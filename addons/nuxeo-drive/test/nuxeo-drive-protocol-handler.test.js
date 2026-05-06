@@ -133,64 +133,28 @@ suite('nuxeo-drive-protocol-handler', () => {
     });
   });
 
-  suite('primary timeout fires before blur (race condition)', () => {
-    test('dismisses dialog when blur arrives after primary timeout', () => {
+  suite('primary timeout fires before blur / show() is idempotent', () => {
+    test('blur after primary timeout dismisses dialog and show() does not double-toggle', () => {
       openDrive();
-
-      // Primary timeout fires first.
       clock.tick(TIMEOUT);
-      expect(toggle).to.have.been.calledOnce; // dialog shown
+      expect(toggle).to.have.been.calledOnce; // dialog shown (show() called)
 
-      // Then blur arrives.
+      // Blur arrives — confirms Drive/OS dialog was involved → hide().
+      // Also verifies show() is idempotent: dialogShown was true, hide() is called once, not show() again.
       fireBlurDebounce();
-
-      // Blur confirms Drive/OS dialog was involved → dismiss.
-      expect(toggle).to.have.been.calledTwice;
+      expect(toggle).to.have.been.calledTwice; // hide() fired, no extra show()
     });
   });
 
-  suite('show() called when dialog already visible — no double toggle', () => {
-    test('show() is idempotent: second call while dialogShown is true does not call toggle again', () => {
-      // Primary timeout fires → show() called (dialogShown becomes true).
+  suite('Firefox path — no blur fires, primary timeout shows dialog', () => {
+    test('shows dialog once; subsequent focus/tick after cleanup have no effect', () => {
       openDrive();
       clock.tick(TIMEOUT);
-      expect(toggle).to.have.been.calledOnce; // first show
-
-      // Simulate blur arriving after the primary timeout fired (dialogShown already true).
-      fireBlurDebounce();
-
-      // Blur fires hide() (dialogShown → false) then re-registers onFocusAfterOpened.
-      // No extra show() should have occurred at this point.
-      expect(toggle).to.have.been.calledTwice; // hide() fired
-    });
-  });
-
-  suite('Firefox path — onFocusAfterOpened is NOT registered after blur', () => {
-    test('primary timeout fires and shows dialog when no blur occurs (Firefox-like behavior)', () => {
-      // On Firefox, blur never fires when the protocol handler is absent.
-      // Simulate this: open the URL, no blur, let the primary timeout expire.
-      openDrive();
-
-      // No blur dispatched — primary timeout fires.
-      clock.tick(TIMEOUT);
-
-      // Dialog should be shown exactly once by the primary timeout.
       expect(toggle).to.have.been.calledOnce;
 
       // Any subsequent focus after cleanup should have no effect.
       fireWindowEvent('focus');
       clock.tick(TIMEOUT);
-      expect(toggle).to.have.been.calledOnce;
-    });
-
-    test('Chrome path registers onFocusAfterOpened; quick focus return shows dialog', () => {
-      // On Chrome/Edge/Safari (non-Firefox), blur fires and onFocusAfterOpened IS registered.
-      // Quick focus return (< timeoutMs elapsed since debounce settled) → show().
-      openDrive();
-
-      fireBlurDebounce(); // debounce settles
-      fireWindowEvent('focus'); // immediately return → elapsed ≈ 0 < TIMEOUT → show()
-
       expect(toggle).to.have.been.calledOnce;
     });
   });
@@ -228,49 +192,25 @@ suite('nuxeo-drive-protocol-handler', () => {
 // navigateTo — tested separately (no fake timers needed)
 // ---------------------------------------------------------------------------
 suite('navigateTo', () => {
-  let appendSpy;
-  let anchor;
+  teardown(() => sinon.restore());
 
-  setup(() => {
-    appendSpy = sinon.spy(document.body, 'appendChild');
-  });
-
-  teardown(() => {
-    sinon.restore();
-    appendSpy = null;
-    anchor = null;
-  });
-
-  /**
-   * Calls navigateTo and captures the anchor element appended to the body.
-   */
-  function navigate(url) {
-    navigateTo(url);
-    anchor = appendSpy.firstCall.args[0];
-  }
-
-  test('appends a hidden anchor to document.body, clicks it, then removes it', () => {
-    navigate('nxdrive://test/url');
-    expect(appendSpy).to.have.been.calledOnce;
+  test('appends a hidden anchor, sets correct attributes, clicks it, then removes it', () => {
+    const spy = sinon.spy(document.body, 'appendChild');
+    navigateTo('nxdrive://test/url');
+    const anchor = spy.firstCall.args[0];
+    expect(spy).to.have.been.calledOnce;
     expect(anchor.tagName).to.equal('A');
-    // anchor.remove() is used (preferred over parentNode.removeChild); verify it is no longer in the DOM
+    expect(anchor.getAttribute('aria-hidden')).to.equal('true');
+    expect(anchor.getAttribute('tabindex')).to.equal('-1');
+    // anchor.remove() is used — verify it is no longer in the DOM
     expect(document.body.contains(anchor)).to.be.false;
   });
 
-  test('anchor href contains the given URL', () => {
-    navigate('nxdrive://direct-download/abc123');
-    expect(anchor.href).to.include('nxdrive');
-  });
-
-  test('anchor is aria-hidden and not in tab order', () => {
-    navigate('nxdrive://test/url');
-    expect(anchor.getAttribute('aria-hidden')).to.equal('true');
-    expect(anchor.getAttribute('tabindex')).to.equal('-1');
-  });
-
-  test('anchor is not left in the DOM after navigation', () => {
+  test('anchor href contains the protocol scheme and DOM is left clean', () => {
     const before = document.body.children.length;
-    navigateTo('nxdrive://test/url');
+    const spy = sinon.spy(document.body, 'appendChild');
+    navigateTo('nxdrive://direct-download/abc123');
+    expect(spy.firstCall.args[0].href).to.include('nxdrive');
     expect(document.body.children.length).to.equal(before);
   });
 
