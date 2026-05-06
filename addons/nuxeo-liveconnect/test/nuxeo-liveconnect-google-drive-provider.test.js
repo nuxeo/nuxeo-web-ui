@@ -72,7 +72,13 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
   suite('_checkAuth', () => {
     test('should call _handleAuthResult when gapi token exists', () => {
       const stub = sinon.stub(element, '_handleAuthResult');
-      window.gapi = { auth: { getToken: () => {return { access_token: 'gapi-token' }} } };
+      window.gapi = {
+        auth: {
+          getToken: () => {
+            return { access_token: 'gapi-token' };
+          },
+        },
+      };
       element._checkAuth();
       expect(stub).to.have.been.calledWith('gapi-token');
       delete window.gapi;
