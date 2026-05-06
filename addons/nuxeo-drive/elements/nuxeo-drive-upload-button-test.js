@@ -138,12 +138,16 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     });
 
     test('delegates to the shared openDriveUrl and passes dialog toggle as callback', () => {
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-      expect(() => element._openDriveUrl('nxdrive://direct-transfer/localhost/some-path')).to.not.throw();
-      return new Promise((resolve) => setTimeout(resolve, 1600)).then(() => {
+      const clock = sinon.useFakeTimers();
+      try {
+        element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+        const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+        expect(() => element._openDriveUrl('nxdrive://direct-transfer/localhost/some-path')).to.not.throw();
+        clock.tick(1600);
         expect(dialogToggleStub).to.have.been.calledOnce;
-      });
+      } finally {
+        clock.restore();
+      }
     });
   });
 

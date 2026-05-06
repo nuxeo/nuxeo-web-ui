@@ -108,6 +108,7 @@ export function openDriveUrl(url, toggle, timeoutMs = DRIVE_OPEN_TIMEOUT_MS, deb
   };
 
   const onBlur = () => {
+    clearTimeout(debounceTimer); // cancel any previous debounce before starting a new one
     debounceTimer = setTimeout(() => {
       appOpened = true;
       debounceSettledAt = Date.now();

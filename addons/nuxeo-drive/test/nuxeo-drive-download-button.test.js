@@ -455,15 +455,19 @@ suite('nuxeo-drive-download-button', () => {
     });
 
     test('delegates to the shared openDriveUrl and passes dialog toggle as callback', () => {
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-      // Verify the element's _openDriveUrl wires up to the dialog correctly
-      // by checking the toggle is callable (the shared module is tested separately).
-      expect(() => element._openDriveUrl('nxdrive://direct-download/abc123')).to.not.throw();
-      // Give the primary timeout a chance to fire and clean up.
-      return new Promise((resolve) => setTimeout(resolve, 1600)).then(() => {
+      const clock = sinon.useFakeTimers();
+      try {
+        element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+        const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+        // Verify the element's _openDriveUrl wires up to the dialog correctly
+        // by checking the toggle is callable (the shared module is tested separately).
+        expect(() => element._openDriveUrl('nxdrive://direct-download/abc123')).to.not.throw();
+        // Advance the protocol timeout without waiting in real time.
+        clock.tick(1600);
         expect(dialogToggleStub).to.have.been.calledOnce;
-      });
+      } finally {
+        clock.restore();
+      }
     });
   });
 
