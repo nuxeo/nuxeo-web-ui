@@ -20,7 +20,7 @@ import {
   navigateTo,
   DRIVE_OPEN_TIMEOUT_MS,
   BLUR_DEBOUNCE_MS,
-} from '../addons/nuxeo-drive/elements/nuxeo-drive-protocol-handler.js';
+} from '../elements/nuxeo-drive-protocol-handler.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
 HTMLAnchorElement.prototype.click = HTMLAnchorElement.prototype.click || function () {};
@@ -34,7 +34,7 @@ const DEBOUNCE = 20;
  */
 function fireWindowEvent(type) {
   const evt = new Event(type);
-  window.dispatchEvent(evt);
+  globalThis.dispatchEvent(evt);
   return evt;
 }
 
@@ -50,9 +50,20 @@ suite('nuxeo-drive-protocol-handler', () => {
   teardown(() => {
     clock.restore();
     // Remove any lingering listeners added during the test.
-    window.dispatchEvent(new Event('focus'));
-    window.dispatchEvent(new Event('blur'));
+    globalThis.dispatchEvent(new Event('focus'));
+    globalThis.dispatchEvent(new Event('blur'));
   });
+
+  /** Convenience: start a Drive URL open with test-sized timeouts. */
+  function openDrive() {
+    openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+  }
+
+  /** Convenience: fire blur and let the debounce settle. */
+  function fireBlurDebounce() {
+    fireWindowEvent('blur');
+    clock.tick(DEBOUNCE);
+  }
 
   suite('exported constants', () => {
     test('DRIVE_OPEN_TIMEOUT_MS is a positive number', () => {
@@ -67,7 +78,7 @@ suite('nuxeo-drive-protocol-handler', () => {
 
   suite('primary timeout path (Firefox / Drive truly absent)', () => {
     test('shows install dialog when no blur fires within timeoutMs', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
       expect(toggle).not.to.have.been.called;
 
       clock.tick(TIMEOUT);
@@ -76,7 +87,7 @@ suite('nuxeo-drive-protocol-handler', () => {
     });
 
     test('does not show dialog again if already shown', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
       clock.tick(TIMEOUT);
       expect(toggle).to.have.been.calledOnce;
 
@@ -88,10 +99,9 @@ suite('nuxeo-drive-protocol-handler', () => {
 
   suite('blur + quick focus return (Chrome/Edge/Safari — Drive absent)', () => {
     test('shows install dialog when focus returns quickly after debounce settles', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE); // debounce settles — debounceSettledAt recorded
+      fireBlurDebounce(); // debounce settles — debounceSettledAt recorded
       fireWindowEvent('focus'); // quick return (0ms elapsed since debounce settled, < TIMEOUT)
 
       expect(toggle).to.have.been.calledOnce;
@@ -100,10 +110,9 @@ suite('nuxeo-drive-protocol-handler', () => {
     test('does not show dialog when focus returns slowly (Drive is installed)', () => {
       // Blur fires → debounce settles (appOpened=true) → primary timer finds appOpened=true, no show().
       // Slow focus return → onFocusAfterOpened → elapsed >= TIMEOUT → hide() but dialogShown=false → no-op.
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE); // debounce settles, appOpened=true, onFocusAfterOpened registered
+      fireBlurDebounce(); // debounce settles, appOpened=true, onFocusAfterOpened registered
       clock.tick(TIMEOUT); // primary fires but appOpened=true → no show(); elapsed from debounce >= TIMEOUT
       fireWindowEvent('focus'); // slow return → hide() is a no-op since dialogShown=false
 
@@ -113,7 +122,7 @@ suite('nuxeo-drive-protocol-handler', () => {
 
   suite('blur + quick focus during debounce (Drive opened as background app)', () => {
     test('does not show dialog when focus fires before debounce settles', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
       fireWindowEvent('blur');
       clock.tick(DEBOUNCE / 2); // still within debounce window
@@ -124,50 +133,23 @@ suite('nuxeo-drive-protocol-handler', () => {
     });
   });
 
-  suite('primary timeout fires before blur (race condition)', () => {
-    test('dismisses dialog when blur arrives after primary timeout', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
-
-      // Primary timeout fires first.
+  suite('primary timeout fires before blur / show() is idempotent', () => {
+    test('blur after primary timeout dismisses dialog and show() does not double-toggle', () => {
+      openDrive();
       clock.tick(TIMEOUT);
-      expect(toggle).to.have.been.calledOnce; // dialog shown
+      expect(toggle).to.have.been.calledOnce; // dialog shown (show() called)
 
-      // Then blur arrives.
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE);
-
-      // Blur confirms Drive/OS dialog was involved → dismiss.
-      expect(toggle).to.have.been.calledTwice;
+      // Blur arrives — confirms Drive/OS dialog was involved → hide().
+      // Also verifies show() is idempotent: dialogShown was true, hide() is called once, not show() again.
+      fireBlurDebounce();
+      expect(toggle).to.have.been.calledTwice; // hide() fired, no extra show()
     });
   });
 
-  suite('show() called when dialog already visible — no double toggle', () => {
-    test('show() is idempotent: second call while dialogShown is true does not call toggle again', () => {
-      // Primary timeout fires → show() called (dialogShown becomes true).
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+  suite('Firefox path — no blur fires, primary timeout shows dialog', () => {
+    test('shows dialog once; subsequent focus/tick after cleanup have no effect', () => {
+      openDrive();
       clock.tick(TIMEOUT);
-      expect(toggle).to.have.been.calledOnce; // first show
-
-      // Simulate blur arriving after the primary timeout fired (dialogShown already true).
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE);
-
-      // Blur fires hide() (dialogShown → false) then re-registers onFocusAfterOpened.
-      // No extra show() should have occurred at this point.
-      expect(toggle).to.have.been.calledTwice; // hide() fired
-    });
-  });
-
-  suite('Firefox path — onFocusAfterOpened is NOT registered after blur', () => {
-    test('primary timeout fires and shows dialog when no blur occurs (Firefox-like behavior)', () => {
-      // On Firefox, blur never fires when the protocol handler is absent.
-      // Simulate this: open the URL, no blur, let the primary timeout expire.
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
-
-      // No blur dispatched — primary timeout fires.
-      clock.tick(TIMEOUT);
-
-      // Dialog should be shown exactly once by the primary timeout.
       expect(toggle).to.have.been.calledOnce;
 
       // Any subsequent focus after cleanup should have no effect.
@@ -175,30 +157,17 @@ suite('nuxeo-drive-protocol-handler', () => {
       clock.tick(TIMEOUT);
       expect(toggle).to.have.been.calledOnce;
     });
-
-    test('Chrome path registers onFocusAfterOpened; quick focus return shows dialog', () => {
-      // On Chrome/Edge/Safari (non-Firefox), blur fires and onFocusAfterOpened IS registered.
-      // Quick focus return (< timeoutMs elapsed since debounce settled) → show().
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
-
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE); // debounce settles
-      fireWindowEvent('focus'); // immediately return → elapsed ≈ 0 < TIMEOUT → show()
-
-      expect(toggle).to.have.been.calledOnce;
-    });
   });
 
   suite('cleanup — no lingering listeners after completion', () => {
     test('hardCap timer removes all listeners even if the user never refocuses', () => {
-      openDriveUrl('nxdrive://test', toggle, TIMEOUT, DEBOUNCE);
+      openDrive();
 
       // Hard cap fires at timeoutMs + 3000ms (using proportional ms here).
       clock.tick(TIMEOUT + 3000);
 
       // Any subsequent blur/focus should have no effect.
-      fireWindowEvent('blur');
-      clock.tick(DEBOUNCE);
+      fireBlurDebounce();
       fireWindowEvent('focus');
 
       expect(toggle).to.have.been.calledOnce; // only the primary timeout show
@@ -223,47 +192,31 @@ suite('nuxeo-drive-protocol-handler', () => {
 // navigateTo — tested separately (no fake timers needed)
 // ---------------------------------------------------------------------------
 suite('navigateTo', () => {
-  teardown(() => {
-    sinon.restore();
-  });
+  teardown(() => sinon.restore());
 
-  test('appends a hidden anchor to document.body, clicks it, then removes it', () => {
-    const appendSpy = sinon.spy(document.body, 'appendChild');
-    const removeSpy = sinon.spy(document.body, 'removeChild');
-
+  test('appends a hidden anchor, sets correct attributes, clicks it, then removes it', () => {
+    const spy = sinon.spy(document.body, 'appendChild');
     navigateTo('nxdrive://test/url');
-
-    expect(appendSpy).to.have.been.calledOnce;
-    const anchor = appendSpy.firstCall.args[0];
+    const anchor = spy.firstCall.args[0];
+    expect(spy).to.have.been.calledOnce;
     expect(anchor.tagName).to.equal('A');
-    expect(removeSpy).to.have.been.calledOnce;
-    expect(removeSpy.firstCall.args[0]).to.equal(anchor);
-  });
-
-  test('anchor href contains the given URL', () => {
-    const appendSpy = sinon.spy(document.body, 'appendChild');
-    navigateTo('nxdrive://direct-download/abc123');
-    const anchor = appendSpy.firstCall.args[0];
-    expect(anchor.href).to.include('nxdrive');
-  });
-
-  test('anchor is aria-hidden and not in tab order', () => {
-    const appendSpy = sinon.spy(document.body, 'appendChild');
-    navigateTo('nxdrive://test/url');
-    const anchor = appendSpy.firstCall.args[0];
     expect(anchor.getAttribute('aria-hidden')).to.equal('true');
     expect(anchor.getAttribute('tabindex')).to.equal('-1');
+    // anchor.remove() is used — verify it is no longer in the DOM
+    expect(document.body.contains(anchor)).to.be.false;
   });
 
-  test('anchor is not left in the DOM after navigation', () => {
+  test('anchor href contains the protocol scheme and DOM is left clean', () => {
     const before = document.body.children.length;
-    navigateTo('nxdrive://test/url');
+    const spy = sinon.spy(document.body, 'appendChild');
+    navigateTo('nxdrive://direct-download/abc123');
+    expect(spy.firstCall.args[0].href).to.include('nxdrive');
     expect(document.body.children.length).to.equal(before);
   });
 
   test('does not modify window.location', () => {
-    const before = window.location.href;
+    const before = globalThis.location.href;
     navigateTo('nxdrive://test/url');
-    expect(window.location.href).to.equal(before);
+    expect(globalThis.location.href).to.equal(before);
   });
 });

@@ -17,21 +17,24 @@ limitations under the License.
 */
 import { fixture, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-drive-edit-button.js';
-import * as protocolHandler from '../elements/nuxeo-drive-protocol-handler.js';
+import {
+  setupI18n,
+  nextTick,
+  addGoErrorSuites,
+  addOpenDriveUrlSuite,
+  addShowErrorSuite,
+} from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
 
 // Setup i18n keys used by the component
-window.nuxeo = window.nuxeo || {};
-window.nuxeo.I18n = window.nuxeo.I18n || {};
-window.nuxeo.I18n.language = 'en';
-window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
-window.nuxeo.I18n.en['driveEditButton.tooltip'] = 'Open with Nuxeo Drive';
-window.nuxeo.I18n.en['driveEditButton.directTransfer.failed'] =
-  'An error occurred while trying to open the document with Nuxeo Drive.';
-window.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
-window.nuxeo.I18n.en['command.close'] = 'Close';
+setupI18n({
+  'driveEditButton.tooltip': 'Open with Nuxeo Drive',
+  'driveEditButton.directTransfer.failed': 'An error occurred while trying to open the document with Nuxeo Drive.',
+  'driveEditButton.dialog.heading': 'Download Nuxeo Drive Client',
+  'command.close': 'Close',
+});
 
 suite('nuxeo-drive-edit-button — error handling', () => {
   let element;
@@ -40,74 +43,13 @@ suite('nuxeo-drive-edit-button — error handling', () => {
     element = await fixture(html`<nuxeo-drive-edit-button></nuxeo-drive-edit-button>`);
   });
 
-  suite('_go — token fetch failure', () => {
-    let toastStub;
-
-    setup(() => {
-      toastStub = { text: '', open: sinon.spy() };
-      sinon.stub(element.$, 'toast').value(toastStub);
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-    });
-
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('shows error toast when token.get rejects', async () => {
-      sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
-
-      element._go();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(toastStub.open).to.have.been.calledOnce;
-      expect(toastStub.text).to.include('error occurred');
-    });
-
-    test('does not open dialog when token.get rejects', async () => {
-      sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-
-      element._go();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(dialogToggleStub).to.not.have.been.called;
-    });
-  });
-
-  suite('_go — no token registered (Drive not authenticated)', () => {
-    let toastStub;
-
-    setup(() => {
-      toastStub = { text: '', open: sinon.spy() };
-      sinon.stub(element.$, 'toast').value(toastStub);
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-    });
-
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('opens install dialog when token list is empty', async () => {
-      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-
-      element._go();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(dialogToggleStub).to.have.been.calledOnce;
-      expect(toastStub.open).to.not.have.been.called;
-    });
-
-    test('does not show error toast when token list is empty', async () => {
-      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      sinon.stub(element.$.dialog, 'toggle');
-
-      element._go();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(toastStub.open).to.not.have.been.called;
-    });
-  });
+  // Shared suites: _go token-fetch failure, _go no-token, _showError, _openDriveUrl
+  addGoErrorSuites(() => element);
+  addShowErrorSuite(() => element);
+  addOpenDriveUrlSuite(
+    () => element,
+    'nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/abc/filename/test.docx',
+  );
 
   suite('_go — Drive installed and token present', () => {
     teardown(() => {
@@ -122,89 +64,10 @@ suite('nuxeo-drive-edit-button — error handling', () => {
       const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
 
       element._go();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(openDriveUrlStub).to.have.been.calledOnce;
       expect(openDriveUrlStub.firstCall.args[0]).to.match(/^nxdrive:\/\/edit\//);
-    });
-  });
-
-  // _openDriveUrl — wires the shared openDriveUrl with the element's dialog toggle.
-  // The blur/debounce detection logic itself is tested in nuxeo-drive-protocol-handler.test.js
-  suite('_openDriveUrl', () => {
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('delegates to the shared openDriveUrl and passes dialog toggle as callback', () => {
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-      expect(() =>
-        element._openDriveUrl(
-          'nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/abc/filename/test.docx',
-        ),
-      ).to.not.throw();
-      return new Promise((resolve) => setTimeout(resolve, 1600)).then(() => {
-        expect(dialogToggleStub).to.have.been.calledOnce;
-      });
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // navigateTo (moved to shared module — tested via protocolHandler.navigateTo)
-  // ---------------------------------------------------------------------------
-  suite('navigateTo', () => {
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('appends an anchor to document.body, clicks it, then removes it', () => {
-      const appendSpy = sinon.spy(document.body, 'appendChild');
-      const removeSpy = sinon.spy(document.body, 'removeChild');
-
-      protocolHandler.navigateTo(
-        'nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/abc/filename/test.docx',
-      );
-
-      expect(appendSpy).to.have.been.calledOnce;
-      const anchor = appendSpy.firstCall.args[0];
-      expect(anchor.tagName).to.equal('A');
-      expect(anchor.href).to.include('nxdrive');
-      expect(removeSpy).to.have.been.calledOnce;
-      expect(removeSpy.firstCall.args[0]).to.equal(anchor);
-    });
-
-    test('does not modify window.location', () => {
-      const before = window.location.href;
-      protocolHandler.navigateTo(
-        'nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/abc/filename/test.docx',
-      );
-      expect(window.location.href).to.equal(before);
-    });
-
-    test('anchor has aria-hidden and tabindex=-1 (accessible)', () => {
-      const appendSpy = sinon.spy(document.body, 'appendChild');
-      protocolHandler.navigateTo(
-        'nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/abc/filename/test.docx',
-      );
-      const anchor = appendSpy.firstCall.args[0];
-      expect(anchor.getAttribute('aria-hidden')).to.equal('true');
-      expect(anchor.getAttribute('tabindex')).to.equal('-1');
-    });
-  });
-  suite('_showError', () => {
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('sets toast text and opens it', () => {
-      const toastStub = { text: '', open: sinon.spy() };
-      sinon.stub(element.$, 'toast').value(toastStub);
-
-      element._showError('Something went wrong');
-
-      expect(toastStub.text).to.equal('Something went wrong');
-      expect(toastStub.open).to.have.been.calledOnce;
     });
   });
 
