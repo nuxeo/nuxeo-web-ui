@@ -18,24 +18,21 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
-import * as protocolHandler from '../elements/nuxeo-drive-protocol-handler.js';
+import { setupI18n, nextTick, addOpenDriveUrlSuite } from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
 
 // Setup i18n keys used by the component
-window.nuxeo = window.nuxeo || {};
-window.nuxeo.I18n = window.nuxeo.I18n || {};
-window.nuxeo.I18n.language = 'en';
-window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
-window.nuxeo.I18n.en['driveDownloadButton.tooltip'] = 'Download with Nuxeo Drive';
-window.nuxeo.I18n.en['driveDownload.noDocumentsSelected'] = 'No documents selected for download.';
-window.nuxeo.I18n.en['driveDownload.tooManyDocuments'] =
-  'You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.';
-window.nuxeo.I18n.en['driveDownload.directTransfer.failed'] =
-  'An error occurred while trying to download the document with Nuxeo Drive.';
-window.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
-window.nuxeo.I18n.en['command.close'] = 'Close';
+setupI18n({
+  'driveDownloadButton.tooltip': 'Download with Nuxeo Drive',
+  'driveDownload.noDocumentsSelected': 'No documents selected for download.',
+  'driveDownload.tooManyDocuments':
+    'You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.',
+  'driveDownload.directTransfer.failed': 'An error occurred while trying to download the document with Nuxeo Drive.',
+  'driveEditButton.dialog.heading': 'Download Nuxeo Drive Client',
+  'command.close': 'Close',
+});
 
 suite('nuxeo-drive-download-button', () => {
   let element;
@@ -249,30 +246,6 @@ suite('nuxeo-drive-download-button', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // _base64UrlSafeEncode
-  // ---------------------------------------------------------------------------
-  suite('_base64UrlSafeEncode', () => {
-    test('output contains no standard base64 padding (=)', () => {
-      const bytes = new Uint8Array([1, 2, 3, 4, 5]);
-      const result = element._base64UrlSafeEncode(bytes);
-      expect(result).to.not.include('=');
-    });
-
-    test('output contains no + characters (URL-safe)', () => {
-      // Use bytes that would produce '+' in standard base64
-      const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
-      expect(result).to.not.include('+');
-    });
-
-    test('output contains no / characters (URL-safe)', () => {
-      const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
-      expect(result).to.not.include('/');
-    });
-  });
-
-  // ---------------------------------------------------------------------------
   // _download — guard conditions
   // ---------------------------------------------------------------------------
   suite('_download', () => {
@@ -307,7 +280,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(toastStub.open).to.not.have.been.called;
       expect(element._openDriveUrl).to.have.been.calledOnce;
@@ -315,6 +288,18 @@ suite('nuxeo-drive-download-button', () => {
     });
 
     test('shows noDocumentsSelected error when select-all is active but view has no items', () => {
+      const viewStub = {
+        selectAllActive: true,
+        behaviors: [...PageProviderDisplayBehavior],
+        items: [],
+      };
+      element.documents = viewStub;
+      element._download();
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.include('No documents selected');
+    });
+
+    test('shows tooManyDocuments error when select-all yields more than 25 items', () => {
       const viewStub = {
         selectAllActive: true,
         behaviors: [...PageProviderDisplayBehavior],
@@ -345,7 +330,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(toastStub.open).to.not.have.been.called;
       expect(element._openDriveUrl).to.have.been.calledOnce;
@@ -377,7 +362,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(element._openDriveUrl).to.have.been.calledOnce;
       const calledUrl = element._openDriveUrl.firstCall.args[0];
@@ -391,7 +376,7 @@ suite('nuxeo-drive-download-button', () => {
       const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(dialogToggleStub).to.have.been.calledOnce;
       expect(toastStub.open).to.not.have.been.called;
@@ -402,7 +387,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(toastStub.open).to.have.been.calledOnce;
       expect(toastStub.text).to.include('error occurred');
@@ -436,7 +421,7 @@ suite('nuxeo-drive-download-button', () => {
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(element._openDriveUrl).to.have.been.calledOnce;
       // Verify the UID is encoded in the URL built for the download flow
@@ -449,64 +434,7 @@ suite('nuxeo-drive-download-button', () => {
   // _openDriveUrl — wires the shared openDriveUrl with the element's dialog toggle
   // The blur/debounce detection logic itself is tested in nuxeo-drive-protocol-handler.test.js
   // ---------------------------------------------------------------------------
-  suite('_openDriveUrl', () => {
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('delegates to the shared openDriveUrl and passes dialog toggle as callback', () => {
-      const clock = sinon.useFakeTimers();
-      try {
-        element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-        const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-        // Verify the element's _openDriveUrl wires up to the dialog correctly
-        // by checking the toggle is callable (the shared module is tested separately).
-        expect(() => element._openDriveUrl('nxdrive://direct-download/abc123')).to.not.throw();
-        // Advance the protocol timeout without waiting in real time.
-        clock.tick(1600);
-        expect(dialogToggleStub).to.have.been.calledOnce;
-      } finally {
-        clock.restore();
-      }
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // navigateTo (moved to shared module — tested via protocolHandler.navigateTo)
-  // ---------------------------------------------------------------------------
-  suite('navigateTo', () => {
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('appends an anchor to document.body, clicks it, then removes it', () => {
-      const appendSpy = sinon.spy(document.body, 'appendChild');
-      const removeSpy = sinon.spy(document.body, 'removeChild');
-
-      protocolHandler.navigateTo('nxdrive://direct-download/abc123');
-
-      expect(appendSpy).to.have.been.calledOnce;
-      const anchor = appendSpy.firstCall.args[0];
-      expect(anchor.tagName).to.equal('A');
-      expect(anchor.href).to.include('nxdrive');
-      expect(removeSpy).to.have.been.calledOnce;
-      expect(removeSpy.firstCall.args[0]).to.equal(anchor);
-    });
-
-    test('does not modify window.location', () => {
-      const before = window.location.href;
-      protocolHandler.navigateTo('nxdrive://direct-download/abc123');
-      expect(window.location.href).to.equal(before);
-    });
-
-    test('anchor has aria-hidden and tabindex=-1 (accessible)', () => {
-      const appendSpy = sinon.spy(document.body, 'appendChild');
-      protocolHandler.navigateTo('nxdrive://direct-download/abc123');
-      const anchor = appendSpy.firstCall.args[0];
-      expect(anchor.getAttribute('aria-hidden')).to.equal('true');
-      expect(anchor.getAttribute('tabindex')).to.equal('-1');
-    });
-  });
+  addOpenDriveUrlSuite(() => element, 'nxdrive://direct-download/abc123');
 
   // ---------------------------------------------------------------------------
   // _buildOriginalUrl — server info
