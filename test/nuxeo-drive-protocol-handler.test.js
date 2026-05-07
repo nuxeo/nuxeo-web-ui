@@ -20,7 +20,7 @@ import {
   navigateTo,
   DRIVE_OPEN_TIMEOUT_MS,
   BLUR_DEBOUNCE_MS,
-} from '../elements/nuxeo-drive-protocol-handler.js';
+} from '../addons/nuxeo-drive/elements/nuxeo-drive-protocol-handler.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
 HTMLAnchorElement.prototype.click = HTMLAnchorElement.prototype.click || function () {};
