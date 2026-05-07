@@ -189,6 +189,7 @@ export function addOpenDriveUrlSuite(getElement, sampleUrl) {
         expect(() => element._openDriveUrl(sampleUrl)).to.not.throw();
         clock.tick(1600);
         expect(dialogToggleStub).to.have.been.calledOnce;
+        clock.tick(10000); // tick past the hard-cap timer so cleanup runs and listeners don't leak
       } finally {
         clock.restore();
       }

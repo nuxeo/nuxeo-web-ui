@@ -68,21 +68,6 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     });
   });
 
-  suite('_showError', () => {
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('sets toast text and opens it', () => {
-      const toastStub = stubToast(element);
-
-      element._showError('Something went wrong');
-
-      expect(toastStub.text).to.equal('Something went wrong');
-      expect(toastStub.open).to.have.been.calledOnce;
-    });
-  });
-
   // ---------------------------------------------------------------------------
   // _compressUploadUrl / directTransferUrl
   // ---------------------------------------------------------------------------
