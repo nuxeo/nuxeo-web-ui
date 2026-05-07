@@ -21,6 +21,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+import { openDriveUrl } from './nuxeo-drive-protocol-handler.js';
 
 /**
 `nuxeo-drive-edit-button`
@@ -49,10 +50,10 @@ Polymer({
       <div class="buttons">
         <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
-    </nuxeo-dialog>
-  `,
+      </nuxeo-dialog>
 
-  is: 'nuxeo-drive-edit-button',
+    <paper-toast id="toast"></paper-toast>
+  `,  is: 'nuxeo-drive-edit-button',
   behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
@@ -76,14 +77,28 @@ Polymer({
   },
 
   _go() {
-    this.$.token.get().then((response) => {
-      const tokens = response.entries.map((token) => token.id);
-      if (!tokens || !tokens.length) {
-        this.$.dialog.toggle();
-        return;
-      }
-      window.open(this.driveEditURL, '_top');
-    });
+    this.$.token
+      .get()
+      .then((response) => {
+        const tokens = response.entries.map((token) => token.id);
+        if (!tokens || !tokens.length) {
+          this.$.dialog.toggle();
+          return;
+        }
+        this._openDriveUrl(this.driveEditURL);
+      })
+      .catch(() => {
+        this._showError(this.i18n('driveEditButton.directTransfer.failed'));
+      });
+  },
+
+  _showError(message) {
+    this.$.toast.text = message;
+    this.$.toast.open();
+  },
+
+  _openDriveUrl(url) {
+    openDriveUrl(url, () => this.$.dialog.toggle());
   },
 
   get driveEditURL() {

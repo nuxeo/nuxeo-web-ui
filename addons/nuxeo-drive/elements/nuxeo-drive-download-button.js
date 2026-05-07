@@ -19,6 +19,7 @@ import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { isPageProviderDisplayBehavior } from '../../../elements/select-all-helpers.js';
+import { openDriveUrl } from './nuxeo-drive-protocol-handler.js';
 import './nuxeo-drive-icons.js';
 
 window.nuxeo = window.nuxeo || {};
@@ -105,11 +106,17 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
           return;
         }
 
-        window.open(this.directDownloadUrl, '_top');
+        this._openDriveUrl(this.directDownloadUrl);
       })
       .catch((err) => {
         this._showError(err && err.userMessage ? err.userMessage : this.i18n('driveDownload.directTransfer.failed'));
       });
+  }
+
+  // Invokes a nxdrive:// URL; shows the install dialog if Drive did not handle it.
+  // Chrome/Edge/Safari: blur+debounce heuristic. Firefox: primary timeout only (no blur when Drive absent).
+  _openDriveUrl(url) {
+    openDriveUrl(url, () => this.$.dialog.toggle());
   }
 
   _showError(message) {
@@ -173,7 +180,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     const serverBytes = new TextEncoder().encode(server);
     if (serverBytes.length > 255) {
       const userMessage = this.i18n('driveDownload.serverUrlTooLong');
-      const err = new Error(this.i18n('driveDownload.serverUrlTooLong'));
+      const err = new Error(userMessage);
       err.userMessage = userMessage;
       throw err;
     }
