@@ -50,10 +50,11 @@ Polymer({
       <div class="buttons">
         <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
       </div>
-      </nuxeo-dialog>
+    </nuxeo-dialog>
 
     <paper-toast id="toast"></paper-toast>
-  `,  is: 'nuxeo-drive-edit-button',
+  `,
+  is: 'nuxeo-drive-edit-button',
   behaviors: [I18nBehavior, FiltersBehavior],
 
   properties: {
