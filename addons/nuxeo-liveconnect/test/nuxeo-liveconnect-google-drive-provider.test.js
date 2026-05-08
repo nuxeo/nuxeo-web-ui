@@ -56,15 +56,15 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
   suite('openPicker', () => {
     test('should load the picker api and call init callback', () => {
       const initStub = sinon.stub(element, '_init');
-      window.gapi = {
+      globalThis.gapi = {
         load: sinon.stub().callsFake((_name, options) => {
           options.callback();
         }),
       };
       element.openPicker();
-      expect(window.gapi.load).to.have.been.calledWith('picker', sinon.match.object);
+      expect(globalThis.gapi.load).to.have.been.calledWith('picker', sinon.match.object);
       expect(initStub).to.have.been.calledOnce;
-      delete window.gapi;
+      delete globalThis.gapi;
     });
   });
 
@@ -89,13 +89,13 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
 
   suite('_doAuth', () => {
     test('should call gapi authorize with user and domain', () => {
-      window.gapi = { auth: { authorize: sinon.spy() } };
+      globalThis.gapi = { auth: { authorize: sinon.spy() } };
       element.clientId = 'client-id';
       element.userId = 'john';
       element.domain = 'example.com';
       const callback = sinon.spy();
       element._doAuth(true, callback);
-      expect(window.gapi.auth.authorize).to.have.been.calledWith(
+      expect(globalThis.gapi.auth.authorize).to.have.been.calledWith(
         sinon.match({
           client_id: 'client-id',
           user_id: 'john',
@@ -104,20 +104,20 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
         }),
         callback,
       );
-      delete window.gapi;
+      delete globalThis.gapi;
     });
 
     test('should request account chooser when user is missing', () => {
-      window.gapi = { auth: { authorize: sinon.spy() } };
+      globalThis.gapi = { auth: { authorize: sinon.spy() } };
       element.clientId = 'client-id';
       element.userId = '';
       element.domain = '';
       element._doAuth(false, sinon.spy());
-      const authOptions = window.gapi.auth.authorize.firstCall.args[0];
+      const authOptions = globalThis.gapi.auth.authorize.firstCall.args[0];
       expect(authOptions.authuser).to.equal(-1);
       expect(authOptions).to.not.have.property('user_id');
       expect(authOptions).to.not.have.property('immediate');
-      delete window.gapi;
+      delete globalThis.gapi;
     });
   });
 
@@ -140,7 +140,7 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
   suite('_checkAuth', () => {
     test('should call _handleAuthResult when gapi token exists', () => {
       const stub = sinon.stub(element, '_handleAuthResult');
-      window.gapi = {
+      globalThis.gapi = {
         auth: {
           getToken: () => {
             return { access_token: 'gapi-token' };
@@ -149,15 +149,15 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
       };
       element._checkAuth();
       expect(stub).to.have.been.calledWith('gapi-token');
-      delete window.gapi;
+      delete globalThis.gapi;
     });
 
     test('should retry with _doAuth when no gapi token', () => {
       const doAuthStub = sinon.stub(element, '_doAuth');
-      window.gapi = { auth: { getToken: () => null } };
+      globalThis.gapi = { auth: { getToken: () => null } };
       element._checkAuth();
       expect(doAuthStub).to.have.been.calledWith(false);
-      delete window.gapi;
+      delete globalThis.gapi;
     });
   });
 
@@ -203,7 +203,7 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
         enableFeature: sinon.stub().returnsThis(),
         build: sinon.stub().returns(pickerInstance),
       };
-      window.google = {
+      globalThis.google = {
         picker: {
           DocsView: function DocsView() {
             return docsView;
@@ -220,7 +220,7 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
       expect(builder.setOAuthToken).to.have.been.calledWith('token-456');
       expect(builder.setAppId).to.have.been.calledWith('client-id');
       expect(pickerInstance.setVisible).to.have.been.calledWith(true);
-      delete window.google;
+      delete globalThis.google;
     });
   });
 
@@ -231,7 +231,7 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
       element.userId = 'test@example.com';
       sinon.stub(element, 'generateBlobKey').returns('googledrive:test@example.com:file1');
 
-      window.google = {
+      globalThis.google = {
         picker: {
           Response: { ACTION: 'action', DOCUMENTS: 'docs' },
           Action: { PICKED: 'picked' },
@@ -251,13 +251,13 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
       expect(files[0].providerName).to.equal('Google Drive');
       expect(files[0].fileId).to.equal('file1');
 
-      delete window.google;
+      delete globalThis.google;
     });
 
     test('should not call notifyBlobPick for non-PICKED action', () => {
       const notifyStub = sinon.stub(element, 'notifyBlobPick');
 
-      window.google = {
+      globalThis.google = {
         picker: {
           Response: { ACTION: 'action', DOCUMENTS: 'docs' },
           Action: { PICKED: 'picked' },
@@ -267,7 +267,7 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
       element._pickerCallback({ action: 'cancel', docs: [] });
       expect(notifyStub).to.not.have.been.called;
 
-      delete window.google;
+      delete globalThis.google;
     });
   });
 });

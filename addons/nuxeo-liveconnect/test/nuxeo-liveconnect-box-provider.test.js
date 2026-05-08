@@ -124,13 +124,13 @@ suite('nuxeo-liveconnect-box-provider', () => {
         }),
         launchPopup,
       };
-      window.BoxSelect = sinon.stub().returns(boxSelect);
+      globalThis.BoxSelect = sinon.stub().returns(boxSelect);
       const notifyStub = sinon.stub(element, 'notifyBlobPick');
       sinon.stub(element, 'generateBlobKey').callsFake((id) => `box:user:${id}`);
       element.clientId = 'client-id';
       element.userId = 'user@example.com';
       element._showPicker();
-      expect(window.BoxSelect).to.have.been.calledWith(
+      expect(globalThis.BoxSelect).to.have.been.calledWith(
         sinon.match({ clientId: 'client-id', linkType: 'direct', multiselect: true }),
       );
       onSuccess([{ id: 12, name: 'File.pdf', size: 64 }]);
@@ -144,7 +144,7 @@ suite('nuxeo-liveconnect-box-provider', () => {
         size: 64,
       });
       expect(launchPopup).to.have.been.calledOnce;
-      delete window.BoxSelect;
+      delete globalThis.BoxSelect;
     });
   });
 });
