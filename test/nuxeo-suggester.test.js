@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, html, flush, login } from '@nuxeo/testing-helpers';
 import { _Suggester } from '../elements/nuxeo-suggester/nuxeo-suggester.js';
 import '../elements/nuxeo-suggester/nuxeo-suggester.js';
 
@@ -229,5 +229,40 @@ suite('nuxeo-suggester', () => {
       _Suggester.addCommand(cmd);
       expect(cmd.suggestion.command).to.equal(cmd);
     });
+  });
+});
+
+suite('nuxeo-suggester — sanitization', () => {
+  let suggester;
+
+  setup(async () => {
+    suggester = await fixture(html`<nuxeo-suggester></nuxeo-suggester>`);
+    await flush();
+  });
+
+  test('sanitizes double quotes and trims search term', () => {
+    const term = '  test "quoted"  ';
+    expect(suggester._sanitizeSearchTerm(term)).to.equal('test %22quoted%22');
+  });
+
+  test('clears items and skips execution for blank search term', async () => {
+    suggester.$.op.execute = sinon.stub().resolves();
+    suggester.items = [{ id: '1', label: 'existing' }];
+    suggester.searchTerm = '   ';
+    await flush();
+
+    expect(suggester.sanitizedSearchTerm).to.equal('');
+    expect(suggester.items).to.deep.equal([]);
+    expect(suggester.$.op.execute).to.not.have.been.called;
+  });
+
+  test('executes operation when sanitized search term is present', async () => {
+    suggester.$.op.execute = sinon.stub().resolves();
+    sinon.stub(suggester, 'debounce').callsFake((jobName, callback) => callback());
+    suggester.searchTerm = 'invoice "2024"';
+    await flush();
+
+    expect(suggester.sanitizedSearchTerm).to.equal('invoice %222024%22');
+    expect(suggester.$.op.execute).to.have.been.calledOnce;
   });
 });

@@ -274,7 +274,7 @@ Polymer({
       id="op"
       op="Search.SuggestersLauncher"
       response="{{items}}"
-      params='{"searchTerm":"[[searchTerm]]"}'
+      params='{"searchTerm":"[[sanitizedSearchTerm]]"}'
     ></nuxeo-operation>
 
     <div hidden$="[[!toggled]]">
@@ -366,6 +366,10 @@ Polymer({
       notify: true,
       observer: '_searchTermChanged',
     },
+    sanitizedSearchTerm: {
+      type: String,
+      value: '',
+    },
     searchDelay: {
       type: Number,
       value: 500,
@@ -447,8 +451,9 @@ Polymer({
   },
 
   _searchTermChanged() {
+    this.sanitizedSearchTerm = this._sanitizeSearchTerm(this.searchTerm);
     this.$.selector.selected = 0;
-    if (this.searchTerm === '') {
+    if (!this.sanitizedSearchTerm) {
       this.items = [];
     } else {
       this.debounce(
@@ -475,6 +480,10 @@ Polymer({
         this.searchDelay,
       );
     }
+  },
+
+  _sanitizeSearchTerm(term) {
+    return (term || '').replace(/"/g, encodeURIComponent('"')).trim();
   },
 
   _canShowResults() {
