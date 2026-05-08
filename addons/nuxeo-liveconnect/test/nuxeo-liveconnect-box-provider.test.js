@@ -70,6 +70,16 @@ suite('nuxeo-liveconnect-box-provider', () => {
     });
   });
 
+  suite('openPicker', () => {
+    test('should fetch provider info before initialization', async () => {
+      const updateStub = sinon.stub(element, 'updateProviderInfo').resolves();
+      const initStub = sinon.stub(element, '_init');
+      element.openPicker();
+      await updateStub.returnValues[0];
+      expect(initStub).to.have.been.calledOnce;
+    });
+  });
+
   suite('_onOAuthPopupClose', () => {
     test('should not act when accessToken is falsy', () => {
       const showPickerStub = sinon.stub(element, '_showPicker');
@@ -101,6 +111,40 @@ suite('nuxeo-liveconnect-box-provider', () => {
       expect(updateStub).to.have.been.called;
       await updateStub.returnValues[0];
       expect(showPickerStub).to.have.been.called;
+    });
+  });
+
+  suite('_showPicker', () => {
+    test('should configure box select and emit picked blobs', () => {
+      let onSuccess;
+      const launchPopup = sinon.spy();
+      const boxSelect = {
+        success: sinon.stub().callsFake((cb) => {
+          onSuccess = cb;
+        }),
+        launchPopup,
+      };
+      window.BoxSelect = sinon.stub().returns(boxSelect);
+      const notifyStub = sinon.stub(element, 'notifyBlobPick');
+      sinon.stub(element, 'generateBlobKey').callsFake((id) => `box:user:${id}`);
+      element.clientId = 'client-id';
+      element.userId = 'user@example.com';
+      element._showPicker();
+      expect(window.BoxSelect).to.have.been.calledWith(
+        sinon.match({ clientId: 'client-id', linkType: 'direct', multiselect: true }),
+      );
+      onSuccess([{ id: 12, name: 'File.pdf', size: 64 }]);
+      expect(notifyStub).to.have.been.calledOnce;
+      expect(notifyStub.firstCall.args[0][0]).to.deep.include({
+        providerId: 'box',
+        providerName: 'Box',
+        user: 'user@example.com',
+        fileId: '12',
+        name: 'File.pdf',
+        size: 64,
+      });
+      expect(launchPopup).to.have.been.calledOnce;
+      delete window.BoxSelect;
     });
   });
 });
