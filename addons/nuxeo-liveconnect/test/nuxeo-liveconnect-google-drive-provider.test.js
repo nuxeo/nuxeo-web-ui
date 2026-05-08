@@ -53,6 +53,74 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
     });
   });
 
+  suite('openPicker', () => {
+    test('should load the picker api and call init callback', () => {
+      const initStub = sinon.stub(element, '_init');
+      window.gapi = {
+        load: sinon.stub().callsFake((_name, options) => {
+          options.callback();
+        }),
+      };
+      element.openPicker();
+      expect(window.gapi.load).to.have.been.calledWith('picker', sinon.match.object);
+      expect(initStub).to.have.been.calledOnce;
+      delete window.gapi;
+    });
+  });
+
+  suite('_init', () => {
+    test('should open OAuth popup when user is not authorized', async () => {
+      element.isUserAuthorized = false;
+      element.authorizationURL = 'https://auth.example.com';
+      sinon.stub(element, 'updateProviderInfo').resolves();
+      const popupStub = sinon.stub(element, 'openPopup');
+      await element._init();
+      expect(popupStub).to.have.been.calledOnce;
+    });
+
+    test('should start immediate auth when user is authorized', async () => {
+      element.isUserAuthorized = true;
+      sinon.stub(element, 'updateProviderInfo').resolves();
+      const doAuthStub = sinon.stub(element, '_doAuth');
+      await element._init();
+      expect(doAuthStub).to.have.been.calledWith(true, sinon.match.func);
+    });
+  });
+
+  suite('_doAuth', () => {
+    test('should call gapi authorize with user and domain', () => {
+      window.gapi = { auth: { authorize: sinon.spy() } };
+      element.clientId = 'client-id';
+      element.userId = 'john';
+      element.domain = 'example.com';
+      const callback = sinon.spy();
+      element._doAuth(true, callback);
+      expect(window.gapi.auth.authorize).to.have.been.calledWith(
+        sinon.match({
+          client_id: 'client-id',
+          user_id: 'john',
+          immediate: true,
+          hd: 'example.com',
+        }),
+        callback,
+      );
+      delete window.gapi;
+    });
+
+    test('should request account chooser when user is missing', () => {
+      window.gapi = { auth: { authorize: sinon.spy() } };
+      element.clientId = 'client-id';
+      element.userId = '';
+      element.domain = '';
+      element._doAuth(false, sinon.spy());
+      const authOptions = window.gapi.auth.authorize.firstCall.args[0];
+      expect(authOptions.authuser).to.equal(-1);
+      expect(authOptions).to.not.have.property('user_id');
+      expect(authOptions).to.not.have.property('immediate');
+      delete window.gapi;
+    });
+  });
+
   suite('_onOAuthPopupClose', () => {
     test('should call _handleAuthResult when accessToken exists', () => {
       const stub = sinon.stub(element, '_handleAuthResult');
@@ -98,6 +166,61 @@ suite('nuxeo-liveconnect-google-drive-provider', () => {
       const checkStub = sinon.stub(element, '_checkAuth');
       element._handleAuthResult(null);
       expect(checkStub).to.have.been.called;
+    });
+
+    test('should fetch token info and show picker when token exists', async () => {
+      const request = {
+        response: { email: 'john@example.com' },
+        send: sinon.stub().resolves(),
+      };
+      const createElement = document.createElement.bind(document);
+      sinon.stub(document, 'createElement').callsFake((tagName) => {
+        if (tagName === 'iron-request') {
+          return request;
+        }
+        return createElement(tagName);
+      });
+      const showPickerStub = sinon.stub(element, '_showPicker');
+      element._handleAuthResult('token-123');
+      await request.send.firstCall.returnValue;
+      expect(element.userId).to.equal('john@example.com');
+      expect(showPickerStub).to.have.been.calledWith('token-123');
+    });
+  });
+
+  suite('_showPicker', () => {
+    test('should build a multi-select picker and show it', () => {
+      const docsView = {
+        setIncludeFolders: sinon.spy(),
+        setOwnedByMe: sinon.spy(),
+      };
+      const pickerInstance = { setVisible: sinon.spy() };
+      const builder = {
+        setOAuthToken: sinon.stub().returnsThis(),
+        setAppId: sinon.stub().returnsThis(),
+        addView: sinon.stub().returnsThis(),
+        setCallback: sinon.stub().returnsThis(),
+        enableFeature: sinon.stub().returnsThis(),
+        build: sinon.stub().returns(pickerInstance),
+      };
+      window.google = {
+        picker: {
+          DocsView: function DocsView() {
+            return docsView;
+          },
+          PickerBuilder: function PickerBuilder() {
+            return builder;
+          },
+          Feature: { MULTISELECT_ENABLED: 'multi' },
+        },
+      };
+      element.clientId = 'client-id';
+      element._showPicker('token-456');
+      expect(docsView.setIncludeFolders).to.have.been.calledWith(true);
+      expect(builder.setOAuthToken).to.have.been.calledWith('token-456');
+      expect(builder.setAppId).to.have.been.calledWith('client-id');
+      expect(pickerInstance.setVisible).to.have.been.calledWith(true);
+      delete window.google;
     });
   });
 
