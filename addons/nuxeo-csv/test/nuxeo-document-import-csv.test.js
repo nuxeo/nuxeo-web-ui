@@ -153,7 +153,7 @@ suite('nuxeo-document-import-csv', () => {
     });
 
     test('should clear pending timeout when hidden', () => {
-      const clearTimeoutStub = sinon.stub(window, 'clearTimeout');
+      const clearTimeoutStub = sinon.stub(globalThis, 'clearTimeout');
       element.visible = false;
       element._waitProgressId = 99;
       element._observeVisible();
@@ -299,7 +299,7 @@ suite('nuxeo-document-import-csv', () => {
 
   suite('_import and _waitForProgress', () => {
     test('should trigger CSV import and switch to progress stage', async () => {
-      const timeoutStub = sinon.stub(window, 'setTimeout').returns(77);
+      const timeoutStub = sinon.stub(globalThis, 'setTimeout').returns(77);
       element.batchId = 'batch-id';
       element.targetPath = '/default-domain';
       element.receiveEmailReport = true;
@@ -314,7 +314,7 @@ suite('nuxeo-document-import-csv', () => {
     });
 
     test('should update progress and schedule next poll for running imports', async () => {
-      const timeoutStub = sinon.stub(window, 'setTimeout').returns(88);
+      const timeoutStub = sinon.stub(globalThis, 'setTimeout').returns(88);
       element.$.importProgress = { indeterminate: true };
       element.$.cvsImportStatus = {
         input: null,
@@ -399,7 +399,7 @@ suite('nuxeo-document-import-csv', () => {
 
   suite('_close', () => {
     test('should navigate parent and clear pending timeout when import progressed', () => {
-      const clearTimeoutStub = sinon.stub(window, 'clearTimeout');
+      const clearTimeoutStub = sinon.stub(globalThis, 'clearTimeout');
       const fireStub = sinon.stub(element, 'fire');
       const navigateStub = sinon.stub(element, 'navigateTo');
       element.stage = 'progress';

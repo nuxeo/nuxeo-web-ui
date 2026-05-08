@@ -76,7 +76,7 @@ suite('LiveConnectBehavior', () => {
   suite('openPopup', () => {
     test('should open a window with correct parameters', () => {
       const fakePopup = { closed: true };
-      const openStub = sinon.stub(window, 'open').returns(fakePopup);
+      const openStub = sinon.stub(globalThis, 'open').returns(fakePopup);
       behavior.openPopup('https://auth.example.com', {});
       expect(openStub).to.have.been.calledWith('https://auth.example.com', 'popup', sinon.match.string);
       openStub.restore();
@@ -84,7 +84,7 @@ suite('LiveConnectBehavior', () => {
 
     test('should use default settings when no options given', () => {
       const fakePopup = { closed: true };
-      const openStub = sinon.stub(window, 'open').returns(fakePopup);
+      const openStub = sinon.stub(globalThis, 'open').returns(fakePopup);
       behavior.openPopup('https://auth.example.com');
       expect(openStub).to.have.been.called;
       const args = openStub.firstCall.args[2];
@@ -95,12 +95,12 @@ suite('LiveConnectBehavior', () => {
 
     test('should add message listener when onMessageReceive is provided', () => {
       const fakePopup = { closed: true };
-      sinon.stub(window, 'open').returns(fakePopup);
-      const addListenerSpy = sinon.spy(window, 'addEventListener');
+      sinon.stub(globalThis, 'open').returns(fakePopup);
+      const addListenerSpy = sinon.spy(globalThis, 'addEventListener');
       behavior.openPopup('https://auth.example.com', { onMessageReceive: sinon.spy() });
       expect(addListenerSpy).to.have.been.calledWith('message', sinon.match.func);
       addListenerSpy.restore();
-      window.open.restore();
+      globalThis.open.restore();
     });
   });
 
