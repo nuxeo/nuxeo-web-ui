@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, flush } from '@nuxeo/testing-helpers';
+import { fixture, html, flush, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-collections/nuxeo-collections.js';
 
 suite('nuxeo-collections', () => {
@@ -379,5 +379,89 @@ suite('nuxeo-collections', () => {
     element._removeFromMembers('nonexistent');
     expect(spliceSpy).to.not.have.been.called;
     spliceSpy.restore();
+  });
+});
+
+/**
+ * Unit tests for nuxeo-collections (WEBUI-1823).
+ *
+ * Verifies that the user_collections page provider request does NOT include
+ * hardcoded sort parameters (sortBy / sortOrder), so that any server-side
+ * customisation of the sort order is respected.
+ */
+
+const jsonHeader = { 'Content-Type': 'application/json' };
+
+const emptyPageProviderResponse = JSON.stringify({
+  'entity-type': 'documents',
+  isPaginable: true,
+  resultsCount: 0,
+  pageSize: 40,
+  maxPageSize: 40,
+  currentPageSize: 0,
+  currentPageIndex: 0,
+  numberOfPages: 0,
+  isPreviousPageAvailable: false,
+  isNextPageAvailable: false,
+  isLastPageAvailable: false,
+  isSortable: true,
+  entries: [],
+});
+
+suite('nuxeo-collections — WEBUI-1823: no hardcoded sort on user_collections provider', () => {
+  let server;
+
+  setup(async () => {
+    server = await login();
+    // Stub the user_collections page provider endpoint generally;
+    // the absence of sortBy/sortOrder is enforced by the assertions in each test.
+    server.respondWith('GET', /\/api\/v1\/search\/pp\/user_collections\/execute/, [
+      200,
+      jsonHeader,
+      emptyPageProviderResponse,
+    ]);
+    // Stub the Operation.RemoveFromCollection (required by nuxeo-operation import)
+    server.respondWith('POST', '/api/v1/automation/Collection.RemoveFromCollection', [
+      200,
+      jsonHeader,
+      JSON.stringify({}),
+    ]);
+  });
+
+  teardown(() => {
+    server.restore();
+  });
+
+  test('user_collections page provider request must not include sortBy or sortOrder parameters', async () => {
+    await fixture(html`<nuxeo-collections visible></nuxeo-collections>`, true);
+    await flush();
+
+    // Find the request(s) made to the user_collections page provider
+    const ppRequests = server.requests.filter((req) => req.url.includes('/search/pp/user_collections/execute'));
+
+    expect(ppRequests).to.have.length.greaterThan(0, 'Expected at least one request to user_collections provider');
+
+    ppRequests.forEach((req) => {
+      expect(req.url).to.not.include('sortBy', `Request URL should not contain sortBy: ${req.url}`);
+      expect(req.url).to.not.include('sortOrder', `Request URL should not contain sortOrder: ${req.url}`);
+    });
+  });
+
+  test('user_collections page provider request must include the expected searchTerm and user params', async () => {
+    await fixture(html`<nuxeo-collections visible></nuxeo-collections>`, true);
+    await flush();
+
+    const ppRequests = server.requests.filter((req) => req.url.includes('/search/pp/user_collections/execute'));
+
+    expect(ppRequests).to.have.length.greaterThan(0, 'Expected at least one request to user_collections provider');
+
+    // The params '{"searchTerm":"%","user":"$currentUser"}' are serialised as query string params
+    ppRequests.forEach((req) => {
+      const decodedUrl = decodeURIComponent(req.url);
+      expect(decodedUrl).to.include('searchTerm=', `Request URL should contain searchTerm param: ${req.url}`);
+      expect(decodedUrl).to.include('searchTerm=%', `Request URL should contain expected searchTerm value: ${req.url}`);
+      expect(decodedUrl).to.include('user=', `Request URL should contain user param: ${req.url}`);
+      expect(decodedUrl).to.include('user=$currentUser', `Request URL should contain expected user value: ${req.url}`);
+    });
   });
 });
