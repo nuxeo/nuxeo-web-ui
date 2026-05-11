@@ -161,7 +161,9 @@ Polymer({
 
   ready() {
     // Prime userId on the provider; fetch() also waits on this (WEBUI-1686).
-    this._ensureTaskParams();
+    this._ensureTaskParams().catch((error) => {
+      console.warn(`Failed to get tasks list user parameters: ${error}`);
+    });
   },
 
   /**
@@ -172,11 +174,26 @@ Polymer({
   _ensureTaskParams() {
     const existing = this.$.tasksProvider.params;
     if (existing?.userId) {
+      this._ensureTaskParamsPromise = null;
       return Promise.resolve();
     }
-    return this.$.nx.connect().then((user) => {
-      this.$.tasksProvider.params = { ...existing, userId: user.id };
-    });
+    if (this._ensureTaskParamsPromise) {
+      return this._ensureTaskParamsPromise;
+    }
+    this._ensureTaskParamsPromise = this.$.nx
+      .connect()
+      .then((user) => {
+        const current = this.$.tasksProvider.params;
+        if (!current?.userId && user?.id != null) {
+          this.$.tasksProvider.params = { ...current, userId: user.id };
+        }
+        this._ensureTaskParamsPromise = null;
+      })
+      .catch((error) => {
+        this._ensureTaskParamsPromise = null;
+        throw error;
+      });
+    return this._ensureTaskParamsPromise;
   },
 
   _selectionChanged() {
