@@ -80,7 +80,32 @@ import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 
+import { IronOverlayManager } from '@polymer/iron-overlay-behavior/iron-overlay-manager.js';
 import { Performance } from './performance.js';
+
+/**
+ * IronOverlayBehavior only wraps Tab when deepActiveElement === first/last focusable.
+ * Focus is often inside a child shadow root (e.g. paper-button), so that check fails and
+ * Shift+Tab escapes the modal. This mirrors "focus is on this scope" across shadow boundaries.
+ */
+function focusIsWithinOrIs(scope, node) {
+  if (!scope || !node) {
+    return false;
+  }
+  let current = node;
+  while (current) {
+    if (current === scope) {
+      return true;
+    }
+    const root = current.getRootNode();
+    if (root instanceof ShadowRoot) {
+      current = root.host;
+    } else {
+      current = current.parentElement;
+    }
+  }
+  return false;
+}
 
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
@@ -361,6 +386,7 @@ Polymer({
         border: 1px dotted gray;
         color: #000;
         padding: 8px 16px;
+        /* Above drawer / logo (≤103); while a modal is open, z-index is lowered in JS so overlays stay on top. */
         z-index: 1000;
         text-decoration: none;
         transition: top 0.2s ease;
@@ -888,12 +914,34 @@ Polymer({
     const { skipLink, mainContent } = this.$;
     let skipLinkActivated = true; // only active once after load/top
 
-    const handleFirstTab = (e) => {
-      if (skipLinkActivated && e.key === 'Tab') {
-        skipLinkActivated = false; // deactivate until page cycle resets
-        e.preventDefault();
-        skipLink.focus({ preventScroll: true });
+    const hasBackdropOverlay = () => {
+      const cur = IronOverlayManager.currentOverlay();
+      return !!(cur && cur.withBackdrop);
+    };
+
+    const syncSkipLinkTabOrder = () => {
+      if (hasBackdropOverlay()) {
+        skipLink.setAttribute('tabindex', '-1');
+        /* First iron overlay/backdrop pair uses ~102–103; keep skip link under that stack while modal is open. */
+        skipLink.style.zIndex = '101';
+      } else {
+        skipLink.removeAttribute('tabindex');
+        skipLink.style.zIndex = '';
       }
+    };
+
+    const handleFirstTab = (e) => {
+      // Shift+Tab must not be intercepted (would break modal focus trap on backward tab).
+      if (e.key !== 'Tab' || e.shiftKey) {
+        return;
+      }
+      // Bubble phase runs after iron-overlay capture; do not steal focus while a modal is open.
+      if (!skipLinkActivated || hasBackdropOverlay()) {
+        return;
+      }
+      skipLinkActivated = false; // deactivate until page cycle resets
+      e.preventDefault();
+      skipLink.focus({ preventScroll: true });
     };
 
     // Activate skip link only once after load
@@ -905,6 +953,43 @@ Polymer({
     } else {
       attachTabListener();
     }
+
+    document.addEventListener('iron-overlay-opened', syncSkipLinkTabOrder);
+    document.addEventListener('iron-overlay-closed', syncSkipLinkTabOrder);
+
+    // After iron-overlay capture: fix Tab wrap when focus is inside shadow (strict === fails there).
+    const enforceModalTabWrap = (e) => {
+      if (e.key !== 'Tab' || e.defaultPrevented) {
+        return;
+      }
+      const overlay = IronOverlayManager.currentOverlay();
+      if (!overlay || !overlay.withBackdrop) {
+        return;
+      }
+      if (typeof overlay.__ensureFirstLastFocusables === 'function') {
+        overlay.__ensureFirstLastFocusables();
+      }
+      const first = overlay.__firstFocusableNode;
+      const last = overlay.__lastFocusableNode;
+      if (!first || !last) {
+        return;
+      }
+      const active = IronOverlayManager.deepActiveElement;
+      const atFirst = active === first || focusIsWithinOrIs(first, active);
+      const atLast = active === last || focusIsWithinOrIs(last, active);
+      const onOverlayHost = active === overlay;
+
+      if (e.shiftKey && (atFirst || onOverlayHost)) {
+        e.preventDefault();
+        overlay._focusedChild = last;
+        last.focus({ preventScroll: true });
+      } else if (!e.shiftKey && atLast) {
+        e.preventDefault();
+        overlay._focusedChild = first;
+        first.focus({ preventScroll: true });
+      }
+    };
+    document.addEventListener('keydown', enforceModalTabWrap, true);
 
     // Re-arm skip link when focus is cycled back to body/top
     document.addEventListener('focusin', (e) => {
