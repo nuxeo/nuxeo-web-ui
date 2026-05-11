@@ -243,4 +243,121 @@ suite('nuxeo-dropzone', () => {
       expect(element._allUploadedFiles).to.eql([]);
     });
   });
+
+  suite('batch and value management', () => {
+    test('importBatch reports failed files and keeps invalid state synchronized', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      const validateSpy = sinon.stub(element, 'validate').returns(false);
+      const stopSpy = sinon.spy();
+      element.files = [
+        { name: 'ok.txt', index: 0 },
+        { name: 'bad.txt', index: 1, error: 'failed' },
+      ];
+      element.uploadedFiles = [{ name: 'ok.txt' }, { name: 'bad.txt' }];
+      element.i18n = sinon.stub().callsFake((key, value) => (value ? `${key}:${value}` : key));
+      element.invalid = true;
+
+      await element.importBatch({
+        type: 'batchFinished',
+        stopPropagation: stopSpy,
+        detail: { batchId: 'batch-1' },
+      });
+
+      expect(stopSpy).to.have.been.calledOnce;
+      expect(notifySpy).to.have.been.calledOnce;
+      expect(notifySpy.firstCall.args[0].message).to.contain('dropzone.toast.error');
+      expect(validateSpy).to.have.been.calledOnce;
+      notifySpy.restore();
+      validateSpy.restore();
+    });
+
+    test('importBatch stores successful files in multiple mode and notifies success', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      const legacyStub = sinon.stub(element, '_legacyUpdateDocument').resolves();
+      element.multiple = true;
+      element.xpath = 'file:content';
+      element.document = { uid: 'doc-1' };
+      element.value = [];
+      element.files = [{ name: 'ok.txt', index: 0 }];
+      element.uploadedFiles = [{ name: 'ok.txt' }];
+      element.i18n = sinon.stub().callsFake((key) => key);
+
+      await element.importBatch({
+        type: 'batchFinished',
+        stopPropagation: sinon.spy(),
+        detail: { batchId: 'batch-2' },
+      });
+
+      expect(element.value).to.have.length(1);
+      expect(element._allUploadedFiles).to.have.length(1);
+      expect(element.hasFilesUploaded).to.eql(true);
+      expect(legacyStub).to.have.been.calledOnce;
+      expect(notifySpy.lastCall.args[0].message).to.eql('dropzone.uploaded');
+      notifySpy.restore();
+      legacyStub.restore();
+    });
+
+    test('deleteFile prunes uploaded values in multiple mode', () => {
+      sinon.stub(element, 'validate');
+      element.required = false;
+      element.multiple = true;
+      element.value = [{ id: 1 }, { id: 2 }, { id: 3 }];
+      element.files = [{ name: 'f2' }, { name: 'f3' }];
+      element.uploadedFiles = [{ name: 'f2' }, { name: 'f3' }];
+      element._allUploadedFiles = [{ name: 'f2' }, { name: 'f3' }];
+
+      element._deleteFile({ model: { itemsIndex: 1 } });
+
+      expect(element.value).to.eql([{ id: 1 }, { id: 2 }]);
+      expect(element.files).to.eql([{ name: 'f2' }]);
+      expect(element.uploadedFiles).to.eql([{ name: 'f2' }]);
+      expect(element.validate).to.have.been.calledOnce;
+      element.validate.restore();
+    });
+
+    test('deleteFile resets single value mode', () => {
+      const resetSpy = sinon.spy(element, '_reset');
+      element.multiple = false;
+      element.value = { id: 'existing' };
+      element.uploadedFiles = [{ name: 'f1' }];
+
+      element._deleteFile({ model: { itemsIndex: 0 } });
+
+      expect(resetSpy.callCount).to.be.greaterThan(0);
+      expect(element.value).to.eql('');
+      expect(element.uploadedFiles).to.eql([]);
+      resetSpy.restore();
+    });
+
+    test('uploadInputFiles triggers upload only when valid', () => {
+      const uploadSpy = sinon.spy(element, '_upload');
+      sinon.stub(element, 'validate').returns(false);
+      const file = { name: 'x.txt' };
+
+      element._uploadInputFiles({ target: { files: [file] } });
+
+      expect(element.files).to.eql([file]);
+      expect(uploadSpy).to.not.have.been.called;
+      element.validate.restore();
+      uploadSpy.restore();
+    });
+
+    test('abortUpload removes file only when abort is available', () => {
+      element.files = [{ name: 'a' }, { name: 'b' }];
+      const abortSpy = sinon.spy(element, 'abort');
+      sinon.stub(element, 'hasAbort').returns(false);
+
+      element._abortUpload({ model: { itemsIndex: 0 } });
+      expect(element.files).to.have.length(2);
+
+      element.hasAbort.restore();
+      sinon.stub(element, 'hasAbort').returns(true);
+      element._abortUpload({ model: { itemsIndex: 1 } });
+      expect(abortSpy).to.have.been.calledOnce;
+      expect(element.files).to.eql([{ name: 'a' }]);
+
+      abortSpy.restore();
+      element.hasAbort.restore();
+    });
+  });
 });

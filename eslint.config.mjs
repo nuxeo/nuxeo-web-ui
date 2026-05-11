@@ -172,7 +172,7 @@ export default [
   ...spreadsheetConfig,
 
   {
-    files: ['**/test/**/*.test.js'],
+    files: ['**/test/**/*.test.js', '**/test/setup.js'],
     languageOptions: {
       globals: {
         ...globals.mocha,

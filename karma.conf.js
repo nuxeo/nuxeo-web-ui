@@ -1,10 +1,30 @@
+/**
+ * Karma configuration for Nuxeo Web UI unit tests (@open-wc/karma-esm + Mocha).
+ *
+ * Important design choices:
+ *
+ * 1) Single test entry (`test/load-all-tests.js` only in `files`)
+ *    Karma+ESM can otherwise load many test modules in parallel; Mocha may call `__karma__.loaded()`
+ *    before every suite is registered, so some tests never run. The generated barrel imports
+ *    `setup.js` then every `*.test.js` in one static graph. Do not add separate test file globs here.
+ *
+ * 2) Coverage mode (`karma start --coverage`)
+ *    - Serves the element source globs defined in coverageSourceFiles as modules (not executed as scripts)
+ *      so dynamic imports from `test/setup.js` can resolve.
+ *    - `esm.compatibility: 'always'` runs sources through Babel so Istanbul instruments them
+ *      (native ESM in Chrome can skip instrumentation otherwise).
+ *    - `skipFilesWithNoCoverage: false` keeps files with zero hits visible in reports.
+ *    - Bulk import of all element modules happens in `test/setup.js` `suiteTeardown`, not here.
+ *
+ * Related: `scripts/generate-test-load-all.js`, `scripts/generate-coverage-imports.js`, `test/setup.js`.
+ */
 const path = require('path');
 
 const coverage = process.argv.find((arg) => arg.includes('coverage'));
+// When instrumenting, Karma must be able to fetch any element URL that setup.js imports dynamically.
 const coverageSourceFiles = coverage
   ? [
       {
-        // Serve all source modules so coverage can resolve every app element (see test/coverage-helpers/coverage-app-modules.test.js).
         pattern: 'elements/**/*.js',
         type: 'module',
         included: false,
@@ -15,17 +35,6 @@ const coverageSourceFiles = coverage
         type: 'module',
         included: false,
         watched: false,
-      },
-    ]
-  : [];
-
-// Only when running with --coverage: element sources are served and Istanbul runs.
-// Omit this suite for plain `karma start` / `test:watch` so dynamic imports resolve.
-const coverageAppModuleTestFile = coverage
-  ? [
-      {
-        pattern: 'test/coverage-helpers/coverage-app-modules.test.js',
-        type: 'module',
       },
     ]
   : [];
@@ -78,6 +87,8 @@ if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
 }
 
 module.exports = (config) => {
+  // Single module entry (see test/load-all-tests.js) loads every suite in one graph before
+  // __karma__.loaded(). Do not add separate test globs here — that reintroduces parallel races.
   const sauceLabs = {};
   if (config.record) {
     sauceLabs.recordVideo = true;
@@ -100,21 +111,11 @@ module.exports = (config) => {
       path: path.join(process.cwd(), ''),
     },
     files: [
-      {
-        pattern: 'test/setup.js',
-        type: 'module',
-      },
       ...coverageSourceFiles,
       {
-        pattern: `test/*${config.grep || '*.test.js'}`,
+        pattern: 'test/load-all-tests.js',
         type: 'module',
       },
-      {
-        pattern: `addons/*/test/*${config.grep || '*.test.js'}`,
-        type: 'module',
-      },
-      // After all other tests: bulk-import app modules for aggregate coverage (coverage mode only).
-      ...coverageAppModuleTestFile,
     ],
     plugins: [
       // load plugin
@@ -125,8 +126,14 @@ module.exports = (config) => {
     ],
     frameworks: ['esm', 'mocha', 'source-map-support'],
     esm: {
-      // prevent auto loading of polyfills
-      compatibility: 'none',
+      // 'always' runs app sources through Babel so istanbul can record hits. With 'none',
+      // modern browsers skip transforms and some modules (e.g. elements/performance.js) stay
+      // effectively un-instrumented despite tests executing their logic.
+      compatibility: coverage ? 'always' : 'none',
+      // polyfills-loader hashes with crypto.createHash('md4'), which throws on Node 17+
+      // (OpenSSL 3) unless NODE_OPTIONS=--openssl-legacy-provider. Unit tests use modern
+      // Chrome only, so injecting the polyfills loader is unnecessary here.
+      polyfillsLoader: false,
       coverage,
       // if you are using 'bare module imports' you will need this option
       nodeResolve: {
@@ -143,7 +150,8 @@ module.exports = (config) => {
     port: 9876,
     colors: true,
     browserConsoleLogOptions: {
-      level: 'error',
+      // Set KARMA_VERBOSE=1 to surface karma-esm "Error loading test file" in the terminal.
+      level: process.env.KARMA_VERBOSE === '1' ? 'log' : 'error',
     },
     logLevel: config.LOG_WARN,
     /** Some errors come in JSON format with a message property. */
@@ -170,10 +178,12 @@ module.exports = (config) => {
     },
 
     client: {
+      useCoverage: Boolean(coverage),
       mocha: {
         reporter: 'html',
         ui: 'tdd',
         timeout: 3000,
+        ...(config.grep ? { grep: config.grep } : {}),
       },
     },
   });
