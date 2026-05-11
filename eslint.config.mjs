@@ -1,15 +1,13 @@
 import js from '@eslint/js';
 import html from 'eslint-plugin-html';
-import importPlugin from 'eslint-plugin-import';
+import importPlugin from 'eslint-plugin-import-x';
 import { configs as wcConfigs } from 'eslint-plugin-wc';
 import noOnlyTests from 'eslint-plugin-no-only-tests';
 import prettier from 'eslint-config-prettier/flat';
 import globals from 'globals';
 
-import ftestConfig from './ftest/eslint.config.mjs';
-import webUiFtestConfig from './packages/nuxeo-web-ui-ftest/eslint.config.js';
-import a11yConfig from './plugin/a11y/eslint.config.js';
-import spreadsheetConfig from './addons/nuxeo-spreadsheet/eslint.config.mjs';
+import ftestConfig from './ftest/eslint-rules.mjs';
+import spreadsheetConfig from './addons/nuxeo-spreadsheet/eslint-rules.mjs';
 
 export default [
   {
@@ -55,7 +53,7 @@ export default [
 
   {
     plugins: {
-      import: importPlugin,
+      'import-x': importPlugin,
       'no-only-tests': noOnlyTests,
     },
     languageOptions: {
@@ -151,8 +149,8 @@ export default [
       },
     },
     rules: {
-      'import/no-dynamic-require': 'off',
-      'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+      'import-x/no-dynamic-require': 'off',
+      'import-x/no-extraneous-dependencies': ['error', { devDependencies: true }],
       'global-require': 'off',
       'no-console': 'off',
     },
@@ -161,14 +159,12 @@ export default [
   {
     files: ['addons/**/ftest/features/step_definitions/**/*.js'],
     rules: {
-      'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+      'import-x/no-extraneous-dependencies': ['error', { devDependencies: true }],
       'no-unused-expressions': 'off',
     },
   },
 
   ...ftestConfig,
-  ...webUiFtestConfig,
-  ...a11yConfig,
   ...spreadsheetConfig,
 
   {
