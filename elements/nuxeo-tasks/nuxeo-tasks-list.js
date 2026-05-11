@@ -171,11 +171,11 @@ Polymer({
    */
   _ensureTaskParams() {
     const existing = this.$.tasksProvider.params;
-    if (existing && existing.userId) {
+    if (existing?.userId) {
       return Promise.resolve();
     }
     return this.$.nx.connect().then((user) => {
-      this.$.tasksProvider.params = { ...(existing || {}), userId: user.id };
+      this.$.tasksProvider.params = { ...existing, userId: user.id };
     });
   },
 
