@@ -1,7 +1,7 @@
 {
   "name": "@nuxeo/nuxeo-web-ui-a11y",
   "version": "1.0.0",
-  "type":"module",
+  "type": "module",
   "engines": {
     "node": ">=22.0.0"
   },
