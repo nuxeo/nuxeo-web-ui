@@ -9,7 +9,7 @@ This is a Polymer 3 web application (SPA) for the Nuxeo content services platfor
 Always follow this sequence when making changes:
 
 ```bash
-npm install                  # Install dependencies (Node ≥ 18)
+npm install                  # Install dependencies (Node ≥ 22)
 npm run format               # Auto-fix formatting (Prettier → ESLint)
 npm run lint                 # ESLint + Prettier check — must pass
 npm test                     # Karma unit tests — must pass

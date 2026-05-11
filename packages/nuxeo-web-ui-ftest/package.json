@@ -10,7 +10,7 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "overrides": {
     "ws": "8.17.1",
@@ -32,7 +32,7 @@
     "check-engine": "^1.10.0",
     "chrome-launcher": "^0.14.0",
     "cucumber-junit": "^1.7.1",
-    "fs-extra": "^9.1.0",
+    "fs-extra": "^11.2.0",
     "fs-finder": "^1.8.1",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",

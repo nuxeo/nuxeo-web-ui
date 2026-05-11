@@ -39,7 +39,7 @@ Nuxeo Web UI is a single-page application (SPA) that serves as the standard user
 | Web Components Polyfills | @webcomponents/webcomponentsjs | ^2.0 |
 | Bundler | Webpack 5 | ^5.3 |
 | Package Manager | npm | ≥ 8 |
-| Node.js | Node.js | ≥ 18 |
+| Node.js | Node.js | ≥ 22 |
 | Unit Testing | Karma + Mocha + Chai + Sinon | Various |
 | Functional Testing | WebdriverIO 9 + Cucumber | ^9.12 |
 | Linting | ESLint 9 (flat config) + Prettier | ^9.0 / ^3.8 |
