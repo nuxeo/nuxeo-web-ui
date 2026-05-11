@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import BasePage from '../../base.js';
-import DocumentComment from './document_comment.js'; /* eslint import/no-cycle: 0 */
+import DocumentComment from './document_comment.js';
 
 export default class DocumentCommentThread extends BasePage {
   get loadMoreCommentsLink() {
