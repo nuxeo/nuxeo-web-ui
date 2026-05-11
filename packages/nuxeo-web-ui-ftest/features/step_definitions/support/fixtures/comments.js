@@ -1,5 +1,4 @@
 import Nuxeo from 'nuxeo';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { After } from '@cucumber/cucumber';
 
 global.addedComments = [];

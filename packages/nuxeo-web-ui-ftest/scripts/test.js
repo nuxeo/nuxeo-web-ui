@@ -33,7 +33,6 @@ import chromeLauncher from 'chrome-launcher';
 import fetch from 'node-fetch';
 import { fileURLToPath } from 'url';
 import minimist from 'minimist';
-// eslint-disable-next-line import/no-named-default
 const { Launcher: CliLauncher } = await import('@wdio/cli');
 
 const __filename = fileURLToPath(import.meta.url);

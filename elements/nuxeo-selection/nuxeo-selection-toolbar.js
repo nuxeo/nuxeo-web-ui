@@ -220,7 +220,7 @@ Polymer({
   },
 
   _computeShortcutHint() {
-    let platform = '';
+    let platform;
 
     if (navigator.userAgentData && navigator.userAgentData.platform) {
       platform = navigator.userAgentData.platform.toLowerCase();

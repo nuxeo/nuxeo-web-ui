@@ -33,7 +33,7 @@ module.exports = (options) => {
   const srcCatalog = fs.createReadStream(srcFilepath);
 
   const srcPackagesFile = path.resolve(__dirname, '../', srcFilepath);
-  // eslint-disable-next-line global-require, import/no-dynamic-require
+  // eslint-disable-next-line global-require, import-x/no-dynamic-require
   const srcPackages = require(srcPackagesFile);
   const { pkgManagement } = options;
 
