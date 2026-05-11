@@ -160,10 +160,22 @@ Polymer({
   },
 
   ready() {
-    this.$.nx.connect().then((user) => {
-      this.$.tasksProvider.params = {
-        userId: user.id,
-      };
+    // Prime userId on the provider; fetch() also waits on this (WEBUI-1686).
+    this._ensureTaskParams();
+  },
+
+  /**
+   * Resolves when `tasksProvider.params.userId` is set from `nuxeo-connection`.
+   * The Tasks drawer can call `fetch()` before `ready()`'s async `connect()` completes,
+   * which previously issued `/task` without `userId` and listed every user's tasks.
+   */
+  _ensureTaskParams() {
+    const existing = this.$.tasksProvider.params;
+    if (existing && existing.userId) {
+      return Promise.resolve();
+    }
+    return this.$.nx.connect().then((user) => {
+      this.$.tasksProvider.params = { ...(existing || {}), userId: user.id };
     });
   },
 
@@ -223,10 +235,12 @@ Polymer({
   },
 
   fetch(offset, pageSize = this.$.tasksProvider.pageSize) {
-    if (offset) {
-      return this.$.list._fetchRange(offset, offset + pageSize, false);
-    }
-    return this.$.list.fetch();
+    return this._ensureTaskParams().then(() => {
+      if (offset) {
+        return this.$.list._fetchRange(offset, offset + pageSize, false);
+      }
+      return this.$.list.fetch();
+    });
   },
 
   _handleKeyNav(e) {
