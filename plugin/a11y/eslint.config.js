@@ -27,7 +27,7 @@ export default [
   },
 
   {
-    files: ['wdio.conf.js'],
+    files: ['wdio.conf.js', 'getDriverVersion.js'],
     languageOptions: {
       globals: {
         ...globals.node,
