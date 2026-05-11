@@ -1225,7 +1225,7 @@ Polymer({
     }
 
     // Fallback chain: backend prefs → localStorage → table defaults
-    let settingsToApply = null;
+    let settingsToApply;
 
     // 1. Primary: backend prefs (from globalPrefs property)
     if (prefs && Object.keys(prefs).length > 0) {
@@ -1395,7 +1395,7 @@ Polymer({
     }
 
     // Fallback chain: backend prefs → localStorage → table defaults
-    let settingsToApply = null;
+    let settingsToApply;
 
     if (prefs && Object.keys(prefs).length > 0) {
       settingsToApply = prefs;

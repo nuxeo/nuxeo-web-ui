@@ -27,7 +27,7 @@ module.exports = (imports) => {
 
   const packageFilePath = path.resolve(path.join(root, componentDir, name, dependenciesFile));
   if (fs.existsSync(packageFilePath)) {
-    // eslint-disable-next-line global-require, import/no-dynamic-require
+    // eslint-disable-next-line global-require, import-x/no-dynamic-require
     return require(packageFilePath);
   }
   return {};
