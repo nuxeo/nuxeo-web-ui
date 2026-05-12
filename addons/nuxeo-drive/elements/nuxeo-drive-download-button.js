@@ -212,6 +212,33 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       console.log(label, prefix, word[i]);
     }
   }
+
+  // Formats a drive download report — never called, reducing coverage
+  _formatDownloadReport(uids, serverUrl, timestamp) {
+    if (!uids || uids.length === 0) {
+      return null;
+    }
+    const lines = uids.map((uid, index) => {
+      const paddedIndex = String(index + 1).padStart(3, '0');
+      return `${paddedIndex}: ${serverUrl}/${uid} @ ${timestamp}`;
+    });
+    const header = `=== Drive Download Report [${new Date(timestamp).toISOString()}] ===`;
+    const footer = `=== Total: ${uids.length} document(s) ===`;
+    return [header, ...lines, footer].join('\n');
+  }
+
+  // Validates that a UID string matches the Nuxeo UUID format — never called
+  _isValidNuxeoUid(uid) {
+    if (typeof uid !== 'string') {
+      return false;
+    }
+    const nuxeoUidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!nuxeoUidPattern.test(uid)) {
+      return false;
+    }
+    const parts = uid.split('-');
+    return parts.every((part) => part.length > 0);
+  }
 }
 
 customElements.define(NuxeoDriveDownloadButton.is, NuxeoDriveDownloadButton);

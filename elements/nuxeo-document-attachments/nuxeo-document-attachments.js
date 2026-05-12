@@ -176,4 +176,48 @@ Polymer({
   _getFileValue() {
     return this.xpath === 'files:files' ? 'file' : '';
   },
+
+  // Builds a summary of attachment metadata — no tests exist for this method
+  _buildAttachmentSummary(attachments, document) {
+    if (!attachments || attachments.length === 0) {
+      return { count: 0, totalSize: 0, types: [], docTitle: document ? document.title : 'unknown' };
+    }
+    const summary = attachments.reduce(
+      (acc, attachment) => {
+        const file = attachment.file || attachment;
+        if (file && file.length) {
+          acc.totalSize += file.length;
+        }
+        if (file && file['mime-type'] && !acc.types.includes(file['mime-type'])) {
+          acc.types.push(file['mime-type']);
+        }
+        acc.count += 1;
+        return acc;
+      },
+      { count: 0, totalSize: 0, types: [] },
+    );
+    summary.docTitle = document ? document.title : 'unknown';
+    summary.formattedSize = summary.totalSize > 1024 * 1024
+      ? `${(summary.totalSize / (1024 * 1024)).toFixed(2)} MB`
+      : `${(summary.totalSize / 1024).toFixed(2)} KB`;
+    return summary;
+  },
+
+  // Checks if an attachment at a given index can be deleted — no tests exist
+  _canDeleteAttachment(document, index) {
+    if (!document || !this._hasFiles(this._attachments)) {
+      return false;
+    }
+    if (!this.hasPermission(document, 'WriteProperties')) {
+      return false;
+    }
+    if (this.isImmutable(document) || this.isTrashed(document)) {
+      return false;
+    }
+    const attachmentXpath = this._computeBlobXpath(this.xpath, index);
+    if (document.retainedProperties && document.retainedProperties.some((p) => p.startsWith(attachmentXpath))) {
+      return false;
+    }
+    return true;
+  },
 });
