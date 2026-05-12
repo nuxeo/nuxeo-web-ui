@@ -15,18 +15,31 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-const url = `themes/${localStorage.getItem('theme') || 'default'}/theme.html`;
+// Validate that the theme name is a safe single path segment.
+// Block path traversal (../), directory separators (/ \), and protocol markers (:).
+const UNSAFE_THEME_PATTERN = /[/\\:]|\.\./;
+
+function getValidTheme() {
+  const theme = localStorage.getItem('theme');
+  if (theme && theme.trim() && !UNSAFE_THEME_PATTERN.test(theme)) {
+    return theme;
+  }
+  return 'default';
+}
+
+const theme = getValidTheme();
+const url = `themes/${theme}/theme.html`;
 const xhr = new XMLHttpRequest();
 xhr.open('HEAD', url, false);
 xhr.onreadystatechange = function () {
   if (xhr.readyState === 4) {
     if (xhr.status === 404) {
-      console.warn(`"${localStorage.getItem('theme')}" theme not found, fallback to "default".`);
+      console.warn(`"${theme}" theme not found, fallback to "default".`);
       localStorage.setItem('theme', 'default');
     }
     const link = document.createElement('link');
     link.setAttribute('rel', 'import');
-    link.setAttribute('href', `themes/${localStorage.getItem('theme') || 'default'}/theme.html`);
+    link.setAttribute('href', `themes/${getValidTheme()}/theme.html`);
     document.head.appendChild(link);
   }
 };
