@@ -43,7 +43,7 @@
     "globals": "^17.4.0",
     "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.6.0",
-    "http-server": "^0.11.1",
+    "http-server": "^14.1.1",
     "husky": "^4.2.3",
     "karma": "^6.4.1",
     "karma-chrome-launcher": "^3.1.1",
