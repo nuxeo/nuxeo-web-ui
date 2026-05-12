@@ -92,7 +92,7 @@ jobs:
       - name: Resolve project version and branch
         id: project_meta
         run: |
-          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
           # github.head_ref = PR source branch, github.ref_name = push branch,
           # inputs.branch = workflow_call. git HEAD is detached on PR/push events.
           echo "branch=${{ github.head_ref || github.ref_name || inputs.branch }}" >> "$GITHUB_OUTPUT"
