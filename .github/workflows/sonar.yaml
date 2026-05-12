@@ -16,7 +16,7 @@ on:
         required: false
     secrets:
       NPM_PACKAGES_TOKEN:
-        required: false
+        required: true
       SONAR_TOKEN:
         required: true
 
@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package.json') }}
           restore-keys: ${{ runner.os }}-node-
 
       - name: Install npm dependencies
@@ -64,13 +64,58 @@ jobs:
         run: npm install
         working-directory: ${{ github.workspace }}
 
+      - name: Ensure latest @nuxeo RC packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
+            | jq -r '.[]' \
+            | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" \
+            | sort -V | tail -n1)
+          echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
+
+          npm install \
+            @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
+        working-directory: ${{ github.workspace }}
+
       - name: Run unit tests with coverage
         run: npm test
         working-directory: ${{ github.workspace }}
 
+      - name: Resolve project version and branch
+        id: project_meta
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "branch=$(git rev-parse --abbrev-ref HEAD)" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ github.workspace }}
+
       - name: Build and analyze
+        id: sonar_scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         uses: SonarSource/sonarqube-scan-action@v8.0.0
         with:
           projectBaseDir: ${{ github.workspace }}
+          args: >
+            -Dsonar.projectVersion=${{ steps.project_meta.outputs.version }}
+            -Dsonar.branch.name=${{ steps.project_meta.outputs.branch }}
+            -Dsonar.scm.revision=${{ github.sha }}
+
+      - name: Enforce Quality Gate
+        # Fails if sonar scan was skipped (e.g. prior step failed) or gate not passed.
+        if: always()
+        run: |
+          if [ "${{ steps.sonar_scan.outcome }}" = "skipped" ]; then
+            echo "❌ SonarCloud scan was skipped — a prior step (e.g. coverage baseline) failed."
+            exit 1
+          fi
+          if [ "${{ steps.sonar_scan.outcome }}" != "success" ]; then
+            echo "❌ SonarCloud Quality Gate FAILED. Fix flagged issues before merging."
+            echo "   • New-code coverage must be ≥ 90 %"
+            echo "   • No unresolved code-quality issues on new/changed code"
+            exit 1
+          fi
+          echo "✅ SonarCloud Quality Gate passed."
