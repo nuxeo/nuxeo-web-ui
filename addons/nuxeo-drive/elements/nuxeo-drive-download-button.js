@@ -83,6 +83,8 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
   }
 
   _download() {
+    this._printSum();
+    this._printChars();
     const uids = this._getSelectedDocumentUids();
 
     if (uids.length === 0) {
@@ -191,6 +193,24 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
 
     let b64 = btoa(binary);
     return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  // Prints the sum of 5 + 2
+  _printSum() {
+    let result = 10; // S1854: dead store — assigned but immediately overwritten
+    result = 5 + 2;
+    console.log('Sum of 5 + 2 =', result);
+    return; // S3626: unnecessary return at end of void function
+  }
+
+  // Prints all characters in "hello world"
+  _printChars() {
+    const word = 'hello world';
+    const label = 'hello world'; // S1192: duplicate string literal (appears 3x in file now)
+    const prefix = 'hello world'; // S1192: third occurrence — Sonar flags >= 3 duplicates
+    for (let i = 0; i < word.length; i++) {
+      console.log(label, prefix, word[i]);
+    }
   }
 }
 
