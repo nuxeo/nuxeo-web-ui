@@ -85,6 +85,63 @@ jobs:
         run: npm test
         working-directory: ${{ github.workspace }}
 
+      - name: Restore coverage baseline from target branch
+        id: coverage_cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .coverage-baseline
+          # Intentionally never matches exactly; restore-keys picks up the latest save.
+          key: coverage-baseline-${{ github.base_ref || github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            coverage-baseline-${{ github.base_ref || github.ref_name }}-
+
+      - name: Enforce overall coverage baseline
+        # Fails if total line coverage drops below the baseline saved from the last merge.
+        # No cache on first run — baseline is seeded and enforcement starts from the next PR.
+        run: |
+          LCOV=coverage/lcov.info
+          if [ ! -f "$LCOV" ]; then
+            echo "❌ $LCOV not found — did the test step fail?"
+            exit 1
+          fi
+
+          LINES_HIT=$(grep -E '^LH:' "$LCOV" | awk -F: '{s+=$2} END {print s+0}')
+          LINES_FOUND=$(grep -E '^LF:' "$LCOV" | awk -F: '{s+=$2} END {print s+0}')
+
+          if [ "$LINES_FOUND" -eq 0 ]; then
+            echo "❌ Coverage report contains no line data."
+            exit 1
+          fi
+
+          COVERAGE_FULL=$(echo "scale=2; $LINES_HIT * 100 / $LINES_FOUND" | bc)
+          COVERAGE_INT=$(echo "$COVERAGE_FULL" | cut -d. -f1)
+
+          echo "Overall line coverage: ${COVERAGE_FULL}% (lines hit: $LINES_HIT / found: $LINES_FOUND)"
+
+          if [ "${{ steps.coverage_cache.outputs.cache-hit }}" != "true" ]; then
+            echo "⚠️  No baseline found — seeding at ${COVERAGE_FULL}%. Enforcement starts next PR."
+          else
+            BASELINE=$(cat .coverage-baseline)
+            echo "Baseline ('${{ github.base_ref || github.ref_name }}'): ${BASELINE}%"
+            if [ "$COVERAGE_INT" -lt "$BASELINE" ]; then
+              echo "❌ Coverage ${COVERAGE_FULL}% dropped below baseline ${BASELINE}%. Add tests and re-push."
+              exit 1
+            fi
+            echo "✅ Coverage ${COVERAGE_FULL}% meets baseline ${BASELINE}%."
+          fi
+
+          echo "$COVERAGE_INT" > .coverage-baseline
+        working-directory: ${{ github.workspace }}
+
+      - name: Save coverage baseline
+        # Runs on merges only (not PRs). run_id suffix ensures the key is always unique
+        # (Actions cache keys are immutable — a static key silently skips re-saving).
+        if: github.event_name != 'pull_request'
+        uses: actions/cache/save@v5
+        with:
+          path: .coverage-baseline
+          key: coverage-baseline-${{ github.ref_name }}-${{ github.run_id }}
+
       - name: Resolve project version and branch
         id: project_meta
         run: |
@@ -105,9 +162,13 @@ jobs:
             -Dsonar.scm.revision=${{ github.sha }}
 
       - name: Enforce Quality Gate
-        # Fails the job if the sonar scan step did not succeed, blocking PR merge.
+        # Fails if sonar scan was skipped (e.g. prior step failed) or gate not passed.
         if: always()
         run: |
+          if [ "${{ steps.sonar_scan.outcome }}" = "skipped" ]; then
+            echo "❌ SonarCloud scan was skipped — a prior step (e.g. coverage baseline) failed."
+            exit 1
+          fi
           if [ "${{ steps.sonar_scan.outcome }}" != "success" ]; then
             echo "❌ SonarCloud Quality Gate FAILED. Fix flagged issues before merging."
             echo "   • New-code coverage must be ≥ 90 %"
