@@ -107,8 +107,14 @@ jobs:
           projectBaseDir: ${{ github.workspace }}
           args: >
             -Dsonar.projectVersion=${{ steps.project_meta.outputs.version }}
-            -Dsonar.branch.name=${{ steps.project_meta.outputs.branch }}
             -Dsonar.scm.revision=${{ github.sha }}
+            -Dsonar.qualitygate.wait=true
+            ${{ github.event_name == 'pull_request' &&
+              format('-Dsonar.pullrequest.key={0} -Dsonar.pullrequest.branch={1} -Dsonar.pullrequest.base={2}',
+                github.event.pull_request.number,
+                github.event.pull_request.head.ref,
+                github.event.pull_request.base.ref)
+              || format('-Dsonar.branch.name={0}', steps.project_meta.outputs.branch) }}
 
       - name: Enforce Quality Gate
         # Fails if sonar scan was skipped (e.g. prior step failed) or gate not passed.
