@@ -6,10 +6,6 @@ on:
     branches:
       - maintenance-3.1.x
 
-  push:
-    branches:
-      - maintenance-3.1.x
-
   workflow_dispatch:
 
   workflow_call:
@@ -24,12 +20,13 @@ on:
       SONAR_TOKEN:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   sonar:
     name: Build and analyze
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
@@ -62,24 +59,20 @@ jobs:
       - name: Install npm dependencies
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: npm ci --ignore-scripts
+        # npm install is required (not npm ci) because the preinstall script runs
+        # npm install in sub-packages that do not have a package-lock.json
+        run: npm install
         working-directory: ${{ github.workspace }}
 
       - name: Ensure latest @nuxeo RC packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          ELEMENTS_VERSION=$(
-            for pkg in @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers; do
-              npm view "$pkg" versions --json | jq -r '.[]'
-            done | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" \
-                 | sort | uniq -c | awk '$1 == 4 {print $2}' | sort -V | tail -n1
-          )
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
+            | jq -r '.[]' \
+            | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" \
+            | sort -V | tail -n1)
           echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
-          if [ -z "$ELEMENTS_VERSION" ]; then
-            echo "::error::Could not resolve a common RC version across all @nuxeo packages"
-            exit 1
-          fi
 
           npm install \
             @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
@@ -95,10 +88,8 @@ jobs:
       - name: Resolve project version and branch
         id: project_meta
         run: |
-          echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
-          # github.head_ref = PR source branch, github.ref_name = push branch,
-          # inputs.branch = workflow_call. git HEAD is detached on PR/push events.
-          echo "branch=${{ github.head_ref || github.ref_name || inputs.branch }}" >> "$GITHUB_OUTPUT"
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "branch=$(git rev-parse --abbrev-ref HEAD)" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}
 
       - name: Build and analyze
@@ -110,14 +101,8 @@ jobs:
           projectBaseDir: ${{ github.workspace }}
           args: >
             -Dsonar.projectVersion=${{ steps.project_meta.outputs.version }}
+            -Dsonar.branch.name=${{ steps.project_meta.outputs.branch }}
             -Dsonar.scm.revision=${{ github.sha }}
-            -Dsonar.qualitygate.wait=true
-            ${{ github.event_name == 'pull_request' &&
-              format('-Dsonar.pullrequest.key={0} -Dsonar.pullrequest.branch={1} -Dsonar.pullrequest.base={2}',
-                github.event.pull_request.number,
-                github.event.pull_request.head.ref,
-                github.event.pull_request.base.ref)
-              || format('-Dsonar.branch.name={0}', steps.project_meta.outputs.branch) }}
 
       - name: Enforce Quality Gate
         # Fails if sonar scan was skipped (e.g. prior step failed) or gate not passed.
