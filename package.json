@@ -21,7 +21,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@nuxeo/nuxeo-web-ui-ftest": "file:./packages/nuxeo-web-ui-ftest",
-    "@nuxeo/testing-helpers": "~3.1.31-rc",
+    "@nuxeo/testing-helpers": "~2025.15.0",
     "@open-wc/karma-esm": "^4.0.0",
     "@open-wc/webpack-import-meta-loader": "^0.4.7",
     "@wdio/cli": "^9.12.2",
