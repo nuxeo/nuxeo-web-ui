@@ -16,14 +16,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 // Validate that the theme name is a safe single path segment.
-// Block path traversal (../), directory separators (/ \), and protocol markers (:).
-const UNSAFE_THEME_PATTERN = /[/\\:]|\.\./;
+// Block path traversal (../), directory separators (/ \), protocol markers (:),
+// and percent-encoding (%) to prevent encoded bypasses like %2f or %2e%2e.
+const UNSAFE_THEME_PATTERN = /[/\\:%]|\.\./;
 
 function getValidTheme() {
-  const theme = localStorage.getItem('theme');
-  if (theme && theme.trim() && !UNSAFE_THEME_PATTERN.test(theme)) {
+  const raw = localStorage.getItem('theme');
+  const theme = raw && raw.trim();
+  if (theme && !UNSAFE_THEME_PATTERN.test(theme)) {
     return theme;
   }
+  // Correct any invalid or empty value in localStorage to avoid persistent bad state.
+  localStorage.setItem('theme', 'default');
   return 'default';
 }
 
