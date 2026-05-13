@@ -84,9 +84,6 @@ jobs:
       - name: Purge cached Nuxeo artifacts
         run: rm -rf ~/.m2/repository/org/nuxeo
 
-      - name: Purge cached Nuxeo artifacts
-        run: rm -rf ~/.m2/repository/org/nuxeo
-
       - name: Prepare environment
         run: |
           echo "PACKAGE_VERSION=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
