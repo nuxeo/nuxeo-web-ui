@@ -57,6 +57,10 @@ jobs:
           npm i @nuxeo/nuxeo-ui-elements@$VERSION --save-exact
           npm i @nuxeo/testing-helpers@$VERSION --save-exact
 
+          # Sync all lockfiles after package.json changes
+          npm install --package-lock-only --ignore-scripts
+          (cd packages/nuxeo-web-ui-ftest && npm install --package-lock-only --ignore-scripts)
+
       - name: Perform git release of Nuxeo Web UI ${{ env.VERSION }}
         run: |
           git commit -a -m "Release $VERSION"
@@ -155,6 +159,10 @@ jobs:
           npm i @nuxeo/nuxeo-dataviz-elements@$NEW_ELEMENTS_VERSION --save-prefix="${NEW_ELEMENTS_VERSION:0:1}"
           npm i @nuxeo/nuxeo-ui-elements@$NEW_ELEMENTS_VERSION --save-prefix="${NEW_ELEMENTS_VERSION:0:1}"
           npm i @nuxeo/testing-helpers@$NEW_ELEMENTS_VERSION --save-prefix="${NEW_ELEMENTS_VERSION:0:1}"
+
+          # Sync all lockfiles after package.json changes
+          npm install --package-lock-only --ignore-scripts
+          (cd packages/nuxeo-web-ui-ftest && npm install --package-lock-only --ignore-scripts)
 
           find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$OLD_SNAPSHOT"'/'"$NEW_SNAPSHOT"'/g' {} \;
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
