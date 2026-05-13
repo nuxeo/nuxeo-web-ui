@@ -23,14 +23,21 @@ const UNSAFE_THEME_PATTERN = /[/\\:%?#]|\.\./;
 function safeSetTheme(value) {
   try {
     localStorage.setItem('theme', value);
-  } catch (_) {
-    // localStorage may be unavailable (e.g., private browsing)
+  } catch (e) {
+    // localStorage may be unavailable (e.g., private browsing); theme will not persist.
+    console.warn('Failed to persist theme preference:', e.message);
   }
 }
 
 function getValidTheme() {
-  const raw = localStorage.getItem('theme');
-  const theme = raw && raw.trim();
+  let raw;
+  try {
+    raw = localStorage.getItem('theme');
+  } catch (_) {
+    // localStorage may be unavailable (e.g., private browsing)
+    return 'default';
+  }
+  const theme = raw?.trim();
   if (theme && !UNSAFE_THEME_PATTERN.test(theme)) {
     // Normalize: persist trimmed value if it differs from stored value.
     if (theme !== raw) {
@@ -45,19 +52,20 @@ function getValidTheme() {
   return 'default';
 }
 
-const theme = getValidTheme();
-const url = `themes/${theme}/theme.html`;
+let resolvedTheme = getValidTheme();
+const url = `themes/${resolvedTheme}/theme.html`;
 const xhr = new XMLHttpRequest();
 xhr.open('HEAD', url, false);
 xhr.onreadystatechange = function () {
   if (xhr.readyState === 4) {
     if (xhr.status === 404) {
-      console.warn(`"${theme}" theme not found, fallback to "default".`);
-      safeSetTheme('default');
+      console.warn(`"${resolvedTheme}" theme not found, fallback to "default".`);
+      resolvedTheme = 'default';
+      safeSetTheme(resolvedTheme);
     }
     const link = document.createElement('link');
     link.setAttribute('rel', 'import');
-    link.setAttribute('href', `themes/${getValidTheme()}/theme.html`);
+    link.setAttribute('href', `themes/${resolvedTheme}/theme.html`);
     document.head.appendChild(link);
   }
 };
