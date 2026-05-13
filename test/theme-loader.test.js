@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { SAFE_THEME_PATTERN, safeSetTheme, getValidTheme } from '../themes/loader.js';
+import { SAFE_THEME_PATTERN, safeSetTheme, getValidTheme, loadTheme } from '../themes/loader.js';
 
 suite('theme-loader', () => {
   let getItemStub;
@@ -81,6 +81,48 @@ suite('theme-loader', () => {
     test('should return "default" when localStorage.getItem throws', () => {
       getItemStub.throws(new Error('SecurityError'));
       expect(getValidTheme()).to.equal('default');
+    });
+  });
+
+  suite('loadTheme', () => {
+    let xhrStub;
+    let fakeXhr;
+
+    setup(() => {
+      // Remove any link[rel="import"] elements added by previous runs
+      document.querySelectorAll('link[rel="import"]').forEach((el) => el.remove());
+    });
+
+    test('should add a theme link when theme file exists', () => {
+      getItemStub.returns('dark');
+      fakeXhr = { open: sinon.stub(), send: sinon.stub(), readyState: 4, status: 200 };
+      fakeXhr.send.callsFake(function () {
+        fakeXhr.onreadystatechange();
+      });
+      xhrStub = sinon.stub(window, 'XMLHttpRequest').returns(fakeXhr);
+
+      loadTheme();
+
+      const link = document.querySelector('link[rel="import"][href="themes/dark/theme.html"]');
+      expect(link).to.exist;
+      xhrStub.restore();
+    });
+
+    test('should fallback to default when theme file returns 404', () => {
+      getItemStub.returns('nonexistent');
+      fakeXhr = { open: sinon.stub(), send: sinon.stub(), readyState: 4, status: 404 };
+      fakeXhr.send.callsFake(function () {
+        fakeXhr.onreadystatechange();
+      });
+      xhrStub = sinon.stub(window, 'XMLHttpRequest').returns(fakeXhr);
+
+      loadTheme();
+
+      expect(warnStub).to.have.been.calledWithMatch('not found');
+      expect(setItemStub).to.have.been.calledWith('theme', 'default');
+      const link = document.querySelector('link[rel="import"][href="themes/default/theme.html"]');
+      expect(link).to.exist;
+      xhrStub.restore();
     });
   });
 });

@@ -33,8 +33,9 @@ export function getValidTheme() {
   let raw;
   try {
     raw = localStorage.getItem('theme');
-  } catch (_) {
+  } catch (e) {
     // localStorage may be unavailable (e.g., private browsing)
+    console.warn('Failed to read theme preference:', e.message);
     return 'default';
   }
   const theme = raw?.trim();
@@ -52,21 +53,25 @@ export function getValidTheme() {
   return 'default';
 }
 
-let resolvedTheme = getValidTheme();
-const url = `themes/${resolvedTheme}/theme.html`;
-const xhr = new XMLHttpRequest();
-xhr.open('HEAD', url, false);
-xhr.onreadystatechange = function () {
-  if (xhr.readyState === 4) {
-    if (xhr.status === 404) {
-      console.warn(`"${resolvedTheme}" theme not found, fallback to "default".`);
-      resolvedTheme = 'default';
-      safeSetTheme(resolvedTheme);
+export function loadTheme() {
+  let resolvedTheme = getValidTheme();
+  const url = `themes/${resolvedTheme}/theme.html`;
+  const xhr = new XMLHttpRequest();
+  xhr.open('HEAD', url, false);
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 404) {
+        console.warn(`"${resolvedTheme}" theme not found, fallback to "default".`);
+        resolvedTheme = 'default';
+        safeSetTheme(resolvedTheme);
+      }
+      const link = document.createElement('link');
+      link.setAttribute('rel', 'import');
+      link.setAttribute('href', `themes/${resolvedTheme}/theme.html`);
+      document.head.appendChild(link);
     }
-    const link = document.createElement('link');
-    link.setAttribute('rel', 'import');
-    link.setAttribute('href', `themes/${resolvedTheme}/theme.html`);
-    document.head.appendChild(link);
-  }
-};
-xhr.send(null);
+  };
+  xhr.send(null);
+}
+
+loadTheme();
