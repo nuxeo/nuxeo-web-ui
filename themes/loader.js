@@ -17,8 +17,8 @@ limitations under the License.
 */
 // Validate that the theme name is a safe single path segment.
 // Block path traversal (../), directory separators (/ \), protocol markers (:),
-// and percent-encoding (%) to prevent encoded bypasses like %2f or %2e%2e.
-const UNSAFE_THEME_PATTERN = /[/\\:%]|\.\./;
+// percent-encoding (%), and URL delimiters (? #) to prevent request manipulation.
+const UNSAFE_THEME_PATTERN = /[/\\:%?#]|\.\./;
 
 function getValidTheme() {
   const raw = localStorage.getItem('theme');
