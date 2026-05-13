@@ -101,9 +101,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm ci
-          npm install ./nuxeo-elements/core
-          npm install ./nuxeo-elements/ui
-          npm install ./nuxeo-elements/dataviz
+          npm install --no-package-lock ./nuxeo-elements/core
+          npm install --no-package-lock ./nuxeo-elements/ui
+          npm install --no-package-lock ./nuxeo-elements/dataviz
 
       - name: Webpack build
         run: npm run build
