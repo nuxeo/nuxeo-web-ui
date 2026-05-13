@@ -208,7 +208,7 @@ Polymer({
           <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
             <nuxeo-quick-filters
               quick-filters="{{quickFilters}}"
-              on-quick-filters-changed="fetch"
+              on-quick-filters-changed="_onQuickFiltersChanged"
             ></nuxeo-quick-filters>
           </template>
 
@@ -468,6 +468,7 @@ Polymer({
 
     // Update localStorage key when name changes (different documents have different names)
     '_updateStorage(name, _connectedUserId)',
+    '_enforcePendingQuickFilters(quickFilters.*)',
   ],
 
   listeners: {
@@ -509,6 +510,38 @@ Polymer({
       return [];
     }
     return [];
+  },
+
+  _onQuickFiltersChanged(e) {
+    const eventFilters = Array.isArray(e?.detail?.value)
+      ? e.detail.value
+      : Array.isArray(e?.target?.quickFilters)
+        ? e.target.quickFilters
+        : this.quickFilters;
+    const filters = this._cloneQuickFilters(eventFilters);
+    this.quickFilters = this._cloneQuickFilters(filters);
+    this._pendingQuickFilters = this._cloneQuickFilters(filters);
+    this._quickFiltersDirty = true;
+
+    // Keep provider/view in sync before fetching to avoid stale quick-filter state after navigation.
+    if (this.nxProvider) {
+      this.set('nxProvider.quickFilters', this._cloneQuickFilters(filters));
+    }
+    if (this.view && this.view.quickFilters !== undefined) {
+      this.view.quickFilters = this._cloneQuickFilters(filters);
+    }
+
+    this.dispatchEvent(
+      new CustomEvent('search-quick-filters-updated', {
+        detail: { quickFilters: this._cloneQuickFilters(filters) },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+
+    this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
+      this.fetch();
+    });
   },
 
   detached() {
@@ -667,7 +700,20 @@ Polymer({
       this.listen(view, '_excluded-items-changed', '_excludedDocsChanged');
       view.nxProvider = this.nxProvider;
       // update view - now safe as reset/fetch have defensive checks
+      // reset first
       this.reset();
+
+      // restore quick filters after reset
+      const restoredQuickFilters = this._cloneQuickFilters(this.quickFilters);
+      if (this.nxProvider) {
+        this.set('nxProvider.quickFilters', this._cloneQuickFilters(restoredQuickFilters));
+      }
+
+      if (view.quickFilters !== undefined) {
+        view.quickFilters = this._cloneQuickFilters(restoredQuickFilters);
+      }
+
+      // fetch after state restore
       this.fetch();
       this.fire('search-results-view', { view, name: this.name });
     }
@@ -940,8 +986,69 @@ Polymer({
   },
 
   _quickFiltersChanged(e) {
-    if (this.nxProvider && e.detail.value) {
-      this.quickFilters = this.nxProvider.quickFilters;
+    let incomingFilters;
+    if (Array.isArray(e?.detail?.value)) {
+      incomingFilters = this._cloneQuickFilters(e.detail.value);
+    } else if (this.nxProvider && Array.isArray(this.nxProvider.quickFilters)) {
+      incomingFilters = this._cloneQuickFilters(this.nxProvider.quickFilters);
+    }
+
+    if (!incomingFilters) {
+      return;
+    }
+
+    if (
+      this._quickFiltersDirty &&
+      !this._quickFiltersEqual(incomingFilters, this._pendingQuickFilters || this.quickFilters)
+    ) {
+      const pendingFilters = this._cloneQuickFilters(this._pendingQuickFilters || this.quickFilters);
+      this.quickFilters = this._cloneQuickFilters(pendingFilters);
+      if (this.nxProvider) {
+        this.set('nxProvider.quickFilters', this._cloneQuickFilters(pendingFilters));
+      }
+      if (this.view && this.view.quickFilters !== undefined) {
+        this.view.quickFilters = this._cloneQuickFilters(pendingFilters);
+      }
+      this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
+        this.fetch();
+      });
+      return;
+    }
+
+    this.quickFilters = this._cloneQuickFilters(incomingFilters);
+    if (this._quickFiltersDirty && this._quickFiltersEqual(incomingFilters, this._pendingQuickFilters)) {
+      this._quickFiltersDirty = false;
+      this._pendingQuickFilters = null;
+    }
+  },
+
+  _cloneQuickFilters(filters) {
+    if (!Array.isArray(filters)) {
+      return [];
+    }
+    return JSON.parse(JSON.stringify(filters));
+  },
+
+  _quickFiltersEqual(a, b) {
+    return JSON.stringify(Array.isArray(a) ? a : []) === JSON.stringify(Array.isArray(b) ? b : []);
+  },
+
+  _enforcePendingQuickFilters() {
+    if (!this._quickFiltersDirty || !this._pendingQuickFilters) {
+      return;
+    }
+
+    if (this._quickFiltersEqual(this.quickFilters, this._pendingQuickFilters)) {
+      return;
+    }
+
+    const pendingFilters = this._cloneQuickFilters(this._pendingQuickFilters);
+    this.quickFilters = this._cloneQuickFilters(pendingFilters);
+    if (this.nxProvider) {
+      this.set('nxProvider.quickFilters', this._cloneQuickFilters(pendingFilters));
+    }
+    if (this.view && this.view.quickFilters !== undefined) {
+      this.view.quickFilters = this._cloneQuickFilters(pendingFilters);
     }
   },
 
