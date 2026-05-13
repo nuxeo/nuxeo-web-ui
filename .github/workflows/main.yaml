@@ -133,7 +133,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm ci
+          npm ci --ignore-scripts
           (cd packages/nuxeo-web-ui-ftest && npm ci)
           (cd packages/nuxeo-designer-catalog && npm ci)
 

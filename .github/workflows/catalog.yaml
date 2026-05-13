@@ -81,15 +81,13 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/nuxeo-designer-catalog
-        run: |
-          npm ci
-          npm install -g gulp
+        run: npm ci
 
       - name: Generate catalog
         working-directory: packages/nuxeo-designer-catalog
         run: |
-          gulp catalog --tp "$TARGET_PLATFORM" --webui-branch "$WEBUI_REF"
-          gulp hints --tp "$TARGET_PLATFORM"
+          npx gulp catalog --tp "$TARGET_PLATFORM" --webui-branch "$WEBUI_REF"
+          npx gulp hints --tp "$TARGET_PLATFORM"
 
       - name: Bundle catalog
         run: |
