@@ -11,7 +11,6 @@ name: Veracode LTS-2025
 on:
   schedule:
     - cron: '0 19 * * *'   # 7:00 PM UTC daily
-  workflow_dispatch:          # enables manual runs from GitHub UI
 
 env:
   REFERENCE_BRANCH: lts-2025
@@ -69,7 +68,7 @@ jobs:
           pushd packages/nuxeo-web-ui-ftest
           npm install
           popd
-          
+
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v6
         with:
@@ -103,6 +102,7 @@ jobs:
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
           npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_HELPERS}
+
       - name: Delete Node Modules
         run: |
           rm -rf node_modules

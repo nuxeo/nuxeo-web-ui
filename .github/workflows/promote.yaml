@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to promote (e.g.: 3.1.2-rc.2)'
+        description: 'Version to promote (e.g.: 2025.1.0-rc.2)'
         required: true
       referenceBranch:
         description: 'Branch to be updated after the promotion'
         required: true
-        default: 'maintenance-3.1.x'
+        default: 'lts-2025'
       dryRun:
         description: 'Run the workflow without pushing code or publishing artifacts'
         type: boolean
@@ -35,7 +35,7 @@ jobs:
 
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
-      # Extract VERSION from x.y.z-rc.n → x.y.z
+      # Extract VERSION from format 2025.x.0-rc.y to get 2025.x.0
       - run: echo "VERSION=$(echo '${{ github.event.inputs.version }}' | sed -E 's/-rc\.[0-9]+//')" >> $GITHUB_ENV
 
       - name: Update Nuxeo Web UI version to ${{ env.VERSION }}
@@ -135,7 +135,7 @@ jobs:
           ref: ${{ github.event.inputs.referenceBranch }}
 
       - name: Compute next version
-        run: echo "NEW_VERSION=$(npx semver -i patch $VERSION)" >> $GITHUB_ENV
+        run: echo "NEW_VERSION=$(npx semver -i minor $VERSION)" >> $GITHUB_ENV
 
       - name: Align branch on next SNAPSHOT
         env:

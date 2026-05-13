@@ -254,7 +254,6 @@ Polymer({
 
     name: String,
     document: Object,
-
     selectedItems: {
       type: Array,
       notify: true,

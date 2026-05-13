@@ -36,6 +36,7 @@ import { _fetchSchemas } from '../fetch-schemas.js';
 
 let _customLoadPromise;
 const jsondiffpatch = create();
+
 /**
 `nuxeo-diff`
 @group Nuxeo UI

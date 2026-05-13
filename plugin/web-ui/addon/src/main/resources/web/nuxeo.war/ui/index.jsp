@@ -22,7 +22,7 @@ limitations under the License.
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
 <%@ page import="org.nuxeo.ecm.core.api.repository.RepositoryManager"%>
 <%@ page import="org.nuxeo.common.utils.UserAgentMatcher"%>
-<%@ page import="javax.servlet.http.HttpServletResponse" %>
+<%@ page import="jakarta.servlet.http.HttpServletResponse" %>
 
 
 <%

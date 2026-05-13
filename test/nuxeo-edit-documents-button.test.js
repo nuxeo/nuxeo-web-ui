@@ -53,13 +53,13 @@ const _nxRoot = typeof globalThis !== 'undefined' ? globalThis : typeof window !
 _nxRoot.Nuxeo = _nxRoot.Nuxeo || {};
 _nxRoot.Nuxeo.LayoutBehavior = LayoutBehavior;
 
-// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/maintenance-3.1.x/ui/test/ui-test-helpers.js
+// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/lts-2025/ui/test/ui-test-helpers.js
 // should be refactored and moved to the public helpers in nuxeo-elements (see ELEMENTS-1437 & WEBUI-604)
 function waitForLayoutLoad(layout) {
   return Promise.race([waitForEvent(layout, 'element-changed'), waitForAttrMutation(layout.$.error, 'hidden', null)]);
 }
 
-// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/maintenance-3.1.x/ui/test/nuxeo-document-picker.test.js
+// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/lts-2025/ui/test/nuxeo-document-picker.test.js
 // should be refactored and moved to the public helpers in nuxeo-elements (see ELEMENTS-1437 & WEBUI-604)
 const waitForDialogOpen = async (dialog) => {
   if (!isElementVisible(dialog)) {
@@ -68,7 +68,7 @@ const waitForDialogOpen = async (dialog) => {
   }
 };
 
-// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/maintenance-3.1.x/ui/test/nuxeo-document-picker.test.js
+// XXX Copied from https://github.com/nuxeo/nuxeo-elements/blob/lts-2025/ui/test/nuxeo-document-picker.test.js
 // should be refactored and moved to the public helpers in nuxeo-elements (see ELEMENTS-1437 & WEBUI-604)
 const waitForDialogClose = async (dialog) => {
   if (isElementVisible(dialog)) {

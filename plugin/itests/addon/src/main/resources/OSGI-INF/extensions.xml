@@ -149,7 +149,7 @@
     </filter>
   </extension>
   <extension target="org.nuxeo.ecm.platform.query.api.PageProviderService" point="providers">
-    <genericPageProvider class="org.nuxeo.elasticsearch.provider.ElasticSearchNxqlPageProvider" name="test_search">
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider" name="test_search">
       <trackUsage>true</trackUsage>
       <property name="coreSession">#{documentManager}</property>
       <whereClause>
@@ -162,7 +162,7 @@
       <pageSize>10</pageSize>
     </genericPageProvider>
 
-    <genericPageProvider class="org.nuxeo.elasticsearch.provider.ElasticSearchNxqlPageProvider" name="manual-default">
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider" name="manual-default">
       <trackUsage>true</trackUsage>
       <property name="coreSession">#{documentManager}</property>
       <whereClause>

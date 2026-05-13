@@ -39,7 +39,6 @@ const refresh = async () => {
 
 const url = async (...args) => {
   await driver.url(...args);
-
   // Wait until *either* login proceeds OR UI is loading
   await driver.waitUntil(
     async () => {

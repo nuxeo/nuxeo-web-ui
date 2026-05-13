@@ -189,6 +189,7 @@ export const DocumentContentBehavior = [
     _isFileDrag(e) {
       return e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files');
     },
+
     _toggleDragging(flag) {
       const { view } = this;
       if (view) {
