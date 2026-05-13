@@ -740,6 +740,7 @@ Polymer({
     'document-unlocked': '_documentUnlocked',
     'theme-changed': '_themeChanged',
     'search-results': '_showSearchResults',
+    'search-quick-filters-updated': '_syncSearchQuickFilters',
     navigate: '_navigate',
     'collection-loaded': '_updateCollectionMenu',
     notify: '_notify',
@@ -1261,6 +1262,20 @@ Polymer({
   _showSearchResults(e) {
     const target = e.composedPath()[0];
     this.navigateTo('search', target.searchName);
+  },
+
+  _syncSearchQuickFilters(e) {
+    this.searchForm = this.$$(`[search-name='${this.searchName}']`) || this.searchForm;
+
+    if (!this.searchForm || !Array.isArray(e?.detail?.quickFilters)) {
+      return;
+    }
+
+    const quickFilters = JSON.parse(JSON.stringify(e.detail.quickFilters));
+    this.searchForm.set('_quickFilters', quickFilters);
+    if (this.searchForm.$ && this.searchForm.$.provider) {
+      this.searchForm.$.provider.quickFilters = JSON.parse(JSON.stringify(quickFilters));
+    }
   },
 
   _toggleDrawer(e, selectedObj) {
