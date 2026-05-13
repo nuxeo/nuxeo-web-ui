@@ -877,9 +877,9 @@ Polymer({
       (this.results && Array.isArray(this.results.quickFilters) && this.results.quickFilters) ||
       [];
 
-    const clonedQuickFilters = JSON.parse(JSON.stringify(quickFilters));
+    const clonedQuickFilters = quickFilters.slice();
     this.set('_quickFilters', clonedQuickFilters);
-    this.$.provider.quickFilters = JSON.parse(JSON.stringify(clonedQuickFilters));
+    this.$.provider.quickFilters = clonedQuickFilters.slice();
   },
 
   _computeData(searches) {

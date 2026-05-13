@@ -513,11 +513,12 @@ Polymer({
   },
 
   _onQuickFiltersChanged(e) {
-    const eventFilters = Array.isArray(e?.detail?.value)
-      ? e.detail.value
-      : Array.isArray(e?.target?.quickFilters)
-        ? e.target.quickFilters
-        : this.quickFilters;
+    let eventFilters = this.quickFilters;
+    if (Array.isArray(e?.detail?.value)) {
+      eventFilters = e.detail.value;
+    } else if (Array.isArray(e?.target?.quickFilters)) {
+      eventFilters = e.target.quickFilters;
+    }
     const filters = this._cloneQuickFilters(eventFilters);
     this.quickFilters = this._cloneQuickFilters(filters);
     this._pendingQuickFilters = this._cloneQuickFilters(filters);
