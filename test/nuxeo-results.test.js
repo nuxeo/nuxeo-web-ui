@@ -1023,39 +1023,47 @@ suite('nuxeo-results', () => {
     test('_onQuickFiltersChanged syncs quick filters to provider and view before fetch', async () => {
       const mockProvider = createMockProvider();
       const mockView = createMockView({ quickFilters: [] });
+      const clock = sinon.useFakeTimers();
       const fetchSpy = sinon.stub(results, 'fetch').resolves();
 
-      results.nxProvider = mockProvider;
-      results.view = mockView;
-      results.quickFilters = ['Validated'];
+      try {
+        results.nxProvider = mockProvider;
+        results.view = mockView;
+        results.quickFilters = ['Validated'];
 
-      results._onQuickFiltersChanged();
-      await flush();
+        results._onQuickFiltersChanged();
+        await clock.tickAsync(51);
 
-      expect(results.nxProvider.quickFilters).to.deep.equal(['Validated']);
-      expect(results.view.quickFilters).to.deep.equal(['Validated']);
-      expect(fetchSpy).to.have.been.called;
-
-      fetchSpy.restore();
+        expect(results.nxProvider.quickFilters).to.deep.equal(['Validated']);
+        expect(results.view.quickFilters).to.deep.equal(['Validated']);
+        expect(fetchSpy).to.have.been.called;
+      } finally {
+        fetchSpy.restore();
+        clock.restore();
+      }
     });
 
     test('_onQuickFiltersChanged uses event payload when local quickFilters is stale', async () => {
       const mockProvider = createMockProvider();
       const mockView = createMockView({ quickFilters: [] });
+      const clock = sinon.useFakeTimers();
       const fetchSpy = sinon.stub(results, 'fetch').resolves();
 
-      results.nxProvider = mockProvider;
-      results.view = mockView;
-      results.quickFilters = ['Validated'];
+      try {
+        results.nxProvider = mockProvider;
+        results.view = mockView;
+        results.quickFilters = ['Validated'];
 
-      results._onQuickFiltersChanged({ detail: { value: ['Most Recent'] } });
-      await flush();
+        results._onQuickFiltersChanged({ detail: { value: ['Most Recent'] } });
+        await clock.tickAsync(51);
 
-      expect(results.quickFilters).to.deep.equal(['Most Recent']);
-      expect(results.nxProvider.quickFilters).to.deep.equal(['Most Recent']);
-      expect(results.view.quickFilters).to.deep.equal(['Most Recent']);
-
-      fetchSpy.restore();
+        expect(results.quickFilters).to.deep.equal(['Most Recent']);
+        expect(results.nxProvider.quickFilters).to.deep.equal(['Most Recent']);
+        expect(results.view.quickFilters).to.deep.equal(['Most Recent']);
+      } finally {
+        fetchSpy.restore();
+        clock.restore();
+      }
     });
 
     test('_quickFiltersChanged ignores stale provider quick filters while user change is pending', () => {
