@@ -15,7 +15,42 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { safeSetTheme, getValidTheme } from './theme-utils.js';
+// Validate that the theme name is a safe single path segment.
+// Block path traversal (../), directory separators (/ \), protocol markers (:),
+// percent-encoding (%), and URL delimiters (? #) to prevent request manipulation.
+export const UNSAFE_THEME_PATTERN = /[/\\:%?#]|\.\./;
+
+export function safeSetTheme(value) {
+  try {
+    localStorage.setItem('theme', value);
+  } catch (e) {
+    // localStorage may be unavailable (e.g., private browsing); theme will not persist.
+    console.warn('Failed to persist theme preference:', e.message);
+  }
+}
+
+export function getValidTheme() {
+  let raw;
+  try {
+    raw = localStorage.getItem('theme');
+  } catch (_) {
+    // localStorage may be unavailable (e.g., private browsing)
+    return 'default';
+  }
+  const theme = raw?.trim();
+  if (theme && !UNSAFE_THEME_PATTERN.test(theme)) {
+    // Normalize: persist trimmed value if it differs from stored value.
+    if (theme !== raw) {
+      safeSetTheme(theme);
+    }
+    return theme;
+  }
+  // Only correct localStorage when there was an invalid stored value, not when the key is absent.
+  if (raw != null) {
+    safeSetTheme('default');
+  }
+  return 'default';
+}
 
 let resolvedTheme = getValidTheme();
 const url = `themes/${resolvedTheme}/theme.html`;
