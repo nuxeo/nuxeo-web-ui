@@ -527,7 +527,7 @@ Polymer({
     if (this.nxProvider) {
       this.set('nxProvider.quickFilters', this._cloneQuickFilters(filters));
     }
-    if (this.view && this.view.quickFilters !== undefined) {
+    if (this.view?.quickFilters !== undefined) {
       this.view.quickFilters = this._cloneQuickFilters(filters);
     }
 
@@ -1006,7 +1006,7 @@ Polymer({
       if (this.nxProvider) {
         this.set('nxProvider.quickFilters', this._cloneQuickFilters(pendingFilters));
       }
-      if (this.view && this.view.quickFilters !== undefined) {
+      if (this.view?.quickFilters !== undefined) {
         this.view.quickFilters = this._cloneQuickFilters(pendingFilters);
       }
       this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
@@ -1047,7 +1047,7 @@ Polymer({
     if (this.nxProvider) {
       this.set('nxProvider.quickFilters', this._cloneQuickFilters(pendingFilters));
     }
-    if (this.view && this.view.quickFilters !== undefined) {
+    if (this.view?.quickFilters !== undefined) {
       this.view.quickFilters = this._cloneQuickFilters(pendingFilters);
     }
   },
