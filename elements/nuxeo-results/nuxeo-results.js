@@ -1026,7 +1026,7 @@ Polymer({
     if (!Array.isArray(filters)) {
       return [];
     }
-    return JSON.parse(JSON.stringify(filters));
+    return filters.slice();
   },
 
   _quickFiltersEqual(a, b) {
