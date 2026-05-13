@@ -122,6 +122,9 @@ jobs:
           ' package.json > tmp.json && mv tmp.json package.json
           echo "Updated all Nuxeo dependencies to version $ELEMENTS_VERSION"
 
+          # Sync lockfile after manual package.json edits
+          npm install --package-lock-only --ignore-scripts
+
           pushd packages/nuxeo-web-ui-ftest
           npm version ${VERSION} --no-git-tag-version
           popd
