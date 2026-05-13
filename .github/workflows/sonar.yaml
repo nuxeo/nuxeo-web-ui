@@ -1,0 +1,133 @@
+name: SonarQube
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - lts-2025
+
+  push:
+    branches:
+      - lts-2025
+
+  workflow_dispatch:
+
+  workflow_call:
+    inputs:
+      branch:
+        description: 'Branch to analyze'
+        type: string
+        required: false
+    secrets:
+      NPM_PACKAGES_TOKEN:
+        required: true
+      SONAR_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  sonar:
+    name: Build and analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Run git config
+        run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          node-version: 22
+          scope: '@nuxeo'
+
+      - name: Cache npm packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Install npm dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        # npm install is required (not npm ci) because the preinstall script runs
+        # npm install in sub-packages that do not have a package-lock.json
+        run: npm install
+        working-directory: ${{ github.workspace }}
+
+      - name: Ensure latest @nuxeo RC packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
+            | jq -r '.[]' \
+            | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
+            | sort -V | tail -n1)
+          echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
+
+          npm install \
+            @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
+        working-directory: ${{ github.workspace }}
+
+      - name: Run unit tests with coverage
+        run: npm test
+        working-directory: ${{ github.workspace }}
+
+      - name: Resolve project version and branch
+        id: project_meta
+        run: |
+          echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+          # github.head_ref = PR source branch, github.ref_name = push branch,
+          # inputs.branch = workflow_call. git HEAD is detached on PR/push events.
+          echo "branch=${{ github.head_ref || github.ref_name || inputs.branch }}" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ github.workspace }}
+
+      - name: Build and analyze
+        id: sonar_scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        uses: SonarSource/sonarqube-scan-action@v8.0.0
+        with:
+          projectBaseDir: ${{ github.workspace }}
+          args: >
+            -Dsonar.projectVersion=${{ steps.project_meta.outputs.version }}
+            -Dsonar.scm.revision=${{ github.sha }}
+            -Dsonar.qualitygate.wait=true
+            ${{ github.event_name == 'pull_request' &&
+              format('-Dsonar.pullrequest.key={0} -Dsonar.pullrequest.branch={1} -Dsonar.pullrequest.base={2}',
+                github.event.pull_request.number,
+                github.event.pull_request.head.ref,
+                github.event.pull_request.base.ref)
+              || format('-Dsonar.branch.name={0}', steps.project_meta.outputs.branch) }}
+
+      - name: Enforce Quality Gate
+        # Fails if sonar scan was skipped (e.g. prior step failed) or gate not passed.
+        if: always()
+        run: |
+          if [ "${{ steps.sonar_scan.outcome }}" = "skipped" ]; then
+            echo "❌ SonarCloud scan was skipped — a prior step (e.g. coverage baseline) failed."
+            exit 1
+          fi
+          if [ "${{ steps.sonar_scan.outcome }}" != "success" ]; then
+            echo "❌ SonarCloud Quality Gate FAILED. Fix flagged issues before merging."
+            echo "   • New-code coverage must be ≥ 90 %"
+            echo "   • No unresolved code-quality issues on new/changed code"
+            exit 1
+          fi
+          echo "✅ SonarCloud Quality Gate passed."
