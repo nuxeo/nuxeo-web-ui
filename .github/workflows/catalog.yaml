@@ -46,7 +46,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 14
+          node-version: 18
 
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
