@@ -20,14 +20,28 @@ limitations under the License.
 // percent-encoding (%), and URL delimiters (? #) to prevent request manipulation.
 const UNSAFE_THEME_PATTERN = /[/\\:%?#]|\.\./;
 
+function safeSetTheme(value) {
+  try {
+    localStorage.setItem('theme', value);
+  } catch (_) {
+    // localStorage may be unavailable (e.g., private browsing)
+  }
+}
+
 function getValidTheme() {
   const raw = localStorage.getItem('theme');
   const theme = raw && raw.trim();
   if (theme && !UNSAFE_THEME_PATTERN.test(theme)) {
+    // Normalize: persist trimmed value if it differs from stored value.
+    if (theme !== raw) {
+      safeSetTheme(theme);
+    }
     return theme;
   }
-  // Correct any invalid or empty value in localStorage to avoid persistent bad state.
-  localStorage.setItem('theme', 'default');
+  // Only correct localStorage when there was an invalid stored value, not when the key is absent.
+  if (raw != null) {
+    safeSetTheme('default');
+  }
   return 'default';
 }
 
@@ -39,7 +53,7 @@ xhr.onreadystatechange = function () {
   if (xhr.readyState === 4) {
     if (xhr.status === 404) {
       console.warn(`"${theme}" theme not found, fallback to "default".`);
-      localStorage.setItem('theme', 'default');
+      safeSetTheme('default');
     }
     const link = document.createElement('link');
     link.setAttribute('rel', 'import');
