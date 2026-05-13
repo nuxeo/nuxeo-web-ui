@@ -16,9 +16,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 // Validate that the theme name is a safe single path segment.
-// Block path traversal (../), directory separators (/ \), protocol markers (:),
-// percent-encoding (%), and URL delimiters (? #) to prevent request manipulation.
-export const UNSAFE_THEME_PATTERN = /[/\\:%?#]|\.\./;
+// Only alphanumeric characters, hyphens, and underscores are allowed.
+// This allowlist approach prevents path traversal, encoded characters, and URL manipulation.
+export const SAFE_THEME_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
 export function safeSetTheme(value) {
   try {
@@ -38,7 +38,7 @@ export function getValidTheme() {
     return 'default';
   }
   const theme = raw?.trim();
-  if (theme && !UNSAFE_THEME_PATTERN.test(theme)) {
+  if (theme && SAFE_THEME_PATTERN.test(theme)) {
     // Normalize: persist trimmed value if it differs from stored value.
     if (theme !== raw) {
       safeSetTheme(theme);
