@@ -92,7 +92,7 @@ jobs:
             | sort -V | tail -n1)
           echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
 
-          npm install --no-package-lock \
+          npm install \
             @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
             @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
             @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
