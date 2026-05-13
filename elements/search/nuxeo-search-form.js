@@ -862,10 +862,10 @@ Polymer({
   },
 
   _resultsElementChanged(results, oldResults) {
-    if (oldResults) {
+    if (oldResults && typeof oldResults.addEventListener === 'function') {
       this.unlisten(oldResults, 'quick-filters-changed', '_syncQuickFiltersFromResults');
     }
-    if (results) {
+    if (results && typeof results.addEventListener === 'function') {
       this.listen(results, 'quick-filters-changed', '_syncQuickFiltersFromResults');
     }
   },
