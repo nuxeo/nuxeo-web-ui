@@ -1273,7 +1273,7 @@ Polymer({
 
     const quickFilters = JSON.parse(JSON.stringify(e.detail.quickFilters));
     this.searchForm.set('_quickFilters', quickFilters);
-    if (this.searchForm.$ && this.searchForm.$.provider) {
+    if (this.searchForm?.$.provider) {
       this.searchForm.$.provider.quickFilters = JSON.parse(JSON.stringify(quickFilters));
     }
   },
