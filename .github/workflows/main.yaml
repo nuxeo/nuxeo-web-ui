@@ -130,9 +130,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install
-          (cd packages/nuxeo-web-ui-ftest && npm install)
-          (cd packages/nuxeo-designer-catalog && npm install)
+          npm ci
+          (cd packages/nuxeo-web-ui-ftest && npm ci)
+          (cd packages/nuxeo-designer-catalog && npm ci)
 
       - name: Build packages
         env:

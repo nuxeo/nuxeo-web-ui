@@ -47,7 +47,7 @@ jobs:
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: npm install
+        run: npm ci
 
       - name: Lint
         run: npm run lint

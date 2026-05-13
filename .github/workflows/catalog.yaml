@@ -82,7 +82,7 @@ jobs:
       - name: Install dependencies
         working-directory: packages/nuxeo-designer-catalog
         run: |
-          npm install
+          npm ci
           npm install -g gulp
 
       - name: Generate catalog
