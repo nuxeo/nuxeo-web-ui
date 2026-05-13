@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { UNSAFE_THEME_PATTERN, safeSetTheme, getValidTheme } from '../themes/loader.js';
+import { SAFE_THEME_PATTERN, safeSetTheme, getValidTheme } from '../themes/loader.js';
 
 suite('theme-loader', () => {
   let getItemStub;
@@ -32,16 +32,16 @@ suite('theme-loader', () => {
     sinon.restore();
   });
 
-  suite('UNSAFE_THEME_PATTERN', () => {
+  suite('SAFE_THEME_PATTERN', () => {
     test('should reject unsafe characters and path traversal', () => {
       ['foo/bar', 'foo\\bar', '../etc', 'http:', '%2f', 'default?x=1', 'default#foo'].forEach((value) => {
-        expect(UNSAFE_THEME_PATTERN.test(value), `expected "${value}" to be rejected`).to.be.true;
+        expect(SAFE_THEME_PATTERN.test(value), `expected "${value}" to be rejected`).to.be.false;
       });
     });
 
     test('should allow valid theme names', () => {
       ['default', 'dark', 'light', 'kawaii', 'my-custom-theme'].forEach((value) => {
-        expect(UNSAFE_THEME_PATTERN.test(value), `expected "${value}" to be allowed`).to.be.false;
+        expect(SAFE_THEME_PATTERN.test(value), `expected "${value}" to be allowed`).to.be.true;
       });
     });
   });
