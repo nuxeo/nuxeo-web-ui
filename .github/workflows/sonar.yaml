@@ -112,7 +112,7 @@ jobs:
                 github.event.pull_request.number,
                 github.event.pull_request.head.ref,
                 github.event.pull_request.base.ref)
-              || format('-Dsonar.branch.name={0}', steps.project_meta.outputs.branch) }}
+              || format('-Dsonar.branch.name={0} -Dsonar.newCode.referenceBranch={0}', steps.project_meta.outputs.branch) }}
 
       - name: Enforce Quality Gate
         # Fails if sonar scan was skipped (e.g. prior step failed) or gate not passed.
