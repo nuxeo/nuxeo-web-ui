@@ -215,6 +215,8 @@ GitHub Actions run on every push to the `maintenance-3.1.x` branch and on PRs:
 5. **Sonar** — SonarCloud quality/security scan
 6. **Build** — Maven marketplace package (only after all above pass)
 
+CI workflows use `npm ci` for deterministic installs from `package-lock.json`. Always commit lockfile changes when dependencies are added or updated.
+
 ## npm Registry
 
 `@nuxeo` scoped packages are published to and installed from:

@@ -128,6 +128,8 @@ See `.github/skills/link-nuxeo-elements/SKILL.md` for full details and custom pa
 - **Main branch flow (`maintenance-3.1.x`)**: lint → test → a11y → ftest → sonar → build (sequential gates)
 - **Preview**: PRs tagged `preview` get ephemeral environments (cross-repo with nuxeo-elements)
 - **Registry**: `@nuxeo` packages come from `https://packages.nuxeo.com/repository/npm-public/`
+- **Lockfile**: `package-lock.json` is committed. CI workflows use `npm ci` for deterministic installs.
+- **Sub-package lockfiles**: `packages/nuxeo-web-ui-ftest`, `packages/nuxeo-designer-catalog`, and `plugin/a11y` also have committed lockfiles and use `npm ci`.
 
 ## Environment Variables
 

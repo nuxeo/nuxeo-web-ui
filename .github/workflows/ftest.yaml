@@ -94,12 +94,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install
+          npm ci --ignore-scripts
           pushd packages/nuxeo-web-ui-ftest
-          npm install
+          npm ci
           popd
           pushd packages/nuxeo-designer-catalog
-          npm install
+          npm ci
           popd
 
       - name: Checkout the nuxeo-elements repo

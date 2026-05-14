@@ -122,6 +122,9 @@ jobs:
           ' package.json > tmp.json && mv tmp.json package.json
           echo "Updated all Nuxeo dependencies to version $ELEMENTS_VERSION"
 
+          # Sync lockfile after manual package.json edits
+          npm install --package-lock-only --ignore-scripts
+
           pushd packages/nuxeo-web-ui-ftest
           npm version ${VERSION} --no-git-tag-version
           popd
@@ -130,9 +133,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install
-          (cd packages/nuxeo-web-ui-ftest && npm install)
-          (cd packages/nuxeo-designer-catalog && npm install)
+          npm ci --ignore-scripts
+          (cd packages/nuxeo-web-ui-ftest && npm ci)
+          (cd packages/nuxeo-designer-catalog && npm ci)
 
       - name: Build packages
         env:
