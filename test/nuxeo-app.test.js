@@ -695,6 +695,21 @@ suite('nuxeo-app', () => {
       expect(() => app._syncSearchQuickFilters.call(ctx, { detail: { quickFilters: null } })).to.not.throw();
       expect(() => app._syncSearchQuickFilters.call(ctx, { detail: {} })).to.not.throw();
     });
+
+    test('syncs quick filters even when provider is missing on search form', () => {
+      const setSpy = sinon.spy();
+      const ctx = {
+        searchName: 'default_search',
+        searchForm: {
+          set: setSpy,
+          $: {},
+        },
+        $$: sinon.stub().returns(null),
+      };
+
+      expect(() => app._syncSearchQuickFilters.call(ctx, { detail: { quickFilters: ['Validated'] } })).to.not.throw();
+      expect(setSpy).to.have.been.calledWith('_quickFilters', ['Validated']);
+    });
   });
 
   test('loadTask with empty id calls _defineTaskAndNavigate with no arg', () => {

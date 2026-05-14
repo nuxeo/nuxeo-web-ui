@@ -1066,6 +1066,51 @@ suite('nuxeo-results', () => {
       }
     });
 
+    test('_onQuickFiltersChanged falls back to target quickFilters', async () => {
+      const mockProvider = createMockProvider();
+      const mockView = createMockView({ quickFilters: [] });
+      const clock = sinon.useFakeTimers();
+      const fetchSpy = sinon.stub(results, 'fetch').resolves();
+
+      try {
+        results.nxProvider = mockProvider;
+        results.view = mockView;
+        fetchSpy.resetHistory();
+
+        results._onQuickFiltersChanged({ target: { quickFilters: ['Target Filter'] } });
+        await clock.tickAsync(51);
+
+        expect(results.quickFilters).to.deep.equal(['Target Filter']);
+        expect(results.nxProvider.quickFilters).to.deep.equal(['Target Filter']);
+        expect(results.view.quickFilters).to.deep.equal(['Target Filter']);
+        expect(fetchSpy).to.have.been.calledOnce;
+      } finally {
+        fetchSpy.restore();
+        clock.restore();
+      }
+    });
+
+    test('_onQuickFiltersChanged tolerates missing provider and unsupported view quickFilters', async () => {
+      const clock = sinon.useFakeTimers();
+      const fetchSpy = sinon.stub(results, 'fetch').resolves();
+
+      try {
+        results.nxProvider = null;
+        results.view = createMockView();
+        delete results.view.quickFilters;
+        fetchSpy.resetHistory();
+
+        results._onQuickFiltersChanged({ detail: { value: ['Validated'] } });
+        await clock.tickAsync(51);
+
+        expect(results.quickFilters).to.deep.equal(['Validated']);
+        expect(fetchSpy).to.have.been.calledOnce;
+      } finally {
+        fetchSpy.restore();
+        clock.restore();
+      }
+    });
+
     test('_quickFiltersChanged ignores stale provider quick filters while user change is pending', () => {
       results.quickFilters = ['Validated'];
       results._quickFiltersDirty = true;
@@ -1078,10 +1123,128 @@ suite('nuxeo-results', () => {
       expect(results.quickFilters).to.deep.equal(['Validated']);
     });
 
+    test('_quickFiltersChanged falls back to provider quick filters when event has no array value', () => {
+      results.nxProvider = createMockProvider();
+      results.nxProvider.quickFilters = ['Provider Filter'];
+
+      results._quickFiltersChanged({ detail: { value: null } });
+
+      expect(results.quickFilters).to.deep.equal(['Provider Filter']);
+    });
+
+    test('_quickFiltersChanged reapplies pending filters to provider and view when stale values return', async () => {
+      const clock = sinon.useFakeTimers();
+      const fetchSpy = sinon.stub(results, 'fetch').resolves();
+      results.nxProvider = createMockProvider();
+      results.view = createMockView({ quickFilters: [] });
+      results.quickFilters = ['Validated'];
+      results._quickFiltersDirty = true;
+      results._pendingQuickFilters = ['Validated'];
+
+      try {
+        fetchSpy.resetHistory();
+        results._quickFiltersChanged({ detail: { value: ['Most Recent'] } });
+        await clock.tickAsync(51);
+
+        expect(results.quickFilters).to.deep.equal(['Validated']);
+        expect(results.nxProvider.quickFilters).to.deep.equal(['Validated']);
+        expect(results.view.quickFilters).to.deep.equal(['Validated']);
+        expect(fetchSpy).to.have.been.calledOnce;
+      } finally {
+        fetchSpy.restore();
+        clock.restore();
+      }
+    });
+
+    test('_quickFiltersChanged reuses current quickFilters when pending filters are absent', async () => {
+      const clock = sinon.useFakeTimers();
+      const fetchSpy = sinon.stub(results, 'fetch').resolves();
+
+      try {
+        results.quickFilters = ['Validated'];
+        results._quickFiltersDirty = true;
+        results._pendingQuickFilters = null;
+        results.nxProvider = null;
+        results.view = createMockView();
+        delete results.view.quickFilters;
+        fetchSpy.resetHistory();
+
+        results._quickFiltersChanged({ detail: { value: ['Most Recent'] } });
+        await clock.tickAsync(51);
+
+        expect(results.quickFilters).to.deep.equal(['Validated']);
+        expect(fetchSpy).to.have.been.calledOnce;
+      } finally {
+        fetchSpy.restore();
+        clock.restore();
+      }
+    });
+
+    test('_quickFiltersChanged clears dirty state when provider confirms pending filters', () => {
+      results._quickFiltersDirty = true;
+      results._pendingQuickFilters = ['Validated'];
+
+      results._quickFiltersChanged({ detail: { value: ['Validated'] } });
+
+      expect(results.quickFilters).to.deep.equal(['Validated']);
+      expect(results._quickFiltersDirty).to.be.false;
+      expect(results._pendingQuickFilters).to.be.null;
+    });
+
+    test('_cloneQuickFilters returns empty array for non-arrays and clones arrays', () => {
+      const filters = ['Validated'];
+      const cloned = results._cloneQuickFilters(filters);
+      expect(results._cloneQuickFilters(null)).to.deep.equal([]);
+      expect(cloned).to.deep.equal(filters);
+      expect(cloned).to.not.equal(filters);
+    });
+
+    test('_enforcePendingQuickFilters returns early when state is incomplete or already in sync', () => {
+      results.quickFilters = ['Validated'];
+      results._quickFiltersDirty = false;
+      results._pendingQuickFilters = ['Validated'];
+      expect(() => results._enforcePendingQuickFilters()).to.not.throw();
+
+      results._quickFiltersDirty = true;
+      results._pendingQuickFilters = null;
+      expect(() => results._enforcePendingQuickFilters()).to.not.throw();
+
+      results._pendingQuickFilters = ['Validated'];
+      expect(() => results._enforcePendingQuickFilters()).to.not.throw();
+      expect(results.quickFilters).to.deep.equal(['Validated']);
+    });
+
+    test('_enforcePendingQuickFilters reapplies pending filters to provider and view', () => {
+      results.quickFilters = ['Most Recent'];
+      results._quickFiltersDirty = true;
+      results._pendingQuickFilters = ['Validated'];
+      results.nxProvider = createMockProvider();
+      results.view = createMockView({ quickFilters: [] });
+
+      results._enforcePendingQuickFilters();
+
+      expect(results.quickFilters).to.deep.equal(['Validated']);
+      expect(results.nxProvider.quickFilters).to.deep.equal(['Validated']);
+      expect(results.view.quickFilters).to.deep.equal(['Validated']);
+    });
+
+    test('_enforcePendingQuickFilters reapplies pending filters without provider or view quickFilters support', () => {
+      results.quickFilters = ['Most Recent'];
+      results._quickFiltersDirty = true;
+      results._pendingQuickFilters = ['Validated'];
+      results.nxProvider = null;
+      results.view = createMockView();
+      delete results.view.quickFilters;
+
+      expect(() => results._enforcePendingQuickFilters()).to.not.throw();
+      expect(results.quickFilters).to.deep.equal(['Validated']);
+    });
+
     test('_quickFiltersEqual compares quick filters safely', () => {
       expect(results._quickFiltersEqual(['Validated'], ['Validated'])).to.be.true;
       expect(results._quickFiltersEqual(['Validated'], ['Most Recent'])).to.be.false;
       expect(results._quickFiltersEqual(undefined, [])).to.be.true;
+      expect(results._quickFiltersEqual(['Validated'], undefined)).to.be.false;
     });
   });
 
