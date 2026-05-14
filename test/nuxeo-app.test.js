@@ -642,6 +642,61 @@ suite('nuxeo-app', () => {
     expect(app.navigateTo).to.have.been.calledWith('search', 'default_search');
   });
 
+  suite('_syncSearchQuickFilters', () => {
+    test('syncs quick filters to active search form and provider', () => {
+      const setSpy = sinon.spy();
+      const form = {
+        set: setSpy,
+        $: {
+          provider: {},
+        },
+      };
+      const ctx = {
+        searchName: 'default_search',
+        searchForm: null,
+        $$: sinon.stub().returns(form),
+      };
+
+      const filters = ['Validated', 'Most Recent'];
+      app._syncSearchQuickFilters.call(ctx, { detail: { quickFilters: filters } });
+
+      expect(setSpy).to.have.been.calledWith('_quickFilters', filters);
+      expect(form.$.provider.quickFilters).to.deep.equal(filters);
+      expect(form.$.provider.quickFilters).to.not.equal(filters);
+    });
+
+    test('uses existing searchForm when lookup returns null', () => {
+      const setSpy = sinon.spy();
+      const ctx = {
+        searchName: 'default_search',
+        searchForm: {
+          set: setSpy,
+          $: {
+            provider: {},
+          },
+        },
+        $$: sinon.stub().returns(null),
+      };
+
+      app._syncSearchQuickFilters.call(ctx, { detail: { quickFilters: ['Validated'] } });
+
+      expect(setSpy).to.have.been.calledOnce;
+      expect(ctx.searchForm.$.provider.quickFilters).to.deep.equal(['Validated']);
+    });
+
+    test('returns early when no search form or invalid payload', () => {
+      const ctx = {
+        searchName: 'default_search',
+        searchForm: null,
+        $$: sinon.stub().returns(null),
+      };
+
+      expect(() => app._syncSearchQuickFilters.call(ctx, { detail: { quickFilters: ['A'] } })).to.not.throw();
+      expect(() => app._syncSearchQuickFilters.call(ctx, { detail: { quickFilters: null } })).to.not.throw();
+      expect(() => app._syncSearchQuickFilters.call(ctx, { detail: {} })).to.not.throw();
+    });
+  });
+
   test('loadTask with empty id calls _defineTaskAndNavigate with no arg', () => {
     sinon.stub(app, '_defineTaskAndNavigate');
     app.loadTask('');
