@@ -521,6 +521,64 @@ suite('nuxeo-search-form', () => {
     closeSpy.restore();
     searchForm._selectedSearchIdxChanged.restore();
   });
+
+  suite('quick filters sync with results element', () => {
+    test('_resultsElementChanged rewires listeners from old results to new results', () => {
+      const oldResults = document.createElement('div');
+      const newResults = document.createElement('div');
+      const listenSpy = sinon.spy(searchForm, 'listen');
+      const unlistenSpy = sinon.spy(searchForm, 'unlisten');
+
+      searchForm._resultsElementChanged(newResults, oldResults);
+
+      expect(unlistenSpy).to.have.been.calledWith(oldResults, 'quick-filters-changed', '_syncQuickFiltersFromResults');
+      expect(listenSpy).to.have.been.calledWith(newResults, 'quick-filters-changed', '_syncQuickFiltersFromResults');
+      listenSpy.restore();
+      unlistenSpy.restore();
+    });
+
+    test('_resultsElementChanged ignores non-event targets safely', () => {
+      const listenSpy = sinon.spy(searchForm, 'listen');
+      const unlistenSpy = sinon.spy(searchForm, 'unlisten');
+
+      searchForm._resultsElementChanged({}, {});
+
+      expect(listenSpy).to.not.have.been.called;
+      expect(unlistenSpy).to.not.have.been.called;
+      listenSpy.restore();
+      unlistenSpy.restore();
+    });
+
+    test('_syncQuickFiltersFromResults prioritizes event detail values', () => {
+      searchForm.$.provider.quickFilters = [];
+
+      searchForm._syncQuickFiltersFromResults({ detail: { value: ['Validated'] } });
+
+      expect(searchForm._quickFilters).to.deep.equal(['Validated']);
+      expect(searchForm.$.provider.quickFilters).to.deep.equal(['Validated']);
+    });
+
+    test('_syncQuickFiltersFromResults falls back to target and results quickFilters', () => {
+      searchForm.results = { quickFilters: ['From Results'] };
+
+      searchForm._syncQuickFiltersFromResults({ target: { quickFilters: ['From Target'] } });
+      expect(searchForm._quickFilters).to.deep.equal(['From Target']);
+
+      searchForm._syncQuickFiltersFromResults({ detail: {} });
+      expect(searchForm._quickFilters).to.deep.equal(['From Results']);
+      expect(searchForm.$.provider.quickFilters).to.deep.equal(['From Results']);
+    });
+
+    test('_syncQuickFiltersFromResults defaults to empty array', () => {
+      searchForm.results = null;
+      searchForm.$.provider.quickFilters = ['Old'];
+
+      searchForm._syncQuickFiltersFromResults({ detail: {} });
+
+      expect(searchForm._quickFilters).to.deep.equal([]);
+      expect(searchForm.$.provider.quickFilters).to.deep.equal([]);
+    });
+  });
 });
 
 /**
