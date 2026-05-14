@@ -63,7 +63,7 @@ jobs:
       - name: Install npm dependencies
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: npm ci
+        run: npm ci --ignore-scripts
         working-directory: ${{ github.workspace }}
 
       - name: Ensure latest @nuxeo RC packages
