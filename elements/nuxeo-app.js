@@ -1271,10 +1271,10 @@ Polymer({
       return;
     }
 
-    const quickFilters = JSON.parse(JSON.stringify(e.detail.quickFilters));
+    const quickFilters = e.detail.quickFilters.slice();
     this.searchForm.set('_quickFilters', quickFilters);
-    if (this.searchForm.$ && this.searchForm.$.provider) {
-      this.searchForm.$.provider.quickFilters = JSON.parse(JSON.stringify(quickFilters));
+    if (this.searchForm?.$.provider) {
+      this.searchForm.$.provider.quickFilters = quickFilters.slice();
     }
   },
 

@@ -513,11 +513,12 @@ Polymer({
   },
 
   _onQuickFiltersChanged(e) {
-    const eventFilters = Array.isArray(e?.detail?.value)
-      ? e.detail.value
-      : Array.isArray(e?.target?.quickFilters)
-        ? e.target.quickFilters
-        : this.quickFilters;
+    let eventFilters = this.quickFilters;
+    if (Array.isArray(e?.detail?.value)) {
+      eventFilters = e.detail.value;
+    } else if (Array.isArray(e?.target?.quickFilters)) {
+      eventFilters = e.target.quickFilters;
+    }
     const filters = this._cloneQuickFilters(eventFilters);
     this.quickFilters = this._cloneQuickFilters(filters);
     this._pendingQuickFilters = this._cloneQuickFilters(filters);
@@ -527,7 +528,7 @@ Polymer({
     if (this.nxProvider) {
       this.set('nxProvider.quickFilters', this._cloneQuickFilters(filters));
     }
-    if (this.view && this.view.quickFilters !== undefined) {
+    if (this.view?.quickFilters !== undefined) {
       this.view.quickFilters = this._cloneQuickFilters(filters);
     }
 
@@ -1006,7 +1007,7 @@ Polymer({
       if (this.nxProvider) {
         this.set('nxProvider.quickFilters', this._cloneQuickFilters(pendingFilters));
       }
-      if (this.view && this.view.quickFilters !== undefined) {
+      if (this.view?.quickFilters !== undefined) {
         this.view.quickFilters = this._cloneQuickFilters(pendingFilters);
       }
       this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
@@ -1026,7 +1027,7 @@ Polymer({
     if (!Array.isArray(filters)) {
       return [];
     }
-    return JSON.parse(JSON.stringify(filters));
+    return filters.slice();
   },
 
   _quickFiltersEqual(a, b) {
@@ -1047,7 +1048,7 @@ Polymer({
     if (this.nxProvider) {
       this.set('nxProvider.quickFilters', this._cloneQuickFilters(pendingFilters));
     }
-    if (this.view && this.view.quickFilters !== undefined) {
+    if (this.view?.quickFilters !== undefined) {
       this.view.quickFilters = this._cloneQuickFilters(pendingFilters);
     }
   },
