@@ -46,7 +46,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 14
+          node-version: 18
 
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
@@ -81,15 +81,13 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/nuxeo-designer-catalog
-        run: |
-          npm install
-          npm install -g gulp
+        run: npm ci
 
       - name: Generate catalog
         working-directory: packages/nuxeo-designer-catalog
         run: |
-          gulp catalog --tp "$TARGET_PLATFORM" --webui-branch "$WEBUI_REF"
-          gulp hints --tp "$TARGET_PLATFORM"
+          npx gulp catalog --tp "$TARGET_PLATFORM" --webui-branch "$WEBUI_REF"
+          npx gulp hints --tp "$TARGET_PLATFORM"
 
       - name: Bundle catalog
         run: |
