@@ -15,12 +15,11 @@ on:
         type: boolean
         required: false
 
-permissions:
-  contents: write
-
 jobs:
   promote:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/setup-node@v6
         with:

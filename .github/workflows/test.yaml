@@ -18,9 +18,6 @@ on:
       SAUCE_ACCESS_KEY:
         required: false
 
-permissions:
-  contents: read
-
 env:
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
 
@@ -28,6 +25,8 @@ jobs:
   unit-test:
     runs-on:
       group: medium-4cpu-runners
+    permissions:
+      contents: read
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2

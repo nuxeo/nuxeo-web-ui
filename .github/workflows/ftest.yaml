@@ -21,9 +21,6 @@ on:
       REPOSITORY_MANAGER_PASSWORD:
         required: true
 
-permissions:
-  contents: read
-
 env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
   NODE_OPTIONS: "--max-old-space-size=2048"
@@ -33,6 +30,8 @@ jobs:
   ftests:
     runs-on:
       group: medium-4cpu-runners
+    permissions:
+      contents: read
 
     steps:
       - name: Debug
