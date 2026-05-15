@@ -515,8 +515,9 @@
   "driveDownloadButton.tooltip": "Download with Nuxeo Drive",
   "driveEditButton.dialog.heading": "Download Nuxeo Drive Client",
   "driveEditButton.tooltip": "Open with Nuxeo Drive",
-  "driveUpload.directTransfer.failed": "An error occurred while trying to upload the document with Nuxeo Drive.",
-  "driveUploadButton.tooltip": "Upload with Nuxeo Drive",
+  
+  "driveUpload.serverUrlTooLong": "The server URL is too long to generate a Nuxeo Drive transfer link.",
+ 
   "drivePage.heading": "Nuxeo Drive",
   "drivePage.packages": "Packages",
   "drivePage.roots": "Synchronization Roots",
@@ -1538,5 +1539,8 @@
   "workflowAnalytics.averageTaskDurationPerUser.heading": "Average Task Duration per User",
   "workflowAnalytics.averageTaskDurationPerUser.user": "User",
   "workflowAnalytics.averageWorkflowDuration.heading": "Average Workflow Duration",
-  "workflowAnalytics.workflowInitiators.heading": "Workflow Initiators"
+  "workflowAnalytics.workflowInitiators.heading": "Workflow Initiators",
+  "driveEditButton.directTransfer.failed": "An error occurred while trying to open the document with Nuxeo Drive.",
+  "driveUpload.directTransfer.failed": "An error occurred while trying to upload the document with Nuxeo Drive.",
+  "driveUploadButton.tooltip": "Upload with Nuxeo Drive"
 }

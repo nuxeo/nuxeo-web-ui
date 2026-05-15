@@ -107,13 +107,43 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   }
 
   get directTransferUrl() {
-    const finalUrl = [
-      'nxdrive://direct-transfer',
-      baseUrl.split('/ui/')[0].replace('://', '/'),
-      this.document.path.slice(1),
-    ].join('/');
-    return finalUrl;
+    const cleanBaseUrl = baseUrl.split('/ui/')[0].replace(/\/$/, '');
+    const serverPath = cleanBaseUrl.replace('://', '/');
+    const docPath = this.document.path.slice(1);
+    const originalUrl = `nxdrive://direct-transfer/${serverPath}/${docPath}`;
+    console.log('Original Direct Transfer URL:', originalUrl);
+    return this._compressDirectTransferUrl(originalUrl);
   }
+
+  _compressDirectTransferUrl(originalUrl) {
+    const path = originalUrl.replace('nxdrive://direct-transfer/', '');
+    const segments = path.split('/');
+    const scheme = segments[0] === 'https' ? 1 : 0;
+    const server = segments.slice(1).join('/');
+
+    const serverBytes = new TextEncoder().encode(server);
+    const payload = new Uint8Array([
+        scheme,
+        serverBytes.length,
+        ...serverBytes
+    ]);
+
+    const b64 = this._base64UrlSafeEncode(payload);
+    console.log('Compressed Direct Transfer URL:', `nxdrive://direct-transfer/${b64}`);
+    return `nxdrive://direct-transfer/${b64}`;
+}
+
+  _base64UrlSafeEncode(bytes) {
+    let binary = '';
+    bytes.forEach(byte => {
+        binary += String.fromCharCode(byte);
+    });
+
+    let b64 = btoa(binary);
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+
 }
 
 customElements.define(NuxeoDriveUploadButton.is, NuxeoDriveUploadButton);
