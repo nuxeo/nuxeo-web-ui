@@ -5,19 +5,21 @@ on:
   # Make workflow reusable, to be called by the scheduled crowdin workflow in the default branch
   workflow_call:
 
-  # Sync when a commit is done on the reference branches
+  # Sync when a commit is done on lts-2025
   push:
     branches: ["lts-2025"]
     paths:
       - 'i18n/messages.json'
 
-permissions:
-  contents: write
-  pull-requests: write
-
+  # Manually trigger the workflow
+  workflow_dispatch:
+  
 jobs:
   crowdin:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout
@@ -29,8 +31,9 @@ jobs:
         id: crowdin-sync
         uses: crowdin/github-action@v2.16.2
         with:
-          # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
+          # Skip the action's internal ref checkout because this workflow already checks out lts-2025 explicitly.
           skip_ref_checkout: true
+
           # Tokens
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

@@ -44,9 +44,6 @@ on:
         type: string
         required: false
 
-permissions:
-  contents: read
-
 env:
   REFERENCE_BRANCH: lts-2025
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
@@ -55,6 +52,8 @@ jobs:
   id:
     name: Remote Caller ID ${{ github.event.inputs.caller_id }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - env:
           CALLER_ID: ${{ github.event.inputs.caller_id }}
@@ -64,6 +63,8 @@ jobs:
     name: Build
     needs: id
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2

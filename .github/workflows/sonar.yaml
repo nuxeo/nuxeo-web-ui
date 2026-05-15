@@ -24,13 +24,12 @@ on:
       SONAR_TOKEN:
         required: true
 
-permissions:
-  contents: read
-
 jobs:
   sonar:
     name: Build and analyze
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2

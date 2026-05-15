@@ -6,17 +6,18 @@ on:
       - lts-2025
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
+    permissions:
+      contents: read
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
 
   test:
     uses: ./.github/workflows/test.yaml
+    permissions:
+      contents: read
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -25,6 +26,8 @@ jobs:
 
   a11y:
     uses: ./.github/workflows/a11y.yaml
+    permissions:
+      contents: read
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
@@ -34,6 +37,8 @@ jobs:
 
   sonar:
     uses: ./.github/workflows/sonar.yaml
+    permissions:
+      contents: read
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -42,6 +47,8 @@ jobs:
 
   ftest:
     uses: ./.github/workflows/ftest.yaml
+    permissions:
+      contents: read
     secrets:
       NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
       REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
@@ -53,6 +60,8 @@ jobs:
     needs: [lint, test, a11y, ftest, sonar]
     runs-on:
       group: medium-4cpu-runners
+    permissions:
+      contents: write
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
