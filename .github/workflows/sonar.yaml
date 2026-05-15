@@ -106,7 +106,7 @@ jobs:
           args: >
             -Dsonar.projectVersion=${{ steps.project_meta.outputs.version }}
             -Dsonar.scm.revision=${{ github.sha }}
-            -Dsonar.qualitygate.wait=false
+            -Dsonar.qualitygate.wait=true
             ${{ github.event_name == 'pull_request' &&
               format('-Dsonar.pullrequest.key={0} -Dsonar.pullrequest.branch={1} -Dsonar.pullrequest.base={2}',
                 github.event.pull_request.number,
