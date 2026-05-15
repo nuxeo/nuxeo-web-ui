@@ -20,15 +20,14 @@ on:
       REPOSITORY_MANAGER_PASSWORD:
         required: true
 
-permissions:
-  contents: read
-
 env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
   a11y:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Debug

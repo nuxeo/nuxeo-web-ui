@@ -24,14 +24,12 @@ env:
   GKE_CLUSTER: jx-prod
   GKE_ZONE: us-east1-b
 
-permissions:
-  contents: read
-  pull-requests: write
-
 jobs:
   id:
     name: Remote Caller ID ${{ github.event.inputs.caller_id }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - run: echo run identifier ${{ github.event.inputs.caller_id }}
 
@@ -45,6 +43,9 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'preview') ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - uses: actions/setup-node@v6
@@ -190,6 +191,8 @@ jobs:
     name: "Result: ${{ needs.preview.outputs.url }}"
     needs: preview
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: github.event_name == 'workflow_dispatch'
     steps:
       - run: echo ${{ needs.preview.outputs.url }}
