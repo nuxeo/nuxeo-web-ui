@@ -100,10 +100,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
+          npm ci --ignore-scripts
           npm install ./nuxeo-elements/core
           npm install ./nuxeo-elements/ui
           npm install ./nuxeo-elements/dataviz
-          npm install
 
       - name: Webpack build
         run: npm run build

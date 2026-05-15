@@ -118,9 +118,14 @@ Push to the `maintenance-3.1.x` branch triggers: **lint → test → a11y → ft
 
 PRs run lint and test workflows automatically.
 
+- CI uses `npm ci` (not `npm install`) for deterministic, lockfile-based installs.
+- `package-lock.json` is committed and must be kept in sync with `package.json`.
+- Sub-packages `packages/nuxeo-web-ui-ftest`, `packages/nuxeo-designer-catalog`, and `plugin/a11y` also have committed lockfiles and use `npm ci` in CI.
+
 ## Common Pitfalls
 
 - `npm install` **replaces** nuxeo-elements symlinks. Re-create them manually after install if developing locally against a sibling `nuxeo-elements` repo (see `.github/skills/link-nuxeo-elements/SKILL.md` for the procedure).
+- Always commit `package-lock.json` changes when dependencies change. CI relies on it for `npm ci`.
 - `.html` files contain real Polymer components with inline JS — don't treat them as static HTML.
 - The `NUXEO_PACKAGES` env var controls which addon JS bundles are imported at runtime via `Nuxeo.UI.bundles`. If unset, addon resources are still copied to the build but no addon entry points are imported (except `nuxeo-spreadsheet`, which is always loaded).
 - `@nuxeo` npm packages come from `https://packages.nuxeo.com/repository/npm-public/`, not npmjs.org.

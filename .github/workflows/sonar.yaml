@@ -63,9 +63,7 @@ jobs:
       - name: Install npm dependencies
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        # npm install is required (not npm ci) because the preinstall script runs
-        # npm install in sub-packages that do not have a package-lock.json
-        run: npm install
+        run: npm ci --ignore-scripts
         working-directory: ${{ github.workspace }}
 
       - name: Ensure latest @nuxeo RC packages
