@@ -208,7 +208,7 @@ Polymer({
           <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
             <nuxeo-quick-filters
               quick-filters="{{quickFilters}}"
-              on-quick-filters-changed="_onQuickFiltersChanged"
+              on-quick-filters-changed="_handleUserQuickFilterToggle"
             ></nuxeo-quick-filters>
           </template>
 
@@ -512,7 +512,7 @@ Polymer({
     return [];
   },
 
-  _onQuickFiltersChanged(e) {
+  _handleUserQuickFilterToggle(e) {
     let eventFilters = this.quickFilters;
     if (Array.isArray(e?.detail?.value)) {
       eventFilters = e.detail.value;
@@ -520,25 +520,27 @@ Polymer({
       eventFilters = e.target.quickFilters;
     }
     const filters = this._cloneQuickFilters(eventFilters);
-    this.quickFilters = this._cloneQuickFilters(filters);
-    this._pendingQuickFilters = this._cloneQuickFilters(filters);
+    // Single clone suffices — assign shared reference where independent copies are not needed
+    this.quickFilters = filters;
+    this._pendingQuickFilters = filters.slice();
     this._quickFiltersDirty = true;
+
+    // Safety net: clear dirty flag after 5 s in case the view never echoes back the pending value
+    if (this._quickFilterDirtyTimeout) {
+      this.cancelAsync(this._quickFilterDirtyTimeout);
+    }
+    this._quickFilterDirtyTimeout = this.async(() => {
+      this._quickFiltersDirty = false;
+      this._pendingQuickFilters = null;
+    }, 5000);
 
     // Keep provider/view in sync before fetching to avoid stale quick-filter state after navigation.
     if (this.nxProvider) {
-      this.set('nxProvider.quickFilters', this._cloneQuickFilters(filters));
+      this.set('nxProvider.quickFilters', filters.slice());
     }
     if (this.view?.quickFilters !== undefined) {
-      this.view.quickFilters = this._cloneQuickFilters(filters);
+      this.view.quickFilters = filters.slice();
     }
-
-    this.dispatchEvent(
-      new CustomEvent('search-quick-filters-updated', {
-        detail: { quickFilters: this._cloneQuickFilters(filters) },
-        bubbles: true,
-        composed: true,
-      }),
-    );
 
     this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
       this.fetch();
@@ -666,7 +668,7 @@ Polymer({
       this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
       this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
       this.unlisten(oldView, 'items-changed', '_itemsChanged');
-      this.unlisten(oldView, 'quick-filters-changed', '_quickFiltersChanged');
+      this.unlisten(oldView, 'quick-filters-changed', '_handleViewQuickFiltersSync');
       this.unlisten(oldView, 'select-all-active-changed', '_selectAllActiveChanged');
       this.unlisten(oldView, '_excluded-items-changed', '_excludedDocsChanged');
       // we need to clear the selected items and selection (removes selection synchronization)
@@ -696,7 +698,7 @@ Polymer({
       this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
       this.listen(view, 'settings-changed', '_saveViewSettings');
       this.listen(view, 'items-changed', '_itemsChanged');
-      this.listen(view, 'quick-filters-changed', '_quickFiltersChanged');
+      this.listen(view, 'quick-filters-changed', '_handleViewQuickFiltersSync');
       this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
       this.listen(view, '_excluded-items-changed', '_excludedDocsChanged');
       view.nxProvider = this.nxProvider;
@@ -704,14 +706,14 @@ Polymer({
       // reset first
       this.reset();
 
-      // restore quick filters after reset
+      // restore quick filters after reset — single clone shared safely across provider and view
       const restoredQuickFilters = this._cloneQuickFilters(this.quickFilters);
       if (this.nxProvider) {
-        this.set('nxProvider.quickFilters', this._cloneQuickFilters(restoredQuickFilters));
+        this.set('nxProvider.quickFilters', restoredQuickFilters);
       }
 
       if (view.quickFilters !== undefined) {
-        view.quickFilters = this._cloneQuickFilters(restoredQuickFilters);
+        view.quickFilters = restoredQuickFilters.slice();
       }
 
       // fetch after state restore
@@ -986,7 +988,7 @@ Polymer({
     }
   },
 
-  _quickFiltersChanged(e) {
+  _handleViewQuickFiltersSync(e) {
     let incomingFilters;
     if (Array.isArray(e?.detail?.value)) {
       incomingFilters = this._cloneQuickFilters(e.detail.value);
@@ -1003,12 +1005,12 @@ Polymer({
       !this._quickFiltersEqual(incomingFilters, this._pendingQuickFilters || this.quickFilters)
     ) {
       const pendingFilters = this._cloneQuickFilters(this._pendingQuickFilters || this.quickFilters);
-      this.quickFilters = this._cloneQuickFilters(pendingFilters);
+      this.quickFilters = pendingFilters;
       if (this.nxProvider) {
-        this.set('nxProvider.quickFilters', this._cloneQuickFilters(pendingFilters));
+        this.set('nxProvider.quickFilters', pendingFilters.slice());
       }
       if (this.view?.quickFilters !== undefined) {
-        this.view.quickFilters = this._cloneQuickFilters(pendingFilters);
+        this.view.quickFilters = pendingFilters.slice();
       }
       this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
         this.fetch();
@@ -1016,10 +1018,14 @@ Polymer({
       return;
     }
 
-    this.quickFilters = this._cloneQuickFilters(incomingFilters);
+    this.quickFilters = incomingFilters;
     if (this._quickFiltersDirty && this._quickFiltersEqual(incomingFilters, this._pendingQuickFilters)) {
       this._quickFiltersDirty = false;
       this._pendingQuickFilters = null;
+      if (this._quickFilterDirtyTimeout) {
+        this.cancelAsync(this._quickFilterDirtyTimeout);
+        this._quickFilterDirtyTimeout = null;
+      }
     }
   },
 
@@ -1031,10 +1037,14 @@ Polymer({
   },
 
   _quickFiltersEqual(a, b) {
+    // Quick filters are always flat arrays of strings; JSON.stringify is safe here.
+    // If filter entries ever become objects, switch to a deep-equality comparison.
     return JSON.stringify(Array.isArray(a) ? a : []) === JSON.stringify(Array.isArray(b) ? b : []);
   },
 
   _enforcePendingQuickFilters() {
+    // Re-entrancy guard: setting this.quickFilters below re-triggers this observer via Polymer
+    if (this._enforcingPending) return;
     if (!this._quickFiltersDirty || !this._pendingQuickFilters) {
       return;
     }
@@ -1043,13 +1053,18 @@ Polymer({
       return;
     }
 
-    const pendingFilters = this._cloneQuickFilters(this._pendingQuickFilters);
-    this.quickFilters = this._cloneQuickFilters(pendingFilters);
-    if (this.nxProvider) {
-      this.set('nxProvider.quickFilters', this._cloneQuickFilters(pendingFilters));
-    }
-    if (this.view?.quickFilters !== undefined) {
-      this.view.quickFilters = this._cloneQuickFilters(pendingFilters);
+    this._enforcingPending = true;
+    try {
+      const pendingFilters = this._cloneQuickFilters(this._pendingQuickFilters);
+      this.quickFilters = pendingFilters;
+      if (this.nxProvider) {
+        this.set('nxProvider.quickFilters', pendingFilters.slice());
+      }
+      if (this.view?.quickFilters !== undefined) {
+        this.view.quickFilters = pendingFilters.slice();
+      }
+    } finally {
+      this._enforcingPending = false;
     }
   },
 
