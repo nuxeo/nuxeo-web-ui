@@ -31,7 +31,7 @@ jobs:
         id: crowdin-sync
         uses: crowdin/github-action@v2.16.2
         with:
-          # Disable 'git checkout "$GITHUB_REF_HEADS"'
+          # Skip the action's internal ref checkout because this workflow already checks out lts-2025 explicitly.
           skip_ref_checkout: true
 
           # Tokens
