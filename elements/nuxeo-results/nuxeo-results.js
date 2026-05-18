@@ -521,18 +521,8 @@ Polymer({
     }
     const filters = this._cloneQuickFilters(eventFilters);
     // Single clone suffices — assign shared reference where independent copies are not needed
-    this.quickFilters = filters;
-    this._pendingQuickFilters = filters.slice();
-    this._quickFiltersDirty = true;
-
-    // Safety net: clear dirty flag after 5 s in case the view never echoes back the pending value
-    if (this._quickFilterDirtyTimeout) {
-      this.cancelAsync(this._quickFilterDirtyTimeout);
-    }
-    this._quickFilterDirtyTimeout = this.async(() => {
-      this._quickFiltersDirty = false;
-      this._pendingQuickFilters = null;
-    }, 5000);
+    const requestId = this._nextQuickFiltersRequestId();
+    this._setPendingQuickFilters(filters);
 
     // Keep provider/view in sync before fetching to avoid stale quick-filter state after navigation.
     if (this.nxProvider) {
@@ -542,9 +532,7 @@ Polymer({
       this.view.quickFilters = filters.slice();
     }
 
-    this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
-      this.fetch();
-    });
+    this._scheduleQuickFilterFetch(requestId);
   },
 
   detached() {
@@ -566,6 +554,8 @@ Polymer({
     if (this._applyDocPrefsDebouncer && this._applyDocPrefsDebouncer.flush) {
       this._applyDocPrefsDebouncer.flush();
     }
+
+    this._clearPendingQuickFilters();
 
     this.columns = [];
     this.view = null;
@@ -1012,20 +1002,47 @@ Polymer({
       if (this.view?.quickFilters !== undefined) {
         this.view.quickFilters = pendingFilters.slice();
       }
-      this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
-        this.fetch();
-      });
+      this._scheduleQuickFilterFetch(this._quickFiltersRequestId);
       return;
     }
 
     this.quickFilters = incomingFilters;
     if (this._quickFiltersDirty && this._quickFiltersEqual(incomingFilters, this._pendingQuickFilters)) {
-      this._quickFiltersDirty = false;
-      this._pendingQuickFilters = null;
-      if (this._quickFilterDirtyTimeout) {
-        this.cancelAsync(this._quickFilterDirtyTimeout);
-        this._quickFilterDirtyTimeout = null;
-      }
+      this._clearPendingQuickFilters();
+    }
+  },
+
+  _nextQuickFiltersRequestId() {
+    this._quickFiltersRequestId = (this._quickFiltersRequestId || 0) + 1;
+    return this._quickFiltersRequestId;
+  },
+
+  _setPendingQuickFilters(filters) {
+    this.quickFilters = filters;
+    this._pendingQuickFilters = filters.slice();
+    this._quickFiltersDirty = true;
+  },
+
+  _clearPendingQuickFilters() {
+    this._quickFiltersDirty = false;
+    this._pendingQuickFilters = null;
+  },
+
+  _scheduleQuickFilterFetch(requestId) {
+    this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
+      this.fetch()
+        .then(() => this._finalizeQuickFilterSync(requestId))
+        .catch(() => this._finalizeQuickFilterSync(requestId));
+    });
+  },
+
+  _finalizeQuickFilterSync(requestId) {
+    if (!this._quickFiltersDirty || requestId !== this._quickFiltersRequestId) {
+      return;
+    }
+
+    if (this._quickFiltersEqual(this.quickFilters, this._pendingQuickFilters)) {
+      this._clearPendingQuickFilters();
     }
   },
 

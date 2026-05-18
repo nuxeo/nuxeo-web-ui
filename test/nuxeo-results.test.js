@@ -1191,6 +1191,30 @@ suite('nuxeo-results', () => {
       expect(results._pendingQuickFilters).to.be.null;
     });
 
+    test('_finalizeQuickFilterSync clears dirty state for the active request when pending filters are still applied', () => {
+      results.quickFilters = ['Validated'];
+      results._quickFiltersDirty = true;
+      results._pendingQuickFilters = ['Validated'];
+      results._quickFiltersRequestId = 3;
+
+      results._finalizeQuickFilterSync(3);
+
+      expect(results._quickFiltersDirty).to.be.false;
+      expect(results._pendingQuickFilters).to.be.null;
+    });
+
+    test('_finalizeQuickFilterSync ignores outdated request ids', () => {
+      results.quickFilters = ['Validated'];
+      results._quickFiltersDirty = true;
+      results._pendingQuickFilters = ['Validated'];
+      results._quickFiltersRequestId = 4;
+
+      results._finalizeQuickFilterSync(3);
+
+      expect(results._quickFiltersDirty).to.be.true;
+      expect(results._pendingQuickFilters).to.deep.equal(['Validated']);
+    });
+
     test('_cloneQuickFilters returns empty array for non-arrays and clones arrays', () => {
       const filters = ['Validated'];
       const cloned = results._cloneQuickFilters(filters);
