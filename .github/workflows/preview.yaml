@@ -24,14 +24,12 @@ env:
   GKE_CLUSTER: jx-prod
   GKE_ZONE: us-east1-b
 
-permissions:
-  contents: read
-  pull-requests: write
-
 jobs:
   id:
     name: Remote Caller ID ${{ github.event.inputs.caller_id }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - run: echo run identifier ${{ github.event.inputs.caller_id }}
 
@@ -45,6 +43,9 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'preview') ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - uses: actions/setup-node@v6
@@ -100,10 +101,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install ./nuxeo-elements/core
-          npm install ./nuxeo-elements/ui
-          npm install ./nuxeo-elements/dataviz
-          npm install
+          npm ci --ignore-scripts
+          npm install --no-package-lock ./nuxeo-elements/core
+          npm install --no-package-lock ./nuxeo-elements/ui
+          npm install --no-package-lock ./nuxeo-elements/dataviz
 
       - name: Webpack build
         run: npm run build
@@ -190,6 +191,8 @@ jobs:
     name: "Result: ${{ needs.preview.outputs.url }}"
     needs: preview
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: github.event_name == 'workflow_dispatch'
     steps:
       - run: echo ${{ needs.preview.outputs.url }}

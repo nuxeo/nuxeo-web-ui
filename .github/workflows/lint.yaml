@@ -15,15 +15,14 @@ on:
       NPM_PACKAGES_TOKEN:
         required: true
 
-permissions:
-  contents: read
-
 env:
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v6
@@ -47,7 +46,7 @@ jobs:
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Lint
         run: npm run lint

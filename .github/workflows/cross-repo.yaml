@@ -44,9 +44,6 @@ on:
         type: string
         required: false
 
-permissions:
-  contents: read
-
 env:
   REFERENCE_BRANCH: lts-2025
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
@@ -55,13 +52,19 @@ jobs:
   id:
     name: Remote Caller ID ${{ github.event.inputs.caller_id }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - run: echo "run identifier ${{ github.event.inputs.caller_id }}"
+      - env:
+          CALLER_ID: ${{ github.event.inputs.caller_id }}
+        run: echo "run identifier $CALLER_ID"
 
   build:
     name: Build
     needs: id
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
@@ -69,7 +72,9 @@ jobs:
           comment_on_pr: false
 
       - name: Build parameters
-        run: echo '${{ toJSON(github.event.inputs) }}'
+        env:
+          BUILD_PARAMS: ${{ toJSON(github.event.inputs) }}
+        run: echo "$BUILD_PARAMS"
 
       - uses: actions/setup-node@v6
         with:
@@ -109,15 +114,15 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install
+          npm ci --ignore-scripts
           pushd packages/nuxeo-web-ui-ftest
-          npm install
+          npm ci
           popd
           pushd plugin/a11y
-          npm install
+          npm ci
           popd
           pushd packages/nuxeo-designer-catalog
-          npm install
+          npm ci
           popd
 
       - name: Lint Web UI
@@ -177,13 +182,15 @@ jobs:
           MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
           RUN_ALL: ${{ github.event.inputs.run_all }}
           BAIL: ${{ github.event.inputs.bail }}
+          SKIP_FTESTS: ${{ github.event.inputs.skip_ftests }}
+          GENERATE_METRICS: ${{ github.event.inputs.generate_metrics }}
         run: |
           profiles=()
-          if [ ${{ github.event.inputs.skip_ftests }} = "false" ]
+          if [ "$SKIP_FTESTS" = "false" ]
           then
             profiles+=('ftest')
           fi
-          if ${{ github.event.inputs.generate_metrics }}
+          if [ "$GENERATE_METRICS" = "true" ]
           then
             profiles+=('metrics')
           fi

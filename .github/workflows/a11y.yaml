@@ -20,15 +20,14 @@ on:
       REPOSITORY_MANAGER_PASSWORD:
         required: true
 
-permissions:
-  contents: read
-
 env:
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
   a11y:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Debug
@@ -74,12 +73,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install
+          npm ci --ignore-scripts
           pushd packages/nuxeo-web-ui-ftest
-          npm install
+          npm ci
           popd
           pushd packages/nuxeo-designer-catalog
-          npm install
+          npm ci
           popd
 
       - name: Ensure latest @nuxeo RC packages
@@ -92,7 +91,7 @@ jobs:
             | sort -V | tail -n1)
           echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
 
-          npm install \
+          npm install --no-package-lock \
             @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
             @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
             @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
