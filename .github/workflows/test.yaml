@@ -19,9 +19,6 @@ on:
       SAUCE_ACCESS_KEY:
         required: false
 
-permissions:
-  contents: read
-
 env:
   BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
 
@@ -29,6 +26,8 @@ jobs:
   unit-test:
     runs-on:
       group: medium-4cpu-runners
+    permissions:
+      contents: read
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@v2
@@ -56,7 +55,7 @@ jobs:
       - name: Install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Ensure latest @nuxeo RC packages
         env:
@@ -75,6 +74,7 @@ jobs:
             @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
 
       - name: Unit tests
+        # package.json "test": runs generate-coverage-imports.js then `karma start --coverage` (Istanbul).
         # Disabling SauceLabs. Karma is not compatible with SauceLabs v4
         # env:
         #   SAUCE_USERNAME: nuxeo-web-ui

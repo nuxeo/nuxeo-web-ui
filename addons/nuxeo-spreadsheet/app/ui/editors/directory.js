@@ -91,7 +91,7 @@ class DirectoryEditor extends Select2Editor {
 
     if (this._isDirectoryEntry) {
       // Normalize value into array of ids first
-      let ids = [];
+      let ids;
 
       if (Array.isArray(value)) {
         // Could be array of strings or array of directoryEntry objects

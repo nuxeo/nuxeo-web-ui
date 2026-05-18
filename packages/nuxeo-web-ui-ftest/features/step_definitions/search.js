@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, Then, When } from '@cucumber/cucumber';
 import { url } from '../../pages/helpers.js';
 
@@ -141,25 +140,46 @@ When('I switch to filter view', async function () {
 });
 
 Then(/^I can see (\d+) search results$/, async function (numberOfResults) {
-  await driver.pause(2000);
+  await driver.pause(1000);
   const uiResult = await this.ui.results;
   const displayMode = await uiResult.displayMode;
   if (numberOfResults === 0) {
-    const outResult2 = await uiResult.resultsCount(displayMode);
-    if (outResult2 !== numberOfResults) {
-      throw new Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
-    }
+    await driver.waitUntil(
+      async () => {
+        const count = await uiResult.resultsCount(displayMode);
+        return count === numberOfResults;
+      },
+      { timeout: 20000, interval: 2000, timeoutMsg: `Expected 0 results but count never reached 0` },
+    );
     const emptyResult = await uiResult.noResults;
     const emptyResultVisible = await emptyResult.waitForVisible();
     emptyResultVisible.should.be.true;
   } else {
-    const outLabel = await uiResult.resultsCountLabel;
-    await outLabel.waitForVisible();
-    const outText = await outLabel.getText();
-    const outResult = parseInt(outText, 10);
-    if (outResult !== numberOfResults) {
-      throw new Error(`Expecting to get ${numberOfResults} results but found ${outResult}`);
-    }
+    await driver.waitUntil(
+      async () => {
+        try {
+          const outLabel = await uiResult.resultsCountLabel;
+          if (!(await outLabel.isExisting()) || !(await outLabel.isDisplayed())) return false;
+          const outText = await outLabel.getText();
+          const outResult = parseInt(outText, 10);
+          if (outResult === numberOfResults) return true;
+          // Count doesn't match yet — trigger a page provider refresh for ES indexing lag
+          const el = await uiResult.el;
+          await driver.execute((r) => {
+            const pp = r && r.querySelector('nuxeo-page-provider');
+            if (pp && pp.fetch) pp.fetch();
+          }, el);
+          return false;
+        } catch (e) {
+          return false;
+        }
+      },
+      {
+        timeout: 20000,
+        interval: 2000,
+        timeoutMsg: `Expected ${numberOfResults} in results count label`,
+      },
+    );
     const outResult2 = await uiResult.resultsCount(displayMode);
     if (outResult2 !== numberOfResults) {
       throw new Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);

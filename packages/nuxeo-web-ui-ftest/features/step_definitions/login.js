@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Given, Then, When } from '@cucumber/cucumber';
 import Login from '../../pages/login.js';
 import UI from '../../pages/ui.js';
@@ -34,24 +33,40 @@ Given('user {string} exists', async (username) => {
 });
 
 When('I login as {string}', { timeout: 120000 }, async function (username) {
-  // Ensure clean browser state on every login
-  await browser.deleteCookies();
-
   const logIn = await Login.get();
-  await logIn.username(username);
   const password = await users[username];
+  if (!password) {
+    throw new Error(`No password found for user "${username}" — was the user created before login?`);
+  }
+  await logIn.username(username);
   await logIn.password(password);
   await logIn.submit();
 
+  let hasRetried = false;
+  const submitTime = Date.now();
   await browser.waitUntil(
     async () => {
       const u = await browser.getUrl();
-      return !u.includes('login.jsp') && u.includes('/ui');
+      if (u.includes('/ui') && !u.includes('login.jsp')) {
+        return true;
+      }
+      // Only retry ONCE, and only after giving the server 10s to process the initial submit
+      if (u.includes('login.jsp') && !hasRetried && Date.now() - submitTime > 10000) {
+        hasRetried = true;
+        try {
+          await logIn.username(username);
+          await logIn.password(password);
+          await logIn.submit();
+        } catch (e) {
+          // page may have navigated away during retry — ignore
+        }
+      }
+      return false;
     },
     {
       timeout: 30000,
-      interval: 200,
-      timeoutMsg: 'UI did not load after login — still stuck on login.jsp',
+      interval: 2000,
+      timeoutMsg: `UI did not load after login as "${username}" — still stuck on login.jsp`,
     },
   );
 

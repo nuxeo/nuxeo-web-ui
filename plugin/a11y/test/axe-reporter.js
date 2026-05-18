@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
 import { source } from 'axe-core';
 
 class AxeCore {

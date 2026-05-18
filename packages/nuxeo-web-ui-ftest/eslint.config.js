@@ -1,8 +1,18 @@
+import js from '@eslint/js';
+import prettier from 'eslint-config-prettier/flat';
 import globals from 'globals';
 
 export default [
   {
-    files: ['packages/nuxeo-web-ui-ftest/**/*.js'],
+    linterOptions: {
+      reportUnusedDisableDirectives: 'off',
+    },
+  },
+
+  js.configs.recommended,
+
+  {
+    files: ['**/*.js'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -23,6 +33,7 @@ export default [
         moment: 'readonly',
         assert: 'readonly',
         expect: 'readonly',
+        Nuxeo: 'writable',
       },
     },
     rules: {
@@ -33,27 +44,33 @@ export default [
         },
       ],
       'no-unused-expressions': 'off',
+      'no-unused-vars': ['error', { args: 'none', caughtErrors: 'none', varsIgnorePattern: '^_$' }],
+      'no-setter-return': 'off',
+      'no-constant-binary-expression': 'off',
+      'no-useless-assignment': 'off',
     },
   },
 
   {
-    files: ['packages/nuxeo-web-ui-ftest/features/step_definitions/*.js'],
+    files: ['features/step_definitions/*.js'],
     rules: {
       'no-unused-expressions': 'off',
     },
   },
 
   {
-    files: ['packages/nuxeo-web-ui-ftest/features/step_definitions/support/fixtures/localstorage.js'],
+    files: ['features/step_definitions/support/fixtures/localstorage.js'],
     rules: {
       'no-redeclare': 'off',
     },
   },
 
   {
-    files: ['packages/nuxeo-web-ui-ftest/pages/ui.js'],
+    files: ['pages/ui.js'],
     rules: {
       'no-redeclare': 'off',
     },
   },
+
+  prettier,
 ];

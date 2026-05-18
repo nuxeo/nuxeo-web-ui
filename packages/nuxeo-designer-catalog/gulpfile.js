@@ -222,7 +222,7 @@ const cleanupCatalog = () => {
           fs.removeSync(path.join(appBase, 'packages'));
           const importMapPath = path.join(base, platform, 'importMap.json');
           if (fs.existsSync(importMapPath)) {
-            // eslint-disable-next-line global-require, import/no-dynamic-require
+            // eslint-disable-next-line global-require, import-x/no-dynamic-require
             const importMap = require(importMapPath);
             // decide which folders to keep
             const foldersToKeep = Object.keys(importMap.imports).map((packageName) =>

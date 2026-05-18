@@ -214,7 +214,6 @@ Polymer({
             provider="user_collections"
             page-size="40"
             params='{"searchTerm":"%","user": "$currentUser"}'
-            sort='{"dc:modified": "desc"}'
             schemas="dublincore,common"
             enrichers="permissions"
             headers='{"fetch-document": "properties"}'

@@ -23,7 +23,17 @@ limitations under the License.
 -->
 <dom-module id="nuxeo-default-search-form">
   <template>
-    <style include="nuxeo-styles"></style>
+    <style include="nuxeo-styles">
+      fieldset {
+        border: none;
+        margin: 0;
+        padding: 0;
+        margin-bottom: var(--nuxeo-widget_-_margin-bottom);
+      }
+      fieldset > legend {
+        padding: 0;
+      }
+    </style>
 
     <nuxeo-input
       role="widget"
@@ -48,21 +58,20 @@ limitations under the License.
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div role="widget">
-      <label>[[i18n('defaultSearch.authors')]]</label>
+    <fieldset>
+      <legend>[[i18n('defaultSearch.authors')]]</legend>
       <nuxeo-dropdown-aggregation
         placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
         data="[[aggregations.dc_creator_agg]]"
         value="{{params.dc_creator_agg}}"
         multiple="true"
         name="authors"
-        aria-label$="[[i18n('defaultSearch.authors')]]"
       >
       </nuxeo-dropdown-aggregation>
-    </div>
+    </fieldset>
 
-    <div role="widget">
-      <label>[[i18n('defaultSearch.collections')]]</label>
+    <fieldset>
+      <legend>[[i18n('defaultSearch.collections')]]</legend>
       <template is="dom-if" if="[[_checkForCollectionTitle(params)]]">
         <nuxeo-selectivity
           operation="User.GetCollections"
@@ -71,24 +80,22 @@ limitations under the License.
           value="{{params.ecm_collections}}"
           multiple="true"
           name="collections"
-          aria-label$="[[i18n('defaultSearch.collections')]]"
         >
         </nuxeo-selectivity>
       </template>
-    </div>
+    </fieldset>
 
-    <div role="widget">
-      <label>[[i18n('defaultSearch.tags')]]</label>
+    <fieldset>
+      <legend>[[i18n('defaultSearch.tags')]]</legend>
       <nuxeo-tag-suggestion
         min-chars="1"
         placeholder="[[i18n('defaultSearch.tags.placeholder')]]"
         value="{{params.ecm_tags}}"
         multiple="true"
         name="tags"
-        aria-label$="[[i18n('defaultSearch.tags')]]"
       >
       </nuxeo-tag-suggestion>
-    </div>
+    </fieldset>
 
     <div role="widget">
       <nuxeo-checkbox-aggregation

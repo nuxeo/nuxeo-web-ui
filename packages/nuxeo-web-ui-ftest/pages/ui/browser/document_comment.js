@@ -1,4 +1,4 @@
-import DocumentCommentThread from './document_comment_thread.js'; /* eslint import/no-cycle: 0 */
+import DocumentCommentThread from './document_comment_thread.js';
 
 export default class DocumentComment {
   constructor(element) {

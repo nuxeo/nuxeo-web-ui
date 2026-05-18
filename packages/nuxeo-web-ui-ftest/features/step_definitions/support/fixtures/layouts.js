@@ -324,19 +324,27 @@ global.fieldRegistry.register(
 );
 global.fieldRegistry.register(
   'nuxeo-data-table',
-  (element) => {
-    element.scrollIntoView();
+  async (element) => {
+    try {
+      await element.scrollIntoView();
+    } catch (e) {
+      // ignore stale element from re-render
+    }
     const result = [];
-    element.$$('nuxeo-data-table-row:not([header])').forEach((row) => {
+    const rows = await element.$$('nuxeo-data-table-row:not([header])');
+    for (let i = 0; i < rows.length; i++) {
       const cellValue = [];
-      row.$$('nuxeo-data-table-cell:not([header])').forEach((cell) => {
-        const txt = cell.getText();
+      // eslint-disable-next-line no-await-in-loop
+      const cells = await rows[i].$$('nuxeo-data-table-cell:not([header])');
+      for (let j = 0; j < cells.length; j++) {
+        // eslint-disable-next-line no-await-in-loop
+        const txt = await cells[j].getText();
         if (txt) {
           cellValue.push(txt);
         }
-      });
+      }
       result.push(cellValue);
-    });
+    }
     return JSON.stringify(result);
   },
   async (element, values) => {
@@ -362,9 +370,14 @@ global.fieldRegistry.register(
     }
   },
 );
-global.fieldRegistry.register('nuxeo-document-blob', (element) => {
-  element.scrollIntoView();
-  return element.$('a').getAttribute('title');
+global.fieldRegistry.register('nuxeo-document-blob', async (element) => {
+  try {
+    await element.scrollIntoView();
+  } catch (e) {
+    // ignore stale element from re-render
+  }
+  const link = await element.$('a');
+  return link.getAttribute('title');
 });
 global.fieldRegistry.register(
   'generic',

@@ -107,7 +107,7 @@ function _parseElements(pkg, sourcePaths, packageDependencies, pkgManagement, de
 
 module.exports = (imports) => {
   const { application, destDir, pkgManagement, root } = imports;
-  // eslint-disable-next-line global-require, import/no-dynamic-require
+  // eslint-disable-next-line global-require, import-x/no-dynamic-require
   const dependenciesFile = require(path.join(root, pkgManagement === 'npm' ? 'package.json' : 'bower.json'));
   const deps = dependenciesFile.dependencies;
   // inject the application itself to retrieve its own dependencies
