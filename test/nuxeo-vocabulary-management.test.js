@@ -359,4 +359,66 @@ suite('nuxeo-vocabulary-management', () => {
       expect(fields).to.include.members(['id', 'label']);
     });
   });
+
+  suite('data-table cell wrapping styles', () => {
+    // Long labels in the vocabulary table used to be truncated with ellipsis.
+    // The element's <style> block overrides the cell host CSS so long values
+    // wrap onto multiple lines and remain fully visible.
+    const getStyleText = (el) =>
+      Array.from(el.shadowRoot.querySelectorAll('style'))
+        .map((s) => s.textContent)
+        .join('\n');
+
+    test('should target non-header data-table cells', () => {
+      expect(getStyleText(element)).to.match(/nuxeo-data-table-cell:not\(\[header\]\)/);
+    });
+
+    test('should allow text to wrap onto multiple lines', () => {
+      const css = getStyleText(element);
+      expect(css).to.match(/white-space:\s*normal/);
+      expect(css).to.match(/word-break:\s*break-word/);
+    });
+
+    test('should make cell content visible (no overflow clipping)', () => {
+      const css = getStyleText(element);
+      expect(css).to.match(/overflow-x:\s*visible/);
+      expect(css).to.match(/overflow-y:\s*visible/);
+    });
+
+    test('should top-align wrapped content with vertical padding', () => {
+      const css = getStyleText(element);
+      expect(css).to.match(/align-items:\s*flex-start/);
+      expect(css).to.match(/padding-top:\s*12px/);
+      expect(css).to.match(/padding-bottom:\s*12px/);
+    });
+
+    test('should apply wrapping styles to a real data-table cell', async () => {
+      // Render a non-header cell inside the element and verify the host CSS
+      // declared in the element's style block is the one in effect.
+      const host = document.createElement('div');
+      host.attachShadow({ mode: 'open' });
+      host.shadowRoot.innerHTML = `
+        <style>${getStyleText(element)}</style>
+        <nuxeo-data-table-cell>A very very long label that should wrap onto multiple lines</nuxeo-data-table-cell>
+      `;
+      document.body.appendChild(host);
+      const cell = host.shadowRoot.querySelector('nuxeo-data-table-cell');
+      const styles = window.getComputedStyle(cell);
+      expect(styles.whiteSpace).to.equal('normal');
+      expect(styles.overflowX).to.equal('visible');
+      expect(styles.overflowY).to.equal('visible');
+      expect(styles.alignItems).to.equal('flex-start');
+      document.body.removeChild(host);
+    });
+
+    test('should not apply wrapping styles to header cells', () => {
+      // The override is scoped via :not([header]) so header cells keep their
+      // default ellipsis behaviour.
+      const css = getStyleText(element);
+      const blockMatch = css.match(/nuxeo-data-table-cell:not\(\[header\]\)\s*{([^}]*)}/);
+      expect(blockMatch, 'expected a scoped non-header cell rule').to.be.ok;
+      // The opposite (header) selector should not appear in our override block.
+      expect(css).to.not.match(/nuxeo-data-table-cell\[header\]\s*{[^}]*white-space:\s*normal/);
+    });
+  });
 });
