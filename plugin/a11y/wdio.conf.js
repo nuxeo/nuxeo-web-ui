@@ -1,4 +1,3 @@
-import { execSync } from 'child_process';
 import CompatService from '@nuxeo/nuxeo-web-ui-ftest/wdio-compat-plugin.js';
 import ShadowService from '@nuxeo/nuxeo-web-ui-ftest/wdio-shadow-plugin.js';
 
@@ -44,21 +43,6 @@ if (process.env.HEADLESS) {
   options.args.push('--disable-dev-shm-usage');
 }
 capability['goog:chromeOptions'] = options;
-
-// Allow overriding driver version
-if (!process.env.DRIVER_VERSION) {
-  try {
-    process.env.DRIVER_VERSION = execSync('node getDriverVersion.js').toString().trim();
-  } catch (e) {
-    console.error('unable to get Chrome version: ', e);
-  }
-}
-const drivers = {
-  chrome: {},
-};
-if (process.env.DRIVER_VERSION) {
-  drivers.chrome.version = process.env.DRIVER_VERSION;
-}
 
 export const config = {
   execArgv: debug ? ['--inspect'] : [],

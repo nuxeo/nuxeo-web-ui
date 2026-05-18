@@ -15,7 +15,14 @@
   "overrides": {
     "ws": "8.17.1",
     "tar-fs": "^3.0.9",
-    "marked": "^4.0.17"
+    "marked": "^4.0.17",
+    "serialize-javascript": "^7.0.5",
+    "@nuxeo/page": {
+      "path-to-regexp": "^8.4.0"
+    },
+    "mocha": {
+      "diff": "^8.0.3"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
