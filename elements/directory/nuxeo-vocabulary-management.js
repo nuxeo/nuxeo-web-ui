@@ -131,7 +131,7 @@ Polymer({
             empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered')]]"
             style$="[[_visibleDataTableStyle(entries)]]"
             caption-text="[[i18n('table.caption.vocabulary')]]"
-            columnResizeEnabled="true"
+            column-resize-enabled
           >
             <template is="dom-repeat" items="[[colDef]]" as="col">
               <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
