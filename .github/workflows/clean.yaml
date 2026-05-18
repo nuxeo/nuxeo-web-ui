@@ -22,13 +22,12 @@ env:
   GKE_CLUSTER: jx-prod
   GKE_ZONE: us-east1-b
 
-permissions:
-  contents: read
-
 jobs:
   id:
     name: Remote Caller ID ${{ github.event.inputs.caller_id }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Show caller id
         run: echo "run identifier ${{ github.event.inputs.caller_id }}"
@@ -41,6 +40,8 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'preview') ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Prepare environment (pull_request)

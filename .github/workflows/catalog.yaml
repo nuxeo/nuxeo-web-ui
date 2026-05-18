@@ -25,10 +25,6 @@ on:
   release:
     types: [published]
 
-permissions:
-  contents: write
-  pull-requests: write
-
 env:
   ARTIFACT_ID: view-designer-catalog
   GROUP_ID: org.nuxeo.web.ui.studio
@@ -36,6 +32,9 @@ env:
 jobs:
   catalog:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     if: |
       github.event_name != 'release' ||
       startsWith(github.event.release.tag_name, 'v3.1.')
