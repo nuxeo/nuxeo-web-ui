@@ -270,18 +270,24 @@ export const config = {
     // eslint-disable-next-line no-console
     console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
 
-    // Strip file:// prefix and suppress original PASSED/FAILED lines (replaced with timed versions)
+    // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines
     const originalWrite = process.stdout.write.bind(process.stdout);
     global._originalStdoutWrite = originalWrite;
     // eslint-disable-next-line no-control-regex
     const ansiRegex = /\x1b\[[0-9;]*m/g;
+    const statusLineRegex = /\[(\d+-\d+)\] (?:PASSED|FAILED) in .* - /;
     process.stdout.write = (chunk, ...args) => {
       if (typeof chunk === 'string') {
         chunk = chunk.replace(/file:\/\//g, '');
-        // Suppress WDIO's PASSED/FAILED lines — onWorkerEnd prints them with timing
         const plain = chunk.replace(ansiRegex, '');
-        if (/\[\d+-\d+\] (?:PASSED|FAILED) in .* - /.test(plain) && !plain.includes('(')) {
-          return true;
+        const match = statusLineRegex.exec(plain);
+        if (match && !/\(\s*[\d.]+s\s*\)/.test(plain)) {
+          // Append elapsed time to WDIO's native status line
+          const start = _workerStartTimes.get(match[1]);
+          if (start) {
+            const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+            chunk = chunk.replace(/\n$/, '') + ` \x1b[1m( ${elapsed}s )\x1b[0m\n`;
+          }
         }
       }
       return originalWrite(chunk, ...args);
@@ -295,9 +301,6 @@ export const config = {
     if (start) {
       const elapsed = ((Date.now() - start) / 1000).toFixed(1);
       const specNames = specs.map((s) => s.replace(process.cwd(), '').replace(/^file:\/\//, '')).join(', ');
-      const browserName = process.env.BROWSER || 'chrome';
-      const status = exitCode === 0 ? '\x1b[1;32mPASSED\x1b[0m' : '\x1b[1;31mFAILED\x1b[0m';
-      process.stdout.write(`[${cid}] ${status} in ${browserName} - ${specNames} \x1b[1m( ${elapsed}s )\x1b[0m\n`);
       _featureResults.push({ feature: specNames, status: exitCode === 0 ? 'PASSED' : 'FAILED', elapsed });
       _workerStartTimes.delete(cid);
     }
