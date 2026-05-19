@@ -54,6 +54,9 @@ switch (capability.browserName) {
       '--disable-background-timer-throttling',
       '--disable-backgrounding-occluded-windows',
       '--disable-renderer-backgrounding',
+      '--disable-field-trial-config',
+      '--disable-ipc-flooding-protection',
+      '--disable-hang-monitor',
     ];
 
     if (process.env.HEADLESS === 'true') {
@@ -165,16 +168,8 @@ export const config = {
   // ===================
   // Define all options that are relevant for the WebdriverIO instance here
   //
-  // By default WebdriverIO commands are executed in a synchronous way using
-  // the wdio-sync package. If you still want to run your tests in an async way
-  // e.g. using promises you can set the sync option to false.
-  sync: true,
-  //
   // Level of logging verbosity: trace | debug | info | warn | error | silent
   logLevel: 'error',
-  //
-  // Enables colors for log output.
-  coloredLogs: true,
   //
   // Saves a screenshot to a given path if a command fails.
   // screenshotPath: '',
