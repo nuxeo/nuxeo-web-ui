@@ -135,7 +135,7 @@ jobs:
           RUN_ALL: false
           BAIL: 0
           HEADLESS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v17.6.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v18.0.1
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
