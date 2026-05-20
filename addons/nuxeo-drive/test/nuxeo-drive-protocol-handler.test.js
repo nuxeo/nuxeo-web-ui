@@ -223,11 +223,9 @@ suite('navigateTo', () => {
   });
 
   suite('Safari (object-element path)', () => {
-    let uaStub;
-
     setup(() => {
       // Stub navigator.userAgent to report Safari (no Chrome/CriOS/FxiOS token).
-      uaStub = sinon.stub(navigator, 'userAgent').get(() => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15');
+      sinon.stub(navigator, 'userAgent').get(() => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15');
     });
 
     test('appends a hidden object element with the correct data attribute', () => {
