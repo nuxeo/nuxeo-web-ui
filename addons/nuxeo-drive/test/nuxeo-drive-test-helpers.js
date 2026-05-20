@@ -1,20 +1,20 @@
 /**
- @license
- ©2023 Hyland Software, Inc. and its affiliates. All rights reserved.
- All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
+@license
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved.
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 /**
  * Shared helpers for nuxeo-drive unit tests.
@@ -101,6 +101,9 @@ export function addShowErrorSuite(getElement) {
  * Both `nuxeo-drive-edit-button` and `nuxeo-drive-upload-button` share the same
  * token-fetch / no-token guard behaviour, so they share these tests.
  *
+ * Note: `_go` now fires `_openDriveUrl` synchronously before the token fetch resolves,
+ * so `_openDriveUrl` must be stubbed to prevent real protocol navigation in tests.
+ *
  * @param {Function} getElement  - Returns the element under test.
  */
 export function addGoErrorSuites(getElement) {
@@ -111,6 +114,8 @@ export function addGoErrorSuites(getElement) {
       const element = getElement();
       toastStub = stubToast(element);
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+      // _openDriveUrl fires immediately on _go — stub it to prevent real protocol navigation.
+      sinon.stub(element, '_openDriveUrl');
     });
 
     teardown(() => sinon.restore());
@@ -141,6 +146,8 @@ export function addGoErrorSuites(getElement) {
       const element = getElement();
       toastStub = stubToast(element);
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+      // _openDriveUrl fires immediately on _go — stub it to prevent real protocol navigation.
+      sinon.stub(element, '_openDriveUrl');
     });
 
     teardown(() => sinon.restore());
@@ -164,6 +171,27 @@ export function addGoErrorSuites(getElement) {
       expect(toastStub.open).to.not.have.been.called;
     });
   });
+
+  suite('_go — re-entry guard', () => {
+    setup(() => {
+      const element = getElement();
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+      sinon.stub(element, '_openDriveUrl');
+    });
+
+    teardown(() => sinon.restore());
+
+    test('ignores clicks while the install dialog is open', () => {
+      const element = getElement();
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
+      // Simulate dialog being open by setting the property directly.
+      element.$.dialog.opened = true;
+
+      element._go();
+
+      expect(element._openDriveUrl).to.not.have.been.called;
+    });
+  });
 }
 
 /**
@@ -180,16 +208,30 @@ export function addOpenDriveUrlSuite(getElement, sampleUrl) {
   suite('_openDriveUrl', () => {
     teardown(() => sinon.restore());
 
-    test('delegates to the shared openDriveUrl and passes dialog toggle as callback', () => {
+    test('delegates to the shared openDriveUrl and calls dialog.toggle as callback', () => {
       const element = getElement();
       const clock = sinon.useFakeTimers();
       try {
-        element.$.dialog.toggle = element.$.dialog.toggle || function () {};
         const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
         expect(() => element._openDriveUrl(sampleUrl)).to.not.throw();
-        clock.tick(1600);
+        // Tick past DRIVE_OPEN_TIMEOUT_MS (150ms) to trigger the primary timeout callback.
+        clock.tick(200);
         expect(dialogToggleStub).to.have.been.calledOnce;
-        clock.tick(10000); // tick past the hard-cap timer so cleanup runs and listeners don't leak
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('cancelRef suppresses dialog.toggle when set to cancelled before timeout fires', () => {
+      const element = getElement();
+      const clock = sinon.useFakeTimers();
+      try {
+        const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+        const cancelRef = { cancelled: false };
+        element._openDriveUrl(sampleUrl, cancelRef);
+        cancelRef.cancelled = true;
+        clock.tick(200);
+        expect(dialogToggleStub).to.not.have.been.called;
       } finally {
         clock.restore();
       }

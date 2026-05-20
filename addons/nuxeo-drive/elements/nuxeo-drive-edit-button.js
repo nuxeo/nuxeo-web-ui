@@ -35,14 +35,14 @@ Polymer({
     <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
 
     <template is="dom-if" if="[[_isAvailable(document,blob)]]">
-      <div class="action" on-tap="_go">
+      <div class="action" on-click="_go">
         <paper-icon-button noink icon="icons:open-in-new" id="driveBtn" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveEditButton.tooltip')]]</span>
         <nuxeo-tooltip>[[i18n('driveEditButton.tooltip')]]</nuxeo-tooltip>
       </div>
     </template>
 
-    <nuxeo-dialog id="dialog" with-backdrop>
+    <nuxeo-dialog id="dialog" with-backdrop no-cancel-on-outside-click>
       <div class="vertical layout">
         <h1>[[i18n('driveEditButton.dialog.heading')]]</h1>
         <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
@@ -54,6 +54,7 @@ Polymer({
 
     <paper-toast id="toast"></paper-toast>
   `,
+
   is: 'nuxeo-drive-edit-button',
   behaviors: [I18nBehavior, FiltersBehavior],
 
@@ -78,17 +79,28 @@ Polymer({
   },
 
   _go() {
+    // Ignore clicks while the install dialog is already open.
+    if (this.$.dialog.opened) {
+      return;
+    }
+
+    // Navigate immediately; token check runs in parallel to detect missing Drive auth.
+    const cancelRef = { cancelled: false };
+    this._openDriveUrl(this.driveEditURL, cancelRef);
+
     this.$.token
       .get()
       .then((response) => {
         const tokens = response.entries.map((token) => token.id);
         if (!tokens || !tokens.length) {
-          this.$.dialog.toggle();
-          return;
+          cancelRef.cancelled = true;
+          if (!this.$.dialog.opened) {
+            this.$.dialog.toggle();
+          }
         }
-        this._openDriveUrl(this.driveEditURL);
       })
       .catch(() => {
+        cancelRef.cancelled = true;
         this._showError(this.i18n('driveEditButton.directTransfer.failed'));
       });
   },
@@ -98,8 +110,15 @@ Polymer({
     this.$.toast.open();
   },
 
-  _openDriveUrl(url) {
-    openDriveUrl(url, () => this.$.dialog.toggle());
+  _openDriveUrl(url, cancelRef) {
+    openDriveUrl(url, () => {
+      if (cancelRef && cancelRef.cancelled) {
+        return;
+      }
+      if (!this.$.dialog.opened) {
+        this.$.dialog.toggle();
+      }
+    });
   },
 
   get driveEditURL() {

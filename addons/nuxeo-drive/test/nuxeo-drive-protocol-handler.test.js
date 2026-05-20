@@ -7,7 +7,7 @@
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
@@ -186,6 +186,39 @@ suite('nuxeo-drive-protocol-handler', () => {
       expect(toggle2).to.have.been.calledOnce;
     });
   });
+  suite('Firefox UA — blur skips onFocusAfterOpened registration', () => {
+    setup(() => {
+      sinon
+        .stub(navigator, 'userAgent')
+        .get(() => 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0');
+    });
+
+    test('does not register onFocusAfterOpened when Firefox UA is detected', () => {
+      openDrive();
+
+      // Blur + debounce settles — on Firefox, onFocusAfterOpened should NOT be registered.
+      fireBlurDebounce();
+
+      // A subsequent focus should NOT trigger show/hide via onFocusAfterOpened.
+      fireWindowEvent('focus');
+
+      // Only cleanup happened — toggle should not have been called at all
+      // (primary timeout was cleared by appOpened=true from blur debounce settling).
+      expect(toggle).not.to.have.been.called;
+    });
+  });
+
+  suite('show() is idempotent — calling show twice only toggles once', () => {
+    test('second primary timeout after show does not call toggle again', () => {
+      openDrive();
+      clock.tick(TIMEOUT);
+      expect(toggle).to.have.been.calledOnce;
+
+      // Manually tick far past — show() should not fire again since dialogShown is already true.
+      clock.tick(TIMEOUT * 10);
+      expect(toggle).to.have.been.calledOnce;
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -194,29 +227,67 @@ suite('nuxeo-drive-protocol-handler', () => {
 suite('navigateTo', () => {
   teardown(() => sinon.restore());
 
-  test('appends a hidden anchor, sets correct attributes, clicks it, then removes it', () => {
-    const spy = sinon.spy(document.body, 'appendChild');
-    navigateTo('nxdrive://test/url');
-    const anchor = spy.firstCall.args[0];
-    expect(spy).to.have.been.calledOnce;
-    expect(anchor.tagName).to.equal('A');
-    expect(anchor.getAttribute('aria-hidden')).to.equal('true');
-    expect(anchor.getAttribute('tabindex')).to.equal('-1');
-    // anchor.remove() is used — verify it is no longer in the DOM
-    expect(document.body.contains(anchor)).to.be.false;
+  suite('non-Safari (anchor-click path)', () => {
+    test('appends a hidden anchor, sets correct attributes, clicks it, then removes it', () => {
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://test/url');
+      const anchor = spy.firstCall.args[0];
+      expect(spy).to.have.been.calledOnce;
+      expect(anchor.tagName).to.equal('A');
+      expect(anchor.getAttribute('aria-hidden')).to.equal('true');
+      expect(anchor.getAttribute('tabindex')).to.equal('-1');
+      // anchor.remove() is used — verify it is no longer in the DOM
+      expect(document.body.contains(anchor)).to.be.false;
+    });
+
+    test('anchor href contains the protocol scheme and DOM is left clean', () => {
+      const before = document.body.children.length;
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://direct-download/abc123');
+      expect(spy.firstCall.args[0].href).to.include('nxdrive');
+      expect(document.body.children.length).to.equal(before);
+    });
+
+    test('does not modify window.location', () => {
+      const before = globalThis.location.href;
+      navigateTo('nxdrive://test/url');
+      expect(globalThis.location.href).to.equal(before);
+    });
   });
 
-  test('anchor href contains the protocol scheme and DOM is left clean', () => {
-    const before = document.body.children.length;
-    const spy = sinon.spy(document.body, 'appendChild');
-    navigateTo('nxdrive://direct-download/abc123');
-    expect(spy.firstCall.args[0].href).to.include('nxdrive');
-    expect(document.body.children.length).to.equal(before);
-  });
+  suite('Safari (object-element path)', () => {
+    setup(() => {
+      // Stub navigator.userAgent to report Safari (no Chrome/CriOS/FxiOS token).
+      sinon
+        .stub(navigator, 'userAgent')
+        .get(
+          () =>
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+        );
+    });
 
-  test('does not modify window.location', () => {
-    const before = globalThis.location.href;
-    navigateTo('nxdrive://test/url');
-    expect(globalThis.location.href).to.equal(before);
+    test('appends a hidden object element with the correct data attribute', () => {
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://test/url');
+      const obj = spy.firstCall.args[0];
+      expect(spy).to.have.been.calledOnce;
+      expect(obj.tagName).to.equal('OBJECT');
+      expect(obj.data).to.include('nxdrive');
+      expect(obj.getAttribute('aria-hidden')).to.equal('true');
+    });
+
+    test('object element is hidden and positioned off-screen', () => {
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://test/url');
+      const obj = spy.firstCall.args[0];
+      expect(obj.style.cssText).to.include('none');
+    });
+
+    test('does not use an anchor element on Safari', () => {
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://test/url');
+      const el = spy.firstCall.args[0];
+      expect(el.tagName).not.to.equal('A');
+    });
   });
 });

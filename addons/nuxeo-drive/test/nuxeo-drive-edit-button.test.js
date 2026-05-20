@@ -83,10 +83,7 @@ suite('nuxeo-drive-edit-button — error handling', () => {
       };
     };
 
-    const blobWithNoAppLinks = {
-      data: 'http://localhost/nxfile/default/doc-1/file:content/test.docx',
-      appLinks: [],
-    };
+    const blobWithNoAppLinks = { data: 'http://localhost/nxfile/default/doc-1/file:content/test.docx', appLinks: [] };
 
     test('returns false when blob is null', () => {
       expect(element._isAvailable(baseDoc(), null)).to.not.be.ok;

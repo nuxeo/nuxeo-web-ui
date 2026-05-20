@@ -51,7 +51,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
 
       <template is="dom-if" if="[[_isAvailable(document)]]">
-        <div class="action" on-tap="_go">
+        <div class="action" on-click="_go">
           <paper-icon-button
             noink
             icon="nuxeo-drive:transfer"
@@ -63,7 +63,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
         </div>
       </template>
 
-      <nuxeo-dialog id="dialog" with-backdrop>
+      <nuxeo-dialog id="dialog" with-backdrop no-cancel-on-outside-click>
         <div class="vertical layout">
           <h1>[[i18n('driveEditButton.dialog.heading')]]</h1>
           <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
@@ -91,25 +91,44 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   }
 
   _go() {
+    // Ignore clicks while the install dialog is already open.
+    if (this.$.dialog.opened) {
+      return;
+    }
+
+    // Navigate immediately; token check runs in parallel to detect missing Drive auth.
+    const cancelRef = { cancelled: false };
+    this._openDriveUrl(this.directTransferUrl, cancelRef);
+
     this.$.token
       .get()
       .then((response) => {
         const tokens = response.entries.map((token) => token.id);
         if (!tokens || !tokens.length) {
-          this.$.dialog.toggle();
-          return;
+          cancelRef.cancelled = true;
+          if (!this.$.dialog.opened) {
+            this.$.dialog.toggle();
+          }
         }
-        this._openDriveUrl(this.directTransferUrl);
       })
       .catch((error) => {
+        cancelRef.cancelled = true;
         console.error('Token fetch failed:', error);
         this._showError(this.i18n('driveUpload.directTransfer.failed'));
       });
   }
 
   // Invokes a nxdrive:// URL; shows the install dialog if Drive did not handle it.
-  _openDriveUrl(url) {
-    openDriveUrl(url, () => this.$.dialog.toggle());
+  // cancelRef: optional { cancelled: boolean } — if set to true before the dialog fires, suppresses it.
+  _openDriveUrl(url, cancelRef) {
+    openDriveUrl(url, () => {
+      if (cancelRef && cancelRef.cancelled) {
+        return;
+      }
+      if (!this.$.dialog.opened) {
+        this.$.dialog.toggle();
+      }
+    });
   }
 
   _showError(message) {
