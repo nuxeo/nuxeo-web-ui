@@ -18,7 +18,7 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
-import { setupI18n, nextTick, addOpenDriveUrlSuite } from './nuxeo-drive-test-helpers.js';
+import { setupI18n, nextTick, addOpenDriveUrlSuite } from './nuxeo-drive-shared-suites.test.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
