@@ -24,15 +24,45 @@ limitations under the License.
  */
 
 // How long (ms) to wait for window.blur before concluding Drive is not installed.
-export const DRIVE_OPEN_TIMEOUT_MS = 1500;
+// Must be long enough for Drive's OS handoff blur to arrive (~50ms on macOS), but short
+// enough to feel instant when Drive is absent.
+// Note: on Safari the <object> path never fires blur when Drive is absent, so this
+// is the sole detection delay on Safari — keep it as low as the OS handoff allows.
+export const DRIVE_OPEN_TIMEOUT_MS = 150;
 
 // How long (ms) the window must stay blurred to be treated as Drive having opened.
-export const BLUR_DEBOUNCE_MS = 300;
+// Must exceed the blur→focus round-trip of a Chrome/Edge OS launch dialog (~40ms).
+export const BLUR_DEBOUNCE_MS = 60;
 
 /**
- * Navigates to a URL via a hidden anchor click — needed for custom protocol (nxdrive://) URLs.
+ * Navigates to a custom protocol URL (nxdrive://) to trigger the OS protocol handoff.
+ *
+ * On Safari, both anchor `.click()` and `window.location.href` go through WebKit's main frame
+ * loader, which fires a synchronous "address is invalid" system alert when the protocol is not
+ * registered. Using a hidden `<object>` element avoids this: WebKit treats object/embed src
+ * loading as a passive resource fetch rather than a frame navigation, so an unregistered protocol
+ * silently no-ops with no alert. When Drive IS installed the OS still intercepts the load and
+ * triggers the expected window blur.
+ *
+ * On Chrome/Edge/Firefox the original anchor-click approach is kept: those browsers do not show
+ * an alert for unknown custom schemes on anchor clicks, and assigning an unknown scheme to
+ * window.location.href can cause Chrome to render an ERR_UNKNOWN_URL_SCHEME error page.
  */
 export function navigateTo(url) {
+  // Feature detection is not possible here — UA sniffing is the only option. // NOSONAR
+  // Matches Safari but not Chrome/Edge (which include "Chrome" or "CriOS" in their UA string).
+  const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent); // NOSONAR
+  if (isSafari) {
+    const obj = document.createElement('object');
+    obj.data = url;
+    obj.style.cssText = 'display:none;position:absolute;left:-9999px;width:1px;height:1px;';
+    obj.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(obj);
+    // Keep the element alive long enough for the OS to initiate the protocol handoff,
+    // then remove it. The blur/focus timing logic in openDriveUrl runs independently.
+    setTimeout(() => obj.remove(), DRIVE_OPEN_TIMEOUT_MS + 200);
+    return;
+  }
   const a = document.createElement('a');
   a.href = url;
   a.style.cssText = 'display:none;position:absolute;left:-9999px;';
