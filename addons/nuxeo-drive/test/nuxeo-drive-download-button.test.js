@@ -357,6 +357,28 @@ suite('nuxeo-drive-download-button', () => {
       expect(toastStub.open).to.not.have.been.called;
     });
 
+    test('calls _openDriveUrl immediately (before token fetch resolves)', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      // Token fetch never resolves — confirms _openDriveUrl fires synchronously.
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
+
+      element._download();
+
+      expect(element._openDriveUrl).to.have.been.calledOnce;
+      expect(element._openDriveUrl.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-download\//);
+    });
+
+    test('passes a cancelRef object as second argument to _openDriveUrl', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
+
+      element._download();
+
+      const cancelRef = element._openDriveUrl.firstCall.args[1];
+      expect(cancelRef).to.be.an('object');
+      expect(cancelRef).to.have.property('cancelled', false);
+    });
+
     test('calls _openDriveUrl with directDownloadUrl when a valid Drive token exists', async () => {
       element.documents = [{ uid: 'doc-uid-1' }, { uid: 'doc-uid-2' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
@@ -372,14 +394,26 @@ suite('nuxeo-drive-download-button', () => {
     test('opens Drive install dialog when no Drive token is found', async () => {
       element.documents = [{ uid: 'doc-uid-1' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
       const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
 
       element._download();
       await nextTick();
 
+      // cancelRef.cancelled is set to true and dialog.toggle() is called directly by the token path.
       expect(dialogToggleStub).to.have.been.calledOnce;
       expect(toastStub.open).to.not.have.been.called;
+    });
+
+    test('cancels the heuristic dialog and sets cancelRef.cancelled when no token found', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
+      sinon.stub(element.$.dialog, 'toggle');
+
+      element._download();
+      await nextTick();
+
+      const cancelRef = element._openDriveUrl.firstCall.args[1];
+      expect(cancelRef.cancelled).to.be.true;
     });
 
     test('shows directTransfer.failed error when token.get rejects', async () => {
@@ -391,6 +425,16 @@ suite('nuxeo-drive-download-button', () => {
 
       expect(toastStub.open).to.have.been.calledOnce;
       expect(toastStub.text).to.include('error occurred');
+    });
+
+    test('ignores clicks while the install dialog is open', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
+      element.$.dialog.opened = true;
+
+      element._download();
+
+      expect(element._openDriveUrl).to.not.have.been.called;
     });
 
     test('folder UID is collected as a single item (folder = one ID)', () => {

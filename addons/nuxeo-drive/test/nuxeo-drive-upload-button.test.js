@@ -43,6 +43,8 @@ suite('nuxeo-drive-upload-button — error handling', () => {
 
   setup(async () => {
     element = await fixture(html`<nuxeo-drive-upload-button></nuxeo-drive-upload-button>`);
+    // Set document so directTransferUrl can be computed in _go without crashing.
+    element.document = { path: '/default-domain/workspaces/test-folder' };
   });
 
   // Shared suites: _go token-fetch failure, _go no-token, _showError, _openDriveUrl
@@ -53,6 +55,30 @@ suite('nuxeo-drive-upload-button — error handling', () => {
   suite('_go — Drive installed and token present', () => {
     teardown(() => {
       sinon.restore();
+    });
+
+    test('calls _openDriveUrl immediately (before token fetch resolves)', () => {
+      element.document = { path: '/default-domain/workspaces/my-folder' };
+      // Token fetch never resolves — confirms _openDriveUrl fires synchronously.
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
+      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
+
+      element._go();
+
+      expect(openDriveUrlStub).to.have.been.calledOnce;
+      expect(openDriveUrlStub.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-transfer\//);
+    });
+
+    test('passes a cancelRef object as second argument to _openDriveUrl', () => {
+      element.document = { path: '/default-domain/workspaces/my-folder' };
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
+      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
+
+      element._go();
+
+      const cancelRef = openDriveUrlStub.firstCall.args[1];
+      expect(cancelRef).to.be.an('object');
+      expect(cancelRef).to.have.property('cancelled', false);
     });
 
     test('calls _openDriveUrl with directTransferUrl when token exists', async () => {
@@ -66,20 +92,18 @@ suite('nuxeo-drive-upload-button — error handling', () => {
       expect(openDriveUrlStub).to.have.been.calledOnce;
       expect(openDriveUrlStub.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-transfer\//);
     });
-  });
 
-  suite('_showError', () => {
-    teardown(() => {
-      sinon.restore();
-    });
+    test('cancels the heuristic dialog and sets cancelRef.cancelled when no token found', async () => {
+      element.document = { path: '/default-domain/workspaces/my-folder' };
+      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
+      sinon.stub(element.$.dialog, 'toggle');
+      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
 
-    test('sets toast text and opens it', () => {
-      const toastStub = stubToast(element);
+      element._go();
+      await nextTick();
 
-      element._showError('Something went wrong');
-
-      expect(toastStub.text).to.equal('Something went wrong');
-      expect(toastStub.open).to.have.been.calledOnce;
+      const cancelRef = openDriveUrlStub.firstCall.args[1];
+      expect(cancelRef.cancelled).to.be.true;
     });
   });
 

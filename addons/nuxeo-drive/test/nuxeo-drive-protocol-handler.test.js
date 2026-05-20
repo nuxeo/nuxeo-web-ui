@@ -194,29 +194,64 @@ suite('nuxeo-drive-protocol-handler', () => {
 suite('navigateTo', () => {
   teardown(() => sinon.restore());
 
-  test('appends a hidden anchor, sets correct attributes, clicks it, then removes it', () => {
-    const spy = sinon.spy(document.body, 'appendChild');
-    navigateTo('nxdrive://test/url');
-    const anchor = spy.firstCall.args[0];
-    expect(spy).to.have.been.calledOnce;
-    expect(anchor.tagName).to.equal('A');
-    expect(anchor.getAttribute('aria-hidden')).to.equal('true');
-    expect(anchor.getAttribute('tabindex')).to.equal('-1');
-    // anchor.remove() is used — verify it is no longer in the DOM
-    expect(document.body.contains(anchor)).to.be.false;
+  suite('non-Safari (anchor-click path)', () => {
+    test('appends a hidden anchor, sets correct attributes, clicks it, then removes it', () => {
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://test/url');
+      const anchor = spy.firstCall.args[0];
+      expect(spy).to.have.been.calledOnce;
+      expect(anchor.tagName).to.equal('A');
+      expect(anchor.getAttribute('aria-hidden')).to.equal('true');
+      expect(anchor.getAttribute('tabindex')).to.equal('-1');
+      // anchor.remove() is used — verify it is no longer in the DOM
+      expect(document.body.contains(anchor)).to.be.false;
+    });
+
+    test('anchor href contains the protocol scheme and DOM is left clean', () => {
+      const before = document.body.children.length;
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://direct-download/abc123');
+      expect(spy.firstCall.args[0].href).to.include('nxdrive');
+      expect(document.body.children.length).to.equal(before);
+    });
+
+    test('does not modify window.location', () => {
+      const before = globalThis.location.href;
+      navigateTo('nxdrive://test/url');
+      expect(globalThis.location.href).to.equal(before);
+    });
   });
 
-  test('anchor href contains the protocol scheme and DOM is left clean', () => {
-    const before = document.body.children.length;
-    const spy = sinon.spy(document.body, 'appendChild');
-    navigateTo('nxdrive://direct-download/abc123');
-    expect(spy.firstCall.args[0].href).to.include('nxdrive');
-    expect(document.body.children.length).to.equal(before);
-  });
+  suite('Safari (object-element path)', () => {
+    let uaStub;
 
-  test('does not modify window.location', () => {
-    const before = globalThis.location.href;
-    navigateTo('nxdrive://test/url');
-    expect(globalThis.location.href).to.equal(before);
+    setup(() => {
+      // Stub navigator.userAgent to report Safari (no Chrome/CriOS/FxiOS token).
+      uaStub = sinon.stub(navigator, 'userAgent').get(() => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15');
+    });
+
+    test('appends a hidden object element with the correct data attribute', () => {
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://test/url');
+      const obj = spy.firstCall.args[0];
+      expect(spy).to.have.been.calledOnce;
+      expect(obj.tagName).to.equal('OBJECT');
+      expect(obj.data).to.include('nxdrive');
+      expect(obj.getAttribute('aria-hidden')).to.equal('true');
+    });
+
+    test('object element is hidden and positioned off-screen', () => {
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://test/url');
+      const obj = spy.firstCall.args[0];
+      expect(obj.style.cssText).to.include('none');
+    });
+
+    test('does not use an anchor element on Safari', () => {
+      const spy = sinon.spy(document.body, 'appendChild');
+      navigateTo('nxdrive://test/url');
+      const el = spy.firstCall.args[0];
+      expect(el.tagName).not.to.equal('A');
+    });
   });
 });

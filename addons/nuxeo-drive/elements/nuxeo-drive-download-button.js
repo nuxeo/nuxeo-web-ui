@@ -55,7 +55,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
       <div
         class="action"
-        on-tap="_download"
+        on-click="_download"
         hidden$="[[!_isAvailable(documents.splices, documents.items.splices, documents.items.length, documents.selectedItems.splices, documents.selectedItems.length)]]"
       >
         <paper-icon-button noink icon="nuxeo-drive:download" id="driveBtn" aria-labelledby="label"></paper-icon-button>
@@ -63,7 +63,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
         <nuxeo-tooltip>[[i18n('driveDownloadButton.tooltip')]]</nuxeo-tooltip>
       </div>
 
-      <nuxeo-dialog id="dialog" with-backdrop>
+      <nuxeo-dialog id="dialog" with-backdrop no-cancel-on-outside-click>
         <div class="vertical layout">
           <h1>[[i18n('driveEditButton.dialog.heading')]]</h1>
           <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
@@ -96,27 +96,46 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       return;
     }
 
+    // Ignore clicks while the install dialog is already open.
+    if (this.$.dialog.opened) {
+      return;
+    }
+
+    // Navigate immediately; token check runs in parallel to detect missing Drive auth.
+    const cancelRef = { cancelled: false };
+    this._openDriveUrl(this.directDownloadUrl, cancelRef);
+
     this.$.token
       .get()
       .then((response) => {
         const tokens = response.entries.map((token) => token.id);
-
         if (!tokens || !tokens.length) {
-          this.$.dialog.toggle();
-          return;
+          // Drive not authenticated — flag the navigation as cancelled so the
+          // blur/focus heuristic does not open the dialog, then open it directly.
+          cancelRef.cancelled = true;
+          if (!this.$.dialog.opened) {
+            this.$.dialog.toggle();
+          }
         }
-
-        this._openDriveUrl(this.directDownloadUrl);
       })
       .catch((err) => {
+        cancelRef.cancelled = true;
         this._showError(err && err.userMessage ? err.userMessage : this.i18n('driveDownload.directTransfer.failed'));
       });
   }
 
   // Invokes a nxdrive:// URL; shows the install dialog if Drive did not handle it.
   // Chrome/Edge/Safari: blur+debounce heuristic. Firefox: primary timeout only (no blur when Drive absent).
-  _openDriveUrl(url) {
-    openDriveUrl(url, () => this.$.dialog.toggle());
+  // cancelRef: optional { cancelled: boolean } — if set to true before the dialog fires, suppresses it.
+  _openDriveUrl(url, cancelRef) {
+    openDriveUrl(url, () => {
+      if (cancelRef && cancelRef.cancelled) {
+        return;
+      }
+      if (!this.$.dialog.opened) {
+        this.$.dialog.toggle();
+      }
+    });
   }
 
   _showError(message) {
