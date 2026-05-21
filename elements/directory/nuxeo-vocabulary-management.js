@@ -129,11 +129,12 @@ Polymer({
                   <template is="dom-if" if="[[!_entryActions(column.key)]]">
                     <paper-input
                       no-label-float
-                      placeholder="[[i18n(column.name)]]"
+                      placeholder="[[column.name]]"
+                      aria-label$="[[column.name]]"
                       data-key$="[[column.key]]"
                     ></paper-input>
                   </template>
-                  <template is="dom-if" if="[[_entryActions(column.key)]]"> [[i18n(column.name)]] </template>
+                  <template is="dom-if" if="[[_entryActions(column.key)]]"> [[column.name]] </template>
                 </template>
                 <template>
                   <template is="dom-if" if="[[!_entryActions(column.key)]]">
@@ -291,7 +292,10 @@ Polymer({
       entry: this._selectedEntry,
       directory: this.selectedVocabulary,
       parentDirectory: this._getParentDirectoryFor(this._selectedEntry),
-      entries: this.entries,
+      // Pass the unfiltered list so edit layouts (e.g. parent/children pickers
+      // for hierarchical vocabularies) always see every entry, regardless of
+      // any active table filter.
+      entries: this._allEntries,
       new: this._new,
     };
   },

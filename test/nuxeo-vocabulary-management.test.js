@@ -286,15 +286,23 @@ suite('nuxeo-vocabulary-management', () => {
 
     test('should ignore events on the actions column', () => {
       const applySpy = sinon.spy(element, '_applyFilters');
-      element._onAnyInput(makeEvent({ key: 'actions', value: 'foo' }));
-      expect(applySpy).to.not.have.been.called;
-      expect(element._filters).to.deep.equal({});
+      try {
+        element._onAnyInput(makeEvent({ key: 'actions', value: 'foo' }));
+        expect(applySpy).to.not.have.been.called;
+        expect(element._filters).to.deep.equal({});
+      } finally {
+        applySpy.restore();
+      }
     });
 
     test('should ignore events without a keyed element in the path', () => {
       const applySpy = sinon.spy(element, '_applyFilters');
-      element._onAnyInput({ composedPath: () => [{ value: 'x' }] });
-      expect(applySpy).to.not.have.been.called;
+      try {
+        element._onAnyInput({ composedPath: () => [{ value: 'x' }] });
+        expect(applySpy).to.not.have.been.called;
+      } finally {
+        applySpy.restore();
+      }
     });
 
     test('should read value from the native input, not the shadow host', () => {
@@ -347,6 +355,17 @@ suite('nuxeo-vocabulary-management', () => {
       expect(model).to.have.property('parentDirectory');
       expect(model).to.have.property('entries');
       expect(model).to.have.property('new', false);
+    });
+
+    test('should expose the unfiltered entry list (not the filtered display list)', () => {
+      // Set selectedVocabulary first; its observer (_refresh) resets _allEntries.
+      element.selectedVocabulary = 'coverage';
+      const all = [{ properties: { id: 'a' } }, { properties: { id: 'b' } }];
+      element._allEntries = all;
+      element.entries = [all[0]];
+      element._selectedEntry = { directoryName: 'coverage' };
+      const model = element._layoutModel();
+      expect(model.entries).to.equal(all);
     });
   });
 
