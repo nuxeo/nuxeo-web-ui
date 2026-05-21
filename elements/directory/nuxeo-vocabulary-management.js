@@ -28,6 +28,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-item/paper-item.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '../nuxeo-app/nuxeo-page.js';
@@ -116,15 +117,28 @@ Polymer({
           </div>
           <nuxeo-data-table
             id="table"
+            items="[[entries]]"
             empty-label="[[i18n('vocabularyManagement.noEntry')]]"
             empty-label-when-filtered="[[i18n('vocabularyManagement.noEntryWhenFiltered')]]"
-            style$="[[_visibleDataTableStyle(entries)]]"
+            style$="[[_visibleDataTableStyle(entries, _allEntries, _filters)]]"
             caption-text="[[i18n('table.caption.vocabulary')]]"
           >
             <template is="dom-repeat" items="[[colDef]]" as="col">
               <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
+                <template is="header">
+                  <template is="dom-if" if="[[!_entryActions(column.key)]]">
+                    <paper-input
+                      no-label-float
+                      placeholder="[[i18n(column.name)]]"
+                      data-key$="[[column.key]]"
+                    ></paper-input>
+                  </template>
+                  <template is="dom-if" if="[[_entryActions(column.key)]]"> [[i18n(column.name)]] </template>
+                </template>
                 <template>
-                  <template is="dom-if" if="[[!_entryActions(column.key)]]"> [[_value(index, column.key)]] </template>
+                  <template is="dom-if" if="[[!_entryActions(column.key)]]">
+                    [[_cellValue(item, column.key)]]
+                  </template>
                   <template is="dom-if" if="[[_entryActions(column.key)]]">
                     <paper-icon-button
                       id="edit-button-[[index]]"
@@ -185,6 +199,16 @@ Polymer({
       type: Array,
       value: [],
     },
+    _allEntries: {
+      type: Array,
+      value: () => [],
+    },
+    _filters: {
+      type: Object,
+      value() {
+        return {};
+      },
+    },
     colDef: {
       type: Object,
       notify: true,
@@ -204,8 +228,46 @@ Polymer({
 
   observers: ['_refresh(selectedVocabulary)'],
 
-  _visibleDataTableStyle(entries) {
-    return entries.length ? 'display: block;' : 'display: none;';
+  listeners: {
+    input: '_onAnyInput',
+  },
+
+  // Delegate filter input changes from inside the data-table (which
+  // templatizes header templates, so `on-*` annotations may not bind reliably
+  // to the host, and Polymer notify events like `value-changed` don't bubble).
+  _onAnyInput(e) {
+    const path = e.composedPath ? e.composedPath() : [];
+    const keyed = path.find((n) => n && n.dataset && n.dataset.key);
+    if (!keyed) {
+      return;
+    }
+    const key = keyed.dataset.key;
+    if (!key || key === 'actions') {
+      return;
+    }
+    // Due to shadow DOM event retargeting `e.target` is the paper-input (the
+    // shadow host) whose `value` hasn't been synced yet. `composedPath()[0]`
+    // is the real native <input> which always has the current value.
+    const nativeInput = path[0];
+    const value = nativeInput && 'value' in nativeInput ? nativeInput.value : keyed.value;
+    const next = Object.assign({}, this._filters);
+    if (value == null || value === '') {
+      delete next[key];
+    } else {
+      next[key] = value;
+    }
+    this._filters = next;
+    this._applyFilters();
+  },
+
+  _visibleDataTableStyle(entries, allEntries, filters) {
+    const hasFilter = filters && Object.keys(filters).length > 0;
+    // show the table when there are visible entries, or when a filter is active but matches
+    // nothing (so the table's empty-when-filtered label is rendered instead of hiding the table)
+    if ((entries && entries.length) || (hasFilter && allEntries && allEntries.length)) {
+      return 'display: block;';
+    }
+    return 'display: none;';
   },
 
   _visibleChanged() {
@@ -272,33 +334,72 @@ Polymer({
     if (this._isVocabularySelected()) {
       this.$.directory.path = `/directory/${this.selectedVocabulary}`;
       this.entries = [];
+      this._allEntries = [];
+      this._filters = {};
       this.colDef = [];
       this.$.directory.get().then((resp) => {
         let tmp = [];
         if (resp.entries.length > 0) {
           tmp = Object.keys(resp.entries[0].properties).map((key) => {
-            return { key, name: `vocabularyManagement.edit.${key}`, pos: this._computeColPos(key) };
+            return {
+              key,
+              name: `vocabularyManagement.edit.${key}`,
+              pos: this._computeColPos(key),
+            };
           });
         }
-        tmp.push({ key: 'actions', name: 'vocabularyManagement.edit.actions', pos: 1000, actions: true });
+        tmp.push({
+          key: 'actions',
+          name: 'vocabularyManagement.edit.actions',
+          pos: 1000,
+          actions: true,
+        });
         tmp.sort((a, b) => a.pos - b.pos);
         this.colDef = tmp;
-        this.entries = resp.entries;
-
-        const table = this.$$('#table');
-        table.items = [];
-        table.items = this.entries;
+        this._allEntries = resp.entries;
+        this._applyFilters();
       });
     }
   },
 
-  _value(index, prop) {
-    const entry = this.entries[index];
-    if (entry && entry.properties && prop) {
+  _formattedFilterableValue(entry, key) {
+    const val = entry && entry.properties ? entry.properties[key] : undefined;
+    if (val == null) {
+      return '';
+    }
+    if (key === 'obsolete') {
+      return val > 0 ? this.i18n('label.yes') : this.i18n('label.no');
+    }
+    return String(val);
+  },
+
+  _applyFilters() {
+    const filters = this._filters || {};
+    const keys = Object.keys(filters);
+    const all = this._allEntries || [];
+    if (keys.length === 0) {
+      this.entries = all.slice();
+    } else {
+      this.entries = all.filter((entry) => {
+        if (!entry || !entry.properties) {
+          return false;
+        }
+        return keys.every((k) => {
+          const term = String(filters[k]).toLowerCase();
+          const cell = this._formattedFilterableValue(entry, k).toLowerCase();
+          // starts-with matching, same UX as the workspace table
+          return cell.indexOf(term) === 0;
+        });
+      });
+    }
+  },
+
+  _cellValue(item, prop) {
+    if (item && item.properties && prop) {
       if (prop === 'obsolete') {
-        return entry.properties[prop] > 0 ? this.i18n('label.yes') : this.i18n('label.no');
+        return item.properties[prop] > 0 ? this.i18n('label.yes') : this.i18n('label.no');
       }
-      return entry.properties[prop];
+      return item.properties[prop];
     }
     return 'N/A';
   },
@@ -438,8 +539,8 @@ Polymer({
     if (schemaDataCache[schema]) {
       return Promise.resolve(schemaDataCache[schema]);
     }
-    if (this.entries.length > 0) {
-      const fields = Object.keys(this.entries[0].properties);
+    if (this._allEntries && this._allEntries.length > 0) {
+      const fields = Object.keys(this._allEntries[0].properties);
       schemaDataCache[schema] = fields;
       return Promise.resolve(fields);
     }
