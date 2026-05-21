@@ -95,11 +95,19 @@ suite('nuxeo-vocabulary-management', () => {
 
   suite('_visibleDataTableStyle', () => {
     test('should return display block when entries exist', () => {
-      expect(element._visibleDataTableStyle([{ id: '1' }])).to.equal('display: block;');
+      expect(element._visibleDataTableStyle([{ id: '1' }], [], {})).to.equal('display: block;');
     });
 
-    test('should return display none when entries is empty', () => {
-      expect(element._visibleDataTableStyle([])).to.equal('display: none;');
+    test('should return display none when entries is empty and no filter', () => {
+      expect(element._visibleDataTableStyle([], [], {})).to.equal('display: none;');
+    });
+
+    test('should return display block when a filter is active even with no matches', () => {
+      expect(element._visibleDataTableStyle([], [{ id: 'x' }], { id: 'z' })).to.equal('display: block;');
+    });
+
+    test('should return display none when filter is active but source is empty', () => {
+      expect(element._visibleDataTableStyle([], [], { id: 'z' })).to.equal('display: none;');
     });
   });
 
@@ -143,37 +151,157 @@ suite('nuxeo-vocabulary-management', () => {
     });
   });
 
-  suite('_value', () => {
-    test('should return entry property value', () => {
-      element.entries = [{ properties: { id: 'entry1', label: 'Entry 1' } }];
-      expect(element._value(0, 'label')).to.equal('Entry 1');
+  suite('_cellValue', () => {
+    test('should return item property value', () => {
+      const item = { properties: { id: 'entry1', label: 'Entry 1' } };
+      expect(element._cellValue(item, 'label')).to.equal('Entry 1');
     });
 
     test('should return i18n yes key for obsolete property > 0', () => {
-      element.entries = [{ properties: { obsolete: 1 } }];
-      expect(element._value(0, 'obsolete')).to.equal('label.yes');
+      expect(element._cellValue({ properties: { obsolete: 1 } }, 'obsolete')).to.equal('label.yes');
     });
 
     test('should return i18n no key for obsolete property = 0', () => {
-      element.entries = [{ properties: { obsolete: 0 } }];
-      expect(element._value(0, 'obsolete')).to.equal('label.no');
+      expect(element._cellValue({ properties: { obsolete: 0 } }, 'obsolete')).to.equal('label.no');
     });
 
-    test('should return undefined for property not in entry', () => {
-      element.entries = [{ properties: { id: 'entry1' } }];
-      // The code enters the if block (entry, entry.properties, and prop are all truthy)
-      // but returns entry.properties['missing'] which is undefined
-      expect(element._value(0, 'missing')).to.be.undefined;
+    test('should return undefined for property not in item', () => {
+      expect(element._cellValue({ properties: { id: 'entry1' } }, 'missing')).to.be.undefined;
     });
 
-    test('should return N/A when entry is missing', () => {
-      element.entries = [];
-      expect(element._value(5, 'id')).to.equal('N/A');
+    test('should return N/A when item is missing', () => {
+      expect(element._cellValue(null, 'id')).to.equal('N/A');
+    });
+
+    test('should return N/A when item has no properties', () => {
+      expect(element._cellValue({}, 'id')).to.equal('N/A');
     });
 
     test('should return N/A when prop is empty', () => {
-      element.entries = [{ properties: { id: 'entry1' } }];
-      expect(element._value(0, '')).to.equal('N/A');
+      expect(element._cellValue({ properties: { id: 'entry1' } }, '')).to.equal('N/A');
+    });
+  });
+
+  suite('_formattedFilterableValue', () => {
+    test('should stringify property value', () => {
+      expect(element._formattedFilterableValue({ properties: { id: 'abc' } }, 'id')).to.equal('abc');
+    });
+
+    test('should coerce numbers to string', () => {
+      expect(element._formattedFilterableValue({ properties: { ordering: 5 } }, 'ordering')).to.equal('5');
+    });
+
+    test('should return empty string when value is null/undefined', () => {
+      expect(element._formattedFilterableValue({ properties: {} }, 'missing')).to.equal('');
+      expect(element._formattedFilterableValue(null, 'id')).to.equal('');
+    });
+
+    test('should return i18n yes/no for obsolete', () => {
+      expect(element._formattedFilterableValue({ properties: { obsolete: 1 } }, 'obsolete')).to.equal('label.yes');
+      expect(element._formattedFilterableValue({ properties: { obsolete: 0 } }, 'obsolete')).to.equal('label.no');
+    });
+  });
+
+  suite('_applyFilters', () => {
+    const allEntries = [
+      { properties: { id: 'apple', label: 'Apple' } },
+      { properties: { id: 'apricot', label: 'Apricot' } },
+      { properties: { id: 'banana', label: 'Banana' } },
+      { properties: { id: 'blueberry', label: 'Blueberry' } },
+    ];
+
+    setup(() => {
+      element._allEntries = allEntries;
+    });
+
+    test('should expose all entries when no filter is set', () => {
+      element._filters = {};
+      element._applyFilters();
+      expect(element.entries).to.have.lengthOf(4);
+    });
+
+    test('should keep only entries whose column starts with the filter term', () => {
+      element._filters = { id: 'ap' };
+      element._applyFilters();
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple', 'apricot']);
+    });
+
+    test('should be case-insensitive', () => {
+      element._filters = { id: 'AP' };
+      element._applyFilters();
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple', 'apricot']);
+    });
+
+    test('should only match at the start of the value, not anywhere', () => {
+      element._filters = { id: 'ana' };
+      element._applyFilters();
+      expect(element.entries).to.have.lengthOf(0);
+    });
+
+    test('should AND multiple column filters together', () => {
+      element._filters = { id: 'a', label: 'Apr' };
+      element._applyFilters();
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apricot']);
+    });
+
+    test('should ignore entries with no properties', () => {
+      element._allEntries = [{}, { properties: { id: 'apple' } }];
+      element._filters = { id: 'a' };
+      element._applyFilters();
+      expect(element.entries).to.have.lengthOf(1);
+    });
+
+    test('should return a fresh array (not the original reference) when no filter is set', () => {
+      element._filters = {};
+      element._applyFilters();
+      expect(element.entries).to.not.equal(allEntries);
+      expect(element.entries).to.deep.equal(allEntries);
+    });
+  });
+
+  suite('_onAnyInput', () => {
+    setup(() => {
+      element._allEntries = [{ properties: { id: 'apple' } }, { properties: { id: 'banana' } }];
+      element._filters = {};
+    });
+
+    function makeEvent({ key, value }) {
+      const nativeInput = { value };
+      const keyed = { dataset: { key } };
+      return { composedPath: () => [nativeInput, keyed] };
+    }
+
+    test('should add a filter entry and re-apply', () => {
+      element._onAnyInput(makeEvent({ key: 'id', value: 'ap' }));
+      expect(element._filters).to.deep.equal({ id: 'ap' });
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple']);
+    });
+
+    test('should remove the filter when value is cleared', () => {
+      element._filters = { id: 'ap' };
+      element._onAnyInput(makeEvent({ key: 'id', value: '' }));
+      expect(element._filters).to.deep.equal({});
+      expect(element.entries).to.have.lengthOf(2);
+    });
+
+    test('should ignore events on the actions column', () => {
+      const applySpy = sinon.spy(element, '_applyFilters');
+      element._onAnyInput(makeEvent({ key: 'actions', value: 'foo' }));
+      expect(applySpy).to.not.have.been.called;
+      expect(element._filters).to.deep.equal({});
+    });
+
+    test('should ignore events without a keyed element in the path', () => {
+      const applySpy = sinon.spy(element, '_applyFilters');
+      element._onAnyInput({ composedPath: () => [{ value: 'x' }] });
+      expect(applySpy).to.not.have.been.called;
+    });
+
+    test('should read value from the native input, not the shadow host', () => {
+      const nativeInput = { value: 'app' };
+      const paperInput = { dataset: { key: 'id' }, value: 'stale' };
+      element._onAnyInput({ composedPath: () => [nativeInput, paperInput] });
+      expect(element._filters.id).to.equal('app');
     });
   });
 
