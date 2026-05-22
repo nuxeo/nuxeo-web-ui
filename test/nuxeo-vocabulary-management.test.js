@@ -220,33 +220,39 @@ suite('nuxeo-vocabulary-management', () => {
       expect(element.entries).to.have.lengthOf(4);
     });
 
-    test('should keep only entries whose column starts with the filter term', () => {
+    test('should match entries whose cell value is in the dropdown selection', () => {
+      element._filters = { id: ['apple', 'banana'] };
+      element._applyFilters();
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple', 'banana']);
+    });
+
+    test('should treat an empty dropdown selection as no filter on that column', () => {
+      element._filters = { id: [] };
+      element._applyFilters();
+      expect(element.entries).to.have.lengthOf(4);
+    });
+
+    test('should AND multiple column filters together', () => {
+      element._filters = { id: ['apple', 'apricot'], label: ['Apricot'] };
+      element._applyFilters();
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apricot']);
+    });
+
+    test('should keep starts-with matching when filter is a string (back-compat)', () => {
       element._filters = { id: 'ap' };
       element._applyFilters();
       expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple', 'apricot']);
     });
 
-    test('should be case-insensitive', () => {
+    test('should be case-insensitive for string filters', () => {
       element._filters = { id: 'AP' };
       element._applyFilters();
       expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple', 'apricot']);
     });
 
-    test('should only match at the start of the value, not anywhere', () => {
-      element._filters = { id: 'ana' };
-      element._applyFilters();
-      expect(element.entries).to.have.lengthOf(0);
-    });
-
-    test('should AND multiple column filters together', () => {
-      element._filters = { id: 'a', label: 'Apr' };
-      element._applyFilters();
-      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apricot']);
-    });
-
     test('should ignore entries with no properties', () => {
       element._allEntries = [{}, { properties: { id: 'apple' } }];
-      element._filters = { id: 'a' };
+      element._filters = { id: ['apple'] };
       element._applyFilters();
       expect(element.entries).to.have.lengthOf(1);
     });
@@ -259,35 +265,105 @@ suite('nuxeo-vocabulary-management', () => {
     });
   });
 
-  suite('_onAnyInput', () => {
+  suite('_filterByFor', () => {
+    test('should return the column key for filterable columns', () => {
+      expect(element._filterByFor({ key: 'id' })).to.equal('id');
+    });
+
+    test('should return empty string for the actions column', () => {
+      expect(element._filterByFor({ key: 'actions' })).to.equal('');
+    });
+
+    test('should return empty string for an undefined column', () => {
+      expect(element._filterByFor(undefined)).to.equal('');
+    });
+  });
+
+  suite('_aggregationData', () => {
+    test('should return the bucket data for the given key', () => {
+      const aggs = { id: { extendedBuckets: [{ key: 'a', label: 'a', docCount: 1 }], selection: [] } };
+      expect(element._aggregationData(aggs, 'id')).to.equal(aggs.id);
+    });
+
+    test('should return undefined when aggregations or key are missing', () => {
+      expect(element._aggregationData(undefined, 'id')).to.be.undefined;
+      expect(element._aggregationData({}, '')).to.be.undefined;
+    });
+  });
+
+  suite('_computeAggregations', () => {
+    test('should produce a bucket per distinct value of every non-action column', () => {
+      const entries = [
+        { properties: { id: 'apple', label: 'Apple' } },
+        { properties: { id: 'apple', label: 'Apple' } },
+        { properties: { id: 'banana', label: 'Banana' } },
+      ];
+      const cols = [{ key: 'id' }, { key: 'label' }, { key: 'actions' }];
+      const aggs = element._computeAggregations(entries, cols);
+      expect(aggs).to.have.keys(['id', 'label']);
+      const idBuckets = aggs.id.extendedBuckets;
+      const apple = idBuckets.find((b) => b.key === 'apple');
+      const banana = idBuckets.find((b) => b.key === 'banana');
+      expect(apple).to.deep.equal({ key: 'apple', label: 'apple', docCount: 2 });
+      expect(banana).to.deep.equal({ key: 'banana', label: 'banana', docCount: 1 });
+      expect(aggs.id.selection).to.deep.equal([]);
+    });
+
+    test('should sort buckets alphabetically by label', () => {
+      const entries = [
+        { properties: { id: 'charlie' } },
+        { properties: { id: 'alpha' } },
+        { properties: { id: 'bravo' } },
+      ];
+      const aggs = element._computeAggregations(entries, [{ key: 'id' }]);
+      expect(aggs.id.extendedBuckets.map((b) => b.key)).to.deep.equal(['alpha', 'bravo', 'charlie']);
+    });
+
+    test('should skip empty cell values', () => {
+      const entries = [{ properties: { id: '' } }, { properties: { id: 'apple' } }, { properties: {} }];
+      const aggs = element._computeAggregations(entries, [{ key: 'id' }]);
+      expect(aggs.id.extendedBuckets.map((b) => b.key)).to.deep.equal(['apple']);
+    });
+
+    test('should return an empty object when inputs are not arrays', () => {
+      expect(element._computeAggregations(null, [{ key: 'id' }])).to.deep.equal({});
+      expect(element._computeAggregations([], null)).to.deep.equal({});
+    });
+  });
+
+  suite('_onColumnFilterChanged', () => {
     setup(() => {
       element._allEntries = [{ properties: { id: 'apple' } }, { properties: { id: 'banana' } }];
       element._filters = {};
     });
 
-    function makeEvent({ key, value }) {
-      const nativeInput = { value };
-      const keyed = { dataset: { key } };
-      return { composedPath: () => [nativeInput, keyed] };
+    function makeEvent(filterBy, value) {
+      return { detail: { filterBy, value } };
     }
 
-    test('should add a filter entry and re-apply', () => {
-      element._onAnyInput(makeEvent({ key: 'id', value: 'ap' }));
-      expect(element._filters).to.deep.equal({ id: 'ap' });
+    test('should record a non-empty selection and re-apply filters', () => {
+      element._onColumnFilterChanged(makeEvent('id', ['apple']));
+      expect(element._filters).to.deep.equal({ id: ['apple'] });
       expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple']);
     });
 
-    test('should remove the filter when value is cleared', () => {
-      element._filters = { id: 'ap' };
-      element._onAnyInput(makeEvent({ key: 'id', value: '' }));
+    test('should drop the column filter when the selection is cleared', () => {
+      element._filters = { id: ['apple'] };
+      element._onColumnFilterChanged(makeEvent('id', []));
       expect(element._filters).to.deep.equal({});
       expect(element.entries).to.have.lengthOf(2);
     });
 
-    test('should ignore events on the actions column', () => {
+    test('should drop the column filter when value is null/undefined', () => {
+      element._filters = { id: ['apple'] };
+      element._onColumnFilterChanged(makeEvent('id', null));
+      expect(element._filters).to.deep.equal({});
+    });
+
+    test('should ignore events for the actions column', () => {
       const applySpy = sinon.spy(element, '_applyFilters');
       try {
-        element._onAnyInput(makeEvent({ key: 'actions', value: 'foo' }));
+        element._onColumnFilterChanged(makeEvent('actions', ['x']));
         expect(applySpy).to.not.have.been.called;
         expect(element._filters).to.deep.equal({});
       } finally {
@@ -295,21 +371,15 @@ suite('nuxeo-vocabulary-management', () => {
       }
     });
 
-    test('should ignore events without a keyed element in the path', () => {
+    test('should ignore events with no detail or no filterBy', () => {
       const applySpy = sinon.spy(element, '_applyFilters');
       try {
-        element._onAnyInput({ composedPath: () => [{ value: 'x' }] });
+        element._onColumnFilterChanged({});
+        element._onColumnFilterChanged(makeEvent('', ['x']));
         expect(applySpy).to.not.have.been.called;
       } finally {
         applySpy.restore();
       }
-    });
-
-    test('should read value from the native input, not the shadow host', () => {
-      const nativeInput = { value: 'app' };
-      const paperInput = { dataset: { key: 'id' }, value: 'stale' };
-      element._onAnyInput({ composedPath: () => [nativeInput, paperInput] });
-      expect(element._filters.id).to.equal('app');
     });
   });
 
@@ -504,6 +574,68 @@ suite('nuxeo-vocabulary-management', () => {
       element._allEntries = [{ properties: { id: '1', label: 'L' } }];
       const fields = await element._getSchemaFields();
       expect(fields).to.include.members(['id', 'label']);
+    });
+  });
+
+  suite('data-table cell wrapping styles', () => {
+    // Long labels in the vocabulary table used to be truncated with ellipsis.
+    // The element's <style> block overrides the cell host CSS so long values
+    // wrap onto multiple lines and remain fully visible.
+    const getStyleText = (el) =>
+      Array.from(el.shadowRoot.querySelectorAll('style'))
+        .map((s) => s.textContent)
+        .join('\n');
+
+    test('should target non-header data-table cells', () => {
+      expect(getStyleText(element)).to.match(/nuxeo-data-table-cell:not\(\[header\]\)/);
+    });
+
+    test('should allow text to wrap onto multiple lines', () => {
+      const css = getStyleText(element);
+      expect(css).to.match(/white-space:\s*normal/);
+      expect(css).to.match(/word-break:\s*break-word/);
+    });
+
+    test('should make cell content visible (no overflow clipping)', () => {
+      const css = getStyleText(element);
+      expect(css).to.match(/overflow-x:\s*visible/);
+      expect(css).to.match(/overflow-y:\s*visible/);
+    });
+
+    test('should top-align wrapped content with vertical padding', () => {
+      const css = getStyleText(element);
+      expect(css).to.match(/align-items:\s*flex-start/);
+      expect(css).to.match(/padding-top:\s*12px/);
+      expect(css).to.match(/padding-bottom:\s*12px/);
+    });
+
+    test('should apply wrapping styles to a real data-table cell', async () => {
+      // Render a non-header cell inside the element and verify the host CSS
+      // declared in the element's style block is the one in effect.
+      const host = document.createElement('div');
+      host.attachShadow({ mode: 'open' });
+      host.shadowRoot.innerHTML = `
+        <style>${getStyleText(element)}</style>
+        <nuxeo-data-table-cell>A very very long label that should wrap onto multiple lines</nuxeo-data-table-cell>
+      `;
+      document.body.appendChild(host);
+      const cell = host.shadowRoot.querySelector('nuxeo-data-table-cell');
+      const styles = window.getComputedStyle(cell);
+      expect(styles.whiteSpace).to.equal('normal');
+      expect(styles.overflowX).to.equal('visible');
+      expect(styles.overflowY).to.equal('visible');
+      expect(styles.alignItems).to.equal('flex-start');
+      document.body.removeChild(host);
+    });
+
+    test('should not apply wrapping styles to header cells', () => {
+      // The override is scoped via :not([header]) so header cells keep their
+      // default ellipsis behaviour.
+      const css = getStyleText(element);
+      const blockMatch = css.match(/nuxeo-data-table-cell:not\(\[header\]\)\s*{([^}]*)}/);
+      expect(blockMatch, 'expected a scoped non-header cell rule').to.be.ok;
+      // The opposite (header) selector should not appear in our override block.
+      expect(css).to.not.match(/nuxeo-data-table-cell\[header\]\s*{[^}]*white-space:\s*normal/);
     });
   });
 });
