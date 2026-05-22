@@ -12,7 +12,7 @@ Always follow this sequence when making changes:
 npm install                  # Install dependencies (Node ≥ 18)
 npm run format               # Auto-fix formatting (Prettier → ESLint)
 npm run lint                 # ESLint + Prettier check — must pass
-npm test                     # Karma unit tests — must pass
+npm test                     # Web Test Runner unit tests — must pass
 ```
 
 - `npm run lint` runs both `eslint` and `prettier --list-different`.
@@ -38,10 +38,10 @@ elements/             → ALL Polymer web components live here
 addons/               → Optional feature bundles (each has index.js entry)
 i18n/                 → Translation JSON files (16 languages)
 themes/               → Visual themes (default, dark, light, kawaii)
-test/                 → Unit tests (test/nuxeo-*.test.js)
+test/                 → Unit tests (@web/test-runner + Mocha; sources in test/*.test.js)
 ftest/features/       → Functional test Gherkin scenarios
 packages/nuxeo-web-ui-ftest/ → WDIO page objects + step definitions
-scripts/              → Build helpers
+scripts/              → Build helpers (merge-messages.js, test/unit/, test/ftest/)
 plugin/               → Maven sub-modules
 ```
 
@@ -91,11 +91,13 @@ Always use Nuxeo Elements for API calls, never `fetch()`:
 ### Unit Tests
 
 ```bash
-npm test                    # Single run with coverage
-npm run test:watch          # Watch mode
+npm test                    # Single run with coverage (~1 runner file, 1000+ Mocha tests)
+npm run test:watch          # Watch mode (no coverage)
+npm run update-test-load-all  # Regenerate test/load-all-tests.js after adding *.test.js
 ```
 
-- Framework: Karma + Mocha + Chai + Sinon
+- Framework: `@web/test-runner` + Mocha + Chai + Sinon
+- **Runner vs suites**: `web-test-runner.config.mjs` lists one entry (`test/load-all-tests.js`); WTR shows `1/1 test files`. That file imports every `*.test.js` module — pass/fail counts are individual Mocha tests.
 - Globals available: `expect`, `assert`, `sinon`, `should`
 - Test setup: `test/setup.js` (chai + sinon-chai)
 - Element helpers: `@nuxeo/testing-helpers`

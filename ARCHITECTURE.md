@@ -40,7 +40,7 @@ Nuxeo Web UI is a single-page application (SPA) that serves as the standard user
 | Bundler | Webpack 5 | ^5.3 |
 | Package Manager | npm | ≥ 8 |
 | Node.js | Node.js | ≥ 18 |
-| Unit Testing | Karma + Mocha + Chai + Sinon | Various |
+| Unit Testing | @web/test-runner + Mocha + Chai + Sinon | Various |
 | Functional Testing | WebdriverIO 9 + Cucumber | ^9.12 |
 | Linting | ESLint 9 (flat config) + Prettier | ^9.0 / ^3.8 |
 | Java Build | Maven | Java 17 |
@@ -283,7 +283,7 @@ Workflow orchestration in `.github/workflows/main.yaml`:
 ```
 Push to the maintenance-3.1.x branch triggers:
   lint    → ESLint + Prettier check
-  test    → Karma unit tests
+  test    → Web Test Runner unit tests (single entry: test/load-all-tests.js)
   a11y    → Accessibility tests
   ftest   → WebdriverIO functional tests
   build   → (depends on all above) Maven marketplace build
@@ -308,5 +308,5 @@ Additional workflows: `preview.yaml` (PR preview environments), `cross-repo.yaml
 | `ftest/` | Functional test feature files |
 | `packages/nuxeo-web-ui-ftest/` | WDIO framework (page objects, steps) |
 | `plugin/` | Maven modules (addon, marketplace, itests, a11y, metrics) |
-| `scripts/` | Build helper scripts |
+| `scripts/` | Build helpers (`merge-messages.js`, `test/unit/`, `test/ftest/`) |
 | `server/` | Nginx configs for Docker |
