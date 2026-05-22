@@ -16,7 +16,8 @@
     "ws": "8.20.1",
     "tar-fs": "^3.0.9",
     "serialize-javascript": "^7.0.5",
-    "tmp": "^0.2.4"
+    "tmp": "^0.2.4",
+    "uuid": "^13.0.1"
   },
   "dependencies": {
     "@babel/core": "^7.15.0",
@@ -36,7 +37,7 @@
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.29.4",
-    "multiple-cucumber-html-reporter": "^1.18.0",
+    "multiple-cucumber-html-reporter": "^3.10.0",
     "node-fetch": "^2.6.1",
     "nuxeo": "^4.0.3",
     "wdio-cucumberjs-json-reporter": "6.0.1",
