@@ -27,6 +27,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-aggregation/nuxeo-dropdown-aggregation.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-item/paper-item.js';
@@ -94,6 +95,37 @@ Polymer({
         overflow: hidden;
         text-overflow: ellipsis;
       }
+
+      /* Make the dropdown filter visually align with the default header cell
+         and match the typography used elsewhere in the app. */
+      .filter-dropdown {
+        width: 100%;
+        --paper-input-container: {
+          font-size: inherit;
+          margin: 12px 2px 9px 2px;
+          margin-top: 3px;
+        }
+        --paper-input-container-input: {
+          min-height: 2em;
+          padding: 0;
+          font-size: inherit;
+          font-weight: 600;
+        }
+        --paper-input-container-color: {
+          color: var(--nuxeo-text-default, #3a3a54);
+        }
+        --paper-input-container-label: {
+          font-size: inherit;
+          color: #606978;
+          font-weight: 600;
+          padding: 0;
+        }
+      }
+
+      .actions-header {
+        font-size: 1rem;
+        font-weight: 600;
+      }
     </style>
 
     <nuxeo-resource id="directory" path="/directory" params='{"pageSize": 0}'></nuxeo-resource>
@@ -136,17 +168,22 @@ Polymer({
             column-resize-enabled
           >
             <template is="dom-repeat" items="[[colDef]]" as="col">
-              <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]">
+              <nuxeo-data-table-column name="[[i18n(col.name)]]" key="[[col.key]]" filter-by$="[[_filterByFor(col)]]">
                 <template is="header">
                   <template is="dom-if" if="[[!_entryActions(column.key)]]">
-                    <paper-input
-                      no-label-float
+                    <nuxeo-dropdown-aggregation
+                      class="filter-dropdown"
                       placeholder="[[column.name]]"
                       aria-label$="[[column.name]]"
-                      data-key$="[[column.key]]"
-                    ></paper-input>
+                      data="[[_aggregationData(_aggregations, column.key)]]"
+                      value="{{column.filterValue}}"
+                      sort-by-label
+                    >
+                    </nuxeo-dropdown-aggregation>
                   </template>
-                  <template is="dom-if" if="[[_entryActions(column.key)]]"> [[column.name]] </template>
+                  <template is="dom-if" if="[[_entryActions(column.key)]]">
+                    <span class="actions-header">[[column.name]]</span>
+                  </template>
                 </template>
                 <template>
                   <template is="dom-if" if="[[!_entryActions(column.key)]]">
@@ -222,6 +259,10 @@ Polymer({
         return {};
       },
     },
+    _aggregations: {
+      type: Object,
+      computed: '_computeAggregations(_allEntries, colDef)',
+    },
     colDef: {
       type: Object,
       notify: true,
@@ -239,32 +280,50 @@ Polymer({
     },
   },
 
-  observers: ['_refresh(selectedVocabulary)'],
+  observers: ['_refresh(selectedVocabulary)', '_syncFilterDropdowns(_aggregations)'],
 
   listeners: {
-    input: '_onAnyInput',
+    'column-filter-changed': '_onColumnFilterChanged',
   },
 
-  // Delegate filter input changes from inside the data-table (which
-  // templatizes header templates, so `on-*` annotations may not bind reliably
-  // to the host, and Polymer notify events like `value-changed` don't bubble).
-  _onAnyInput(e) {
-    const path = e.composedPath ? e.composedPath() : [];
-    const keyed = path.find((n) => n && n.dataset && n.dataset.key);
-    if (!keyed) {
+  // After the aggregation buckets are (re)computed (e.g. when an entry is
+  // created or deleted), push the fresh `data` onto each rendered filter
+  // dropdown. Relying solely on the templated `data` binding is unreliable
+  // because `_aggregations` is a host property and the dropdown lives inside
+  // the templatized column header, so the binding does not always re-evaluate
+  // when the host property changes.
+  _syncFilterDropdowns(aggregations) {
+    if (!aggregations || !this.$.table) {
       return;
     }
-    const key = keyed.dataset.key;
+    this.async(() => {
+      const dropdowns = this.$.table.querySelectorAll('nuxeo-dropdown-aggregation');
+      dropdowns.forEach((dd) => {
+        const cell =
+          (dd.parentNode && dd.parentNode.host) || (dd.closest && dd.closest('nuxeo-data-table-cell')) || dd.parentNode;
+        const key = cell && cell.column && cell.column.key;
+        if (key && aggregations[key]) {
+          dd.data = aggregations[key];
+        }
+      });
+    });
+  },
+
+  // The data-table-column dispatches `column-filter-changed` (composed + bubbling)
+  // whenever its `filterValue` updates. We listen at the host and re-derive the
+  // visible entries from the unfiltered source.
+  _onColumnFilterChanged(e) {
+    const detail = e && e.detail;
+    if (!detail) {
+      return;
+    }
+    const key = detail.filterBy;
     if (!key || key === 'actions') {
       return;
     }
-    // Due to shadow DOM event retargeting `e.target` is the paper-input (the
-    // shadow host) whose `value` hasn't been synced yet. `composedPath()[0]`
-    // is the real native <input> which always has the current value.
-    const nativeInput = path[0];
-    const value = nativeInput && 'value' in nativeInput ? nativeInput.value : keyed.value;
+    const value = detail.value;
     const next = Object.assign({}, this._filters);
-    if (value == null || value === '') {
+    if (value == null || (Array.isArray(value) && value.length === 0)) {
       delete next[key];
     } else {
       next[key] = value;
@@ -401,13 +460,57 @@ Polymer({
           return false;
         }
         return keys.every((k) => {
-          const term = String(filters[k]).toLowerCase();
-          const cell = this._formattedFilterableValue(entry, k).toLowerCase();
-          // starts-with matching, same UX as the workspace table
-          return cell.indexOf(term) === 0;
+          const filterVal = filters[k];
+          const cell = this._formattedFilterableValue(entry, k);
+          if (Array.isArray(filterVal)) {
+            // dropdown multi-select: match when the cell value is one of the
+            // selected bucket keys (empty selection is treated as no filter).
+            return filterVal.length === 0 || filterVal.indexOf(cell) >= 0;
+          }
+          return cell.toLowerCase().indexOf(String(filterVal).toLowerCase()) === 0;
         });
       });
     }
+  },
+
+  // Build the aggregation buckets consumed by `nuxeo-dropdown-aggregation` for
+  // every filterable column out of the unfiltered source list. Shape mirrors
+  // what a `nuxeo-page-provider` would return for an aggregation:
+  //   { extendedBuckets: [{ key, label, docCount }, ...], selection: [] }
+  _computeAggregations(allEntries, colDef) {
+    if (!Array.isArray(allEntries) || !Array.isArray(colDef)) {
+      return {};
+    }
+    const result = {};
+    colDef.forEach((col) => {
+      if (!col || col.key === 'actions') {
+        return;
+      }
+      const counts = new Map();
+      allEntries.forEach((entry) => {
+        const v = this._formattedFilterableValue(entry, col.key);
+        if (v === '') {
+          return;
+        }
+        counts.set(v, (counts.get(v) || 0) + 1);
+      });
+      const extendedBuckets = Array.from(counts.entries()).map(([key, docCount]) => {
+        return { key, label: key, docCount };
+      });
+      extendedBuckets.sort((a, b) => String(a.label).localeCompare(String(b.label)));
+      result[col.key] = { extendedBuckets, selection: [] };
+    });
+    return result;
+  },
+
+  _aggregationData(aggregations, key) {
+    return aggregations && key ? aggregations[key] : undefined;
+  },
+
+  _filterByFor(col) {
+    // Only set `filter-by` on non-action columns so the data-table-column emits
+    // `column-filter-changed` events for those columns.
+    return col && col.key && col.key !== 'actions' ? col.key : '';
   },
 
   _cellValue(item, prop) {
