@@ -19,7 +19,6 @@ import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { isPageProviderDisplayBehavior } from '../../../elements/select-all-helpers.js';
-import { navigateTo } from './nuxeo-drive-protocol-handler.js';
 import './nuxeo-drive-icons.js';
 
 window.nuxeo = window.nuxeo || {};
@@ -219,7 +218,19 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       this._driveOpened = true;
     };
     window.addEventListener('blur', onBlur);
-    navigateTo(this.directDownloadUrl);
+    this._navigateTo(this.directDownloadUrl);
+  }
+
+  /**
+   * Triggers a custom protocol URL (nxdrive://) via a hidden anchor click.
+   */
+  _navigateTo(url) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   _showFailure(launched, driveOpened) {

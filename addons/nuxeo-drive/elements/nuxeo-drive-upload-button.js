@@ -19,7 +19,6 @@ import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { navigateTo } from './nuxeo-drive-protocol-handler.js';
 import './nuxeo-drive-icons.js';
 
 window.nuxeo = window.nuxeo || {};
@@ -213,7 +212,21 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       this._driveOpened = true;
     };
     window.addEventListener('blur', onBlur);
-    navigateTo(this.directTransferUrl);
+    this._navigateTo(this.directTransferUrl);
+  }
+
+  /**
+   * Triggers a custom protocol URL (nxdrive://) via a hidden anchor click.
+   * This is the standard cross-browser approach used by Teams, Zoom, and Slack.
+   * If no protocol handler is registered, the click silently no-ops.
+   */
+  _navigateTo(url) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   _showFailure(launched, driveOpened) {

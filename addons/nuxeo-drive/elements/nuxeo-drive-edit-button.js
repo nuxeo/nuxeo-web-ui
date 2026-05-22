@@ -21,7 +21,6 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { navigateTo } from './nuxeo-drive-protocol-handler.js';
 
 /**
 `nuxeo-drive-edit-button`
@@ -201,7 +200,19 @@ Polymer({
       this._driveOpened = true;
     };
     window.addEventListener('blur', onBlur);
-    navigateTo(this.driveEditURL);
+    this._navigateTo(this.driveEditURL);
+  },
+
+  /**
+   * Triggers a custom protocol URL (nxdrive://) via a hidden anchor click.
+   */
+  _navigateTo(url) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   },
 
   _showFailure(launched, driveOpened) {
