@@ -500,8 +500,8 @@ suite('nuxeo-vocabulary-management', () => {
 
   suite('_getSchemaFields', () => {
     test('should use entry properties when entries already loaded', async () => {
-      element._selectedSchema = 'coverage';
-      element.entries = [{ properties: { id: '1', label: 'L' } }];
+      element.selectedVocabulary = 'coverage';
+      element._allEntries = [{ properties: { id: '1', label: 'L' } }];
       const fields = await element._getSchemaFields();
       expect(fields).to.include.members(['id', 'label']);
     });
