@@ -30,6 +30,9 @@
     "uuid": "$uuid",
     "request": {
       "uuid": "^3.4.0"
+    },
+    "replace": {
+      "minimatch": "^3.1.4"
     }
   },
   "devDependencies": {
