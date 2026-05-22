@@ -7,7 +7,7 @@ const { removeSync } = require('fs-extra');
 // read .env file and assign to process.env
 require('dotenv').config();
 
-const FTEST = path.join(__dirname, '../ftest');
+const FTEST = path.join(__dirname, '../../../ftest');
 
 function runFunctionalTests(project, dir) {
   if (!fs.existsSync(dir)) {
@@ -33,4 +33,4 @@ if (!args.skipWebUi) {
 (process.env.NUXEO_PACKAGES || '')
   .split(/[\s,]+/)
   .filter(Boolean)
-  .forEach((addon) => runFunctionalTests(addon, path.join(__dirname, `../addons/${addon}/ftest`)));
+  .forEach((addon) => runFunctionalTests(addon, path.join(__dirname, `../../../addons/${addon}/ftest`)));

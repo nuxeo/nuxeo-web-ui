@@ -6,7 +6,14 @@ applyTo: "test/**/*.test.js,test/**/*.js"
 
 ## Framework
 
-Karma + Mocha + Chai + Sinon with `@nuxeo/testing-helpers`.
+`@web/test-runner` + Mocha + Chai + Sinon with `@nuxeo/testing-helpers`.
+
+## How tests are loaded
+
+- **Source files**: `test/**/*.test.js` and `addons/*/test/**/*.test.js`
+- **Runner entry**: `test/load-all-tests.js` (auto-generated) — the only file in `web-test-runner.config.mjs`
+- Web Test Runner shows **1 test file** in progress; **pass/fail counts are Mocha tests**, not file count
+- After adding a new `*.test.js`, run `npm run update-test-load-all` so it is imported in the barrel
 
 ## Globals
 
@@ -33,7 +40,8 @@ suite('nuxeo-my-component', () => {
 
 ## Rules
 
-- Test files go in `test/nuxeo-<element-name>.test.js`
+- Test files go in `test/nuxeo-<element-name>.test.js` (or `addons/<addon>/test/`)
+- Regenerate `test/load-all-tests.js` after adding or removing test files (`npm run update-test-load-all`)
 - Do NOT use `.only` — the `no-only-tests` ESLint rule blocks it
 - Use `@nuxeo/testing-helpers` for creating elements and mocking server responses
 - Run: `npm test` (single) or `npm run test:watch` (watch mode)

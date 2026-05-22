@@ -23,6 +23,7 @@ suite('nuxeo-document-create', () => {
 
   setup(async () => {
     element = await fixture(html`<nuxeo-document-create></nuxeo-document-create>`);
+    sinon.stub(element, 'i18n').callsFake((key) => key);
     await flush();
   });
 

@@ -20,13 +20,13 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 
-const root = path.join(__dirname, '..');
+const root = path.join(__dirname, '../../..');
 const outFile = path.join(root, 'test', 'coverage-imports-data.js');
 
 const patterns = ['elements/**/*.js', 'addons/**/elements/**/*.js'];
 
-// Omit modules that break bulk import in the Karma ESM pipeline; extend when new failures appear.
-// - nuxeo-platform-3d: glTF scripts are not valid ESM named exports under karma-esm.
+// Omit modules that break bulk import in the test runner ESM pipeline; extend when new failures appear.
+// - nuxeo-platform-3d: glTF scripts are not valid ESM named exports under the test runner.
 // - routing.js: runs Page.js route setup at import time and requires a full Nuxeo.UI app shell.
 const EXCLUDE_PREFIXES = ['addons/nuxeo-platform-3d/'];
 const EXCLUDE_EXACT = new Set(['elements/routing.js']);
