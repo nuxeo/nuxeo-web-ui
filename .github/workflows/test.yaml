@@ -78,6 +78,10 @@ jobs:
             @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
             @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
 
+      - name: Install Chromium for Web Test Runner
+        # npm ci --ignore-scripts skips puppeteer's browser download; WTR uses bundled Chromium.
+        run: npx puppeteer browsers install chrome
+
       - name: Unit tests
         # npm test: regenerate barrels, print WTR layout notice, then web-test-runner --coverage.
         # WTR reports "1/1 test files" (load-all-tests.js); Mocha pass/fail counts are individual tests.
