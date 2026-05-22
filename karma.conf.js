@@ -46,58 +46,13 @@ let customLaunchers = {
     base: 'ChromeHeadless',
     flags: ['--disable-gpu', '--no-sandbox'],
   },
-  /* Disabled Firefox since self-hosted runners do not have it pre-installed.
-     Can be enabled once we shift to Github Runners */
-  // FirefoxHeadless: {
-  //   base: 'Firefox',
-  //   flags: ['-headless'],
-  // },
 };
-
-if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-  customLaunchers = {
-    sl_latest_chrome: {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 10',
-      version: 'latest',
-    },
-    sl_latest_edge: {
-      base: 'SauceLabs',
-      browserName: 'microsoftedge',
-      platform: 'Windows 10',
-      version: 'latest',
-    },
-    sl_latest_firefox: {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      platform: 'Windows 10',
-      version: '98.0',
-      geckodriverVersion: '0.30.0',
-    },
-    sl_latest_safari: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'macOS 12',
-      version: 'latest',
-    },
-  };
-
-  reporters.push('saucelabs');
-}
 
 module.exports = (config) => {
   // Single module entry (see test/load-all-tests.js) loads every suite in one graph before
   // __karma__.loaded(). Do not add separate test globs here — that reintroduces parallel races.
-  const sauceLabs = {};
-  if (config.record) {
-    sauceLabs.recordVideo = true;
-  } else if (config.sauceRunName) {
-    sauceLabs.testName = config.sauceRunName;
-  }
 
   config.set({
-    sauceLabs,
     hostname: '127.0.0.1',
     basePath: '',
     singleRun: true,
