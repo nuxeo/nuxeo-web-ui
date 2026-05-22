@@ -1,4 +1,3 @@
-import { execSync } from 'child_process';
 import CompatService from '@nuxeo/nuxeo-web-ui-ftest/wdio-compat-plugin.js';
 import ShadowService from '@nuxeo/nuxeo-web-ui-ftest/wdio-shadow-plugin.js';
 
@@ -45,21 +44,6 @@ if (process.env.HEADLESS) {
 }
 capability['goog:chromeOptions'] = options;
 
-// Allow overriding driver version
-if (!process.env.DRIVER_VERSION) {
-  try {
-    process.env.DRIVER_VERSION = execSync('node getDriverVersion.js').toString().trim();
-  } catch (e) {
-    console.error('unable to get Chrome version: ', e);
-  }
-}
-const drivers = {
-  chrome: {},
-};
-if (process.env.DRIVER_VERSION) {
-  drivers.chrome.version = process.env.DRIVER_VERSION;
-}
-
 export const config = {
   execArgv: debug ? ['--inspect'] : [],
   //
@@ -100,7 +84,7 @@ export const config = {
   // and 30 processes will get spawned. The property handles how many capabilities
   // from the same test should run tests.
   //
-  maxInstances: 10,
+  maxInstances: 1,
   //
   // If you have trouble getting all important capabilities together, check out the
   // Sauce Labs platform configurator - a great tool to configure your capabilities:
@@ -117,8 +101,10 @@ export const config = {
   logLevel: 'warn',
   //
   // Set specific log levels per logger
-  // loggers:
-  // - webdriver, webdriverio
+  logLevels: {
+    'webdriverio:ShadowRootManager': 'silent',
+  },
+  //
   // - @wdio/applitools-service, @wdio/browserstack-service, @wdio/devtools-service, @wdio/sauce-service
   // - @wdio/mocha-framework, @wdio/jasmine-framework
   // - @wdio/local-runner

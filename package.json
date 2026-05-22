@@ -10,12 +10,24 @@
     "node": ">=18.0.0"
   },
   "config": {
-    "workboxCli": "7.3.0"
+    "workboxCli": "7.4.1"
   },
   "overrides": {
-    "ws": "8.17.1",
+    "ws": "8.20.1",
     "tar-fs": "^3.0.9",
-    "marked": "^4.0.17"
+    "marked": "^4.0.17",
+    "serialize-javascript": "^7.0.5",
+    "tmp": "^0.2.4",
+    "cross-spawn": "^7.0.6",
+    "minimatch": "^3.1.4",
+    "qs": "^6.14.1",
+    "form-data": "^2.5.4",
+    "@nuxeo/page": {
+      "path-to-regexp": "^8.4.0"
+    },
+    "mocha": {
+      "diff": "^8.0.3"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -43,7 +55,7 @@
     "globals": "^17.4.0",
     "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.6.0",
-    "http-server": "^0.11.1",
+    "http-server": "^14.1.1",
     "husky": "^4.2.3",
     "karma": "^6.4.1",
     "karma-chrome-launcher": "^3.1.1",
@@ -51,7 +63,6 @@
     "karma-firefox-launcher": "^2.1.2",
     "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "^2.2.5",
-    "karma-sauce-launcher": "^4.3.6",
     "karma-source-map-support": "^1.4.0",
     "karma-static": "^1.0.1",
     "lint-staged": "^10.1.1",
@@ -71,9 +82,8 @@
     "webpack-bundle-analyzer": "^5.3.0",
     "webpack-cli": "^7.0.2",
     "webpack-dev-server": "^5.0.4",
-    "webpack-log": "^3.0.1",
     "webpack-merge": "^6.0.1",
-    "workbox-cli": "7.3.0"
+    "workbox-cli": "7.4.1"
   },
   "scripts": {
     "postinstall": "check-engine --ignore",
