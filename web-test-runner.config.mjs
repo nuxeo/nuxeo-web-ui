@@ -16,9 +16,16 @@
  *
  * Related: scripts/test/unit/generate-test-load-all.js, scripts/test/unit/generate-coverage-imports.js, test/setup.js.
  */
+import { createRequire } from 'node:module';
 import { chromeLauncher } from '@web/test-runner-chrome';
 import { nuxeoTestFallbackPlugin } from './scripts/test/unit/web-test-runner-fallback-plugin.mjs';
 import { nuxeoCoverageFlagPlugin } from './scripts/test/unit/web-test-runner-coverage-flag-plugin.mjs';
+
+const require = createRequire(import.meta.url);
+// Bundled Chromium matches puppeteer-core; system Chrome on CI runners often mismatches (see WEBUI-2038).
+const puppeteer = require('puppeteer');
+
+const chromeArgs = ['--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'];
 
 const verbose = process.env.WTR_VERBOSE === '1';
 
@@ -66,8 +73,9 @@ export default {
   },
   browsers: [
     chromeLauncher({
+      puppeteer,
       launchOptions: {
-        args: ['--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'],
+        args: chromeArgs,
       },
     }),
   ],
