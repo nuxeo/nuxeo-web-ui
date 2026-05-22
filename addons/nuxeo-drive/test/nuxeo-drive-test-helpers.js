@@ -101,9 +101,6 @@ export function addShowErrorSuite(getElement) {
  * Both `nuxeo-drive-edit-button` and `nuxeo-drive-upload-button` share the same
  * token-fetch / no-token guard behaviour, so they share these tests.
  *
- * Note: `_go` now fires `_openDriveUrl` synchronously before the token fetch resolves,
- * so `_openDriveUrl` must be stubbed to prevent real protocol navigation in tests.
- *
  * @param {Function} getElement  - Returns the element under test.
  */
 export function addGoErrorSuites(getElement) {
@@ -114,8 +111,6 @@ export function addGoErrorSuites(getElement) {
       const element = getElement();
       toastStub = stubToast(element);
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-      // _openDriveUrl fires immediately on _go — stub it to prevent real protocol navigation.
-      sinon.stub(element, '_openDriveUrl');
     });
 
     teardown(() => sinon.restore());
@@ -123,52 +118,37 @@ export function addGoErrorSuites(getElement) {
     test('shows error toast when token.get rejects', async () => {
       const element = getElement();
       sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
+      sinon.stub(element.$.dialog, 'toggle');
       element._go();
       await nextTick();
       expect(toastStub.open).to.have.been.calledOnce;
       expect(toastStub.text).to.include('error occurred');
     });
-
-    test('does not open dialog when token.get rejects', async () => {
-      const element = getElement();
-      sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-      element._go();
-      await nextTick();
-      expect(dialogToggleStub).to.not.have.been.called;
-    });
   });
 
   suite('_go — no token registered (Drive not authenticated)', () => {
-    let toastStub;
-
     setup(() => {
       const element = getElement();
-      toastStub = stubToast(element);
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-      // _openDriveUrl fires immediately on _go — stub it to prevent real protocol navigation.
-      sinon.stub(element, '_openDriveUrl');
     });
 
     teardown(() => sinon.restore());
 
-    test('opens install dialog when token list is empty', async () => {
-      const element = getElement();
-      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-      element._go();
-      await nextTick();
-      expect(dialogToggleStub).to.have.been.calledOnce;
-      expect(toastStub.open).to.not.have.been.called;
-    });
-
-    test('does not show error toast when token list is empty', async () => {
+    test('sets _showInstall to true when token list is empty', async () => {
       const element = getElement();
       sinon.stub(element.$.token, 'get').resolves({ entries: [] });
       sinon.stub(element.$.dialog, 'toggle');
       element._go();
       await nextTick();
-      expect(toastStub.open).to.not.have.been.called;
+      expect(element._showInstall).to.be.true;
+    });
+
+    test('opens the dialog immediately on _go', () => {
+      const element = getElement();
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
+      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+      element._go();
+      expect(dialogToggleStub).to.have.been.calledOnce;
     });
   });
 
@@ -176,65 +156,19 @@ export function addGoErrorSuites(getElement) {
     setup(() => {
       const element = getElement();
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-      sinon.stub(element, '_openDriveUrl');
     });
 
     teardown(() => sinon.restore());
 
-    test('ignores clicks while the install dialog is open', () => {
+    test('ignores clicks while the dialog is open', () => {
       const element = getElement();
       sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
-      // Simulate dialog being open by setting the property directly.
       element.$.dialog.opened = true;
+      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
 
       element._go();
 
-      expect(element._openDriveUrl).to.not.have.been.called;
-    });
-  });
-}
-
-/**
- * Registers the canonical `_openDriveUrl` wiring test against an element getter.
- *
- * Verifies that the element's `_openDriveUrl` delegates to the shared protocol
- * handler and wires the dialog toggle correctly.  The blur/debounce logic itself
- * is tested in nuxeo-drive-protocol-handler.test.js.
- *
- * @param {Function} getElement  - Returns the element under test.
- * @param {string}   sampleUrl   - A valid nxdrive:// URL for the element type.
- */
-export function addOpenDriveUrlSuite(getElement, sampleUrl) {
-  suite('_openDriveUrl', () => {
-    teardown(() => sinon.restore());
-
-    test('delegates to the shared openDriveUrl and calls dialog.toggle as callback', () => {
-      const element = getElement();
-      const clock = sinon.useFakeTimers();
-      try {
-        const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-        expect(() => element._openDriveUrl(sampleUrl)).to.not.throw();
-        // Tick past DRIVE_OPEN_TIMEOUT_MS (150ms) to trigger the primary timeout callback.
-        clock.tick(200);
-        expect(dialogToggleStub).to.have.been.calledOnce;
-      } finally {
-        clock.restore();
-      }
-    });
-
-    test('cancelRef suppresses dialog.toggle when set to cancelled before timeout fires', () => {
-      const element = getElement();
-      const clock = sinon.useFakeTimers();
-      try {
-        const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-        const cancelRef = { cancelled: false };
-        element._openDriveUrl(sampleUrl, cancelRef);
-        cancelRef.cancelled = true;
-        clock.tick(200);
-        expect(dialogToggleStub).to.not.have.been.called;
-      } finally {
-        clock.restore();
-      }
+      expect(dialogToggleStub).to.not.have.been.called;
     });
   });
 }

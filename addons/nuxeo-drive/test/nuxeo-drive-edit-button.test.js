@@ -17,13 +17,7 @@ limitations under the License.
 */
 import { fixture, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-drive-edit-button.js';
-import {
-  setupI18n,
-  nextTick,
-  addGoErrorSuites,
-  addOpenDriveUrlSuite,
-  addShowErrorSuite,
-} from './nuxeo-drive-test-helpers.js';
+import { setupI18n, nextTick, addGoErrorSuites, addShowErrorSuite } from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
@@ -43,31 +37,27 @@ suite('nuxeo-drive-edit-button — error handling', () => {
     element = await fixture(html`<nuxeo-drive-edit-button></nuxeo-drive-edit-button>`);
   });
 
-  // Shared suites: _go token-fetch failure, _go no-token, _showError, _openDriveUrl
+  // Shared suites: _go token-fetch failure, _go no-token, _showError
   addGoErrorSuites(() => element);
   addShowErrorSuite(() => element);
-  addOpenDriveUrlSuite(
-    () => element,
-    'nxdrive://edit/localhost/user/Administrator/repo/default/nxdocid/abc/filename/test.docx',
-  );
 
   suite('_go — Drive installed and token present', () => {
     teardown(() => {
       sinon.restore();
     });
 
-    test('calls _openDriveUrl with driveEditURL when token exists', async () => {
+    test('opens dialog immediately and does not set _showInstall when token exists', async () => {
       element.user = { id: 'Administrator' };
       element.document = { uid: 'doc-uid-1', repository: 'default' };
       element.blob = { data: 'http://localhost/nxfile/default/doc-uid-1/file:content/test.docx', name: 'test.docx' };
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
+      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
 
       element._go();
       await nextTick();
 
-      expect(openDriveUrlStub).to.have.been.calledOnce;
-      expect(openDriveUrlStub.firstCall.args[0]).to.match(/^nxdrive:\/\/edit\//);
+      expect(dialogToggleStub).to.have.been.calledOnce;
+      expect(element._showInstall).to.be.false;
     });
   });
 

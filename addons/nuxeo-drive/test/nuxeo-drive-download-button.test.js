@@ -18,7 +18,7 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
-import { setupI18n, nextTick, addOpenDriveUrlSuite } from './nuxeo-drive-test-helpers.js';
+import { setupI18n, nextTick } from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
@@ -254,8 +254,8 @@ suite('nuxeo-drive-download-button', () => {
     setup(() => {
       toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
-      // Stub _openDriveUrl to prevent real protocol navigation in Karma.
-      sinon.stub(element, '_openDriveUrl');
+      // Stub dialog.toggle to prevent real dialog interaction.
+      sinon.stub(element.$.dialog, 'toggle');
     });
 
     teardown(() => {
@@ -283,8 +283,7 @@ suite('nuxeo-drive-download-button', () => {
       await nextTick();
 
       expect(toastStub.open).to.not.have.been.called;
-      expect(element._openDriveUrl).to.have.been.calledOnce;
-      expect(element._openDriveUrl.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-download\//);
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
     });
 
     test('shows noDocumentsSelected error when select-all is active but view has no items', () => {
@@ -314,8 +313,6 @@ suite('nuxeo-drive-download-button', () => {
     });
 
     test('succeeds after deselecting items so count drops to ≤ 25, even though selectAllActive stays true', async () => {
-      // Simulates the bug fix: select-all on 36 docs → deselect 13 → 23 selectedItems.
-      // selectAllActive remains true but selectedItems has only 23 entries.
       const viewStub = {
         selectAllActive: true,
         behaviors: [...PageProviderDisplayBehavior],
@@ -333,8 +330,7 @@ suite('nuxeo-drive-download-button', () => {
       await nextTick();
 
       expect(toastStub.open).to.not.have.been.called;
-      expect(element._openDriveUrl).to.have.been.calledOnce;
-      expect(element._openDriveUrl.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-download\//);
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
     });
 
     test('shows tooManyDocuments error when more than 25 documents are selected', async () => {
@@ -350,70 +346,28 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = Array.from({ length: 25 }, (_, i) => {
         return { uid: `uid-${i}` };
       });
-      // Stub token.get to prevent real network call — promise never resolves so _navigate is never reached
       sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
       element._download();
-      // The toast should not have been opened at this point (no guard condition triggered)
       expect(toastStub.open).to.not.have.been.called;
     });
 
-    test('calls _openDriveUrl immediately (before token fetch resolves)', () => {
-      element.documents = [{ uid: 'doc-uid-1' }];
-      // Token fetch never resolves — confirms _openDriveUrl fires synchronously.
-      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
-
-      element._download();
-
-      expect(element._openDriveUrl).to.have.been.calledOnce;
-      expect(element._openDriveUrl.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-download\//);
-    });
-
-    test('passes a cancelRef object as second argument to _openDriveUrl', () => {
+    test('opens dialog immediately on _download (before token fetch resolves)', () => {
       element.documents = [{ uid: 'doc-uid-1' }];
       sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
 
       element._download();
 
-      const cancelRef = element._openDriveUrl.firstCall.args[1];
-      expect(cancelRef).to.be.an('object');
-      expect(cancelRef).to.have.property('cancelled', false);
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
     });
 
-    test('calls _openDriveUrl with directDownloadUrl when a valid Drive token exists', async () => {
-      element.documents = [{ uid: 'doc-uid-1' }, { uid: 'doc-uid-2' }];
-      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-
-      element._download();
-      await nextTick();
-
-      expect(element._openDriveUrl).to.have.been.calledOnce;
-      const calledUrl = element._openDriveUrl.firstCall.args[0];
-      expect(calledUrl).to.match(/^nxdrive:\/\/direct-download\/[A-Za-z0-9_-]+$/);
-    });
-
-    test('opens Drive install dialog when no Drive token is found', async () => {
+    test('sets _showInstall when no Drive token is found', async () => {
       element.documents = [{ uid: 'doc-uid-1' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
 
       element._download();
       await nextTick();
 
-      // cancelRef.cancelled is set to true and dialog.toggle() is called directly by the token path.
-      expect(dialogToggleStub).to.have.been.calledOnce;
-      expect(toastStub.open).to.not.have.been.called;
-    });
-
-    test('cancels the heuristic dialog and sets cancelRef.cancelled when no token found', async () => {
-      element.documents = [{ uid: 'doc-uid-1' }];
-      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      sinon.stub(element.$.dialog, 'toggle');
-
-      element._download();
-      await nextTick();
-
-      const cancelRef = element._openDriveUrl.firstCall.args[1];
-      expect(cancelRef.cancelled).to.be.true;
+      expect(element._showInstall).to.be.true;
     });
 
     test('shows directTransfer.failed error when token.get rejects', async () => {
@@ -434,7 +388,7 @@ suite('nuxeo-drive-download-button', () => {
 
       element._download();
 
-      expect(element._openDriveUrl).to.not.have.been.called;
+      expect(element.$.dialog.toggle).to.not.have.been.called;
     });
 
     test('folder UID is collected as a single item (folder = one ID)', () => {
@@ -467,18 +421,11 @@ suite('nuxeo-drive-download-button', () => {
       element._download();
       await nextTick();
 
-      expect(element._openDriveUrl).to.have.been.calledOnce;
-      // Verify the UID is encoded in the URL built for the download flow
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
       const originalUrl = element._buildOriginalUrl();
       expect(originalUrl).to.include('single-doc-uid');
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // _openDriveUrl — wires the shared openDriveUrl with the element's dialog toggle
-  // The blur/debounce detection logic itself is tested in nuxeo-drive-protocol-handler.test.js
-  // ---------------------------------------------------------------------------
-  addOpenDriveUrlSuite(() => element, 'nxdrive://direct-download/abc123');
 
   // ---------------------------------------------------------------------------
   // _buildOriginalUrl — server info

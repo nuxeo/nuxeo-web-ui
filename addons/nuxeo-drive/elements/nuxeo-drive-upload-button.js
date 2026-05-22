@@ -19,7 +19,7 @@ import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
-import { openDriveUrl } from './nuxeo-drive-protocol-handler.js';
+import { navigateTo } from './nuxeo-drive-protocol-handler.js';
 import './nuxeo-drive-icons.js';
 
 window.nuxeo = window.nuxeo || {};
@@ -39,6 +39,26 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       showLabel: {
         type: Boolean,
         reflectToAttribute: true,
+        value: false,
+      },
+
+      _showInstall: {
+        type: Boolean,
+        value: false,
+      },
+
+      _launched: {
+        type: Boolean,
+        value: false,
+      },
+
+      _driveOpened: {
+        type: Boolean,
+        value: false,
+      },
+
+      _hasToken: {
+        type: Boolean,
         value: false,
       },
     };
@@ -64,9 +84,82 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       </template>
 
       <nuxeo-dialog id="dialog" with-backdrop no-cancel-on-outside-click>
-        <div class="vertical layout">
-          <h1>[[i18n('driveEditButton.dialog.heading')]]</h1>
-          <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
+        <style>
+          #dialog {
+            margin-top: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            max-height: 80vh;
+          }
+
+          .dialog-content {
+            text-align: center;
+            padding: 24px 32px;
+          }
+
+          .dialog-content h1 {
+            margin: 0 0 12px;
+            font-size: 1.6em;
+          }
+
+          .dialog-content p {
+            color: var(--secondary-text-color, #666);
+            margin: 0 0 32px;
+          }
+
+          .launch-btn {
+            display: block;
+            background-color: var(--nuxeo-primary-color, #0066ff);
+            color: #fff;
+            text-transform: uppercase;
+            margin: 0 auto 16px;
+            width: fit-content;
+            min-width: 200px;
+          }
+
+          .launch-btn[disabled] {
+            background-color: var(--disabled-text-color, #9e9e9e);
+          }
+
+          .install-link {
+            display: block;
+            text-align: center;
+            margin-top: 4px;
+            font-size: 0.9em;
+          }
+
+          .dialog-content .failure-msg {
+            color: var(--secondary-text-color, #666);
+            margin: 12px 0 0;
+            font-size: 0.9em;
+          }
+
+          .dialog-content .install-prompt {
+            color: var(--secondary-text-color, #666);
+            margin: 4px 0 8px;
+            font-size: 0.9em;
+          }
+
+          .buttons {
+            justify-content: center;
+          }
+        </style>
+        <div class="dialog-content">
+          <h1>[[i18n('driveButton.dialog.heading')]]</h1>
+          <p>[[i18n('driveButton.dialog.description')]]</p>
+          <paper-button class="launch-btn" on-click="_launchDrive" noink disabled$="[[_launched]]"
+            >[[i18n('driveButton.dialog.open')]]</paper-button
+          >
+          <template is="dom-if" if="[[_showFailure(_launched, _driveOpened)]]">
+            <p class="failure-msg">[[i18n('driveButton.dialog.couldNotOpen')]]</p>
+          </template>
+          <template is="dom-if" if="[[_showInstall]]">
+            <p class="install-prompt">[[i18n('driveButton.dialog.install.prompt')]]</p>
+            <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
+          </template>
+          <template is="dom-if" if="[[!_showInstall]]">
+            <a class="install-link" href="#" on-click="_toggleInstall">[[i18n('driveButton.dialog.install.link')]]</a>
+          </template>
         </div>
         <div class="buttons">
           <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
@@ -91,44 +184,45 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   }
 
   _go() {
-    // Ignore clicks while the install dialog is already open.
     if (this.$.dialog.opened) {
       return;
     }
 
-    // Navigate immediately; token check runs in parallel to detect missing Drive auth.
-    const cancelRef = { cancelled: false };
-    this._openDriveUrl(this.directTransferUrl, cancelRef);
-
+    this._showInstall = false;
+    this._launched = false;
+    this._driveOpened = false;
+    this._hasToken = false;
     this.$.token
       .get()
       .then((response) => {
         const tokens = response.entries.map((token) => token.id);
-        if (!tokens || !tokens.length) {
-          cancelRef.cancelled = true;
-          if (!this.$.dialog.opened) {
-            this.$.dialog.toggle();
-          }
+        if (tokens && tokens.length) {
+          this._hasToken = true;
         }
       })
-      .catch((error) => {
-        cancelRef.cancelled = true;
-        console.error('Token fetch failed:', error);
-        this._showError(this.i18n('driveUpload.directTransfer.failed'));
-      });
+      .catch(() => {});
+
+    this.$.dialog.toggle();
   }
 
-  // Invokes a nxdrive:// URL; shows the install dialog if Drive did not handle it.
-  // cancelRef: optional { cancelled: boolean } — if set to true before the dialog fires, suppresses it.
-  _openDriveUrl(url, cancelRef) {
-    openDriveUrl(url, () => {
-      if (cancelRef && cancelRef.cancelled) {
-        return;
-      }
-      if (!this.$.dialog.opened) {
-        this.$.dialog.toggle();
-      }
-    });
+  _launchDrive() {
+    this._launched = true;
+    this._driveOpened = false;
+    const onBlur = () => {
+      window.removeEventListener('blur', onBlur);
+      this._driveOpened = true;
+    };
+    window.addEventListener('blur', onBlur);
+    navigateTo(this.directTransferUrl);
+  }
+
+  _showFailure(launched, driveOpened) {
+    return launched && !driveOpened;
+  }
+
+  _toggleInstall(e) {
+    e.preventDefault();
+    this._showInstall = true;
   }
 
   _showError(message) {

@@ -17,14 +17,7 @@ limitations under the License.
 */
 import { fixture, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-drive-upload-button.js';
-import {
-  setupI18n,
-  nextTick,
-  stubToast,
-  addGoErrorSuites,
-  addOpenDriveUrlSuite,
-  addShowErrorSuite,
-} from './nuxeo-drive-test-helpers.js';
+import { setupI18n, nextTick, stubToast, addGoErrorSuites, addShowErrorSuite } from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
@@ -47,63 +40,45 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     element.document = { path: '/default-domain/workspaces/test-folder' };
   });
 
-  // Shared suites: _go token-fetch failure, _go no-token, _showError, _openDriveUrl
+  // Shared suites: _go token-fetch failure, _go no-token, _showError
   addGoErrorSuites(() => element);
   addShowErrorSuite(() => element);
-  addOpenDriveUrlSuite(() => element, 'nxdrive://direct-transfer/localhost/some-path');
 
   suite('_go — Drive installed and token present', () => {
     teardown(() => {
       sinon.restore();
     });
 
-    test('calls _openDriveUrl immediately (before token fetch resolves)', () => {
+    test('opens dialog immediately on _go (before token fetch resolves)', () => {
       element.document = { path: '/default-domain/workspaces/my-folder' };
-      // Token fetch never resolves — confirms _openDriveUrl fires synchronously.
       sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
-      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
+      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
 
       element._go();
 
-      expect(openDriveUrlStub).to.have.been.calledOnce;
-      expect(openDriveUrlStub.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-transfer\//);
+      expect(dialogToggleStub).to.have.been.calledOnce;
     });
 
-    test('passes a cancelRef object as second argument to _openDriveUrl', () => {
-      element.document = { path: '/default-domain/workspaces/my-folder' };
-      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
-      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
-
-      element._go();
-
-      const cancelRef = openDriveUrlStub.firstCall.args[1];
-      expect(cancelRef).to.be.an('object');
-      expect(cancelRef).to.have.property('cancelled', false);
-    });
-
-    test('calls _openDriveUrl with directTransferUrl when token exists', async () => {
+    test('does not set _showInstall when token exists', async () => {
       element.document = { path: '/default-domain/workspaces/my-folder' };
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
+      sinon.stub(element.$.dialog, 'toggle');
 
       element._go();
       await nextTick();
 
-      expect(openDriveUrlStub).to.have.been.calledOnce;
-      expect(openDriveUrlStub.firstCall.args[0]).to.match(/^nxdrive:\/\/direct-transfer\//);
+      expect(element._showInstall).to.be.false;
     });
 
-    test('cancels the heuristic dialog and sets cancelRef.cancelled when no token found', async () => {
+    test('sets _showInstall to true when no token found', async () => {
       element.document = { path: '/default-domain/workspaces/my-folder' };
       sinon.stub(element.$.token, 'get').resolves({ entries: [] });
       sinon.stub(element.$.dialog, 'toggle');
-      const openDriveUrlStub = sinon.stub(element, '_openDriveUrl');
 
       element._go();
       await nextTick();
 
-      const cancelRef = openDriveUrlStub.firstCall.args[1];
-      expect(cancelRef.cancelled).to.be.true;
+      expect(element._showInstall).to.be.true;
     });
   });
 
