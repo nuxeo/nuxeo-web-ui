@@ -7,7 +7,7 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ProvidePlugin } = require('webpack');
 
-const log = require('webpack-log')({ name: 'WEBUI' });
+const log = { info: (msg) => console.warn(`\u2B21 WEBUI: ${msg}`) };
 
 // read .env file and assign to process.env
 require('dotenv').config();

@@ -13,35 +13,33 @@
     "node": ">=18.0.0"
   },
   "overrides": {
-    "ws": "8.17.1",
-    "tar-fs": "^3.0.9"
+    "ws": "8.20.1",
+    "tar-fs": "^3.0.9",
+    "serialize-javascript": "^7.0.5",
+    "tmp": "^0.2.4"
   },
   "dependencies": {
     "@babel/core": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@babel/register": "^7.14.5",
+    "@cucumber/cucumber": "^10.3.1",
     "@cucumber/tag-expressions": "^2.0.4",
-    "@wdio/cli": "9.12.7",
-    "@wdio/cucumber-framework": "9.12.6",
-    "@wdio/local-runner": "9.12.7",
-    "@wdio/spec-reporter": "9.12.6",
+    "@wdio/cli": "9.27.1",
+    "@wdio/cucumber-framework": "9.27.1",
+    "@wdio/local-runner": "9.27.1",
+    "@wdio/spec-reporter": "9.27.1",
     "babel-plugin-transform-rename-import": "^2.3.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
     "chai": "^4.1.2",
     "check-engine": "^1.10.0",
     "chrome-launcher": "^0.14.0",
-    "cucumber-junit": "^1.7.1",
     "fs-extra": "^9.1.0",
-    "fs-finder": "^1.8.1",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.29.4",
     "multiple-cucumber-html-reporter": "^1.18.0",
     "node-fetch": "^2.6.1",
     "nuxeo": "^4.0.3",
-    "wdio": "^6.0.1",
     "wdio-cucumberjs-json-reporter": "6.0.1",
-    "webdriverio": "9.12.7"
+    "webdriverio": "9.27.1"
   }
 }
