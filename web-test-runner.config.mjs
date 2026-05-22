@@ -39,7 +39,8 @@ export default {
   hostname: '127.0.0.1',
   testsStartTimeout: 180000,
   testsFinishTimeout: 900000,
-  browserStartTimeout: 30000,
+  // Single entry imports 114 suite modules; dev-server transform + first page load can exceed 30s in CI.
+  browserStartTimeout: 120000,
   coverage: coverageEnabled,
   coverageConfig: coverageEnabled
     ? {
@@ -66,7 +67,7 @@ export default {
   browsers: [
     chromeLauncher({
       launchOptions: {
-        args: ['--disable-gpu', '--no-sandbox'],
+        args: ['--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'],
       },
     }),
   ],
