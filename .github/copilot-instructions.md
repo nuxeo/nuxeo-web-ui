@@ -34,14 +34,14 @@ elements/             → All Polymer web components
 addons/               → Optional addon bundles (Drive, LiveConnect, CSV, Spreadsheet, etc.)
 i18n/                 → Localization JSON files (16 languages), merged at build time
 themes/               → Themeable CSS (default, dark, light, kawaii)
-test/                 → Unit tests (Karma + Mocha + Chai + Sinon)
+test/                 → Unit tests (@web/test-runner + Mocha + Chai + Sinon)
 ftest/                → Functional tests (Cucumber/Gherkin .feature files)
 packages/
   nuxeo-web-ui-ftest/ → WDIO test framework (page objects, step definitions, hooks)
   nuxeo-designer-catalog/ → Design element catalog builder
 plugin/               → Maven sub-modules (web-ui addon/marketplace, itests, a11y, metrics)
 server/               → Nginx configs for Docker-based deployment
-scripts/              → Build helpers (merge-messages.js, test-runner.js)
+scripts/              → Build helpers (merge-messages.js, test/unit/, test/ftest/)
 ```
 
 ## Commands
@@ -52,8 +52,8 @@ scripts/              → Build helpers (merge-messages.js, test-runner.js)
 | Dev server | `npm start` | Webpack dev server at `:5000`, proxies to Nuxeo at `NUXEO_HOST` (default `localhost:8080`) |
 | Lint | `npm run lint` | ESLint (flat config) + Prettier check |
 | Format | `npm run format` | Prettier write → ESLint fix |
-| Unit tests | `npm test` | Karma + Chrome headless, `test/**/*.test.js` |
-| Unit tests (watch) | `npm run test:watch` | Auto-rerun on changes |
+| Unit tests | `npm test` | Web Test Runner + Chrome headless; 1 runner file, all suites via `test/load-all-tests.js` |
+| Unit tests (watch) | `npm run test:watch` | Auto-rerun on changes (no coverage) |
 | Functional tests | `npm run ftest` | WebdriverIO + Cucumber, requires running Nuxeo server |
 | Production build | `npm run build` | Output in `dist/` |
 | Bundle analysis | `npm run build:analyze` | Webpack bundle analyzer |
@@ -95,10 +95,13 @@ scripts/              → Build helpers (merge-messages.js, test-runner.js)
 
 ### Unit Tests
 
-- Framework: Karma + Mocha + Chai + Sinon (globals: `expect`, `assert`, `sinon`)
+- Framework: `@web/test-runner` + Mocha + Chai + Sinon (globals: `expect`, `assert`, `sinon`)
+- **One runner file**: `test/load-all-tests.js` imports every `*.test.js` — WTR reports `1/1 test files`; ignore that and read Mocha pass/fail counts
 - Helpers: `@nuxeo/testing-helpers` for creating/fixture-ing elements and mocking server
 - Setup: `test/setup.js` configures chai with sinon-chai
-- Run a single test: not directly supported — use `grep` in karma config or `.only` (but `no-only-tests` lint rule will catch it)
+- After adding `test/foo.test.js`: run `npm run update-test-load-all` (or `npm test`) to refresh the barrel
+- Run a single suite: `npx web-test-runner --files test/nuxeo-keys.test.js` (must import `./setup.js` or use the full barrel)
+- Do not use `.only` — the `no-only-tests` lint rule catches it
 
 ### Functional Tests
 
