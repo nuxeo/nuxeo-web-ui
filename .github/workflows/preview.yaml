@@ -19,10 +19,8 @@ on:
         required: false
 
 env:
-  DOCKER_REGISTRY: us-east1-docker.pkg.dev
-  DOCKER_IMAGE: ${{ secrets.GKE_PROJECT }}/webui/nuxeo-web-ui
-  GKE_CLUSTER: jx-prod
-  GKE_ZONE: us-east1-b
+  REGISTRY: docker-internal.packages.nuxeo.com
+  REPOSITORY: nuxeo/nuxeo-web-ui
 
 jobs:
   id:
@@ -37,7 +35,7 @@ jobs:
     needs: id
     name: Setup
     outputs:
-      url: ${{ steps.preview.outputs.url }}
+      image: ${{ steps.preview.outputs.image }}
     if: >
       (github.event.action == 'labeled' && github.event.label.name == 'preview') ||
       contains(github.event.pull_request.labels.*.name, 'preview') ||
@@ -79,7 +77,6 @@ jobs:
       - name: Prepare environment
         run: |
           echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME_SANITIZED" >> $GITHUB_ENV
-          echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME_SANITIZED)))" >> $GITHUB_ENV
 
       - name: Determine nuxeo-elements branch to use
         id: pick_nuxeo_elements_branch
@@ -112,12 +109,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Login to DockerHub
+      - name: Login to Docker registry
         uses: docker/login-action@v4
         with:
-          registry: ${{ env.DOCKER_REGISTRY }}
-          username: _json_key
-          password: ${{ secrets.GKE_SA_KEY }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.NUXEO_DOCKER_USERNAME }}
+          password: ${{ secrets.NUXEO_DOCKER_TOKEN }}
 
       - name: Build and push server image
         uses: docker/build-push-action@v7
@@ -126,7 +123,7 @@ jobs:
           pull: true
           push: true
           file: server/Dockerfile
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/server:${{ env.VERSION }}
 
       - name: Build and push image
         uses: docker/build-push-action@v7
@@ -135,45 +132,14 @@ jobs:
           pull: true
           push: true
           file: Dockerfile
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
-          build-args: SERVER_IMAGE=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}
+          build-args: SERVER_IMAGE=${{ env.REGISTRY }}/${{ env.REPOSITORY }}/server:${{ env.VERSION }}
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v3
-        with:
-          credentials_json: ${{ secrets.GKE_SA_KEY }}
-
-      - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v3.0.0
-        with:
-          cluster_name: ${{ env.GKE_CLUSTER }}
-          location: ${{ env.GKE_ZONE }}
-          project_id: ${{ secrets.GKE_PROJECT }}
-
-      - name: Install preview
+      - name: Set preview image reference
         id: preview
-        working-directory: ./charts/preview
         run: |
-          # add helm jx repo
-          helm repo add jx https://jenkins-x-charts.github.io/v2/
-
-          # substitute env variables in values.yaml
-          mv values.yaml values.yaml.tosubst
-          envsubst < values.yaml.tosubst > values.yaml
-
-          # update helm deps
-          helm dependency update .
-
-          helm upgrade --install \
-            --namespace ${PREVIEW_NAMESPACE} \
-            --create-namespace \
-            ${PREVIEW_NAMESPACE} .
-
-          # ensure the deployment is restarted to pull the new preview image
-          kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
-
-          echo "url=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_OUTPUT
-          echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
+          echo "image=${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
+          echo "PREVIEW_IMAGE=${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}" >> $GITHUB_ENV
 
       - uses: actions/github-script@v9.0.0
         if: github.event_name == 'pull_request'
@@ -184,15 +150,15 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `:star: PR built and available [here](${process.env.PREVIEW_URL})`
+              body: `:star: PR preview image published: \`${process.env.PREVIEW_IMAGE}\``
             })
 
   result:
-    name: "Result: ${{ needs.preview.outputs.url }}"
+    name: "Result: ${{ needs.preview.outputs.image }}"
     needs: preview
     runs-on: ubuntu-latest
     permissions:
       contents: read
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - run: echo ${{ needs.preview.outputs.url }}
+      - run: echo ${{ needs.preview.outputs.image }}
