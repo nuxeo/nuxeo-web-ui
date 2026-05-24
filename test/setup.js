@@ -298,8 +298,9 @@ suiteTeardown(async function coverageMaterializationTeardown() {
 
   if (failures.length > 0) {
     const message = failures.map((f) => `${f.specifier}: ${f.err && f.err.message ? f.err.message : f.err}`).join('\n');
+    // console.error so WTR filterBrowserLogs surfaces this in CI (warn is filtered unless WTR_VERBOSE=1).
     // eslint-disable-next-line no-console
-    console.warn(
+    console.error(
       `coverage materialization: ${failures.length} of ${toLoad.length} modules failed to load (0% will be injected in lcov):\n${message}`,
     );
   }
