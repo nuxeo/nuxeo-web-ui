@@ -299,9 +299,8 @@ Polymer({
     this.async(() => {
       const dropdowns = this.$.table.querySelectorAll('nuxeo-dropdown-aggregation');
       dropdowns.forEach((dd) => {
-        const cell =
-          (dd.parentNode && dd.parentNode.host) || (dd.closest && dd.closest('nuxeo-data-table-cell')) || dd.parentNode;
-        const key = cell && cell.column && cell.column.key;
+        const cell = dd.parentNode?.host || dd.closest?.('nuxeo-data-table-cell') || dd.parentNode;
+        const key = cell?.column?.key;
         if (key && aggregations[key]) {
           dd.data = aggregations[key];
         }
@@ -313,7 +312,7 @@ Polymer({
   // whenever its `filterValue` updates. We listen at the host and re-derive the
   // visible entries from the unfiltered source.
   _onColumnFilterChanged(e) {
-    const detail = e && e.detail;
+    const detail = e?.detail;
     if (!detail) {
       return;
     }
@@ -321,8 +320,8 @@ Polymer({
     if (!key || key === 'actions') {
       return;
     }
-    const value = detail.value;
-    const next = Object.assign({}, this._filters);
+    const { value } = detail;
+    const next = { ...this._filters };
     if (value == null || (Array.isArray(value) && value.length === 0)) {
       delete next[key];
     } else {
@@ -336,7 +335,7 @@ Polymer({
     const hasFilter = filters && Object.keys(filters).length > 0;
     // show the table when there are visible entries, or when a filter is active but matches
     // nothing (so the table's empty-when-filtered label is rendered instead of hiding the table)
-    if ((entries && entries.length) || (hasFilter && allEntries && allEntries.length)) {
+    if (entries?.length || (hasFilter && allEntries?.length)) {
       return 'display: block;';
     }
     return 'display: none;';
@@ -438,7 +437,7 @@ Polymer({
   },
 
   _formattedFilterableValue(entry, key) {
-    const val = entry && entry.properties ? entry.properties[key] : undefined;
+    const val = entry?.properties?.[key];
     if (val == null) {
       return '';
     }
@@ -456,7 +455,7 @@ Polymer({
       this.entries = all.slice();
     } else {
       this.entries = all.filter((entry) => {
-        if (!entry || !entry.properties) {
+        if (!entry?.properties) {
           return false;
         }
         return keys.every((k) => {
@@ -465,7 +464,7 @@ Polymer({
           if (Array.isArray(filterVal)) {
             // dropdown multi-select: match when the cell value is one of the
             // selected bucket keys (empty selection is treated as no filter).
-            return filterVal.length === 0 || filterVal.indexOf(cell) >= 0;
+            return filterVal.length === 0 || filterVal.includes(cell);
           }
           return cell.toLowerCase().indexOf(String(filterVal).toLowerCase()) === 0;
         });
@@ -510,11 +509,11 @@ Polymer({
   _filterByFor(col) {
     // Only set `filter-by` on non-action columns so the data-table-column emits
     // `column-filter-changed` events for those columns.
-    return col && col.key && col.key !== 'actions' ? col.key : '';
+    return col?.key && col.key !== 'actions' ? col.key : '';
   },
 
   _cellValue(item, prop) {
-    if (item && item.properties && prop) {
+    if (item?.properties && prop) {
       if (prop === 'obsolete') {
         return item.properties[prop] > 0 ? this.i18n('label.yes') : this.i18n('label.no');
       }
