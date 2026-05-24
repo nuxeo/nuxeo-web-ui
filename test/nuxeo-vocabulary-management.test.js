@@ -383,6 +383,63 @@ suite('nuxeo-vocabulary-management', () => {
     });
   });
 
+  suite('_syncFilterDropdowns', () => {
+    test('should no-op when aggregations is falsy', () => {
+      const asyncSpy = sinon.spy(element, 'async');
+      try {
+        element._syncFilterDropdowns(null);
+        element._syncFilterDropdowns(undefined);
+        expect(asyncSpy).to.not.have.been.called;
+      } finally {
+        asyncSpy.restore();
+      }
+    });
+
+    test('should no-op when this.$.table is missing', () => {
+      const asyncSpy = sinon.spy(element, 'async');
+      const originalTable = element.$.table;
+      delete element.$.table;
+      try {
+        element._syncFilterDropdowns({ id: { extendedBuckets: [], selection: [] } });
+        expect(asyncSpy).to.not.have.been.called;
+      } finally {
+        if (originalTable) {
+          element.$.table = originalTable;
+        }
+        asyncSpy.restore();
+      }
+    });
+
+    test('should push aggregation data onto each rendered dropdown by column key', () => {
+      const ddWithHost = { data: null, parentNode: { host: { column: { key: 'id' } } } };
+      const ddWithClosest = {
+        data: null,
+        parentNode: {},
+        closest: (sel) => (sel === 'nuxeo-data-table-cell' ? { column: { key: 'label' } } : null),
+      };
+      const ddFallbackToParent = { data: null, parentNode: { column: { key: 'obsolete' } } };
+      const ddWithoutKey = { data: null, parentNode: {} };
+      const dropdowns = [ddWithHost, ddWithClosest, ddFallbackToParent, ddWithoutKey];
+      element.$.table = { querySelectorAll: () => dropdowns };
+
+      const aggregations = {
+        id: { extendedBuckets: [{ key: 'a' }], selection: [] },
+        label: { extendedBuckets: [{ key: 'b' }], selection: [] },
+        // obsolete intentionally omitted to exercise `aggregations[key]` falsy branch
+      };
+      sinon.stub(element, 'async').callsFake((fn) => fn());
+      try {
+        element._syncFilterDropdowns(aggregations);
+        expect(ddWithHost.data).to.equal(aggregations.id);
+        expect(ddWithClosest.data).to.equal(aggregations.label);
+        expect(ddFallbackToParent.data).to.be.null;
+        expect(ddWithoutKey.data).to.be.null;
+      } finally {
+        element.async.restore();
+      }
+    });
+  });
+
   suite('_layoutHref', () => {
     test('should return layout URL for schema', () => {
       const href = element._layoutHref('coverage');
