@@ -3,16 +3,16 @@
  * Build script: writes `test/coverage-imports-data.js` (gitignored).
  *
  * Purpose:
- * Istanbul only knows about JavaScript that was loaded in the browser. Many UI modules are never
+ * Coverage tools only know about JavaScript that was loaded in the browser. Many UI modules are never
  * imported by any unit test; without a manifest + bulk import they disappear from coverage reports
  * and percentages look inflated. This script globs all app element sources and emits a sorted list
  * of project-relative paths. `test/setup.js` imports every path in a coverage-only `suiteTeardown`.
  *
  * Scope:
  * - Included: all `.js` files under `elements/` and under each addon's `elements/` tree (see `patterns` below).
- * - Excluded: paths in `EXCLUDE_PREFIXES` / `EXCLUDE_EXACT` that cannot be safely loaded in Karma
- *   (e.g. routing bootstrap, problematic addon trees). Not included: webpack bundles, `scripts/`,
- *   `packages/`, or addon code outside those element directories.
+ * - Excluded: paths in `EXCLUDE_PREFIXES` / `EXCLUDE_EXACT` that cannot be safely loaded in the
+ *   Web Test Runner ESM pipeline (e.g. routing bootstrap, problematic addon trees). Not included:
+ *   webpack bundles, `scripts/`, `packages/`, or addon code outside those element directories.
  *
  * Run: `npm run update-coverage-imports` (also runs at the start of `npm test`).
  */
@@ -60,7 +60,7 @@ const banner = `/**
  * AUTO-GENERATED — do not edit. Regenerate: npm run update-coverage-imports (runs in npm test).
  *
  * Exports \`coverageModulePaths\`: every app element module path under elements/ and each addon's
- * elements/ tree (minus excludes in generate-coverage-imports.js). Used only for Istanbul:
+ * elements/ tree (minus excludes in generate-coverage-imports.js). Used for coverage materialization:
  * test/setup.js imports these URLs after all tests in coverage mode so reports include files that
  * no unit test loads (they appear as 0% coverage instead of being missing).
  */

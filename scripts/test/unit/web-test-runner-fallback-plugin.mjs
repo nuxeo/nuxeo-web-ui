@@ -46,23 +46,23 @@ const TINY_JPEG = Uint8Array.from([
   0x00, 0xff, 0xd9,
 ]);
 
-function fallbackBody(path) {
-  if (path.startsWith('/api/v1/search/') || path.startsWith('/api/v1/task')) {
+function fallbackBody(urlPath) {
+  if (urlPath.startsWith('/api/v1/search/') || urlPath.startsWith('/api/v1/task')) {
     return EMPTY_DOCUMENTS;
   }
-  if (path.startsWith('/api/v1/automation/')) {
+  if (urlPath.startsWith('/api/v1/automation/')) {
     return EMPTY_ENTITY;
   }
-  if (path.startsWith('/api/v1/')) {
+  if (urlPath.startsWith('/api/v1/')) {
     return EMPTY_ENTITY;
   }
-  if (path.startsWith('/json/')) {
+  if (urlPath.startsWith('/json/')) {
     return '{}';
   }
-  if (path.endsWith('.html')) {
+  if (urlPath.endsWith('.html')) {
     return '<html><head></head><body></body></html>';
   }
-  if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+  if (urlPath.endsWith('.jpg') || urlPath.endsWith('.jpeg')) {
     return TINY_JPEG;
   }
   return null;
