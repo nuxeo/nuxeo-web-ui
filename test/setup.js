@@ -97,8 +97,8 @@ globalThis.should = chai.should();
 // triggering test has already passed (e.g. nuxeo-search-form's `visible change` test calls
 // `_visibleChanged()` which fires real iron-ajax requests against /api/v1/...). When those
 // requests reject as 404 / Aborted / Invalid json AFTER the test ends, the unhandled
-// rejection / window error reaches mocha and the test runner; uncaught errors can abort the run.
-// and treats the run as complete. Result: the remaining tests in the offending suite (and
+// rejection / window error reaches mocha and the test runner, which can abort the run and
+// treat it as complete. Result: the remaining tests in the offending suite (and
 // every suite registered after it — selection-toolbar, suggester, tasks-list, vocabulary-
 // management, workflow-*, etc.) never execute, the test count is artificially low, and
 // coverage on those modules looks like 0%.
@@ -110,16 +110,24 @@ const _isBenignNuxeoNetworkFailure = (info) => {
   if (info == null) {
     return false;
   }
-  const message = String((info && info.message) || info);
-  return (message.includes('Invalid json') || message.includes('No message')) && info.status === 404;
+  const message = String(typeof info === 'object' && info.message != null ? info.message : info);
+  const hasBenignMessage = message.includes('Invalid json') || message.includes('No message');
+  if (!hasBenignMessage) {
+    return false;
+  }
+  if (typeof info === 'object' && info.status != null) {
+    return info.status === 404;
+  }
+  return message.includes('404');
 };
 
 const _logIgnoredAsyncFailure = (label, info) => {
   if (_isBenignNuxeoNetworkFailure(info)) {
     return;
   }
+  const display = typeof info === 'object' && info.message != null ? info.message : info;
   // eslint-disable-next-line no-console
-  console.warn(`[test-setup] ignoring stray ${label} after test boundary:`, info);
+  console.warn(`[test-setup] ignoring stray ${label} after test boundary:`, display);
 };
 
 // Wrap ResizeObserver to defer notifications via requestAnimationFrame. Chrome occasionally
@@ -136,14 +144,14 @@ if (typeof window.ResizeObserver === 'function') {
             try {
               callback(entries, observer);
             } catch (err) {
-              _logIgnoredAsyncFailure('ResizeObserver', err && err.message);
+              _logIgnoredAsyncFailure('ResizeObserver', err);
             }
           });
         } else {
           try {
             callback(entries, observer);
           } catch (err) {
-            _logIgnoredAsyncFailure('ResizeObserver', err && err.message);
+            _logIgnoredAsyncFailure('ResizeObserver', err);
           }
         }
       });
@@ -155,7 +163,7 @@ window.addEventListener(
   'unhandledrejection',
   (event) => {
     const reason = event.reason;
-    _logIgnoredAsyncFailure('unhandledrejection', (reason && reason.message) || reason);
+    _logIgnoredAsyncFailure('unhandledrejection', reason);
     event.stopImmediatePropagation();
     event.preventDefault();
   },
@@ -165,7 +173,7 @@ window.addEventListener(
 window.addEventListener(
   'error',
   (event) => {
-    _logIgnoredAsyncFailure('error', event.message || (event.error && event.error.message));
+    _logIgnoredAsyncFailure('error', event.error || event.message);
     event.stopImmediatePropagation();
     event.preventDefault();
   },
@@ -177,7 +185,7 @@ window.addEventListener(
 // Returning true here suppresses the default browser/mocha "uncaught" reporting.
 const _previousOnError = window.onerror;
 window.onerror = function _suppressedOnError(message, source, lineno, colno, error) {
-  _logIgnoredAsyncFailure('window.onerror', (error && error.message) || message);
+  _logIgnoredAsyncFailure('window.onerror', error || message);
   if (typeof _previousOnError === 'function') {
     try {
       _previousOnError.call(this, message, source, lineno, colno, error);
@@ -190,7 +198,7 @@ window.onerror = function _suppressedOnError(message, source, lineno, colno, err
 const _previousOnRejection = window.onunhandledrejection;
 window.onunhandledrejection = function _suppressedOnRejection(event) {
   const reason = event && event.reason;
-  _logIgnoredAsyncFailure('window.onunhandledrejection', (reason && reason.message) || reason);
+  _logIgnoredAsyncFailure('window.onunhandledrejection', reason);
   if (typeof _previousOnRejection === 'function') {
     try {
       _previousOnRejection.call(this, event);
