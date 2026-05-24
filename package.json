@@ -19,7 +19,6 @@
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.4",
     "cross-spawn": "^7.0.6",
-    "minimatch": "^3.1.4",
     "qs": "^6.14.1",
     "form-data": "^2.5.4",
     "@nuxeo/page": {
@@ -27,6 +26,13 @@
     },
     "mocha": {
       "diff": "^8.0.3"
+    },
+    "uuid": "$uuid",
+    "request": {
+      "uuid": "^3.4.0"
+    },
+    "replace": {
+      "minimatch": "^3.1.4"
     }
   },
   "devDependencies": {
