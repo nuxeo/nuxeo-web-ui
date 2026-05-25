@@ -1461,7 +1461,7 @@ Polymer({
   /** Open drawer width (px): stored preference or natural default, clamped. */
   _computeOpenDrawerWidth() {
     const fallback = DRAWER_NATURAL_CONTENT_PX + this._sidebarPx();
-    const stored = this._drawerOpenWidth != null ? this._drawerOpenWidth : this._loadStoredDrawerWidth();
+    const stored = this._drawerOpenWidth ?? this._loadStoredDrawerWidth();
     if (stored == null) {
       return fallback;
     }
@@ -1475,21 +1475,24 @@ Polymer({
 
   _loadStoredDrawerWidth() {
     try {
-      const raw = window.localStorage && window.localStorage.getItem(DRAWER_STORAGE_KEY);
-      const n = raw != null ? Number.parseInt(raw, 10) : NaN;
-      return Number.isFinite(n) ? n : null;
-    } catch (_e) {
+      const raw = globalThis.localStorage?.getItem(DRAWER_STORAGE_KEY);
+      const n = Number.parseInt(raw ?? '', 10);
+      if (!Number.isFinite(n)) {
+        return null;
+      }
+      return n;
+    } catch {
       return null;
     }
   },
 
   _persistDrawerWidth(px) {
     try {
-      if (window.localStorage) {
-        window.localStorage.setItem(DRAWER_STORAGE_KEY, String(px));
+      if (globalThis.localStorage) {
+        globalThis.localStorage.setItem(DRAWER_STORAGE_KEY, String(px));
       }
-    } catch (_e) {
-      // ignore storage errors (e.g. private mode quota)
+    } catch {
+      // Storage may be unavailable (private mode, quota); width is not persisted.
     }
   },
 
@@ -1499,14 +1502,13 @@ Polymer({
     }
     e.preventDefault();
     e.stopPropagation();
-    const point = e.touches && e.touches[0] ? e.touches[0] : e;
+    const point = e.touches?.[0] ?? e;
     const startX = point.clientX;
     const startWidth = this._computeOpenDrawerWidth();
     this.setAttribute('drawer-resizing', '');
     const rtl = this._isRTL;
-
     const onMove = (ev) => {
-      const p = ev.touches && ev.touches[0] ? ev.touches[0] : ev;
+      const p = ev.touches?.[0] ?? ev;
       const delta = (p.clientX - startX) * (rtl ? -1 : 1);
       const next = this._clampDrawerWidth(startWidth + delta);
       this._drawerOpenWidth = next;
@@ -1518,20 +1520,20 @@ Polymer({
     const onEnd = () => {
       this._cancelDrawerDragLayoutNotify();
       this.removeAttribute('drawer-resizing');
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onEnd);
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onEnd);
+      globalThis.removeEventListener('mousemove', onMove);
+      globalThis.removeEventListener('mouseup', onEnd);
+      globalThis.removeEventListener('touchmove', onMove);
+      globalThis.removeEventListener('touchend', onEnd);
       if (this._drawerOpenWidth != null) {
         this._persistDrawerWidth(this._drawerOpenWidth);
       }
       this._notifyLayoutChanged();
     };
 
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onEnd);
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('touchend', onEnd);
+    globalThis.addEventListener('mousemove', onMove);
+    globalThis.addEventListener('mouseup', onEnd);
+    globalThis.addEventListener('touchmove', onMove, { passive: false });
+    globalThis.addEventListener('touchend', onEnd);
   },
 
   _onDrawerResizeKey(e) {
@@ -1577,7 +1579,8 @@ Polymer({
     if (!this.drawerOpened || this.isNarrow) {
       return;
     }
-    const amount = e && e.detail && Number.isFinite(e.detail.amount) ? Math.max(0, e.detail.amount) : 0;
+    const rawAmount = e?.detail?.amount;
+    const amount = Number.isFinite(rawAmount) ? Math.max(0, rawAmount) : 0;
     if (amount <= 0) {
       return;
     }
@@ -1614,11 +1617,11 @@ Polymer({
   _resetDrawerWidth() {
     this._drawerOpenWidth = null;
     try {
-      if (window.localStorage) {
-        window.localStorage.removeItem(DRAWER_STORAGE_KEY);
+      if (globalThis.localStorage) {
+        globalThis.localStorage.removeItem(DRAWER_STORAGE_KEY);
       }
-    } catch (_e) {
-      // ignore storage errors
+    } catch {
+      // Storage may be unavailable (private mode, quota); width is not persisted.
     }
     if (this.drawerOpened) {
       this.drawerWidth = `${DRAWER_NATURAL_CONTENT_PX + this._sidebarPx()}px`;
@@ -2247,7 +2250,7 @@ Polymer({
 
   /** Notify tables/viewers: `window.resize` plus `notifyResize()` on the drawer layout. */
   _runLayoutNotify() {
-    const drawerPanel = this.$ && this.$.drawerPanel;
+    const drawerPanel = this.$?.drawerPanel;
     if (drawerPanel && typeof drawerPanel.notifyResize === 'function') {
       drawerPanel.notifyResize();
     }
