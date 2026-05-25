@@ -138,11 +138,30 @@ suite('nuxeo-vocabulary-management', () => {
     test('_deleteEntry should be a no-op for readOnly vocabularies', () => {
       const confirmStub = sinon.stub(window, 'confirm').returns(true);
       try {
-        element._deleteEntry({ target: { parentNode: { item: { directoryName: 'country', properties: { id: 'x' } } } } });
+        element._deleteEntry({
+          target: { parentNode: { item: { directoryName: 'country', properties: { id: 'x' } } } },
+        });
         expect(confirmStub).to.not.have.been.called;
       } finally {
         confirmStub.restore();
       }
+    });
+
+    test('addEntry button should be disabled (not hidden) for readOnly vocabulary', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      const btn = element.shadowRoot.querySelector('#addEntry');
+      expect(btn, 'addEntry button should be rendered').to.exist;
+      expect(btn.disabled).to.be.true;
+      expect(btn.hasAttribute('hidden')).to.be.false;
+    });
+
+    test('addEntry button should not be disabled for writable vocabulary', async () => {
+      element.selectedVocabulary = 'coverage';
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      const btn = element.shadowRoot.querySelector('#addEntry');
+      expect(btn, 'addEntry button should be rendered').to.exist;
+      expect(btn.disabled).to.be.false;
+      expect(btn.hasAttribute('hidden')).to.be.false;
     });
   });
 

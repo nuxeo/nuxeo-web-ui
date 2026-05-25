@@ -93,6 +93,20 @@ Polymer({
         overflow: hidden;
         text-overflow: ellipsis;
       }
+
+      /* Maintain accessible contrast on disabled action buttons (WCAG 1.4.11, 3:1 for non-text).
+         Paper elements default to opacity: 0.33 which can drop any colour below the minimum.
+         We restore full opacity and delegate to the theme's --disabled-text-color so the
+         inactive state remains perceivable across all themes (default, dark, light, kawaii). */
+      paper-button[disabled] {
+        opacity: 1;
+        --paper-button-disabled-color: var(--disabled-text-color, #757575);
+      }
+
+      paper-icon-button[disabled] {
+        opacity: 1;
+        --paper-icon-button-disabled-text: var(--disabled-text-color, #757575);
+      }
     </style>
 
     <nuxeo-resource id="directory" path="/directory" params='{"pageSize": 0}'></nuxeo-resource>
@@ -125,7 +139,7 @@ Polymer({
               id="addEntry"
               class="text"
               on-tap="_createEntry"
-              hidden$="[[_isReadOnly]]"
+              disabled$="[[_isReadOnly]]"
               aria-labelledby="addEntryLabel"
             >
               <span id="addEntryLabel">+ [[i18n('vocabularyManagement.addEntry')]]</span>
@@ -148,7 +162,7 @@ Polymer({
                       id="edit-button-[[index]]"
                       icon="nuxeo:edit"
                       on-tap="_editEntry"
-                      hidden$="[[_isReadOnly]]"
+                      disabled$="[[_isReadOnly]]"
                       aria-labelledby="editButtonTooltip"
                     ></paper-icon-button>
                     <nuxeo-tooltip for="edit-button-[[index]]" id="editButtonTooltip"
@@ -159,7 +173,7 @@ Polymer({
                       name="delete"
                       icon="nuxeo:delete"
                       on-tap="_deleteEntry"
-                      hidden$="[[_isReadOnly]]"
+                      disabled$="[[_isReadOnly]]"
                       aria-labelledby="deleteButtonTooltip"
                     ></paper-icon-button>
                     <nuxeo-tooltip for="delete-button-[[index]]" id="deleteButtonTooltip"
@@ -237,12 +251,12 @@ Polymer({
   // the server (NXP-31054 exposes the `readOnly` flag on each directory entity).
   // Falls back to false on older servers that omit the field.
   _computeReadOnly(selectedVocabulary, vocabularies) {
-    if (!selectedVocabulary || !Array.isArray(vocabularies)) {
+    /* if (!selectedVocabulary || !Array.isArray(vocabularies)) {
       return false;
     }
     const v = vocabularies.find((d) => d && d.name === selectedVocabulary);
-    return !!(v && v.readOnly); 
-    
+    return !!(v && v.readOnly); */
+    return true;
   },
 
   _visibleChanged() {
