@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/directory/nuxeo-vocabulary-management.js';
 
 suite('nuxeo-vocabulary-management', () => {
@@ -107,10 +107,12 @@ suite('nuxeo-vocabulary-management', () => {
       expect(element._computeReadOnly('nature', element.vocabularies)).to.be.false;
     });
 
-    test('should expose _isReadOnly as a computed property reflecting the selection', () => {
+    test('should expose _isReadOnly as a computed property reflecting the selection', async () => {
       element.selectedVocabulary = 'country';
+      await flush();
       expect(element._isReadOnly).to.be.true;
       element.selectedVocabulary = 'coverage';
+      await flush();
       expect(element._isReadOnly).to.be.false;
     });
   });
