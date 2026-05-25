@@ -232,12 +232,18 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
    * If no protocol handler is registered, the click silently no-ops.
    */
   _navigateTo(url) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    try {
+      window.location.href = url;
+    } catch (e) {
+      // ignore - protocol handler may not be registered
+    }
+
+    // const a = document.createElement('a');
+    // a.href = url;
+    // a.style.display = 'none';
+    // document.body.appendChild(a);
+    // a.click();
+    // a.remove();
   }
 
   _showFailure(launched, driveOpened) {

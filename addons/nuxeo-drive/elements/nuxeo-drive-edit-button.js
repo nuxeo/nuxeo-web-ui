@@ -218,12 +218,18 @@ Polymer({
    * Triggers a custom protocol URL (nxdrive://) via a hidden anchor click.
    */
   _navigateTo(url) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    try {
+      window.location.href = url;
+    } catch (e) {
+      // ignore - protocol handler may not be registered
+    }
+
+    // const a = document.createElement('a');
+    // a.href = url;
+    // a.style.display = 'none';
+    // document.body.appendChild(a);
+    // a.click();
+    // a.remove();
   },
 
   _showFailure(launched, driveOpened) {
