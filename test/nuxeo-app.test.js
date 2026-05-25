@@ -941,29 +941,24 @@ suite('nuxeo-app', () => {
       app._maxDrawerWidth.restore();
     });
 
-    test('_reclampDrawerWidth dispatches resize so iron-resize listeners re-evaluate', async () => {
-      // After `drawerWidth` is resynced post-zoom, descendants that rely on
-      // iron-resize (e.g. data tables that show/hide columns) must be nudged
-      // to recompute their layout. Without this dispatch, the main content
-      // would keep its pre-resync layout until any other interaction forced
-      // a reflow.
+    test('_updateIsNarrow dispatches resize even when drawer width is already correct', async () => {
       app.sidebarWidth = '52px';
       app.drawerOpened = true;
       app.isNarrow = false;
       app._drawerOpenWidth = 500;
-      app.drawerWidth = '200px';
+      app.drawerWidth = '500px';
       sinon.stub(app, '_maxDrawerWidth').returns(700);
+      sinon.stub(app, '_computeOpenDrawerWidth').returns(500);
       const onResize = sinon.spy();
       globalThis.addEventListener('resize', onResize);
       try {
-        app._reclampDrawerWidth();
-        // The dispatch is scheduled via requestAnimationFrame so the browser
-        // applies the new width before listeners re-run. Wait one frame.
+        app._updateIsNarrow();
         await new Promise((resolve) => requestAnimationFrame(resolve));
         expect(onResize).to.have.been.called;
       } finally {
         globalThis.removeEventListener('resize', onResize);
         app._maxDrawerWidth.restore();
+        app._computeOpenDrawerWidth.restore();
       }
     });
 
