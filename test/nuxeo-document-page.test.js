@@ -328,6 +328,39 @@ suite('nuxeo-document-page', () => {
       expect(element.sideWidth).to.be.null;
     });
 
+    test('_reclampSideWidth restores persisted width after in-memory shrink on zoom', () => {
+      element.opened = true;
+      sinon.stub(element, '_isNarrowViewport').returns(false);
+      window.localStorage.setItem('nuxeo.documentPage.sidePaneWidth', '500');
+      element.sideWidth = 280;
+      sinon.stub(element, '_maxSideWidth').returns(600);
+      element._reclampSideWidth();
+      expect(element.sideWidth).to.equal(500);
+      element._maxSideWidth.restore();
+      element._isNarrowViewport.restore();
+    });
+
+    test('_scheduleViewportReclamp reclamps and fires nuxeo-layout-updated on the next frame', async () => {
+      element.opened = true;
+      sinon.stub(element, '_isNarrowViewport').returns(false);
+      element.sideWidth = 600;
+      const reclampSpy = sinon.spy(element, '_reclampSideWidth');
+      const onLayoutUpdated = sinon.spy();
+      element.addEventListener('nuxeo-layout-updated', onLayoutUpdated);
+      try {
+        element._scheduleViewportReclamp();
+        expect(reclampSpy).to.not.have.been.called;
+        await new Promise((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(resolve));
+        });
+        expect(reclampSpy).to.have.been.calledOnce;
+        expect(onLayoutUpdated).to.have.been.calledOnce;
+      } finally {
+        reclampSpy.restore();
+        element._isNarrowViewport.restore();
+      }
+    });
+
     test('_onSideResizeStart drag updates width and persists', () => {
       element.opened = true;
       sinon.stub(element, '_isNarrowViewport').returns(false);

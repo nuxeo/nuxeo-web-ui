@@ -422,10 +422,8 @@ Polymer({
   },
 
   attached() {
-    // Re-clamp on viewport/drawer changes (numeric only — no DOM flicker).
     this._onWindowResize = () => {
-      this._reclampSideWidth();
-      this._updateSideResizeAria();
+      this._scheduleViewportReclamp();
     };
     window.addEventListener('resize', this._onWindowResize);
 
@@ -444,6 +442,10 @@ Polymer({
   },
 
   detached() {
+    if (this._viewportReclampRaf != null) {
+      cancelAnimationFrame(this._viewportReclampRaf);
+      this._viewportReclampRaf = null;
+    }
     if (this._onWindowResize) {
       window.removeEventListener('resize', this._onWindowResize);
       this._onWindowResize = null;
@@ -479,6 +481,7 @@ Polymer({
     return this.hasCollections(doc);
   },
 
+  /** Mirror `sideWidth` to `--nuxeo-side-pane-width` and refresh resize-handle ARIA. */
   _sideWidthChanged(value) {
     if (value == null || Number.isNaN(Number(value))) {
       this.style.removeProperty('--nuxeo-side-pane-width');
@@ -505,7 +508,15 @@ Polymer({
   /** Width of `.page` (main + side row); drives all clamp math. */
   _containerWidth() {
     const pageEl = this.shadowRoot?.querySelector('.page');
-    return pageEl?.offsetWidth || this.offsetWidth || window.innerWidth || CONTAINER_WIDTH_FALLBACK_PX;
+    const pageWidth = pageEl?.offsetWidth ?? 0;
+    if (pageWidth > 0) {
+      return pageWidth;
+    }
+    const hostWidth = this.offsetWidth ?? 0;
+    if (hostWidth > 0) {
+      return hostWidth;
+    }
+    return CONTAINER_WIDTH_FALLBACK_PX;
   },
 
   /** Min info-pane width (px); absolute floor only, not natural flex width. */
@@ -513,6 +524,7 @@ Polymer({
     return SIDE_PANE_MIN_ABSOLUTE_PX;
   },
 
+  /** Minimum info-pane width (px); same as the absolute floor. */
   _minSideWidth() {
     return this._absoluteMinSideWidth();
   },
@@ -532,21 +544,71 @@ Polymer({
     return Math.max(this._minSideWidth(), cap);
   },
 
+  /** Clamp info-pane width between `_minSideWidth` and `_maxSideWidth`. */
   _clampSideWidth(px) {
     return Math.min(this._maxSideWidth(), Math.max(this._minSideWidth(), px));
   },
 
-  /** Re-clamp `sideWidth` on resize; skip at narrow viewport to preserve the stored value. */
+  /**
+   * Target info-pane width (px): persisted preference when set, else current `sideWidth`.
+   * Mirrors `_computeOpenDrawerWidth` — reclamp always starts from preference, not a
+   * value that may have been shrunk in memory during zoom.
+   */
+  _computeTargetSideWidth() {
+    const stored = this._loadStoredSideWidth();
+    const preference = stored != null ? stored : this.sideWidth;
+    if (preference == null || Number.isNaN(Number(preference))) {
+      return null;
+    }
+    return this._clampSideWidth(preference);
+  },
+
+  /** Re-clamp `sideWidth` from preference; skip at narrow viewport (CSS uses vertical layout). */
   _reclampSideWidth() {
-    if (this.sideWidth == null || this._isNarrowViewport()) {
+    if (this._isNarrowViewport()) {
       return;
     }
-    const next = this._clampSideWidth(this.sideWidth);
+    if (this.hasAttribute('side-resizing')) {
+      if (this.sideWidth == null) {
+        return;
+      }
+      const next = this._clampSideWidth(this.sideWidth);
+      if (next !== this.sideWidth) {
+        this.sideWidth = next;
+      }
+      return;
+    }
+    const next = this._computeTargetSideWidth();
+    if (next == null) {
+      return;
+    }
     if (next !== this.sideWidth) {
       this.sideWidth = next;
     }
   },
 
+  /**
+   * Re-clamp on the next frame after zoom/resize (container metrics are stale in the
+   * sync handler), then ask nuxeo-app to run iron-resize via `nuxeo-layout-updated`.
+   */
+  _scheduleViewportReclamp() {
+    if (this._viewportReclampRaf != null) {
+      cancelAnimationFrame(this._viewportReclampRaf);
+    }
+    this._viewportReclampRaf = requestAnimationFrame(() => {
+      this._viewportReclampRaf = null;
+      this._reclampSideWidth();
+      this._updateSideResizeAria();
+      this.dispatchEvent(
+        new CustomEvent('nuxeo-layout-updated', {
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    });
+  },
+
+  /** Read persisted info-pane width from localStorage, or null if missing/invalid. */
   _loadStoredSideWidth() {
     try {
       const raw = globalThis.localStorage?.getItem(SIDE_PANE_STORAGE_KEY);
@@ -561,6 +623,7 @@ Polymer({
     }
   },
 
+  /** Save or clear info-pane width under `nuxeo.documentPage.sidePaneWidth`. */
   _persistSideWidth(px) {
     try {
       if (globalThis.localStorage) {
@@ -575,6 +638,7 @@ Polymer({
     }
   },
 
+  /** True on narrow breakpoint or when min side + min main cannot fit in the row. */
   _isNarrowViewport() {
     if (globalThis?.matchMedia(`(max-width: ${NARROW_VIEWPORT_BREAKPOINT_PX}px)`).matches) {
       return true;
@@ -584,6 +648,7 @@ Polymer({
     return containerWidth < this._absoluteMinSideWidth() + MAIN_COLUMN_MIN_PX;
   },
 
+  /** Pointer drag on the info-pane handle; may fire `nuxeo-shrink-drawer` when capped. */
   _onSideResizeStart(e) {
     if (!this.opened || this._isNarrowViewport()) {
       return;
@@ -633,7 +698,12 @@ Polymer({
       if (this.sideWidth != null) {
         this._persistSideWidth(this.sideWidth);
       }
-      globalThis.dispatchEvent(new Event('resize'));
+      this.dispatchEvent(
+        new CustomEvent('nuxeo-layout-updated', {
+          bubbles: true,
+          composed: true,
+        }),
+      );
     };
 
     globalThis.addEventListener('mousemove', onMove);
@@ -642,6 +712,7 @@ Polymer({
     globalThis.addEventListener('touchend', onEnd);
   },
 
+  /** Keyboard resize on the info-pane handle (arrows, Home/End, Enter/Space to reset). */
   _onSideResizeKey(e) {
     if (!this.opened || this._isNarrowViewport()) {
       return;
@@ -694,6 +765,12 @@ Polymer({
         composed: true,
       }),
     );
+    this.dispatchEvent(
+      new CustomEvent('nuxeo-layout-updated', {
+        bubbles: true,
+        composed: true,
+      }),
+    );
   },
 
   /** Clear stored side width and restore default flex layout. */
@@ -701,7 +778,7 @@ Polymer({
     this.sideWidth = null;
     this._persistSideWidth(null);
     this.dispatchEvent(
-      new CustomEvent('resize', {
+      new CustomEvent('nuxeo-layout-updated', {
         bubbles: true,
         composed: true,
       }),
