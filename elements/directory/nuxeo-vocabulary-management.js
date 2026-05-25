@@ -470,6 +470,16 @@ Polymer({
         });
       });
     }
+    // iron-data-table caches stamped rows by reference and does not always
+    // rebuild them when `items` is reassigned via data binding. Force a full
+    // re-stamp by clearing and re-setting `items` imperatively, mirroring the
+    // pre-filter behaviour of `_refresh`. Without this, deleted/edited entries
+    // can remain visible in the DOM (see WEBUI-1683).
+    const table = this.$ && this.$.table ? this.$.table : this.$$('#table');
+    if (table) {
+      table.items = [];
+      table.items = this.entries;
+    }
   },
 
   // Build the aggregation buckets consumed by `nuxeo-dropdown-aggregation` for
