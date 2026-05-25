@@ -208,7 +208,7 @@ Polymer({
           <template is="dom-if" if="[[_displayQuickFilters(displayQuickFilters, view)]]">
             <nuxeo-quick-filters
               quick-filters="{{quickFilters}}"
-              on-quick-filters-changed="fetch"
+              on-quick-filters-changed="_handleUserQuickFilterToggle"
             ></nuxeo-quick-filters>
           </template>
 
@@ -468,6 +468,7 @@ Polymer({
 
     // Update localStorage key when name changes (different documents have different names)
     '_updateStorage(name, _connectedUserId)',
+    '_enforcePendingQuickFilters(quickFilters.*)',
   ],
 
   listeners: {
@@ -511,6 +512,29 @@ Polymer({
     return [];
   },
 
+  _handleUserQuickFilterToggle(e) {
+    let eventFilters = this.quickFilters;
+    if (Array.isArray(e?.detail?.value)) {
+      eventFilters = e.detail.value;
+    } else if (Array.isArray(e?.target?.quickFilters)) {
+      eventFilters = e.target.quickFilters;
+    }
+    const filters = this._cloneQuickFilters(eventFilters);
+    // Single clone suffices — assign shared reference where independent copies are not needed
+    const requestId = this._nextQuickFiltersRequestId();
+    this._setPendingQuickFilters(filters);
+
+    // Keep provider/view in sync before fetching to avoid stale quick-filter state after navigation.
+    if (this.nxProvider) {
+      this.set('nxProvider.quickFilters', filters.slice());
+    }
+    if (this.view?.quickFilters !== undefined) {
+      this.view.quickFilters = filters.slice();
+    }
+
+    this._scheduleQuickFilterFetch(requestId);
+  },
+
   detached() {
     if (this.view) {
       this.unlisten(this.view, 'columns-changed', '_columnsChanged');
@@ -530,6 +554,8 @@ Polymer({
     if (this._applyDocPrefsDebouncer && this._applyDocPrefsDebouncer.flush) {
       this._applyDocPrefsDebouncer.flush();
     }
+
+    this._clearPendingQuickFilters();
 
     this.columns = [];
     this.view = null;
@@ -632,7 +658,7 @@ Polymer({
       this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
       this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
       this.unlisten(oldView, 'items-changed', '_itemsChanged');
-      this.unlisten(oldView, 'quick-filters-changed', '_quickFiltersChanged');
+      this.unlisten(oldView, 'quick-filters-changed', '_handleViewQuickFiltersSync');
       this.unlisten(oldView, 'select-all-active-changed', '_selectAllActiveChanged');
       this.unlisten(oldView, '_excluded-items-changed', '_excludedDocsChanged');
       // we need to clear the selected items and selection (removes selection synchronization)
@@ -662,12 +688,25 @@ Polymer({
       this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
       this.listen(view, 'settings-changed', '_saveViewSettings');
       this.listen(view, 'items-changed', '_itemsChanged');
-      this.listen(view, 'quick-filters-changed', '_quickFiltersChanged');
+      this.listen(view, 'quick-filters-changed', '_handleViewQuickFiltersSync');
       this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
       this.listen(view, '_excluded-items-changed', '_excludedDocsChanged');
       view.nxProvider = this.nxProvider;
       // update view - now safe as reset/fetch have defensive checks
+      // reset first
       this.reset();
+
+      // restore quick filters after reset — single clone shared safely across provider and view
+      const restoredQuickFilters = this._cloneQuickFilters(this.quickFilters);
+      if (this.nxProvider) {
+        this.set('nxProvider.quickFilters', restoredQuickFilters);
+      }
+
+      if (view.quickFilters !== undefined) {
+        view.quickFilters = restoredQuickFilters.slice();
+      }
+
+      // fetch after state restore
       this.fetch();
       this.fire('search-results-view', { view, name: this.name });
     }
@@ -939,9 +978,110 @@ Polymer({
     }
   },
 
-  _quickFiltersChanged(e) {
-    if (this.nxProvider && e.detail.value) {
-      this.quickFilters = this.nxProvider.quickFilters;
+  _handleViewQuickFiltersSync(e) {
+    let incomingFilters;
+    if (Array.isArray(e?.detail?.value)) {
+      incomingFilters = this._cloneQuickFilters(e.detail.value);
+    } else if (this.nxProvider && Array.isArray(this.nxProvider.quickFilters)) {
+      incomingFilters = this._cloneQuickFilters(this.nxProvider.quickFilters);
+    }
+
+    if (!incomingFilters) {
+      return;
+    }
+
+    if (
+      this._quickFiltersDirty &&
+      !this._quickFiltersEqual(incomingFilters, this._pendingQuickFilters || this.quickFilters)
+    ) {
+      const pendingFilters = this._cloneQuickFilters(this._pendingQuickFilters || this.quickFilters);
+      this.quickFilters = pendingFilters;
+      if (this.nxProvider) {
+        this.set('nxProvider.quickFilters', pendingFilters.slice());
+      }
+      if (this.view?.quickFilters !== undefined) {
+        this.view.quickFilters = pendingFilters.slice();
+      }
+      this._scheduleQuickFilterFetch(this._quickFiltersRequestId);
+      return;
+    }
+
+    this.quickFilters = incomingFilters;
+    if (this._quickFiltersDirty && this._quickFiltersEqual(incomingFilters, this._pendingQuickFilters)) {
+      this._clearPendingQuickFilters();
+    }
+  },
+
+  _nextQuickFiltersRequestId() {
+    this._quickFiltersRequestId = (this._quickFiltersRequestId || 0) + 1;
+    return this._quickFiltersRequestId;
+  },
+
+  _setPendingQuickFilters(filters) {
+    this.quickFilters = filters;
+    this._pendingQuickFilters = filters.slice();
+    this._quickFiltersDirty = true;
+  },
+
+  _clearPendingQuickFilters() {
+    this._quickFiltersDirty = false;
+    this._pendingQuickFilters = null;
+  },
+
+  _scheduleQuickFilterFetch(requestId) {
+    this._quickFilterDebouncer = Debouncer.debounce(this._quickFilterDebouncer, timeOut.after(50), () => {
+      this.fetch()
+        .then(() => this._finalizeQuickFilterSync(requestId))
+        .catch(() => this._finalizeQuickFilterSync(requestId));
+    });
+  },
+
+  _finalizeQuickFilterSync(requestId) {
+    if (!this._quickFiltersDirty || requestId !== this._quickFiltersRequestId) {
+      return;
+    }
+
+    if (this._quickFiltersEqual(this.quickFilters, this._pendingQuickFilters)) {
+      this._clearPendingQuickFilters();
+    }
+  },
+
+  _cloneQuickFilters(filters) {
+    if (!Array.isArray(filters)) {
+      return [];
+    }
+    return filters.slice();
+  },
+
+  _quickFiltersEqual(a, b) {
+    // Quick filters are always flat arrays of strings; JSON.stringify is safe here.
+    // If filter entries ever become objects, switch to a deep-equality comparison.
+    return JSON.stringify(Array.isArray(a) ? a : []) === JSON.stringify(Array.isArray(b) ? b : []);
+  },
+
+  _enforcePendingQuickFilters() {
+    // Re-entrancy guard: setting this.quickFilters below re-triggers this observer via Polymer
+    if (this._enforcingPending) return;
+    if (!this._quickFiltersDirty || !this._pendingQuickFilters) {
+      return;
+    }
+
+    if (this._quickFiltersEqual(this.quickFilters, this._pendingQuickFilters)) {
+      return;
+    }
+
+    this._enforcingPending = true;
+    try {
+      const pendingFilters = this._cloneQuickFilters(this._pendingQuickFilters);
+      this.quickFilters = pendingFilters;
+      if (this.nxProvider) {
+        this.set('nxProvider.quickFilters', pendingFilters.slice());
+      }
+      if (this.view?.quickFilters !== undefined) {
+        this.view.quickFilters = pendingFilters.slice();
+      }
+    } finally {
+      this._enforcingPending = false;
     }
   },
 
