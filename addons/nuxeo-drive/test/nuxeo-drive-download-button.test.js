@@ -189,6 +189,68 @@ suite('nuxeo-drive-download-button', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // _launchDrive
+  // ---------------------------------------------------------------------------
+  suite('_launchDrive', () => {
+    let clock;
+
+    setup(() => {
+      clock = sinon.useFakeTimers();
+      element.documents = [{ uid: '00000000-1111-2222-3333-444444444444' }];
+    });
+
+    teardown(() => {
+      clock.restore();
+      sinon.restore();
+    });
+
+    test('sets _launched to true', () => {
+      sinon.stub(element, '_navigateTo');
+      element._launchDrive();
+      expect(element._launched).to.be.true;
+    });
+
+    test('sets _failureVisible after 1500ms when blur does not fire', () => {
+      sinon.stub(element, '_navigateTo');
+      element._launchDrive();
+      expect(element._failureVisible).to.be.false;
+      clock.tick(1500);
+      expect(element._failureVisible).to.be.true;
+    });
+
+    test('does not set _failureVisible when blur fires before timeout', () => {
+      sinon.stub(element, '_navigateTo');
+      element._launchDrive();
+      window.dispatchEvent(new Event('blur'));
+      expect(element._driveOpened).to.be.true;
+      clock.tick(2000);
+      expect(element._failureVisible).to.be.false;
+    });
+
+    test('calls _navigateTo with directDownloadUrl', () => {
+      const navStub = sinon.stub(element, '_navigateTo');
+      element._launchDrive();
+      expect(navStub).to.have.been.calledOnce;
+      expect(navStub.firstCall.args[0]).to.equal(element.directDownloadUrl);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _navigateTo
+  // ---------------------------------------------------------------------------
+  suite('_navigateTo', () => {
+    teardown(() => sinon.restore());
+
+    test('creates and clicks an anchor for non-Safari browsers', () => {
+      const appendSpy = sinon.spy(document.body, 'appendChild');
+      element._navigateTo('nxdrive://test');
+      const call = appendSpy.getCall(0);
+      expect(call).to.exist;
+      expect(call.args[0].tagName).to.equal('A');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // _buildOriginalUrl
   // ---------------------------------------------------------------------------
   suite('_buildOriginalUrl', () => {

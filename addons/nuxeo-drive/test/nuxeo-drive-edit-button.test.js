@@ -17,7 +17,13 @@ limitations under the License.
 */
 import { fixture, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-drive-edit-button.js';
-import { setupI18n, nextTick, addGoErrorSuites, addShowErrorSuite } from './nuxeo-drive-test-helpers.js';
+import {
+  setupI18n,
+  nextTick,
+  addGoErrorSuites,
+  addShowErrorSuite,
+  addLaunchDriveSuite,
+} from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
@@ -35,11 +41,18 @@ suite('nuxeo-drive-edit-button — error handling', () => {
 
   setup(async () => {
     element = await fixture(html`<nuxeo-drive-edit-button></nuxeo-drive-edit-button>`);
+    element.user = { id: 'Administrator' };
+    element.document = { uid: 'doc-uid-1', repository: 'default' };
+    element.blob = { data: 'http://localhost/nxfile/default/doc-uid-1/file:content/test.docx', name: 'test.docx' };
   });
 
-  // Shared suites: _go token-fetch failure, _go no-token, _showError
+  // Shared suites: _go token-fetch failure, _go no-token, _showError, _launchDrive
   addGoErrorSuites(() => element);
   addShowErrorSuite(() => element);
+  addLaunchDriveSuite(
+    () => element,
+    () => element.driveEditURL,
+  );
 
   suite('_go — Drive installed and token present', () => {
     teardown(() => {

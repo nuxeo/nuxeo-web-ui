@@ -17,7 +17,14 @@ limitations under the License.
 */
 import { fixture, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-drive-upload-button.js';
-import { setupI18n, nextTick, stubToast, addGoErrorSuites, addShowErrorSuite } from './nuxeo-drive-test-helpers.js';
+import {
+  setupI18n,
+  nextTick,
+  stubToast,
+  addGoErrorSuites,
+  addShowErrorSuite,
+  addLaunchDriveSuite,
+} from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
@@ -40,9 +47,13 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     element.document = { path: '/default-domain/workspaces/test-folder' };
   });
 
-  // Shared suites: _go token-fetch failure, _go no-token, _showError
+  // Shared suites: _go token-fetch failure, _go no-token, _showError, _launchDrive
   addGoErrorSuites(() => element);
   addShowErrorSuite(() => element);
+  addLaunchDriveSuite(
+    () => element,
+    () => element.directTransferUrl,
+  );
 
   suite('_go — Drive installed and token present', () => {
     teardown(() => {
