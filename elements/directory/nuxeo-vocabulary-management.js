@@ -121,7 +121,13 @@ Polymer({
 
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
           <div class="top actions">
-            <paper-button id="addEntry" class="text" on-tap="_createEntry" aria-labelledby="addEntryLabel">
+            <paper-button
+              id="addEntry"
+              class="text"
+              on-tap="_createEntry"
+              hidden$="[[_isReadOnly]]"
+              aria-labelledby="addEntryLabel"
+            >
               <span id="addEntryLabel">+ [[i18n('vocabularyManagement.addEntry')]]</span>
             </paper-button>
           </div>
@@ -142,6 +148,7 @@ Polymer({
                       id="edit-button-[[index]]"
                       icon="nuxeo:edit"
                       on-tap="_editEntry"
+                      hidden$="[[_isReadOnly]]"
                       aria-labelledby="editButtonTooltip"
                     ></paper-icon-button>
                     <nuxeo-tooltip for="edit-button-[[index]]" id="editButtonTooltip"
@@ -152,6 +159,7 @@ Polymer({
                       name="delete"
                       icon="nuxeo:delete"
                       on-tap="_deleteEntry"
+                      hidden$="[[_isReadOnly]]"
                       aria-labelledby="deleteButtonTooltip"
                     ></paper-icon-button>
                     <nuxeo-tooltip for="delete-button-[[index]]" id="deleteButtonTooltip"
@@ -212,12 +220,29 @@ Polymer({
       type: String,
       computed: '_schemaFor(selectedVocabulary)',
     },
+    _isReadOnly: {
+      type: Boolean,
+      computed: '_computeReadOnly(selectedVocabulary, vocabularies)',
+      value: true,
+    },
   },
 
   observers: ['_refresh(selectedVocabulary)'],
 
   _visibleDataTableStyle(entries) {
     return entries.length ? 'display: block;' : 'display: none;';
+  },
+
+  // Returns true when the currently selected vocabulary is declared read-only on
+  // the server (NXP-31054 exposes the `readOnly` flag on each directory entity).
+  // Falls back to false on older servers that omit the field.
+  _computeReadOnly(selectedVocabulary, vocabularies) {
+    if (!selectedVocabulary || !Array.isArray(vocabularies)) {
+      return false;
+    }
+    const v = vocabularies.find((d) => d && d.name === selectedVocabulary);
+    return !!(v && v.readOnly); 
+    
   },
 
   _visibleChanged() {
@@ -332,6 +357,9 @@ Polymer({
   },
 
   _deleteEntry(e) {
+    if (this._isReadOnly) {
+      return;
+    }
     if (window.confirm(this.i18n('vocabularyManagement.confirmDelete'))) {
       const { item } = e.target.parentNode;
       this.$.directory.path = `/directory/${item.directoryName}/${item.properties.id}`;
@@ -360,6 +388,9 @@ Polymer({
   },
 
   _editEntry(e) {
+    if (this._isReadOnly) {
+      return;
+    }
     this._new = false;
     this._selectedEntry = e.target.parentNode.item;
     this.$.vocabularyEditDialog.toggle();
@@ -372,6 +403,9 @@ Polymer({
   },
 
   _save() {
+    if (this._isReadOnly) {
+      return;
+    }
     if (!this.$.layout.validate()) {
       return;
     }
@@ -429,6 +463,9 @@ Polymer({
   },
 
   _createEntry() {
+    if (this._isReadOnly) {
+      return;
+    }
     const emptyEntry = {
       'entity-type': 'directoryEntry',
       directoryName: this.selectedVocabulary,
