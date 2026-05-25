@@ -251,12 +251,11 @@ Polymer({
   // the server (NXP-31054 exposes the `readOnly` flag on each directory entity).
   // Falls back to false on older servers that omit the field.
   _computeReadOnly(selectedVocabulary, vocabularies) {
-    /* if (!selectedVocabulary || !Array.isArray(vocabularies)) {
+    if (!selectedVocabulary || !Array.isArray(vocabularies)) {
       return false;
     }
     const v = vocabularies.find((d) => d && d.name === selectedVocabulary);
-    return !!(v && v.readOnly); */
-    return true;
+    return !!(v && v.readOnly);
   },
 
   _visibleChanged() {
