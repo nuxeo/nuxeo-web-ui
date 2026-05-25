@@ -704,7 +704,7 @@ suite('nuxeo-app', () => {
   suite('drawer pane resize', () => {
     teardown(() => {
       try {
-        window.localStorage.removeItem('nuxeo.drawerWidth');
+        globalThis.localStorage.removeItem('nuxeo.drawerWidth');
       } catch (_e) {
         // ignore
       }
@@ -793,28 +793,28 @@ suite('nuxeo-app', () => {
     });
 
     test('_loadStoredDrawerWidth reads stored value', () => {
-      window.localStorage.setItem('nuxeo.drawerWidth', '420');
+      globalThis.localStorage.setItem('nuxeo.drawerWidth', '420');
       expect(app._loadStoredDrawerWidth()).to.equal(420);
     });
 
     test('_loadStoredDrawerWidth returns null when missing', () => {
-      window.localStorage.removeItem('nuxeo.drawerWidth');
+      globalThis.localStorage.removeItem('nuxeo.drawerWidth');
       expect(app._loadStoredDrawerWidth()).to.be.null;
     });
 
     test('_loadStoredDrawerWidth returns null for non-numeric value', () => {
-      window.localStorage.setItem('nuxeo.drawerWidth', 'NaN');
+      globalThis.localStorage.setItem('nuxeo.drawerWidth', 'NaN');
       expect(app._loadStoredDrawerWidth()).to.be.null;
     });
 
     test('_persistDrawerWidth saves value to localStorage', () => {
       app._persistDrawerWidth(420);
-      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.equal('420');
+      expect(globalThis.localStorage.getItem('nuxeo.drawerWidth')).to.equal('420');
     });
 
     test('_computeOpenDrawerWidth falls back to default when nothing persisted', () => {
       app._drawerOpenWidth = null;
-      window.localStorage.removeItem('nuxeo.drawerWidth');
+      globalThis.localStorage.removeItem('nuxeo.drawerWidth');
       app.sidebarWidth = '52px';
       expect(app._computeOpenDrawerWidth()).to.equal(350);
     });
@@ -823,14 +823,14 @@ suite('nuxeo-app', () => {
       app._drawerOpenWidth = null;
       app.sidebarWidth = '52px';
       sinon.stub(app, '_maxDrawerWidth').returns(700);
-      window.localStorage.setItem('nuxeo.drawerWidth', '480');
+      globalThis.localStorage.setItem('nuxeo.drawerWidth', '480');
       expect(app._computeOpenDrawerWidth()).to.equal(480);
       app._maxDrawerWidth.restore();
     });
 
     test('_computeOpenDrawerWidth clamps persisted preference that is too small', () => {
       app._drawerOpenWidth = null;
-      window.localStorage.setItem('nuxeo.drawerWidth', '50');
+      globalThis.localStorage.setItem('nuxeo.drawerWidth', '50');
       app.sidebarWidth = '52px';
       expect(app._computeOpenDrawerWidth()).to.equal(app._minDrawerWidth());
     });
@@ -842,7 +842,7 @@ suite('nuxeo-app', () => {
       app._persistDrawerWidth(480);
       app._resetDrawerWidth();
       expect(app._drawerOpenWidth).to.be.null;
-      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.be.null;
+      expect(globalThis.localStorage.getItem('nuxeo.drawerWidth')).to.be.null;
       expect(app.drawerWidth).to.equal('350px');
     });
 
@@ -941,7 +941,7 @@ suite('nuxeo-app', () => {
       app._maxDrawerWidth.restore();
     });
 
-    test('_reclampDrawerWidth dispatches resize so iron-resize listeners re-evaluate', (done) => {
+    test('_reclampDrawerWidth dispatches resize so iron-resize listeners re-evaluate', async () => {
       // After `drawerWidth` is resynced post-zoom, descendants that rely on
       // iron-resize (e.g. data tables that show/hide columns) must be nudged
       // to recompute their layout. Without this dispatch, the main content
@@ -954,45 +954,41 @@ suite('nuxeo-app', () => {
       app.drawerWidth = '200px';
       sinon.stub(app, '_maxDrawerWidth').returns(700);
       const onResize = sinon.spy();
-      window.addEventListener('resize', onResize);
-      app._reclampDrawerWidth();
-      // The dispatch is scheduled via requestAnimationFrame so the browser
-      // applies the new width before listeners re-run. Wait one frame.
-      requestAnimationFrame(() => {
-        try {
-          expect(onResize).to.have.been.called;
-          done();
-        } finally {
-          window.removeEventListener('resize', onResize);
-          app._maxDrawerWidth.restore();
-        }
-      });
+      globalThis.addEventListener('resize', onResize);
+      try {
+        app._reclampDrawerWidth();
+        // The dispatch is scheduled via requestAnimationFrame so the browser
+        // applies the new width before listeners re-run. Wait one frame.
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        expect(onResize).to.have.been.called;
+      } finally {
+        globalThis.removeEventListener('resize', onResize);
+        app._maxDrawerWidth.restore();
+      }
     });
 
-    test('_scheduleDrawerDragLayoutNotify coalesces multiple calls into one frame', (done) => {
+    test('_scheduleDrawerDragLayoutNotify coalesces multiple calls into one frame', async () => {
       app._cancelDrawerDragLayoutNotify();
       let runCount = 0;
       const originalRun = app._runLayoutNotify;
       app._runLayoutNotify = () => {
         runCount += 1;
       };
-      app._scheduleDrawerDragLayoutNotify();
-      app._scheduleDrawerDragLayoutNotify();
-      expect(app._drawerDragLayoutRaf).to.exist;
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          try {
-            expect(runCount).to.equal(1);
-            done();
-          } finally {
-            app._runLayoutNotify = originalRun;
-            app._cancelDrawerDragLayoutNotify();
-          }
+      try {
+        app._scheduleDrawerDragLayoutNotify();
+        app._scheduleDrawerDragLayoutNotify();
+        expect(app._drawerDragLayoutRaf).to.exist;
+        await new Promise((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(resolve));
         });
-      });
+        expect(runCount).to.equal(1);
+      } finally {
+        app._runLayoutNotify = originalRun;
+        app._cancelDrawerDragLayoutNotify();
+      }
     });
 
-    test('_notifyLayoutChanged calls notifyResize on the drawer-layout', (done) => {
+    test('_notifyLayoutChanged calls notifyResize on the drawer-layout', async () => {
       // Polymer components that use `IronResizableBehavior` (picture viewer,
       // iron-pages, etc.) are decoupled from `window.resize` and only
       // re-evaluate when an ancestor explicitly walks the iron-resize chain.
@@ -1002,15 +998,13 @@ suite('nuxeo-app', () => {
       const originalNotify = app.$.drawerPanel.notifyResize;
       const notifySpy = sinon.spy();
       app.$.drawerPanel.notifyResize = notifySpy;
-      app._notifyLayoutChanged();
-      requestAnimationFrame(() => {
-        try {
-          expect(notifySpy).to.have.been.called;
-          done();
-        } finally {
-          app.$.drawerPanel.notifyResize = originalNotify;
-        }
-      });
+      try {
+        app._notifyLayoutChanged();
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        expect(notifySpy).to.have.been.called;
+      } finally {
+        app.$.drawerPanel.notifyResize = originalNotify;
+      }
     });
 
     test('_reclampDrawerWidth bails when drawer is closed or layout is narrow', () => {
@@ -1093,7 +1087,7 @@ suite('nuxeo-app', () => {
       window.dispatchEvent(new MouseEvent('mouseup'));
       expect(app._drawerOpenWidth).to.equal(370);
       expect(app.drawerWidth).to.equal('370px');
-      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.equal('370');
+      expect(globalThis.localStorage.getItem('nuxeo.drawerWidth')).to.equal('370');
       expect(app.hasAttribute('drawer-resizing')).to.be.false;
       expect(app._notifyLayoutChanged).to.have.been.called;
       app._maxDrawerWidth.restore();
@@ -1149,7 +1143,7 @@ suite('nuxeo-app', () => {
       app._onShrinkDrawerRequest({ detail: { amount: 80 } });
       expect(app._drawerOpenWidth).to.equal(420);
       expect(app.drawerWidth).to.equal('420px');
-      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.equal('420');
+      expect(globalThis.localStorage.getItem('nuxeo.drawerWidth')).to.equal('420');
       expect(app.hasAttribute('drawer-resizing')).to.be.true;
       clock.tick(100);
       expect(app.hasAttribute('drawer-resizing')).to.be.false;
@@ -1233,7 +1227,7 @@ suite('nuxeo-app', () => {
     });
 
     test('_loadStoredDrawerWidth returns null when localStorage throws', () => {
-      const getItem = sinon.stub(window.localStorage, 'getItem').throws(new Error('denied'));
+      const getItem = sinon.stub(globalThis.localStorage, 'getItem').throws(new Error('denied'));
       expect(app._loadStoredDrawerWidth()).to.be.null;
       getItem.restore();
     });
@@ -1243,12 +1237,12 @@ suite('nuxeo-app', () => {
       app.drawerOpened = false;
       app.drawerWidth = '52px';
       app._drawerOpenWidth = 480;
-      window.localStorage.setItem('nuxeo.drawerWidth', '480');
+      globalThis.localStorage.setItem('nuxeo.drawerWidth', '480');
       sinon.stub(app, '_notifyLayoutChanged');
       app._resetDrawerWidth();
       expect(app._drawerOpenWidth).to.be.null;
       expect(app.drawerWidth).to.equal('52px');
-      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.be.null;
+      expect(globalThis.localStorage.getItem('nuxeo.drawerWidth')).to.be.null;
       app._notifyLayoutChanged.restore();
     });
   });
@@ -1619,24 +1613,21 @@ suite('nuxeo-app', () => {
       expect(main.classList.contains('user-is-tabbing')).to.be.false;
     });
 
-    test('_resizeDuringAnimation dispatches resize until transitionend', (done) => {
+    test('_resizeDuringAnimation dispatches resize until transitionend', async () => {
       const drawer = app.$.drawer;
       if (!drawer) {
-        done();
         return;
       }
       const onResize = sinon.spy();
-      window.addEventListener('resize', onResize);
-      app._resizeDuringAnimation();
-      drawer.dispatchEvent(new Event('transitionend'));
-      requestAnimationFrame(() => {
-        try {
-          expect(onResize).to.have.been.called;
-          done();
-        } finally {
-          window.removeEventListener('resize', onResize);
-        }
-      });
+      globalThis.addEventListener('resize', onResize);
+      try {
+        app._resizeDuringAnimation();
+        drawer.dispatchEvent(new Event('transitionend'));
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        expect(onResize).to.have.been.called;
+      } finally {
+        globalThis.removeEventListener('resize', onResize);
+      }
     });
   });
 

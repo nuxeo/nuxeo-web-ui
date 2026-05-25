@@ -496,17 +496,16 @@ Polymer({
       this._sideResizeAriaNow = 0;
       return;
     }
-    const sideEl = this.shadowRoot && this.shadowRoot.querySelector('.side');
+    const sideEl = this.shadowRoot?.querySelector('.side');
     this._sideResizeAriaMin = this._minSideWidth();
     this._sideResizeAriaMax = this._maxSideWidth();
-    this._sideResizeAriaNow =
-      this.sideWidth != null ? this.sideWidth : (sideEl && sideEl.offsetWidth) || SIDE_PANE_FALLBACK_PX;
+    this._sideResizeAriaNow = this.sideWidth ?? sideEl?.offsetWidth ?? SIDE_PANE_FALLBACK_PX;
   },
 
   /** Width of `.page` (main + side row); drives all clamp math. */
   _containerWidth() {
-    const pageEl = this.shadowRoot && this.shadowRoot.querySelector('.page');
-    return (pageEl && pageEl.offsetWidth) || this.offsetWidth || window.innerWidth || CONTAINER_WIDTH_FALLBACK_PX;
+    const pageEl = this.shadowRoot?.querySelector('.page');
+    return pageEl?.offsetWidth || this.offsetWidth || window.innerWidth || CONTAINER_WIDTH_FALLBACK_PX;
   },
 
   /** Min info-pane width (px); absolute floor only, not natural flex width. */
@@ -550,30 +549,34 @@ Polymer({
 
   _loadStoredSideWidth() {
     try {
-      const raw = window.localStorage && window.localStorage.getItem(SIDE_PANE_STORAGE_KEY);
-      const n = raw != null ? Number.parseInt(raw, 10) : NaN;
-      return Number.isFinite(n) ? n : null;
-    } catch (_e) {
+      const raw = globalThis.localStorage?.getItem(SIDE_PANE_STORAGE_KEY);
+      const n = Number.parseInt(raw ?? '', 10);
+      if (!Number.isFinite(n)) {
+        return null;
+      }
+      return n;
+    } catch {
+      // Storage may be unavailable (private mode, quota); width is not persisted.
       return null;
     }
   },
 
   _persistSideWidth(px) {
     try {
-      if (window.localStorage) {
+      if (globalThis.localStorage) {
         if (px == null) {
-          window.localStorage.removeItem(SIDE_PANE_STORAGE_KEY);
+          globalThis.localStorage.removeItem(SIDE_PANE_STORAGE_KEY);
         } else {
-          window.localStorage.setItem(SIDE_PANE_STORAGE_KEY, String(px));
+          globalThis.localStorage.setItem(SIDE_PANE_STORAGE_KEY, String(px));
         }
       }
-    } catch (_e) {
-      // ignore storage errors
+    } catch {
+      // Storage may be unavailable (private mode, quota); width is not persisted.
     }
   },
 
   _isNarrowViewport() {
-    if (window.matchMedia && window.matchMedia(`(max-width: ${NARROW_VIEWPORT_BREAKPOINT_PX}px)`).matches) {
+    if (globalThis?.matchMedia(`(max-width: ${NARROW_VIEWPORT_BREAKPOINT_PX}px)`).matches) {
       return true;
     }
     // Too narrow when min side + min main cannot fit side by side.
@@ -587,16 +590,15 @@ Polymer({
     }
     e.preventDefault();
     e.stopPropagation();
-    const point = e.touches && e.touches[0] ? e.touches[0] : e;
+    const point = e.touches?.[0] ?? e;
     const startX = point.clientX;
-    const sideEl = this.shadowRoot && this.shadowRoot.querySelector('.side');
-    const startWidth =
-      this.sideWidth != null ? this.sideWidth : (sideEl && sideEl.offsetWidth) || SIDE_PANE_FALLBACK_PX;
+    const sideEl = this.shadowRoot?.querySelector('.side');
+    const startWidth = this.sideWidth ?? sideEl?.offsetWidth ?? SIDE_PANE_FALLBACK_PX;
     const rtl = this.getAttribute('dir') === 'rtl';
     this.setAttribute('side-resizing', '');
 
     const onMove = (ev) => {
-      const p = ev.touches && ev.touches[0] ? ev.touches[0] : ev;
+      const p = ev.touches?.[0] ?? ev;
       const delta = (startX - p.clientX) * (rtl ? -1 : 1);
       const requested = startWidth + delta;
       const currentMax = this._maxSideWidth();
@@ -624,20 +626,20 @@ Polymer({
 
     const onEnd = () => {
       this.removeAttribute('side-resizing');
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onEnd);
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onEnd);
+      globalThis.removeEventListener('mousemove', onMove);
+      globalThis.removeEventListener('mouseup', onEnd);
+      globalThis.removeEventListener('touchmove', onMove);
+      globalThis.removeEventListener('touchend', onEnd);
       if (this.sideWidth != null) {
         this._persistSideWidth(this.sideWidth);
       }
-      window.dispatchEvent(new Event('resize'));
+      globalThis.dispatchEvent(new Event('resize'));
     };
 
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onEnd);
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('touchend', onEnd);
+    globalThis.addEventListener('mousemove', onMove);
+    globalThis.addEventListener('mouseup', onEnd);
+    globalThis.addEventListener('touchmove', onMove, { passive: false });
+    globalThis.addEventListener('touchend', onEnd);
   },
 
   _onSideResizeKey(e) {
@@ -645,8 +647,8 @@ Polymer({
       return;
     }
     const step = e.shiftKey ? SIDE_KEY_STEP_SHIFT_PX : SIDE_KEY_STEP_PX;
-    const sideEl = this.shadowRoot && this.shadowRoot.querySelector('.side');
-    const current = this.sideWidth != null ? this.sideWidth : (sideEl && sideEl.offsetWidth) || SIDE_PANE_FALLBACK_PX;
+    const sideEl = this.shadowRoot?.querySelector('.side');
+    const current = this.sideWidth ?? sideEl?.offsetWidth ?? SIDE_PANE_FALLBACK_PX;
     const rtl = this.getAttribute('dir') === 'rtl';
     let next;
     switch (e.key) {
