@@ -120,6 +120,7 @@
     "update-coverage-imports": "node scripts/test/unit/generate-coverage-imports.js",
     "update-test-load-all": "node scripts/test/unit/generate-test-load-all.js",
     "pretest": "puppeteer browsers install chrome",
+    "pretest:watch": "puppeteer browsers install chrome",
     "test": "npm run update-coverage-imports && npm run update-test-load-all && node scripts/test/unit/print-test-runner-notice.js && web-test-runner --coverage && node scripts/test/unit/inject-zero-coverage.js",
     "test:watch": "npm run update-coverage-imports && npm run update-test-load-all && node scripts/test/unit/print-test-runner-notice.js && web-test-runner --watch"
   },

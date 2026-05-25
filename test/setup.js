@@ -314,7 +314,8 @@ suiteTeardown(async function coverageMaterializationTeardown() {
 
   if (!Array.isArray(coverageModulePaths) || coverageModulePaths.length === 0) {
     expect.fail(
-      'test/coverage-imports-data.js has no paths. Run: node scripts/test/unit/generate-coverage-imports.js (or npm run update-coverage-imports).',
+      'test/coverage-imports-data.js has no paths. Run: node scripts/test/unit/generate-coverage-imports.js ' +
+        '(or npm run update-coverage-imports).',
     );
   }
 
