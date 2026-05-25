@@ -88,9 +88,6 @@ export default {
     if (text.includes('Promise outside a test')) {
       return false;
     }
-    if (text.includes('[test-setup] ignoring stray')) {
-      return false;
-    }
     if (/Invalid json|No message/.test(text) && text.includes('404')) {
       return false;
     }

@@ -10,7 +10,8 @@ export function nuxeoCoverageFlagPlugin(enabled) {
   return {
     name: 'nuxeo-coverage-flag',
     transformImport({ context }) {
-      if (!context.path.endsWith('/test/setup.js')) {
+      const pathname = context.path.split('?')[0];
+      if (!pathname.endsWith('/test/setup.js')) {
         return undefined;
       }
       return {
