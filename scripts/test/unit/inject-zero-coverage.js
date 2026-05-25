@@ -105,7 +105,9 @@ function main() {
   const after = summarizeLcov(updated);
   // eslint-disable-next-line no-console
   console.log(
-    `inject-zero-coverage: added ${records.length} zero-coverage records (${covered.size} → ${covered.size + records.length} files, ${before.pct.toFixed(2)}% → ${after.pct.toFixed(2)}% lines)`,
+    `inject-zero-coverage: added ${records.length} zero-coverage records ` +
+      `(${covered.size} → ${covered.size + records.length} files, ` +
+      `${before.pct.toFixed(2)}% → ${after.pct.toFixed(2)}% lines)`,
   );
 }
 
