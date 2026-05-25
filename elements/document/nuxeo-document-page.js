@@ -155,7 +155,7 @@ Polymer({
         width: 6px;
         height: 100%;
         cursor: ew-resize;
-        z-index: 5;
+        z-index: 20;
         background-color: transparent;
         transition: background-color 0.2s ease;
         user-select: none;
@@ -280,6 +280,7 @@ Polymer({
 
       <div class="side">
         <div
+          id="sideResizeHandle"
           class="side-resize-handle"
           role="separator"
           aria-orientation="vertical"
@@ -293,6 +294,9 @@ Polymer({
           on-keydown="_onSideResizeKey"
           on-dblclick="_resetSideWidth"
         ></div>
+        <nuxeo-tooltip for="sideResizeHandle" position="left" animation-delay="0">
+          <span class="resize-handle-tooltip-label">[[i18n('documentPage.resize.side')]]</span>
+        </nuxeo-tooltip>
         <div class="scrollerHeader">
           <paper-icon-button
             id="details"
