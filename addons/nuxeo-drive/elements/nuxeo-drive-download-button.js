@@ -60,6 +60,11 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
         value: false,
       },
 
+      _failureVisible: {
+        type: Boolean,
+        value: false,
+      },
+
       _hasToken: {
         type: Boolean,
         value: false,
@@ -92,8 +97,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
           }
 
           .dialog-content {
-            text-align: center;
-            padding: 24px 32px;
+            padding: 16px 24px;
           }
 
           .dialog-content h1 {
@@ -102,54 +106,56 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
           }
 
           .dialog-content p {
-            color: var(--secondary-text-color, #666);
-            margin: 0 0 32px;
+            color: var(--primary-text-color, #333);
+            margin: 0 0 16px;
           }
 
           .launch-btn {
-            display: block;
             background-color: var(--nuxeo-primary-color, #0066ff);
             color: #fff;
             text-transform: uppercase;
-            margin: 0 auto 16px;
-            width: fit-content;
-            min-width: 200px;
+            font-size: 0.9em;
+            padding: 0.5em 1em;
           }
 
           .launch-btn[disabled] {
             background-color: var(--disabled-text-color, #9e9e9e);
           }
 
+          .close-btn {
+            border: 1px solid var(--nuxeo-primary-color, #0066ff);
+            color: var(--nuxeo-primary-color, #0066ff);
+            text-transform: uppercase;
+            font-size: 0.9em;
+            padding: 0.5em 1em;
+          }
+
           .install-link {
             display: block;
-            text-align: center;
             margin-top: 4px;
             font-size: 0.9em;
           }
 
           .dialog-content .failure-msg {
-            color: var(--secondary-text-color, #666);
-            margin: 12px 0 0;
+            color: var(--nuxeo-warn-text, #d32f2f);
+            margin: 12px 0 16px;
             font-size: 0.9em;
           }
 
           .dialog-content .install-prompt {
-            color: var(--secondary-text-color, #666);
+            color: var(--primary-text-color, #333);
             margin: 4px 0 8px;
             font-size: 0.9em;
           }
 
           .buttons {
-            justify-content: center;
+            justify-content: space-between;
           }
         </style>
         <div class="dialog-content">
           <h1>[[i18n('driveButton.dialog.heading')]]</h1>
           <p>[[i18n('driveButton.dialog.description')]]</p>
-          <paper-button class="launch-btn" on-click="_launchDrive" noink disabled$="[[_launched]]"
-            >[[i18n('driveButton.dialog.open')]]</paper-button
-          >
-          <template is="dom-if" if="[[_showFailure(_launched, _driveOpened)]]">
+          <template is="dom-if" if="[[_failureVisible]]">
             <p class="failure-msg">[[i18n('driveButton.dialog.couldNotOpen')]]</p>
           </template>
           <template is="dom-if" if="[[_showInstall]]">
@@ -161,7 +167,10 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
           </template>
         </div>
         <div class="buttons">
-          <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
+          <paper-button dialog-dismiss class="close-btn">[[i18n('command.close')]]</paper-button>
+          <paper-button class="launch-btn" on-click="_launchDrive" noink disabled$="[[_launched]]"
+            >[[i18n('driveButton.dialog.open')]]</paper-button
+          >
         </div>
       </nuxeo-dialog>
 
@@ -196,6 +205,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     this._showInstall = false;
     this._launched = false;
     this._driveOpened = false;
+    this._failureVisible = false;
     this._hasToken = false;
     this.$.token
       .get()
@@ -219,18 +229,25 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     };
     window.addEventListener('blur', onBlur);
     this._navigateTo(this.directDownloadUrl);
+    this._failureVisible = true;
   }
 
   /**
    * Triggers a custom protocol URL (nxdrive://) via a hidden anchor click.
    */
   _navigateTo(url) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    try {
+      window.location.href = url;
+    } catch (e) {
+      // ignore - protocol handler may not be registered
+    }
+
+    // const a = document.createElement('a');
+    // a.href = url;
+    // a.style.display = 'none';
+    // document.body.appendChild(a);
+    // a.click();
+    // a.remove();
   }
 
   _showFailure(launched, driveOpened) {
