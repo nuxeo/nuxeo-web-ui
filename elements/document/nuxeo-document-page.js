@@ -285,6 +285,9 @@ Polymer({
           aria-orientation="vertical"
           tabindex="0"
           aria-label$="[[i18n('documentPage.resize.side')]]"
+          aria-valuemin$="[[_sideResizeAriaMin]]"
+          aria-valuemax$="[[_sideResizeAriaMax]]"
+          aria-valuenow$="[[_sideResizeAriaNow]]"
           on-mousedown="_onSideResizeStart"
           on-touchstart="_onSideResizeStart"
           on-keydown="_onSideResizeKey"
@@ -388,6 +391,22 @@ Polymer({
       reflectToAttribute: true,
       observer: '_sideWidthChanged',
     },
+
+    /** ARIA bounds for the info-pane resize separator (updated with width changes). */
+    _sideResizeAriaMin: {
+      type: Number,
+      value: 0,
+    },
+
+    _sideResizeAriaMax: {
+      type: Number,
+      value: 0,
+    },
+
+    _sideResizeAriaNow: {
+      type: Number,
+      value: 0,
+    },
   },
 
   ready() {
@@ -402,6 +421,7 @@ Polymer({
     // Re-clamp on viewport/drawer changes (numeric only — no DOM flicker).
     this._onWindowResize = () => {
       this._reclampSideWidth();
+      this._updateSideResizeAria();
     };
     window.addEventListener('resize', this._onWindowResize);
 
@@ -415,6 +435,7 @@ Polymer({
         }
         this._pendingStoredSideWidth = null;
       }
+      this._updateSideResizeAria();
     });
   },
 
@@ -430,6 +451,7 @@ Polymer({
   },
 
   _openedChanged() {
+    this._updateSideResizeAria();
     animationFrame.run(() => {
       // notify that there was a resize
       this.dispatchEvent(
@@ -456,11 +478,25 @@ Polymer({
   _sideWidthChanged(value) {
     if (value == null || Number.isNaN(Number(value))) {
       this.style.removeProperty('--nuxeo-side-pane-width');
-      this.removeAttribute('side-width');
     } else {
       this.style.setProperty('--nuxeo-side-pane-width', `${value}px`);
-      this.setAttribute('side-width', String(value));
     }
+    this._updateSideResizeAria();
+  },
+
+  /** Sync aria-valuemin / aria-valuemax / aria-valuenow on the info-pane resize handle. */
+  _updateSideResizeAria() {
+    if (!this.opened || this._isNarrowViewport()) {
+      this._sideResizeAriaMin = 0;
+      this._sideResizeAriaMax = 0;
+      this._sideResizeAriaNow = 0;
+      return;
+    }
+    const sideEl = this.shadowRoot && this.shadowRoot.querySelector('.side');
+    this._sideResizeAriaMin = this._minSideWidth();
+    this._sideResizeAriaMax = this._maxSideWidth();
+    this._sideResizeAriaNow =
+      this.sideWidth != null ? this.sideWidth : (sideEl && sideEl.offsetWidth) || SIDE_PANE_FALLBACK_PX;
   },
 
   /** Width of `.page` (main + side row); drives all clamp math. */
@@ -573,6 +609,7 @@ Polymer({
       }
       const next = this._clampSideWidth(requested);
       this.sideWidth = next;
+      this._updateSideResizeAria();
       this.dispatchEvent(
         new CustomEvent('resize', {
           bubbles: true,
@@ -644,6 +681,7 @@ Polymer({
     next = this._clampSideWidth(next);
     this.sideWidth = next;
     this._persistSideWidth(next);
+    this._updateSideResizeAria();
     this.dispatchEvent(
       new CustomEvent('resize', {
         bubbles: true,
