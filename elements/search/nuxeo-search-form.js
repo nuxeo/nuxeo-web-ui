@@ -657,6 +657,7 @@ Polymer({
     results: {
       type: Object,
       notify: true,
+      observer: '_resultsElementChanged',
     },
 
     /**
@@ -858,6 +859,27 @@ Polymer({
     if (this.form) {
       this.form.searchTerm = this.searchTerm;
     }
+  },
+
+  _resultsElementChanged(results, oldResults) {
+    if (oldResults && typeof oldResults.addEventListener === 'function') {
+      this.unlisten(oldResults, 'quick-filters-changed', '_syncQuickFiltersFromResults');
+    }
+    if (results && typeof results.addEventListener === 'function') {
+      this.listen(results, 'quick-filters-changed', '_syncQuickFiltersFromResults');
+    }
+  },
+
+  _syncQuickFiltersFromResults(e) {
+    const quickFilters =
+      (Array.isArray(e?.detail?.value) && e.detail.value) ||
+      (Array.isArray(e?.target?.quickFilters) && e.target.quickFilters) ||
+      (this.results && Array.isArray(this.results.quickFilters) && this.results.quickFilters) ||
+      [];
+
+    const clonedQuickFilters = quickFilters.slice();
+    this.set('_quickFilters', clonedQuickFilters);
+    this.$.provider.quickFilters = clonedQuickFilters.slice();
   },
 
   _computeData(searches) {
