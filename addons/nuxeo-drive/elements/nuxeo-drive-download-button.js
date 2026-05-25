@@ -233,21 +233,31 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
   }
 
   /**
-   * Triggers a custom protocol URL (nxdrive://) via a hidden anchor click.
+   * Triggers a custom protocol URL (nxdrive://).
+   * Uses a hidden object element for Safari (avoids "address is invalid" alert)
+   * and a hidden anchor click for all other browsers.
    */
   _navigateTo(url) {
-    try {
-      window.location.href = url;
-    } catch (e) {
-      // ignore - protocol handler may not be registered
+    if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+      if (this._protocolObj) {
+        this._protocolObj.remove();
+      }
+      const obj = document.createElement('object');
+      obj.data = url;
+      obj.style.position = 'fixed';
+      obj.style.opacity = '0';
+      obj.style.width = '1px';
+      obj.style.height = '1px';
+      document.body.appendChild(obj);
+      this._protocolObj = obj;
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
     }
-
-    // const a = document.createElement('a');
-    // a.href = url;
-    // a.style.display = 'none';
-    // document.body.appendChild(a);
-    // a.click();
-    // a.remove();
   }
 
   _showFailure(launched, driveOpened) {
