@@ -201,6 +201,10 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
     this._driveOpened = false;
     this._failureVisible = false;
     this._hasToken = false;
+    if (this._failureTimer) {
+      clearTimeout(this._failureTimer);
+      this._failureTimer = null;
+    }
     this.$.token
       .get()
       .then((response) => {
@@ -217,13 +221,26 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   _launchDrive() {
     this._launched = true;
     this._driveOpened = false;
+    if (this._failureTimer) {
+      clearTimeout(this._failureTimer);
+    }
     const onBlur = () => {
       window.removeEventListener('blur', onBlur);
       this._driveOpened = true;
+      if (this._failureTimer) {
+        clearTimeout(this._failureTimer);
+        this._failureTimer = null;
+      }
     };
     window.addEventListener('blur', onBlur);
     this._navigateTo(this.directTransferUrl);
-    this._failureVisible = true;
+    // No browser API detects custom protocol failure; wait for blur (app launched) or assume failure after timeout.
+    this._failureTimer = setTimeout(() => {
+      this._failureTimer = null;
+      if (!this._driveOpened) {
+        this._failureVisible = true;
+      }
+    }, 1500);
   }
 
   /**
