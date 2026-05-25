@@ -25,7 +25,12 @@ const require = createRequire(import.meta.url);
 // Bundled Chromium matches puppeteer-core; system Chrome on CI runners often mismatches (see WEBUI-2038).
 const puppeteer = require('puppeteer');
 
-const chromeArgs = ['--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'];
+const chromeArgs = [
+  '--disable-gpu',
+  '--no-sandbox',
+  '--disable-dev-shm-usage',
+  '--disable-setuid-sandbox',
+];
 
 const verbose = process.env.WTR_VERBOSE === '1';
 

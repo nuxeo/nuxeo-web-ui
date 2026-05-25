@@ -103,9 +103,24 @@ globalThis.should = chai.should();
 // management, workflow-*, etc.) never execute, the test count is artificially low, and
 // coverage on those modules looks like 0%.
 //
-// The capture-phase listeners below intercept these events before mocha's listeners
-// can see them. Benign 404/Invalid json noise is silently dropped; other stray failures
-// are logged via console.error so WTR surfaces them in CI without WTR_VERBOSE=1.
+// The capture-phase listeners below intercept stray events before mocha's listeners
+// can see them, but only when no test is actively running. Benign 404/Invalid json
+// noise is silently dropped; other stray failures are logged via console.error.
+let _testRunning = false;
+
+if (typeof window.setup === 'function') {
+  window.setup(() => {
+    _testRunning = true;
+  });
+}
+
+if (typeof window.teardown === 'function') {
+  window.teardown(() => {
+    _testRunning = false;
+  });
+}
+
+const _shouldSuppressStrayAsyncFailure = () => !_testRunning;
 const _isBenignNuxeoNetworkFailure = (info) => {
   if (info == null) {
     return false;
@@ -144,6 +159,9 @@ if (typeof window.ResizeObserver === 'function') {
             try {
               callback(entries, observer);
             } catch (err) {
+              if (_testRunning) {
+                throw err;
+              }
               _logIgnoredAsyncFailure('ResizeObserver', err);
             }
           });
@@ -151,6 +169,9 @@ if (typeof window.ResizeObserver === 'function') {
           try {
             callback(entries, observer);
           } catch (err) {
+            if (_testRunning) {
+              throw err;
+            }
             _logIgnoredAsyncFailure('ResizeObserver', err);
           }
         }
@@ -162,7 +183,15 @@ if (typeof window.ResizeObserver === 'function') {
 window.addEventListener(
   'unhandledrejection',
   (event) => {
+    if (!_shouldSuppressStrayAsyncFailure()) {
+      return;
+    }
     const reason = event.reason;
+    if (_isBenignNuxeoNetworkFailure(reason)) {
+      event.stopImmediatePropagation();
+      event.preventDefault();
+      return;
+    }
     _logIgnoredAsyncFailure('unhandledrejection', reason);
     event.stopImmediatePropagation();
     event.preventDefault();
@@ -173,6 +202,9 @@ window.addEventListener(
 window.addEventListener(
   'error',
   (event) => {
+    if (!_shouldSuppressStrayAsyncFailure()) {
+      return;
+    }
     _logIgnoredAsyncFailure('error', event.error || event.message);
     event.stopImmediatePropagation();
     event.preventDefault();
@@ -185,6 +217,12 @@ window.addEventListener(
 // Returning true here suppresses the default browser/mocha "uncaught" reporting.
 const _previousOnError = window.onerror;
 window.onerror = function _suppressedOnError(message, source, lineno, colno, error) {
+  if (!_shouldSuppressStrayAsyncFailure()) {
+    if (typeof _previousOnError === 'function') {
+      return _previousOnError.call(this, message, source, lineno, colno, error);
+    }
+    return false;
+  }
   _logIgnoredAsyncFailure('window.onerror', error || message);
   if (typeof _previousOnError === 'function') {
     try {
@@ -197,6 +235,12 @@ window.onerror = function _suppressedOnError(message, source, lineno, colno, err
 };
 const _previousOnRejection = window.onunhandledrejection;
 window.onunhandledrejection = function _suppressedOnRejection(event) {
+  if (!_shouldSuppressStrayAsyncFailure()) {
+    if (typeof _previousOnRejection === 'function') {
+      return _previousOnRejection.call(this, event);
+    }
+    return false;
+  }
   const reason = event && event.reason;
   _logIgnoredAsyncFailure('window.onunhandledrejection', reason);
   if (typeof _previousOnRejection === 'function') {
@@ -281,8 +325,7 @@ suiteTeardown(async function coverageMaterializationTeardown() {
   // Istanbul (legacy Karma): skip paths already keyed in window.__coverage__ — re-importing through
   // a different instrumented URL wipes counters collected during tests.
   // Native V8 (Web Test Runner): ES module cache makes re-import a no-op for modules already loaded;
-  // only modules never touched during tests are fetched here. Failures are logged and get 0% via
-  // scripts/test/unit/inject-zero-coverage.js (same as Karma listing unloadable modules at 0%).
+  // only modules never touched during tests are fetched here. Failures fail the run (Karma parity).
   const alreadyCovered =
     typeof window.__coverage__ !== 'undefined' ? new Set(Object.keys(window.__coverage__)) : new Set();
   const toLoad = coverageModulePaths.filter((p) => !alreadyCovered.has(p));
@@ -298,10 +341,10 @@ suiteTeardown(async function coverageMaterializationTeardown() {
 
   if (failures.length > 0) {
     const message = failures.map((f) => `${f.specifier}: ${f.err && f.err.message ? f.err.message : f.err}`).join('\n');
-    // console.error so WTR filterBrowserLogs surfaces this in CI (warn is filtered unless WTR_VERBOSE=1).
     // eslint-disable-next-line no-console
     console.error(
-      `coverage materialization: ${failures.length} of ${toLoad.length} modules failed to load (0% will be injected in lcov):\n${message}`,
+      `coverage materialization: ${failures.length} of ${toLoad.length} modules failed to load:\n${message}`,
     );
+    expect(failures, 'every app module should load in the test environment').to.have.length(0);
   }
 });
