@@ -556,7 +556,7 @@ Polymer({
    */
   _computeTargetSideWidth() {
     const stored = this._loadStoredSideWidth();
-    const preference = stored != null ? stored : this.sideWidth;
+    const preference = stored ?? this.sideWidth;
     if (preference == null || Number.isNaN(Number(preference))) {
       return null;
     }
