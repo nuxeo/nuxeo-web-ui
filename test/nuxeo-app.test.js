@@ -52,6 +52,50 @@ suite('nuxeo-app', () => {
     expect(app.drawerOpened).to.be.false;
   });
 
+  test('_handleNarrowChange re-syncs drawerOpened on narrow → wide when drawer is visually wide', () => {
+    app.sidebarWidth = '52px';
+    app.drawerWidth = '350px';
+    app.drawerOpened = false;
+    app._handleNarrowChange(false);
+    expect(app.drawerOpened).to.be.true;
+  });
+
+  test('_handleNarrowChange is a no-op on initial wide load (drawerWidth == sidebarWidth)', () => {
+    app.sidebarWidth = '52px';
+    app.drawerWidth = '52px';
+    app.drawerOpened = false;
+    app._handleNarrowChange(false);
+    expect(app.drawerOpened).to.be.false;
+  });
+
+  test('_handleNarrowChange does not touch drawerOpened when already true on narrow → wide', () => {
+    app.sidebarWidth = '52px';
+    app.drawerWidth = '350px';
+    app.drawerOpened = true;
+    app._handleNarrowChange(false);
+    expect(app.drawerOpened).to.be.true;
+  });
+
+  test('_updateDrawerResizeAria sets min max and now for screen readers', () => {
+    app.sidebarWidth = '52px';
+    app.drawerOpened = true;
+    app.isNarrow = false;
+    app._drawerOpenWidth = 400;
+    sinon.stub(app, '_maxDrawerWidth').returns(700);
+    app._updateDrawerResizeAria();
+    expect(app._drawerResizeAriaMin).to.equal(app._minDrawerWidth());
+    expect(app._drawerResizeAriaMax).to.equal(700);
+    expect(app._drawerResizeAriaNow).to.equal(400);
+    app._maxDrawerWidth.restore();
+  });
+
+  test('_computeDrawerResizeHidden hides the handle when the drawer is closed or layout is narrow', () => {
+    expect(app._computeDrawerResizeHidden(false, false)).to.be.true;
+    expect(app._computeDrawerResizeHidden(true, true)).to.be.true;
+    expect(app._computeDrawerResizeHidden(false, true)).to.be.true;
+    expect(app._computeDrawerResizeHidden(true, false)).to.be.false;
+  });
+
   test('_logo builds theme logo URL from baseUrl and localStorage theme', () => {
     sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'ocean' : null));
     expect(app._logo('https://host/nuxeo/')).to.equal('https://host/nuxeo/themes/ocean/logo.png');
@@ -655,5 +699,1378 @@ suite('nuxeo-app', () => {
     app.loadTask(null);
     expect(app._defineTaskAndNavigate).to.have.been.calledOnce;
     app._defineTaskAndNavigate.restore();
+  });
+
+  suite('drawer pane resize', () => {
+    teardown(() => {
+      try {
+        window.localStorage.removeItem('nuxeo.drawerWidth');
+      } catch (_e) {
+        // ignore
+      }
+    });
+
+    test('_sidebarPx parses the css sidebar width', () => {
+      app.sidebarWidth = '52px';
+      expect(app._sidebarPx()).to.equal(52);
+    });
+
+    test('_sidebarPx defaults to 52 when sidebar width is invalid', () => {
+      app.sidebarWidth = 'abc';
+      expect(app._sidebarPx()).to.equal(52);
+    });
+
+    test('_minDrawerWidth is the natural open width on wide viewports', () => {
+      app.sidebarWidth = '52px';
+      expect(app._minDrawerWidth()).to.equal(350);
+    });
+
+    test('_minDrawerWidth can drop below natural open when the viewport is narrow', () => {
+      app.sidebarWidth = '52px';
+      const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth');
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        get: () => 560,
+      });
+      try {
+        expect(app._minDrawerWidth()).to.equal(280);
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(window, 'innerWidth', originalDescriptor);
+        } else {
+          delete window.innerWidth;
+        }
+      }
+    });
+
+    test('_maxDrawerWidth increases when the viewport grows (zoom out)', () => {
+      app.sidebarWidth = '52px';
+      const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth');
+      let innerWidth = 1200;
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        get: () => innerWidth,
+      });
+      try {
+        const maxNarrow = app._maxDrawerWidth();
+        innerWidth = 2000;
+        const maxWide = app._maxDrawerWidth();
+        expect(maxWide).to.be.above(maxNarrow);
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(window, 'innerWidth', originalDescriptor);
+        } else {
+          delete window.innerWidth;
+        }
+      }
+    });
+
+    test('_maxDrawerWidth reserves main column space like the info pane', () => {
+      app.sidebarWidth = '52px';
+      const layoutWidth = app._drawerLayoutWidth();
+      const expectedCap = Math.min(
+        Math.floor(layoutWidth - app._minMainWidthForDrawer()),
+        Math.floor(window.innerWidth * 0.5),
+      );
+      expect(app._maxDrawerWidth()).to.equal(Math.max(app._minDrawerWidth(), expectedCap));
+    });
+
+    test('_computeOpenDrawerWidth restores a wide preference after a simulated zoom-in clamp', () => {
+      app.sidebarWidth = '52px';
+      app._drawerOpenWidth = 700;
+      const maxStub = sinon.stub(app, '_maxDrawerWidth');
+      maxStub.onCall(0).returns(400);
+      maxStub.onCall(1).returns(700);
+      expect(app._computeOpenDrawerWidth()).to.equal(400);
+      expect(app._computeOpenDrawerWidth()).to.equal(700);
+      maxStub.restore();
+    });
+
+    test('_clampDrawerWidth keeps value within min/max', () => {
+      app.sidebarWidth = '52px';
+      expect(app._clampDrawerWidth(0)).to.equal(app._minDrawerWidth());
+      expect(app._clampDrawerWidth(99999)).to.equal(app._maxDrawerWidth());
+    });
+
+    test('_loadStoredDrawerWidth reads stored value', () => {
+      window.localStorage.setItem('nuxeo.drawerWidth', '420');
+      expect(app._loadStoredDrawerWidth()).to.equal(420);
+    });
+
+    test('_loadStoredDrawerWidth returns null when missing', () => {
+      window.localStorage.removeItem('nuxeo.drawerWidth');
+      expect(app._loadStoredDrawerWidth()).to.be.null;
+    });
+
+    test('_loadStoredDrawerWidth returns null for non-numeric value', () => {
+      window.localStorage.setItem('nuxeo.drawerWidth', 'NaN');
+      expect(app._loadStoredDrawerWidth()).to.be.null;
+    });
+
+    test('_persistDrawerWidth saves value to localStorage', () => {
+      app._persistDrawerWidth(420);
+      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.equal('420');
+    });
+
+    test('_computeOpenDrawerWidth falls back to default when nothing persisted', () => {
+      app._drawerOpenWidth = null;
+      window.localStorage.removeItem('nuxeo.drawerWidth');
+      app.sidebarWidth = '52px';
+      expect(app._computeOpenDrawerWidth()).to.equal(350);
+    });
+
+    test('_computeOpenDrawerWidth honors persisted preference within bounds', () => {
+      app._drawerOpenWidth = null;
+      app.sidebarWidth = '52px';
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      window.localStorage.setItem('nuxeo.drawerWidth', '480');
+      expect(app._computeOpenDrawerWidth()).to.equal(480);
+      app._maxDrawerWidth.restore();
+    });
+
+    test('_computeOpenDrawerWidth clamps persisted preference that is too small', () => {
+      app._drawerOpenWidth = null;
+      window.localStorage.setItem('nuxeo.drawerWidth', '50');
+      app.sidebarWidth = '52px';
+      expect(app._computeOpenDrawerWidth()).to.equal(app._minDrawerWidth());
+    });
+
+    test('_resetDrawerWidth clears persisted preference and restores default width', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app._drawerOpenWidth = 480;
+      app._persistDrawerWidth(480);
+      app._resetDrawerWidth();
+      expect(app._drawerOpenWidth).to.be.null;
+      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.be.null;
+      expect(app.drawerWidth).to.equal('350px');
+    });
+
+    test('_onDrawerResizeKey ArrowRight increases width by 16px (LTR)', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._isRTL = false;
+      app._drawerOpenWidth = 350;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      const evt = { key: 'ArrowRight', shiftKey: false, preventDefault: sinon.spy() };
+      app._onDrawerResizeKey(evt);
+      expect(evt.preventDefault).to.have.been.called;
+      expect(app._drawerOpenWidth).to.equal(366);
+      expect(app.drawerWidth).to.equal('366px');
+      app._maxDrawerWidth.restore();
+    });
+
+    test('_onDrawerResizeKey ArrowLeft decreases width by 16px (LTR)', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._isRTL = false;
+      app._drawerOpenWidth = 400;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      app._onDrawerResizeKey({ key: 'ArrowLeft', shiftKey: false, preventDefault: sinon.spy() });
+      expect(app._drawerOpenWidth).to.equal(384);
+      app._maxDrawerWidth.restore();
+    });
+
+    test('_onDrawerResizeKey Home/End jump to min/max', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 400;
+      app._onDrawerResizeKey({ key: 'Home', preventDefault: sinon.spy() });
+      expect(app._drawerOpenWidth).to.equal(app._minDrawerWidth());
+      app._onDrawerResizeKey({ key: 'End', preventDefault: sinon.spy() });
+      expect(app._drawerOpenWidth).to.equal(app._maxDrawerWidth());
+    });
+
+    test('_onDrawerResizeKey Enter triggers _resetDrawerWidth', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      sinon.stub(app, '_resetDrawerWidth');
+      app._onDrawerResizeKey({ key: 'Enter', preventDefault: sinon.spy() });
+      expect(app._resetDrawerWidth).to.have.been.calledOnce;
+      app._resetDrawerWidth.restore();
+    });
+
+    test('_onDrawerResizeKey does nothing on narrow layouts', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = true;
+      app._drawerOpenWidth = 400;
+      app._onDrawerResizeKey({ key: 'ArrowRight', preventDefault: sinon.spy() });
+      expect(app._drawerOpenWidth).to.equal(400);
+    });
+
+    test('_onDrawerResizeKey does nothing when drawer is closed', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = false;
+      app._drawerOpenWidth = 400;
+      app._onDrawerResizeKey({ key: 'ArrowRight', preventDefault: sinon.spy() });
+      expect(app._drawerOpenWidth).to.equal(400);
+    });
+
+    test('_onDrawerResizeKey ArrowRight in RTL decreases width (mirrored)', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._isRTL = true;
+      app._drawerOpenWidth = 400;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      app._onDrawerResizeKey({ key: 'ArrowRight', preventDefault: sinon.spy() });
+      expect(app._drawerOpenWidth).to.equal(384);
+      app._maxDrawerWidth.restore();
+    });
+
+    test('_reclampDrawerWidth resyncs drawerWidth after a narrow-to-wide zoom cycle', () => {
+      // Simulates: user opened the drawer while the viewport was narrow (overlay
+      // mode). `_openDrawer` wrote a clamped narrow-mode value into the inline
+      // `drawerWidth` style but `_drawerOpenWidth` kept the user's wide-mode
+      // preference. When the user zooms back out, the inline style must catch
+      // back up to the preferred width — even though `_drawerOpenWidth` already
+      // equals the computed target.
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 500;
+      app.drawerWidth = '200px';
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      app._reclampDrawerWidth();
+      expect(app.drawerWidth).to.equal('500px');
+      app._maxDrawerWidth.restore();
+    });
+
+    test('_reclampDrawerWidth dispatches resize so iron-resize listeners re-evaluate', (done) => {
+      // After `drawerWidth` is resynced post-zoom, descendants that rely on
+      // iron-resize (e.g. data tables that show/hide columns) must be nudged
+      // to recompute their layout. Without this dispatch, the main content
+      // would keep its pre-resync layout until any other interaction forced
+      // a reflow.
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 500;
+      app.drawerWidth = '200px';
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      const onResize = sinon.spy();
+      window.addEventListener('resize', onResize);
+      app._reclampDrawerWidth();
+      // The dispatch is scheduled via requestAnimationFrame so the browser
+      // applies the new width before listeners re-run. Wait one frame.
+      requestAnimationFrame(() => {
+        try {
+          expect(onResize).to.have.been.called;
+          done();
+        } finally {
+          window.removeEventListener('resize', onResize);
+          app._maxDrawerWidth.restore();
+        }
+      });
+    });
+
+    test('_scheduleDrawerDragLayoutNotify coalesces multiple calls into one frame', (done) => {
+      app._cancelDrawerDragLayoutNotify();
+      let runCount = 0;
+      const originalRun = app._runLayoutNotify;
+      app._runLayoutNotify = () => {
+        runCount += 1;
+      };
+      app._scheduleDrawerDragLayoutNotify();
+      app._scheduleDrawerDragLayoutNotify();
+      expect(app._drawerDragLayoutRaf).to.exist;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          try {
+            expect(runCount).to.equal(1);
+            done();
+          } finally {
+            app._runLayoutNotify = originalRun;
+            app._cancelDrawerDragLayoutNotify();
+          }
+        });
+      });
+    });
+
+    test('_notifyLayoutChanged calls notifyResize on the drawer-layout', (done) => {
+      // Polymer components that use `IronResizableBehavior` (picture viewer,
+      // iron-pages, etc.) are decoupled from `window.resize` and only
+      // re-evaluate when an ancestor explicitly walks the iron-resize chain.
+      // `_notifyLayoutChanged` must propagate to that chain via the
+      // drawer-layout's `notifyResize()` so the fix is global, not just
+      // useful for plain `window.resize` listeners.
+      const originalNotify = app.$.drawerPanel.notifyResize;
+      const notifySpy = sinon.spy();
+      app.$.drawerPanel.notifyResize = notifySpy;
+      app._notifyLayoutChanged();
+      requestAnimationFrame(() => {
+        try {
+          expect(notifySpy).to.have.been.called;
+          done();
+        } finally {
+          app.$.drawerPanel.notifyResize = originalNotify;
+        }
+      });
+    });
+
+    test('_reclampDrawerWidth bails when drawer is closed or layout is narrow', () => {
+      app.sidebarWidth = '52px';
+      app._drawerOpenWidth = 500;
+      app.drawerWidth = '200px';
+      app.drawerOpened = false;
+      app.isNarrow = false;
+      app._reclampDrawerWidth();
+      expect(app.drawerWidth).to.equal('200px');
+
+      app.drawerOpened = true;
+      app.isNarrow = true;
+      app._reclampDrawerWidth();
+      expect(app.drawerWidth).to.equal('200px');
+    });
+
+    test('_drawerLayoutWidth subtracts sidebar from viewport', () => {
+      app.sidebarWidth = '52px';
+      const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth');
+      Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => 1000 });
+      try {
+        expect(app._drawerLayoutWidth()).to.equal(948);
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(window, 'innerWidth', originalDescriptor);
+        } else {
+          delete window.innerWidth;
+        }
+      }
+    });
+
+    test('_minMainWidthForDrawer respects floor and ratio cap', () => {
+      app.sidebarWidth = '52px';
+      const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth');
+      Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => 400 });
+      try {
+        expect(app._minMainWidthForDrawer()).to.equal(240);
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(window, 'innerWidth', originalDescriptor);
+        } else {
+          delete window.innerWidth;
+        }
+      }
+    });
+
+    test('_openDrawer sets width from stored preference and opens the drawer', () => {
+      app.sidebarWidth = '52px';
+      app._drawerOpenWidth = 420;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      const drawerPanel = app.$.drawerPanel;
+      if (drawerPanel) {
+        drawerPanel.narrow = false;
+      }
+      const pages = app.$['drawer-pages'];
+      if (pages) {
+        sinon.stub(pages, 'selectIndex');
+        sinon.stub(pages, 'select');
+        Object.defineProperty(pages, 'selected', { get: () => 'tasks', configurable: true });
+      }
+      app._openDrawer();
+      expect(app.drawerOpened).to.be.true;
+      expect(app.drawerWidth).to.equal('420px');
+      app._maxDrawerWidth.restore();
+    });
+
+    test('_onDrawerResizeStart drag updates width and persists on mouseup', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._isRTL = false;
+      app._drawerOpenWidth = 350;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      sinon.stub(app, '_notifyLayoutChanged');
+      const evt = { clientX: 100, preventDefault: sinon.spy(), stopPropagation: sinon.spy() };
+      app._onDrawerResizeStart(evt);
+      expect(app.hasAttribute('drawer-resizing')).to.be.true;
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 120 }));
+      window.dispatchEvent(new MouseEvent('mouseup'));
+      expect(app._drawerOpenWidth).to.equal(370);
+      expect(app.drawerWidth).to.equal('370px');
+      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.equal('370');
+      expect(app.hasAttribute('drawer-resizing')).to.be.false;
+      expect(app._notifyLayoutChanged).to.have.been.called;
+      app._maxDrawerWidth.restore();
+      app._notifyLayoutChanged.restore();
+    });
+
+    test('_onDrawerResizeStart does nothing when drawer is closed or layout is narrow', () => {
+      app.sidebarWidth = '52px';
+      app._drawerOpenWidth = 400;
+      const evt = { clientX: 0, preventDefault: sinon.spy(), stopPropagation: sinon.spy() };
+      app.drawerOpened = false;
+      app._onDrawerResizeStart(evt);
+      expect(evt.preventDefault).to.not.have.been.called;
+
+      app.drawerOpened = true;
+      app.isNarrow = true;
+      app._onDrawerResizeStart(evt);
+      expect(evt.preventDefault).to.not.have.been.called;
+      expect(app._drawerOpenWidth).to.equal(400);
+    });
+
+    test('_onDrawerResizeKey Shift+ArrowRight increases width by 64px (LTR)', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._isRTL = false;
+      app._drawerOpenWidth = 350;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      app._onDrawerResizeKey({ key: 'ArrowRight', shiftKey: true, preventDefault: sinon.spy() });
+      expect(app._drawerOpenWidth).to.equal(414);
+      app._maxDrawerWidth.restore();
+    });
+
+    test('_onDrawerResizeKey Space triggers _resetDrawerWidth', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      sinon.stub(app, '_resetDrawerWidth');
+      const preventDefault = sinon.spy();
+      app._onDrawerResizeKey({ key: ' ', preventDefault });
+      expect(app._resetDrawerWidth).to.have.been.calledOnce;
+      expect(preventDefault).to.have.been.called;
+      app._resetDrawerWidth.restore();
+    });
+
+    test('_onShrinkDrawerRequest reduces width and clears drawer-resizing after delay', () => {
+      const clock = sinon.useFakeTimers();
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 500;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      app._onShrinkDrawerRequest({ detail: { amount: 80 } });
+      expect(app._drawerOpenWidth).to.equal(420);
+      expect(app.drawerWidth).to.equal('420px');
+      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.equal('420');
+      expect(app.hasAttribute('drawer-resizing')).to.be.true;
+      clock.tick(100);
+      expect(app.hasAttribute('drawer-resizing')).to.be.false;
+      clock.restore();
+      app._maxDrawerWidth.restore();
+    });
+
+    test('_onShrinkDrawerRequest ignores invalid or zero amount', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 500;
+      app._onShrinkDrawerRequest({ detail: { amount: 0 } });
+      app._onShrinkDrawerRequest({ detail: {} });
+      app._onShrinkDrawerRequest(null);
+      expect(app._drawerOpenWidth).to.equal(500);
+    });
+
+    test('_onShrinkDrawerRequest does nothing when drawer is already at minimum width', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      const min = app._minDrawerWidth();
+      app._drawerOpenWidth = min;
+      app._onShrinkDrawerRequest({ detail: { amount: 50 } });
+      expect(app._drawerOpenWidth).to.equal(min);
+    });
+
+    test('_onShrinkDrawerRequest does nothing when drawer is closed or narrow', () => {
+      app.sidebarWidth = '52px';
+      app._drawerOpenWidth = 500;
+      app.drawerOpened = false;
+      app._onShrinkDrawerRequest({ detail: { amount: 50 } });
+      expect(app._drawerOpenWidth).to.equal(500);
+
+      app.drawerOpened = true;
+      app.isNarrow = true;
+      app._onShrinkDrawerRequest({ detail: { amount: 50 } });
+      expect(app._drawerOpenWidth).to.equal(500);
+    });
+
+    test('_cancelDrawerDragLayoutNotify clears a scheduled animation frame', () => {
+      app._drawerDragLayoutRaf = 42;
+      const cancelSpy = sinon.spy(window, 'cancelAnimationFrame');
+      app._cancelDrawerDragLayoutNotify();
+      expect(cancelSpy).to.have.been.calledWith(42);
+      expect(app._drawerDragLayoutRaf).to.be.null;
+      cancelSpy.restore();
+    });
+
+    test('_handleNarrowChange notifies layout when switching to narrow overlay', () => {
+      sinon.stub(app, '_notifyLayoutChanged');
+      app.drawerOpened = true;
+      app._handleNarrowChange(true);
+      expect(app.drawerOpened).to.be.false;
+      expect(app._notifyLayoutChanged).to.have.been.called;
+      app._notifyLayoutChanged.restore();
+    });
+
+    test('_updateIsNarrow reclamps drawer width when the drawer is open on wide layout', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 500;
+      app.drawerWidth = '200px';
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth');
+      Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => 1200 });
+      try {
+        app._updateIsNarrow();
+        expect(app.isNarrow).to.be.false;
+        expect(app.drawerWidth).to.equal('500px');
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(window, 'innerWidth', originalDescriptor);
+        } else {
+          delete window.innerWidth;
+        }
+        app._maxDrawerWidth.restore();
+      }
+    });
+
+    test('_loadStoredDrawerWidth returns null when localStorage throws', () => {
+      const getItem = sinon.stub(window.localStorage, 'getItem').throws(new Error('denied'));
+      expect(app._loadStoredDrawerWidth()).to.be.null;
+      getItem.restore();
+    });
+
+    test('_resetDrawerWidth does not change drawerWidth when the drawer is closed', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = false;
+      app.drawerWidth = '52px';
+      app._drawerOpenWidth = 480;
+      window.localStorage.setItem('nuxeo.drawerWidth', '480');
+      sinon.stub(app, '_notifyLayoutChanged');
+      app._resetDrawerWidth();
+      expect(app._drawerOpenWidth).to.be.null;
+      expect(app.drawerWidth).to.equal('52px');
+      expect(window.localStorage.getItem('nuxeo.drawerWidth')).to.be.null;
+      app._notifyLayoutChanged.restore();
+    });
+  });
+
+  suite('refresh', () => {
+    test('refresh reloads search when page is search', () => {
+      sinon.stub(app, '_refreshSearch');
+      app.page = 'search';
+      app.refresh();
+      expect(app._refreshSearch).to.have.been.calledOnce;
+      app._refreshSearch.restore();
+    });
+
+    test('refresh loads task when page is tasks', () => {
+      sinon.stub(app, 'loadTask');
+      app.page = 'tasks';
+      app.currentTaskId = 'task-1';
+      app.refresh();
+      expect(app.loadTask).to.have.been.calledWith('task-1');
+      app.loadTask.restore();
+    });
+
+    test('refresh reloads browse document when docId is set', () => {
+      sinon.stub(app, 'load');
+      app.page = 'browse';
+      app.docId = 'doc-uid';
+      app.docPath = '';
+      app.docAction = 'view';
+      app.refresh();
+      expect(app.load).to.have.been.calledWith('browse', 'doc-uid', '', 'view');
+      app.load.restore();
+    });
+
+    test('refresh navigates home when no document context', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      app.page = 'home';
+      app.docId = '';
+      app.docPath = '';
+      app.refresh();
+      expect(app.navigateTo).to.have.been.calledWith('home');
+    });
+  });
+
+  suite('loadTask with id', () => {
+    test('loadTask fetches task and navigates on success', async () => {
+      const task = { id: 't1', name: 'Review' };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      app.loadTask('t1');
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(app.currentTask).to.equal(task);
+      expect(app.page).to.equal('tasks');
+      app.$.task.get.restore();
+    });
+
+    test('loadTask navigates to tasks on 403', async () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon.stub(app.$.task, 'get').rejects({ status: 403 });
+      sinon.stub(app, '_fetchTaskCount');
+      app.loadTask('t1');
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(app.navigateTo).to.have.been.calledWith('tasks');
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app._fetchTaskCount.restore();
+    });
+  });
+
+  suite('drawer toggle', () => {
+    test('_toggleDrawer opens drawer when a new tab is selected', () => {
+      sinon.stub(app, '_openDrawer');
+      app.drawerOpened = false;
+      app._selected = '';
+      app._toggleDrawer({ detail: { selected: 'tasks' } });
+      expect(app._openDrawer).to.have.been.calledOnce;
+      expect(app.selectedTab).to.equal('tasks');
+      app._openDrawer.restore();
+    });
+
+    test('_toggleDrawer closes drawer when the same tab is selected again', (done) => {
+      sinon.stub(app, '_closeDrawer');
+      app._selected = 'tasks';
+      app.drawerOpened = true;
+      app._toggleDrawer({ detail: { selected: 'tasks' } });
+      requestAnimationFrame(() => {
+        expect(app._closeDrawer).to.have.been.calledOnce;
+        app._closeDrawer.restore();
+        done();
+      });
+    });
+
+    test('_closeDrawer resets width and clears menu state', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.selectedTab = 'tasks';
+      if (app.$.drawerMenu) {
+        app.$.drawerMenu.setAttribute('opened', '');
+      }
+      app._closeDrawer();
+      expect(app.drawerWidth).to.equal('52px');
+      expect(app.drawerOpened).to.be.false;
+      expect(app.selectedTab).to.equal('');
+    });
+  });
+
+  suite('showDiff', () => {
+    test('showDiff merges with existing docIds when context overlaps', () => {
+      app.$.diff.docIds = ['a', 'b', 'c'];
+      app.showDiff('a', 'b');
+      expect(app.$.diff.docIds).to.deep.equal(['a', 'b', 'c']);
+    });
+  });
+
+  suite('_updateTitle extended', () => {
+    test('sets collections title for Collections document type', () => {
+      app.page = 'browse';
+      app.productName = 'Nuxeo';
+      app.currentDocument = { title: 'My Coll', type: 'Collections' };
+      sinon.stub(app, 'hasFacet').returns(false);
+      app._updateTitle();
+      expect(document.title).to.include('app.title.collections');
+      app.hasFacet.restore();
+    });
+
+    test('sets favorites title for Favorites collection', () => {
+      app.page = 'browse';
+      app.productName = 'Nuxeo';
+      app.currentDocument = { title: 'Fav', type: 'Favorites' };
+      sinon.stub(app, 'hasFacet').withArgs(app.currentDocument, 'Collection').returns(true);
+      app._updateTitle();
+      expect(document.title).to.include('app.title.favorites');
+      app.hasFacet.restore();
+    });
+
+    test('sets collection title for Collection facet documents', () => {
+      app.page = 'browse';
+      app.productName = 'Nuxeo';
+      app.currentDocument = { title: 'Col', type: 'Collection' };
+      sinon.stub(app, 'hasFacet').withArgs(app.currentDocument, 'Collection').returns(true);
+      app._updateTitle();
+      expect(document.title).to.include('app.title.collection');
+      app.hasFacet.restore();
+    });
+
+    test('sets task title from currentTask workflow', () => {
+      app.page = 'tasks';
+      app.productName = 'Nuxeo';
+      app.currentTask = { workflowModelName: 'wf', name: 'step' };
+      app._updateTitle();
+      expect(document.title).to.include('wf');
+      expect(document.title).to.include('step');
+    });
+  });
+
+  suite('keyboard shortcuts and wizards', () => {
+    test('showHome prevents default and shows home page', () => {
+      const preventDefault = sinon.spy();
+      app.showHome({ detail: { keyboardEvent: { preventDefault } } });
+      expect(preventDefault).to.have.been.called;
+      expect(app.page).to.equal('home');
+    });
+
+    test('_focusMenu focuses the menu', () => {
+      const preventDefault = sinon.spy();
+      const focusSpy = sinon.spy(app.$.menu, 'focus');
+      app._focusMenu({ detail: { keyboardEvent: { preventDefault } } });
+      expect(preventDefault).to.have.been.called;
+      expect(focusSpy).to.have.been.called;
+      focusSpy.restore();
+    });
+
+    test('_showSuggester toggles suggester', () => {
+      const preventDefault = sinon.spy();
+      const toggleSpy = sinon.spy(app.$.suggester, 'toggle');
+      app._showSuggester({ detail: { keyboardEvent: { preventDefault } } });
+      expect(toggleSpy).to.have.been.called;
+      toggleSpy.restore();
+    });
+
+    test('_showDocumentCreationWizard opens import with files', () => {
+      const preventDefault = sinon.spy();
+      const toggleSpy = sinon.spy(app.$.importPopup, 'toggleDialogImport');
+      app._showDocumentCreationWizard({
+        detail: { keyboardEvent: { preventDefault }, files: [{ name: 'a.pdf' }] },
+      });
+      expect(toggleSpy).to.have.been.calledWith([{ name: 'a.pdf' }]);
+      toggleSpy.restore();
+    });
+
+    test('_showDocumentCreationWizard opens create dialog for a type', () => {
+      const toggleSpy = sinon.spy(app.$.importPopup, 'toggleDialogCreate');
+      app._showDocumentCreationWizard({ detail: { type: 'File' } });
+      expect(toggleSpy).to.have.been.calledWith('File');
+      toggleSpy.restore();
+    });
+
+    test('_showDocumentCreationWizard opens default import dialog', () => {
+      const toggleSpy = sinon.spy(app.$.importPopup, 'toggleDialog');
+      app._showDocumentCreationWizard({ detail: {} });
+      expect(toggleSpy).to.have.been.called;
+      toggleSpy.restore();
+    });
+  });
+
+  suite('_navigate', () => {
+    test('_navigate routes to document browse', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      const doc = { uid: 'd1' };
+      app._navigate({ detail: { doc, docAction: 'view' } });
+      expect(app.navigateTo).to.have.been.calledWith(doc, 'view');
+    });
+
+    test('_navigate opens tasks drawer when visible', () => {
+      const selectTask = sinon.spy();
+      sinon
+        .stub(app, '$$')
+        .withArgs('nuxeo-tasks-drawer')
+        .returns({
+          visible: true,
+          $: { tasks: { selectTask } },
+        });
+      app._navigate({ detail: { task: { id: 't1' }, index: 0, params: {} } });
+      expect(selectTask).to.have.been.called;
+      app.$$.restore();
+    });
+  });
+
+  suite('_loadDocument and load', () => {
+    test('_loadDocument resolves document without updating UI when saved search', async () => {
+      const doc = { uid: '1', facets: ['SavedSearch'], path: '/search' };
+      sinon.stub(app.$.doc, 'get').resolves(doc);
+      sinon.stub(app, '_redirectSavedSearch');
+      const result = await app._loadDocument({ uid: '1', path: '/search' });
+      expect(result).to.be.undefined;
+      expect(app._routedSearch).to.equal(doc);
+      app.$.doc.get.restore();
+      app._redirectSavedSearch.restore();
+    });
+
+    test('load shows browse page after document loads', async () => {
+      const doc = { uid: '1', path: '/p', facets: [], isVersion: true };
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      app.load('browse', '1', '/p', 'view');
+      await Promise.resolve();
+      expect(app.show).to.have.been.calledWith('browse');
+      app._loadDocument.restore();
+      app.show.restore();
+    });
+
+    test('load shows error when document fetch fails', async () => {
+      sinon.stub(app, '_loadDocument').returns(Promise.reject({ status: 404, message: 'missing' }));
+      sinon.stub(app, 'showError');
+      app.load('browse', '1', '/p');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(app.showError).to.have.been.calledOnce;
+      expect(app.showError.firstCall.args[0]).to.equal(404);
+      expect(app.showError.firstCall.args[2]).to.equal('missing');
+      app._loadDocument.restore();
+      app.showError.restore();
+    });
+  });
+
+  suite('_refreshAndFetchTasks', () => {
+    test('refreshes document and fetches tasks when currentDocument is set', async () => {
+      const doc = { uid: '1', path: '/p' };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks();
+      await Promise.resolve();
+      expect(app._loadDocument).to.have.been.calledWith(doc);
+      expect(app._fetchTaskCount).to.have.been.called;
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+  });
+
+  suite('_observeCurrentUser and clipboard', () => {
+    test('_observeCurrentUser loads user workspace and task count', async () => {
+      app.currentUser = { id: 'user-1', properties: {} };
+      app._observeCurrentUser();
+      await Promise.resolve();
+      expect(app.userWorkspace).to.equal('/user-workspace');
+      expect(app.$.tasksProvider.params).to.deep.equal({ userId: 'user-1' });
+    });
+
+    test('_onClipboardAction updates recents on Document.Move', () => {
+      const update = sinon.spy();
+      sinon.stub(app, '$$').withArgs('#recent').returns({ update });
+      sinon.stub(app, 'fire');
+      app._onClipboardAction({
+        detail: { operation: 'Document.Move', documents: [{ uid: '1' }] },
+      });
+      expect(update).to.have.been.calledWith({ uid: '1' });
+      app.$$.restore();
+      app.fire.restore();
+    });
+
+    test('_workflowTaskProcess navigates to task', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      app._workflowTaskProcess({ detail: { task: { id: 'wf-1' } } });
+      expect(app.navigateTo).to.have.been.calledWith('tasks', 'wf-1');
+    });
+  });
+
+  suite('document lifecycle navigation', () => {
+    test('_documentDeleted navigates to firstAccessibleAncestor on success', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon.stub(app, '_toast');
+      sinon.stub(app, '_removeFromClipboard');
+      sinon.stub(app, '_removeFromRecentlyViewed');
+      sinon.stub(app, 'hasFacet').returns(false);
+      sinon.stub(app, '_refreshSearch');
+      const doc = {
+        uid: '1',
+        contextParameters: { firstAccessibleAncestor: { uid: 'parent' } },
+      };
+      app._documentDeleted({ detail: { doc, error: false } });
+      expect(app.navigateTo).to.have.been.called;
+      app._toast.restore();
+      app._removeFromClipboard.restore();
+      app._removeFromRecentlyViewed.restore();
+      app.hasFacet.restore();
+      app._refreshSearch.restore();
+    });
+
+    test('_documentUntrashed navigates to restored document', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon.stub(app, '_toast');
+      sinon.stub(app, 'hasFacet').returns(false);
+      sinon.stub(app, '_refreshSearch');
+      const doc = { uid: '1' };
+      app._documentUntrashed({ detail: { doc, error: false } });
+      expect(app.navigateTo).to.have.been.called;
+      app._toast.restore();
+      app.hasFacet.restore();
+      app._refreshSearch.restore();
+    });
+  });
+
+  suite('ready accessibility hooks', () => {
+    test('Tab keydown adds user-is-tabbing on main content', () => {
+      const main = app.$.mainContent;
+      if (!main) {
+        return;
+      }
+      main.classList.remove('user-is-tabbing');
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      expect(main.classList.contains('user-is-tabbing')).to.be.true;
+    });
+
+    test('mousedown removes user-is-tabbing from main content', () => {
+      const main = app.$.mainContent;
+      if (!main) {
+        return;
+      }
+      main.classList.add('user-is-tabbing');
+      window.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(main.classList.contains('user-is-tabbing')).to.be.false;
+    });
+
+    test('_resizeDuringAnimation dispatches resize until transitionend', (done) => {
+      const drawer = app.$.drawer;
+      if (!drawer) {
+        done();
+        return;
+      }
+      const onResize = sinon.spy();
+      window.addEventListener('resize', onResize);
+      app._resizeDuringAnimation();
+      drawer.dispatchEvent(new Event('transitionend'));
+      requestAnimationFrame(() => {
+        try {
+          expect(onResize).to.have.been.called;
+          done();
+        } finally {
+          window.removeEventListener('resize', onResize);
+        }
+      });
+    });
+  });
+
+  suite('logo menu keyboard navigation', () => {
+    test('ArrowDown on logo focuses first menu item', () => {
+      const logo = app.$.logo;
+      const menu = app.$.menu;
+      if (!logo || !menu) {
+        return;
+      }
+      const item = document.createElement('div');
+      item.setAttribute('name', 'browse');
+      const focusSpy = sinon.spy(item, 'focus');
+      sinon.stub(menu, 'querySelector').returns(item);
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(focusSpy).to.have.been.called;
+      menu.querySelector.restore();
+      focusSpy.restore();
+    });
+  });
+
+  suite('ready listeners and snackbar', () => {
+    test('drawer transitionrun triggers resize during animation', () => {
+      const drawer = app.$.drawer;
+      if (!drawer) {
+        return;
+      }
+      sinon.stub(app, '_resizeDuringAnimation');
+      drawer.dispatchEvent(new Event('transitionrun'));
+      drawer.dispatchEvent(new Event('transitionstart'));
+      expect(app._resizeDuringAnimation).to.have.been.calledTwice;
+      app._resizeDuringAnimation.restore();
+    });
+
+    test('default toast opening listener applies snackbar layout hacks', () => {
+      const { toast } = app.$;
+      if (!toast) {
+        return;
+      }
+      Object.defineProperty(toast, 'mdcRoot', {
+        configurable: true,
+        value: {
+          style: {},
+          querySelector: sinon.stub().returns({ style: {} }),
+        },
+      });
+      toast.dispatchEvent(new Event('MDCSnackbar:opening'));
+      expect(toast.mdcRoot.style.position).to.equal('relative');
+    });
+  });
+
+  suite('saved search routing', () => {
+    test('_getSavedSearchForm returns null without routed search', () => {
+      app._routedSearch = null;
+      expect(app._getSavedSearchForm()).to.be.null;
+    });
+
+    test('_redirectSavedSearch navigates and loads saved search', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      app._routedSearch = { uid: 'saved-1', properties: { 'saved:providerName': 'default' } };
+      const loadSaved = sinon.spy();
+      const form = {
+        getAttribute: sinon.stub().callsFake((attr) => (attr === 'search-name' ? 'default_search' : null)),
+        _loadSavedSearch: loadSaved,
+      };
+      sinon.stub(app, '_getSavedSearchForm').returns(form);
+      sinon.stub(app, '_updateSearch');
+      app.searchName = 'default_search';
+      app._searchOnLoad = false;
+      app._redirectSavedSearch();
+      expect(app.navigateTo).to.have.been.calledWith('search', 'default_search');
+      expect(loadSaved).to.have.been.calledWith('saved-1');
+      app._getSavedSearchForm.restore();
+      app._updateSearch.restore();
+    });
+
+    test('_loadSavedSearch loads when form matches search name', () => {
+      app._routedSearch = { uid: 'saved-2' };
+      const loadSaved = sinon.spy();
+      const form = {
+        getAttribute: sinon.stub().callsFake((attr) => (attr === 'search-name' ? 'my-search' : null)),
+        _loadSavedSearch: loadSaved,
+      };
+      sinon.stub(app, '_getSavedSearchForm').returns(form);
+      sinon.stub(app, '_updateSearch');
+      app.searchName = 'my-search';
+      app._loadSavedSearch();
+      expect(loadSaved).to.have.been.calledWith('saved-2');
+      expect(app._routedSearch).to.be.null;
+      app._getSavedSearchForm.restore();
+      app._updateSearch.restore();
+    });
+  });
+
+  suite('_loadDocument browse path', () => {
+    test('loads document and assigns currentDocument via set', async () => {
+      const doc = {
+        uid: 'doc-1',
+        path: '/default-domain/workspaces/folder/doc',
+        facets: [],
+        isVersion: false,
+        contextParameters: { breadcrumb: { entries: [{}, { uid: 'parent' }] } },
+      };
+      sinon.stub(app, 'set');
+      sinon.stub(app, 'hasFacet').withArgs(doc, 'Folderish').returns(false);
+      sinon.stub(app.$.doc, 'get').resolves(doc);
+      const result = await app._loadDocument({ uid: 'doc-1', path: '/p' });
+      expect(result).to.equal(doc);
+      expect(app.set).to.have.been.calledWith('currentDocument', doc);
+      expect(app.docPath).to.equal(doc.path);
+      app.set.restore();
+      app.hasFacet.restore();
+      app.$.doc.get.restore();
+    });
+
+    test('load ignores AbortError', async () => {
+      sinon.stub(app, '_loadDocument').returns(Promise.reject({ name: 'AbortError' }));
+      sinon.stub(app, 'showError');
+      app.load('browse', '1', '/p');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(app.showError).to.not.have.been.called;
+      app._loadDocument.restore();
+      app.showError.restore();
+    });
+  });
+
+  suite('_navigate and search refresh', () => {
+    test('_navigate displays collection members when from collection', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      const displayMembers = sinon.spy();
+      sinon.stub(app, '$$').withArgs('#collectionsForm').returns({ displayMembers });
+      const doc = { uid: 'd1' };
+      app._navigate({ detail: { doc, docAction: 'view', isFromCollection: true, srcDoc: {}, index: 0 } });
+      expect(displayMembers).to.have.been.called;
+      app.$$.restore();
+    });
+
+    test('_updateSearch redirects when not loading search on startup', () => {
+      sinon.stub(app, '_redirectSavedSearch');
+      sinon.stub(app, '$$').returns(null);
+      app._searchOnLoad = false;
+      app._updateSearch();
+      expect(app._redirectSavedSearch).to.have.been.called;
+      app._redirectSavedSearch.restore();
+      app.$$.restore();
+    });
+
+    test('_updateCollectionMenu loads collection on menu event', () => {
+      const loadCollection = sinon.spy();
+      sinon.stub(app, '$$').withArgs('#collectionsForm').returns({ loadCollection });
+      app._updateCollectionMenu({ detail: { collection: { uid: 'c1' } } });
+      expect(loadCollection).to.have.been.calledWith({ uid: 'c1' });
+      app.$$.restore();
+    });
+  });
+
+  suite('_openDrawer overlay mode', () => {
+    test('_openDrawer calls openDrawer on narrow drawer panel', () => {
+      app.sidebarWidth = '52px';
+      const drawerPanel = app.$.drawerPanel;
+      if (!drawerPanel || typeof drawerPanel.openDrawer !== 'function') {
+        return;
+      }
+      drawerPanel.narrow = true;
+      const openDrawer = sinon.spy(drawerPanel, 'openDrawer');
+      const pages = app.$['drawer-pages'];
+      if (pages) {
+        sinon.stub(pages, 'select');
+        Object.defineProperty(pages, 'selected', { get: () => 'activity', configurable: true });
+      }
+      app.selectedTab = 'activity';
+      app._openDrawer();
+      expect(openDrawer).to.have.been.called;
+      openDrawer.restore();
+      if (pages && pages.select.restore) {
+        pages.select.restore();
+      }
+    });
+  });
+
+  suite('_refreshAndFetchTasks errors', () => {
+    test('navigates to tasks on 403 when refreshing document', async () => {
+      app.currentDocument = { uid: '1' };
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon
+        .stub(app, '_loadDocument')
+        .returns(Promise.reject({ 'entity-type': 'exception', status: 403, message: 'denied' }));
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: true, $: { tasks: { fetch: sinon.spy() } } });
+      app._refreshAndFetchTasks();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(app.navigateTo).to.have.been.calledWith('tasks');
+      expect(app.loading).to.be.false;
+      app._loadDocument.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+  });
+
+  suite('document delete and notify', () => {
+    test('_documentDeleted navigates via breadcrumb when ancestor missing', () => {
+      sinon.stub(app, '_navigate');
+      sinon.stub(app, '_toast');
+      sinon.stub(app, '_removeFromClipboard');
+      sinon.stub(app, '_removeFromRecentlyViewed');
+      sinon.stub(app, 'hasFacet').returns(false);
+      sinon.stub(app, '_refreshSearch');
+      const doc = {
+        uid: '1',
+        contextParameters: {
+          breadcrumb: { entries: [{ uid: 'a' }, { uid: 'parent' }] },
+        },
+      };
+      app._documentDeleted({ detail: { doc, error: false } });
+      expect(app._navigate).to.have.been.called;
+      app._navigate.restore();
+      app._toast.restore();
+      app._removeFromClipboard.restore();
+      app._removeFromRecentlyViewed.restore();
+      app.hasFacet.restore();
+      app._refreshSearch.restore();
+    });
+
+    test('_documentsDeleted shows 403 message in notify', () => {
+      sinon.stub(app, '_notify');
+      app._documentsDeleted({
+        detail: {
+          error: { response: { status: 403 } },
+          documents: [{ uid: '1' }],
+        },
+      });
+      expect(app._notify).to.have.been.calledOnce;
+      expect(app._notify.firstCall.args[0].detail.message).to.include('error.403');
+      app._notify.restore();
+    });
+
+    test('_documentsUntrashed refreshes collections for Collection facet', () => {
+      sinon.stub(app, '_toast');
+      sinon.stub(app, 'hasFacet').returns(true);
+      sinon.stub(app, '_refreshCollections');
+      sinon.stub(app, '_refreshSearch');
+      app._documentsUntrashed({ detail: { documents: [{ uid: '1' }], error: false } });
+      expect(app._refreshCollections).to.have.been.called;
+      app._toast.restore();
+      app.hasFacet.restore();
+      app._refreshCollections.restore();
+      app._refreshSearch.restore();
+    });
+  });
+
+  suite('_notify and snackbars', () => {
+    test('_getToastFor creates a command snackbar when missing', () => {
+      if (!app.$.snackbarPanel) {
+        return;
+      }
+      sinon.stub(app.$.snackbarPanel, 'querySelector').returns(null);
+      const append = sinon.stub(app.$.snackbarPanel, 'appendChild');
+      const toast = app._getToastFor('bulk-edit', { abort: sinon.spy() });
+      expect(append).to.have.been.called;
+      expect(toast.getAttribute('id')).to.equal('snack_bulkedit');
+      app.$.snackbarPanel.querySelector.restore();
+      append.restore();
+    });
+
+    test('_notify shows message on command toast', () => {
+      const show = sinon.spy();
+      const toast = {
+        __state: {},
+        open: false,
+        close: sinon.spy(),
+        show,
+        querySelector: sinon.stub().returns({ hidden: false }),
+      };
+      sinon.stub(app, '_getToastFor').returns(toast);
+      app._notify({
+        detail: {
+          commandId: 'cmd-1',
+          message: 'Processing',
+          abort: true,
+          dismissible: true,
+          duration: 4000,
+        },
+      });
+      expect(show).to.have.been.called;
+      expect(toast.labelText).to.equal('Processing');
+      app._getToastFor.restore();
+    });
+
+    test('_notify closes toast when close flag is set', () => {
+      const close = sinon.spy();
+      const toast = { __state: {}, close, show: sinon.spy(), querySelector: sinon.stub().returns({}) };
+      sinon.stub(app, '_getToastFor').returns(toast);
+      app._notify({ detail: { commandId: 'cmd-2', close: true } });
+      expect(close).to.have.been.called;
+      app._getToastFor.restore();
+    });
+  });
+
+  suite('accessibility and menu keyboard', () => {
+    test('skipLinkEvent focuses main content on Enter', () => {
+      const { skipLink, mainContent } = app.$;
+      if (!skipLink || !mainContent) {
+        return;
+      }
+      const focusSpy = sinon.spy(mainContent, 'focus');
+      const scrollSpy = sinon.spy(mainContent, 'scrollIntoView');
+      skipLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(focusSpy).to.have.been.called;
+      expect(scrollSpy).to.have.been.called;
+      focusSpy.restore();
+      scrollSpy.restore();
+    });
+
+    test('logoToMenuNavigation moves focus from last item to logo on ArrowDown', () => {
+      const logo = app.$.logo;
+      const menu = app.$.menu;
+      if (!logo || !menu) {
+        return;
+      }
+      app.logoToMenuNavigation();
+      const first = document.createElement('div');
+      const last = document.createElement('div');
+      sinon.stub(menu, 'querySelectorAll').returns([first, last]);
+      const focusSpy = sinon.spy(logo, 'focus');
+      const evt = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true });
+      Object.defineProperty(evt, 'target', { value: last, configurable: true });
+      menu.dispatchEvent(evt);
+      expect(focusSpy).to.have.been.called;
+      menu.querySelectorAll.restore();
+      focusSpy.restore();
+    });
+  });
+
+  suite('misc coverage', () => {
+    test('_getSavedSearchForm finds provider form when routed search is set', () => {
+      app._routedSearch = { properties: { 'saved:providerName': 'default' } };
+      const form = document.createElement('div');
+      sinon.stub(app, '$$').withArgs('nuxeo-search-form[provider="default"]').returns(form);
+      expect(app._getSavedSearchForm()).to.equal(form);
+      app.$$.restore();
+    });
+
+    test('_updateTitle uses selectedSearch title on search page', () => {
+      app.page = 'search';
+      app.productName = 'Nuxeo';
+      Object.defineProperty(app, 'searchForm', {
+        get: () => {
+          return { selectedSearch: { title: 'My saved search' } };
+        },
+        configurable: true,
+      });
+      app._updateTitle();
+      expect(document.title).to.include('My saved search');
+    });
+
+    test('_navigate goes to tasks route when tasks drawer is hidden', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon.stub(app, '$$').withArgs('nuxeo-tasks-drawer').returns({ visible: false });
+      app._navigate({ detail: { task: { id: 'task-99' } } });
+      expect(app.navigateTo).to.have.been.calledWith('tasks', 'task-99');
+      app.$$.restore();
+    });
+
+    test('_refreshCollections refreshes visible collections form', () => {
+      const refresh = sinon.spy();
+      sinon.stub(app, '$$').withArgs('#collectionsForm').returns({ visible: true, _refreshCollections: refresh });
+      app._refreshCollections();
+      expect(refresh).to.have.been.called;
+      app.$$.restore();
+    });
+
+    test('_refreshAndFetchTasks fetches tasks when drawer is visible', async () => {
+      const fetch = sinon.spy();
+      app.currentDocument = null;
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: true, $: { tasks: { fetch } } });
+      app._refreshAndFetchTasks();
+      expect(fetch).to.have.been.called;
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('_documentUntrashed navigates to restored document', () => {
+      sinon.stub(app, '_navigate');
+      sinon.stub(app, '_toast');
+      sinon.stub(app, 'hasFacet').returns(false);
+      sinon.stub(app, '_refreshSearch');
+      const doc = { uid: '1' };
+      app._documentUntrashed({ detail: { doc, error: false } });
+      expect(app._navigate).to.have.been.calledWith({ detail: { doc } });
+      app._navigate.restore();
+      app._toast.restore();
+      app.hasFacet.restore();
+      app._refreshSearch.restore();
+    });
+
+    test('_documentsDeleted bulk path refreshes search and collections', () => {
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_refreshCollections');
+      sinon.stub(app, '_refreshSearch');
+      app._documentsDeleted({ detail: {} });
+      expect(app._refreshCollections).to.have.been.called;
+      app._fetchTaskCount.restore();
+      app._refreshCollections.restore();
+      app._refreshSearch.restore();
+    });
+  });
+
+  suite('drawer resize edge cases', () => {
+    test('_onDrawerResizeKey ignores unknown keys', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 400;
+      app._onDrawerResizeKey({ key: 'Escape', preventDefault: sinon.spy() });
+      expect(app._drawerOpenWidth).to.equal(400);
+    });
+
+    test('_onShrinkDrawerRequest keeps drawer-resizing when attribute was already set', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 500;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      app.setAttribute('drawer-resizing', '');
+      app._onShrinkDrawerRequest({ detail: { amount: 40 } });
+      expect(app.hasAttribute('drawer-resizing')).to.be.true;
+      app._maxDrawerWidth.restore();
+    });
   });
 });

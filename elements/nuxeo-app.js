@@ -574,6 +574,9 @@ Polymer({
                 tabindex="0"
                 aria-label$="[[i18n('app.drawer.resize')]]"
                 title$="[[i18n('app.drawer.resize')]]"
+                aria-valuemin$="[[_drawerResizeAriaMin]]"
+                aria-valuemax$="[[_drawerResizeAriaMax]]"
+                aria-valuenow$="[[_drawerResizeAriaNow]]"
                 on-mousedown="_onDrawerResizeStart"
                 on-touchstart="_onDrawerResizeStart"
                 on-keydown="_onDrawerResizeKey"
@@ -809,6 +812,22 @@ Polymer({
       computed: '_computeDrawerResizeHidden(drawerOpened, isNarrow)',
       value: true,
     },
+
+    /** ARIA bounds for the drawer resize separator (updated with width changes). */
+    _drawerResizeAriaMin: {
+      type: Number,
+      value: 0,
+    },
+
+    _drawerResizeAriaMax: {
+      type: Number,
+      value: 0,
+    },
+
+    _drawerResizeAriaNow: {
+      type: Number,
+      value: 0,
+    },
   },
 
   listeners: {
@@ -879,6 +898,7 @@ Polymer({
     this.$.drawerMenu.opened = false; // close
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
     this._drawerOpenWidth = this._loadStoredDrawerWidth();
+    this._updateDrawerResizeAria();
 
     const { toast } = this.$;
     // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
@@ -1376,6 +1396,7 @@ Polymer({
 
   _openDrawer() {
     this.drawerWidth = `${this._computeOpenDrawerWidth()}px`;
+    this._updateDrawerResizeAria();
     this.drawerOpened = true;
     const { drawerPanel } = this.$;
     if (drawerPanel.narrow) {
@@ -1486,6 +1507,7 @@ Polymer({
       const next = this._clampDrawerWidth(startWidth + delta);
       this._drawerOpenWidth = next;
       this.drawerWidth = `${next}px`;
+      this._updateDrawerResizeAria();
       this._scheduleDrawerDragLayoutNotify();
     };
 
@@ -1542,6 +1564,7 @@ Polymer({
     this._drawerOpenWidth = next;
     this.drawerWidth = `${next}px`;
     this._persistDrawerWidth(next);
+    this._updateDrawerResizeAria();
     this._notifyLayoutChanged();
   },
 
@@ -1571,6 +1594,7 @@ Polymer({
     this._drawerOpenWidth = next;
     this.drawerWidth = `${next}px`;
     this._persistDrawerWidth(next);
+    this._updateDrawerResizeAria();
     if (!hadAttr) {
       if (this._clearDrawerResizingTimer) {
         clearTimeout(this._clearDrawerResizingTimer);
@@ -1594,7 +1618,10 @@ Polymer({
     }
     if (this.drawerOpened) {
       this.drawerWidth = `${DRAWER_NATURAL_CONTENT_PX + this._sidebarPx()}px`;
+      this._updateDrawerResizeAria();
       this._notifyLayoutChanged();
+    } else {
+      this._updateDrawerResizeAria();
     }
   },
   _fetchTaskCount() {
@@ -2177,10 +2204,24 @@ Polymer({
   _updateIsNarrow() {
     this.isNarrow = window.innerWidth <= 720;
     this._reclampDrawerWidth();
+    this._updateDrawerResizeAria();
   },
 
   _computeDrawerResizeHidden(drawerOpened, isNarrow) {
     return !drawerOpened || Boolean(isNarrow);
+  },
+
+  /** Sync aria-valuemin / aria-valuemax / aria-valuenow on the drawer resize handle. */
+  _updateDrawerResizeAria() {
+    if (!this.drawerOpened || this.isNarrow) {
+      this._drawerResizeAriaMin = 0;
+      this._drawerResizeAriaMax = 0;
+      this._drawerResizeAriaNow = 0;
+      return;
+    }
+    this._drawerResizeAriaMin = this._minDrawerWidth();
+    this._drawerResizeAriaMax = this._maxDrawerWidth();
+    this._drawerResizeAriaNow = this._computeOpenDrawerWidth();
   },
 
   /**
@@ -2195,6 +2236,7 @@ Polymer({
     const currentInlinePx = Number.parseInt(this.drawerWidth, 10) || 0;
     if (currentInlinePx !== target) {
       this.drawerWidth = `${target}px`;
+      this._updateDrawerResizeAria();
       this._notifyLayoutChanged();
     }
   },
