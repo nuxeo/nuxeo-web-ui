@@ -93,6 +93,28 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Root',
 ];
 const MAX_TOASTS = 3; // max number of toasts that can be displayed simultaneously besides the default one
+/** Natural width (px) of the drawer's content (icons + labels), excluding the sidebar column. */
+const DRAWER_NATURAL_CONTENT_PX = 298;
+/** Absolute floor (px) for the drawer body under heavy zoom: `sidebarPx + this value`. */
+const DRAWER_MIN_FLOOR_OFFSET_PX = 120;
+/** Hard floor (px) for the main content column beside the drawer (matches document-page). */
+const DRAWER_MAIN_COLUMN_MIN_PX = 240;
+/** Max main-column reservation (px) when computing drawer max width; mirrors document-page. */
+const DRAWER_MAIN_COLUMN_TARGET_MAX_PX = 640;
+/** Share of layout width (sidebar excluded) reserved for main before the drawer can grow further. */
+const DRAWER_MAIN_COLUMN_RATIO = 0.5;
+/** The drawer can never occupy more than this fraction of the viewport. */
+const DRAWER_VIEWPORT_HALF_RATIO = 0.5;
+/** Fallback for `_sidebarPx()` when the `--nuxeo-sidebar-width` CSS variable can't be parsed. */
+const DRAWER_SIDEBAR_FALLBACK_PX = 52;
+/** Keyboard resize step (px) when the user presses an arrow key on the drawer handle. */
+const DRAWER_KEY_STEP_PX = 16;
+/** Faster keyboard resize step (px) when the user holds Shift + arrow. */
+const DRAWER_KEY_STEP_SHIFT_PX = 64;
+/** Debounce before re-enabling drawer width transition after info-pane push-back. */
+const DRAWER_RESIZING_CLEAR_DELAY_MS = 100;
+/** localStorage key under which the user's preferred drawer width is persisted. */
+const DRAWER_STORAGE_KEY = 'nuxeo.drawerWidth';
 
 setPassiveTouchGestures(true);
 
@@ -227,6 +249,11 @@ Polymer({
         transition: width 0.3s ease;
       }
 
+      /* Disable transition while the user is actively dragging the drawer resize handle */
+      :host([drawer-resizing]) #drawer {
+        transition: none;
+      }
+
       #drawer .toggle {
         position: absolute;
         right: -16px;
@@ -255,6 +282,47 @@ Polymer({
       #drawer:hover .toggle iron-icon,
       #drawer .toggle:hover iron-icon {
         visibility: visible !important;
+      }
+
+      /* Drag handle to resize the drawer (side nav panes width) */
+      #drawer .resize-handle {
+        position: absolute;
+        top: 0;
+        right: -3px;
+        width: 6px;
+        height: 100%;
+        cursor: ew-resize;
+        z-index: 11;
+        user-select: none;
+        touch-action: none;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+      }
+
+      :host([dir='rtl']) #drawer .resize-handle {
+        left: -3px;
+        right: auto;
+      }
+
+      #drawer .resize-handle:hover,
+      :host([drawer-resizing]) #drawer .resize-handle,
+      #drawer .resize-handle:focus-visible {
+        background-color: var(--nuxeo-resize-handle-color, #989898);
+        opacity: 1;
+      }
+
+      #drawer .resize-handle:focus {
+        outline: none;
+      }
+
+      #drawer .resize-handle:focus-visible {
+        outline: 2px solid var(--nuxeo-resize-handle-color, #989898);
+        outline-offset: -2px;
+      }
+
+      :host([drawer-resizing]) {
+        cursor: ew-resize;
+        user-select: none;
       }
 
       #drawer iron-pages {
@@ -498,6 +566,20 @@ Polymer({
               <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
                 <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
               </div>
+
+              <div
+                class="resize-handle"
+                role="separator"
+                aria-orientation="vertical"
+                tabindex="0"
+                aria-label$="[[i18n('app.drawer.resize')]]"
+                title$="[[i18n('app.drawer.resize')]]"
+                on-mousedown="_onDrawerResizeStart"
+                on-touchstart="_onDrawerResizeStart"
+                on-keydown="_onDrawerResizeKey"
+                on-dblclick="_resetDrawerWidth"
+                hidden$="[[_drawerResizeHidden]]"
+              ></div>
             </div>
           </div>
         </app-drawer>
@@ -653,6 +735,12 @@ Polymer({
       notify: true,
     },
 
+    /** Persisted drawer width (px); null uses the default open width. */
+    _drawerOpenWidth: {
+      type: Number,
+      value: null,
+    },
+
     keyEventTarget: {
       type: Object,
       value() {
@@ -714,12 +802,20 @@ Polymer({
       value: false,
       reflectToAttribute: true,
     },
+
+    /** Hidden when the drawer is closed or in narrow (overlay) layout. */
+    _drawerResizeHidden: {
+      type: Boolean,
+      computed: '_computeDrawerResizeHidden(drawerOpened, isNarrow)',
+      value: true,
+    },
   },
 
   listeners: {
     'document-updated': 'refresh',
     'create-document': '_showDocumentCreationWizard',
     'document-created': '_handleDocumentCreated',
+    'nuxeo-shrink-drawer': '_onShrinkDrawerRequest',
     workflowStarted: '_refreshAndFetchTasks',
     workflowAbandoned: '_refreshAndFetchTasks',
     workflowTaskAssignment: '_workflowTaskAssigned',
@@ -782,6 +878,7 @@ Polymer({
 
     this.$.drawerMenu.opened = false; // close
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
+    this._drawerOpenWidth = this._loadStoredDrawerWidth();
 
     const { toast } = this.$;
     // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
@@ -1278,8 +1375,7 @@ Polymer({
   },
 
   _openDrawer() {
-    const pixelsSuffix = 'px';
-    this.drawerWidth = 298 + Math.round(this.sidebarWidth.substring(0, this.sidebarWidth.length - 2)) + pixelsSuffix;
+    this.drawerWidth = `${this._computeOpenDrawerWidth()}px`;
     this.drawerOpened = true;
     const { drawerPanel } = this.$;
     if (drawerPanel.narrow) {
@@ -1300,6 +1396,206 @@ Polymer({
     const drawerMenu = this.$ && this.$.drawerMenu;
     drawerMenu.removeAttribute('opened');
     this.selectedTab = '';
+  },
+
+  /** Viewport width minus the icon sidebar (px). */
+  _drawerLayoutWidth() {
+    return Math.max(0, window.innerWidth - this._sidebarPx());
+  },
+
+  /** Min width (px) left for main content when the drawer grows (proportional, like info pane). */
+  _minMainWidthForDrawer() {
+    const layoutWidth = this._drawerLayoutWidth();
+    return Math.max(
+      DRAWER_MAIN_COLUMN_MIN_PX,
+      Math.min(DRAWER_MAIN_COLUMN_TARGET_MAX_PX, Math.floor(layoutWidth * DRAWER_MAIN_COLUMN_RATIO)),
+    );
+  },
+
+  /** Min drawer width: natural open size, capped by viewport on zoom. */
+  _minDrawerWidth() {
+    const defaultOpen = DRAWER_NATURAL_CONTENT_PX + this._sidebarPx();
+    const viewportCap = Math.floor(window.innerWidth * DRAWER_VIEWPORT_HALF_RATIO);
+    return Math.min(defaultOpen, Math.max(this._sidebarPx() + DRAWER_MIN_FLOOR_OFFSET_PX, viewportCap));
+  },
+
+  /** Max drawer width: half the viewport and enough room for `_minMainWidthForDrawer`. */
+  _maxDrawerWidth() {
+    const min = this._minDrawerWidth();
+    const layoutWidth = this._drawerLayoutWidth();
+    const capFromMain = Math.floor(layoutWidth - this._minMainWidthForDrawer());
+    const capFromViewport = Math.floor(window.innerWidth * DRAWER_VIEWPORT_HALF_RATIO);
+    const cap = Math.min(capFromMain, capFromViewport);
+    return Math.max(min, cap);
+  },
+
+  _sidebarPx() {
+    return Number.parseInt(this.sidebarWidth, 10) || DRAWER_SIDEBAR_FALLBACK_PX;
+  },
+
+  /** Open drawer width (px): stored preference or natural default, clamped. */
+  _computeOpenDrawerWidth() {
+    const fallback = DRAWER_NATURAL_CONTENT_PX + this._sidebarPx();
+    const stored = this._drawerOpenWidth != null ? this._drawerOpenWidth : this._loadStoredDrawerWidth();
+    if (stored == null) {
+      return fallback;
+    }
+    this._drawerOpenWidth = stored;
+    return this._clampDrawerWidth(stored);
+  },
+
+  _clampDrawerWidth(px) {
+    return Math.min(this._maxDrawerWidth(), Math.max(this._minDrawerWidth(), px));
+  },
+
+  _loadStoredDrawerWidth() {
+    try {
+      const raw = window.localStorage && window.localStorage.getItem(DRAWER_STORAGE_KEY);
+      const n = raw != null ? Number.parseInt(raw, 10) : NaN;
+      return Number.isFinite(n) ? n : null;
+    } catch (_e) {
+      return null;
+    }
+  },
+
+  _persistDrawerWidth(px) {
+    try {
+      if (window.localStorage) {
+        window.localStorage.setItem(DRAWER_STORAGE_KEY, String(px));
+      }
+    } catch (_e) {
+      // ignore storage errors (e.g. private mode quota)
+    }
+  },
+
+  _onDrawerResizeStart(e) {
+    if (!this.drawerOpened || this.isNarrow) {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    const point = e.touches && e.touches[0] ? e.touches[0] : e;
+    const startX = point.clientX;
+    const startWidth = this._computeOpenDrawerWidth();
+    this.setAttribute('drawer-resizing', '');
+    const rtl = this._isRTL;
+
+    const onMove = (ev) => {
+      const p = ev.touches && ev.touches[0] ? ev.touches[0] : ev;
+      const delta = (p.clientX - startX) * (rtl ? -1 : 1);
+      const next = this._clampDrawerWidth(startWidth + delta);
+      this._drawerOpenWidth = next;
+      this.drawerWidth = `${next}px`;
+      this._scheduleDrawerDragLayoutNotify();
+    };
+
+    const onEnd = () => {
+      this._cancelDrawerDragLayoutNotify();
+      this.removeAttribute('drawer-resizing');
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onEnd);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onEnd);
+      if (this._drawerOpenWidth != null) {
+        this._persistDrawerWidth(this._drawerOpenWidth);
+      }
+      this._notifyLayoutChanged();
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onEnd);
+  },
+
+  _onDrawerResizeKey(e) {
+    if (!this.drawerOpened || this.isNarrow) {
+      return;
+    }
+    const step = e.shiftKey ? DRAWER_KEY_STEP_SHIFT_PX : DRAWER_KEY_STEP_PX;
+    const current = this._computeOpenDrawerWidth();
+    const rtl = this._isRTL;
+    let next;
+    switch (e.key) {
+      case 'ArrowLeft':
+        next = current + (rtl ? step : -step);
+        break;
+      case 'ArrowRight':
+        next = current + (rtl ? -step : step);
+        break;
+      case 'Home':
+        next = this._minDrawerWidth();
+        break;
+      case 'End':
+        next = this._maxDrawerWidth();
+        break;
+      case 'Enter':
+      case ' ':
+        this._resetDrawerWidth();
+        e.preventDefault();
+        return;
+      default:
+        return;
+    }
+    e.preventDefault();
+    next = this._clampDrawerWidth(next);
+    this._drawerOpenWidth = next;
+    this.drawerWidth = `${next}px`;
+    this._persistDrawerWidth(next);
+    this._notifyLayoutChanged();
+  },
+
+  /** Shrinks the open drawer when the info pane needs more width (`nuxeo-shrink-drawer`). */
+  _onShrinkDrawerRequest(e) {
+    if (!this.drawerOpened || this.isNarrow) {
+      return;
+    }
+    const amount = e && e.detail && Number.isFinite(e.detail.amount) ? Math.max(0, e.detail.amount) : 0;
+    if (amount <= 0) {
+      return;
+    }
+    const current = this._computeOpenDrawerWidth();
+    const min = this._minDrawerWidth();
+    if (current <= min) {
+      return;
+    }
+    const next = Math.max(min, current - amount);
+    if (next === current) {
+      return;
+    }
+    // Keep drawer-resizing set during push-back so width changes are instant.
+    const hadAttr = this.hasAttribute('drawer-resizing');
+    if (!hadAttr) {
+      this.setAttribute('drawer-resizing', '');
+    }
+    this._drawerOpenWidth = next;
+    this.drawerWidth = `${next}px`;
+    this._persistDrawerWidth(next);
+    if (!hadAttr) {
+      if (this._clearDrawerResizingTimer) {
+        clearTimeout(this._clearDrawerResizingTimer);
+      }
+      this._clearDrawerResizingTimer = setTimeout(() => {
+        this.removeAttribute('drawer-resizing');
+        this._clearDrawerResizingTimer = null;
+      }, DRAWER_RESIZING_CLEAR_DELAY_MS);
+    }
+  },
+
+  /** Reset drawer to default width and clear localStorage. */
+  _resetDrawerWidth() {
+    this._drawerOpenWidth = null;
+    try {
+      if (window.localStorage) {
+        window.localStorage.removeItem(DRAWER_STORAGE_KEY);
+      }
+    } catch (_e) {
+      // ignore storage errors
+    }
+    if (this.drawerOpened) {
+      this.drawerWidth = `${DRAWER_NATURAL_CONTENT_PX + this._sidebarPx()}px`;
+      this._notifyLayoutChanged();
+    }
   },
   _fetchTaskCount() {
     this.$.tasksProvider.fetch().then((response) => {
@@ -1880,6 +2176,60 @@ Polymer({
 
   _updateIsNarrow() {
     this.isNarrow = window.innerWidth <= 720;
+    this._reclampDrawerWidth();
+  },
+
+  _computeDrawerResizeHidden(drawerOpened, isNarrow) {
+    return !drawerOpened || Boolean(isNarrow);
+  },
+
+  /**
+   * Re-clamp drawer width on resize/zoom. Syncs inline `drawerWidth`, not only
+   * `_drawerOpenWidth`, so a wide preference is restored after narrow-mode open.
+   */
+  _reclampDrawerWidth() {
+    if (!this.drawerOpened || this.isNarrow) {
+      return;
+    }
+    const target = this._computeOpenDrawerWidth();
+    const currentInlinePx = Number.parseInt(this.drawerWidth, 10) || 0;
+    if (currentInlinePx !== target) {
+      this.drawerWidth = `${target}px`;
+      this._notifyLayoutChanged();
+    }
+  },
+
+  /** Notify tables/viewers: `window.resize` plus `notifyResize()` on the drawer layout. */
+  _runLayoutNotify() {
+    const drawerPanel = this.$ && this.$.drawerPanel;
+    if (drawerPanel && typeof drawerPanel.notifyResize === 'function') {
+      drawerPanel.notifyResize();
+    }
+    window.dispatchEvent(new Event('resize'));
+  },
+
+  _notifyLayoutChanged() {
+    requestAnimationFrame(() => {
+      this._runLayoutNotify();
+    });
+  },
+
+  /** At most one layout notify per frame while dragging the drawer. */
+  _scheduleDrawerDragLayoutNotify() {
+    if (this._drawerDragLayoutRaf != null) {
+      return;
+    }
+    this._drawerDragLayoutRaf = requestAnimationFrame(() => {
+      this._drawerDragLayoutRaf = null;
+      this._runLayoutNotify();
+    });
+  },
+
+  _cancelDrawerDragLayoutNotify() {
+    if (this._drawerDragLayoutRaf != null) {
+      cancelAnimationFrame(this._drawerDragLayoutRaf);
+      this._drawerDragLayoutRaf = null;
+    }
   },
 
   isDrawerHidden(isNarrow, drawerOpened) {
@@ -1892,6 +2242,16 @@ Polymer({
   _handleNarrowChange(isNarrow) {
     if (isNarrow) {
       this.drawerOpened = false;
+      // Reflow main content after switching to overlay layout (zoom edge case).
+      this._notifyLayoutChanged();
+      return;
     }
+    // Zoom out: drawer may still look open while drawerOpened is false — resync.
+    const currentWidthPx = Number.parseInt(this.drawerWidth, 10) || 0;
+    const sidebarPx = this._sidebarPx();
+    if (!this.drawerOpened && currentWidthPx > sidebarPx) {
+      this.drawerOpened = true;
+    }
+    this._notifyLayoutChanged();
   },
 });

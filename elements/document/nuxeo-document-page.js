@@ -34,6 +34,27 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { animationFrame } from '@polymer/polymer/lib/utils/async.js';
 
+/** Bare-minimum width (px) at which the cards inside the info pane render cleanly. */
+const SIDE_PANE_MIN_ABSOLUTE_PX = 280;
+/** Hard floor (px) for the main document column — below this the doc view truly breaks. */
+const MAIN_COLUMN_MIN_PX = 240;
+/** Max main-column reservation (px) on wide screens; mirrors drawer math in nuxeo-app. */
+const MAIN_COLUMN_TARGET_MAX_PX = 640;
+/** Min share of container width reserved for main before the side pane can grow further. */
+const MAIN_COLUMN_CONTAINER_RATIO = 0.5;
+/** Fallback width (px) used when `.side` element's `offsetWidth` is 0 (not yet laid out). */
+const SIDE_PANE_FALLBACK_PX = 360;
+/** Keyboard resize step (px) when the user presses an arrow key on the side handle. */
+const SIDE_KEY_STEP_PX = 16;
+/** Faster keyboard resize step (px) when the user holds Shift + arrow. */
+const SIDE_KEY_STEP_SHIFT_PX = 64;
+/** Must match `@media (max-width: 1024px)` / `(min-width: 1025px)` in this template. */
+const NARROW_VIEWPORT_BREAKPOINT_PX = 1024;
+/** Fallback (px) used by `_containerWidth()` when nothing else is measurable. */
+const CONTAINER_WIDTH_FALLBACK_PX = 1024;
+/** localStorage key under which the user's preferred info-pane width is persisted. */
+const SIDE_PANE_STORAGE_KEY = 'nuxeo.documentPage.sidePaneWidth';
+
 /**
 `nuxeo-document-page`
 @group Nuxeo UI
@@ -76,6 +97,12 @@ Polymer({
 
       .page {
         @apply --layout-horizontal;
+        position: relative;
+      }
+
+      :host([side-resizing]) .page {
+        cursor: ew-resize;
+        user-select: none;
       }
 
       .main {
@@ -103,6 +130,62 @@ Polymer({
 
       :host([opened]) .side {
         @apply --layout-flex;
+      }
+
+      /* When user has chosen a custom width, switch from flex grow to a fixed
+         width. This only applies on wide viewports (> 1024px). At narrow
+         viewports the responsive media query below takes over and the original
+         vertical layout is used regardless of the persisted preference. */
+      @media (min-width: 1025px) {
+        :host([opened][side-width]) .main {
+          @apply --layout-flex;
+        }
+
+        :host([opened][side-width]) .side {
+          flex: 0 0 auto;
+          width: var(--nuxeo-side-pane-width, 360px);
+        }
+      }
+
+      /* Drag handle to resize the side (Information) pane */
+      .side-resize-handle {
+        position: absolute;
+        top: 0;
+        left: -6px;
+        width: 6px;
+        height: 100%;
+        cursor: ew-resize;
+        z-index: 5;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+        user-select: none;
+        touch-action: none;
+        display: none;
+      }
+
+      :host([opened]) .side-resize-handle {
+        display: block;
+      }
+
+      :host([dir='rtl']) .side-resize-handle {
+        left: auto;
+        right: -6px;
+      }
+
+      .side-resize-handle:hover,
+      :host([side-resizing]) .side-resize-handle,
+      .side-resize-handle:focus-visible {
+        background-color: var(--nuxeo-resize-handle-color, #989898);
+        opacity: 1;
+      }
+
+      .side-resize-handle:focus {
+        outline: none;
+      }
+
+      .side-resize-handle:focus-visible {
+        outline: 2px solid var(--nuxeo-resize-handle-color, #989898);
+        outline-offset: -2px;
       }
 
       .scroller {
@@ -166,6 +249,10 @@ Polymer({
           margin-bottom: 16px;
         }
 
+        :host([opened]) .side-resize-handle {
+          display: none;
+        }
+
         .scroller {
           top: 0;
           position: relative;
@@ -192,6 +279,17 @@ Polymer({
       </div>
 
       <div class="side">
+        <div
+          class="side-resize-handle"
+          role="separator"
+          aria-orientation="vertical"
+          tabindex="0"
+          aria-label$="[[i18n('documentPage.resize.side')]]"
+          on-mousedown="_onSideResizeStart"
+          on-touchstart="_onSideResizeStart"
+          on-keydown="_onSideResizeKey"
+          on-dblclick="_resetSideWidth"
+        ></div>
         <div class="scrollerHeader">
           <paper-icon-button
             id="details"
@@ -282,12 +380,48 @@ Polymer({
       reflectToAttribute: true,
       observer: '_openedChanged',
     },
+    /** Info pane width (px); null uses default flex layout. */
+    sideWidth: {
+      type: Number,
+      value: null,
+      notify: true,
+      reflectToAttribute: true,
+      observer: '_sideWidthChanged',
+    },
   },
 
   ready() {
     if (!this.hasAttribute('dir')) {
       const direction = document.documentElement.getAttribute('dir');
       this.setAttribute('dir', direction);
+    }
+    this._pendingStoredSideWidth = this._loadStoredSideWidth();
+  },
+
+  attached() {
+    // Re-clamp on viewport/drawer changes (numeric only — no DOM flicker).
+    this._onWindowResize = () => {
+      this._reclampSideWidth();
+    };
+    window.addEventListener('resize', this._onWindowResize);
+
+    animationFrame.run(() => {
+      if (this._pendingStoredSideWidth != null) {
+        if (this._isNarrowViewport()) {
+          // Keep stored width unclamped; narrow CSS ignores [side-width].
+          this.sideWidth = this._pendingStoredSideWidth;
+        } else {
+          this.sideWidth = this._clampSideWidth(this._pendingStoredSideWidth);
+        }
+        this._pendingStoredSideWidth = null;
+      }
+    });
+  },
+
+  detached() {
+    if (this._onWindowResize) {
+      window.removeEventListener('resize', this._onWindowResize);
+      this._onWindowResize = null;
     }
   },
 
@@ -317,5 +451,216 @@ Polymer({
 
   _hasCollections(doc) {
     return this.hasCollections(doc);
+  },
+
+  _sideWidthChanged(value) {
+    if (value == null || Number.isNaN(Number(value))) {
+      this.style.removeProperty('--nuxeo-side-pane-width');
+      this.removeAttribute('side-width');
+    } else {
+      this.style.setProperty('--nuxeo-side-pane-width', `${value}px`);
+      this.setAttribute('side-width', String(value));
+    }
+  },
+
+  /** Width of `.page` (main + side row); drives all clamp math. */
+  _containerWidth() {
+    const pageEl = this.shadowRoot && this.shadowRoot.querySelector('.page');
+    return (pageEl && pageEl.offsetWidth) || this.offsetWidth || window.innerWidth || CONTAINER_WIDTH_FALLBACK_PX;
+  },
+
+  /** Min info-pane width (px); absolute floor only, not natural flex width. */
+  _absoluteMinSideWidth() {
+    return SIDE_PANE_MIN_ABSOLUTE_PX;
+  },
+
+  _minSideWidth() {
+    return this._absoluteMinSideWidth();
+  },
+
+  /** Min width (px) reserved for the main document column. */
+  _minMainWidth() {
+    const containerWidth = this._containerWidth();
+    return Math.max(
+      MAIN_COLUMN_MIN_PX,
+      Math.min(MAIN_COLUMN_TARGET_MAX_PX, Math.floor(containerWidth * MAIN_COLUMN_CONTAINER_RATIO)),
+    );
+  },
+
+  /** Max side-pane width: container minus `_minMainWidth`, at least `_minSideWidth`. */
+  _maxSideWidth() {
+    const cap = Math.floor(this._containerWidth() - this._minMainWidth());
+    return Math.max(this._minSideWidth(), cap);
+  },
+
+  _clampSideWidth(px) {
+    return Math.min(this._maxSideWidth(), Math.max(this._minSideWidth(), px));
+  },
+
+  /** Re-clamp `sideWidth` on resize; skip at narrow viewport to preserve the stored value. */
+  _reclampSideWidth() {
+    if (this.sideWidth == null || this._isNarrowViewport()) {
+      return;
+    }
+    const next = this._clampSideWidth(this.sideWidth);
+    if (next !== this.sideWidth) {
+      this.sideWidth = next;
+    }
+  },
+
+  _loadStoredSideWidth() {
+    try {
+      const raw = window.localStorage && window.localStorage.getItem(SIDE_PANE_STORAGE_KEY);
+      const n = raw != null ? Number.parseInt(raw, 10) : NaN;
+      return Number.isFinite(n) ? n : null;
+    } catch (_e) {
+      return null;
+    }
+  },
+
+  _persistSideWidth(px) {
+    try {
+      if (window.localStorage) {
+        if (px == null) {
+          window.localStorage.removeItem(SIDE_PANE_STORAGE_KEY);
+        } else {
+          window.localStorage.setItem(SIDE_PANE_STORAGE_KEY, String(px));
+        }
+      }
+    } catch (_e) {
+      // ignore storage errors
+    }
+  },
+
+  _isNarrowViewport() {
+    if (window.matchMedia && window.matchMedia(`(max-width: ${NARROW_VIEWPORT_BREAKPOINT_PX}px)`).matches) {
+      return true;
+    }
+    // Too narrow when min side + min main cannot fit side by side.
+    const containerWidth = this._containerWidth();
+    return containerWidth < this._absoluteMinSideWidth() + MAIN_COLUMN_MIN_PX;
+  },
+
+  _onSideResizeStart(e) {
+    if (!this.opened || this._isNarrowViewport()) {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    const point = e.touches && e.touches[0] ? e.touches[0] : e;
+    const startX = point.clientX;
+    const sideEl = this.shadowRoot && this.shadowRoot.querySelector('.side');
+    const startWidth =
+      this.sideWidth != null ? this.sideWidth : (sideEl && sideEl.offsetWidth) || SIDE_PANE_FALLBACK_PX;
+    const rtl = this.getAttribute('dir') === 'rtl';
+    this.setAttribute('side-resizing', '');
+
+    const onMove = (ev) => {
+      const p = ev.touches && ev.touches[0] ? ev.touches[0] : ev;
+      const delta = (startX - p.clientX) * (rtl ? -1 : 1);
+      const requested = startWidth + delta;
+      const currentMax = this._maxSideWidth();
+      // Growing past max: ask nuxeo-app to shrink the drawer.
+      if (requested > currentMax) {
+        const overflow = requested - currentMax;
+        this.dispatchEvent(
+          new CustomEvent('nuxeo-shrink-drawer', {
+            bubbles: true,
+            composed: true,
+            detail: { amount: Math.ceil(overflow) },
+          }),
+        );
+      }
+      const next = this._clampSideWidth(requested);
+      this.sideWidth = next;
+      this.dispatchEvent(
+        new CustomEvent('resize', {
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    };
+
+    const onEnd = () => {
+      this.removeAttribute('side-resizing');
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onEnd);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onEnd);
+      if (this.sideWidth != null) {
+        this._persistSideWidth(this.sideWidth);
+      }
+      window.dispatchEvent(new Event('resize'));
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onEnd);
+  },
+
+  _onSideResizeKey(e) {
+    if (!this.opened || this._isNarrowViewport()) {
+      return;
+    }
+    const step = e.shiftKey ? SIDE_KEY_STEP_SHIFT_PX : SIDE_KEY_STEP_PX;
+    const sideEl = this.shadowRoot && this.shadowRoot.querySelector('.side');
+    const current = this.sideWidth != null ? this.sideWidth : (sideEl && sideEl.offsetWidth) || SIDE_PANE_FALLBACK_PX;
+    const rtl = this.getAttribute('dir') === 'rtl';
+    let next;
+    switch (e.key) {
+      case 'ArrowLeft':
+        next = current + (rtl ? -step : step);
+        break;
+      case 'ArrowRight':
+        next = current + (rtl ? step : -step);
+        break;
+      case 'Home':
+        next = this._minSideWidth();
+        break;
+      case 'End':
+        next = this._maxSideWidth();
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        this._resetSideWidth();
+        return;
+      default:
+        return;
+    }
+    e.preventDefault();
+    const currentMax = this._maxSideWidth();
+    if (next > currentMax) {
+      const overflow = next - currentMax;
+      this.dispatchEvent(
+        new CustomEvent('nuxeo-shrink-drawer', {
+          bubbles: true,
+          composed: true,
+          detail: { amount: Math.ceil(overflow) },
+        }),
+      );
+    }
+    next = this._clampSideWidth(next);
+    this.sideWidth = next;
+    this._persistSideWidth(next);
+    this.dispatchEvent(
+      new CustomEvent('resize', {
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  },
+
+  /** Clear stored side width and restore default flex layout. */
+  _resetSideWidth() {
+    this.sideWidth = null;
+    this._persistSideWidth(null);
+    this.dispatchEvent(
+      new CustomEvent('resize', {
+        bubbles: true,
+        composed: true,
+      }),
+    );
   },
 });
