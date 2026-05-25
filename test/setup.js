@@ -104,8 +104,8 @@ globalThis.should = chai.should();
 // coverage on those modules looks like 0%.
 //
 // The capture-phase listeners below intercept these events before mocha's listeners
-// can see them. We log a short summary so genuine issues are still visible, but we stop
-// propagation so the run keeps going and every registered suite gets to execute.
+// can see them. Benign 404/Invalid json noise is silently dropped; other stray failures
+// are logged via console.error so WTR surfaces them in CI without WTR_VERBOSE=1.
 const _isBenignNuxeoNetworkFailure = (info) => {
   if (info == null) {
     return false;
@@ -127,7 +127,7 @@ const _logIgnoredAsyncFailure = (label, info) => {
   }
   const display = typeof info === 'object' && info.message != null ? info.message : info;
   // eslint-disable-next-line no-console
-  console.warn(`[test-setup] ignoring stray ${label} after test boundary:`, display);
+  console.error(`[test-setup] ignoring stray ${label} after test boundary:`, display);
 };
 
 // Wrap ResizeObserver to defer notifications via requestAnimationFrame. Chrome occasionally

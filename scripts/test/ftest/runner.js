@@ -8,6 +8,7 @@ const { removeSync } = require('fs-extra');
 require('dotenv').config();
 
 const FTEST = path.join(__dirname, '../../../ftest');
+const CUCUMBER_REPORT_DIR = path.join(FTEST, 'target/cucumber-reports');
 
 function runFunctionalTests(project, dir) {
   if (!fs.existsSync(dir)) {
@@ -15,7 +16,7 @@ function runFunctionalTests(project, dir) {
     return;
   }
   console.info(`Starting Functional Tests for "${project}" on "${dir}" location.`);
-  const ftestArgs = [...process.argv, '--cucumberReport', path.join(FTEST, 'target/cucumber-reports')];
+  const ftestArgs = [...process.argv.slice(2), '--cucumberReport', CUCUMBER_REPORT_DIR];
   const run = spawnSync('nuxeo-web-ui-ftest', ftestArgs, { cwd: dir, stdio: 'inherit' });
   if (run.status !== 0) {
     console.error(`An error was returned by the process running the Functional Tests for "${project}".`);
@@ -23,8 +24,8 @@ function runFunctionalTests(project, dir) {
   }
 }
 
-if (fs.existsSync(path.join(FTEST, 'target/cucumber-reports')) && process.env.CUCUMBER_REPORT_PATH) {
-  removeSync(process.env.CUCUMBER_REPORT_PATH);
+if (fs.existsSync(CUCUMBER_REPORT_DIR)) {
+  removeSync(CUCUMBER_REPORT_DIR);
 }
 
 if (!args.skipWebUi) {
