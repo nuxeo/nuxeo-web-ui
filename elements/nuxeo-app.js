@@ -58,6 +58,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import '@material/mwc-snackbar';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
@@ -292,7 +293,7 @@ Polymer({
         width: 6px;
         height: 100%;
         cursor: ew-resize;
-        z-index: 11;
+        z-index: 20;
         user-select: none;
         touch-action: none;
         background-color: transparent;
@@ -568,12 +569,12 @@ Polymer({
               </div>
 
               <div
+                id="drawerResizeHandle"
                 class="resize-handle"
                 role="separator"
                 aria-orientation="vertical"
                 tabindex="0"
                 aria-label$="[[i18n('app.drawer.resize')]]"
-                title$="[[i18n('app.drawer.resize')]]"
                 aria-valuemin$="[[_drawerResizeAriaMin]]"
                 aria-valuemax$="[[_drawerResizeAriaMax]]"
                 aria-valuenow$="[[_drawerResizeAriaNow]]"
@@ -583,6 +584,9 @@ Polymer({
                 on-dblclick="_resetDrawerWidth"
                 hidden$="[[_drawerResizeHidden]]"
               ></div>
+              <nuxeo-tooltip for="drawerResizeHandle" position="right" animation-delay="0">
+                <span class="resize-handle-tooltip-label">[[i18n('app.drawer.resize')]]</span>
+              </nuxeo-tooltip>
             </div>
           </div>
         </app-drawer>

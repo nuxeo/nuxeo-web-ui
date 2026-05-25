@@ -614,6 +614,15 @@ const template = html`
           --nuxeo-document-blob-actions-menu-max-width: 80px;
         }
       }
+
+      /* nuxeo-tooltip clones slot content into paper-tooltip on document.body */
+      .resize-handle-tooltip-label {
+        display: block;
+        max-width: 280px;
+        white-space: normal;
+        line-height: 1.4;
+        text-align: left;
+      }
     </style>
   </custom-style>
 `;
