@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@polymer/iron-form/iron-form.js';
+import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
@@ -95,6 +96,7 @@ Polymer({
       }
     </style>
 
+    <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-resource id="directory" path="/directory" params='{"pageSize": 0}'></nuxeo-resource>
     <nuxeo-resource id="schema"></nuxeo-resource>
 
@@ -335,19 +337,20 @@ Polymer({
     const stringValue = `${value}`;
     try {
       return encodeURIComponent(decodeURIComponent(stringValue));
-    } catch (_) {
+    } catch (e) {
+      console.warn(`_encodePathSegment: unable to decode "${stringValue}": ${e.message}`);
       return encodeURIComponent(stringValue);
     }
   },
 
   _executeDirectoryRequest(method, body) {
     const path = this.$.directory.path;
-    return this.$.directory.$.nx.request().then((request) => {
-      const baseUrl = request._url.endsWith('/') ? request._url.slice(0, -1) : request._url;
-      const requestPath = path.startsWith('/') ? path : `/${path}`;
+    const requestPath = path.startsWith('/') ? path : `/${path}`;
+    return this.$.nx.request().then((request) => {
+      const restUrl = `${this.$.nx.url.replace(/\/$/, '')}/api/v1`;
       const options = {
         method,
-        url: `${baseUrl}${requestPath}`,
+        url: `${restUrl}${requestPath}`,
       };
 
       if (body !== undefined) {
