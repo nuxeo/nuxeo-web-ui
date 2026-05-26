@@ -45,22 +45,12 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
         value: false,
       },
 
-      _showInstall: {
+      _installExpanded: {
         type: Boolean,
         value: false,
       },
 
-      _launched: {
-        type: Boolean,
-        value: false,
-      },
-
-      _driveOpened: {
-        type: Boolean,
-        value: false,
-      },
-
-      _failureVisible: {
+      _opened: {
         type: Boolean,
         value: false,
       },
@@ -136,10 +126,12 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
             font-size: 0.9em;
           }
 
-          .dialog-content .failure-msg {
-            color: var(--nuxeo-warn-text, #d32f2f);
-            margin: 12px 0 16px;
-            font-size: 0.9em;
+          .dialog-content .install-hint {
+            border-left: 4px solid var(--nuxeo-primary-color, #0066ff);
+            color: var(--primary-text-color);
+            padding-left: 8px;
+            margin: 12px 0 8px;
+            font-size: 0.85em;
           }
 
           .dialog-content .install-prompt {
@@ -155,20 +147,20 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
         <div class="dialog-content">
           <h1>[[i18n('driveButton.dialog.heading')]]</h1>
           <p>[[i18n('driveButton.dialog.description')]]</p>
-          <template is="dom-if" if="[[_failureVisible]]">
-            <p class="failure-msg">[[i18n('driveButton.dialog.couldNotOpen')]]</p>
+          <template is="dom-if" if="[[_opened]]">
+            <p class="install-hint">[[i18n('driveButton.dialog.install.hint')]]</p>
           </template>
-          <template is="dom-if" if="[[_showInstall]]">
+          <template is="dom-if" if="[[_installExpanded]]">
             <p class="install-prompt">[[i18n('driveButton.dialog.install.prompt')]]</p>
             <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
           </template>
-          <template is="dom-if" if="[[!_showInstall]]">
+          <template is="dom-if" if="[[!_installExpanded]]">
             <a class="install-link" href="#" on-click="_toggleInstall">[[i18n('driveButton.dialog.install.link')]]</a>
           </template>
         </div>
         <div class="buttons">
           <paper-button dialog-dismiss class="close-btn">[[i18n('command.close')]]</paper-button>
-          <paper-button class="launch-btn" on-click="_launchDrive" noink disabled$="[[_launched]]"
+          <paper-button class="launch-btn" on-click="_openDrive" noink disabled$="[[_opened]]"
             >[[i18n('driveButton.dialog.open')]]</paper-button
           >
         </div>
@@ -201,109 +193,35 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       return;
     }
 
-    // Check token in parallel — if no token, show install packages directly.
-    this._showInstall = false;
-    this._launched = false;
-    this._driveOpened = false;
-    this._failureVisible = false;
     this._hasToken = false;
-    this._cleanupFocusListener();
-    if (this._failureTimer) {
-      clearTimeout(this._failureTimer);
-      this._failureTimer = null;
-    }
+    this._installExpanded = false;
+    this._opened = false;
     this.$.token
       .get()
       .then((response) => {
         const tokens = response.entries.map((token) => token.id);
         if (tokens && tokens.length) {
           this._hasToken = true;
+        } else {
+          this._installExpanded = true;
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        this._installExpanded = true;
+      });
 
     this.$.dialog.toggle();
   }
 
-  _launchDrive() {
-    this._launched = true;
-    this._driveOpened = false;
-    this._cleanupFocusListener();
-    if (this._failureTimer) {
-      clearTimeout(this._failureTimer);
-    }
-    const onBlur = () => {
-      window.removeEventListener('blur', onBlur);
-      this._driveOpened = true;
-      if (this._failureTimer) {
-        clearTimeout(this._failureTimer);
-        this._failureTimer = null;
-      }
-      if (!/mac/i.test(navigator.platform)) {
-        this._onFocusReturn = () => {
-          this._cleanupFocusListener();
-          this._driveOpened = false;
-          this._failureVisible = true;
-        };
-        window.addEventListener('focus', this._onFocusReturn);
-      }
-    };
-    window.addEventListener('blur', onBlur);
-    this._navigateTo(this.directDownloadUrl);
-    // No browser API detects custom protocol failure; wait for blur (app launched) or assume failure after timeout.
-    this._failureTimer = setTimeout(() => {
-      this._failureTimer = null;
-      if (!this._driveOpened) {
-        this._failureVisible = true;
-      }
-    }, 1500);
-  }
-
-  _cleanupFocusListener() {
-    if (this._onFocusReturn) {
-      window.removeEventListener('focus', this._onFocusReturn);
-      this._onFocusReturn = null;
-    }
-  }
-
-  /**
-   * Triggers a custom protocol URL (nxdrive://).
-   * - Safari: hidden <object> element (avoids "address is invalid" page navigation)
-   * - Firefox: window.open (anchor click may not trigger blur on Linux)
-   * - Chrome and others: hidden anchor click
-   */
-  _navigateTo(url) {
-    if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-      if (this._protocolObj) {
-        this._protocolObj.remove();
-      }
-      const obj = document.createElement('object');
-      obj.data = url;
-      obj.style.position = 'fixed';
-      obj.style.opacity = '0';
-      obj.style.width = '1px';
-      obj.style.height = '1px';
-      document.body.appendChild(obj);
-      this._protocolObj = obj;
-    } else if (typeof InstallTrigger !== 'undefined' || /firefox/i.test(navigator.userAgent)) {
-      window.open(url, '_blank', 'noopener,noreferrer,width=1,height=1');
-    } else {
-      const a = document.createElement('a');
-      a.href = url;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-  }
-
-  _showFailure(launched, driveOpened) {
-    return launched && !driveOpened;
+  _openDrive() {
+    this._opened = true;
+    this._installExpanded = true;
+    window.location.href = this.directDownloadUrl;
   }
 
   _toggleInstall(e) {
     e.preventDefault();
-    this._showInstall = true;
+    this._installExpanded = true;
   }
 
   _showError(message) {

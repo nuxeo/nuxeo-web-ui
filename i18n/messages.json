@@ -518,7 +518,7 @@
   "driveButton.dialog.open": "Open with Nuxeo Drive",
   "driveButton.dialog.install.link": "Don't have Nuxeo Drive? Download it here.",
   "driveButton.dialog.install.prompt": "Download and install Nuxeo Drive for your platform:",
-  "driveButton.dialog.couldNotOpen": "We couldn't open Nuxeo Drive. It may not be installed on your system.",
+  "driveButton.dialog.install.hint": "If Nuxeo Drive didn't open, it may not be installed on this computer.",
   "driveEditButton.dialog.heading": "Download Nuxeo Drive Client",
   "driveEditButton.directTransfer.failed": "An error occurred while trying to open the document with Nuxeo Drive.",
   "driveEditButton.tooltip": "Open with Nuxeo Drive",
