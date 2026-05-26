@@ -331,11 +331,40 @@ Polymer({
     return 50;
   },
 
+  _encodePathSegment(value) {
+    const stringValue = `${value}`;
+    try {
+      return encodeURIComponent(decodeURIComponent(stringValue));
+    } catch (_) {
+      return encodeURIComponent(stringValue);
+    }
+  },
+
+  _executeDirectoryRequest(method, body) {
+    const path = this.$.directory.path;
+    return this.$.directory.$.nx.request().then((request) => {
+      const baseUrl = request._url.endsWith('/') ? request._url.slice(0, -1) : request._url;
+      const requestPath = path.startsWith('/') ? path : `/${path}`;
+      const options = {
+        method,
+        url: `${baseUrl}${requestPath}`,
+      };
+
+      if (body !== undefined) {
+        options.body = body;
+      }
+
+      return request.execute(options);
+    });
+  },
+
   _deleteEntry(e) {
     if (window.confirm(this.i18n('vocabularyManagement.confirmDelete'))) {
       const { item } = e.target.parentNode;
-      this.$.directory.path = `/directory/${item.directoryName}/${item.properties.id}`;
-      this.$.directory.remove().then(
+      this.$.directory.path = `/directory/${this._encodePathSegment(item.directoryName)}/${this._encodePathSegment(
+        item.properties.id,
+      )}`;
+      this._executeDirectoryRequest('DELETE').then(
         () => {
           this._refresh();
           this.notify({ message: this.i18n('vocabularyManagement.successfullyDeleted') });
@@ -390,8 +419,8 @@ Polymer({
     }
     this.$.directory.data = this._selectedEntry;
     if (this._new) {
-      this.$.directory.path = `/directory/${this._selectedEntry.directoryName}`;
-      this.$.directory.post().then(
+      this.$.directory.path = `/directory/${this._encodePathSegment(this._selectedEntry.directoryName)}`;
+      this._executeDirectoryRequest('POST', this.$.directory.data).then(
         () => {
           this.$.vocabularyEditDialog.toggle();
           this.notify({ message: this.i18n('vocabularyManagement.successfullyCreated') });
@@ -406,8 +435,10 @@ Polymer({
         },
       );
     } else {
-      this.$.directory.path = `/directory/${this._selectedEntry.directoryName}/${this._selectedEntry.properties.id}`;
-      this.$.directory.put().then(
+      this.$.directory.path = `/directory/${this._encodePathSegment(
+        this._selectedEntry.directoryName,
+      )}/${this._encodePathSegment(this._selectedEntry.properties.id)}`;
+      this._executeDirectoryRequest('PUT', this.$.directory.data).then(
         () => {
           this.$.vocabularyEditDialog.toggle();
           this.notify({ message: this.i18n('vocabularyManagement.successfullyEdited') });
