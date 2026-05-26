@@ -1520,6 +1520,9 @@ Polymer({
     this.setAttribute('drawer-resizing', '');
     const rtl = this._isRTL;
     const onMove = (ev) => {
+      if (ev.cancelable) {
+        ev.preventDefault();
+      }
       const p = ev.touches?.[0] ?? ev;
       const delta = (p.clientX - startX) * (rtl ? -1 : 1);
       const next = this._clampDrawerWidth(startWidth + delta);
