@@ -255,7 +255,7 @@ Polymer({
       return false;
     }
     const v = vocabularies.find((d) => d && d.name === selectedVocabulary);
-    return !!(v && v.readOnly);
+    return !!v?.readOnly;
   },
 
   _visibleChanged() {
