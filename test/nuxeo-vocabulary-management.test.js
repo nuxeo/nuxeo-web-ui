@@ -329,9 +329,7 @@ suite('nuxeo-vocabulary-management', () => {
       element._selectedEntry = { properties: { ordering: '5', id: 'test' } };
       element._new = true;
       element.selectedVocabulary = 'coverage';
-      // Stub the form validation and directory call
-      const form = element.$.form;
-      sinon.stub(form, 'validate').returns(true);
+      sinon.stub(element.$.layout, 'validate').returns(true);
       const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves({});
       sinon.stub(element, '_refresh');
       sinon.stub(element, 'notify');
@@ -346,9 +344,9 @@ suite('nuxeo-vocabulary-management', () => {
     test('should execute request with explicit URL without re-encoding path', async () => {
       element.$.directory.path = '/directory/language/%40test';
       const execute = sinon.stub().resolves({});
-      const request = { _url: '/nuxeo/api/v1', execute };
-      element.$.directory.$ = element.$.directory.$ || {};
-      element.$.directory.$.nx = { request: sinon.stub().resolves(request) };
+      const request = { execute };
+      element.$.nx.url = '/nuxeo';
+      sinon.stub(element.$.nx, 'request').resolves(request);
 
       await element._executeDirectoryRequest('DELETE');
 
@@ -362,9 +360,9 @@ suite('nuxeo-vocabulary-management', () => {
       element.$.directory.path = 'directory/continent/entry';
       const body = { test: true };
       const execute = sinon.stub().resolves({});
-      const request = { _url: '/nuxeo/api/v1/', execute };
-      element.$.directory.$ = element.$.directory.$ || {};
-      element.$.directory.$.nx = { request: sinon.stub().resolves(request) };
+      const request = { execute };
+      element.$.nx.url = '/nuxeo/';
+      sinon.stub(element.$.nx, 'request').resolves(request);
 
       await element._executeDirectoryRequest('PUT', body);
 
