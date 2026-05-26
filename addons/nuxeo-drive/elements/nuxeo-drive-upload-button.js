@@ -131,7 +131,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
           }
 
           .install-link {
-            display: block;
+            display: inline-block;
             margin-top: 4px;
             font-size: 0.9em;
           }
@@ -201,6 +201,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
     this._driveOpened = false;
     this._failureVisible = false;
     this._hasToken = false;
+    this._cleanupFocusListener();
     if (this._failureTimer) {
       clearTimeout(this._failureTimer);
       this._failureTimer = null;
@@ -221,6 +222,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   _launchDrive() {
     this._launched = true;
     this._driveOpened = false;
+    this._cleanupFocusListener();
     if (this._failureTimer) {
       clearTimeout(this._failureTimer);
     }
@@ -230,6 +232,18 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       if (this._failureTimer) {
         clearTimeout(this._failureTimer);
         this._failureTimer = null;
+      }
+      // On Linux and Windows, the OS may show intermediate dialogs (e.g. xdg-open,
+      // "How do you want to open this?") that steal focus without actually launching
+      // Drive. Listen for focus returning to detect this and show the failure message.
+      // Skipped on macOS where blur reliably means the protocol handler launched.
+      if (!/mac/i.test(navigator.platform)) {
+        this._onFocusReturn = () => {
+          this._cleanupFocusListener();
+          this._driveOpened = false;
+          this._failureVisible = true;
+        };
+        window.addEventListener('focus', this._onFocusReturn);
       }
     };
     window.addEventListener('blur', onBlur);
@@ -243,10 +257,19 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
     }, 1500);
   }
 
+  /** Removes any pending focus-return listener from a previous _launchDrive call. */
+  _cleanupFocusListener() {
+    if (this._onFocusReturn) {
+      window.removeEventListener('focus', this._onFocusReturn);
+      this._onFocusReturn = null;
+    }
+  }
+
   /**
    * Triggers a custom protocol URL (nxdrive://).
-   * Uses a hidden object element for Safari (avoids "address is invalid" alert)
-   * and a hidden anchor click for all other browsers.
+   * - Safari: hidden <object> element (avoids "address is invalid" page navigation)
+   * - Firefox: window.open (anchor click may not trigger blur on Linux)
+   * - Chrome and others: hidden anchor click
    */
   _navigateTo(url) {
     if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
@@ -261,6 +284,9 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       obj.style.height = '1px';
       document.body.appendChild(obj);
       this._protocolObj = obj;
+    } else if (typeof InstallTrigger !== 'undefined' || /firefox/i.test(navigator.userAgent)) {
+      // Firefox: window.open reliably triggers blur and closes automatically for unknown protocols
+      window.open(url, '_blank', 'noopener,noreferrer,width=1,height=1');
     } else {
       const a = document.createElement('a');
       a.href = url;
