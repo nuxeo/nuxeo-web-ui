@@ -663,6 +663,9 @@ Polymer({
     this.setAttribute('side-resizing', '');
 
     const onMove = (ev) => {
+      if (ev.cancelable) {
+        ev.preventDefault();
+      }
       const p = ev.touches?.[0] ?? ev;
       const delta = (startX - p.clientX) * (rtl ? -1 : 1);
       const requested = startWidth + delta;
