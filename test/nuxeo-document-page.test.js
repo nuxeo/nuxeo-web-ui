@@ -15,8 +15,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
+import {
+  RESIZE_HANDLE_KEY_STEP_PX,
+  resizeDeltaForKey,
+  resizeDeltaFromPointer,
+} from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-resize-handle.js';
 import '../elements/document/nuxeo-document-page.js';
+
+/** Stub `window.matchMedia` for iron-media-query / breakpoint listeners in fixtures. */
+function createMatchMediaStub(matches) {
+  return sinon.stub(window, 'matchMedia').callsFake((query) => {
+    return {
+      matches,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    };
+  });
+}
 
 suite('nuxeo-document-page', () => {
   let server;
@@ -197,82 +218,67 @@ suite('nuxeo-document-page', () => {
       expect(window.localStorage.getItem('nuxeo.documentPage.sidePaneWidth')).to.be.null;
     });
 
-    test('_onSideResizeKey ArrowLeft increases side width by 16px (LTR)', () => {
+    test('_onSideResizeStep ArrowLeft increases side width by 16px (LTR)', () => {
       element.opened = true;
       element.setAttribute('dir', 'ltr');
       sinon.stub(element, '_isNarrowViewport').returns(false);
       sinon.stub(element, '_maxSideWidth').returns(800);
       element.sideWidth = 400;
-      const evt = { key: 'ArrowLeft', shiftKey: false, preventDefault: sinon.spy() };
-      element._onSideResizeKey(evt);
-      expect(evt.preventDefault).to.have.been.called;
+      element._onSideResizeStep({ detail: { delta: 16 } });
       expect(element.sideWidth).to.equal(416);
     });
 
-    test('_onSideResizeKey ArrowRight decreases side width by 16px (LTR)', () => {
+    test('_onSideResizeStep ArrowRight decreases side width by 16px (LTR)', () => {
       element.opened = true;
       element.setAttribute('dir', 'ltr');
       sinon.stub(element, '_isNarrowViewport').returns(false);
       sinon.stub(element, '_maxSideWidth').returns(800);
       element.sideWidth = 400;
-      const evt = { key: 'ArrowRight', shiftKey: false, preventDefault: sinon.spy() };
-      element._onSideResizeKey(evt);
+      element._onSideResizeStep({ detail: { delta: -16 } });
       expect(element.sideWidth).to.equal(384);
     });
 
-    test('_onSideResizeKey Shift+Arrow uses a larger 64px step', () => {
+    test('_onSideResizeStep Shift+Arrow uses a larger 64px step', () => {
       element.opened = true;
       element.setAttribute('dir', 'ltr');
       sinon.stub(element, '_isNarrowViewport').returns(false);
       sinon.stub(element, '_maxSideWidth').returns(800);
       element.sideWidth = 400;
-      const evt = { key: 'ArrowLeft', shiftKey: true, preventDefault: sinon.spy() };
-      element._onSideResizeKey(evt);
+      element._onSideResizeStep({ detail: { delta: 64 } });
       expect(element.sideWidth).to.equal(464);
     });
 
-    test('_onSideResizeKey Home/End jump to min/max', () => {
+    test('_onSideResizeBound Home/End jump to min/max', () => {
       element.opened = true;
       element.setAttribute('dir', 'ltr');
       sinon.stub(element, '_isNarrowViewport').returns(false);
       element.sideWidth = 400;
-      element._onSideResizeKey({ key: 'Home', preventDefault: sinon.spy() });
+      element._onSideResizeBound({ detail: { bound: 'min' } });
       expect(element.sideWidth).to.equal(element._minSideWidth());
-      element._onSideResizeKey({ key: 'End', preventDefault: sinon.spy() });
+      element._onSideResizeBound({ detail: { bound: 'max' } });
       expect(element.sideWidth).to.equal(element._maxSideWidth());
     });
 
-    test('_onSideResizeKey Enter triggers _resetSideWidth', () => {
+    test('_onSideResizeReset triggers _resetSideWidth', () => {
       element.opened = true;
       sinon.stub(element, '_isNarrowViewport').returns(false);
       sinon.stub(element, '_resetSideWidth');
-      const evt = { key: 'Enter', preventDefault: sinon.spy() };
-      element._onSideResizeKey(evt);
+      element._onSideResizeReset();
       expect(element._resetSideWidth).to.have.been.calledOnce;
     });
 
-    test('_onSideResizeKey does nothing when not opened', () => {
+    test('_onSideResizeStep does nothing when not opened', () => {
       element.opened = false;
       element.sideWidth = 400;
-      element._onSideResizeKey({ key: 'ArrowLeft', preventDefault: sinon.spy() });
+      element._onSideResizeStep({ detail: { delta: 16 } });
       expect(element.sideWidth).to.equal(400);
     });
 
-    test('_onSideResizeKey does nothing on narrow viewports', () => {
+    test('_onSideResizeStep does nothing on narrow viewports', () => {
       element.opened = true;
       sinon.stub(element, '_isNarrowViewport').returns(true);
       element.sideWidth = 400;
-      element._onSideResizeKey({ key: 'ArrowLeft', preventDefault: sinon.spy() });
-      expect(element.sideWidth).to.equal(400);
-    });
-
-    test('_onSideResizeKey ignores unrelated keys', () => {
-      element.opened = true;
-      sinon.stub(element, '_isNarrowViewport').returns(false);
-      element.sideWidth = 400;
-      const evt = { key: 'a', preventDefault: sinon.spy() };
-      element._onSideResizeKey(evt);
-      expect(evt.preventDefault).to.not.have.been.called;
+      element._onSideResizeStep({ detail: { delta: 16 } });
       expect(element.sideWidth).to.equal(400);
     });
 
@@ -284,7 +290,7 @@ suite('nuxeo-document-page', () => {
 
     test('attached clamps stored side width on wide viewport', async () => {
       window.localStorage.setItem('nuxeo.documentPage.sidePaneWidth', '900');
-      const matchMediaStub = sinon.stub(window, 'matchMedia').returns({ matches: false });
+      const matchMediaStub = createMatchMediaStub(false);
       const fresh = await fixture(html`<nuxeo-document-page></nuxeo-document-page>`);
       await new Promise((resolve) => {
         requestAnimationFrame(() => requestAnimationFrame(resolve));
@@ -295,7 +301,7 @@ suite('nuxeo-document-page', () => {
 
     test('attached keeps unclamped stored width on narrow viewport', async () => {
       window.localStorage.setItem('nuxeo.documentPage.sidePaneWidth', '900');
-      const matchMediaStub = sinon.stub(window, 'matchMedia').returns({ matches: true });
+      const matchMediaStub = createMatchMediaStub(true);
       const fresh = await fixture(html`<nuxeo-document-page></nuxeo-document-page>`);
       await new Promise((resolve) => {
         requestAnimationFrame(() => requestAnimationFrame(resolve));
@@ -361,65 +367,259 @@ suite('nuxeo-document-page', () => {
       }
     });
 
-    test('_onSideResizeStart drag updates width and persists', () => {
+    test('_onSideResizeDrag updates width and persists', () => {
       element.opened = true;
       sinon.stub(element, '_isNarrowViewport').returns(false);
       element.setAttribute('dir', 'ltr');
       element.sideWidth = 400;
       sinon.stub(element, '_maxSideWidth').returns(800);
-      const evt = { clientX: 200, preventDefault: sinon.spy(), stopPropagation: sinon.spy() };
-      element._onSideResizeStart(evt);
+      element._onSideResizeDragStart();
       expect(element.hasAttribute('side-resizing')).to.be.true;
-      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 180 }));
-      window.dispatchEvent(new MouseEvent('mouseup'));
+      element._onSideResizeDrag({ detail: { deltaFromStart: 20 } });
+      element._onSideResizeDragEnd();
       expect(element.sideWidth).to.equal(420);
       expect(window.localStorage.getItem('nuxeo.documentPage.sidePaneWidth')).to.equal('420');
       element._maxSideWidth.restore();
     });
 
-    test('_onSideResizeStart dispatches nuxeo-shrink-drawer when growing past max', () => {
+    test('_onSideResizeDrag dispatches nuxeo-shrink-drawer when growing past max', () => {
       element.opened = true;
       sinon.stub(element, '_isNarrowViewport').returns(false);
       element.setAttribute('dir', 'ltr');
-      const max = element._maxSideWidth();
+      const max = 400;
+      sinon.stub(element, '_maxSideWidth').returns(max);
       element.sideWidth = max;
-      const shrinkSpy = sinon.spy();
-      element.addEventListener('nuxeo-shrink-drawer', shrinkSpy);
-      const evt = { clientX: 500, preventDefault: sinon.spy(), stopPropagation: sinon.spy() };
-      element._onSideResizeStart(evt);
-      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
-      window.dispatchEvent(new MouseEvent('mouseup'));
-      expect(shrinkSpy).to.have.been.called;
-      expect(shrinkSpy.firstCall.args[0].detail.amount).to.be.at.least(1);
+      const parent = element.parentNode;
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      host.appendChild(element);
+      const hostSpy = sinon.spy();
+      host.addEventListener('nuxeo-shrink-drawer', hostSpy);
+      try {
+        element._onSideResizeDragStart();
+        element._onSideResizeDrag({ detail: { deltaFromStart: 50 } });
+        element._onSideResizeDragEnd();
+        expect(hostSpy).to.have.been.called;
+        const shrinkEvent = hostSpy.firstCall.args[0];
+        expect(shrinkEvent.bubbles).to.be.true;
+        expect(shrinkEvent.composed).to.be.true;
+        expect(shrinkEvent.detail.amount).to.be.at.least(1);
+      } finally {
+        host.removeEventListener('nuxeo-shrink-drawer', hostSpy);
+        if (parent) {
+          parent.appendChild(element);
+        }
+        host.remove();
+        element._maxSideWidth.restore();
+      }
     });
 
-    test('_onSideResizeKey dispatches nuxeo-shrink-drawer when growth exceeds max', () => {
+    test('nuxeo-shrink-drawer from drag reaches a shadow host when composed', () => {
+      element.opened = true;
+      sinon.stub(element, '_isNarrowViewport').returns(false);
+      element.setAttribute('dir', 'ltr');
+      const max = 400;
+      sinon.stub(element, '_maxSideWidth').returns(max);
+      element.sideWidth = max;
+      const parent = element.parentNode;
+      const shadowHost = document.createElement('div');
+      document.body.appendChild(shadowHost);
+      shadowHost.attachShadow({ mode: 'open' }).appendChild(element);
+      const hostSpy = sinon.spy();
+      shadowHost.addEventListener('nuxeo-shrink-drawer', hostSpy);
+      try {
+        element._onSideResizeDragStart();
+        element._onSideResizeDrag({ detail: { deltaFromStart: 50 } });
+        element._onSideResizeDragEnd();
+        expect(hostSpy).to.have.been.called;
+        expect(hostSpy.firstCall.args[0].composed).to.be.true;
+      } finally {
+        shadowHost.removeEventListener('nuxeo-shrink-drawer', hostSpy);
+        if (parent) {
+          parent.appendChild(element);
+        }
+        shadowHost.remove();
+        element._maxSideWidth.restore();
+      }
+    });
+
+    test('_onSideResizeStep dispatches nuxeo-shrink-drawer when growth exceeds max', () => {
       element.opened = true;
       sinon.stub(element, '_isNarrowViewport').returns(false);
       element.setAttribute('dir', 'ltr');
       const max = 400;
       sinon.stub(element, '_maxSideWidth').returns(max);
       element.sideWidth = max - 10;
-      const shrinkSpy = sinon.spy();
-      element.addEventListener('nuxeo-shrink-drawer', shrinkSpy);
-      element._onSideResizeKey({ key: 'ArrowLeft', shiftKey: false, preventDefault: sinon.spy() });
-      expect(shrinkSpy).to.have.been.called;
-      element._maxSideWidth.restore();
+      const parent = element.parentNode;
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      host.appendChild(element);
+      const hostSpy = sinon.spy();
+      host.addEventListener('nuxeo-shrink-drawer', hostSpy);
+      try {
+        element._onSideResizeStep({ detail: { delta: 16 } });
+        expect(hostSpy).to.have.been.called;
+        const shrinkEvent = hostSpy.firstCall.args[0];
+        expect(shrinkEvent.bubbles).to.be.true;
+        expect(shrinkEvent.composed).to.be.true;
+        expect(shrinkEvent.detail.amount).to.be.at.least(1);
+      } finally {
+        host.removeEventListener('nuxeo-shrink-drawer', hostSpy);
+        if (parent) {
+          parent.appendChild(element);
+        }
+        host.remove();
+        element._maxSideWidth.restore();
+      }
     });
 
-    test('_onSideResizeKey Space triggers _resetSideWidth', () => {
+    test('_onSideResizeReset triggers _resetSideWidth', () => {
       element.opened = true;
       sinon.stub(element, '_isNarrowViewport').returns(false);
       sinon.stub(element, '_resetSideWidth');
-      element._onSideResizeKey({ key: ' ', preventDefault: sinon.spy() });
+      element._onSideResizeReset();
       expect(element._resetSideWidth).to.have.been.calledOnce;
       element._resetSideWidth.restore();
     });
 
     test('_loadStoredSideWidth returns null when localStorage throws', () => {
-      const getItem = sinon.stub(window.localStorage, 'getItem').throws(new Error('denied'));
+      const getItem = sinon.stub(globalThis.localStorage, 'getItem').throws(new Error('denied'));
       expect(element._loadStoredSideWidth()).to.be.null;
       getItem.restore();
+    });
+
+    test('_persistSideWidth does not throw when setItem throws', () => {
+      const setItem = sinon.stub(globalThis.localStorage, 'setItem').throws(new Error('quota'));
+      expect(() => element._persistSideWidth(420)).to.not.throw();
+      setItem.restore();
+    });
+
+    test('_persistSideWidth(null) does not throw when removeItem throws', () => {
+      const removeItem = sinon.stub(globalThis.localStorage, 'removeItem').throws(new Error('denied'));
+      expect(() => element._persistSideWidth(null)).to.not.throw();
+      removeItem.restore();
+    });
+
+    suite('RTL', () => {
+      const prepareRtl = () => {
+        element.opened = true;
+        element.dir = 'rtl';
+        element.setAttribute('dir', 'rtl');
+        sinon.stub(element, '_isNarrowViewport').returns(false);
+        sinon.stub(element, '_maxSideWidth').returns(800);
+        element.sideWidth = 400;
+      };
+
+      const sideHandle = () => element.shadowRoot.querySelector('nuxeo-resize-handle');
+
+      teardown(() => {
+        if (element._isNarrowViewport?.restore) {
+          element._isNarrowViewport.restore();
+        }
+        if (element._maxSideWidth?.restore) {
+          element._maxSideWidth.restore();
+        }
+      });
+
+      test('resizeDeltaForKey mirrors ArrowLeft/ArrowRight for start edge in rtl', () => {
+        expect(resizeDeltaForKey('ArrowLeft', { edge: 'start', rtl: true })).to.equal(-RESIZE_HANDLE_KEY_STEP_PX);
+        expect(resizeDeltaForKey('ArrowRight', { edge: 'start', rtl: true })).to.equal(RESIZE_HANDLE_KEY_STEP_PX);
+      });
+
+      test('ArrowRight on resize handle increases side width in rtl', async () => {
+        prepareRtl();
+        const handle = sideHandle();
+        await flush();
+        expect(handle.getAttribute('dir')).to.equal('rtl');
+        handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, composed: true }));
+        expect(element.sideWidth).to.equal(416);
+      });
+
+      test('ArrowLeft on resize handle decreases side width in rtl', async () => {
+        prepareRtl();
+        const handle = sideHandle();
+        await flush();
+        handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, composed: true }));
+        expect(element.sideWidth).to.equal(384);
+      });
+
+      test('_onSideResizeDrag grows when pointer delta matches rtl start edge', () => {
+        prepareRtl();
+        // Mirrored from LTR grow (start 100, client 80): same physical move yields +20 in rtl.
+        const delta = resizeDeltaFromPointer(80, 100, { edge: 'start', rtl: true });
+        expect(delta).to.equal(20);
+        element._onSideResizeDragStart();
+        element._onSideResizeDrag({ detail: { deltaFromStart: delta } });
+        element._onSideResizeDragEnd();
+        expect(element.sideWidth).to.equal(420);
+      });
+
+      test('_onSideResizeDrag shrinks when pointer moves the opposite way in rtl', () => {
+        prepareRtl();
+        // Mirrored from LTR shrink (start 100, client 120).
+        const delta = resizeDeltaFromPointer(120, 100, { edge: 'start', rtl: true });
+        expect(delta).to.equal(-20);
+        element._onSideResizeDragStart();
+        element._onSideResizeDrag({ detail: { deltaFromStart: delta } });
+        element._onSideResizeDragEnd();
+        expect(element.sideWidth).to.equal(380);
+      });
+
+      test('_onSideResizeDrag dispatches nuxeo-shrink-drawer when growing past max in rtl', () => {
+        prepareRtl();
+        const max = 400;
+        element._maxSideWidth.restore();
+        sinon.stub(element, '_maxSideWidth').returns(max);
+        element.sideWidth = max;
+        const parent = element.parentNode;
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        host.appendChild(element);
+        const hostSpy = sinon.spy();
+        host.addEventListener('nuxeo-shrink-drawer', hostSpy);
+        try {
+          const delta = resizeDeltaFromPointer(80, 100, { edge: 'start', rtl: true });
+          expect(delta).to.equal(20);
+          element._onSideResizeDragStart();
+          element._onSideResizeDrag({ detail: { deltaFromStart: delta } });
+          element._onSideResizeDragEnd();
+          expect(hostSpy).to.have.been.called;
+          expect(hostSpy.firstCall.args[0].detail.amount).to.be.at.least(1);
+        } finally {
+          host.removeEventListener('nuxeo-shrink-drawer', hostSpy);
+          if (parent) {
+            parent.appendChild(element);
+          }
+          host.remove();
+          element._maxSideWidth.restore();
+        }
+      });
+
+      test('_onSideResizeStep dispatches nuxeo-shrink-drawer when growth exceeds max in rtl', () => {
+        prepareRtl();
+        const max = 400;
+        element._maxSideWidth.restore();
+        sinon.stub(element, '_maxSideWidth').returns(max);
+        element.sideWidth = max - 10;
+        const parent = element.parentNode;
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        host.appendChild(element);
+        const hostSpy = sinon.spy();
+        host.addEventListener('nuxeo-shrink-drawer', hostSpy);
+        try {
+          const delta = resizeDeltaForKey('ArrowRight', { edge: 'start', rtl: true });
+          element._onSideResizeStep({ detail: { delta } });
+          expect(hostSpy).to.have.been.called;
+        } finally {
+          host.removeEventListener('nuxeo-shrink-drawer', hostSpy);
+          if (parent) {
+            parent.appendChild(element);
+          }
+          host.remove();
+          element._maxSideWidth.restore();
+        }
+      });
     });
   });
 
