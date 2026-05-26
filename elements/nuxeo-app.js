@@ -52,6 +52,7 @@ import './nuxeo-app/nuxeo-page-item.js';
 import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
+import { NuxeoAppDrawerResizeBehavior } from './behaviors/nuxeo-app-drawer-resize-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-task-page-provider.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
@@ -59,6 +60,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-resize-handle.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-thumbnail/nuxeo-document-thumbnail.js';
 import '@material/mwc-snackbar';
 import './nuxeo-browser/nuxeo-breadcrumb.js';
@@ -94,28 +96,6 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Root',
 ];
 const MAX_TOASTS = 3; // max number of toasts that can be displayed simultaneously besides the default one
-/** Natural width (px) of the drawer's content (icons + labels), excluding the sidebar column. */
-const DRAWER_NATURAL_CONTENT_PX = 298;
-/** Absolute floor (px) for the drawer body under heavy zoom: `sidebarPx + this value`. */
-const DRAWER_MIN_FLOOR_OFFSET_PX = 120;
-/** Hard floor (px) for the main content column beside the drawer (matches document-page). */
-const DRAWER_MAIN_COLUMN_MIN_PX = 240;
-/** Max main-column reservation (px) when computing drawer max width; mirrors document-page. */
-const DRAWER_MAIN_COLUMN_TARGET_MAX_PX = 640;
-/** Share of layout width (sidebar excluded) reserved for main before the drawer can grow further. */
-const DRAWER_MAIN_COLUMN_RATIO = 0.5;
-/** The drawer can never occupy more than this fraction of the viewport. */
-const DRAWER_VIEWPORT_HALF_RATIO = 0.5;
-/** Fallback for `_sidebarPx()` when the `--nuxeo-sidebar-width` CSS variable can't be parsed. */
-const DRAWER_SIDEBAR_FALLBACK_PX = 52;
-/** Keyboard resize step (px) when the user presses an arrow key on the drawer handle. */
-const DRAWER_KEY_STEP_PX = 16;
-/** Faster keyboard resize step (px) when the user holds Shift + arrow. */
-const DRAWER_KEY_STEP_SHIFT_PX = 64;
-/** Debounce before re-enabling drawer width transition after info-pane push-back. */
-const DRAWER_RESIZING_CLEAR_DELAY_MS = 100;
-/** localStorage key under which the user's preferred drawer width is persisted. */
-const DRAWER_STORAGE_KEY = 'nuxeo.drawerWidth';
 
 setPassiveTouchGestures(true);
 
@@ -283,42 +263,6 @@ Polymer({
       #drawer:hover .toggle iron-icon,
       #drawer .toggle:hover iron-icon {
         visibility: visible !important;
-      }
-
-      /* Drag handle to resize the drawer (side nav panes width) */
-      #drawer .resize-handle {
-        position: absolute;
-        top: 0;
-        right: -3px;
-        width: 6px;
-        height: 100%;
-        cursor: ew-resize;
-        z-index: 20;
-        user-select: none;
-        touch-action: none;
-        background-color: transparent;
-        transition: background-color 0.2s ease;
-      }
-
-      :host([dir='rtl']) #drawer .resize-handle {
-        left: -3px;
-        right: auto;
-      }
-
-      #drawer .resize-handle:hover,
-      :host([drawer-resizing]) #drawer .resize-handle,
-      #drawer .resize-handle:focus-visible {
-        background-color: var(--nuxeo-resize-handle-color, #989898);
-        opacity: 1;
-      }
-
-      #drawer .resize-handle:focus {
-        outline: none;
-      }
-
-      #drawer .resize-handle:focus-visible {
-        outline: 2px solid var(--nuxeo-resize-handle-color, #989898);
-        outline-offset: -2px;
       }
 
       :host([drawer-resizing]) {
@@ -568,25 +512,23 @@ Polymer({
                 <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
               </div>
 
-              <div
+              <nuxeo-resize-handle
                 id="drawerResizeHandle"
-                class="resize-handle"
-                role="separator"
-                aria-orientation="vertical"
-                tabindex="0"
-                aria-label$="[[i18n('app.drawer.resize')]]"
-                aria-valuemin$="[[_drawerResizeAriaMin]]"
-                aria-valuemax$="[[_drawerResizeAriaMax]]"
-                aria-valuenow$="[[_drawerResizeAriaNow]]"
-                on-mousedown="_onDrawerResizeStart"
-                on-touchstart="_onDrawerResizeStart"
-                on-keydown="_onDrawerResizeKey"
-                on-dblclick="_resetDrawerWidth"
+                edge="end"
+                dir$="[[_resizeHandleDir(_isRTL)]]"
+                label-key="app.drawer.resize"
+                tooltip-position$="[[_drawerResizeTooltipPosition(_isRTL)]]"
                 hidden$="[[_drawerResizeHidden]]"
-              ></div>
-              <nuxeo-tooltip for="drawerResizeHandle" position="right" animation-delay="0">
-                <span class="resize-handle-tooltip-label">[[i18n('app.drawer.resize')]]</span>
-              </nuxeo-tooltip>
+                aria-value-min="[[_drawerResizeAriaMin]]"
+                aria-value-max="[[_drawerResizeAriaMax]]"
+                aria-value-now="[[_drawerResizeAriaNow]]"
+                on-resize-step="_onDrawerResizeStep"
+                on-resize-bound="_onDrawerResizeBound"
+                on-resize-reset="_onDrawerResizeReset"
+                on-resize-drag-start="_onDrawerResizeDragStart"
+                on-resize-drag="_onDrawerResizeDrag"
+                on-resize-drag-end="_onDrawerResizeDragEnd"
+              ></nuxeo-resize-handle>
             </div>
           </div>
         </app-drawer>
@@ -684,7 +626,7 @@ Polymer({
   `,
 
   is: 'nuxeo-app',
-  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior, NuxeoAppDrawerResizeBehavior],
   importMeta: import.meta,
   properties: {
     productName: {
@@ -740,12 +682,6 @@ Polymer({
       type: Boolean,
       value: false,
       notify: true,
-    },
-
-    /** Persisted drawer width (px); null uses the default open width. */
-    _drawerOpenWidth: {
-      type: Number,
-      value: null,
     },
 
     keyEventTarget: {
@@ -808,29 +744,6 @@ Polymer({
       type: Boolean,
       value: false,
       reflectToAttribute: true,
-    },
-
-    /** Hidden when the drawer is closed or in narrow (overlay) layout. */
-    _drawerResizeHidden: {
-      type: Boolean,
-      computed: '_computeDrawerResizeHidden(drawerOpened, isNarrow)',
-      value: true,
-    },
-
-    /** ARIA bounds for the drawer resize separator (updated with width changes). */
-    _drawerResizeAriaMin: {
-      type: Number,
-      value: 0,
-    },
-
-    _drawerResizeAriaMax: {
-      type: Number,
-      value: 0,
-    },
-
-    _drawerResizeAriaNow: {
-      type: Number,
-      value: 0,
     },
   },
 
@@ -899,6 +812,7 @@ Polymer({
 
     this._boundUpdateIsNarrow = () => this._updateIsNarrow();
     window.addEventListener('resize', this._boundUpdateIsNarrow);
+    /** Handles {@link nuxeo-document-page}'s `nuxeo-layout-updated` (see ELEMENTS-1844 implementation strategy §3.4a). */
     this._onDescendantLayoutUpdated = () => this._notifyLayoutChanged();
     this.addEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
 
@@ -1057,6 +971,15 @@ Polymer({
   _checkRtl() {
     const dir = document.documentElement.getAttribute('dir');
     this._isRTL = dir === 'rtl';
+  },
+
+  /** Bound on `nuxeo-resize-handle` (avoids unreliable :host-context through app-drawer). */
+  _resizeHandleDir(isRTL) {
+    return isRTL ? 'rtl' : 'ltr';
+  },
+
+  _drawerResizeTooltipPosition(isRTL) {
+    return isRTL ? 'left' : 'right';
   },
 
   _directionChanged(isRTL) {
@@ -1430,224 +1353,6 @@ Polymer({
     this.selectedTab = '';
   },
 
-  /** Viewport width minus the icon sidebar (px). */
-  _drawerLayoutWidth() {
-    return Math.max(0, window.innerWidth - this._sidebarPx());
-  },
-
-  /** Min width (px) left for main content when the drawer grows (proportional, like info pane). */
-  _minMainWidthForDrawer() {
-    const layoutWidth = this._drawerLayoutWidth();
-    return Math.max(
-      DRAWER_MAIN_COLUMN_MIN_PX,
-      Math.min(DRAWER_MAIN_COLUMN_TARGET_MAX_PX, Math.floor(layoutWidth * DRAWER_MAIN_COLUMN_RATIO)),
-    );
-  },
-
-  /** Min drawer width: natural open size, capped by viewport on zoom. */
-  _minDrawerWidth() {
-    const defaultOpen = DRAWER_NATURAL_CONTENT_PX + this._sidebarPx();
-    const viewportCap = Math.floor(window.innerWidth * DRAWER_VIEWPORT_HALF_RATIO);
-    return Math.min(defaultOpen, Math.max(this._sidebarPx() + DRAWER_MIN_FLOOR_OFFSET_PX, viewportCap));
-  },
-
-  /** Max drawer width: half the viewport and enough room for `_minMainWidthForDrawer`. */
-  _maxDrawerWidth() {
-    const min = this._minDrawerWidth();
-    const layoutWidth = this._drawerLayoutWidth();
-    const capFromMain = Math.floor(layoutWidth - this._minMainWidthForDrawer());
-    const capFromViewport = Math.floor(window.innerWidth * DRAWER_VIEWPORT_HALF_RATIO);
-    const cap = Math.min(capFromMain, capFromViewport);
-    return Math.max(min, cap);
-  },
-
-  /** Parsed icon sidebar width (px); uses fallback when the CSS value is missing. */
-  _sidebarPx() {
-    return Number.parseInt(this.sidebarWidth, 10) || DRAWER_SIDEBAR_FALLBACK_PX;
-  },
-
-  /** Open drawer width (px): stored preference or natural default, clamped. */
-  _computeOpenDrawerWidth() {
-    const fallback = DRAWER_NATURAL_CONTENT_PX + this._sidebarPx();
-    const stored = this._drawerOpenWidth ?? this._loadStoredDrawerWidth();
-    if (stored == null) {
-      return fallback;
-    }
-    this._drawerOpenWidth = stored;
-    return this._clampDrawerWidth(stored);
-  },
-
-  /** Clamp drawer width between `_minDrawerWidth` and `_maxDrawerWidth`. */
-  _clampDrawerWidth(px) {
-    return Math.min(this._maxDrawerWidth(), Math.max(this._minDrawerWidth(), px));
-  },
-
-  /** Read persisted drawer width from localStorage, or null if missing/invalid. */
-  _loadStoredDrawerWidth() {
-    try {
-      const raw = globalThis.localStorage?.getItem(DRAWER_STORAGE_KEY);
-      const n = Number.parseInt(raw ?? '', 10);
-      if (!Number.isFinite(n)) {
-        return null;
-      }
-      return n;
-    } catch {
-      return null;
-    }
-  },
-
-  /** Persist drawer width under `nuxeo.drawerWidth` (no-op when storage is unavailable). */
-  _persistDrawerWidth(px) {
-    try {
-      if (globalThis.localStorage) {
-        globalThis.localStorage.setItem(DRAWER_STORAGE_KEY, String(px));
-      }
-    } catch {
-      // Storage may be unavailable (private mode, quota); width is not persisted.
-    }
-  },
-
-  /** Pointer drag on the drawer resize handle; saves width and notifies layout on release. */
-  _onDrawerResizeStart(e) {
-    if (!this.drawerOpened || this.isNarrow) {
-      return;
-    }
-    e.preventDefault();
-    e.stopPropagation();
-    const point = e.touches?.[0] ?? e;
-    const startX = point.clientX;
-    const startWidth = this._computeOpenDrawerWidth();
-    this.setAttribute('drawer-resizing', '');
-    const rtl = this._isRTL;
-    const onMove = (ev) => {
-      if (ev.cancelable) {
-        ev.preventDefault();
-      }
-      const p = ev.touches?.[0] ?? ev;
-      const delta = (p.clientX - startX) * (rtl ? -1 : 1);
-      const next = this._clampDrawerWidth(startWidth + delta);
-      this._drawerOpenWidth = next;
-      this.drawerWidth = `${next}px`;
-      this._updateDrawerResizeAria();
-      this._scheduleDrawerDragLayoutNotify();
-    };
-
-    const onEnd = () => {
-      this._cancelDrawerDragLayoutNotify();
-      this.removeAttribute('drawer-resizing');
-      globalThis.removeEventListener('mousemove', onMove);
-      globalThis.removeEventListener('mouseup', onEnd);
-      globalThis.removeEventListener('touchmove', onMove);
-      globalThis.removeEventListener('touchend', onEnd);
-      if (this._drawerOpenWidth != null) {
-        this._persistDrawerWidth(this._drawerOpenWidth);
-      }
-      this._notifyLayoutChanged();
-    };
-
-    globalThis.addEventListener('mousemove', onMove);
-    globalThis.addEventListener('mouseup', onEnd);
-    globalThis.addEventListener('touchmove', onMove, { passive: false });
-    globalThis.addEventListener('touchend', onEnd);
-  },
-
-  /** Keyboard resize on the drawer handle (arrows, Home/End, Enter/Space to reset). */
-  _onDrawerResizeKey(e) {
-    if (!this.drawerOpened || this.isNarrow) {
-      return;
-    }
-    const step = e.shiftKey ? DRAWER_KEY_STEP_SHIFT_PX : DRAWER_KEY_STEP_PX;
-    const current = this._computeOpenDrawerWidth();
-    const rtl = this._isRTL;
-    let next;
-    switch (e.key) {
-      case 'ArrowLeft':
-        next = current + (rtl ? step : -step);
-        break;
-      case 'ArrowRight':
-        next = current + (rtl ? -step : step);
-        break;
-      case 'Home':
-        next = this._minDrawerWidth();
-        break;
-      case 'End':
-        next = this._maxDrawerWidth();
-        break;
-      case 'Enter':
-      case ' ':
-        this._resetDrawerWidth();
-        e.preventDefault();
-        return;
-      default:
-        return;
-    }
-    e.preventDefault();
-    next = this._clampDrawerWidth(next);
-    this._drawerOpenWidth = next;
-    this.drawerWidth = `${next}px`;
-    this._persistDrawerWidth(next);
-    this._updateDrawerResizeAria();
-    this._notifyLayoutChanged();
-  },
-
-  /** Shrinks the open drawer when the info pane needs more width (`nuxeo-shrink-drawer`). */
-  _onShrinkDrawerRequest(e) {
-    if (!this.drawerOpened || this.isNarrow) {
-      return;
-    }
-    const rawAmount = e?.detail?.amount;
-    const amount = Number.isFinite(rawAmount) ? Math.max(0, rawAmount) : 0;
-    if (amount <= 0) {
-      return;
-    }
-    const current = this._computeOpenDrawerWidth();
-    const min = this._minDrawerWidth();
-    if (current <= min) {
-      return;
-    }
-    const next = Math.max(min, current - amount);
-    if (next === current) {
-      return;
-    }
-    // Keep drawer-resizing set during push-back so width changes are instant.
-    const hadAttr = this.hasAttribute('drawer-resizing');
-    if (!hadAttr) {
-      this.setAttribute('drawer-resizing', '');
-    }
-    this._drawerOpenWidth = next;
-    this.drawerWidth = `${next}px`;
-    this._persistDrawerWidth(next);
-    this._updateDrawerResizeAria();
-    if (!hadAttr) {
-      if (this._clearDrawerResizingTimer) {
-        clearTimeout(this._clearDrawerResizingTimer);
-      }
-      this._clearDrawerResizingTimer = setTimeout(() => {
-        this.removeAttribute('drawer-resizing');
-        this._clearDrawerResizingTimer = null;
-      }, DRAWER_RESIZING_CLEAR_DELAY_MS);
-    }
-    this._scheduleDrawerDragLayoutNotify();
-  },
-
-  /** Reset drawer to default width and clear localStorage. */
-  _resetDrawerWidth() {
-    this._drawerOpenWidth = null;
-    try {
-      if (globalThis.localStorage) {
-        globalThis.localStorage.removeItem(DRAWER_STORAGE_KEY);
-      }
-    } catch {
-      // Storage may be unavailable (private mode, quota); width is not persisted.
-    }
-    if (this.drawerOpened) {
-      this.drawerWidth = `${DRAWER_NATURAL_CONTENT_PX + this._sidebarPx()}px`;
-      this._updateDrawerResizeAria();
-      this._notifyLayoutChanged();
-    } else {
-      this._updateDrawerResizeAria();
-    }
-  },
   _fetchTaskCount() {
     this.$.tasksProvider.fetch().then((response) => {
       this.taskCount = response.resultsCount;
@@ -2237,49 +1942,25 @@ Polymer({
     this._notifyLayoutChanged();
   },
 
-  /** Hide the drawer resize handle when the drawer is closed or layout is narrow. */
-  _computeDrawerResizeHidden(drawerOpened, isNarrow) {
-    return !drawerOpened || Boolean(isNarrow);
-  },
-
-  /** Sync aria-valuemin / aria-valuemax / aria-valuenow on the drawer resize handle. */
-  _updateDrawerResizeAria() {
-    if (!this.drawerOpened || this.isNarrow) {
-      this._drawerResizeAriaMin = 0;
-      this._drawerResizeAriaMax = 0;
-      this._drawerResizeAriaNow = 0;
-      return;
-    }
-    this._drawerResizeAriaMin = this._minDrawerWidth();
-    this._drawerResizeAriaMax = this._maxDrawerWidth();
-    this._drawerResizeAriaNow = this._computeOpenDrawerWidth();
-  },
-
   /**
-   * Re-clamp drawer width on resize/zoom. Syncs inline `drawerWidth`, not only
-   * `_drawerOpenWidth`, so a wide preference is restored after narrow-mode open.
+   * Reflow descendants after a pane width change.
+   *
+   * @param {{ includeWindowResize?: boolean }} [options]
+   *   - `includeWindowResize: false` — iron-resize only (drawer drag / key-repeat coalescing).
+   *   - `includeWindowResize: true` (default) — also synthesise `window.resize` for
+   *     `nuxeo-document-page` viewport reclamp and other legacy listeners; suppressed
+   *     from re-entering `_updateIsNarrow` to avoid feedback loops.
    */
-  _reclampDrawerWidth() {
-    if (!this.drawerOpened || this.isNarrow) {
-      return;
-    }
-    const target = this._computeOpenDrawerWidth();
-    const currentInlinePx = Number.parseInt(this.drawerWidth, 10) || 0;
-    if (currentInlinePx !== target) {
-      this.drawerWidth = `${target}px`;
-      this._updateDrawerResizeAria();
-    }
-  },
-
-  /** Notify tables/viewers: `notifyResize()` on the drawer layout plus a guarded `window.resize`. */
-  _runLayoutNotify() {
+  _runLayoutNotify({ includeWindowResize = true } = {}) {
     const drawerPanel = this.$?.drawerPanel;
     if (drawerPanel && typeof drawerPanel.notifyResize === 'function') {
       drawerPanel.notifyResize();
     }
-    this._suppressLayoutResizeHandler = true;
-    globalThis.dispatchEvent(new Event('resize'));
-    this._suppressLayoutResizeHandler = false;
+    if (includeWindowResize) {
+      this._suppressLayoutResizeHandler = true;
+      globalThis.dispatchEvent(new Event('resize'));
+      this._suppressLayoutResizeHandler = false;
+    }
   },
 
   /** Defer layout notify to the next frame so width/CSS updates are applied first. */
@@ -2291,25 +1972,6 @@ Polymer({
       this._layoutNotifyRaf = null;
       this._runLayoutNotify();
     });
-  },
-
-  /** At most one layout notify per frame while dragging the drawer. */
-  _scheduleDrawerDragLayoutNotify() {
-    if (this._drawerDragLayoutRaf != null) {
-      return;
-    }
-    this._drawerDragLayoutRaf = requestAnimationFrame(() => {
-      this._drawerDragLayoutRaf = null;
-      this._runLayoutNotify();
-    });
-  },
-
-  /** Cancel a pending drawer-drag layout notify animation frame. */
-  _cancelDrawerDragLayoutNotify() {
-    if (this._drawerDragLayoutRaf != null) {
-      cancelAnimationFrame(this._drawerDragLayoutRaf);
-      this._drawerDragLayoutRaf = null;
-    }
   },
 
   isDrawerHidden(isNarrow, drawerOpened) {

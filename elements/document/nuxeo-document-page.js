@@ -23,6 +23,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-document-comments/nuxeo-document-comment-
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-resize-handle.js';
 import '../nuxeo-app/nuxeo-page-item.js';
 import '../nuxeo-document-info-bar/nuxeo-document-info-bar.js';
 import '../nuxeo-document-info/nuxeo-document-info.js';
@@ -44,10 +45,6 @@ const MAIN_COLUMN_TARGET_MAX_PX = 640;
 const MAIN_COLUMN_CONTAINER_RATIO = 0.5;
 /** Fallback width (px) used when `.side` element's `offsetWidth` is 0 (not yet laid out). */
 const SIDE_PANE_FALLBACK_PX = 360;
-/** Keyboard resize step (px) when the user presses an arrow key on the side handle. */
-const SIDE_KEY_STEP_PX = 16;
-/** Faster keyboard resize step (px) when the user holds Shift + arrow. */
-const SIDE_KEY_STEP_SHIFT_PX = 64;
 /** Must match `@media (max-width: 1024px)` / `(min-width: 1025px)` in this template. */
 const NARROW_VIEWPORT_BREAKPOINT_PX = 1024;
 /** Fallback (px) used by `_containerWidth()` when nothing else is measurable. */
@@ -59,6 +56,16 @@ const SIDE_PANE_STORAGE_KEY = 'nuxeo.documentPage.sidePaneWidth';
 `nuxeo-document-page`
 @group Nuxeo UI
 @element nuxeo-document-page
+@event nuxeo-layout-updated
+  Fired when the information-pane width has been reclamped or settled and descendants under
+  `nuxeo-app` should run an `iron-resize` pass. The app shell listens and calls
+  `notifyResize()` on the drawer panel (and may synthesise `window.resize` once).
+  @param {Object} detail - Reserved; currently empty. Do not rely on any properties.
+  @param {boolean} bubbles - `true`
+  @param {boolean} composed - `true`
+  Dispatched from `_scheduleViewportReclamp` (after zoom/window resize reclamp),
+  `_notifySideLayoutUpdated` (keyboard step, Home/End, drag end), and `_resetSideWidth`.
+  Not fired on each drag move — use the bubbling `resize` event on this element during drag.
 */
 Polymer({
   _template: html`
@@ -147,47 +154,6 @@ Polymer({
         }
       }
 
-      /* Drag handle to resize the side (Information) pane */
-      .side-resize-handle {
-        position: absolute;
-        top: 0;
-        left: -6px;
-        width: 6px;
-        height: 100%;
-        cursor: ew-resize;
-        z-index: 20;
-        background-color: transparent;
-        transition: background-color 0.2s ease;
-        user-select: none;
-        touch-action: none;
-        display: none;
-      }
-
-      :host([opened]) .side-resize-handle {
-        display: block;
-      }
-
-      :host([dir='rtl']) .side-resize-handle {
-        left: auto;
-        right: -6px;
-      }
-
-      .side-resize-handle:hover,
-      :host([side-resizing]) .side-resize-handle,
-      .side-resize-handle:focus-visible {
-        background-color: var(--nuxeo-resize-handle-color, #989898);
-        opacity: 1;
-      }
-
-      .side-resize-handle:focus {
-        outline: none;
-      }
-
-      .side-resize-handle:focus-visible {
-        outline: 2px solid var(--nuxeo-resize-handle-color, #989898);
-        outline-offset: -2px;
-      }
-
       .scroller {
         @apply --nuxeo-card;
         margin-bottom: 0;
@@ -249,8 +215,8 @@ Polymer({
           margin-bottom: 16px;
         }
 
-        :host([opened]) .side-resize-handle {
-          display: none;
+        :host([opened]) nuxeo-resize-handle {
+          display: none !important;
         }
 
         .scroller {
@@ -279,24 +245,23 @@ Polymer({
       </div>
 
       <div class="side">
-        <div
+        <nuxeo-resize-handle
           id="sideResizeHandle"
-          class="side-resize-handle"
-          role="separator"
-          aria-orientation="vertical"
-          tabindex="0"
-          aria-label$="[[i18n('documentPage.resize.side')]]"
-          aria-valuemin$="[[_sideResizeAriaMin]]"
-          aria-valuemax$="[[_sideResizeAriaMax]]"
-          aria-valuenow$="[[_sideResizeAriaNow]]"
-          on-mousedown="_onSideResizeStart"
-          on-touchstart="_onSideResizeStart"
-          on-keydown="_onSideResizeKey"
-          on-dblclick="_resetSideWidth"
-        ></div>
-        <nuxeo-tooltip for="sideResizeHandle" position="left" animation-delay="0">
-          <span class="resize-handle-tooltip-label">[[i18n('documentPage.resize.side')]]</span>
-        </nuxeo-tooltip>
+          edge="start"
+          dir$="[[_resizeHandleDir]]"
+          label-key="documentPage.resize.side"
+          tooltip-position$="[[_sideResizeTooltipPosition]]"
+          hidden$="[[!opened]]"
+          aria-value-min="[[_sideResizeAriaMin]]"
+          aria-value-max="[[_sideResizeAriaMax]]"
+          aria-value-now="[[_sideResizeAriaNow]]"
+          on-resize-step="_onSideResizeStep"
+          on-resize-bound="_onSideResizeBound"
+          on-resize-reset="_onSideResizeReset"
+          on-resize-drag-start="_onSideResizeDragStart"
+          on-resize-drag="_onSideResizeDrag"
+          on-resize-drag-end="_onSideResizeDragEnd"
+        ></nuxeo-resize-handle>
         <div class="scrollerHeader">
           <paper-icon-button
             id="details"
@@ -387,6 +352,12 @@ Polymer({
       reflectToAttribute: true,
       observer: '_openedChanged',
     },
+
+    dir: {
+      type: String,
+      reflectToAttribute: true,
+      value: 'ltr',
+    },
     /** Info pane width (px); null uses default flex layout. */
     sideWidth: {
       type: Number,
@@ -411,13 +382,20 @@ Polymer({
       type: Number,
       value: 0,
     },
+
+    _resizeHandleDir: {
+      type: String,
+      computed: '_computeResizeHandleDir(dir)',
+    },
+
+    _sideResizeTooltipPosition: {
+      type: String,
+      computed: '_computeSideResizeTooltipPosition(dir)',
+    },
   },
 
   ready() {
-    if (!this.hasAttribute('dir')) {
-      const direction = document.documentElement.getAttribute('dir');
-      this.setAttribute('dir', direction);
-    }
+    this.dir = document.documentElement.getAttribute('dir') || 'ltr';
     this._pendingStoredSideWidth = this._loadStoredSideWidth();
   },
 
@@ -450,6 +428,14 @@ Polymer({
       window.removeEventListener('resize', this._onWindowResize);
       this._onWindowResize = null;
     }
+  },
+
+  _computeResizeHandleDir(dir) {
+    return dir === 'rtl' ? 'rtl' : 'ltr';
+  },
+
+  _computeSideResizeTooltipPosition(dir) {
+    return dir === 'rtl' ? 'right' : 'left';
   },
 
   _documentChanged(doc) {
@@ -590,6 +576,7 @@ Polymer({
   /**
    * Re-clamp on the next frame after zoom/resize (container metrics are stale in the
    * sync handler), then ask nuxeo-app to run iron-resize via `nuxeo-layout-updated`.
+   * @fires nuxeo-layout-updated
    */
   _scheduleViewportReclamp() {
     if (this._viewportReclampRaf != null) {
@@ -648,119 +635,27 @@ Polymer({
     return containerWidth < this._absoluteMinSideWidth() + MAIN_COLUMN_MIN_PX;
   },
 
-  /** Pointer drag on the info-pane handle; may fire `nuxeo-shrink-drawer` when capped. */
-  _onSideResizeStart(e) {
-    if (!this.opened || this._isNarrowViewport()) {
-      return;
-    }
-    e.preventDefault();
-    e.stopPropagation();
-    const point = e.touches?.[0] ?? e;
-    const startX = point.clientX;
+  _sideResizeCurrentWidth() {
     const sideEl = this.shadowRoot?.querySelector('.side');
-    const startWidth = this.sideWidth ?? sideEl?.offsetWidth ?? SIDE_PANE_FALLBACK_PX;
-    const rtl = this.getAttribute('dir') === 'rtl';
-    this.setAttribute('side-resizing', '');
-
-    const onMove = (ev) => {
-      if (ev.cancelable) {
-        ev.preventDefault();
-      }
-      const p = ev.touches?.[0] ?? ev;
-      const delta = (startX - p.clientX) * (rtl ? -1 : 1);
-      const requested = startWidth + delta;
-      const currentMax = this._maxSideWidth();
-      // Growing past max: ask nuxeo-app to shrink the drawer.
-      if (requested > currentMax) {
-        const overflow = requested - currentMax;
-        this.dispatchEvent(
-          new CustomEvent('nuxeo-shrink-drawer', {
-            bubbles: true,
-            composed: true,
-            detail: { amount: Math.ceil(overflow) },
-          }),
-        );
-      }
-      const next = this._clampSideWidth(requested);
-      this.sideWidth = next;
-      this._updateSideResizeAria();
-      this.dispatchEvent(
-        new CustomEvent('resize', {
-          bubbles: true,
-          composed: true,
-        }),
-      );
-    };
-
-    const onEnd = () => {
-      this.removeAttribute('side-resizing');
-      globalThis.removeEventListener('mousemove', onMove);
-      globalThis.removeEventListener('mouseup', onEnd);
-      globalThis.removeEventListener('touchmove', onMove);
-      globalThis.removeEventListener('touchend', onEnd);
-      if (this.sideWidth != null) {
-        this._persistSideWidth(this.sideWidth);
-      }
-      this.dispatchEvent(
-        new CustomEvent('nuxeo-layout-updated', {
-          bubbles: true,
-          composed: true,
-        }),
-      );
-    };
-
-    globalThis.addEventListener('mousemove', onMove);
-    globalThis.addEventListener('mouseup', onEnd);
-    globalThis.addEventListener('touchmove', onMove, { passive: false });
-    globalThis.addEventListener('touchend', onEnd);
+    return this.sideWidth ?? sideEl?.offsetWidth ?? SIDE_PANE_FALLBACK_PX;
   },
 
-  /** Keyboard resize on the info-pane handle (arrows, Home/End, Enter/Space to reset). */
-  _onSideResizeKey(e) {
-    if (!this.opened || this._isNarrowViewport()) {
-      return;
-    }
-    const step = e.shiftKey ? SIDE_KEY_STEP_SHIFT_PX : SIDE_KEY_STEP_PX;
-    const sideEl = this.shadowRoot?.querySelector('.side');
-    const current = this.sideWidth ?? sideEl?.offsetWidth ?? SIDE_PANE_FALLBACK_PX;
-    const rtl = this.getAttribute('dir') === 'rtl';
-    let next;
-    switch (e.key) {
-      case 'ArrowLeft':
-        next = current + (rtl ? -step : step);
-        break;
-      case 'ArrowRight':
-        next = current + (rtl ? step : -step);
-        break;
-      case 'Home':
-        next = this._minSideWidth();
-        break;
-      case 'End':
-        next = this._maxSideWidth();
-        break;
-      case 'Enter':
-      case ' ':
-        e.preventDefault();
-        this._resetSideWidth();
-        return;
-      default:
-        return;
-    }
-    e.preventDefault();
+  _sideResizeActive() {
+    return this.opened && !this._isNarrowViewport();
+  },
+
+  _applySideWidth(requested) {
     const currentMax = this._maxSideWidth();
-    if (next > currentMax) {
-      const overflow = next - currentMax;
+    if (requested > currentMax) {
       this.dispatchEvent(
         new CustomEvent('nuxeo-shrink-drawer', {
           bubbles: true,
           composed: true,
-          detail: { amount: Math.ceil(overflow) },
+          detail: { amount: Math.ceil(requested - currentMax) },
         }),
       );
     }
-    next = this._clampSideWidth(next);
-    this.sideWidth = next;
-    this._persistSideWidth(next);
+    this.sideWidth = this._clampSideWidth(requested);
     this._updateSideResizeAria();
     this.dispatchEvent(
       new CustomEvent('resize', {
@@ -768,6 +663,10 @@ Polymer({
         composed: true,
       }),
     );
+  },
+
+  /** @fires nuxeo-layout-updated - After info-pane resize settles (keyboard or drag end). */
+  _notifySideLayoutUpdated() {
     this.dispatchEvent(
       new CustomEvent('nuxeo-layout-updated', {
         bubbles: true,
@@ -776,7 +675,64 @@ Polymer({
     );
   },
 
-  /** Clear stored side width and restore default flex layout. */
+  /** Keyboard step from `nuxeo-resize-handle`. */
+  _onSideResizeStep(e) {
+    if (!this._sideResizeActive()) {
+      return;
+    }
+    const next = this._sideResizeCurrentWidth() + e.detail.delta;
+    this._applySideWidth(next);
+    this._persistSideWidth(this.sideWidth);
+    this._notifySideLayoutUpdated();
+  },
+
+  /** Home/End from `nuxeo-resize-handle`. */
+  _onSideResizeBound(e) {
+    if (!this._sideResizeActive()) {
+      return;
+    }
+    const next = e.detail.bound === 'min' ? this._minSideWidth() : this._maxSideWidth();
+    this._applySideWidth(next);
+    this._persistSideWidth(this.sideWidth);
+    this._notifySideLayoutUpdated();
+  },
+
+  /** Reset from `nuxeo-resize-handle`. */
+  _onSideResizeReset() {
+    if (!this._sideResizeActive()) {
+      return;
+    }
+    this._resetSideWidth();
+  },
+
+  /** Pointer drag start from `nuxeo-resize-handle`. */
+  _onSideResizeDragStart() {
+    if (!this._sideResizeActive()) {
+      return;
+    }
+    this._sideDragStartWidth = this._sideResizeCurrentWidth();
+    this.setAttribute('side-resizing', '');
+  },
+
+  /** Pointer drag move from `nuxeo-resize-handle`. */
+  _onSideResizeDrag(e) {
+    if (!this._sideResizeActive() || this._sideDragStartWidth == null) {
+      return;
+    }
+    this._applySideWidth(this._sideDragStartWidth + e.detail.deltaFromStart);
+  },
+
+  /** Pointer drag end from `nuxeo-resize-handle`. */
+  _onSideResizeDragEnd() {
+    this.removeAttribute('side-resizing');
+    this._sideDragStartWidth = null;
+    if (this.sideWidth != null) {
+      this._persistSideWidth(this.sideWidth);
+    }
+    this._notifySideLayoutUpdated();
+  },
+
+  /** Clear stored side width and restore default flex layout. @fires nuxeo-layout-updated */
   _resetSideWidth() {
     this.sideWidth = null;
     this._persistSideWidth(null);
