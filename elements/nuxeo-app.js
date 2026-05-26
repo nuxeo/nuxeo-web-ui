@@ -2275,7 +2275,7 @@ Polymer({
       drawerPanel.notifyResize();
     }
     this._suppressLayoutResizeHandler = true;
-    window.dispatchEvent(new Event('resize'));
+    globalThis.dispatchEvent(new Event('resize'));
     this._suppressLayoutResizeHandler = false;
   },
 
