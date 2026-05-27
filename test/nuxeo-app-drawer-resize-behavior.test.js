@@ -371,7 +371,7 @@ suite('nuxeo-app-drawer-resize-behavior', () => {
       }
     });
 
-    test('_scheduleDrawerDragLayoutNotify runs iron-resize without synthetic window.resize', async () => {
+    test('_scheduleDrawerDragLayoutNotify runs iron-resize and synthetic window.resize', async () => {
       app._cancelDrawerDragLayoutNotify();
       const onWindowResize = sinon.spy();
       const originalNotify = app.$.drawerPanel.notifyResize;
@@ -384,7 +384,7 @@ suite('nuxeo-app-drawer-resize-behavior', () => {
           requestAnimationFrame(() => requestAnimationFrame(resolve));
         });
         expect(notifySpy).to.have.been.calledOnce;
-        expect(onWindowResize).to.not.have.been.called;
+        expect(onWindowResize).to.have.been.calledOnce;
       } finally {
         app.$.drawerPanel.notifyResize = originalNotify;
         globalThis.removeEventListener('resize', onWindowResize);
