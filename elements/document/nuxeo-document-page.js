@@ -576,6 +576,14 @@ Polymer({
   /**
    * Re-clamp on the next frame after zoom/resize (container metrics are stale in the
    * sync handler), then ask nuxeo-app to run iron-resize via `nuxeo-layout-updated`.
+   *
+   * The `nuxeo-layout-updated` event is fired **only when `_reclampSideWidth` actually
+   * changed `sideWidth`**. This is essential to break the feedback loop:
+   * `window.resize` → `_scheduleViewportReclamp` → `nuxeo-layout-updated` →
+   * `nuxeo-app._notifyLayoutChanged` → synthetic `window.resize` → repeats forever.
+   * Once the side width has settled at its clamped value, no further descendant reflow
+   * is required (iron-resize already cascaded from the original window.resize via
+   * `nuxeo-app._notifyLayoutChanged` → `drawerPanel.notifyResize()`).
    * @fires nuxeo-layout-updated
    */
   _scheduleViewportReclamp() {
@@ -584,14 +592,17 @@ Polymer({
     }
     this._viewportReclampRaf = requestAnimationFrame(() => {
       this._viewportReclampRaf = null;
+      const prevSideWidth = this.sideWidth;
       this._reclampSideWidth();
       this._updateSideResizeAria();
-      this.dispatchEvent(
-        new CustomEvent('nuxeo-layout-updated', {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      if (this.sideWidth !== prevSideWidth) {
+        this.dispatchEvent(
+          new CustomEvent('nuxeo-layout-updated', {
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      }
     });
   },
 
