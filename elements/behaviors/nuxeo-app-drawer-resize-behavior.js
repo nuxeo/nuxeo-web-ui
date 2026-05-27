@@ -317,14 +317,20 @@ export const NuxeoAppDrawerResizeBehavior = {
     }
   },
 
-  /** At most one iron-resize notify per frame while dragging (no synthetic `window.resize`). */
+  /**
+   * At most one layout notify per frame while dragging. Synthetic `window.resize`
+   * is included so `nuxeo-document-page._onWindowResize` runs `_scheduleViewportReclamp`
+   * and the info pane shrinks live during drag — preventing the main column from being
+   * squeezed below its min width. `_updateIsNarrow` is suppressed via
+   * `_suppressLayoutResizeHandler` inside `_runLayoutNotify` to avoid feedback.
+   */
   _scheduleDrawerDragLayoutNotify() {
     if (this._drawerDragLayoutRaf != null) {
       return;
     }
     this._drawerDragLayoutRaf = requestAnimationFrame(() => {
       this._drawerDragLayoutRaf = null;
-      this._runLayoutNotify({ includeWindowResize: false });
+      this._runLayoutNotify({ includeWindowResize: true });
     });
   },
 

@@ -849,12 +849,18 @@ Polymer({
     });
 
     // fire resize event during drawer animation for elements that need to adapt to size changes (nuxeo-data-table etc)
+    // Filter to transitions on the drawer element itself; descendant transitions
+    // (e.g. resize-handle hover) bubble up and would otherwise spuriously start the resize loop.
     const { drawer } = this.$;
-    drawer.addEventListener('transitionrun', () => {
-      this._resizeDuringAnimation();
+    drawer.addEventListener('transitionrun', (e) => {
+      if (e.target === drawer) {
+        this._resizeDuringAnimation();
+      }
     });
-    drawer.addEventListener('transitionstart', () => {
-      this._resizeDuringAnimation();
+    drawer.addEventListener('transitionstart', (e) => {
+      if (e.target === drawer) {
+        this._resizeDuringAnimation();
+      }
     });
   },
 
