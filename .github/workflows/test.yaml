@@ -61,11 +61,17 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json \
-            | jq -r '.[]' \
-            | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" \
-            | sort -V | tail -n1)
+          ELEMENTS_VERSION=$(
+            for pkg in @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers; do
+              npm view "$pkg" versions --json | jq -r '.[]'
+            done | grep -E "3\.1\.[0-9]+-rc\.[0-9]+$" \
+                 | sort | uniq -c | awk '$1 == 4 {print $2}' | sort -V | tail -n1
+          )
           echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
+          if [ -z "$ELEMENTS_VERSION" ]; then
+            echo "::error::Could not resolve a common RC version across all @nuxeo packages"
+            exit 1
+          fi
 
           npm install \
             @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
