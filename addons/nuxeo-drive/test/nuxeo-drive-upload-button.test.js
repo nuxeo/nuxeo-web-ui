@@ -24,6 +24,8 @@ import {
   addGoErrorSuites,
   addShowErrorSuite,
   addLaunchDriveSuite,
+  addOpenDriveSuite,
+  addToggleInstallSuite,
 } from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
@@ -54,6 +56,11 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     () => element,
     () => element.directTransferUrl,
   );
+  addOpenDriveSuite(
+    () => element,
+    () => element.directTransferUrl,
+  );
+  addToggleInstallSuite(() => element);
 
   suite('_go — Drive installed and token present', () => {
     teardown(() => {
