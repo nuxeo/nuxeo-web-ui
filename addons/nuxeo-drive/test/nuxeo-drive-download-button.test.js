@@ -18,7 +18,7 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
-import { setupI18n, nextTick } from './nuxeo-drive-test-helpers.js';
+import { setupI18n, nextTick, addToggleInstallSuite } from './nuxeo-drive-test-helpers.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};
@@ -503,4 +503,92 @@ suite('nuxeo-drive-download-button', () => {
       expect(segments.length).to.be.at.least(2);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // _download — _hasToken path
+  // ---------------------------------------------------------------------------
+  suite('_download — token found', () => {
+    let toastStub;
+
+    setup(() => {
+      toastStub = { text: '', open: sinon.spy() };
+      sinon.stub(element.$, 'toast').value(toastStub);
+      sinon.stub(element.$.dialog, 'toggle');
+    });
+
+    teardown(() => sinon.restore());
+
+    test('sets _hasToken to true when token list is non-empty', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+
+      element._download();
+      await nextTick();
+
+      expect(element._hasToken).to.be.true;
+      expect(element._installExpanded).to.be.false;
+    });
+
+    test('sets _installExpanded on catch', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').rejects(new Error('fail'));
+
+      element._download();
+      await nextTick();
+
+      expect(element._installExpanded).to.be.true;
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _openDrive
+  // ---------------------------------------------------------------------------
+  suite('_openDrive', () => {
+    let origLocation;
+
+    setup(() => {
+      origLocation = window.location;
+      try {
+        Object.defineProperty(window, 'location', { configurable: true, writable: true, value: { href: '' } });
+      } catch (_) {
+        // already writable
+      }
+    });
+
+    teardown(() => {
+      try {
+        Object.defineProperty(window, 'location', {
+          configurable: true,
+          writable: true,
+          value: origLocation,
+        });
+      } catch (_) {
+        // ignore
+      }
+      sinon.restore();
+    });
+
+    test('sets _opened to true', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      element._openDrive();
+      expect(element._opened).to.be.true;
+    });
+
+    test('sets _installExpanded to true', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      element._openDrive();
+      expect(element._installExpanded).to.be.true;
+    });
+
+    test('sets window.location.href to directDownloadUrl', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      element._openDrive();
+      expect(window.location.href).to.equal(element.directDownloadUrl);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _toggleInstall
+  // ---------------------------------------------------------------------------
+  addToggleInstallSuite(() => element);
 });

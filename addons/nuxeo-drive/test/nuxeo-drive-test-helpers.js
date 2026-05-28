@@ -260,4 +260,111 @@ export function addGoErrorSuites(getElement) {
       expect(dialogToggleStub).to.not.have.been.called;
     });
   });
+
+  suite('_go — token found (Drive authenticated)', () => {
+    teardown(() => sinon.restore());
+
+    test('sets _hasToken to true when token list is non-empty', async () => {
+      const element = getElement();
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-xyz' }] });
+      sinon.stub(element.$.dialog, 'toggle');
+
+      element._go();
+      await nextTick();
+
+      expect(element._hasToken).to.be.true;
+    });
+
+    test('does not set _installExpanded when token is found', async () => {
+      const element = getElement();
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-xyz' }] });
+      sinon.stub(element.$.dialog, 'toggle');
+
+      element._go();
+      await nextTick();
+
+      expect(element._installExpanded).to.be.false;
+    });
+  });
+}
+
+/**
+ * Registers canonical `_openDrive` test suite against an element getter.
+ *
+ * Covers: _opened flag, _installExpanded flag, and window.location.href assignment.
+ *
+ * @param {Function} getElement  - Returns the element under test.
+ * @param {Function} getUrl      - Returns the URL the element should navigate to.
+ */
+export function addOpenDriveSuite(getElement, getUrl) {
+  suite('_openDrive', () => {
+    let origLocation;
+
+    setup(() => {
+      origLocation = window.location;
+      try {
+        Object.defineProperty(window, 'location', {
+          configurable: true,
+          writable: true,
+          value: { href: '' },
+        });
+      } catch (_) {
+        // already writable in some environments
+      }
+    });
+
+    teardown(() => {
+      try {
+        Object.defineProperty(window, 'location', {
+          configurable: true,
+          writable: true,
+          value: origLocation,
+        });
+      } catch (_) {
+        // ignore
+      }
+      sinon.restore();
+    });
+
+    test('sets _opened to true', () => {
+      const element = getElement();
+      element._openDrive();
+      expect(element._opened).to.be.true;
+    });
+
+    test('sets _installExpanded to true', () => {
+      const element = getElement();
+      element._openDrive();
+      expect(element._installExpanded).to.be.true;
+    });
+
+    test('sets window.location.href to the drive URL', () => {
+      const element = getElement();
+      element._openDrive();
+      expect(window.location.href).to.equal(getUrl());
+    });
+  });
+}
+
+/**
+ * Registers canonical `_toggleInstall` test suite against an element getter.
+ *
+ * @param {Function} getElement  - Returns the element under test.
+ */
+export function addToggleInstallSuite(getElement) {
+  suite('_toggleInstall', () => {
+    test('sets _installExpanded to true', () => {
+      const element = getElement();
+      const fakeEvent = { preventDefault: sinon.spy() };
+      element._toggleInstall(fakeEvent);
+      expect(element._installExpanded).to.be.true;
+    });
+
+    test('calls event.preventDefault()', () => {
+      const element = getElement();
+      const fakeEvent = { preventDefault: sinon.spy() };
+      element._toggleInstall(fakeEvent);
+      expect(fakeEvent.preventDefault).to.have.been.calledOnce;
+    });
+  });
 }
