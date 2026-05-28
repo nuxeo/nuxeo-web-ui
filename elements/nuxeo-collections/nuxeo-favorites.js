@@ -202,6 +202,8 @@ Polymer({
   _refresh() {
     this._fetchFavorite().then((favorite) => {
       if (!favorite) {
+        this.$.favoritesProvider.resultsCount = 0;
+        this.$.favoritesList.reset(0);
         return;
       }
       this.$.favoritesProvider.params = [favorite.uid];
