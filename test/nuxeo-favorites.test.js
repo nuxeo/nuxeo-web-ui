@@ -93,6 +93,40 @@ suite('nuxeo-favorites', () => {
     });
   });
 
+  suite('_refresh', () => {
+    test('should set resultsCount to 0 and reset list when no favorite collection exists', async () => {
+      const fetchFavPromise = Promise.resolve(null);
+      sinon.stub(element, '_fetchFavorite').returns(fetchFavPromise);
+      const resetSpy = sinon.spy(element.$.favoritesList, 'reset');
+      element._refresh();
+      await fetchFavPromise;
+      expect(element.$.favoritesProvider.resultsCount).to.equal(0);
+      expect(resetSpy).to.have.been.calledOnce;
+      expect(resetSpy).to.have.been.calledWith(0);
+    });
+
+    test('should fetch favorites list when favorite collection exists', async () => {
+      const fav = { uid: 'fav-collection-1' };
+      const fetchFavPromise = Promise.resolve(fav);
+      sinon.stub(element, '_fetchFavorite').returns(fetchFavPromise);
+      const fetchSpy = sinon.spy(element.$.favoritesList, 'fetch');
+      element._refresh();
+      await fetchFavPromise;
+      expect(element.$.favoritesProvider.params).to.deep.equal([fav.uid]);
+      expect(element.$.favoritesProvider.page).to.equal(1);
+      expect(fetchSpy).to.have.been.calledOnce;
+    });
+
+    test('should not call fetch on list when favorite is null', async () => {
+      const fetchFavPromise = Promise.resolve(null);
+      sinon.stub(element, '_fetchFavorite').returns(fetchFavPromise);
+      const fetchSpy = sinon.spy(element.$.favoritesList, 'fetch');
+      element._refresh();
+      await fetchFavPromise;
+      expect(fetchSpy).to.not.have.been.called;
+    });
+  });
+
   suite('_removeFromFavorites', () => {
     test('should execute operation and fire event', async () => {
       const stub = sinon.stub(element.$.removeFromFavOp, 'execute').resolves();
