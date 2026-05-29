@@ -61,5 +61,7 @@ export function base64UrlSafeEncode(bytes) {
   bytes.forEach((byte) => {
     binary += String.fromCodePoint(byte);
   });
-  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+  const b64 = btoa(binary).replaceAll('+', '-').replaceAll('/', '_');
+  const padStart = b64.indexOf('=');
+  return padStart === -1 ? b64 : b64.slice(0, padStart);
 }
