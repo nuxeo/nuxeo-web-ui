@@ -9,16 +9,12 @@ export function nuxeoCoverageFlagPlugin(enabled) {
 
   return {
     name: 'nuxeo-coverage-flag',
-    transformImport({ context }) {
+    transform(context) {
       const pathname = context.path.split('?')[0];
       if (!pathname.endsWith('/test/setup.js')) {
         return undefined;
       }
-      return {
-        transform(source) {
-          return `globalThis.__NUXEO_COVERAGE_RUN__ = true;\n${source}`;
-        },
-      };
+      return `globalThis.__NUXEO_COVERAGE_RUN__ = true;\n${context.body}`;
     },
   };
 }
