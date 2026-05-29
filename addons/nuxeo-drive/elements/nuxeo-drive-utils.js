@@ -38,7 +38,7 @@ export function fetchTokenAndToggleDialog(element) {
     .get()
     .then((response) => {
       const tokens = response.entries.map((token) => token.id);
-      if (tokens && tokens.length) {
+      if (tokens?.length) {
         element._hasToken = true;
       } else {
         element._installExpanded = true;
@@ -59,7 +59,7 @@ export function fetchTokenAndToggleDialog(element) {
 export function base64UrlSafeEncode(bytes) {
   let binary = '';
   bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
+    binary += String.fromCodePoint(byte);
   });
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
 }
