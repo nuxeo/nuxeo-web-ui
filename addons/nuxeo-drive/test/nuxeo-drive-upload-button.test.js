@@ -50,6 +50,34 @@ suite('nuxeo-drive-upload-button', () => {
   addGoSuite(() => element);
 
   // ---------------------------------------------------------------------------
+  // _isAvailable
+  // ---------------------------------------------------------------------------
+  suite('_isAvailable', () => {
+    test('returns false when doc is null', () => {
+      expect(element._isAvailable(null)).to.be.false;
+    });
+
+    test('returns false when doc is undefined', () => {
+      expect(element._isAvailable(undefined)).to.be.false;
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _go — error path
+  // ---------------------------------------------------------------------------
+  suite('_go — error handling', () => {
+    teardown(() => sinon.restore());
+
+    test('shows error when _compressUploadUrl throws', () => {
+      const toastStub = stubToast(element);
+      sinon.stub(element, '_compressUploadUrl').throws(new Error('compression failed'));
+      element._go();
+      expect(toastStub.text).to.equal('compression failed');
+      expect(toastStub.open).to.have.been.calledOnce;
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // _compressUploadUrl / directTransferUrl
   // ---------------------------------------------------------------------------
   suite('_compressUploadUrl', () => {

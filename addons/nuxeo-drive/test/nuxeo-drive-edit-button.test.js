@@ -85,6 +85,15 @@ suite('nuxeo-drive-edit-button', () => {
       };
       expect(element._isAvailable(doc, blobWithNoAppLinks)).to.be.false;
     });
+
+    test('returns true when blob has no appLinks property at all', () => {
+      const blobNoAppLinksKey = { data: 'http://localhost/nxfile/default/doc-1/file:content/test.docx' };
+      expect(element._isAvailable(baseDoc(), blobNoAppLinksKey)).to.be.true;
+    });
+
+    test('returns true when all conditions are met', () => {
+      expect(element._isAvailable(baseDoc(), blobWithNoAppLinks)).to.be.true;
+    });
   });
 
   // ---------------------------------------------------------------------------

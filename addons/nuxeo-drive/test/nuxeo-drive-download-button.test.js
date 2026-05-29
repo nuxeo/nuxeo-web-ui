@@ -374,5 +374,23 @@ suite('nuxeo-drive-download-button', () => {
       element._download();
       expect(toastStub.open).to.not.have.been.called;
     });
+
+    test('shows error with userMessage when _compressFromOriginalUrl throws with userMessage', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      const err = new Error('internal error');
+      err.userMessage = 'The server URL is too long';
+      sinon.stub(element, '_compressFromOriginalUrl').throws(err);
+      element._download();
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.equal('The server URL is too long');
+    });
+
+    test('shows error with message when _compressFromOriginalUrl throws without userMessage', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element, '_compressFromOriginalUrl').throws(new Error('generic error'));
+      element._download();
+      expect(toastStub.open).to.have.been.calledOnce;
+      expect(toastStub.text).to.equal('generic error');
+    });
   });
 });
