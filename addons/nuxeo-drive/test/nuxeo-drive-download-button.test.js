@@ -243,6 +243,13 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = [{ uid: '00000000-1111-2222-3333-444444444444' }];
       expect(element.directDownloadUrl).to.match(/^nxdrive:\/\/direct-download\/[A-Za-z0-9_-]+$/);
     });
+
+    test('throws when server host segment exceeds 255 bytes', () => {
+      // Craft a URL whose server segment is longer than 255 bytes.
+      const longServer = 'http/' + 'a'.repeat(260) + '/00000000-1111-2222-3333-444444444444';
+      const longUrl = `nxdrive://direct-download/${longServer}`;
+      expect(() => element._compressFromOriginalUrl(longUrl)).to.throw();
+    });
   });
 
   // ---------------------------------------------------------------------------

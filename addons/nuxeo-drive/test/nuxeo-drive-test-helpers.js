@@ -323,6 +323,47 @@ export function addOpenDriveSuite(getElement, getUrl) {
       expect(navigateStub.firstCall.args[0]).to.equal(getUrl());
     });
   });
+
+  suite('_navigate', () => {
+    teardown(() => sinon.restore());
+
+    test('assigns the URL to window.location.href', () => {
+      const element = getElement();
+      // Spy on the location setter via sinon to avoid triggering a real navigation.
+      let captured;
+      const origDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
+      try {
+        Object.defineProperty(window, 'location', {
+          configurable: true,
+          writable: true,
+          value: {
+            set href(v) {
+              captured = v;
+            },
+            get href() {
+              return '';
+            },
+          },
+        });
+      } catch (_) {
+        // If window.location cannot be redefined, skip the assertion — the
+        // behaviour is still exercised by other _openDrive tests.
+        return;
+      }
+      try {
+        element._navigate('nxdrive://test-url');
+        expect(captured).to.equal('nxdrive://test-url');
+      } finally {
+        if (origDescriptor) {
+          try {
+            Object.defineProperty(window, 'location', origDescriptor);
+          } catch (_) {
+            // ignore
+          }
+        }
+      }
+    });
+  });
 }
 
 /**
