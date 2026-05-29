@@ -174,7 +174,12 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   _isAvailable(doc) {
     if (!doc) return false;
 
-    return this.hasPermission?.(doc, 'Write') && this.hasFacet?.(doc, 'Folderish') && !this.isProxy?.(doc);
+    return (
+      this.hasPermission?.(doc, 'Write') &&
+      this.hasFacet?.(doc, 'Folderish') &&
+      this.isProxy != null &&
+      !this.isProxy(doc)
+    );
   }
 
   _go() {
