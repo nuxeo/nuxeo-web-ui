@@ -5,6 +5,7 @@
  * Native V8 coverage only includes modules executed in the browser. Karma + Istanbul also
  * listed every path from coverage-imports-data.js (including modules that fail to load),
  * typically at 0% — that keeps the overall percentage honest (~60% vs ~91% executed-only).
+ * Zero records omit blank lines from DA/LF counts (non-empty lines only).
  *
  * Run automatically after `web-test-runner --coverage` (see npm test).
  */
@@ -52,10 +53,15 @@ function buildZeroRecord(relativePath) {
 
   const lines = fs.readFileSync(absolutePath, 'utf8').split('\n');
   const parts = [`SF:${relativePath}`];
+  let lineHits = 0;
   for (let i = 0; i < lines.length; i += 1) {
+    if (lines[i].trim() === '') {
+      continue;
+    }
+    lineHits += 1;
     parts.push(`DA:${i + 1},0`);
   }
-  parts.push(`LF:${lines.length}`);
+  parts.push(`LF:${lineHits}`);
   parts.push('LH:0');
   parts.push('FNF:0');
   parts.push('FNH:0');
