@@ -20,6 +20,7 @@ import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { isPageProviderDisplayBehavior } from '../../../elements/select-all-helpers.js';
 import './nuxeo-drive-icons.js';
+import { base64UrlSafeEncode, fetchTokenAndToggleDialog } from './nuxeo-drive-utils.js';
 
 window.nuxeo = window.nuxeo || {};
 const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
@@ -193,24 +194,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       return;
     }
 
-    this._hasToken = false;
-    this._installExpanded = false;
-    this._opened = false;
-    this.$.token
-      .get()
-      .then((response) => {
-        const tokens = response.entries.map((token) => token.id);
-        if (tokens && tokens.length) {
-          this._hasToken = true;
-        } else {
-          this._installExpanded = true;
-        }
-      })
-      .catch(() => {
-        this._installExpanded = true;
-      });
-
-    this.$.dialog.toggle();
+    fetchTokenAndToggleDialog(this);
   }
 
   _openDrive() {
@@ -295,18 +279,8 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     }
     const payload = new Uint8Array([scheme, serverBytes.length, ...serverBytes, allUuidHex.length, ...uuidBinary]);
 
-    const b64 = this._base64UrlSafeEncode(payload);
+    const b64 = base64UrlSafeEncode(payload);
     return `nxdrive://direct-download/${b64}`;
-  }
-
-  _base64UrlSafeEncode(bytes) {
-    let binary = '';
-    bytes.forEach((byte) => {
-      binary += String.fromCharCode(byte);
-    });
-
-    let b64 = btoa(binary);
-    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 }
 

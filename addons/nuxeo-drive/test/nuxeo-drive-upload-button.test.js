@@ -17,6 +17,7 @@ limitations under the License.
 */
 import { fixture, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-drive-upload-button.js';
+import { base64UrlSafeEncode } from '../elements/nuxeo-drive-utils.js';
 import {
   setupI18n,
   nextTick,
@@ -178,19 +179,19 @@ suite('nuxeo-drive-upload-button — error handling', () => {
   suite('_base64UrlSafeEncode', () => {
     test('output contains no standard base64 padding (=)', () => {
       const bytes = new Uint8Array([1, 2, 3, 4, 5]);
-      const result = element._base64UrlSafeEncode(bytes);
+      const result = base64UrlSafeEncode(bytes);
       expect(result).to.not.include('=');
     });
 
     test('output contains no + characters (URL-safe)', () => {
       const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
+      const result = base64UrlSafeEncode(bytes);
       expect(result).to.not.include('+');
     });
 
     test('output contains no / characters (URL-safe)', () => {
       const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
+      const result = base64UrlSafeEncode(bytes);
       expect(result).to.not.include('/');
     });
   });
