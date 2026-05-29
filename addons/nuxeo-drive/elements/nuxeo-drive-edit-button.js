@@ -21,6 +21,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+import { fetchTokenAndToggleDialog } from './nuxeo-drive-utils.js';
 
 /**
 `nuxeo-drive-edit-button`
@@ -176,24 +177,7 @@ Polymer({
       return;
     }
 
-    this._hasToken = false;
-    this._installExpanded = false;
-    this._opened = false;
-    this.$.token
-      .get()
-      .then((response) => {
-        const tokens = response.entries.map((token) => token.id);
-        if (tokens && tokens.length) {
-          this._hasToken = true;
-        } else {
-          this._installExpanded = true;
-        }
-      })
-      .catch(() => {
-        this._installExpanded = true;
-      });
-
-    this.$.dialog.toggle();
+    fetchTokenAndToggleDialog(this);
   },
 
   _openDrive() {
