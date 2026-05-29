@@ -151,10 +151,17 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     test('shows error and throws when server bytes exceed 255', () => {
       const toastStub = stubToast(element);
 
-      sinon.stub(element, '_compressUploadUrl').callsFake(function () {
-        const msg = element.i18n('driveUpload.serverUrlTooLong');
-        element._showError(msg);
-        throw new Error(msg);
+      // Force the TextEncoder to return an oversized byte array for the server segment,
+      // which triggers the > 255 guard inside _compressUploadUrl.
+      const origEncode = TextEncoder.prototype.encode;
+      let callCount = 0;
+      sinon.stub(TextEncoder.prototype, 'encode').callsFake(function (str) {
+        callCount++;
+        // First call encodes the server host — return a 256-byte array to trip the guard.
+        if (callCount === 1) {
+          return new Uint8Array(256);
+        }
+        return origEncode.call(this, str);
       });
 
       element.document = { path: '/some/path' };
