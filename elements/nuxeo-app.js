@@ -81,6 +81,7 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 
 import { Performance } from './performance.js';
+import '../addons/nuxeo-drive/index.js';
 
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
