@@ -1392,7 +1392,7 @@ Polymer({
         result += user.properties.lastName;
       }
       if (result.length === 0) {
-        result = (user.properties && user.properties.username) || user.name || user.id;
+        result = user.properties?.username || user.name || user.id;
       }
       return result;
     }
