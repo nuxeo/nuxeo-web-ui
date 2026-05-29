@@ -294,56 +294,15 @@ export function addGoErrorSuites(getElement) {
  */
 export function addOpenDriveSuite(getElement, getUrl) {
   suite('_openDrive', () => {
-    let hrefSetter;
+    let navigateStub;
 
     setup(() => {
-      // Intercept window.location.href writes so nxdrive:// assignments never
-      // reach the browser and cause a Karma page reload.
-      hrefSetter = sinon.spy();
-      const descriptor = Object.getOwnPropertyDescriptor(window, 'location') || {};
-      try {
-        Object.defineProperty(window, 'location', {
-          configurable: true,
-          get: () => {return {
-            ...descriptor.value,
-            set href(v) {
-              hrefSetter(v);
-            },
-            get href() {
-              return '';
-            },
-          }},
-        });
-      } catch (_) {
-        // If the above fails, fall back to a plain writable value object.
-        try {
-          Object.defineProperty(window, 'location', {
-            configurable: true,
-            writable: true,
-            value: {
-              set href(v) {
-                hrefSetter(v);
-              },
-              get href() {
-                return '';
-              },
-            },
-          });
-        } catch (__) {
-          // ignore — tests that call _openDrive will still set the flag
-        }
-      }
+      // Stub _navigate so window.location.href is never touched and
+      // headless Chrome never attempts a page reload.
+      navigateStub = sinon.stub(getElement(), '_navigate');
     });
 
-    teardown(() => {
-      sinon.restore();
-      // Restore the real location object.
-      try {
-        delete window.location;
-      } catch (_) {
-        // ignore non-configurable
-      }
-    });
+    teardown(() => sinon.restore());
 
     test('sets _opened to true', () => {
       const element = getElement();
@@ -357,9 +316,11 @@ export function addOpenDriveSuite(getElement, getUrl) {
       expect(element._installExpanded).to.be.true;
     });
 
-    test('navigates to the drive URL (nxdrive:// scheme)', () => {
-      // Verify the computed URL has the expected nxdrive:// scheme.
-      expect(getUrl()).to.match(/^nxdrive:\/\//);
+    test('calls _navigate with the nxdrive:// URL', () => {
+      const element = getElement();
+      element._openDrive();
+      expect(navigateStub).to.have.been.calledOnce;
+      expect(navigateStub.firstCall.args[0]).to.equal(getUrl());
     });
   });
 }

@@ -211,7 +211,11 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   _openDrive() {
     this._opened = true;
     this._installExpanded = true;
-    window.location.href = this.directTransferUrl;
+    this._navigate(this.directTransferUrl);
+  }
+
+  _navigate(url) {
+    window.location.href = url;
   }
 
   _toggleInstall(e) {
