@@ -534,6 +534,7 @@
   "driveSyncToggleButton.sync": "Synchronize",
   "driveSyncToggleButton.unsync": "Unsynchronize",
   "driveUpload.directTransfer.failed": "An error occurred while trying to upload the document with Nuxeo Drive.",
+  "driveUpload.serverUrlTooLong": "The server URL is too long to generate a Nuxeo Drive upload link.",
   "driveUploadButton.tooltip": "Upload with Nuxeo Drive",
   "dropzone.abort": "Abort file upload",
   "dropzone.add": "Upload main file",
