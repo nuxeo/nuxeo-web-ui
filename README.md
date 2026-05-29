@@ -46,10 +46,10 @@ nuxeo.cors.urls=*
 | Format | `npm run format` | |
 | Unit tests | `npm test` | Web Test Runner; one runner file, ~1000+ Mocha tests |
 | Functional tests | `npm run ftest` | |
-| Production build | `npm run build` |
-| Bundle analysis | `npm run build:analyze` |
-| Maven marketplace | `mvn clean install` |
-| Maven + ftests | `mvn clean install -Pftest` |
+| Production build | `npm run build` | |
+| Bundle analysis | `npm run build:analyze` | |
+| Maven marketplace | `mvn clean install` | |
+| Maven + ftests | `mvn clean install -Pftest` | |
 
 ### Docker Compose
 
