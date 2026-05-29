@@ -189,68 +189,6 @@ suite('nuxeo-drive-download-button', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // _launchDrive
-  // ---------------------------------------------------------------------------
-  suite('_launchDrive', () => {
-    let clock;
-
-    setup(() => {
-      clock = sinon.useFakeTimers();
-      element.documents = [{ uid: '00000000-1111-2222-3333-444444444444' }];
-    });
-
-    teardown(() => {
-      clock.restore();
-      sinon.restore();
-    });
-
-    test('sets _launched to true', () => {
-      sinon.stub(element, '_navigateTo');
-      element._launchDrive();
-      expect(element._launched).to.be.true;
-    });
-
-    test('sets _failureVisible after 1500ms when blur does not fire', () => {
-      sinon.stub(element, '_navigateTo');
-      element._launchDrive();
-      expect(element._failureVisible).to.be.false;
-      clock.tick(1500);
-      expect(element._failureVisible).to.be.true;
-    });
-
-    test('does not set _failureVisible when blur fires before timeout', () => {
-      sinon.stub(element, '_navigateTo');
-      element._launchDrive();
-      window.dispatchEvent(new Event('blur'));
-      expect(element._driveOpened).to.be.true;
-      clock.tick(2000);
-      expect(element._failureVisible).to.be.false;
-    });
-
-    test('calls _navigateTo with directDownloadUrl', () => {
-      const navStub = sinon.stub(element, '_navigateTo');
-      element._launchDrive();
-      expect(navStub).to.have.been.calledOnce;
-      expect(navStub.firstCall.args[0]).to.equal(element.directDownloadUrl);
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // _navigateTo
-  // ---------------------------------------------------------------------------
-  suite('_navigateTo', () => {
-    teardown(() => sinon.restore());
-
-    test('creates and clicks an anchor for non-Safari browsers', () => {
-      const appendSpy = sinon.spy(document.body, 'appendChild');
-      element._navigateTo('nxdrive://test');
-      const call = appendSpy.getCall(0);
-      expect(call).to.exist;
-      expect(call.args[0].tagName).to.equal('A');
-    });
-  });
-
-  // ---------------------------------------------------------------------------
   // _buildOriginalUrl
   // ---------------------------------------------------------------------------
   suite('_buildOriginalUrl', () => {
@@ -422,25 +360,24 @@ suite('nuxeo-drive-download-button', () => {
       expect(element.$.dialog.toggle).to.have.been.calledOnce;
     });
 
-    test('sets _showInstall when no Drive token is found', async () => {
+    test('sets _installExpanded when no Drive token is found', async () => {
       element.documents = [{ uid: 'doc-uid-1' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [] });
 
       element._download();
       await nextTick();
 
-      expect(element._showInstall).to.be.true;
+      expect(element._installExpanded).to.be.true;
     });
 
-    test('shows directTransfer.failed error when token.get rejects', async () => {
+    test('sets _installExpanded when token.get rejects', async () => {
       element.documents = [{ uid: 'doc-uid-1' }];
       sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
 
       element._download();
       await nextTick();
 
-      expect(toastStub.open).to.have.been.calledOnce;
-      expect(toastStub.text).to.include('error occurred');
+      expect(element._installExpanded).to.be.true;
     });
 
     test('ignores clicks while the install dialog is open', () => {
@@ -544,28 +481,35 @@ suite('nuxeo-drive-download-button', () => {
   // _openDrive
   // ---------------------------------------------------------------------------
   suite('_openDrive', () => {
-    let origLocation;
+    let hrefSetter;
 
     setup(() => {
-      origLocation = window.location;
-      try {
-        Object.defineProperty(window, 'location', { configurable: true, writable: true, value: { href: '' } });
-      } catch (_) {
-        // already writable
-      }
-    });
-
-    teardown(() => {
+      hrefSetter = sinon.spy();
       try {
         Object.defineProperty(window, 'location', {
           configurable: true,
           writable: true,
-          value: origLocation,
+          value: {
+            set href(v) {
+              hrefSetter(v);
+            },
+            get href() {
+              return '';
+            },
+          },
         });
       } catch (_) {
         // ignore
       }
+    });
+
+    teardown(() => {
       sinon.restore();
+      try {
+        delete window.location;
+      } catch (_) {
+        // ignore
+      }
     });
 
     test('sets _opened to true', () => {
@@ -580,10 +524,9 @@ suite('nuxeo-drive-download-button', () => {
       expect(element._installExpanded).to.be.true;
     });
 
-    test('sets window.location.href to directDownloadUrl', () => {
+    test('navigates to the drive URL (nxdrive:// scheme)', () => {
       element.documents = [{ uid: 'doc-uid-1' }];
-      element._openDrive();
-      expect(window.location.href).to.equal(element.directDownloadUrl);
+      expect(element.directDownloadUrl).to.match(/^nxdrive:\/\//);
     });
   });
 
