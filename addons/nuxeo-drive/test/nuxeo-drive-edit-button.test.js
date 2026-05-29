@@ -22,7 +22,6 @@ import {
   nextTick,
   addGoErrorSuites,
   addShowErrorSuite,
-  addLaunchDriveSuite,
   addOpenDriveSuite,
   addToggleInstallSuite,
 } from './nuxeo-drive-test-helpers.js';
@@ -48,13 +47,9 @@ suite('nuxeo-drive-edit-button — error handling', () => {
     element.blob = { data: 'http://localhost/nxfile/default/doc-uid-1/file:content/test.docx', name: 'test.docx' };
   });
 
-  // Shared suites: _go token-fetch failure, _go no-token, _showError, _launchDrive
+  // Shared suites: _go token-fetch failure, _go no-token, _showError
   addGoErrorSuites(() => element);
   addShowErrorSuite(() => element);
-  addLaunchDriveSuite(
-    () => element,
-    () => element.driveEditURL,
-  );
   addOpenDriveSuite(
     () => element,
     () => element.driveEditURL,
@@ -77,7 +72,7 @@ suite('nuxeo-drive-edit-button — error handling', () => {
       await nextTick();
 
       expect(dialogToggleStub).to.have.been.calledOnce;
-      expect(element._showInstall).to.be.false;
+      expect(element._installExpanded).to.be.false;
     });
   });
 

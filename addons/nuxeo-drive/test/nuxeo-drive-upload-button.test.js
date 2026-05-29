@@ -23,7 +23,6 @@ import {
   stubToast,
   addGoErrorSuites,
   addShowErrorSuite,
-  addLaunchDriveSuite,
   addOpenDriveSuite,
   addToggleInstallSuite,
 } from './nuxeo-drive-test-helpers.js';
@@ -49,13 +48,9 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     element.document = { path: '/default-domain/workspaces/test-folder' };
   });
 
-  // Shared suites: _go token-fetch failure, _go no-token, _showError, _launchDrive
+  // Shared suites: _go token-fetch failure, _go no-token, _showError
   addGoErrorSuites(() => element);
   addShowErrorSuite(() => element);
-  addLaunchDriveSuite(
-    () => element,
-    () => element.directTransferUrl,
-  );
   addOpenDriveSuite(
     () => element,
     () => element.directTransferUrl,
@@ -77,7 +72,7 @@ suite('nuxeo-drive-upload-button — error handling', () => {
       expect(dialogToggleStub).to.have.been.calledOnce;
     });
 
-    test('does not set _showInstall when token exists', async () => {
+    test('does not set _installExpanded when token exists', async () => {
       element.document = { path: '/default-domain/workspaces/my-folder' };
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
       sinon.stub(element.$.dialog, 'toggle');
@@ -85,10 +80,10 @@ suite('nuxeo-drive-upload-button — error handling', () => {
       element._go();
       await nextTick();
 
-      expect(element._showInstall).to.be.false;
+      expect(element._installExpanded).to.be.false;
     });
 
-    test('sets _showInstall to true when no token found', async () => {
+    test('sets _installExpanded to true when no token found', async () => {
       element.document = { path: '/default-domain/workspaces/my-folder' };
       sinon.stub(element.$.token, 'get').resolves({ entries: [] });
       sinon.stub(element.$.dialog, 'toggle');
@@ -96,7 +91,7 @@ suite('nuxeo-drive-upload-button — error handling', () => {
       element._go();
       await nextTick();
 
-      expect(element._showInstall).to.be.true;
+      expect(element._installExpanded).to.be.true;
     });
   });
 
