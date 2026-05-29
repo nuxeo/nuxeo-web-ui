@@ -18,20 +18,21 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-drive-download-button.js';
+import { setupI18n, nextTick, addToggleInstallSuite } from './nuxeo-drive-test-helpers.test.js';
+
+// Prevent nxdrive:// anchor clicks from triggering a Karma page reload
+HTMLAnchorElement.prototype.click = function () {};
 
 // Setup i18n keys used by the component
-window.nuxeo = window.nuxeo || {};
-window.nuxeo.I18n = window.nuxeo.I18n || {};
-window.nuxeo.I18n.language = 'en';
-window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
-window.nuxeo.I18n.en['driveDownloadButton.tooltip'] = 'Download with Nuxeo Drive';
-window.nuxeo.I18n.en['driveDownload.noDocumentsSelected'] = 'No documents selected for download.';
-window.nuxeo.I18n.en['driveDownload.tooManyDocuments'] =
-  'You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.';
-window.nuxeo.I18n.en['driveDownload.directTransfer.failed'] =
-  'An error occurred while trying to download the document with Nuxeo Drive.';
-window.nuxeo.I18n.en['driveEditButton.dialog.heading'] = 'Download Nuxeo Drive Client';
-window.nuxeo.I18n.en['command.close'] = 'Close';
+setupI18n({
+  'driveDownloadButton.tooltip': 'Download with Nuxeo Drive',
+  'driveDownload.noDocumentsSelected': 'No documents selected for download.',
+  'driveDownload.tooManyDocuments':
+    'You have selected more documents than supported. Please select up to {0} documents to download via Nuxeo Drive.',
+  'driveDownload.directTransfer.failed': 'An error occurred while trying to download the document with Nuxeo Drive.',
+  'driveEditButton.dialog.heading': 'Download Nuxeo Drive Client',
+  'command.close': 'Close',
+});
 
 suite('nuxeo-drive-download-button', () => {
   let element;
@@ -242,29 +243,12 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = [{ uid: '00000000-1111-2222-3333-444444444444' }];
       expect(element.directDownloadUrl).to.match(/^nxdrive:\/\/direct-download\/[A-Za-z0-9_-]+$/);
     });
-  });
 
-  // ---------------------------------------------------------------------------
-  // _base64UrlSafeEncode
-  // ---------------------------------------------------------------------------
-  suite('_base64UrlSafeEncode', () => {
-    test('output contains no standard base64 padding (=)', () => {
-      const bytes = new Uint8Array([1, 2, 3, 4, 5]);
-      const result = element._base64UrlSafeEncode(bytes);
-      expect(result).to.not.include('=');
-    });
-
-    test('output contains no + characters (URL-safe)', () => {
-      // Use bytes that would produce '+' in standard base64
-      const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
-      expect(result).to.not.include('+');
-    });
-
-    test('output contains no / characters (URL-safe)', () => {
-      const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
-      expect(result).to.not.include('/');
+    test('throws when server host segment exceeds 255 bytes', () => {
+      // Craft a URL whose server segment is longer than 255 bytes.
+      const longServer = 'http/' + 'a'.repeat(260) + '/00000000-1111-2222-3333-444444444444';
+      const longUrl = `nxdrive://direct-download/${longServer}`;
+      expect(() => element._compressFromOriginalUrl(longUrl)).to.throw();
     });
   });
 
@@ -277,6 +261,8 @@ suite('nuxeo-drive-download-button', () => {
     setup(() => {
       toastStub = { text: '', open: sinon.spy() };
       sinon.stub(element.$, 'toast').value(toastStub);
+      // Stub dialog.toggle to prevent real dialog interaction.
+      sinon.stub(element.$.dialog, 'toggle');
     });
 
     teardown(() => {
@@ -299,14 +285,12 @@ suite('nuxeo-drive-download-button', () => {
       };
       element.documents = viewStub;
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openStub = sinon.stub(window, 'open');
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(toastStub.open).to.not.have.been.called;
-      expect(openStub).to.have.been.calledOnce;
-      expect(openStub.firstCall.args[1]).to.equal('_top');
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
     });
 
     test('shows noDocumentsSelected error when select-all is active but view has no items', () => {
@@ -336,8 +320,6 @@ suite('nuxeo-drive-download-button', () => {
     });
 
     test('succeeds after deselecting items so count drops to ≤ 25, even though selectAllActive stays true', async () => {
-      // Simulates the bug fix: select-all on 36 docs → deselect 13 → 23 selectedItems.
-      // selectAllActive remains true but selectedItems has only 23 entries.
       const viewStub = {
         selectAllActive: true,
         behaviors: [...PageProviderDisplayBehavior],
@@ -350,14 +332,12 @@ suite('nuxeo-drive-download-button', () => {
       };
       element.documents = viewStub;
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openStub = sinon.stub(window, 'open');
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
       expect(toastStub.open).to.not.have.been.called;
-      expect(openStub).to.have.been.calledOnce;
-      expect(openStub.firstCall.args[1]).to.equal('_top');
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
     });
 
     test('shows tooManyDocuments error when more than 25 documents are selected', async () => {
@@ -373,49 +353,48 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = Array.from({ length: 25 }, (_, i) => {
         return { uid: `uid-${i}` };
       });
-      // Stub token.get to prevent real network call; stub window.open before _download is called
-      sinon.stub(element.$.token, 'get').returns(new Promise(() => {})); // never resolves — prevents window.open
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
       element._download();
-      // The toast should not have been opened at this point (no guard condition triggered)
       expect(toastStub.open).to.not.have.been.called;
     });
 
-    test('calls window.open with directDownloadUrl when a valid Drive token exists', async () => {
-      element.documents = [{ uid: 'doc-uid-1' }, { uid: 'doc-uid-2' }];
-      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openStub = sinon.stub(window, 'open');
+    test('opens dialog immediately on _download (before token fetch resolves)', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
 
       element._download();
-      // Let the promise chain resolve
-      await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(openStub).to.have.been.calledOnce;
-      const calledUrl = openStub.firstCall.args[0];
-      expect(calledUrl).to.match(/^nxdrive:\/\/direct-download\/[A-Za-z0-9_-]+$/);
-      expect(openStub.firstCall.args[1]).to.equal('_top');
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
     });
 
-    test('opens Drive install dialog when no Drive token is found', async () => {
+    test('sets _installExpanded when no Drive token is found', async () => {
       element.documents = [{ uid: 'doc-uid-1' }];
       sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
-      expect(dialogToggleStub).to.have.been.calledOnce;
-      expect(toastStub.open).to.not.have.been.called;
+      expect(element._installExpanded).to.be.true;
     });
 
-    test('shows directTransfer.failed error when token.get rejects', async () => {
+    test('sets _installExpanded when token.get rejects', async () => {
       element.documents = [{ uid: 'doc-uid-1' }];
       sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
-      expect(toastStub.open).to.have.been.calledOnce;
-      expect(toastStub.text).to.include('error occurred');
+      expect(element._installExpanded).to.be.true;
+    });
+
+    test('ignores clicks while the install dialog is open', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
+      element.$.dialog.opened = true;
+
+      element._download();
+
+      expect(element.$.dialog.toggle).to.not.have.been.called;
     });
 
     test('folder UID is collected as a single item (folder = one ID)', () => {
@@ -444,13 +423,11 @@ suite('nuxeo-drive-download-button', () => {
       element.documents = [];
       element.document = { uid: 'single-doc-uid' };
       sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const openStub = sinon.stub(window, 'open');
 
       element._download();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
 
-      expect(openStub).to.have.been.calledOnce;
-      // Verify the UID is encoded in the compressed URL by checking the uncompressed URL
+      expect(element.$.dialog.toggle).to.have.been.calledOnce;
       const originalUrl = element._buildOriginalUrl();
       expect(originalUrl).to.include('single-doc-uid');
     });
@@ -470,4 +447,79 @@ suite('nuxeo-drive-download-button', () => {
       expect(segments.length).to.be.at.least(2);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // _download — _hasToken path
+  // ---------------------------------------------------------------------------
+  suite('_download — token found', () => {
+    let toastStub;
+
+    setup(() => {
+      toastStub = { text: '', open: sinon.spy() };
+      sinon.stub(element.$, 'toast').value(toastStub);
+      sinon.stub(element.$.dialog, 'toggle');
+    });
+
+    teardown(() => sinon.restore());
+
+    test('sets _hasToken to true when token list is non-empty', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
+
+      element._download();
+      await nextTick();
+
+      expect(element._hasToken).to.be.true;
+      expect(element._installExpanded).to.be.false;
+    });
+
+    test('sets _installExpanded on catch', async () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      sinon.stub(element.$.token, 'get').rejects(new Error('fail'));
+
+      element._download();
+      await nextTick();
+
+      expect(element._installExpanded).to.be.true;
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _openDrive
+  // ---------------------------------------------------------------------------
+  suite('_openDrive', () => {
+    let navigateStub;
+
+    setup(() => {
+      navigateStub = sinon.stub(element, '_navigate');
+    });
+
+    teardown(() => {
+      sinon.restore();
+    });
+
+    test('sets _opened to true', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      element._openDrive();
+      expect(element._opened).to.be.true;
+    });
+
+    test('sets _installExpanded to true', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      element._openDrive();
+      expect(element._installExpanded).to.be.true;
+    });
+
+    test('calls _navigate with the nxdrive:// URL', () => {
+      element.documents = [{ uid: 'doc-uid-1' }];
+      element._openDrive();
+      expect(navigateStub).to.have.been.calledOnce;
+      expect(navigateStub.firstCall.args[0]).to.equal(element.directDownloadUrl);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // _toggleInstall
+  // ---------------------------------------------------------------------------
+  addToggleInstallSuite(() => element);
 });
