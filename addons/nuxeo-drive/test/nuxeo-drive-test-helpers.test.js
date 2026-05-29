@@ -23,6 +23,11 @@ limitations under the License.
  * common test-suite factories) so individual test files stay free of duplication.
  */
 
+// Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
+// navigateAndShowFallback() creates an anchor and clicks it; this no-op
+// stops the browser from actually following the custom-protocol link.
+HTMLAnchorElement.prototype.click = function () {};
+
 // ---------------------------------------------------------------------------
 // i18n bootstrap
 // ---------------------------------------------------------------------------

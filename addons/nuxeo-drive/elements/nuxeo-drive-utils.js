@@ -40,7 +40,13 @@ limitations under the License.
  */
 export function navigateAndShowFallback(element, driveUrl) {
   // Navigate immediately — the browser / OS handles the custom protocol prompt.
-  globalThis.location.href = driveUrl;
+  // We use an anchor click instead of location.href to avoid a full page reload
+  // when the custom protocol is not registered (e.g. nxdrive:// on a machine
+  // without Nuxeo Drive).  Anchor clicks with unknown schemes are silently
+  // ignored by the browser rather than triggering a navigation error.
+  const a = document.createElement('a');
+  a.href = driveUrl;
+  a.click();
 
   // Open the install-help dialog behind the browser's native prompt.
   if (!element.$.dialog.opened) {

@@ -20,9 +20,6 @@ import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page
 import '../elements/nuxeo-drive-download-button.js';
 import { setupI18n, stubToast, addShowErrorSuite, addToggleInstallSuite } from './nuxeo-drive-test-helpers.test.js';
 
-// Prevent nxdrive:// anchor clicks from triggering a Karma page reload
-HTMLAnchorElement.prototype.click = function () {};
-
 // Setup i18n keys used by the component
 setupI18n({
   'driveDownloadButton.tooltip': 'Download with Nuxeo Drive',
