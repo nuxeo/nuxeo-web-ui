@@ -24,7 +24,7 @@ import {
   addShowErrorSuite,
   addOpenDriveSuite,
   addToggleInstallSuite,
-} from './nuxeo-drive-test-helpers.js';
+} from './nuxeo-drive-test-helpers.test.js';
 
 // Prevent nxdrive:// anchor clicks from triggering a Karma page reload
 HTMLAnchorElement.prototype.click = function () {};

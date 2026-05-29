@@ -23,8 +23,6 @@ limitations under the License.
  * common test-suite factories) so individual test files stay free of duplication.
  */
 
-/* global sinon, suite, setup, teardown, test, expect */
-
 // ---------------------------------------------------------------------------
 // i18n bootstrap
 // ---------------------------------------------------------------------------
