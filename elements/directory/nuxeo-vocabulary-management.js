@@ -95,11 +95,12 @@ Polymer({
       }
 
       paper-button[disabled] {
-        opacity: 0.85;
+        opacity: 0.95;
       }
 
       paper-icon-button[disabled] {
-        opacity: 0.85;
+        opacity: 0.4;
+        color: #999;
       }
     </style>
 
@@ -231,7 +232,7 @@ Polymer({
     _isReadOnly: {
       type: Boolean,
       computed: '_computeReadOnly(selectedVocabulary, vocabularies)',
-      value: true,
+      value: false,
     },
   },
 
@@ -245,14 +246,11 @@ Polymer({
   // the server (NXP-31054 exposes the `readOnly` flag on each directory entity).
   // Falls back to false on older servers that omit the field.
   _computeReadOnly(selectedVocabulary, vocabularies) {
-    /*
     if (!selectedVocabulary || !Array.isArray(vocabularies)) {
       return false;
     }
     const v = vocabularies.find((d) => d && d.name === selectedVocabulary);
     return !!v?.readOnly;
-    */
-    return true;
   },
 
   _visibleChanged() {
