@@ -481,35 +481,14 @@ suite('nuxeo-drive-download-button', () => {
   // _openDrive
   // ---------------------------------------------------------------------------
   suite('_openDrive', () => {
-    let hrefSetter;
+    let navigateStub;
 
     setup(() => {
-      hrefSetter = sinon.spy();
-      try {
-        Object.defineProperty(window, 'location', {
-          configurable: true,
-          writable: true,
-          value: {
-            set href(v) {
-              hrefSetter(v);
-            },
-            get href() {
-              return '';
-            },
-          },
-        });
-      } catch (_) {
-        // ignore
-      }
+      navigateStub = sinon.stub(element, '_navigate');
     });
 
     teardown(() => {
       sinon.restore();
-      try {
-        delete window.location;
-      } catch (_) {
-        // ignore
-      }
     });
 
     test('sets _opened to true', () => {
@@ -524,9 +503,11 @@ suite('nuxeo-drive-download-button', () => {
       expect(element._installExpanded).to.be.true;
     });
 
-    test('navigates to the drive URL (nxdrive:// scheme)', () => {
+    test('calls _navigate with the nxdrive:// URL', () => {
       element.documents = [{ uid: 'doc-uid-1' }];
-      expect(element.directDownloadUrl).to.match(/^nxdrive:\/\//);
+      element._openDrive();
+      expect(navigateStub).to.have.been.calledOnce;
+      expect(navigateStub.firstCall.args[0]).to.equal(element.directDownloadUrl);
     });
   });
 

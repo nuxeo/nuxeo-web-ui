@@ -199,7 +199,11 @@ Polymer({
   _openDrive() {
     this._opened = true;
     this._installExpanded = true;
-    window.location.href = this.driveEditURL;
+    this._navigate(this.driveEditURL);
+  },
+
+  _navigate(url) {
+    window.location.href = url;
   },
 
   _toggleInstall(e) {

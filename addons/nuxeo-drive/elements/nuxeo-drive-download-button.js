@@ -216,7 +216,11 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
   _openDrive() {
     this._opened = true;
     this._installExpanded = true;
-    window.location.href = this.directDownloadUrl;
+    this._navigate(this.directDownloadUrl);
+  }
+
+  _navigate(url) {
+    window.location.href = url;
   }
 
   _toggleInstall(e) {
