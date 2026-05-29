@@ -167,9 +167,7 @@ Polymer({
   },
 
   _isAvailable(doc, blob) {
-    return (
-      this.hasPermission(doc, 'Write') && !this.isProxy(doc) && blob && (!blob.appLinks || blob.appLinks.length === 0)
-    );
+    return this.hasPermission(doc, 'Write') && !this.isProxy(doc) && blob && !blob.appLinks?.length;
   },
 
   _go() {
@@ -187,7 +185,7 @@ Polymer({
   },
 
   _navigate(url) {
-    window.location.href = url;
+    globalThis.location.href = url;
   },
 
   _toggleInstall(e) {

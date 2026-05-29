@@ -174,14 +174,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   _isAvailable(doc) {
     if (!doc) return false;
 
-    return (
-      this.hasPermission &&
-      this.hasFacet &&
-      this.isProxy &&
-      this.hasPermission(doc, 'Write') &&
-      this.hasFacet(doc, 'Folderish') &&
-      !this.isProxy(doc)
-    );
+    return this.hasPermission?.(doc, 'Write') && this.hasFacet?.(doc, 'Folderish') && !this.isProxy?.(doc);
   }
 
   _go() {
@@ -199,7 +192,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   }
 
   _navigate(url) {
-    window.location.href = url;
+    globalThis.location.href = url;
   }
 
   _toggleInstall(e) {
