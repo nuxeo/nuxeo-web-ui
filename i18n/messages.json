@@ -513,7 +513,7 @@
   "driveButton.dialog.install.prompt": "Download and install Nuxeo Drive for your platform:",
   "driveButton.dialog.open": "Open with Nuxeo Drive",
   "driveButton.install.dialog.heading": "Install Nuxeo Drive",
-  "driveButton.install.dialog.hint": "Nuxeo Drive didn\u0027t open? You might need to install it.",
+  "driveButton.install.dialog.hint": "Nuxeo Drive didn\u0027t open? Click here to download and install it.",
   "driveDesktopPackages.install": "Package to Install",
   "driveDesktopPackages.platform": "Platform",
   "driveDownload.directTransfer.failed": "An error occurred while trying to download the document with Nuxeo Drive.",
