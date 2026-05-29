@@ -118,8 +118,9 @@ suite('nuxeo-vocabulary-management', () => {
   });
 
   suite('read-only guards', () => {
-    setup(() => {
+    setup(async () => {
       element.selectedVocabulary = 'country';
+      await flush();
     });
 
     test('_createEntry should be a no-op for readOnly vocabularies', () => {
@@ -150,7 +151,7 @@ suite('nuxeo-vocabulary-management', () => {
     });
 
     test('addEntry button should be disabled (not hidden) for readOnly vocabulary', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flush();
       const btn = element.shadowRoot.querySelector('#addEntry');
       expect(btn, 'addEntry button should be rendered').to.exist;
       expect(btn.disabled).to.be.true;
@@ -159,7 +160,7 @@ suite('nuxeo-vocabulary-management', () => {
 
     test('addEntry button should not be disabled for writable vocabulary', async () => {
       element.selectedVocabulary = 'coverage';
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flush();
       const btn = element.shadowRoot.querySelector('#addEntry');
       expect(btn, 'addEntry button should be rendered').to.exist;
       expect(btn.disabled).to.be.false;
