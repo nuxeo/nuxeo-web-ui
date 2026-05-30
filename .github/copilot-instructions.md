@@ -100,7 +100,9 @@ scripts/              → Build helpers (merge-messages.js, test/unit/, test/fte
 - Helpers: `@nuxeo/testing-helpers` for creating/fixture-ing elements and mocking server
 - Setup: `test/setup.js` configures chai with sinon-chai
 - After adding `test/foo.test.js`: run `npm run update-test-load-all` (or `npm test`) to refresh the barrel
-- Run a single suite: `npx web-test-runner --files test/nuxeo-keys.test.js` (must import `./setup.js` or use the full barrel)
+- Run one suite: `npx web-test-runner --grep 'nuxeo-keys'` (uses `test/load-all-tests.js`; Mocha filters examples)
+- Or a one-off entry that imports setup first, then the suite: `import './setup.js'; import './nuxeo-keys.test.js';` → `npx web-test-runner --files test/run-one.js`
+- Do **not** use `npx web-test-runner --files test/nuxeo-keys.test.js` alone — `test/setup.js` is not loaded, so `expect` / `sinon` globals are missing
 - Do not use `.only` — the `no-only-tests` lint rule catches it
 
 ### Functional Tests
