@@ -128,7 +128,18 @@ When(/^I clear the (.+) search on (.+)$/, async function (searchType, searchName
 When(/^I perform a (.+) search for (.+) on (.+)$/, async function (searchType, searchTerm, searchName) {
   const searchForm = await this.ui.searchForm(searchName);
   await searchForm.waitForVisible();
-  await driver.pause(1000);
+  // Wait for the form's internal elements to be ready (shadow DOM rendering)
+  await driver.waitUntil(
+    async () => {
+      try {
+        const el = await searchForm.el;
+        return el && (await el.isDisplayed());
+      } catch (e) {
+        return false;
+      }
+    },
+    { timeout: 10000, interval: 500 },
+  );
   await searchForm.search(searchType, searchTerm);
 });
 
