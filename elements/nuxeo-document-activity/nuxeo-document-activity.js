@@ -32,12 +32,22 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style>
-      .row {
-        @apply --layout-horizontal;
+      .activity-list {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        column-gap: 4px;
+        row-gap: 7px;
+      }
+
+      nuxeo-user-tag {
+        max-width: 150px;
+        overflow: hidden;
+        min-width: 0;
       }
 
       .value {
-        margin: 0 4px 7px;
+        min-width: 0;
       }
 
       .datetime {
@@ -46,15 +56,15 @@ Polymer({
       }
     </style>
 
-    <template is="dom-repeat" items="[[activities]]">
-      <div class="row">
+    <div class="activity-list">
+      <template is="dom-repeat" items="[[activities]]">
         <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
         <div class="value">
           <span>[[_activity(item)]]</span>
           <nuxeo-date class="datetime" datetime="[[item.eventDate]]" format="relative"></nuxeo-date>
         </div>
-      </div>
-    </template>
+      </template>
+    </div>
   `,
 
   is: 'nuxeo-document-activity',
