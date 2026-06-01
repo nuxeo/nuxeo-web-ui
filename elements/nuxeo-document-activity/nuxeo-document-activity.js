@@ -42,8 +42,10 @@ Polymer({
 
       nuxeo-user-tag {
         max-width: 150px;
-        overflow: hidden;
         min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .value {
