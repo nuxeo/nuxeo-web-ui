@@ -122,6 +122,9 @@ export function addToggleInstallSuite(getElement) {
  *
  * Covers: dialog opening, _installExpanded reset, and re-entry guard.
  *
+ * Stubs the element's `_navigate` method (if it exists) to prevent actual navigation
+ * and ensure test isolation. If the element doesn't expose `_navigate`, the stub is skipped.
+ *
  * @param {Function} getElement  - Returns the element under test.
  * @param {string}   goMethod   - Name of the go method (e.g. '_go' or '_download').
  */
@@ -130,6 +133,11 @@ export function addGoSuite(getElement, goMethod = '_go') {
     setup(() => {
       const element = getElement();
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+      // Stub _navigate if it exists to prevent actual globalThis.location assignment.
+      // This ensures each test is isolated and not dependent on test execution order.
+      if (typeof element._navigate === 'function') {
+        sinon.stub(element, '_navigate');
+      }
     });
 
     teardown(() => sinon.restore());
