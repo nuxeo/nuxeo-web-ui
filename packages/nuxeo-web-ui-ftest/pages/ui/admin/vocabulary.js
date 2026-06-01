@@ -32,7 +32,8 @@ export default class Vocabulary extends BasePage {
     await driver.waitForVisible('#table');
     await driver.waitUntil(
       async () => {
-        const cells = await el.elements('#table nuxeo-data-table-cell');
+        // Select only data table cells (exclude header cells which contain filter inputs)
+        const cells = await el.elements('#table nuxeo-data-table-row nuxeo-data-table-cell:not([header])');
         if (reverse) {
           return cells.every(async (cell) => (await cell.getText()).trim() !== id);
         }
