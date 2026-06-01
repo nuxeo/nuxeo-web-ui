@@ -475,7 +475,7 @@ Polymer({
     // re-stamp by clearing and re-setting `items` imperatively, mirroring the
     // pre-filter behaviour of `_refresh`. Without this, deleted/edited entries
     // can remain visible in the DOM (see WEBUI-1683).
-    const table = this.$ && this.$.table ? this.$.table : this.$$('#table');
+    const table = this.$.table ?? this.$$('#table');
     if (table) {
       table.items = [];
       table.items = this.entries;
