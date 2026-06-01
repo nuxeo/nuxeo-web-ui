@@ -1,10 +1,8 @@
 import { Then, When } from '@cucumber/cucumber';
 
 When('I click the {string} button', async function (button) {
-  await driver.pause(1000);
   const drawer = await this.ui.drawer;
-  const buttonToclick = await drawer.open(button);
-  return buttonToclick;
+  await drawer.open(button);
 });
 
 When('I select {string} from the View menu', async function (option) {
