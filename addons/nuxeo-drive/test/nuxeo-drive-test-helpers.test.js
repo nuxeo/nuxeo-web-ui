@@ -23,6 +23,11 @@ limitations under the License.
  * common test-suite factories) so individual test files stay free of duplication.
  */
 
+// Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
+// navigateAndShowFallback() creates an anchor and clicks it; this no-op
+// stops the browser from actually following the custom-protocol link.
+HTMLAnchorElement.prototype.click = function () {};
+
 // ---------------------------------------------------------------------------
 // i18n bootstrap
 // ---------------------------------------------------------------------------
@@ -73,9 +78,6 @@ export function stubToast(element) {
 /**
  * Registers the canonical `_showError` test suite against an element getter.
  *
- * Usage:
- *   addShowErrorSuite(() => element);
- *
  * @param {Function} getElement  - Returns the element under test (called inside each test).
  */
 export function addShowErrorSuite(getElement) {
@@ -88,189 +90,6 @@ export function addShowErrorSuite(getElement) {
       element._showError('Something went wrong');
       expect(toastStub.text).to.equal('Something went wrong');
       expect(toastStub.open).to.have.been.calledOnce;
-    });
-  });
-}
-
-/**
- * Registers the canonical `_go` error-handling suites (token-fetch failure and
- * no-token-registered) against an element getter.
- *
- * Both `nuxeo-drive-edit-button` and `nuxeo-drive-upload-button` share the same
- * token-fetch / no-token guard behaviour, so they share these tests.
- *
- * @param {Function} getElement  - Returns the element under test.
- */
-export function addGoErrorSuites(getElement) {
-  suite('_go — token fetch failure', () => {
-    setup(() => {
-      const element = getElement();
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-    });
-
-    teardown(() => sinon.restore());
-
-    test('sets _installExpanded to true when token.get rejects', async () => {
-      const element = getElement();
-      sinon.stub(element.$.token, 'get').rejects(new Error('network error'));
-      sinon.stub(element.$.dialog, 'toggle');
-      element._go();
-      await nextTick();
-      expect(element._installExpanded).to.be.true;
-    });
-  });
-
-  suite('_go — no token registered (Drive not authenticated)', () => {
-    setup(() => {
-      const element = getElement();
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-    });
-
-    teardown(() => sinon.restore());
-
-    test('sets _installExpanded to true when token list is empty', async () => {
-      const element = getElement();
-      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      sinon.stub(element.$.dialog, 'toggle');
-      element._go();
-      await nextTick();
-      expect(element._installExpanded).to.be.true;
-    });
-
-    test('opens the dialog immediately on _go', () => {
-      const element = getElement();
-      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-      element._go();
-      expect(dialogToggleStub).to.have.been.calledOnce;
-    });
-  });
-
-  suite('_go — re-entry guard', () => {
-    setup(() => {
-      const element = getElement();
-      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
-    });
-
-    teardown(() => sinon.restore());
-
-    test('ignores clicks while the dialog is open', () => {
-      const element = getElement();
-      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
-      element.$.dialog.opened = true;
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-
-      element._go();
-
-      expect(dialogToggleStub).to.not.have.been.called;
-    });
-  });
-
-  suite('_go — token found (Drive authenticated)', () => {
-    teardown(() => sinon.restore());
-
-    test('sets _hasToken to true when token list is non-empty', async () => {
-      const element = getElement();
-      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-xyz' }] });
-      sinon.stub(element.$.dialog, 'toggle');
-
-      element._go();
-      await nextTick();
-
-      expect(element._hasToken).to.be.true;
-    });
-
-    test('does not set _installExpanded when token is found', async () => {
-      const element = getElement();
-      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-xyz' }] });
-      sinon.stub(element.$.dialog, 'toggle');
-
-      element._go();
-      await nextTick();
-
-      expect(element._installExpanded).to.be.false;
-    });
-  });
-}
-
-/**
- * Registers canonical `_openDrive` test suite against an element getter.
- *
- * Covers: _opened flag, _installExpanded flag, and window.location.href assignment.
- *
- * @param {Function} getElement  - Returns the element under test.
- * @param {Function} getUrl      - Returns the URL the element should navigate to.
- */
-export function addOpenDriveSuite(getElement, getUrl) {
-  suite('_openDrive', () => {
-    let navigateStub;
-
-    setup(() => {
-      // Stub _navigate so window.location.href is never touched and
-      // headless Chrome never attempts a page reload.
-      navigateStub = sinon.stub(getElement(), '_navigate');
-    });
-
-    teardown(() => sinon.restore());
-
-    test('sets _opened to true', () => {
-      const element = getElement();
-      element._openDrive();
-      expect(element._opened).to.be.true;
-    });
-
-    test('sets _installExpanded to true', () => {
-      const element = getElement();
-      element._openDrive();
-      expect(element._installExpanded).to.be.true;
-    });
-
-    test('calls _navigate with the nxdrive:// URL', () => {
-      const element = getElement();
-      element._openDrive();
-      expect(navigateStub).to.have.been.calledOnce;
-      expect(navigateStub.firstCall.args[0]).to.equal(getUrl());
-    });
-  });
-
-  suite('_navigate', () => {
-    teardown(() => sinon.restore());
-
-    test('assigns the URL to window.location.href', () => {
-      const element = getElement();
-      // Spy on the location setter via sinon to avoid triggering a real navigation.
-      let captured;
-      const origDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
-      try {
-        Object.defineProperty(window, 'location', {
-          configurable: true,
-          writable: true,
-          value: {
-            set href(v) {
-              captured = v;
-            },
-            get href() {
-              return '';
-            },
-          },
-        });
-      } catch (_) {
-        // If window.location cannot be redefined, skip the assertion — the
-        // behaviour is still exercised by other _openDrive tests.
-        return;
-      }
-      try {
-        element._navigate('nxdrive://test-url');
-        expect(captured).to.equal('nxdrive://test-url');
-      } finally {
-        if (origDescriptor) {
-          try {
-            Object.defineProperty(window, 'location', origDescriptor);
-          } catch (_) {
-            // ignore
-          }
-        }
-      }
     });
   });
 }
@@ -294,6 +113,56 @@ export function addToggleInstallSuite(getElement) {
       const fakeEvent = { preventDefault: sinon.spy() };
       element._toggleInstall(fakeEvent);
       expect(fakeEvent.preventDefault).to.have.been.calledOnce;
+    });
+  });
+}
+
+/**
+ * Registers a test suite for the navigate-first `_go` method pattern.
+ *
+ * Covers: dialog opening, _installExpanded reset, and re-entry guard.
+ *
+ * Stubs the element's `_navigate` method (if it exists) to prevent actual navigation
+ * and ensure test isolation. If the element doesn't expose `_navigate`, the stub is skipped.
+ *
+ * @param {Function} getElement  - Returns the element under test.
+ * @param {string}   goMethod   - Name of the go method (e.g. '_go' or '_download').
+ */
+export function addGoSuite(getElement, goMethod = '_go') {
+  suite(`${goMethod} — navigate-first pattern`, () => {
+    setup(() => {
+      const element = getElement();
+      element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+      // Stub _navigate if it exists to prevent actual globalThis.location assignment.
+      // This ensures each test is isolated and not dependent on test execution order.
+      if (typeof element._navigate === 'function') {
+        sinon.stub(element, '_navigate');
+      }
+    });
+
+    teardown(() => sinon.restore());
+
+    test('opens the dialog', () => {
+      const element = getElement();
+      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+      element[goMethod]();
+      expect(dialogToggleStub).to.have.been.calledOnce;
+    });
+
+    test('resets _installExpanded to false', () => {
+      const element = getElement();
+      sinon.stub(element.$.dialog, 'toggle');
+      element._installExpanded = true;
+      element[goMethod]();
+      expect(element._installExpanded).to.be.false;
+    });
+
+    test('does not re-open the dialog when it is already open', () => {
+      const element = getElement();
+      element.$.dialog.opened = true;
+      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
+      element[goMethod]();
+      expect(dialogToggleStub).to.not.have.been.called;
     });
   });
 }

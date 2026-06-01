@@ -24,30 +24,34 @@ limitations under the License.
  */
 
 /**
- * Resets drive state, fetches the current Drive token list from the server,
- * updates `element._hasToken` / `element._installExpanded` accordingly, and
- * toggles the install dialog open.
+ * Navigates to the given nxdrive:// URL and opens the install-help dialog.
  *
- * @param {Object} element - The Polymer element instance (must expose $.token and $.dialog).
+ * This follows the "navigate-first" pattern (like Zoom/Slack/Spotify):
+ * - The browser fires the custom protocol immediately; if Drive is installed
+ *   the OS shows a native "Open app?" prompt on top of the dialog.
+ * - The dialog stays visible behind the prompt with a subtle install hint,
+ *   so if Drive is *not* installed the user can expand the install links.
+ * - If Drive opened successfully the user simply closes the dialog.
+ *
+ * No detection hacks, timeouts, or environment-specific code.
+ *
+ * @param {Object} element  - The Polymer element instance (must expose $.dialog).
+ * @param {string} driveUrl - The nxdrive:// URL to navigate to.
  */
-export function fetchTokenAndToggleDialog(element) {
-  element._hasToken = false;
-  element._installExpanded = false;
-  element._opened = false;
-  element.$.token
-    .get()
-    .then((response) => {
-      const tokens = response.entries.map((token) => token.id);
-      if (tokens?.length) {
-        element._hasToken = true;
-      } else {
-        element._installExpanded = true;
-      }
-    })
-    .catch(() => {
-      element._installExpanded = true;
-    });
-  element.$.dialog.toggle();
+export function navigateAndShowFallback(element, driveUrl) {
+  // Navigate immediately — the browser / OS handles the custom protocol prompt.
+  // We use an anchor click instead of location.href to avoid a full page reload
+  // when the custom protocol is not registered (e.g. nxdrive:// on a machine
+  // without Nuxeo Drive).  Anchor clicks with unknown schemes are silently
+  // ignored by the browser rather than triggering a navigation error.
+  const a = document.createElement('a');
+  a.href = driveUrl;
+  a.click();
+
+  // Open the install-help dialog behind the browser's native prompt.
+  if (!element.$.dialog.opened) {
+    element.$.dialog.toggle();
+  }
 }
 
 /**

@@ -20,79 +20,60 @@ import '../elements/nuxeo-drive-upload-button.js';
 import { base64UrlSafeEncode } from '../elements/nuxeo-drive-utils.js';
 import {
   setupI18n,
-  nextTick,
   stubToast,
-  addGoErrorSuites,
   addShowErrorSuite,
-  addOpenDriveSuite,
   addToggleInstallSuite,
+  addGoSuite,
 } from './nuxeo-drive-test-helpers.test.js';
-
-// Prevent nxdrive:// anchor clicks from triggering a Karma page reload
-HTMLAnchorElement.prototype.click = function () {};
 
 // Setup i18n keys used by the component
 setupI18n({
   'driveUploadButton.tooltip': 'Upload with Nuxeo Drive',
   'driveUpload.directTransfer.failed': 'An error occurred while trying to upload the document with Nuxeo Drive.',
   'driveUpload.serverUrlTooLong': 'Server URL is too long to encode.',
-  'driveEditButton.dialog.heading': 'Download Nuxeo Drive Client',
+  'driveButton.dialog.heading': 'Nuxeo Drive',
+  'driveButton.dialog.description': 'Use Nuxeo Drive to work with your documents directly from your desktop.',
   'command.close': 'Close',
 });
 
-suite('nuxeo-drive-upload-button — error handling', () => {
+suite('nuxeo-drive-upload-button', () => {
   let element;
 
   setup(async () => {
     element = await fixture(html`<nuxeo-drive-upload-button></nuxeo-drive-upload-button>`);
-    // Set document so directTransferUrl can be computed in _go without crashing.
     element.document = { path: '/default-domain/workspaces/test-folder' };
   });
 
-  // Shared suites: _go token-fetch failure, _go no-token, _showError
-  addGoErrorSuites(() => element);
+  // Shared suites
   addShowErrorSuite(() => element);
-  addOpenDriveSuite(
-    () => element,
-    () => element.directTransferUrl,
-  );
   addToggleInstallSuite(() => element);
+  addGoSuite(() => element);
 
-  suite('_go — Drive installed and token present', () => {
-    teardown(() => {
-      sinon.restore();
+  // ---------------------------------------------------------------------------
+  // _isAvailable
+  // ---------------------------------------------------------------------------
+  suite('_isAvailable', () => {
+    test('returns false when doc is null', () => {
+      expect(element._isAvailable(null)).to.be.false;
     });
 
-    test('opens dialog immediately on _go (before token fetch resolves)', () => {
-      element.document = { path: '/default-domain/workspaces/my-folder' };
-      sinon.stub(element.$.token, 'get').returns(new Promise(() => {}));
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-
-      element._go();
-
-      expect(dialogToggleStub).to.have.been.calledOnce;
+    test('returns false when doc is undefined', () => {
+      expect(element._isAvailable(undefined)).to.be.false;
     });
+  });
 
-    test('does not set _installExpanded when token exists', async () => {
-      element.document = { path: '/default-domain/workspaces/my-folder' };
-      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      sinon.stub(element.$.dialog, 'toggle');
+  // ---------------------------------------------------------------------------
+  // _go — error path
+  // ---------------------------------------------------------------------------
+  suite('_go — error handling', () => {
+    teardown(() => sinon.restore());
 
+    test('shows error when _compressUploadUrl throws', () => {
+      const toastStub = stubToast(element);
+      sinon.stub(element, '_compressUploadUrl').throws(new Error('compression failed'));
       element._go();
-      await nextTick();
-
-      expect(element._installExpanded).to.be.false;
-    });
-
-    test('sets _installExpanded to true when no token found', async () => {
-      element.document = { path: '/default-domain/workspaces/my-folder' };
-      sinon.stub(element.$.token, 'get').resolves({ entries: [] });
-      sinon.stub(element.$.dialog, 'toggle');
-
-      element._go();
-      await nextTick();
-
-      expect(element._installExpanded).to.be.true;
+      expect(toastStub.text).to.equal('compression failed');
+      expect(toastStub.open).to.have.been.calledOnce;
     });
   });
 
@@ -101,26 +82,21 @@ suite('nuxeo-drive-upload-button — error handling', () => {
   // ---------------------------------------------------------------------------
   suite('_compressUploadUrl', () => {
     test('returns a nxdrive://direct-transfer/<base64> URL', () => {
-      element.document = { path: '/default-domain/workspaces/my-folder' };
       const compressed = element._compressUploadUrl();
       expect(compressed).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
     });
 
     test('compressed URL does not contain the raw document path', () => {
-      element.document = { path: '/default-domain/workspaces/my-folder' };
       const compressed = element._compressUploadUrl();
       expect(compressed).to.not.include('default-domain');
       expect(compressed).to.not.include('workspaces');
-      expect(compressed).to.not.include('my-folder');
     });
 
     test('different document paths produce different compressed URLs', () => {
       element.document = { path: '/default-domain/workspaces/folder-a' };
       const url1 = element._compressUploadUrl();
-
       element.document = { path: '/default-domain/workspaces/folder-b' };
       const url2 = element._compressUploadUrl();
-
       expect(url1).to.not.equal(url2);
     });
 
@@ -137,28 +113,19 @@ suite('nuxeo-drive-upload-button — error handling', () => {
     });
 
     test('directTransferUrl getter delegates to _compressUploadUrl', () => {
-      element.document = { path: '/default-domain/workspaces/my-folder' };
       const compressSpy = sinon.spy(element, '_compressUploadUrl');
       const url = element.directTransferUrl;
       expect(compressSpy).to.have.been.calledOnce;
       expect(url).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
-    });
-
-    test('directTransferUrl getter returns a valid nxdrive URL', () => {
-      element.document = { path: '/default-domain/workspaces/my-folder' };
-      expect(element.directTransferUrl).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
+      sinon.restore();
     });
 
     test('shows error and throws when server bytes exceed 255', () => {
       const toastStub = stubToast(element);
-
-      // Force the TextEncoder to return an oversized byte array for the server segment,
-      // which triggers the > 255 guard inside _compressUploadUrl.
       const origEncode = TextEncoder.prototype.encode;
       let callCount = 0;
       sinon.stub(TextEncoder.prototype, 'encode').callsFake(function (str) {
         callCount++;
-        // First call encodes the server host — return a 256-byte array to trip the guard.
         if (callCount === 1) {
           return new Uint8Array(256);
         }
@@ -174,9 +141,9 @@ suite('nuxeo-drive-upload-button — error handling', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // _base64UrlSafeEncode
+  // base64UrlSafeEncode
   // ---------------------------------------------------------------------------
-  suite('_base64UrlSafeEncode', () => {
+  suite('base64UrlSafeEncode', () => {
     test('output contains no standard base64 padding (=)', () => {
       const bytes = new Uint8Array([1, 2, 3, 4, 5]);
       const result = base64UrlSafeEncode(bytes);

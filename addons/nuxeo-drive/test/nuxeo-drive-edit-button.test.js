@@ -17,27 +17,19 @@ limitations under the License.
 */
 import { fixture, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-drive-edit-button.js';
-import {
-  setupI18n,
-  nextTick,
-  addGoErrorSuites,
-  addShowErrorSuite,
-  addOpenDriveSuite,
-  addToggleInstallSuite,
-} from './nuxeo-drive-test-helpers.test.js';
-
-// Prevent nxdrive:// anchor clicks from triggering a Karma page reload
-HTMLAnchorElement.prototype.click = function () {};
+import { setupI18n, addShowErrorSuite, addToggleInstallSuite, addGoSuite } from './nuxeo-drive-test-helpers.test.js';
 
 // Setup i18n keys used by the component
 setupI18n({
   'driveEditButton.tooltip': 'Open with Nuxeo Drive',
   'driveEditButton.directTransfer.failed': 'An error occurred while trying to open the document with Nuxeo Drive.',
   'driveEditButton.dialog.heading': 'Download Nuxeo Drive Client',
+  'driveButton.dialog.heading': 'Nuxeo Drive',
+  'driveButton.dialog.description': 'Use Nuxeo Drive to work with your documents directly from your desktop.',
   'command.close': 'Close',
 });
 
-suite('nuxeo-drive-edit-button — error handling', () => {
+suite('nuxeo-drive-edit-button', () => {
   let element;
 
   setup(async () => {
@@ -47,34 +39,10 @@ suite('nuxeo-drive-edit-button — error handling', () => {
     element.blob = { data: 'http://localhost/nxfile/default/doc-uid-1/file:content/test.docx', name: 'test.docx' };
   });
 
-  // Shared suites: _go token-fetch failure, _go no-token, _showError
-  addGoErrorSuites(() => element);
+  // Shared suites
   addShowErrorSuite(() => element);
-  addOpenDriveSuite(
-    () => element,
-    () => element.driveEditURL,
-  );
   addToggleInstallSuite(() => element);
-
-  suite('_go — Drive installed and token present', () => {
-    teardown(() => {
-      sinon.restore();
-    });
-
-    test('opens dialog immediately and does not set _showInstall when token exists', async () => {
-      element.user = { id: 'Administrator' };
-      element.document = { uid: 'doc-uid-1', repository: 'default' };
-      element.blob = { data: 'http://localhost/nxfile/default/doc-uid-1/file:content/test.docx', name: 'test.docx' };
-      sinon.stub(element.$.token, 'get').resolves({ entries: [{ id: 'token-abc' }] });
-      const dialogToggleStub = sinon.stub(element.$.dialog, 'toggle');
-
-      element._go();
-      await nextTick();
-
-      expect(dialogToggleStub).to.have.been.calledOnce;
-      expect(element._installExpanded).to.be.false;
-    });
-  });
+  addGoSuite(() => element);
 
   // ---------------------------------------------------------------------------
   // _isAvailable — branch coverage
@@ -117,10 +85,19 @@ suite('nuxeo-drive-edit-button — error handling', () => {
       };
       expect(element._isAvailable(doc, blobWithNoAppLinks)).to.be.false;
     });
+
+    test('returns true when blob has no appLinks property at all', () => {
+      const blobNoAppLinksKey = { data: 'http://localhost/nxfile/default/doc-1/file:content/test.docx' };
+      expect(element._isAvailable(baseDoc(), blobNoAppLinksKey)).to.be.true;
+    });
+
+    test('returns true when all conditions are met', () => {
+      expect(element._isAvailable(baseDoc(), blobWithNoAppLinks)).to.be.true;
+    });
   });
 
   // ---------------------------------------------------------------------------
-  // driveEditURL — null guard
+  // driveEditURL
   // ---------------------------------------------------------------------------
   suite('driveEditURL', () => {
     test('returns empty string when blob is not set', () => {
@@ -134,9 +111,6 @@ suite('nuxeo-drive-edit-button — error handling', () => {
     });
 
     test('builds a valid nxdrive://edit URL from blob data', () => {
-      element.user = { id: 'Administrator' };
-      element.document = { uid: 'doc-uid-1', repository: 'default' };
-      element.blob = { data: 'http://localhost/nxfile/default/doc-uid-1/file:content/test.docx', name: 'test.docx' };
       const url = element.driveEditURL;
       expect(url).to.match(/^nxdrive:\/\/edit\//);
       expect(url).to.include('Administrator');
@@ -146,8 +120,6 @@ suite('nuxeo-drive-edit-button — error handling', () => {
     });
 
     test('encodes the filename in the URL', () => {
-      element.user = { id: 'Administrator' };
-      element.document = { uid: 'doc-uid-1', repository: 'default' };
       element.blob = {
         data: 'http://localhost/nxfile/default/doc-uid-1/file:content/my%20doc.docx',
         name: 'my doc.docx',
