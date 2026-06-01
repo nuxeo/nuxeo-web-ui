@@ -54,7 +54,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       <style include="nuxeo-action-button-styles"></style>
 
       <template is="dom-if" if="[[_isAvailable(document)]]">
-        <div class="action" on-click="_go">
+        <div class="action" on-tap="_go">
           <paper-icon-button
             noink
             icon="nuxeo-drive:transfer"
@@ -143,7 +143,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       this._installExpanded = false;
       navigateAndShowFallback(this, this.directTransferUrl);
     } catch (e) {
-      this._showError(e.message);
+      this._showError(e.userMessage || e.message || this.i18n('driveUpload.directTransfer.failed'));
     }
   }
 
@@ -177,6 +177,14 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
     const server = segments.slice(1).join('/');
 
     const serverBytes = new TextEncoder().encode(server);
+
+    // Guard against oversized server URL (max 255 bytes)
+    if (serverBytes.length > 255) {
+      const error = new Error(this.i18n('driveUpload.serverUrlTooLong'));
+      error.userMessage = this.i18n('driveUpload.serverUrlTooLong');
+      throw error;
+    }
+
     const payload = new Uint8Array([scheme, serverBytes.length, ...serverBytes]);
 
     const b64 = this._base64UrlSafeEncode(payload);

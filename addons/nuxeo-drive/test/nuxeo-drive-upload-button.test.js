@@ -176,14 +176,14 @@ suite('nuxeo-drive-upload-button', () => {
       expect(decoded.length).to.be.greaterThan(2);
     });
 
-    test('different document paths produce same compressed URL (only server encoded)', () => {
+    test('different document paths produce different compressed URLs', () => {
       element.document = { path: '/folder-a' };
       const url1 = element._compressDirectTransferUrl(element._buildOriginalUrl());
       element.document = { path: '/folder-b' };
       const url2 = element._compressDirectTransferUrl(element._buildOriginalUrl());
-      // Same server, different paths, both should compress to same URL
-      // (since path is not included in payload)
-      expect(url1).to.equal(url2);
+      // Different paths must produce different compressed URLs
+      // so that Drive knows which folder to upload into
+      expect(url1).to.not.equal(url2);
     });
 
     test('handles oversized server URL gracefully', () => {
@@ -226,13 +226,14 @@ suite('nuxeo-drive-upload-button', () => {
       expect(url).to.match(/^nxdrive:\/\/direct-transfer\/[A-Za-z0-9_-]+$/);
     });
 
-    test('different document paths produce same compressed URL (path not in payload)', () => {
+    test('different document paths produce different compressed URLs', () => {
       element.document = { path: '/default-domain/workspaces/folder-a' };
       const url1 = element.directTransferUrl;
       element.document = { path: '/default-domain/workspaces/folder-b' };
       const url2 = element.directTransferUrl;
-      // Both should compress to the same URL since path is not included
-      expect(url1).to.equal(url2);
+      // Different paths must produce different compressed URLs
+      // so that Drive knows which folder to upload into
+      expect(url1).to.not.equal(url2);
     });
 
     test('handles path with leading slash correctly', () => {
