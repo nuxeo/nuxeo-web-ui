@@ -23,11 +23,6 @@ limitations under the License.
  * common test-suite factories) so individual test files stay free of duplication.
  */
 
-// Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
-// navigateAndShowFallback() creates an anchor and clicks it; this no-op
-// stops the browser from actually following the custom-protocol link.
-HTMLAnchorElement.prototype.click = function () {};
-
 // ---------------------------------------------------------------------------
 // i18n bootstrap
 // ---------------------------------------------------------------------------
@@ -133,6 +128,12 @@ export function addGoSuite(getElement, goMethod = '_go') {
     setup(() => {
       const element = getElement();
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+
+      // Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
+      // navigateAndShowFallback() creates an anchor and clicks it; this stub
+      // prevents the browser from following the custom-protocol link during tests.
+      sinon.stub(HTMLAnchorElement.prototype, 'click');
+
       // Stub _navigate if it exists to prevent actual globalThis.location assignment.
       // This ensures each test is isolated and not dependent on test execution order.
       if (typeof element._navigate === 'function') {
