@@ -30,13 +30,16 @@ export default class Vocabulary extends BasePage {
   }
 
   async waitForHasEntry(id, reverse) {
-    const el = await this.el;
-    await driver.waitForVisible('#table');
     await driver.waitUntil(
       async () => {
-        // Select only data table cells (exclude header cells which contain filter inputs)
-        const cells = await el.elements('#table nuxeo-data-table-row nuxeo-data-table-cell:not([header])');
-        // Await all cell texts concurrently so we can compare them synchronously
+        // Search within nuxeo-vocabulary-management to avoid ambiguous global #table lookups.
+        // Exclude header cells which contain filter dropdowns (they carry the [header] attribute).
+        const cells = await this.el.elements('#table nuxeo-data-table-row nuxeo-data-table-cell:not([header])');
+        if (!cells.length) {
+          // Table has no data cells yet (hidden during refresh or rows not yet stamped); keep waiting.
+          return false;
+        }
+        // Await all cell texts concurrently so we can compare synchronously
         const texts = await Promise.all(cells.map((cell) => cell.getText().then((t) => t.trim())));
         if (reverse) {
           return texts.every((text) => text !== id);
