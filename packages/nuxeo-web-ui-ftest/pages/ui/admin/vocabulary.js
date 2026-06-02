@@ -13,8 +13,8 @@ export default class Vocabulary extends BasePage {
   }
 
   async addNewEntry(id, label) {
-    await driver.waitForVisible('#addEntry');
     const addEntryButton = await this.el.element('#addEntry');
+    await addEntryButton.waitForVisible();
     await addEntryButton.click();
     const dialog = await this.el.element('nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])');
     await dialog.waitForVisible();
@@ -121,8 +121,9 @@ export default class Vocabulary extends BasePage {
   }
 
   async table() {
-    await driver.waitForVisible('#table');
-    return this.el.element('#table');
+    const table = await this.el.element('#table');
+    await table.waitForVisible();
+    return table;
   }
 
   get isVocabularyTableFilled() {
@@ -137,8 +138,8 @@ export default class Vocabulary extends BasePage {
 
   get hasEditDialog() {
     return async () => {
-      await driver.waitForVisible('#edit-button-0');
       const editButton = await this.el.element('#edit-button-0');
+      await editButton.waitForVisible();
       await editButton.click();
       await this.el.waitForVisible('nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])');
       const dialog = await this.el.element('nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])');
