@@ -25,6 +25,8 @@ export default class Vocabulary extends BasePage {
     const saveButton = await dialog.element('paper-button[name="save"]');
     await saveButton.waitForVisible();
     await saveButton.click();
+    // Wait for the dialog to close, confirming the save has been submitted
+    await this.waitForNotVisible('nuxeo-dialog[id="vocabularyEditDialog"]');
   }
 
   async waitForHasEntry(id, reverse) {
@@ -34,14 +36,17 @@ export default class Vocabulary extends BasePage {
       async () => {
         // Select only data table cells (exclude header cells which contain filter inputs)
         const cells = await el.elements('#table nuxeo-data-table-row nuxeo-data-table-cell:not([header])');
+        // Await all cell texts concurrently so we can compare them synchronously
+        const texts = await Promise.all(cells.map((cell) => cell.getText().then((t) => t.trim())));
         if (reverse) {
-          return cells.every(async (cell) => (await cell.getText()).trim() !== id);
+          return texts.every((text) => text !== id);
         }
-        return cells.some(async (cell) => (await cell.getText()).trim() === id);
+        return texts.some((text) => text === id);
       },
-      reverse ? 'The vocabulary does have such entry' : 'The vocabulary does not have such entry',
       {
-        timeoutMsg: 'waitForHasEntry timedout',
+        timeoutMsg: reverse
+          ? `Expected not to find vocabulary entry: ${id}`
+          : `Expected to find vocabulary entry: ${id}`,
       },
     );
     return true;
@@ -50,6 +55,7 @@ export default class Vocabulary extends BasePage {
   async deleteEntry(index) {
     const selector = `#delete-button-${index - 1}`;
     const deleteButton = await this.el.element(selector);
+    await deleteButton.waitForVisible();
     await deleteButton.scrollIntoView(selector);
 
     // Wait for the alert to appear, retrying the click if it didn't register
@@ -82,6 +88,7 @@ export default class Vocabulary extends BasePage {
   async editEntry(index, label) {
     const selector = `#edit-button-${index - 1}`;
     const editButton = await this.el.element(selector);
+    await editButton.waitForVisible();
     await editButton.scrollIntoView(selector);
     await editButton.click();
     const dialog = await this.el.element('nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])');
