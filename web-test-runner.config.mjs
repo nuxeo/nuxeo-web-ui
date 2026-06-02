@@ -84,7 +84,8 @@ export default {
       },
     }),
   ],
-  browserLogs: verbose,
+  // Always collect browser logs; filterBrowserLogs decides what reaches CI output (see test/setup.js).
+  browserLogs: true,
   filterBrowserLogs: (log) => {
     if (verbose) {
       return true;
