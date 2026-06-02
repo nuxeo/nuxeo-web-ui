@@ -7,6 +7,9 @@ import { After, Status } from '@cucumber/cucumber';
  * Runs BEFORE other After hooks (order: higher = earlier in Cucumber).
  * Dismisses stale alerts, clears session storage, and navigates to the login
  * page so the next scenario starts from a known baseline.
+ *
+ * IMPORTANT: Never call browser.reloadSession() here — it destroys the undici
+ * HTTP connection pool and causes UND_ERR_CLOSED crashes in subsequent features.
  */
 After({ order: 10000 }, async (scenario) => {
   const { status } = scenario.result;
@@ -28,7 +31,7 @@ After({ order: 10000 }, async (scenario) => {
         }
       });
     } catch (e) {
-      // page may be unresponsive
+      // page may be unresponsive — skip silently
     }
 
     // Navigate to logout to reset server session, ensuring a fresh login for the next scenario
@@ -36,19 +39,14 @@ After({ order: 10000 }, async (scenario) => {
       const baseUrl = process.env.NUXEO_URL || '';
       const logoutUrl = baseUrl ? `${baseUrl}/logout` : 'logout';
       await browser.url(logoutUrl);
-      // Give the server a moment to process the logout
+      // Wait for the app to unload
       await browser.waitUntil(async () => !(await browser.$$('nuxeo-app')).length, {
         timeout: 10000,
         interval: 500,
       });
     } catch (e) {
-      // If navigation itself fails, try a hard reload as last resort
-      try {
-        await browser.reloadSession();
-        await browser.maximizeWindow();
-      } catch (err) {
-        // Nothing more we can do
-      }
+      // Navigation failed — session may be dead. Do NOT call reloadSession() as it
+      // destroys the undici connection pool. Let the next scenario's login step handle recovery.
     }
   }
 });
