@@ -192,6 +192,14 @@ export const config = {
 
   bail: process.env.BAIL ? Number(process.env.BAIL) : 0,
   //
+  // The number of times to retry the entire spec file when it fails as a whole.
+  // This handles transient ChromeDriver/Chrome crashes (e.g. UND_ERR_CLOSED) that kill
+  // the worker process — each retry gets a fresh browser session.
+  specFileRetries: 1,
+  // Run retried spec files after all others have completed, giving the system
+  // time to recover from resource pressure that may have caused the crash.
+  specFileRetriesDeferred: true,
+  //
   // Initialize the browser instance with a WebdriverIO plugin. The object should have the
   // plugin name as key and the desired plugin options as properties. Make sure you have
   // the plugin installed before running any tests. The following plugins are currently
@@ -304,6 +312,25 @@ export const config = {
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
   before: async () => {
+    /**
+     * Prevent UND_ERR_CLOSED errors from crashing the worker process.
+     * When ChromeDriver's TCP connection drops (Chrome crash, resource pressure),
+     * undici reports UND_ERR_CLOSED which is NOT in WDIO's retryable error codes.
+     * Without this handler, the unhandled rejection kills the Node.js worker,
+     * preventing cucumber reports and screenshots from being saved.
+     */
+    process.on('unhandledRejection', (reason) => {
+      if (
+        reason &&
+        (reason.code === 'UND_ERR_CLOSED' || (reason.message && reason.message.includes('UND_ERR_CLOSED')))
+      ) {
+        console.error('[WDIO Worker] Browser connection lost (UND_ERR_CLOSED) — scenario will fail gracefully');
+        return;
+      }
+      // Let other unhandled rejections crash as normal
+      throw reason;
+    });
+
     /*
      * Increase window size to avoid hidden buttons
      */
