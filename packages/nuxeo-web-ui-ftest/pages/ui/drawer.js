@@ -79,6 +79,17 @@ export default class Drawer extends BasePage {
       const selector = name === 'profile' ? '#profileWrapper' : `nuxeo-menu-icon[name='${name}']`;
       const buttonToclick = await menu.$(selector);
       await buttonToclick.click();
+      // Wait for the opened panel to be visible after the click
+      await driver.waitUntil(
+        async () => {
+          try {
+            return await section.isDisplayed();
+          } catch (e) {
+            return false;
+          }
+        },
+        { timeout: 10000, interval: 500, timeoutMsg: `Drawer section "${name}" did not become visible after click` },
+      );
     }
     return section;
   }
