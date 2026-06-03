@@ -1381,8 +1381,8 @@ Polymer({
     if (!user) {
       return '';
     }
-    const firstName = user.properties && user.properties.firstName ? user.properties.firstName.trim() : '';
-    const lastName = user.properties && user.properties.lastName ? user.properties.lastName.trim() : '';
+    const firstName = user.properties?.firstName?.trim() || '';
+    const lastName = user.properties?.lastName?.trim() || '';
 
     // Case 1: Both first and last name - use first letter of each
     if (firstName && lastName) {
