@@ -17,6 +17,7 @@ limitations under the License.
 */
 import { fixture, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-drive-upload-button.js';
+import { base64UrlSafeEncode } from '../elements/nuxeo-drive-utils.js';
 import {
   setupI18n,
   stubToast,
@@ -250,36 +251,36 @@ suite('nuxeo-drive-upload-button', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // _base64UrlSafeEncode
+  // base64UrlSafeEncode (shared helper from nuxeo-drive-utils.js)
   // ---------------------------------------------------------------------------
-  suite('_base64UrlSafeEncode', () => {
+  suite('base64UrlSafeEncode', () => {
     test('output contains no standard base64 padding (=)', () => {
       const bytes = new Uint8Array([1, 2, 3, 4, 5]);
-      const result = element._base64UrlSafeEncode(bytes);
+      const result = base64UrlSafeEncode(bytes);
       expect(result).to.not.include('=');
     });
 
     test('output contains no + characters (URL-safe)', () => {
       const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
+      const result = base64UrlSafeEncode(bytes);
       expect(result).to.not.include('+');
     });
 
     test('output contains no / characters (URL-safe)', () => {
       const bytes = new Uint8Array(Array.from({ length: 32 }, (_, i) => i + 200));
-      const result = element._base64UrlSafeEncode(bytes);
+      const result = base64UrlSafeEncode(bytes);
       expect(result).to.not.include('/');
     });
 
     test('output contains only URL-safe characters [A-Za-z0-9_-]', () => {
       const bytes = new Uint8Array(Array.from({ length: 100 }, (_, i) => (i * 7) % 256));
-      const result = element._base64UrlSafeEncode(bytes);
+      const result = base64UrlSafeEncode(bytes);
       expect(result).to.match(/^[A-Za-z0-9_-]*$/);
     });
 
     test('decodes back to original bytes', () => {
       const originalBytes = new Uint8Array([1, 2, 3, 255, 254, 0, 127]);
-      const encoded = element._base64UrlSafeEncode(originalBytes);
+      const encoded = base64UrlSafeEncode(originalBytes);
       const decoded = atob(encoded.replace(/-/g, '+').replace(/_/g, '/'));
       const decodedBytes = new Uint8Array(decoded.length);
       for (let i = 0; i < decoded.length; i++) {
@@ -290,13 +291,13 @@ suite('nuxeo-drive-upload-button', () => {
 
     test('handles empty bytes array', () => {
       const bytes = new Uint8Array([]);
-      const result = element._base64UrlSafeEncode(bytes);
+      const result = base64UrlSafeEncode(bytes);
       expect(result).to.be.a('string');
     });
 
     test('handles single byte', () => {
       const bytes = new Uint8Array([42]);
-      const result = element._base64UrlSafeEncode(bytes);
+      const result = base64UrlSafeEncode(bytes);
       expect(result).to.match(/^[A-Za-z0-9_-]*$/);
     });
   });
