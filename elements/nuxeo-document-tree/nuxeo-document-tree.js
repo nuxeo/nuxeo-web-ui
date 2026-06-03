@@ -358,11 +358,11 @@ Polymer({
 
     // Listen for browser back/forward button navigation
     this._boundPopStateHandler = this._handlePopState.bind(this);
-    window.addEventListener('popstate', this._boundPopStateHandler);
+    globalThis.addEventListener('popstate', this._boundPopStateHandler);
 
     // Listen for location changes (Polymer routing)
     this._boundLocationChangedHandler = this._handleLocationChanged.bind(this);
-    window.addEventListener('location-changed', this._boundLocationChangedHandler);
+    globalThis.addEventListener('location-changed', this._boundLocationChangedHandler);
 
     // Set up observer for dynamically loaded tree nodes
     this._setupTreeObserver();
@@ -371,10 +371,10 @@ Polymer({
   detached() {
     // Clean up event listeners
     if (this._boundPopStateHandler) {
-      window.removeEventListener('popstate', this._boundPopStateHandler);
+      globalThis.removeEventListener('popstate', this._boundPopStateHandler);
     }
     if (this._boundLocationChangedHandler) {
-      window.removeEventListener('location-changed', this._boundLocationChangedHandler);
+      globalThis.removeEventListener('location-changed', this._boundLocationChangedHandler);
     }
     if (this._treeObserver) {
       this._treeObserver.disconnect();
@@ -387,7 +387,7 @@ Polymer({
       this.setAttribute('dir', direction);
     }
     this._checkRtl();
-    window.addEventListener('nuxeo-documents-deleted', (e) => {
+    globalThis.addEventListener('nuxeo-documents-deleted', (e) => {
       if (e.detail.documents) {
         this.removeDocuments(e.detail.documents);
         return;
@@ -396,11 +396,11 @@ Polymer({
       this._fetchDocument();
     });
 
-    window.addEventListener('refresh-display', () => {
+    globalThis.addEventListener('refresh-display', () => {
       this._fetchDocument();
     });
 
-    window.addEventListener('document-created', this._fetchDocument.bind(this));
+    globalThis.addEventListener('document-created', this._fetchDocument.bind(this));
 
     this.controller = {
       getChildren: function (node, page) {
@@ -553,7 +553,7 @@ Polymer({
    */
   _handleNodeClick(e) {
     const clickedLink = e.currentTarget;
-    const clickedPath = clickedLink.getAttribute('data-path');
+    const clickedPath = clickedLink.dataset.path;
 
     // Store the selected path for persistence
     if (clickedPath) {
@@ -641,9 +641,7 @@ Polymer({
     // Determine which path should be highlighted
     // Priority: explicit path > currentDocument > sessionStorage
     const pathToHighlight =
-      selectedPath ||
-      (this.currentDocument && this.currentDocument.path) ||
-      sessionStorage.getItem('nuxeo.tree.selectedPath');
+      selectedPath || this.currentDocument?.path || sessionStorage.getItem('nuxeo.tree.selectedPath');
 
     if (!pathToHighlight) return false;
 
@@ -675,7 +673,7 @@ Polymer({
 
     // Add 'selected' class to the matching link - EXACT match only
     allLinks.forEach((link) => {
-      const linkPath = link.getAttribute('data-path');
+      const linkPath = link.dataset.path;
       // Only match if paths are EXACTLY the same
       if (linkPath && linkPath === pathToHighlight) {
         markSelectedRow(link);
@@ -692,7 +690,7 @@ Polymer({
         const treeLinks = root.querySelectorAll('a[data-path]');
         treeLinks.forEach((link) => {
           clearSelectedRow(link);
-          const linkPath = link.getAttribute('data-path');
+          const linkPath = link.dataset.path;
           if (linkPath === pathToHighlight) {
             markSelectedRow(link);
             highlighted = true;

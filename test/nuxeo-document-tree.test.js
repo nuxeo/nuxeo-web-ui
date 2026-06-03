@@ -717,6 +717,25 @@ suite('nuxeo-document-tree unit behavior', () => {
     retrySpy.restore();
   });
 
+  test('_currentDocumentChanged handles Root documents and syncs selected path', () => {
+    sinon.stub(element, 'hasFacet').returns(false);
+    const retrySpy = sinon.spy(element, '_retryHighlightUpdate');
+    element.docPath = '/old';
+    element.currentDocument = {
+      type: 'Root',
+      path: '/',
+      contextParameters: { breadcrumb: { entries: [{ path: '/' }] } },
+    };
+
+    element._currentDocumentChanged();
+
+    expect(element.docPath).to.equal('/');
+    expect(sessionStorage.getItem('nuxeo.tree.selectedPath')).to.equal('/');
+    expect(retrySpy).to.have.been.calledWith('/');
+    element.hasFacet.restore();
+    retrySpy.restore();
+  });
+
   test('_setupTreeObserver creates observer when missing and is idempotent otherwise', () => {
     element._treeObserver = null;
     element._setupTreeObserver();

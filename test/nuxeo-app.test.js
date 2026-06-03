@@ -72,6 +72,9 @@ suite('nuxeo-app', () => {
     expect(app._userInitials(null)).to.equal('');
     expect(app._userInitials({ properties: { firstName: 'Jane', lastName: 'Doe' } })).to.equal('JD');
     expect(app._userInitials({ properties: { firstName: 'Al' } })).to.equal('AL');
+    expect(app._userInitials({ properties: { firstName: 'Q' } })).to.equal('Q');
+    expect(app._userInitials({ properties: { lastName: 'Ng' } })).to.equal('NG');
+    expect(app._userInitials({ properties: { lastName: 'X' } })).to.equal('X');
     expect(app._userInitials({ id: 'administrator', properties: {} })).to.equal('AD');
     expect(app._userInitials({ properties: {} })).to.equal('??');
   });
@@ -416,6 +419,73 @@ suite('nuxeo-app', () => {
     app._directionChanged(false);
     expect(app.$.drawerPanel.getAttribute('align')).to.equal('start');
     expect(app.toggleChevronIcon).to.equal('icons:chevron-left');
+  });
+
+  suite('keyboard navigation helpers', () => {
+    test('logo ArrowDown focuses home link when available', () => {
+      const logo = app.$.logo;
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      sinon.spy(homeLink, 'focus');
+
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+
+      expect(homeLink.focus).to.have.been.calledOnce;
+      homeLink.focus.restore();
+    });
+
+    test('home ArrowDown focuses first menu item via _setFocusedItem', () => {
+      const menu = app.$.menu;
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      sinon.stub(menu, '_setFocusedItem');
+
+      homeLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(menu._setFocusedItem).to.have.been.calledOnce;
+      menu._setFocusedItem.restore();
+    });
+
+    test('menu ArrowDown on last item returns focus to logo', () => {
+      const menu = app.$.menu;
+      const logo = app.$.logo;
+      const visibleItems = (menu.items || []).filter((el) => !el.hasAttribute('hidden'));
+      const lastItem = visibleItems[visibleItems.length - 1];
+      sinon.spy(logo, 'focus');
+
+      if (lastItem) {
+        lastItem.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+      }
+
+      expect(logo.focus).to.have.been.calledOnce;
+      logo.focus.restore();
+    });
+  });
+
+  suite('skip link behavior', () => {
+    test('click on skip link focuses and scrolls main content', () => {
+      const { skipLink, mainContent } = app.$;
+      sinon.spy(mainContent, 'focus');
+      sinon.stub(mainContent, 'scrollIntoView');
+
+      skipLink.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+      expect(mainContent.focus).to.have.been.calledOnce;
+      expect(mainContent.scrollIntoView).to.have.been.calledWith({ behavior: 'smooth' });
+      mainContent.focus.restore();
+      mainContent.scrollIntoView.restore();
+    });
+
+    test('Enter on skip link activates main content', () => {
+      const { skipLink, mainContent } = app.$;
+      sinon.spy(mainContent, 'focus');
+      sinon.stub(mainContent, 'scrollIntoView');
+
+      skipLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+
+      expect(mainContent.focus).to.have.been.calledOnce;
+      expect(mainContent.scrollIntoView).to.have.been.calledWith({ behavior: 'smooth' });
+      mainContent.focus.restore();
+      mainContent.scrollIntoView.restore();
+    });
   });
 
   test('_documentRemovedFromCollection toasts', () => {
