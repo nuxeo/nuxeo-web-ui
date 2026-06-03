@@ -189,25 +189,9 @@ const template = html`
           url('../fonts/Inter-Bold.woff?v=3.13') format('woff');
       }
 
-      /* Figtree font family */
-      @font-face {
-        font-family: 'Figtree';
-        font-style: normal;
-        font-weight: 300;
-        font-display: swap;
-        src: url('../fonts/figtree-latin-300-normal.woff2') format('woff2'),
-          url('../fonts/figtree-latin-300-normal.woff') format('woff');
-      }
-
-      @font-face {
-        font-family: 'Figtree';
-        font-style: normal;
-        font-weight: 400;
-        font-display: swap;
-        src: url('../fonts/figtree-latin-400-normal.woff2') format('woff2'),
-          url('../fonts/figtree-latin-400-normal.woff') format('woff');
-      }
-
+      /* Figtree — consumed only via the --sat-section-header mixin (font-weight: 500).
+         Other weights / italic variants were dropped in the rebrand cleanup; re-add
+         here on demand if a new component needs them. */
       @font-face {
         font-family: 'Figtree';
         font-style: normal;
@@ -215,24 +199,6 @@ const template = html`
         font-display: swap;
         src: url('../fonts/figtree-latin-500-normal.woff2') format('woff2'),
           url('../fonts/figtree-latin-500-normal.woff') format('woff');
-      }
-
-      @font-face {
-        font-family: 'Figtree';
-        font-style: normal;
-        font-weight: 600;
-        font-display: swap;
-        src: url('../fonts/figtree-latin-600-normal.woff2') format('woff2'),
-          url('../fonts/figtree-latin-600-normal.woff') format('woff');
-      }
-
-      @font-face {
-        font-family: 'Figtree';
-        font-style: normal;
-        font-weight: 700;
-        font-display: swap;
-        src: url('../fonts/figtree-latin-700-normal.woff2') format('woff2'),
-          url('../fonts/figtree-latin-700-normal.woff') format('woff');
       }
 
       /* Noto Sans font family */
@@ -281,15 +247,9 @@ const template = html`
           url('../fonts/noto-sans-latin-700-normal.woff') format('woff');
       }
 
-      @font-face {
-        font-family: 'Noto Sans';
-        font-style: normal;
-        font-weight: 800;
-        font-display: swap;
-        src: url('../fonts/noto-sans-latin-800-normal.woff2') format('woff2'),
-          url('../fonts/noto-sans-latin-800-normal.woff') format('woff');
-      }
-
+      /* Noto Sans 900 — referenced only by the nuxeo-template-rendering addon
+         (font-weight: 900). Kept so that addon retains a real font face
+         when enabled; safe to drop if/when that usage is migrated to 700. */
       @font-face {
         font-family: 'Noto Sans';
         font-style: normal;
@@ -386,16 +346,14 @@ const template = html`
         }
 
         --nuxeo-block-selected: {
-          background-color: var(--nuxeo-box);
+          background-color: var(--sat-drawer-item-selected-background, var(--nuxeo-box));
           outline: 0;
-          box-shadow: 5px 0 0 0 var(--nuxeo-primary-color) inset;
         }
 
         [dir='rtl'] {
           --nuxeo-block-selected: {
-            background-color: var(--nuxeo-box);
+            background-color: var(--sat-drawer-item-selected-background, var(--nuxeo-box));
             outline: 0;
-            box-shadow: -5px 0 0 0 var(--nuxeo-primary-color) inset;
           }
         }
 

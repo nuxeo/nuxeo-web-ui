@@ -39,8 +39,8 @@ Polymer({
   _template: html`
     <style>
       paper-fab {
-        width: var(--sat-document-create-button-width, var(--nuxeo-document-create-button-width, 56px));
-        height: var(--sat-document-create-button-height, var(--nuxeo-document-create-button-height, 56px));
+        width: 56px;
+        height: 56px;
         border-radius: 16px;
         color: var(--sat-document-create-button-icon-color, var(--nuxeo-button-primary-text));
         --paper-fab-background: var(--sat-document-create-button-background, var(--nuxeo-button-primary));

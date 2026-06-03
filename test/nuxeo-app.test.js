@@ -62,6 +62,29 @@ suite('nuxeo-app', () => {
     localStorage.getItem.restore();
   });
 
+  test('_onProfileAvatarClick prevents navigation', () => {
+    const e = { preventDefault: sinon.spy() };
+    app._onProfileAvatarClick(e);
+    expect(e.preventDefault).to.have.been.calledOnce;
+  });
+
+  test('_userInitials derives display initials from user properties', () => {
+    expect(app._userInitials(null)).to.equal('');
+    expect(app._userInitials({ properties: { firstName: 'Jane', lastName: 'Doe' } })).to.equal('JD');
+    expect(app._userInitials({ properties: { firstName: 'Al' } })).to.equal('AL');
+    expect(app._userInitials({ id: 'administrator', properties: {} })).to.equal('AD');
+    expect(app._userInitials({ properties: {} })).to.equal('??');
+  });
+
+  test('_resizeDuringAnimation schedules resize animation loop', () => {
+    app._resizeDuringAnimation();
+    expect(app._resizeLoop).to.exist;
+    if (app._resizeLoop) {
+      cancelAnimationFrame(app._resizeLoop);
+      app._resizeLoop = null;
+    }
+  });
+
   test('_baseUrlChanged assigns RoutingBehavior.baseUrl', () => {
     app.baseUrl = 'https://example/nuxeo/';
     app._baseUrlChanged();

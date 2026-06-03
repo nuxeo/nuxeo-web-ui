@@ -24,6 +24,16 @@ limitations under the License.
 <dom-module id="nuxeo-home">
   <template>
     <style include="nuxeo-styles">
+      /* Opt this rebranded host into the Satori page chrome.
+         These scoped vars are read by <nuxeo-page>; admin / legacy pages do NOT set them
+         so they keep the original transparent content + white toolbar. */
+      :host {
+        --nuxeo-page-host-background: var(--sat-drawer-content-background);
+        --nuxeo-page-content-background: var(--sat-drawer-content-background);
+        --nuxeo-page-toolbar-background: var(--sat-app-header-background);
+        --nuxeo-page-toolbar-box-shadow: var(--sat-app-header-shadow);
+      }
+
       .dashboard {
         display: flex;
         flex-direction: row;
@@ -98,7 +108,7 @@ limitations under the License.
       }
 
       .header {
-        @apply --sat-header-h5;
+        @apply --sat-section-header;
         display: flex;
         align-items: center;
         gap: 16px;

@@ -20,7 +20,6 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-fab/paper-fab.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -33,6 +32,11 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style is="custom-style">
+      /*
+       * Labelled create shortcut chip (Satori FAB stack — Figma 128:53937):
+       * icon + label pill, 48px tall, 16px radius, shared FAB colors/shadow.
+       * Single focus target (.shortcut-container); paper-fab is decorative only.
+       */
       :host {
         display: inline-block;
       }
@@ -40,9 +44,11 @@ Polymer({
       .shortcut-container {
         display: flex;
         align-items: center;
-        gap: 9px;
+        box-sizing: border-box;
+        min-height: 48px;
+        gap: 8px;
         cursor: pointer;
-        padding: 4px 6px;
+        padding: 4px 12px 4px 4px;
         border-radius: 16px;
         background-color: var(--sat-document-create-button-background, var(--nuxeo-button-primary));
         transition: background-color 0.2s ease;
@@ -51,38 +57,55 @@ Polymer({
           0px 4px 8px 3px rgba(0, 0, 0, 0.15),
           0px 1px 3px rgba(0, 0, 0, 0.3)
         );
+        outline: none;
+      }
+
+      :host-context([dir='rtl']) .shortcut-container {
+        flex-direction: row-reverse;
+        padding: 4px 4px 4px 12px;
       }
 
       .shortcut-container:hover {
         background-color: var(--sat-document-create-button-hover-background, var(--nuxeo-button-primary-focus));
       }
 
+      .shortcut-container:focus-visible {
+        outline: auto;
+      }
+
       paper-fab {
+        flex-shrink: 0;
         width: 40px;
         height: 40px;
         color: var(--sat-document-create-button-icon-color, var(--nuxeo-button-primary-text));
         --paper-fab-background: transparent;
         --paper-fab-keyboard-focus-background: transparent;
         box-shadow: none;
+        pointer-events: none;
       }
 
       .shortcut-label {
         font-size: 14px;
         font-weight: 500;
         line-height: 20px;
-        color: var(--sat-create-button-shortcut-label-color, var(--nuxeo-button-primary-text));
+        color: var(--sat-document-create-shortcut-label-color, var(--nuxeo-button-primary-text));
         white-space: nowrap;
         letter-spacing: 0.1px;
-        font-family: var(--sat-font-family-secondary, var(--nuxeo-app-font));
+        font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
       }
     </style>
 
-    <div class="shortcut-container" role="button" tabindex="0" on-keydown="_handleKeydown" on-tap="_tap">
-      <paper-fab mini noink id="createBtn" src="[[icon]]"></paper-fab>
-      <span class="shortcut-label">[[i18n(label)]]</span>
+    <div
+      class="shortcut-container"
+      role="button"
+      tabindex="0"
+      aria-labelledby="shortcutLabel"
+      on-keydown="_handleKeydown"
+      on-tap="_tap"
+    >
+      <paper-fab mini noink id="createBtn" src="[[icon]]" tabindex="-1" aria-hidden="true"></paper-fab>
+      <span id="shortcutLabel" class="shortcut-label">[[i18n(label)]]</span>
     </div>
-
-    <nuxeo-tooltip for="createBtn" position="left">[[i18n(label)]]</nuxeo-tooltip>
   `,
 
   is: 'nuxeo-document-create-shortcut',

@@ -32,6 +32,11 @@ Polymer({
     <style>
       :host {
         display: block;
+        --nuxeo-link-hover-color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+      }
+
+      :host(:hover:not(.iron-selected)) {
+        background-color: var(--nuxeo-container-hover);
       }
 
       a {
@@ -40,6 +45,29 @@ Polymer({
         display: block;
         @apply --nuxeo-link;
         @apply --nuxeo-menu-item-link;
+        @apply --sat-drawer-item;
+      }
+
+      a:hover,
+      a:focus,
+      a:active {
+        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        text-decoration: none;
+      }
+
+      /* iron-selector adds .iron-selected (Administration, Profile drawers) */
+      :host(.iron-selected),
+      :host(.iron-selected:hover),
+      :host(.iron-selected:focus) {
+        @apply --sat-drawer-item-selected;
+      }
+
+      :host(.iron-selected) a,
+      :host(.iron-selected) a:hover,
+      :host(.iron-selected) a:focus,
+      :host(.iron-selected) a:active {
+        background-color: transparent;
+        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
       }
     </style>
 
