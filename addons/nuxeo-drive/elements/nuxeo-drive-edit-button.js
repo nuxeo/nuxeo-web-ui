@@ -33,7 +33,7 @@ Polymer({
     <style include="nuxeo-action-button-styles"></style>
 
     <template is="dom-if" if="[[_isAvailable(document,blob)]]">
-      <div class="action" on-tap="_go">
+      <div class="action" on-click="_go">
         <paper-icon-button noink icon="icons:open-in-new" id="driveBtn" aria-labelledby="label"></paper-icon-button>
         <span class="label" hidden$="[[!showLabel]]" id="label">[[i18n('driveEditButton.tooltip')]]</span>
         <nuxeo-tooltip>[[i18n('driveEditButton.tooltip')]]</nuxeo-tooltip>
