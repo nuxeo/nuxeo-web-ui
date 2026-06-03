@@ -20,6 +20,7 @@ import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import './nuxeo-drive-icons.js';
+import { base64UrlSafeEncode, navigateAndShowFallback } from './nuxeo-drive-utils.js';
 
 window.nuxeo = window.nuxeo || {};
 const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
@@ -40,6 +41,11 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
         reflectToAttribute: true,
         value: false,
       },
+
+      _installExpanded: {
+        type: Boolean,
+        value: false,
+      },
     };
   }
 
@@ -47,10 +53,8 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
     return html`
       <style include="nuxeo-action-button-styles"></style>
 
-      <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
-
       <template is="dom-if" if="[[_isAvailable(document)]]">
-        <div class="action" on-tap="_go">
+        <div class="action" on-click="_go">
           <paper-icon-button
             noink
             icon="nuxeo-drive:transfer"
@@ -63,16 +67,63 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       </template>
 
       <nuxeo-dialog id="dialog" with-backdrop>
-        <div class="vertical layout">
-          <h1>[[i18n('driveEditButton.dialog.heading')]]</h1>
-          <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
+        <style>
+          #dialog {
+            margin-top: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            max-height: 80vh;
+          }
+
+          .dialog-content {
+            padding: 16px 24px;
+          }
+
+          .dialog-content h1 {
+            margin: 0 0 12px;
+            font-size: 1.6em;
+          }
+
+          .dialog-content p {
+            color: var(--primary-text-color, #333);
+            margin: 0 0 16px;
+          }
+
+          .close-btn {
+            border: 1px solid var(--nuxeo-primary-color, #0066ff);
+            color: var(--nuxeo-primary-color, #0066ff);
+            text-transform: uppercase;
+            font-size: 0.9em;
+            padding: 0.5em 1em;
+          }
+
+          .buttons {
+            justify-content: flex-end;
+          }
+
+          .install-link {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 0.9em;
+          }
+        </style>
+        <div class="dialog-content">
+          <h1>[[i18n('driveButton.dialog.heading')]]</h1>
+          <p>[[i18n('driveButton.dialog.description')]]</p>
+          <template is="dom-if" if="[[_installExpanded]]">
+            <p>[[i18n('driveButton.dialog.install.prompt')]]</p>
+            <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
+          </template>
+          <template is="dom-if" if="[[!_installExpanded]]">
+            <a class="install-link" href="#" on-click="_toggleInstall">[[i18n('driveButton.install.dialog.hint')]]</a>
+          </template>
         </div>
         <div class="buttons">
-          <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
+          <paper-button dialog-dismiss class="close-btn">[[i18n('command.close')]]</paper-button>
         </div>
       </nuxeo-dialog>
 
-      <paper-toast id="toast">[[i18n('driveUpload.directTransfer.failed')]]</paper-toast>
+      <paper-toast id="toast"></paper-toast>
     `;
   }
 
@@ -80,39 +131,54 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
     if (!doc) return false;
 
     return (
-      this.hasPermission &&
-      this.hasFacet &&
-      this.isProxy &&
-      this.hasPermission(doc, 'Write') &&
-      this.hasFacet(doc, 'Folderish') &&
+      this.hasPermission?.(doc, 'Write') &&
+      this.hasFacet?.(doc, 'Folderish') &&
+      this.isProxy != null &&
       !this.isProxy(doc)
     );
   }
 
   _go() {
-    this.$.token
-      .get()
-      .then((response) => {
-        const tokens = response.entries.map((token) => token.id);
-        if (!tokens || !tokens.length) {
-          this.$.dialog.toggle();
-          return;
-        }
-        window.open(this.directTransferUrl, '_top');
-      })
-      .catch((error) => {
-        console.error('Token fetch failed:', error);
-        this.$.toast.toggle();
-      });
+    try {
+      this._installExpanded = false;
+      navigateAndShowFallback(this, this.directTransferUrl);
+    } catch (e) {
+      this._showError(e.message);
+    }
+  }
+
+  _toggleInstall(e) {
+    e.preventDefault();
+    this._installExpanded = true;
+  }
+
+  _showError(message) {
+    this.$.toast.text = message;
+    this.$.toast.open();
   }
 
   get directTransferUrl() {
-    const finalUrl = [
-      'nxdrive://direct-transfer',
-      baseUrl.split('/ui/')[0].replace('://', '/'),
-      this.document.path.slice(1),
-    ].join('/');
-    return finalUrl;
+    return this._compressUploadUrl();
+  }
+
+  _compressUploadUrl() {
+    const cleanBaseUrl = baseUrl.split('/ui/')[0].replace(/\/$/, '');
+    const isHttps = cleanBaseUrl.startsWith('https') ? 1 : 0;
+    const serverHost = cleanBaseUrl.replace('://', '/').split('/').slice(1).join('/');
+
+    const serverBytes = new TextEncoder().encode(serverHost);
+    if (serverBytes.length > 255) {
+      const msg = this.i18n('driveUpload.serverUrlTooLong');
+      this._showError(msg);
+      throw new Error(msg);
+    }
+
+    const docPath = this.document.path.startsWith('/') ? this.document.path.slice(1) : this.document.path;
+    const pathBytes = new TextEncoder().encode(docPath);
+
+    const payload = new Uint8Array([isHttps, serverBytes.length, ...serverBytes, ...pathBytes]);
+    const b64 = base64UrlSafeEncode(payload);
+    return `nxdrive://direct-transfer/${b64}`;
   }
 }
 
