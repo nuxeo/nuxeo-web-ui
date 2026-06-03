@@ -23,11 +23,6 @@ limitations under the License.
  * common test-suite factories) so individual test files stay free of duplication.
  */
 
-// Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
-// navigateAndShowFallback() creates an anchor and clicks it; this no-op
-// stops the browser from actually following the custom-protocol link.
-HTMLAnchorElement.prototype.click = function () {};
-
 // ---------------------------------------------------------------------------
 // i18n bootstrap
 // ---------------------------------------------------------------------------
@@ -133,6 +128,15 @@ export function addGoSuite(getElement, goMethod = '_go') {
     setup(() => {
       const element = getElement();
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
+
+      // Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
+      // navigateAndShowFallback() creates an anchor and calls .click() on it.
+      // In Chrome 148+, click() is NOT an own property of HTMLAnchorElement.prototype
+      // (it is inherited from HTMLElement.prototype), so sinon.stub() has no effect.
+      // A direct property assignment creates an own property that shadows the
+      // inherited native implementation. The teardown deletes it to restore inheritance.
+      HTMLAnchorElement.prototype.click = function () {};
+
       // Stub _navigate if it exists to prevent actual globalThis.location assignment.
       // This ensures each test is isolated and not dependent on test execution order.
       if (typeof element._navigate === 'function') {
@@ -140,7 +144,10 @@ export function addGoSuite(getElement, goMethod = '_go') {
       }
     });
 
-    teardown(() => sinon.restore());
+    teardown(() => {
+      delete HTMLAnchorElement.prototype.click;
+      sinon.restore();
+    });
 
     test('opens the dialog', () => {
       const element = getElement();
