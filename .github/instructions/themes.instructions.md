@@ -16,8 +16,6 @@ themes/
     preview.jpg    → Theme preview thumbnail
     README.md      → Theme description
   dark/            → Dark theme (same structure)
-  light/           → Light theme (same structure)
-  kawaii/           → Kawaii theme (same structure, includes background.png)
 ```
 
 ## Theme File (`theme.html`)
@@ -66,14 +64,14 @@ This provides layout utilities, button styles, and common CSS rules used across 
 ## Theme Loading (`loader.js`)
 
 - Reads `localStorage.getItem('theme')` to determine active theme
-- Falls back to `default` if the stored theme is not found (404 check)
+- Falls back to `default` if the stored theme is deprecated or not found (404 check)
 - Injects a `<link rel="import">` for the selected `themes/<name>/theme.html`
 - Users switch themes from their profile settings at runtime
 
 ## Rules
 
 - Always use CSS custom properties (e.g., `var(--nuxeo-primary-color)`) — never hardcode colors
-- Test changes against all 4 themes (default, dark, light, kawaii)
+- Test changes against the supported built-in themes (default, dark)
 - Keep the same custom property interface across themes — all themes must define the same set of variables
 - New custom properties should be added to all theme files simultaneously
 - `base.js` changes affect every component — modify with care

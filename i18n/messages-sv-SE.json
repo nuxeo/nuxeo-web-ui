@@ -1412,8 +1412,6 @@
   "themes.current": "Aktuellt",
   "themes.dark": "Mörkt",
   "themes.default": "Nuxeo",
-  "themes.kawaii": "Kawaii",
-  "themes.light": "Ljust",
   "threeDViewLayout.delete.confirm.message": "Vill du verkligen ta bort detta 3D-innehåll?",
   "threeDViewLayout.delete.tooltip": "Ta bort 3D-innehåll",
   "threeDViewLayout.deleted.message": "3D-innehåll borttaget",

@@ -80,11 +80,9 @@ Optional addons extend Web UI with additional capabilities:
 
 ## Themes
 
-Four visual themes are bundled:
+Two visual themes are bundled:
 - **Default** — Standard Nuxeo branding
 - **Dark** — Dark mode interface
-- **Light** — Light/minimal interface
-- **Kawaii** — Fun/playful theme
 
 Users can switch themes from their profile settings.
 
