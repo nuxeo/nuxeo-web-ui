@@ -38,7 +38,9 @@ Polymer({
         height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         display: flex;
         flex-direction: column;
-        background-color: var(--sat-drawer-content-background);
+        /* Scoped page-chrome variable; set only by rebranded hosts (nuxeo-browser, nuxeo-home).
+           Unset on admin / legacy pages so they keep the original transparent chrome. */
+        background-color: var(--nuxeo-page-host-background, transparent);
       }
 
       #content {
@@ -46,7 +48,7 @@ Polymer({
         position: relative;
         overflow-y: auto;
         padding: var(--nuxeo-page-content-padding, 16px 16px 2px 16px);
-        background-color: var(--sat-drawer-content-background, var(--nuxeo-app-content-background));
+        background-color: var(--nuxeo-page-content-background, var(--nuxeo-app-content-background));
       }
 
       .main-section-container {
@@ -64,8 +66,8 @@ Polymer({
         @apply --layout-center;
         height: var(--nuxeo-drawer-header-height);
         color: var(--nuxeo-app-header);
-        background: var(--sat-app-header-box-background-color, var(--nuxeo-app-header-background));
-        box-shadow: var(--sat-app-header-box-shadow, var(--nuxeo-app-header-box-shadow));
+        background: var(--nuxeo-page-toolbar-background, var(--nuxeo-app-header-background));
+        box-shadow: var(--nuxeo-page-toolbar-box-shadow, var(--nuxeo-app-header-box-shadow));
         overflow-x: auto;
       }
 

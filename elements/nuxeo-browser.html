@@ -56,6 +56,16 @@ limitations under the License.
         max-width: var(--nuxeo-browser-actions-menu-max-width, 240px);
       }
 
+      /* Opt this rebranded host into the Satori page chrome.
+         These scoped vars are read by <nuxeo-page>; admin / legacy pages do NOT set them
+         so they keep the original transparent content + white toolbar. */
+      :host {
+        --nuxeo-page-host-background: var(--sat-drawer-content-background);
+        --nuxeo-page-content-background: var(--sat-drawer-content-background);
+        --nuxeo-page-toolbar-background: var(--sat-app-header-background);
+        --nuxeo-page-toolbar-box-shadow: var(--sat-app-header-shadow);
+      }
+
       /* Apply styles only when viewing folders (document listing) */
       :host([document-facets~='Folderish']) nuxeo-page,
       :host([document-facets~='Collection']) nuxeo-page {
@@ -67,7 +77,7 @@ limitations under the License.
 
       /* Apply background color to tabs when viewing individual documents (NOT folders) */
       :host(:not([document-facets~='Folderish']):not([document-facets~='Collection'])) nuxeo-page {
-        --nuxeo-page-tabs-background: var(--sat-page-tabs-background-default);
+        --nuxeo-page-tabs-background: var(--sat-page-tabs-background);
         --nuxeo-page-content-padding: 16px 16px 0 16px;
       }
     </style>

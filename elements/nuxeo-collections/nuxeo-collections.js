@@ -135,6 +135,11 @@ Polymer({
       .list-item {
         cursor: pointer;
         padding: 1em;
+        @apply --sat-drawer-item;
+      }
+
+      .list-item-title {
+        @apply --sat-drawer-item;
       }
 
       .list-item:hover {
@@ -144,7 +149,7 @@ Polymer({
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply --nuxeo-block-selected;
+        @apply --sat-drawer-item-selected;
       }
 
       .list-item iron-icon {
@@ -174,7 +179,7 @@ Polymer({
       }
 
       .collection-header {
-        @apply --sat-header-h5;
+        @apply --sat-section-header;
       }
     </style>
 

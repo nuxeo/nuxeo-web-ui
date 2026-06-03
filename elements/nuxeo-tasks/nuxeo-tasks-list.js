@@ -68,7 +68,7 @@ Polymer({
       .list-item {
         cursor: pointer;
         padding: 1em;
-        border-bottom: 1px solid var(--nuxeo-border);
+        @apply --sat-drawer-item;
       }
 
       .list-item:hover {
@@ -78,7 +78,7 @@ Polymer({
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply --nuxeo-block-selected;
+        @apply --sat-drawer-item-selected;
       }
 
       nuxeo-data-list {

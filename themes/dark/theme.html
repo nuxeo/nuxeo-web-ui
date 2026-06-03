@@ -22,7 +22,7 @@ limitations under the License.
   <style is="custom-style">
     html {
       /* -- Nuxeo Branding colors -- */
-      --nuxeo-app-font: var(--sat-font-family-secondary);
+      --nuxeo-app-font: 'Noto Sans'; /* matches --sat-font-family-primary */
       --nuxeo-text-default: #fff;
 
       --nuxeo-primary-color: #1f28bf;
@@ -165,26 +165,44 @@ limitations under the License.
       --nuxeo-diff-deleted-color: #ca8f8f;
       --nuxeo-diff-label-color: #d4d4d9;
 
-      /*Drawer*/
-      --sat-drawer-item-font-weight: 500;
-      --sat-drawer-item-font-size: 14px;
-      --sat-drawer-item-line-height: 20px;
-      --sat-drawer-item-letter-spacing: 0.1px;
-      --sat-drawer-item-selected-background: #1f28bf;
+      /* ================================================================
+         TIER 3 — NUXEO COMPONENT TOKENS (--sat-<component>-<property>)
+         See docs/THEMING.md for the full naming contract.
+         ================================================================ */
 
-      /*Header*/
-      --sat-home-header-font-weight: 500;
-      --sat-home-header-font-size: 26px;
+      /* Browse drawer */
+      --sat-drawer-item-font-weight: 500;
+      --sat-drawer-item-selected-background: #2e2e3e;
+
+      /* Section header */
+      --sat-section-header-font-weight: 500;
+
+      /* Section header mixin — @apply --sat-section-header; */
+      --sat-section-header: {
+        font-weight: var(--sat-section-header-font-weight, 500);
+        font-size: 26px;
+        font-family: var(--sat-font-family-secondary, 'Figtree');
+      };
+
+      /* Drawer list / menu label — @apply --sat-drawer-item; */
+      --sat-drawer-item: {
+        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
+        font-weight: var(--sat-drawer-item-font-weight, 500);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+      };
+
+      /* Drawer active item — @apply --sat-drawer-item-selected; */
+      --sat-drawer-item-selected: {
+        background-color: var(--sat-drawer-item-selected-background, var(--nuxeo-box));
+        border-radius: 54px;
+        outline: 0;
+      };
 
       /* Nuxeo Elements - Map to Satori colors */
       --nuxeo-checkmark-border-color: var(--nuxeo-text-default);
-
-      /*Header Font Style*/
-      --sat-header-h5: {
-        font-weight: var(--sat-home-header-font-weight);
-        font-size: var(--sat-home-header-font-size);
-        font-family: var(--sat-font-family-primary);
-      };
     }
   </style>
 </custom-style>

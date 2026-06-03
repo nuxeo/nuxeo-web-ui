@@ -122,32 +122,56 @@ Polymer({
         align-items: center;
         justify-content: center;
         color: var(--nuxeo-sidebar-menu);
-        padding: 12px 13px;
+        position: relative;
+        min-height: 48px;
+        padding: 4px 14px;
         width: var(--nuxeo-sidebar-width);
+        flex-shrink: 0;
+        box-sizing: border-box;
         cursor: pointer;
         background: transparent;
         border: none;
         outline: none;
         text-decoration: none;
-        box-sizing: border-box;
       }
 
       .profile-avatar:hover {
-        background: rgba(0, 0, 0, 0.2);
+        background: var(--sat-sidebar-item-hover-background, rgba(255, 255, 255, 0.12));
+        border-radius: 12px;
         color: var(--nuxeo-sidebar-menu-hover);
       }
 
       :host([sidebar-expanded]) .profile-avatar:hover,
       .profile-avatar.selected {
-        background: rgba(0, 0, 0, 0.2);
+        background: var(--sat-sidebar-item-selected-background, rgba(255, 255, 255, 0.12));
+        border-radius: 12px;
         color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      .profile-avatar.selected::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 20px;
+        background: var(--nuxeo-sidebar-menu, #fff);
+        border-radius: 0 16px 16px 0;
+        pointer-events: none;
+      }
+
+      :host([dir='rtl']) .profile-avatar.selected::before {
+        left: auto;
+        right: 0;
+        border-radius: 16px 0 0 16px;
       }
 
       .profile-initials {
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: var(--sat-profile-avatar-bg);
+        background: var(--sat-profile-avatar-background, rgba(255, 255, 255, 0.15));
         color: var(--nuxeo-sidebar-menu);
         border: none;
         display: flex;
@@ -241,6 +265,8 @@ Polymer({
         background-color: var(--nuxeo-sidebar-background);
         display: flex;
         flex-direction: column;
+        padding-bottom: 8px;
+        box-sizing: border-box;
       }
 
       :host([dir='ltr']) #menuContainer {
@@ -254,13 +280,13 @@ Polymer({
       .home-link {
         position: relative;
         width: var(--nuxeo-sidebar-width);
+        flex-shrink: 0;
         background-color: var(--nuxeo-sidebar-background);
         display: block;
         text-decoration: none;
         outline: none;
-        margin-top: 16px;
+        margin-top: 43px;
         margin-bottom: 0;
-        flex-shrink: 0;
       }
 
       /* menu */
@@ -274,6 +300,10 @@ Polymer({
         flex-direction: column;
         flex: 1 1 auto;
         min-height: 0;
+      }
+
+      #menu nuxeo-menu-icon {
+        flex-shrink: 0;
       }
 
       .home-link:focus-visible {
@@ -307,6 +337,15 @@ Polymer({
         overflow: visible;
         width: var(--app-drawer-width, 350px);
         transition: width 0.3s ease;
+        /* Thin full-height separator between the secondary nav (drawer) and main content.
+           Drawn on the wrapper so it spans the entire viewport height regardless of
+           how much content the active drawer page renders. */
+        border-right: 1px solid var(--sys-outline-variant, var(--nuxeo-border, rgba(0, 0, 0, 0.12)));
+      }
+
+      :host([dir='rtl']) #drawer {
+        border-right: none;
+        border-left: 1px solid var(--sys-outline-variant, var(--nuxeo-border, rgba(0, 0, 0, 0.12)));
       }
 
       #drawer .toggle {
@@ -324,18 +363,22 @@ Polymer({
         right: auto;
       }
 
-      #drawer .toggle iron-icon {
+      /* Vertical pill handle revealed on drawer hover. Replaces the previous
+         directional chevron — a single non-directional shape works for both
+         LTR and RTL, matching the Figma drag-handle treatment. */
+      #drawer .toggle .handle {
         visibility: hidden;
-        color: var(--nuxeo-drawer-background);
-        background-color: var(--nuxeo-drawer-text);
-        width: 16px;
-        height: 48px;
+        position: absolute;
         top: calc(50% - 24px);
-        opacity: 0.6;
+        left: calc(50% - 2px);
+        width: 4px;
+        height: 48px;
+        border-radius: 2px;
+        background-color: var(--sat-drawer-handle-color, #c8c5d3);
       }
 
-      #drawer:hover .toggle iron-icon,
-      #drawer .toggle:hover iron-icon {
+      #drawer:hover .toggle .handle,
+      #drawer .toggle:hover .handle {
         visibility: visible !important;
       }
 
@@ -353,18 +396,21 @@ Polymer({
         margin-left: 0;
       }
 
-      #drawer nuxeo-menu-item:hover,
+      #drawer nuxeo-menu-item:hover:not(.iron-selected),
       #drawer list-item:hover {
         @apply --nuxeo-block-hover;
       }
 
-      #drawer .list-item.selected,
       #drawer nuxeo-menu-item.iron-selected,
-      #drawer .list-item:focus,
       #drawer nuxeo-menu-item:focus,
-      #drawer .list-item.selected:focus,
       #drawer nuxeo-menu-item.iron-selected:focus {
-        @apply --nuxeo-block-selected;
+        @apply --sat-drawer-item-selected;
+      }
+
+      #drawer .list-item.selected,
+      #drawer .list-item:focus,
+      #drawer .list-item.selected:focus {
+        @apply --sat-drawer-item-selected;
       }
 
       #drawer nuxeo-menu-item {
@@ -386,14 +432,11 @@ Polymer({
         top: 5px;
         left: 6px;
         z-index: 99;
-        background-color: var(--sat-drawer-toggle-bg, var(--nuxeo-drawer-background));
+        background-color: var(--sat-drawer-toggle-background, var(--nuxeo-drawer-background));
       }
 
       .header h5 {
-        font-weight: var(--sat-home-header-font-weight);
-        font-size: var(--sat-home-header-font-size);
-        color: var(--sat-home-header-color, var(--nuxeo-drawer-text));
-        font-family: var(--sat-font-family-primary);
+        @apply --sat-section-header;
       }
 
       #drawerToggle svg,
@@ -550,7 +593,16 @@ Polymer({
                   hidden$="[[!hasAdministrationPermissions(currentUser)]]"
                   icon="nuxeo:admin"
                 ></nuxeo-menu-icon>
-                <a name="profile" class="settings profile-avatar" id="profileWrapper" role="option">
+                <a
+                  name="profile"
+                  class="settings profile-avatar"
+                  id="profileWrapper"
+                  role="option"
+                  href="#"
+                  tabindex="0"
+                  aria-label$="[[i18n('app.account')]]"
+                  on-click="_onProfileAvatarClick"
+                >
                   <template is="dom-if" if="[[currentUser.contextParameters.userprofile.avatar.data]]">
                     <img
                       class="profile-avatar-image"
@@ -608,7 +660,7 @@ Polymer({
               </iron-pages>
 
               <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
-                <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
+                <div class="handle" aria-hidden="true"></div>
               </div>
             </div>
           </div>
@@ -961,22 +1013,63 @@ Polymer({
   },
 
   logoToMenuNavigation() {
-    const { logo } = this.$;
-    const { menu } = this.$;
+    const { logo, menu, menuContainer } = this.$;
+    const homeLink = menuContainer.querySelector('.home-link');
+
+    const getListItems = () => (menu.items || []).filter((el) => !el.hasAttribute('hidden'));
+
+    const isEventFromHome = (e) => homeLink && e.composedPath().includes(homeLink);
+
+    const focusHome = () => {
+      if (homeLink) {
+        homeLink.focus();
+      }
+    };
+
+    const focusMenuItem = (item) => {
+      if (!item) {
+        return;
+      }
+      // paper-listbox keeps tabindex -1 on items until iron-menu focuses them.
+      if (typeof menu._setFocusedItem === 'function') {
+        menu._setFocusedItem(item);
+      } else {
+        item.setAttribute('tabindex', '0');
+        item.focus();
+      }
+    };
+
     logo.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        const firstItem = menu.querySelector('nuxeo-menu-icon, [name]');
-        if (firstItem) {
-          firstItem.focus();
+        if (homeLink) {
+          focusHome();
+        } else {
+          focusMenuItem(getListItems()[0]);
         }
       }
     });
 
+    // Home lives outside paper-listbox (so it does not open the drawer); wire arrows manually.
+    menuContainer.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'ArrowDown' && isEventFromHome(e)) {
+          e.preventDefault();
+          e.stopPropagation();
+          focusMenuItem(getListItems()[0]);
+          return;
+        }
+        if (e.key === 'ArrowUp' && isEventFromHome(e)) {
+          e.preventDefault();
+          logo.focus();
+        }
+      },
+      true,
+    );
+
     menu.addEventListener('keydown', (e) => {
-      const items = Array.from(menu.querySelectorAll('nuxeo-menu-icon, [name]')).filter(
-        (el) => !el.hasAttribute('hidden'),
-      );
+      const items = getListItems();
 
       if (!items.length) return;
 
@@ -984,7 +1077,17 @@ Polymer({
       const lastItem = items[items.length - 1];
       const active = e.target;
 
-      if ((e.key === 'ArrowUp' && active === firstItem) || (e.key === 'ArrowDown' && active === lastItem)) {
+      if (e.key === 'ArrowUp' && active === firstItem) {
+        e.preventDefault();
+        if (homeLink) {
+          focusHome();
+        } else {
+          logo.focus();
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowDown' && active === lastItem) {
         e.preventDefault();
         logo.focus();
       }
@@ -1267,7 +1370,11 @@ Polymer({
   },
 
   _logo(baseUrl) {
-    return `${baseUrl}themes/${localStorage.getItem('theme') || 'default'}/logo.svg`;
+    return `${baseUrl}themes/${localStorage.getItem('theme') || 'default'}/logo.png`;
+  },
+
+  _onProfileAvatarClick(e) {
+    e.preventDefault();
   },
 
   _userInitials(user) {

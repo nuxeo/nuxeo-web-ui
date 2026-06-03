@@ -40,7 +40,7 @@ Polymer({
       }
 
       .header h5 {
-        @apply --sat-header-h5;
+        @apply --sat-section-header;
       }
 
       nuxeo-data-list {
@@ -53,12 +53,14 @@ Polymer({
         cursor: pointer;
         padding: 1em;
         border-bottom: none;
+        @apply --sat-drawer-item;
       }
 
       .list-item-title {
         display: inline-block;
         text-overflow: ellipsis;
         overflow: hidden;
+        @apply --sat-drawer-item;
       }
 
       .list-item-info {
@@ -73,7 +75,7 @@ Polymer({
       .list-item.selected,
       .selected:focus,
       .list-item.selected:focus {
-        @apply --nuxeo-block-selected;
+        @apply --sat-drawer-item-selected;
       }
     </style>
 

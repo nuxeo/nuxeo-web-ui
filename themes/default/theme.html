@@ -22,11 +22,11 @@ limitations under the License.
   <style is="custom-style">
     html {
       /* -- Nuxeo Branding colors -- */
-      --nuxeo-app-font: var(--sat-font-family-secondary);
+      --nuxeo-app-font: 'Noto Sans'; /*--sat-font-family-primary */
       --nuxeo-text-default: #1a1c1e;
 
-      --nuxeo-primary-color: var(--mat-sys-primary);
-      --nuxeo-secondary-color: var(--mat-sys-secondary);
+      --nuxeo-primary-color: #5654ac; /* Satori primary */
+      --nuxeo-secondary-color: #5c5b7f; /* Satori secondary */
 
       --nuxeo-page-background: #f5f5f5;
       --nuxeo-border: rgba(0, 0, 0, 0.15);
@@ -35,13 +35,15 @@ limitations under the License.
       --nuxeo-app-header: var(--nuxeo-text-default);
       --nuxeo-app-header-background: #fff;
       --nuxeo-app-header-pill: #ecf3f7;
-      --nuxeo-app-header-pill-hover: var(--mat-sys-primary);
-      --nuxeo-app-header-pill-active: var(--mat-sys-primary);
+      --nuxeo-app-header-pill-hover: #5654ac; /* Satori primary */
+      --nuxeo-app-header-pill-active: #5654ac; /* Satori primary */
 
       /* App Sidebar + Drawer*/
-      --nuxeo-sidebar-background: var(--mat-sys-primary);
-      --nuxeo-sidebar-menu: var(--mat-sys-on-primary);
-      --nuxeo-sidebar-menu-hover: var(--mat-sys-on-primary);
+      --nuxeo-sidebar-background: #5654ac; /* Satori primary */
+      --nuxeo-sidebar-menu: #ffffff; /* Satori on-primary */
+      --nuxeo-sidebar-menu-hover: #ffffff; /* Satori on-primary */
+      --sat-sidebar-item-selected-background: rgba(255, 255, 255, 0.12);
+      --sat-sidebar-item-hover-background: rgba(255, 255, 255, 0.12);
       --nuxeo-badge-background: #fb6107;
       --nuxeo-drawer-header: var(--nuxeo-text-default);
       --nuxeo-drawer-text: var(--nuxeo-text-default);
@@ -69,7 +71,7 @@ limitations under the License.
       --nuxeo-button-primary: var(--nuxeo-primary-color);
       --nuxeo-button-primary-focus: var(--nuxeo-secondary-color);
       --nuxeo-button-primary-text: #ffffff;
-      --nuxeo-button-secondary-text: var(--mat-sys-primary);
+      --nuxeo-button-secondary-text: #5654ac; /* Satori primary */
       --nuxeo-button-disabled: rgba(0, 0, 0, 0.05);
       --nuxeo-button-disabled-text: rgba(0, 0, 0, 0.1);
       --nuxeo-link-color: var(--nuxeo-text-default);
@@ -167,48 +169,67 @@ limitations under the License.
       --nuxeo-diff-deleted-color: #e6b1b1;
       --nuxeo-diff-label-color: #d4d4d9;
 
-      /* ----------------Satori-specific variables start--------------------- */
-      /* Home Dashboard Header */
-      --sat-home-header-font-weight: 500;
-      --sat-home-header-font-size: 26px;
-      --sat-home-header-color: #474551;
-      --sat-app-header-box-shadow: #f4f3f7;
-      --sat-app-header-box-background-color: #f4f3f7;
+      /* ================================================================
+         TIER 3 — NUXEO COMPONENT TOKENS (--sat-<component>-<property>)
+         Pattern: full words, no abbreviations, no -default suffixes.
+         ================================================================ */
 
-      /* Browse Drawer Content */
+      /* Section header (used by home, clipboard, tasks, collections,
+         recent docs, document tree — applied via the --sat-section-header mixin) */
+      --sat-section-header-font-weight: 500;
+      --sat-section-header-text-color: #474551;
+
+      /* App / page-level header bar */
+      --sat-app-header-background: #f4f3f7;
+      --sat-app-header-shadow: none;
+
+      /* Browse drawer content */
       --sat-drawer-content-background: #f4f3f7;
       --sat-drawer-item-font-weight: 500;
-      --sat-drawer-item-font-size: 14px;
-      --sat-drawer-item-line-height: 20px;
-      --sat-drawer-item-letter-spacing: 0.1px;
       --sat-drawer-item-font-color: #1a1c1e;
       --sat-drawer-item-selected-background: #e2dfff;
+      --sat-drawer-handle-color: #c8c5d3;
 
-      /*Create Button*/
+      /* Document create button (FAB on the home dashboard) */
       --sat-document-create-button-icon-color: #3e3b92;
       --sat-document-create-button-background: #e2dfff;
       --sat-document-create-button-hover-background: #b6b0f1;
-      --sat-document-create-button-width: 56px;
-      --sat-document-create-button-height: 56px;
       --sat-document-create-button-box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
 
-      /*Create Button Shortcuts*/
-      --sat-create-button-shortcut-label-color: #3e3b92;
+      /* Document create shortcuts (labelled mini-buttons that expand from the FAB) */
+      --sat-document-create-shortcut-label-color: #3e3b92;
 
-      /* Global Header H5 Mixin - Apply with @apply --sat-header-h5; */
-      --sat-header-h5: {
-        font-weight: var(--sat-home-header-font-weight);
-        font-size: var(--sat-home-header-font-size);
-        color: var(--sat-home-header-color);
-        font-family: var(--sat-font-family-primary);
-      }
+      /* Document view tabs */
+      --sat-page-tabs-background: #f4f4f4;
+      --sat-page-tabs-unselected-text-color: #474551;
 
-      /* Document view tabs background for non-folders */
-      --sat-page-tabs-background-default: #f4f4f4;
-      --sat-page-tabs-unselected-color: #474551;
+      /* Section header mixin — @apply --sat-section-header; */
+      --sat-section-header: {
+        font-weight: var(--sat-section-header-font-weight, 500);
+        font-size: 26px;
+        color: var(--sat-section-header-text-color, var(--nuxeo-drawer-text));
+        font-family: var(--sat-font-family-secondary, 'Figtree');
+      };
+
+      /* Drawer list / menu label — @apply --sat-drawer-item; */
+      --sat-drawer-item: {
+        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
+        font-weight: var(--sat-drawer-item-font-weight, 500);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+      };
+
+      /* Drawer active item — @apply --sat-drawer-item-selected; */
+      --sat-drawer-item-selected: {
+        background-color: var(--sat-drawer-item-selected-background, #e2dfff);
+        border-radius: 54px;
+        outline: 0;
+      };
 
       /* Nuxeo Elements - Map to Satori colors */
-      --nuxeo-checkmark-border-color: var(--mat-sys-on-surface-variant);
+      --nuxeo-checkmark-border-color: #474551; /* Satori on-surface-variant */
     }
   </style>
 </custom-style>

@@ -60,6 +60,7 @@ Polymer({
       .list-item {
         cursor: pointer;
         padding: 1em;
+        @apply --sat-drawer-item;
       }
 
       .list-item:hover {
@@ -69,7 +70,7 @@ Polymer({
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply --nuxeo-block-selected;
+        @apply --sat-drawer-item-selected;
       }
 
       .list-item-box {
@@ -88,6 +89,7 @@ Polymer({
 
       .list-item-title {
         @apply --layout-flex;
+        @apply --sat-drawer-item;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
@@ -127,7 +129,7 @@ Polymer({
       }
 
       .header h5 {
-        @apply --sat-header-h5;
+        @apply --sat-section-header;
       }
     </style>
 
