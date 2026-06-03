@@ -130,9 +130,12 @@ export function addGoSuite(getElement, goMethod = '_go') {
       element.$.dialog.toggle = element.$.dialog.toggle || function () {};
 
       // Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
-      // navigateAndShowFallback() creates an anchor and clicks it; this stub
-      // prevents the browser from following the custom-protocol link during tests.
-      sinon.stub(HTMLAnchorElement.prototype, 'click');
+      // navigateAndShowFallback() creates an anchor and calls .click() on it.
+      // In Chrome 148+, click() is NOT an own property of HTMLAnchorElement.prototype
+      // (it is inherited from HTMLElement.prototype), so sinon.stub() has no effect.
+      // A direct property assignment creates an own property that shadows the
+      // inherited native implementation. The teardown deletes it to restore inheritance.
+      HTMLAnchorElement.prototype.click = function () {};
 
       // Stub _navigate if it exists to prevent actual globalThis.location assignment.
       // This ensures each test is isolated and not dependent on test execution order.
@@ -141,7 +144,10 @@ export function addGoSuite(getElement, goMethod = '_go') {
       }
     });
 
-    teardown(() => sinon.restore());
+    teardown(() => {
+      delete HTMLAnchorElement.prototype.click;
+      sinon.restore();
+    });
 
     test('opens the dialog', () => {
       const element = getElement();

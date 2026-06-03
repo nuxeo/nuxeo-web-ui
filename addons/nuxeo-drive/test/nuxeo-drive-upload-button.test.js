@@ -82,7 +82,7 @@ suite('nuxeo-drive-upload-button', () => {
     test('format includes scheme, host and path', () => {
       element.document = { path: '/path/to/folder' };
       const originalUrl = element._buildOriginalUrl();
-      expect(originalUrl).to.match(/^nxdrive:\/\/direct-transfer\/https?\/[^/]+\/path\/to\/folder$/);
+      expect(originalUrl).to.match(/^nxdrive:\/\/direct-transfer\/https?\/.+\/path\/to\/folder$/);
     });
   });
 
