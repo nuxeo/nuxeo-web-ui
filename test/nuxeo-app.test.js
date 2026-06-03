@@ -422,6 +422,19 @@ suite('nuxeo-app', () => {
   });
 
   suite('keyboard navigation helpers', () => {
+    test('home ArrowUp returns focus to logo', () => {
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      const logo = app.$.logo;
+      sinon.spy(logo, 'focus');
+
+      const event = new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true });
+      homeLink.dispatchEvent(event);
+
+      expect(event.defaultPrevented).to.be.true;
+      expect(logo.focus).to.have.been.calledOnce;
+      logo.focus.restore();
+    });
+
     test('logo ArrowDown focuses home link when available', () => {
       const logo = app.$.logo;
       const homeLink = app.shadowRoot.querySelector('.home-link');
@@ -442,6 +455,65 @@ suite('nuxeo-app', () => {
 
       expect(menu._setFocusedItem).to.have.been.calledOnce;
       menu._setFocusedItem.restore();
+    });
+
+    test('home ArrowDown with no visible menu items exits early', () => {
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      const menu = app.$.menu;
+
+      const prevItems = menu.items;
+      menu.items = [];
+
+      homeLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      menu.items = prevItems;
+    });
+
+    test('logo ArrowDown fallback path focuses first item when no home link exists', () => {
+      const logo = document.createElement('div');
+      const menu = document.createElement('div');
+      const menuContainer = document.createElement('div');
+      const item = document.createElement('div');
+      item.setAttribute('name', 'synthetic-item');
+
+      // Simulate paper-listbox public API consumed by logoToMenuNavigation.
+      menu.items = [item];
+      menu._setFocusedItem = undefined;
+      sinon.spy(item, 'setAttribute');
+      sinon.spy(item, 'focus');
+
+      app.logoToMenuNavigation.call({
+        $: {
+          logo,
+          menu,
+          menuContainer: {
+            querySelector: () => null,
+            addEventListener: menuContainer.addEventListener.bind(menuContainer),
+          },
+        },
+      });
+
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(item.setAttribute).to.have.been.calledWith('tabindex', '0');
+      expect(item.focus).to.have.been.calledOnce;
+      item.setAttribute.restore();
+      item.focus.restore();
+    });
+
+    test('menu ArrowUp on first item focuses home link and stops further handling', () => {
+      const menu = app.$.menu;
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      const visibleItems = (menu.items || []).filter((el) => !el.hasAttribute('hidden'));
+      const firstItem = visibleItems[0];
+      sinon.spy(homeLink, 'focus');
+
+      if (firstItem) {
+        firstItem.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+      }
+
+      expect(homeLink.focus).to.have.been.calledOnce;
+      homeLink.focus.restore();
     });
 
     test('menu ArrowDown on last item returns focus to logo', () => {
