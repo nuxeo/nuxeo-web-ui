@@ -194,11 +194,14 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   _base64UrlSafeEncode(bytes) {
     let binary = '';
     bytes.forEach((byte) => {
-      binary += String.fromCharCode(byte);
+      binary += String.fromCodePoint(byte);
     });
 
-    let b64 = btoa(binary);
-    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const b64 = btoa(binary);
+    return b64
+      .replaceAll('+', '-')
+      .replaceAll('/', '_')
+      .replace(/={1,2}$/, '');
   }
 }
 
