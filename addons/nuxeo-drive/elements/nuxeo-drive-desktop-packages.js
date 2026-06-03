@@ -40,6 +40,7 @@ Polymer({
       .table {
         font-family: var(--nuxeo-app-font);
         line-height: 3.5;
+        text-align: left;
       }
 
       .row {
@@ -54,20 +55,26 @@ Polymer({
       .header {
         background-color: var(--nuxeo-table-header-background);
         color: var(--nuxeo-table-header-titles);
-        font-weight: 400;
+        font-weight: bold;
         height: 56px;
         display: flex;
         flex-direction: row;
       }
 
       .cell {
-        padding: 0 24px 0 24px;
+        padding: 0 16px;
         min-height: 46px;
         overflow: hidden;
+        display: flex;
+        align-items: center;
       }
 
       paper-button {
         line-height: normal;
+        margin: 0;
+        padding: 0;
+        min-width: 0;
+        text-transform: none;
       }
 
       .platform {
@@ -77,7 +84,7 @@ Polymer({
         font-size: 0.9em;
         letter-spacing: 0.04em;
         line-height: 130%;
-        margin: 0 0.2em 0.2em 0;
+        margin: 0;
         padding: 0.06em 0.3em;
         vertical-align: baseline;
         white-space: nowrap;
@@ -89,12 +96,12 @@ Polymer({
     <div class="table">
       <div class="header">
         <div class="cell flex">[[i18n('driveDesktopPackages.platform')]]</div>
-        <div class="cell flex-3">[[i18n('driveDesktopPackages.install')]]</div>
+        <div class="cell flex-2">[[i18n('driveDesktopPackages.install')]]</div>
       </div>
       <template is="dom-repeat" items="[[packages]]" as="pkg">
         <div class="row">
           <div class="cell flex"><span class="platform">[[pkg.platform]]</span></div>
-          <div class="cell flex-3">
+          <div class="cell flex-2">
             <a href$="[[pkg.url]]" tabindex="-1" target="_blank">
               <paper-button noink> [[pkg.name]] </paper-button>
             </a>
