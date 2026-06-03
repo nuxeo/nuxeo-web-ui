@@ -20,7 +20,7 @@ import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import './nuxeo-drive-icons.js';
-import { base64UrlSafeEncode, navigateAndShowFallback } from './nuxeo-drive-utils.js';
+import { navigateAndShowFallback } from './nuxeo-drive-utils.js';
 
 window.nuxeo = window.nuxeo || {};
 const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
@@ -54,7 +54,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       <style include="nuxeo-action-button-styles"></style>
 
       <template is="dom-if" if="[[_isAvailable(document)]]">
-        <div class="action" on-click="_go">
+        <div class="action" on-tap="_go">
           <paper-icon-button
             noink
             icon="nuxeo-drive:transfer"
@@ -143,7 +143,7 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
       this._installExpanded = false;
       navigateAndShowFallback(this, this.directTransferUrl);
     } catch (e) {
-      this._showError(e.message);
+      this._showError(e.userMessage || e.message || this.i18n('driveUpload.directTransfer.failed'));
     }
   }
 
@@ -158,27 +158,50 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
   }
 
   get directTransferUrl() {
-    return this._compressUploadUrl();
+    const originalUrl = this._buildOriginalUrl();
+    return this._compressDirectTransferUrl(originalUrl);
   }
 
-  _compressUploadUrl() {
+  _buildOriginalUrl() {
     const cleanBaseUrl = baseUrl.split('/ui/')[0].replace(/\/$/, '');
-    const isHttps = cleanBaseUrl.startsWith('https') ? 1 : 0;
-    const serverHost = cleanBaseUrl.replace('://', '/').split('/').slice(1).join('/');
+    const serverPath = cleanBaseUrl.replace('://', '/');
+    const docPath = this.document.path.startsWith('/') ? this.document.path.slice(1) : this.document.path;
 
-    const serverBytes = new TextEncoder().encode(serverHost);
+    return `nxdrive://direct-transfer/${serverPath}/${docPath}`;
+  }
+
+  _compressDirectTransferUrl(originalUrl) {
+    const path = originalUrl.replace('nxdrive://direct-transfer/', '');
+    const segments = path.split('/');
+    const scheme = segments[0] === 'https' ? 1 : 0;
+    const server = segments.slice(1).join('/');
+
+    const serverBytes = new TextEncoder().encode(server);
+
+    // Guard against oversized server URL (max 255 bytes)
     if (serverBytes.length > 255) {
-      const msg = this.i18n('driveUpload.serverUrlTooLong');
-      this._showError(msg);
-      throw new Error(msg);
+      const error = new Error(this.i18n('driveUpload.serverUrlTooLong'));
+      error.userMessage = this.i18n('driveUpload.serverUrlTooLong');
+      throw error;
     }
 
-    const docPath = this.document.path.startsWith('/') ? this.document.path.slice(1) : this.document.path;
-    const pathBytes = new TextEncoder().encode(docPath);
+    const payload = new Uint8Array([scheme, serverBytes.length, ...serverBytes]);
 
-    const payload = new Uint8Array([isHttps, serverBytes.length, ...serverBytes, ...pathBytes]);
-    const b64 = base64UrlSafeEncode(payload);
+    const b64 = this._base64UrlSafeEncode(payload);
     return `nxdrive://direct-transfer/${b64}`;
+  }
+
+  _base64UrlSafeEncode(bytes) {
+    let binary = '';
+    bytes.forEach((byte) => {
+      binary += String.fromCodePoint(byte);
+    });
+
+    const b64 = btoa(binary);
+    return b64
+      .replaceAll('+', '-')
+      .replaceAll('/', '_')
+      .replace(/={1,2}$/, '');
   }
 }
 

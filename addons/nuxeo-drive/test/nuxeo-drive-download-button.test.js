@@ -263,9 +263,14 @@ suite('nuxeo-drive-download-button', () => {
 
     setup(() => {
       toastStub = stubToast(element);
+      // Prevent nxdrive:// anchor clicks from triggering a Karma page reload.
+      // In Chrome 148+, click() is inherited from HTMLElement.prototype, so sinon.stub()
+      // on HTMLAnchorElement.prototype has no effect. A direct own-property assignment shadows it.
+      HTMLAnchorElement.prototype.click = function () {};
     });
 
     teardown(() => {
+      delete HTMLAnchorElement.prototype.click;
       sinon.restore();
     });
 
