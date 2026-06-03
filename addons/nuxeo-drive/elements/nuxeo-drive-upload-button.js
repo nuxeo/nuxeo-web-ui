@@ -20,7 +20,7 @@ import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import './nuxeo-drive-icons.js';
-import { navigateAndShowFallback } from './nuxeo-drive-utils.js';
+import { navigateAndShowFallback, base64UrlSafeEncode } from './nuxeo-drive-utils.js';
 
 window.nuxeo = window.nuxeo || {};
 const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
@@ -187,21 +187,8 @@ class NuxeoDriveUploadButton extends mixinBehaviors([I18nBehavior, FiltersBehavi
 
     const payload = new Uint8Array([scheme, serverBytes.length, ...serverBytes]);
 
-    const b64 = this._base64UrlSafeEncode(payload);
+    const b64 = base64UrlSafeEncode(payload);
     return `nxdrive://direct-transfer/${b64}`;
-  }
-
-  _base64UrlSafeEncode(bytes) {
-    let binary = '';
-    bytes.forEach((byte) => {
-      binary += String.fromCodePoint(byte);
-    });
-
-    const b64 = btoa(binary);
-    return b64
-      .replaceAll('+', '-')
-      .replaceAll('/', '_')
-      .replace(/={1,2}$/, '');
   }
 }
 
