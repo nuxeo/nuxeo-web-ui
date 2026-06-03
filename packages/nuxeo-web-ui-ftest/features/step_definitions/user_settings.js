@@ -73,10 +73,17 @@ Then(/^I can only see (\d+) authorized application[s]?$/, async function (number
 
 Then('I cannot see authorized application', async function () {
   const ui = await this.ui;
-  const apps = await ui.emptyAuthorizedApps;
-  await driver.pause(1500);
-  await apps.waitForExist({ timeout: 5000 });
-  await apps.waitForDisplayed();
+  await driver.waitUntil(
+    async () => {
+      try {
+        const apps = await ui.emptyAuthorizedApps;
+        return (await apps.isExisting()) && (await apps.isDisplayed());
+      } catch (e) {
+        return false;
+      }
+    },
+    { timeout: 30000, interval: 1000, timeoutMsg: 'Empty authorized apps message was not displayed' },
+  );
 });
 
 Then(/^I can revoke access for "(.+)" application$/, async function (appName) {
