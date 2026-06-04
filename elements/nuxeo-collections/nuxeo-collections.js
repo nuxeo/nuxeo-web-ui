@@ -134,7 +134,7 @@ Polymer({
 
       .list-item {
         cursor: pointer;
-        padding: 1em;
+        padding: 0.7em 1em;
         @apply --sat-drawer-item;
       }
 
@@ -143,7 +143,7 @@ Polymer({
       }
 
       .list-item:hover {
-        @apply --nuxeo-block-hover;
+        @apply --sat-drawer-item-selected;
       }
 
       .list-item.selected,
