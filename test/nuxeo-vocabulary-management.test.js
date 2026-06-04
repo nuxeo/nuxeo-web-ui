@@ -228,6 +228,36 @@ suite('nuxeo-vocabulary-management', () => {
     });
   });
 
+  suite('_encodePathSegment', () => {
+    test('should encode a raw path segment', () => {
+      expect(element._encodePathSegment('my entry')).to.equal('my%20entry');
+    });
+
+    test('should encode @ at start of segment', () => {
+      expect(element._encodePathSegment('@test')).to.equal('%40test');
+    });
+
+    test('should encode @ in middle of segment', () => {
+      expect(element._encodePathSegment('qa@test')).to.equal('qa%40test');
+    });
+
+    test('should not double encode an already encoded segment', () => {
+      expect(element._encodePathSegment('my%20entry')).to.equal('my%20entry');
+    });
+
+    test('should not double encode an already encoded @ segment', () => {
+      expect(element._encodePathSegment('qa%40test')).to.equal('qa%40test');
+    });
+
+    test('should not double encode an already encoded @ at start', () => {
+      expect(element._encodePathSegment('%40test')).to.equal('%40test');
+    });
+
+    test('should encode when decodeURIComponent throws', () => {
+      expect(element._encodePathSegment('%E0%A4%A')).to.equal('%25E0%25A4%25A');
+    });
+  });
+
   suite('_value', () => {
     test('should return entry property value', () => {
       element.entries = [{ properties: { id: 'entry1', label: 'Entry 1' } }];
@@ -308,20 +338,124 @@ suite('nuxeo-vocabulary-management', () => {
   });
 
   suite('_save', () => {
+    test('should encode directory path when creating a new entry', async () => {
+      element._selectedEntry = {
+        directoryName: 'my vocabulary',
+        properties: { id: 'entry one' },
+      };
+      element._new = true;
+      sinon.stub(element.$.layout, 'validate').returns(true);
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves({});
+      sinon.stub(element, '_refresh');
+      sinon.stub(element, 'notify');
+      sinon.stub(element.$.vocabularyEditDialog, 'toggle');
+
+      element._save();
+      await executeStub.returnValues[0];
+
+      expect(element.$.directory.path).to.equal('/directory/my%20vocabulary');
+    });
+
+    test('should encode directory and id path segments when updating an entry', async () => {
+      element._selectedEntry = {
+        directoryName: 'my vocabulary',
+        properties: { id: 'entry one' },
+      };
+      element._new = false;
+      sinon.stub(element.$.layout, 'validate').returns(true);
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves({});
+      sinon.stub(element, '_refresh');
+      sinon.stub(element, 'notify');
+      sinon.stub(element.$.vocabularyEditDialog, 'toggle');
+
+      element._save();
+      await executeStub.returnValues[0];
+
+      expect(element.$.directory.path).to.equal('/directory/my%20vocabulary/entry%20one');
+    });
+
+    test('should keep already encoded id unchanged when updating an entry', async () => {
+      element._selectedEntry = {
+        directoryName: 'my vocabulary',
+        properties: { id: 'entry%20one' },
+      };
+      element._new = false;
+      sinon.stub(element.$.layout, 'validate').returns(true);
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves({});
+      sinon.stub(element, '_refresh');
+      sinon.stub(element, 'notify');
+      sinon.stub(element.$.vocabularyEditDialog, 'toggle');
+
+      element._save();
+      await executeStub.returnValues[0];
+
+      expect(element.$.directory.path).to.equal('/directory/my%20vocabulary/entry%20one');
+    });
+
+    test('should encode id starting with @ when updating an entry', async () => {
+      element._selectedEntry = {
+        directoryName: 'language',
+        properties: { id: '@test' },
+      };
+      element._new = false;
+      sinon.stub(element.$.layout, 'validate').returns(true);
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves({});
+      sinon.stub(element, '_refresh');
+      sinon.stub(element, 'notify');
+      sinon.stub(element.$.vocabularyEditDialog, 'toggle');
+
+      element._save();
+      await executeStub.returnValues[0];
+
+      expect(element.$.directory.path).to.equal('/directory/language/%40test');
+    });
+
     test('should convert ordering to number', () => {
       element._selectedEntry = { properties: { ordering: '5', id: 'test' } };
       element._new = true;
       element.selectedVocabulary = 'coverage';
-      // Stub the form validation and directory call
-      const form = element.$.form;
-      sinon.stub(form, 'validate').returns(true);
-      const dirStub = sinon.stub(element.$.directory, 'post').resolves({});
+      sinon.stub(element.$.layout, 'validate').returns(true);
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves({});
       sinon.stub(element, '_refresh');
       sinon.stub(element, 'notify');
       element.$.vocabularyEditDialog = { toggle: sinon.stub() };
       element._save();
       expect(element._selectedEntry.properties.ordering).to.equal(5);
-      dirStub.restore();
+      executeStub.restore();
+    });
+  });
+
+  suite('_executeDirectoryRequest', () => {
+    test('should execute request with explicit URL without re-encoding path', async () => {
+      element.$.directory.path = '/directory/language/%40test';
+      const execute = sinon.stub().resolves({});
+      const request = { execute };
+      element.$.nx.url = '/nuxeo';
+      sinon.stub(element.$.nx, 'request').resolves(request);
+
+      await element._executeDirectoryRequest('DELETE');
+
+      expect(execute).to.have.been.calledWithMatch({
+        method: 'DELETE',
+        url: '/nuxeo/api/v1/directory/language/%40test',
+      });
+    });
+
+    test('should include body and normalize URL when base has trailing slash and path has no leading slash', async () => {
+      element.$.directory.path = 'directory/continent/entry';
+      const body = { test: true };
+      const execute = sinon.stub().resolves({});
+      const request = { execute };
+      element.$.nx.url = '/nuxeo/';
+      sinon.stub(element.$.nx, 'request').resolves(request);
+
+      await element._executeDirectoryRequest('PUT', body);
+
+      expect(execute).to.have.been.calledWithMatch({
+        method: 'PUT',
+        url: '/nuxeo/api/v1/directory/continent/entry',
+        body,
+      });
     });
   });
 
@@ -389,25 +523,76 @@ suite('nuxeo-vocabulary-management', () => {
       sinon.stub(window, 'confirm').returns(true);
       sinon.stub(element, '_refresh');
       sinon.stub(element, 'notify');
-      sinon.stub(element.$.directory, 'remove').resolves();
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves();
       const item = {
         directoryName: 'coverage',
         properties: { id: 'entry-1' },
       };
       element._deleteEntry({ target: { parentNode: { item } } });
-      await element.$.directory.remove.returnValues[0];
+      await executeStub.returnValues[0];
       expect(element.$.directory.path).to.equal('/directory/coverage/entry-1');
       expect(element._refresh).to.have.been.called;
+      window.confirm.restore();
+    });
+
+    test('should encode directory and id path segments when deleting', async () => {
+      sinon.stub(window, 'confirm').returns(true);
+      sinon.stub(element, '_refresh');
+      sinon.stub(element, 'notify');
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves();
+      const item = {
+        directoryName: 'my vocabulary',
+        properties: { id: 'entry one' },
+      };
+
+      element._deleteEntry({ target: { parentNode: { item } } });
+      await executeStub.returnValues[0];
+
+      expect(element.$.directory.path).to.equal('/directory/my%20vocabulary/entry%20one');
+      window.confirm.restore();
+    });
+
+    test('should not double encode already encoded id when deleting', async () => {
+      sinon.stub(window, 'confirm').returns(true);
+      sinon.stub(element, '_refresh');
+      sinon.stub(element, 'notify');
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves();
+      const item = {
+        directoryName: 'my vocabulary',
+        properties: { id: 'entry%20one' },
+      };
+
+      element._deleteEntry({ target: { parentNode: { item } } });
+      await executeStub.returnValues[0];
+
+      expect(element.$.directory.path).to.equal('/directory/my%20vocabulary/entry%20one');
+      window.confirm.restore();
+    });
+
+    test('should encode id starting with @ when deleting', async () => {
+      sinon.stub(window, 'confirm').returns(true);
+      sinon.stub(element, '_refresh');
+      sinon.stub(element, 'notify');
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').resolves();
+      const item = {
+        directoryName: 'language',
+        properties: { id: '@test' },
+      };
+
+      element._deleteEntry({ target: { parentNode: { item } } });
+      await executeStub.returnValues[0];
+
+      expect(element.$.directory.path).to.equal('/directory/language/%40test');
       window.confirm.restore();
     });
 
     test('should notify on 409 conflict when deleting', async () => {
       sinon.stub(window, 'confirm').returns(true);
       sinon.stub(element, 'notify');
-      sinon.stub(element.$.directory, 'remove').rejects({ status: 409 });
+      const executeStub = sinon.stub(element, '_executeDirectoryRequest').rejects({ status: 409 });
       const item = { directoryName: 'coverage', properties: { id: 'x' } };
       element._deleteEntry({ target: { parentNode: { item } } });
-      await element.$.directory.remove.returnValues[0].catch(() => {});
+      await executeStub.returnValues[0].catch(() => {});
       expect(element.notify).to.have.been.called;
       window.confirm.restore();
     });

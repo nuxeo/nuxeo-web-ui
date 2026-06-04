@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-flex-layout/iron-flex-layout.js';
 import '@polymer/iron-form/iron-form.js';
+import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
@@ -104,6 +105,7 @@ Polymer({
       }
     </style>
 
+    <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-resource id="directory" path="/directory" params='{"pageSize": 0}'></nuxeo-resource>
     <nuxeo-resource id="schema"></nuxeo-resource>
 
@@ -364,14 +366,44 @@ Polymer({
     return 50;
   },
 
+  _encodePathSegment(value) {
+    const stringValue = `${value}`;
+    try {
+      return encodeURIComponent(decodeURIComponent(stringValue));
+    } catch (e) {
+      console.warn(`_encodePathSegment: unable to decode "${stringValue}": ${e.message}`);
+      return encodeURIComponent(stringValue);
+    }
+  },
+
+  _executeDirectoryRequest(method, body) {
+    const path = this.$.directory.path;
+    const requestPath = path.startsWith('/') ? path : `/${path}`;
+    return this.$.nx.request().then((request) => {
+      const restUrl = `${this.$.nx.url.replace(/\/$/, '')}/api/v1`;
+      const options = {
+        method,
+        url: `${restUrl}${requestPath}`,
+      };
+
+      if (body !== undefined) {
+        options.body = body;
+      }
+
+      return request.execute(options);
+    });
+  },
+
   _deleteEntry(e) {
     if (this._isReadOnly) {
       return;
     }
     if (window.confirm(this.i18n('vocabularyManagement.confirmDelete'))) {
       const { item } = e.target.parentNode;
-      this.$.directory.path = `/directory/${item.directoryName}/${item.properties.id}`;
-      this.$.directory.remove().then(
+      this.$.directory.path = `/directory/${this._encodePathSegment(item.directoryName)}/${this._encodePathSegment(
+        item.properties.id,
+      )}`;
+      this._executeDirectoryRequest('DELETE').then(
         () => {
           this._refresh();
           this.notify({ message: this.i18n('vocabularyManagement.successfullyDeleted') });
@@ -432,8 +464,8 @@ Polymer({
     }
     this.$.directory.data = this._selectedEntry;
     if (this._new) {
-      this.$.directory.path = `/directory/${this._selectedEntry.directoryName}`;
-      this.$.directory.post().then(
+      this.$.directory.path = `/directory/${this._encodePathSegment(this._selectedEntry.directoryName)}`;
+      this._executeDirectoryRequest('POST', this.$.directory.data).then(
         () => {
           this.$.vocabularyEditDialog.toggle();
           this.notify({ message: this.i18n('vocabularyManagement.successfullyCreated') });
@@ -448,8 +480,10 @@ Polymer({
         },
       );
     } else {
-      this.$.directory.path = `/directory/${this._selectedEntry.directoryName}/${this._selectedEntry.properties.id}`;
-      this.$.directory.put().then(
+      this.$.directory.path = `/directory/${this._encodePathSegment(
+        this._selectedEntry.directoryName,
+      )}/${this._encodePathSegment(this._selectedEntry.properties.id)}`;
+      this._executeDirectoryRequest('PUT', this.$.directory.data).then(
         () => {
           this.$.vocabularyEditDialog.toggle();
           this.notify({ message: this.i18n('vocabularyManagement.successfullyEdited') });
