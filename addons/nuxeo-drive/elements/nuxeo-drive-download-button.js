@@ -59,7 +59,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
 
       <div
         class="action"
-        on-click="_download"
+        on-tap="_download"
         hidden$="[[!_isAvailable(documents.splices, documents.items.splices, documents.items.length, documents.selectedItems.splices, documents.selectedItems.length)]]"
       >
         <paper-icon-button noink icon="nuxeo-drive:download" id="driveBtn" aria-labelledby="label"></paper-icon-button>
