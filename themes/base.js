@@ -670,6 +670,32 @@ const template = html`
         --nuxeo-widget: {
           margin-bottom: 16px;
         }
+
+        /* SAT drawersection header mixin — @apply --sat-section-header; */
+        --sat-section-header: {
+          font-weight: 500;
+          font-size: 26px;
+          color: var(--sat-section-header-text-color, var(--nuxeo-drawer-text));
+          font-family: var(--sat-font-family-secondary, 'Figtree');
+        };
+
+        /* SAT drawer list / menu label mixin — @apply --sat-drawer-item; */
+        --sat-drawer-item: {
+          color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+          font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
+          font-weight: 500;
+          font-size: 14px;
+          line-height: 20px;
+          letter-spacing: 0.1px;
+        };
+
+        /* SAT drawer active item mixin — @apply --sat-drawer-item-selected; */
+        --sat-drawer-item-selected: {
+          background-color: var(--sat-drawer-item-selected-background, var(--nuxeo-box));
+          border-radius: 54px;
+          outline: 0;
+        };
+
       }
 
       @media (max-width: 1024px) {

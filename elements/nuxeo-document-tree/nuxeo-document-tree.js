@@ -70,7 +70,7 @@ Polymer({
       }
 
       .content {
-        padding: 0;
+        padding: 0px 4px 0px 4px;
         overflow: auto;
         background-color: var(--sat-drawer-content-background, transparent);
         height: calc(100vh - 72px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
@@ -358,7 +358,7 @@ Polymer({
 
     // Listen for browser back/forward button navigation
     this._boundPopStateHandler = this._handlePopState.bind(this);
-    globalThis.addEventListener('popstate', this._boundPopStateHandler);
+    window.addEventListener('popstate', this._boundPopStateHandler);
 
     // Listen for location changes (Polymer routing)
     this._boundLocationChangedHandler = this._handleLocationChanged.bind(this);
@@ -371,7 +371,7 @@ Polymer({
   detached() {
     // Clean up event listeners
     if (this._boundPopStateHandler) {
-      globalThis.removeEventListener('popstate', this._boundPopStateHandler);
+      window.removeEventListener('popstate', this._boundPopStateHandler);
     }
     if (this._boundLocationChangedHandler) {
       globalThis.removeEventListener('location-changed', this._boundLocationChangedHandler);

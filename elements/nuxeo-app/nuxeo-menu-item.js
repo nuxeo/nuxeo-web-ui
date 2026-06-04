@@ -35,8 +35,9 @@ Polymer({
         --nuxeo-link-hover-color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
       }
 
-      :host(:hover:not(.iron-selected)) {
-        background-color: var(--nuxeo-container-hover);
+      :host(:hover:not(.iron-selected)),
+      :host(:focus:not(.iron-selected)) {
+        @apply --sat-drawer-item-hover;
       }
 
       a {

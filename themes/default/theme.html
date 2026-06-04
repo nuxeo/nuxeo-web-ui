@@ -176,7 +176,6 @@ limitations under the License.
 
       /* Section header (used by home, clipboard, tasks, collections,
          recent docs, document tree — applied via the --sat-section-header mixin) */
-      --sat-section-header-font-weight: 500;
       --sat-section-header-text-color: #474551;
 
       /* App / page-level header bar */
@@ -185,7 +184,6 @@ limitations under the License.
 
       /* Browse drawer content */
       --sat-drawer-content-background: #f4f3f7;
-      --sat-drawer-item-font-weight: 500;
       --sat-drawer-item-font-color: #1a1c1e;
       --sat-drawer-item-selected-background: #e2dfff;
       --sat-drawer-handle-color: #c8c5d3;
@@ -202,31 +200,6 @@ limitations under the License.
       /* Document view tabs */
       --sat-page-tabs-background: #f4f4f4;
       --sat-page-tabs-unselected-text-color: #474551;
-
-      /* Section header mixin — @apply --sat-section-header; */
-      --sat-section-header: {
-        font-weight: var(--sat-section-header-font-weight, 500);
-        font-size: 26px;
-        color: var(--sat-section-header-text-color, var(--nuxeo-drawer-text));
-        font-family: var(--sat-font-family-secondary, 'Figtree');
-      };
-
-      /* Drawer list / menu label — @apply --sat-drawer-item; */
-      --sat-drawer-item: {
-        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
-        font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
-        font-weight: var(--sat-drawer-item-font-weight, 500);
-        font-size: 14px;
-        line-height: 20px;
-        letter-spacing: 0.1px;
-      };
-
-      /* Drawer active item — @apply --sat-drawer-item-selected; */
-      --sat-drawer-item-selected: {
-        background-color: var(--sat-drawer-item-selected-background, #e2dfff);
-        border-radius: 54px;
-        outline: 0;
-      };
 
       /* Nuxeo Elements - Map to Satori colors */
       --nuxeo-checkmark-border-color: #474551; /* Satori on-surface-variant */
