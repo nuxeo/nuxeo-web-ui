@@ -39,8 +39,9 @@ export default class Vocabulary extends BasePage {
         // array so we can use Array.prototype methods (.map/.every/.some) synchronously.
         const cellArray = Array.from(cells);
         if (!cellArray.length) {
-          // Table has no data cells yet (hidden during refresh or rows not yet stamped); keep waiting.
-          return false;
+          // Table can be temporarily empty during refresh and permanently empty when the last
+          // entry is deleted. In reverse mode, empty means the target entry is absent.
+          return Boolean(reverse);
         }
         // Await all cell texts concurrently so we can compare synchronously
         const texts = await Promise.all(cellArray.map((cell) => cell.getText().then((t) => t.trim())));
