@@ -132,6 +132,10 @@ const common = merge([
       // they are referenced directly from index.html / spreadsheet.popup.html.
       // The webpack runtime embedded in the entry bundle knows the hashed mapping
       // for dynamic chunks, so this is transparent to application code.
+      // IMPORTANT: This relies on the Nuxeo server sending Cache-Control: no-cache
+      // for main.bundle.js (the stable-named entry), which forces the browser to
+      // revalidate it on every navigation. Without that, a stale entry bundle could
+      // reference chunk hashes that no longer exist after an upgrade, causing 404s.
       chunkFilename: '[name].[contenthash].bundle.js',
       path: TARGET,
       // Force root-relative URLs for @open-wc/webpack-import-meta-loader 0.4.x.
