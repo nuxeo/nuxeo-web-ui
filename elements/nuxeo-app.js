@@ -154,7 +154,6 @@ Polymer({
         top: var(--nuxeo-app-top);
         z-index: 102;
         box-sizing: border-box;
-        outline: none;
         background-color: var(--nuxeo-sidebar-background);
       }
 
