@@ -126,6 +126,13 @@ const common = merge([
     },
     output: {
       filename: '[name].bundle.js',
+      // Include a content hash in dynamically-imported chunk filenames so that
+      // browsers (and intermediate caches) are forced to re-fetch them whenever
+      // their content changes. Entry chunks above keep their stable names because
+      // they are referenced directly from index.html / spreadsheet.popup.html.
+      // The webpack runtime embedded in the entry bundle knows the hashed mapping
+      // for dynamic chunks, so this is transparent to application code.
+      chunkFilename: '[name].[contenthash].bundle.js',
       path: TARGET,
       // Force root-relative URLs for @open-wc/webpack-import-meta-loader 0.4.x.
       // The loader uses __webpack_public_path__ to build import.meta.url; the default
