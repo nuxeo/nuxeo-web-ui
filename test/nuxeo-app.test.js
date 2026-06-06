@@ -530,6 +530,242 @@ suite('nuxeo-app', () => {
       expect(logo.focus).to.have.been.calledOnce;
       logo.focus.restore();
     });
+
+    test('logo Enter toggles sidebar expanded state', () => {
+      const logo = app.$.logo;
+      expect(app.sidebarExpanded).to.be.false;
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      expect(app.sidebarExpanded).to.be.true;
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      expect(app.sidebarExpanded).to.be.false;
+    });
+  });
+
+  suite('expandable sidebar', () => {
+    test('_sidebarProductTitle uses productName', () => {
+      const fakeI18n = (key, ...args) => (key === 'app.brandedProductName' ? `Hyland ${args[0]}` : key);
+      expect(app._sidebarProductTitle('Nuxeo', fakeI18n)).to.equal('Hyland Nuxeo');
+    });
+
+    test('_toggleDrawer collapses expanded sidebar when opening drawer', () => {
+      app.sidebarExpanded = true;
+      app.drawerOpened = false;
+      app._selected = '';
+      app._toggleDrawer({ type: 'iron-activate' }, { detail: { selected: 'browser' } });
+      expect(app.sidebarExpanded).to.be.false;
+      expect(app.drawerOpened).to.be.true;
+    });
+
+    test('_toggleDrawer collapses expanded sidebar when clicking the same item', async () => {
+      app.sidebarExpanded = true;
+      app.drawerOpened = true;
+      app._selected = 'browser';
+      app.selectedTab = 'browser';
+      app._toggleDrawer({ type: 'iron-activate', detail: { selected: 'browser' } });
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      expect(app.drawerOpened).to.be.true;
+      expect(app.sidebarExpanded).to.be.false;
+    });
+
+    test('logo keeps dynamic theme img src', () => {
+      const img = app.$.logo.querySelector('img');
+      expect(img.getAttribute('src')).to.include('themes/');
+    });
+
+    test('sidebarRail is fixed for width transition', () => {
+      const rail = app.$.sidebarRail;
+      expect(rail).to.exist;
+      expect(getComputedStyle(rail).position).to.equal('fixed');
+    });
+
+    test('sidebar scrim is presentational and stays hidden from AT', () => {
+      const scrim = app.$.sidebarExpandScrim;
+      expect(scrim.getAttribute('role')).to.equal('presentation');
+      expect(scrim.getAttribute('aria-hidden')).to.equal('true');
+    });
+
+    test('_logoAriaLabel uses the collapsed key with product title placeholder', () => {
+      app.productName = 'Nuxeo';
+      const fakeI18n = (key, ...args) =>
+        key === 'app.brandedProductName' ? `Hyland ${args[0]}` : `${key}|${args.join(',')}`;
+
+      expect(app._logoAriaLabel(false, app.productName, fakeI18n)).to.equal(
+        'accessibility.sidebar.logoCollapsed|Hyland Nuxeo',
+      );
+    });
+
+    test('_logoAriaLabel uses the expanded key with product title placeholder', () => {
+      app.productName = 'Nuxeo';
+      const fakeI18n = (key, ...args) =>
+        key === 'app.brandedProductName' ? `Hyland ${args[0]}` : `${key}|${args.join(',')}`;
+
+      expect(app._logoAriaLabel(true, app.productName, fakeI18n)).to.equal(
+        'accessibility.sidebar.logoExpanded|Hyland Nuxeo',
+      );
+    });
+
+    test('_syncSidebarExpandedTooltips hides profile tooltip on expand', () => {
+      sinon.stub(app, '_syncSidebarMenuTooltips');
+      const profileTooltip = app.$.profileTooltip;
+      sinon.stub(profileTooltip, 'hide');
+
+      app._syncSidebarExpandedTooltips(true);
+
+      expect(app._syncSidebarMenuTooltips).to.have.been.calledWith(true);
+      expect(profileTooltip.hide).to.have.been.calledOnce;
+
+      app._syncSidebarMenuTooltips.restore();
+      profileTooltip.hide.restore();
+    });
+
+    test('_syncSidebarExpandedTooltips does not call hide when collapsing', () => {
+      sinon.stub(app, '_syncSidebarMenuTooltips');
+      const profileTooltip = app.$.profileTooltip;
+      sinon.stub(profileTooltip, 'hide');
+
+      app._syncSidebarExpandedTooltips(false);
+
+      expect(profileTooltip.hide).to.not.have.been.called;
+      app._syncSidebarMenuTooltips.restore();
+      profileTooltip.hide.restore();
+    });
+
+    test('_syncSidebarMenuTooltips propagates expanded state to all icons', () => {
+      const iconA = {};
+      const iconB = {};
+      const originalMenuContainer = app.$.menuContainer;
+      app.$.menuContainer = { querySelectorAll: sinon.stub().returns([iconA, iconB]) };
+
+      app._syncSidebarMenuTooltips(true);
+      expect(iconA.expanded).to.be.true;
+      expect(iconB.expanded).to.be.true;
+
+      app._syncSidebarMenuTooltips(false);
+      expect(iconA.expanded).to.be.false;
+      expect(iconB.expanded).to.be.false;
+
+      app.$.menuContainer = originalMenuContainer;
+    });
+
+    test('_syncSidebarMenuTooltips returns early when menu container is missing', () => {
+      const ctx = { $: null };
+      expect(() => app._syncSidebarMenuTooltips.call(ctx, true)).to.not.throw();
+    });
+
+    test('_onSidebarNavClick collapses sidebar and resets task selection', () => {
+      sinon.stub(app, '_collapseSidebar');
+      sinon.stub(app, '_resetTaskSelection');
+
+      app._onSidebarNavClick();
+
+      expect(app._collapseSidebar).to.have.been.calledOnce;
+      expect(app._resetTaskSelection).to.have.been.calledOnce;
+      app._collapseSidebar.restore();
+      app._resetTaskSelection.restore();
+    });
+
+    test('_onLogoClick prevents default, stops propagation and toggles sidebar', () => {
+      sinon.stub(app, '_toggleSidebarExpanded');
+      const event = { preventDefault: sinon.spy(), stopPropagation: sinon.spy() };
+
+      app._onLogoClick(event);
+
+      expect(event.preventDefault).to.have.been.calledOnce;
+      expect(event.stopPropagation).to.have.been.calledOnce;
+      expect(app._toggleSidebarExpanded).to.have.been.calledOnce;
+      app._toggleSidebarExpanded.restore();
+    });
+
+    test('_onSidebarScrimClick collapses sidebar', () => {
+      sinon.stub(app, '_collapseSidebar');
+
+      app._onSidebarScrimClick();
+
+      expect(app._collapseSidebar).to.have.been.calledOnce;
+      app._collapseSidebar.restore();
+    });
+
+    test('_onSidebarEscape collapses sidebar when Escape is pressed and expanded', () => {
+      sinon.stub(app, '_collapseSidebar');
+      app.sidebarExpanded = true;
+
+      app._onSidebarEscape({ key: 'Escape' });
+
+      expect(app._collapseSidebar).to.have.been.calledOnce;
+      app._collapseSidebar.restore();
+    });
+
+    test('menu keyup listener delegates to _toggleDrawer', () => {
+      sinon.stub(app, '_toggleDrawer');
+      app.$.menu.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true, cancelable: true }));
+
+      expect(app._toggleDrawer.called).to.be.true;
+      app._toggleDrawer.restore();
+    });
+
+    test('drawer transition listeners call _resizeDuringAnimation', () => {
+      sinon.stub(app, '_resizeDuringAnimation');
+
+      app.$.drawer.dispatchEvent(new Event('transitionrun'));
+      app.$.drawer.dispatchEvent(new Event('transitionstart'));
+
+      expect(app._resizeDuringAnimation.callCount).to.equal(2);
+      app._resizeDuringAnimation.restore();
+    });
+
+    test('toast opening listener applies panel style tweaks', async () => {
+      app.$.toast.labelText = 'opening';
+      app.$.toast.show();
+      await app.$.toast.updateComplete;
+
+      const root = app.$.toast.mdcRoot;
+      const label = root && root.querySelector('.mdc-snackbar__label');
+      const surface = root && root.querySelector('.mdc-snackbar__surface');
+      expect(root).to.exist;
+      expect(root.style.position).to.equal('relative');
+      expect(label.style.webkitFontSmoothing).to.equal('auto');
+      expect(surface.style.width).to.equal('344px');
+      app.$.toast.close();
+    });
+
+    test('unhandledrejection listener reports 404 errors via showError', () => {
+      const originalAddEventListener = window.addEventListener;
+      let rejectionHandler;
+      window.addEventListener = (type, handler, ...rest) => {
+        if (type === 'unhandledrejection') {
+          rejectionHandler = handler;
+        }
+        return originalAddEventListener.call(window, type, handler, ...rest);
+      };
+
+      return fixture(html`<nuxeo-app></nuxeo-app>`)
+        .then((app2) => {
+          sinon.stub(app2, 'i18n').callsFake((key) => key);
+          sinon.stub(app2, 'showError');
+          sinon.stub(app2, '_errorUrl').returns('https://example/error-url');
+
+          rejectionHandler({ reason: { status: 404, message: 'Not found' } });
+
+          expect(app2.showError).to.have.been.calledWith(404, 'Not found', 'https://example/error-url');
+          app2.showError.restore();
+          app2._errorUrl.restore();
+          app2.i18n.restore();
+        })
+        .finally(() => {
+          window.addEventListener = originalAddEventListener;
+        });
+    });
+
+    test('menu mutation observer syncs tooltips when sidebar is expanded', async () => {
+      sinon.stub(app, '_syncSidebarMenuTooltips');
+      app.sidebarExpanded = true;
+
+      app.$.menu.appendChild(document.createElement('div'));
+      await flush();
+
+      expect(app._syncSidebarMenuTooltips).to.have.been.calledWith(true);
+      app._syncSidebarMenuTooltips.restore();
+    });
   });
 
   suite('skip link behavior', () => {

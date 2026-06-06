@@ -358,7 +358,7 @@ Polymer({
 
     // Listen for browser back/forward button navigation
     this._boundPopStateHandler = this._handlePopState.bind(this);
-    window.addEventListener('popstate', this._boundPopStateHandler);
+    globalThis.addEventListener('popstate', this._boundPopStateHandler);
 
     // Listen for location changes (Polymer routing)
     this._boundLocationChangedHandler = this._handleLocationChanged.bind(this);
@@ -371,7 +371,7 @@ Polymer({
   detached() {
     // Clean up event listeners
     if (this._boundPopStateHandler) {
-      window.removeEventListener('popstate', this._boundPopStateHandler);
+      globalThis.removeEventListener('popstate', this._boundPopStateHandler);
     }
     if (this._boundLocationChangedHandler) {
       globalThis.removeEventListener('location-changed', this._boundLocationChangedHandler);
