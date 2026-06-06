@@ -1185,9 +1185,9 @@ Polymer({
    */
   _collapseSidebar(options) {
     const wasExpanded = this.sidebarExpanded;
-    const restoreFocus = !!(options && options.restoreFocus);
+    const restoreFocus = !!options?.restoreFocus;
     this.sidebarExpanded = false;
-    if (wasExpanded && restoreFocus && this.$ && this.$.logo) {
+    if (wasExpanded && restoreFocus && this.$?.logo) {
       this.$.logo.focus();
     }
   },
@@ -1234,14 +1234,14 @@ Polymer({
    */
   _syncSidebarExpandedTooltips(expanded) {
     this._syncSidebarMenuTooltips(expanded);
-    const profileTooltip = this.$ && this.$.profileTooltip;
+    const profileTooltip = this.$?.profileTooltip;
     if (expanded && profileTooltip && typeof profileTooltip.hide === 'function') {
       profileTooltip.hide();
     }
   },
 
   _syncSidebarMenuTooltips(expanded) {
-    const container = this.$ && this.$.menuContainer;
+    const container = this.$?.menuContainer;
     if (!container) {
       return;
     }
