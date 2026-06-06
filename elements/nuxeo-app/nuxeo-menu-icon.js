@@ -41,6 +41,8 @@ Polymer({
        *   content area so the button's internal iron-icon (width/height 100%) stays 24px.
        * - Tooltip and hover use #menuItemAnchor (full cell); badge uses #button (icon).
        * - cursor: pointer on host/anchor (drawer items often have no href).
+       * - When nuxeo-app is [sidebar-expanded], show icon + label; the label is
+       *   decorative (the anchor's aria-label is the accessible name).
        */
       :host {
         display: block;
@@ -132,21 +134,86 @@ Polymer({
         --paper-badge-height: 16px;
       }
 
+      .sidebar-item-label {
+        display: block;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: var(--nuxeo-app-font);
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        color: var(--nuxeo-sidebar-menu);
+        opacity: 0;
+        max-width: 0;
+        height: 0;
+        padding: 0;
+        transition:
+          opacity 0.2s ease,
+          max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      :host([expanded]) {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+      }
+
+      :host([expanded]) #menuItemAnchor {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        min-height: 48px;
+        height: auto;
+        padding: 0;
+        padding-inline-end: 12px;
+      }
+
+      :host([expanded]) paper-icon-button {
+        flex-shrink: 0;
+      }
+
+      :host([expanded]) .sidebar-item-label {
+        opacity: 1;
+        max-width: 200px;
+        height: auto;
+        transition:
+          opacity 0.2s ease 0.05s,
+          max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      :host(.selected) .sidebar-item-label {
+        font-weight: 600;
+      }
+
       paper-icon-button svg,
       paper-icon-button g,
       paper-icon-button path {
         pointer-events: none;
       }
+
+      @media (prefers-reduced-motion: reduce) {
+        .sidebar-item-label {
+          transition: none;
+        }
+      }
     </style>
 
-    <a id="menuItemAnchor" href$="[[_href(urlFor, route, link)]]" aria-labelledby="tooltip">
+    <a id="menuItemAnchor" href$="[[_href(urlFor, route, link)]]" aria-label$="[[i18n(label)]]">
       <paper-icon-button noink id="button" name$="[[name]]" tabindex="-1" aria-hidden="true"></paper-icon-button>
+      <span class="sidebar-item-label" aria-hidden="true">[[i18n(label)]]</span>
       <nuxeo-tooltip
         for="menuItemAnchor"
         position="[[_tooltipPosition]]"
         offset="0"
         animation-delay="0"
         id="tooltip"
+        hidden$="[[expanded]]"
         tabindex="-1"
         >[[i18n(label)]]</nuxeo-tooltip
       >
@@ -211,6 +278,18 @@ Polymer({
       type: String,
       value: 'left',
     },
+
+    /**
+     * Set by the parent `nuxeo-app` to mirror its `sidebar-expanded` state.
+     * Reflected so CSS can key off `:host([expanded])` (cross-browser; avoids
+     * non-standard `:host-context()`).
+     */
+    expanded: {
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true,
+      observer: '_onExpandedChanged',
+    },
   },
 
   observers: ['_srcOrIcon(icon, src)'],
@@ -230,6 +309,13 @@ Polymer({
       this._tooltipPosition = 'right';
     } else {
       this._tooltipPosition = 'left';
+    }
+  },
+
+  _onExpandedChanged(expanded) {
+    const tooltip = this.$ && this.$.tooltip;
+    if (tooltip && expanded && typeof tooltip.hide === 'function') {
+      tooltip.hide();
     }
   },
 
