@@ -313,7 +313,7 @@ Polymer({
   },
 
   _onExpandedChanged(expanded) {
-    const tooltip = this.$ && this.$.tooltip;
+    const tooltip = this.$?.tooltip;
     if (tooltip && expanded && typeof tooltip.hide === 'function') {
       tooltip.hide();
     }
