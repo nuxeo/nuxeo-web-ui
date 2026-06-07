@@ -346,13 +346,13 @@ const template = html`
         }
 
         --nuxeo-block-selected: {
-          background-color: var(--sat-drawer-item-selected-background, var(--nuxeo-box));
+          background-color: var(--sat-selection-pill-background, var(--nuxeo-box));
           outline: 0;
         }
 
         [dir='rtl'] {
           --nuxeo-block-selected: {
-            background-color: var(--sat-drawer-item-selected-background, var(--nuxeo-box));
+            background-color: var(--sat-selection-pill-background, var(--nuxeo-box));
             outline: 0;
           }
         }
@@ -681,7 +681,7 @@ const template = html`
 
         /* SAT drawer list / menu label mixin — @apply --sat-drawer-item; */
         --sat-drawer-item: {
-          color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+          color: var(--nuxeo-drawer-text);
           font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
           font-weight: 500;
           font-size: 14px;
@@ -691,7 +691,7 @@ const template = html`
 
         /* SAT drawer active item mixin — @apply --sat-drawer-item-selected; */
         --sat-drawer-item-selected: {
-          background-color: var(--sat-drawer-item-selected-background, var(--nuxeo-box));
+          background-color: var(--sat-selection-pill-background, var(--nuxeo-box));
           border-radius: 54px;
           outline: 0;
         };

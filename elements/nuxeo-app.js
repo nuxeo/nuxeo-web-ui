@@ -513,7 +513,7 @@ Polymer({
         width: 4px;
         height: 48px;
         border-radius: 2px;
-        background-color: var(--sat-drawer-handle-color, #c8c5d3);
+        background-color: var(--sat-drawer-toggle-handle-background, #c8c5d3);
       }
 
       #drawer:hover .toggle .handle,
@@ -527,7 +527,7 @@ Polymer({
         width: calc(100% - var(--nuxeo-sidebar-width));
         height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         margin-left: var(--nuxeo-sidebar-width);
-        background-color: var(--sat-drawer-content-background, var(--nuxeo-drawer-background));
+        background-color: var(--sat-page-surface-background, var(--nuxeo-drawer-background));
       }
 
       :host([dir='rtl']) #drawer iron-pages {

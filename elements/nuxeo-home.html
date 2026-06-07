@@ -28,8 +28,8 @@ limitations under the License.
          These scoped vars are read by <nuxeo-page>; admin / legacy pages do NOT set them
          so they keep the original transparent content + white toolbar. */
       :host {
-        --nuxeo-page-host-background: var(--sat-drawer-content-background);
-        --nuxeo-page-content-background: var(--sat-drawer-content-background);
+        --nuxeo-page-host-background: var(--sat-page-surface-background);
+        --nuxeo-page-content-background: var(--sat-page-surface-background);
         --nuxeo-page-toolbar-background: var(--sat-app-header-background);
         --nuxeo-page-toolbar-box-shadow: var(--sat-app-header-shadow);
       }
@@ -39,7 +39,7 @@ limitations under the License.
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
-        background-color: var(--sat-drawer-content-background, var(--nuxeo-app-content-background));
+        background-color: var(--sat-page-surface-background, var(--nuxeo-app-content-background));
       }
 
       nuxeo-card {
