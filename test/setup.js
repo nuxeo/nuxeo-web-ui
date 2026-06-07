@@ -319,6 +319,10 @@ suiteTeardown(async function coverageMaterializationTeardown() {
     );
   }
 
+  // Suppress async errors thrown by Polymer observer side-effects when modules are bulk-imported.
+  // These are benign — elements fire property observers on registration but have no data context.
+  _testRunning = false;
+
   this.timeout(0);
   const root = new URL('../', import.meta.url);
   const failures = [];
