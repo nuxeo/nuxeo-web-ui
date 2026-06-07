@@ -14,7 +14,7 @@ export function nuxeoCoverageFlagPlugin(enabled) {
       if (!pathname.endsWith('/test/setup.js')) {
         return undefined;
       }
-      return `globalThis.__NUXEO_COVERAGE_RUN__ = true;\n${context.body}`;
+      return { body: `globalThis.__NUXEO_COVERAGE_RUN__ = true;\n${context.body}` };
     },
   };
 }
