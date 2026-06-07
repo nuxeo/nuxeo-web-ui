@@ -20,6 +20,7 @@ import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { isPageProviderDisplayBehavior } from '../../../elements/select-all-helpers.js';
 import './nuxeo-drive-icons.js';
+import { base64UrlSafeEncode, navigateAndShowFallback } from './nuxeo-drive-utils.js';
 
 window.nuxeo = window.nuxeo || {};
 const baseUrl = window.nuxeo.baseUrl || window.location.origin + window.location.pathname;
@@ -44,6 +45,11 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
         reflectToAttribute: true,
         value: false,
       },
+
+      _installExpanded: {
+        type: Boolean,
+        value: false,
+      },
     };
   }
 
@@ -51,7 +57,6 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     return html`
       <style include="nuxeo-action-button-styles"></style>
 
-      <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
       <div
         class="action"
         on-tap="_download"
@@ -63,12 +68,59 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       </div>
 
       <nuxeo-dialog id="dialog" with-backdrop>
-        <div class="vertical layout">
-          <h1>[[i18n('driveEditButton.dialog.heading')]]</h1>
-          <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
+        <style>
+          #dialog {
+            margin-top: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            max-height: 80vh;
+          }
+
+          .dialog-content {
+            padding: 16px 24px;
+          }
+
+          .dialog-content h1 {
+            margin: 0 0 12px;
+            font-size: 1.6em;
+          }
+
+          .dialog-content p {
+            color: var(--primary-text-color, #333);
+            margin: 0 0 16px;
+          }
+
+          .close-btn {
+            border: 1px solid var(--nuxeo-primary-color, #0066ff);
+            color: var(--nuxeo-primary-color, #0066ff);
+            text-transform: uppercase;
+            font-size: 0.9em;
+            padding: 0.5em 1em;
+          }
+
+          .buttons {
+            justify-content: flex-end;
+          }
+
+          .install-link {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 0.9em;
+          }
+        </style>
+        <div class="dialog-content">
+          <h1>[[i18n('driveButton.dialog.heading')]]</h1>
+          <p>[[i18n('driveButton.dialog.description')]]</p>
+          <template is="dom-if" if="[[_installExpanded]]">
+            <p>[[i18n('driveButton.dialog.install.prompt')]]</p>
+            <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
+          </template>
+          <template is="dom-if" if="[[!_installExpanded]]">
+            <a class="install-link" href="#" on-click="_toggleInstall">[[i18n('driveButton.install.dialog.hint')]]</a>
+          </template>
         </div>
         <div class="buttons">
-          <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
+          <paper-button dialog-dismiss class="close-btn">[[i18n('command.close')]]</paper-button>
         </div>
       </nuxeo-dialog>
 
@@ -79,7 +131,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
   _isAvailable() {
     return isPageProviderDisplayBehavior(this.documents)
       ? (this.documents.selectedItems || this.documents.items || []).length > 0
-      : this.documents && this.documents.length > 0;
+      : this.documents?.length > 0;
   }
 
   _download() {
@@ -95,21 +147,17 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       return;
     }
 
-    this.$.token
-      .get()
-      .then((response) => {
-        const tokens = response.entries.map((token) => token.id);
+    try {
+      this._installExpanded = false;
+      navigateAndShowFallback(this, this.directDownloadUrl);
+    } catch (e) {
+      this._showError(e.userMessage || e.message);
+    }
+  }
 
-        if (!tokens || !tokens.length) {
-          this.$.dialog.toggle();
-          return;
-        }
-
-        window.open(this.directDownloadUrl, '_top');
-      })
-      .catch((err) => {
-        this._showError(err && err.userMessage ? err.userMessage : this.i18n('driveDownload.directTransfer.failed'));
-      });
+  _toggleInstall(e) {
+    e.preventDefault();
+    this._installExpanded = true;
   }
 
   _showError(message) {
@@ -122,11 +170,11 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
       return (this.documents.selectedItems || this.documents.items || []).map((doc) => doc.uid);
     }
 
-    if (this.documents && this.documents.length > 0) {
+    if (this.documents?.length > 0) {
       return this.documents.map((doc) => doc.uid);
     }
 
-    if (this.document && this.document.uid) {
+    if (this.document?.uid) {
       return [this.document.uid];
     }
 
@@ -173,24 +221,14 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     const serverBytes = new TextEncoder().encode(server);
     if (serverBytes.length > 255) {
       const userMessage = this.i18n('driveDownload.serverUrlTooLong');
-      const err = new Error(this.i18n('driveDownload.serverUrlTooLong'));
+      const err = new Error(userMessage);
       err.userMessage = userMessage;
       throw err;
     }
     const payload = new Uint8Array([scheme, serverBytes.length, ...serverBytes, allUuidHex.length, ...uuidBinary]);
 
-    const b64 = this._base64UrlSafeEncode(payload);
+    const b64 = base64UrlSafeEncode(payload);
     return `nxdrive://direct-download/${b64}`;
-  }
-
-  _base64UrlSafeEncode(bytes) {
-    let binary = '';
-    bytes.forEach((byte) => {
-      binary += String.fromCharCode(byte);
-    });
-
-    let b64 = btoa(binary);
-    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 }
 
