@@ -76,7 +76,7 @@ export function nuxeoTestFallbackPlugin() {
       if (urlPath.endsWith('.html')) {
         return { body, type: 'html' };
       }
-      return { body, type: 'js', headers: JSON_HEADERS };
+      return { body, type: 'json', headers: JSON_HEADERS };
     },
   };
 }
