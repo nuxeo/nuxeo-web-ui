@@ -48,7 +48,7 @@ Polymer({
         position: relative;
         overflow-y: auto;
         padding: var(--nuxeo-page-content-padding, 16px 16px 2px 16px);
-        background-color: var(--nuxeo-page-content-background, var(--nuxeo-app-content-background));
+        background-color: var(--sat-page-surface-background, var(--nuxeo-app-content-background));
       }
 
       .main-section-container {

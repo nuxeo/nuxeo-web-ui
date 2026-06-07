@@ -32,12 +32,7 @@ Polymer({
     <style>
       :host {
         display: block;
-        --nuxeo-link-hover-color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
-      }
-
-      :host(:hover:not(.iron-selected)),
-      :host(:focus:not(.iron-selected)) {
-        @apply --sat-drawer-item-hover;
+        --nuxeo-link-hover-color: var(--nuxeo-drawer-text);
       }
 
       a {
@@ -52,7 +47,7 @@ Polymer({
       a:hover,
       a:focus,
       a:active {
-        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        color: var(--nuxeo-drawer-text);
         text-decoration: none;
       }
 
@@ -68,7 +63,7 @@ Polymer({
       :host(.iron-selected) a:focus,
       :host(.iron-selected) a:active {
         background-color: transparent;
-        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        color: var(--nuxeo-drawer-text);
       }
     </style>
 

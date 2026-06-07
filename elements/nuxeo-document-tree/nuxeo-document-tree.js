@@ -72,7 +72,7 @@ Polymer({
       .content {
         padding: 0px 4px 0px 4px;
         overflow: auto;
-        background-color: var(--sat-drawer-content-background, transparent);
+        background-color: var(--sat-page-surface-background, transparent);
         height: calc(100vh - 72px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
       }
 
@@ -130,7 +130,7 @@ Polymer({
       }
 
       a:hover {
-        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        color: var(--nuxeo-drawer-text);
       }
 
       /* Active / selected row — Satori pill (@apply --sat-drawer-item-selected in theme) */
@@ -140,7 +140,7 @@ Polymer({
       }
 
       [role='treeitem'].selected a {
-        color: var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        color: var(--nuxeo-drawer-text);
       }
 
       nuxeo-tree-node {
@@ -156,7 +156,7 @@ Polymer({
       }
 
       [toggle]:focus {
-        outline: 2px solid var(--sat-drawer-item-font-color, var(--nuxeo-drawer-text));
+        outline: 2px solid var(--nuxeo-drawer-text);
         outline-offset: 2px;
         border-radius: 1000px;
         background-color: transparent;
