@@ -5,6 +5,7 @@ on:
     types: [closed, unlabeled]
     branches:
       - lts-2025
+
   workflow_dispatch:
     inputs:
       branch_name:
