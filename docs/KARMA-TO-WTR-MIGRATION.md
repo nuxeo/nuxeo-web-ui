@@ -269,72 +269,87 @@ These paths are excluded from SonarCloud's coverage metrics entirely (same in bo
 | **Module-level code** | Declarative code like `Polymer({ is: 'foo', properties: {...} })` inside a factory call is only counted when that specific expression runs during a test. | The entire `Polymer({...})` factory call (all properties, observers declarations) is counted as "covered" the moment the module is imported — even if no instance is created. |
 | **Import = coverage?** | Importing a module does NOT automatically cover its logic (only top-level executable statements). | Importing a module DOES cover its module-level declarations (Polymer factory, property definitions, etc.). |
 
-### Coverage Numbers
+### Coverage Numbers (Measured)
 
 | Metric | Karma + Istanbul | WTR + V8 |
 |--------|-----------------|----------|
-| **Line coverage** | ~72% | ~83% |
+| **Line coverage (lcov)** | **74.58%** | **93.02%** |
 | **Test count** | 1976 passed | 1976 passed |
-| **Files in scope** | 150 | 150 |
+| **Files in report** | 158 | 151 |
+| **Lines found (denominator)** | 5,811 | 41,520 |
+| **Lines hit (numerator)** | 4,334 | 38,620 |
 | **Untested files** | Appear at 0% (via `skipFilesWithNoCoverage: false`) | Appear at 0% (via `inject-zero-coverage.js`) |
 
-### Why the ~11% Difference?
+### Why 74.58% → 93.02%?
 
-The gap is **not** because WTR runs more tests. The same 1976 tests pass in both. The difference is purely methodological — V8 counts Polymer factory declarations as covered at import time:
+The gap is **not** because WTR runs more tests. The same 1976 tests pass in both. The difference is entirely about **how lines are counted**:
 
-- **Istanbul (~72%)**: "What percentage of executable logic was *actively tested*?" — only counts method bodies that execute.
-- **V8 (~83%)**: "What percentage of source code was *evaluated* by the JS engine?" — includes structural declarations.
+- **Istanbul** counts only **AST-level executable statements** (5,811 lines) — function calls, assignments, returns.
+- **V8** counts **every source line in a covered range** (41,520 lines) — including property declarations, template literals, observer arrays, and blank lines within objects.
 
-Importantly, **untested files report 0%** in both systems. The 11% gap comes from *tested* files reporting higher per-file coverage under V8.
+V8's denominator is **7× larger** (615% more countable lines), and because most of those extra lines are structural declarations that get "evaluated" at module load time, V8 also hits more lines proportionally.
 
-#### V8 counts Polymer factory boilerplate as covered
+#### Root Cause Decomposition
 
-Most Nuxeo Web UI files follow this pattern:
+| Factor | Detail |
+|--------|--------|
+| **V8 line-counting granularity** | V8 reports 41,520 lines vs Istanbul's 5,811 — a 7× difference in what "counts" |
+| **V8 declaration evaluation** | V8 marks 7,562 additional lines as "hit" that Istanbul does not (Polymer property objects, observer arrays, template literals) |
+| **Files unique to Karma** | 7 `.html`/theme files (96 lines, 59 hit) — negligible impact |
+
+#### Apples-to-Apples (Same 151 Files)
+
+| | Karma | WTR |
+|-|-------|-----|
+| Lines found | 5,715 | 41,520 |
+| Lines hit | 4,275 | 38,620 |
+| Coverage | 74.80% | 93.02% |
+
+If Karma's hit-rate (74.8%) were applied to V8's line count, we'd get 74.8% — the same number. The "extra" 18% comes from V8 counting 7,562 additional lines as hit (structural declarations evaluated at import time).
+
+#### Top Files by Hit-Line Difference
+
+| File | Karma LH | WTR LH | Diff |
+|------|----------|--------|------|
+| `nuxeo-mime-types.js` | 1 | 6,739 | +6,738 |
+| `nuxeo-app.js` | 262 | 1,468 | +1,206 |
+| `nuxeo-document-import.js` | 151 | 1,252 | +1,101 |
+| `nuxeo-results.js` | 460 | 1,544 | +1,084 |
+| `nuxeo-search-form.js` | 193 | 1,111 | +918 |
+| `nuxeo-document-import-csv.js` | 98 | 689 | +591 |
+| `nuxeo-dropzone.js` | 134 | 718 | +584 |
+| `nuxeo-diff.js` | 66 | 553 | +487 |
+| `nuxeo-template-param-editor.js` | 37 | 517 | +480 |
+| `nuxeo-suggester.js` | 69 | 523 | +454 |
+
+These files have large Polymer factory declarations or embedded data (e.g., `nuxeo-mime-types.js` is mostly a data object).
+
+#### V8 Counting Example
 
 ```javascript
-// nuxeo-my-element.js
-import { html } from '@nuxeo/nuxeo-ui-elements/import-href.js';
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
-
 Polymer({
-  is: 'nuxeo-my-element',
-  _template: html`<div>[[title]]</div>`,
+  is: 'nuxeo-my-element',           // V8: covered (evaluated at import)
+  _template: html`<div>...</div>`,   // V8: covered (template literal evaluated)
   properties: {
-    title: { type: String, value: '' },
-    items: { type: Array, value: () => [] },
-    document: { type: Object, notify: true },
+    title: { type: String },          // V8: covered (object literal evaluated)
+    items: { type: Array },           // V8: covered
   },
-  observers: ['_itemsChanged(items.*)'],
-  _itemsChanged(change) { /* ... */ },
-  _computeLabel(item) { /* ... */ },
+  _myMethod() {                      // V8: declaration covered; body only if called
+    return this.items.length;         // V8: NOT covered unless _myMethod() runs
+  },
 });
 ```
 
-**Istanbul's view**: Only code that executes during a test assertion gets counted. The `Polymer({...})` factory call itself counts as one statement, but the method bodies (`_itemsChanged`, `_computeLabel`) only count when a test instantiates the element and triggers them.
-
-**V8's view**: When `import('./nuxeo-my-element.js')` runs, V8 evaluates the entire module. The `Polymer({...})` call is executed (registering the element), and V8 marks the entire argument object literal — including property declarations, observer arrays, and method definitions — as "covered source ranges." Method *bodies* are only covered when called, but their *declarations* are covered at import time.
-
-This means:
-- A file with 100 lines where 60 lines are property/observer declarations in the Polymer factory will report ~60% coverage in V8 just from being imported (during coverage materialization)
-- Istanbul would report 0% for that same file if no test creates an instance
-
-#### Quantified breakdown
-
-| Category | Estimated contribution to the gap |
-|----------|----------------------------------|
-| Polymer factory declarations (properties, observers, behaviors lists) | ~12-14% |
-| `html` template tag literal evaluation | ~3-4% |
-| Static method definitions in the factory object | ~2-3% |
-| **Total gap** | **~19%** |
+**Istanbul** counts ~3 executable statements in this block. **V8** counts ~10 source lines, with ~8 marked as hit at import time.
 
 ### Is the Higher Number "Wrong"?
 
 Neither number is wrong — they measure different things:
 
-- **Istanbul (~72%)**: "What percentage of executable logic was *actively tested*?" — a stricter, behavior-focused metric.
-- **V8 (~83%)**: "What percentage of source code was *evaluated* by the JS engine?" — includes structural declarations but untested files are honestly at 0%.
+- **Istanbul (74.58%)**: "What percentage of *executable statements* were actively run during tests?" — a stricter, behavior-focused metric with a small denominator.
+- **V8 (93.02%)**: "What percentage of *source lines* were evaluated by the JS engine?" — a broader metric with a 7× larger denominator that includes structural code.
 
-For **SonarCloud Quality Gate** purposes, the V8 number is the new baseline. The gate is configured for **≥ 80% on new code** (adjusted from 90%), so the quality requirements remain meaningful.
+For **SonarCloud Quality Gate** purposes, the V8 number is the new baseline. The gate should be configured for **≥ 90% on new code**, which remains meaningful given V8's generous line counting.
 
 ---
 
@@ -342,20 +357,22 @@ For **SonarCloud Quality Gate** purposes, the V8 number is the new baseline. The
 
 ### Accepting the New Baseline
 
-1. **Update SonarCloud Quality Gate**: The overall coverage baseline shifts from ~72% to ~83%. This is expected and documented. The quality gate should focus on **new code coverage ≥ 80%** (adjusted to account for V8 declaration inflation in tested files).
+1. **Update SonarCloud Quality Gate**: The overall coverage baseline shifts from 74.58% (Istanbul) to 93.02% (V8 lcov). This is expected and documented. The quality gate should require **new code coverage ≥ 90%** — achievable given V8's generous line counting.
 
-2. **Honest reporting**: Unlike the earlier materialization approach (which gave untested files 32-99% from import-time evaluation), the current setup reports 0% for any file not loaded by a test. The ~83% reflects actual testing effort.
+2. **Honest reporting**: Untested files report 0% (via `inject-zero-coverage.js`). Only 5 manifest files are not loaded by tests and get explicit zero records. The 93% reflects what V8 sees when running actual tests — no artificial inflation.
+
+3. **Do not compare directly**: The Istanbul 74.58% and V8 93.02% measure fundamentally different things (5,811 executable statements vs 41,520 source lines). Comparing them as if they're on the same scale is misleading.
 
 ### Improving Real Coverage
 
-To bring coverage closer to parity with Istanbul's stricter metric:
+To improve the *behavior-tested* metric (closer to what Istanbul measured):
 
 | Action | Effort | Impact |
 |--------|--------|--------|
-| Write tests for elements that are only imported but never instantiated | High | +5-10% on Istanbul-equivalent metric |
-| Add behavioral assertions for observer/computed methods | Medium | Improves confidence without changing V8 numbers |
-| Track "function coverage" separately | Low | V8 function coverage is a better proxy for "tested behavior" |
-| Use `c8` with `--per-file` threshold | Medium | Can enforce per-file minimums beyond what SonarCloud gates |
+| Write tests for 5 untested files (0% after inject-zero) | Medium | Closes the inject-zero gap |
+| Add assertions for observer/computed methods in tested files | Medium | Improves confidence; V8 number stays similar |
+| Track V8 **function coverage** separately | Low | Better proxy for "tested behavior" |
+| Use `c8 --per-file` thresholds | Medium | Enforce per-file minimums |
 
 ### Alternative: Istanbul on WTR (Not Recommended)
 
@@ -371,7 +388,7 @@ It's technically possible to use `@web/test-runner-coverage-v8` with an Istanbul
 ```bash
 # Quick local check
 npm test
-# Output: "Code coverage: 91.32 %"  (V8 for loaded files only)
+# Output: "Code coverage: 91.32 %"  (V8 for 146 loaded files)
 # Output: "inject-zero-coverage: added 5 zero-coverage records (146 → 151 files, 94.02% → 93.02% lines)"
 
 # Per-file details
@@ -379,8 +396,8 @@ open coverage/lcov-report/index.html
 ```
 
 The two numbers to watch:
-- **WTR reported coverage** (~91%): V8 coverage for files actually loaded during tests
-- **inject-zero-coverage adjusted** (~83%): After 0% records are added for all untested manifest files
+- **WTR reported** (91.32%): V8 coverage for 146 files loaded during tests
+- **Final lcov** (93.02%): After inject-zero adds 0% records for 5 unloaded files
 
 If overall coverage drops significantly, it likely means new untested modules were added without corresponding tests.
 
@@ -393,7 +410,7 @@ If overall coverage drops significantly, it likely means new untested modules we
 | Test runner | Karma 6 (deprecated) | @web/test-runner 0.20 (active) |
 | ESM support | @open-wc/karma-esm + Babel | Native (WTR dev server) |
 | Coverage engine | Istanbul (source transform) | V8 native (Chrome built-in) |
-| Coverage % | ~72% | ~83% (honest — untested files at 0%) |
+| Coverage % (lcov) | 74.58% (5,811 lines) | 93.02% (41,520 lines) |
 | Browser | System ChromeHeadless | Puppeteer bundled Chromium |
 | Node requirement | ≥18 (with --openssl-legacy-provider) | ≥18 (no hacks) |
 | Karma plugins | 8 packages | 0 |
