@@ -34,18 +34,95 @@ import { PaperItemBehavior } from '@polymer/paper-item/paper-item-behavior.js';
 Polymer({
   _template: html`
     <style>
+      /*
+       * Sidebar rail layout contract (52px × 48px per item):
+       * - Host and link use fixed --nuxeo-sidebar-width (never width: 100%).
+       * - paper-icon-button matches that box; padding 12px×14px leaves a 24×24px
+       *   content area so the button's internal iron-icon (width/height 100%) stays 24px.
+       * - Tooltip and hover use #menuItemAnchor (full cell); badge uses #button (icon).
+       * - cursor: pointer on host/anchor (drawer items often have no href).
+       * - When nuxeo-app is [sidebar-expanded], show icon + label; the label is
+       *   decorative (the anchor's aria-label is the accessible name).
+       */
       :host {
         display: block;
         position: relative;
         outline: none;
+        flex-shrink: 0;
+        width: var(--nuxeo-sidebar-width, 52px);
+        min-height: 48px;
+        box-sizing: border-box;
+        cursor: pointer;
       }
 
       :host(:focus-visible) {
         outline: auto;
       }
 
+      :host(.selected) {
+        background: var(--sat-sidebar-item-selected-background, rgba(255, 255, 255, 0.12));
+        border-radius: 12px;
+      }
+
+      :host(.selected)::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 20px;
+        background: var(--nuxeo-sidebar-menu, #fff);
+        border-radius: 0 16px 16px 0;
+        pointer-events: none;
+      }
+
+      :host-context([dir='rtl']):host(.selected)::before {
+        left: auto;
+        right: 0;
+        border-radius: 16px 0 0 16px;
+      }
+
+      #menuItemAnchor {
+        display: block;
+        box-sizing: border-box;
+        width: var(--nuxeo-sidebar-width, 52px);
+        height: 48px;
+        min-height: 48px;
+        color: var(--nuxeo-sidebar-menu);
+        text-decoration: none;
+        /* Drawer items often have no href; paper-icon-button used to supply cursor: pointer */
+        cursor: pointer;
+      }
+
+      #menuItemAnchor:hover {
+        background: var(--sat-sidebar-item-hover-background, rgba(255, 255, 255, 0.12));
+        border-radius: 12px;
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      :host(.selected) #menuItemAnchor:hover {
+        background: transparent;
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      paper-icon-button {
+        box-sizing: border-box;
+        display: block;
+        width: var(--nuxeo-sidebar-width, 52px);
+        min-width: var(--nuxeo-sidebar-width, 52px);
+        max-width: var(--nuxeo-sidebar-width, 52px);
+        height: 48px;
+        min-height: 48px;
+        margin: 0;
+        padding: 12px 14px;
+        color: var(--nuxeo-sidebar-menu);
+        pointer-events: none;
+      }
+
+      paper-icon-button:hover,
       :host(.selected) paper-icon-button {
-        background: rgba(0, 0, 0, 0.2);
+        background: transparent;
         color: var(--nuxeo-sidebar-menu-hover);
       }
 
@@ -57,33 +134,86 @@ Polymer({
         --paper-badge-height: 16px;
       }
 
-      paper-icon-button {
+      .sidebar-item-label {
+        display: block;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: var(--nuxeo-app-font);
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: 0.1px;
         color: var(--nuxeo-sidebar-menu);
-        height: 48px;
-        padding: 12px 13px;
-        width: var(--nuxeo-sidebar-width);
+        opacity: 0;
+        max-width: 0;
+        height: 0;
+        padding: 0;
+        transition:
+          opacity 0.2s ease,
+          max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      paper-icon-button:hover {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
+      :host([expanded]) {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+      }
+
+      :host([expanded]) #menuItemAnchor {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        min-height: 48px;
+        height: auto;
+        padding: 0;
+        padding-inline-end: 12px;
+      }
+
+      :host([expanded]) paper-icon-button {
+        flex-shrink: 0;
+      }
+
+      :host([expanded]) .sidebar-item-label {
+        opacity: 1;
+        max-width: 200px;
+        height: auto;
+        transition:
+          opacity 0.2s ease 0.05s,
+          max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      :host(.selected) .sidebar-item-label {
+        font-weight: 600;
       }
 
       paper-icon-button svg,
       paper-icon-button g,
       paper-icon-button path {
-        tabindex: -1;
+        pointer-events: none;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .sidebar-item-label {
+          transition: none;
+        }
       }
     </style>
 
-    <a href$="[[_href(urlFor, route, link)]]">
-      <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip" tabindex="-1"></paper-icon-button>
+    <a id="menuItemAnchor" href$="[[_href(urlFor, route, link)]]" aria-label$="[[i18n(label)]]">
+      <paper-icon-button noink id="button" name$="[[name]]" tabindex="-1" aria-hidden="true"></paper-icon-button>
+      <span class="sidebar-item-label" aria-hidden="true">[[i18n(label)]]</span>
       <nuxeo-tooltip
-        for="button"
+        for="menuItemAnchor"
         position="[[_tooltipPosition]]"
         offset="0"
         animation-delay="0"
         id="tooltip"
+        hidden$="[[expanded]]"
         tabindex="-1"
         >[[i18n(label)]]</nuxeo-tooltip
       >
@@ -148,6 +278,18 @@ Polymer({
       type: String,
       value: 'left',
     },
+
+    /**
+     * Set by the parent `nuxeo-app` to mirror its `sidebar-expanded` state.
+     * Reflected so CSS can key off `:host([expanded])` (cross-browser; avoids
+     * non-standard `:host-context()`).
+     */
+    expanded: {
+      type: Boolean,
+      value: false,
+      reflectToAttribute: true,
+      observer: '_onExpandedChanged',
+    },
   },
 
   observers: ['_srcOrIcon(icon, src)'],
@@ -167,6 +309,13 @@ Polymer({
       this._tooltipPosition = 'right';
     } else {
       this._tooltipPosition = 'left';
+    }
+  },
+
+  _onExpandedChanged(expanded) {
+    const tooltip = this.$?.tooltip;
+    if (tooltip && expanded && typeof tooltip.hide === 'function') {
+      tooltip.hide();
     }
   },
 

@@ -135,6 +135,12 @@ const template = html`
           text-overflow: ellipsis;
           color: var(--nuxeo-drawer-header);
         }
+        /* Responsive adjustments for dashboard header title */
+        @media (max-width: 720px) {
+          .header {
+            padding-left: 48px;
+          }
+        }
 
         /* layouts */
         div[role='widget'] > div.multiline {
@@ -181,6 +187,76 @@ const template = html`
         font-display: swap;
         src: url('../fonts/Inter-Bold.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-Bold.woff?v=3.13') format('woff');
+      }
+
+      /* Figtree — consumed only via the --sat-section-header mixin (font-weight: 500).
+         Other weights / italic variants were dropped in the rebrand cleanup; re-add
+         here on demand if a new component needs them. */
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/figtree-latin-500-normal.woff2') format('woff2'),
+          url('../fonts/figtree-latin-500-normal.woff') format('woff');
+      }
+
+      /* Noto Sans font family */
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 300;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-300-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-300-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-400-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-400-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-500-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-500-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-600-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-600-normal.woff') format('woff');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-700-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-700-normal.woff') format('woff');
+      }
+
+      /* Noto Sans 900 — referenced only by the nuxeo-template-rendering addon
+         (font-weight: 900). Kept so that addon retains a real font face
+         when enabled; safe to drop if/when that usage is migrated to 700. */
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 900;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-900-normal.woff2') format('woff2'),
+          url('../fonts/noto-sans-latin-900-normal.woff') format('woff');
       }
 
       html {
@@ -270,16 +346,14 @@ const template = html`
         }
 
         --nuxeo-block-selected: {
-          background-color: var(--nuxeo-box);
+          background-color: var(--sat-selection-pill-background, #e2dfff);
           outline: 0;
-          box-shadow: 5px 0 0 0 var(--nuxeo-primary-color) inset;
         }
 
         [dir='rtl'] {
           --nuxeo-block-selected: {
-            background-color: var(--nuxeo-box);
+            background-color: var(--sat-selection-pill-background, #e2dfff);
             outline: 0;
-            box-shadow: -5px 0 0 0 var(--nuxeo-primary-color) inset;
           }
         }
 
@@ -426,6 +500,10 @@ const template = html`
 
         --iron-data-table: {
           font-family: var(--nuxeo-app-font);
+        }
+
+        --iron-data-table-row: {
+          border-bottom: none;
         }
 
         --paper-tooltip: {
@@ -592,6 +670,32 @@ const template = html`
         --nuxeo-widget: {
           margin-bottom: 16px;
         }
+
+        /* SAT drawersection header mixin — @apply --sat-section-header; */
+        --sat-section-header: {
+          font-weight: 500;
+          font-size: 26px;
+          color: var(--sat-section-header-text-color, var(--nuxeo-drawer-text));
+          font-family: var(--sat-font-family-secondary, 'Figtree');
+        };
+
+        /* SAT drawer list / menu label mixin — @apply --sat-drawer-item; */
+        --sat-drawer-item: {
+          color: var(--nuxeo-drawer-text);
+          font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
+          font-weight: 500;
+          font-size: 14px;
+          line-height: 20px;
+          letter-spacing: 0.1px;
+        };
+
+        /* SAT drawer active item mixin — @apply --sat-drawer-item-selected; */
+        --sat-drawer-item-selected: {
+          background-color: var(--sat-selection-pill-background, #e2dfff);
+          border-radius: 54px;
+          outline: 0;
+        };
+
       }
 
       @media (max-width: 1024px) {

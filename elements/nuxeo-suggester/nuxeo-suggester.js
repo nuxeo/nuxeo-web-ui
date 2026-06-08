@@ -249,7 +249,7 @@ Polymer({
 
       @media (max-width: 1024px) {
         #searchButton {
-          background-color: var(--nuxeo-app-header-background);
+          background-color: var(--sat-app-header-box-background-color, var(--nuxeo-app-header-background));
           z-index: 100;
         }
 

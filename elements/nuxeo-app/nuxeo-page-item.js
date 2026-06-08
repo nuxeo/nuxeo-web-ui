@@ -33,7 +33,7 @@ Polymer({
         outline: none;
         user-select: none;
         cursor: pointer;
-        color: var(--disabled-text-color);
+        color: var(--sat-page-tabs-unselected-text-color, var(--disabled-text-color));
         margin: 0 0 0 16px;
         padding: 12px 6px 12px 6px;
         border-bottom: 2px solid transparent;
@@ -47,10 +47,10 @@ Polymer({
         border-bottom: 2px solid var(--nuxeo-app-header-pill-hover);
         color: var(--nuxeo-app-header-pill-hover);
       }
-
+      /* Active tab border and font color */
       :host(.iron-selected) {
         border-bottom: 2px solid var(--nuxeo-app-header-pill-active);
-        color: var(--nuxeo-app-header-pill-active);
+        color: var(--nuxeo-text-default, var(--nuxeo-app-header-pill-active));
       }
 
       :host(:focus) {
