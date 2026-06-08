@@ -98,7 +98,10 @@ function main() {
   if (missing.length === 0) {
     const { pct } = summarizeLcov(lcov);
     // eslint-disable-next-line no-console
-    console.log(`inject-zero-coverage: manifest fully represented (${covered.size} files, ${pct.toFixed(2)}% lines)`);
+    console.log(
+      `inject-zero-coverage: manifest fully represented (${covered.size} files, ${pct.toFixed(2)}% lines)\n` +
+        `\nFinal code coverage (lcov): ${pct.toFixed(2)} %`,
+    );
     return;
   }
 
@@ -113,7 +116,8 @@ function main() {
   console.log(
     `inject-zero-coverage: added ${records.length} zero-coverage records ` +
       `(${covered.size} → ${covered.size + records.length} files, ` +
-      `${before.pct.toFixed(2)}% → ${after.pct.toFixed(2)}% lines)`,
+      `${before.pct.toFixed(2)}% → ${after.pct.toFixed(2)}% lines)\n` +
+      `\nFinal code coverage (lcov): ${after.pct.toFixed(2)} %`,
   );
 }
 
