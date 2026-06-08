@@ -18,6 +18,7 @@
  */
 import { createRequire } from 'node:module';
 import { chromeLauncher } from '@web/test-runner-chrome';
+import { defaultReporter } from '@web/test-runner';
 import { nuxeoTestFallbackPlugin } from './scripts/test/unit/web-test-runner-fallback-plugin.mjs';
 
 const require = createRequire(import.meta.url);
@@ -35,12 +36,28 @@ const verbose = process.env.WTR_VERBOSE === '1';
 
 const coverageEnabled = process.argv.includes('--coverage');
 
+/**
+ * Wraps the default WTR reporter to suppress the built-in "Code coverage: X %" line.
+ * Our inject-zero-coverage.js post-run script prints the authoritative number instead.
+ */
+function noCoverageSummaryReporter() {
+  const inner = defaultReporter();
+  return {
+    ...inner,
+    getTestProgress(args) {
+      const lines = inner.getTestProgress(args);
+      return lines.filter((line) => !/Code coverage:|coverage report at/.test(line));
+    },
+  };
+}
+
 /** App sources included in coverage reports (mirrors former karma coverage globs). */
 const appSources = ['elements/**/*.js', 'addons/**/elements/**/*.js'];
 
 export default {
   files: ['test/load-all-tests.js'],
   plugins: [nuxeoTestFallbackPlugin()],
+  reporters: [noCoverageSummaryReporter()],
   nodeResolve: {
     exportConditions: ['browser', 'development', 'import', 'module', 'default'],
   },
@@ -57,7 +74,7 @@ export default {
     ? {
         report: true,
         reportDir: 'coverage',
-        reporters: ['html', 'lcov', 'text-summary'],
+        reporters: ['html', 'lcov'],
         include: appSources,
         exclude: [
           // Dev server serves Polymer .html imports as *.html.js; those paths do not exist on disk.
