@@ -72,6 +72,20 @@ Polymer({
     document: Object,
   },
 
+  attached() {
+    this._blockPreviewShortcuts = (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P' || e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    window.addEventListener('keydown', this._blockPreviewShortcuts, true);
+  },
+
+  detached() {
+    window.removeEventListener('keydown', this._blockPreviewShortcuts, true);
+  },
+
   created() {
     this._createMethodObserver('_valueChanged(document.properties.file:content)', true);
   },
