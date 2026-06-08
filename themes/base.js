@@ -346,13 +346,13 @@ const template = html`
         }
 
         --nuxeo-block-selected: {
-          background-color: var(--sat-selection-pill-background, var(--nuxeo-box));
+          background-color: var(--sat-selection-pill-background, #e2dfff);
           outline: 0;
         }
 
         [dir='rtl'] {
           --nuxeo-block-selected: {
-            background-color: var(--sat-selection-pill-background, var(--nuxeo-box));
+            background-color: var(--sat-selection-pill-background, #e2dfff);
             outline: 0;
           }
         }
@@ -691,7 +691,7 @@ const template = html`
 
         /* SAT drawer active item mixin — @apply --sat-drawer-item-selected; */
         --sat-drawer-item-selected: {
-          background-color: var(--sat-selection-pill-background, var(--nuxeo-box));
+          background-color: var(--sat-selection-pill-background, #e2dfff);
           border-radius: 54px;
           outline: 0;
         };

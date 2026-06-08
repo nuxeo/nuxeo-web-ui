@@ -35,15 +35,13 @@ limitations under the License.
       --nuxeo-app-header: var(--nuxeo-text-default);
       --nuxeo-app-header-background: #fff;
       --nuxeo-app-header-pill: #ecf3f7;
-      --nuxeo-app-header-pill-hover: #5654ac; /* Satori primary */
-      --nuxeo-app-header-pill-active: #5654ac; /* Satori primary */
+      --nuxeo-app-header-pill-hover: var(--nuxeo-primary-color); /* Satori primary */
+      --nuxeo-app-header-pill-active: var(--nuxeo-primary-color); /* Satori primary */
 
       /* App Sidebar + Drawer*/
-      --nuxeo-sidebar-background: #5654ac; /* Satori primary */
+      --nuxeo-sidebar-background: var(--nuxeo-primary-color); /* Satori primary */
       --nuxeo-sidebar-menu: #ffffff; /* Satori on-primary */
       --nuxeo-sidebar-menu-hover: #ffffff; /* Satori on-primary */
-      --sat-sidebar-item-selected-background: rgba(255, 255, 255, 0.12);
-      --sat-sidebar-item-hover-background: rgba(255, 255, 255, 0.12);
       --nuxeo-badge-background: #fb6107;
       --nuxeo-drawer-header: var(--nuxeo-text-default);
       --nuxeo-drawer-text: var(--nuxeo-text-default);
@@ -71,7 +69,7 @@ limitations under the License.
       --nuxeo-button-primary: var(--nuxeo-primary-color);
       --nuxeo-button-primary-focus: var(--nuxeo-secondary-color);
       --nuxeo-button-primary-text: #ffffff;
-      --nuxeo-button-secondary-text: #5654ac; /* Satori primary */
+      --nuxeo-button-secondary-text: var(--nuxeo-primary-color); /* Satori primary */
       --nuxeo-button-disabled: rgba(0, 0, 0, 0.05);
       --nuxeo-button-disabled-text: rgba(0, 0, 0, 0.1);
       --nuxeo-link-color: var(--nuxeo-text-default);
@@ -181,11 +179,13 @@ limitations under the License.
       /* App / page-level header bar */
       --sat-app-header-background: #f4f3f7;
       --sat-app-header-shadow: none;
-
-      /* Browse drawer content */
       --sat-page-surface-background: #f4f3f7;
+
+      /* Drawer + Sidebar content */
       --sat-selection-pill-background: #e2dfff;
       --sat-drawer-toggle-handle-background: #c8c5d3;
+      --sat-sidebar-item-selected-background: rgba(255, 255, 255, 0.12);
+      --sat-sidebar-item-hover-background: rgba(255, 255, 255, 0.12);
 
       /* Document create button (FAB on the home dashboard) */
       --sat-document-create-button-icon-color: #3e3b92;
