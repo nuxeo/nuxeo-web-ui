@@ -21,21 +21,26 @@ limitations under the License.
  *
  * What this file does:
  * - Registers Chai, Sinon, and common globals (`expect`, `assert`, `should`) expected by legacy tests.
- * - In coverage runs only, runs a `suiteTeardown` hook that dynamically imports every path listed
- *   in `test/coverage-imports-data.js` (when `window.__coverage__` or `__NUXEO_COVERAGE_RUN__` is
- *   set). That forces modules never loaded by tests into the V8 report. Paths that fail to load get
- *   0% entries via `scripts/test/unit/inject-zero-coverage.js` after the run (Karma parity).
+ * - Installs error/rejection suppression so stray async failures between tests don't abort the run.
+ * - Patches sinon.stub to handle non-configurable Polymer element properties.
+ * - Auto-restores leaked sinon fakes/clocks after each test.
+ *
+ * Coverage strategy:
+ * V8 native coverage only reports modules that the browser actually loaded. Files never imported
+ * by any test are NOT bulk-loaded here — they are added as 0% records by
+ * `scripts/test/unit/inject-zero-coverage.js` after the run. This keeps coverage honest: only
+ * code that tests actually exercise gets a non-zero percentage.
  *
  * Related files:
  * - `test/load-all-tests.js` — imports this module first, then every `*.test.js`.
- * - `scripts/test/unit/generate-coverage-imports.js` — regenerates `coverage-imports-data.js` (gitignored).
+ * - `scripts/test/unit/generate-coverage-imports.js` — regenerates `coverage-imports-data.js` (manifest).
+ * - `scripts/test/unit/inject-zero-coverage.js` — adds 0% lcov records for untested modules.
  * - `web-test-runner.config.mjs` — instruments app sources when `--coverage` is used.
  */
 
 import * as chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { coverageModulePaths } from './coverage-imports-data.js';
 
 chai.config.includeStack = true;
 
@@ -304,52 +309,3 @@ const _restoreLeakedSinonGlobals = () => {
 if (typeof window.teardown === 'function') {
   window.teardown(_restoreLeakedSinonGlobals);
 }
-
-// Coverage-only: bulk-load all app element modules after every test has finished (see file header).
-suiteTeardown(async function coverageMaterializationTeardown() {
-  const coverageActive = typeof window.__coverage__ !== 'undefined' || globalThis.__NUXEO_COVERAGE_RUN__ === true;
-  if (!coverageActive) {
-    return;
-  }
-
-  if (!Array.isArray(coverageModulePaths) || coverageModulePaths.length === 0) {
-    expect.fail(
-      'test/coverage-imports-data.js has no paths. Run: node scripts/test/unit/generate-coverage-imports.js ' +
-        '(or npm run update-coverage-imports).',
-    );
-  }
-
-  // Suppress async errors thrown by Polymer observer side-effects when modules are bulk-imported.
-  // These are benign — elements fire property observers on registration but have no data context.
-  _testRunning = false;
-
-  this.timeout(0);
-  const root = new URL('../', import.meta.url);
-  const failures = [];
-
-  // Istanbul (legacy Karma): skip paths already keyed in window.__coverage__ — re-importing through
-  // a different instrumented URL wipes counters collected during tests.
-  // Native V8 (Web Test Runner): ES module cache makes re-import a no-op for modules already loaded;
-  // only modules never touched during tests are fetched here. Failures fail the run (Karma parity).
-  const alreadyCovered =
-    typeof window.__coverage__ !== 'undefined' ? new Set(Object.keys(window.__coverage__)) : new Set();
-  const toLoad = coverageModulePaths.filter((p) => !alreadyCovered.has(p));
-
-  await Promise.all(
-    toLoad.map((p) => {
-      const href = new URL(p, root).href;
-      return import(href).catch((err) => {
-        failures.push({ specifier: p, err });
-      });
-    }),
-  );
-
-  if (failures.length > 0) {
-    const message = failures.map((f) => `${f.specifier}: ${f.err && f.err.message ? f.err.message : f.err}`).join('\n');
-    // eslint-disable-next-line no-console
-    console.error(
-      `coverage materialization: ${failures.length} of ${toLoad.length} modules failed to load:\n${message}`,
-    );
-    expect(failures, 'every app module should load in the test environment').to.have.length(0);
-  }
-});
