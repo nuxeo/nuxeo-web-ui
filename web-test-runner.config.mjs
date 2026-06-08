@@ -19,7 +19,6 @@
 import { createRequire } from 'node:module';
 import { chromeLauncher } from '@web/test-runner-chrome';
 import { nuxeoTestFallbackPlugin } from './scripts/test/unit/web-test-runner-fallback-plugin.mjs';
-import { nuxeoCoverageFlagPlugin } from './scripts/test/unit/web-test-runner-coverage-flag-plugin.mjs';
 
 const require = createRequire(import.meta.url);
 // Bundled Chromium matches puppeteer-core; system Chrome on CI runners often mismatches (see WEBUI-2038).
@@ -41,7 +40,7 @@ const appSources = ['elements/**/*.js', 'addons/**/elements/**/*.js'];
 
 export default {
   files: ['test/load-all-tests.js'],
-  plugins: [nuxeoTestFallbackPlugin(), nuxeoCoverageFlagPlugin(coverageEnabled)],
+  plugins: [nuxeoTestFallbackPlugin()],
   nodeResolve: {
     exportConditions: ['browser', 'development', 'import', 'module', 'default'],
   },
