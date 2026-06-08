@@ -274,13 +274,13 @@ These paths are excluded from SonarCloud's coverage metrics entirely (same in bo
 | Metric | Karma + Istanbul | WTR + V8 |
 |--------|-----------------|----------|
 | **Line coverage** | ~72% | ~83% |
-| **Test count** | 1909 passed | 1909 passed |
+| **Test count** | 1976 passed | 1976 passed |
 | **Files in scope** | 150 | 150 |
 | **Untested files** | Appear at 0% (via `skipFilesWithNoCoverage: false`) | Appear at 0% (via `inject-zero-coverage.js`) |
 
 ### Why the ~11% Difference?
 
-The gap is **not** because WTR runs more tests. The same 1909 tests pass in both. The difference is purely methodological — V8 counts Polymer factory declarations as covered at import time:
+The gap is **not** because WTR runs more tests. The same 1976 tests pass in both. The difference is purely methodological — V8 counts Polymer factory declarations as covered at import time:
 
 - **Istanbul (~72%)**: "What percentage of executable logic was *actively tested*?" — only counts method bodies that execute.
 - **V8 (~83%)**: "What percentage of source code was *evaluated* by the JS engine?" — includes structural declarations.
@@ -400,5 +400,5 @@ If overall coverage drops significantly, it likely means new untested modules we
 | WTR plugins | 0 | 1 custom (fallback) |
 | CI stability | Intermittent race conditions | Deterministic (single-entry barrel) |
 | Config file | `karma.conf.js` (CJS, 90 lines) | `web-test-runner.config.mjs` (ESM, 102 lines) |
-| Test count | 1909 | 1909 (identical) |
+| Test count | 1976 | 1976 (identical) |
 | Test behavior | Unchanged | Unchanged |
