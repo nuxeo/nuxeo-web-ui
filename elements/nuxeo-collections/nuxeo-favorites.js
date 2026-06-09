@@ -174,7 +174,7 @@ Polymer({
 
   properties: {
     favorites: {
-      type: Object,
+      type: Array,
       notify: true,
     },
     selectedFavorite: {
@@ -200,8 +200,10 @@ Polymer({
   },
 
   _refresh() {
-    this._fetchFavorite().then((favorite) => {
+    return this._fetchFavorite().then((favorite) => {
       if (!favorite) {
+        this.$.favoritesProvider.resultsCount = 0;
+        this.$.favoritesList.reset();
         return;
       }
       this.$.favoritesProvider.params = [favorite.uid];
