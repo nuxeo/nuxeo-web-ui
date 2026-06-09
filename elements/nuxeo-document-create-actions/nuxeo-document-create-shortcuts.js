@@ -34,11 +34,8 @@ Polymer({
     <style>
       #shortcuts {
         @apply --layout-vertical;
-        @apply --layout-end;
+        @apply --layout-center;
         @apply --layout-end-justified;
-        position: absolute;
-        right: 0;
-        bottom: 60px;
       }
 
       nuxeo-document-create-shortcut {

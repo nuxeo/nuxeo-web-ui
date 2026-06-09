@@ -1418,6 +1418,8 @@
   "themes.current": "حالي",
   "themes.dark": "داكن",
   "themes.default": "Nuxeo",
+  "themes.kawaii": "محبوب",
+  "themes.light": "فاتح",
   "threeDViewLayout.delete.confirm.message": "هل تريد فعلا حذف هذا المحتوى ثلاثي الأبعاد؟",
   "threeDViewLayout.delete.tooltip": "حذف محتوى ثلاثي الأبعاد",
   "threeDViewLayout.deleted.message": "تم حذف محتوى ثلاثي الأبعاد",

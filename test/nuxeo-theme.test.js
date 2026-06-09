@@ -26,8 +26,8 @@ suite('nuxeo-theme', () => {
     });
 
     test('uses themes folder when preview is not set', async () => {
-      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
-      expect(el._image('dark')).to.equal('themes/dark/preview.jpg');
+      const el = await fixture(html`<nuxeo-theme name="kawaii"></nuxeo-theme>`);
+      expect(el._image('kawaii')).to.equal('themes/kawaii/preview.jpg');
     });
   });
 
@@ -72,8 +72,8 @@ suite('nuxeo-theme', () => {
 
     test('returns false for non-default when no theme in storage', async () => {
       sinon.stub(localStorage, 'getItem').callsFake(() => null);
-      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
-      expect(el._selected('dark')).to.be.false;
+      const el = await fixture(html`<nuxeo-theme name="kawaii"></nuxeo-theme>`);
+      expect(el._selected('kawaii')).to.be.false;
     });
   });
 
@@ -89,9 +89,9 @@ suite('nuxeo-theme', () => {
 
     test('uses apply i18n key when theme is not selected', async () => {
       const lsStub = sinon.stub(localStorage, 'getItem').callsFake(() => null);
-      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
+      const el = await fixture(html`<nuxeo-theme name="kawaii"></nuxeo-theme>`);
       const i18nStub = sinon.stub(el, 'i18n').callsFake((k) => k);
-      expect(el._button('dark')).to.equal('themes.apply');
+      expect(el._button('kawaii')).to.equal('themes.apply');
       i18nStub.restore();
       lsStub.restore();
     });
@@ -106,14 +106,14 @@ suite('nuxeo-theme', () => {
 
     test('persists theme and dispatches theme-changed', async () => {
       sinon.stub(localStorage, 'setItem');
-      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
+      const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);
       const listener = sinon.spy();
       el.addEventListener('theme-changed', listener);
       el._apply();
-      expect(localStorage.setItem).to.have.been.calledWith('theme', 'dark');
+      expect(localStorage.setItem).to.have.been.calledWith('theme', 'light');
       expect(listener).to.have.been.calledOnce;
       const [evt] = listener.firstCall.args;
-      expect(evt.detail.theme).to.equal('dark');
+      expect(evt.detail.theme).to.equal('light');
     });
   });
 });

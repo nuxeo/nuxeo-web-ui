@@ -1418,6 +1418,8 @@
   "themes.current": "נוכחי",
   "themes.dark": "כהה",
   "themes.default": "Nuxeo",
+  "themes.kawaii": "קוואי",
+  "themes.light": "לייט",
   "threeDViewLayout.delete.confirm.message": "האם אתה באמת רוצה למחוק את התוכן התלת-ממדי הזה?",
   "threeDViewLayout.delete.tooltip": "מחיקת תוכן תלת-ממדי",
   "threeDViewLayout.deleted.message": "התוכן התלת-ממדי נמחק",

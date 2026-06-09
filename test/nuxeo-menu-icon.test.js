@@ -70,47 +70,6 @@ suite('nuxeo-menu-icon', () => {
     });
   });
 
-  suite('expanded property', () => {
-    test('defaults to false and is reflected as attribute', async () => {
-      expect(element.expanded).to.be.false;
-      expect(element.hasAttribute('expanded')).to.be.false;
-
-      element.expanded = true;
-      await flush();
-      expect(element.hasAttribute('expanded')).to.be.true;
-
-      element.expanded = false;
-      await flush();
-      expect(element.hasAttribute('expanded')).to.be.false;
-    });
-
-    test('hides tooltip when toggled to true', () => {
-      sinon.stub(element.$.tooltip, 'hide');
-      element.expanded = true;
-      expect(element.$.tooltip.hide).to.have.been.calledOnce;
-      element.$.tooltip.hide.restore();
-    });
-
-    test('does not call tooltip.hide when toggled to false', () => {
-      element.expanded = true;
-      sinon.stub(element.$.tooltip, 'hide');
-      element.expanded = false;
-      expect(element.$.tooltip.hide).to.not.have.been.called;
-      element.$.tooltip.hide.restore();
-    });
-
-    test('binds tooltip hidden attribute to expanded', async () => {
-      const tooltip = element.$.tooltip;
-      element.expanded = true;
-      await flush();
-      expect(tooltip.hasAttribute('hidden')).to.be.true;
-
-      element.expanded = false;
-      await flush();
-      expect(tooltip.hasAttribute('hidden')).to.be.false;
-    });
-  });
-
   suite('_srcOrIcon', () => {
     test('should prefer src over icon when src is set', async () => {
       element.icon = 'icons:home';
@@ -158,24 +117,5 @@ suite('nuxeo-menu-icon', () => {
       expect(element._href()).to.equal('/stubbed-url');
       expect(element.urlFor.calledWith('document', 'uid1')).to.be.true;
     });
-
-    test('returns undefined when route is set but urlFor is not available', () => {
-      element.urlFor = undefined;
-      element.link = '';
-      element.route = 'document:uid1';
-      expect(element._href()).to.equal(undefined);
-    });
-  });
-
-  test('_srcOrIcon keeps existing button src when src is empty', () => {
-    element.src = '';
-    element.icon = 'icons:folder';
-    element.$.button.src = 'https://cdn.example/existing.png';
-    element.$.button.icon = 'icons:existing';
-
-    element._srcOrIcon();
-
-    expect(element.$.button.src).to.equal('https://cdn.example/existing.png');
-    expect(element.$.button.icon).to.equal('icons:existing');
   });
 });

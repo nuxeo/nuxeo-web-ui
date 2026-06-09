@@ -24,28 +24,16 @@ limitations under the License.
 <dom-module id="nuxeo-home">
   <template>
     <style include="nuxeo-styles">
-      /* Opt this rebranded host into the Satori page chrome.
-         These scoped vars are read by <nuxeo-page>; admin / legacy pages do NOT set them
-         so they keep the original transparent content + white toolbar. */
-      :host {
-        --nuxeo-page-host-background: var(--sat-page-surface-background);
-        --nuxeo-page-content-background: var(--sat-page-surface-background);
-        --nuxeo-page-toolbar-background: var(--sat-app-header-background);
-        --nuxeo-page-toolbar-box-shadow: var(--sat-app-header-shadow);
-      }
-
       .dashboard {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
-        background-color: var(--sat-page-surface-background, var(--nuxeo-app-content-background));
       }
 
       nuxeo-card {
         min-width: 25em;
         width: 49%;
-        border-radius: 12px;
       }
 
       @media (max-width: 1024px) {
@@ -107,18 +95,6 @@ limitations under the License.
         outline: 0;
       }
 
-      .header {
-        @apply --sat-section-header;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-
-      .header-logo {
-        margin-left: auto;
-        margin-right: 58px;
-      }
-
       .task-name {
         font-weight: bold;
       }
@@ -131,12 +107,9 @@ limitations under the License.
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-page>
-      <div slot="header" class="header">
+      <div slot="header">
         <nuxeo-repositories></nuxeo-repositories>
         [[i18n('home.dashboard')]]
-        <div class="header-logo">
-          <img src="images/hyland-wordmark.svg" alt="Hyland" width="110" height="20" />
-        </div>
       </div>
       <div>
         <section name="dashboard" class="dashboard">
