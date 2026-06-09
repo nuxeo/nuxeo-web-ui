@@ -26,7 +26,6 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
-import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion/nuxeo-path-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-quick-filters/nuxeo-quick-filters.js';
@@ -117,234 +116,6 @@ Polymer({
         };
       }
 
-      /* Profile avatar with initials */
-      .profile-avatar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--nuxeo-sidebar-menu);
-        position: relative;
-        min-height: 48px;
-        padding: 0;
-        width: var(--nuxeo-sidebar-width);
-        flex-shrink: 0;
-        box-sizing: border-box;
-        cursor: pointer;
-        background: transparent;
-        border: none;
-        outline: none;
-        text-decoration: none;
-      }
-
-      .profile-avatar:hover {
-        background: var(--sat-sidebar-item-hover-background, rgba(255, 255, 255, 0.12));
-        border-radius: 12px;
-        color: var(--nuxeo-sidebar-menu-hover);
-      }
-
-      :host([sidebar-expanded]) .profile-avatar:hover,
-      .profile-avatar.selected {
-        background: var(--sat-sidebar-item-selected-background, rgba(255, 255, 255, 0.12));
-        border-radius: 12px;
-        color: var(--nuxeo-sidebar-menu-hover);
-      }
-
-      .profile-avatar.selected::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 4px;
-        height: 20px;
-        background: var(--nuxeo-sidebar-menu, #fff);
-        border-radius: 0 16px 16px 0;
-        pointer-events: none;
-      }
-
-      :host([dir='rtl']) .profile-avatar.selected::before {
-        left: auto;
-        right: 0;
-        border-radius: 16px 0 0 16px;
-      }
-
-      .profile-initials {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: var(--sat-profile-avatar-background, rgba(255, 255, 255, 0.15));
-        color: var(--nuxeo-sidebar-menu);
-        border: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0;
-        flex-shrink: 0;
-      }
-
-      .profile-avatar-image {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
-      }
-
-      .profile-avatar-icon-cell {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        width: var(--nuxeo-sidebar-width, 52px);
-        min-width: var(--nuxeo-sidebar-width, 52px);
-        max-width: var(--nuxeo-sidebar-width, 52px);
-        min-height: 48px;
-        box-sizing: border-box;
-      }
-
-      .profile-avatar-label {
-        display: none;
-      }
-
-      :host([sidebar-expanded]) .profile-avatar {
-        width: 100%;
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 12px;
-        padding: 0;
-        padding-inline-end: 12px;
-      }
-
-      :host([sidebar-expanded]) .profile-initials,
-      :host([sidebar-expanded]) .profile-avatar-image {
-        width: 32px;
-        height: 32px;
-        flex-shrink: 0;
-      }
-
-      :host([sidebar-expanded]) .profile-avatar-label {
-        display: block;
-        flex: 1 1 auto;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-family: var(--nuxeo-app-font);
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 20px;
-        letter-spacing: 0.1px;
-        color: var(--nuxeo-sidebar-menu);
-      }
-
-      :host([sidebar-expanded]) .profile-avatar.selected .profile-avatar-label {
-        font-weight: 600;
-      }
-
-      /*
-       * Sidebar rail: collapsed width matches layout; expands as overlay without
-       * shifting main content. Uses logical 'inset-inline-start' so the rail
-       * pins to the leading edge in both LTR and RTL without dir selectors.
-       */
-      #sidebarRail {
-        position: fixed;
-        top: var(--nuxeo-app-top, 0);
-        bottom: var(--nuxeo-app-bottom, 0);
-        inset-inline-start: 0;
-        width: var(--nuxeo-sidebar-width);
-        z-index: 100;
-        display: flex;
-        flex-direction: column;
-        background-color: var(--nuxeo-sidebar-background);
-        overflow: hidden;
-        box-sizing: border-box;
-        transition:
-          width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-          box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      :host([sidebar-expanded]) #sidebarRail {
-        width: var(--sat-sidebar-expanded-width, 280px);
-        z-index: 150;
-        /* Drop shadow trails the rail's trailing edge in LTR/RTL. */
-        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.18);
-      }
-
-      :host([dir='rtl'][sidebar-expanded]) #sidebarRail {
-        box-shadow: -4px 0 16px rgba(0, 0, 0, 0.18);
-      }
-
-      #sidebarExpandScrim {
-        position: fixed;
-        inset: 0;
-        z-index: 140;
-        border: none;
-        padding: 0;
-        margin: 0;
-        background: transparent;
-        cursor: default;
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transition:
-          opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-          visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      :host([sidebar-expanded]) #sidebarExpandScrim {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-      }
-
-      .sidebar-expanded-title {
-        display: block;
-        flex: 0 1 auto;
-        min-width: 0;
-        font-family: var(--nuxeo-app-font);
-        font-size: 16px;
-        font-weight: 500;
-        line-height: 24px;
-        letter-spacing: 0.15px;
-        color: var(--nuxeo-sidebar-menu);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        opacity: 0;
-        max-width: 0;
-        padding-inline-end: 0;
-        transition:
-          opacity 0.2s ease,
-          max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-          padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      :host([sidebar-expanded]) .sidebar-expanded-title {
-        opacity: 1;
-        max-width: 220px;
-        padding-inline-end: 8px;
-        transition:
-          opacity 0.2s ease 0.05s,
-          max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-          padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      :host([sidebar-expanded]) .home-link,
-      :host([sidebar-expanded]) #menu {
-        width: 100%;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        #sidebarRail,
-        #sidebarExpandScrim,
-        .sidebar-expanded-title {
-          transition: none;
-        }
-      }
-
       /* Layout base */
       app-drawer-layout {
         display: flex;
@@ -377,76 +148,54 @@ Polymer({
 
       /* logo */
       #logo {
-        position: relative;
-        width: 100%;
+        position: fixed;
+        width: var(--nuxeo-sidebar-width);
         height: 53px;
+        top: var(--nuxeo-app-top);
+        z-index: 102;
         box-sizing: border-box;
         outline: none;
         background-color: var(--nuxeo-sidebar-background);
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        flex-shrink: 0;
       }
 
-      #logo:focus-visible {
-        outline: auto;
+      :host([dir='ltr']) #logo {
+        left: 0;
+        right: auto;
       }
 
       #logo img {
         width: var(--nuxeo-sidebar-width);
         height: 53px;
-        flex-shrink: 0;
-        box-sizing: border-box;
-        object-fit: contain;
       }
 
-      /* Scrollable menu container */
-      #menuContainer {
-        position: relative;
-        width: 100%;
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow-x: hidden;
-        overflow-y: auto;
-        background-color: var(--nuxeo-sidebar-background);
-        display: flex;
-        flex-direction: column;
-        padding-bottom: 8px;
-        box-sizing: border-box;
-      }
-
-      .home-link {
-        position: relative;
-        width: var(--nuxeo-sidebar-width);
-        flex-shrink: 0;
-        background-color: var(--nuxeo-sidebar-background);
-        display: block;
-        text-decoration: none;
-        outline: none;
-        margin-top: 43px;
-        margin-bottom: 0;
+      :host([dir='rtl']) #logo {
+        right: 0px;
+        height: 53px;
+        left: auto;
       }
 
       /* menu */
       #menu {
         @apply --nuxeo-sidebar;
-        position: relative;
+        position: fixed;
         width: var(--nuxeo-sidebar-width);
+        height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         z-index: 100;
         padding: 0;
+        padding-top: 54px;
+        overflow: auto;
         display: flex;
         flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0;
       }
 
-      #menu nuxeo-menu-icon {
-        flex-shrink: 0;
+      #logo:hover img {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
       }
 
-      .home-link:focus-visible {
-        outline: auto;
+      #logo:hover img {
+        filter: brightness(110%);
+        -webkit-filter: brightness(110%);
       }
 
       /* Apply margin-top: auto to all settings and then reset them, except the first one */
@@ -476,15 +225,6 @@ Polymer({
         overflow: visible;
         width: var(--app-drawer-width, 350px);
         transition: width 0.3s ease;
-        /* Thin full-height separator between the secondary nav (drawer) and main content.
-           Drawn on the wrapper so it spans the entire viewport height regardless of
-           how much content the active drawer page renders. */
-        border-right: 1px solid var(--sys-outline-variant, var(--nuxeo-border, rgba(0, 0, 0, 0.12)));
-      }
-
-      :host([dir='rtl']) #drawer {
-        border-right: none;
-        border-left: 1px solid var(--sys-outline-variant, var(--nuxeo-border, rgba(0, 0, 0, 0.12)));
       }
 
       #drawer .toggle {
@@ -502,22 +242,18 @@ Polymer({
         right: auto;
       }
 
-      /* Vertical pill handle revealed on drawer hover. Replaces the previous
-         directional chevron — a single non-directional shape works for both
-         LTR and RTL, matching the Figma drag-handle treatment. */
-      #drawer .toggle .handle {
+      #drawer .toggle iron-icon {
         visibility: hidden;
-        position: absolute;
-        top: calc(50% - 24px);
-        left: calc(50% - 2px);
-        width: 4px;
+        color: var(--nuxeo-drawer-background);
+        background-color: var(--nuxeo-drawer-text);
+        width: 16px;
         height: 48px;
-        border-radius: 2px;
-        background-color: var(--sat-drawer-toggle-handle-background, #c8c5d3);
+        top: calc(50% - 24px);
+        opacity: 0.6;
       }
 
-      #drawer:hover .toggle .handle,
-      #drawer .toggle:hover .handle {
+      #drawer:hover .toggle iron-icon,
+      #drawer .toggle:hover iron-icon {
         visibility: visible !important;
       }
 
@@ -527,7 +263,7 @@ Polymer({
         width: calc(100% - var(--nuxeo-sidebar-width));
         height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         margin-left: var(--nuxeo-sidebar-width);
-        background-color: var(--sat-page-surface-background, var(--nuxeo-drawer-background));
+        background-color: var(--nuxeo-drawer-background);
       }
 
       :host([dir='rtl']) #drawer iron-pages {
@@ -535,12 +271,25 @@ Polymer({
         margin-left: 0;
       }
 
+      #drawer nuxeo-menu-item:hover,
+      #drawer list-item:hover {
+        @apply --nuxeo-block-hover;
+      }
+
+      #drawer .list-item.selected,
+      #drawer nuxeo-menu-item.iron-selected,
+      #drawer .list-item:focus,
+      #drawer nuxeo-menu-item:focus,
+      #drawer .list-item.selected:focus,
+      #drawer nuxeo-menu-item.iron-selected:focus {
+        @apply --nuxeo-block-selected;
+      }
+
       #drawer nuxeo-menu-item {
         @apply --nuxeo-sidebar-item-theme;
         --nuxeo-menu-item-link {
           @apply --nuxeo-sidebar-item-link;
         }
-        border: none !important;
       }
 
       #drawer .profile nuxeo-menu-item:last-of-type {
@@ -554,11 +303,7 @@ Polymer({
         top: 5px;
         left: 6px;
         z-index: 99;
-        background-color: var(--sat-drawer-toggle-background, var(--nuxeo-drawer-background));
-      }
-
-      .header h5 {
-        @apply --sat-section-header;
+        background-color: var(--nuxeo-drawer-background);
       }
 
       #drawerToggle svg,
@@ -684,99 +429,38 @@ Polymer({
           hidden$="[[isDrawerHidden(isNarrow, drawerOpened)]]"
         >
           <div role="list">
-            <!--
-              Scrim is a click target for dismissing the expanded sidebar; it carries no
-              semantic content for assistive tech (Escape also dismisses, focus stays in
-              the rail). role="presentation" + aria-hidden keep it out of the AT tree.
-            -->
-            <div
-              id="sidebarExpandScrim"
-              on-click="_onSidebarScrimClick"
-              role="presentation"
-              aria-hidden="true"
-              tabindex="-1"
-            ></div>
+            <!-- logo -->
+            <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
+              <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
+            </a>
 
-            <div id="sidebarRail">
-              <!-- logo -->
-              <div
-                id="logo"
-                tabindex="0"
-                role="button"
-                aria-expanded="[[sidebarExpanded]]"
-                aria-controls="menuContainer"
-                aria-label$="[[_logoAriaLabel(sidebarExpanded, productName, i18n)]]"
-                on-click="_onLogoClick"
-              >
-                <img src$="[[_logo(baseUrl)]]" alt$="[[_logoImgAlt(sidebarExpanded)]]" />
-                <span class="sidebar-expanded-title" aria-hidden="true"
-                  >[[_sidebarProductTitle(productName, i18n)]]</span
-                >
-              </div>
-
-              <!-- Scrollable menu container -->
-              <div id="menuContainer">
-                <!-- home icon (outside paper-listbox to prevent drawer opening) -->
-                <a href$="[[urlFor('home')]]" on-click="_onSidebarNavClick" class="home-link">
-                  <nuxeo-menu-icon name="home" icon="nuxeo:home" label="app.home"></nuxeo-menu-icon>
-                </a>
-
-                <!-- menu -->
-                <paper-listbox
-                  id="menu"
-                  selected="{{selectedTab}}"
-                  attr-for-selected="name"
-                  selected-class="selected"
-                  on-iron-activate="_toggleDrawer"
-                  aria-label$="[[i18n('app.drawer')]]"
-                  aria-expanded="[[drawerOpened]]"
-                  on-keyup="_toggleDrawer"
-                >
-                  <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-                  <nuxeo-menu-icon
-                    name="administration"
-                    label="app.administration"
-                    class="settings"
-                    hidden$="[[!hasAdministrationPermissions(currentUser)]]"
-                    icon="nuxeo:admin"
-                  ></nuxeo-menu-icon>
-                  <a
-                    name="profile"
-                    class="settings profile-avatar"
-                    id="profileWrapper"
-                    role="option"
-                    href="#"
-                    tabindex="0"
-                    aria-label$="[[i18n('app.account')]]"
-                    on-click="_onProfileAvatarClick"
-                  >
-                    <span class="profile-avatar-icon-cell">
-                      <template is="dom-if" if="[[currentUser.contextParameters.userprofile.avatar.data]]">
-                        <img
-                          class="profile-avatar-image"
-                          src="[[currentUser.contextParameters.userprofile.avatar.data]]"
-                          alt="[[_displayUser(currentUser)]]"
-                        />
-                      </template>
-                      <template is="dom-if" if="[[!currentUser.contextParameters.userprofile.avatar.data]]">
-                        <span class="profile-initials">[[_userInitials(currentUser)]]</span>
-                      </template>
-                    </span>
-                    <span class="profile-avatar-label" aria-hidden="true">[[i18n('app.account')]]</span>
-                  </a>
-                  <nuxeo-tooltip
-                    for="profileWrapper"
-                    position="right"
-                    offset="0"
-                    animation-delay="0"
-                    id="profileTooltip"
-                    hidden$="[[sidebarExpanded]]"
-                    tabindex="-1"
-                    >[[i18n('app.account')]]
-                  </nuxeo-tooltip>
-                </paper-listbox>
-              </div>
-            </div>
+            <!-- menu -->
+            <paper-listbox
+              id="menu"
+              selected="{{selectedTab}}"
+              attr-for-selected="name"
+              selected-class="selected"
+              on-iron-activate="_toggleDrawer"
+              aria-label$="[[i18n('app.drawer')]]"
+              aria-expanded="[[drawerOpened]]"
+              on-keyup="_toggleDrawer"
+            >
+              <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
+              <nuxeo-menu-icon
+                name="administration"
+                icon="nuxeo:admin"
+                label="app.administration"
+                class="settings"
+                hidden$="[[!hasAdministrationPermissions(currentUser)]]"
+              ></nuxeo-menu-icon>
+              <nuxeo-menu-icon
+                name="profile"
+                src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+                icon="nuxeo:user-settings"
+                label="app.account"
+                class="settings"
+              ></nuxeo-menu-icon>
+            </paper-listbox>
 
             <!-- drawer content -->
             <div id="drawer" style="width: {{drawerWidth}}">
@@ -812,7 +496,7 @@ Polymer({
               </iron-pages>
 
               <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
-                <div class="handle" aria-hidden="true"></div>
+                <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
               </div>
             </div>
           </div>
@@ -911,7 +595,7 @@ Polymer({
   `,
 
   is: 'nuxeo-app',
-  behaviors: [RoutingBehavior, I18nBehavior, FormatBehavior, FiltersBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior],
   importMeta: import.meta,
   properties: {
     productName: {
@@ -1030,12 +714,6 @@ Polymer({
       value: false,
       reflectToAttribute: true,
     },
-
-    sidebarExpanded: {
-      type: Boolean,
-      value: false,
-      reflectToAttribute: true,
-    },
   },
 
   listeners: {
@@ -1078,7 +756,6 @@ Polymer({
     '_computeSharedActionContext(currentUser)',
     '_updateTitle(page, i18n, currentDocument, searchForm, currentTask, selectedAdminTab)',
     '_handleNarrowChange(isNarrow)',
-    '_syncSidebarExpandedTooltips(sidebarExpanded)',
   ],
 
   ready() {
@@ -1105,21 +782,6 @@ Polymer({
 
     this.$.drawerMenu.opened = false; // close
     this.drawerWidth = this.sidebarWidth = getComputedStyle(this).getPropertyValue('--nuxeo-sidebar-width');
-
-    // Slotted drawer items (Browse, Tasks, ...) are stamped after `ready()`, so
-    // when the sidebar is expanded we re-sync newly added `nuxeo-menu-icon`s.
-    // Scoped to direct children (childList only) — paper-listbox stamps icons
-    // there, no need to observe deeper subtree mutations (e.g. badge updates).
-    this._menuTooltipSyncObserver = new MutationObserver(() => {
-      if (this.sidebarExpanded) {
-        this._syncSidebarMenuTooltips(true);
-      }
-    });
-    this.async(() => {
-      if (this.$.menu) {
-        this._menuTooltipSyncObserver.observe(this.$.menu, { childList: true });
-      }
-    }, 1);
 
     const { toast } = this.$;
     // HACK - by changing the position to relative, we can stack snackbars (and tweak the internal label)
@@ -1156,103 +818,6 @@ Polymer({
     drawer.addEventListener('transitionstart', () => {
       this._resizeDuringAnimation();
     });
-
-    this._onSidebarEscape = (e) => {
-      // Defer to any handler (dialog, dropdown, etc.) that already claimed Escape
-      // via preventDefault — avoids collapsing the sidebar as a side effect.
-      if (e.defaultPrevented) {
-        return;
-      }
-      if (e.key === 'Escape' && this.sidebarExpanded) {
-        // Keyboard dismissal: return focus to the trigger.
-        this._collapseSidebar({ restoreFocus: true });
-      }
-    };
-    document.addEventListener('keydown', this._onSidebarEscape);
-  },
-
-  _toggleSidebarExpanded() {
-    this.sidebarExpanded = !this.sidebarExpanded;
-  },
-
-  /**
-   * Collapse the expanded sidebar.
-   *
-   * @param {{restoreFocus?: boolean}} [options]
-   *   `restoreFocus` only when collapse was driven by keyboard (Escape). For
-   *   pointer dismissal (scrim click, nav click) we leave focus where the user
-   *   put it to avoid surprising mouse users.
-   */
-  _collapseSidebar(options) {
-    const wasExpanded = this.sidebarExpanded;
-    const restoreFocus = !!options?.restoreFocus;
-    this.sidebarExpanded = false;
-    if (wasExpanded && restoreFocus && this.$?.logo) {
-      this.$.logo.focus();
-    }
-  },
-
-  _onSidebarScrimClick() {
-    this._collapseSidebar();
-  },
-
-  _onLogoClick(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this._toggleSidebarExpanded();
-  },
-
-  _logoImgAlt(sidebarExpanded) {
-    return sidebarExpanded ? '' : this.i18n('accessibility.logo');
-  },
-
-  /**
-   * `i18n` is passed as an argument so Polymer re-evaluates the binding when
-   * `I18nBehavior` swaps `this.i18n` after `messages.json` loads. Without it,
-   * the label would freeze on the unresolved key.
-   */
-  _logoAriaLabel(sidebarExpanded, productName, i18n) {
-    const title = this._sidebarProductTitle(productName, i18n);
-    return sidebarExpanded
-      ? i18n('accessibility.sidebar.logoExpanded', title)
-      : i18n('accessibility.sidebar.logoCollapsed', title);
-  },
-
-  _sidebarProductTitle(productName, i18n) {
-    const name = (productName && String(productName).trim()) || 'Nuxeo';
-    return i18n('app.brandedProductName', name);
-  },
-
-  /**
-   * Push the expanded state down to all `nuxeo-menu-icon` instances (including
-   * slotted drawer items). The icons reflect `expanded` to an attribute and
-   * key their CSS off `:host([expanded])`; the tooltip's `hidden$="[[expanded]]"`
-   * binding suppresses tooltips when labels are visible.
-   *
-   * Also hides the open profile tooltip on transition (`hidden$` already covers
-   * subsequent hovers via the template binding on `#profileTooltip`).
-   */
-  _syncSidebarExpandedTooltips(expanded) {
-    this._syncSidebarMenuTooltips(expanded);
-    const profileTooltip = this.$?.profileTooltip;
-    if (expanded && profileTooltip && typeof profileTooltip.hide === 'function') {
-      profileTooltip.hide();
-    }
-  },
-
-  _syncSidebarMenuTooltips(expanded) {
-    const container = this.$?.menuContainer;
-    if (!container) {
-      return;
-    }
-    container.querySelectorAll('nuxeo-menu-icon').forEach((icon) => {
-      icon.expanded = expanded;
-    });
-  },
-
-  _onSidebarNavClick() {
-    this._collapseSidebar();
-    this._resetTaskSelection();
   },
 
   _resizeDuringAnimation() {
@@ -1284,69 +849,22 @@ Polymer({
   },
 
   logoToMenuNavigation() {
-    const { logo, menu, menuContainer } = this.$;
-    const homeLink = menuContainer.querySelector('.home-link');
-
-    const getListItems = () => (menu.items || []).filter((el) => !el.hasAttribute('hidden'));
-
-    const isEventFromHome = (e) => homeLink && e.composedPath().includes(homeLink);
-
-    const focusHome = () => {
-      if (homeLink) {
-        homeLink.focus();
-      }
-    };
-
-    const focusMenuItem = (item) => {
-      if (!item) {
-        return;
-      }
-      // paper-listbox keeps tabindex -1 on items until iron-menu focuses them.
-      if (typeof menu._setFocusedItem === 'function') {
-        menu._setFocusedItem(item);
-      } else {
-        item.setAttribute('tabindex', '0');
-        item.focus();
-      }
-    };
-
+    const { logo } = this.$;
+    const { menu } = this.$;
     logo.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        e.stopPropagation();
-        this._toggleSidebarExpanded();
-        return;
-      }
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        if (homeLink) {
-          focusHome();
-        } else {
-          focusMenuItem(getListItems()[0]);
+        const firstItem = menu.querySelector('nuxeo-menu-icon, [name]');
+        if (firstItem) {
+          firstItem.focus();
         }
       }
     });
 
-    // Home lives outside paper-listbox (so it does not open the drawer); wire arrows manually.
-    menuContainer.addEventListener(
-      'keydown',
-      (e) => {
-        if (e.key === 'ArrowDown' && isEventFromHome(e)) {
-          e.preventDefault();
-          e.stopPropagation();
-          focusMenuItem(getListItems()[0]);
-          return;
-        }
-        if (e.key === 'ArrowUp' && isEventFromHome(e)) {
-          e.preventDefault();
-          logo.focus();
-        }
-      },
-      true,
-    );
-
     menu.addEventListener('keydown', (e) => {
-      const items = getListItems();
+      const items = Array.from(menu.querySelectorAll('nuxeo-menu-icon, [name]')).filter(
+        (el) => !el.hasAttribute('hidden'),
+      );
 
       if (!items.length) return;
 
@@ -1354,17 +872,7 @@ Polymer({
       const lastItem = items[items.length - 1];
       const active = e.target;
 
-      if (e.key === 'ArrowUp' && active === firstItem) {
-        e.preventDefault();
-        if (homeLink) {
-          focusHome();
-        } else {
-          logo.focus();
-        }
-        return;
-      }
-
-      if (e.key === 'ArrowDown' && active === lastItem) {
+      if ((e.key === 'ArrowUp' && active === firstItem) || (e.key === 'ArrowDown' && active === lastItem)) {
         e.preventDefault();
         logo.focus();
       }
@@ -1372,13 +880,6 @@ Polymer({
   },
 
   disconnectedCallback() {
-    if (this._onSidebarEscape) {
-      document.removeEventListener('keydown', this._onSidebarEscape);
-    }
-    if (this._menuTooltipSyncObserver) {
-      this._menuTooltipSyncObserver.disconnect();
-      this._menuTooltipSyncObserver = null;
-    }
     window.removeEventListener('resize', this._updateIsNarrow.bind(this));
     super.disconnectedCallback();
   },
@@ -1427,9 +928,8 @@ Polymer({
   },
 
   _checkRtl() {
-    const dir = document.documentElement.getAttribute('dir') || 'ltr';
+    const dir = document.documentElement.getAttribute('dir');
     this._isRTL = dir === 'rtl';
-    this.setAttribute('dir', dir);
   },
 
   _directionChanged(isRTL) {
@@ -1658,49 +1158,6 @@ Polymer({
     return `${baseUrl}themes/${localStorage.getItem('theme') || 'default'}/logo.png`;
   },
 
-  _onProfileAvatarClick(e) {
-    e.preventDefault();
-  },
-
-  _userInitials(user) {
-    if (!user) {
-      return '';
-    }
-    const firstName = user.properties?.firstName?.trim() || '';
-    const lastName = user.properties?.lastName?.trim() || '';
-
-    // Case 1: Both first and last name - use first letter of each
-    if (firstName && lastName) {
-      return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
-    }
-
-    // Case 2: Only first name with 2+ characters - use first two
-    if (firstName && firstName.length >= 2) {
-      return firstName.substring(0, 2).toUpperCase();
-    }
-
-    // Case 3: Only first name with 1 character
-    if (firstName) {
-      return firstName.charAt(0).toUpperCase();
-    }
-
-    // Case 4: Only last name
-    if (lastName && lastName.length >= 2) {
-      return lastName.substring(0, 2).toUpperCase();
-    }
-
-    if (lastName) {
-      return lastName.charAt(0).toUpperCase();
-    }
-
-    // Fallback to user id first two characters
-    if (user.id) {
-      return user.id.substring(0, 2).toUpperCase();
-    }
-
-    return '??';
-  },
-
   showHome(e) {
     e.detail.keyboardEvent.preventDefault();
     this.show('home');
@@ -1811,20 +1268,10 @@ Polymer({
     const selectedItemDetailSelected =
       selectedItem.detail && selectedItem.detail.selected ? selectedItem.detail.selected : 0;
     if (this._selected === selectedItemDetailSelected && this.drawerOpened) {
-      // Re-clicking the currently selected item:
-      //  - If the sidebar is expanded, the user's intent is to shrink the rail
-      //    back; keep the secondary nav open so they don't lose context.
-      //  - Otherwise (collapsed rail), preserve the original toggle behavior:
-      //    re-click closes the secondary nav.
-      if (this.sidebarExpanded) {
-        this._collapseSidebar();
-      } else {
-        requestAnimationFrame(() => {
-          this._closeDrawer();
-        });
-      }
+      requestAnimationFrame(() => {
+        this._closeDrawer();
+      });
     } else {
-      this._collapseSidebar();
       this._selected = this.selectedTab = selectedItemDetailSelected;
       this._openDrawer();
     }

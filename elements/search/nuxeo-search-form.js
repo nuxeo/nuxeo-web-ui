@@ -77,6 +77,7 @@ Polymer({
         right: 0;
         margin: 0;
         padding: 1rem;
+        background-color: var(--nuxeo-drawer-background);
       }
 
       .actions paper-button {
@@ -164,6 +165,7 @@ Polymer({
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
         @apply --layout-horizontal;
         @apply --layout-center;
+        background-color: var(--nuxeo-drawer-background);
       }
 
       .header h1 {
@@ -215,22 +217,19 @@ Polymer({
 
       .list-item {
         cursor: pointer;
-        padding: 0.7em 1em;
-        @apply --sat-drawer-item;
+        color: var(--nuxeo-drawer-text);
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
       }
 
       .list-item:hover {
-        @apply --sat-drawer-item-selected;
+        @apply --nuxeo-block-hover;
       }
 
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply --sat-drawer-item-selected;
-      }
-
-      .list-item-title {
-        @apply --sat-drawer-item;
+        @apply --nuxeo-block-selected;
       }
 
       .list-item-info {

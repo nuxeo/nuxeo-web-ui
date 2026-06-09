@@ -1418,6 +1418,8 @@
   "themes.current": "Arus",
   "themes.dark": "Gelap",
   "themes.default": "Nuxeo",
+  "themes.kawaii": "Kawaii",
+  "themes.light": "Cahaya",
   "threeDViewLayout.delete.confirm.message": "Apakah anda benar-benar ingin menghapus konten 3D ini?",
   "threeDViewLayout.delete.tooltip": "Hapus Konten 3D",
   "threeDViewLayout.deleted.message": "Konten 3D dihapus",

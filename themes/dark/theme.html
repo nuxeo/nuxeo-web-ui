@@ -15,14 +15,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
-<!-- Import Satori Design Tokens -->
-<link rel="stylesheet" href="../satori-design-tokens.css" />
 <custom-style>
   <style is="custom-style">
     html {
       /* -- Nuxeo Branding colors -- */
-      --nuxeo-app-font: 'Noto Sans'; /* matches --sat-font-family-primary */
+      --nuxeo-app-font: 'Inter', Arial, sans-serif;
       --nuxeo-text-default: #fff;
 
       --nuxeo-primary-color: #1f28bf;
@@ -164,17 +161,6 @@ limitations under the License.
       --nuxeo-diff-added-color: #7ab490;
       --nuxeo-diff-deleted-color: #ca8f8f;
       --nuxeo-diff-label-color: #d4d4d9;
-
-      /* ================================================================
-         TIER 3 — NUXEO COMPONENT TOKENS (--sat-<component>-<property>)
-         See docs/THEMING.md for the full naming contract.
-         ================================================================ */
-
-      /* Browse drawer */
-      --sat-selection-pill-background: #2e2e3e;
-
-      /* Nuxeo Elements - Map to Satori colors */
-      --nuxeo-checkmark-border-color: var(--nuxeo-text-default);
     }
   </style>
 </custom-style>

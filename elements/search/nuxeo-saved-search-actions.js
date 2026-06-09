@@ -72,7 +72,7 @@ Polymer({
         hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty, _isSearchFormVisible)]]"
       >
         <paper-icon-button
-          icon="nuxeo:more-vert"
+          icon="icons:more-vert"
           slot="dropdown-trigger"
           aria-label$="[[i18n('command.menu')]]"
         ></paper-icon-button>
