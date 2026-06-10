@@ -32,23 +32,39 @@ export default class Vocabulary extends BasePage {
   async waitForHasEntry(id, reverse) {
     await driver.waitUntil(
       async () => {
-        // Search within nuxeo-vocabulary-management to avoid ambiguous global #table lookups.
-        // Exclude header cells which contain filter dropdowns (they carry the [header] attribute).
-        const cells = await this.el.elements('#table nuxeo-data-table-row nuxeo-data-table-cell:not([header])');
-        // `elements()` returns a WDIO ChainablePromiseArray-resolved object; convert to a real
-        // array so we can use Array.prototype methods (.map/.every/.some) synchronously.
-        const cellArray = Array.from(cells);
-        if (!cellArray.length) {
-          // Table can be temporarily empty during refresh and permanently empty when the last
-          // entry is deleted. In reverse mode, empty means the target entry is absent.
+        // Read the element's `entries` property directly (the source of truth) instead
+        // of scraping rendered cell text. The `nuxeo-data-table` wraps `iron-list`,
+        // which virtualises rows: when `items.length` shrinks (e.g. after a delete),
+        // iron-list keeps the extra physical row in the DOM with its previous `item`
+        // model still bound, so its `nuxeo-data-table-cell` continues to render the
+        // stale label. Polling rendered cell text therefore can never see the entry
+        // disappear and `I cannot see "Breizh" entry` times out after a successful
+        // delete.
+        //
+        // We use `this.el.getProperty('entries')` rather than `driver.execute` with a
+        // `document.querySelector`, because `nuxeo-vocabulary-management` is stamped
+        // inside `nuxeo-admin`'s shadow DOM and is not reachable from light DOM. The
+        // page object's `this.el` is already a WDIO element resolved through WDIO's
+        // shadow-piercing `$`, so `getProperty` reads across the shadow boundary.
+        let entries;
+        try {
+          entries = await this.el.getProperty('entries');
+        } catch (e) {
+          // Element may be temporarily detached during a refresh \u2014 keep waiting.
+          return false;
+        }
+        if (!Array.isArray(entries)) {
+          // `entries` not yet populated (initial load). In reverse mode (asserting
+          // absence) treat as "not present"; otherwise keep waiting for the first load.
           return Boolean(reverse);
         }
-        // Await all cell texts concurrently so we can compare synchronously
-        const texts = await Promise.all(cellArray.map((cell) => cell.getText().then((t) => t.trim())));
-        if (reverse) {
-          return texts.every((text) => text !== id);
-        }
-        return texts.some((text) => text === id);
+        // The scenario passes either the entry id ("Brittany") or its label ("Breizh"),
+        // so match against both to support both styles of step usage.
+        const present = entries.some((entry) => {
+          const props = (entry && entry.properties) || {};
+          return props.id === id || props.label === id;
+        });
+        return reverse ? !present : present;
       },
       {
         timeoutMsg: reverse
