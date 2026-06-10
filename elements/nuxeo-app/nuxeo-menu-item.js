@@ -54,14 +54,18 @@ Polymer({
       /* iron-selector adds .iron-selected (Administration, Profile drawers) */
       :host(.iron-selected),
       :host(.iron-selected:hover),
-      :host(.iron-selected:focus) {
+      :host(.iron-selected:focus),
+      :host(:hover),
+      :host(:focus-within) {
         @apply --sat-drawer-item-selected;
       }
 
       :host(.iron-selected) a,
       :host(.iron-selected) a:hover,
       :host(.iron-selected) a:focus,
-      :host(.iron-selected) a:active {
+      :host(.iron-selected) a:active,
+      :host(:hover) a,
+      :host(:focus-within) a {
         background-color: transparent;
         color: var(--nuxeo-drawer-text);
       }
