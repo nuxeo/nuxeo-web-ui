@@ -3,6 +3,7 @@
 
 <%@ page import="java.util.List"%>
 <%@ page import="java.lang.management.ManagementFactory"%>
+<%@ page import="java.nio.file.DirectoryStream"%>
 <%@ page import="java.nio.file.Files"%>
 <%@ page import="java.nio.file.Path"%>
 <%@ page import="java.nio.file.Paths"%>
@@ -35,7 +36,14 @@ Nuxeo.UI.bundles = [
   '<%= context %><%= resource.getURI() %>',
   <% } %>
   <% for (String pn : pm.listInstalledPackagesNames(PackageType.ADDON)) {
-    if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".bundle.js"))) { %>
+    boolean hasJsBundle = Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".bundle.js"));
+    if (!hasJsBundle) {
+      try (DirectoryStream<Path> ds = Files.newDirectoryStream(
+          Paths.get("nxserver/nuxeo.war/ui"), pn + ".*.bundle.js")) {
+        hasJsBundle = ds.iterator().hasNext();
+      } catch (Exception e) { /* ignored */ }
+    }
+    if (hasJsBundle) { %>
       '<%= pn %>',
     <% } else if (Files.exists(Paths.get("nxserver/nuxeo.war/ui/" + pn + ".html"))) { %>
       '<%= context %><%= "/ui/" + pn + ".html" %>',
