@@ -27,11 +27,11 @@ suite('nuxeo-distribution-analytics', () => {
     await flush();
   });
 
-  test('_params builds nxql scoped to path', () => {
+  test('_params returns path as params array', () => {
     el.path = '/default-domain/workspaces/';
-    const { queryParams } = el._params();
-    expect(queryParams).to.include("ecm:path STARTSWITH '/default-domain/workspaces/'");
-    expect(queryParams).to.include('ecm:isTrashed = 0');
+    const params = el._params();
+    expect(params).to.be.an('array');
+    expect(params).to.deep.equal(['/default-domain/workspaces/']);
   });
 
   test('_headers sets document fetch enricher', () => {

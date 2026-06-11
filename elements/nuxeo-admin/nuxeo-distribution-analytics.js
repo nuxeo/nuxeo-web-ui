@@ -75,10 +75,10 @@ Polymer({
       }
     </style>
 
-    <!-- use nxql page provider to limit the use of the distribution analytics chart -->
+    <!-- use document_distribution page provider to limit the use of the distribution analytics chart -->
     <nuxeo-page-provider
       id="provider"
-      provider="nxql_search"
+      provider="document_distribution"
       page-size="1"
       schemas="dublincore,uid"
       headers="[[_headers()]]"
@@ -165,15 +165,7 @@ Polymer({
   observers: ['_observeDocPath(path, depth, visible)'],
 
   _params() {
-    return {
-      queryParams:
-        'SELECT * FROM Document ' +
-        "WHERE ecm:mixinType != 'HiddenInNavigation' " +
-        'AND ecm:isProxy = 0 AND ' +
-        'ecm:isVersion = 0 AND ' +
-        'ecm:isTrashed = 0 AND ' +
-        `ecm:path STARTSWITH '${this.path}'`,
-    };
+    return [this.path];
   },
 
   _headers() {
