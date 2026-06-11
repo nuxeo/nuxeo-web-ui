@@ -329,6 +329,7 @@ limitations under the License.
         this.$.recentStorage.reload();
         this._fetchFavorite().then((favorite) => {
           if (!(favorite && favorite.uid)) {
+            this.$.favoriteDocs.reset();
             return;
           }
 
@@ -358,8 +359,12 @@ limitations under the License.
           return Promise.resolve(this.favorite);
         }
         return this.$.fetchFavOp.execute().then((resp) => {
-          this.favorite = resp;
-          return resp;
+          if (resp.status === 204) {
+            this.favorite = null;
+          } else {
+            this.favorite = resp;
+          }
+          return this.favorite;
         });
       },
 

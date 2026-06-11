@@ -189,7 +189,7 @@ Polymer({
   },
 
   _visibleChanged() {
-    if (this.visible && !this.favorite) {
+    if (this.visible) {
       this._refresh();
     }
   },
@@ -202,6 +202,7 @@ Polymer({
   _refresh() {
     this._fetchFavorite().then((favorite) => {
       if (!favorite) {
+        this.$.favoritesList.reset();
         return;
       }
       this.$.favoritesProvider.params = [favorite.uid];
