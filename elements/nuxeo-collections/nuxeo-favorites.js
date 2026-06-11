@@ -204,6 +204,7 @@ Polymer({
       if (!favorite) {
         this.$.favoritesProvider.resultsCount = 0;
         this.$.favoritesList.reset();
+        this.$.favoritesList._computedEmptyLabel = this.i18n('favorites.empty');
         return;
       }
       this.$.favoritesProvider.params = [favorite.uid];
