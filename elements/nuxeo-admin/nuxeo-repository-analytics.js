@@ -282,7 +282,8 @@ Polymer({
   // builds page provider query to get info about downloaded docs
   _downloadsQuery(entries) {
     if (entries.length > 0) {
-      return entries.map((entry) => entry.key);
+      const ids = entries.map((entry) => `'${entry.key}'`).join(',');
+      return [ids];
     }
   },
 

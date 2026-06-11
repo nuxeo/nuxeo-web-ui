@@ -41,6 +41,7 @@ suite('nuxeo-document-versions', () => {
     });
 
     test('should default page to 1', () => {
+      // The declared default is 0, but two-way binding with nuxeo-page-provider (which defaults to page 1) overrides it
       expect(element.page).to.equal(1);
     });
 
