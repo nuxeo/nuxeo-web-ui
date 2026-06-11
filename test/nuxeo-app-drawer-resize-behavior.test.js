@@ -550,15 +550,18 @@ suite('nuxeo-app-drawer-resize-behavior', () => {
       app.isNarrow = false;
       app._drawerOpenWidth = 500;
       sinon.stub(app, '_maxDrawerWidth').returns(700);
-      app._onShrinkDrawerRequest({ detail: { amount: 80 } });
-      expect(app._drawerOpenWidth).to.equal(420);
-      expect(app.drawerWidth).to.equal('420px');
-      expect(globalThis.localStorage.getItem('nuxeo.drawerWidth')).to.equal('420');
-      expect(app.hasAttribute('drawer-resizing')).to.be.true;
-      clock.tick(100);
-      expect(app.hasAttribute('drawer-resizing')).to.be.false;
-      clock.restore();
-      app._maxDrawerWidth.restore();
+      try {
+        app._onShrinkDrawerRequest({ detail: { amount: 80 } });
+        expect(app._drawerOpenWidth).to.equal(420);
+        expect(app.drawerWidth).to.equal('420px');
+        expect(globalThis.localStorage.getItem('nuxeo.drawerWidth')).to.equal('420');
+        expect(app.hasAttribute('drawer-resizing')).to.be.true;
+        clock.tick(100);
+        expect(app.hasAttribute('drawer-resizing')).to.be.false;
+      } finally {
+        clock.restore();
+        app._maxDrawerWidth.restore();
+      }
     });
 
     test('_onShrinkDrawerRequest ignores invalid or zero amount', () => {
@@ -719,6 +722,153 @@ suite('nuxeo-app-drawer-resize-behavior', () => {
       app._onShrinkDrawerRequest({ detail: { amount: 40 } });
       expect(app.hasAttribute('drawer-resizing')).to.be.true;
       app._maxDrawerWidth.restore();
+    });
+  });
+
+  suite('branch coverage gaps', () => {
+    test('_onDrawerResizeBound is a no-op when drawer is closed', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = false;
+      app._drawerOpenWidth = 400;
+      app._onDrawerResizeBound({ detail: { bound: 'min' } });
+      expect(app._drawerOpenWidth).to.equal(400);
+    });
+
+    test('_onDrawerResizeBound is a no-op when layout is narrow', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = true;
+      app._drawerOpenWidth = 400;
+      app._onDrawerResizeBound({ detail: { bound: 'max' } });
+      expect(app._drawerOpenWidth).to.equal(400);
+    });
+
+    test('_onDrawerResizeReset is a no-op when drawer is closed', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = false;
+      const resetSpy = sinon.spy(app, '_resetDrawerWidth');
+      try {
+        app._onDrawerResizeReset();
+        expect(resetSpy).to.not.have.been.called;
+      } finally {
+        resetSpy.restore();
+      }
+    });
+
+    test('_onDrawerResizeDrag is a no-op when drawer is closed', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = false;
+      app._drawerOpenWidth = 400;
+      app._drawerDragStartWidth = 400;
+      app._onDrawerResizeDrag({ detail: { deltaFromStart: 20 } });
+      expect(app._drawerOpenWidth).to.equal(400);
+    });
+
+    test('_onDrawerResizeDrag is a no-op when _drawerDragStartWidth is null', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 400;
+      app._drawerDragStartWidth = null;
+      app._onDrawerResizeDrag({ detail: { deltaFromStart: 20 } });
+      expect(app._drawerOpenWidth).to.equal(400);
+    });
+
+    test('_onDrawerResizeDragEnd does not persist when _drawerOpenWidth is null', () => {
+      app.sidebarWidth = '52px';
+      app._drawerOpenWidth = null;
+      const persistSpy = sinon.spy(app, '_persistDrawerWidth');
+      try {
+        app._onDrawerResizeDragEnd();
+        expect(persistSpy).to.not.have.been.called;
+      } finally {
+        persistSpy.restore();
+      }
+    });
+
+    test('_onShrinkDrawerRequest clears a pending drawer-resizing timer on a second call', () => {
+      const clock = sinon.useFakeTimers();
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 500;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      try {
+        app._onShrinkDrawerRequest({ detail: { amount: 30 } });
+        const firstTimer = app._clearDrawerResizingTimer;
+        expect(firstTimer).to.exist;
+        app._drawerOpenWidth = 500;
+        app.removeAttribute('drawer-resizing');
+        const clearSpy = sinon.spy(globalThis, 'clearTimeout');
+        try {
+          app._onShrinkDrawerRequest({ detail: { amount: 30 } });
+          expect(clearSpy).to.have.been.calledWith(firstTimer);
+        } finally {
+          clearSpy.restore();
+        }
+      } finally {
+        clock.restore();
+        app._maxDrawerWidth.restore();
+      }
+    });
+
+    test('_loadStoredDrawerWidth returns null when localStorage is unavailable', () => {
+      const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+      Object.defineProperty(globalThis, 'localStorage', { configurable: true, get: () => undefined });
+      try {
+        expect(app._loadStoredDrawerWidth()).to.be.null;
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(globalThis, 'localStorage', originalDescriptor);
+        }
+      }
+    });
+
+    test('_persistDrawerWidth is a no-op when localStorage is unavailable', () => {
+      const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+      Object.defineProperty(globalThis, 'localStorage', { configurable: true, get: () => undefined });
+      try {
+        expect(() => app._persistDrawerWidth(420)).to.not.throw();
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(globalThis, 'localStorage', originalDescriptor);
+        }
+      }
+    });
+
+    test('_resetDrawerWidth is a no-op for storage when localStorage is unavailable', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app._drawerOpenWidth = 480;
+      sinon.stub(app, '_notifyLayoutChanged');
+      const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+      Object.defineProperty(globalThis, 'localStorage', { configurable: true, get: () => undefined });
+      try {
+        expect(() => app._resetDrawerWidth()).to.not.throw();
+        expect(app._drawerOpenWidth).to.be.null;
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(globalThis, 'localStorage', originalDescriptor);
+        }
+        app._notifyLayoutChanged.restore();
+      }
+    });
+
+    test('_reclampDrawerWidth treats a non-parseable drawerWidth as 0 and rewrites it', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._drawerOpenWidth = 500;
+      app.drawerWidth = 'auto';
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      sinon.stub(app, '_computeOpenDrawerWidth').returns(500);
+      try {
+        app._reclampDrawerWidth();
+        expect(app.drawerWidth).to.equal('500px');
+      } finally {
+        app._maxDrawerWidth.restore();
+        app._computeOpenDrawerWidth.restore();
+      }
     });
   });
 });
