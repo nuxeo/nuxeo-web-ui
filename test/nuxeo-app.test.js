@@ -1529,4 +1529,61 @@ suite('nuxeo-app', () => {
       app._refreshSearch.restore();
     });
   });
+
+  suite('branch coverage gaps', () => {
+    test('drawer transitionrun from a descendant does not start the resize loop', () => {
+      const drawer = app.$.drawer;
+      if (!drawer) {
+        return;
+      }
+      const child = document.createElement('div');
+      drawer.appendChild(child);
+      sinon.stub(app, '_resizeDuringAnimation');
+      try {
+        child.dispatchEvent(new Event('transitionrun', { bubbles: true }));
+        child.dispatchEvent(new Event('transitionstart', { bubbles: true }));
+        expect(app._resizeDuringAnimation).to.not.have.been.called;
+      } finally {
+        app._resizeDuringAnimation.restore();
+        child.remove();
+      }
+    });
+
+    test('disconnectedCallback does not throw when _boundUpdateIsNarrow is not set', () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const fresh = document.createElement('nuxeo-app');
+      host.appendChild(fresh);
+      try {
+        fresh._boundUpdateIsNarrow = null;
+        expect(() => host.removeChild(fresh)).to.not.throw();
+      } finally {
+        host.remove();
+      }
+    });
+
+    test('_runLayoutNotify skips synthetic window.resize when includeWindowResize is false', () => {
+      const onResize = sinon.spy();
+      globalThis.addEventListener('resize', onResize);
+      try {
+        app._runLayoutNotify({ includeWindowResize: false });
+        expect(onResize).to.not.have.been.called;
+      } finally {
+        globalThis.removeEventListener('resize', onResize);
+      }
+    });
+
+    test('_handleNarrowChange on wide treats a non-parseable drawerWidth as 0', () => {
+      app.sidebarWidth = '52px';
+      app.drawerWidth = 'auto';
+      app.drawerOpened = false;
+      sinon.stub(app, '_notifyLayoutChanged');
+      try {
+        app._handleNarrowChange(false);
+        expect(app.drawerOpened).to.be.false;
+      } finally {
+        app._notifyLayoutChanged.restore();
+      }
+    });
+  });
 });

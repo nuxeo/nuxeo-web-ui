@@ -346,22 +346,27 @@ suite('nuxeo-document-page', () => {
       element._isNarrowViewport.restore();
     });
 
-    test('_scheduleViewportReclamp reclamps and fires nuxeo-layout-updated on the next frame', async () => {
+    test('_scheduleViewportReclamp reclamps and fires nuxeo-layout-updated on the next frame', () => {
       element.opened = true;
       sinon.stub(element, '_isNarrowViewport').returns(false);
       element.sideWidth = 600;
       const reclampSpy = sinon.spy(element, '_reclampSideWidth');
       const onLayoutUpdated = sinon.spy();
       element.addEventListener('nuxeo-layout-updated', onLayoutUpdated);
+      let rafCallback;
+      const rafStub = sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+        rafCallback = cb;
+        return 1;
+      });
       try {
         element._scheduleViewportReclamp();
         expect(reclampSpy).to.not.have.been.called;
-        await new Promise((resolve) => {
-          requestAnimationFrame(() => requestAnimationFrame(resolve));
-        });
+        expect(rafCallback).to.be.a('function');
+        rafCallback();
         expect(reclampSpy).to.have.been.calledOnce;
         expect(onLayoutUpdated).to.have.been.calledOnce;
       } finally {
+        rafStub.restore();
         reclampSpy.restore();
         element._isNarrowViewport.restore();
       }
@@ -618,6 +623,211 @@ suite('nuxeo-document-page', () => {
           }
           host.remove();
           element._maxSideWidth.restore();
+        }
+      });
+    });
+
+    suite('branch coverage gaps', () => {
+      test('_containerWidth falls back to host offsetWidth when .page has no width', () => {
+        sinon.stub(element.shadowRoot, 'querySelector').withArgs('.page').returns({ offsetWidth: 0 });
+        Object.defineProperty(element, 'offsetWidth', { configurable: true, get: () => 777 });
+        try {
+          expect(element._containerWidth()).to.equal(777);
+        } finally {
+          element.shadowRoot.querySelector.restore();
+          delete element.offsetWidth;
+        }
+      });
+
+      test('_containerWidth falls back to CONTAINER_WIDTH_FALLBACK_PX when nothing has width', () => {
+        sinon.stub(element.shadowRoot, 'querySelector').withArgs('.page').returns(null);
+        Object.defineProperty(element, 'offsetWidth', { configurable: true, get: () => 0 });
+        try {
+          expect(element._containerWidth()).to.equal(1024);
+        } finally {
+          element.shadowRoot.querySelector.restore();
+          delete element.offsetWidth;
+        }
+      });
+
+      test('_updateSideResizeAria uses .side offsetWidth when sideWidth is null', () => {
+        element.opened = true;
+        sinon.stub(element, '_isNarrowViewport').returns(false);
+        sinon.stub(element.shadowRoot, 'querySelector').withArgs('.side').returns({ offsetWidth: 444 });
+        element.sideWidth = null;
+        try {
+          element._updateSideResizeAria();
+          expect(element._sideResizeAriaNow).to.equal(444);
+        } finally {
+          element._isNarrowViewport.restore();
+          element.shadowRoot.querySelector.restore();
+        }
+      });
+
+      test('_updateSideResizeAria uses SIDE_PANE_FALLBACK_PX when sideWidth and .side are missing', () => {
+        element.opened = true;
+        sinon.stub(element, '_isNarrowViewport').returns(false);
+        sinon.stub(element.shadowRoot, 'querySelector').withArgs('.side').returns(null);
+        element.sideWidth = null;
+        try {
+          element._updateSideResizeAria();
+          expect(element._sideResizeAriaNow).to.equal(360);
+        } finally {
+          element._isNarrowViewport.restore();
+          element.shadowRoot.querySelector.restore();
+        }
+      });
+
+      test('_sideResizeCurrentWidth uses .side offsetWidth when sideWidth is null', () => {
+        sinon.stub(element.shadowRoot, 'querySelector').withArgs('.side').returns({ offsetWidth: 333 });
+        element.sideWidth = null;
+        try {
+          expect(element._sideResizeCurrentWidth()).to.equal(333);
+        } finally {
+          element.shadowRoot.querySelector.restore();
+        }
+      });
+
+      test('_sideResizeCurrentWidth falls back to SIDE_PANE_FALLBACK_PX when nothing is set', () => {
+        sinon.stub(element.shadowRoot, 'querySelector').withArgs('.side').returns(null);
+        element.sideWidth = null;
+        try {
+          expect(element._sideResizeCurrentWidth()).to.equal(360);
+        } finally {
+          element.shadowRoot.querySelector.restore();
+        }
+      });
+
+      test('_computeTargetSideWidth returns null when preference is NaN', () => {
+        sinon.stub(element, '_loadStoredSideWidth').returns(NaN);
+        element.sideWidth = null;
+        try {
+          expect(element._computeTargetSideWidth()).to.be.null;
+        } finally {
+          element._loadStoredSideWidth.restore();
+        }
+      });
+
+      test('_reclampSideWidth in side-resizing mode returns early when sideWidth is null', () => {
+        element.opened = true;
+        sinon.stub(element, '_isNarrowViewport').returns(false);
+        element.setAttribute('side-resizing', '');
+        element.sideWidth = null;
+        try {
+          element._reclampSideWidth();
+          expect(element.sideWidth).to.be.null;
+        } finally {
+          element._isNarrowViewport.restore();
+          element.removeAttribute('side-resizing');
+        }
+      });
+
+      test('_reclampSideWidth in side-resizing mode clamps an out-of-range sideWidth', () => {
+        element.opened = true;
+        sinon.stub(element, '_isNarrowViewport').returns(false);
+        sinon.stub(element, '_maxSideWidth').returns(500);
+        element.setAttribute('side-resizing', '');
+        element.sideWidth = 99999;
+        try {
+          element._reclampSideWidth();
+          expect(element.sideWidth).to.equal(500);
+        } finally {
+          element._isNarrowViewport.restore();
+          element._maxSideWidth.restore();
+          element.removeAttribute('side-resizing');
+        }
+      });
+
+      test('_reclampSideWidth in side-resizing mode keeps an in-range sideWidth untouched', () => {
+        element.opened = true;
+        sinon.stub(element, '_isNarrowViewport').returns(false);
+        sinon.stub(element, '_clampSideWidth').callsFake((px) => px);
+        element.setAttribute('side-resizing', '');
+        element.sideWidth = 400;
+        try {
+          element._reclampSideWidth();
+          expect(element.sideWidth).to.equal(400);
+        } finally {
+          element._isNarrowViewport.restore();
+          element._clampSideWidth.restore();
+          element.removeAttribute('side-resizing');
+        }
+      });
+
+      test('_reclampSideWidth is a no-op when _computeTargetSideWidth returns null', () => {
+        element.opened = true;
+        sinon.stub(element, '_isNarrowViewport').returns(false);
+        sinon.stub(element, '_computeTargetSideWidth').returns(null);
+        element.sideWidth = 400;
+        try {
+          element._reclampSideWidth();
+          expect(element.sideWidth).to.equal(400);
+        } finally {
+          element._isNarrowViewport.restore();
+          element._computeTargetSideWidth.restore();
+        }
+      });
+
+      test('_persistSideWidth is a no-op when localStorage is unavailable', () => {
+        const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+        Object.defineProperty(globalThis, 'localStorage', { configurable: true, get: () => undefined });
+        try {
+          expect(() => element._persistSideWidth(420)).to.not.throw();
+          expect(() => element._persistSideWidth(null)).to.not.throw();
+        } finally {
+          if (originalDescriptor) {
+            Object.defineProperty(globalThis, 'localStorage', originalDescriptor);
+          }
+        }
+      });
+
+      test('_onSideResizeBound is a no-op when not opened', () => {
+        element.opened = false;
+        element.sideWidth = 400;
+        element._onSideResizeBound({ detail: { bound: 'min' } });
+        expect(element.sideWidth).to.equal(400);
+      });
+
+      test('_onSideResizeReset is a no-op when not opened', () => {
+        element.opened = false;
+        const resetSpy = sinon.spy(element, '_resetSideWidth');
+        try {
+          element._onSideResizeReset();
+          expect(resetSpy).to.not.have.been.called;
+        } finally {
+          resetSpy.restore();
+        }
+      });
+
+      test('_onSideResizeDragStart is a no-op when not opened', () => {
+        element.opened = false;
+        element._onSideResizeDragStart();
+        expect(element.hasAttribute('side-resizing')).to.be.false;
+        expect(element._sideDragStartWidth).to.not.exist;
+      });
+
+      test('_onSideResizeDrag is a no-op when _sideDragStartWidth is null', () => {
+        element.opened = true;
+        sinon.stub(element, '_isNarrowViewport').returns(false);
+        element.sideWidth = 400;
+        element._sideDragStartWidth = null;
+        try {
+          element._onSideResizeDrag({ detail: { deltaFromStart: 50 } });
+          expect(element.sideWidth).to.equal(400);
+        } finally {
+          element._isNarrowViewport.restore();
+        }
+      });
+
+      test('_onSideResizeDragEnd does not persist when sideWidth is null', () => {
+        element.sideWidth = null;
+        const persistSpy = sinon.spy(element, '_persistSideWidth');
+        try {
+          element._onSideResizeDragEnd();
+          expect(persistSpy).to.not.have.been.called;
+          expect(element.hasAttribute('side-resizing')).to.be.false;
+        } finally {
+          persistSpy.restore();
         }
       });
     });
