@@ -33,11 +33,10 @@ suite('nuxeo-repository-analytics', () => {
     expect(el._isEmpty([1])).to.be.false;
   });
 
-  test('_downloadsQuery returns array of uuids', () => {
+  test('_downloadsQuery returns single-element array with quoted comma-separated uuids', () => {
     const q = el._downloadsQuery([{ key: 'uuid-a' }, { key: 'uuid-b' }]);
-    expect(q).to.be.an('array');
-    expect(q).to.include('uuid-a');
-    expect(q).to.include('uuid-b');
+    expect(q).to.be.an('array').with.lengthOf(1);
+    expect(q[0]).to.equal("'uuid-a','uuid-b'");
   });
 
   test('_downloadsQuery is undefined when there are no entries', () => {
