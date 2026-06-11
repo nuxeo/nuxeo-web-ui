@@ -19,10 +19,8 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-elements/nuxeo-document.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
-import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-fab/paper-fab.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
@@ -39,27 +37,18 @@ Polymer({
   _template: html`
     <style>
       paper-fab {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        color: var(--sat-document-create-button-icon-color, var(--nuxeo-button-primary-text));
-        --paper-fab-background: var(--sat-document-create-button-background, var(--nuxeo-button-primary));
-        --paper-fab-keyboard-focus-background: var(
-          --sat-document-create-button-hover-background,
-          var(--nuxeo-button-primary-focus)
-        );
-        box-shadow: var(
-          --sat-document-create-button-box-shadow,
-          0px 4px 8px 3px rgba(0, 0, 0, 0.15),
-          0px 1px 3px rgba(0, 0, 0, 0.3)
-        );
+        width: var(--nuxeo-document-create-button-width, 56px);
+        height: var(--nuxeo-document-create-button-height, 56px);
+        color: var(--nuxeo-button-primary-text);
+        --paper-fab-background: var(--nuxeo-button-primary);
+        --paper-fab-keyboard-focus-background: var(--nuxeo-button-primary-focus);
         @apply --nuxeo-document-create-button;
         transition: color 0.25s ease-in-out;
       }
 
       paper-fab:hover,
       paper-fab:focus {
-        background-color: var(--sat-document-create-button-hover-background, var(--nuxeo-button-primary-focus));
+        background-color: var(--nuxeo-button-primary-focus);
       }
 
       #tray {
@@ -100,11 +89,11 @@ Polymer({
       </div>
 
       <paper-fab
-        noink
         id="createBtn"
-        icon="nuxeo:create"
-        aria-labelledby="createBtnTooltip"
+        noink
+        icon="nuxeo:add"
         on-tap="_displayWizard"
+        aria-labelledby="createBtnTooltip"
       ></paper-fab>
       <!-- nuxeo-tooltip does not play nice (in shadycss) when attached to elements that are position: absolute -->
       <paper-tooltip for="createBtn" position="left" id="createBtnTooltip"

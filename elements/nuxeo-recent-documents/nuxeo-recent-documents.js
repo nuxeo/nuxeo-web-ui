@@ -39,10 +39,6 @@ Polymer({
         @apply --layout-vertical;
       }
 
-      .header h5 {
-        @apply --sat-section-header;
-      }
-
       nuxeo-data-list {
         display: block;
         position: relative;
@@ -51,16 +47,14 @@ Polymer({
 
       .list-item {
         cursor: pointer;
-        padding: 0.7em 1em;
-        border-bottom: none;
-        @apply --sat-drawer-item;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
       }
 
       .list-item-title {
         display: inline-block;
         text-overflow: ellipsis;
         overflow: hidden;
-        @apply --sat-drawer-item;
       }
 
       .list-item-info {
@@ -69,13 +63,13 @@ Polymer({
       }
 
       .list-item:hover {
-        @apply --sat-drawer-item-selected;
+        @apply --nuxeo-block-hover;
       }
 
       .list-item.selected,
       .selected:focus,
       .list-item.selected:focus {
-        @apply --sat-drawer-item-selected;
+        @apply --nuxeo-block-selected;
       }
     </style>
 

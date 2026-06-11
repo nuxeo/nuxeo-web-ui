@@ -33,7 +33,7 @@ elements/             → All Polymer web components
   nuxeo-results/      → Result list/grid display
 addons/               → Optional addon bundles (Drive, LiveConnect, CSV, Spreadsheet, etc.)
 i18n/                 → Localization JSON files (16 languages), merged at build time
-themes/               → Themeable CSS (default, dark)
+themes/               → Themeable CSS (default, dark, light, kawaii)
 test/                 → Unit tests (@web/test-runner + Mocha + Chai + Sinon)
 ftest/                → Functional tests (Cucumber/Gherkin .feature files)
 packages/

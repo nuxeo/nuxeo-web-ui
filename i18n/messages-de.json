@@ -1418,6 +1418,8 @@
   "themes.current": "Aktuell",
   "themes.dark": "Dunkel",
   "themes.default": "Nuxeo",
+  "themes.kawaii": "Kawaii",
+  "themes.light": "Hell",
   "threeDViewLayout.delete.confirm.message": "Wollen Sie dieses 3D wirklich löschen?",
   "threeDViewLayout.delete.tooltip": "3D-Inhalt löschen",
   "threeDViewLayout.deleted.message": "3D gelöscht",

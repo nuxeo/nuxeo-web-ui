@@ -541,7 +541,7 @@
 
 <nuxeo-slot-content name="damSearchMenuButtons" slot="DRAWER_ITEMS" order="45">
   <template>
-    <nuxeo-menu-icon id="assetsSearchButton" name="assetsSearch" icon="nuxeo:asset" label="dam.assets.heading">
+    <nuxeo-menu-icon id="assetsSearchButton" name="assetsSearch" icon="icons:perm-media" label="dam.assets.heading">
     </nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
@@ -560,8 +560,13 @@
 
 <nuxeo-slot-content name="tasksDrawerItem" slot="DRAWER_ITEMS" order="50">
   <template>
-    <nuxeo-menu-icon name="tasks" id="menuTasks" icon="nuxeo:tasks" label="app.tasks" badge="[[taskCount]]">
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon
+      name="tasks"
+      icon="nuxeo:tasks"
+      id="menuTasks"
+      label="app.tasks"
+      badge="[[taskCount]]"
+    ></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="tasksDrawerPage" slot="DRAWER_PAGES">
@@ -610,8 +615,12 @@
 
 <nuxeo-slot-content name="clipboardDrawerItem" slot="DRAWER_ITEMS" order="90">
   <template>
-    <nuxeo-menu-icon name="clipboard" icon="nuxeo:clipboard" label="app.clipboard" badge="[[clipboardDocCount]]">
-    </nuxeo-menu-icon>
+    <nuxeo-menu-icon
+      name="clipboard"
+      icon="nuxeo:clipboard"
+      label="app.clipboard"
+      badge="[[clipboardDocCount]]"
+    ></nuxeo-menu-icon>
   </template>
 </nuxeo-slot-content>
 <nuxeo-slot-content name="clipboardDrawerPage" slot="DRAWER_PAGES">
@@ -715,6 +724,18 @@
 <nuxeo-slot-content name="darkTheme" slot="THEMES" order="20">
   <template>
     <nuxeo-theme name="dark"></nuxeo-theme>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="kawaiiTheme" slot="THEMES" order="30">
+  <template>
+    <nuxeo-theme name="kawaii"></nuxeo-theme>
+  </template>
+</nuxeo-slot-content>
+
+<nuxeo-slot-content name="lightTheme" slot="THEMES" order="40">
+  <template>
+    <nuxeo-theme name="light"></nuxeo-theme>
   </template>
 </nuxeo-slot-content>
 

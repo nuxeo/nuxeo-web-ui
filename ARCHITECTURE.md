@@ -203,12 +203,14 @@ Addon loading is a two-step process. During the build, webpack injects `Nuxeo.UI
 
 ## Theming
 
-Two built-in themes in `themes/`:
+Four built-in themes in `themes/`:
 
 | Theme | Directory |
 |---|---|
 | Default | `themes/default/theme.html` |
 | Dark | `themes/dark/theme.html` |
+| Light | `themes/light/theme.html` |
+| Kawaii | `themes/kawaii/theme.html` |
 
 Base styles are in `themes/base.js` and `themes/loader.js` handles dynamic theme switching.
 

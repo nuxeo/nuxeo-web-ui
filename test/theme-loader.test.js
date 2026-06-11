@@ -40,7 +40,7 @@ suite('theme-loader', () => {
     });
 
     test('should allow valid theme names', () => {
-      ['default', 'dark', 'my-custom-theme'].forEach((value) => {
+      ['default', 'dark', 'light', 'kawaii', 'my-custom-theme'].forEach((value) => {
         expect(SAFE_THEME_PATTERN.test(value), `expected "${value}" to be allowed`).to.be.true;
       });
     });
@@ -76,17 +76,6 @@ suite('theme-loader', () => {
       getItemStub.returns('  dark  ');
       expect(getValidTheme()).to.equal('dark');
       expect(setItemStub).to.have.been.calledWith('theme', 'dark');
-    });
-
-    test('should map deprecated theme values to default', () => {
-      ['light', 'Light', 'kawaii', 'Kawaii'].forEach((value) => {
-        getItemStub.resetHistory();
-        setItemStub.resetHistory();
-        getItemStub.returns(value);
-
-        expect(getValidTheme()).to.equal('default');
-        expect(setItemStub).to.have.been.calledWith('theme', 'default');
-      });
     });
 
     test('should return "default" when localStorage.getItem throws', () => {

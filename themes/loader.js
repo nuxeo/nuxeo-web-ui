@@ -33,11 +33,6 @@ export function getValidTheme() {
   let raw;
   try {
     raw = localStorage.getItem('theme');
-    if (['light', 'kawaii'].includes(raw?.trim()?.toLowerCase())) {
-      // Remove deprecated themes from storage, fallback to default.
-      safeSetTheme('default');
-      raw = 'default';
-    }
   } catch (e) {
     // localStorage may be unavailable (e.g., private browsing)
     console.warn('Failed to read theme preference:', e.message);

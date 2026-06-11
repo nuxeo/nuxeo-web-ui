@@ -67,18 +67,18 @@ Polymer({
 
       .list-item {
         cursor: pointer;
-        padding: 0.7em 1em;
-        @apply --sat-drawer-item;
+        padding: 1em;
+        border-bottom: 1px solid var(--nuxeo-border);
       }
 
       .list-item:hover {
-        @apply --sat-drawer-item-selected;
+        @apply --nuxeo-block-hover;
       }
 
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply --sat-drawer-item-selected;
+        @apply --nuxeo-block-selected;
       }
 
       nuxeo-data-list {
