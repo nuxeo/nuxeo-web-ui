@@ -100,6 +100,7 @@ suite('nuxeo-favorites', () => {
       await element._refresh();
       expect(element.$.favoritesProvider.resultsCount).to.equal(0);
       expect(resetSpy).to.have.been.calledOnce;
+      expect(element.$.favoritesList._computedEmptyLabel).to.equal(element.i18n('favorites.empty'));
     });
 
     test('should fetch favorites list when favorite collection exists', async () => {
