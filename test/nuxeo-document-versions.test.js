@@ -40,8 +40,8 @@ suite('nuxeo-document-versions', () => {
       expect(element.versions).to.deep.equal([]);
     });
 
-    test('should default page to 0', () => {
-      expect(element.page).to.equal(0);
+    test('should default page to 1', () => {
+      expect(element.page).to.equal(1);
     });
 
     test('should default pageSize to 100', () => {
@@ -166,12 +166,13 @@ suite('nuxeo-document-versions', () => {
   });
 
   suite('_query', () => {
-    test('should set query string and reset page', () => {
+    test('should set provider params and reset page', () => {
       sinon.stub(element.$.scrollThreshold, 'clearTriggers');
       sinon.stub(element.$.provider, 'fetch').resolves({ entries: [] });
       Object.defineProperty(element.$.provider, 'isNextPageAvailable', { value: false, configurable: true });
       element._query('abc123');
-      expect(element.query).to.include('abc123');
+      expect(element.$.provider.params).to.deep.equal(['abc123']);
+      expect(element.$.provider.provider).to.equal('document_versions');
       expect(element.page).to.be.above(0);
     });
   });

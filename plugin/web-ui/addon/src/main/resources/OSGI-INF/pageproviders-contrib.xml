@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.nuxeo.web.ui.pageproviders">
+
+  <extension target="org.nuxeo.ecm.platform.query.api.PageProviderService" point="providers">
+
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider"
+                         name="recent_documents">
+      <property name="coreSession">#{documentManager}</property>
+      <pattern>
+        SELECT * FROM Document WHERE ecm:uuid IN (?) AND ecm:isTrashed = 0
+      </pattern>
+      <pageSize>20</pageSize>
+    </genericPageProvider>
+
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider"
+                         name="document_versions">
+      <property name="coreSession">#{documentManager}</property>
+      <pattern>
+        SELECT * FROM Document WHERE ecm:versionVersionableId = ? AND ecm:isVersion = 1
+      </pattern>
+      <pageSize>100</pageSize>
+    </genericPageProvider>
+
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider"
+                         name="document_publications">
+      <property name="coreSession">#{documentManager}</property>
+      <pattern>
+        SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0
+        AND (rend:sourceVersionableId = ? OR ecm:proxyVersionableId = ?)
+      </pattern>
+      <pageSize>40</pageSize>
+    </genericPageProvider>
+
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider"
+                         name="downloaded_documents">
+      <property name="coreSession">#{documentManager}</property>
+      <pattern>
+        SELECT * FROM Document WHERE ecm:uuid IN (?)
+      </pattern>
+      <pageSize>10</pageSize>
+    </genericPageProvider>
+
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider"
+                         name="document_distribution">
+      <property name="coreSession">#{documentManager}</property>
+      <pattern>
+        SELECT * FROM Document WHERE ecm:mixinType != 'HiddenInNavigation'
+        AND ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:isTrashed = 0
+        AND ecm:path STARTSWITH ?
+      </pattern>
+      <pageSize>1</pageSize>
+    </genericPageProvider>
+
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider"
+                         name="nxql_default_search">
+      <property name="coreSession">#{documentManager}</property>
+      <pattern>
+        SELECT * FROM Document WHERE ecm:mixinType != 'HiddenInNavigation'
+        AND ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:isTrashed = 0
+      </pattern>
+      <pageSize>20</pageSize>
+    </genericPageProvider>
+
+    <!-- Required by @nuxeo/nuxeo-ui-elements/nuxeo-path-suggestion -->
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider"
+                         name="path_children">
+      <property name="coreSession">#{documentManager}</property>
+      <pattern>
+        SELECT * FROM Document WHERE ecm:parentId = ?
+        AND ecm:mixinType = 'Folderish'
+        AND ecm:mixinType != 'HiddenInNavigation'
+        AND ecm:isVersion = 0 AND ecm:isTrashed = 0
+        AND ecm:name ILIKE ?
+      </pattern>
+      <pageSize>20</pageSize>
+    </genericPageProvider>
+
+    <!-- Required by @nuxeo/nuxeo-ui-elements/nuxeo-user-group-management/nuxeo-user-group-permissions-table -->
+    <genericPageProvider class="org.nuxeo.ecm.platform.query.nxql.SearchServicePageProvider"
+                         name="entity_permissions">
+      <property name="coreSession">#{documentManager}</property>
+      <pattern>
+        SELECT * FROM Document WHERE ecm:mixinType != 'HiddenInNavigation'
+        AND ecm:isProxy = 0 AND ecm:isVersion = 0 AND ecm:isTrashed = 0
+        AND ecm:acl/*1/principal = ?
+      </pattern>
+      <pageSize>25</pageSize>
+    </genericPageProvider>
+
+  </extension>
+
+</component>

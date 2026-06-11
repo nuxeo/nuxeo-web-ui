@@ -117,7 +117,8 @@ Polymer({
         <nuxeo-page-provider
           auto
           page-size="10"
-          query="[[_downloadsQuery(downloads)]]"
+          provider="downloaded_documents"
+          params="[[_downloadsQuery(downloads)]]"
           schemas="dublincore, common"
           current-page="{{downloadedDocs}}"
         >
@@ -281,8 +282,7 @@ Polymer({
   // builds page provider query to get info about downloaded docs
   _downloadsQuery(entries) {
     if (entries.length > 0) {
-      const values = entries.map((entry) => `'${entry.key}'`).join(',');
-      return `SELECT * FROM Document WHERE ecm:uuid IN (${values})`;
+      return entries.map((entry) => entry.key);
     }
   },
 

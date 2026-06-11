@@ -112,7 +112,7 @@ Polymer({
 
     <nuxeo-page-provider
       id="provider"
-      query="[[query]]"
+      provider="document_versions"
       page-size="[[pageSize]]"
       page="{{page}}"
       sort='{"uid:major_version": "desc", "uid:minor_version": "desc"}'
@@ -212,14 +212,16 @@ Polymer({
   },
 
   _query(id) {
-    this.query = `SELECT * FROM Document WHERE ecm:versionVersionableId = "${id}" AND ecm:isVersion = 1`;
+    this.$.provider.provider = 'document_versions';
+    this.$.provider.query = null;
+    this.$.provider.params = [id];
     this.page = 0;
     this._loadMore();
   },
 
   _loadMore() {
     this.$.scrollThreshold.clearTriggers();
-    if (this.query && (this.$.provider.isNextPageAvailable || this.page === 0)) {
+    if (this.$.provider.params && (this.$.provider.isNextPageAvailable || this.page === 0)) {
       this.page = this.page + 1;
       this.$.provider.fetch().then((results) => {
         if (this.page === 1) {

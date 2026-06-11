@@ -33,11 +33,11 @@ suite('nuxeo-repository-analytics', () => {
     expect(el._isEmpty([1])).to.be.false;
   });
 
-  test('_downloadsQuery builds IN clause for uuids', () => {
+  test('_downloadsQuery returns array of uuids', () => {
     const q = el._downloadsQuery([{ key: 'uuid-a' }, { key: 'uuid-b' }]);
+    expect(q).to.be.an('array');
     expect(q).to.include('uuid-a');
     expect(q).to.include('uuid-b');
-    expect(q).to.include('ecm:uuid IN');
   });
 
   test('_downloadsQuery is undefined when there are no entries', () => {

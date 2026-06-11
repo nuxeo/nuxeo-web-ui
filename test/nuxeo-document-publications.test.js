@@ -197,12 +197,11 @@ suite('nuxeo-document-publications', () => {
   });
 
   suite('_computeParams', () => {
-    test('should return query params when _src is set', () => {
+    test('should return params array when _src is set', () => {
       element._src = { uid: 'doc-123' };
       const params = element._computeParams();
-      expect(params).to.be.an('object');
-      expect(params.queryParams).to.contain('doc-123');
-      expect(params.queryParams).to.contain('ecm:isProxy = 1');
+      expect(params).to.be.an('array');
+      expect(params).to.deep.equal(['doc-123', 'doc-123']);
     });
 
     test('should return undefined when _src is null', () => {

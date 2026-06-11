@@ -91,8 +91,7 @@ Polymer({
     <nuxeo-page-provider
       id="provider"
       page-size="40"
-      provider="nxql_search"
-      params="[[_computeParams(_src)]]"
+      provider="document_publications"
       sort='{"dc:modified": "desc", "uid:major_version": "desc", "uid:minor_version": "desc"}'
       enrichers="thumbnail, permissions, audit"
       headers='{"fetch-document": "properties", "translate-directoryEntry": "label"}'
@@ -200,14 +199,13 @@ Polymer({
   _computeParams() {
     if (this._src) {
       const { uid } = this._src;
-      return {
-        queryParams: `${'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0 AND (rend:sourceVersionableId = "'}${uid}" OR ecm:proxyVersionableId = "${uid}")`,
-      };
+      return [uid, uid];
     }
   },
 
   _fetchPublications() {
     if (this.visible && this._src) {
+      this.$.provider.params = this._computeParams();
       this.$.table.fetch();
     }
   },
