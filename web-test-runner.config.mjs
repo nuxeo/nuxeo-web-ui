@@ -19,11 +19,16 @@
 import { createRequire } from 'node:module';
 import { chromeLauncher } from '@web/test-runner-chrome';
 import { defaultReporter } from '@web/test-runner';
+import { fromRollup } from '@web/dev-server-rollup';
 import { nuxeoTestFallbackPlugin } from './scripts/test/unit/web-test-runner-fallback-plugin.mjs';
 
 const require = createRequire(import.meta.url);
 // Bundled Chromium matches puppeteer-core; system Chrome on CI runners often mismatches (see WEBUI-2038).
 const puppeteer = require('puppeteer');
+
+// Istanbul instrumentation via rollup-plugin-istanbul — gives Karma-equivalent function body coverage.
+const rollupIstanbul = require('rollup-plugin-istanbul');
+const istanbulPlugin = fromRollup(rollupIstanbul);
 
 const chromeArgs = [
   '--disable-gpu',
@@ -56,7 +61,19 @@ const appSources = ['elements/**/*.js', 'addons/**/elements/**/*.js'];
 
 export default {
   files: ['test/load-all-tests.js'],
-  plugins: [nuxeoTestFallbackPlugin()],
+  plugins: [
+    nuxeoTestFallbackPlugin(),
+    // Istanbul instrumentation (only when --coverage) — instruments app source files so function bodies
+    // get accurate hit/miss counting (unlike V8 which inflates coverage for Polymer declarations).
+    ...(coverageEnabled
+      ? [
+          istanbulPlugin({
+            include: appSources,
+            exclude: ['test/**', 'node_modules/**', '**/routing.js', 'addons/nuxeo-platform-3d/**'],
+          }),
+        ]
+      : []),
+  ],
   reporters: [noCoverageSummaryReporter()],
   nodeResolve: {
     exportConditions: ['browser', 'development', 'import', 'module', 'default'],
@@ -75,6 +92,7 @@ export default {
         report: true,
         reportDir: 'coverage',
         reporters: ['html', 'lcov'],
+        nativeInstrumentation: false, // Use Istanbul instrumentation (via rollup-plugin-istanbul) instead of V8
         include: appSources,
         exclude: [
           // Dev server serves Polymer .html imports as *.html.js; those paths do not exist on disk.
