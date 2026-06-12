@@ -79,12 +79,11 @@ puppeteer                    ^24.0.0
 | **Removed** | `karma.conf.js` | Old Karma configuration |
 | **Added** | `web-test-runner.config.mjs` | WTR configuration (ESM) |
 | **Added** | `scripts/test/unit/web-test-runner-fallback-plugin.mjs` | Serves fallback JSON/HTML/JPEG for unstubbed API calls |
-| **Added** | `scripts/test/unit/web-test-runner-coverage-flag-plugin.mjs` | Injects `__NUXEO_COVERAGE_RUN__` flag when `--coverage` is active |
 | **Added** | `scripts/test/unit/inject-zero-coverage.js` | Post-run: adds 0% LCOV records for unloaded manifest modules |
 | **Added** | `scripts/test/unit/print-test-runner-notice.js` | Prints explanatory notice before WTR starts |
 | **Modified** | `scripts/test/unit/generate-coverage-imports.js` | Already existed; adjusted exclude patterns |
 | **Modified** | `scripts/test/unit/generate-test-load-all.js` | Already existed; unchanged logic |
-| **Modified** | `test/setup.js` | Major rewrite: error suppression, coverage materialization, sinon patching |
+| **Modified** | `test/setup.js` | Major rewrite: error suppression, sinon patching, leaked sandbox cleanup |
 | **Modified** | `package.json` | Scripts + devDependencies |
 | **Modified** | `.github/workflows/sonar.yaml` | Uses `npm test` (now WTR) for coverage |
 | **Modified** | `sonar-project.properties` | Updated coverage report path reference |
@@ -122,22 +121,20 @@ npm install --save-dev @web/test-runner @web/test-runner-chrome \
 Key design decisions:
 - **Single test entry**: `test/load-all-tests.js` (same pattern as Karma — prevents suite registration races)
 - **Puppeteer Chrome**: Bundled Chromium avoids system Chrome version mismatches
-- **Native V8 coverage**: No Babel; uses `coverageConfig` with `include` globs
-- **Custom plugins**: Fallback responses for unstubbed API calls, coverage flag injection
+- **Istanbul instrumentation**: Uses `rollup-plugin-istanbul` via `@web/dev-server-rollup`'s `fromRollup()` adapter for Karma-equivalent function-body coverage (native V8 disabled)
+- **Custom plugins**: Fallback responses for unstubbed API calls
 
 #### 3. Rewrite `test/setup.js`
 
 The setup file was significantly enhanced to handle WTR's stricter error model:
-- **Error suppression**: Intercepts uncaught errors and unhandled rejections that fire between tests or during materialization
+- **Error suppression**: Intercepts uncaught errors and unhandled rejections that fire between tests
 - **Sinon patching**: Handles Sinon ≥11's strict non-configurable property checks (Polymer elements)
-- **Coverage materialization**: Bulk-imports all app modules in `suiteTeardown` for complete V8 coverage
 - **Leaked sandbox cleanup**: Auto-restores sinon fakes/clocks left by failing tests
 
 #### 4. Create Helper Scripts
 
 - **Fallback plugin**: Serves valid JSON/JPEG for unstubbed `nuxeo-operation`/`nuxeo-resource` calls (prevents hundreds of 404 errors in test logs)
-- **Coverage flag plugin**: Injects `globalThis.__NUXEO_COVERAGE_RUN__ = true` at the top of setup.js when `--coverage` is active (V8 doesn't set `window.__coverage__` like Istanbul)
-- **Zero-coverage injection**: Post-processes `coverage/lcov.info` to add 0% records for modules that failed to load during materialization
+- **Zero-coverage injection**: Post-processes `coverage/lcov.info` to add 0% records for manifest paths that were never loaded by any test
 
 #### 5. Delete `karma.conf.js`
 
@@ -151,8 +148,8 @@ The `sonar.yaml` workflow required no changes to commands — `npm test` now run
 |-----------|----------|
 | Suite registration races | Single-entry `load-all-tests.js` barrel (preserved from Karma) |
 | Unstubbed API 404s flooding logs | `nuxeoTestFallbackPlugin` serves valid fallback responses |
-| V8 not reporting untested modules | Coverage materialization in `suiteTeardown` + `inject-zero-coverage.js` |
-| Polymer observer side-effects during materialization | `_testRunning = false` suppresses async errors |
+| Istanbul not reporting untested modules | `inject-zero-coverage.js` adds 0% lcov records for manifest paths never loaded |
+| Polymer observer side-effects during teardown | `_testRunning = false` suppresses async errors |
 | Sinon refusing to stub non-configurable Polymer properties | Custom `sinon.stub` patch with `Object.defineProperty` fallback |
 | CI Chrome version mismatch | Bundled Puppeteer Chromium |
 | Leaked sinon fakes causing cascade failures | Auto-restore in per-test `teardown` |

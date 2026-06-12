@@ -4,9 +4,10 @@
  *
  * Purpose:
  * Coverage tools only know about JavaScript that was loaded in the browser. Many UI modules are never
- * imported by any unit test; without a manifest + bulk import they disappear from coverage reports
- * and percentages look inflated. This script globs all app element sources and emits a sorted list
- * of project-relative paths. `test/setup.js` imports every path in a coverage-only `suiteTeardown`.
+ * imported by any unit test; without a manifest they disappear from coverage reports and percentages
+ * look inflated. This script globs all app element sources and emits a sorted list of project-relative
+ * paths. After the test run, `scripts/test/unit/inject-zero-coverage.js` uses this manifest to add
+ * 0% lcov records for any paths that were not loaded during tests.
  *
  * Scope:
  * - Included: all `.js` files under `elements/` and under each addon's `elements/` tree (see `patterns` below).

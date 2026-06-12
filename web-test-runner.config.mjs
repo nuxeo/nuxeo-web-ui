@@ -10,9 +10,11 @@
  *    loading can race and skip suites (the original Karma failure mode).
  *
  * 2) Coverage mode (`web-test-runner --coverage`, used by npm test)
- *    Uses native Chromium coverage (fast). `test/setup.js` bulk-imports uncovered modules in
- *    suiteTeardown when coverage is active. `scripts/test/unit/inject-zero-coverage.js` then adds 0%
- *    lcov records for manifest paths still missing (mirrors Karma skipFilesWithNoCoverage:false).
+ *    Uses Istanbul source instrumentation via rollup-plugin-istanbul (adapted with @web/dev-server-rollup's
+ *    fromRollup()). This gives Karma-equivalent function-body coverage for Polymer's factory pattern.
+ *    Native V8 instrumentation is disabled (`nativeInstrumentation: false`). After the run,
+ *    `scripts/test/unit/inject-zero-coverage.js` adds 0% lcov records for manifest paths not loaded
+ *    by any test (mirrors Karma skipFilesWithNoCoverage:false).
  *
  * Related: scripts/test/unit/generate-test-load-all.js, scripts/test/unit/generate-coverage-imports.js, test/setup.js.
  */

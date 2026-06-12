@@ -26,10 +26,11 @@ limitations under the License.
  * - Auto-restores leaked sinon fakes/clocks after each test.
  *
  * Coverage strategy:
- * V8 native coverage only reports modules that the browser actually loaded. Files never imported
- * by any test are NOT bulk-loaded here — they are added as 0% records by
- * `scripts/test/unit/inject-zero-coverage.js` after the run. This keeps coverage honest: only
- * code that tests actually exercise gets a non-zero percentage.
+ * Istanbul source instrumentation (via rollup-plugin-istanbul in web-test-runner.config.mjs) only
+ * reports modules that the browser actually loaded. Files never imported by any test are NOT
+ * bulk-loaded here — they are added as 0% records by `scripts/test/unit/inject-zero-coverage.js`
+ * after the run. This keeps coverage honest: only code that tests actually exercise gets a
+ * non-zero percentage.
  *
  * Related files:
  * - `test/load-all-tests.js` — imports this module first, then every `*.test.js`.
