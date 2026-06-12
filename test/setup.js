@@ -114,6 +114,12 @@ globalThis.should = chai.should();
 // noise is silently dropped; other stray failures are logged via console.error.
 let _testRunning = false;
 
+if (typeof window.suiteSetup === 'function') {
+  window.suiteSetup(() => {
+    _testRunning = true;
+  });
+}
+
 if (typeof window.setup === 'function') {
   window.setup(() => {
     _testRunning = true;
@@ -122,6 +128,12 @@ if (typeof window.setup === 'function') {
 
 if (typeof window.teardown === 'function') {
   window.teardown(() => {
+    _testRunning = false;
+  });
+}
+
+if (typeof window.suiteTeardown === 'function') {
+  window.suiteTeardown(() => {
     _testRunning = false;
   });
 }
