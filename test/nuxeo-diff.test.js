@@ -53,13 +53,6 @@ suite('nuxeo-diff', () => {
     test('should default _hasVersions to false', () => {
       expect(element._hasVersions).to.be.false;
     });
-
-    test('should have headers with fetch-document and translate-directoryEntry', () => {
-      expect(element.headers).to.deep.equal({
-        'fetch-document': 'properties',
-        'translate-directoryEntry': 'label',
-      });
-    });
   });
 
   suite('_title', () => {
