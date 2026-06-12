@@ -39,8 +39,25 @@ import { handleVerticalKeyNavigation } from '../common-utils.js';
 Polymer({
   _template: html`
     <style include="nuxeo-styles">
+      :host([hidden]) {
+        display: none !important;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
       .content {
         @apply --layout-vertical;
+      }
+
+      .emptyResult {
+        opacity: 0.8;
+        display: block;
+        font-weight: 300;
+        padding: 1.5em 0.7em;
+        text-align: center;
+        font-size: 1.1em;
       }
 
       nuxeo-data-list {
@@ -132,6 +149,7 @@ Polymer({
       <h5>[[i18n('app.favorites')]]</h5>
     </div>
     <div class="content">
+      <div class="emptyResult" hidden$="[[!_noFavorites]]">[[i18n('favorites.empty')]]</div>
       <nuxeo-data-list
         nx-provider="favoritesProvider"
         id="favoritesList"
@@ -142,6 +160,7 @@ Polymer({
         as="favorite"
         empty-label="[[i18n('favorites.empty')]]"
         empty-label-when-filtered="[[i18n('favorites.empty')]]"
+        hidden$="[[_noFavorites]]"
       >
         <template>
           <div tabindex="0" class$="[[_computedClass(selected)]]" on-keydown="_handleKeyNav">
@@ -177,6 +196,10 @@ Polymer({
       type: Array,
       notify: true,
     },
+    _noFavorites: {
+      type: Boolean,
+      value: false,
+    },
     selectedFavorite: {
       type: Object,
       observer: '_selectedFavoriteChanged',
@@ -202,14 +225,14 @@ Polymer({
   _refresh() {
     return this._fetchFavorite().then((favorite) => {
       if (!favorite) {
-        this.$.favoritesProvider.resultsCount = 0;
-        this.$.favoritesList.reset();
-        this.$.favoritesList._computedEmptyLabel = this.i18n('favorites.empty');
+        this._noFavorites = true;
         return;
       }
       this.$.favoritesProvider.params = [favorite.uid];
       this.$.favoritesProvider.page = 1;
-      this.$.favoritesList.fetch();
+      return this.$.favoritesList.fetch().then(() => {
+        this._noFavorites = !this.favorites || this.favorites.length === 0;
+      });
     });
   },
 
