@@ -28,7 +28,7 @@
 | **Node.js compatibility** | `karma-esm` uses `crypto.createHash('md4')` via polyfills-loader, which throws on Node 17+ (OpenSSL 3) without `--openssl-legacy-provider`. |
 | **Babel overhead for coverage** | Karma requires `compatibility: 'always'` (Babel transform) to get Istanbul instrumentation. This slows the test pipeline and introduces transpilation artifacts. |
 | **8 Karma-specific packages** | `karma`, `karma-chrome-launcher`, `karma-coverage-istanbul-reporter`, `karma-firefox-launcher`, `karma-mocha`, `karma-mocha-reporter`, `karma-source-map-support`, `karma-static` — all stale. |
-| **SonarCloud integration** | Istanbul's LCOV output works but the pipeline is fragile (Babel → Istanbul → reporter → file). Native V8 is direct and reliable. |
+| **SonarCloud integration** | Istanbul's LCOV output works but the pipeline is fragile (Babel → Istanbul → reporter → file). Istanbul on WTR is simpler (rollup plugin → lcov). |
 | **CI instability** | Karma's test registration race (`__karma__.loaded()` fires before all suites register) caused intermittent "fewer tests run" failures. |
 
 ### Benefits of Web Test Runner
@@ -37,7 +37,7 @@
 |---------|--------|
 | **Modern, maintained** | Part of the [@modernweb](https://modern-web.dev/) ecosystem; active development; aligns with Open WC community. |
 | **Native ESM** | Serves modules as-is via a dev server; no Babel or bundling needed for test execution. |
-| **Native V8 coverage** | Uses Chrome's built-in V8 coverage API; no instrumentation step; fast and accurate. |
+| **Istanbul coverage (no Babel)** | Uses `rollup-plugin-istanbul` to instrument sources at serve-time; no Babel transpilation needed. Fast and accurate. |
 | **Puppeteer integration** | Uses a bundled Chromium via `puppeteer`; no system Chrome version mismatches in CI. |
 | **Simpler configuration** | Single `web-test-runner.config.mjs` replaces Karma config + Karma plugins + ESM config. |
 | **Better error reporting** | Stack traces are source-mapped; browser logs are filterable; uncaught errors are attributed to tests. |
@@ -367,34 +367,31 @@ To improve the *behavior-tested* metric (closer to what Istanbul measured):
 | Action | Effort | Impact |
 |--------|--------|--------|
 | Write tests for 5 untested files (0% after inject-zero) | Medium | Closes the inject-zero gap |
-| Add assertions for observer/computed methods in tested files | Medium | Improves confidence; V8 number stays similar |
-| Track V8 **function coverage** separately | Low | Better proxy for "tested behavior" |
+| Add assertions for observer/computed methods in tested files | Medium | Improves confidence |
+| Track **function coverage** separately | Low | Better proxy for "tested behavior" |
 | Use `c8 --per-file` thresholds | Medium | Enforce per-file minimums |
 
-### Alternative: Istanbul on WTR (Not Recommended)
+### Coverage Approach: Istanbul via rollup-plugin-istanbul
 
-It's technically possible to use `@web/test-runner-coverage-v8` with an Istanbul fallback via `babel-plugin-istanbul`. This would produce Istanbul-equivalent numbers but:
-- Reintroduces Babel transformation (slower, potential bugs)
-- Defeats the purpose of native ESM testing
-- Adds maintenance burden for no functional benefit
-
-**Recommendation**: Accept V8 native coverage as the standard. Use function-level coverage metrics for deeper analysis when needed.
+The project uses `rollup-plugin-istanbul` adapted for WTR via `@web/dev-server-rollup`'s `fromRollup()`. Native V8 instrumentation is disabled (`nativeInstrumentation: false`). This approach:
+- Produces standard Istanbul coverage data (`window.__coverage__`)
+- Works reliably with Polymer's legacy element patterns
+- Avoids Babel transpilation (rollup plugin instruments ESM source directly)
+- Generates LCOV output consumed by SonarCloud
 
 ### Monitoring Coverage Drift
 
 ```bash
 # Quick local check
 npm test
-# Output: "Code coverage: 91.32 %"  (V8 for 146 loaded files)
 # Output: "inject-zero-coverage: added 5 zero-coverage records (146 → 151 files, 94.02% → 93.02% lines)"
 
 # Per-file details
 open coverage/lcov-report/index.html
 ```
 
-The two numbers to watch:
-- **WTR reported** (91.32%): V8 coverage for 146 files loaded during tests
-- **Final lcov** (93.02%): After inject-zero adds 0% records for 5 unloaded files
+The key number to watch:
+- **Final lcov** (93.02%): Istanbul coverage after inject-zero adds 0% records for unloaded files
 
 If overall coverage drops significantly, it likely means new untested modules were added without corresponding tests.
 
@@ -406,7 +403,7 @@ If overall coverage drops significantly, it likely means new untested modules we
 |-----------|--------|-------|
 | Test runner | Karma 6 (deprecated) | @web/test-runner 0.20 (active) |
 | ESM support | @open-wc/karma-esm + Babel | Native (WTR dev server) |
-| Coverage engine | Istanbul (source transform) | V8 native (Chrome built-in) |
+| Coverage engine | Istanbul (source transform) | Istanbul (rollup-plugin-istanbul, no Babel) |
 | Coverage % (lcov) | 74.58% (5,811 lines) | 93.02% (41,520 lines) |
 | Browser | System ChromeHeadless | Puppeteer bundled Chromium |
 | Node requirement | ≥18 (with --openssl-legacy-provider) | ≥18 (no hacks) |

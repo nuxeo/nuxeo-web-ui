@@ -61,9 +61,9 @@ const banner = `/**
  * AUTO-GENERATED — do not edit. Regenerate: npm run update-coverage-imports (runs in npm test).
  *
  * Exports \`coverageModulePaths\`: every app element module path under elements/ and each addon's
- * elements/ tree (minus excludes in generate-coverage-imports.js). Used for coverage materialization:
- * test/setup.js imports these URLs after all tests in coverage mode so reports include files that
- * no unit test loads (they appear as 0% coverage instead of being missing).
+ * elements/ tree (minus excludes in generate-coverage-imports.js). Used by
+ * scripts/test/unit/inject-zero-coverage.js after the test run to add 0% lcov records for any
+ * paths that were never loaded by a test (so reports include them instead of omitting them).
  */
 `;
 
