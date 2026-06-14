@@ -127,8 +127,12 @@ if (typeof window.setup === 'function') {
 }
 
 if (typeof window.teardown === 'function') {
-  window.teardown(() => {
-    _testRunning = false;
+  window.teardown(function _markTestBoundaryEnd() {
+    // Use setTimeout to defer flipping the flag until after all other teardown hooks
+    // have run. This prevents suppressing genuine errors thrown during fixture cleanup.
+    setTimeout(() => {
+      _testRunning = false;
+    }, 0);
   });
 }
 

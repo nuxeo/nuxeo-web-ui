@@ -2,9 +2,10 @@
 /**
  * Post-process Web Test Runner lcov output to match legacy Karma coverage scope.
  *
- * Native V8 coverage only includes modules executed in the browser. Karma + Istanbul also
- * listed every path from coverage-imports-data.js (including modules that fail to load),
- * typically at 0% — that keeps the overall percentage honest (~60% vs ~91% executed-only).
+ * Istanbul source instrumentation (via rollup-plugin-istanbul) only includes modules
+ * actually loaded by the test suite. Karma + Istanbul also listed every path from
+ * coverage-imports-data.js (including modules that fail to load), typically at 0% — that
+ * keeps the overall percentage honest (~60% vs ~91% executed-only).
  * Zero records omit blank lines from DA/LF counts (non-empty lines only).
  *
  * Run automatically after `web-test-runner --coverage` (see npm test).
