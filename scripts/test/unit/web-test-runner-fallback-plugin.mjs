@@ -62,8 +62,12 @@ export function nuxeoTestFallbackPlugin() {
     name: 'nuxeo-test-fallback',
     serve(context) {
       const urlPath = context.path.split('?')[0];
-      const diskPath = path.join(rootDir, urlPath.replace(/^\//, ''));
-      if (fs.existsSync(diskPath)) {
+      // Resolve and contain the path: protect against `..` segments in the request URL
+      // escaping `rootDir`. Without this guard, a crafted URL could make the plugin
+      // treat arbitrary host files as "existing on disk" and skip the fallback path.
+      const diskPath = path.resolve(rootDir, urlPath.replace(/^\//, ''));
+      const isInsideRoot = diskPath === rootDir || diskPath.startsWith(rootDir + path.sep);
+      if (isInsideRoot && fs.existsSync(diskPath)) {
         return undefined;
       }
       const body = fallbackBody(urlPath);

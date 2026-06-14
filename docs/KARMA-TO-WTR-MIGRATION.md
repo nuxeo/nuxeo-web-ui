@@ -195,7 +195,7 @@ The `sonar.yaml` workflow required no changes to commands — `npm test` now run
 │  └── Auto-restore leaked sinon globals                              │
 │                                                                     │
 │  inject-zero-coverage.js (post-run)                                 │
-│  └── Adds 0% lcov records for files in manifest but not in V8 output│
+│  └── Adds 0% lcov records for manifest files Istanbul never loaded  │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -208,7 +208,7 @@ The coverage exclusion lists are **identical** between the old Karma setup and t
 
 ### WTR Runtime Exclusions (`coverageConfig.exclude`)
 
-These paths are excluded from V8 coverage instrumentation at runtime:
+These paths are excluded from Istanbul coverage instrumentation at runtime (via `rollup-plugin-istanbul`, with `nativeInstrumentation: false`):
 
 | Pattern | Reason | Was excluded in Karma? |
 |---------|--------|------------------------|
@@ -218,7 +218,7 @@ These paths are excluded from V8 coverage instrumentation at runtime:
 
 ### Coverage Materialization Exclusions (`generate-coverage-imports.js`)
 
-These files are excluded from the `suiteTeardown` bulk-import that forces untested modules into coverage reports:
+`generate-coverage-imports.js` walks the source tree and writes a manifest of all instrumentable files into `test/coverage-imports-data.js`. After the run, `inject-zero-coverage.js` consumes that manifest and adds 0% lcov records for every entry Istanbul did not load. The exclusions below keep specific files out of that manifest so they are not forced to 0% (they are also excluded from runtime instrumentation):
 
 | Exclusion | Files affected | Reason |
 |-----------|---------------|--------|
