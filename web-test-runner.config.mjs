@@ -126,11 +126,54 @@ export default {
     if (verbose) {
       return true;
     }
-    const text = (log.args || []).map(String).join(' ');
+    // Stringify so we can match against object args (e.g. `{ message: 'No message', status: 404 }`)
+    // that `String(obj)` would otherwise turn into `[object Object]`.
+    const text = (log.args || [])
+      .map((arg) => {
+        if (arg == null) return String(arg);
+        if (typeof arg === 'string') return arg;
+        try {
+          return JSON.stringify(arg);
+        } catch (_) {
+          return String(arg);
+        }
+      })
+      .join(' ');
     if (text.includes('Promise outside a test')) {
       return false;
     }
-    if (/Invalid json|No message/.test(text) && text.includes('404')) {
+    // Benign nuxeo-client 404 / 500 / abort noise from async work that resolves after a test ends.
+    if (/Invalid json|No message|Not Found/.test(text) && /\b404\b/.test(text)) {
+      return false;
+    }
+    // Object dumps like `{ status: 404 }` / `{ status: 500 }` / `{ message: 'No message', status: 404 }`
+    // emitted by nuxeo-client failure handlers — no useful signal in the test output.
+    if (/^\{[^{}]*"status":\s*\d{3}[^{}]*\}\s*$/.test(text.trim())) {
+      return false;
+    }
+    // Bare `Error: Not Found` stacks from the nuxeo client's internal `_callFetch` (nuxeo.js:1901)
+    // — emitted whenever a 404 rejects the request, regardless of whether status is in the message.
+    if (/Error: Not Found/.test(text) && /node_modules\/nuxeo\/nuxeo\.js/.test(text)) {
+      return false;
+    }
+    if (/AbortError\b|: Aborted\b/.test(text)) {
+      return false;
+    }
+    // Stray TypeError / DOMException stacks from observers firing on detached fixtures or on
+    // post-teardown async work. These are caught by capture-phase listeners in test/setup.js,
+    // but Chromium still surfaces the stack via console — drop the well-known offenders.
+    if (
+      /nuxeo-tree-node\.js|nuxeo-document-task\.js|nuxeo-path-suggestion\.js|nuxeo-dropzone\.js|nuxeo-document-preview\.js|nuxeo-search-form\.js/.test(
+        text,
+      ) &&
+      /TypeError|Cannot read properties/.test(text)
+    ) {
+      return false;
+    }
+    if (/\[name=\]' is not a valid selector/.test(text)) {
+      return false;
+    }
+    if (/cannot resolve route: object does not have an "entity-type"/.test(text)) {
       return false;
     }
     return log.type === 'error';
