@@ -110,14 +110,22 @@ globalThis.should = chai.should();
 // coverage on those modules looks like 0%.
 //
 // The capture-phase listeners below intercept stray events before mocha's listeners
-// can see them, but only when no test is actively running. Benign 404/Invalid json
-// noise is silently dropped; other stray failures are logged via console.debug (see
-// `_logIgnoredAsyncFailure`) so they don't pollute CI output but remain available when
-// debugging locally with verbose browser logs enabled.
+// can see them, but only after Mocha has actually started running suites AND no test is
+// actively running. Benign 404/Invalid json noise is silently dropped; other stray
+// failures are logged via console.debug (see `_logIgnoredAsyncFailure`) so they don't
+// pollute CI output but remain available when debugging locally with verbose browser
+// logs enabled.
+//
+// `_mochaStarted` guards against suppressing errors thrown during initial test-module
+// loading and suite registration (before any Mocha hook has run). Without that guard,
+// real import/initialization failures would be silently swallowed and the run would
+// continue with missing suites.
 let _testRunning = false;
+let _mochaStarted = false;
 
 if (typeof window.suiteSetup === 'function') {
   window.suiteSetup(() => {
+    _mochaStarted = true;
     _testRunning = true;
   });
 }
@@ -144,7 +152,7 @@ if (typeof window.suiteTeardown === 'function') {
   });
 }
 
-const _shouldSuppressStrayAsyncFailure = () => !_testRunning;
+const _shouldSuppressStrayAsyncFailure = () => _mochaStarted && !_testRunning;
 const _isBenignNuxeoNetworkFailure = (info) => {
   if (info == null) {
     return false;
