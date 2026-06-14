@@ -44,7 +44,10 @@ for (const pattern of patterns) {
   }
 }
 
-// Strings like "elements/foo.js" so consumers can do `new URL(path, projectRoot)` (see test/setup.js).
+// Strings like "elements/foo.js". The manifest is consumed post-run by
+// `scripts/test/unit/inject-zero-coverage.js`, which adds 0% lcov records for every
+// path listed here that no test actually pulled in (keeps Sonar's overall percentage
+// honest instead of reporting executed-only coverage).
 const relImports = Array.from(seen).sort();
 
 if (relImports.length === 0) {

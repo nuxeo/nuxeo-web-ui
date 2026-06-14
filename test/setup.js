@@ -111,7 +111,9 @@ globalThis.should = chai.should();
 //
 // The capture-phase listeners below intercept stray events before mocha's listeners
 // can see them, but only when no test is actively running. Benign 404/Invalid json
-// noise is silently dropped; other stray failures are logged via console.error.
+// noise is silently dropped; other stray failures are logged via console.debug (see
+// `_logIgnoredAsyncFailure`) so they don't pollute CI output but remain available when
+// debugging locally with verbose browser logs enabled.
 let _testRunning = false;
 
 if (typeof window.suiteSetup === 'function') {
