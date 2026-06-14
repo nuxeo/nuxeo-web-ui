@@ -256,19 +256,28 @@ These paths are excluded from SonarCloud's coverage metrics entirely (same in bo
 
 ## Coverage Comparison
 
+> **Note**: The shipped configuration uses **Istanbul source instrumentation** via `rollup-plugin-istanbul`
+> (`nativeInstrumentation: false`). The V8 native measurements below were captured during experimentation
+> and are retained for historical context. With Istanbul on WTR, coverage methodology is similar to
+> the old Karma + Istanbul approach (AST-based statement/branch/function counting) — the main difference
+> is native ESM loading without Babel.
+
 ### Methodology Differences
 
-| Aspect | Karma + Istanbul | WTR + V8 Native |
+| Aspect | Karma + Istanbul (old) | WTR + Istanbul via rollup-plugin-istanbul (current) |
 |--------|-----------------|-----------------|
-| **Instrumentation** | Source-to-source transform (Babel + Istanbul plugin). Adds counter statements to every branch/statement/function. | Chrome's built-in V8 coverage API. Reports exact byte ranges executed. No source transformation. |
-| **When counted** | Counter increments when the inserted statement executes at runtime. Module-level code (Polymer factory calls) is counted only when the factory function body runs. | V8 marks source ranges as "covered" when the JS engine evaluates them. Top-level code (including the `Polymer({...})` call) is covered at import time. |
-| **Granularity** | Statement, branch, function — based on AST nodes. | Block ranges — based on V8's internal coverage counters (mapped to source via source maps). |
-| **Module-level code** | Declarative code like `Polymer({ is: 'foo', properties: {...} })` inside a factory call is only counted when that specific expression runs during a test. | The entire `Polymer({...})` factory call (all properties, observers declarations) is counted as "covered" the moment the module is imported — even if no instance is created. |
-| **Import = coverage?** | Importing a module does NOT automatically cover its logic (only top-level executable statements). | Importing a module DOES cover its module-level declarations (Polymer factory, property definitions, etc.). |
+| **Instrumentation** | Source-to-source transform (Babel + Istanbul plugin). Adds counter statements to every branch/statement/function. | Source-to-source transform (rollup-plugin-istanbul, no Babel). Same Istanbul counters injected during WTR dev-server serve. |
+| **When counted** | Counter increments when the inserted statement executes at runtime. Module-level code (Polymer factory calls) is counted only when the factory function body runs. | Same as Karma + Istanbul — counters increment at runtime. Module-level Polymer factory code is counted when it executes. |
+| **Granularity** | Statement, branch, function — based on AST nodes. | Statement, branch, function — same AST-based approach via Istanbul. |
+| **Module-level code** | Declarative code like `Polymer({ is: 'foo', properties: {...} })` inside a factory call is only counted when that specific expression runs during a test. | Same — Istanbul counts the expression as covered when it runs. Importing a module covers its top-level statements. |
+| **Key difference** | Babel transforms may alter the AST (e.g., arrow functions → regular functions), affecting what gets instrumented. | No Babel — native ESM. Istanbul instruments the original source as-is. |
 
-### Coverage Numbers (Measured)
+### Coverage Numbers (Measured with V8 — historical)
 
-| Metric | Karma + Istanbul | WTR + V8 |
+> These numbers were measured during the V8 native coverage phase. With Istanbul on WTR,
+> expect numbers closer to the old Karma percentages since both use AST-based counting.
+
+| Metric | Karma + Istanbul | WTR + V8 (historical) |
 |--------|-----------------|----------|
 | **Line coverage (lcov)** | **74.58%** | **93.02%** |
 | **Test count** | 1976 passed | 1976 passed |
@@ -277,7 +286,10 @@ These paths are excluded from SonarCloud's coverage metrics entirely (same in bo
 | **Lines hit (numerator)** | 4,334 | 38,620 |
 | **Untested files** | Appear at 0% (via `skipFilesWithNoCoverage: false`) | Appear at 0% (via `inject-zero-coverage.js`) |
 
-### Why 74.58% → 93.02%?
+### Why 74.58% → 93.02% (V8 only)?
+
+> This explanation applies to V8 native coverage. With Istanbul on WTR, the gap
+> is much smaller since both Karma and WTR use the same Istanbul counting methodology.
 
 The gap is **not** because WTR runs more tests. The same 1976 tests pass in both. The difference is entirely about **how lines are counted**:
 
@@ -346,7 +358,9 @@ Neither number is wrong — they measure different things:
 - **Istanbul (74.58%)**: "What percentage of *executable statements* were actively run during tests?" — a stricter, behavior-focused metric with a small denominator.
 - **V8 (93.02%)**: "What percentage of *source lines* were evaluated by the JS engine?" — a broader metric with a 7× larger denominator that includes structural code.
 
-For **SonarCloud Quality Gate** purposes, the V8 number is the new baseline. The gate should be configured for **≥ 90% on new code**, which remains meaningful given V8's generous line counting.
+> **Current configuration**: Since the shipped setup uses Istanbul on WTR (not V8), the coverage
+> numbers will be closer to the old Karma baseline. The SonarCloud gate should be calibrated
+> based on actual `npm test` output.
 
 ---
 
@@ -354,11 +368,11 @@ For **SonarCloud Quality Gate** purposes, the V8 number is the new baseline. The
 
 ### Accepting the New Baseline
 
-1. **Update SonarCloud Quality Gate**: The overall coverage baseline shifts from 74.58% (Istanbul) to 93.02% (V8 lcov). This is expected and documented. The quality gate should require **new code coverage ≥ 90%** — achievable given V8's generous line counting.
+1. **SonarCloud Quality Gate**: With Istanbul on WTR, the coverage baseline should be similar to the old Karma numbers. Calibrate the gate based on actual `npm test` output rather than historical V8 measurements.
 
-2. **Honest reporting**: Untested files report 0% (via `inject-zero-coverage.js`). Only 5 manifest files are not loaded by tests and get explicit zero records. The 93% reflects what V8 sees when running actual tests — no artificial inflation.
+2. **Honest reporting**: Untested files report 0% (via `inject-zero-coverage.js`). Only 5 manifest files are not loaded by tests and get explicit zero records.
 
-3. **Do not compare directly**: The Istanbul 74.58% and V8 93.02% measure fundamentally different things (5,811 executable statements vs 41,520 source lines). Comparing them as if they're on the same scale is misleading.
+3. **Consistent methodology**: Both old (Karma) and new (WTR) now use Istanbul AST-based instrumentation, making numbers directly comparable. The main improvement is native ESM (no Babel) and faster test execution.
 
 ### Improving Real Coverage
 
