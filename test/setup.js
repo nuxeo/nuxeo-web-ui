@@ -163,8 +163,10 @@ const _logIgnoredAsyncFailure = (label, info) => {
     return;
   }
   const display = typeof info === 'object' && info.message != null ? info.message : info;
+  // Downgraded to `debug` so it does not pollute the WTR console output for every
+  // suppressed post-teardown rejection. Set `WTR_VERBOSE=1` (or open DevTools) to see them.
   // eslint-disable-next-line no-console
-  console.error(`[test-setup] ignoring stray ${label} after test boundary:`, display);
+  console.debug(`[test-setup] ignoring stray ${label} after test boundary:`, display);
 };
 
 // Wrap ResizeObserver to defer notifications via requestAnimationFrame. Chrome occasionally
