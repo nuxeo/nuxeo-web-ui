@@ -24,6 +24,15 @@ suite('nuxeo-authentication-tokens-management', () => {
 
   setup(async () => {
     server = await login();
+    // The element renders <nuxeo-resource auto path="/token">. Without a mock route the
+    // sinon.fakeServer returns a default 404, which on slow CI fires `_handleTokens` with
+    // an empty body before the test starts and used to crash the dom-if binding. Register
+    // a stable empty response so setup is deterministic regardless of runner speed.
+    server.respondWith('GET', /\/api\/v1\/token(\?.*)?$/, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify({ 'entity-type': 'tokens', entries: [] }),
+    ]);
     element = await fixture(
       html`<nuxeo-authentication-tokens-management application="Nuxeo Drive"></nuxeo-authentication-tokens-management>`,
     );
