@@ -398,14 +398,18 @@ The project uses `rollup-plugin-istanbul` adapted for WTR via `@web/dev-server-r
 ```bash
 # Quick local check
 npm test
-# Output: "inject-zero-coverage: added 5 zero-coverage records (146 → 151 files, 94.02% → 93.02% lines)"
+# Last line of output is the inject-zero-coverage summary:
+#   "inject-zero-coverage: added <N> zero-coverage records (<before> → <after> files, <before>% → <after>% lines)"
 
 # Per-file details
 open coverage/lcov-report/index.html
 ```
 
-The key number to watch:
-- **Final lcov** (93.02%): Istanbul coverage after inject-zero adds 0% records for unloaded files
+The key number to watch is the **final lcov percentage** printed by
+`scripts/test/unit/inject-zero-coverage.js` at the end of `npm test`. The authoritative
+baseline for what is acceptable lives in SonarCloud (see the project's quality gate);
+the percentage in `coverage/lcov.info` will drift as modules and tests are added or
+removed, so no fixed number is pinned here.
 
 If overall coverage drops significantly, it likely means new untested modules were added without corresponding tests.
 
@@ -418,7 +422,7 @@ If overall coverage drops significantly, it likely means new untested modules we
 | Test runner | Karma 6 (deprecated) | @web/test-runner 0.20 (active) |
 | ESM support | @open-wc/karma-esm + Babel | Native (WTR dev server) |
 | Coverage engine | Istanbul (source transform) | Istanbul (rollup-plugin-istanbul, no Babel) |
-| Coverage % (lcov) | 74.58% (5,811 lines) | 93.02% (41,520 lines) |
+| Coverage % (lcov) | reported by Karma at the end of the run | reported by `inject-zero-coverage.js` at the end of `npm test`; current baseline tracked in SonarCloud |
 | Browser | System ChromeHeadless | Puppeteer bundled Chromium |
 | Node requirement | ≥18 (with --openssl-legacy-provider) | ≥18 (no hacks) |
 | Karma plugins | 8 packages | 0 |

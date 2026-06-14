@@ -18,9 +18,15 @@ function runFunctionalTests(project, dir) {
   console.info(`Starting Functional Tests for "${project}" on "${dir}" location.`);
   const ftestArgs = [...process.argv.slice(2), '--cucumberReport', CUCUMBER_REPORT_DIR];
   const run = spawnSync('nuxeo-web-ui-ftest', ftestArgs, { cwd: dir, stdio: 'inherit' });
-  if (run.status !== 0) {
-    console.error(`An error was returned by the process running the Functional Tests for "${project}".`);
-    process.exit(run.status);
+  if (run.error || run.status !== 0) {
+    if (run.error) {
+      console.error(`Failed to spawn the Functional Tests process for "${project}": ${run.error.message}`);
+    } else {
+      console.error(`An error was returned by the process running the Functional Tests for "${project}".`);
+    }
+    // `spawnSync` returns `status === null` when the child was terminated by a signal or
+    // never started (e.g. ENOENT). Fall back to a non-zero code so CI still fails loudly.
+    process.exit(run.status ?? 1);
   }
 }
 
