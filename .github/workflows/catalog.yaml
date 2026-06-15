@@ -48,7 +48,7 @@ jobs:
           node-version: 18
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.14.0
         with:
           java-version: '21'
 
