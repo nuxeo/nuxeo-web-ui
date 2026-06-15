@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-workflow-graph/nuxeo-workflow-graph.js';
 
 suite('nuxeo-workflow-graph', () => {
@@ -80,18 +80,22 @@ suite('nuxeo-workflow-graph', () => {
   });
 
   suite('show', () => {
-    // Regression test for WEBUI-2055: the graph is initially painted while the dialog is
-    // hidden (so every element offset is 0). Once the dialog is open, the graph must be
-    // rebuilt from scratch so jsPlumb 2.15.x picks up the real offsets for both endpoints
+    // Regression test for WEBUI-2055: setting `graph` (via the resource response) initially
+    // paints the graph while the dialog is still hidden, so every element offset is 0. The
+    // fix is that `show()` schedules an additional `_updateGraph()` call after
+    // `iron-overlay-opened` so jsPlumb 2.15.x picks up the real offsets for both endpoints
     // and connector segments.
     test('should rebuild the graph after the dialog has been opened', async () => {
       sinon.stub(element.$.graphResource, 'execute').resolves();
       const toggle = sinon.stub(element.$.graphDialog, 'toggle');
       const updateGraph = sinon.stub(element, '_updateGraph');
-      // Assign after stubbing so the observer call is captured by the stub.
+      // Assign after stubbing so the initial observer call is captured by the stub.
       element.graph = { nodes: [], transitions: [] };
-      // The `graph` observer fired once for the assignment above; reset so we can assert that
-      // `show()` does NOT re-render until the dialog is open.
+      // Polymer flushes property-effect observers asynchronously, so flush before resetting
+      // the stub history to avoid a race with the initial `_updateGraph(graph)` call.
+      await flush();
+      // We only want to assert that `show()` does NOT trigger an extra `_updateGraph()` call
+      // until the dialog is opened, so drop the initial-observer invocation from the history.
       updateGraph.resetHistory();
 
       // Awaiting the promise returned by `show()` deterministically resumes after the `.then()`
