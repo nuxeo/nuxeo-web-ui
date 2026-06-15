@@ -94,10 +94,9 @@ suite('nuxeo-workflow-graph', () => {
       // `show()` does NOT re-render until the dialog is open.
       updateGraph.resetHistory();
 
-      element.show();
-      // Wait for the resource promise to resolve and the listener to be attached.
-      await Promise.resolve();
-      await Promise.resolve();
+      // Awaiting the promise returned by `show()` deterministically resumes after the `.then()`
+      // in `show()` has run (it shares the same micro-task chain as the stubbed `execute()`).
+      await element.show();
 
       expect(toggle).to.have.been.calledOnce;
       expect(updateGraph).to.not.have.been.called;

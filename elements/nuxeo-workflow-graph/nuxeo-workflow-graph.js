@@ -247,25 +247,29 @@ Polymer({
   },
 
   show() {
-    this.$.graphResource
+    return this.$.graphResource
       .execute()
       .then(() => {
         // The graph is rendered by the `_updateGraph(graph)` observer as soon as the resource
         // resolves, i.e. while the dialog (and therefore the workflow container) is still hidden.
-        // In that state every DOM node reports `offsetLeft = offsetTop = 0`, so jsPlumb (2.15+
-        // caches offsets eagerly inside `addEndpoint`) anchors every endpoint and connector at
-        // the upper-left corner of the container. A simple `repaintEverything()` is not enough
-        // because the connector SVG paths that were built against the bogus offsets are not
-        // fully reconstructed. `paper-dialog-behavior` does not dispatch `iron-resize` on open,
-        // so we have to wait for `iron-overlay-opened` and rebuild the graph from scratch once
-        // the container has real offsets. See https://hyland.atlassian.net/browse/WEBUI-2055.
-        this.$.graphDialog.addEventListener(
-          'iron-overlay-opened',
-          () => {
+        // In that state every DOM node reports `offsetLeft = offsetTop = 0`, and jsPlumb 2.15+
+        // caches element offsets eagerly inside `addEndpoint`, so every endpoint and connector
+        // gets anchored at the upper-left corner of the container. A simple `repaintEverything()`
+        // is not enough because the connector SVG paths that were built against the bogus
+        // offsets are not fully reconstructed. `paper-dialog-behavior` does not dispatch
+        // `iron-resize` on open, so we have to wait for `iron-overlay-opened` and rebuild the
+        // graph from scratch once the container has real offsets.
+        // See https://hyland.atlassian.net/browse/WEBUI-2055.
+        //
+        // The handler is stored on the instance so repeated `show()` calls reuse the same
+        // listener reference: `addEventListener` deduplicates identical (type, listener, options)
+        // triples, preventing accumulation of one-shot listeners on rapid double-clicks.
+        if (!this._onGraphDialogOpened) {
+          this._onGraphDialogOpened = () => {
             this._updateGraph(this.graph);
-          },
-          { once: true },
-        );
+          };
+        }
+        this.$.graphDialog.addEventListener('iron-overlay-opened', this._onGraphDialogOpened, { once: true });
         this.$.graphDialog.toggle();
       })
       .catch((error) => {
