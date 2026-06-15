@@ -110,5 +110,44 @@ suite('nuxeo-workflow-graph', () => {
       expect(updateGraph).to.have.been.calledOnce;
       expect(updateGraph).to.have.been.calledWith(element.graph);
     });
+
+    test('should notify and rethrow when the graph resource fails', async () => {
+      const failure = new Error('boom');
+      sinon.stub(element.$.graphResource, 'execute').rejects(failure);
+      const toggle = sinon.stub(element.$.graphDialog, 'toggle');
+      const notify = sinon.stub(element, 'notify');
+
+      let caught;
+      try {
+        await element.show();
+      } catch (error) {
+        caught = error;
+      }
+
+      expect(caught).to.equal(failure);
+      expect(notify).to.have.been.calledOnce;
+      expect(notify).to.have.been.calledWith({ message: 'documentPage.route.view.graph.error' });
+      expect(toggle).to.not.have.been.called;
+    });
+
+    test('should reuse the cached iron-overlay-opened handler across show() calls', async () => {
+      sinon.stub(element.$.graphResource, 'execute').resolves();
+      sinon.stub(element.$.graphDialog, 'toggle');
+      sinon.stub(element, '_updateGraph');
+      const addEventListener = sinon.spy(element.$.graphDialog, 'addEventListener');
+
+      await element.show();
+      const firstHandler = element._onGraphDialogOpened;
+      expect(firstHandler).to.be.a('function');
+      expect(addEventListener).to.have.been.calledWith('iron-overlay-opened', firstHandler, { once: true });
+
+      await element.show();
+
+      // The instance-level handler reference is reused on subsequent show() calls so the
+      // DOM deduplicates the (type, listener, capture) triple and we do not accumulate
+      // one-shot listeners on rapid double-clicks.
+      expect(element._onGraphDialogOpened).to.equal(firstHandler);
+      expect(addEventListener.secondCall).to.have.been.calledWith('iron-overlay-opened', firstHandler, { once: true });
+    });
   });
 });
