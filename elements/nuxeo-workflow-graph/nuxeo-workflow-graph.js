@@ -262,8 +262,9 @@ Polymer({
         // See https://hyland.atlassian.net/browse/WEBUI-2055.
         //
         // The handler is stored on the instance so repeated `show()` calls reuse the same
-        // listener reference: `addEventListener` deduplicates identical (type, listener, options)
-        // triples, preventing accumulation of one-shot listeners on rapid double-clicks.
+        // listener reference. The DOM only considers `(type, listener, capture)` when checking
+        // for duplicate listeners, so reusing the same function reference is enough to prevent
+        // accumulation of one-shot listeners on rapid double-clicks.
         if (!this._onGraphDialogOpened) {
           this._onGraphDialogOpened = () => {
             this._updateGraph(this.graph);
