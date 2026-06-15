@@ -78,4 +78,34 @@ suite('nuxeo-workflow-graph', () => {
       expect(result).to.be.an('array');
     });
   });
+
+  suite('show', () => {
+    // Regression test for WEBUI-2055: the graph is initially painted while the dialog is
+    // hidden (so every element offset is 0). Once the dialog is open, the graph must be
+    // rebuilt from scratch so jsPlumb 2.15.x picks up the real offsets for both endpoints
+    // and connector segments.
+    test('should rebuild the graph after the dialog has been opened', async () => {
+      sinon.stub(element.$.graphResource, 'execute').resolves();
+      const toggle = sinon.stub(element.$.graphDialog, 'toggle');
+      const updateGraph = sinon.stub(element, '_updateGraph');
+      // Assign after stubbing so the observer call is captured by the stub.
+      element.graph = { nodes: [], transitions: [] };
+      // The `graph` observer fired once for the assignment above; reset so we can assert that
+      // `show()` does NOT re-render until the dialog is open.
+      updateGraph.resetHistory();
+
+      element.show();
+      // Wait for the resource promise to resolve and the listener to be attached.
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(toggle).to.have.been.calledOnce;
+      expect(updateGraph).to.not.have.been.called;
+
+      element.$.graphDialog.dispatchEvent(new CustomEvent('iron-overlay-opened'));
+
+      expect(updateGraph).to.have.been.calledOnce;
+      expect(updateGraph).to.have.been.calledWith(element.graph);
+    });
+  });
 });
