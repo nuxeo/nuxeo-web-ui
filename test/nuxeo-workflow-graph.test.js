@@ -130,24 +130,25 @@ suite('nuxeo-workflow-graph', () => {
       expect(toggle).to.not.have.been.called;
     });
 
-    test('should reuse the cached iron-overlay-opened handler across show() calls', async () => {
+    test('should register a fresh one-shot listener on every show() call', async () => {
       sinon.stub(element.$.graphResource, 'execute').resolves();
       sinon.stub(element.$.graphDialog, 'toggle');
       sinon.stub(element, '_updateGraph');
       const addEventListener = sinon.spy(element.$.graphDialog, 'addEventListener');
 
       await element.show();
-      const firstHandler = element._onGraphDialogOpened;
-      expect(firstHandler).to.be.a('function');
-      expect(addEventListener).to.have.been.calledWith('iron-overlay-opened', firstHandler, { once: true });
-
       await element.show();
 
-      // The instance-level handler reference is reused on subsequent show() calls so the
-      // DOM deduplicates the (type, listener, capture) triple and we do not accumulate
-      // one-shot listeners on rapid double-clicks.
-      expect(element._onGraphDialogOpened).to.equal(firstHandler);
-      expect(addEventListener.secondCall).to.have.been.calledWith('iron-overlay-opened', firstHandler, { once: true });
+      // Each show() registers a brand-new arrow function with `{ once: true }`. Reusing a
+      // cached reference (as in the previous fix attempt) caused the second open to silently
+      // drop its handler in some browsers, leaving the connectors anchored to stale offsets.
+      const calls = addEventListener.getCalls().filter((call) => call.args[0] === 'iron-overlay-opened');
+      expect(calls).to.have.length(2);
+      expect(calls[0].args[1]).to.be.a('function');
+      expect(calls[1].args[1]).to.be.a('function');
+      expect(calls[0].args[1]).to.not.equal(calls[1].args[1]);
+      expect(calls[0].args[2]).to.deep.equal({ once: true });
+      expect(calls[1].args[2]).to.deep.equal({ once: true });
     });
   });
 });
