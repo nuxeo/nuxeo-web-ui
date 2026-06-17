@@ -35,15 +35,8 @@ Polymer({
       .row {
         @apply --layout-horizontal;
       }
-      .user {
-        width: 200px;
-        min-width: 180px;
-        overflow: hidden;
-        padding-right: 20px;
-      }
 
       .value {
-        flex: 1;
         margin: 0 4px 7px;
       }
 
@@ -55,9 +48,7 @@ Polymer({
 
     <template is="dom-repeat" items="[[activities]]">
       <div class="row">
-        <div class="user">
-          <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
-        </div>
+        <nuxeo-user-tag user="[[item.principalName]]" max-characters="15"></nuxeo-user-tag>
         <div class="value">
           <span>[[_activity(item)]]</span>
           <nuxeo-date class="datetime" datetime="[[item.eventDate]]" format="relative"></nuxeo-date>
