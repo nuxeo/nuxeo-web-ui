@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/directory/nuxeo-vocabulary-management.js';
 
 suite('nuxeo-vocabulary-management', () => {
@@ -28,8 +28,9 @@ suite('nuxeo-vocabulary-management', () => {
     sinon.stub(element, 'i18n').callsFake((key) => key);
     // Provide vocabularies to prevent _schemaFor from crashing
     element.vocabularies = [
-      { name: 'coverage', schema: 'coverage', parent: '' },
-      { name: 'continent', schema: 'xvocabulary', parent: 'coverage' },
+      { name: 'coverage', schema: 'coverage', parent: '', readOnly: false },
+      { name: 'continent', schema: 'xvocabulary', parent: 'coverage', readOnly: false },
+      { name: 'country', schema: 'xvocabulary', parent: 'continent', readOnly: true },
       { name: 'nature', schema: '', parent: '' },
     ];
   });
@@ -80,6 +81,90 @@ suite('nuxeo-vocabulary-management', () => {
     test('should return xvocabulary schema for continent', () => {
       element.selectedVocabulary = 'continent';
       expect(element._schemaFor()).to.equal('xvocabulary');
+    });
+  });
+
+  suite('_computeReadOnly', () => {
+    test('should return false when no vocabulary is selected', () => {
+      expect(element._computeReadOnly('', element.vocabularies)).to.be.false;
+      expect(element._computeReadOnly(null, element.vocabularies)).to.be.false;
+    });
+
+    test('should return false when vocabularies is not an array', () => {
+      expect(element._computeReadOnly('country', null)).to.be.false;
+      expect(element._computeReadOnly('country', undefined)).to.be.false;
+    });
+
+    test('should return false for a writable vocabulary', () => {
+      expect(element._computeReadOnly('coverage', element.vocabularies)).to.be.false;
+    });
+
+    test('should return true for a readOnly vocabulary', () => {
+      expect(element._computeReadOnly('country', element.vocabularies)).to.be.true;
+    });
+
+    test('should return false when the vocabulary has no readOnly field (legacy server)', () => {
+      expect(element._computeReadOnly('nature', element.vocabularies)).to.be.false;
+    });
+
+    test('should expose _isReadOnly as a computed property reflecting the selection', async () => {
+      element.selectedVocabulary = 'country';
+      await flush();
+      expect(element._isReadOnly).to.be.true;
+      element.selectedVocabulary = 'coverage';
+      await flush();
+      expect(element._isReadOnly).to.be.false;
+    });
+  });
+
+  suite('read-only guards', () => {
+    setup(async () => {
+      element.selectedVocabulary = 'country';
+      await flush();
+    });
+
+    test('_createEntry should be a no-op for readOnly vocabularies', () => {
+      const dialog = { toggle: sinon.spy() };
+      element.$.vocabularyEditDialog = dialog;
+      element._createEntry();
+      expect(dialog.toggle).to.not.have.been.called;
+      expect(element._selectedEntry).to.be.undefined;
+    });
+
+    test('_save should be a no-op for readOnly vocabularies', () => {
+      const layout = { validate: sinon.spy() };
+      element.$.layout = layout;
+      element._save();
+      expect(layout.validate).to.not.have.been.called;
+    });
+
+    test('_deleteEntry should be a no-op for readOnly vocabularies', () => {
+      const confirmStub = sinon.stub(window, 'confirm').returns(true);
+      try {
+        element._deleteEntry({
+          target: { parentNode: { item: { directoryName: 'country', properties: { id: 'x' } } } },
+        });
+        expect(confirmStub).to.not.have.been.called;
+      } finally {
+        confirmStub.restore();
+      }
+    });
+
+    test('addEntry button should be disabled (not hidden) for readOnly vocabulary', async () => {
+      await flush();
+      const btn = element.shadowRoot.querySelector('#addEntry');
+      expect(btn, 'addEntry button should be rendered').to.exist;
+      expect(btn.disabled).to.be.true;
+      expect(btn.hasAttribute('hidden')).to.be.false;
+    });
+
+    test('addEntry button should not be disabled for writable vocabulary', async () => {
+      element.selectedVocabulary = 'coverage';
+      await flush();
+      const btn = element.shadowRoot.querySelector('#addEntry');
+      expect(btn, 'addEntry button should be rendered').to.exist;
+      expect(btn.disabled).to.be.false;
+      expect(btn.hasAttribute('hidden')).to.be.false;
     });
   });
 
