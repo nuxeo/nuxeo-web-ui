@@ -93,6 +93,50 @@ suite('nuxeo-favorites', () => {
     });
   });
 
+  suite('_refresh', () => {
+    test('should set _noFavorites to true when no favorite collection exists', async () => {
+      sinon.stub(element, '_fetchFavorite').resolves(null);
+      await element._refresh();
+      expect(element._noFavorites).to.be.true;
+    });
+
+    test('should set _noFavorites to false when favorite collection has items', async () => {
+      element._noFavorites = true;
+      const fav = { uid: 'fav-collection-1' };
+      sinon.stub(element, '_fetchFavorite').resolves(fav);
+      sinon.stub(element.$.favoritesList, 'fetch').callsFake(() => {
+        element.favorites = [{ uid: 'doc1' }];
+        return Promise.resolve();
+      });
+      await element._refresh();
+      expect(element._noFavorites).to.be.false;
+      expect(element.$.favoritesProvider.params).to.deep.equal([fav.uid]);
+      expect(element.$.favoritesProvider.page).to.equal(1);
+      expect(element.$.favoritesList.fetch).to.have.been.calledOnce;
+    });
+
+    test('should set _noFavorites to true when favorite collection exists but is empty', async () => {
+      element._noFavorites = false;
+      const fav = { uid: 'fav-collection-1' };
+      sinon.stub(element, '_fetchFavorite').resolves(fav);
+      sinon.stub(element.$.favoritesList, 'fetch').callsFake(() => {
+        element.favorites = [];
+        return Promise.resolve();
+      });
+      await element._refresh();
+      expect(element._noFavorites).to.be.true;
+      expect(element.$.favoritesProvider.params).to.deep.equal([fav.uid]);
+      expect(element.$.favoritesProvider.page).to.equal(1);
+    });
+
+    test('should not call fetch on list when favorite is null', async () => {
+      sinon.stub(element, '_fetchFavorite').resolves(null);
+      const fetchSpy = sinon.spy(element.$.favoritesList, 'fetch');
+      await element._refresh();
+      expect(fetchSpy).to.not.have.been.called;
+    });
+  });
+
   suite('_removeFromFavorites', () => {
     test('should execute operation and fire event', async () => {
       const stub = sinon.stub(element.$.removeFromFavOp, 'execute').resolves();

@@ -127,6 +127,15 @@ Polymer({
         font-size: 1rem;
         font-weight: 600;
       }
+
+      paper-button[disabled] {
+        opacity: 0.95;
+      }
+
+      paper-icon-button[disabled] {
+        opacity: 0.4;
+        color: #999;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
@@ -156,7 +165,13 @@ Polymer({
 
         <template is="dom-if" if="[[_isVocabularySelected(selectedVocabulary)]]">
           <div class="top actions">
-            <paper-button id="addEntry" class="text" on-tap="_createEntry" aria-labelledby="addEntryLabel">
+            <paper-button
+              id="addEntry"
+              class="text"
+              on-tap="_createEntry"
+              disabled$="[[_isReadOnly]]"
+              aria-labelledby="addEntryLabel"
+            >
               <span id="addEntryLabel">+ [[i18n('vocabularyManagement.addEntry')]]</span>
             </paper-button>
           </div>
@@ -196,6 +211,7 @@ Polymer({
                       id="edit-button-[[index]]"
                       icon="nuxeo:edit"
                       on-tap="_editEntry"
+                      disabled$="[[_isReadOnly]]"
                       aria-labelledby="editButtonTooltip"
                     ></paper-icon-button>
                     <nuxeo-tooltip for="edit-button-[[index]]" id="editButtonTooltip"
@@ -206,6 +222,7 @@ Polymer({
                       name="delete"
                       icon="nuxeo:delete"
                       on-tap="_deleteEntry"
+                      disabled$="[[_isReadOnly]]"
                       aria-labelledby="deleteButtonTooltip"
                     ></paper-icon-button>
                     <nuxeo-tooltip for="delete-button-[[index]]" id="deleteButtonTooltip"
@@ -280,6 +297,11 @@ Polymer({
       type: String,
       computed: '_schemaFor(selectedVocabulary)',
     },
+    _isReadOnly: {
+      type: Boolean,
+      computed: '_computeReadOnly(selectedVocabulary, vocabularies)',
+      value: false,
+    },
   },
 
   observers: ['_refresh(selectedVocabulary)', '_syncFilterDropdowns(_aggregations)'],
@@ -341,6 +363,17 @@ Polymer({
       return 'display: block;';
     }
     return 'display: none;';
+  },
+
+  // Returns true when the currently selected vocabulary is declared read-only on
+  // the server (NXP-31054 exposes the `readOnly` flag on each directory entity).
+  // Falls back to false on older servers that omit the field.
+  _computeReadOnly(selectedVocabulary, vocabularies) {
+    if (!selectedVocabulary || !Array.isArray(vocabularies)) {
+      return false;
+    }
+    const v = vocabularies.find((d) => d && d.name === selectedVocabulary);
+    return !!v?.readOnly;
   },
 
   _visibleChanged() {
@@ -579,6 +612,9 @@ Polymer({
   },
 
   _deleteEntry(e) {
+    if (this._isReadOnly) {
+      return;
+    }
     if (window.confirm(this.i18n('vocabularyManagement.confirmDelete'))) {
       const { item } = e.target.parentNode;
       this.$.directory.path = `/directory/${this._encodePathSegment(item.directoryName)}/${this._encodePathSegment(
@@ -609,6 +645,9 @@ Polymer({
   },
 
   _editEntry(e) {
+    if (this._isReadOnly) {
+      return;
+    }
     this._new = false;
     this._selectedEntry = e.target.parentNode.item;
     this.$.vocabularyEditDialog.toggle();
@@ -621,6 +660,9 @@ Polymer({
   },
 
   _save() {
+    if (this._isReadOnly) {
+      return;
+    }
     if (!this.$.layout.validate()) {
       return;
     }
@@ -680,6 +722,9 @@ Polymer({
   },
 
   _createEntry() {
+    if (this._isReadOnly) {
+      return;
+    }
     const emptyEntry = {
       'entity-type': 'directoryEntry',
       directoryName: this.selectedVocabulary,
