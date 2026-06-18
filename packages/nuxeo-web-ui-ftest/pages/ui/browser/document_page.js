@@ -11,17 +11,7 @@ export default class DocumentPage extends BasePage {
   }
 
   get view() {
-    return (async () => {
-      if (this._selector === 'nuxeo-document-page') {
-        const selectorChain = ['nuxeo-document-view', 'nuxeo-document-layout', 'nuxeo-layout', 'div#container'];
-        const container = await browser.waitForShadowDeep(selectorChain);
-        return new DocumentView(container, this.docType);
-      }
-      const flatSelector = `${this._selector} nuxeo-document-view div#container`;
-      const container = await browser.$(flatSelector);
-      await container.waitForDisplayed();
-      return new DocumentView(container, this.docType);
-    })();
+    return (async () => new DocumentView(`${this._selector} nuxeo-document-view div#container`, this.docType))();
   }
 
   get metadata() {
