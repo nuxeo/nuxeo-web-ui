@@ -1521,19 +1521,45 @@ suite('nuxeo-app', () => {
   });
 
   suite('logo menu keyboard navigation', () => {
-    test('ArrowDown on logo focuses first menu item', () => {
+    test('ArrowDown on logo focuses home link when present', () => {
+      const logo = app.$.logo;
+      const menuContainer = app.$.menuContainer;
+      if (!logo || !menuContainer) {
+        return;
+      }
+      const homeLink = menuContainer.querySelector('.home-link');
+      if (!homeLink) {
+        return;
+      }
+      const focusSpy = sinon.spy(homeLink, 'focus');
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(focusSpy).to.have.been.called;
+      focusSpy.restore();
+    });
+
+    test('ArrowDown from home link focuses first menu item', () => {
       const logo = app.$.logo;
       const menu = app.$.menu;
-      if (!logo || !menu) {
+      const menuContainer = app.$.menuContainer;
+      if (!logo || !menu || !menuContainer) {
+        return;
+      }
+      const homeLink = menuContainer.querySelector('.home-link');
+      if (!homeLink) {
         return;
       }
       const item = document.createElement('div');
-      item.setAttribute('name', 'browse');
       const focusSpy = sinon.spy(item, 'focus');
-      sinon.stub(menu, 'querySelector').returns(item);
-      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      sinon.stub(menu, '_setFocusedItem').callsFake(() => item.focus());
+      Object.defineProperty(menu, 'items', { value: [item], configurable: true });
+      const evt = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true });
+      Object.defineProperty(evt, 'composedPath', {
+        value: () => [homeLink, menuContainer, app],
+        configurable: true,
+      });
+      menuContainer.dispatchEvent(evt);
       expect(focusSpy).to.have.been.called;
-      menu.querySelector.restore();
+      menu._setFocusedItem.restore();
       focusSpy.restore();
     });
   });
@@ -1840,16 +1866,14 @@ suite('nuxeo-app', () => {
       if (!logo || !menu) {
         return;
       }
-      app.logoToMenuNavigation();
       const first = document.createElement('div');
       const last = document.createElement('div');
-      sinon.stub(menu, 'querySelectorAll').returns([first, last]);
+      Object.defineProperty(menu, 'items', { value: [first, last], configurable: true });
       const focusSpy = sinon.spy(logo, 'focus');
       const evt = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true });
       Object.defineProperty(evt, 'target', { value: last, configurable: true });
       menu.dispatchEvent(evt);
       expect(focusSpy).to.have.been.called;
-      menu.querySelectorAll.restore();
       focusSpy.restore();
     });
   });
