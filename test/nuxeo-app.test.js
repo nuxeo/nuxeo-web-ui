@@ -52,6 +52,84 @@ suite('nuxeo-app', () => {
     expect(app.drawerOpened).to.be.false;
   });
 
+  test('_handleNarrowChange re-syncs drawerOpened on narrow → wide when drawer is visually wide', () => {
+    app.sidebarWidth = '52px';
+    app.drawerWidth = '350px';
+    app.drawerOpened = false;
+    app._handleNarrowChange(false);
+    expect(app.drawerOpened).to.be.true;
+  });
+
+  test('_handleNarrowChange is a no-op on initial wide load (drawerWidth == sidebarWidth)', () => {
+    app.sidebarWidth = '52px';
+    app.drawerWidth = '52px';
+    app.drawerOpened = false;
+    app._handleNarrowChange(false);
+    expect(app.drawerOpened).to.be.false;
+  });
+
+  test('_handleNarrowChange does not touch drawerOpened when already true on narrow → wide', () => {
+    app.sidebarWidth = '52px';
+    app.drawerWidth = '350px';
+    app.drawerOpened = true;
+    app._handleNarrowChange(false);
+    expect(app.drawerOpened).to.be.true;
+  });
+
+  test('_updateDrawerResizeAria sets min max and now for screen readers', () => {
+    app.sidebarWidth = '52px';
+    app.drawerOpened = true;
+    app.isNarrow = false;
+    app._drawerOpenWidth = 400;
+    sinon.stub(app, '_maxDrawerWidth').returns(700);
+    app._updateDrawerResizeAria();
+    expect(app._drawerResizeAriaMin).to.equal(app._minDrawerWidth());
+    expect(app._drawerResizeAriaMax).to.equal(700);
+    expect(app._drawerResizeAriaNow).to.equal(400);
+    app._maxDrawerWidth.restore();
+  });
+
+  suite('drawer resize handle (RTL)', () => {
+    test('ArrowLeft on handle increases drawer width when dir is rtl', async () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._isRTL = true;
+      app.setAttribute('dir', 'rtl');
+      app._drawerOpenWidth = 400;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      await flush();
+      const handle = app.$.drawerResizeHandle;
+      expect(handle.getAttribute('dir')).to.equal('rtl');
+      handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, composed: true }));
+      expect(app._drawerOpenWidth).to.equal(416);
+      app._maxDrawerWidth.restore();
+    });
+
+    test('ArrowRight on handle decreases drawer width when dir is rtl', async () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.isNarrow = false;
+      app._isRTL = true;
+      app.setAttribute('dir', 'rtl');
+      app._drawerOpenWidth = 400;
+      sinon.stub(app, '_maxDrawerWidth').returns(700);
+      await flush();
+      app.$.drawerResizeHandle.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, composed: true }),
+      );
+      expect(app._drawerOpenWidth).to.equal(384);
+      app._maxDrawerWidth.restore();
+    });
+  });
+
+  test('_computeDrawerResizeHidden hides the handle when the drawer is closed or layout is narrow', () => {
+    expect(app._computeDrawerResizeHidden(false, false)).to.be.true;
+    expect(app._computeDrawerResizeHidden(true, true)).to.be.true;
+    expect(app._computeDrawerResizeHidden(false, true)).to.be.true;
+    expect(app._computeDrawerResizeHidden(true, false)).to.be.false;
+  });
+
   test('_logo builds theme logo URL from baseUrl and localStorage theme', () => {
     sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'ocean' : null));
     expect(app._logo('https://host/nuxeo/')).to.equal('https://host/nuxeo/themes/ocean/logo.png');
@@ -1056,5 +1134,857 @@ suite('nuxeo-app', () => {
     app.loadTask(null);
     expect(app._defineTaskAndNavigate).to.have.been.calledOnce;
     app._defineTaskAndNavigate.restore();
+  });
+
+  suite('refresh', () => {
+    test('refresh reloads search when page is search', () => {
+      sinon.stub(app, '_refreshSearch');
+      app.page = 'search';
+      app.refresh();
+      expect(app._refreshSearch).to.have.been.calledOnce;
+      app._refreshSearch.restore();
+    });
+
+    test('refresh loads task when page is tasks', () => {
+      sinon.stub(app, 'loadTask');
+      app.page = 'tasks';
+      app.currentTaskId = 'task-1';
+      app.refresh();
+      expect(app.loadTask).to.have.been.calledWith('task-1');
+      app.loadTask.restore();
+    });
+
+    test('refresh reloads browse document when docId is set', () => {
+      sinon.stub(app, 'load');
+      app.page = 'browse';
+      app.docId = 'doc-uid';
+      app.docPath = '';
+      app.docAction = 'view';
+      app.refresh();
+      expect(app.load).to.have.been.calledWith('browse', 'doc-uid', '', 'view');
+      app.load.restore();
+    });
+
+    test('refresh navigates home when no document context', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      app.page = 'home';
+      app.docId = '';
+      app.docPath = '';
+      app.refresh();
+      expect(app.navigateTo).to.have.been.calledWith('home');
+    });
+  });
+
+  suite('loadTask with id', () => {
+    test('loadTask fetches task and navigates on success', async () => {
+      const task = { id: 't1', name: 'Review' };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      app.loadTask('t1');
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(app.currentTask).to.equal(task);
+      expect(app.page).to.equal('tasks');
+      app.$.task.get.restore();
+    });
+
+    test('loadTask navigates to tasks on 403', async () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon.stub(app.$.task, 'get').rejects({ status: 403 });
+      sinon.stub(app, '_fetchTaskCount');
+      app.loadTask('t1');
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(app.navigateTo).to.have.been.calledWith('tasks');
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app._fetchTaskCount.restore();
+    });
+  });
+
+  suite('drawer toggle', () => {
+    test('_toggleDrawer opens drawer when a new tab is selected', () => {
+      sinon.stub(app, '_openDrawer');
+      app.drawerOpened = false;
+      app._selected = '';
+      app._toggleDrawer({ detail: { selected: 'tasks' } });
+      expect(app._openDrawer).to.have.been.calledOnce;
+      expect(app.selectedTab).to.equal('tasks');
+      app._openDrawer.restore();
+    });
+
+    test('_toggleDrawer closes drawer when the same tab is selected again', (done) => {
+      sinon.stub(app, '_closeDrawer');
+      app._selected = 'tasks';
+      app.drawerOpened = true;
+      app._toggleDrawer({ detail: { selected: 'tasks' } });
+      requestAnimationFrame(() => {
+        expect(app._closeDrawer).to.have.been.calledOnce;
+        app._closeDrawer.restore();
+        done();
+      });
+    });
+
+    test('_closeDrawer resets width and clears menu state', () => {
+      app.sidebarWidth = '52px';
+      app.drawerOpened = true;
+      app.selectedTab = 'tasks';
+      if (app.$.drawerMenu) {
+        app.$.drawerMenu.setAttribute('opened', '');
+      }
+      app._closeDrawer();
+      expect(app.drawerWidth).to.equal('52px');
+      expect(app.drawerOpened).to.be.false;
+      expect(app.selectedTab).to.equal('');
+    });
+  });
+
+  suite('showDiff', () => {
+    test('showDiff merges with existing docIds when context overlaps', () => {
+      app.$.diff.docIds = ['a', 'b', 'c'];
+      app.showDiff('a', 'b');
+      expect(app.$.diff.docIds).to.deep.equal(['a', 'b', 'c']);
+    });
+  });
+
+  suite('_updateTitle extended', () => {
+    test('sets collections title for Collections document type', () => {
+      app.page = 'browse';
+      app.productName = 'Nuxeo';
+      app.currentDocument = { title: 'My Coll', type: 'Collections' };
+      sinon.stub(app, 'hasFacet').returns(false);
+      app._updateTitle();
+      expect(document.title).to.include('app.title.collections');
+      app.hasFacet.restore();
+    });
+
+    test('sets favorites title for Favorites collection', () => {
+      app.page = 'browse';
+      app.productName = 'Nuxeo';
+      app.currentDocument = { title: 'Fav', type: 'Favorites' };
+      sinon.stub(app, 'hasFacet').withArgs(app.currentDocument, 'Collection').returns(true);
+      app._updateTitle();
+      expect(document.title).to.include('app.title.favorites');
+      app.hasFacet.restore();
+    });
+
+    test('sets collection title for Collection facet documents', () => {
+      app.page = 'browse';
+      app.productName = 'Nuxeo';
+      app.currentDocument = { title: 'Col', type: 'Collection' };
+      sinon.stub(app, 'hasFacet').withArgs(app.currentDocument, 'Collection').returns(true);
+      app._updateTitle();
+      expect(document.title).to.include('app.title.collection');
+      app.hasFacet.restore();
+    });
+
+    test('sets task title from currentTask workflow', () => {
+      app.page = 'tasks';
+      app.productName = 'Nuxeo';
+      app.currentTask = { workflowModelName: 'wf', name: 'step' };
+      app._updateTitle();
+      expect(document.title).to.include('wf');
+      expect(document.title).to.include('step');
+    });
+  });
+
+  suite('keyboard shortcuts and wizards', () => {
+    test('showHome prevents default and shows home page', () => {
+      const preventDefault = sinon.spy();
+      app.showHome({ detail: { keyboardEvent: { preventDefault } } });
+      expect(preventDefault).to.have.been.called;
+      expect(app.page).to.equal('home');
+    });
+
+    test('_focusMenu focuses the menu', () => {
+      const preventDefault = sinon.spy();
+      const focusSpy = sinon.spy(app.$.menu, 'focus');
+      app._focusMenu({ detail: { keyboardEvent: { preventDefault } } });
+      expect(preventDefault).to.have.been.called;
+      expect(focusSpy).to.have.been.called;
+      focusSpy.restore();
+    });
+
+    test('_showSuggester toggles suggester', () => {
+      const preventDefault = sinon.spy();
+      const toggleSpy = sinon.spy(app.$.suggester, 'toggle');
+      app._showSuggester({ detail: { keyboardEvent: { preventDefault } } });
+      expect(toggleSpy).to.have.been.called;
+      toggleSpy.restore();
+    });
+
+    test('_showDocumentCreationWizard opens import with files', () => {
+      const preventDefault = sinon.spy();
+      const toggleSpy = sinon.spy(app.$.importPopup, 'toggleDialogImport');
+      app._showDocumentCreationWizard({
+        detail: { keyboardEvent: { preventDefault }, files: [{ name: 'a.pdf' }] },
+      });
+      expect(toggleSpy).to.have.been.calledWith([{ name: 'a.pdf' }]);
+      toggleSpy.restore();
+    });
+
+    test('_showDocumentCreationWizard opens create dialog for a type', () => {
+      const toggleSpy = sinon.spy(app.$.importPopup, 'toggleDialogCreate');
+      app._showDocumentCreationWizard({ detail: { type: 'File' } });
+      expect(toggleSpy).to.have.been.calledWith('File');
+      toggleSpy.restore();
+    });
+
+    test('_showDocumentCreationWizard opens default import dialog', () => {
+      const toggleSpy = sinon.spy(app.$.importPopup, 'toggleDialog');
+      app._showDocumentCreationWizard({ detail: {} });
+      expect(toggleSpy).to.have.been.called;
+      toggleSpy.restore();
+    });
+  });
+
+  suite('_navigate', () => {
+    test('_navigate routes to document browse', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      const doc = { uid: 'd1' };
+      app._navigate({ detail: { doc, docAction: 'view' } });
+      expect(app.navigateTo).to.have.been.calledWith(doc, 'view');
+    });
+
+    test('_navigate opens tasks drawer when visible', () => {
+      const selectTask = sinon.spy();
+      sinon
+        .stub(app, '$$')
+        .withArgs('nuxeo-tasks-drawer')
+        .returns({
+          visible: true,
+          $: { tasks: { selectTask } },
+        });
+      app._navigate({ detail: { task: { id: 't1' }, index: 0, params: {} } });
+      expect(selectTask).to.have.been.called;
+      app.$$.restore();
+    });
+  });
+
+  suite('_loadDocument and load', () => {
+    test('_loadDocument resolves document without updating UI when saved search', async () => {
+      const doc = { uid: '1', facets: ['SavedSearch'], path: '/search' };
+      sinon.stub(app.$.doc, 'get').resolves(doc);
+      sinon.stub(app, '_redirectSavedSearch');
+      const result = await app._loadDocument({ uid: '1', path: '/search' });
+      expect(result).to.be.undefined;
+      expect(app._routedSearch).to.equal(doc);
+      app.$.doc.get.restore();
+      app._redirectSavedSearch.restore();
+    });
+
+    test('load shows browse page after document loads', async () => {
+      const doc = { uid: '1', path: '/p', facets: [], isVersion: true };
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      app.load('browse', '1', '/p', 'view');
+      await Promise.resolve();
+      expect(app.show).to.have.been.calledWith('browse');
+      app._loadDocument.restore();
+      app.show.restore();
+    });
+
+    test('load shows error when document fetch fails', async () => {
+      sinon.stub(app, '_loadDocument').returns(Promise.reject({ status: 404, message: 'missing' }));
+      sinon.stub(app, 'showError');
+      app.load('browse', '1', '/p');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(app.showError).to.have.been.calledOnce;
+      expect(app.showError.firstCall.args[0]).to.equal(404);
+      expect(app.showError.firstCall.args[2]).to.equal('missing');
+      app._loadDocument.restore();
+      app.showError.restore();
+    });
+  });
+
+  suite('_refreshAndFetchTasks', () => {
+    test('refreshes document and fetches tasks when currentDocument is set', async () => {
+      const doc = { uid: '1', path: '/p' };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks();
+      await Promise.resolve();
+      expect(app._loadDocument).to.have.been.calledWith(doc);
+      expect(app._fetchTaskCount).to.have.been.called;
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+  });
+
+  suite('_observeCurrentUser and clipboard', () => {
+    test('_observeCurrentUser loads user workspace and task count', async () => {
+      app.currentUser = { id: 'user-1', properties: {} };
+      app._observeCurrentUser();
+      await Promise.resolve();
+      expect(app.userWorkspace).to.equal('/user-workspace');
+      expect(app.$.tasksProvider.params).to.deep.equal({ userId: 'user-1' });
+    });
+
+    test('_onClipboardAction updates recents on Document.Move', () => {
+      const update = sinon.spy();
+      sinon.stub(app, '$$').withArgs('#recent').returns({ update });
+      sinon.stub(app, 'fire');
+      app._onClipboardAction({
+        detail: { operation: 'Document.Move', documents: [{ uid: '1' }] },
+      });
+      expect(update).to.have.been.calledWith({ uid: '1' });
+      app.$$.restore();
+      app.fire.restore();
+    });
+
+    test('_workflowTaskProcess navigates to task', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      app._workflowTaskProcess({ detail: { task: { id: 'wf-1' } } });
+      expect(app.navigateTo).to.have.been.calledWith('tasks', 'wf-1');
+    });
+  });
+
+  suite('document lifecycle navigation', () => {
+    test('_documentDeleted navigates to firstAccessibleAncestor on success', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon.stub(app, '_toast');
+      sinon.stub(app, '_removeFromClipboard');
+      sinon.stub(app, '_removeFromRecentlyViewed');
+      sinon.stub(app, 'hasFacet').returns(false);
+      sinon.stub(app, '_refreshSearch');
+      const doc = {
+        uid: '1',
+        contextParameters: { firstAccessibleAncestor: { uid: 'parent' } },
+      };
+      app._documentDeleted({ detail: { doc, error: false } });
+      expect(app.navigateTo).to.have.been.called;
+      app._toast.restore();
+      app._removeFromClipboard.restore();
+      app._removeFromRecentlyViewed.restore();
+      app.hasFacet.restore();
+      app._refreshSearch.restore();
+    });
+
+    test('_documentUntrashed navigates to restored document', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon.stub(app, '_toast');
+      sinon.stub(app, 'hasFacet').returns(false);
+      sinon.stub(app, '_refreshSearch');
+      const doc = { uid: '1' };
+      app._documentUntrashed({ detail: { doc, error: false } });
+      expect(app.navigateTo).to.have.been.called;
+      app._toast.restore();
+      app.hasFacet.restore();
+      app._refreshSearch.restore();
+    });
+  });
+
+  suite('ready accessibility hooks', () => {
+    test('Tab keydown adds user-is-tabbing on main content', () => {
+      const main = app.$.mainContent;
+      if (!main) {
+        return;
+      }
+      main.classList.remove('user-is-tabbing');
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      expect(main.classList.contains('user-is-tabbing')).to.be.true;
+    });
+
+    test('mousedown removes user-is-tabbing from main content', () => {
+      const main = app.$.mainContent;
+      if (!main) {
+        return;
+      }
+      main.classList.add('user-is-tabbing');
+      window.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(main.classList.contains('user-is-tabbing')).to.be.false;
+    });
+
+    test('_resizeDuringAnimation dispatches resize until transitionend', async () => {
+      const drawer = app.$.drawer;
+      if (!drawer) {
+        return;
+      }
+      const onResize = sinon.spy();
+      globalThis.addEventListener('resize', onResize);
+      try {
+        app._resizeDuringAnimation();
+        drawer.dispatchEvent(new Event('transitionend'));
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        expect(onResize).to.have.been.called;
+      } finally {
+        globalThis.removeEventListener('resize', onResize);
+      }
+    });
+  });
+
+  suite('logo menu keyboard navigation', () => {
+    test('ArrowDown on logo focuses first menu item', () => {
+      const logo = app.$.logo;
+      const menu = app.$.menu;
+      if (!logo || !menu) {
+        return;
+      }
+      const item = document.createElement('div');
+      item.setAttribute('name', 'browse');
+      const focusSpy = sinon.spy(item, 'focus');
+      sinon.stub(menu, 'querySelector').returns(item);
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(focusSpy).to.have.been.called;
+      menu.querySelector.restore();
+      focusSpy.restore();
+    });
+  });
+
+  suite('ready listeners and snackbar', () => {
+    test('drawer transitionrun triggers resize during animation', () => {
+      const drawer = app.$.drawer;
+      if (!drawer) {
+        return;
+      }
+      sinon.stub(app, '_resizeDuringAnimation');
+      drawer.dispatchEvent(new Event('transitionrun'));
+      drawer.dispatchEvent(new Event('transitionstart'));
+      expect(app._resizeDuringAnimation).to.have.been.calledTwice;
+      app._resizeDuringAnimation.restore();
+    });
+
+    test('default toast opening listener applies snackbar layout hacks', () => {
+      const { toast } = app.$;
+      if (!toast) {
+        return;
+      }
+      Object.defineProperty(toast, 'mdcRoot', {
+        configurable: true,
+        value: {
+          style: {},
+          querySelector: sinon.stub().returns({ style: {} }),
+        },
+      });
+      toast.dispatchEvent(new Event('MDCSnackbar:opening'));
+      expect(toast.mdcRoot.style.position).to.equal('relative');
+    });
+  });
+
+  suite('saved search routing', () => {
+    test('_getSavedSearchForm returns null without routed search', () => {
+      app._routedSearch = null;
+      expect(app._getSavedSearchForm()).to.be.null;
+    });
+
+    test('_redirectSavedSearch navigates and loads saved search', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      app._routedSearch = { uid: 'saved-1', properties: { 'saved:providerName': 'default' } };
+      const loadSaved = sinon.spy();
+      const form = {
+        getAttribute: sinon.stub().callsFake((attr) => (attr === 'search-name' ? 'default_search' : null)),
+        _loadSavedSearch: loadSaved,
+      };
+      sinon.stub(app, '_getSavedSearchForm').returns(form);
+      sinon.stub(app, '_updateSearch');
+      app.searchName = 'default_search';
+      app._searchOnLoad = false;
+      app._redirectSavedSearch();
+      expect(app.navigateTo).to.have.been.calledWith('search', 'default_search');
+      expect(loadSaved).to.have.been.calledWith('saved-1');
+      app._getSavedSearchForm.restore();
+      app._updateSearch.restore();
+    });
+
+    test('_loadSavedSearch loads when form matches search name', () => {
+      app._routedSearch = { uid: 'saved-2' };
+      const loadSaved = sinon.spy();
+      const form = {
+        getAttribute: sinon.stub().callsFake((attr) => (attr === 'search-name' ? 'my-search' : null)),
+        _loadSavedSearch: loadSaved,
+      };
+      sinon.stub(app, '_getSavedSearchForm').returns(form);
+      sinon.stub(app, '_updateSearch');
+      app.searchName = 'my-search';
+      app._loadSavedSearch();
+      expect(loadSaved).to.have.been.calledWith('saved-2');
+      expect(app._routedSearch).to.be.null;
+      app._getSavedSearchForm.restore();
+      app._updateSearch.restore();
+    });
+  });
+
+  suite('_loadDocument browse path', () => {
+    test('loads document and assigns currentDocument via set', async () => {
+      const doc = {
+        uid: 'doc-1',
+        path: '/default-domain/workspaces/folder/doc',
+        facets: [],
+        isVersion: false,
+        contextParameters: { breadcrumb: { entries: [{}, { uid: 'parent' }] } },
+      };
+      sinon.stub(app, 'set');
+      sinon.stub(app, 'hasFacet').withArgs(doc, 'Folderish').returns(false);
+      sinon.stub(app.$.doc, 'get').resolves(doc);
+      const result = await app._loadDocument({ uid: 'doc-1', path: '/p' });
+      expect(result).to.equal(doc);
+      expect(app.set).to.have.been.calledWith('currentDocument', doc);
+      expect(app.docPath).to.equal(doc.path);
+      app.set.restore();
+      app.hasFacet.restore();
+      app.$.doc.get.restore();
+    });
+
+    test('load ignores AbortError', async () => {
+      sinon.stub(app, '_loadDocument').returns(Promise.reject({ name: 'AbortError' }));
+      sinon.stub(app, 'showError');
+      app.load('browse', '1', '/p');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(app.showError).to.not.have.been.called;
+      app._loadDocument.restore();
+      app.showError.restore();
+    });
+  });
+
+  suite('_navigate and search refresh', () => {
+    test('_navigate displays collection members when from collection', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      const displayMembers = sinon.spy();
+      sinon.stub(app, '$$').withArgs('#collectionsForm').returns({ displayMembers });
+      const doc = { uid: 'd1' };
+      app._navigate({ detail: { doc, docAction: 'view', isFromCollection: true, srcDoc: {}, index: 0 } });
+      expect(displayMembers).to.have.been.called;
+      app.$$.restore();
+    });
+
+    test('_updateSearch redirects when not loading search on startup', () => {
+      sinon.stub(app, '_redirectSavedSearch');
+      sinon.stub(app, '$$').returns(null);
+      app._searchOnLoad = false;
+      app._updateSearch();
+      expect(app._redirectSavedSearch).to.have.been.called;
+      app._redirectSavedSearch.restore();
+      app.$$.restore();
+    });
+
+    test('_updateCollectionMenu loads collection on menu event', () => {
+      const loadCollection = sinon.spy();
+      sinon.stub(app, '$$').withArgs('#collectionsForm').returns({ loadCollection });
+      app._updateCollectionMenu({ detail: { collection: { uid: 'c1' } } });
+      expect(loadCollection).to.have.been.calledWith({ uid: 'c1' });
+      app.$$.restore();
+    });
+  });
+
+  suite('_openDrawer overlay mode', () => {
+    test('_openDrawer calls openDrawer on narrow drawer panel', () => {
+      app.sidebarWidth = '52px';
+      const drawerPanel = app.$.drawerPanel;
+      if (!drawerPanel || typeof drawerPanel.openDrawer !== 'function') {
+        return;
+      }
+      drawerPanel.narrow = true;
+      const openDrawer = sinon.spy(drawerPanel, 'openDrawer');
+      const pages = app.$['drawer-pages'];
+      if (pages) {
+        sinon.stub(pages, 'select');
+        Object.defineProperty(pages, 'selected', { get: () => 'activity', configurable: true });
+      }
+      app.selectedTab = 'activity';
+      app._openDrawer();
+      expect(openDrawer).to.have.been.called;
+      openDrawer.restore();
+      if (pages && pages.select.restore) {
+        pages.select.restore();
+      }
+    });
+  });
+
+  suite('_refreshAndFetchTasks errors', () => {
+    test('navigates to tasks on 403 when refreshing document', async () => {
+      app.currentDocument = { uid: '1' };
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon
+        .stub(app, '_loadDocument')
+        .returns(Promise.reject({ 'entity-type': 'exception', status: 403, message: 'denied' }));
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: true, $: { tasks: { fetch: sinon.spy() } } });
+      app._refreshAndFetchTasks();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(app.navigateTo).to.have.been.calledWith('tasks');
+      expect(app.loading).to.be.false;
+      app._loadDocument.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+  });
+
+  suite('document delete and notify', () => {
+    test('_documentDeleted navigates via breadcrumb when ancestor missing', () => {
+      sinon.stub(app, '_navigate');
+      sinon.stub(app, '_toast');
+      sinon.stub(app, '_removeFromClipboard');
+      sinon.stub(app, '_removeFromRecentlyViewed');
+      sinon.stub(app, 'hasFacet').returns(false);
+      sinon.stub(app, '_refreshSearch');
+      const doc = {
+        uid: '1',
+        contextParameters: {
+          breadcrumb: { entries: [{ uid: 'a' }, { uid: 'parent' }] },
+        },
+      };
+      app._documentDeleted({ detail: { doc, error: false } });
+      expect(app._navigate).to.have.been.called;
+      app._navigate.restore();
+      app._toast.restore();
+      app._removeFromClipboard.restore();
+      app._removeFromRecentlyViewed.restore();
+      app.hasFacet.restore();
+      app._refreshSearch.restore();
+    });
+
+    test('_documentsDeleted shows 403 message in notify', () => {
+      sinon.stub(app, '_notify');
+      app._documentsDeleted({
+        detail: {
+          error: { response: { status: 403 } },
+          documents: [{ uid: '1' }],
+        },
+      });
+      expect(app._notify).to.have.been.calledOnce;
+      expect(app._notify.firstCall.args[0].detail.message).to.include('error.403');
+      app._notify.restore();
+    });
+
+    test('_documentsUntrashed refreshes collections for Collection facet', () => {
+      sinon.stub(app, '_toast');
+      sinon.stub(app, 'hasFacet').returns(true);
+      sinon.stub(app, '_refreshCollections');
+      sinon.stub(app, '_refreshSearch');
+      app._documentsUntrashed({ detail: { documents: [{ uid: '1' }], error: false } });
+      expect(app._refreshCollections).to.have.been.called;
+      app._toast.restore();
+      app.hasFacet.restore();
+      app._refreshCollections.restore();
+      app._refreshSearch.restore();
+    });
+  });
+
+  suite('_notify and snackbars', () => {
+    test('_getToastFor creates a command snackbar when missing', () => {
+      if (!app.$.snackbarPanel) {
+        return;
+      }
+      sinon.stub(app.$.snackbarPanel, 'querySelector').returns(null);
+      const append = sinon.stub(app.$.snackbarPanel, 'appendChild');
+      const toast = app._getToastFor('bulk-edit', { abort: sinon.spy() });
+      expect(append).to.have.been.called;
+      expect(toast.getAttribute('id')).to.equal('snack_bulkedit');
+      app.$.snackbarPanel.querySelector.restore();
+      append.restore();
+    });
+
+    test('_notify shows message on command toast', () => {
+      const show = sinon.spy();
+      const toast = {
+        __state: {},
+        open: false,
+        close: sinon.spy(),
+        show,
+        querySelector: sinon.stub().returns({ hidden: false }),
+      };
+      sinon.stub(app, '_getToastFor').returns(toast);
+      app._notify({
+        detail: {
+          commandId: 'cmd-1',
+          message: 'Processing',
+          abort: true,
+          dismissible: true,
+          duration: 4000,
+        },
+      });
+      expect(show).to.have.been.called;
+      expect(toast.labelText).to.equal('Processing');
+      app._getToastFor.restore();
+    });
+
+    test('_notify closes toast when close flag is set', () => {
+      const close = sinon.spy();
+      const toast = { __state: {}, close, show: sinon.spy(), querySelector: sinon.stub().returns({}) };
+      sinon.stub(app, '_getToastFor').returns(toast);
+      app._notify({ detail: { commandId: 'cmd-2', close: true } });
+      expect(close).to.have.been.called;
+      app._getToastFor.restore();
+    });
+  });
+
+  suite('accessibility and menu keyboard', () => {
+    test('skipLinkEvent focuses main content on Enter', () => {
+      const { skipLink, mainContent } = app.$;
+      if (!skipLink || !mainContent) {
+        return;
+      }
+      const focusSpy = sinon.spy(mainContent, 'focus');
+      const scrollSpy = sinon.spy(mainContent, 'scrollIntoView');
+      skipLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(focusSpy).to.have.been.called;
+      expect(scrollSpy).to.have.been.called;
+      focusSpy.restore();
+      scrollSpy.restore();
+    });
+
+    test('logoToMenuNavigation moves focus from last item to logo on ArrowDown', () => {
+      const logo = app.$.logo;
+      const menu = app.$.menu;
+      if (!logo || !menu) {
+        return;
+      }
+      app.logoToMenuNavigation();
+      const first = document.createElement('div');
+      const last = document.createElement('div');
+      sinon.stub(menu, 'querySelectorAll').returns([first, last]);
+      const focusSpy = sinon.spy(logo, 'focus');
+      const evt = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true });
+      Object.defineProperty(evt, 'target', { value: last, configurable: true });
+      menu.dispatchEvent(evt);
+      expect(focusSpy).to.have.been.called;
+      menu.querySelectorAll.restore();
+      focusSpy.restore();
+    });
+  });
+
+  suite('misc coverage', () => {
+    test('_getSavedSearchForm finds provider form when routed search is set', () => {
+      app._routedSearch = { properties: { 'saved:providerName': 'default' } };
+      const form = document.createElement('div');
+      sinon.stub(app, '$$').withArgs('nuxeo-search-form[provider="default"]').returns(form);
+      expect(app._getSavedSearchForm()).to.equal(form);
+      app.$$.restore();
+    });
+
+    test('_updateTitle uses selectedSearch title on search page', () => {
+      app.page = 'search';
+      app.productName = 'Nuxeo';
+      Object.defineProperty(app, 'searchForm', {
+        get: () => {
+          return { selectedSearch: { title: 'My saved search' } };
+        },
+        configurable: true,
+      });
+      app._updateTitle();
+      expect(document.title).to.include('My saved search');
+    });
+
+    test('_navigate goes to tasks route when tasks drawer is hidden', () => {
+      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
+      sinon.stub(app, '$$').withArgs('nuxeo-tasks-drawer').returns({ visible: false });
+      app._navigate({ detail: { task: { id: 'task-99' } } });
+      expect(app.navigateTo).to.have.been.calledWith('tasks', 'task-99');
+      app.$$.restore();
+    });
+
+    test('_refreshCollections refreshes visible collections form', () => {
+      const refresh = sinon.spy();
+      sinon.stub(app, '$$').withArgs('#collectionsForm').returns({ visible: true, _refreshCollections: refresh });
+      app._refreshCollections();
+      expect(refresh).to.have.been.called;
+      app.$$.restore();
+    });
+
+    test('_refreshAndFetchTasks fetches tasks when drawer is visible', async () => {
+      const fetch = sinon.spy();
+      app.currentDocument = null;
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: true, $: { tasks: { fetch } } });
+      app._refreshAndFetchTasks();
+      expect(fetch).to.have.been.called;
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('_documentUntrashed navigates to restored document', () => {
+      sinon.stub(app, '_navigate');
+      sinon.stub(app, '_toast');
+      sinon.stub(app, 'hasFacet').returns(false);
+      sinon.stub(app, '_refreshSearch');
+      const doc = { uid: '1' };
+      app._documentUntrashed({ detail: { doc, error: false } });
+      expect(app._navigate).to.have.been.calledWith({ detail: { doc } });
+      app._navigate.restore();
+      app._toast.restore();
+      app.hasFacet.restore();
+      app._refreshSearch.restore();
+    });
+
+    test('_documentsDeleted bulk path refreshes search and collections', () => {
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_refreshCollections');
+      sinon.stub(app, '_refreshSearch');
+      app._documentsDeleted({ detail: {} });
+      expect(app._refreshCollections).to.have.been.called;
+      app._fetchTaskCount.restore();
+      app._refreshCollections.restore();
+      app._refreshSearch.restore();
+    });
+  });
+
+  suite('branch coverage gaps', () => {
+    test('drawer transitionrun from a descendant does not start the resize loop', () => {
+      const drawer = app.$.drawer;
+      if (!drawer) {
+        return;
+      }
+      const child = document.createElement('div');
+      drawer.appendChild(child);
+      sinon.stub(app, '_resizeDuringAnimation');
+      try {
+        child.dispatchEvent(new Event('transitionrun', { bubbles: true }));
+        child.dispatchEvent(new Event('transitionstart', { bubbles: true }));
+        expect(app._resizeDuringAnimation).to.not.have.been.called;
+      } finally {
+        app._resizeDuringAnimation.restore();
+        child.remove();
+      }
+    });
+
+    test('disconnectedCallback does not throw when _boundUpdateIsNarrow is not set', () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const fresh = document.createElement('nuxeo-app');
+      host.appendChild(fresh);
+      try {
+        fresh._boundUpdateIsNarrow = null;
+        expect(() => host.removeChild(fresh)).to.not.throw();
+      } finally {
+        host.remove();
+      }
+    });
+
+    test('_runLayoutNotify skips synthetic window.resize when includeWindowResize is false', () => {
+      const onResize = sinon.spy();
+      globalThis.addEventListener('resize', onResize);
+      try {
+        app._runLayoutNotify({ includeWindowResize: false });
+        expect(onResize).to.not.have.been.called;
+      } finally {
+        globalThis.removeEventListener('resize', onResize);
+      }
+    });
+
+    test('_handleNarrowChange on wide treats a non-parseable drawerWidth as 0', () => {
+      app.sidebarWidth = '52px';
+      app.drawerWidth = 'auto';
+      app.drawerOpened = false;
+      sinon.stub(app, '_notifyLayoutChanged');
+      try {
+        app._handleNarrowChange(false);
+        expect(app.drawerOpened).to.be.false;
+      } finally {
+        app._notifyLayoutChanged.restore();
+      }
+    });
   });
 });

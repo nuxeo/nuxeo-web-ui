@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/directory/nuxeo-vocabulary-management.js';
 
 suite('nuxeo-vocabulary-management', () => {
@@ -28,8 +28,9 @@ suite('nuxeo-vocabulary-management', () => {
     sinon.stub(element, 'i18n').callsFake((key) => key);
     // Provide vocabularies to prevent _schemaFor from crashing
     element.vocabularies = [
-      { name: 'coverage', schema: 'coverage', parent: '' },
-      { name: 'continent', schema: 'xvocabulary', parent: 'coverage' },
+      { name: 'coverage', schema: 'coverage', parent: '', readOnly: false },
+      { name: 'continent', schema: 'xvocabulary', parent: 'coverage', readOnly: false },
+      { name: 'country', schema: 'xvocabulary', parent: 'continent', readOnly: true },
       { name: 'nature', schema: '', parent: '' },
     ];
   });
@@ -83,6 +84,90 @@ suite('nuxeo-vocabulary-management', () => {
     });
   });
 
+  suite('_computeReadOnly', () => {
+    test('should return false when no vocabulary is selected', () => {
+      expect(element._computeReadOnly('', element.vocabularies)).to.be.false;
+      expect(element._computeReadOnly(null, element.vocabularies)).to.be.false;
+    });
+
+    test('should return false when vocabularies is not an array', () => {
+      expect(element._computeReadOnly('country', null)).to.be.false;
+      expect(element._computeReadOnly('country', undefined)).to.be.false;
+    });
+
+    test('should return false for a writable vocabulary', () => {
+      expect(element._computeReadOnly('coverage', element.vocabularies)).to.be.false;
+    });
+
+    test('should return true for a readOnly vocabulary', () => {
+      expect(element._computeReadOnly('country', element.vocabularies)).to.be.true;
+    });
+
+    test('should return false when the vocabulary has no readOnly field (legacy server)', () => {
+      expect(element._computeReadOnly('nature', element.vocabularies)).to.be.false;
+    });
+
+    test('should expose _isReadOnly as a computed property reflecting the selection', async () => {
+      element.selectedVocabulary = 'country';
+      await flush();
+      expect(element._isReadOnly).to.be.true;
+      element.selectedVocabulary = 'coverage';
+      await flush();
+      expect(element._isReadOnly).to.be.false;
+    });
+  });
+
+  suite('read-only guards', () => {
+    setup(async () => {
+      element.selectedVocabulary = 'country';
+      await flush();
+    });
+
+    test('_createEntry should be a no-op for readOnly vocabularies', () => {
+      const dialog = { toggle: sinon.spy() };
+      element.$.vocabularyEditDialog = dialog;
+      element._createEntry();
+      expect(dialog.toggle).to.not.have.been.called;
+      expect(element._selectedEntry).to.be.undefined;
+    });
+
+    test('_save should be a no-op for readOnly vocabularies', () => {
+      const layout = { validate: sinon.spy() };
+      element.$.layout = layout;
+      element._save();
+      expect(layout.validate).to.not.have.been.called;
+    });
+
+    test('_deleteEntry should be a no-op for readOnly vocabularies', () => {
+      const confirmStub = sinon.stub(window, 'confirm').returns(true);
+      try {
+        element._deleteEntry({
+          target: { parentNode: { item: { directoryName: 'country', properties: { id: 'x' } } } },
+        });
+        expect(confirmStub).to.not.have.been.called;
+      } finally {
+        confirmStub.restore();
+      }
+    });
+
+    test('addEntry button should be disabled (not hidden) for readOnly vocabulary', async () => {
+      await flush();
+      const btn = element.shadowRoot.querySelector('#addEntry');
+      expect(btn, 'addEntry button should be rendered').to.exist;
+      expect(btn.disabled).to.be.true;
+      expect(btn.hasAttribute('hidden')).to.be.false;
+    });
+
+    test('addEntry button should not be disabled for writable vocabulary', async () => {
+      element.selectedVocabulary = 'coverage';
+      await flush();
+      const btn = element.shadowRoot.querySelector('#addEntry');
+      expect(btn, 'addEntry button should be rendered').to.exist;
+      expect(btn.disabled).to.be.false;
+      expect(btn.hasAttribute('hidden')).to.be.false;
+    });
+  });
+
   suite('_computeDialogHeading', () => {
     test('should return addEntry key for new entry', () => {
       expect(element._computeDialogHeading(true)).to.equal('vocabularyManagement.popup.addEntry');
@@ -95,11 +180,19 @@ suite('nuxeo-vocabulary-management', () => {
 
   suite('_visibleDataTableStyle', () => {
     test('should return display block when entries exist', () => {
-      expect(element._visibleDataTableStyle([{ id: '1' }])).to.equal('display: block;');
+      expect(element._visibleDataTableStyle([{ id: '1' }], [], {})).to.equal('display: block;');
     });
 
-    test('should return display none when entries is empty', () => {
-      expect(element._visibleDataTableStyle([])).to.equal('display: none;');
+    test('should return display none when entries is empty and no filter', () => {
+      expect(element._visibleDataTableStyle([], [], {})).to.equal('display: none;');
+    });
+
+    test('should return display block when a filter is active even with no matches', () => {
+      expect(element._visibleDataTableStyle([], [{ id: 'x' }], { id: 'z' })).to.equal('display: block;');
+    });
+
+    test('should return display none when filter is active but source is empty', () => {
+      expect(element._visibleDataTableStyle([], [], { id: 'z' })).to.equal('display: none;');
     });
   });
 
@@ -173,37 +266,292 @@ suite('nuxeo-vocabulary-management', () => {
     });
   });
 
-  suite('_value', () => {
-    test('should return entry property value', () => {
-      element.entries = [{ properties: { id: 'entry1', label: 'Entry 1' } }];
-      expect(element._value(0, 'label')).to.equal('Entry 1');
+  suite('_cellValue', () => {
+    test('should return item property value', () => {
+      const item = { properties: { id: 'entry1', label: 'Entry 1' } };
+      expect(element._cellValue(item, 'label')).to.equal('Entry 1');
     });
 
     test('should return i18n yes key for obsolete property > 0', () => {
-      element.entries = [{ properties: { obsolete: 1 } }];
-      expect(element._value(0, 'obsolete')).to.equal('label.yes');
+      expect(element._cellValue({ properties: { obsolete: 1 } }, 'obsolete')).to.equal('label.yes');
     });
 
     test('should return i18n no key for obsolete property = 0', () => {
-      element.entries = [{ properties: { obsolete: 0 } }];
-      expect(element._value(0, 'obsolete')).to.equal('label.no');
+      expect(element._cellValue({ properties: { obsolete: 0 } }, 'obsolete')).to.equal('label.no');
     });
 
-    test('should return undefined for property not in entry', () => {
-      element.entries = [{ properties: { id: 'entry1' } }];
-      // The code enters the if block (entry, entry.properties, and prop are all truthy)
-      // but returns entry.properties['missing'] which is undefined
-      expect(element._value(0, 'missing')).to.be.undefined;
+    test('should return undefined for property not in item', () => {
+      expect(element._cellValue({ properties: { id: 'entry1' } }, 'missing')).to.be.undefined;
     });
 
-    test('should return N/A when entry is missing', () => {
-      element.entries = [];
-      expect(element._value(5, 'id')).to.equal('N/A');
+    test('should return N/A when item is missing', () => {
+      expect(element._cellValue(null, 'id')).to.equal('N/A');
+    });
+
+    test('should return N/A when item has no properties', () => {
+      expect(element._cellValue({}, 'id')).to.equal('N/A');
     });
 
     test('should return N/A when prop is empty', () => {
-      element.entries = [{ properties: { id: 'entry1' } }];
-      expect(element._value(0, '')).to.equal('N/A');
+      expect(element._cellValue({ properties: { id: 'entry1' } }, '')).to.equal('N/A');
+    });
+  });
+
+  suite('_formattedFilterableValue', () => {
+    test('should stringify property value', () => {
+      expect(element._formattedFilterableValue({ properties: { id: 'abc' } }, 'id')).to.equal('abc');
+    });
+
+    test('should coerce numbers to string', () => {
+      expect(element._formattedFilterableValue({ properties: { ordering: 5 } }, 'ordering')).to.equal('5');
+    });
+
+    test('should return empty string when value is null/undefined', () => {
+      expect(element._formattedFilterableValue({ properties: {} }, 'missing')).to.equal('');
+      expect(element._formattedFilterableValue(null, 'id')).to.equal('');
+    });
+
+    test('should return i18n yes/no for obsolete', () => {
+      expect(element._formattedFilterableValue({ properties: { obsolete: 1 } }, 'obsolete')).to.equal('label.yes');
+      expect(element._formattedFilterableValue({ properties: { obsolete: 0 } }, 'obsolete')).to.equal('label.no');
+    });
+  });
+
+  suite('_applyFilters', () => {
+    const allEntries = [
+      { properties: { id: 'apple', label: 'Apple' } },
+      { properties: { id: 'apricot', label: 'Apricot' } },
+      { properties: { id: 'banana', label: 'Banana' } },
+      { properties: { id: 'blueberry', label: 'Blueberry' } },
+    ];
+
+    setup(() => {
+      element._allEntries = allEntries;
+    });
+
+    test('should expose all entries when no filter is set', () => {
+      element._filters = {};
+      element._applyFilters();
+      expect(element.entries).to.have.lengthOf(4);
+    });
+
+    test('should match entries whose cell value is in the dropdown selection', () => {
+      element._filters = { id: ['apple', 'banana'] };
+      element._applyFilters();
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple', 'banana']);
+    });
+
+    test('should treat an empty dropdown selection as no filter on that column', () => {
+      element._filters = { id: [] };
+      element._applyFilters();
+      expect(element.entries).to.have.lengthOf(4);
+    });
+
+    test('should AND multiple column filters together', () => {
+      element._filters = { id: ['apple', 'apricot'], label: ['Apricot'] };
+      element._applyFilters();
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apricot']);
+    });
+
+    test('should keep starts-with matching when filter is a string (back-compat)', () => {
+      element._filters = { id: 'ap' };
+      element._applyFilters();
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple', 'apricot']);
+    });
+
+    test('should be case-insensitive for string filters', () => {
+      element._filters = { id: 'AP' };
+      element._applyFilters();
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple', 'apricot']);
+    });
+
+    test('should ignore entries with no properties', () => {
+      element._allEntries = [{}, { properties: { id: 'apple' } }];
+      element._filters = { id: ['apple'] };
+      element._applyFilters();
+      expect(element.entries).to.have.lengthOf(1);
+    });
+
+    test('should return a fresh array (not the original reference) when no filter is set', () => {
+      element._filters = {};
+      element._applyFilters();
+      expect(element.entries).to.not.equal(allEntries);
+      expect(element.entries).to.deep.equal(allEntries);
+    });
+  });
+
+  suite('_filterByFor', () => {
+    test('should return the column key for filterable columns', () => {
+      expect(element._filterByFor({ key: 'id' })).to.equal('id');
+    });
+
+    test('should return empty string for the actions column', () => {
+      expect(element._filterByFor({ key: 'actions' })).to.equal('');
+    });
+
+    test('should return empty string for an undefined column', () => {
+      expect(element._filterByFor(undefined)).to.equal('');
+    });
+  });
+
+  suite('_aggregationData', () => {
+    test('should return the bucket data for the given key', () => {
+      const aggs = { id: { extendedBuckets: [{ key: 'a', label: 'a', docCount: 1 }], selection: [] } };
+      expect(element._aggregationData(aggs, 'id')).to.equal(aggs.id);
+    });
+
+    test('should return undefined when aggregations or key are missing', () => {
+      expect(element._aggregationData(undefined, 'id')).to.be.undefined;
+      expect(element._aggregationData({}, '')).to.be.undefined;
+    });
+  });
+
+  suite('_computeAggregations', () => {
+    test('should produce a bucket per distinct value of every non-action column', () => {
+      const entries = [
+        { properties: { id: 'apple', label: 'Apple' } },
+        { properties: { id: 'apple', label: 'Apple' } },
+        { properties: { id: 'banana', label: 'Banana' } },
+      ];
+      const cols = [{ key: 'id' }, { key: 'label' }, { key: 'actions' }];
+      const aggs = element._computeAggregations(entries, cols);
+      expect(aggs).to.have.keys(['id', 'label']);
+      const idBuckets = aggs.id.extendedBuckets;
+      const apple = idBuckets.find((b) => b.key === 'apple');
+      const banana = idBuckets.find((b) => b.key === 'banana');
+      expect(apple).to.deep.equal({ key: 'apple', label: 'apple', docCount: 2 });
+      expect(banana).to.deep.equal({ key: 'banana', label: 'banana', docCount: 1 });
+      expect(aggs.id.selection).to.deep.equal([]);
+    });
+
+    test('should sort buckets alphabetically by label', () => {
+      const entries = [
+        { properties: { id: 'charlie' } },
+        { properties: { id: 'alpha' } },
+        { properties: { id: 'bravo' } },
+      ];
+      const aggs = element._computeAggregations(entries, [{ key: 'id' }]);
+      expect(aggs.id.extendedBuckets.map((b) => b.key)).to.deep.equal(['alpha', 'bravo', 'charlie']);
+    });
+
+    test('should skip empty cell values', () => {
+      const entries = [{ properties: { id: '' } }, { properties: { id: 'apple' } }, { properties: {} }];
+      const aggs = element._computeAggregations(entries, [{ key: 'id' }]);
+      expect(aggs.id.extendedBuckets.map((b) => b.key)).to.deep.equal(['apple']);
+    });
+
+    test('should return an empty object when inputs are not arrays', () => {
+      expect(element._computeAggregations(null, [{ key: 'id' }])).to.deep.equal({});
+      expect(element._computeAggregations([], null)).to.deep.equal({});
+    });
+  });
+
+  suite('_onColumnFilterChanged', () => {
+    setup(() => {
+      element._allEntries = [{ properties: { id: 'apple' } }, { properties: { id: 'banana' } }];
+      element._filters = {};
+    });
+
+    function makeEvent(filterBy, value) {
+      return { detail: { filterBy, value } };
+    }
+
+    test('should record a non-empty selection and re-apply filters', () => {
+      element._onColumnFilterChanged(makeEvent('id', ['apple']));
+      expect(element._filters).to.deep.equal({ id: ['apple'] });
+      expect(element.entries.map((e) => e.properties.id)).to.deep.equal(['apple']);
+    });
+
+    test('should drop the column filter when the selection is cleared', () => {
+      element._filters = { id: ['apple'] };
+      element._onColumnFilterChanged(makeEvent('id', []));
+      expect(element._filters).to.deep.equal({});
+      expect(element.entries).to.have.lengthOf(2);
+    });
+
+    test('should drop the column filter when value is null/undefined', () => {
+      element._filters = { id: ['apple'] };
+      element._onColumnFilterChanged(makeEvent('id', null));
+      expect(element._filters).to.deep.equal({});
+    });
+
+    test('should ignore events for the actions column', () => {
+      const applySpy = sinon.spy(element, '_applyFilters');
+      try {
+        element._onColumnFilterChanged(makeEvent('actions', ['x']));
+        expect(applySpy).to.not.have.been.called;
+        expect(element._filters).to.deep.equal({});
+      } finally {
+        applySpy.restore();
+      }
+    });
+
+    test('should ignore events with no detail or no filterBy', () => {
+      const applySpy = sinon.spy(element, '_applyFilters');
+      try {
+        element._onColumnFilterChanged({});
+        element._onColumnFilterChanged(makeEvent('', ['x']));
+        expect(applySpy).to.not.have.been.called;
+      } finally {
+        applySpy.restore();
+      }
+    });
+  });
+
+  suite('_syncFilterDropdowns', () => {
+    test('should no-op when aggregations is falsy', () => {
+      const asyncSpy = sinon.spy(element, 'async');
+      try {
+        element._syncFilterDropdowns(null);
+        element._syncFilterDropdowns(undefined);
+        expect(asyncSpy).to.not.have.been.called;
+      } finally {
+        asyncSpy.restore();
+      }
+    });
+
+    test('should no-op when this.$.table is missing', () => {
+      const asyncSpy = sinon.spy(element, 'async');
+      const originalTable = element.$.table;
+      delete element.$.table;
+      try {
+        element._syncFilterDropdowns({ id: { extendedBuckets: [], selection: [] } });
+        expect(asyncSpy).to.not.have.been.called;
+      } finally {
+        if (originalTable) {
+          element.$.table = originalTable;
+        }
+        asyncSpy.restore();
+      }
+    });
+
+    test('should push aggregation data onto each rendered dropdown by column key', () => {
+      const ddWithHost = { data: null, parentNode: { host: { column: { key: 'id' } } } };
+      const ddWithClosest = {
+        data: null,
+        parentNode: {},
+        closest: (sel) => (sel === 'nuxeo-data-table-cell' ? { column: { key: 'label' } } : null),
+      };
+      const ddFallbackToParent = { data: null, parentNode: { column: { key: 'obsolete' } } };
+      const ddWithoutKey = { data: null, parentNode: {} };
+      const dropdowns = [ddWithHost, ddWithClosest, ddFallbackToParent, ddWithoutKey];
+      element.$.table = { querySelectorAll: () => dropdowns };
+
+      const aggregations = {
+        id: { extendedBuckets: [{ key: 'a' }], selection: [] },
+        label: { extendedBuckets: [{ key: 'b' }], selection: [] },
+        // obsolete intentionally omitted to exercise `aggregations[key]` falsy branch
+      };
+      sinon.stub(element, 'async').callsFake((fn) => fn());
+      try {
+        element._syncFilterDropdowns(aggregations);
+        expect(ddWithHost.data).to.equal(aggregations.id);
+        expect(ddWithClosest.data).to.equal(aggregations.label);
+        expect(ddFallbackToParent.data).to.be.null;
+        expect(ddWithoutKey.data).to.be.null;
+      } finally {
+        element.async.restore();
+      }
     });
   });
 
@@ -249,6 +597,17 @@ suite('nuxeo-vocabulary-management', () => {
       expect(model).to.have.property('parentDirectory');
       expect(model).to.have.property('entries');
       expect(model).to.have.property('new', false);
+    });
+
+    test('should expose the unfiltered entry list (not the filtered display list)', () => {
+      // Set selectedVocabulary first; its observer (_refresh) resets _allEntries.
+      element.selectedVocabulary = 'coverage';
+      const all = [{ properties: { id: 'a' } }, { properties: { id: 'b' } }];
+      element._allEntries = all;
+      element.entries = [all[0]];
+      element._selectedEntry = { directoryName: 'coverage' };
+      const model = element._layoutModel();
+      expect(model.entries).to.equal(all);
     });
   });
 
@@ -538,8 +897,8 @@ suite('nuxeo-vocabulary-management', () => {
 
   suite('_getSchemaFields', () => {
     test('should use entry properties when entries already loaded', async () => {
-      element._selectedSchema = 'coverage';
-      element.entries = [{ properties: { id: '1', label: 'L' } }];
+      element.selectedVocabulary = 'coverage';
+      element._allEntries = [{ properties: { id: '1', label: 'L' } }];
       const fields = await element._getSchemaFields();
       expect(fields).to.include.members(['id', 'label']);
     });
