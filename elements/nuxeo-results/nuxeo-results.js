@@ -673,6 +673,10 @@ Polymer({
       if (Array.isArray(view.columns)) {
         this.listen(view, 'columns-changed', '_columnsChanged');
       }
+      // attach provider before restoring settings so column filter events
+      // emitted during settings restoration are handled by the provider
+      view.nxProvider = this.nxProvider;
+
       // restore settings
       if (this._settings) {
         this.set('_settings.displayMode', this.displayMode);
@@ -889,7 +893,10 @@ Polymer({
   },
 
   _saveViewSettings() {
-    if (this.view.settings && !this._isRestoring) {
+    // Skip saving if we're restoring settings or the view just restored filters (WEBUI-1885)
+    // The view._recentlyRestoredFilters flag prevents spurious saves during the settling period
+    // after filter values are restored from preferences
+    if (this.view.settings && !this._isRestoring && !this.view._recentlyRestoredFilters) {
       this.set('_settings.displayMode', this.displayMode);
       this.saveSettings();
 
@@ -899,6 +906,10 @@ Polymer({
       if (isSettingsView && this.document && this.document.path) {
         const docKey = this._getDocResultsPrefsKey();
         this._debounceSave('_docPrefsSaveDebouncer', () => {
+          // Double-check restore flag in case it was set between debounce schedule and execution (WEBUI-1885)
+          if (this.view._recentlyRestoredFilters) {
+            return;
+          }
           // Save to backend (primary)
           this.saveDocPrefs(this.document.path, docKey, this.view.settings)
             .then(() => {
@@ -924,6 +935,10 @@ Polymer({
       // ---- global level (search providers) ----
       if (isSettingsView && this._shouldUseGlobalPrefs) {
         this._debounceSave('_prefsSaveDebouncer', () => {
+          // Double-check restore flag in case it was set between debounce schedule and execution (WEBUI-1885)
+          if (this.view._recentlyRestoredFilters) {
+            return;
+          }
           // Save to backend (primary)
           this.saveGlobalResultsPrefs(this.view.settings)
             .then(() => {
@@ -1170,6 +1185,10 @@ Polymer({
         // This approach is future-proof: to add support for new customizable column properties,
         // just update the two sections marked with "EXTEND HERE" below.
 
+        // Set the restore flag on the view to prevent spurious saves during reset (WEBUI-1885)
+        // This mirrors what the `set settings()` setter does
+        view._recentlyRestoredFilters = true;
+
         /**
          * Returns the default value for a given column property.
          *
@@ -1184,6 +1203,8 @@ Polymer({
               return idx;
             case 'width':
               return null;
+            case 'filterValue':
+              return '';
             default:
               return null;
           }
@@ -1193,7 +1214,7 @@ Polymer({
          * EXTEND HERE: If adding support for new customizable properties,
          * add the property name to this array (e.g., 'minWidth', 'align').
          */
-        const customizableProps = ['hidden', 'order', 'width'];
+        const customizableProps = ['hidden', 'order', 'width', 'filterValue'];
 
         // Reset all customizable properties to their defaults
         view.columns.forEach((column, idx) => {
@@ -1209,6 +1230,11 @@ Polymer({
         if (view.sortOrder && view.sortOrder.length > 0) {
           view.sortOrder = [];
         }
+
+        // Clear the restore flag after a delay (WEBUI-1885)
+        setTimeout(() => {
+          view._recentlyRestoredFilters = false;
+        }, 1000);
       } else {
         // Apply settings via the setter
         view.settings = newSettings;
