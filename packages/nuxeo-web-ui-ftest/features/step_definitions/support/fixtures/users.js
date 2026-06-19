@@ -32,7 +32,7 @@ fixtures.users = {
         throw new Error(`unable to fetch user "${username}"`);
       })
       .then((_user) => {
-        users[_user.id] = 'password';
+        users[username] = fixtures.users.DEFAULT_PASSWORD;
         return _user;
       });
   },
