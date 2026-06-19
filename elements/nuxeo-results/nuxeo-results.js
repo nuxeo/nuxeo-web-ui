@@ -673,9 +673,6 @@ Polymer({
       if (Array.isArray(view.columns)) {
         this.listen(view, 'columns-changed', '_columnsChanged');
       }
-      // attach provider before restoring settings so column filter events
-      // emitted during settings restoration are handled by the provider
-      view.nxProvider = this.nxProvider;
 
       // restore settings
       if (this._settings) {
