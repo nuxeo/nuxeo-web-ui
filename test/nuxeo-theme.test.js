@@ -97,6 +97,45 @@ suite('nuxeo-theme', () => {
     });
   });
 
+  suite('_ariaLabel', () => {
+    test('calls themes.apply.ariaLabel i18n key with theme label', async () => {
+      const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);
+      const i18nStub = sinon.stub(el, 'i18n').callsFake((k, ...args) => (args.length ? `${k}:${args[0]}` : k));
+      expect(el._ariaLabel('light')).to.equal('themes.apply.ariaLabel:themes.light');
+      i18nStub.restore();
+    });
+
+    test('uses custom title when set', async () => {
+      const el = await fixture(html`<nuxeo-theme name="ocean" title="Ocean"></nuxeo-theme>`);
+      const i18nStub = sinon.stub(el, 'i18n').callsFake((k, ...args) => (args.length ? `${k}:${args[0]}` : k));
+      expect(el._ariaLabel('ocean')).to.equal('themes.apply.ariaLabel:Ocean');
+      i18nStub.restore();
+    });
+  });
+
+  suite('aria-label on apply button', () => {
+    teardown(() => {
+      if (localStorage.getItem.restore) {
+        localStorage.getItem.restore();
+      }
+    });
+
+    test('apply button has aria-label attribute', async () => {
+      sinon.stub(localStorage, 'getItem').callsFake(() => null);
+      const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);
+      const button = el.shadowRoot.querySelector('paper-button');
+      expect(button.hasAttribute('aria-label')).to.be.true;
+      expect(button.getAttribute('aria-label')).to.not.be.empty;
+    });
+
+    test('aria-label reflects _ariaLabel method result', async () => {
+      sinon.stub(localStorage, 'getItem').callsFake(() => null);
+      const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);
+      const button = el.shadowRoot.querySelector('paper-button');
+      expect(button.getAttribute('aria-label')).to.equal(el._ariaLabel('light'));
+    });
+  });
+
   suite('_apply', () => {
     teardown(() => {
       if (localStorage.setItem.restore) {

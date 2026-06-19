@@ -71,7 +71,9 @@ Polymer({
       <iron-image src="[[_image(name)]]" sizing="contain"></iron-image>
       <div class="details">
         <div class="label">[[_label(name)]]</div>
-        <paper-button on-tap="_apply" noink disabled$="[[_selected(name)]]"> [[_button(name)]] </paper-button>
+        <paper-button on-tap="_apply" noink disabled$="[[_selected(name)]]" aria-label="[[_ariaLabel(name)]]">
+          [[_button(name)]]
+        </paper-button>
       </div>
     </nuxeo-card>
   `,
@@ -95,6 +97,10 @@ Polymer({
 
   _button(name) {
     return this.i18n(`themes.${this._selected(name) ? 'current' : 'apply'}`);
+  },
+
+  _ariaLabel(name) {
+    return this.i18n('themes.apply.ariaLabel', this._label(name));
   },
 
   _selected(name) {

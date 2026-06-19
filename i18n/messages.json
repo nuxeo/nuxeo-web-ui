@@ -1416,6 +1416,7 @@
   "templateSourceViewLayout.templateBasedDocuments.noDocument": "There are no documents bound to this template.",
   "templateSourceViewLayout.templateBasedDocuments.noDocumentWhenFiltered": "There are no bound documents within these search criteria.",
   "themes.apply": "Apply",
+  "themes.apply.ariaLabel": "Apply {0} theme",
   "themes.applying": "Applying Theme...",
   "themes.current": "Current",
   "themes.dark": "Dark",
