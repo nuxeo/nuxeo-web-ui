@@ -179,4 +179,49 @@ suite('nuxeo-document-create-popup', () => {
       expect(getStub).to.not.have.been.called;
     });
   });
+
+  suite('dialog dismissal configuration', () => {
+    let dialog;
+
+    setup(() => {
+      dialog = element.$.createDocDialog;
+    });
+
+    test('should not be a modal dialog (so ESC can dismiss it)', () => {
+      expect(dialog.hasAttribute('modal')).to.be.false;
+      expect(dialog.modal).to.not.be.true;
+    });
+
+    test('should allow cancel on ESC key press', () => {
+      expect(dialog.noCancelOnEscKey).to.not.be.true;
+    });
+
+    test('should prevent cancel on outside click', () => {
+      expect(dialog.hasAttribute('no-cancel-on-outside-click')).to.be.true;
+      expect(dialog.noCancelOnOutsideClick).to.be.true;
+    });
+
+    test('should render a backdrop', () => {
+      expect(dialog.hasAttribute('with-backdrop')).to.be.true;
+      expect(dialog.withBackdrop).to.be.true;
+    });
+
+    test('should close the dialog when ESC key is pressed', async () => {
+      element.parent = { contextParameters: { subtypes: [], permissions: [] } };
+      element.parentPath = '/some/path';
+      dialog.open();
+      await new Promise((resolve) => {
+        dialog.addEventListener('iron-overlay-opened', resolve, { once: true });
+      });
+      expect(dialog.opened).to.be.true;
+
+      // Simulate the ESC key handling path that iron-overlay-behavior invokes when
+      // `noCancelOnEscKey` is false. With `modal`, this path is short-circuited.
+      dialog._onCaptureEsc(new CustomEvent('keydown'));
+      await new Promise((resolve) => {
+        dialog.addEventListener('iron-overlay-closed', resolve, { once: true });
+      });
+      expect(dialog.opened).to.be.false;
+    });
+  });
 });
