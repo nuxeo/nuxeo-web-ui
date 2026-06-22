@@ -1419,6 +1419,7 @@
   "themes.apply.ariaLabel": "Apply {0} theme",
   "themes.applying": "Applying Theme...",
   "themes.current": "Current",
+  "themes.current.ariaLabel": "Current {0} theme",
   "themes.dark": "Dark",
   "themes.default": "Nuxeo",
   "themes.kawaii": "Kawaii",

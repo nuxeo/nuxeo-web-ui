@@ -111,6 +111,15 @@ suite('nuxeo-theme', () => {
       expect(el._ariaLabel('ocean')).to.equal('themes.apply.ariaLabel:Ocean');
       i18nStub.restore();
     });
+
+    test('uses current.ariaLabel key when theme is selected', async () => {
+      sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'dark' : null));
+      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
+      const i18nStub = sinon.stub(el, 'i18n').callsFake((k, ...args) => (args.length ? `${k}:${args[0]}` : k));
+      expect(el._ariaLabel('dark')).to.equal('themes.current.ariaLabel:themes.dark');
+      i18nStub.restore();
+      localStorage.getItem.restore();
+    });
   });
 
   suite('aria-label on apply button', () => {
