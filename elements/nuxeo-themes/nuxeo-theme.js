@@ -100,7 +100,10 @@ Polymer({
   },
 
   _ariaLabel(name) {
-    return this.i18n('themes.apply.ariaLabel', this._label(name));
+    const label = this._label(name);
+    return this._selected(name)
+      ? this.i18n('themes.current.ariaLabel', label)
+      : this.i18n('themes.apply.ariaLabel', label);
   },
 
   _selected(name) {
