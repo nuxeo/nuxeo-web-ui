@@ -42,7 +42,7 @@ evolves with the codebase.
 | `.github/instructions/themes.instructions.md` | `themes/**` | Theme structure, CSS custom properties, base styles |
 | `.github/instructions/document-layouts.instructions.md` | `elements/document/**` | Document type layout naming, LayoutBehavior, modes |
 | `.github/instructions/search-layouts.instructions.md` | `elements/search/**` | Search form/results naming, aggregations, page providers |
-| `.github/instructions/build-config.instructions.md` | `webpack.config.js,eslint.config.mjs,karma.conf.js,prettier.config.js` | Build toolchain conventions |
+| `.github/instructions/build-config.instructions.md` | `webpack.config.js,eslint.config.mjs,web-test-runner.config.mjs,prettier.config.js` | Build toolchain conventions |
 
 ### Tier 3: Skills (invoked on demand for specific tasks)
 
@@ -74,7 +74,7 @@ Scan the codebase to identify what has changed since the context files were last
 - Check git log for recent changes: structural moves, new elements, deleted files
 - Compare directory listings against what's documented
 - Check package.json for dependency changes (versions, new deps, removed deps)
-- Check webpack.config.js, eslint.config.mjs, karma.conf.js for config changes
+- Check webpack.config.js, eslint.config.mjs, web-test-runner.config.mjs for config changes
 - Check for new addons, elements, test files, feature files
 - Check for renamed or moved files/directories
 ```
@@ -86,7 +86,7 @@ Key things to verify against reality:
 - **Dependencies** — `@nuxeo/*` package versions, Polymer version
 - **Element list** — new elements added, old ones removed
 - **Addon list** — new addons, removed addons
-- **Test patterns** — any framework changes (WDIO version, Karma config)
+- **Test patterns** — any framework changes (WDIO version, Web Test Runner config)
 - **CI workflows** in `.github/workflows/`
 - **Environment variables** referenced in code
 
@@ -240,7 +240,7 @@ npm test
 ## When to Run This Skill
 
 - After a **major refactor** (file moves, renames, new directory structure)
-- After a **dependency upgrade** (Polymer, WDIO, Karma, Node version bump)
+- After a **dependency upgrade** (Polymer, WDIO, @web/test-runner, Node version bump)
 - After adding **new elements, addons, or features**
 - After changing **build configuration** (webpack, eslint, CI workflows)
 - **Quarterly** as a maintenance task to catch drift

@@ -24,6 +24,15 @@ suite('nuxeo-authentication-tokens-management', () => {
 
   setup(async () => {
     server = await login();
+    // The element renders <nuxeo-resource auto path="/token">. Without a mock route the
+    // sinon.fakeServer returns a default 404, which on slow CI fires `_handleTokens` with
+    // an empty body before the test starts and used to crash the dom-if binding. Register
+    // a stable empty response so setup is deterministic regardless of runner speed.
+    server.respondWith('GET', /\/api\/v1\/token(\?.*)?$/, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify({ 'entity-type': 'tokens', entries: [] }),
+    ]);
     element = await fixture(
       html`<nuxeo-authentication-tokens-management application="Nuxeo Drive"></nuxeo-authentication-tokens-management>`,
     );
@@ -67,11 +76,37 @@ suite('nuxeo-authentication-tokens-management', () => {
       element._handleTokens({ detail: { response: { entries: [] } } });
       expect(element.tokens).to.be.an('array').that.is.empty;
     });
+
+    test('should default to empty array when response shape is missing', () => {
+      // Exercises every short-circuit of `e?.detail?.response?.entries || []`:
+      // missing event, missing detail, missing response, missing entries.
+      element.tokens = [{ id: 'preexisting' }];
+      element._handleTokens(undefined);
+      expect(element.tokens).to.be.an('array').that.is.empty;
+
+      element.tokens = [{ id: 'preexisting' }];
+      element._handleTokens({});
+      expect(element.tokens).to.be.an('array').that.is.empty;
+
+      element.tokens = [{ id: 'preexisting' }];
+      element._handleTokens({ detail: {} });
+      expect(element.tokens).to.be.an('array').that.is.empty;
+
+      element.tokens = [{ id: 'preexisting' }];
+      element._handleTokens({ detail: { response: {} } });
+      expect(element.tokens).to.be.an('array').that.is.empty;
+    });
   });
 
   suite('_empty', () => {
     test('should return true for empty array', () => {
       expect(element._empty([])).to.be.true;
+    });
+
+    test('should return true for nullish argument', () => {
+      // Covers the `?.` short-circuit in `!arr?.length`.
+      expect(element._empty(undefined)).to.be.true;
+      expect(element._empty(null)).to.be.true;
     });
 
     test('should return false for non-empty array', () => {

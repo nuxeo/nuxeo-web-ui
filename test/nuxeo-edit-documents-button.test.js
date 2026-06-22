@@ -36,7 +36,8 @@ window.nuxeo.I18n.en['bulkWidget.error.replaceWithEmpty'] = 'Please enter the va
 window.nuxeo.I18n.en['bulkWidget.mode.keep'] = "Don't change value(s)";
 window.nuxeo.I18n.en['bulkWidget.mode.remove'] = 'Empty value(s)';
 window.nuxeo.I18n.en['bulkWidget.mode.replace'] = 'Replace with';
-window.nuxeo.I18n.en['bulkWidget.warning.bool'] = 'This field will be unchecked for all selected documents';
+window.nuxeo.I18n.en['bulkWidget.warning.bool'] =
+  'This field will be unchecked (set as false) for all selected documents';
 window.nuxeo.I18n.en['bulkWidget.warning.remove'] = 'This field will be emptied for all selected documents';
 window.nuxeo.I18n.en['bulkWidget.warning.required'] = 'This field requires a non empty value';
 window.nuxeo.I18n.en['command.add'] = 'Add';
@@ -472,7 +473,9 @@ suite('nuxeo-edit-documents-button', () => {
       // check that update mode is set to replace
       expect(boolBulkWidget.updateMode).to.be.equals('replace');
       // check that message is shown
-      expect(boolBulkWidget._message).to.be.equals('This field will be unchecked for all selected documents');
+      expect(boolBulkWidget._message).to.be.equals(
+        'This field will be unchecked (set as false) for all selected documents',
+      );
     });
 
     test('Should handle widgets for blob properties', async () => {

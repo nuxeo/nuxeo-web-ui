@@ -3,16 +3,17 @@
  * Build script: writes `test/coverage-imports-data.js` (gitignored).
  *
  * Purpose:
- * Istanbul only knows about JavaScript that was loaded in the browser. Many UI modules are never
- * imported by any unit test; without a manifest + bulk import they disappear from coverage reports
- * and percentages look inflated. This script globs all app element sources and emits a sorted list
- * of project-relative paths. `test/setup.js` imports every path in a coverage-only `suiteTeardown`.
+ * Coverage tools only know about JavaScript that was loaded in the browser. Many UI modules are never
+ * imported by any unit test; without a manifest they disappear from coverage reports and percentages
+ * look inflated. This script globs all app element sources and emits a sorted list of project-relative
+ * paths. After the test run, `scripts/test/unit/inject-zero-coverage.js` uses this manifest to add
+ * 0% lcov records for any paths that were not loaded during tests.
  *
  * Scope:
  * - Included: all `.js` files under `elements/` and under each addon's `elements/` tree (see `patterns` below).
- * - Excluded: paths in `EXCLUDE_PREFIXES` / `EXCLUDE_EXACT` that cannot be safely loaded in Karma
- *   (e.g. routing bootstrap, problematic addon trees). Not included: webpack bundles, `scripts/`,
- *   `packages/`, or addon code outside those element directories.
+ * - Excluded: paths in `EXCLUDE_PREFIXES` / `EXCLUDE_EXACT` that cannot be safely loaded in the
+ *   Web Test Runner ESM pipeline (e.g. routing bootstrap, problematic addon trees). Not included:
+ *   webpack bundles, `scripts/`, `packages/`, or addon code outside those element directories.
  *
  * Run: `npm run update-coverage-imports` (also runs at the start of `npm test`).
  */
@@ -20,13 +21,13 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 
-const root = path.join(__dirname, '..');
+const root = path.join(__dirname, '../../..');
 const outFile = path.join(root, 'test', 'coverage-imports-data.js');
 
 const patterns = ['elements/**/*.js', 'addons/**/elements/**/*.js'];
 
-// Omit modules that break bulk import in the Karma ESM pipeline; extend when new failures appear.
-// - nuxeo-platform-3d: glTF scripts are not valid ESM named exports under karma-esm.
+// Omit modules that break bulk import in the test runner ESM pipeline; extend when new failures appear.
+// - nuxeo-platform-3d: glTF scripts are not valid ESM named exports under the test runner.
 // - routing.js: runs Page.js route setup at import time and requires a full Nuxeo.UI app shell.
 const EXCLUDE_PREFIXES = ['addons/nuxeo-platform-3d/'];
 const EXCLUDE_EXACT = new Set(['elements/routing.js']);
@@ -43,7 +44,10 @@ for (const pattern of patterns) {
   }
 }
 
-// Strings like "elements/foo.js" so consumers can do `new URL(path, projectRoot)` (see test/setup.js).
+// Strings like "elements/foo.js". The manifest is consumed post-run by
+// `scripts/test/unit/inject-zero-coverage.js`, which adds 0% lcov records for every
+// path listed here that no test actually pulled in (keeps Sonar's overall percentage
+// honest instead of reporting executed-only coverage).
 const relImports = Array.from(seen).sort();
 
 if (relImports.length === 0) {
@@ -60,9 +64,9 @@ const banner = `/**
  * AUTO-GENERATED — do not edit. Regenerate: npm run update-coverage-imports (runs in npm test).
  *
  * Exports \`coverageModulePaths\`: every app element module path under elements/ and each addon's
- * elements/ tree (minus excludes in generate-coverage-imports.js). Used only for Istanbul:
- * test/setup.js imports these URLs after all tests in coverage mode so reports include files that
- * no unit test loads (they appear as 0% coverage instead of being missing).
+ * elements/ tree (minus excludes in generate-coverage-imports.js). Used by
+ * scripts/test/unit/inject-zero-coverage.js after the test run to add 0% lcov records for any
+ * paths that were never loaded by a test (so reports include them instead of omitting them).
  */
 `;
 

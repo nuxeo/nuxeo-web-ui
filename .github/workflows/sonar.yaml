@@ -89,6 +89,7 @@ jobs:
         working-directory: ${{ github.workspace }}
 
       - name: Run unit tests with coverage
+        # pretest installs Puppeteer Chromium (npm ci --ignore-scripts skips its postinstall).
         run: npm test
         working-directory: ${{ github.workspace }}
 
