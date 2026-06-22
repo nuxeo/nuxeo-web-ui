@@ -923,12 +923,11 @@ Polymer({
     });
   },
 
-  disconnectedCallback() {
+  detached() {
     if (this._boundUpdateIsNarrow) {
       window.removeEventListener('resize', this._boundUpdateIsNarrow);
     }
     this.removeEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
-    super.disconnectedCallback();
   },
 
   skipLinkEvent() {

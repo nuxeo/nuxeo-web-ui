@@ -1549,7 +1549,7 @@ suite('nuxeo-app', () => {
       }
     });
 
-    test('disconnectedCallback does not throw when _boundUpdateIsNarrow is not set', () => {
+    test('detached does not throw when _boundUpdateIsNarrow is not set', () => {
       const host = document.createElement('div');
       document.body.appendChild(host);
       const fresh = document.createElement('nuxeo-app');
