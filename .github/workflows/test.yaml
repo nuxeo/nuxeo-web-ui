@@ -33,7 +33,7 @@ jobs:
         with:
           comment_on_pr: false
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.BRANCH_NAME }}
 
