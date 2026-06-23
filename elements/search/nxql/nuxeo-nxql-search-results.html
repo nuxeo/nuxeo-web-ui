@@ -79,15 +79,17 @@ limitations under the License.
           hidden
         >
           <template>
-            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
+            <a class="ellipsis" href$="[[urlFor(item)]]"
+              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
+            >
           </template>
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column name="[[i18n('label.path')]]" field="ecm:path" sort-by="ecm:path" flex="100">
           <template>
-            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="ellipsis" href$="[[urlFor(item)]]" on-tap="_navigate">[[item.path]]</a>
+            <a class="ellipsis" href$="[[urlFor(item)]]" on-tap="_navigate"
+              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.path]]</a
+            >
             <nuxeo-tooltip>[[item.path]]</nuxeo-tooltip>
           </template>
         </nuxeo-data-table-column>

@@ -77,8 +77,9 @@ limitations under the License.
           flex="30"
         >
           <template>
-            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-            <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
+            <a class="ellipsis" href$="[[urlFor(item)]]"
+              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
+            >
           </template>
         </nuxeo-data-table-column>
 
