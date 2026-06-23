@@ -22,6 +22,7 @@ suite('nuxeo-dropzone', () => {
   let element;
   setup(async () => {
     element = await fixture(html` <nuxeo-dropzone></nuxeo-dropzone> `);
+    sinon.stub(element, 'i18n').callsFake((key) => key);
   });
 
   suite('should return whether property is under retention', () => {

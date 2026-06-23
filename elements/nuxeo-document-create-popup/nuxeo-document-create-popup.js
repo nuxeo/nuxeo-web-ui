@@ -87,7 +87,7 @@ Polymer({
     <nuxeo-document id="defaultDoc" doc-path="[[parentPath]]" enrichers="permissions, subtypes" response="{{parent}}">
     </nuxeo-document>
 
-    <nuxeo-dialog id="createDocDialog" opened="{{opened}}" modal>
+    <nuxeo-dialog id="createDocDialog" opened="{{opened}}" with-backdrop no-cancel-on-outside-click>
       <paper-tabs hidden$="[[!_showTabs]]" selected="{{selectedTab}}" attr-for-selected="name" noink>
         <nuxeo-slot name="CREATE_POPUP_ITEMS" model="[[importContext]]"></nuxeo-slot>
       </paper-tabs>

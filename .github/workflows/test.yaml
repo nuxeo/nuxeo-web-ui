@@ -79,9 +79,7 @@ jobs:
             @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
 
       - name: Unit tests
-        # package.json "test": runs generate-coverage-imports.js then `karma start --coverage` (Istanbul).
-        # Disabling SauceLabs. Karma is not compatible with SauceLabs v4
-        # env:
-        #   SAUCE_USERNAME: nuxeo-web-ui
-        #   SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        # pretest installs Puppeteer Chromium (npm ci --ignore-scripts skips its postinstall).
+        # npm test: regenerate barrels, print WTR layout notice, then web-test-runner --coverage.
+        # WTR reports "1/1 test files" (load-all-tests.js); Mocha pass/fail counts are individual tests.
         run: npm run test

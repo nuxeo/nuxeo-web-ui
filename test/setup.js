@@ -17,26 +17,31 @@ limitations under the License.
 */
 
 /**
- * Shared Karma/Mocha bootstrap for all unit tests.
+ * Shared Mocha bootstrap for all unit tests (loaded first from test/load-all-tests.js).
  *
  * What this file does:
  * - Registers Chai, Sinon, and common globals (`expect`, `assert`, `should`) expected by legacy tests.
- * - In coverage runs only (`window.__coverage__` present), runs a `suiteTeardown` hook that
- *   dynamically imports every path listed in `test/coverage-imports-data.js`. That forces Istanbul
- *   to include the full `elements/` and addon element trees in the report (files no test imports
- *   show up as 0% covered instead of being omitted). Imports run after all tests finish so module
- *   side effects do not run in the middle of the suite.
+ * - Installs error/rejection suppression so stray async failures between tests don't abort the run.
+ * - Patches sinon.stub to handle non-configurable Polymer element properties.
+ * - Auto-restores leaked sinon fakes/clocks after each test.
+ *
+ * Coverage strategy:
+ * Istanbul source instrumentation (via rollup-plugin-istanbul in web-test-runner.config.mjs) only
+ * reports modules that the browser actually loaded. Files never imported by any test are NOT
+ * bulk-loaded here — they are added as 0% records by `scripts/test/unit/inject-zero-coverage.js`
+ * after the run. This keeps coverage honest: only code that tests actually exercise gets a
+ * non-zero percentage.
  *
  * Related files:
  * - `test/load-all-tests.js` — imports this module first, then every `*.test.js`.
- * - `scripts/generate-coverage-imports.js` — regenerates `coverage-imports-data.js` (gitignored).
- * - `karma.conf.js` — serves source trees as modules when `--coverage` is used.
+ * - `scripts/test/unit/generate-coverage-imports.js` — regenerates `coverage-imports-data.js` (manifest).
+ * - `scripts/test/unit/inject-zero-coverage.js` — adds 0% lcov records for untested modules.
+ * - `web-test-runner.config.mjs` — instruments app sources when `--coverage` is used.
  */
 
 import * as chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { coverageModulePaths } from './coverage-imports-data.js';
 
 chai.config.includeStack = true;
 
@@ -98,18 +103,80 @@ globalThis.should = chai.should();
 // triggering test has already passed (e.g. nuxeo-search-form's `visible change` test calls
 // `_visibleChanged()` which fires real iron-ajax requests against /api/v1/...). When those
 // requests reject as 404 / Aborted / Invalid json AFTER the test ends, the unhandled
-// rejection / window error reaches mocha and karma; karma reports it via `__karma__.error()`
-// and treats the run as complete. Result: the remaining tests in the offending suite (and
+// rejection / window error reaches mocha and the test runner, which can abort the run and
+// treat it as complete. Result: the remaining tests in the offending suite (and
 // every suite registered after it — selection-toolbar, suggester, tasks-list, vocabulary-
 // management, workflow-*, etc.) never execute, the test count is artificially low, and
 // coverage on those modules looks like 0%.
 //
-// The capture-phase listeners below intercept these events before mocha's / karma's listeners
-// can see them. We log a short summary so genuine issues are still visible, but we stop
-// propagation so the run keeps going and every registered suite gets to execute.
+// The capture-phase listeners below intercept stray events before mocha's listeners
+// can see them, but only after Mocha has actually started running suites AND no test is
+// actively running. Benign 404/Invalid json noise is silently dropped; other stray
+// failures are logged via console.debug (see `_logIgnoredAsyncFailure`) so they don't
+// pollute CI output but remain available when debugging locally with verbose browser
+// logs enabled.
+//
+// `_mochaStarted` guards against suppressing errors thrown during initial test-module
+// loading and suite registration (before any Mocha hook has run). Without that guard,
+// real import/initialization failures would be silently swallowed and the run would
+// continue with missing suites.
+let _testRunning = false;
+let _mochaStarted = false;
+
+if (typeof window.suiteSetup === 'function') {
+  window.suiteSetup(() => {
+    _mochaStarted = true;
+    _testRunning = true;
+  });
+}
+
+if (typeof window.setup === 'function') {
+  window.setup(() => {
+    _testRunning = true;
+  });
+}
+
+if (typeof window.teardown === 'function') {
+  window.teardown(function _markTestBoundaryEnd() {
+    // Use setTimeout to defer flipping the flag until after all other teardown hooks
+    // have run. This prevents suppressing genuine errors thrown during fixture cleanup.
+    setTimeout(() => {
+      _testRunning = false;
+    }, 0);
+  });
+}
+
+if (typeof window.suiteTeardown === 'function') {
+  window.suiteTeardown(() => {
+    _testRunning = false;
+  });
+}
+
+const _shouldSuppressStrayAsyncFailure = () => _mochaStarted && !_testRunning;
+const _isBenignNuxeoNetworkFailure = (info) => {
+  if (info == null) {
+    return false;
+  }
+  const message = String(typeof info === 'object' && info.message != null ? info.message : info);
+  const hasBenignMessage = message.includes('Invalid json') || message.includes('No message');
+  if (!hasBenignMessage) {
+    return false;
+  }
+  if (typeof info === 'object' && info.status != null) {
+    return info.status === 404;
+  }
+  return message.includes('404');
+};
+
 const _logIgnoredAsyncFailure = (label, info) => {
+  if (_isBenignNuxeoNetworkFailure(info)) {
+    return;
+  }
+  const display = typeof info === 'object' && info.message != null ? info.message : info;
+  // Downgraded to `debug` so it does not pollute the WTR console output for every
+  // suppressed post-teardown rejection. Set `WTR_VERBOSE=1` (or open DevTools) to see them.
   // eslint-disable-next-line no-console
-  console.warn(`[test-setup] ignoring stray ${label} after test boundary:`, info);
+  console.debug(`[test-setup] ignoring stray ${label} after test boundary:`, display);
 };
 
 // Wrap ResizeObserver to defer notifications via requestAnimationFrame. Chrome occasionally
@@ -126,14 +193,20 @@ if (typeof window.ResizeObserver === 'function') {
             try {
               callback(entries, observer);
             } catch (err) {
-              _logIgnoredAsyncFailure('ResizeObserver', err && err.message);
+              if (_testRunning) {
+                throw err;
+              }
+              _logIgnoredAsyncFailure('ResizeObserver', err);
             }
           });
         } else {
           try {
             callback(entries, observer);
           } catch (err) {
-            _logIgnoredAsyncFailure('ResizeObserver', err && err.message);
+            if (_testRunning) {
+              throw err;
+            }
+            _logIgnoredAsyncFailure('ResizeObserver', err);
           }
         }
       });
@@ -144,8 +217,16 @@ if (typeof window.ResizeObserver === 'function') {
 window.addEventListener(
   'unhandledrejection',
   (event) => {
+    if (!_shouldSuppressStrayAsyncFailure()) {
+      return;
+    }
     const reason = event.reason;
-    _logIgnoredAsyncFailure('unhandledrejection', (reason && reason.message) || reason);
+    if (_isBenignNuxeoNetworkFailure(reason)) {
+      event.stopImmediatePropagation();
+      event.preventDefault();
+      return;
+    }
+    _logIgnoredAsyncFailure('unhandledrejection', reason);
     event.stopImmediatePropagation();
     event.preventDefault();
   },
@@ -155,7 +236,10 @@ window.addEventListener(
 window.addEventListener(
   'error',
   (event) => {
-    _logIgnoredAsyncFailure('error', event.message || (event.error && event.error.message));
+    if (!_shouldSuppressStrayAsyncFailure()) {
+      return;
+    }
+    _logIgnoredAsyncFailure('error', event.error || event.message);
     event.stopImmediatePropagation();
     event.preventDefault();
   },
@@ -167,7 +251,13 @@ window.addEventListener(
 // Returning true here suppresses the default browser/mocha "uncaught" reporting.
 const _previousOnError = window.onerror;
 window.onerror = function _suppressedOnError(message, source, lineno, colno, error) {
-  _logIgnoredAsyncFailure('window.onerror', (error && error.message) || message);
+  if (!_shouldSuppressStrayAsyncFailure()) {
+    if (typeof _previousOnError === 'function') {
+      return _previousOnError.call(this, message, source, lineno, colno, error);
+    }
+    return false;
+  }
+  _logIgnoredAsyncFailure('window.onerror', error || message);
   if (typeof _previousOnError === 'function') {
     try {
       _previousOnError.call(this, message, source, lineno, colno, error);
@@ -179,8 +269,14 @@ window.onerror = function _suppressedOnError(message, source, lineno, colno, err
 };
 const _previousOnRejection = window.onunhandledrejection;
 window.onunhandledrejection = function _suppressedOnRejection(event) {
+  if (!_shouldSuppressStrayAsyncFailure()) {
+    if (typeof _previousOnRejection === 'function') {
+      return _previousOnRejection.call(this, event);
+    }
+    return false;
+  }
   const reason = event && event.reason;
-  _logIgnoredAsyncFailure('window.onunhandledrejection', (reason && reason.message) || reason);
+  _logIgnoredAsyncFailure('window.onunhandledrejection', reason);
   if (typeof _previousOnRejection === 'function') {
     try {
       _previousOnRejection.call(this, event);
@@ -242,46 +338,3 @@ const _restoreLeakedSinonGlobals = () => {
 if (typeof window.teardown === 'function') {
   window.teardown(_restoreLeakedSinonGlobals);
 }
-
-// Coverage-only: bulk-load all app element modules after every test has finished (see file header).
-suiteTeardown(async function coverageMaterializationTeardown() {
-  if (typeof window.__coverage__ === 'undefined') {
-    return;
-  }
-
-  if (!Array.isArray(coverageModulePaths) || coverageModulePaths.length === 0) {
-    expect.fail(
-      'test/coverage-imports-data.js has no paths. Run: node scripts/generate-coverage-imports.js (or npm run update-coverage-imports).',
-    );
-  }
-
-  this.timeout(0);
-  const root = new URL('../', import.meta.url);
-  const failures = [];
-
-  // Critical: skip modules already loaded by tests. Re-importing them here through a different
-  // URL (karma-esm + Babel under `compatibility: 'always'`) yields a fresh instrumentation with a
-  // different hash; istanbul then overwrites `window.__coverage__[path]`, wiping the counters
-  // collected during tests (symptom: a file with passing tests reports near-0% coverage).
-  // Only materialize modules whose path is NOT already present in `window.__coverage__`.
-  const alreadyCovered = new Set(Object.keys(window.__coverage__));
-  const toLoad = coverageModulePaths.filter((p) => !alreadyCovered.has(p));
-
-  await Promise.all(
-    toLoad.map((p) => {
-      const href = new URL(p, root).href;
-      return import(href).catch((err) => {
-        failures.push({ specifier: p, err });
-      });
-    }),
-  );
-
-  if (failures.length > 0) {
-    const message = failures.map((f) => `${f.specifier}: ${f.err && f.err.message ? f.err.message : f.err}`).join('\n');
-    // eslint-disable-next-line no-console
-    console.error(
-      `coverage materialization: ${failures.length} of ${toLoad.length} modules failed to load:\n${message}`,
-    );
-    expect(failures, 'every app module should load in the test environment').to.have.length(0);
-  }
-});
