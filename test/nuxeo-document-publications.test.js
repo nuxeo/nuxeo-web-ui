@@ -316,11 +316,16 @@ suite('nuxeo-document-publications', () => {
     suiteSetup(async () => {
       const url = '/elements/nuxeo-publication/nuxeo-document-publications.js';
       const response = await fetch(url);
+      expect(response.ok, `Failed to fetch ${url}: ${response.status} ${response.statusText}`).to.be.true;
       const jsText = await response.text();
       const htmlTagIdx = jsText.indexOf('html`');
-      const templateHtml = jsText.substring(htmlTagIdx + 5, jsText.indexOf('`', htmlTagIdx + 5));
+      expect(htmlTagIdx, `html\` template literal not found in ${url}`).to.be.greaterThan(-1);
+      const htmlEndIdx = jsText.indexOf('`', htmlTagIdx + 5);
+      expect(htmlEndIdx, `Closing \` for html\` template literal not found in ${url}`).to.be.greaterThan(htmlTagIdx);
+      const templateHtml = jsText.substring(htmlTagIdx + 5, htmlEndIdx);
       const doc = new DOMParser().parseFromString(`<div>${templateHtml}</div>`, 'text/html');
       tmpl = doc.body.firstElementChild;
+      expect(tmpl, `Failed to parse html\` template literal from ${url}`).to.exist;
     });
 
     test('nuxeo-document-thumbnail has alt="" (decorative image)', () => {
