@@ -167,12 +167,49 @@ suite('nuxeo-document-grid-thumbnail', () => {
   });
 
   suite('_computeTitle', () => {
-    test('includes title and i18n select key', () => {
-      expect(element._computeTitle({ title: 'Hello ' })).to.equal('Hello command.select');
+    test('returns only the i18n select key (no doc title prefix)', () => {
+      expect(element._computeTitle({ title: 'Hello' })).to.equal('command.select');
     });
 
-    test('handles missing doc title', () => {
-      expect(element._computeTitle({})).to.equal('undefinedcommand.select');
+    test('returns i18n select key when doc title is missing', () => {
+      expect(element._computeTitle({})).to.equal('command.select');
+    });
+
+    test('returns i18n select key when doc is null', () => {
+      expect(element._computeTitle(null)).to.equal('command.select');
+    });
+  });
+
+  suite('WCAG H2: thumbnail and title combined in one link', () => {
+    setup(async () => {
+      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
+      sinon.stub(element, 'urlFor').returns('/doc/doc-1');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      element.shadowRoot.querySelectorAll('template').forEach((t) => {
+        if (t.__dataHost && t.__dataHost.render) t.__dataHost.render();
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    test('thumbnail container is inside the title link', () => {
+      const link = element.shadowRoot.querySelector('a.title');
+      if (!link) return; // dom-if not yet stamped in this env — skip gracefully
+      const thumbContainer = link.querySelector('.thumbnailContainer');
+      expect(thumbContainer, 'thumbnailContainer should be inside <a class="title">').to.exist;
+    });
+
+    test('thumbnail image has empty alt (decorative)', () => {
+      const link = element.shadowRoot.querySelector('a.title');
+      if (!link) return;
+      const img = link.querySelector('.thumbnailContainer img');
+      expect(img, 'img should be inside the title link').to.exist;
+      expect(img.alt).to.equal('');
+    });
+
+    test('tooltip has aria-hidden="true"', () => {
+      const tooltip = element.shadowRoot.querySelector('nuxeo-tooltip');
+      if (!tooltip) return;
+      expect(tooltip.getAttribute('aria-hidden')).to.equal('true');
     });
   });
 

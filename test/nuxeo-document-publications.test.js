@@ -299,4 +299,48 @@ suite('nuxeo-document-publications', () => {
       document.dir = origDir;
     });
   });
+
+  suite('WCAG H2: thumbnail combined with path in one link', () => {
+    // Recursively collect elements matching selector, descending into <template> content.
+    function queryAllDeep(root, selector) {
+      const results = [];
+      root.querySelectorAll(selector).forEach((el) => results.push(el));
+      root.querySelectorAll('template').forEach((t) => {
+        results.push(...queryAllDeep(t.content, selector));
+      });
+      return results;
+    }
+
+    let tmpl;
+
+    suiteSetup(async () => {
+      const url = '/elements/nuxeo-publication/nuxeo-document-publications.js';
+      const response = await fetch(url);
+      const jsText = await response.text();
+      const htmlTagIdx = jsText.indexOf('html`');
+      const templateHtml = jsText.substring(htmlTagIdx + 5, jsText.indexOf('`', htmlTagIdx + 5));
+      const doc = new DOMParser().parseFromString(`<div>${templateHtml}</div>`, 'text/html');
+      tmpl = doc.body.firstElementChild;
+    });
+
+    test('nuxeo-document-thumbnail has alt="" (decorative image)', () => {
+      const thumbnails = queryAllDeep(tmpl, 'nuxeo-document-thumbnail');
+      expect(thumbnails.length).to.be.greaterThan(0, 'should have at least one nuxeo-document-thumbnail');
+      thumbnails.forEach((thumb) => {
+        expect(thumb.getAttribute('alt')).to.equal(
+          '',
+          `thumbnail should have alt="" but got "${thumb.getAttribute('alt')}"`,
+        );
+      });
+    });
+
+    test('nuxeo-document-thumbnail is inside an <a> link', () => {
+      const thumbnails = queryAllDeep(tmpl, 'nuxeo-document-thumbnail');
+      expect(thumbnails.length).to.be.greaterThan(0);
+      thumbnails.forEach((thumb) => {
+        const link = thumb.closest('a');
+        expect(link, 'nuxeo-document-thumbnail should be a descendant of an <a> element').to.exist;
+      });
+    });
+  });
 });
