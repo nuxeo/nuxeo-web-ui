@@ -216,15 +216,15 @@ Polymer({
     </style>
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
-      <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
-        <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
-      </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown" tabindex="0">
+        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown">
+          <div class="thumbnailContainer">
+            <img src="[[_thumbnail(doc)]]" alt="" />
+          </div>
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
-            <nuxeo-tooltip for="title">[[doc.title]]</nuxeo-tooltip>
+            <nuxeo-tooltip for="title" aria-hidden="true">[[doc.title]]</nuxeo-tooltip>
           </div>
         </a>
         <div class="actions">
@@ -339,6 +339,6 @@ Polymer({
   },
 
   _computeTitle(doc) {
-    return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
+    return this.i18n && this.i18n('command.select');
   },
 });

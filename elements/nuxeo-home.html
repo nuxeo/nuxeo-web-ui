@@ -53,7 +53,6 @@ limitations under the License.
         overflow: hidden;
         white-space: nowrap;
         display: block;
-        width: calc(100% - 38px);
       }
 
       .task-box {
@@ -136,8 +135,9 @@ limitations under the License.
             >
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
-                  <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-                  <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
+                  <a class="ellipsis" href$="[[urlFor(item)]]"
+                    ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
+                  >
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
@@ -213,8 +213,9 @@ limitations under the License.
             >
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
-                  <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-                  <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
+                  <a class="ellipsis" href$="[[urlFor(item)]]"
+                    ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
+                  >
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('recentDocumentsTable.type')]]" flex="50">
@@ -253,8 +254,9 @@ limitations under the License.
             >
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
-                  <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
-                  <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
+                  <a class="ellipsis" href$="[[urlFor(item)]]"
+                    ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
+                  >
                 </template>
               </nuxeo-data-table-column>
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.modified')]]" flex="50">
