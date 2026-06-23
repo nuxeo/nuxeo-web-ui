@@ -191,24 +191,24 @@ suite('nuxeo-document-grid-thumbnail', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    test('thumbnail container is inside the title link', () => {
+    test('thumbnail container is inside the title link', function () {
       const link = element.shadowRoot.querySelector('a.title');
-      if (!link) return; // dom-if not yet stamped in this env — skip gracefully
+      if (!link) this.skip(); // dom-if not yet stamped in this env
       const thumbContainer = link.querySelector('.thumbnailContainer');
       expect(thumbContainer, 'thumbnailContainer should be inside <a class="title">').to.exist;
     });
 
-    test('thumbnail image has empty alt (decorative)', () => {
+    test('thumbnail image has empty alt (decorative)', function () {
       const link = element.shadowRoot.querySelector('a.title');
-      if (!link) return;
+      if (!link) this.skip();
       const img = link.querySelector('.thumbnailContainer img');
       expect(img, 'img should be inside the title link').to.exist;
       expect(img.alt).to.equal('');
     });
 
-    test('tooltip has aria-hidden="true"', () => {
+    test('tooltip has aria-hidden="true"', function () {
       const tooltip = element.shadowRoot.querySelector('nuxeo-tooltip');
-      if (!tooltip) return;
+      if (!tooltip) this.skip();
       expect(tooltip.getAttribute('aria-hidden')).to.equal('true');
     });
   });
