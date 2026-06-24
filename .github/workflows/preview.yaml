@@ -142,7 +142,7 @@ jobs:
           context: .
           pull: true
           push: true
-          file: Dockerfile.nuxeo
+          file: Dockerfile
           tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}
           build-args: |
             NUXEO_IMAGE=${{ env.NUXEO_IMAGE }}
