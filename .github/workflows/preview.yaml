@@ -17,6 +17,11 @@ on:
         default: 'lts-2025'
         type: string
         required: false
+      nuxeo_packages:
+        description: 'Space/comma-separated Web UI addons to bundle into the image (e.g. "nuxeo-drive nuxeo-csv"). Overrides the NUXEO_PACKAGES repository variable used for PR previews.'
+        default: ''
+        type: string
+        required: false
 
 env:
   REGISTRY: docker-internal.packages.nuxeo.com
@@ -104,6 +109,8 @@ jobs:
           npm install --no-package-lock ./nuxeo-elements/dataviz
 
       - name: Webpack build
+        env:
+          NUXEO_PACKAGES: ${{ github.event.inputs.nuxeo_packages || vars.NUXEO_PACKAGES }}
         run: npm run build
 
       - name: Set up Docker Buildx
