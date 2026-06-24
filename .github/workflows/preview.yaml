@@ -26,6 +26,8 @@ on:
 env:
   REGISTRY: docker-internal.packages.nuxeo.com
   REPOSITORY: nuxeo/nuxeo-web-ui
+  # Base Nuxeo server image baked into the deployable image (matches the LTS line).
+  NUXEO_IMAGE: docker-private.packages.nuxeo.com/nuxeo/nuxeo:2025
 
 jobs:
   id:
@@ -113,6 +115,17 @@ jobs:
           NUXEO_PACKAGES: ${{ github.event.inputs.nuxeo_packages || vars.NUXEO_PACKAGES }}
         run: npm run build
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build Web UI marketplace package
+        # Reuses the dist/ produced by the Webpack build above (-DskipInstall -DskipBuild),
+        # then packages it into the Nuxeo Web UI marketplace zip installed in the image.
+        run: mvn -B -ntp clean install -DskipTests -DskipInstall=true -DskipBuild=true
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -129,8 +142,11 @@ jobs:
           context: .
           pull: true
           push: true
-          file: Dockerfile
+          file: Dockerfile.nuxeo
           tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}
+          build-args: |
+            NUXEO_IMAGE=${{ env.NUXEO_IMAGE }}
+            NUXEO_SERVER_PACKAGES=${{ vars.NUXEO_SERVER_PACKAGES }}
 
       - name: Set preview image reference
         id: preview

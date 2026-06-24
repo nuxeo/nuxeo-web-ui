@@ -276,6 +276,16 @@ Environment variables control deployment:
 - `NUXEO_DEV_MODE` — Enable hot-reload in server
 - `NUXEO_CLID` — License key
 
+### Combined image (EKS preview)
+
+The `preview` workflow builds a single, self-contained Nuxeo server image
+(`Dockerfile.nuxeo`) that bakes in the Web UI marketplace package built from this
+repo, so one image serves both the backend and the Web UI at `/nuxeo/ui` — suitable
+for direct EKS deployment. The base server image is selected via the `NUXEO_IMAGE`
+build arg (matching the LTS line), frontend addons are chosen via `NUXEO_PACKAGES`
+(baked into the UI during the Webpack build), and optional server-side Connect
+packages via `NUXEO_SERVER_PACKAGES` (requires `NUXEO_CLID`).
+
 ## CI/CD (GitHub Actions)
 
 Workflow orchestration in `.github/workflows/main.yaml`:
