@@ -21,6 +21,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
+import { navigateAndShowFallback } from './nuxeo-drive-utils.js';
 
 /**
 `nuxeo-drive-edit-button`
@@ -31,8 +32,6 @@ Polymer({
   _template: html`
     <style include="nuxeo-action-button-styles"></style>
 
-    <nuxeo-resource id="token" path="/token" params='{"application": "Nuxeo Drive"}'></nuxeo-resource>
-
     <template is="dom-if" if="[[_isAvailable(document,blob)]]">
       <div class="action" on-tap="_go">
         <paper-icon-button noink icon="icons:open-in-new" id="driveBtn" aria-labelledby="label"></paper-icon-button>
@@ -42,14 +41,63 @@ Polymer({
     </template>
 
     <nuxeo-dialog id="dialog" with-backdrop>
-      <div class="vertical layout">
-        <h1>[[i18n('driveEditButton.dialog.heading')]]</h1>
-        <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
+      <style>
+        #dialog {
+          margin-top: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          max-height: 80vh;
+        }
+
+        .dialog-content {
+          padding: 16px 24px;
+        }
+
+        .dialog-content h1 {
+          margin: 0 0 12px;
+          font-size: 1.6em;
+        }
+
+        .dialog-content p {
+          color: var(--primary-text-color, #333);
+          margin: 0 0 16px;
+        }
+
+        .close-btn {
+          border: 1px solid var(--nuxeo-primary-color, #0066ff);
+          color: var(--nuxeo-primary-color, #0066ff);
+          text-transform: uppercase;
+          font-size: 0.9em;
+          padding: 0.5em 1em;
+        }
+
+        .buttons {
+          justify-content: flex-end;
+        }
+
+        .install-link {
+          display: inline-block;
+          margin-top: 4px;
+          font-size: 0.9em;
+        }
+      </style>
+      <div class="dialog-content">
+        <h1>[[i18n('driveButton.dialog.heading')]]</h1>
+        <p>[[i18n('driveButton.dialog.description')]]</p>
+        <template is="dom-if" if="[[_installExpanded]]">
+          <p>[[i18n('driveButton.dialog.install.prompt')]]</p>
+          <nuxeo-drive-desktop-packages></nuxeo-drive-desktop-packages>
+        </template>
+        <template is="dom-if" if="[[!_installExpanded]]">
+          <a class="install-link" href="#" on-click="_toggleInstall">[[i18n('driveButton.install.dialog.hint')]]</a>
+        </template>
       </div>
       <div class="buttons">
-        <paper-button dialog-dismiss class="secondary">[[i18n('command.close')]]</paper-button>
+        <paper-button dialog-dismiss class="close-btn">[[i18n('command.close')]]</paper-button>
       </div>
     </nuxeo-dialog>
+
+    <paper-toast id="toast"></paper-toast>
   `,
 
   is: 'nuxeo-drive-edit-button',
@@ -67,23 +115,32 @@ Polymer({
       reflectToAttribute: true,
       value: false,
     },
+
+    _installExpanded: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   _isAvailable(doc, blob) {
-    return (
-      this.hasPermission(doc, 'Write') && !this.isProxy(doc) && blob && (!blob.appLinks || blob.appLinks.length === 0)
-    );
+    return this.hasPermission(doc, 'Write') && !this.isProxy(doc) && blob && !blob.appLinks?.length;
   },
 
   _go() {
-    this.$.token.get().then((response) => {
-      const tokens = response.entries.map((token) => token.id);
-      if (!tokens || !tokens.length) {
-        this.$.dialog.toggle();
-        return;
-      }
-      window.open(this.driveEditURL, '_top');
-    });
+    const url = this.driveEditURL;
+    if (!url) return;
+    this._installExpanded = false;
+    navigateAndShowFallback(this, url);
+  },
+
+  _toggleInstall(e) {
+    e.preventDefault();
+    this._installExpanded = true;
+  },
+
+  _showError(message) {
+    this.$.toast.text = message;
+    this.$.toast.open();
   },
 
   get driveEditURL() {

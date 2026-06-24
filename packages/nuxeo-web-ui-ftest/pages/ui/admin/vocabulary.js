@@ -13,8 +13,8 @@ export default class Vocabulary extends BasePage {
   }
 
   async addNewEntry(id, label) {
-    await driver.waitForVisible('#addEntry');
     const addEntryButton = await this.el.element('#addEntry');
+    await addEntryButton.waitForVisible();
     await addEntryButton.click();
     const dialog = await this.el.element('nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])');
     await dialog.waitForVisible();
@@ -25,22 +25,51 @@ export default class Vocabulary extends BasePage {
     const saveButton = await dialog.element('paper-button[name="save"]');
     await saveButton.waitForVisible();
     await saveButton.click();
+    // Wait for the dialog to close, confirming the save has been submitted
+    await this.waitForNotVisible('nuxeo-dialog[id="vocabularyEditDialog"]');
   }
 
   async waitForHasEntry(id, reverse) {
-    const el = await this.el;
-    await driver.waitForVisible('#table');
     await driver.waitUntil(
       async () => {
-        const cells = await el.elements('#table nuxeo-data-table-cell');
-        if (reverse) {
-          return cells.every(async (cell) => (await cell.getText()).trim() !== id);
+        // Read the element's `entries` property directly (the source of truth) instead
+        // of scraping rendered cell text. The `nuxeo-data-table` wraps `iron-list`,
+        // which virtualises rows: when `items.length` shrinks (e.g. after a delete),
+        // iron-list keeps the extra physical row in the DOM with its previous `item`
+        // model still bound, so its `nuxeo-data-table-cell` continues to render the
+        // stale label. Polling rendered cell text therefore can never see the entry
+        // disappear and `I cannot see "Breizh" entry` times out after a successful
+        // delete.
+        //
+        // We use `this.el.getProperty('entries')` rather than `driver.execute` with a
+        // `document.querySelector`, because `nuxeo-vocabulary-management` is stamped
+        // inside `nuxeo-admin`'s shadow DOM and is not reachable from light DOM. The
+        // page object's `this.el` is already a WDIO element resolved through WDIO's
+        // shadow-piercing `$`, so `getProperty` reads across the shadow boundary.
+        let entries;
+        try {
+          entries = await this.el.getProperty('entries');
+        } catch (e) {
+          // Element may be temporarily detached during a refresh \u2014 keep waiting.
+          return false;
         }
-        return cells.some(async (cell) => (await cell.getText()).trim() === id);
+        if (!Array.isArray(entries)) {
+          // `entries` not yet populated (initial load). In reverse mode (asserting
+          // absence) treat as "not present"; otherwise keep waiting for the first load.
+          return Boolean(reverse);
+        }
+        // The scenario passes either the entry id ("Brittany") or its label ("Breizh"),
+        // so match against both to support both styles of step usage.
+        const present = entries.some((entry) => {
+          const props = (entry && entry.properties) || {};
+          return props.id === id || props.label === id;
+        });
+        return reverse ? !present : present;
       },
-      reverse ? 'The vocabulary does have such entry' : 'The vocabulary does not have such entry',
       {
-        timeoutMsg: 'waitForHasEntry timedout',
+        timeoutMsg: reverse
+          ? `Expected not to find vocabulary entry: ${id}`
+          : `Expected to find vocabulary entry: ${id}`,
       },
     );
     return true;
@@ -49,6 +78,7 @@ export default class Vocabulary extends BasePage {
   async deleteEntry(index) {
     const selector = `#delete-button-${index - 1}`;
     const deleteButton = await this.el.element(selector);
+    await deleteButton.waitForVisible();
     await deleteButton.scrollIntoView(selector);
 
     // Wait for the alert to appear, retrying the click if it didn't register
@@ -81,6 +111,7 @@ export default class Vocabulary extends BasePage {
   async editEntry(index, label) {
     const selector = `#edit-button-${index - 1}`;
     const editButton = await this.el.element(selector);
+    await editButton.waitForVisible();
     await editButton.scrollIntoView(selector);
     await editButton.click();
     const dialog = await this.el.element('nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])');
@@ -110,8 +141,9 @@ export default class Vocabulary extends BasePage {
   }
 
   async table() {
-    await driver.waitForVisible('#table');
-    return this.el.element('#table');
+    const table = await this.el.element('#table');
+    await table.waitForVisible();
+    return table;
   }
 
   get isVocabularyTableFilled() {
@@ -126,8 +158,8 @@ export default class Vocabulary extends BasePage {
 
   get hasEditDialog() {
     return async () => {
-      await driver.waitForVisible('#edit-button-0');
       const editButton = await this.el.element('#edit-button-0');
+      await editButton.waitForVisible();
       await editButton.click();
       await this.el.waitForVisible('nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])');
       const dialog = await this.el.element('nuxeo-dialog[id="vocabularyEditDialog"]:not([aria-hidden])');

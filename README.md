@@ -38,18 +38,18 @@ nuxeo.cors.urls=*
 
 ### Commands
 
-| Task | Command |
-|---|---|
-| Install dependencies | `npm install` |
-| Start dev server | `npm start` |
-| Lint | `npm run lint` |
-| Format | `npm run format` |
-| Unit tests | `npm test` |
-| Functional tests | `npm run ftest` |
-| Production build | `npm run build` |
-| Bundle analysis | `npm run build:analyze` |
-| Maven marketplace | `mvn clean install` |
-| Maven + ftests | `mvn clean install -Pftest` |
+| Task | Command | Notes |
+|---|---|---|
+| Install dependencies | `npm install` | |
+| Start dev server | `npm start` | |
+| Lint | `npm run lint` | |
+| Format | `npm run format` | |
+| Unit tests | `npm test` | Web Test Runner; one runner file, ~1000+ Mocha tests |
+| Functional tests | `npm run ftest` | |
+| Production build | `npm run build` | |
+| Bundle analysis | `npm run build:analyze` | |
+| Maven marketplace | `mvn clean install` | |
+| Maven + ftests | `mvn clean install -Pftest` | |
 
 ### Docker Compose
 

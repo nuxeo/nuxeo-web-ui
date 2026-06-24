@@ -121,7 +121,7 @@ export default [
 
   {
     files: [
-      'karma.conf.js',
+      'web-test-runner.config.mjs',
       'webpack.config.js',
       '**/*.conf.js',
       '**/*.config.js',
