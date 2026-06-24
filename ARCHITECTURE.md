@@ -259,13 +259,21 @@ mvn clean install
 
 ### Docker Compose
 
-Three-service architecture in `docker-compose.yml`:
+Two setups are provided:
 
-```
-proxy (nginx) :8080 → routes to:
-  ├── /nuxeo/* → nuxeo (Nuxeo Server)
-  └── /*       → webui (Nginx serving dist/)
-```
+- **Complete (default)** — `docker-compose.yml` runs a single Nuxeo image
+  (`Dockerfile`) with the Web UI baked in, serving the backend and the UI at
+  `http://localhost:8080/nuxeo/ui`. Requires the marketplace package to be built
+  first (`npm run build` then `mvn -ntp clean install -DskipTests -DskipInstall=true -DskipBuild=true`).
+
+- **Lightweight nginx (opt-in)** — `docker compose -f docker-compose.nginx.yml up`
+  runs a faster three-service local-dev loop:
+
+  ```
+  proxy (nginx) :8080 → routes to:
+    ├── /nuxeo/* → nuxeo (Nuxeo Server)
+    └── /*       → webui (Nginx serving dist/, built from Dockerfile.nginx)
+  ```
 
 ### Configuration
 
@@ -279,7 +287,7 @@ Environment variables control deployment:
 ### Combined image (EKS preview)
 
 The `preview` workflow builds a single, self-contained Nuxeo server image
-(`Dockerfile.nuxeo`) that bakes in the Web UI marketplace package built from this
+(`Dockerfile`) that bakes in the Web UI marketplace package built from this
 repo, so one image serves both the backend and the Web UI at `/nuxeo/ui` — suitable
 for direct EKS deployment. The base server image is selected via the `NUXEO_IMAGE`
 build arg (matching the LTS line), frontend addons are chosen via `NUXEO_PACKAGES`
