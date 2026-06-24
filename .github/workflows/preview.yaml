@@ -159,7 +159,7 @@ jobs:
             NUXEO_IMAGE=${{ env.NUXEO_IMAGE }}
             NUXEO_SERVER_PACKAGES=${{ vars.NUXEO_SERVER_PACKAGES }}
           secrets: |
-            CLID=${{ secrets.NUXEO_CLID }}
+            CLID=${{ secrets.CONNECT_CLID }}
 
       - name: Set preview image reference
         id: preview
