@@ -116,15 +116,6 @@ jobs:
           username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
 
-      - name: Build and push server image
-        uses: docker/build-push-action@v7
-        with:
-          context: server
-          pull: true
-          push: true
-          file: server/Dockerfile
-          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/server:${{ env.VERSION }}
-
       - name: Build and push image
         uses: docker/build-push-action@v7
         with:
@@ -133,7 +124,6 @@ jobs:
           push: true
           file: Dockerfile
           tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}
-          build-args: SERVER_IMAGE=${{ env.REGISTRY }}/${{ env.REPOSITORY }}/server:${{ env.VERSION }}
 
       - name: Set preview image reference
         id: preview
