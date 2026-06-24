@@ -40,12 +40,12 @@ Polymer({
     <style include="nuxeo-styles">
       .page {
         @apply --layout-vertical;
-        background-color: var(--nuxeo-app-header-background);
+        background-color: transparent;
         padding: 16px;
       }
 
       #detailsCard {
-        border-bottom: 1px solid var(--divider-color);
+        border-bottom: 1px solid var(--nuxeo-border);
         box-shadow: none;
       }
 

@@ -62,6 +62,13 @@ Polymer({
         margin-bottom: var(--nuxeo-document-trash-content-margin-bottom, 0);
       }
 
+      /* Scope the quick-filters top spacing to the trash page only; nuxeo-results is reusable
+         so this token (default 0 elsewhere) is set here and inherits into its shadow DOM. */
+      nuxeo-results {
+        --nuxeo-results-quick-filters-margin-top: 70px;
+        --nuxeo-results-quick-filters-margin-bottom: 0;
+      }
+
       .ellipsis {
         text-overflow: ellipsis;
         overflow: hidden;

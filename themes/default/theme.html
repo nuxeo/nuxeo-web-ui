@@ -22,11 +22,11 @@ limitations under the License.
   <style is="custom-style">
     html {
       /* -- Nuxeo Branding colors -- */
-      --nuxeo-app-font: 'Noto Sans'; /*--sat-font-family-primary */
+      --nuxeo-app-font: 'Noto Sans';
       --nuxeo-text-default: #1a1c1e;
 
-      --nuxeo-primary-color: #5654ac; /* Satori primary */
-      --nuxeo-secondary-color: #5c5b7f; /* Satori secondary */
+      --nuxeo-primary-color: #5654ac;
+      --nuxeo-secondary-color: #5c5b7f;
 
       --nuxeo-page-background: #f5f5f5;
       --nuxeo-border: rgba(0, 0, 0, 0.15);
@@ -35,13 +35,13 @@ limitations under the License.
       --nuxeo-app-header: var(--nuxeo-text-default);
       --nuxeo-app-header-background: #fff;
       --nuxeo-app-header-pill: #ecf3f7;
-      --nuxeo-app-header-pill-hover: var(--nuxeo-primary-color); /* Satori primary */
-      --nuxeo-app-header-pill-active: var(--nuxeo-primary-color); /* Satori primary */
+      --nuxeo-app-header-pill-hover: var(--nuxeo-secondary-color);
+      --nuxeo-app-header-pill-active: var(--nuxeo-primary-color);
 
       /* App Sidebar + Drawer*/
-      --nuxeo-sidebar-background: var(--nuxeo-primary-color); /* Satori primary */
-      --nuxeo-sidebar-menu: #ffffff; /* Satori on-primary */
-      --nuxeo-sidebar-menu-hover: #ffffff; /* Satori on-primary */
+      --nuxeo-sidebar-background: var(--nuxeo-primary-color);
+      --nuxeo-sidebar-menu: #ffffff;
+      --nuxeo-sidebar-menu-hover: #ffffff;
       --nuxeo-badge-background: #fb6107;
       --nuxeo-drawer-header: var(--nuxeo-text-default);
       --nuxeo-drawer-text: var(--nuxeo-text-default);
@@ -71,8 +71,8 @@ limitations under the License.
       --nuxeo-button-primary-focus: var(--nuxeo-secondary-color);
       --nuxeo-button-primary-text: #ffffff;
       --nuxeo-button-secondary-text: var(--nuxeo-primary-color); /* Satori primary */
-      --nuxeo-button-disabled: rgba(0, 0, 0, 0.05);
-      --nuxeo-button-disabled-text: rgba(0, 0, 0, 0.1);
+      --nuxeo-button-disabled: rgba(8, 8, 8, 0.148);
+      --nuxeo-button-disabled-text: rgba(0, 0, 0, 0.139);
       --nuxeo-link-color: var(--nuxeo-text-default);
       --nuxeo-link-hover-color: var(--nuxeo-primary-color);
 
@@ -84,7 +84,7 @@ limitations under the License.
       --input-background: rgba(0, 0, 0, 0.05);
 
       /* Warn, Info, Error */
-      --nuxeo-action-color-activated: #0177a3;
+      --nuxeo-action-color-activated: var(--nuxeo-primary-color);
       --nuxeo-warn-text: #de350b;
       --nuxeo-validated: #42be65;
       --nuxeo-result-highlight: var(--nuxeo-primary-color);
@@ -196,13 +196,28 @@ limitations under the License.
 
       /* Document create shortcuts (labelled mini-buttons that expand from the FAB) */
       --sat-document-create-shortcut-label-color: #3e3b92;
+      --sat-document-create-shortcut-icon-color: #3e3b92;
 
       /* Document view tabs */
       --sat-page-tabs-background: #f4f4f4;
-      --sat-page-tabs-unselected-text-color: #474551;
+      --sat-page-tabs-selected-background: #dadadd;
+      --sat-page-tabs-active-text-color: #3e3b92;
+
+      /* Results view mode toggle (segmented button) */
+      --sat-view-toggle-outline: #777683;
+      --sat-view-toggle-selected-background: #e2dfff;
+      --sat-view-toggle-selected-icon-color: #1a1c1e;
+      --sat-view-toggle-unselected-icon-color: #1a1c1e;
+      --sat-view-toggle-unselected-background: transparent;
+      --sat-view-toggle-check-color: #3e3b92;
+      --sat-view-toggle-hover-background: rgba(85, 84, 172, 0.538);
+      --sat-view-toggle-hover-icon-color: var(--nuxeo-primary-color);
 
       /* Nuxeo Elements - Map to Satori colors */
-      --nuxeo-checkmark-border-color: #474551; /* Satori on-surface-variant */
+      --nuxeo-checkmark-border-color: #474551;
+      --sat-tooltip-text-color: #ffffff;
+      --sat-document-grid-thumbnail-background: var(--nuxeo-box);
+      --sat-nuxeo-card-background: var(--nuxeo-box);
     }
   </style>
 </custom-style>
