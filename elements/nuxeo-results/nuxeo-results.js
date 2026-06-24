@@ -20,7 +20,6 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/iron-localstorage/iron-localstorage.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/iron-icon/iron-icon.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { config } from '@nuxeo/nuxeo-elements';
@@ -207,13 +206,6 @@ Polymer({
         min-height: 38px;
       }
 
-      .resultActions paper-icon-button {
-        width: 2em;
-        height: 2em;
-        padding: 0.3em;
-        margin-left: 4px;
-      }
-
       .resultsCount {
         opacity: 0.8;
         margin-right: 16px;
@@ -274,7 +266,8 @@ Polymer({
                 <button
                   type="button"
                   class="displayMode"
-                  title$="[[_displayModeTitle(item, i18n)]]"
+                  title$="[[_displayModeTitle(item)]]"
+                  aria-label$="[[_displayModeTitle(item)]]"
                   selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
                   disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
                   aria-pressed="[[_isCurrentDisplayMode(item, displayMode)]]"
