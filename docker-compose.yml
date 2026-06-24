@@ -15,7 +15,6 @@ services:
       context: .
       args:
         NUXEO_IMAGE: docker-private.packages.nuxeo.com/nuxeo/nuxeo:${NUXEO_VERSION}
-        NUXEO_SERVER_PACKAGES: ${NUXEO_SERVER_PACKAGES:-}
     ports:
       - "8080:8080"
     environment:
