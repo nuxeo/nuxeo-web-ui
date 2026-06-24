@@ -23,4 +23,4 @@ USER 900
 # secret (id=CLID, mounted at /run/secrets/CLID) so it never persists in a layer.
 RUN --mount=type=secret,id=CLID,uid=900 \
     /install-packages.sh --offline /home/nuxeo/local-packages/nuxeo-web-ui-marketplace-*.zip \
- && if [ -n "${NUXEO_SERVER_PACKAGES}" ]; then /install-packages.sh --clid /run/secrets/CLID ${NUXEO_SERVER_PACKAGES}; fi
+ && if [ -n "${NUXEO_SERVER_PACKAGES}" ]; then /install-packages.sh --clid "$(cat /run/secrets/CLID)" ${NUXEO_SERVER_PACKAGES}; fi
