@@ -19,7 +19,6 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@polymer/iron-icon/iron-icon.js';
-import '@polymer/paper-fab/paper-fab.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -35,7 +34,7 @@ Polymer({
       /*
        * Labelled create shortcut chip (Satori FAB stack — Figma 128:53937):
        * icon + label pill, 48px tall, 16px radius, shared FAB colors/shadow.
-       * Single focus target (.shortcut-container); paper-fab is decorative only.
+       * Single focus target (.shortcut-container); icon is decorative only.
        */
       :host {
         display: inline-block;
@@ -73,15 +72,22 @@ Polymer({
         outline: auto;
       }
 
-      paper-fab {
+      .shortcut-icon {
         flex-shrink: 0;
         width: 40px;
         height: 40px;
-        color: var(--sat-document-create-button-icon-color, var(--nuxeo-button-primary-text));
-        --paper-fab-background: transparent;
-        --paper-fab-keyboard-focus-background: transparent;
-        box-shadow: none;
-        pointer-events: none;
+        background-color: var(
+          --sat-document-create-shortcut-icon-color,
+          var(--sat-document-create-button-icon-color, var(--nuxeo-button-primary-text))
+        );
+        -webkit-mask-image: var(--shortcut-icon-mask);
+        mask-image: var(--shortcut-icon-mask);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: 24px 24px;
+        mask-size: 24px 24px;
       }
 
       .shortcut-label {
@@ -103,7 +109,13 @@ Polymer({
       on-keydown="_handleKeydown"
       on-tap="_tap"
     >
-      <paper-fab mini noink id="createBtn" src="[[icon]]" tabindex="-1" aria-hidden="true"></paper-fab>
+      <span
+        id="createBtn"
+        class="shortcut-icon"
+        style$="--shortcut-icon-mask: url([[icon]])"
+        tabindex="-1"
+        aria-hidden="true"
+      ></span>
       <span id="shortcutLabel" class="shortcut-label">[[i18n(label)]]</span>
     </div>
   `,
