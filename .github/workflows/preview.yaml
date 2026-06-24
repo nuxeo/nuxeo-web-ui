@@ -158,9 +158,6 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}
           build-args: |
             NUXEO_IMAGE=${{ env.NUXEO_IMAGE }}
-            NUXEO_SERVER_PACKAGES=${{ vars.NUXEO_SERVER_PACKAGES }}
-          secrets: |
-            CLID=${{ secrets.CONNECT_CLID }}
 
       - name: Set preview image reference
         id: preview
