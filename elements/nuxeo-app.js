@@ -1415,7 +1415,7 @@ Polymer({
     });
   },
 
-  disconnectedCallback() {
+  detached() {
     if (this._onSidebarEscape) {
       document.removeEventListener('keydown', this._onSidebarEscape);
     }
@@ -1427,7 +1427,6 @@ Polymer({
       window.removeEventListener('resize', this._boundUpdateIsNarrow);
     }
     this.removeEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
-    super.disconnectedCallback();
   },
 
   skipLinkEvent() {

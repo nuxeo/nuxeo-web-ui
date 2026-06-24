@@ -116,6 +116,32 @@ const waitForTreeNodeLoading = async (tree, node = null) => {
   }
 };
 
+/**
+ * Polls a predicate until it returns truthy or times out.
+ *
+ * The tree is populated through multiple chained XHRs (sinon's fakeServer
+ * defaults to a 10 ms autoRespond timer per request). On slower CI runners
+ * each response can produce its own MutationObserver batch, so a single
+ * `waitForChildListMutation` call only catches the first batch and the
+ * subsequent assertions race against the remaining updates. Polling until
+ * the expected state is reached makes these assertions deterministic.
+ */
+const waitForCondition = async (predicate, { timeout = 5000, interval = 25 } = {}) => {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (await predicate()) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+  if (!(await predicate())) {
+    throw new Error(`waitForCondition: timed out after ${timeout}ms`);
+  }
+};
+
+const waitForTreeNodeCount = (tree, expected, options) =>
+  waitForCondition(() => getTreeNodes(tree).length === expected, options);
+
 const getDocumentByPath = (path) => {
   let document;
   const parts = path.split('/');
@@ -298,6 +324,9 @@ suite('nuxeo-document-tree', () => {
       await flush();
       await waitForChildListMutation(documentTree.$.tree);
       await waitForTreeNodeLoading(documentTree);
+      // tree population requires multiple chained XHRs; wait until the
+      // expected node count is reached before asserting on it
+      await waitForTreeNodeCount(documentTree, 3);
 
       // check that there are only three nodes (two children and the ancestor)
       const nodes = getTreeNodes(documentTree);
@@ -327,6 +356,7 @@ suite('nuxeo-document-tree', () => {
       await flush();
       await waitForChildListMutation(documentTree.$.tree);
       await waitForTreeNodeLoading(documentTree);
+      await waitForTreeNodeCount(documentTree, 4);
 
       const nodes = getTreeNodes(documentTree);
       expect(nodes).to.have.length(4);
@@ -372,6 +402,7 @@ suite('nuxeo-document-tree', () => {
       expect(node).to.be.not.null;
       expect(node.opened).to.be.true;
       await waitForTreeNodeLoading(documentTree, node);
+      await waitForTreeNodeCount(documentTree, 3);
 
       // check that there are only three nodes (two children and the ancestor)
       nodes = getTreeNodes(documentTree);
@@ -457,6 +488,7 @@ suite('nuxeo-document-tree', () => {
       await flush();
       await waitForChildListMutation(documentTree.$.tree);
       await waitForTreeNodeLoading(documentTree);
+      await waitForTreeNodeCount(documentTree, 5);
 
       // assert that we have an extra node in the tree and it is the correct one
       const nodes = getTreeNodes(documentTree);
@@ -483,6 +515,7 @@ suite('nuxeo-document-tree', () => {
       await flush();
       await waitForChildListMutation(documentTree.$.tree);
       await waitForTreeNodeLoading(documentTree);
+      await waitForTreeNodeCount(documentTree, 4);
 
       // check we still have all the tree nodes
       const nodes = getTreeNodes(documentTree);
@@ -506,6 +539,7 @@ suite('nuxeo-document-tree', () => {
       await flush();
       await waitForChildListMutation(documentTree.$.tree);
       await waitForTreeNodeLoading(documentTree);
+      await waitForTreeNodeCount(documentTree, 4);
 
       // check we still have all the tree nodes
       const nodes = getTreeNodes(documentTree);
