@@ -30,7 +30,8 @@ nuxeo.cors.urls=*
 
 | Variable | Used by | Description | Default |
 |---|---|---|---|
-| `NUXEO_PACKAGES` | Webpack, Docker | Addon packages whose bundles are loaded at runtime | empty (no addon bundles loaded; resources are still copied) |
+| `NUXEO_PACKAGES` | Webpack, Docker, CI | Addon packages whose bundles are loaded at runtime. For preview builds, set it as a GitHub Actions repository/organization variable (Settings → Secrets and variables → Actions → Variables); the `preview` workflow's `nuxeo_packages` manual input overrides it. | empty (no addon bundles loaded; resources are still copied) |
+| `NUXEO_SERVER_PACKAGES` | CI | Optional space/comma-separated Nuxeo Connect marketplace packages baked into the combined Nuxeo image at build time (server-side addons). Requires a valid `NUXEO_CLID`. Set as a GitHub Actions variable. | empty (no Connect packages installed) |
 | `NUXEO_URL` | Webpack | URL to connect to Nuxeo server | `/nuxeo` |
 | `NUXEO_HOST` | Webpack | Nuxeo host address for dev server proxy | `localhost:8080` |
 | `NUXEO_WEB_UI_VERSION` | Docker Compose | Version of Web UI image to build/start | |
