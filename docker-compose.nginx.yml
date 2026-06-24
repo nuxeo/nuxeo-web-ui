@@ -1,4 +1,3 @@
-version: '3.5'
 # Lightweight local-dev setup: nginx serves the built dist/ behind a proxy that
 # routes /nuxeo/* to a separate Nuxeo server container. Faster rebuilds than the
 # complete single-image setup in docker-compose.yml.
@@ -23,7 +22,7 @@ services:
       dockerfile: Dockerfile.nginx
 
   nuxeo:
-    image: nuxeo/nuxeo:${NUXEO_VERSION}
+    image: docker-private.packages.nuxeo.com/nuxeo/nuxeo:${NUXEO_VERSION}
     environment:
       - NUXEO_DEV_MODE
       - NUXEO_PACKAGES
