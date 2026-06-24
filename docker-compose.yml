@@ -1,4 +1,3 @@
-version: '3.5'
 # Complete setup (default): a single Nuxeo image with the Web UI baked in, serving
 # both the backend and the Web UI at http://localhost:8080/nuxeo/ui.
 #
@@ -15,7 +14,7 @@ services:
     build:
       context: .
       args:
-        NUXEO_IMAGE: nuxeo/nuxeo:${NUXEO_VERSION}
+        NUXEO_IMAGE: docker-private.packages.nuxeo.com/nuxeo/nuxeo:${NUXEO_VERSION}
         NUXEO_SERVER_PACKAGES: ${NUXEO_SERVER_PACKAGES:-}
     ports:
       - "8080:8080"
