@@ -8,19 +8,11 @@
 ARG NUXEO_IMAGE=docker-private.packages.nuxeo.com/nuxeo/nuxeo:2025
 FROM ${NUXEO_IMAGE}
 
-# Optional space/comma-separated Nuxeo Connect marketplace packages to also install
-# at build time (e.g. server-side addons). Requires a valid NUXEO_CLID at build time.
-ARG NUXEO_SERVER_PACKAGES=""
-
 USER root
 # Locally-built Web UI marketplace package (mvn clean install output).
 COPY --chown=900:0 plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip \
      /home/nuxeo/local-packages/
 USER 900
 
-# Install the Web UI package offline, plus any Connect packages when provided.
-# Connect packages require a registered instance: the CLID is passed as a build
-# secret (id=CLID, mounted at /run/secrets/CLID) so it never persists in a layer.
-RUN --mount=type=secret,id=CLID,uid=900 \
-    /install-packages.sh --offline /home/nuxeo/local-packages/nuxeo-web-ui-marketplace-*.zip \
- && if [ -n "${NUXEO_SERVER_PACKAGES}" ]; then /install-packages.sh --clid "$(cat /run/secrets/CLID)" ${NUXEO_SERVER_PACKAGES}; fi
+# Install the Web UI marketplace package offline.
+RUN /install-packages.sh --offline /home/nuxeo/local-packages/nuxeo-web-ui-marketplace-*.zip
