@@ -26,6 +26,8 @@ on:
 env:
   REGISTRY: docker-internal.packages.nuxeo.com
   REPOSITORY: nuxeo/nuxeo-web-ui
+  # Registry hosting the base Nuxeo server image (requires authentication to pull).
+  BASE_REGISTRY: docker-private.packages.nuxeo.com
   # Base Nuxeo server image baked into the deployable image (matches the LTS line).
   NUXEO_IMAGE: docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023
 
@@ -135,6 +137,13 @@ jobs:
         uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+
+      - name: Login to base image registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.BASE_REGISTRY }}
           username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
 
