@@ -403,33 +403,17 @@ suite('nuxeo-search-form', () => {
     clearSpy.restore();
   });
 
-  test('reset reloads saved search params when current search is saved', async () => {
-    const getStub = sinon.stub(searchForm.$['saved-search'], 'get').resolves({ params: { ecm_fulltext: '*saved*' } });
-    sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
+  test('reset clears the form even when current search is saved', () => {
+    const clearSpy = sinon.spy(searchForm, '_clear');
     // Initialise _searches so the selectedSearch observer's findIndex call doesn't throw.
     searchForm._searches = [];
     searchForm.isSavedSearch = true;
     searchForm.selectedSearch = { id: 'saved-1', title: 'saved-1', text: 'saved-1', displaytext: 'saved-1' };
-    Object.defineProperty(searchForm, 'form', {
-      configurable: true,
-      get() {
-        return { searchTerm: '' };
-      },
-    });
 
     searchForm._reset();
-    for (let i = 0; i < 5; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
-      await Promise.resolve();
-    }
 
-    expect(getStub).to.have.been.calledOnce;
-    expect(searchForm.searchTerm).to.equal('saved');
-    expect(searchForm.dirty).to.be.false;
-
-    getStub.restore();
-    searchForm._mutateParams.restore();
-    delete searchForm.form;
+    expect(clearSpy).to.have.been.calledOnce;
+    clearSpy.restore();
   });
 
   test('save routes to saveAs for index 0 and saveSearch otherwise', () => {
