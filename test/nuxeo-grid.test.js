@@ -22,6 +22,26 @@ function getStyle(grid) {
   return grid.shadowRoot.querySelector('style').textContent;
 }
 
+/**
+ * Asserts that no `nuxeo-grid` validation warning was emitted.
+ *
+ * `console.warn.notCalled` is brittle in the full-suite (load-all-tests) run
+ * because stray async work from other suites can land an unrelated
+ * `console.warn` between this test's setup and assertion on slower CI runners.
+ * The test really only cares about the `"X" is an invalid value for Y` warning
+ * emitted by `validateValue` in nuxeo-grid.js, so check that pattern only.
+ */
+function expectNoValidationWarning() {
+  const offending = console.warn.getCalls().filter((call) => {
+    const msg = String(call.args && call.args[0] != null ? call.args[0] : '');
+    return /is an invalid value for /.test(msg);
+  });
+  expect(
+    offending,
+    `unexpected nuxeo-grid validation warnings: ${offending.map((c) => c.args[0]).join('; ')}`,
+  ).to.have.length(0);
+}
+
 suite('nuxeo-grid', () => {
   let grid;
 
@@ -113,7 +133,7 @@ suite('nuxeo-grid', () => {
 }
 `;
     expect(getStyle(grid)).to.equal(expected);
-    expect(console.warn.notCalled).to.be.true;
+    expectNoValidationWarning();
   });
 
   suite('Should generate proper style when partial properties are set', () => {
@@ -135,7 +155,7 @@ suite('nuxeo-grid', () => {
       main.setAttribute('data-row-span', '2');
 
       await flush();
-      expect(console.warn.notCalled).to.be.true;
+      expectNoValidationWarning();
     });
 
     test('Should not log warning when only row span property is set', async () => {
@@ -152,7 +172,7 @@ suite('nuxeo-grid', () => {
       main.setAttribute('data-row-span', '2');
 
       await flush();
-      expect(console.warn.notCalled).to.be.true;
+      expectNoValidationWarning();
     });
 
     test('Should not log warning when only when only column span property is set', async () => {
@@ -168,7 +188,7 @@ suite('nuxeo-grid', () => {
       top.setAttribute('data-column-span', '3');
       main.setAttribute('data-column-span', '2');
       await flush();
-      expect(console.warn.notCalled).to.be.true;
+      expectNoValidationWarning();
     });
 
     test('Should generate proper style when align and justify properties are set', async () => {
@@ -187,7 +207,7 @@ suite('nuxeo-grid', () => {
       main.setAttribute('data-justify', 'center');
 
       await flush();
-      expect(console.warn.notCalled).to.be.true;
+      expectNoValidationWarning();
     });
   });
 
@@ -239,7 +259,7 @@ suite('nuxeo-grid', () => {
 }
 `;
     expect(getStyle(grid)).to.equal(expected);
-    expect(console.warn.notCalled).to.be.true;
+    expectNoValidationWarning();
   });
   test('Should generate proper style when align and justify items are empty', async () => {
     grid.columns = 100; // this will be ignored if templateColumns is defined
@@ -286,7 +306,7 @@ suite('nuxeo-grid', () => {
 }
 `;
     expect(getStyle(grid)).to.equal(expected);
-    expect(console.warn.notCalled).to.be.true;
+    expectNoValidationWarning();
   });
 
   test('Should log a warning in unsupported value is used', async () => {

@@ -113,9 +113,12 @@ Translations for other languages are managed by Crowdin — do not edit `i18n/me
 ### Unit Tests
 
 ```bash
-npm test                  # Single run with coverage
+npm test                  # Single run with coverage (Web Test Runner)
 npm run test:watch        # Watch mode for development
+npm run update-test-load-all  # After adding/removing test/*.test.js files
 ```
+
+Web Test Runner lists one entry file (`test/load-all-tests.js`) that imports every suite module. Progress shows `1/1 test files`; pass/fail counts are individual Mocha tests (~1000+).
 
 Create test files at `test/nuxeo-<element-name>.test.js`:
 
@@ -209,7 +212,7 @@ This starts:
 GitHub Actions run on every push to the `maintenance-3.1.x` branch and on PRs:
 
 1. **Lint** — ESLint + Prettier
-2. **Test** — Karma unit tests
+2. **Test** — Web Test Runner unit tests (`test/load-all-tests.js` entry, Mocha pass/fail counts)
 3. **A11y** — Accessibility tests
 4. **FTest** — WebdriverIO functional tests
 5. **Sonar** — SonarCloud quality/security scan

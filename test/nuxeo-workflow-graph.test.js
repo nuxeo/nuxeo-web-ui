@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-workflow-graph/nuxeo-workflow-graph.js';
 
 suite('nuxeo-workflow-graph', () => {
@@ -76,6 +76,79 @@ suite('nuxeo-workflow-graph', () => {
       const transition = { label: 'approve', path: '1-2' };
       const result = element._transitionOverlay(transition);
       expect(result).to.be.an('array');
+    });
+  });
+
+  suite('show', () => {
+    // Regression test for WEBUI-2055: setting `graph` (via the resource response) initially
+    // paints the graph while the dialog is still hidden, so every element offset is 0. The
+    // fix is that `show()` schedules an additional `_updateGraph()` call after
+    // `iron-overlay-opened` so jsPlumb 2.15.x picks up the real offsets for both endpoints
+    // and connector segments.
+    test('should rebuild the graph after the dialog has been opened', async () => {
+      sinon.stub(element.$.graphResource, 'execute').resolves();
+      const toggle = sinon.stub(element.$.graphDialog, 'toggle');
+      const updateGraph = sinon.stub(element, '_updateGraph');
+      // Assign after stubbing so the initial observer call is captured by the stub.
+      element.graph = { nodes: [], transitions: [] };
+      // Polymer flushes property-effect observers asynchronously, so flush before resetting
+      // the stub history to avoid a race with the initial `_updateGraph(graph)` call.
+      await flush();
+      // We only want to assert that `show()` does NOT trigger an extra `_updateGraph()` call
+      // until the dialog is opened, so drop the initial-observer invocation from the history.
+      updateGraph.resetHistory();
+
+      // Awaiting the promise returned by `show()` deterministically resumes after the `.then()`
+      // in `show()` has run (it shares the same micro-task chain as the stubbed `execute()`).
+      await element.show();
+
+      expect(toggle).to.have.been.calledOnce;
+      expect(updateGraph).to.not.have.been.called;
+
+      element.$.graphDialog.dispatchEvent(new CustomEvent('iron-overlay-opened'));
+
+      expect(updateGraph).to.have.been.calledOnce;
+      expect(updateGraph).to.have.been.calledWith(element.graph);
+    });
+
+    test('should notify and rethrow when the graph resource fails', async () => {
+      const failure = new Error('boom');
+      sinon.stub(element.$.graphResource, 'execute').rejects(failure);
+      const toggle = sinon.stub(element.$.graphDialog, 'toggle');
+      const notify = sinon.stub(element, 'notify');
+
+      let caught;
+      try {
+        await element.show();
+      } catch (error) {
+        caught = error;
+      }
+
+      expect(caught).to.equal(failure);
+      expect(notify).to.have.been.calledOnce;
+      expect(notify).to.have.been.calledWith({ message: 'documentPage.route.view.graph.error' });
+      expect(toggle).to.not.have.been.called;
+    });
+
+    test('should register a fresh one-shot listener on every show() call', async () => {
+      sinon.stub(element.$.graphResource, 'execute').resolves();
+      sinon.stub(element.$.graphDialog, 'toggle');
+      sinon.stub(element, '_updateGraph');
+      const addEventListener = sinon.spy(element.$.graphDialog, 'addEventListener');
+
+      await element.show();
+      await element.show();
+
+      // Each show() registers a brand-new arrow function with `{ once: true }`. Reusing a
+      // cached reference (as in the previous fix attempt) caused the second open to silently
+      // drop its handler in some browsers, leaving the connectors anchored to stale offsets.
+      const calls = addEventListener.getCalls().filter((call) => call.args[0] === 'iron-overlay-opened');
+      expect(calls).to.have.length(2);
+      expect(calls[0].args[1]).to.be.a('function');
+      expect(calls[1].args[1]).to.be.a('function');
+      expect(calls[0].args[1]).to.not.equal(calls[1].args[1]);
+      expect(calls[0].args[2]).to.deep.equal({ once: true });
+      expect(calls[1].args[2]).to.deep.equal({ once: true });
     });
   });
 });
