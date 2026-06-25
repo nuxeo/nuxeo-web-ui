@@ -940,20 +940,7 @@ Polymer({
   },
 
   _reset() {
-    if (!this.isSavedSearch) {
-      this._clear();
-    } else {
-      const _el = this.$['saved-search'];
-      _el.searchId = this.selectedSearch.id;
-      _el.get().then((response) => {
-        const clonedParams = JSON.parse(JSON.stringify(response.params));
-        this.params = this._mutateParams(clonedParams, true);
-
-        this.searchTerm = this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
-        this.form.searchTerm = this.searchTerm;
-        this.dirty = false;
-      });
-    }
+    this._clear();
   },
 
   saveAs() {
