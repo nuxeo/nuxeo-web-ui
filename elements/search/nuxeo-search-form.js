@@ -905,10 +905,8 @@ Polymer({
       this.form.clear();
     }
     this.params = {};
-    if (!this._isSavedSearch()) {
-      this.dirty = false;
-    }
     this.selectedSearchIdx = 0;
+    this.dirty = false;
     this._resetResults();
     if (!this.auto) {
       this.aggregations = {};
