@@ -415,6 +415,8 @@ suite('nuxeo-search-form', () => {
       },
     });
     searchForm.auto = false;
+    // Initialize saved searches to satisfy selectedSearch observer lookups.
+    searchForm._searches = [];
     searchForm.params = { 'my_schema:boolean_status': true, ecm_fulltext: '*saved*' };
     searchForm.searchTerm = 'saved';
     searchForm.selectedSearchIdx = 2;
