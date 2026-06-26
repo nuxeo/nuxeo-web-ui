@@ -261,6 +261,7 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.selectedSearchIdx).to.equal(0);
     expect(searchForm.params).to.deep.equal({});
     expect(searchForm.aggregations).to.deep.equal({});
+    expect(searchForm.dirty).to.be.false;
     expect(resetSpy.callCount).to.be.greaterThan(0);
     expect(searchSpy.callCount).to.be.greaterThan(0);
 
@@ -404,16 +405,41 @@ suite('nuxeo-search-form', () => {
   });
 
   test('reset clears the form even when current search is saved', () => {
-    const clearSpy = sinon.spy(searchForm, '_clear');
-    // Initialise _searches so the selectedSearch observer's findIndex call doesn't throw.
+    const form = { clear: sinon.spy() };
+    const resetSpy = sinon.spy(searchForm, '_resetResults');
+    const searchSpy = sinon.spy(searchForm, '_search');
+    Object.defineProperty(searchForm, 'form', {
+      configurable: true,
+      get() {
+        return form;
+      },
+    });
+    searchForm.auto = false;
+    // Initialize saved searches to satisfy selectedSearch observer lookups.
     searchForm._searches = [];
+    searchForm.params = { 'my_schema:boolean_status': true, ecm_fulltext: '*saved*' };
+    searchForm.searchTerm = 'saved';
+    searchForm.selectedSearchIdx = 2;
     searchForm.isSavedSearch = true;
     searchForm.selectedSearch = { id: 'saved-1', title: 'saved-1', text: 'saved-1', displaytext: 'saved-1' };
+    searchForm.aggregations = { old: true };
+    searchForm.dirty = true;
 
     searchForm._reset();
 
-    expect(clearSpy).to.have.been.calledOnce;
-    clearSpy.restore();
+    expect(form.clear).to.have.been.calledOnce;
+    expect(searchForm.selectedSearchIdx).to.equal(0);
+    expect(searchForm.selectedSearch).to.be.null;
+    expect(searchForm.params).to.deep.equal({});
+    expect(searchForm.aggregations).to.deep.equal({});
+    expect(searchForm.searchTerm).to.equal('');
+    expect(searchForm.dirty).to.be.false;
+    expect(resetSpy.callCount).to.be.greaterThan(0);
+    expect(searchSpy.callCount).to.be.greaterThan(0);
+
+    delete searchForm.form;
+    resetSpy.restore();
+    searchSpy.restore();
   });
 
   test('save routes to saveAs for index 0 and saveSearch otherwise', () => {
