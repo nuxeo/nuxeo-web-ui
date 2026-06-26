@@ -2,9 +2,23 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import chai from 'chai';
 
+import http from 'http';
+import https from 'https';
 import htmlReporter from 'multiple-cucumber-html-reporter';
 import CompatService from './wdio-compat-plugin.js';
 import ShadowService from './wdio-shadow-plugin.js';
+
+/*
+ * Workaround for node-fetch v2 "Premature close" errors on Node >= 19 (CI runs Node 22).
+ * Since Node 19 the global HTTP/HTTPS agents enable keep-alive by default, so the node-fetch
+ * used by the Nuxeo REST client in step hooks reuses a pooled socket the server has already
+ * closed, which surfaces as `FetchError: ... Premature close`. Forcing keep-alive off makes
+ * each request open a fresh socket.
+ */
+[http.globalAgent, https.globalAgent].forEach((agent) => {
+  agent.keepAlive = false;
+  agent.options.keepAlive = false;
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

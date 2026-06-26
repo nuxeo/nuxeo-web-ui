@@ -30,7 +30,6 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import chromeLauncher from 'chrome-launcher';
-import fetch from 'node-fetch';
 import { fileURLToPath } from 'url';
 import minimist from 'minimist';
 const { Launcher: CliLauncher } = await import('@wdio/cli');
