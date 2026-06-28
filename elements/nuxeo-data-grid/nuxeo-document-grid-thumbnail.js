@@ -191,14 +191,15 @@ Polymer({
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
       }
 
-      :host(:focus) .bubbleBox .actions,
-      :host(:focus) .bubbleBox .select,
+      .bubbleBox:focus-within .actions,
+      .bubbleBox:focus-within .select,
       .bubbleBox:hover .actions,
       .bubbleBox:hover .select,
       .bubbleBox[selection-mode] .select {
         opacity: 1;
         height: auto;
         overflow: visible;
+        visibility: visible;
         transition:
           opacity 0.2s ease,
           height 0.2s ease;
@@ -209,6 +210,7 @@ Polymer({
         opacity: 0;
         height: 0;
         overflow: hidden;
+        visibility: hidden;
         transition:
           opacity 0.2s ease,
           height 0.2s ease;
