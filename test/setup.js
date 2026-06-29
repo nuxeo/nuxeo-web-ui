@@ -131,8 +131,17 @@ if (typeof window.suiteSetup === 'function') {
 }
 
 if (typeof window.setup === 'function') {
-  window.setup(() => {
+  window.setup(function _logTestStart() {
     _testRunning = true;
+    // Trace each test as it starts so a synchronous hang (e.g. a Polymer observer recursion that
+    // freezes the event loop) leaves the offending test name as the last line in the streamed
+    // browser logs. Mocha's per-test timeout cannot interrupt a blocked loop, so without this the
+    // run just stalls until testsFinishTimeout with no clue which test froze. Opt-in via
+    // WTR_TRACE_TESTS=1 to avoid noise on normal runs.
+    if (globalThis.__WTR_TRACE_TESTS__ && this.currentTest) {
+      // eslint-disable-next-line no-console
+      console.warn(`▶ ${this.currentTest.fullTitle()}`);
+    }
   });
 }
 
