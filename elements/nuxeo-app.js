@@ -935,11 +935,20 @@ Polymer({
     let skipLinkActivated = true; // only active once after load/top
 
     const handleFirstTab = (e) => {
-      if (skipLinkActivated && e.key === 'Tab') {
-        skipLinkActivated = false; // deactivate until page cycle resets
-        e.preventDefault();
-        skipLink.focus({ preventScroll: true });
+      if (!skipLinkActivated || e.key !== 'Tab') {
+        return;
       }
+      // Another handler (e.g. a modal/overlay focus trap such as nuxeo-dialog, which runs in the
+      // capture phase) already handled this Tab to keep focus inside the dialog. Consume the
+      // first-tab state instead of jumping to the skip link, otherwise the jump is merely deferred
+      // to the next Tab and focus escapes the modal to the background skip link.
+      if (e.defaultPrevented) {
+        skipLinkActivated = false;
+        return;
+      }
+      skipLinkActivated = false; // deactivate until page cycle resets
+      e.preventDefault();
+      skipLink.focus({ preventScroll: true });
     };
 
     // Activate skip link only once after load

@@ -1433,6 +1433,75 @@ suite('nuxeo-app', () => {
       scrollSpy.restore();
     });
 
+    // Capture the first-Tab keydown handler that skipLinkEvent registers on document,
+    // so it can be exercised in isolation without dispatching real events on the shared
+    // document (where stale listeners from other fixtures would interfere).
+    const captureFirstTabHandler = () => {
+      let handler;
+      const addEventListener = sinon.stub(document, 'addEventListener').callsFake((type, fn, opts) => {
+        if (type === 'keydown' && !handler) {
+          handler = fn;
+        }
+        return addEventListener.wrappedMethod.call(document, type, fn, opts);
+      });
+      app.skipLinkEvent();
+      addEventListener.restore();
+      return handler;
+    };
+
+    test('skipLinkEvent focuses the skip link on the first Tab after load', () => {
+      const { skipLink } = app.$;
+      if (!skipLink) {
+        return;
+      }
+      const handleFirstTab = captureFirstTabHandler();
+      const focusSpy = sinon.spy(skipLink, 'focus');
+      const event = { key: 'Tab', defaultPrevented: false, preventDefault: sinon.spy() };
+      handleFirstTab(event);
+      expect(event.preventDefault).to.have.been.called;
+      expect(focusSpy).to.have.been.calledWith({ preventScroll: true });
+      // The handler deactivates after the first Tab: a second Tab is a no-op.
+      const second = { key: 'Tab', defaultPrevented: false, preventDefault: sinon.spy() };
+      handleFirstTab(second);
+      expect(second.preventDefault).to.not.have.been.called;
+      expect(focusSpy).to.have.been.calledOnce;
+      focusSpy.restore();
+    });
+
+    test('skipLinkEvent keeps focus in the modal when the Tab was already handled', () => {
+      const { skipLink } = app.$;
+      if (!skipLink) {
+        return;
+      }
+      const handleFirstTab = captureFirstTabHandler();
+      const focusSpy = sinon.spy(skipLink, 'focus');
+      // A capture-phase focus trap (e.g. nuxeo-dialog) already called preventDefault.
+      const event = { key: 'Tab', defaultPrevented: true, preventDefault: sinon.spy() };
+      handleFirstTab(event);
+      expect(event.preventDefault).to.not.have.been.called;
+      expect(focusSpy).to.not.have.been.called;
+      // The first-tab state is consumed, so a later un-prevented Tab does not jump either.
+      const next = { key: 'Tab', defaultPrevented: false, preventDefault: sinon.spy() };
+      handleFirstTab(next);
+      expect(next.preventDefault).to.not.have.been.called;
+      expect(focusSpy).to.not.have.been.called;
+      focusSpy.restore();
+    });
+
+    test('skipLinkEvent ignores keys other than Tab', () => {
+      const { skipLink } = app.$;
+      if (!skipLink) {
+        return;
+      }
+      const handleFirstTab = captureFirstTabHandler();
+      const focusSpy = sinon.spy(skipLink, 'focus');
+      const event = { key: 'Enter', defaultPrevented: false, preventDefault: sinon.spy() };
+      handleFirstTab(event);
+      expect(event.preventDefault).to.not.have.been.called;
+      expect(focusSpy).to.not.have.been.called;
+      focusSpy.restore();
+    });
+
     test('logoToMenuNavigation moves focus from last item to logo on ArrowDown', () => {
       const logo = app.$.logo;
       const menu = app.$.menu;
