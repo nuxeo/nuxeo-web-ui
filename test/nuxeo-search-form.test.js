@@ -24,6 +24,8 @@ suite('nuxeo-search-form', () => {
   setup(async () => {
     searchForm = await fixture(html`<nuxeo-search-form provider="default_search"></nuxeo-search-form>`);
     searchForm.notify = sinon.spy();
+    // Prevent tests from triggering real navigation, which detaches the browser frame and crashes the test run.
+    searchForm.navigateTo = sinon.spy();
     await flush();
   });
 
@@ -242,7 +244,7 @@ suite('nuxeo-search-form', () => {
 
   test('clear resets state and triggers search in manual mode', () => {
     const resetSpy = sinon.spy(searchForm, '_resetResults');
-    const searchSpy = sinon.spy(searchForm, '_search');
+    const searchSpy = sinon.stub(searchForm, '_search');
     Object.defineProperty(searchForm, 'form', {
       configurable: true,
       get() {
@@ -407,7 +409,10 @@ suite('nuxeo-search-form', () => {
   test('reset clears the form even when current search is saved', () => {
     const form = { clear: sinon.spy() };
     const resetSpy = sinon.spy(searchForm, '_resetResults');
-    const searchSpy = sinon.spy(searchForm, '_search');
+    const searchSpy = sinon.stub(searchForm, '_search');
+    // Stub the observer so selectedSearch/selectedSearchIdx changes don't loop back through the
+    // two-way bound selectivity widget, which would otherwise recurse and freeze the test run.
+    sinon.stub(searchForm, '_selectedSearchIdxChanged');
     Object.defineProperty(searchForm, 'form', {
       configurable: true,
       get() {
@@ -440,6 +445,7 @@ suite('nuxeo-search-form', () => {
     delete searchForm.form;
     resetSpy.restore();
     searchSpy.restore();
+    searchForm._selectedSearchIdxChanged.restore();
   });
 
   test('save routes to saveAs for index 0 and saveSearch otherwise', () => {
