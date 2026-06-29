@@ -1,5 +1,19 @@
+import http from 'http';
+import https from 'https';
 import CompatService from '@nuxeo/nuxeo-web-ui-ftest/wdio-compat-plugin.js';
 import ShadowService from '@nuxeo/nuxeo-web-ui-ftest/wdio-shadow-plugin.js';
+
+/*
+ * Workaround for node-fetch v2 "Premature close" errors on Node >= 19 (CI runs Node 22).
+ * Since Node 19 the global HTTP/HTTPS agents enable keep-alive by default, so the node-fetch
+ * used by the Nuxeo REST client in `before`/`after` hooks reuses a pooled socket the server has
+ * already closed, which surfaces as `FetchError: ... Premature close`. Forcing keep-alive off
+ * makes each request open a fresh socket.
+ */
+[http.globalAgent, https.globalAgent].forEach((agent) => {
+  agent.keepAlive = false;
+  agent.options.keepAlive = false;
+});
 
 const debug = process.env.DEBUG;
 const debugTimeout = 24 * 60 * 60 * 1000;
