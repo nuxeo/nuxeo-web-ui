@@ -62,33 +62,30 @@ function encodeQueryParams(path) {
 // (`.../repo/<name>/ui/`); the default repository is also served from the bare
 // `.../ui/` path, in which case we fall back to the repository flagged as default.
 function currentRepositoryName() {
-  const repositories = (Nuxeo && Nuxeo.UI && Nuxeo.UI.repositories) || [];
-  const current = repositories.find((repo) => repo.href && window.location.pathname.startsWith(repo.href));
-  return (current || repositories.find((repo) => repo.isDefault) || {}).name;
+  const repositories = Nuxeo?.UI?.repositories || [];
+  const current = repositories.find((repo) => repo.href && globalThis.location.pathname.startsWith(repo.href));
+  return (current || repositories.find((repo) => repo.isDefault))?.name;
 }
 
 // When reverse routing produces an absolute URL for a document (which happens in
 // multi-repository instances), navigating to it would trigger a full page reload.
 // If that URL targets the repository we are already browsing, return the client-side
 // route (the part after the hashbang) so we can navigate without losing the current
-// search drawer/queue state. Returns null when the URL is external or points to a
-// different repository, where a context switch (full reload) is still required.
+// search drawer/queue state. Returns null when the URL is external, points to a
+// different repository, or carries no hashbang route, where a full navigation is
+// still required.
 function sameRepositoryClientPath(path) {
-  let url;
-  try {
-    url = new URL(path);
-  } catch (e) {
+  const url = new URL(path);
+  if (url.origin !== globalThis.location.origin) {
     return null;
   }
-  if (url.origin !== window.location.origin) {
-    return null;
-  }
-  const repositories = (Nuxeo && Nuxeo.UI && Nuxeo.UI.repositories) || [];
+  const repositories = Nuxeo?.UI?.repositories || [];
   const target = repositories.find((repo) => repo.href && url.pathname.startsWith(repo.href));
   if (!target || target.name !== currentRepositoryName()) {
     return null;
   }
-  return url.hash.replace(/^#!?/, '') || '/';
+  const route = url.hash.replace(/^#!?/, '');
+  return route || null;
 }
 
 function _routeAdmin(selectedAdminTab, errorPath, routeData) {
