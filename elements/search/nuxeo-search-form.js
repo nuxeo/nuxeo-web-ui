@@ -938,6 +938,10 @@ Polymer({
   },
 
   _reset() {
+    if (this._isSavedSearch()) {
+      this.selectedSearchIdx = 0;
+      return;
+    }
     this._clear();
   },
 
