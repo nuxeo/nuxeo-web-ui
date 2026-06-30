@@ -156,6 +156,7 @@ Polymer({
           field="dc:title"
           sort-by="[[_displaySort(document, 'dc:title')]]"
           filter-by="title"
+          width="300px"
           flex="100"
           filter-expression="$term*"
         >
