@@ -120,10 +120,22 @@ Polymer({
 
   connectedCallback() {
     this.addEventListener('iron-overlay-opened', this._formLayoutOpened);
+    this._boundDialogKeydown = this._handleDialogKeydown.bind(this);
+    document.addEventListener('keydown', this._boundDialogKeydown, true);
   },
 
   disconnectedCallback() {
     this.removeEventListener('iron-overlay-opened', this._formLayoutOpened);
+    document.removeEventListener('keydown', this._boundDialogKeydown, true);
+  },
+
+  // Close the dialog on Escape unless a child widget (e.g. date picker calendar)
+  // has already consumed the event via stopPropagation() in window capture.
+  _handleDialogKeydown(e) {
+    if (e.key === 'Escape' && this.dialog && this.dialog.opened) {
+      e.stopPropagation();
+      this._closeDialog();
+    }
   },
 
   _isAvailable(doc) {
