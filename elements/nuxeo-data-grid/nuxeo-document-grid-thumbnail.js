@@ -217,7 +217,7 @@ Polymer({
       }
     </style>
 
-    <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
+    <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]" role="presentation">
       <template is="dom-if" if="[[_hasDocument(doc)]]">
         <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown">
           <div class="thumbnailContainer">
@@ -229,11 +229,11 @@ Polymer({
             <nuxeo-tooltip for="title" aria-hidden="true">[[doc.title]]</nuxeo-tooltip>
           </div>
         </a>
-        <div class="actions">
+        <div class="actions" role="presentation">
           <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
           <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
         </div>
-        <div class="select">
+        <div class="select" role="presentation">
           <paper-icon-button
             noink
             icon="icons:check"
@@ -250,6 +250,10 @@ Polymer({
 
   is: 'nuxeo-document-grid-thumbnail',
   behaviors: [FormatBehavior, RoutingBehavior],
+
+  hostAttributes: {
+    role: 'link',
+  },
 
   properties: {
     doc: {
