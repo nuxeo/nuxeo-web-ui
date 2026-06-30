@@ -400,10 +400,11 @@ suite('nuxeo-app', () => {
   });
 
   suite('WEBUI-1736 screen reader cleanup', () => {
-    test('main landmark is marked role="presentation" to silence redundant VoiceOver announcement', () => {
+    test('main landmark is preserved (no role override) so screen readers can use landmark navigation', () => {
       const main = app.$.mainContent;
       expect(main, '<main id="mainContent"> should exist').to.exist;
-      expect(main.getAttribute('role')).to.equal('presentation');
+      expect(main.tagName).to.equal('MAIN');
+      expect(main.hasAttribute('role'), 'main should not have a role override').to.be.false;
     });
   });
 
