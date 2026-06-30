@@ -399,6 +399,69 @@ suite('nuxeo-app', () => {
     app.$.nxcon.url = prev;
   });
 
+  suite('inactivity timer (WEBUI-1987)', () => {
+    let getStub;
+    let timeoutStub;
+    let clearStub;
+    let scheduled;
+
+    setup(() => {
+      // drop the timer/listeners armed by the fixture's real ready() so this suite starts clean
+      app._teardownInactivityTimer();
+      getStub = sinon.stub(config, 'get');
+      scheduled = [];
+      // Stub the timer primitives instead of faking global time (faking time can freeze the shared
+      // test page for every other suite). Capture scheduled callbacks and invoke them manually.
+      timeoutStub = sinon.stub(window, 'setTimeout').callsFake((fn, delay) => {
+        scheduled.push({ fn, delay });
+        return scheduled.length;
+      });
+      clearStub = sinon.stub(window, 'clearTimeout');
+    });
+
+    teardown(() => {
+      timeoutStub.restore();
+      clearStub.restore();
+      getStub.restore();
+      app._teardownInactivityTimer();
+    });
+
+    test('arms a timeout for the configured idle period and logs out when it fires', () => {
+      getStub.withArgs('session.timeout', 60).returns(1); // 1 minute
+      sinon.stub(app, '_onInactivityTimeout');
+      app._setupInactivityTimer();
+      expect(scheduled).to.have.lengthOf(1);
+      expect(scheduled[0].delay).to.equal(60000);
+      scheduled[0].fn(); // simulate the idle period elapsing
+      expect(app._onInactivityTimeout).to.have.been.calledOnce;
+      app._onInactivityTimeout.restore();
+    });
+
+    test('user activity re-arms the timer', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      app._setupInactivityTimer();
+      expect(scheduled).to.have.lengthOf(1);
+      app._lastInactivityReset = Date.now() - 2000; // bypass the 1s throttle
+      window.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      expect(clearStub).to.have.been.called;
+      expect(scheduled).to.have.lengthOf(2);
+    });
+
+    test('a non-positive timeout disables the feature', () => {
+      getStub.withArgs('session.timeout', 60).returns(0);
+      app._setupInactivityTimer();
+      expect(app._inactivityTimeoutMs).to.equal(0);
+      expect(scheduled).to.have.lengthOf(0);
+    });
+
+    test('converts the configured minutes into milliseconds', () => {
+      getStub.withArgs('session.timeout', 60).returns(60);
+      app._setupInactivityTimer();
+      expect(app._inactivityTimeoutMs).to.equal(60 * 60000);
+      expect(scheduled[0].delay).to.equal(60 * 60000);
+    });
+  });
+
   test('_moveDocumentsToContainer configures operation and toasts on success', async () => {
     sinon.stub(app.$.moveDocumentsOp, 'execute').resolves();
     sinon.stub(app, '_toast');
