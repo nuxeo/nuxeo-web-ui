@@ -48,7 +48,7 @@ Polymer({
 
     <template is="dom-repeat" items="[[activities]]">
       <div class="row">
-        <nuxeo-user-tag user="[[item.principalName]]"></nuxeo-user-tag>
+        <nuxeo-user-tag user="[[item.principalName]]" max-characters="15"></nuxeo-user-tag>
         <div class="value">
           <span>[[_activity(item)]]</span>
           <nuxeo-date class="datetime" datetime="[[item.eventDate]]" format="relative"></nuxeo-date>
