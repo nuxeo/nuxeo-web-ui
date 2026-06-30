@@ -426,15 +426,18 @@ suite('nuxeo-app', () => {
       app._teardownInactivityTimer();
     });
 
-    test('arms a timeout for the configured idle period and logs out when it fires', () => {
+    test('arms a timeout for the configured idle period and redirects to logout when it fires', () => {
       getStub.withArgs('session.timeout', 60).returns(1); // 1 minute
-      sinon.stub(app, '_onInactivityTimeout');
+      const redirect = sinon.stub(app, '_redirect');
+      const prev = app.$.nxcon.url;
+      app.$.nxcon.url = 'https://server/nuxeo';
       app._setupInactivityTimer();
       expect(scheduled).to.have.lengthOf(1);
       expect(scheduled[0].delay).to.equal(60000);
       scheduled[0].fn(); // simulate the idle period elapsing
-      expect(app._onInactivityTimeout).to.have.been.calledOnce;
-      app._onInactivityTimeout.restore();
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+      app.$.nxcon.url = prev;
+      redirect.restore();
     });
 
     test('user activity re-arms the timer', () => {
@@ -445,6 +448,14 @@ suite('nuxeo-app', () => {
       window.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       expect(clearStub).to.have.been.called;
       expect(scheduled).to.have.lengthOf(2);
+    });
+
+    test('re-running setup is idempotent (tears down before re-arming)', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      app._setupInactivityTimer();
+      clearStub.resetHistory();
+      app._setupInactivityTimer();
+      expect(clearStub).to.have.been.called; // teardown ran before the second arm
     });
 
     test('a non-positive timeout disables the feature', () => {

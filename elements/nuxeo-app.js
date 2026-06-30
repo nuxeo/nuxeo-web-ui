@@ -1654,15 +1654,17 @@ Polymer({
   // WEBUI-1987 (CWE-613): arm a client-side inactivity timer that logs the user out after a
   // configurable idle period, so sensitive data is not left on-screen once the server session expires.
   _setupInactivityTimer() {
-    const minutes = config.get('session.timeout', 60);
+    this._teardownInactivityTimer(); // idempotent: never stack listeners/timers across calls
+    const minutes = Number(config.get('session.timeout', 60));
     this._inactivityTimeoutMs = minutes > 0 ? minutes * 60000 : 0;
     if (!this._inactivityTimeoutMs) {
-      return; // a non-positive timeout disables the feature
+      return; // a non-positive or invalid timeout disables the feature
     }
     this._inactivityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'wheel'];
+    this._inactivityListenerOptions = { passive: true, capture: true };
     this._boundResetInactivityTimer = () => this._resetInactivityTimer();
     this._inactivityEvents.forEach((evt) =>
-      window.addEventListener(evt, this._boundResetInactivityTimer, { passive: true, capture: true }),
+      window.addEventListener(evt, this._boundResetInactivityTimer, this._inactivityListenerOptions),
     );
     this._lastInactivityReset = 0; // ensure the initial arm is never throttled
     this._resetInactivityTimer();
@@ -1683,16 +1685,23 @@ Polymer({
   },
 
   _onInactivityTimeout() {
-    window.location.href = this._logout();
+    this._redirect(this._logout());
+  },
+
+  // Use replace() (not href) so the potentially sensitive page is not left as a navigable
+  // history/bfcache entry after an inactivity-driven logout.
+  _redirect(url) {
+    window.location.replace(url);
   },
 
   _teardownInactivityTimer() {
     clearTimeout(this._inactivityTimer);
     this._inactivityTimer = null;
+    this._inactivityTimeoutMs = 0; // fully disable so an in-flight handler can't re-arm the timer
     this._lastInactivityReset = 0;
     if (this._boundResetInactivityTimer && this._inactivityEvents) {
       this._inactivityEvents.forEach((evt) =>
-        window.removeEventListener(evt, this._boundResetInactivityTimer, { capture: true }),
+        window.removeEventListener(evt, this._boundResetInactivityTimer, this._inactivityListenerOptions),
       );
     }
   },
