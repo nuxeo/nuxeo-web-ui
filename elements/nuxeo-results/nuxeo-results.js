@@ -722,6 +722,7 @@ Polymer({
       if (Array.isArray(view.columns)) {
         this.listen(view, 'columns-changed', '_columnsChanged');
       }
+
       // restore settings
       if (this._settings) {
         this.set('_settings.displayMode', this.displayMode);
@@ -1233,6 +1234,8 @@ Polymer({
               return idx;
             case 'width':
               return null;
+            case 'filterValue':
+              return '';
             default:
               return null;
           }
@@ -1242,7 +1245,7 @@ Polymer({
          * EXTEND HERE: If adding support for new customizable properties,
          * add the property name to this array (e.g., 'minWidth', 'align').
          */
-        const customizableProps = ['hidden', 'order', 'width'];
+        const customizableProps = ['hidden', 'order', 'width', 'filterValue'];
 
         // Reset all customizable properties to their defaults
         view.columns.forEach((column, idx) => {
