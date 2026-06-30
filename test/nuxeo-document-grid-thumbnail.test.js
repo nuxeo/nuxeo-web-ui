@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-data-grid/nuxeo-document-grid-thumbnail.js';
 
 suite('nuxeo-document-grid-thumbnail', () => {
@@ -182,46 +182,38 @@ suite('nuxeo-document-grid-thumbnail', () => {
 
   suite('WCAG H2: thumbnail and title combined in one link', () => {
     setup(async () => {
-      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
       sinon.stub(element, 'urlFor').returns('/doc/doc-1');
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      element.shadowRoot.querySelectorAll('template').forEach((t) => {
-        if (t.__dataHost && t.__dataHost.render) t.__dataHost.render();
-      });
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
+      await flush();
     });
 
-    test('thumbnail container is inside the title link', function () {
+    test('thumbnail container is inside the title link', () => {
       const link = element.shadowRoot.querySelector('a.title');
-      if (!link) this.skip(); // dom-if not yet stamped in this env
+      expect(link, '<a class="title"> should be stamped').to.exist;
       const thumbContainer = link.querySelector('.thumbnailContainer');
       expect(thumbContainer, 'thumbnailContainer should be inside <a class="title">').to.exist;
     });
 
-    test('thumbnail image has empty alt (decorative)', function () {
+    test('thumbnail image has empty alt (decorative)', () => {
       const link = element.shadowRoot.querySelector('a.title');
-      if (!link) this.skip();
+      expect(link, '<a class="title"> should be stamped').to.exist;
       const img = link.querySelector('.thumbnailContainer img');
       expect(img, 'img should be inside the title link').to.exist;
       expect(img.alt).to.equal('');
     });
 
-    test('tooltip has aria-hidden="true"', function () {
+    test('tooltip has aria-hidden="true"', () => {
       const tooltip = element.shadowRoot.querySelector('nuxeo-tooltip');
-      if (!tooltip) this.skip();
+      expect(tooltip, 'nuxeo-tooltip should be stamped').to.exist;
       expect(tooltip.getAttribute('aria-hidden')).to.equal('true');
     });
   });
 
   suite('WEBUI-1736 screen reader cleanup', () => {
     setup(async () => {
-      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
       sinon.stub(element, 'urlFor').returns('/doc/doc-1');
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      element.shadowRoot.querySelectorAll('template').forEach((t) => {
-        if (t.__dataHost && t.__dataHost.render) t.__dataHost.render();
-      });
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
+      await flush();
     });
 
     test('host has role="link" so VoiceOver announces "link" instead of implicit "group"', () => {
@@ -234,15 +226,15 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(bubble.getAttribute('role')).to.equal('presentation');
     });
 
-    test('.actions wrapper is marked role="presentation"', function () {
+    test('.actions wrapper is marked role="presentation"', () => {
       const actions = element.shadowRoot.querySelector('.actions');
-      if (!actions) this.skip();
+      expect(actions, '.actions should be stamped').to.exist;
       expect(actions.getAttribute('role')).to.equal('presentation');
     });
 
-    test('.select wrapper is marked role="presentation"', function () {
+    test('.select wrapper is marked role="presentation"', () => {
       const select = element.shadowRoot.querySelector('.select');
-      if (!select) this.skip();
+      expect(select, '.select should be stamped').to.exist;
       expect(select.getAttribute('role')).to.equal('presentation');
     });
   });

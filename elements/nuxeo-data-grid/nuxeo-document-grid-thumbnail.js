@@ -191,6 +191,8 @@ Polymer({
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
       }
 
+      :host(:focus-within) .actions,
+      :host(:focus-within) .select,
       .bubbleBox:focus-within .actions,
       .bubbleBox:focus-within .select,
       .bubbleBox:hover .actions,
