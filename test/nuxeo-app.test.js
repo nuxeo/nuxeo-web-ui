@@ -399,6 +399,14 @@ suite('nuxeo-app', () => {
     app.$.nxcon.url = prev;
   });
 
+  suite('WEBUI-1736 screen reader cleanup', () => {
+    test('main landmark is marked role="presentation" to silence redundant VoiceOver announcement', () => {
+      const main = app.$.mainContent;
+      expect(main, '<main id="mainContent"> should exist').to.exist;
+      expect(main.getAttribute('role')).to.equal('presentation');
+    });
+  });
+
   test('_moveDocumentsToContainer configures operation and toasts on success', async () => {
     sinon.stub(app.$.moveDocumentsOp, 'execute').resolves();
     sinon.stub(app, '_toast');
