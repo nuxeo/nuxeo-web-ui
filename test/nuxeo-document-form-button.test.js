@@ -95,4 +95,48 @@ suite('nuxeo-document-form-button', () => {
       expect(element._isAvailable(null)).to.not.be.ok;
     });
   });
+
+  suite('Escape key handling', () => {
+    let closeDialogStub;
+    let mockDialog;
+
+    setup(() => {
+      mockDialog = { opened: false, close: sinon.stub() };
+      // Shadow the prototype getter on this instance so tests are fully isolated
+      Object.defineProperty(element, 'dialog', {
+        get: () => mockDialog,
+        configurable: true,
+      });
+      closeDialogStub = sinon.stub(element, '_closeDialog');
+    });
+
+    test('closes dialog on Escape when dialog is open and event originates within the dialog', () => {
+      mockDialog.opened = true;
+      const event = { key: 'Escape', stopPropagation: sinon.stub(), composedPath: () => [mockDialog] };
+      element._handleDialogKeydown(event);
+      expect(closeDialogStub).to.have.been.calledOnce;
+      expect(event.stopPropagation).to.have.been.calledOnce;
+    });
+
+    test('does not close dialog on Escape when event originates outside the dialog', () => {
+      mockDialog.opened = true;
+      const event = { key: 'Escape', stopPropagation: sinon.stub(), composedPath: () => [] };
+      element._handleDialogKeydown(event);
+      expect(closeDialogStub).not.to.have.been.called;
+    });
+
+    test('does not close dialog when a non-Escape key is pressed', () => {
+      mockDialog.opened = true;
+      const event = { key: 'Enter', stopPropagation: sinon.stub(), composedPath: () => [mockDialog] };
+      element._handleDialogKeydown(event);
+      expect(closeDialogStub).not.to.have.been.called;
+    });
+
+    test('does not close dialog when dialog is not open', () => {
+      mockDialog.opened = false;
+      const event = { key: 'Escape', stopPropagation: sinon.stub(), composedPath: () => [mockDialog] };
+      element._handleDialogKeydown(event);
+      expect(closeDialogStub).not.to.have.been.called;
+    });
+  });
 });
