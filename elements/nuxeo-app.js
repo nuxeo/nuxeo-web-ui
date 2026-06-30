@@ -843,6 +843,8 @@ Polymer({
 
     this.removeAttribute('unresolved');
 
+    this._setupInactivityTimer();
+
     Performance.mark('nuxeo-app.ready');
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
@@ -928,6 +930,7 @@ Polymer({
       window.removeEventListener('resize', this._boundUpdateIsNarrow);
     }
     this.removeEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
+    this._teardownInactivityTimer();
   },
 
   skipLinkEvent() {
@@ -1646,6 +1649,52 @@ Polymer({
 
   _logout() {
     return `${this.$.nxcon.url}/logout`;
+  },
+
+  // WEBUI-1987 (CWE-613): arm a client-side inactivity timer that logs the user out after a
+  // configurable idle period, so sensitive data is not left on-screen once the server session expires.
+  _setupInactivityTimer() {
+    const minutes = config.get('session.timeout', 60);
+    this._inactivityTimeoutMs = minutes > 0 ? minutes * 60000 : 0;
+    if (!this._inactivityTimeoutMs) {
+      return; // a non-positive timeout disables the feature
+    }
+    this._inactivityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'wheel'];
+    this._boundResetInactivityTimer = () => this._resetInactivityTimer();
+    this._inactivityEvents.forEach((evt) =>
+      window.addEventListener(evt, this._boundResetInactivityTimer, { passive: true, capture: true }),
+    );
+    this._lastInactivityReset = 0; // ensure the initial arm is never throttled
+    this._resetInactivityTimer();
+  },
+
+  _resetInactivityTimer() {
+    if (!this._inactivityTimeoutMs) {
+      return;
+    }
+    // Throttle re-arming so continuous events (e.g. mousemove) don't clear/set the timer on every tick.
+    const now = Date.now();
+    if (this._lastInactivityReset && now - this._lastInactivityReset < 1000) {
+      return;
+    }
+    this._lastInactivityReset = now;
+    clearTimeout(this._inactivityTimer);
+    this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs);
+  },
+
+  _onInactivityTimeout() {
+    window.location.href = this._logout();
+  },
+
+  _teardownInactivityTimer() {
+    clearTimeout(this._inactivityTimer);
+    this._inactivityTimer = null;
+    this._lastInactivityReset = 0;
+    if (this._boundResetInactivityTimer && this._inactivityEvents) {
+      this._inactivityEvents.forEach((evt) =>
+        window.removeEventListener(evt, this._boundResetInactivityTimer, { capture: true }),
+      );
+    }
   },
 
   async _pageChanged(page, oldPage) {
