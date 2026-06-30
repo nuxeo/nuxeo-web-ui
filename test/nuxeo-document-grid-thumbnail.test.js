@@ -213,6 +213,40 @@ suite('nuxeo-document-grid-thumbnail', () => {
     });
   });
 
+  suite('WEBUI-1736 screen reader cleanup', () => {
+    setup(async () => {
+      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
+      sinon.stub(element, 'urlFor').returns('/doc/doc-1');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      element.shadowRoot.querySelectorAll('template').forEach((t) => {
+        if (t.__dataHost && t.__dataHost.render) t.__dataHost.render();
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    test('host has role="link" so VoiceOver announces "link" instead of implicit "group"', () => {
+      expect(element.getAttribute('role')).to.equal('link');
+    });
+
+    test('.bubbleBox wrapper is marked role="presentation"', () => {
+      const bubble = element.shadowRoot.querySelector('.bubbleBox');
+      expect(bubble, '.bubbleBox should exist').to.exist;
+      expect(bubble.getAttribute('role')).to.equal('presentation');
+    });
+
+    test('.actions wrapper is marked role="presentation"', function () {
+      const actions = element.shadowRoot.querySelector('.actions');
+      if (!actions) this.skip();
+      expect(actions.getAttribute('role')).to.equal('presentation');
+    });
+
+    test('.select wrapper is marked role="presentation"', function () {
+      const select = element.shadowRoot.querySelector('.select');
+      if (!select) this.skip();
+      expect(select.getAttribute('role')).to.equal('presentation');
+    });
+  });
+
   suite('handleClick', () => {
     setup(() => {
       element.doc = { uid: 'd1' };
