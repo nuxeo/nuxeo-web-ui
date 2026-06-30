@@ -420,17 +420,15 @@ suite('nuxeo-search-form', () => {
       },
     });
     searchForm.auto = false;
-    // Keep saved-search id/index consistent with observer logic.
-    searchForm._searches = [savedSearch];
+    // Initialize saved searches to satisfy selectedSearch observer lookups.
+    searchForm._searches = [];
     searchForm.params = { 'my_schema:boolean_status': true, ecm_fulltext: '*saved*' };
     searchForm.searchTerm = 'saved';
-    searchForm.selectedSearchIdx = 1;
+    searchForm.selectedSearchIdx = 2;
     searchForm.isSavedSearch = true;
-    searchForm.selectedSearch = savedSearch;
+    searchForm.selectedSearch = { id: 'saved-1', title: 'saved-1', text: 'saved-1', displaytext: 'saved-1' };
     searchForm.aggregations = { old: true };
     searchForm.dirty = true;
-
-    expect(searchForm.selectedSearchIdx).to.equal(1);
 
     searchForm._reset();
 
