@@ -409,7 +409,7 @@ limitations under the License.
       },
 
       getWordmarkLogo() {
-        let theme = localStorage.getItem('theme') || 'default';
+        const theme = localStorage.getItem('theme') || 'default';
         return `themes/${theme}/hyland-wordmark.svg`;
       },
     });
