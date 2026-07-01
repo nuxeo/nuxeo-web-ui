@@ -847,9 +847,6 @@ Polymer({
 
     this.removeAttribute('unresolved');
 
-    this._setupInactivityTimer();
-    this._setupUnauthorizedRedirect();
-
     Performance.mark('nuxeo-app.ready');
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
@@ -928,6 +925,13 @@ Polymer({
         logo.focus();
       }
     });
+  },
+
+  attached() {
+    // WEBUI-1987: arm here (not in ready) so the feature survives a detach/re-attach cycle — ready()
+    // runs only once, whereas attached()/detached() are paired. Both setups are idempotent.
+    this._setupInactivityTimer();
+    this._setupUnauthorizedRedirect();
   },
 
   detached() {
@@ -1677,6 +1681,11 @@ Polymer({
     // Cross-tab activity: reset this tab's timer when another tab records activity.
     this._boundInactivityStorage = (e) => this._onInactivityStorage(e);
     window.addEventListener('storage', this._boundInactivityStorage);
+    // Background tabs/sleeping machines throttle or suspend setTimeout, so re-check idle time whenever
+    // the tab becomes visible/focused again and log out immediately if the timeout already elapsed.
+    this._boundInactivityResume = () => this._checkInactivityOnResume();
+    document.addEventListener('visibilitychange', this._boundInactivityResume);
+    window.addEventListener('focus', this._boundInactivityResume);
     this._lastInactivityReset = 0; // ensure the initial arm is never throttled
     this._resetInactivityTimer();
   },
@@ -1691,6 +1700,7 @@ Polymer({
       return;
     }
     this._lastInactivityReset = now;
+    this._lastActivityTs = now; // local fallback reference when localStorage is unavailable
     clearTimeout(this._inactivityTimer);
     this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs);
     // Broadcast this activity to other tabs (skip when the reset was itself triggered by another tab).
@@ -1708,6 +1718,18 @@ Polymer({
     }
   },
 
+  // Most recent activity across all tabs (shared timestamp), falling back to this tab's own when
+  // localStorage is unavailable. Used to decide whether an elapsed timer should log out or re-arm.
+  _getLastActivity() {
+    let shared = 0;
+    try {
+      shared = Number(window.localStorage.getItem(INACTIVITY_ACTIVITY_KEY)) || 0;
+    } catch (e) {
+      // localStorage unavailable; rely on this tab's local reference below.
+    }
+    return Math.max(shared, this._lastActivityTs || 0);
+  },
+
   // Another tab recorded activity — re-arm this (possibly idle) tab without re-broadcasting.
   _onInactivityStorage(e) {
     if (e && e.key === INACTIVITY_ACTIVITY_KEY && e.newValue) {
@@ -1716,13 +1738,30 @@ Polymer({
     }
   },
 
+  // On tab resume (visible/focused) reconcile against real elapsed time, since timers may have been
+  // suspended while hidden/asleep. Log out if already idle past the timeout, otherwise re-arm for the rest.
+  _checkInactivityOnResume() {
+    if (!this._inactivityTimeoutMs || document.visibilityState === 'hidden') {
+      return;
+    }
+    const idleFor = Date.now() - this._getLastActivity();
+    if (idleFor >= this._inactivityTimeoutMs) {
+      this._logoutRedirect();
+      return;
+    }
+    clearTimeout(this._inactivityTimer);
+    this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs - idleFor);
+  },
+
   _onInactivityTimeout() {
     // A tab may have been active while this one sat idle; only log out if every tab has been idle.
+    // Keyed off the shared (cross-tab) timestamp: this tab's own timer already elapsed, so its local
+    // activity is by definition older than the timeout — what matters is whether another tab was active.
     let lastActivity = 0;
     try {
       lastActivity = Number(window.localStorage.getItem(INACTIVITY_ACTIVITY_KEY)) || 0;
     } catch (e) {
-      // localStorage may be unavailable; treat as no shared activity (lastActivity stays 0).
+      // localStorage unavailable; no cross-tab signal, so fall through to a per-tab logout.
     }
     const idleFor = Date.now() - lastActivity;
     if (lastActivity && idleFor < this._inactivityTimeoutMs) {
@@ -1780,6 +1819,11 @@ Polymer({
     if (this._boundInactivityStorage) {
       window.removeEventListener('storage', this._boundInactivityStorage);
       this._boundInactivityStorage = null;
+    }
+    if (this._boundInactivityResume) {
+      document.removeEventListener('visibilitychange', this._boundInactivityResume);
+      window.removeEventListener('focus', this._boundInactivityResume);
+      this._boundInactivityResume = null;
     }
   },
 
