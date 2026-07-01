@@ -421,6 +421,11 @@ Polymer({
     </header>
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
+    <!-- WEBUI-1987: lightweight authenticated request used to renew the server HTTP session while the
+         user is active (session.timeout is the server session timeout, which plain client activity would
+         not otherwise keep alive). -->
+    <nuxeo-resource id="keepAlive" path="me"></nuxeo-resource>
+
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"></nuxeo-document>
 
     <nuxeo-sardine hidden></nuxeo-sardine>
@@ -1677,6 +1682,10 @@ Polymer({
     if (!this._inactivityTimeoutMs) {
       return; // a non-positive or invalid timeout disables the feature
     }
+    // Renew the server session on activity, well before it lapses. Server session == session.timeout,
+    // so ping at half the window (with a sane floor) to keep an active user logged in across tabs.
+    this._inactivityKeepAliveMs = Math.max(Math.floor(this._inactivityTimeoutMs / 2), 5000);
+    this._lastKeepAlive = 0;
     this._inactivityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'wheel'];
     this._inactivityListenerOptions = { passive: true, capture: true };
     this._boundResetInactivityTimer = () => this._resetInactivityTimer();
@@ -1709,8 +1718,28 @@ Polymer({
     clearTimeout(this._inactivityTimer);
     this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs);
     // Broadcast this activity to other tabs (skip when the reset was itself triggered by another tab).
+    // The tab where the activity actually happened is also the one that renews the shared server session.
     if (propagate) {
       this._recordSharedActivity(now);
+      this._maybeKeepServerSessionAlive(now);
+    }
+  },
+
+  // Renew the server HTTP session (throttled) so genuine user activity keeps the session alive even
+  // when it produces no other server requests (e.g. reading, mouse movement).
+  _maybeKeepServerSessionAlive(now) {
+    if (
+      !this._inactivityKeepAliveMs ||
+      (this._lastKeepAlive && now - this._lastKeepAlive < this._inactivityKeepAliveMs)
+    ) {
+      return;
+    }
+    this._lastKeepAlive = now;
+    const keepAlive = this.$ && this.$.keepAlive;
+    if (keepAlive && typeof keepAlive.execute === 'function') {
+      keepAlive.execute().catch(() => {
+        // A failure here (e.g. the session already expired) is handled by the 401 -> logout redirect.
+      });
     }
   },
 
@@ -1816,6 +1845,8 @@ Polymer({
     this._inactivityTimer = null;
     this._inactivityTimeoutMs = 0; // fully disable so an in-flight handler can't re-arm the timer
     this._lastInactivityReset = 0;
+    this._inactivityKeepAliveMs = 0;
+    this._lastKeepAlive = 0;
     if (this._boundResetInactivityTimer && this._inactivityEvents) {
       this._inactivityEvents.forEach((evt) =>
         window.removeEventListener(evt, this._boundResetInactivityTimer, this._inactivityListenerOptions),
