@@ -242,7 +242,7 @@ suite('nuxeo-search-form', () => {
 
   test('clear resets state and triggers search in manual mode', () => {
     const resetSpy = sinon.spy(searchForm, '_resetResults');
-    const searchSpy = sinon.spy(searchForm, '_search');
+    const searchSpy = sinon.stub(searchForm, '_search');
     Object.defineProperty(searchForm, 'form', {
       configurable: true,
       get() {
@@ -261,6 +261,7 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.selectedSearchIdx).to.equal(0);
     expect(searchForm.params).to.deep.equal({});
     expect(searchForm.aggregations).to.deep.equal({});
+    expect(searchForm.dirty).to.be.false;
     expect(resetSpy.callCount).to.be.greaterThan(0);
     expect(searchSpy.callCount).to.be.greaterThan(0);
 
@@ -403,33 +404,51 @@ suite('nuxeo-search-form', () => {
     clearSpy.restore();
   });
 
-  test('reset reloads saved search params when current search is saved', async () => {
-    const getStub = sinon.stub(searchForm.$['saved-search'], 'get').resolves({ params: { ecm_fulltext: '*saved*' } });
-    sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
-    // Initialise _searches so the selectedSearch observer's findIndex call doesn't throw.
-    searchForm._searches = [];
-    searchForm.isSavedSearch = true;
-    searchForm.selectedSearch = { id: 'saved-1', title: 'saved-1', text: 'saved-1', displaytext: 'saved-1' };
+  test('reset clears the form even when current search is saved', () => {
+    const form = { clear: sinon.spy() };
+    const resetSpy = sinon.spy(searchForm, '_resetResults');
+    const searchSpy = sinon.stub(searchForm, '_search');
     Object.defineProperty(searchForm, 'form', {
       configurable: true,
       get() {
-        return { searchTerm: '' };
+        return form;
       },
     });
+    searchForm.auto = false;
+    // Initialize saved searches with the currently selected saved search so _selectedSearchChanged
+    // doesn't force selectedSearchIdx back to 0.
+    searchForm._searches = [
+      { id: 'saved-0', title: 'saved-0', text: 'saved-0', displaytext: 'saved-0', params: {} },
+      {
+        id: 'saved-1',
+        title: 'saved-1',
+        text: 'saved-1',
+        displaytext: 'saved-1',
+        params: { 'my_schema:boolean_status': true, ecm_fulltext: '*saved*' },
+      },
+    ];
+    searchForm.params = { 'my_schema:boolean_status': true, ecm_fulltext: '*saved*' };
+    searchForm.searchTerm = 'saved';
+    searchForm.selectedSearchIdx = 2;
+    searchForm.isSavedSearch = true;
+    searchForm.selectedSearch = searchForm._searches[1];
+    searchForm.dirty = true;
 
     searchForm._reset();
-    for (let i = 0; i < 5; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
-      await Promise.resolve();
-    }
 
-    expect(getStub).to.have.been.calledOnce;
-    expect(searchForm.searchTerm).to.equal('saved');
+    expect(form.clear).to.have.been.calledOnce;
+    expect(searchForm.selectedSearchIdx).to.equal(0);
+    expect(searchForm.selectedSearch).to.be.null;
+    expect(searchForm.params).to.deep.equal({});
+    expect(searchForm.aggregations).to.deep.equal({});
+    expect(searchForm.searchTerm).to.equal('');
     expect(searchForm.dirty).to.be.false;
+    expect(resetSpy.callCount).to.be.greaterThan(0);
+    expect(searchSpy.callCount).to.be.greaterThan(0);
 
-    getStub.restore();
-    searchForm._mutateParams.restore();
     delete searchForm.form;
+    resetSpy.restore();
+    searchSpy.restore();
   });
 
   test('save routes to saveAs for index 0 and saveSearch otherwise', () => {
