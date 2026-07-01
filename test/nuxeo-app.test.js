@@ -400,14 +400,19 @@ suite('nuxeo-app', () => {
   });
 
   suite('inactivity timer (WEBUI-1987)', () => {
+    const ACTIVITY_KEY = 'nuxeo-ui-inactivity-last-activity';
     let getStub;
     let timeoutStub;
     let clearStub;
     let scheduled;
 
+    const lastScheduled = () => scheduled[scheduled.length - 1];
+
     setup(() => {
       // drop the timer/listeners armed by the fixture's real ready() so this suite starts clean
       app._teardownInactivityTimer();
+      app._loggingOut = false;
+      window.localStorage.removeItem(ACTIVITY_KEY); // start with no shared cross-tab activity
       getStub = sinon.stub(config, 'get');
       scheduled = [];
       // Stub the timer primitives instead of faking global time (faking time can freeze the shared
@@ -424,6 +429,7 @@ suite('nuxeo-app', () => {
       clearStub.restore();
       getStub.restore();
       app._teardownInactivityTimer();
+      window.localStorage.removeItem(ACTIVITY_KEY);
     });
 
     test('arms a timeout for the configured idle period and redirects to logout when it fires', () => {
@@ -434,6 +440,7 @@ suite('nuxeo-app', () => {
       app._setupInactivityTimer();
       expect(scheduled).to.have.lengthOf(1);
       expect(scheduled[0].delay).to.equal(60000);
+      window.localStorage.removeItem(ACTIVITY_KEY); // no tab has been active → real logout
       scheduled[0].fn(); // simulate the idle period elapsing
       expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
       app.$.nxcon.url = prev;
@@ -448,6 +455,45 @@ suite('nuxeo-app', () => {
       window.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       expect(clearStub).to.have.been.called;
       expect(scheduled).to.have.lengthOf(2);
+    });
+
+    test('local activity records a shared timestamp for other tabs', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      app._setupInactivityTimer(); // initial arm propagates activity
+      expect(Number(window.localStorage.getItem(ACTIVITY_KEY))).to.be.greaterThan(0);
+    });
+
+    test('activity in another tab (storage event) re-arms this tab', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      app._setupInactivityTimer();
+      expect(scheduled).to.have.lengthOf(1);
+      // Simulate another tab writing activity; the throttle must not swallow a remote signal.
+      app._lastInactivityReset = Date.now() - 2000;
+      window.dispatchEvent(new StorageEvent('storage', { key: ACTIVITY_KEY, newValue: String(Date.now()) }));
+      expect(scheduled).to.have.lengthOf(2); // re-armed from the remote activity
+    });
+
+    test('does NOT log out when another tab was active within the timeout', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      const redirect = sinon.stub(app, '_redirect');
+      app._setupInactivityTimer();
+      window.localStorage.setItem(ACTIVITY_KEY, String(Date.now())); // another tab active just now
+      lastScheduled().fn(); // this idle tab's timer fires
+      expect(redirect).not.to.have.been.called; // re-armed instead of logging out
+      redirect.restore();
+    });
+
+    test('logs out only when all tabs have been idle for the full period', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      const redirect = sinon.stub(app, '_redirect');
+      const prev = app.$.nxcon.url;
+      app.$.nxcon.url = 'https://server/nuxeo';
+      app._setupInactivityTimer();
+      window.localStorage.setItem(ACTIVITY_KEY, String(Date.now() - 120000)); // last activity 2 min ago
+      lastScheduled().fn();
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+      app.$.nxcon.url = prev;
+      redirect.restore();
     });
 
     test('re-running setup is idempotent (tears down before re-arming)', () => {

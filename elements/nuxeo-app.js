@@ -97,6 +97,10 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
 ];
 const MAX_TOASTS = 3; // max number of toasts that can be displayed simultaneously besides the default one
 
+// WEBUI-1987: localStorage key used to share the last user-activity timestamp across tabs of the same
+// origin, so activity in ANY tab keeps the whole session alive (only all-tabs-idle triggers logout).
+const INACTIVITY_ACTIVITY_KEY = 'nuxeo-ui-inactivity-last-activity';
+
 setPassiveTouchGestures(true);
 
 /**
@@ -1655,6 +1659,8 @@ Polymer({
 
   // WEBUI-1987 (CWE-613): arm a client-side inactivity timer that logs the user out after a
   // configurable idle period, so sensitive data is not left on-screen once the server session expires.
+  // Activity is shared across tabs (see INACTIVITY_ACTIVITY_KEY) so working in one tab keeps every tab's
+  // session alive — logout only happens when the user is idle in ALL tabs for the full period.
   _setupInactivityTimer() {
     this._teardownInactivityTimer(); // idempotent: never stack listeners/timers across calls
     const minutes = Number(config.get('session.timeout', 60));
@@ -1668,11 +1674,14 @@ Polymer({
     this._inactivityEvents.forEach((evt) =>
       window.addEventListener(evt, this._boundResetInactivityTimer, this._inactivityListenerOptions),
     );
+    // Cross-tab activity: reset this tab's timer when another tab records activity.
+    this._boundInactivityStorage = (e) => this._onInactivityStorage(e);
+    window.addEventListener('storage', this._boundInactivityStorage);
     this._lastInactivityReset = 0; // ensure the initial arm is never throttled
     this._resetInactivityTimer();
   },
 
-  _resetInactivityTimer() {
+  _resetInactivityTimer(propagate = true) {
     if (!this._inactivityTimeoutMs) {
       return;
     }
@@ -1684,9 +1693,44 @@ Polymer({
     this._lastInactivityReset = now;
     clearTimeout(this._inactivityTimer);
     this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs);
+    // Broadcast this activity to other tabs (skip when the reset was itself triggered by another tab).
+    if (propagate) {
+      this._recordSharedActivity(now);
+    }
+  },
+
+  // Persist the activity timestamp so other tabs (listening via the 'storage' event) can keep alive.
+  _recordSharedActivity(now) {
+    try {
+      window.localStorage.setItem(INACTIVITY_ACTIVITY_KEY, String(now));
+    } catch (e) {
+      // localStorage may be unavailable (private mode/quota); fall back to per-tab behaviour.
+    }
+  },
+
+  // Another tab recorded activity — re-arm this (possibly idle) tab without re-broadcasting.
+  _onInactivityStorage(e) {
+    if (e && e.key === INACTIVITY_ACTIVITY_KEY && e.newValue) {
+      this._lastInactivityReset = 0; // bypass throttle so the remote activity always re-arms us
+      this._resetInactivityTimer(false);
+    }
   },
 
   _onInactivityTimeout() {
+    // A tab may have been active while this one sat idle; only log out if every tab has been idle.
+    let lastActivity = 0;
+    try {
+      lastActivity = Number(window.localStorage.getItem(INACTIVITY_ACTIVITY_KEY)) || 0;
+    } catch (e) {
+      // localStorage may be unavailable; treat as no shared activity (lastActivity stays 0).
+    }
+    const idleFor = Date.now() - lastActivity;
+    if (lastActivity && idleFor < this._inactivityTimeoutMs) {
+      // Someone was active recently (in another tab); re-arm for the remaining time instead of logging out.
+      clearTimeout(this._inactivityTimer);
+      this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs - idleFor);
+      return;
+    }
     this._logoutRedirect();
   },
 
@@ -1732,6 +1776,10 @@ Polymer({
       this._inactivityEvents.forEach((evt) =>
         window.removeEventListener(evt, this._boundResetInactivityTimer, this._inactivityListenerOptions),
       );
+    }
+    if (this._boundInactivityStorage) {
+      window.removeEventListener('storage', this._boundInactivityStorage);
+      this._boundInactivityStorage = null;
     }
   },
 
