@@ -1798,4 +1798,76 @@ suite('nuxeo-results', () => {
       debugStub.restore();
     });
   });
+
+  suite('Filter Value Persistence (WEBUI-1885)', () => {
+    test('_applyPrefsToView resets filterValue when clearing to defaults', () => {
+      const view = {
+        columns: [
+          { hiddenBack: false, hidden: false, order: 0, width: null, filterBy: 'title', filterValue: 'test' },
+          { hiddenBack: true, hidden: true, order: 1, width: null, filterBy: 'dc_modified_agg', filterValue: 'month' },
+          { hiddenBack: false, hidden: false, order: 2, width: null },
+        ],
+        sortOrder: [],
+        set: sinon.spy(),
+      };
+
+      results._applyPrefsToView(view, {});
+
+      // filterValue should be reset via view.set for columns that had a non-empty filterValue
+      const filterValueCalls = view.set.getCalls().filter((c) => c.args[0].endsWith('.filterValue'));
+      expect(filterValueCalls.length).to.be.greaterThan(0);
+      // The calls should set filterValue to '' (empty string default)
+      filterValueCalls.forEach((call) => {
+        expect(call.args[1]).to.equal('');
+      });
+    });
+
+    test('_applyPrefsToView does not reset filterValue for columns without a current value', () => {
+      const view = {
+        columns: [{ hiddenBack: false, hidden: false, order: 0, width: null, filterBy: 'title', filterValue: '' }],
+        sortOrder: [],
+        set: sinon.spy(),
+      };
+
+      results._applyPrefsToView(view, {});
+
+      // filterValue is already '' (default), so set should NOT be called for filterValue
+      const filterValueCalls = view.set.getCalls().filter((c) => c.args[0].endsWith('.filterValue'));
+      expect(filterValueCalls.length).to.equal(0);
+    });
+
+    test('_applyPrefsToView applies settings that include filterValue via setter', () => {
+      const view = { settings: null };
+      const prefs = {
+        columns: {
+          'dc:title': { hidden: false, order: 0, width: null, filterValue: 'my-filter' },
+        },
+        sortOrder: [{ path: 'dc:modified', direction: 'desc' }],
+      };
+
+      results._applyPrefsToView(view, prefs);
+      expect(view.settings).to.deep.equal(prefs);
+    });
+
+    test('customizableProps includes filterValue in default reset', () => {
+      // Verify that when _applyPrefsToView resets with empty prefs,
+      // it considers filterValue as a customizable property
+      const view = {
+        columns: [
+          { hiddenBack: false, hidden: true, order: 5, width: '200px', filterBy: 'title', filterValue: 'active' },
+        ],
+        sortOrder: ['dc:title'],
+        set: sinon.spy(),
+      };
+
+      results._applyPrefsToView(view, {});
+
+      // Should have set calls for hidden, order, width, and filterValue
+      const setPaths = view.set.getCalls().map((c) => c.args[0]);
+      expect(setPaths).to.include('columns.0.hidden');
+      expect(setPaths).to.include('columns.0.order');
+      expect(setPaths).to.include('columns.0.width');
+      expect(setPaths).to.include('columns.0.filterValue');
+    });
+  });
 });
