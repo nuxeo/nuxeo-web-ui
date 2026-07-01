@@ -32,6 +32,9 @@ suite('nuxeo-app', () => {
     if (app.$ && app.$.tasksProvider) {
       sinon.stub(app.$.tasksProvider, 'fetch').resolves({ resultsCount: 0 });
     }
+    if (app.$ && app.$.keepAlive) {
+      sinon.stub(app.$.keepAlive, 'execute').resolves({}); // WEBUI-1987: no real session keep-alive in tests
+    }
     await flush();
   });
 
@@ -522,6 +525,26 @@ suite('nuxeo-app', () => {
       expect(redirect).not.to.have.been.called;
       expect(scheduled.length).to.be.greaterThan(before); // re-armed for the remaining time
       redirect.restore();
+    });
+
+    test('renews the server session on activity, throttled to the keep-alive window', () => {
+      getStub.withArgs('session.timeout', 60).returns(1); // 1 min -> keep-alive window 30s
+      const execute = app.$.keepAlive.execute; // stubbed in the outer setup
+      execute.resetHistory();
+      app._setupInactivityTimer();
+      expect(execute).to.have.been.called; // initial arm renews the session
+      const afterSetup = execute.callCount;
+
+      // Activity within the keep-alive window must NOT ping again.
+      app._lastInactivityReset = Date.now() - 2000; // bypass the 1s activity throttle
+      window.dispatchEvent(new MouseEvent('mousedown'));
+      expect(execute.callCount).to.equal(afterSetup);
+
+      // Once the keep-alive window has elapsed, activity pings again.
+      app._lastKeepAlive = Date.now() - 40000; // older than the 30s window
+      app._lastInactivityReset = Date.now() - 2000;
+      window.dispatchEvent(new MouseEvent('mousedown'));
+      expect(execute.callCount).to.equal(afterSetup + 1);
     });
 
     test('re-running setup is idempotent (tears down before re-arming)', () => {
