@@ -67,5 +67,8 @@
 
   <!-- Control external permissions  -->
  <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
+
+  <!-- Hide date picker placeholder text -->
+  <property name="org.nuxeo.web.ui.datepicker.hidePlaceholder">${org.nuxeo.web.ui.datepicker.hidePlaceholder:=false}</property>
   </extension>
 </component>
