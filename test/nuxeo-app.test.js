@@ -496,6 +496,34 @@ suite('nuxeo-app', () => {
       redirect.restore();
     });
 
+    test('logs out on resume when idle beyond the timeout (e.g. after the machine slept)', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      const redirect = sinon.stub(app, '_redirect');
+      const prev = app.$.nxcon.url;
+      app.$.nxcon.url = 'https://server/nuxeo';
+      app._setupInactivityTimer();
+      // Simulate elapsed real time while the tab was hidden (both local and shared references are stale).
+      app._lastActivityTs = Date.now() - 120000;
+      window.localStorage.setItem(ACTIVITY_KEY, String(Date.now() - 120000));
+      app._checkInactivityOnResume();
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+      app.$.nxcon.url = prev;
+      redirect.restore();
+    });
+
+    test('does not log out on resume when activity was recent; re-arms instead', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      const redirect = sinon.stub(app, '_redirect');
+      app._setupInactivityTimer();
+      app._lastActivityTs = Date.now();
+      window.localStorage.setItem(ACTIVITY_KEY, String(Date.now()));
+      const before = scheduled.length;
+      app._checkInactivityOnResume();
+      expect(redirect).not.to.have.been.called;
+      expect(scheduled.length).to.be.greaterThan(before); // re-armed for the remaining time
+      redirect.restore();
+    });
+
     test('re-running setup is idempotent (tears down before re-arming)', () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       app._setupInactivityTimer();
@@ -536,7 +564,7 @@ suite('nuxeo-app', () => {
     });
 
     test('redirects to logout when a 401 unauthorized-request is dispatched', () => {
-      // The fixture's ready() already wired the listener via _setupUnauthorizedRedirect().
+      // The fixture's attached() already wired the listener via _setupUnauthorizedRedirect().
       document.dispatchEvent(new CustomEvent('unauthorized-request', { bubbles: true, composed: true }));
       expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
     });
