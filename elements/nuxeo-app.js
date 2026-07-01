@@ -847,6 +847,11 @@ Polymer({
 
     this.removeAttribute('unresolved');
 
+    // WEBUI-1987: wire the inactivity timer + 401->logout redirect here (ready always runs once). They
+    // are also (re-)armed in attached() to survive a detach/re-attach cycle; both setups are idempotent.
+    this._setupInactivityTimer();
+    this._setupUnauthorizedRedirect();
+
     Performance.mark('nuxeo-app.ready');
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
@@ -928,8 +933,8 @@ Polymer({
   },
 
   attached() {
-    // WEBUI-1987: arm here (not in ready) so the feature survives a detach/re-attach cycle — ready()
-    // runs only once, whereas attached()/detached() are paired. Both setups are idempotent.
+    // WEBUI-1987: re-arm on (re-)attach so the feature survives a detach/re-attach cycle. Initial wiring
+    // happens in ready() (guaranteed to run); these calls are idempotent so double-arming is harmless.
     this._setupInactivityTimer();
     this._setupUnauthorizedRedirect();
   },
