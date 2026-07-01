@@ -473,6 +473,42 @@ suite('nuxeo-app', () => {
     });
   });
 
+  suite('reactive logout on unauthorized request (WEBUI-1987)', () => {
+    let redirect;
+    let prevUrl;
+
+    setup(() => {
+      redirect = sinon.stub(app, '_redirect');
+      prevUrl = app.$.nxcon.url;
+      app.$.nxcon.url = 'https://server/nuxeo';
+      app._loggingOut = false;
+    });
+
+    teardown(() => {
+      app.$.nxcon.url = prevUrl;
+      redirect.restore();
+    });
+
+    test('redirects to logout when a 401 unauthorized-request is dispatched', () => {
+      // The fixture's ready() already wired the listener via _setupUnauthorizedRedirect().
+      document.dispatchEvent(new CustomEvent('unauthorized-request', { bubbles: true, composed: true }));
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+    });
+
+    test('is one-shot: a burst of 401s triggers a single logout redirect', () => {
+      document.dispatchEvent(new CustomEvent('unauthorized-request'));
+      document.dispatchEvent(new CustomEvent('unauthorized-request'));
+      document.dispatchEvent(new CustomEvent('unauthorized-request'));
+      expect(redirect).to.have.been.calledOnce;
+    });
+
+    test('teardown removes the 401 listener', () => {
+      app._teardownUnauthorizedRedirect();
+      document.dispatchEvent(new CustomEvent('unauthorized-request'));
+      expect(redirect).not.to.have.been.called;
+    });
+  });
+
   test('_moveDocumentsToContainer configures operation and toasts on success', async () => {
     sinon.stub(app.$.moveDocumentsOp, 'execute').resolves();
     sinon.stub(app, '_toast');

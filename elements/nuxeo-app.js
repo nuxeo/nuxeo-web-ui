@@ -844,6 +844,7 @@ Polymer({
     this.removeAttribute('unresolved');
 
     this._setupInactivityTimer();
+    this._setupUnauthorizedRedirect();
 
     Performance.mark('nuxeo-app.ready');
     this.$.menu.addEventListener('keyup', (event) => {
@@ -931,6 +932,7 @@ Polymer({
     }
     this.removeEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
     this._teardownInactivityTimer();
+    this._teardownUnauthorizedRedirect();
   },
 
   skipLinkEvent() {
@@ -1685,6 +1687,33 @@ Polymer({
   },
 
   _onInactivityTimeout() {
+    this._logoutRedirect();
+  },
+
+  // WEBUI-1987 (CWE-613): a 401 means the (server) session is already gone. Rather than leaving the
+  // now-inaccessible page on screen behind the "session expired" banner, redirect to logout. This also
+  // propagates an inactivity logout in one tab to any other open tabs, whose next request returns 401.
+  _setupUnauthorizedRedirect() {
+    this._teardownUnauthorizedRedirect(); // idempotent: never stack listeners across calls
+    this._boundUnauthorizedRedirect = () => this._logoutRedirect();
+    // The event bubbles (composed) from nuxeo-resource/nuxeo-operation up to document.
+    document.addEventListener('unauthorized-request', this._boundUnauthorizedRedirect);
+  },
+
+  _teardownUnauthorizedRedirect() {
+    if (this._boundUnauthorizedRedirect) {
+      document.removeEventListener('unauthorized-request', this._boundUnauthorizedRedirect);
+      this._boundUnauthorizedRedirect = null;
+    }
+  },
+
+  // Single logout entry point shared by the inactivity timer and the 401 handler. The one-shot guard
+  // prevents a burst of 401s (or a timer firing during logout) from triggering multiple redirects.
+  _logoutRedirect() {
+    if (this._loggingOut) {
+      return;
+    }
+    this._loggingOut = true;
     this._redirect(this._logout());
   },
 
