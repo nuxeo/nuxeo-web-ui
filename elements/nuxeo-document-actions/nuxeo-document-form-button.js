@@ -134,7 +134,7 @@ Polymer({
   // Guard with composedPath() so only the dialog that contains the focused element
   // is closed, preventing a single Escape from closing multiple open dialogs.
   _handleDialogKeydown(e) {
-    if (e.key === 'Escape' && this.dialog && this.dialog.opened && e.composedPath().includes(this.dialog)) {
+    if (e.key === 'Escape' && this.dialog?.opened && e.composedPath().includes(this.dialog)) {
       e.stopPropagation();
       this._closeDialog();
     }
