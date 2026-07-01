@@ -1690,16 +1690,16 @@ Polymer({
     this._inactivityListenerOptions = { passive: true, capture: true };
     this._boundResetInactivityTimer = () => this._resetInactivityTimer();
     this._inactivityEvents.forEach((evt) =>
-      window.addEventListener(evt, this._boundResetInactivityTimer, this._inactivityListenerOptions),
+      globalThis.addEventListener(evt, this._boundResetInactivityTimer, this._inactivityListenerOptions),
     );
     // Cross-tab activity: reset this tab's timer when another tab records activity.
     this._boundInactivityStorage = (e) => this._onInactivityStorage(e);
-    window.addEventListener('storage', this._boundInactivityStorage);
+    globalThis.addEventListener('storage', this._boundInactivityStorage);
     // Background tabs/sleeping machines throttle or suspend setTimeout, so re-check idle time whenever
     // the tab becomes visible/focused again and log out immediately if the timeout already elapsed.
     this._boundInactivityResume = () => this._checkInactivityOnResume();
     document.addEventListener('visibilitychange', this._boundInactivityResume);
-    window.addEventListener('focus', this._boundInactivityResume);
+    globalThis.addEventListener('focus', this._boundInactivityResume);
     this._lastInactivityReset = 0; // ensure the initial arm is never throttled
     this._resetInactivityTimer();
   },
@@ -1735,7 +1735,7 @@ Polymer({
       return;
     }
     this._lastKeepAlive = now;
-    const keepAlive = this.$ && this.$.keepAlive;
+    const keepAlive = this.$?.keepAlive;
     if (keepAlive && typeof keepAlive.execute === 'function') {
       keepAlive.execute().catch(() => {
         // A failure here (e.g. the session already expired) is handled by the 401 -> logout redirect.
@@ -1746,9 +1746,10 @@ Polymer({
   // Persist the activity timestamp so other tabs (listening via the 'storage' event) can keep alive.
   _recordSharedActivity(now) {
     try {
-      window.localStorage.setItem(INACTIVITY_ACTIVITY_KEY, String(now));
+      globalThis.localStorage.setItem(INACTIVITY_ACTIVITY_KEY, String(now));
     } catch (e) {
       // localStorage may be unavailable (private mode/quota); fall back to per-tab behaviour.
+      this._inactivityStorageError = e;
     }
   },
 
@@ -1757,16 +1758,17 @@ Polymer({
   _getLastActivity() {
     let shared = 0;
     try {
-      shared = Number(window.localStorage.getItem(INACTIVITY_ACTIVITY_KEY)) || 0;
+      shared = Number(globalThis.localStorage.getItem(INACTIVITY_ACTIVITY_KEY)) || 0;
     } catch (e) {
       // localStorage unavailable; rely on this tab's local reference below.
+      this._inactivityStorageError = e;
     }
     return Math.max(shared, this._lastActivityTs || 0);
   },
 
   // Another tab recorded activity — re-arm this (possibly idle) tab without re-broadcasting.
   _onInactivityStorage(e) {
-    if (e && e.key === INACTIVITY_ACTIVITY_KEY && e.newValue) {
+    if (e?.key === INACTIVITY_ACTIVITY_KEY && e.newValue) {
       this._lastInactivityReset = 0; // bypass throttle so the remote activity always re-arms us
       this._resetInactivityTimer(false);
     }
@@ -1793,9 +1795,10 @@ Polymer({
     // activity is by definition older than the timeout — what matters is whether another tab was active.
     let lastActivity = 0;
     try {
-      lastActivity = Number(window.localStorage.getItem(INACTIVITY_ACTIVITY_KEY)) || 0;
+      lastActivity = Number(globalThis.localStorage.getItem(INACTIVITY_ACTIVITY_KEY)) || 0;
     } catch (e) {
       // localStorage unavailable; no cross-tab signal, so fall through to a per-tab logout.
+      this._inactivityStorageError = e;
     }
     const idleFor = Date.now() - lastActivity;
     if (lastActivity && idleFor < this._inactivityTimeoutMs) {
@@ -1837,7 +1840,7 @@ Polymer({
   // Use replace() (not href) so the potentially sensitive page is not left as a navigable
   // history/bfcache entry after an inactivity-driven logout.
   _redirect(url) {
-    window.location.replace(url);
+    globalThis.location.replace(url);
   },
 
   _teardownInactivityTimer() {
@@ -1849,16 +1852,16 @@ Polymer({
     this._lastKeepAlive = 0;
     if (this._boundResetInactivityTimer && this._inactivityEvents) {
       this._inactivityEvents.forEach((evt) =>
-        window.removeEventListener(evt, this._boundResetInactivityTimer, this._inactivityListenerOptions),
+        globalThis.removeEventListener(evt, this._boundResetInactivityTimer, this._inactivityListenerOptions),
       );
     }
     if (this._boundInactivityStorage) {
-      window.removeEventListener('storage', this._boundInactivityStorage);
+      globalThis.removeEventListener('storage', this._boundInactivityStorage);
       this._boundInactivityStorage = null;
     }
     if (this._boundInactivityResume) {
       document.removeEventListener('visibilitychange', this._boundInactivityResume);
-      window.removeEventListener('focus', this._boundInactivityResume);
+      globalThis.removeEventListener('focus', this._boundInactivityResume);
       this._boundInactivityResume = null;
     }
   },
