@@ -26,10 +26,8 @@ on:
 env:
   REGISTRY: docker-internal.packages.nuxeo.com
   REPOSITORY: nuxeo/nuxeo-web-ui
-  # Registry hosting the base Nuxeo server image (requires authentication to pull).
-  BASE_REGISTRY: docker-private.packages.nuxeo.com
-  # Base Nuxeo server image baked into the deployable image (matches the LTS line).
-  NUXEO_IMAGE: docker-private.packages.nuxeo.com/nuxeo/nuxeo:2025
+  # Base Nuxeo server image tag; nuxeo-docker-build pulls docker-private.packages.nuxeo.com/nuxeo/nuxeo:<tag>.
+  BASE_IMAGE_TAG: '2025'
 
 jobs:
   id:
@@ -131,39 +129,33 @@ jobs:
           MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
         run: mvn -B -ntp clean install -DskipTests -DskipInstall=true -DskipBuild=true
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+      - name: Stage Web UI marketplace package for offline install
+        run: |
+          mkdir -p local-modules
+          cp plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip local-modules/
 
-      - name: Login to Docker registry
-        uses: docker/login-action@v4
+      - name: Build and push combined Nuxeo + Web UI image
+        id: build
+        uses: nuxeo/gh-build-tools/.github/actions/nuxeo-docker-build@v0.14.0
         with:
+          base-image-tag: ${{ env.BASE_IMAGE_TAG }}
+          base-registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          base-registry-password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+          nuxeo-local-modules-path: local-modules
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
-          password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
-
-      - name: Login to base image registry
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.BASE_REGISTRY }}
-          username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
-          password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          pull: true
-          push: true
-          file: Dockerfile
-          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}
-          build-args: |
-            NUXEO_IMAGE=${{ env.NUXEO_IMAGE }}
+          registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          registry-password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+          image-name: ${{ env.REPOSITORY }}
+          image-tag: ${{ env.VERSION }}
+          image-title: 'Nuxeo Web UI'
+          platforms: linux/amd64
+          push-image: 'true'
 
       - name: Set preview image reference
         id: preview
         run: |
-          echo "image=${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
-          echo "PREVIEW_IMAGE=${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.VERSION }}" >> $GITHUB_ENV
+          echo "image=${{ steps.build.outputs.image-url }}" >> $GITHUB_OUTPUT
+          echo "PREVIEW_IMAGE=${{ steps.build.outputs.image-url }}" >> $GITHUB_ENV
 
       - uses: actions/github-script@v9.0.0
         if: github.event_name == 'pull_request'
