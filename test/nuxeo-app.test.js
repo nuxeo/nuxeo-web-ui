@@ -981,6 +981,22 @@ suite('nuxeo-app', () => {
       app._loadDocument.restore();
       app.show.restore();
     });
+
+    test('loadTask ended task does not navigate when document reload returns no document', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').resolves(null);
+      sinon.stub(app, 'show');
+      app.loadTask('t1');
+      await flush();
+      expect(app.show).to.not.have.been.called;
+      expect(navigateTo).to.not.have.been.called;
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+      app.show.restore();
+    });
   });
 
   suite('drawer toggle', () => {
@@ -1249,6 +1265,50 @@ suite('nuxeo-app', () => {
       await flush();
       expect(app.show).to.have.been.calledWith('browse');
       expect(navigateTo).to.not.have.been.called;
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('shows browse without navigating on workflowAbandoned', async () => {
+      const doc = {
+        uid: '1',
+        path: '/p',
+        contextParameters: { pendingTasks: [{ id: 'task-next' }] },
+      };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks({ type: 'workflowAbandoned' });
+      await flush();
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.not.have.been.called;
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('refreshes document and shows browse when called without event', async () => {
+      const doc = { uid: '1', path: '/p' };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks();
+      await flush();
+      expect(app._loadDocument).to.have.been.calledWith(doc);
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.not.have.been.called;
+      expect(app._fetchTaskCount).to.have.been.called;
       app._loadDocument.restore();
       app.show.restore();
       app._fetchTaskCount.restore();
