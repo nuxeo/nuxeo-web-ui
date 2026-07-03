@@ -1037,7 +1037,6 @@ Polymer({
             this._loadDocument({ uid: targetDoc.uid, path: targetDoc.path, page: 'browse' })
               .then((doc) => {
                 this._navigateAfterTaskProcessed(doc);
-                this.loading = false;
               })
               .catch((error) => {
                 this._handleTaskLoadError(error);
@@ -1061,13 +1060,18 @@ Polymer({
   },
 
   _navigateAfterTaskProcessed(doc) {
-    const pendingTasks = doc?.contextParameters?.pendingTasks;
-    if (pendingTasks?.length > 0 && pendingTasks[0]?.id) {
-      this.navigateTo('tasks', pendingTasks[0].id);
-    } else if (doc) {
-      this.show('browse');
-      this.navigateTo(doc);
+    if (!doc) {
+      this.loading = false;
+      return;
     }
+    const nextTaskId = doc.contextParameters?.pendingTasks?.find((task) => task?.id)?.id;
+    if (nextTaskId) {
+      this.navigateTo('tasks', nextTaskId);
+      return;
+    }
+    this.show('browse');
+    this.navigateTo(doc);
+    this.loading = false;
   },
 
   _handleTaskLoadError(error) {
