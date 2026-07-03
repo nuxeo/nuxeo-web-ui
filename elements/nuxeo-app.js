@@ -849,8 +849,9 @@ Polymer({
 
     this.removeAttribute('unresolved');
 
-    // WEBUI-1987: wire the inactivity timer + 401->logout redirect here (ready always runs once). They
-    // are also (re-)armed in attached() to survive a detach/re-attach cycle; both setups are idempotent.
+    // WEBUI-1987: wire the inactivity timer + 401->logout redirect once here (ready() always runs).
+    // attached() only re-arms after a real detach (see _inactivityNeedsRearm), so the initial
+    // ready()+attached() sequence does not issue a duplicate startup keep-alive or churn listeners.
     this._setupInactivityTimer();
     this._setupUnauthorizedRedirect();
 
@@ -935,10 +936,14 @@ Polymer({
   },
 
   attached() {
-    // WEBUI-1987: re-arm on (re-)attach so the feature survives a detach/re-attach cycle. Initial wiring
-    // happens in ready() (guaranteed to run); these calls are idempotent so double-arming is harmless.
-    this._setupInactivityTimer();
-    this._setupUnauthorizedRedirect();
+    // WEBUI-1987: only re-arm after a real detach/re-attach cycle. ready() already did the initial
+    // wiring, so re-running setup here on the first attach would issue a redundant keep-alive request
+    // and churn the activity listeners for no benefit.
+    if (this._inactivityNeedsRearm) {
+      this._inactivityNeedsRearm = false;
+      this._setupInactivityTimer();
+      this._setupUnauthorizedRedirect();
+    }
   },
 
   detached() {
@@ -948,6 +953,7 @@ Polymer({
     this.removeEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
     this._teardownInactivityTimer();
     this._teardownUnauthorizedRedirect();
+    this._inactivityNeedsRearm = true; // re-arm from the next attached()
   },
 
   skipLinkEvent() {
