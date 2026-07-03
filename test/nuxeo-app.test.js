@@ -775,25 +775,32 @@ suite('nuxeo-app', () => {
   });
 
   suite('loadTask with id', () => {
+    let navigateTo;
+
+    setup(() => {
+      navigateTo = sinon.stub(app, 'navigateTo');
+    });
+
+    teardown(() => {
+      navigateTo.restore();
+    });
+
     test('loadTask fetches task and navigates on success', async () => {
       const task = { id: 't1', name: 'Review' };
       sinon.stub(app.$.task, 'get').resolves(task);
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.currentTask).to.equal(task);
       expect(app.page).to.equal('tasks');
       app.$.task.get.restore();
     });
 
     test('loadTask navigates to tasks on 403', async () => {
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon.stub(app.$.task, 'get').rejects({ status: 403 });
       sinon.stub(app, '_fetchTaskCount');
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(app.navigateTo).to.have.been.calledWith('tasks');
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks');
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
       app._fetchTaskCount.restore();
@@ -806,8 +813,7 @@ suite('nuxeo-app', () => {
       sinon.stub(app, 'showError');
       app.loading = true;
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.showError).to.not.have.been.called;
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
@@ -819,8 +825,7 @@ suite('nuxeo-app', () => {
       sinon.stub(app, 'showError');
       app.loading = true;
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.showError).to.have.been.calledWith(500, 'browse.error', 'server error');
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
@@ -836,8 +841,7 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '_loadDocument').rejects(abortError);
       sinon.stub(app, 'showError');
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.showError).to.not.have.been.called;
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
@@ -855,11 +859,9 @@ suite('nuxeo-app', () => {
       };
       sinon.stub(app.$.task, 'get').resolves(task);
       sinon.stub(app, '_loadDocument').resolves(doc);
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(app.navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
       app._loadDocument.restore();
@@ -872,12 +874,10 @@ suite('nuxeo-app', () => {
       sinon.stub(app.$.task, 'get').resolves(task);
       sinon.stub(app, '_loadDocument').resolves(doc);
       sinon.stub(app, 'show');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.show).to.have.been.calledWith('browse');
-      expect(app.navigateTo).to.have.been.calledWith(doc);
+      expect(navigateTo).to.have.been.calledWith(doc);
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
       app._loadDocument.restore();
@@ -890,8 +890,7 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '_loadDocument');
       sinon.stub(app, '_defineTaskAndNavigate');
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app._loadDocument).to.not.have.been.called;
       expect(app._defineTaskAndNavigate).to.have.been.calledWith(task);
       expect(app.loading).to.be.false;
@@ -911,10 +910,8 @@ suite('nuxeo-app', () => {
       sinon.stub(app.$.task, 'get').resolves(task);
       sinon.stub(app, '_loadDocument').resolves(doc);
       sinon.stub(app, '_defineTaskAndNavigate');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app._defineTaskAndNavigate).to.not.have.been.called;
       app.$.task.get.restore();
       app._loadDocument.restore();
@@ -927,11 +924,9 @@ suite('nuxeo-app', () => {
       sinon.stub(app.$.task, 'get').resolves(task);
       sinon.stub(app, '_loadDocument').rejects({ status: 403 });
       sinon.stub(app, '_fetchTaskCount');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(app.navigateTo).to.have.been.calledWith('tasks');
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks');
       expect(app._fetchTaskCount).to.have.been.called;
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
@@ -946,8 +941,7 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '_loadDocument').rejects({ status: 500, message: 'server error' });
       sinon.stub(app, 'showError');
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.showError).to.have.been.calledWith(500, 'browse.error', 'server error');
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
@@ -962,13 +956,11 @@ suite('nuxeo-app', () => {
       sinon.stub(app.$.task, 'get').resolves(task);
       sinon.stub(app, '_loadDocument').resolves(doc);
       sinon.stub(app, 'show');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.show).to.have.been.calledWith('browse');
-      expect(app.navigateTo).to.have.been.calledWith(doc);
-      expect(app.navigateTo).to.not.have.been.calledWith('tasks', sinon.match.any);
+      expect(navigateTo).to.have.been.calledWith(doc);
+      expect(navigateTo).to.not.have.been.calledWith('tasks', sinon.match.any);
       app.$.task.get.restore();
       app._loadDocument.restore();
       app.show.restore();
@@ -981,12 +973,10 @@ suite('nuxeo-app', () => {
       sinon.stub(app.$.task, 'get').resolves(task);
       sinon.stub(app, '_loadDocument').resolves(doc);
       sinon.stub(app, 'show');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.show).to.have.been.calledWith('browse');
-      expect(app.navigateTo).to.have.been.calledWith(doc);
+      expect(navigateTo).to.have.been.calledWith(doc);
       app.$.task.get.restore();
       app._loadDocument.restore();
       app.show.restore();
@@ -1192,6 +1182,15 @@ suite('nuxeo-app', () => {
   suite('_refreshAndFetchTasks', () => {
     const workflowTaskProcessed = { type: 'workflowTaskProcessed' };
     const workflowStarted = { type: 'workflowStarted' };
+    let navigateTo;
+
+    setup(() => {
+      navigateTo = sinon.stub(app, 'navigateTo');
+    });
+
+    teardown(() => {
+      navigateTo.restore();
+    });
 
     test('navigates to next pending task when document has pending tasks', async () => {
       const doc = {
@@ -1201,14 +1200,13 @@ suite('nuxeo-app', () => {
       };
       app.currentDocument = doc;
       sinon.stub(app, '_loadDocument').resolves(doc);
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon.stub(app, '_fetchTaskCount');
       sinon.stub(app, '_resetTaskSelection');
       sinon.stub(app, '$$').returns({ visible: false });
       app._refreshAndFetchTasks(workflowTaskProcessed);
-      await Promise.resolve();
+      await flush();
       expect(app._loadDocument).to.have.been.calledWith(doc);
-      expect(app.navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
       expect(app._fetchTaskCount).to.have.been.called;
       app._loadDocument.restore();
       app._fetchTaskCount.restore();
@@ -1221,14 +1219,13 @@ suite('nuxeo-app', () => {
       app.currentDocument = doc;
       sinon.stub(app, '_loadDocument').resolves(doc);
       sinon.stub(app, 'show');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon.stub(app, '_fetchTaskCount');
       sinon.stub(app, '_resetTaskSelection');
       sinon.stub(app, '$$').returns({ visible: false });
       app._refreshAndFetchTasks(workflowTaskProcessed);
-      await Promise.resolve();
+      await flush();
       expect(app.show).to.have.been.calledWith('browse');
-      expect(app.navigateTo).to.have.been.calledWith(doc);
+      expect(navigateTo).to.have.been.calledWith(doc);
       app._loadDocument.restore();
       app.show.restore();
       app._fetchTaskCount.restore();
@@ -1245,14 +1242,13 @@ suite('nuxeo-app', () => {
       app.currentDocument = doc;
       sinon.stub(app, '_loadDocument').resolves(doc);
       sinon.stub(app, 'show');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon.stub(app, '_fetchTaskCount');
       sinon.stub(app, '_resetTaskSelection');
       sinon.stub(app, '$$').returns({ visible: false });
       app._refreshAndFetchTasks(workflowStarted);
-      await Promise.resolve();
+      await flush();
       expect(app.show).to.have.been.calledWith('browse');
-      expect(app.navigateTo).to.not.have.been.called;
+      expect(navigateTo).to.not.have.been.called;
       app._loadDocument.restore();
       app.show.restore();
       app._fetchTaskCount.restore();
@@ -1281,15 +1277,14 @@ suite('nuxeo-app', () => {
       app.currentDocument = doc;
       sinon.stub(app, '_loadDocument').resolves(doc);
       sinon.stub(app, 'show');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon.stub(app, '_fetchTaskCount');
       sinon.stub(app, '_resetTaskSelection');
       sinon.stub(app, '$$').returns({ visible: false });
       app._refreshAndFetchTasks(workflowTaskProcessed);
-      await Promise.resolve();
+      await flush();
       expect(app.show).to.have.been.calledWith('browse');
-      expect(app.navigateTo).to.have.been.calledWith(doc);
-      expect(app.navigateTo).to.not.have.been.calledWith('tasks', sinon.match.any);
+      expect(navigateTo).to.have.been.calledWith(doc);
+      expect(navigateTo).to.not.have.been.calledWith('tasks', sinon.match.any);
       app._loadDocument.restore();
       app.show.restore();
       app._fetchTaskCount.restore();
@@ -1306,14 +1301,13 @@ suite('nuxeo-app', () => {
       app.currentDocument = doc;
       sinon.stub(app, '_loadDocument').resolves(doc);
       sinon.stub(app, 'show');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon.stub(app, '_fetchTaskCount');
       sinon.stub(app, '_resetTaskSelection');
       sinon.stub(app, '$$').returns({ visible: false });
       app._refreshAndFetchTasks(workflowTaskProcessed);
-      await Promise.resolve();
+      await flush();
       expect(app.show).to.not.have.been.called;
-      expect(app.navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
       app._loadDocument.restore();
       app.show.restore();
       app._fetchTaskCount.restore();
@@ -1325,14 +1319,13 @@ suite('nuxeo-app', () => {
       app.currentDocument = { uid: '1', path: '/p' };
       sinon.stub(app, '_loadDocument').resolves(null);
       sinon.stub(app, 'show');
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon.stub(app, '_fetchTaskCount');
       sinon.stub(app, '_resetTaskSelection');
       sinon.stub(app, '$$').returns({ visible: false });
       app._refreshAndFetchTasks(workflowTaskProcessed);
-      await Promise.resolve();
+      await flush();
       expect(app.show).to.not.have.been.called;
-      expect(app.navigateTo).to.not.have.been.called;
+      expect(navigateTo).to.not.have.been.called;
       app._loadDocument.restore();
       app.show.restore();
       app._fetchTaskCount.restore();
@@ -1622,9 +1615,18 @@ suite('nuxeo-app', () => {
   });
 
   suite('_refreshAndFetchTasks errors', () => {
+    let navigateTo;
+
+    setup(() => {
+      navigateTo = sinon.stub(app, 'navigateTo');
+    });
+
+    teardown(() => {
+      navigateTo.restore();
+    });
+
     test('navigates to tasks on 403 when refreshing document', async () => {
       app.currentDocument = { uid: '1' };
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon
         .stub(app, '_loadDocument')
         .returns(Promise.reject({ 'entity-type': 'exception', status: 403, message: 'denied' }));
@@ -1632,9 +1634,8 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '_resetTaskSelection');
       sinon.stub(app, '$$').returns({ visible: true, $: { tasks: { fetch: sinon.spy() } } });
       app._refreshAndFetchTasks();
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(app.navigateTo).to.have.been.calledWith('tasks');
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks');
       expect(app.loading).to.be.false;
       app._loadDocument.restore();
       app._fetchTaskCount.restore();
@@ -1653,8 +1654,7 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '$$').returns({ visible: false });
       app.loading = true;
       app._refreshAndFetchTasks({ type: 'workflowTaskProcessed' });
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.showError).to.not.have.been.called;
       expect(app.loading).to.be.false;
       app._loadDocument.restore();
@@ -1673,8 +1673,7 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '$$').returns({ visible: false });
       app.loading = true;
       app._refreshAndFetchTasks();
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.showError).to.have.been.calledWith(500, 'browse.error', 'server error');
       expect(app.loading).to.be.false;
       app._loadDocument.restore();
