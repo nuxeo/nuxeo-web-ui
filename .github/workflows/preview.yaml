@@ -22,6 +22,11 @@ on:
         default: ''
         type: string
         required: false
+      nuxeo_server_packages:
+        description: 'Space/comma-separated Nuxeo Connect server packages to pre-install. Overrides the NUXEO_SERVER_PACKAGES repository variable (which defaults to replace-administrator-user).'
+        default: ''
+        type: string
+        required: false
 
 env:
   REGISTRY: docker-internal.packages.nuxeo.com
@@ -142,6 +147,9 @@ jobs:
           base-registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           base-registry-password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
           nuxeo-local-modules-path: local-modules
+          # Connect server packages to pre-install; defaults to replace-administrator-user when NUXEO_SERVER_PACKAGES is unset.
+          nuxeo-connect-modules: ${{ github.event.inputs.nuxeo_server_packages || vars.NUXEO_SERVER_PACKAGES || 'replace-administrator-user' }}
+          nuxeo-clid: ${{ secrets.CONNECT_CLID }}
           registry: ${{ env.REGISTRY }}
           registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           registry-password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
