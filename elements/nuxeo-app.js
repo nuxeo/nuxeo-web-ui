@@ -1032,15 +1032,49 @@ Polymer({
       this.$.task
         .get()
         .then((task) => {
+          const targetDoc = task && task.targetDocumentIds && task.targetDocumentIds[0];
+          if (task && task.state === 'ended' && targetDoc && targetDoc.uid) {
+            this._loadDocument({ uid: targetDoc.uid, path: targetDoc.path, page: 'browse' })
+              .then((doc) => {
+                const pendingTasks = doc && doc.contextParameters && doc.contextParameters.pendingTasks;
+                if (pendingTasks && pendingTasks.length > 0 && pendingTasks[0].id) {
+                  this.navigateTo('tasks', pendingTasks[0].id);
+                } else if (doc) {
+                  this.show('browse');
+                  this.navigateTo(doc);
+                }
+                this.loading = false;
+              })
+              .catch((error) => {
+                if (error && error.name === 'AbortError') {
+                  this.loading = false;
+                  return;
+                }
+                if (error.status === 403) {
+                  this._fetchTaskCount();
+                  this.navigateTo('tasks');
+                } else {
+                  this.showError(error.status, this.i18n('browse.error'), error.message);
+                }
+                this.loading = false;
+              });
+            return;
+          }
           this._defineTaskAndNavigate(task);
           this.loading = false;
         })
         .catch((error) => {
+          if (error && error.name === 'AbortError') {
+            this.loading = false;
+            return;
+          }
           if (error.status === 403) {
             this._fetchTaskCount();
             this.navigateTo('tasks');
-            this.loading = false;
+          } else {
+            this.showError(error.status, this.i18n('browse.error'), error.message);
           }
+          this.loading = false;
         });
     } else {
       this._defineTaskAndNavigate();
@@ -1373,20 +1407,35 @@ Polymer({
     });
   },
 
-  _refreshAndFetchTasks() {
+  _refreshAndFetchTasks(e) {
+    const taskProcessed = e && e.type === 'workflowTaskProcessed';
     // let's refresh the current document since it might have been changed (ex: state and version)
     if (this.currentDocument) {
       this._loadDocument(this.currentDocument)
-        .then(() => {
-          this.show('browse');
+        .then((doc) => {
+          if (taskProcessed) {
+            const pendingTasks = doc && doc.contextParameters && doc.contextParameters.pendingTasks;
+            if (pendingTasks && pendingTasks.length > 0 && pendingTasks[0].id) {
+              this.navigateTo('tasks', pendingTasks[0].id);
+            } else if (doc) {
+              this.show('browse');
+              this.navigateTo(doc);
+            }
+          } else {
+            this.show('browse');
+          }
         })
         .catch((err) => {
-          if (err['entity-type'] && err['entity-type'] === 'exception' && err.status === 403) {
+          if (err && err.name === 'AbortError') {
             this.loading = false;
+            return;
+          }
+          if (err['entity-type'] && err['entity-type'] === 'exception' && err.status === 403) {
             this.navigateTo('tasks');
           } else {
             this.showError(err.status, this.i18n('browse.error'), err.message);
           }
+          this.loading = false;
         });
     }
     this._fetchTaskCount();
