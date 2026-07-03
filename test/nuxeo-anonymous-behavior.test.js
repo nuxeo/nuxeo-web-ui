@@ -33,6 +33,12 @@ suite('nuxeo-anonymous-behavior', () => {
     await flush();
   });
 
+  teardown(() => {
+    // Some tests write the `nuxeo.start.url.fragment` cookie; clear it so state does not leak
+    // into other unit tests running in the same browser session.
+    document.cookie = 'nuxeo.start.url.fragment=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  });
+
   suite('_isAnonymousUser', () => {
     test('is false when there is no current user', () => {
       app.currentUser = null;

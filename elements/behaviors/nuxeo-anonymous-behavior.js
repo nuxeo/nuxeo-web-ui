@@ -45,7 +45,7 @@ limitations under the License.
 export const NuxeoAnonymousBehavior = {
   /** True when the connected user is the configured anonymous user. */
   _isAnonymousUser() {
-    return Boolean(this.currentUser && this.currentUser.isAnonymous);
+    return Boolean(this.currentUser?.isAnonymous);
   },
 
   /**
@@ -73,8 +73,11 @@ export const NuxeoAnonymousBehavior = {
     // from `window.location.hash`. We set it here too (mirroring nuxeo-connection's 401 handling), and
     // — crucially — re-append the fragment to the logout URL below so it survives the redirect chain and
     // the server captures the correct value instead of overwriting the cookie with an empty hash.
-    document.cookie = `nuxeo.start.url.fragment=${globalThis.location.hash.substring(1) || ''}; path=/`;
-    const baseUrl = (this.$ && this.$.nxcon && this.$.nxcon.url) || this.url || '';
+    // Strip characters that could terminate the cookie value or inject extra cookie attributes.
+    // Legitimate Web UI fragments never contain these; a crafted permalink could.
+    const fragment = globalThis.location.hash.substring(1).replace(/[;\r\n]/g, '');
+    document.cookie = `nuxeo.start.url.fragment=${fragment}; path=/`;
+    const baseUrl = this.$?.nxcon?.url || this.url || '';
     // `requestedUrl` must be context-relative: an absolute URL would get the context path prepended by
     // the server, producing a broken redirect. Logging out invalidates the anonymous session and, since
     // the user was anonymous, Nuxeo forwards to `login.jsp?forceAnonymousLogin=true&requestedUrl=...`.
