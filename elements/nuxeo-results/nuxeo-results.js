@@ -1177,9 +1177,13 @@ Polymer({
             column &&
             column._declaredWidth === undefined &&
             typeof column.hasAttribute === 'function' &&
+            typeof column.getAttribute === 'function' &&
             column.hasAttribute('width')
           ) {
-            column._declaredWidth = column.getAttribute('width');
+            const declaredWidth = column.getAttribute('width');
+            if (declaredWidth) {
+              column._declaredWidth = declaredWidth;
+            }
           }
         });
 
