@@ -862,7 +862,8 @@ suite('nuxeo-app', () => {
       app.loadTask('t1');
       await flush();
       expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
-      expect(app.loading).to.be.false;
+      // navigateTo is stubbed so loadTask is not re-entered; loading stays true until then
+      expect(app.loading).to.be.true;
       app.$.task.get.restore();
       app._loadDocument.restore();
     });
@@ -961,9 +962,28 @@ suite('nuxeo-app', () => {
       expect(app.show).to.have.been.calledWith('browse');
       expect(navigateTo).to.have.been.calledWith(doc);
       expect(navigateTo).to.not.have.been.calledWith('tasks', sinon.match.any);
+      expect(app.loading).to.be.false;
       app.$.task.get.restore();
       app._loadDocument.restore();
       app.show.restore();
+    });
+
+    test('loadTask ended task skips pending tasks without id and navigates to next valid task', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      const doc = {
+        uid: 'doc-1',
+        path: '/ws/file',
+        contextParameters: { pendingTasks: [{ name: 'orphan' }, { id: 'task-next' }] },
+      };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      app.loadTask('t1');
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      expect(app.loading).to.be.true;
+      app.$.task.get.restore();
+      app._loadDocument.restore();
     });
 
     test('loadTask ended task with missing contextParameters falls back to document browse', async () => {
@@ -1347,6 +1367,26 @@ suite('nuxeo-app', () => {
       expect(navigateTo).to.not.have.been.calledWith('tasks', sinon.match.any);
       app._loadDocument.restore();
       app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('navigates to first pending task with id when earlier entries lack id', async () => {
+      const doc = {
+        uid: '1',
+        path: '/p',
+        contextParameters: { pendingTasks: [{ name: 'orphan' }, { id: 'task-next' }] },
+      };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks(workflowTaskProcessed);
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      app._loadDocument.restore();
       app._fetchTaskCount.restore();
       app._resetTaskSelection.restore();
       app.$$.restore();
