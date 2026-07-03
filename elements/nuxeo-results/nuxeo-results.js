@@ -1171,8 +1171,7 @@ Polymer({
         // This approach is future-proof: to add support for new customizable column properties,
         // just update the two sections marked with "EXTEND HERE" below.
 
-        // Capture layout-declared width once per column (mirrors hiddenBack). Only attributes
-        // explicitly set in the layout count; column.width's property default ('150px') is ignored.
+        // Remember each column's layout-declared width (from the `width` attribute), captured once.
         view.columns.forEach((column) => {
           if (
             column &&
@@ -1197,7 +1196,10 @@ Polymer({
             case 'order':
               return idx;
             case 'width':
-              return column._declaredWidth !== undefined ? column._declaredWidth : null;
+              if (column._declaredWidth !== undefined) {
+                return column._declaredWidth;
+              }
+              return null;
             case 'filterValue':
               return '';
             default:
