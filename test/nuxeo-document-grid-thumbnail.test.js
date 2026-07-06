@@ -44,6 +44,15 @@ suite('nuxeo-document-grid-thumbnail', () => {
     test('should default selectedItems to empty array', () => {
       expect(element.selectedItems).to.deep.equal([]);
     });
+
+    // ELEMENTS-1616: consistent crossorigin across all elements that render the
+    // same thumbnail URL, otherwise a plain <img> poisons Chrome's cache and the
+    // crossorigin <img> (list/thumbnail view) fails to load under S3 direct download.
+    test('renders the thumbnail img with crossorigin="anonymous"', () => {
+      const img = element.shadowRoot.querySelector('.thumbnailContainer img');
+      expect(img).to.be.ok;
+      expect(img.getAttribute('crossorigin')).to.equal('anonymous');
+    });
   });
 
   suite('_thumbnail', () => {
