@@ -86,7 +86,7 @@ suite('nuxeo-drive-sync-roots-management', () => {
   });
 
   suite('document links', () => {
-    // urlFor is a Polymer computed from router; shadow it with a stub for unit tests.
+    // urlFor is a routing helper method provided by RoutingBehavior; shadow it with a stub for unit tests.
     setup(() => {
       Object.defineProperty(element, 'urlFor', {
         value: sinon.stub().callsFake((doc) => `/ui/#!/browse${doc.path}`),
