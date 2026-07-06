@@ -45,13 +45,12 @@ suite('nuxeo-document-list-item', () => {
       expect(element.selectedItems).to.deep.equal([]);
     });
 
-    // ELEMENTS-1616: consistent crossorigin across all elements that render the
-    // same thumbnail URL, otherwise a plain <img> poisons Chrome's cache and the
-    // crossorigin <img> (list/thumbnail view) fails to load under S3 direct download.
-    test('renders the thumbnail img with crossorigin="anonymous"', () => {
-      const img = element.shadowRoot.querySelector('.thumbnailContainer img');
-      expect(img).to.be.ok;
-      expect(img.getAttribute('crossorigin')).to.equal('anonymous');
+    // ELEMENTS-1616: the list-item thumbnail must request the same URL with CORS
+    // so it stays consistent with the grid/preview <img> and avoids Chrome's
+    // cross-origin image cache poisoning under S3 direct download.
+    test('requests its thumbnail with CORS enabled', () => {
+      const thumbnail = element.shadowRoot.querySelector('.thumbnailContainer img');
+      expect(thumbnail.crossOrigin).to.equal('anonymous');
     });
   });
 
