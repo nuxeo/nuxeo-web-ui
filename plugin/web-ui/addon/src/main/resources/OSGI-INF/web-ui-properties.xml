@@ -65,7 +65,10 @@
   <!-- Specify the order of document types using a comma-separated list of their id -->
   <property name="org.nuxeo.web.ui.document_type.order">${org.nuxeo.web.ui.document_type.order:=}</property>
 
- <!-- Control external permissions  -->
+  <!-- Control external permissions  -->
  <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
+
+  <!-- Hide date picker placeholder text (set org.nuxeo.web.ui.datePicker.hidePlaceholder=true in nuxeo.conf to hide) -->
+  <property name="org.nuxeo.web.ui.datePicker.hidePlaceholder">${org.nuxeo.web.ui.datePicker.hidePlaceholder:=false}</property>
   </extension>
 </component>
