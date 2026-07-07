@@ -1200,10 +1200,7 @@ Polymer({
             case 'order':
               return idx;
             case 'width':
-              if (column._declaredWidth !== undefined) {
-                return column._declaredWidth;
-              }
-              return null;
+              return column._declaredWidth || null;
             case 'filterValue':
               return '';
             default:
