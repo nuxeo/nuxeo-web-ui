@@ -22,15 +22,17 @@ suite('nuxeo-document-storage', () => {
   let server;
   let element;
 
-  const doc = (uid, extra = {}) => {return {
-    'entity-type': 'document',
-    uid,
-    path: `/default-domain/${uid}`,
-    repository: 'default',
-    title: `Doc ${uid}`,
-    type: 'File',
-    ...extra,
-  }};
+  const doc = (uid, extra = {}) => {
+    return {
+      'entity-type': 'document',
+      uid,
+      path: `/default-domain/${uid}`,
+      repository: 'default',
+      title: `Doc ${uid}`,
+      type: 'File',
+      ...extra,
+    };
+  };
 
   setup(async () => {
     server = await login();
@@ -167,6 +169,26 @@ suite('nuxeo-document-storage', () => {
       element.documents = null;
       element.initialize();
       expect(element.documents).to.be.an('array').that.is.empty;
+    });
+  });
+
+  suite('_normalizeLoadedValue', () => {
+    test('should initialize documents when the loaded value is null', () => {
+      element.documents = null;
+      element._normalizeLoadedValue();
+      expect(element.documents).to.be.an('array').that.is.empty;
+    });
+
+    test('should initialize documents when the loaded value is not an array', () => {
+      element.documents = 'corrupted';
+      element._normalizeLoadedValue();
+      expect(element.documents).to.be.an('array').that.is.empty;
+    });
+
+    test('should keep the loaded value when it is already an array', () => {
+      element.documents = [doc('1')];
+      element._normalizeLoadedValue();
+      expect(element.documents.map((d) => d.uid)).to.deep.equal(['1']);
     });
   });
 });
