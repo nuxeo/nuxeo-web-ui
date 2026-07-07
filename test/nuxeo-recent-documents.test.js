@@ -97,12 +97,13 @@ suite('nuxeo-recent-documents', () => {
       expect(() => element.add({ uid: '1', type: 'File' })).to.not.throw();
     });
 
-    test('should trim the list to maxSize', () => {
+    test('should trim the list to maxSize after a document is added', () => {
       element.maxSize = 2;
-      element.documents = [{ uid: '1' }, { uid: '2' }, { uid: '3' }];
-      sinon.stub(element.$.storage, 'add');
+      element.documents = [{ uid: '1' }, { uid: '2' }];
+      // simulate the real storage side effect of prepending the added document
+      sinon.stub(element.$.storage, 'add').callsFake((doc) => element.unshift('documents', doc));
       element.add({ uid: '4' });
-      expect(element.documents).to.have.lengthOf(2);
+      expect(element.documents.map((d) => d.uid)).to.deep.equal(['4', '1']);
     });
   });
 
