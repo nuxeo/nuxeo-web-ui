@@ -112,7 +112,7 @@ suite('nuxeo-drive-sync-roots-management', () => {
       expect(links[1].getAttribute('href')).to.equal('/ui/#!/browse/root2');
       // The path cell renders the text without an anchor.
       const pathCell = rows[0].querySelector('.cell.flex-3');
-      expect(pathCell.querySelector('a')).to.equal(null);
+      expect(pathCell.querySelector('a')).to.be.null;
       expect(pathCell.textContent.trim()).to.equal('/root1');
       expect(element.urlFor).to.have.been.calledWith(element.roots[0]);
       expect(element.urlFor).to.have.been.calledWith(element.roots[1]);
