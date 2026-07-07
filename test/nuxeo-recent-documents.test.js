@@ -90,6 +90,22 @@ suite('nuxeo-recent-documents', () => {
     });
   });
 
+  suite('add', () => {
+    test('should not throw when storage leaves documents null', () => {
+      element.documents = null;
+      sinon.stub(element.$.storage, 'add');
+      expect(() => element.add({ uid: '1', type: 'File' })).to.not.throw();
+    });
+
+    test('should trim the list to maxSize', () => {
+      element.maxSize = 2;
+      element.documents = [{ uid: '1' }, { uid: '2' }, { uid: '3' }];
+      sinon.stub(element.$.storage, 'add');
+      element.add({ uid: '4' });
+      expect(element.documents).to.have.lengthOf(2);
+    });
+  });
+
   suite('_currentDocumentChanged', () => {
     test('should not process trashed documents', () => {
       element.isTrashed.returns(true);
