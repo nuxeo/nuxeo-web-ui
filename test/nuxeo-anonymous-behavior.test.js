@@ -93,6 +93,9 @@ suite('nuxeo-anonymous-behavior', () => {
       // requestedUrl must be the context-relative path (no origin), url-encoded
       const expected = encodeURIComponent(`${globalThis.location.pathname}${globalThis.location.search}`);
       expect(url).to.contain(`requestedUrl=${expected}`);
+      // forceAnonymousLogin=true is required so the server renders the login form instead of silently
+      // re-authenticating the follow-up request as anonymous (which would loop back to the document)
+      expect(url).to.contain('&forceAnonymousLogin=true');
       // the fragment (Web UI route) is re-appended so it survives the logout redirect chain
       expect(url.endsWith(globalThis.location.hash)).to.be.true;
     });

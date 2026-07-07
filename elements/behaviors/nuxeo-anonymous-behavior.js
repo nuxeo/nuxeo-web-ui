@@ -84,7 +84,14 @@ export const NuxeoAnonymousBehavior = {
     // Browsers carry a fragment across redirects whose Location has none, so appending it here keeps the
     // requested route alive until the server records it in the cookie.
     const requestedUrl = `${globalThis.location.pathname}${globalThis.location.search}`;
-    const logoutUrl = `${baseUrl}/logout?requestedUrl=${encodeURIComponent(requestedUrl)}${globalThis.location.hash}`;
+    // `forceAnonymousLogin=true` is required: logging out drops the anonymous session, but anonymous
+    // authentication would immediately re-authenticate the follow-up request to `requestedUrl`, bouncing
+    // the user straight back to the document and looping. This flag tells Nuxeo to render the login form
+    // instead of silently re-authenticating as anonymous. The fragment stays last so it is a valid URL
+    // fragment (and is carried across the redirect chain / restored from the cookie after login).
+    const logoutUrl = `${baseUrl}/logout?requestedUrl=${encodeURIComponent(
+      requestedUrl,
+    )}&forceAnonymousLogin=true${globalThis.location.hash}`;
     this._redirect(logoutUrl);
   },
 
