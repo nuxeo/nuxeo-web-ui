@@ -158,6 +158,11 @@ export const NuxeoInactivityBehavior = {
   },
 
   _onInactivityTimeout() {
+    // Bail out if the feature was torn down (e.g. the host detached) after this callback was already
+    // queued — teardown sets _inactivityTimeoutMs to 0, so a stale timer must not force a logout.
+    if (!this._inactivityTimeoutMs) {
+      return;
+    }
     // A tab may have been active while this one sat idle; only log out if every tab has been idle.
     // Keyed off the shared (cross-tab) timestamp: this tab's own timer already elapsed, so its local
     // activity is by definition older than the timeout — what matters is whether another tab was active.

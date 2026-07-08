@@ -20,11 +20,12 @@ import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html as polymerHtml } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
-import { NuxeoInactivityBehavior } from '../elements/behaviors/nuxeo-inactivity-behavior.js';
+import { INACTIVITY_ACTIVITY_KEY, NuxeoInactivityBehavior } from '../elements/behaviors/nuxeo-inactivity-behavior.js';
 
 // Minimal host that composes the behavior exactly like nuxeo-app does — a keepAlive
 // <nuxeo-resource> in the template, a _logout() URL helper, and setup/teardown wired from
-// the element lifecycle — so the behavior can be tested in isolation without the full app fixture.
+// the element lifecycle (with the same _inactivityNeedsRearm guard nuxeo-app uses so attached()
+// only re-arms after a real detach) — so the behavior can be tested in isolation without the full app fixture.
 if (!customElements.get('nuxeo-inactivity-test-host')) {
   Polymer({
     is: 'nuxeo-inactivity-test-host',
@@ -38,12 +39,18 @@ if (!customElements.get('nuxeo-inactivity-test-host')) {
       this._setupUnauthorizedRedirect();
     },
     attached() {
-      this._setupInactivityTimer();
-      this._setupUnauthorizedRedirect();
+      // Mirror nuxeo-app: ready() already wired setup on the first attach, so only re-arm after a
+      // real detach/re-attach cycle to avoid a redundant startup keep-alive and listener churn.
+      if (this._inactivityNeedsRearm) {
+        this._inactivityNeedsRearm = false;
+        this._setupInactivityTimer();
+        this._setupUnauthorizedRedirect();
+      }
     },
     detached() {
       this._teardownInactivityTimer();
       this._teardownUnauthorizedRedirect();
+      this._inactivityNeedsRearm = true; // re-arm from the next attached()
     },
   });
 }
@@ -58,7 +65,7 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
   });
 
   suite('inactivity timer', () => {
-    const ACTIVITY_KEY = 'nuxeo-ui-inactivity-last-activity';
+    const ACTIVITY_KEY = INACTIVITY_ACTIVITY_KEY; // reuse the behavior's exported key so tests can't drift
     let getStub;
     let timeoutStub;
     let clearStub;
