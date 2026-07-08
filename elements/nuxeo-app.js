@@ -718,7 +718,7 @@ Polymer({
                 role="button"
                 aria-expanded="[[sidebarExpanded]]"
                 aria-controls="menuContainer"
-                aria-label$="[[_logoAriaLabel(sidebarExpanded, productName, i18n)]]"
+                aria-label$="[[_logoAriaLabel(sidebarExpanded, i18n)]]"
                 on-click="_onLogoClick"
               >
                 <img src$="[[_logo(baseUrl)]]" alt$="[[_logoImgAlt(sidebarExpanded)]]" />
@@ -728,9 +728,15 @@ Polymer({
               <!-- Scrollable menu container -->
               <div id="menuContainer">
                 <!-- home icon (outside paper-listbox to prevent drawer opening) -->
-                <a href$="[[urlFor('home')]]" on-click="_onSidebarNavClick" class="home-link">
-                  <nuxeo-menu-icon name="home" icon="nuxeo:home" label="app.home"></nuxeo-menu-icon>
-                </a>
+                <!-- Single anchor rendered inside nuxeo-menu-icon via its link property to avoid nested anchors. -->
+                <nuxeo-menu-icon
+                  class="home-link"
+                  name="home"
+                  link="[[urlFor('home')]]"
+                  icon="nuxeo:home"
+                  label="app.home"
+                  on-click="_onSidebarNavClick"
+                ></nuxeo-menu-icon>
 
                 <!-- menu -->
                 <paper-listbox
@@ -1253,7 +1259,7 @@ Polymer({
    * `I18nBehavior` swaps `this.i18n` after `messages.json` loads. Without it,
    * the label would freeze on the unresolved key.
    */
-  _logoAriaLabel(sidebarExpanded, productName, i18n) {
+  _logoAriaLabel(sidebarExpanded, i18n) {
     const title = this._sidebarProductTitle(i18n);
     return sidebarExpanded
       ? i18n('accessibility.sidebar.logoExpanded', title)
@@ -1334,7 +1340,10 @@ Polymer({
 
     const focusHome = () => {
       if (homeLink) {
-        homeLink.focus();
+        // `.home-link` is the nuxeo-menu-icon host, which is not natively
+        // focusable; delegate focus to the anchor it renders in its shadow DOM.
+        const anchor = homeLink.shadowRoot && homeLink.shadowRoot.querySelector('#menuItemAnchor');
+        (anchor || homeLink).focus();
       }
     };
 

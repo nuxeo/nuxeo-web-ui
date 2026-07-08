@@ -152,6 +152,12 @@ suite('nuxeo-menu-icon', () => {
       expect(element._href()).to.equal('https://logout');
     });
 
+    test('returns link even when route is empty (e.g. the home icon)', () => {
+      element.route = '';
+      element.link = '/nuxeo/ui/#!/home';
+      expect(element._href()).to.equal('/nuxeo/ui/#!/home');
+    });
+
     test('delegates to urlFor when route has segments', () => {
       element.link = '';
       element.route = 'document:uid1';

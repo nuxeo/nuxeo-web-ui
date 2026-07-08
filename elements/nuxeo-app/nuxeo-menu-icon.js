@@ -329,11 +329,12 @@ Polymer({
   },
 
   _href() {
-    if (!this.route) {
-      return;
-    }
+    // An explicit link always wins, even without a route (e.g. the home icon).
     if (this.link) {
       return this.link;
+    }
+    if (!this.route) {
+      return;
     }
     if (this.urlFor) {
       const parts = this.route.split(':');
