@@ -364,6 +364,23 @@ Polymer({
     this._boundLocationChangedHandler = this._handleLocationChanged.bind(this);
     globalThis.addEventListener('location-changed', this._boundLocationChangedHandler);
 
+    // Global refresh/document events — store bound refs so detached() can remove them
+    this._boundDocumentsDeletedHandler = (e) => {
+      if (e.detail.documents) {
+        this.removeDocuments(e.detail.documents);
+        return;
+      }
+      // when in select all mode we don't have a list of documents in the event detail
+      this._fetchDocument();
+    };
+    globalThis.addEventListener('nuxeo-documents-deleted', this._boundDocumentsDeletedHandler);
+
+    this._boundRefreshDisplayHandler = () => this._fetchDocument();
+    globalThis.addEventListener('refresh-display', this._boundRefreshDisplayHandler);
+
+    this._boundDocumentCreatedHandler = this._fetchDocument.bind(this);
+    globalThis.addEventListener('document-created', this._boundDocumentCreatedHandler);
+
     // Set up observer for dynamically loaded tree nodes
     this._setupTreeObserver();
   },
@@ -376,6 +393,15 @@ Polymer({
     if (this._boundLocationChangedHandler) {
       globalThis.removeEventListener('location-changed', this._boundLocationChangedHandler);
     }
+    if (this._boundDocumentsDeletedHandler) {
+      globalThis.removeEventListener('nuxeo-documents-deleted', this._boundDocumentsDeletedHandler);
+    }
+    if (this._boundRefreshDisplayHandler) {
+      globalThis.removeEventListener('refresh-display', this._boundRefreshDisplayHandler);
+    }
+    if (this._boundDocumentCreatedHandler) {
+      globalThis.removeEventListener('document-created', this._boundDocumentCreatedHandler);
+    }
     if (this._treeObserver) {
       this._treeObserver.disconnect();
     }
@@ -387,20 +413,6 @@ Polymer({
       this.setAttribute('dir', direction);
     }
     this._checkRtl();
-    globalThis.addEventListener('nuxeo-documents-deleted', (e) => {
-      if (e.detail.documents) {
-        this.removeDocuments(e.detail.documents);
-        return;
-      }
-      // when in select all mode we don't have a list of documents in the event detail
-      this._fetchDocument();
-    });
-
-    globalThis.addEventListener('refresh-display', () => {
-      this._fetchDocument();
-    });
-
-    globalThis.addEventListener('document-created', this._fetchDocument.bind(this));
 
     this.controller = {
       getChildren: function (node, page) {

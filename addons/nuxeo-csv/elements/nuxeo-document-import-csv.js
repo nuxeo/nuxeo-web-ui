@@ -63,7 +63,7 @@ Polymer({
         margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
         padding: 0.8em 1em;
-        background-color: var(--sat-nuxeo-card-background);
+        background-color: var(--sat-nuxeo-card-background, var(--nuxeo-box));
         border: 1px solid var(--divider-color);
         position: relative;
       }
