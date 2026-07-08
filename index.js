@@ -74,5 +74,12 @@ ready
   .then(loadLegacy)
   .then(loadBundle)
   .then(setupApp)
-  .then(loadRouting)
-  .then(loadAddons);
+  // Load addons before routing: addons register their config contributions (e.g. blob
+  // enrichers like `wopi`) and slot content at import time. routing.js dispatches the
+  // initial route on import, which triggers the first document fetch. If addons load after
+  // routing, that first fetch is sent without the addon enrichers, so enricher-dependent
+  // blob actions (e.g. the WOPI "open" icon) are missing until a client-side re-navigation
+  // re-fetches the document (WEBUI-1715 regression). setupApp still runs first so
+  // Nuxeo.UI.app is available to addons.
+  .then(loadAddons)
+  .then(loadRouting);
