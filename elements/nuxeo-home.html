@@ -135,7 +135,7 @@ limitations under the License.
         <nuxeo-repositories></nuxeo-repositories>
         [[i18n('home.dashboard')]]
         <div class="header-logo">
-          <img src="images/hyland-wordmark.svg" alt="Hyland" width="110" height="20" />
+          <img src="[[getWordmarkLogo()]]" alt="Hyland" width="110" height="20" />
         </div>
       </div>
       <div>
@@ -406,6 +406,11 @@ limitations under the License.
             this.$.latestViewedDocs.notifyResize(); // XXX: force rendering for Edge (NXP-26244)
           });
         }
+      },
+
+      getWordmarkLogo() {
+        const theme = localStorage.getItem('theme') || 'default';
+        return `themes/${theme}/hyland-wordmark.svg`;
       },
     });
   </script>

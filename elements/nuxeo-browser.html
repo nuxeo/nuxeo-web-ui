@@ -70,9 +70,11 @@ limitations under the License.
       :host([document-facets~='Folderish']) nuxeo-page,
       :host([document-facets~='Collection']) nuxeo-page {
         --nuxeo-page-tabs-border-radius: 16px 16px 0 0;
+        --nuxeo-page-content-border-radius: 0 0 16px 16px;
         --nuxeo-page-main-section-padding: 16px 16px 0 16px;
         --nuxeo-page-content-padding: 0;
-        --nuxeo-page-margin-bottom: 10px; /* Add margin bottom only on document listing page*/
+        --nuxeo-page-margin-bottom: 10px;
+        --nuxeo-page-content-background: var(--sat-nuxeo-card-background, var(--nuxeo-box));
       }
 
       /* Apply background color to tabs when viewing individual documents (NOT folders) */

@@ -140,14 +140,14 @@ Polymer({
       }
 
       .profile-avatar:hover {
-        background: var(--sat-sidebar-item-hover-background, rgba(255, 255, 255, 0.12));
+        background: var(--sat-sidebar-item-hover-background);
         border-radius: 12px;
         color: var(--nuxeo-sidebar-menu-hover);
       }
 
       :host([sidebar-expanded]) .profile-avatar:hover,
       .profile-avatar.selected {
-        background: var(--sat-sidebar-item-selected-background, rgba(255, 255, 255, 0.12));
+        background: var(--sat-sidebar-item-selected-background);
         border-radius: 12px;
         color: var(--nuxeo-sidebar-menu-hover);
       }
@@ -482,12 +482,12 @@ Polymer({
         /* Thin full-height separator between the secondary nav (drawer) and main content.
            Drawn on the wrapper so it spans the entire viewport height regardless of
            how much content the active drawer page renders. */
-        border-right: 1px solid var(--sys-outline-variant, var(--nuxeo-border, rgba(0, 0, 0, 0.12)));
+        border-right: 1px solid var(--nuxeo-border, rgba(0, 0, 0, 0.12));
       }
 
       :host([dir='rtl']) #drawer {
         border-right: none;
-        border-left: 1px solid var(--sys-outline-variant, var(--nuxeo-border, rgba(0, 0, 0, 0.12)));
+        border-left: 1px solid var(--nuxeo-border, rgba(0, 0, 0, 0.12));
       }
 
       /* Disable transition while the user is actively dragging the drawer resize handle */
@@ -722,9 +722,7 @@ Polymer({
                 on-click="_onLogoClick"
               >
                 <img src$="[[_logo(baseUrl)]]" alt$="[[_logoImgAlt(sidebarExpanded)]]" />
-                <span class="sidebar-expanded-title" aria-hidden="true"
-                  >[[_sidebarProductTitle(productName, i18n)]]</span
-                >
+                <span class="sidebar-expanded-title" aria-hidden="true">[[_sidebarProductTitle(i18n)]]</span>
               </div>
 
               <!-- Scrollable menu container -->
@@ -1256,15 +1254,14 @@ Polymer({
    * the label would freeze on the unresolved key.
    */
   _logoAriaLabel(sidebarExpanded, productName, i18n) {
-    const title = this._sidebarProductTitle(productName, i18n);
+    const title = this._sidebarProductTitle(i18n);
     return sidebarExpanded
       ? i18n('accessibility.sidebar.logoExpanded', title)
       : i18n('accessibility.sidebar.logoCollapsed', title);
   },
 
-  _sidebarProductTitle(productName, i18n) {
-    const name = (productName && String(productName).trim()) || 'Nuxeo';
-    return i18n('app.brandedProductName', name);
+  _sidebarProductTitle(i18n) {
+    return i18n('app.brandedProductName');
   },
 
   /**

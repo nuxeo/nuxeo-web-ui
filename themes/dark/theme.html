@@ -22,26 +22,26 @@ limitations under the License.
   <style is="custom-style">
     html {
       /* -- Nuxeo Branding colors -- */
-      --nuxeo-app-font: 'Noto Sans'; /* matches --sat-font-family-primary */
-      --nuxeo-text-default: #fff;
+      --nuxeo-app-font: 'Noto Sans';
+      --nuxeo-text-default: #e4e0f0;
 
-      --nuxeo-primary-color: #1f28bf;
-      --nuxeo-secondary-color: #0066ff;
+      --nuxeo-primary-color: #c3c0ff;
+      --nuxeo-secondary-color: #c5c2ec;
 
-      --nuxeo-page-background: #060826;
-      --nuxeo-border: rgba(0, 0, 0, 0.15);
+      --nuxeo-page-background: #1a1c1e;
+      --nuxeo-border: #918f9d;
 
       /* App Header */
       --nuxeo-app-header: var(--nuxeo-text-default);
-      --nuxeo-app-header-background: #2e2e3e;
+      --nuxeo-app-header-background: #0a0b0c;
       --nuxeo-app-header-pill: #434649;
-      --nuxeo-app-header-pill-hover: var(--nuxeo-primary-color);
-      --nuxeo-app-header-pill-active: var(--nuxeo-secondary-color);
+      --nuxeo-app-header-pill-hover: var(--nuxeo-secondary-color);
+      --nuxeo-app-header-pill-active: var(--nuxeo-primary-color);
 
       /* App Sidebar + Drawer*/
       --nuxeo-sidebar-background: var(--nuxeo-primary-color);
-      --nuxeo-sidebar-menu: rgba(255, 255, 255, 0.5);
-      --nuxeo-sidebar-menu-hover: rgba(255, 255, 255, 1);
+      --nuxeo-sidebar-menu: #26227b;
+      --nuxeo-sidebar-menu-hover: #26227b;
       --nuxeo-badge-background: #fb6107;
       --nuxeo-drawer-header: var(--nuxeo-text-default);
       --nuxeo-drawer-text: var(--nuxeo-text-default);
@@ -53,26 +53,26 @@ limitations under the License.
       --nuxeo-quicksearch-background: #191928;
 
       /* Tags & Pills */
-      --nuxeo-tag-background: rgba(0, 0, 0, 0.2);
+      --nuxeo-tag-background: #1a1c1e;
       --nuxeo-tag-text: var(--nuxeo-text-default);
-      --nuxeo-pill-filter-background: rgba(0, 0, 0, 0.1);
+      --nuxeo-pill-filter-background: rgba(150, 147, 147, 0.1);
       --nuxeo-pill-filter-background-active: var(--nuxeo-secondary-color);
 
       /* Boxes, Tables & Listings */
-      --nuxeo-box: #2e2e3e;
-      --nuxeo-table-header-background: #2e2e3e;
-      --nuxeo-table-items-background: #2e2e3e;
+      --nuxeo-box: #0a0b0c;
+      --nuxeo-table-header-background: #0a0b0c;
+      --nuxeo-table-items-background: #0a0b0c;
       --nuxeo-grid-selected: var(--nuxeo-primary-color);
-      --nuxeo-dropdown-list-background: #2e2e3e;
+      --nuxeo-dropdown-list-background: #1a1c1e;
 
       /* Buttons & Links */
       --nuxeo-button: transparent;
       --nuxeo-button-primary: var(--nuxeo-primary-color);
       --nuxeo-button-primary-focus: var(--nuxeo-secondary-color);
-      --nuxeo-button-primary-text: #ffffff;
-      --nuxeo-button-secondary-text: #b5b5b5;
-      --nuxeo-button-disabled: rgba(255, 255, 255, 0.05);
-      --nuxeo-button-disabled-text: rgba(255, 255, 255, 0.1);
+      --nuxeo-button-primary-text: #3e3b92;
+      --nuxeo-button-secondary-text: var(--nuxeo-primary-color);
+      --nuxeo-button-disabled: rgba(255, 255, 255, 0.122);
+      --nuxeo-button-disabled-text: rgba(255, 255, 255, 0.668);
       --nuxeo-link-color: var(--nuxeo-text-default);
       --nuxeo-link-hover-color: var(--nuxeo-primary-color);
 
@@ -89,18 +89,18 @@ limitations under the License.
 
       /* Selection toolbar */
       --nuxeo-selection-toolbar-background: var(--nuxeo-primary-color);
-      --nuxeo-selection-toolbar-text: #fff;
-      --nuxeo-selection-toolbar-link: #fff;
+      --nuxeo-selection-toolbar-text: #3e3b92;
+      --nuxeo-selection-toolbar-link: #3e3b92;
       --nuxeo-selection-toolbar-link-hover: #000;
 
       /*-- Polymer Variables --*/
       --default-primary-color: var(--nuxeo-primary-color);
       --dark-primary-color: #05243e;
       --light-primary-color: #c5cae9;
-      --text-primary-color: #ffffff;
+      --text-primary-color: #e2e2e5;
       --accent-color: var(--nuxeo-primary-color);
       --primary-background-color: #f8fafc;
-      --primary-text-color: #434343;
+      --primary-text-color: var(--nuxeo-text-default);
       --secondary-text-color: #727272;
       --disabled-text-color: #bdbdbd;
       --divider-color: var(--nuxeo-border);
@@ -112,7 +112,7 @@ limitations under the License.
       --paper-toolbar-background: var(--nuxeo-box);
       --paper-toolbar-color: var(--nuxeo-text-default);
 
-      --paper-listbox-background-color: var(--nuxeo-box);
+      --paper-listbox-background-color: #1a1c1e;
       --paper-menu-background-color: var(--nuxeo-box);
       --paper-menu-color: var(--nuxeo-text-default);
       --paper-menu-disabled-color: #e9eff3;
@@ -168,14 +168,55 @@ limitations under the License.
 
       /* ================================================================
          TIER 3 — NUXEO COMPONENT TOKENS (--sat-<component>-<property>)
-         See docs/THEMING.md for the full naming contract.
+         Pattern: full words, no abbreviations, no -default suffixes.
          ================================================================ */
+      /* Section header (used by home, clipboard, tasks, collections,
+         recent docs, document tree — applied via the --sat-section-header mixin) */
+      --sat-section-header-text-color: #e4e0f0;
 
-      /* Browse drawer */
-      --sat-selection-pill-background: #2e2e3e;
+      /* App / page-level header bar */
+      --sat-app-header-background: #1a1c1e;
+      --sat-app-header-shadow: none;
+      --sat-page-surface-background: #1a1c1e;
+
+      /* Drawer + Sidebar content */
+      --sat-selection-pill-background: #444366;
+      --sat-drawer-toggle-handle-background: #c8c5d3; /* update */
+      --sat-sidebar-item-selected-background: #26227b1f;
+      --sat-sidebar-item-hover-background: #26227b1f;
+
+      /* Document create button (FAB on the home dashboard) */
+      --sat-document-create-button-icon-color: #e2dfff;
+      --sat-document-create-button-background: #3e3b92;
+      --sat-document-create-button-hover-background: #5753d1;
+      --sat-document-create-button-box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+
+      /* Document create shortcuts (labelled mini-buttons that expand from the FAB) */
+      --sat-document-create-shortcut-label-color: #e2dfff;
+      --sat-document-create-shortcut-icon-color: #e2dfff;
+
+      /* Document view tabs */
+      --sat-page-tabs-background: #1a1c1e;
+      --sat-page-tabs-selected-background: var(--nuxeo-secondary-color);
+      --sat-page-tabs-active-text-color: #3e3b92;
+
+      /* Results view mode toggle (segmented button) */
+      --sat-view-toggle-outline: #918f9d;
+      --sat-view-toggle-selected-background: #444366;
+      --sat-view-toggle-selected-icon-color: #e2dfff;
+      --sat-view-toggle-unselected-icon-color: #e2e2e5;
+      --sat-view-toggle-unselected-background: transparent;
+      --sat-view-toggle-check-color: #e2dfff;
+      --sat-view-toggle-hover-background: rgba(72, 71, 155, 0.538);
+      --sat-view-toggle-hover-icon-color: #e2dfff;
 
       /* Nuxeo Elements - Map to Satori colors */
       --nuxeo-checkmark-border-color: var(--nuxeo-text-default);
+      --sat-tooltip-text-color: #3e3b92;
+      --sat-document-grid-thumbnail-background: black;
+      --sat-nuxeo-card-background: #0a0b0c;
+      --sat-csv-import-background: #1a1c1e;
+      --sat-path-suggestion-result-selected-background: var(--nuxeo-secondary-color);
     }
   </style>
 </custom-style>

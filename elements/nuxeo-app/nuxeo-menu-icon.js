@@ -60,7 +60,7 @@ Polymer({
       }
 
       :host(.selected) {
-        background: var(--sat-sidebar-item-selected-background, rgba(255, 255, 255, 0.12));
+        background: var(--sat-sidebar-item-selected-background);
         border-radius: 12px;
       }
 
@@ -96,13 +96,13 @@ Polymer({
       }
 
       #menuItemAnchor:hover {
-        background: var(--sat-sidebar-item-hover-background, rgba(255, 255, 255, 0.12));
+        background: var(--sat-sidebar-item-hover-background);
         border-radius: 12px;
         color: var(--nuxeo-sidebar-menu-hover);
       }
 
       :host(.selected) #menuItemAnchor:hover {
-        background: transparent;
+        background: var(--sat-sidebar-item-hover-background);
         color: var(--nuxeo-sidebar-menu-hover);
       }
 

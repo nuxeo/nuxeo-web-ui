@@ -620,11 +620,6 @@ suite('nuxeo-app', () => {
   });
 
   suite('expandable sidebar', () => {
-    test('_sidebarProductTitle uses productName', () => {
-      const fakeI18n = (key, ...args) => (key === 'app.brandedProductName' ? `Hyland ${args[0]}` : key);
-      expect(app._sidebarProductTitle('Nuxeo', fakeI18n)).to.equal('Hyland Nuxeo');
-    });
-
     test('_toggleDrawer collapses expanded sidebar when opening drawer', () => {
       app.sidebarExpanded = true;
       app.drawerOpened = false;
@@ -665,7 +660,7 @@ suite('nuxeo-app', () => {
     test('_logoAriaLabel uses the collapsed key with product title placeholder', () => {
       app.productName = 'Nuxeo';
       const fakeI18n = (key, ...args) =>
-        key === 'app.brandedProductName' ? `Hyland ${args[0]}` : `${key}|${args.join(',')}`;
+        key === 'app.brandedProductName' ? 'Hyland Nuxeo' : `${key}|${args.join(',')}`;
 
       expect(app._logoAriaLabel(false, app.productName, fakeI18n)).to.equal(
         'accessibility.sidebar.logoCollapsed|Hyland Nuxeo',
@@ -675,7 +670,7 @@ suite('nuxeo-app', () => {
     test('_logoAriaLabel uses the expanded key with product title placeholder', () => {
       app.productName = 'Nuxeo';
       const fakeI18n = (key, ...args) =>
-        key === 'app.brandedProductName' ? `Hyland ${args[0]}` : `${key}|${args.join(',')}`;
+        key === 'app.brandedProductName' ? 'Hyland Nuxeo' : `${key}|${args.join(',')}`;
 
       expect(app._logoAriaLabel(true, app.productName, fakeI18n)).to.equal(
         'accessibility.sidebar.logoExpanded|Hyland Nuxeo',

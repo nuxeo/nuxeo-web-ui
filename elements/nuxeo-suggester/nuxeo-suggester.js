@@ -104,7 +104,7 @@ Polymer({
       }
 
       #searchButton {
-        border-left: 1px solid rgba(0, 0, 0, 0.1);
+        border-left: 1px solid var(--nuxeo-border, rgba(0, 0, 0, 0.1));
         position: fixed;
         z-index: 100;
         top: 0;
@@ -115,7 +115,7 @@ Polymer({
       :host([dir='rtl']) #searchButton {
         right: auto;
         left: 0;
-        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        border-right: 1px solid var(--nuxeo-border, rgba(0, 0, 0, 0.1));
       }
 
       #searchButton:hover {
@@ -249,7 +249,7 @@ Polymer({
 
       @media (max-width: 1024px) {
         #searchButton {
-          background-color: var(--sat-app-header-box-background-color, var(--nuxeo-app-header-background));
+          background-color: transparent;
           z-index: 100;
         }
 
