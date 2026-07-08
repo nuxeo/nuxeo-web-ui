@@ -784,13 +784,16 @@ suite('nuxeo-document-tree unit behavior', () => {
     const popSpy = sinon.spy(window, 'removeEventListener');
     element._boundPopStateHandler = () => {};
     element._boundLocationChangedHandler = () => {};
-    element._treeObserver = { disconnect: sinon.spy() };
+    // Capture the spy up front: detached() nulls _treeObserver after disconnecting it.
+    const disconnectSpy = sinon.spy();
+    element._treeObserver = { disconnect: disconnectSpy };
 
     element.detached();
 
     expect(popSpy).to.have.been.calledWith('popstate', element._boundPopStateHandler);
     expect(popSpy).to.have.been.calledWith('location-changed', element._boundLocationChangedHandler);
-    expect(element._treeObserver.disconnect).to.have.been.calledOnce;
+    expect(disconnectSpy).to.have.been.calledOnce;
+    expect(element._treeObserver).to.equal(null);
     popSpy.restore();
   });
 });
