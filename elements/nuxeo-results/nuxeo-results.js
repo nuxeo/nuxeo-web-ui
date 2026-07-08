@@ -266,8 +266,8 @@ Polymer({
                 <button
                   type="button"
                   class="displayMode"
-                  title$="[[_displayModeTitle(item)]]"
-                  aria-label$="[[_displayModeTitle(item)]]"
+                  title$="[[_displayModeTitle(item, i18n)]]"
+                  aria-label$="[[_displayModeTitle(item, i18n)]]"
                   selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
                   disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
                   aria-pressed="[[_isCurrentDisplayMode(item, displayMode)]]"
@@ -794,6 +794,7 @@ Polymer({
   },
 
   _displayModeTitle(item) {
+    // `i18n` is passed as a dummy binding argument so labels re-evaluate when translations load.
     return this.i18n(`displayModeButton.display.${item.name}`);
   },
 

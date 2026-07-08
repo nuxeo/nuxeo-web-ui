@@ -409,7 +409,18 @@ limitations under the License.
       },
 
       getWordmarkLogo() {
-        const theme = localStorage.getItem('theme') || 'default';
+        // Allowlist a safe single path segment (alphanumeric, hyphen, underscore) to
+        // prevent path traversal / URL manipulation, and guard localStorage access
+        // which can throw in some browsing modes.
+        let theme = 'default';
+        try {
+          const stored = localStorage.getItem('theme');
+          if (stored && /^[a-zA-Z0-9_-]+$/.test(stored.trim())) {
+            theme = stored.trim();
+          }
+        } catch (e) {
+          console.warn('Failed to read theme preference:', e.message);
+        }
         return `themes/${theme}/hyland-wordmark.svg`;
       },
     });
