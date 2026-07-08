@@ -1420,6 +1420,8 @@
   "themes.current": "Atual",
   "themes.dark": "Escuro",
   "themes.default": "Nuxeo",
+  "themes.kawaii": "Kawaii",
+  "themes.light": "Light",
   "threeDViewLayout.delete.confirm.message": "Deseja mesmo excluir este 3D?",
   "threeDViewLayout.delete.tooltip": "Excluir conteúdo 3D",
   "threeDViewLayout.deleted.message": "3D deletado",

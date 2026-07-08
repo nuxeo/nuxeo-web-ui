@@ -137,8 +137,8 @@ const template = html`
         }
         /* Responsive adjustments for dashboard header title */
         @media (max-width: 720px) {
-          .header {
-            padding-left: 48px;
+          .header[slot='header'] {
+            padding-inline-start: 48px;
           }
         }
 

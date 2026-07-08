@@ -1420,6 +1420,8 @@
   "themes.current": "当前",
   "themes.dark": "Dark",
   "themes.default": "Nuxeo",
+  "themes.kawaii": "Kawaii",
+  "themes.light": "Light",
   "threeDViewLayout.delete.confirm.message": "是否确实要删除此3D 内容？",
   "threeDViewLayout.delete.tooltip": "删除3D 内容",
   "threeDViewLayout.deleted.message": "3D 内容已删除",
