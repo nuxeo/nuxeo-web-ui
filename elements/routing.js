@@ -157,9 +157,6 @@ page('*', (ctx) => {
   app.showError(404, '', ctx.path);
 });
 
-// add #! before urls
-page({ hashbang: true, click: false, decodeURLComponents: false });
-
 app.router = {
   baseUrl: app.baseUrl,
 
@@ -238,3 +235,11 @@ app.router = {
     }
   },
 };
+
+// Register the router (above) before starting page.js. Starting page.js dispatches the initial
+// route, which triggers the first document fetch and renders the first page. `navigateTo`/`urlFor`
+// (RoutingBehavior) are only available once `app.router` is set, so it must be registered before
+// this initial dispatch, otherwise elements rendered by the first route can hit
+// "navigateTo is not a function" (WEBUI-1715).
+// add #! before urls
+page({ hashbang: true, click: false, decodeURLComponents: false });
