@@ -662,9 +662,7 @@ suite('nuxeo-app', () => {
       const fakeI18n = (key, ...args) =>
         key === 'app.brandedProductName' ? 'Hyland Nuxeo' : `${key}|${args.join(',')}`;
 
-      expect(app._logoAriaLabel(false, app.productName, fakeI18n)).to.equal(
-        'accessibility.sidebar.logoCollapsed|Hyland Nuxeo',
-      );
+      expect(app._logoAriaLabel(false, fakeI18n)).to.equal('accessibility.sidebar.logoCollapsed|Hyland Nuxeo');
     });
 
     test('_logoAriaLabel uses the expanded key with product title placeholder', () => {
@@ -672,9 +670,7 @@ suite('nuxeo-app', () => {
       const fakeI18n = (key, ...args) =>
         key === 'app.brandedProductName' ? 'Hyland Nuxeo' : `${key}|${args.join(',')}`;
 
-      expect(app._logoAriaLabel(true, app.productName, fakeI18n)).to.equal(
-        'accessibility.sidebar.logoExpanded|Hyland Nuxeo',
-      );
+      expect(app._logoAriaLabel(true, fakeI18n)).to.equal('accessibility.sidebar.logoExpanded|Hyland Nuxeo');
     });
 
     test('_syncSidebarExpandedTooltips hides profile tooltip on expand', () => {

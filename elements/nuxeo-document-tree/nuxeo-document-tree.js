@@ -404,6 +404,9 @@ Polymer({
     }
     if (this._treeObserver) {
       this._treeObserver.disconnect();
+      // Clear the reference so a later re-attach re-registers the observer
+      // (`_setupTreeObserver()` early-returns while `_treeObserver` is truthy).
+      this._treeObserver = null;
     }
   },
 
