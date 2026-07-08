@@ -794,7 +794,7 @@ suite('nuxeo-results', () => {
 
   suite('Display Mode Features', () => {
     test('_displayModeTitle generates i18n key', () => {
-      const item = { name: 'table', icon: 'icons:list' };
+      const item = { name: 'table', icon: 'nuxeo:view-list' };
 
       const title = results._displayModeTitle(item);
 
@@ -815,7 +815,7 @@ suite('nuxeo-results', () => {
 
     test('_toggleDisplayMode changes display mode', () => {
       const event = {
-        model: { item: { name: 'grid', icon: 'icons:grid-on' } },
+        model: { item: { name: 'grid', icon: 'nuxeo:view-thumbnails' } },
       };
 
       results._toggleDisplayMode(event);
@@ -827,8 +827,8 @@ suite('nuxeo-results', () => {
       // Create a results element with child views
       const resultsWithViews = await fixture(html`
         <nuxeo-results name="test-with-views">
-          <div class="results" name="table" icon="icons:list"></div>
-          <div class="results" name="grid" icon="icons:grid-on"></div>
+          <div class="results" name="table" icon="nuxeo:view-list"></div>
+          <div class="results" name="grid" icon="nuxeo:view-thumbnails"></div>
         </nuxeo-results>
       `);
       await flush();
@@ -837,14 +837,14 @@ suite('nuxeo-results', () => {
       resultsWithViews._updateViews();
 
       expect(resultsWithViews._displayModes).to.have.lengthOf(2);
-      expect(resultsWithViews._displayModes[0]).to.deep.equal({ name: 'table', icon: 'icons:list' });
-      expect(resultsWithViews._displayModes[1]).to.deep.equal({ name: 'grid', icon: 'icons:grid-on' });
+      expect(resultsWithViews._displayModes[0]).to.deep.equal({ name: 'table', icon: 'nuxeo:view-list' });
+      expect(resultsWithViews._displayModes[1]).to.deep.equal({ name: 'grid', icon: 'nuxeo:view-thumbnails' });
     });
 
     test('_updateViews sets default display mode if current is unavailable', async () => {
       const resultsWithViews = await fixture(html`
         <nuxeo-results name="test-default-mode">
-          <div class="results" name="table" icon="icons:list"></div>
+          <div class="results" name="table" icon="nuxeo:view-list"></div>
         </nuxeo-results>
       `);
       await flush();

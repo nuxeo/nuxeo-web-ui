@@ -366,7 +366,7 @@ const template = html`
           box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
           font-family: var(--nuxeo-app-font);
           border-radius: 0;
-          background-color: var(--nuxeo-box);
+          background-color: var(--sat-nuxeo-card-background, var(--nuxeo-box));
         }
 
         --nuxeo-label: {
@@ -510,6 +510,7 @@ const template = html`
           font-size: 1rem;
           font-family: var(--nuxeo-app-font);
           background-color: var(--nuxeo-sidebar-background);
+          color: var(--sat-tooltip-text-color, var(--nuxeo-sidebar-menu));
         }
 
         --paper-card: {

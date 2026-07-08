@@ -19,7 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-localstorage/iron-localstorage.js';
 import '@polymer/iron-pages/iron-pages.js';
-import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/iron-icon/iron-icon.js';
 import '@nuxeo/nuxeo-elements/nuxeo-connection.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { config } from '@nuxeo/nuxeo-elements';
@@ -99,12 +99,65 @@ Polymer({
         height: calc(var(--nuxeo-results-view-height, calc(100vh - 130px - var(--nuxeo-app-top))) - 66px);
       }
 
-      .displayMode {
-        @apply --nuxeo-action;
+      .viewModes {
+        display: inline-flex;
+        align-items: stretch;
+        height: 35px;
+        border: 1px solid var(--sat-view-toggle-outline, #918f9d);
+        border-radius: 1000px;
+        overflow: hidden;
       }
 
-      .displayMode:hover {
-        @apply --nuxeo-action-hover;
+      .displayMode {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        gap: 4px;
+        min-width: 40px;
+        height: 100%;
+        margin: 0;
+        padding: 0 12px;
+        border: none;
+        border-radius: 0;
+        background: var(--sat-view-toggle-unselected-background, transparent);
+        color: var(--sat-view-toggle-unselected-icon-color, #474551);
+        cursor: pointer;
+        font: inherit;
+        transition:
+          background 0.15s ease-in-out,
+          color 0.15s ease-in-out;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .displayMode:not([selected]):hover {
+        background: var(--sat-view-toggle-hover-background, rgba(0, 0, 0, 0.06));
+        color: var(--sat-view-toggle-hover-icon-color, var(--nuxeo-primary-color));
+      }
+
+      .displayMode iron-icon {
+        width: 18px;
+        height: 18px;
+        color: inherit;
+      }
+
+      .displayMode iron-icon.displayModeCheck {
+        width: 18px;
+        height: 18px;
+        color: var(--sat-view-toggle-check-color, #3e3b92);
+      }
+
+      .displayMode[selected] {
+        background: var(--sat-view-toggle-selected-background, #444366);
+        color: var(--sat-view-toggle-selected-icon-color, #e2dfff);
+        cursor: default;
+      }
+
+      .displayMode:focus-visible {
+        outline: 20px solid var(--sat-view-toggle-outline, #c3c7c3);
+        outline-offset: -20px;
+      }
+
+      .displayMode[disabled] {
+        opacity: 1;
       }
 
       .main {
@@ -149,15 +202,8 @@ Polymer({
       }
 
       .resultActions {
-        margin-bottom: 16px;
+        margin-bottom: var(--nuxeo-results-quick-filters-margin-bottom, 16px);
         min-height: 38px;
-      }
-
-      .resultActions paper-icon-button {
-        width: 2em;
-        height: 2em;
-        padding: 0.3em;
-        margin-left: 4px;
       }
 
       .resultsCount {
@@ -167,10 +213,6 @@ Polymer({
         padding-left: 4px;
       }
 
-      paper-icon-button[selected] {
-        color: var(--icon-toggle-outline-color, var(--nuxeo-action-color-activated));
-      }
-
       nuxeo-actions-menu {
         height: 100%;
         max-width: var(--nuxeo-results-selection-actions-menu-max-width, 280px);
@@ -178,6 +220,7 @@ Polymer({
 
       nuxeo-quick-filters {
         margin-right: 16px;
+        margin-top: var(--nuxeo-results-quick-filters-margin-top, 0);
       }
     </style>
 
@@ -218,18 +261,23 @@ Polymer({
               <nuxeo-slot name="RESULTS_ACTIONS" model="[[actionContext]]"></nuxeo-slot>
             </slot>
 
-            <div class="viewModes">
+            <div class="viewModes" role="group" aria-label$="[[i18n('displayModeButton.group')]]">
               <template is="dom-repeat" items="[[_displayModes]]">
-                <paper-icon-button
+                <button
+                  type="button"
                   class="displayMode"
-                  icon="[[item.icon]]"
-                  title$="[[_displayModeTitle(item, i18n)]]"
+                  title$="[[_displayModeTitle(item)]]"
+                  aria-label$="[[_displayModeTitle(item)]]"
                   selected$="[[_isCurrentDisplayMode(item, displayMode)]]"
                   disabled$="[[_isCurrentDisplayMode(item, displayMode)]]"
-                  on-tap="_toggleDisplayMode"
-                  aria-selected="true"
+                  aria-pressed="[[_isCurrentDisplayMode(item, displayMode)]]"
+                  on-click="_toggleDisplayMode"
                 >
-                </paper-icon-button>
+                  <template is="dom-if" if="[[_isCurrentDisplayMode(item, displayMode)]]">
+                    <iron-icon icon="nuxeo:check" class="displayModeCheck" aria-hidden="true"></iron-icon>
+                  </template>
+                  <iron-icon icon="[[item.icon]]" aria-hidden="true"></iron-icon>
+                </button>
               </template>
             </div>
           </div>
