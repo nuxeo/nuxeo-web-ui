@@ -98,11 +98,12 @@ Polymer({
         @apply --layout-flex;
         @apply --layout-vertical;
         height: calc(100vh - 61px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
-        width: 293px;
+        width: 100%;
       }
 
       .collection-box {
         line-height: 155%;
+        min-width: 0;
       }
 
       .collection-box + .collection-box {
@@ -110,6 +111,7 @@ Polymer({
       }
 
       iron-icon.collection-name-icon {
+        flex-shrink: 0;
         height: 0.9em;
         width: 0.9em;
         border-radius: 50px;
@@ -118,9 +120,18 @@ Polymer({
         padding: 0.4em;
       }
 
+      .collection-info {
+        min-width: 0;
+      }
+
       .collection-name {
+        @apply --layout-flex;
         font-weight: 700;
         margin-left: 0.5em;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .collection-detail {
