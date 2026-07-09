@@ -141,7 +141,7 @@ jobs:
 
       - name: Build and push combined Nuxeo + Web UI image
         id: build
-        uses: nuxeo/gh-build-tools/.github/actions/nuxeo-docker-build@v0.14.0
+        uses: nuxeo/gh-build-tools/.github/actions/nuxeo-docker-build@OPSEXP-4184
         with:
           base-image-tag: ${{ env.BASE_IMAGE_TAG }}
           base-registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
