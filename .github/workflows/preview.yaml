@@ -149,7 +149,7 @@ jobs:
           nuxeo-local-modules-path: local-modules
           # Connect server packages to pre-install; defaults to replace-administrator-user when NUXEO_SERVER_PACKAGES is unset.
           nuxeo-connect-modules: ${{ github.event.inputs.nuxeo_server_packages || vars.NUXEO_SERVER_PACKAGES || 'replace-administrator-user' }}
-          nuxeo-connect-url: https://nos-preprod-connect.nuxeocloud.com/nuxeo/site
+          nuxeo-connect-url: https://nos-preprod-connect.nuxeocloud.com/nuxeo/site/
           nuxeo-clid: ${{ secrets.DEVOPS_CLID }}
           registry: ${{ env.REGISTRY }}
           registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
