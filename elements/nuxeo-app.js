@@ -1340,10 +1340,7 @@ Polymer({
 
     const focusHome = () => {
       if (homeLink) {
-        // `.home-link` is the nuxeo-menu-icon host, which is not natively
-        // focusable; delegate focus to the anchor it renders in its shadow DOM.
-        const anchor = homeLink.shadowRoot && homeLink.shadowRoot.querySelector('#menuItemAnchor');
-        (anchor || homeLink).focus();
+        homeLink.focus();
       }
     };
 
