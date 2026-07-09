@@ -33,8 +33,6 @@ env:
   REPOSITORY: nuxeo/nuxeo-web-ui
   # Base Nuxeo server image tag; nuxeo-docker-build pulls docker-private.packages.nuxeo.com/nuxeo/nuxeo:<tag>.
   BASE_IMAGE_TAG: '2023'
-  # Nuxeo Connect server URL for build-time package installs; nuxeo-docker-build consumes it as an env var.
-  NUXEO_CONNECT_URL: https://connect.nuxeo.com/nuxeo
 
 jobs:
   id:
@@ -151,7 +149,8 @@ jobs:
           nuxeo-local-modules-path: local-modules
           # Connect server packages to pre-install; defaults to replace-administrator-user when NUXEO_SERVER_PACKAGES is unset.
           nuxeo-connect-modules: ${{ github.event.inputs.nuxeo_server_packages || vars.NUXEO_SERVER_PACKAGES || 'replace-administrator-user' }}
-          nuxeo-clid: ${{ secrets.DEVOPS_CLID }}
+          nuxeo-connect-url: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+          nuxeo-clid: ${{ secrets.CONNECT_PREPROD_CLID }}
           registry: ${{ env.REGISTRY }}
           registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           registry-password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
