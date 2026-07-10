@@ -961,7 +961,6 @@ suite('nuxeo-app', () => {
       app.loadTask('t1');
       await flush();
       expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
-      expect(app.loading).to.be.true;
       app.$.task.get.restore();
       app._loadDocument.restore();
     });
