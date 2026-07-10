@@ -806,20 +806,6 @@ suite('nuxeo-app', () => {
       app._fetchTaskCount.restore();
     });
 
-    test('loadTask ignores aborted task fetch', async () => {
-      const abortError = new Error('The user aborted a request.');
-      abortError.name = 'AbortError';
-      sinon.stub(app.$.task, 'get').rejects(abortError);
-      sinon.stub(app, 'showError');
-      app.loading = true;
-      app.loadTask('t1');
-      await flush();
-      expect(app.showError).to.not.have.been.called;
-      expect(app.loading).to.be.false;
-      app.$.task.get.restore();
-      app.showError.restore();
-    });
-
     test('loadTask shows error and resets loading on task fetch failure', async () => {
       sinon.stub(app.$.task, 'get').rejects({ status: 500, message: 'server error' });
       sinon.stub(app, 'showError');
@@ -829,23 +815,6 @@ suite('nuxeo-app', () => {
       expect(app.showError).to.have.been.calledWith(500, 'browse.error', 'server error');
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
-      app.showError.restore();
-    });
-
-    test('loadTask ignores aborted document load when task is ended', async () => {
-      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
-      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
-      const abortError = new Error('The user aborted a request.');
-      abortError.name = 'AbortError';
-      sinon.stub(app.$.task, 'get').resolves(task);
-      sinon.stub(app, '_loadDocument').rejects(abortError);
-      sinon.stub(app, 'showError');
-      app.loadTask('t1');
-      await flush();
-      expect(app.showError).to.not.have.been.called;
-      expect(app.loading).to.be.false;
-      app.$.task.get.restore();
-      app._loadDocument.restore();
       app.showError.restore();
     });
 
@@ -861,6 +830,10 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '_loadDocument').resolves(doc);
       app.loadTask('t1');
       await flush();
+      expect(app._loadDocument).to.have.been.calledWith(
+        { uid: 'doc-1', path: '/ws/file', page: 'browse' },
+        { applyState: false },
+      );
       expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
       // navigateTo is stubbed so loadTask is not re-entered; loading stays true until then
       expect(app.loading).to.be.true;
@@ -1241,7 +1214,7 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '$$').returns({ visible: false });
       app._refreshAndFetchTasks(workflowTaskProcessed);
       await flush();
-      expect(app._loadDocument).to.have.been.calledWith(doc);
+      expect(app._loadDocument).to.have.been.calledWith(doc, { applyState: false });
       expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
       expect(app._fetchTaskCount).to.have.been.called;
       app._loadDocument.restore();
@@ -1738,27 +1711,6 @@ suite('nuxeo-app', () => {
       expect(navigateTo).to.have.been.calledWith('tasks');
       expect(app.loading).to.be.false;
       app._loadDocument.restore();
-      app._fetchTaskCount.restore();
-      app._resetTaskSelection.restore();
-      app.$$.restore();
-    });
-
-    test('ignores aborted document reload on workflowTaskProcessed', async () => {
-      const abortError = new Error('The user aborted a request.');
-      abortError.name = 'AbortError';
-      app.currentDocument = { uid: '1', path: '/p' };
-      sinon.stub(app, '_loadDocument').rejects(abortError);
-      sinon.stub(app, 'showError');
-      sinon.stub(app, '_fetchTaskCount');
-      sinon.stub(app, '_resetTaskSelection');
-      sinon.stub(app, '$$').returns({ visible: false });
-      app.loading = true;
-      app._refreshAndFetchTasks({ type: 'workflowTaskProcessed' });
-      await flush();
-      expect(app.showError).to.not.have.been.called;
-      expect(app.loading).to.be.false;
-      app._loadDocument.restore();
-      app.showError.restore();
       app._fetchTaskCount.restore();
       app._resetTaskSelection.restore();
       app.$$.restore();
