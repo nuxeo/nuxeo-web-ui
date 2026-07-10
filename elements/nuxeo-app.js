@@ -1034,7 +1034,7 @@ Polymer({
         .then((task) => {
           const targetDoc = task?.targetDocumentIds?.[0];
           if (task?.state === 'ended' && targetDoc?.uid) {
-            this._loadDocument({ uid: targetDoc.uid, path: targetDoc.path, page: 'browse' })
+            this._loadDocument({ uid: targetDoc.uid, path: targetDoc.path, page: 'browse' }, { applyState: false })
               .then((doc) => {
                 this._navigateAfterTaskProcessed(doc);
               })
@@ -1075,10 +1075,6 @@ Polymer({
   },
 
   _handleTaskLoadError(error) {
-    if (error?.name === 'AbortError') {
-      this.loading = false;
-      return;
-    }
     if (error.status === 403) {
       this._fetchTaskCount();
       this.navigateTo('tasks');
@@ -1089,10 +1085,6 @@ Polymer({
   },
 
   _handleDocumentRefreshError(err) {
-    if (err?.name === 'AbortError') {
-      this.loading = false;
-      return;
-    }
     if (err?.['entity-type'] === 'exception' && err.status === 403) {
       this.navigateTo('tasks');
     } else {
@@ -1132,7 +1124,7 @@ Polymer({
    * If the document is successfuly retrieved, it is retuned by the method, except if the document representes a saved
    * search, in which case `undefined` is returned.
    */
-  _loadDocument(docParam) {
+  _loadDocument(docParam, { applyState = true } = {}) {
     this.loading = true;
     this.docId = docParam.uid;
     this.docPath = docParam.path;
@@ -1148,17 +1140,23 @@ Polymer({
         this.loading = false;
         return;
       }
-      if (this.docId && !doc.isVersion) {
-        this.docId = '';
-        this.docPath = doc.path;
+      if (applyState) {
+        this._applyDocumentFromLoad(doc);
       }
-      this.currentParent = this.hasFacet(doc, 'Folderish')
-        ? doc
-        : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
-      this.set('currentDocument', doc);
       this.loading = false;
       return doc;
     });
+  },
+
+  _applyDocumentFromLoad(doc) {
+    if (this.docId && !doc.isVersion) {
+      this.docId = '';
+      this.docPath = doc.path;
+    }
+    this.currentParent = this.hasFacet(doc, 'Folderish')
+      ? doc
+      : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
+    this.set('currentDocument', doc);
   },
 
   load(page, uid, path, action) {
@@ -1426,7 +1424,8 @@ Polymer({
     const taskProcessed = e?.type === 'workflowTaskProcessed';
     // let's refresh the current document since it might have been changed (ex: state and version)
     if (this.currentDocument) {
-      this._loadDocument(this.currentDocument)
+      const loadOptions = taskProcessed ? { applyState: false } : {};
+      this._loadDocument(this.currentDocument, loadOptions)
         .then((doc) => {
           if (taskProcessed) {
             this._navigateAfterTaskProcessed(doc);
