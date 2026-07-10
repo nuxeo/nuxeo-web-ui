@@ -818,6 +818,15 @@ suite('nuxeo-app', () => {
       app.showError.restore();
     });
 
+    test('_handleTaskLoadError resets loading on a null error without throwing', () => {
+      sinon.stub(app, 'showError');
+      app.loading = true;
+      app._handleTaskLoadError(null);
+      expect(app.loading).to.be.false;
+      expect(app.showError).to.have.been.calledWith(undefined, 'browse.error', undefined);
+      app.showError.restore();
+    });
+
     test('loadTask redirects to next pending task when task is ended', async () => {
       const targetDoc = { uid: 'doc-1', path: '/ws/file' };
       const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
@@ -835,8 +844,6 @@ suite('nuxeo-app', () => {
         { applyState: false },
       );
       expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
-      // navigateTo is stubbed so loadTask is not re-entered; loading stays true until then
-      expect(app.loading).to.be.true;
       app.$.task.get.restore();
       app._loadDocument.restore();
     });

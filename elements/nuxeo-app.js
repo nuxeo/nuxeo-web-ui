@@ -1075,11 +1075,11 @@ Polymer({
   },
 
   _handleTaskLoadError(error) {
-    if (error.status === 403) {
+    if (error?.status === 403) {
       this._fetchTaskCount();
       this.navigateTo('tasks');
     } else {
-      this.showError(error.status, this.i18n('browse.error'), error.message);
+      this.showError(error?.status, this.i18n('browse.error'), error?.message);
     }
     this.loading = false;
   },
@@ -1088,7 +1088,7 @@ Polymer({
     if (err?.['entity-type'] === 'exception' && err.status === 403) {
       this.navigateTo('tasks');
     } else {
-      this.showError(err.status, this.i18n('browse.error'), err.message);
+      this.showError(err?.status, this.i18n('browse.error'), err?.message);
     }
     this.loading = false;
   },
