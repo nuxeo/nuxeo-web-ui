@@ -18,58 +18,12 @@ env:
   PREID: alpha
 
 jobs:
-  lint:
-    uses: ./.github/workflows/lint.yaml
-    permissions:
-      contents: read
-    secrets:
-      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-
-  test:
-    uses: ./.github/workflows/test.yaml
-    permissions:
-      contents: read
-    secrets:
-      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-    with:
-      branch: ${{ github.ref_name }}
-
-  a11y:
-    uses: ./.github/workflows/a11y.yaml
-    permissions:
-      contents: read
-    secrets:
-      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
-      REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
-    with:
-      branch: ${{ github.ref_name }}
-
-  sonar:
-    uses: ./.github/workflows/sonar.yaml
-    permissions:
-      contents: read
-    secrets:
-      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    with:
-      branch: ${{ github.ref_name }}
-
-  ftest:
-    uses: ./.github/workflows/ftest.yaml
-    permissions:
-      contents: read
-    secrets:
-      NPM_PACKAGES_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
-      REPOSITORY_MANAGER_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
-      REPOSITORY_MANAGER_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
-    with:
-      branch: ${{ github.ref_name }}
-
+  # No lint/test/a11y/ftest/sonar gates here on purpose: those already run on
+  # every push to the rebranding PR (each check has an `on: pull_request`
+  # trigger against lts-2025). Re-running them here would just duplicate the
+  # same checks on the same commit. Dispatch this workflow from a commit whose
+  # PR checks are green.
   build:
-    # sonar runs in parallel for visibility but does not gate the publish
-    needs: [lint, test, a11y, ftest]
     runs-on:
       group: medium-4cpu-runners
     permissions:
@@ -137,6 +91,11 @@ jobs:
           if [ -z "$ELEMENTS_VERSION" ]; then
             echo "No ${PREID} nuxeo-ui-elements found on npm, falling back to latest rc"
             ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
+          fi
+
+          if [ -z "$ELEMENTS_VERSION" ]; then
+            echo "::error::Could not resolve any ${PREID} or rc @nuxeo/nuxeo-ui-elements version from npm" >&2
+            exit 1
           fi
 
           echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
