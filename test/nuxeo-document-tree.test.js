@@ -793,7 +793,7 @@ suite('nuxeo-document-tree unit behavior', () => {
     expect(popSpy).to.have.been.calledWith('popstate', element._boundPopStateHandler);
     expect(popSpy).to.have.been.calledWith('location-changed', element._boundLocationChangedHandler);
     expect(disconnectSpy).to.have.been.calledOnce;
-    expect(element._treeObserver).to.equal(null);
+    expect(element._treeObserver).to.be.null;
     popSpy.restore();
   });
 });
