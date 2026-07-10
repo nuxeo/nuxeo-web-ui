@@ -107,9 +107,14 @@ Polymer({
     }
     if (this.entity && this.entity.id && this.entity.type) {
       if (this.entity.type === 'group') {
+        // Reset before assigning so the `groupname` observer on nuxeo-group-management always
+        // re-fires and re-fetches members, even when returning to the group already selected
+        // (e.g. after editing one of its users). Otherwise the member list stays stale.
+        management.selectedGroup = null;
         management.selectedGroup = this.entity.id;
         management.page = 'manage-group';
       } else if (this.entity.type === 'user') {
+        management.selectedUser = null;
         management.selectedUser = this.entity.id;
         management.page = 'manage-user';
       }
