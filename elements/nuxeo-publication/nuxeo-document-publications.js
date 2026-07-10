@@ -59,9 +59,17 @@ Polymer({
       }
 
       .ellipsis {
-        display: block;
-        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        overflow: visible;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .ellipsis > span {
+        min-width: 0;
         overflow: hidden;
+        text-overflow: ellipsis;
         white-space: nowrap;
       }
 
@@ -115,8 +123,9 @@ Polymer({
       >
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.path')]]" flex="200">
           <template>
-            <a class$="path ellipsis [[_ellipsisDirection()]]" href$="[[urlFor(item)]]"
-              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.path]]&lrm;</a
+            <a class="path ellipsis" href$="[[urlFor(item)]]"
+              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail
+              ><span class$="[[_ellipsisDirection()]]">[[item.path]]&lrm;</span></a
             >
             <nuxeo-tooltip>[[item.path]]</nuxeo-tooltip>
           </template>

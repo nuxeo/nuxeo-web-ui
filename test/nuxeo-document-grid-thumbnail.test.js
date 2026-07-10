@@ -220,6 +220,16 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(element.getAttribute('role')).to.equal('link');
     });
 
+    test('host aria-label is the document title so only the title is announced on focus', () => {
+      expect(element.getAttribute('aria-label')).to.equal('My Document');
+    });
+
+    test('host aria-label is removed when there is no document', async () => {
+      element.doc = undefined;
+      await flush();
+      expect(element.hasAttribute('aria-label')).to.be.false;
+    });
+
     test('.bubbleBox wrapper is marked role="presentation"', () => {
       const bubble = element.shadowRoot.querySelector('.bubbleBox');
       expect(bubble, '.bubbleBox should exist').to.exist;
