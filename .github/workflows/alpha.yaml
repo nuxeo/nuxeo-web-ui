@@ -86,11 +86,13 @@ jobs:
 
           npm version ${VERSION} --no-git-tag-version
 
-          # Get latest ALPHA UI Elements version, fall back to latest rc if none published yet
-          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-${PREID}\.[0-9]+$" | sort -V | tail -n1)
+          # Get latest ALPHA UI Elements version, fall back to latest rc if none published yet.
+          # `|| true` keeps a no-match grep (exit 1) from aborting the step under bash -eo
+          # pipefail, so the empty value reaches the fallback and the guard below.
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-${PREID}\.[0-9]+$" | sort -V | tail -n1 || true)
           if [ -z "$ELEMENTS_VERSION" ]; then
             echo "No ${PREID} nuxeo-ui-elements found on npm, falling back to latest rc"
-            ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1)
+            ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1 || true)
           fi
 
           if [ -z "$ELEMENTS_VERSION" ]; then
