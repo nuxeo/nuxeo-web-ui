@@ -169,7 +169,7 @@ suite('nuxeo-menu-icon', () => {
       element.urlFor = undefined;
       element.link = '';
       element.route = 'document:uid1';
-      expect(element._href()).to.equal(undefined);
+      expect(element._href()).to.be.undefined;
     });
   });
 
