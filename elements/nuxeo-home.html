@@ -49,10 +49,18 @@ limitations under the License.
       }
 
       .ellipsis {
-        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        overflow: visible;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .ellipsis > span {
+        min-width: 0;
         overflow: hidden;
+        text-overflow: ellipsis;
         white-space: nowrap;
-        display: block;
       }
 
       .task-box {
@@ -136,7 +144,8 @@ limitations under the License.
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <a class="ellipsis" href$="[[urlFor(item)]]"
-                    ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
+                    ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail
+                    ><span>[[item.title]]</span></a
                   >
                 </template>
               </nuxeo-data-table-column>
@@ -214,7 +223,8 @@ limitations under the License.
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <a class="ellipsis" href$="[[urlFor(item)]]"
-                    ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
+                    ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail
+                    ><span>[[item.title]]</span></a
                   >
                 </template>
               </nuxeo-data-table-column>
@@ -255,7 +265,8 @@ limitations under the License.
               <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
                 <template>
                   <a class="ellipsis" href$="[[urlFor(item)]]"
-                    ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
+                    ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail
+                    ><span>[[item.title]]</span></a
                   >
                 </template>
               </nuxeo-data-table-column>

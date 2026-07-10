@@ -285,7 +285,7 @@ Polymer({
     },
   },
 
-  observers: ['_selectedItemsChanged(selectedItems.splices)'],
+  observers: ['_selectedItemsChanged(selectedItems.splices)', '_updateAriaLabel(doc)'],
 
   _thumbnail(doc) {
     if (
@@ -344,6 +344,16 @@ Polymer({
 
   _hasDocument() {
     return this.doc && this.doc.uid;
+  },
+
+  _updateAriaLabel(doc) {
+    // Expose only the document title as the accessible name of the tile (role="link"),
+    // otherwise screen readers announce every descendant (title, type, actions, select).
+    if (doc && doc.title) {
+      this.setAttribute('aria-label', doc.title);
+    } else {
+      this.removeAttribute('aria-label');
+    }
   },
 
   _computeTitle(doc) {

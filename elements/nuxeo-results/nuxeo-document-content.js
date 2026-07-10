@@ -62,10 +62,18 @@ Polymer({
       }
 
       .ellipsis {
-        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        overflow: visible;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .ellipsis > span {
+        min-width: 0;
         overflow: hidden;
+        text-overflow: ellipsis;
         white-space: nowrap;
-        display: block;
       }
 
       .capitalize {
@@ -160,7 +168,8 @@ Polymer({
         >
           <template>
             <a class="title ellipsis" href$="[[urlFor(item)]]" on-tap="_navigate"
-              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
+              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail
+              ><span>[[item.title]]</span></a
             >
           </template>
         </nuxeo-data-table-column>
