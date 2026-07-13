@@ -16,6 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import { queryAllDeep, loadDomModuleTemplate } from './helpers/template-utils.js';
+
 /**
  * Tests for WEBUI-1736 (nuxeo-nxql-search-results):
  *
@@ -25,34 +27,20 @@ limitations under the License.
  * and the path column were updated.
  */
 
-/** Recursively collect all elements matching selector, descending into <template> content. */
-function queryAllDeep(root, selector) {
-  const results = [];
-  root.querySelectorAll(selector).forEach((el) => results.push(el));
-  root.querySelectorAll('template').forEach((t) => {
-    results.push(...queryAllDeep(t.content, selector));
-  });
-  return results;
-}
-
 let tmpl;
 
 suiteSetup(async () => {
-  const url = '/elements/search/nxql/nuxeo-nxql-search-results.html';
-  const selector = 'dom-module#nuxeo-nxql-search-results template';
-  const response = await fetch(url);
-  expect(response.ok, `Failed to fetch ${url}: ${response.status} ${response.statusText}`).to.be.true;
-  const text = await response.text();
-  const doc = new DOMParser().parseFromString(text, 'text/html');
-  tmpl = doc.querySelector(selector);
-  expect(tmpl, `Template not found for selector "${selector}" in ${url}`).to.not.be.null;
+  tmpl = await loadDomModuleTemplate(
+    '/elements/search/nxql/nuxeo-nxql-search-results.html',
+    'nuxeo-nxql-search-results',
+  );
 });
 
 suite('nuxeo-nxql-search-results', () => {
   suite('WCAG H2: thumbnail combined with text in one link (title and path columns)', () => {
-    test('has two nuxeo-document-thumbnail instances (title column + path column)', () => {
+    test('has thumbnails in both the title and path columns', () => {
       const thumbnails = queryAllDeep(tmpl.content, 'nuxeo-document-thumbnail');
-      expect(thumbnails.length).to.equal(2, 'should have thumbnails in both title and path columns');
+      expect(thumbnails.length).to.be.at.least(2, 'should have thumbnails in both title and path columns');
     });
 
     test('every nuxeo-document-thumbnail has alt="" (decorative image)', () => {

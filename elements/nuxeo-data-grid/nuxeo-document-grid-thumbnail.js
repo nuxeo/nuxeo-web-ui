@@ -323,7 +323,8 @@ Polymer({
   },
 
   _handleKeydown(e) {
-    if (e.key === 'Enter' || e.key === ' ') {
+    // 'Spacebar' is the legacy key value some browsers/AT still emit for the Space key.
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
       e.preventDefault();
       e.stopPropagation();
       this.handleClick(e);
@@ -339,11 +340,8 @@ Polymer({
     if (source !== this) {
       return;
     }
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      e.stopPropagation();
-      this.handleClick(e);
-    }
+    // Delegate to the shared activation handler to keep key handling in one place.
+    this._handleKeydown(e);
   },
 
   _onCheckBoxTap(e) {

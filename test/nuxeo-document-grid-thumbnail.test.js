@@ -306,6 +306,14 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(element.handleClick).to.have.been.called;
       element.handleClick.restore();
     });
+
+    test('legacy Spacebar key also activates', () => {
+      sinon.spy(element, 'handleClick');
+      const ev = { key: 'Spacebar', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      element._handleKeydown(ev);
+      expect(element.handleClick).to.have.been.calledWith(ev);
+      element.handleClick.restore();
+    });
   });
 
   suite('_onHostKeydown', () => {
