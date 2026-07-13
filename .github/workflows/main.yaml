@@ -68,7 +68,7 @@ jobs:
         with:
           comment_on_pr: false
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
 
@@ -78,7 +78,7 @@ jobs:
           scope: '@nuxeo'
 
       - name: Cache npm dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
@@ -86,7 +86,7 @@ jobs:
             npm-${{ runner.os }}-
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.15.1
         with:
           java-version: '21'
 
