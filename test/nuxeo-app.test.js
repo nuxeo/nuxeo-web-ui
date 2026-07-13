@@ -1657,5 +1657,28 @@ suite('nuxeo-app', () => {
         app._notifyLayoutChanged.restore();
       }
     });
+
+    // WEBUI-1987: attached() must only re-arm the inactivity timer after a real detach
+    // (ready() already did the initial wiring), so the first attach is a no-op.
+    test('attached re-arms the inactivity timer only after a real detach', () => {
+      const setupTimer = sinon.stub(app, '_setupInactivityTimer');
+      const setup401 = sinon.stub(app, '_setupUnauthorizedRedirect');
+      try {
+        app._inactivityNeedsRearm = false; // as after ready()'s initial wiring
+        app.attached();
+        expect(setupTimer).to.not.have.been.called; // first attach does not re-arm
+
+        app.detached(); // a real detach arms the re-wire guard
+        expect(app._inactivityNeedsRearm).to.be.true;
+
+        app.attached(); // re-attach now re-arms exactly once
+        expect(setupTimer).to.have.been.calledOnce;
+        expect(setup401).to.have.been.called;
+        expect(app._inactivityNeedsRearm).to.be.false;
+      } finally {
+        setupTimer.restore();
+        setup401.restore();
+      }
+    });
   });
 });
