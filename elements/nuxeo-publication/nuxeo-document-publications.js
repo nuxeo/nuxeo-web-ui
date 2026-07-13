@@ -58,7 +58,7 @@ Polymer({
         text-align: right;
       }
 
-      .ellipsis {
+      a.ellipsis {
         display: flex;
         align-items: center;
         overflow: visible;
@@ -66,8 +66,15 @@ Polymer({
         min-width: 0;
       }
 
-      .ellipsis > span {
+      a.ellipsis > span {
         min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      span.ellipsis {
+        display: block;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
