@@ -333,7 +333,10 @@ Polymer({
   _onHostKeydown(e) {
     // Only activate when the host itself (role="link") is focused, not when the event
     // originates from descendants such as the inner link or the selection checkbox.
-    if (e.target !== this) {
+    // Composed keydown events bubbling out of the shadow DOM are retargeted to the host,
+    // so e.target is unreliable here; use composedPath() to find the true event source.
+    const source = typeof e.composedPath === 'function' ? e.composedPath()[0] : e.target;
+    if (source !== this) {
       return;
     }
     if (e.key === 'Enter' || e.key === ' ') {
