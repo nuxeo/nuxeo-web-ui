@@ -90,6 +90,10 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
     });
 
     teardown(() => {
+      // Drop the stub-issued fake timer id (setTimeout was stubbed to return small integers 1..N)
+      // before restoring the globals, so the real clearTimeout() in _teardownInactivityTimer() below is
+      // only ever handed null — never a small integer that could collide with an unrelated real timeout.
+      host._inactivityTimer = null;
       timeoutStub.restore();
       clearStub.restore();
       getStub.restore();
