@@ -186,4 +186,6 @@ jobs:
       contents: read
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - run: echo ${{ needs.preview.outputs.image }}
+      - env:
+          IMAGE: ${{ needs.preview.outputs.image }}
+        run: echo "$IMAGE"
