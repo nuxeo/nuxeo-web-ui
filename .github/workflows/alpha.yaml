@@ -69,7 +69,7 @@ jobs:
           # Alpha tags live in their own namespace WITHOUT the leading "v" prefix
           # (e.g. 2025.18.0-alpha.3) so they never match the rc pipeline's
           # "v${version}*" tag glob and cannot corrupt rc version numbering.
-          LAST_TAG=$(git tag --sort=taggerdate --list "${PACKAGE_VERSION/-SNAPSHOT}-${PREID}.*" | tail -1 | tr -d '\n')
+          LAST_TAG=$(git tag --list "${PACKAGE_VERSION/-SNAPSHOT}-${PREID}.*" | sort -V | tail -1 | tr -d '\n')
           echo "VERSION=$(npx semver -i prerelease --preid ${PREID} ${LAST_TAG:-$PACKAGE_VERSION}  | tr -d '\n')" >> $GITHUB_ENV
 
       - name: Update versions
