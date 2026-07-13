@@ -257,6 +257,10 @@ Polymer({
     role: 'link',
   },
 
+  listeners: {
+    keydown: '_onHostKeydown',
+  },
+
   properties: {
     doc: {
       type: Object,
@@ -319,6 +323,19 @@ Polymer({
   },
 
   _handleKeydown(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.handleClick(e);
+    }
+  },
+
+  _onHostKeydown(e) {
+    // Only activate when the host itself (role="link") is focused, not when the event
+    // originates from descendants such as the inner link or the selection checkbox.
+    if (e.target !== this) {
+      return;
+    }
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       e.stopPropagation();
