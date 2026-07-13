@@ -17,6 +17,7 @@ limitations under the License.
 */
 import { fixture, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-publication/nuxeo-document-publications.js';
+import { queryAllDeep, loadHtmlLiteralTemplate } from './helpers/template-utils.js';
 
 suite('nuxeo-document-publications', () => {
   let server;
@@ -301,31 +302,10 @@ suite('nuxeo-document-publications', () => {
   });
 
   suite('WCAG H2: thumbnail combined with path in one link', () => {
-    // Recursively collect elements matching selector, descending into <template> content.
-    function queryAllDeep(root, selector) {
-      const results = [];
-      root.querySelectorAll(selector).forEach((el) => results.push(el));
-      root.querySelectorAll('template').forEach((t) => {
-        results.push(...queryAllDeep(t.content, selector));
-      });
-      return results;
-    }
-
     let tmpl;
 
     suiteSetup(async () => {
-      const url = '/elements/nuxeo-publication/nuxeo-document-publications.js';
-      const response = await fetch(url);
-      expect(response.ok, `Failed to fetch ${url}: ${response.status} ${response.statusText}`).to.be.true;
-      const jsText = await response.text();
-      const htmlTagIdx = jsText.indexOf('html`');
-      expect(htmlTagIdx, `html\` template literal not found in ${url}`).to.be.greaterThan(-1);
-      const htmlEndIdx = jsText.indexOf('`', htmlTagIdx + 5);
-      expect(htmlEndIdx, `Closing \` for html\` template literal not found in ${url}`).to.be.greaterThan(htmlTagIdx);
-      const templateHtml = jsText.substring(htmlTagIdx + 5, htmlEndIdx);
-      const doc = new DOMParser().parseFromString(`<div>${templateHtml}</div>`, 'text/html');
-      tmpl = doc.body.firstElementChild;
-      expect(tmpl, `Failed to parse html\` template literal from ${url}`).to.exist;
+      tmpl = await loadHtmlLiteralTemplate('/elements/nuxeo-publication/nuxeo-document-publications.js');
     });
 
     test('nuxeo-document-thumbnail has alt="" (decorative image)', () => {

@@ -16,6 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import { queryAllDeep, loadDomModuleTemplate } from './helpers/template-utils.js';
+
 /**
  * Tests for WEBUI-1736 (nuxeo-default-search-results):
  *
@@ -24,27 +26,13 @@ limitations under the License.
  * screen readers do not announce the link twice.
  */
 
-/** Recursively collect all elements matching selector, descending into <template> content. */
-function queryAllDeep(root, selector) {
-  const results = [];
-  root.querySelectorAll(selector).forEach((el) => results.push(el));
-  root.querySelectorAll('template').forEach((t) => {
-    results.push(...queryAllDeep(t.content, selector));
-  });
-  return results;
-}
-
 let tmpl;
 
 suiteSetup(async () => {
-  const url = '/elements/search/default/nuxeo-default-search-results.html';
-  const selector = 'dom-module#nuxeo-default-search-results template';
-  const response = await fetch(url);
-  expect(response.ok, `Failed to fetch ${url}: ${response.status} ${response.statusText}`).to.be.true;
-  const text = await response.text();
-  const doc = new DOMParser().parseFromString(text, 'text/html');
-  tmpl = doc.querySelector(selector);
-  expect(tmpl, `Template not found for selector "${selector}" in ${url}`).to.not.be.null;
+  tmpl = await loadDomModuleTemplate(
+    '/elements/search/default/nuxeo-default-search-results.html',
+    'nuxeo-default-search-results',
+  );
 });
 
 suite('nuxeo-default-search-results', () => {
