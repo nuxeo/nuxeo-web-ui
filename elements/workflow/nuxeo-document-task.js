@@ -153,6 +153,7 @@ Polymer({
                   dialog-confirm
                   on-tap="_toggleAssignmentDialog"
                   data-args="delegate"
+                  hidden$="[[_isDelegationDisabled(task)]]"
                   >[[i18n('tasks.delegate')]]</paper-button
                 >
               </div>
@@ -326,6 +327,15 @@ Polymer({
 
   _delegatedActorsExist(delegatedActors) {
     return !!delegatedActors && delegatedActors.length > 0;
+  },
+
+  /**
+   * The delegate button stays visible unless the workflow node explicitly disables it
+   * (taskInfo.allowDelegate === false). Legacy nodes with no persisted value keep the
+   * button visible, preserving the previous always-available behavior.
+   */
+  _isDelegationDisabled(task) {
+    return !!task && !!task.taskInfo && task.taskInfo.allowDelegate === false;
   },
 
   _computeLayoutVisibility(task) {
