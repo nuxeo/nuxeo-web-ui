@@ -311,7 +311,12 @@ suite('nuxeo-document-grid-thumbnail', () => {
   suite('_onHostKeydown', () => {
     test('Enter on the host activates and calls handleClick', () => {
       sinon.spy(element, 'handleClick');
-      const ev = { target: element, key: 'Enter', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      const ev = {
+        composedPath: () => [element],
+        key: 'Enter',
+        preventDefault: sinon.stub(),
+        stopPropagation: sinon.stub(),
+      };
       element._onHostKeydown(ev);
       expect(ev.preventDefault).to.have.been.called;
       expect(ev.stopPropagation).to.have.been.called;
@@ -321,24 +326,51 @@ suite('nuxeo-document-grid-thumbnail', () => {
 
     test('Space on the host activates and calls handleClick', () => {
       sinon.spy(element, 'handleClick');
-      const ev = { target: element, key: ' ', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      const ev = {
+        composedPath: () => [element],
+        key: ' ',
+        preventDefault: sinon.stub(),
+        stopPropagation: sinon.stub(),
+      };
       element._onHostKeydown(ev);
       expect(element.handleClick).to.have.been.called;
       element.handleClick.restore();
     });
 
-    test('ignores events originating from descendants (target is not the host)', () => {
+    test('ignores events originating from descendants (composedPath source is not the host)', () => {
       sinon.spy(element, 'handleClick');
-      const ev = { target: {}, key: 'Enter', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      // Composed keydown bubbling from a descendant is retargeted so e.target === host;
+      // composedPath()[0] still points at the real inner source.
+      const inner = document.createElement('a');
+      const ev = {
+        target: element,
+        composedPath: () => [inner, element],
+        key: 'Enter',
+        preventDefault: sinon.stub(),
+        stopPropagation: sinon.stub(),
+      };
       element._onHostKeydown(ev);
       expect(element.handleClick).to.not.have.been.called;
       expect(ev.preventDefault).to.not.have.been.called;
       element.handleClick.restore();
     });
 
+    test('falls back to e.target when composedPath is unavailable', () => {
+      sinon.spy(element, 'handleClick');
+      const ev = { target: element, key: 'Enter', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      element._onHostKeydown(ev);
+      expect(element.handleClick).to.have.been.calledWith(ev);
+      element.handleClick.restore();
+    });
+
     test('ignores non-activation keys on the host', () => {
       sinon.spy(element, 'handleClick');
-      const ev = { target: element, key: 'Tab', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      const ev = {
+        composedPath: () => [element],
+        key: 'Tab',
+        preventDefault: sinon.stub(),
+        stopPropagation: sinon.stub(),
+      };
       element._onHostKeydown(ev);
       expect(element.handleClick).to.not.have.been.called;
       expect(ev.preventDefault).to.not.have.been.called;
