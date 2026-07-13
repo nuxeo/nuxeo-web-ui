@@ -221,6 +221,82 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       expect(host._inactivityTimeoutMs).to.equal(60 * 60000);
       expect(scheduled[0].delay).to.equal(60 * 60000);
     });
+
+    test('_resetInactivityTimer is a no-op while the feature is disabled', () => {
+      // setup() tore the timer down, so _inactivityTimeoutMs is 0 (disabled).
+      host._resetInactivityTimer();
+      expect(scheduled).to.have.lengthOf(0);
+    });
+
+    test('_checkInactivityOnResume is a no-op while the feature is disabled', () => {
+      const redirect = sinon.stub(host, '_redirect');
+      host._checkInactivityOnResume(); // _inactivityTimeoutMs === 0
+      expect(redirect).not.to.have.been.called;
+      expect(scheduled).to.have.lengthOf(0);
+      redirect.restore();
+    });
+
+    test('a queued timeout does not force a logout after teardown disabled the feature', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      const redirect = sinon.stub(host, '_redirect');
+      host._setupInactivityTimer();
+      host._teardownInactivityTimer(); // disables (_inactivityTimeoutMs = 0)
+      host._onInactivityTimeout(); // simulate an already-queued callback firing after teardown
+      expect(redirect).not.to.have.been.called;
+      redirect.restore();
+    });
+
+    test('records the error and falls back to per-tab behaviour when writing shared activity fails', () => {
+      const setItem = sinon.stub(window.localStorage, 'setItem').throws(new Error('quota exceeded'));
+      host._recordSharedActivity(Date.now());
+      expect(host._inactivityStorageError).to.be.an('error');
+      setItem.restore();
+    });
+
+    test('_getLastActivity returns 0 when there is no shared or local activity', () => {
+      window.localStorage.removeItem(ACTIVITY_KEY);
+      host._lastActivityTs = 0;
+      expect(host._getLastActivity()).to.equal(0);
+    });
+
+    test('_getLastActivity falls back to the local timestamp when reading shared activity fails', () => {
+      const getItem = sinon.stub(window.localStorage, 'getItem').throws(new Error('access denied'));
+      host._lastActivityTs = 0;
+      expect(host._getLastActivity()).to.equal(0);
+      expect(host._inactivityStorageError).to.be.an('error');
+      getItem.restore();
+    });
+
+    test('logs out when the idle timer fires and reading shared activity throws', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      const redirect = sinon.stub(host, '_redirect');
+      host._setupInactivityTimer();
+      const getItem = sinon.stub(window.localStorage, 'getItem').throws(new Error('access denied'));
+      lastScheduled().fn(); // timer fires; getItem throws -> catch -> per-tab logout
+      expect(host._inactivityStorageError).to.be.an('error');
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+      getItem.restore();
+      redirect.restore();
+    });
+
+    test('keep-alive is skipped when no keepAlive resource is available', () => {
+      const original = host.$.keepAlive;
+      host.$.keepAlive = null; // no resource -> the execute() branch is not taken
+      host._inactivityKeepAliveMs = 30000;
+      host._lastKeepAlive = 0;
+      expect(() => host._maybeKeepServerSessionAlive(Date.now())).to.not.throw();
+      host.$.keepAlive = original;
+    });
+
+    test('ignores storage events for unrelated keys or without a new value', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      host._setupInactivityTimer();
+      const before = scheduled.length;
+      host._lastInactivityReset = Date.now() - 2000; // bypass throttle so a real signal would re-arm
+      host._onInactivityStorage({ key: 'some-other-key', newValue: '123' });
+      host._onInactivityStorage({ key: ACTIVITY_KEY, newValue: null });
+      expect(scheduled).to.have.lengthOf(before); // neither re-armed the timer
+    });
   });
 
   suite('reactive logout on unauthorized request', () => {
