@@ -207,6 +207,12 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(tooltip, 'nuxeo-tooltip should be stamped').to.exist;
       expect(tooltip.getAttribute('aria-hidden')).to.equal('true');
     });
+
+    test('inner title link is removed from the tab order (host is the single focus stop)', () => {
+      const link = element.shadowRoot.querySelector('a.title');
+      expect(link, '<a class="title"> should be stamped').to.exist;
+      expect(link.getAttribute('tabindex')).to.equal('-1');
+    });
   });
 
   suite('WEBUI-1736 screen reader cleanup', () => {
@@ -224,9 +230,17 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(element.getAttribute('aria-label')).to.equal('My Document');
     });
 
-    test('host aria-label is removed when there is no document', async () => {
+    test('host role and aria-label are removed when there is no document', async () => {
       element.doc = undefined;
       await flush();
+      expect(element.hasAttribute('aria-label')).to.be.false;
+      expect(element.hasAttribute('role')).to.be.false;
+    });
+
+    test('host is not a link when the document has a title but no uid (not actionable)', async () => {
+      element.doc = { title: 'No uid doc' };
+      await flush();
+      expect(element.hasAttribute('role')).to.be.false;
       expect(element.hasAttribute('aria-label')).to.be.false;
     });
 
@@ -285,6 +299,18 @@ suite('nuxeo-document-grid-thumbnail', () => {
       element.handleClick({ ctrlKey: false, shiftKey: false, metaKey: false, button: 1 });
       expect(element.fire).to.not.have.been.calledWith('navigate', sinon.match.any);
       element.fire.restore();
+    });
+
+    test('no-ops when there is no document (avoids firing navigate with undefined item)', () => {
+      element.doc = undefined;
+      element.selectionMode = false;
+      sinon.spy(element, 'fire');
+      sinon.spy(element, '_toogleSelect');
+      element.handleClick({ ctrlKey: false, shiftKey: false, metaKey: false, button: 0 });
+      expect(element.fire).to.not.have.been.calledWith('navigate', sinon.match.any);
+      expect(element._toogleSelect).to.not.have.been.called;
+      element.fire.restore();
+      element._toogleSelect.restore();
     });
   });
 

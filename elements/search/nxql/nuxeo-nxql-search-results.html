@@ -25,18 +25,11 @@ limitations under the License.
   <template>
     <style include="nuxeo-styles">
       .ellipsis {
-        display: flex;
-        align-items: center;
-        overflow: visible;
-        flex: 1;
-        min-width: 0;
-      }
-
-      .ellipsis > span {
-        min-width: 0;
-        overflow: hidden;
         text-overflow: ellipsis;
+        overflow: hidden;
         white-space: nowrap;
+        display: block;
+        width: calc(100% - 38px);
       }
     </style>
 
@@ -86,19 +79,15 @@ limitations under the License.
           hidden
         >
           <template>
-            <a class="ellipsis" href$="[[urlFor(item)]]"
-              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail
-              ><span>[[item.title]]</span></a
-            >
+            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+            <a class="ellipsis" href$="[[urlFor(item)]]">[[item.title]]</a>
           </template>
         </nuxeo-data-table-column>
 
         <nuxeo-data-table-column name="[[i18n('label.path')]]" field="ecm:path" sort-by="ecm:path" flex="100">
           <template>
-            <a class="ellipsis" href$="[[urlFor(item)]]" on-tap="_navigate"
-              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail
-              ><span>[[item.path]]</span></a
-            >
+            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+            <a class="ellipsis" href$="[[urlFor(item)]]" on-tap="_navigate">[[item.path]]</a>
             <nuxeo-tooltip>[[item.path]]</nuxeo-tooltip>
           </template>
         </nuxeo-data-table-column>

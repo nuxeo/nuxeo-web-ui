@@ -221,7 +221,7 @@ Polymer({
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]" role="presentation">
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown">
+        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown" tabindex="-1">
           <div class="thumbnailContainer">
             <img src="[[_thumbnail(doc)]]" alt="" />
           </div>
@@ -252,10 +252,6 @@ Polymer({
 
   is: 'nuxeo-document-grid-thumbnail',
   behaviors: [FormatBehavior, RoutingBehavior],
-
-  hostAttributes: {
-    role: 'link',
-  },
 
   listeners: {
     keydown: '_onHostKeydown',
@@ -315,6 +311,9 @@ Polymer({
   },
 
   handleClick(e) {
+    if (!this._hasDocument()) {
+      return;
+    }
     if (this.selectionMode) {
       this._toogleSelect(e);
     } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
@@ -365,11 +364,15 @@ Polymer({
   },
 
   _updateAriaLabel(doc) {
-    // Expose only the document title as the accessible name of the tile (role="link"),
-    // otherwise screen readers announce every descendant (title, type, actions, select).
-    if (doc && doc.title) {
+    // Expose the document title as the accessible name of the tile and mark it as a link only
+    // when the tile is an actionable document (same condition as _hasDocument); otherwise screen
+    // readers announce every descendant (title, type, actions, select) or a focusable link with
+    // no accessible name that cannot be activated.
+    if (doc && doc.uid && doc.title) {
+      this.setAttribute('role', 'link');
       this.setAttribute('aria-label', doc.title);
     } else {
+      this.removeAttribute('role');
       this.removeAttribute('aria-label');
     }
   },

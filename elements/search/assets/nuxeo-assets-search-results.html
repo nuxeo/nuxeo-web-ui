@@ -52,9 +52,8 @@ limitations under the License.
           flex="100"
         >
           <template>
-            <a class="ellipsis" href$="[[urlFor(item)]]" on-click="_navigate"
-              ><nuxeo-document-thumbnail document="[[item]]" alt=""></nuxeo-document-thumbnail>[[item.title]]</a
-            >
+            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+            <a class="ellipsis" href$="[[urlFor(item)]]" on-click="_navigate">[[item.title]]</a>
           </template>
         </nuxeo-data-table-column>
 
