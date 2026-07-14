@@ -253,10 +253,6 @@ Polymer({
   is: 'nuxeo-document-grid-thumbnail',
   behaviors: [FormatBehavior, RoutingBehavior],
 
-  hostAttributes: {
-    role: 'link',
-  },
-
   listeners: {
     keydown: '_onHostKeydown',
   },
@@ -315,6 +311,9 @@ Polymer({
   },
 
   handleClick(e) {
+    if (!this._hasDocument()) {
+      return;
+    }
     if (this.selectionMode) {
       this._toogleSelect(e);
     } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
@@ -365,11 +364,14 @@ Polymer({
   },
 
   _updateAriaLabel(doc) {
-    // Expose only the document title as the accessible name of the tile (role="link"),
-    // otherwise screen readers announce every descendant (title, type, actions, select).
+    // Expose the document title as the accessible name of the tile and mark it as a link only
+    // when there is a document; otherwise screen readers announce every descendant (title, type,
+    // actions, select) or a focusable link with no accessible name.
     if (doc && doc.title) {
+      this.setAttribute('role', 'link');
       this.setAttribute('aria-label', doc.title);
     } else {
+      this.removeAttribute('role');
       this.removeAttribute('aria-label');
     }
   },
