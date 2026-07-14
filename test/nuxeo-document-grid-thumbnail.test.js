@@ -231,6 +231,13 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(element.hasAttribute('role')).to.be.false;
     });
 
+    test('host is not a link when the document has a title but no uid (not actionable)', async () => {
+      element.doc = { title: 'No uid doc' };
+      await flush();
+      expect(element.hasAttribute('role')).to.be.false;
+      expect(element.hasAttribute('aria-label')).to.be.false;
+    });
+
     test('.bubbleBox wrapper is marked role="presentation"', () => {
       const bubble = element.shadowRoot.querySelector('.bubbleBox');
       expect(bubble, '.bubbleBox should exist').to.exist;

@@ -365,9 +365,10 @@ Polymer({
 
   _updateAriaLabel(doc) {
     // Expose the document title as the accessible name of the tile and mark it as a link only
-    // when there is a document; otherwise screen readers announce every descendant (title, type,
-    // actions, select) or a focusable link with no accessible name.
-    if (doc && doc.title) {
+    // when the tile is an actionable document (same condition as _hasDocument); otherwise screen
+    // readers announce every descendant (title, type, actions, select) or a focusable link with
+    // no accessible name that cannot be activated.
+    if (doc && doc.uid && doc.title) {
       this.setAttribute('role', 'link');
       this.setAttribute('aria-label', doc.title);
     } else {
