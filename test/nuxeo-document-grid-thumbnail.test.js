@@ -207,6 +207,12 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(tooltip, 'nuxeo-tooltip should be stamped').to.exist;
       expect(tooltip.getAttribute('aria-hidden')).to.equal('true');
     });
+
+    test('inner title link is removed from the tab order (host is the single focus stop)', () => {
+      const link = element.shadowRoot.querySelector('a.title');
+      expect(link, '<a class="title"> should be stamped').to.exist;
+      expect(link.getAttribute('tabindex')).to.equal('-1');
+    });
   });
 
   suite('WEBUI-1736 screen reader cleanup', () => {

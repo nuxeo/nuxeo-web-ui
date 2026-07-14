@@ -221,7 +221,7 @@ Polymer({
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]" role="presentation">
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown">
+        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown" tabindex="-1">
           <div class="thumbnailContainer">
             <img src="[[_thumbnail(doc)]]" alt="" />
           </div>
