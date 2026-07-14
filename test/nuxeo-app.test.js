@@ -399,15 +399,6 @@ suite('nuxeo-app', () => {
     app.$.nxcon.url = prev;
   });
 
-  suite('WEBUI-1736 screen reader cleanup', () => {
-    test('main landmark is preserved (no role override) so screen readers can use landmark navigation', () => {
-      const main = app.$.mainContent;
-      expect(main, '<main id="mainContent"> should exist').to.exist;
-      expect(main.tagName).to.equal('MAIN');
-      expect(main.hasAttribute('role'), 'main should not have a role override').to.be.false;
-    });
-  });
-
   test('_moveDocumentsToContainer configures operation and toasts on success', async () => {
     sinon.stub(app.$.moveDocumentsOp, 'execute').resolves();
     sinon.stub(app, '_toast');

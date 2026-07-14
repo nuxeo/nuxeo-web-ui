@@ -54,18 +54,10 @@ Polymer({
       }
 
       .ellipsis {
-        display: flex;
-        align-items: center;
-        overflow: visible;
-        flex: 1;
-        min-width: 0;
-      }
-
-      .ellipsis > span {
-        min-width: 0;
-        overflow: hidden;
         text-overflow: ellipsis;
+        overflow: hidden;
         white-space: nowrap;
+        display: block;
       }
 
       .capitalize {
@@ -126,10 +118,10 @@ Polymer({
           flex="100"
         >
           <template>
-            <a class="title ellipsis" href$="[[urlFor(item)]]" on-tap="_navigateLink" data-index="[[index]]"
-              ><nuxeo-document-thumbnail document="[[item]]" alt="" data-index="[[index]]"></nuxeo-document-thumbnail
-              ><span data-index="[[index]]">[[item.title]]</span></a
-            >
+            <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
+            <a class="title ellipsis" href$="[[urlFor(item)]]" on-tap="_navigateLink" data-index="[[index]]">
+              [[item.title]]
+            </a>
           </template>
         </nuxeo-data-table-column>
         <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.type')]]" field="type" hidden>

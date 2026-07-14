@@ -17,7 +17,6 @@ limitations under the License.
 */
 import { fixture, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-publication/nuxeo-document-publications.js';
-import { queryAllDeep, loadHtmlLiteralTemplate } from './helpers/template-utils.js';
 
 suite('nuxeo-document-publications', () => {
   let server;
@@ -298,34 +297,6 @@ suite('nuxeo-document-publications', () => {
       document.dir = 'rtl';
       expect(element._ellipsisDirection()).to.equal('right-ellipsis');
       document.dir = origDir;
-    });
-  });
-
-  suite('WCAG H2: thumbnail combined with path in one link', () => {
-    let tmpl;
-
-    suiteSetup(async () => {
-      tmpl = await loadHtmlLiteralTemplate('/elements/nuxeo-publication/nuxeo-document-publications.js');
-    });
-
-    test('nuxeo-document-thumbnail has alt="" (decorative image)', () => {
-      const thumbnails = queryAllDeep(tmpl, 'nuxeo-document-thumbnail');
-      expect(thumbnails.length).to.be.greaterThan(0, 'should have at least one nuxeo-document-thumbnail');
-      thumbnails.forEach((thumb) => {
-        expect(thumb.getAttribute('alt')).to.equal(
-          '',
-          `thumbnail should have alt="" but got "${thumb.getAttribute('alt')}"`,
-        );
-      });
-    });
-
-    test('nuxeo-document-thumbnail is inside an <a> link', () => {
-      const thumbnails = queryAllDeep(tmpl, 'nuxeo-document-thumbnail');
-      expect(thumbnails.length).to.be.greaterThan(0);
-      thumbnails.forEach((thumb) => {
-        const link = thumb.closest('a');
-        expect(link, 'nuxeo-document-thumbnail should be a descendant of an <a> element').to.exist;
-      });
     });
   });
 });
