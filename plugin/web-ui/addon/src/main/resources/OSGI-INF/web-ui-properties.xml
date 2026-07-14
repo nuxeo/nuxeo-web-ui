@@ -66,7 +66,7 @@
   <property name="org.nuxeo.web.ui.document_type.order">${org.nuxeo.web.ui.document_type.order:=}</property>
 
   <!-- Control external permissions  -->
- <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
+  <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
 
   <!-- Client-side inactivity timeout (minutes) before redirecting to logout; backed by nuxeo.conf session.timeout. Any non-positive or invalid value (<= 0) disables the timer. -->
   <property name="org.nuxeo.web.ui.session.timeout">${session.timeout:=60}</property>

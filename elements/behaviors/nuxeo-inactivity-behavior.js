@@ -148,7 +148,9 @@ export const NuxeoInactivityBehavior = {
     if (!this._inactivityTimeoutMs || document.visibilityState === 'hidden') {
       return;
     }
-    const idleFor = Date.now() - this._getLastActivity();
+    // Clamp to >= 0: a backwards clock jump (NTP sync, manual change, sleep/resume) could otherwise make
+    // idleFor negative and re-arm for longer than the configured window, weakening the timer.
+    const idleFor = Math.max(0, Date.now() - this._getLastActivity());
     if (idleFor >= this._inactivityTimeoutMs) {
       this._logoutRedirect();
       return;
@@ -173,7 +175,9 @@ export const NuxeoInactivityBehavior = {
       // localStorage unavailable; no cross-tab signal, so fall through to a per-tab logout.
       this._inactivityStorageError = e;
     }
-    const idleFor = Date.now() - lastActivity;
+    // Clamp to >= 0 for the same clock-skew reason as _checkInactivityOnResume(): a future lastActivity
+    // must not extend the effective inactivity window beyond the configured timeout.
+    const idleFor = Math.max(0, Date.now() - lastActivity);
     if (lastActivity && idleFor < this._inactivityTimeoutMs) {
       // Someone was active recently (in another tab); re-arm for the remaining time instead of logging out.
       clearTimeout(this._inactivityTimer);
