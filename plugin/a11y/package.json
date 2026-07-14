@@ -13,7 +13,9 @@
   "license": "Apache-2.0",
   "overrides": {
     "serialize-javascript": "^7.0.5",
-    "tar-fs": "^3.0.9"
+    "tar-fs": "^3.0.9",
+    "undici@^6.0.0": "^6.27.0",
+    "undici@^7.0.0": "^7.28.0"
   },
   "dependencies": {
     "@babel/core": "^7.15.0",
