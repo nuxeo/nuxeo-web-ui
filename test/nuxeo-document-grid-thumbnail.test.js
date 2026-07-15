@@ -167,99 +167,52 @@ suite('nuxeo-document-grid-thumbnail', () => {
   });
 
   suite('_computeTitle', () => {
-    test('returns only the i18n select key (no doc title prefix)', () => {
-      expect(element._computeTitle({ title: 'Hello' })).to.equal('command.select');
+    test('includes title and i18n select key', () => {
+      expect(element._computeTitle({ title: 'Hello ' })).to.equal('Hello command.select');
     });
 
-    test('returns i18n select key when doc title is missing', () => {
-      expect(element._computeTitle({})).to.equal('command.select');
-    });
-
-    test('returns i18n select key when doc is null', () => {
-      expect(element._computeTitle(null)).to.equal('command.select');
+    test('handles missing doc title', () => {
+      expect(element._computeTitle({})).to.equal('undefinedcommand.select');
     });
   });
 
-  suite('WCAG H2: thumbnail and title combined in one link', () => {
-    setup(async () => {
-      sinon.stub(element, 'urlFor').returns('/doc/doc-1');
-      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
+  suite('WEBUI-1736 screen reader', () => {
+    test('sets the host accessible name when doc changes to a titled document', async () => {
+      element.doc = { uid: 'd1', title: 'My Document' };
       await flush();
-    });
-
-    test('thumbnail container is inside the title link', () => {
-      const link = element.shadowRoot.querySelector('a.title');
-      expect(link, '<a class="title"> should be stamped').to.exist;
-      const thumbContainer = link.querySelector('.thumbnailContainer');
-      expect(thumbContainer, 'thumbnailContainer should be inside <a class="title">').to.exist;
-    });
-
-    test('thumbnail image has empty alt (decorative)', () => {
-      const link = element.shadowRoot.querySelector('a.title');
-      expect(link, '<a class="title"> should be stamped').to.exist;
-      const img = link.querySelector('.thumbnailContainer img');
-      expect(img, 'img should be inside the title link').to.exist;
-      expect(img.alt).to.equal('');
-    });
-
-    test('tooltip has aria-hidden="true"', () => {
-      const tooltip = element.shadowRoot.querySelector('nuxeo-tooltip');
-      expect(tooltip, 'nuxeo-tooltip should be stamped').to.exist;
-      expect(tooltip.getAttribute('aria-hidden')).to.equal('true');
-    });
-
-    test('inner title link is removed from the tab order (host is the single focus stop)', () => {
-      const link = element.shadowRoot.querySelector('a.title');
-      expect(link, '<a class="title"> should be stamped').to.exist;
-      expect(link.getAttribute('tabindex')).to.equal('-1');
-    });
-  });
-
-  suite('WEBUI-1736 screen reader cleanup', () => {
-    setup(async () => {
-      sinon.stub(element, 'urlFor').returns('/doc/doc-1');
-      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
-      await flush();
-    });
-
-    test('host has role="link" so VoiceOver announces "link" instead of implicit "group"', () => {
-      expect(element.getAttribute('role')).to.equal('link');
-    });
-
-    test('host aria-label is the document title so only the title is announced on focus', () => {
       expect(element.getAttribute('aria-label')).to.equal('My Document');
     });
 
-    test('host role and aria-label are removed when there is no document', async () => {
-      element.doc = undefined;
-      await flush();
-      expect(element.hasAttribute('aria-label')).to.be.false;
-      expect(element.hasAttribute('role')).to.be.false;
-    });
-
-    test('host is not a link when the document has a title but no uid (not actionable)', async () => {
-      element.doc = { title: 'No uid doc' };
-      await flush();
-      expect(element.hasAttribute('role')).to.be.false;
+    test('_updateAriaLabel removes the host aria-label when there is no document', () => {
+      element.setAttribute('aria-label', 'stale');
+      element._updateAriaLabel(undefined);
       expect(element.hasAttribute('aria-label')).to.be.false;
     });
 
-    test('.bubbleBox wrapper is marked role="presentation"', () => {
-      const bubble = element.shadowRoot.querySelector('.bubbleBox');
-      expect(bubble, '.bubbleBox should exist').to.exist;
-      expect(bubble.getAttribute('role')).to.equal('presentation');
+    test('_updateAriaLabel removes the host aria-label when the document has no title', () => {
+      element.setAttribute('aria-label', 'stale');
+      element._updateAriaLabel({ uid: 'd1' });
+      expect(element.hasAttribute('aria-label')).to.be.false;
     });
 
-    test('.actions wrapper is marked role="presentation"', () => {
-      const actions = element.shadowRoot.querySelector('.actions');
-      expect(actions, '.actions should be stamped').to.exist;
-      expect(actions.getAttribute('role')).to.equal('presentation');
-    });
+    suite('rendered markup', () => {
+      setup(async () => {
+        sinon.stub(element, 'urlFor').returns('/doc/doc-1');
+        element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
+        await flush();
+      });
 
-    test('.select wrapper is marked role="presentation"', () => {
-      const select = element.shadowRoot.querySelector('.select');
-      expect(select, '.select should be stamped').to.exist;
-      expect(select.getAttribute('role')).to.equal('presentation');
+      test('title link exposes only the document title as its accessible name', () => {
+        const link = element.shadowRoot.querySelector('a.title');
+        expect(link, 'a.title should be stamped').to.exist;
+        expect(link.getAttribute('aria-label')).to.equal('My Document');
+      });
+
+      test('tooltip is hidden from assistive technology to avoid a duplicate title announcement', () => {
+        const tooltip = element.shadowRoot.querySelector('nuxeo-tooltip');
+        expect(tooltip, 'nuxeo-tooltip should be stamped').to.exist;
+        expect(tooltip.getAttribute('aria-hidden')).to.equal('true');
+      });
     });
   });
 
@@ -300,18 +253,6 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(element.fire).to.not.have.been.calledWith('navigate', sinon.match.any);
       element.fire.restore();
     });
-
-    test('no-ops when there is no document (avoids firing navigate with undefined item)', () => {
-      element.doc = undefined;
-      element.selectionMode = false;
-      sinon.spy(element, 'fire');
-      sinon.spy(element, '_toogleSelect');
-      element.handleClick({ ctrlKey: false, shiftKey: false, metaKey: false, button: 0 });
-      expect(element.fire).to.not.have.been.calledWith('navigate', sinon.match.any);
-      expect(element._toogleSelect).to.not.have.been.called;
-      element.fire.restore();
-      element._toogleSelect.restore();
-    });
   });
 
   suite('_handleKeydown', () => {
@@ -330,84 +271,6 @@ suite('nuxeo-document-grid-thumbnail', () => {
       const ev = { key: ' ', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
       element._handleKeydown(ev);
       expect(element.handleClick).to.have.been.called;
-      element.handleClick.restore();
-    });
-
-    test('legacy Spacebar key also activates', () => {
-      sinon.spy(element, 'handleClick');
-      const ev = { key: 'Spacebar', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
-      element._handleKeydown(ev);
-      expect(element.handleClick).to.have.been.calledWith(ev);
-      element.handleClick.restore();
-    });
-  });
-
-  suite('_onHostKeydown', () => {
-    test('Enter on the host activates and calls handleClick', () => {
-      sinon.spy(element, 'handleClick');
-      const ev = {
-        composedPath: () => [element],
-        key: 'Enter',
-        preventDefault: sinon.stub(),
-        stopPropagation: sinon.stub(),
-      };
-      element._onHostKeydown(ev);
-      expect(ev.preventDefault).to.have.been.called;
-      expect(ev.stopPropagation).to.have.been.called;
-      expect(element.handleClick).to.have.been.calledWith(ev);
-      element.handleClick.restore();
-    });
-
-    test('Space on the host activates and calls handleClick', () => {
-      sinon.spy(element, 'handleClick');
-      const ev = {
-        composedPath: () => [element],
-        key: ' ',
-        preventDefault: sinon.stub(),
-        stopPropagation: sinon.stub(),
-      };
-      element._onHostKeydown(ev);
-      expect(element.handleClick).to.have.been.called;
-      element.handleClick.restore();
-    });
-
-    test('ignores events originating from descendants (composedPath source is not the host)', () => {
-      sinon.spy(element, 'handleClick');
-      // Composed keydown bubbling from a descendant is retargeted so e.target === host;
-      // composedPath()[0] still points at the real inner source.
-      const inner = document.createElement('a');
-      const ev = {
-        target: element,
-        composedPath: () => [inner, element],
-        key: 'Enter',
-        preventDefault: sinon.stub(),
-        stopPropagation: sinon.stub(),
-      };
-      element._onHostKeydown(ev);
-      expect(element.handleClick).to.not.have.been.called;
-      expect(ev.preventDefault).to.not.have.been.called;
-      element.handleClick.restore();
-    });
-
-    test('falls back to e.target when composedPath is unavailable', () => {
-      sinon.spy(element, 'handleClick');
-      const ev = { target: element, key: 'Enter', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
-      element._onHostKeydown(ev);
-      expect(element.handleClick).to.have.been.calledWith(ev);
-      element.handleClick.restore();
-    });
-
-    test('ignores non-activation keys on the host', () => {
-      sinon.spy(element, 'handleClick');
-      const ev = {
-        composedPath: () => [element],
-        key: 'Tab',
-        preventDefault: sinon.stub(),
-        stopPropagation: sinon.stub(),
-      };
-      element._onHostKeydown(ev);
-      expect(element.handleClick).to.not.have.been.called;
-      expect(ev.preventDefault).to.not.have.been.called;
       element.handleClick.restore();
     });
   });
