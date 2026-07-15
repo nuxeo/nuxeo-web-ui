@@ -297,14 +297,34 @@ export default class {
       true,
     );
     // overwrite element comands that previously took a selector as optional argument
-    ['getText', 'click'].forEach((name) => {
-      browser.overwriteCommand(
-        name,
-        async function (cmd, selector) {
-          return selector ? cmd.call(this.element(selector)) : cmd();
-        },
-        true,
-      );
-    });
+    browser.overwriteCommand(
+      'getText',
+      async function (cmd, selector) {
+        return selector ? cmd.call(this.element(selector)) : cmd();
+      },
+      true,
+    );
+
+    // Scroll the target to the centre of the viewport BEFORE clicking, then use the classic
+    // WebDriver Element Click (no options). Centring avoids "element click intercepted" caused by
+    // Nuxeo's sticky app header/footer — frequent on newer Chrome, whose default scroll aligns
+    // elements near the viewport top, under those bars. Crucially the scroll is a SEPARATE command
+    // and the click keeps NO options, so it stays on the classic Element Click endpoint: native
+    // confirm dialogs (delete/revoke) still work, unlike passing `scrollIntoView` as a click option
+    // which forces the Actions API path and throws "unexpected alert open". Scrolling is
+    // best-effort and never allowed to break the click itself.
+    browser.overwriteCommand(
+      'click',
+      async function (cmd, selector) {
+        const target = selector ? await this.element(selector) : this;
+        try {
+          await target.scrollIntoView({ block: 'center', inline: 'center' });
+        } catch (e) {
+          // ignore: scrolling is a best-effort optimisation, not a precondition for the click
+        }
+        return cmd.call(target);
+      },
+      true,
+    );
   }
 }
