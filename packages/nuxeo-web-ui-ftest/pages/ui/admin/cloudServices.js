@@ -25,7 +25,7 @@ export default class CloudServices extends BasePage {
   async addProvider(provider) {
     await driver.waitForVisible('#addEntry');
     const elem = await this.el.$('#addEntry');
-    await elem.click();
+    await this.scrollAndClick(elem);
     await driver.waitForVisible('#dialog:not([aria-hidden])');
     await this.fillProviderDetails(provider);
     await this.clickElementName('save');
@@ -40,11 +40,11 @@ export default class CloudServices extends BasePage {
     if (index !== -1) {
       const rowEle = await rows[index];
       const editButton = await rowEle.$('[name="edit"]');
-      await editButton.click();
+      await this.scrollAndClick(editButton);
       await driver.waitForVisible('#dialog:not([aria-hidden])');
       await this.fillProviderDetails(newDetails);
       const saveButtonEle = await this.el.$('#dialog:not([aria-hidden]) paper-button[name="save"]');
-      await saveButtonEle.click();
+      await this.scrollAndClick(saveButtonEle);
       return true;
     }
     return false;
@@ -78,7 +78,7 @@ export default class CloudServices extends BasePage {
   async clickElementName(name) {
     const selector = `[name="${name}"]`;
     await driver.waitForExist(selector);
-    await this.el.$(selector).click();
+    await this.scrollAndClick(await this.el.$(selector));
   }
 
   async waitForHasProvider(id, reverse) {
@@ -128,13 +128,13 @@ export default class CloudServices extends BasePage {
 
   async clickOnSaveClientBtn() {
     const saveButton = await this.el.element('#dialog:not([aria-hidden]) paper-button[id="save"]');
-    await saveButton.click();
+    await this.scrollAndClick(saveButton);
   }
 
   async addClient(client) {
     await driver.waitForVisible('#addClient');
     const addClient = await this.el.element('#addClient');
-    await addClient.click();
+    await this.scrollAndClick(addClient);
     await driver.waitForVisible('#dialog:not([aria-hidden])');
     await this.fillClientDetails(client);
     await this.clickOnSaveClientBtn();
@@ -148,7 +148,7 @@ export default class CloudServices extends BasePage {
     const index = edited.findIndex((currenTitle) => currenTitle === currentClientId);
     if (index !== -1) {
       const rowEle = await rows[index].$('[name="edit"]');
-      await rowEle.click();
+      await this.scrollAndClick(rowEle);
       await driver.waitForVisible('#dialog:not([aria-hidden])');
       await this.fillClientDetails(newDetails);
       await this.clickOnSaveClientBtn();
