@@ -167,12 +167,12 @@ suite('nuxeo-document-grid-thumbnail', () => {
   });
 
   suite('_computeTitle', () => {
-    test('returns only the i18n select key, without the document title', () => {
-      expect(element._computeTitle({ title: 'Hello' })).to.equal('command.select');
+    test('includes title and i18n select key', () => {
+      expect(element._computeTitle({ title: 'Hello ' })).to.equal('Hello command.select');
     });
 
-    test('does not depend on the document', () => {
-      expect(element._computeTitle()).to.equal('command.select');
+    test('handles missing doc title', () => {
+      expect(element._computeTitle({})).to.equal('undefinedcommand.select');
     });
   });
 

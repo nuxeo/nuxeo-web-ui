@@ -358,7 +358,7 @@ Polymer({
     }
   },
 
-  _computeTitle() {
-    return this.i18n && this.i18n('command.select');
+  _computeTitle(doc) {
+    return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
   },
 });
