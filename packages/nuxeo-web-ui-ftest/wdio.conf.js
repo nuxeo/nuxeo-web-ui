@@ -32,7 +32,6 @@ const reporters = ['spec'];
 
 const _workerStartTimes = new Map();
 const _featureResults = [];
-let _sessionCid;
 
 if (process.env.CUCUMBER_REPORT_PATH) {
   reporters.push([
@@ -321,33 +320,26 @@ export const config = {
     }
   },
   //
-  // Gets executed in the worker just before the WebDriver session is created. Capture the cid so
-  // the resolved browser/driver versions can be logged once (from the first worker) in `before`.
-  beforeSession: (cfg, capabilities, specs, cid) => {
-    _sessionCid = cid;
-  },
-  //
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
   before: async () => {
     /**
-     * Log the resolved browser and driver versions once (first worker) for CI traceability.
-     * Provisioning is delegated to WebdriverIO's driver manager, so this line is the authoritative
-     * record of which build actually ran (e.g. when `browserVersion` resolves the 'stable' channel).
+     * Log the resolved browser and driver versions right before this worker's steps begin, for
+     * CI traceability. Provisioning is delegated to WebdriverIO's driver manager, so this line is
+     * the authoritative record of which build actually ran (e.g. when `browserVersion` resolves
+     * the 'stable' channel).
      */
-    if (_sessionCid === '0-0') {
-      try {
-        const caps = browser.capabilities || {};
-        const driverVersion =
-          (caps.chrome && caps.chrome.chromedriverVersion) || caps['moz:geckodriverVersion'] || 'unknown';
-        // eslint-disable-next-line no-console
-        console.log(
-          `Using ${caps.browserName || process.env.BROWSER} ${caps.browserVersion || 'unknown'} ` +
-            `(driver ${String(driverVersion).split(' ')[0]})`,
-        );
-      } catch (e) {
-        // best-effort version logging; never block the run
-      }
+    try {
+      const caps = browser.capabilities || {};
+      const driverVersion =
+        (caps.chrome && caps.chrome.chromedriverVersion) || caps['moz:geckodriverVersion'] || 'unknown';
+      // eslint-disable-next-line no-console
+      console.log(
+        `Using ${caps.browserName || process.env.BROWSER} ${caps.browserVersion || 'unknown'} ` +
+          `(driver ${String(driverVersion).split(' ')[0]})`,
+      );
+    } catch (e) {
+      // best-effort version logging; never block the run
     }
 
     /**
