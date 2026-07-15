@@ -305,24 +305,39 @@ export default class {
       true,
     );
 
-    // Scroll the target to the centre of the viewport BEFORE clicking, then use the classic
-    // WebDriver Element Click (no options). Centring avoids "element click intercepted" caused by
-    // Nuxeo's sticky app header/footer — frequent on newer Chrome, whose default scroll aligns
-    // elements near the viewport top, under those bars. Crucially the scroll is a SEPARATE command
-    // and the click keeps NO options, so it stays on the classic Element Click endpoint: native
-    // confirm dialogs (delete/revoke) still work, unlike passing `scrollIntoView` as a click option
-    // which forces the Actions API path and throws "unexpected alert open". Scrolling is
-    // best-effort and never allowed to break the click itself.
+    // Recover from "element click intercepted" without altering the happy path. On newer Chrome,
+    // Nuxeo's sticky app header/footer and dialog overlays intercept clicks that the older pinned
+    // build handled. A plain classic click is attempted first (so normal clicks and native confirm
+    // dialogs behave exactly as before); only when it reports interception do we centre the element
+    // and retry, then fall back to a DOM click that dispatches through the intercepting layer.
+    // Native-confirm clicks succeed on the first classic attempt and never reach this recovery, so
+    // alertAccept/alertDismiss handling is unaffected. Not pre-scrolling on the happy path avoids
+    // disturbing virtual-list (nuxeo-data-table) scroll state.
+    const isInterceptError = (e) => /click intercepted|not clickable/i.test((e && e.message) || '');
     browser.overwriteCommand(
       'click',
       async function (cmd, selector) {
         const target = selector ? await this.element(selector) : this;
         try {
-          await target.scrollIntoView({ block: 'center', inline: 'center' });
+          return await cmd.call(target);
         } catch (e) {
-          // ignore: scrolling is a best-effort optimisation, not a precondition for the click
+          if (!isInterceptError(e)) {
+            throw e;
+          }
+          try {
+            await target.scrollIntoView({ block: 'center', inline: 'center' });
+          } catch (scrollErr) {
+            // best-effort centring
+          }
+          try {
+            return await cmd.call(target);
+          } catch (e2) {
+            if (isInterceptError(e2)) {
+              return browser.execute((el) => el.click(), target);
+            }
+            throw e2;
+          }
         }
-        return cmd.call(target);
       },
       true,
     );

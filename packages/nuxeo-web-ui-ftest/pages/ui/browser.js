@@ -309,7 +309,10 @@ export default class Browser extends BasePage {
         for (let i = 0; i < rows.length; i++) {
           const cell = await rows[i].$('nuxeo-data-table-cell a.title');
           if (await cell.isExisting()) {
-            const text = (await cell.getText()).trim();
+            // Read textContent via JS rather than getText(): on newer Chrome getText() returns an
+            // empty string for rows below the fold, so lower-positioned children (e.g. position 8)
+            // were never matched even though their row exists in the DOM.
+            const text = ((await browser.execute((el) => el.textContent, cell)) || '').trim();
             if (text === title) {
               return { index: i };
             }
