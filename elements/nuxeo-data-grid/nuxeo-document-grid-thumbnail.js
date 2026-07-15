@@ -351,7 +351,7 @@ Polymer({
     // action buttons and select control) at once. Exposing just the document title keeps the tile
     // announcement to a single, meaningful label; inner controls still announce their own labels
     // when focus lands on them. This is a screen-reader-only hint and does not affect keyboard behavior.
-    if (doc && doc.uid && doc.title) {
+    if (doc?.uid && doc.title) {
       this.setAttribute('aria-label', doc.title);
     } else {
       this.removeAttribute('aria-label');
