@@ -202,11 +202,32 @@ Then(/^I can see more than (\d+) search results$/, async function (minNumberOfRe
   await driver.pause(1000);
   const results = await this.ui.results;
   const displayMode = await results.displayMode;
-  const output = await results.resultsCount(displayMode);
-  if (output > minNumberOfResults) {
-    return true;
-  }
-  throw new Error(`Expecting to get more than ${minNumberOfResults} but found ${output}`);
+  const min = parseInt(minNumberOfResults, 10);
+  let output = await results.resultsCount(displayMode);
+  // Wait for the count to update rather than reading it once after a fixed pause: after clearing a
+  // filter the results re-fetch asynchronously, so a single read can still see the stale (filtered)
+  // count. Mirror the "(\d+) search results" step by nudging the page provider to refetch to cover
+  // Elasticsearch indexing / refresh lag.
+  await driver.waitUntil(
+    async () => {
+      output = await results.resultsCount(displayMode);
+      if (output > min) {
+        return true;
+      }
+      try {
+        const el = await results.el;
+        await driver.execute((r) => {
+          const pp = r && r.querySelector('nuxeo-page-provider');
+          if (pp && pp.fetch) pp.fetch();
+        }, el);
+      } catch (e) {
+        // best-effort refresh
+      }
+      return false;
+    },
+    { timeout: 20000, interval: 2000, timeoutMsg: `Expecting to get more than ${min} but found ${output}` },
+  );
+  return true;
 });
 
 Then('I edit the results columns to show {string}', async function (heading) {
