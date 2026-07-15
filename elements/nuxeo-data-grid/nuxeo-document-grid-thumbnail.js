@@ -325,12 +325,19 @@ Polymer({
     // 'Spacebar' is the legacy key value some browsers/AT still emit for the Space key.
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
       e.preventDefault();
-      e.stopPropagation();
+      // The parent results view also binds keydown on this same host node to toggle
+      // selection. stopImmediatePropagation prevents that sibling listener from firing
+      // so a single Enter/Space performs one action instead of navigating and toggling.
+      e.stopImmediatePropagation();
       this.handleClick(e);
     }
   },
 
   _onHostKeydown(e) {
+    // Skip when another handler on this node has already consumed the activation key.
+    if (e.defaultPrevented) {
+      return;
+    }
     // Only activate when the host itself (role="link") is focused, not when the event
     // originates from descendants such as the inner link or the selection checkbox.
     // Composed keydown events bubbling out of the shadow DOM are retargeted to the host,

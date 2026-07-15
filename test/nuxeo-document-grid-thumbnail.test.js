@@ -317,17 +317,17 @@ suite('nuxeo-document-grid-thumbnail', () => {
   suite('_handleKeydown', () => {
     test('Enter prevents default and calls handleClick', () => {
       sinon.spy(element, 'handleClick');
-      const ev = { key: 'Enter', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      const ev = { key: 'Enter', preventDefault: sinon.stub(), stopImmediatePropagation: sinon.stub() };
       element._handleKeydown(ev);
       expect(ev.preventDefault).to.have.been.called;
-      expect(ev.stopPropagation).to.have.been.called;
+      expect(ev.stopImmediatePropagation).to.have.been.called;
       expect(element.handleClick).to.have.been.calledWith(ev);
       element.handleClick.restore();
     });
 
     test('Space prevents default and calls handleClick', () => {
       sinon.spy(element, 'handleClick');
-      const ev = { key: ' ', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      const ev = { key: ' ', preventDefault: sinon.stub(), stopImmediatePropagation: sinon.stub() };
       element._handleKeydown(ev);
       expect(element.handleClick).to.have.been.called;
       element.handleClick.restore();
@@ -335,7 +335,7 @@ suite('nuxeo-document-grid-thumbnail', () => {
 
     test('legacy Spacebar key also activates', () => {
       sinon.spy(element, 'handleClick');
-      const ev = { key: 'Spacebar', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      const ev = { key: 'Spacebar', preventDefault: sinon.stub(), stopImmediatePropagation: sinon.stub() };
       element._handleKeydown(ev);
       expect(element.handleClick).to.have.been.calledWith(ev);
       element.handleClick.restore();
@@ -349,11 +349,11 @@ suite('nuxeo-document-grid-thumbnail', () => {
         composedPath: () => [element],
         key: 'Enter',
         preventDefault: sinon.stub(),
-        stopPropagation: sinon.stub(),
+        stopImmediatePropagation: sinon.stub(),
       };
       element._onHostKeydown(ev);
       expect(ev.preventDefault).to.have.been.called;
-      expect(ev.stopPropagation).to.have.been.called;
+      expect(ev.stopImmediatePropagation).to.have.been.called;
       expect(element.handleClick).to.have.been.calledWith(ev);
       element.handleClick.restore();
     });
@@ -364,10 +364,24 @@ suite('nuxeo-document-grid-thumbnail', () => {
         composedPath: () => [element],
         key: ' ',
         preventDefault: sinon.stub(),
-        stopPropagation: sinon.stub(),
+        stopImmediatePropagation: sinon.stub(),
       };
       element._onHostKeydown(ev);
       expect(element.handleClick).to.have.been.called;
+      element.handleClick.restore();
+    });
+
+    test('ignores an already-consumed event to avoid double handling with the parent view', () => {
+      sinon.spy(element, 'handleClick');
+      const ev = {
+        defaultPrevented: true,
+        composedPath: () => [element],
+        key: 'Enter',
+        preventDefault: sinon.stub(),
+        stopImmediatePropagation: sinon.stub(),
+      };
+      element._onHostKeydown(ev);
+      expect(element.handleClick).to.not.have.been.called;
       element.handleClick.restore();
     });
 
@@ -381,7 +395,7 @@ suite('nuxeo-document-grid-thumbnail', () => {
         composedPath: () => [inner, element],
         key: 'Enter',
         preventDefault: sinon.stub(),
-        stopPropagation: sinon.stub(),
+        stopImmediatePropagation: sinon.stub(),
       };
       element._onHostKeydown(ev);
       expect(element.handleClick).to.not.have.been.called;
@@ -391,7 +405,12 @@ suite('nuxeo-document-grid-thumbnail', () => {
 
     test('falls back to e.target when composedPath is unavailable', () => {
       sinon.spy(element, 'handleClick');
-      const ev = { target: element, key: 'Enter', preventDefault: sinon.stub(), stopPropagation: sinon.stub() };
+      const ev = {
+        target: element,
+        key: 'Enter',
+        preventDefault: sinon.stub(),
+        stopImmediatePropagation: sinon.stub(),
+      };
       element._onHostKeydown(ev);
       expect(element.handleClick).to.have.been.calledWith(ev);
       element.handleClick.restore();
@@ -403,7 +422,7 @@ suite('nuxeo-document-grid-thumbnail', () => {
         composedPath: () => [element],
         key: 'Tab',
         preventDefault: sinon.stub(),
-        stopPropagation: sinon.stub(),
+        stopImmediatePropagation: sinon.stub(),
       };
       element._onHostKeydown(ev);
       expect(element.handleClick).to.not.have.been.called;
