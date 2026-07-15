@@ -289,12 +289,16 @@ export default class Browser extends BasePage {
     for (let i = 0; i < rowTemp.length; i++) {
       const row = rowTemp[i];
       const rowEl = await row.$('nuxeo-data-table-cell a.title');
-      const rowVisible = await rowEl.isVisible();
-      const getText = await rowEl.getText();
-      const rowText = (await getText.trim()) === title;
-      if (rowVisible && rowText) {
-        await row.click();
-        return true; // Exit the loop once a match is found
+      if (await rowEl.isExisting()) {
+        // Match on textContent rather than getText()/isVisible(): on newer Chrome both are
+        // empty/false for rows below the fold, so a child that isn't currently scrolled into
+        // view was never matched. The click auto-scrolls the row into view (and the click
+        // override recovers from any interception).
+        const text = ((await browser.execute((el) => el.textContent, rowEl)) || '').trim();
+        if (text === title) {
+          await row.click();
+          return true; // Exit the loop once a match is found
+        }
       }
     }
     return false;
