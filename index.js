@@ -54,10 +54,13 @@ const setupApp = async () =>
   });
 const loadRouting = async () => {
   if (config.get('router.htmlImport')) {
-    importHref(Nuxeo.UI.app.resolveUrl('routing.html'));
-  } else {
-    return import(/* webpackMode: "eager" */ './elements/routing.js');
+    // Wrap importHref in a promise so the startup chain awaits routing.html actually loading
+    // and load errors reject (surface) instead of being swallowed, matching the import() branch.
+    return new Promise((resolve, reject) => {
+      importHref(Nuxeo.UI.app.resolveUrl('routing.html'), resolve, reject);
+    });
   }
+  return import(/* webpackMode: "eager" */ './elements/routing.js');
 };
 
 const ready =
@@ -75,11 +78,11 @@ ready
   .then(loadBundle)
   .then(setupApp)
   // Load addons before routing: addons register their config contributions (e.g. blob
-  // enrichers like `wopi`) and slot content at import time. routing.js dispatches the
-  // initial route on import, which triggers the first document fetch. If addons load after
-  // routing, that first fetch is sent without the addon enrichers, so enricher-dependent
-  // blob actions (e.g. the WOPI "open" icon) are missing until a client-side re-navigation
-  // re-fetches the document (WEBUI-1715 regression). setupApp still runs first so
-  // Nuxeo.UI.app is available to addons.
+  // enrichers like `wopi`) and slot content at import time. Routing dispatches the initial route
+  // when loaded, which triggers the first document fetch. If addons load after routing starts, that
+  // first fetch is sent without the addon enrichers, so enricher-dependent blob actions (e.g. the
+  // WOPI "open" icon) are missing until a client-side re-navigation re-fetches the document
+  // (WEBUI-1978, WEBUI-1715 regression). setupApp still runs first so Nuxeo.UI.app is available to
+  // addons.
   .then(loadAddons)
   .then(loadRouting);
