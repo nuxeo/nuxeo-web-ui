@@ -191,17 +191,14 @@ Polymer({
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
       }
 
-      :host(:focus-within) .actions,
-      :host(:focus-within) .select,
-      .bubbleBox:focus-within .actions,
-      .bubbleBox:focus-within .select,
+      :host(:focus) .bubbleBox .actions,
+      :host(:focus) .bubbleBox .select,
       .bubbleBox:hover .actions,
       .bubbleBox:hover .select,
       .bubbleBox[selection-mode] .select {
         opacity: 1;
         height: auto;
         overflow: visible;
-        visibility: visible;
         transition:
           opacity 0.2s ease,
           height 0.2s ease;
@@ -212,30 +209,36 @@ Polymer({
         opacity: 0;
         height: 0;
         overflow: hidden;
-        visibility: hidden;
         transition:
           opacity 0.2s ease,
           height 0.2s ease;
       }
     </style>
 
-    <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]" role="presentation">
+    <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
+      <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
+        <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
+      </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown" tabindex="-1">
-          <div class="thumbnailContainer">
-            <img src="[[_thumbnail(doc)]]" alt="" />
-          </div>
+        <a
+          class="title"
+          href$="[[urlFor(doc)]]"
+          on-tap="handleClick"
+          on-keydown="_handleKeydown"
+          tabindex="0"
+          aria-label$="[[doc.title]]"
+        >
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
             <nuxeo-tooltip for="title" aria-hidden="true">[[doc.title]]</nuxeo-tooltip>
           </div>
         </a>
-        <div class="actions" role="presentation">
+        <div class="actions">
           <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
           <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
         </div>
-        <div class="select" role="presentation">
+        <div class="select">
           <paper-icon-button
             noink
             icon="icons:check"
@@ -252,10 +255,6 @@ Polymer({
 
   is: 'nuxeo-document-grid-thumbnail',
   behaviors: [FormatBehavior, RoutingBehavior],
-
-  listeners: {
-    keydown: '_onHostKeydown',
-  },
 
   properties: {
     doc: {
@@ -311,9 +310,6 @@ Polymer({
   },
 
   handleClick(e) {
-    if (!this._hasDocument()) {
-      return;
-    }
     if (this.selectionMode) {
       this._toogleSelect(e);
     } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
@@ -322,32 +318,11 @@ Polymer({
   },
 
   _handleKeydown(e) {
-    // 'Spacebar' is the legacy key value some browsers/AT still emit for the Space key.
-    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      // The parent results view also binds keydown on this same host node to toggle
-      // selection. stopImmediatePropagation prevents that sibling listener from firing
-      // so a single Enter/Space performs one action instead of navigating and toggling.
-      e.stopImmediatePropagation();
+      e.stopPropagation();
       this.handleClick(e);
     }
-  },
-
-  _onHostKeydown(e) {
-    // Skip when another handler on this node has already consumed the activation key.
-    if (e.defaultPrevented) {
-      return;
-    }
-    // Only activate when the host itself (role="link") is focused, not when the event
-    // originates from descendants such as the inner link or the selection checkbox.
-    // Composed keydown events bubbling out of the shadow DOM are retargeted to the host,
-    // so e.target is unreliable here; use composedPath() to find the true event source.
-    const source = typeof e.composedPath === 'function' ? e.composedPath()[0] : e.target;
-    if (source !== this) {
-      return;
-    }
-    // Delegate to the shared activation handler to keep key handling in one place.
-    this._handleKeydown(e);
   },
 
   _onCheckBoxTap(e) {
@@ -371,20 +346,19 @@ Polymer({
   },
 
   _updateAriaLabel(doc) {
-    // Expose the document title as the accessible name of the tile and mark it as a link only
-    // when the tile is an actionable document (same condition as _hasDocument); otherwise screen
-    // readers announce every descendant (title, type, actions, select) or a focusable link with
-    // no accessible name that cannot be activated.
+    // The parent results view moves keyboard focus onto this host element itself, so without an
+    // explicit accessible name a screen reader would announce the whole tile subtree (title, type,
+    // action buttons and select control) at once. Exposing just the document title keeps the tile
+    // announcement to a single, meaningful label; inner controls still announce their own labels
+    // when focus lands on them. This is a screen-reader-only hint and does not affect keyboard behavior.
     if (doc && doc.uid && doc.title) {
-      this.setAttribute('role', 'link');
       this.setAttribute('aria-label', doc.title);
     } else {
-      this.removeAttribute('role');
       this.removeAttribute('aria-label');
     }
   },
 
-  _computeTitle(doc) {
+  _computeTitle() {
     return this.i18n && this.i18n('command.select');
   },
 });
