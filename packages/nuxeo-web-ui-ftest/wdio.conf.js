@@ -284,14 +284,37 @@ export const config = {
     // eslint-disable-next-line no-console
     console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
 
-    // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines
+    // Strip file:// prefix, fold the resolved browser version into the reporter's status lines,
+    // and append timing to WDIO's PASSED/FAILED lines.
     const originalWrite = process.stdout.write.bind(process.stdout);
     global._originalStdoutWrite = originalWrite;
     // eslint-disable-next-line no-control-regex
     const ansiRegex = /\x1b\[[0-9;]*m/g;
     const statusLineRegex = /\[(\d+-\d+)\] (?:PASSED|FAILED) in .* - /;
+    // The spec reporter prints the *requested* capability (e.g. "chrome(stable)"). Capture the
+    // concrete version from the per-worker "Using <name> <version> (driver ...)" log line and
+    // rewrite the reporter lines to show it, e.g. "RUNNING in chrome(150.0.7871.124)". Keep only
+    // the first version line (visible up front and for single-spec/local runs); fold the rest.
+    const configuredBrowserVersion = process.env.BROWSER_VERSION || 'stable';
+    const usingVersionRegex = /Using \S+ (\S+) \(driver /;
+    let resolvedBrowserVersion = null;
+    let versionLineShown = false;
     process.stdout.write = (chunk, ...args) => {
       if (typeof chunk === 'string') {
+        const versionMatch = usingVersionRegex.exec(chunk.replace(ansiRegex, ''));
+        if (versionMatch) {
+          [, resolvedBrowserVersion] = versionMatch;
+          if (versionLineShown) {
+            const cb = args.find((a) => typeof a === 'function');
+            if (cb) cb();
+            return true;
+          }
+          versionLineShown = true;
+          return originalWrite(chunk, ...args);
+        }
+        if (resolvedBrowserVersion && resolvedBrowserVersion !== configuredBrowserVersion) {
+          chunk = chunk.split(`(${configuredBrowserVersion})`).join(`(${resolvedBrowserVersion})`);
+        }
         chunk = chunk.replace(/file:\/\//g, '');
         const plain = chunk.replace(ansiRegex, '');
         const match = statusLineRegex.exec(plain);
