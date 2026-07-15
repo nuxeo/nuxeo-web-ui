@@ -49,7 +49,10 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
-  browserVersion: '135.0.7049.114',
+  // Let WebdriverIO's built-in driver manager resolve the current stable Chrome-for-Testing
+  // (and matching chromedriver) instead of a hard-pinned build. Override via BROWSER_VERSION
+  // (e.g. an explicit version or 'beta'/'dev'/'canary') when a specific build is required.
+  browserVersion: process.env.BROWSER_VERSION || 'stable',
   'wdio:enforceWebDriverClassic': true,
   // Prevent ChromeDriver from auto-dismissing native dialogs (window.confirm, window.alert)
   // so that tests can explicitly accept/dismiss them via alertAccept/alertDismiss.
@@ -113,13 +116,6 @@ switch (capability.browserName) {
 }
 
 const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 40000;
-
-// Allow overriding driver version
-const drivers = {};
-drivers[process.env.BROWSER] = {};
-if (process.env.DRIVER_VERSION) {
-  drivers[process.env.BROWSER].version = process.env.DRIVER_VERSION;
-}
 
 // transform nuxeo-web-ui-ftest requires
 import('@babel/register').then(({ default: register }) => {
