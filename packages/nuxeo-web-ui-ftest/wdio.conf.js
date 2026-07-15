@@ -280,31 +280,42 @@ export const config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  onPrepare: () => {
+  onPrepare: async () => {
     // eslint-disable-next-line no-console
     console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
 
-    // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines. Also print the
-    // per-worker "Using <browser> <version> (driver ...)" line only once, up front, so the
-    // resolved browser/driver version is reported before the runs without repeating per feature.
+    // Report the browser version once, up front, before any worker starts. Provisioning is
+    // delegated to WebdriverIO's driver manager; when a channel (e.g. 'stable') is configured,
+    // resolve the concrete Chrome-for-Testing build purely for this log line. Best-effort: it
+    // never blocks the run and falls back to the configured channel name if the lookup fails.
+    const browserName = process.env.BROWSER || 'chrome';
+    const configuredVersion = process.env.BROWSER_VERSION || 'stable';
+    let resolvedVersion = configuredVersion;
+    if (browserName === 'chrome' && !/^\d/.test(configuredVersion)) {
+      try {
+        const res = await fetch('https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json');
+        if (res.ok) {
+          const { channels = {} } = await res.json();
+          const channel = channels[configuredVersion.charAt(0).toUpperCase() + configuredVersion.slice(1)];
+          if (channel && channel.version) {
+            resolvedVersion = channel.version;
+          }
+        }
+      } catch (e) {
+        // best-effort: fall back to the configured channel name
+      }
+    }
+    // eslint-disable-next-line no-console
+    console.log(`Using ${browserName} ${resolvedVersion} (browserVersion: ${configuredVersion})`);
+
+    // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines.
     const originalWrite = process.stdout.write.bind(process.stdout);
     global._originalStdoutWrite = originalWrite;
     // eslint-disable-next-line no-control-regex
     const ansiRegex = /\x1b\[[0-9;]*m/g;
     const statusLineRegex = /\[(\d+-\d+)\] (?:PASSED|FAILED) in .* - /;
-    const usingVersionRegex = /Using \S+ \S+ \(driver /;
-    let versionLineShown = false;
     process.stdout.write = (chunk, ...args) => {
       if (typeof chunk === 'string') {
-        if (usingVersionRegex.test(chunk.replace(ansiRegex, ''))) {
-          if (versionLineShown) {
-            const cb = args.find((a) => typeof a === 'function');
-            if (cb) cb();
-            return true;
-          }
-          versionLineShown = true;
-          return originalWrite(chunk, ...args);
-        }
         chunk = chunk.replace(/file:\/\//g, '');
         const plain = chunk.replace(ansiRegex, '');
         const match = statusLineRegex.exec(plain);
@@ -336,25 +347,6 @@ export const config = {
   // Gets executed before test execution begins. At this point you can access all global
   // variables, such as `browser`. It is the perfect place to define custom commands.
   before: async () => {
-    /**
-     * Log the resolved browser and driver versions right before this worker's steps begin, for
-     * CI traceability. Provisioning is delegated to WebdriverIO's driver manager, so this line is
-     * the authoritative record of which build actually ran (e.g. when `browserVersion` resolves
-     * the 'stable' channel).
-     */
-    try {
-      const caps = browser.capabilities || {};
-      const driverVersion =
-        (caps.chrome && caps.chrome.chromedriverVersion) || caps['moz:geckodriverVersion'] || 'unknown';
-      // eslint-disable-next-line no-console
-      console.log(
-        `Using ${caps.browserName || process.env.BROWSER} ${caps.browserVersion || 'unknown'} ` +
-          `(driver ${String(driverVersion).split(' ')[0]})`,
-      );
-    } catch (e) {
-      // best-effort version logging; never block the run
-    }
-
     /**
      * Prevent UND_ERR_CLOSED errors from crashing the worker process.
      * When ChromeDriver's TCP connection drops (Chrome crash, resource pressure),
