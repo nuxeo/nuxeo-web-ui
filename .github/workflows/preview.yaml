@@ -33,9 +33,6 @@ env:
   REPOSITORY: nuxeo/nuxeo-web-ui
   # Base Nuxeo server image tag; nuxeo-docker-build pulls docker-private.packages.nuxeo.com/nuxeo/nuxeo:<tag>.
   BASE_IMAGE_TAG: '2023'
-  # Nuxeo Connect server URL for build-time package installs; nuxeo-docker-build consumes it as an env var.
-  # PREPROD: replace-administrator-user is published on preprod Connect (not PROD).
-  NUXEO_CONNECT_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
 
 jobs:
   id:
@@ -125,7 +122,7 @@ jobs:
         run: npm run build
 
       - name: Set up Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
           java-version: '17'
 
@@ -144,7 +141,7 @@ jobs:
 
       - name: Build and push combined Nuxeo + Web UI image
         id: build
-        uses: nuxeo/gh-build-tools/.github/actions/nuxeo-docker-build@v0.14.0
+        uses: nuxeo/gh-build-tools/.github/actions/nuxeo-docker-build@1b8eb07cc779f1c86ecaed70c021ab7c1f27b441 # v0.15.0
         with:
           base-image-tag: ${{ env.BASE_IMAGE_TAG }}
           base-registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
@@ -152,7 +149,8 @@ jobs:
           nuxeo-local-modules-path: local-modules
           # Connect server packages to pre-install; defaults to replace-administrator-user when NUXEO_SERVER_PACKAGES is unset.
           nuxeo-connect-modules: ${{ github.event.inputs.nuxeo_server_packages || vars.NUXEO_SERVER_PACKAGES || 'replace-administrator-user' }}
-          nuxeo-clid: ${{ secrets.CONNECT_PREPROD_CLID }}
+          nuxeo-connect-url: https://connect.nuxeo.com/nuxeo/site/
+          nuxeo-clid: ${{ secrets.DEVOPS_CLID }}
           registry: ${{ env.REGISTRY }}
           registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           registry-password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
@@ -188,4 +186,6 @@ jobs:
       contents: read
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - run: echo ${{ needs.preview.outputs.image }}
+      - env:
+          IMAGE: ${{ needs.preview.outputs.image }}
+        run: echo "$IMAGE"
