@@ -177,8 +177,9 @@ suite('nuxeo-document-grid-thumbnail', () => {
   });
 
   suite('WEBUI-1736 screen reader', () => {
-    test('_updateAriaLabel exposes the document title as the host accessible name', () => {
-      element._updateAriaLabel({ uid: 'd1', title: 'My Document' });
+    test('sets the host accessible name when doc changes to a titled document', async () => {
+      element.doc = { uid: 'd1', title: 'My Document' };
+      await flush();
       expect(element.getAttribute('aria-label')).to.equal('My Document');
     });
 
