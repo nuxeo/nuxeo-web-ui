@@ -10,13 +10,13 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.18.1"
   },
   "overrides": {
     "ws": "8.20.1",
     "tar-fs": "^3.0.9",
-    "undici@^6.0.0": "^6.27.0",
-    "undici@^7.0.0": "^7.28.0",
+    "undici@^6.0.0": "6.27.0",
+    "undici@^7.0.0": "7.28.0",
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.4",
     "uuid": "^13.0.1"
