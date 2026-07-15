@@ -297,14 +297,26 @@ export default class {
       true,
     );
     // overwrite element comands that previously took a selector as optional argument
-    ['getText', 'click'].forEach((name) => {
-      browser.overwriteCommand(
-        name,
-        async function (cmd, selector) {
-          return selector ? cmd.call(this.element(selector)) : cmd();
-        },
-        true,
-      );
-    });
+    browser.overwriteCommand(
+      'getText',
+      async function (cmd, selector) {
+        return selector ? cmd.call(this.element(selector)) : cmd();
+      },
+      true,
+    );
+
+    // Same optional-selector behaviour as above, but scroll the target to the centre of the
+    // viewport before clicking. WebdriverIO's default scroll-into-view aligns the element near
+    // the top of the viewport, where it can land under Nuxeo's sticky app header/footer and be
+    // intercepted ("element click intercepted"). Newer Chrome exposes this more often than the
+    // older pinned build did. Centring the element keeps clicks reliable across Chrome versions.
+    browser.overwriteCommand(
+      'click',
+      async function (cmd, selector) {
+        const clickOptions = { scrollIntoView: { block: 'center', inline: 'center' } };
+        return selector ? cmd.call(this.element(selector), clickOptions) : cmd(clickOptions);
+      },
+      true,
+    );
   }
 }
