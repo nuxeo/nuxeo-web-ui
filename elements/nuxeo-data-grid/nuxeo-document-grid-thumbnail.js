@@ -242,7 +242,7 @@ Polymer({
           <paper-icon-button
             noink
             icon="icons:check"
-            title="[[_computeTitle(doc)]]"
+            title="[[i18n('command.select')]]"
             on-tap="_onCheckBoxTap"
             on-keydown="_onCheckBoxTap"
             role="checkbox"
@@ -346,19 +346,18 @@ Polymer({
   },
 
   _updateAriaLabel(doc) {
-    // The parent results view moves keyboard focus onto this host element itself, so without an
-    // explicit accessible name a screen reader would announce the whole tile subtree (title, type,
-    // action buttons and select control) at once. Exposing just the document title keeps the tile
-    // announcement to a single, meaningful label; inner controls still announce their own labels
-    // when focus lands on them. This is a screen-reader-only hint and does not affect keyboard behavior.
+    // The parent results view moves keyboard focus onto this host element itself. Without an explicit
+    // role and name, a screen reader announces the tile as a generic group and re-reads the whole
+    // subtree (title, thumbnail, type, actions, select), so the title is heard several times. Marking
+    // the host as a single labelled link makes it announce just the document title once; inner controls
+    // still announce their own labels when focus lands on them. This is a screen-reader-only hint: it
+    // adds no keyboard listener, so navigation and selection behavior are unchanged.
     if (doc?.uid && doc.title) {
+      this.setAttribute('role', 'link');
       this.setAttribute('aria-label', doc.title);
     } else {
+      this.removeAttribute('role');
       this.removeAttribute('aria-label');
     }
-  },
-
-  _computeTitle(doc) {
-    return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
   },
 });
