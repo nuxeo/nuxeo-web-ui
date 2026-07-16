@@ -18,11 +18,13 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-operation-button.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { _fetchTypes } from '../fetch-types.js';
 
 /**
 `nuxeo-csv-export-button`
@@ -31,11 +33,12 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 */
 Polymer({
   _template: html`
+    <nuxeo-resource id="types"></nuxeo-resource>
     <nuxeo-operation-button
       id="btn"
       operation="Bulk.RunAction"
       input="[[provider]]"
-      params="[[_params(provider, schemas, fields)]]"
+      params="[[_params(provider, schemas, fields, _resolvedSchemas)]]"
       icon="nuxeo:csv-export"
       label="csvExportButton.label"
       show-label$="[[showLabel]]"
@@ -56,6 +59,7 @@ Polymer({
      */
     provider: {
       type: Object,
+      observer: '_providerChanged',
     },
     /**
      * The interval to poll for the result, in milliseconds.
@@ -92,6 +96,15 @@ Polymer({
       type: Object,
       notify: true,
     },
+
+    /**
+     * The schemas to export, resolved from the document types present in the `provider` results unioned with the
+     * `provider`'s display schemas. Used when neither `schemas` nor the `provider`'s schemas are enough to cover the
+     * custom schemas of the exported documents. Computed internally, do not set.
+     */
+    _resolvedSchemas: {
+      type: String,
+    },
   },
 
   ready() {
@@ -99,14 +112,75 @@ Polymer({
     this.$.btn.addEventListener('response', this._onResponse.bind(this));
   },
 
+  _providerChanged(provider, oldProvider) {
+    if (!this._onProviderPageChanged) {
+      this._onProviderPageChanged = () => this._resolveSchemas();
+    }
+    if (oldProvider && oldProvider.removeEventListener) {
+      oldProvider.removeEventListener('current-page-changed', this._onProviderPageChanged);
+    }
+    if (provider && provider.addEventListener) {
+      provider.addEventListener('current-page-changed', this._onProviderPageChanged);
+    }
+    this._resolveSchemas();
+  },
+
+  /**
+   * Resolves the list of schemas to export from the document types present in the current `provider` results, so that
+   * each exported document's own schemas (including custom ones) are included, without hardcoding schema names. The
+   * `provider`'s display schemas are always kept so no currently exported column is lost. Falls back gracefully to the
+   * `provider`'s schemas when the result types or their configuration are not available.
+   */
+  async _resolveSchemas() {
+    const provider = this.provider;
+    if (!provider) {
+      this._resolvedSchemas = undefined;
+      return;
+    }
+    const schemas = new Set(this._toList(provider.schemas));
+    const types = [...new Set((provider.currentPage || []).map((doc) => doc && doc.type).filter(Boolean))];
+    if (types.length > 0 && this.$ && this.$.types) {
+      try {
+        const config = await this._fetchTypes();
+        const doctypes = (config && config.doctypes) || {};
+        types.forEach((type) => {
+          const info = doctypes[type];
+          if (info && Array.isArray(info.schemas)) {
+            info.schemas.forEach((schema) => schemas.add(schema));
+          }
+        });
+      } catch (e) {
+        // keep the provider's display schemas when the types configuration cannot be fetched
+      }
+    }
+    // ignore stale resolutions if the provider changed while awaiting the types configuration
+    if (this.provider === provider) {
+      this._resolvedSchemas = schemas.size > 0 ? [...schemas].join(',') : undefined;
+    }
+  },
+
+  _fetchTypes() {
+    return _fetchTypes(this.$.types);
+  },
+
+  _toList(value) {
+    return value
+      ? value
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+  },
+
   _params() {
     const actionParams = {};
-    const schemas = this.schemas != null ? this.schemas : this.provider && this.provider.schemas;
+    const schemas =
+      this.schemas != null ? this.schemas : this._resolvedSchemas || (this.provider && this.provider.schemas);
     if (schemas) {
-      actionParams.schemas = schemas.split(',').map((s) => s.trim());
+      actionParams.schemas = this._toList(schemas);
     }
     if (this.fields) {
-      actionParams.xpaths = this.fields.split(',').map((s) => s.trim());
+      actionParams.xpaths = this._toList(this.fields);
     }
     return {
       action: 'csvExport',

@@ -69,5 +69,56 @@ suite('nuxeo-csv-export-button', () => {
       const parsed = JSON.parse(params.parameters);
       expect(parsed.schemas).to.deep.equal(['common', 'uid']);
     });
+
+    test('should use the resolved schemas when schemas is not explicitly set', () => {
+      element.provider = { schemas: 'dublincore' };
+      element.schemas = null;
+      element._resolvedSchemas = 'dublincore,note';
+      const parsed = JSON.parse(element._params().parameters);
+      expect(parsed.schemas).to.deep.equal(['dublincore', 'note']);
+    });
+
+    test('explicit schemas takes precedence over the resolved schemas', () => {
+      element.provider = { schemas: 'dublincore' };
+      element._resolvedSchemas = 'dublincore,note';
+      element.schemas = 'dublincore, file';
+      const parsed = JSON.parse(element._params().parameters);
+      expect(parsed.schemas).to.deep.equal(['dublincore', 'file']);
+    });
+  });
+
+  suite('_resolveSchemas', () => {
+    const typesConfig = {
+      doctypes: {
+        Note: { schemas: ['dublincore', 'common', 'uid', 'note'] },
+        File: { schemas: ['dublincore', 'common', 'uid', 'file'] },
+      },
+    };
+
+    test('unions the provider display schemas with the schemas of the result document types', async () => {
+      sinon.stub(element, '_fetchTypes').resolves(typesConfig);
+      element.provider = {
+        schemas: 'dublincore,common',
+        currentPage: [{ type: 'Note' }, { type: 'File' }, { type: 'Note' }],
+      };
+      await element._resolveSchemas();
+      const parsed = JSON.parse(element._params().parameters);
+      expect(parsed.schemas.slice().sort()).to.deep.equal(['common', 'dublincore', 'file', 'note', 'uid']);
+    });
+
+    test('keeps the provider display schemas when there are no results', async () => {
+      const fetchTypes = sinon.stub(element, '_fetchTypes').resolves(typesConfig);
+      element.provider = { schemas: 'dublincore,common', currentPage: [] };
+      await element._resolveSchemas();
+      expect(fetchTypes).to.not.have.been.called;
+      expect(element._resolvedSchemas.split(',').sort()).to.deep.equal(['common', 'dublincore']);
+    });
+
+    test('falls back to the provider display schemas when the types config cannot be fetched', async () => {
+      sinon.stub(element, '_fetchTypes').rejects(new Error('boom'));
+      element.provider = { schemas: 'dublincore,common', currentPage: [{ type: 'Note' }] };
+      await element._resolveSchemas();
+      expect(element._resolvedSchemas.split(',').sort()).to.deep.equal(['common', 'dublincore']);
+    });
   });
 });
