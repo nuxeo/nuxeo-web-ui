@@ -14,7 +14,7 @@ The catalog contains data about elements properties, methods and behaviors:
 npm install
 ```
 
-Note: This version of the catalog generator requires node version >=14.0.0.
+Note: This version of the catalog generator requires node version >=22.0.0.
 
 #### Catalog generation
 
