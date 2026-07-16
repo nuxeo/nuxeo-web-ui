@@ -307,17 +307,35 @@ export default class {
 
     // Recover from "element click intercepted" without altering the happy path. On newer Chrome,
     // Nuxeo's sticky app header/footer and dialog overlays intercept clicks that the older pinned
-    // build handled. A plain classic click is attempted first (so normal clicks and native confirm
-    // dialogs behave exactly as before); only when it reports interception do we centre the element
-    // and retry, then fall back to a DOM click that dispatches through the intercepting layer.
-    // Native-confirm clicks succeed on the first classic attempt and never reach this recovery, so
-    // alertAccept/alertDismiss handling is unaffected. Not pre-scrolling on the happy path avoids
-    // disturbing virtual-list (nuxeo-data-table) scroll state.
+    // build handled. Elements that are clickable (the common case, including native-confirm triggers)
+    // take the classic click unchanged, so their behaviour — and alertAccept/alertDismiss handling —
+    // is identical to before. Only when the element is NOT clickable even after being centred (i.e.
+    // genuinely obscured by an overlay) do we dispatch the click through the DOM. That is the same
+    // fallback the reactive recovery would eventually reach, but taking it up front means the classic
+    // protocol click — which WebdriverIO retries internally, logging an "element click intercepted"
+    // error on every attempt — never runs for an element we already know it cannot hit. isClickable()
+    // checks the same elementFromPoint condition that produces the interception, so the DOM path is
+    // taken exactly when a classic click would otherwise fail-and-log. A reactive recovery is kept as
+    // a safety net so an unexpected interception is never silently swallowed.
     const isInterceptError = (e) => /click intercepted|not clickable/i.test((e && e.message) || '');
     browser.overwriteCommand(
       'click',
       async function (cmd, selector) {
         const target = selector ? await this.element(selector) : this;
+        let clickable = true;
+        try {
+          clickable = await target.isClickable();
+          if (!clickable) {
+            await target.scrollIntoView({ block: 'center', inline: 'center' });
+            clickable = await target.isClickable();
+          }
+        } catch (preErr) {
+          // best-effort; assume clickable and let the classic click + reactive recovery handle it
+          clickable = true;
+        }
+        if (!clickable) {
+          return browser.execute((el) => el.click(), target);
+        }
         try {
           return await cmd.call(target);
         } catch (e) {
