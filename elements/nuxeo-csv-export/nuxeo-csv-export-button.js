@@ -110,6 +110,8 @@ Polymer({
   ready() {
     this.$.btn.addEventListener('poll-start', this._onPollStart.bind(this));
     this.$.btn.addEventListener('response', this._onResponse.bind(this));
+    // resolve once the local DOM (`this.$.types`) exists, in case `provider` was data-bound before `ready`
+    this._resolveSchemas();
   },
 
   _providerChanged(provider, oldProvider) {
@@ -132,6 +134,9 @@ Polymer({
    * `provider`'s schemas when the result types or their configuration are not available.
    */
   async _resolveSchemas() {
+    // track the latest resolution so a slower in-flight call cannot overwrite a newer one with a stale type set
+    const token = (this._resolveToken || 0) + 1;
+    this._resolveToken = token;
     const provider = this.provider;
     if (!provider) {
       this._resolvedSchemas = undefined;
@@ -153,8 +158,8 @@ Polymer({
         // keep the provider's display schemas when the types configuration cannot be fetched
       }
     }
-    // ignore stale resolutions if the provider changed while awaiting the types configuration
-    if (this.provider === provider) {
+    // ignore stale resolutions superseded by a newer call (provider change or a rapid page change)
+    if (this._resolveToken === token) {
       this._resolvedSchemas = schemas.size > 0 ? [...schemas].join(',') : undefined;
     }
   },

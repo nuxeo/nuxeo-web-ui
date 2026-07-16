@@ -17,8 +17,10 @@ limitations under the License.
 */
 suite('fetch-types', () => {
   /** Fresh module instance so module-level cache does not leak across tests or the rest of Karma. */
+  let nonce = 0;
   const load = async () => {
-    const { _fetchTypes } = await import(`../elements/fetch-types.js?test=${Date.now()}`);
+    nonce += 1;
+    const { _fetchTypes } = await import(`../elements/fetch-types.js?test=${nonce}`);
     return _fetchTypes;
   };
 
