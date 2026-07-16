@@ -10,7 +10,7 @@
 Nuxeo Web UI is the standard web application for the Nuxeo content services platform, built with **Polymer 3** (mostly legacy `Polymer({…})` factory pattern) and backed by the **@nuxeo/nuxeo-elements** library of web components. Licensed Apache 2.0, owned by Hyland Software.
 
 - **Runtime**: Browser (no server-side JS in production)
-- **Node**: ≥ 18
+- **Node**: ≥ 22
 - **Build**: Webpack 5
 - **Package manager**: npm (no yarn/pnpm)
 - **Java**: 21 (Maven wraps the frontend build for marketplace packaging)

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- **Node.js** ≥ 18
+- **Node.js** ≥ 22
 - **npm** (bundled with Node — no yarn or pnpm)
 - **Maven** and **Java 21** for marketplace builds
 - A running **Nuxeo Server** at `localhost:8080` for development and functional testing

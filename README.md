@@ -4,7 +4,7 @@ Nuxeo Web UI is the standard web application for the [Nuxeo Platform](https://ww
 
 ### Prerequisites
 
-- **Node.js** ≥ 18 (see `engines` in `package.json`)
+- **Node.js** ≥ 22 (see `engines` in `package.json`)
 - **npm** (bundled with Node)
 
 ### Quick Start

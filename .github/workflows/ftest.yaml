@@ -53,7 +53,7 @@ jobs:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
           scope: '@nuxeo'
-          node-version: 22
+          node-version: 24
 
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
