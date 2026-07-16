@@ -51,6 +51,11 @@ const suggestionSet = async (element, value) => {
       try {
         dropdown = await element.element('.selectivity-dropdown:last-child');
         const dropdownHighlight = await dropdown.$('.selectivity-result-item.highlight');
+        // Suggestion results (users, directories, documents) are fetched asynchronously after
+        // typing, so the highlighted result is often not rendered on the first check. Wait for it
+        // before selecting; without this the value is silently never applied and the search runs
+        // unfiltered (e.g. an author facet returns every document instead of the filtered set).
+        await dropdownHighlight.waitForDisplayed({ timeout: 10000 }).catch(() => {});
         if (await dropdownHighlight.isVisible()) {
           const highLightText = await dropdownHighlight.getText();
           const hightlightTrimText = highLightText.trim();
