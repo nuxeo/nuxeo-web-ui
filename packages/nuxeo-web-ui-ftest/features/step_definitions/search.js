@@ -201,20 +201,24 @@ Then(/^I can see (\d+) search results$/, async function (numberOfResults) {
 Then(/^I can see more than (\d+) search results$/, async function (minNumberOfResults) {
   await driver.pause(1000);
   const results = await this.ui.results;
-  const displayMode = await results.displayMode;
   const min = parseInt(minNumberOfResults, 10);
-  let output = await results.resultsCount(displayMode);
-  // Wait for the count to update rather than reading it once after a fixed pause: after clearing a
-  // filter the results re-fetch asynchronously, so a single read can still see the stale (filtered)
-  // count. Mirror the "(\d+) search results" step by nudging the page provider to refetch to cover
-  // Elasticsearch indexing / refresh lag.
+  let output = min;
+  // Read the results count label rather than counting rendered rows: the result list is virtualized
+  // (iron-list only keeps a small window of rows in the DOM), so counting DOM rows caps at the number
+  // of on-screen items and never reflects the true total. After clearing a filter the results also
+  // re-fetch asynchronously, so nudge the page provider to refetch to cover Elasticsearch indexing /
+  // refresh lag while waiting for the label to update.
   await driver.waitUntil(
     async () => {
-      output = await results.resultsCount(displayMode);
-      if (output > min) {
-        return true;
-      }
       try {
+        const outLabel = await results.resultsCountLabel;
+        if (!(await outLabel.isExisting()) || !(await outLabel.isDisplayed())) {
+          return false;
+        }
+        output = parseInt(await outLabel.getText(), 10);
+        if (output > min) {
+          return true;
+        }
         const el = await results.el;
         await driver.execute((r) => {
           const pp = r && r.querySelector('nuxeo-page-provider');
