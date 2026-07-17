@@ -367,12 +367,17 @@ export const config = {
     });
 
     /*
-     * Increase window size to avoid hidden buttons
+     * Force a large, deterministic window size so tall dialogs and content keep their action
+     * buttons inside the viewport. `maximizeWindow()` must not be used here: in headless Chrome it
+     * resizes to a tiny default (~800x600, since there is no physical screen), overriding the
+     * `--window-size=1920,1080` launch argument. That small viewport pushed dialog/footer buttons
+     * off-screen, so WebDriver clicked an out-of-viewport point and reported "element click
+     * intercepted". `setWindowSize` works in both headless and headed modes and keeps them consistent.
      */
     try {
-      await browser.maximizeWindow();
+      await browser.setWindowSize(1920, 1080);
     } catch (e) {
-      console.error('Failed to maximize.');
+      console.error('Failed to set window size.');
     }
 
     /**
