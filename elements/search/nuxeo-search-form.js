@@ -861,6 +861,127 @@ Polymer({
     }
   },
 
+  _scheduleDirectorySuggestionRehydration() {
+    if (this.__directorySuggestionRehydrationScheduled) {
+      return;
+    }
+    this.__directorySuggestionRehydrationScheduled = true;
+    Promise.resolve().then(() => {
+      this.__directorySuggestionRehydrationScheduled = false;
+      return this._rehydrateDirectorySuggestionLabels();
+    });
+  },
+
+  _rehydrateDirectorySuggestionLabels() {
+    const form = this.form;
+    if (!form) {
+      return Promise.resolve();
+    }
+    const containers = [form];
+    if (form.shadowRoot) {
+      containers.unshift(form.shadowRoot);
+    }
+    const suggestions = containers.reduce((results, container) => {
+      if (typeof container.querySelectorAll === 'function') {
+        results.push(...Array.from(container.querySelectorAll('nuxeo-directory-suggestion')));
+      }
+      return results;
+    }, []);
+    if (!suggestions.length) {
+      return Promise.resolve();
+    }
+    return Promise.all(suggestions.map((suggestion) => this._rehydrateDirectorySuggestionLabel(suggestion)));
+  },
+
+  _rehydrateDirectorySuggestionLabel(suggestion) {
+    if (!suggestion || !suggestion.$ || !suggestion.$.s2) {
+      return Promise.resolve();
+    }
+    const value = suggestion.value;
+    const ids = Array.isArray(value) ? value.filter((id) => id !== null && id !== undefined && id !== '') : [];
+    if (!Array.isArray(value) && value !== null && value !== undefined && value !== '') {
+      ids.push(value);
+    }
+    if (!ids.length) {
+      return Promise.resolve();
+    }
+    return Promise.all(ids.map((id) => this._queryDirectorySuggestionEntry(suggestion, id))).then((entries) => {
+      const resolvedEntries = entries.filter((entry) => !!entry);
+      if (!resolvedEntries.length) {
+        return;
+      }
+      if (typeof suggestion._selectionFormatter === 'function') {
+        resolvedEntries.forEach((entry) => suggestion._selectionFormatter(entry));
+      }
+      const selectivity = suggestion.$.s2._selectivity;
+      if (selectivity && typeof selectivity.setValue === 'function') {
+        const currentValue = Array.isArray(suggestion.value) ? suggestion.value.slice() : suggestion.value;
+        selectivity.setValue(currentValue, { triggerChange: false });
+      }
+    });
+  },
+
+  _queryDirectorySuggestionEntry(suggestion, id) {
+    return new Promise((resolve) => {
+      const s2 = suggestion && suggestion.$ && suggestion.$.s2;
+      if (!s2 || typeof s2._query !== 'function') {
+        resolve(null);
+        return;
+      }
+
+      let done = false;
+      let fallbackTimeout;
+      const finish = (result) => {
+        if (!done) {
+          done = true;
+          if (fallbackTimeout) {
+            clearTimeout(fallbackTimeout);
+          }
+          resolve(result);
+        }
+      };
+
+      fallbackTimeout = setTimeout(() => finish(null), 3000);
+
+      s2._query({
+        term: String(id),
+        callback: (response) => {
+          const entries = this._flattenSelectivityResults(response && response.results).map(
+            (result) => result.item || result,
+          );
+          const expectedId = String(id);
+          const matchedEntry =
+            entries.find((entry) => {
+              const entryId = typeof suggestion.idFunction === 'function' ? suggestion.idFunction(entry) : undefined;
+              return (
+                String(entryId) === expectedId ||
+                String(entry.id) === expectedId ||
+                String(entry.computedId) === expectedId
+              );
+            }) || null;
+          finish(matchedEntry);
+        },
+        error: () => finish(null),
+      });
+    });
+  },
+
+  _flattenSelectivityResults(results) {
+    const flattened = [];
+    const queue = Array.isArray(results) ? results.slice() : [];
+    while (queue.length) {
+      const item = queue.shift();
+      if (!item) {
+        continue;
+      }
+      flattened.push(item);
+      if (Array.isArray(item.children)) {
+        queue.push(...item.children);
+      }
+    }
+    return flattened;
+  },
+
   _resultsElementChanged(results, oldResults) {
     if (oldResults && typeof oldResults.addEventListener === 'function') {
       this.unlisten(oldResults, 'quick-filters-changed', '_syncQuickFiltersFromResults');
@@ -1126,7 +1247,9 @@ Polymer({
       (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
         this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
         // XXX rely on debouncer to update the results request with the saved search params
-        this._fetch(this.results);
+        return this._fetch(this.results).then(() => {
+          this._scheduleDirectorySuggestionRehydration();
+        });
       });
     if (this.results) {
       load();
