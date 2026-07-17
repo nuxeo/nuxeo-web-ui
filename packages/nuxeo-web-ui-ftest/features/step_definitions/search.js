@@ -166,31 +166,49 @@ Then(/^I can see (\d+) search results$/, async function (numberOfResults) {
     const emptyResultVisible = await emptyResult.waitForVisible();
     emptyResultVisible.should.be.true;
   } else {
-    await driver.waitUntil(
-      async () => {
-        try {
-          const outLabel = await uiResult.resultsCountLabel;
-          if (!(await outLabel.isExisting()) || !(await outLabel.isDisplayed())) return false;
-          const outText = await outLabel.getText();
-          const outResult = parseInt(outText, 10);
-          if (outResult === numberOfResults) return true;
-          // Count doesn't match yet — trigger a page provider refresh for ES indexing lag
-          const el = await uiResult.el;
-          await driver.execute((r) => {
-            const pp = r && r.querySelector('nuxeo-page-provider');
-            if (pp && pp.fetch) pp.fetch();
-          }, el);
-          return false;
-        } catch (e) {
-          return false;
-        }
-      },
-      {
-        timeout: 20000,
-        interval: 2000,
-        timeoutMsg: `Expected ${numberOfResults} in results count label`,
-      },
-    );
+    let lastSeen = 'n/a';
+    try {
+      await driver.waitUntil(
+        async () => {
+          try {
+            const outLabel = await uiResult.resultsCountLabel;
+            if ((await outLabel.isExisting()) && (await outLabel.isDisplayed())) {
+              const outText = await outLabel.getText();
+              lastSeen = outText;
+              if (parseInt(outText, 10) === numberOfResults) return true;
+            }
+            // Always (re)fetch the active page provider. This covers two cases: the results view has
+            // not run its query yet (no count label rendered — e.g. right after navigating to a saved
+            // search by id), and Elasticsearch indexing / refresh lag once results are shown. The
+            // page provider lives inside shadow DOM, so pierce shadow roots to find it rather than a
+            // plain querySelector (which would silently miss it and never trigger the fetch).
+            await driver.execute(() => {
+              const findProvider = (root) => {
+                if (!root) return null;
+                const direct = root.querySelector && root.querySelector('nuxeo-page-provider');
+                if (direct) return direct;
+                const nodes = root.querySelectorAll ? root.querySelectorAll('*') : [];
+                for (let i = 0; i < nodes.length; i++) {
+                  if (nodes[i].shadowRoot) {
+                    const found = findProvider(nodes[i].shadowRoot);
+                    if (found) return found;
+                  }
+                }
+                return null;
+              };
+              const pp = findProvider(document);
+              if (pp && pp.fetch) pp.fetch();
+            });
+            return false;
+          } catch (e) {
+            return false;
+          }
+        },
+        { timeout: 30000, interval: 2000 },
+      );
+    } catch (e) {
+      throw new Error(`Expected ${numberOfResults} in results count label (last seen: "${lastSeen}")`, { cause: e });
+    }
     const outResult2 = await uiResult.resultsCount(displayMode);
     if (outResult2 !== numberOfResults) {
       throw new Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
