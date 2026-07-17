@@ -9,9 +9,9 @@ name: PR Review Reminder
 
 on:
   schedule:
-    # Times are UTC. 03:30 UTC = 09:00 IST, 09:30 UTC = 15:00 IST (Mon-Fri).
-    - cron: '30 3 * * 1-5'
-    - cron: '30 9 * * 1-5'
+    # Times are UTC. 05:30 UTC = 11:00 IST, 10:30 UTC = 16:00 IST (Mon-Fri).
+    - cron: '30 5 * * 1-5'
+    - cron: '30 10 * * 1-5'
   workflow_dispatch:
     inputs:
       dry_run:
