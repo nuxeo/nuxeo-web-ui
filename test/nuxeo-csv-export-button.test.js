@@ -120,5 +120,67 @@ suite('nuxeo-csv-export-button', () => {
       await element._resolveSchemas();
       expect(element._resolvedSchemas.split(',').sort()).to.deep.equal(['common', 'dublincore']);
     });
+
+    test('keeps only the provider schemas when the result type is unknown to the types config', async () => {
+      sinon.stub(element, '_fetchTypes').resolves({});
+      element.provider = { schemas: 'dublincore', currentPage: [{ type: 'Unknown' }] };
+      await element._resolveSchemas();
+      expect(element._resolvedSchemas).to.equal('dublincore');
+    });
+
+    test('resolves to undefined when the provider has neither schemas nor results', async () => {
+      element.provider = { currentPage: [] };
+      await element._resolveSchemas();
+      expect(element._resolvedSchemas).to.be.undefined;
+    });
+
+    test('resolves to undefined when there is no provider', async () => {
+      element.provider = undefined;
+      await element._resolveSchemas();
+      expect(element._resolvedSchemas).to.be.undefined;
+    });
+  });
+
+  suite('_providerChanged', () => {
+    const makeProvider = () => {
+      return {
+        schemas: 'dublincore',
+        addEventListener: sinon.spy(),
+        removeEventListener: sinon.spy(),
+      };
+    };
+
+    test('wires and rewires the current-page-changed listener when the provider changes', () => {
+      const first = makeProvider();
+      const second = makeProvider();
+      element.provider = first;
+      expect(first.addEventListener).to.have.been.calledWith('current-page-changed');
+      element.provider = second;
+      expect(first.removeEventListener).to.have.been.calledWith('current-page-changed');
+      expect(second.addEventListener).to.have.been.calledWith('current-page-changed');
+    });
+
+    test('re-resolves the schemas when the provider fires current-page-changed', () => {
+      const provider = makeProvider();
+      element.provider = provider;
+      const [, handler] = provider.addEventListener.firstCall.args;
+      const resolveSpy = sinon.spy(element, '_resolveSchemas');
+      handler();
+      expect(resolveSpy).to.have.been.calledOnce;
+    });
+
+    test('tolerates a provider without event listener support and a later cleared provider', () => {
+      element.provider = { schemas: 'dublincore' };
+      element.provider = undefined;
+      expect(element._resolvedSchemas).to.be.undefined;
+    });
+  });
+
+  suite('_fetchTypes', () => {
+    test('delegates to the shared config/types helper via the local resource', async () => {
+      element.$.types.get = sinon.stub().resolves({ doctypes: {} });
+      const config = await element._fetchTypes();
+      expect(config).to.be.an('object');
+    });
   });
 });
