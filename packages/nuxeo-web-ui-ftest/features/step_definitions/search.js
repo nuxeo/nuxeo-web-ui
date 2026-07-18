@@ -101,8 +101,34 @@ Given('I have permission {word} for this saved search', function (permission) {
   return fixtures.savedSearches.setPermissions(this.savedSearch, permission, this.username);
 });
 
-When('I browse to the saved search', function () {
-  url(`#!/doc/${this.savedSearch.id}`);
+When('I browse to the saved search', async function () {
+  const savedSearchId = this.savedSearch.id;
+  const uiResult = await this.ui.results;
+  const resultsRendered = async () => {
+    try {
+      const label = await uiResult.resultsCountLabel;
+      return (await label.isExisting()) && (await label.isDisplayed()) && /\d/.test(await label.getText());
+    } catch (e) {
+      return false;
+    }
+  };
+  // Navigating to a saved search by id can intermittently land on a search page whose results view is
+  // not yet wired to the search form, so the saved search is never applied and no results render (the
+  // count label stays absent, i.e. "last seen: n/a"). This is a timing race that surfaces far more often
+  // on recent Chrome versions and under CI load. Re-navigate (via a neutral route so the next hop is a
+  // real route change) until the results actually render.
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    if (attempt > 0) {
+      await url('#!/');
+    }
+    await url(`#!/doc/${savedSearchId}`);
+    try {
+      await driver.waitUntil(resultsRendered, { timeout: 10000, interval: 500 });
+      return;
+    } catch (e) {
+      // results did not render on this attempt — re-navigate and retry
+    }
+  }
 });
 
 Then('I can see that my saved search "{word}" on "{word}" is selected', async function (savedSearchName, searchName) {
