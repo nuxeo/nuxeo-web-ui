@@ -1970,13 +1970,13 @@ suite('nuxeo-results', () => {
 
     test('returns the value as-is when there are no settings', () => {
       const view = createTableView();
-      expect(results._filterSettingsByCapabilities(view, undefined)).to.equal(undefined);
-      expect(results._filterSettingsByCapabilities(view, null)).to.equal(null);
+      expect(results._filterSettingsByCapabilities(view, undefined)).to.be.undefined;
+      expect(results._filterSettingsByCapabilities(view, null)).to.be.null;
     });
 
     test('does not restore any settings when settings-enabled is disabled', () => {
       const view = createTableView({ settingsEnabled: false });
-      expect(results._filterSettingsByCapabilities(view, buildSettings())).to.equal(undefined);
+      expect(results._filterSettingsByCapabilities(view, buildSettings())).to.be.undefined;
     });
 
     test('restores full settings when all capabilities are enabled', () => {
@@ -1994,7 +1994,7 @@ suite('nuxeo-results', () => {
       expect(result.columns['dc:modified']).to.not.have.property('resized');
       // hidden and order are preserved
       expect(result.columns['dc:title'].order).to.equal(1);
-      expect(result.columns['dc:modified'].hidden).to.equal(true);
+      expect(result.columns['dc:modified'].hidden).to.be.true;
     });
 
     test('strips order when column-reorder-enabled is disabled', () => {
@@ -2004,7 +2004,7 @@ suite('nuxeo-results', () => {
       expect(result.columns['dc:modified']).to.not.have.property('order');
       // hidden and width are preserved
       expect(result.columns['dc:title'].width).to.equal('300px');
-      expect(result.columns['dc:modified'].hidden).to.equal(true);
+      expect(result.columns['dc:modified'].hidden).to.be.true;
     });
 
     test('strips both width and order when resize and reorder are disabled', () => {
