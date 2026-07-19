@@ -1941,4 +1941,89 @@ suite('nuxeo-results', () => {
       expect(setPaths).to.include('columns.0.filterValue');
     });
   });
+
+  suite('_filterSettingsByCapabilities', () => {
+    const buildSettings = () => {
+      return {
+        columns: {
+          'dc:title': { hidden: false, order: 1, width: '300px', resized: true },
+          'dc:modified': { hidden: true, order: 0, width: '150px', resized: true },
+        },
+        sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+      };
+    };
+
+    const createTableView = (capabilities = {}) => {
+      const view = document.createElement('nuxeo-data-table');
+      view.settingsEnabled = true;
+      view.columnResizeEnabled = true;
+      view.columnReorderEnabled = true;
+      Object.assign(view, capabilities);
+      return view;
+    };
+
+    test('returns settings unchanged for non nuxeo-data-table views', () => {
+      const view = createMockView();
+      const settings = buildSettings();
+      expect(results._filterSettingsByCapabilities(view, settings)).to.equal(settings);
+    });
+
+    test('returns the value as-is when there are no settings', () => {
+      const view = createTableView();
+      expect(results._filterSettingsByCapabilities(view, undefined)).to.equal(undefined);
+      expect(results._filterSettingsByCapabilities(view, null)).to.equal(null);
+    });
+
+    test('does not restore any settings when settings-enabled is disabled', () => {
+      const view = createTableView({ settingsEnabled: false });
+      expect(results._filterSettingsByCapabilities(view, buildSettings())).to.equal(undefined);
+    });
+
+    test('restores full settings when all capabilities are enabled', () => {
+      const view = createTableView();
+      const settings = buildSettings();
+      expect(results._filterSettingsByCapabilities(view, settings)).to.deep.equal(settings);
+    });
+
+    test('strips width and resized when column-resize-enabled is disabled', () => {
+      const view = createTableView({ columnResizeEnabled: false });
+      const result = results._filterSettingsByCapabilities(view, buildSettings());
+      expect(result.columns['dc:title']).to.not.have.property('width');
+      expect(result.columns['dc:title']).to.not.have.property('resized');
+      expect(result.columns['dc:modified']).to.not.have.property('width');
+      expect(result.columns['dc:modified']).to.not.have.property('resized');
+      // hidden and order are preserved
+      expect(result.columns['dc:title'].order).to.equal(1);
+      expect(result.columns['dc:modified'].hidden).to.equal(true);
+    });
+
+    test('strips order when column-reorder-enabled is disabled', () => {
+      const view = createTableView({ columnReorderEnabled: false });
+      const result = results._filterSettingsByCapabilities(view, buildSettings());
+      expect(result.columns['dc:title']).to.not.have.property('order');
+      expect(result.columns['dc:modified']).to.not.have.property('order');
+      // hidden and width are preserved
+      expect(result.columns['dc:title'].width).to.equal('300px');
+      expect(result.columns['dc:modified'].hidden).to.equal(true);
+    });
+
+    test('strips both width and order when resize and reorder are disabled', () => {
+      const view = createTableView({ columnResizeEnabled: false, columnReorderEnabled: false });
+      const result = results._filterSettingsByCapabilities(view, buildSettings());
+      Object.values(result.columns).forEach((column) => {
+        expect(column).to.not.have.property('width');
+        expect(column).to.not.have.property('resized');
+        expect(column).to.not.have.property('order');
+        expect(column).to.have.property('hidden');
+      });
+    });
+
+    test('does not mutate the original settings object', () => {
+      const view = createTableView({ columnResizeEnabled: false, columnReorderEnabled: false });
+      const settings = buildSettings();
+      results._filterSettingsByCapabilities(view, settings);
+      expect(settings.columns['dc:title']).to.have.property('width', '300px');
+      expect(settings.columns['dc:title']).to.have.property('order', 1);
+    });
+  });
 });

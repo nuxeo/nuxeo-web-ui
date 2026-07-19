@@ -678,7 +678,7 @@ Polymer({
       if (this._settings) {
         this.set('_settings.displayMode', this.displayMode);
         this.saveSettings();
-        view.settings = this._settings[this.displayMode];
+        view.settings = this._filterSettingsByCapabilities(view, this._settings[this.displayMode]);
       }
       // restore selection
       if (this.selectedItems) {
@@ -731,7 +731,7 @@ Polymer({
       const icon = view.getAttribute('icon');
       view.nxProvider = this.nxProvider;
       if (this._settings && view.settings) {
-        view.settings = this._settings[name];
+        view.settings = this._filterSettingsByCapabilities(view, this._settings[name]);
       }
       if (name === this.displayMode) {
         hasDisplayMode = true;
@@ -813,6 +813,47 @@ Polymer({
     this._settings = {};
   },
 
+  // Filters persisted view settings so that only capabilities enabled on the view are restored.
+  // This prevents saved layout (column visibility, width/resize, order) from overriding the
+  // template-declared layout when the corresponding capability is disabled on the view
+  // (`settings-enabled`, `column-resize-enabled`, `column-reorder-enabled`).
+  _filterSettingsByCapabilities(view, settings) {
+    if (!settings) {
+      return settings;
+    }
+    // Only nuxeo-data-table exposes column capability flags; other views (e.g. grid) restore as-is.
+    if (!view || view.localName !== 'nuxeo-data-table') {
+      return settings;
+    }
+    // Without the settings panel capability, do not restore any persisted layout;
+    // the template-declared layout must win.
+    if (!view.settingsEnabled) {
+      return undefined;
+    }
+    const resizeEnabled = !!view.columnResizeEnabled;
+    const reorderEnabled = !!view.columnReorderEnabled;
+    if (resizeEnabled && reorderEnabled) {
+      return settings;
+    }
+    const filtered = this._deepClone(settings);
+    if (filtered.columns) {
+      Object.keys(filtered.columns).forEach((key) => {
+        const column = filtered.columns[key];
+        if (!column) {
+          return;
+        }
+        if (!resizeEnabled) {
+          delete column.width;
+          delete column.resized;
+        }
+        if (!reorderEnabled) {
+          delete column.order;
+        }
+      });
+    }
+    return filtered;
+  },
+
   restoreSettings() {
     // XXX _isRestoring is a control flag to prevent restoring from triggering a save (see WEBUI-581)
     this._isRestoring = true;
@@ -821,7 +862,7 @@ Polymer({
         this.displayMode = this._settings.displayMode;
       }
       if (this._settings[this.displayMode] && this.view) {
-        this.view.settings = this._settings[this.displayMode];
+        this.view.settings = this._filterSettingsByCapabilities(this.view, this._settings[this.displayMode]);
       }
     }
     this._isRestoring = false;
