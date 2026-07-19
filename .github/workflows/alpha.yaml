@@ -103,7 +103,12 @@ jobs:
           echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
 
           # Update package.json dependencies and devDependencies
-          jq --arg ver "~$ELEMENTS_VERSION" '
+          # Pin the EXACT elements version (no "~"). main.yaml uses "~$ELEMENTS_VERSION" for
+          # rc, which is safe there because rc is already the highest prerelease. For alpha it is
+          # NOT: an alpha sorts below the rc's of the same base (X.Y.Z-alpha.N < X.Y.Z-rc.M), so a
+          # "~" range lets npm resolve UP to the latest rc and install rc elements instead of the
+          # alpha we built (dropping the alpha/rebranding changes). Exact pin prevents that.
+          jq --arg ver "$ELEMENTS_VERSION" '
             .dependencies."@nuxeo/nuxeo-dataviz-elements" = $ver |
             .dependencies."@nuxeo/nuxeo-elements" = $ver |
             .dependencies."@nuxeo/nuxeo-ui-elements" = $ver |
