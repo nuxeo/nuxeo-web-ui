@@ -822,7 +822,7 @@ Polymer({
       return settings;
     }
     // Only nuxeo-data-table exposes column capability flags; other views (e.g. grid) restore as-is.
-    if (!view || view.localName !== 'nuxeo-data-table') {
+    if (view?.localName !== 'nuxeo-data-table') {
       return settings;
     }
     // Without the settings panel capability, do not restore any persisted layout;
