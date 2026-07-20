@@ -73,7 +73,6 @@ jobs:
             RAW_BRANCH="${{ github.event.inputs.branch_name }}"
           fi
           echo "BRANCH_NAME=$RAW_BRANCH" >> $GITHUB_ENV
-          echo "BRANCH_NAME_SANITIZED=$(echo $RAW_BRANCH | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
@@ -89,7 +88,15 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME_SANITIZED" >> $GITHUB_ENV
+          BASE_VERSION="$(npx -c 'echo "$npm_package_version"')"
+          # Image version: replace a -SNAPSHOT suffix with -preview, otherwise append -snapshot.
+          if echo "$BASE_VERSION" | grep -qiE 'snapshot'; then
+            IMAGE_VERSION="$(echo "$BASE_VERSION" | sed -E 's/-?snapshot/-preview/I')"
+          else
+            IMAGE_VERSION="${BASE_VERSION}-snapshot"
+          fi
+          # Uniquely identify this run by appending the workflow run id (dot-separated).
+          echo "VERSION=${IMAGE_VERSION}.${{ github.run_id }}" >> "$GITHUB_ENV"
 
       - name: Determine nuxeo-elements branch to use
         id: pick_nuxeo_elements_branch
