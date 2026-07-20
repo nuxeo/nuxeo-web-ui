@@ -55,13 +55,25 @@ if (!customElements.get('nuxeo-inactivity-test-host')) {
   });
 }
 
+// Drain pending microtasks/macrotasks so the async logout flow (fetch -> .then(redirect)) settles before
+// assertions. Uses a real 0ms timer, so callers must not rely on it while window.setTimeout is stubbed.
+const settle = () => new Promise((resolve) => window.setTimeout(resolve));
+
 suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
   let host;
+  let endSessionStub;
 
   setup(async () => {
     host = await fixture(html`<nuxeo-inactivity-test-host></nuxeo-inactivity-test-host>`);
     sinon.stub(host.$.keepAlive, 'execute').resolves({}); // WEBUI-1987: no real session keep-alive in tests
+    // The logout flow ends the session with a background GET to /logout before navigating; stub that seam
+    // so tests never hit the network and the timeout-login redirect (rather than the fallback) is exercised.
+    endSessionStub = sinon.stub(host, '_endServerSession').resolves({});
     await flush();
+  });
+
+  teardown(() => {
+    endSessionStub.restore();
   });
 
   suite('inactivity timer', () => {
@@ -101,15 +113,16 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       window.localStorage.removeItem(ACTIVITY_KEY);
     });
 
-    test('arms a timeout for the configured idle period and redirects to logout when it fires', () => {
+    test('arms a timeout for the configured idle period and redirects to logout when it fires', async () => {
       getStub.withArgs('session.timeout', 60).returns(1); // 1 minute
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
       expect(scheduled).to.have.lengthOf(1);
       expect(scheduled[0].delay).to.equal(60000);
       window.localStorage.removeItem(ACTIVITY_KEY); // no tab has been active → real logout
-      scheduled[0].fn(); // simulate the idle period elapsing
-      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+      await scheduled[0].fn(); // simulate the idle period elapsing (async: ends session then navigates)
+      expect(endSessionStub).to.have.been.calledWith('https://server/nuxeo/logout'); // session ended first
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/login.jsp?nxtimeout=true');
       redirect.restore();
     });
 
@@ -149,25 +162,25 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       redirect.restore();
     });
 
-    test('logs out only when all tabs have been idle for the full period', () => {
+    test('logs out only when all tabs have been idle for the full period', async () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
       window.localStorage.setItem(ACTIVITY_KEY, String(Date.now() - 120000)); // last activity 2 min ago
-      lastScheduled().fn();
-      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+      await lastScheduled().fn();
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/login.jsp?nxtimeout=true');
       redirect.restore();
     });
 
-    test('logs out on resume when idle beyond the timeout (e.g. after the machine slept)', () => {
+    test('logs out on resume when idle beyond the timeout (e.g. after the machine slept)', async () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
       // Simulate elapsed real time while the tab was hidden (both local and shared references are stale).
       host._lastActivityTs = Date.now() - 120000;
       window.localStorage.setItem(ACTIVITY_KEY, String(Date.now() - 120000));
-      host._checkInactivityOnResume();
-      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+      await host._checkInactivityOnResume();
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/login.jsp?nxtimeout=true');
       redirect.restore();
     });
 
@@ -271,14 +284,14 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       getItem.restore();
     });
 
-    test('logs out when the idle timer fires and reading shared activity throws', () => {
+    test('logs out when the idle timer fires and reading shared activity throws', async () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
       const getItem = sinon.stub(window.localStorage, 'getItem').throws(new Error('access denied'));
-      lastScheduled().fn(); // timer fires; getItem throws -> catch -> per-tab logout
+      await lastScheduled().fn(); // timer fires; getItem throws -> catch -> per-tab logout
       expect(host._inactivityStorageError).to.be.an('error');
-      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/login.jsp?nxtimeout=true');
       getItem.restore();
       redirect.restore();
     });
@@ -315,23 +328,48 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       redirect.restore();
     });
 
-    test('redirects to logout when a 401 unauthorized-request is dispatched', () => {
+    test('ends the session then redirects to the timeout login page on a 401 unauthorized-request', async () => {
       // The fixture's ready()/attached() already wired the listener via _setupUnauthorizedRedirect().
       document.dispatchEvent(new CustomEvent('unauthorized-request', { bubbles: true, composed: true }));
-      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+      await settle();
+      expect(endSessionStub).to.have.been.calledWith('https://server/nuxeo/logout'); // session ended first
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/login.jsp?nxtimeout=true');
     });
 
-    test('is one-shot: a burst of 401s triggers a single logout redirect', () => {
+    test('is one-shot: a burst of 401s triggers a single logout redirect', async () => {
       document.dispatchEvent(new CustomEvent('unauthorized-request'));
       document.dispatchEvent(new CustomEvent('unauthorized-request'));
       document.dispatchEvent(new CustomEvent('unauthorized-request'));
+      await settle();
       expect(redirect).to.have.been.calledOnce;
     });
 
-    test('teardown removes the 401 listener', () => {
+    test('teardown removes the 401 listener', async () => {
       host._teardownUnauthorizedRedirect();
       document.dispatchEvent(new CustomEvent('unauthorized-request'));
+      await settle();
       expect(redirect).not.to.have.been.called;
+    });
+
+    test('derives the login page from the logout URL even when it carries a query string', async () => {
+      const logout = sinon.stub(host, '_logout').returns('https://server/nuxeo/logout?foo=bar');
+      await host._logoutRedirect();
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/login.jsp?nxtimeout=true');
+      logout.restore();
+    });
+
+    test('falls back to a plain logout navigation when the logout request fails', async () => {
+      endSessionStub.rejects(new Error('offline')); // GET /logout could not be made
+      await host._logoutRedirect();
+      // Session teardown still attempted, and we navigate to plain logout (message may be skipped).
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+    });
+
+    test('does not throw and still navigates when ending the session throws synchronously', () => {
+      endSessionStub.throws(new Error('blocked'));
+      host._logoutRedirect();
+      expect(host._inactivityLogoutError).to.be.an('error');
+      expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
     });
   });
 });
