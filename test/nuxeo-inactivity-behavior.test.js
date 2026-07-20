@@ -365,9 +365,9 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
     });
 
-    test('does not throw and still navigates when ending the session throws synchronously', () => {
+    test('records the error and still navigates when ending the session throws synchronously', async () => {
       endSessionStub.throws(new Error('blocked'));
-      host._logoutRedirect();
+      await host._logoutRedirect();
       expect(host._inactivityLogoutError).to.be.an('error');
       expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
     });
