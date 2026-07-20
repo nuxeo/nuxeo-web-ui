@@ -49,7 +49,11 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
-  browserVersion: '135.0.7049.114',
+  // Let WebdriverIO's built-in driver manager provision the browser and its matching driver
+  // (e.g. Chrome-for-Testing + chromedriver, or Firefox + geckodriver) rather than a hard-pinned
+  // build. Defaults to the current stable channel; override via BROWSER_VERSION with an explicit
+  // version or a channel name (e.g. 'beta'/'dev'/'canary') when a specific build is required.
+  browserVersion: process.env.BROWSER_VERSION || 'stable',
   'wdio:enforceWebDriverClassic': true,
   // Prevent ChromeDriver from auto-dismissing native dialogs (window.confirm, window.alert)
   // so that tests can explicitly accept/dismiss them via alertAccept/alertDismiss.
@@ -113,13 +117,6 @@ switch (capability.browserName) {
 }
 
 const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 40000;
-
-// Allow overriding driver version
-const drivers = {};
-drivers[process.env.BROWSER] = {};
-if (process.env.DRIVER_VERSION) {
-  drivers[process.env.BROWSER].version = process.env.DRIVER_VERSION;
-}
 
 // transform nuxeo-web-ui-ftest requires
 import('@babel/register').then(({ default: register }) => {
@@ -283,11 +280,35 @@ export const config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  onPrepare: () => {
+  onPrepare: async () => {
     // eslint-disable-next-line no-console
     console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
 
-    // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines
+    // Report the browser version once, up front, before any worker starts. Provisioning is
+    // delegated to WebdriverIO's driver manager; when a channel (e.g. 'stable') is configured,
+    // resolve the concrete Chrome-for-Testing build purely for this log line. Best-effort: it
+    // never blocks the run and falls back to the configured channel name if the lookup fails.
+    const browserName = process.env.BROWSER || 'chrome';
+    const configuredVersion = process.env.BROWSER_VERSION || 'stable';
+    let resolvedVersion = configuredVersion;
+    if (browserName === 'chrome' && !/^\d/.test(configuredVersion)) {
+      try {
+        const res = await fetch('https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json');
+        if (res.ok) {
+          const { channels = {} } = await res.json();
+          const channel = channels[configuredVersion.charAt(0).toUpperCase() + configuredVersion.slice(1)];
+          if (channel && channel.version) {
+            resolvedVersion = channel.version;
+          }
+        }
+      } catch (e) {
+        // best-effort: fall back to the configured channel name
+      }
+    }
+    // eslint-disable-next-line no-console
+    console.log(`Using ${browserName} ${resolvedVersion} (browserVersion: ${configuredVersion})`);
+
+    // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines.
     const originalWrite = process.stdout.write.bind(process.stdout);
     global._originalStdoutWrite = originalWrite;
     // eslint-disable-next-line no-control-regex
@@ -346,12 +367,17 @@ export const config = {
     });
 
     /*
-     * Increase window size to avoid hidden buttons
+     * Force a large, deterministic window size so tall dialogs and content keep their action
+     * buttons inside the viewport. `maximizeWindow()` must not be used here: in headless Chrome it
+     * resizes to a tiny default (~800x600, since there is no physical screen), overriding the
+     * `--window-size=1920,1080` launch argument. That small viewport pushed dialog/footer buttons
+     * off-screen, so WebDriver clicked an out-of-viewport point and reported "element click
+     * intercepted". `setWindowSize` works in both headless and headed modes and keeps them consistent.
      */
     try {
-      await browser.maximizeWindow();
+      await browser.setWindowSize(1920, 1080);
     } catch (e) {
-      console.error('Failed to maximize.');
+      console.error('Failed to set window size.');
     }
 
     /**
