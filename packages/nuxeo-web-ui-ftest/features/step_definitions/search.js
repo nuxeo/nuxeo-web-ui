@@ -203,28 +203,13 @@ Then(/^I can see (\d+) search results$/, async function (numberOfResults) {
               lastSeen = outText;
               if (parseInt(outText, 10) === numberOfResults) return true;
             }
-            // Always (re)fetch the active page provider. This covers two cases: the results view has
-            // not run its query yet (no count label rendered — e.g. right after navigating to a saved
-            // search by id), and Elasticsearch indexing / refresh lag once results are shown. The
-            // page provider lives inside shadow DOM, so pierce shadow roots to find it rather than a
-            // plain querySelector (which would silently miss it and never trigger the fetch).
-            await driver.execute(() => {
-              const findProvider = (root) => {
-                if (!root) return null;
-                const direct = root.querySelector && root.querySelector('nuxeo-page-provider');
-                if (direct) return direct;
-                const nodes = root.querySelectorAll ? root.querySelectorAll('*') : [];
-                for (let i = 0; i < nodes.length; i++) {
-                  if (nodes[i].shadowRoot) {
-                    const found = findProvider(nodes[i].shadowRoot);
-                    if (found) return found;
-                  }
-                }
-                return null;
-              };
-              const pp = findProvider(document);
+            // Count doesn't match yet — nudge the page provider to refetch, covering Elasticsearch
+            // indexing / refresh lag once results are shown.
+            const el = await uiResult.el;
+            await driver.execute((r) => {
+              const pp = r && r.querySelector('nuxeo-page-provider');
               if (pp && pp.fetch) pp.fetch();
-            });
+            }, el);
             return false;
           } catch (e) {
             return false;
