@@ -152,8 +152,7 @@ export const NuxeoInactivityBehavior = {
     // idleFor negative and re-arm for longer than the configured window, weakening the timer.
     const idleFor = Math.max(0, Date.now() - this._getLastActivity());
     if (idleFor >= this._inactivityTimeoutMs) {
-      this._logoutRedirect();
-      return;
+      return this._logoutRedirect();
     }
     clearTimeout(this._inactivityTimer);
     this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs - idleFor);
@@ -182,9 +181,9 @@ export const NuxeoInactivityBehavior = {
       // Someone was active recently (in another tab); re-arm for the remaining time instead of logging out.
       clearTimeout(this._inactivityTimer);
       this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs - idleFor);
-      return;
+      return undefined;
     }
-    this._logoutRedirect();
+    return this._logoutRedirect();
   },
 
   // WEBUI-1987 (CWE-613): a 401 means the (server) session is already gone. Rather than leaving the
@@ -206,12 +205,38 @@ export const NuxeoInactivityBehavior = {
 
   // Single logout entry point shared by the inactivity timer and the 401 handler. The one-shot guard
   // prevents a burst of 401s (or a timer firing during logout) from triggering multiple redirects.
+  // Returns a promise so callers (and tests) can await the session teardown + navigation.
   _logoutRedirect() {
     if (this._loggingOut) {
-      return;
+      return Promise.resolve();
     }
     this._loggingOut = true;
-    this._redirect(this._logout());
+    // We want Nuxeo's native "Your session is inactive. Please log in." message, which login.jsp only
+    // renders when it receives a top-level `nxtimeout` param. We can't reach that by navigating to /logout
+    // with a requestedUrl: when anonymous auth is enabled the /ui SPA bounce re-nests our value inside its
+    // own requestedUrl and login.jsp never sees nxtimeout. So end the server session first with a background
+    // GET to /logout, then navigate straight to the login page with nxtimeout — bypassing the SPA entirely.
+    // If the logout request can't be made, fall back to a plain /logout navigation so the session is still
+    // terminated (the timeout message may be skipped). Only this inactivity/401 path shows the message; the
+    // manual "Sign Out" link uses _logout() directly.
+    const logoutUrl = this._logout();
+    const timeoutLoginUrl = `${logoutUrl.replace(/\/logout\b.*$/, '/login.jsp')}?nxtimeout=true`;
+    const proceed = () => this._redirect(timeoutLoginUrl);
+    const fallback = () => this._redirect(logoutUrl);
+    try {
+      return this._endServerSession(logoutUrl).then(proceed, fallback);
+    } catch (e) {
+      this._inactivityLogoutError = e;
+      fallback();
+      return Promise.resolve();
+    }
+  },
+
+  // Background request that ends the server HTTP session (so the JSESSIONID is invalidated) without
+  // following the redirect into the SPA. Isolated as a seam so tests can stub it without touching global
+  // fetch. redirect:'manual' is enough: the server invalidates the session while handling GET /logout.
+  _endServerSession(logoutUrl) {
+    return globalThis.fetch(logoutUrl, { credentials: 'same-origin', redirect: 'manual' });
   },
 
   // Use replace() (not href) so the potentially sensitive page is not left as a navigable
