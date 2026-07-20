@@ -223,13 +223,18 @@ export const NuxeoInactivityBehavior = {
     const timeoutLoginUrl = `${logoutUrl.replace(/\/logout\b.*$/, '/login.jsp')}?nxtimeout=true`;
     const proceed = () => this._redirect(timeoutLoginUrl);
     const fallback = () => this._redirect(logoutUrl);
+    // The try only guards a synchronous throw from _endServerSession(); its async rejection is handled by
+    // the .then(proceed, fallback) below (kept outside the try so the promise itself is never in scope of
+    // the catch).
+    let sessionEnded;
     try {
-      return this._endServerSession(logoutUrl).then(proceed, fallback);
+      sessionEnded = this._endServerSession(logoutUrl);
     } catch (e) {
       this._inactivityLogoutError = e;
       fallback();
       return Promise.resolve();
     }
+    return sessionEnded.then(proceed, fallback);
   },
 
   // Background request that ends the server HTTP session (so the JSESSIONID is invalidated) without
