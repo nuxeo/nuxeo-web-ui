@@ -4,9 +4,9 @@
  * ones that still need review to a Microsoft Teams channel.
  *
  * "Still needs review" means, for an open, non-draft PR whose checks are all
- * green: it is NOT (approved by the lead) AND NOT (approved by >= 2 non-lead
- * developers). PRs that already satisfy either of those are considered
- * sufficiently reviewed and are skipped.
+ * green: it is NOT (approved by the lead AND approved by >= 1 non-lead
+ * developer). A PR is considered sufficiently reviewed and is skipped only once
+ * it has both the lead's approval and at least one other developer's approval.
  *
  * The Teams message is an Adaptive Card wrapped in the envelope expected by a
  * Power Automate "Workflows" incoming webhook (the successor to the retired
@@ -278,7 +278,7 @@ function evaluatePullRequest(pr, repoSlug) {
   const leadApproved = [...approvers].some((login) => login.toLowerCase() === leadLower);
   const nonLeadApprovals = [...approvers].filter((login) => login.toLowerCase() !== leadLower).length;
 
-  const sufficientlyReviewed = leadApproved || nonLeadApprovals >= 2;
+  const sufficientlyReviewed = leadApproved && nonLeadApprovals >= 1;
   if (sufficientlyReviewed) return null;
 
   return {
@@ -318,7 +318,7 @@ function buildAdaptiveCard(prs) {
   } else {
     body.push({
       type: 'TextBlock',
-      text: 'Checks green, still need a lead approval or 2 developer approvals',
+      text: 'Checks green, still need a lead approval and one other developer approval',
       wrap: true,
       isSubtle: true,
       spacing: 'None',
