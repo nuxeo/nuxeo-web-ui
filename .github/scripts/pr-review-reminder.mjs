@@ -36,8 +36,10 @@
  *   DONT_MERGE_LABEL_REGEX Case-insensitive regex; PRs with a matching label are skipped.
  *                          Default: "do\\s*n'?t\\s*merge|do\\s*not\\s*merge".
  *   MAX_NEW_ISSUES         Skip PRs whose SonarCloud "New issues" count exceeds this. Default 0.
- *   MIN_NEW_COVERAGE       Skip PRs whose SonarCloud "Coverage on New Code" is below this %.
- *                          Default 90.
+ *                          Coverage on New Code is gated on SonarCloud's own pass/fail for that
+ *                          condition (the red-cross icon), not a raw percentage — so a
+ *                          "0.0% accepted" (green check) PR is kept, while a real sub-threshold
+ *                          coverage (red cross) is skipped.
  *   SONAR_MISSING_POLICY   What to do when a PR has no SonarCloud comment / metric:
  *                          'include' (default) keeps it, 'exclude' drops it.
  *   POST_WHEN_EMPTY        'true' posts an "all caught up" card when nothing qualifies.
@@ -76,16 +78,28 @@ const asNumber = (value, fallback) => {
 };
 
 // Parses the SonarCloud PR comment (posted by sonarqubecloud[bot]) for the metrics we gate on.
+// SonarCloud's "Clean as You Code" gate treats "0.0% Coverage on New Code" as PASSED (green check,
+// there are no new lines that need covering), while real coverage below the project's threshold
+// (e.g. 88.5%) FAILS the condition and renders a red-cross icon. The raw percentage alone cannot
+// tell these apart (0.0% can be either), so we read the pass/fail icon that precedes each condition.
 const parseSonar = (comments) => {
   const sonar = [...comments].reverse().find((c) => /sonar/i.test(c.author?.login || ''));
-  if (!sonar) return { present: false, newIssues: null, coverage: null };
+  if (!sonar) {
+    return { present: false, newIssues: null, coverage: null, coverageFailed: null, qualityGatePassed: null };
+  }
   const body = sonar.body || '';
   const issuesMatch = body.match(/\[(\d+)\s+New issues?\]/i);
   const coverageMatch = body.match(/\[([\d.]+)%\s+Coverage on New Code\]/i);
+  // Capture the status icon (passed-16px.png / failed-16px.png) immediately preceding the
+  // "Coverage on New Code" metric on the same line. `[^[]*` spans the " '') " between them.
+  const coverageStatus = body.match(/(passed|failed)-16px\.png[^[]*\[[\d.]+%\s+Coverage on New Code\]/i);
+  const qualityGate = body.match(/Quality Gate\s+(passed|failed)/i);
   return {
     present: true,
     newIssues: issuesMatch ? Number.parseInt(issuesMatch[1], 10) : null,
     coverage: coverageMatch ? Number.parseFloat(coverageMatch[1]) : null,
+    coverageFailed: coverageStatus ? coverageStatus[1].toLowerCase() === 'failed' : null,
+    qualityGatePassed: qualityGate ? qualityGate[1].toLowerCase() === 'passed' : null,
   };
 };
 
@@ -122,7 +136,6 @@ const config = {
     'DONT_MERGE_LABEL_REGEX',
   ),
   maxNewIssues: asNumber(env('MAX_NEW_ISSUES', '0'), 0),
-  minCoverage: asNumber(env('MIN_NEW_COVERAGE', '90'), 90),
   sonarMissingPolicy: (env('SONAR_MISSING_POLICY', 'include') || 'include').toLowerCase(),
   postWhenEmpty: asBool(env('POST_WHEN_EMPTY'), false),
   maxPrs: Math.max(1, Number.parseInt(env('MAX_PRS', '50'), 10) || 50),
@@ -263,7 +276,13 @@ function evaluatePullRequest(pr, repoSlug) {
     if (config.sonarMissingPolicy === 'exclude') return null;
   } else {
     if (sonar.newIssues !== null && sonar.newIssues > config.maxNewIssues) return null;
-    if (sonar.coverage !== null && sonar.coverage < config.minCoverage) return null;
+    // Skip only when SonarCloud actually marks "Coverage on New Code" as failing (red cross).
+    // A "0.0% accepted" coverage (green check — no new lines to cover) must NOT be skipped.
+    const coverageFailing =
+      sonar.coverageFailed === true ||
+      // Fallback when the coverage icon can't be parsed: trust the overall Quality Gate result.
+      (sonar.coverageFailed === null && sonar.qualityGatePassed === false);
+    if (coverageFailing) return null;
   }
 
   const latestByAuthor = pr.latestOpinionatedReviews.nodes;
