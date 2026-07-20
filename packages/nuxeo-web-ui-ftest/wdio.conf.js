@@ -286,14 +286,19 @@ export const config = {
 
     // Report the browser version once, up front, before any worker starts. Provisioning is
     // delegated to WebdriverIO's driver manager; when a channel (e.g. 'stable') is configured,
-    // resolve the concrete Chrome-for-Testing build purely for this log line. Best-effort: it
-    // never blocks the run and falls back to the configured channel name if the lookup fails.
+    // resolve the concrete Chrome-for-Testing build purely for this log line. Best-effort: the
+    // fetch is bounded by a short abortable timeout so a slow/unreachable host can never block the
+    // run, and it falls back to the configured channel name if the lookup fails or times out.
     const browserName = process.env.BROWSER || 'chrome';
     const configuredVersion = process.env.BROWSER_VERSION || 'stable';
     let resolvedVersion = configuredVersion;
     if (browserName === 'chrome' && !/^\d/.test(configuredVersion)) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3000);
       try {
-        const res = await fetch('https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json');
+        const res = await fetch('https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json', {
+          signal: controller.signal,
+        });
         if (res.ok) {
           const { channels = {} } = await res.json();
           const channel = channels[configuredVersion.charAt(0).toUpperCase() + configuredVersion.slice(1)];
@@ -302,7 +307,9 @@ export const config = {
           }
         }
       } catch (e) {
-        // best-effort: fall back to the configured channel name
+        // best-effort: fall back to the configured channel name (also covers the abort timeout)
+      } finally {
+        clearTimeout(timer);
       }
     }
     // eslint-disable-next-line no-console

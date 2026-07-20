@@ -129,6 +129,9 @@ When('I browse to the saved search', async function () {
       // results did not render on this attempt — re-navigate and retry
     }
   }
+  // Every attempt failed: fail the step explicitly rather than letting the scenario continue in a
+  // broken state, so later assertions don't fail misleadingly and the root cause stays visible.
+  throw new Error(`Saved search ${savedSearchId} did not render any results after 5 navigation attempts`);
 });
 
 Then('I can see that my saved search "{word}" on "{word}" is selected', async function (savedSearchName, searchName) {
