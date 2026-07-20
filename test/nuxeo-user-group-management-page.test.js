@@ -115,6 +115,59 @@ suite('nuxeo-user-group-management-page', () => {
       element.$$.restore();
     });
 
+    test('should reset selectedGroup before reassigning so the observer re-fetches (WEBUI-1898)', () => {
+      const assigned = [];
+      const management = { page: null };
+      Object.defineProperty(management, 'selectedGroup', {
+        get() {
+          return this._selectedGroup;
+        },
+        set(v) {
+          this._selectedGroup = v;
+          assigned.push(v);
+        },
+      });
+      // Simulate returning to a group that is already selected.
+      management.selectedGroup = 'admins';
+      assigned.length = 0;
+      element.visible = true;
+      sinon.stub(element, '$$').withArgs('nuxeo-user-group-management').returns(management);
+      element.entity = { type: 'group', id: 'admins' };
+      // Ignore assignments from the observer fired by the line above; assert on an explicit call.
+      assigned.length = 0;
+      element._entityChanged();
+      // null reset then reassignment forces the groupname observer to fire again.
+      expect(assigned).to.deep.equal([null, 'admins']);
+      expect(management.selectedGroup).to.equal('admins');
+      expect(management.page).to.equal('manage-group');
+      element.$$.restore();
+    });
+
+    test('should reset selectedUser before reassigning so the observer re-fetches (WEBUI-1898)', () => {
+      const assigned = [];
+      const management = { page: null };
+      Object.defineProperty(management, 'selectedUser', {
+        get() {
+          return this._selectedUser;
+        },
+        set(v) {
+          this._selectedUser = v;
+          assigned.push(v);
+        },
+      });
+      management.selectedUser = 'jdoe';
+      assigned.length = 0;
+      element.visible = true;
+      sinon.stub(element, '$$').withArgs('nuxeo-user-group-management').returns(management);
+      element.entity = { type: 'user', id: 'jdoe' };
+      assigned.length = 0;
+      element._entityChanged();
+      expect(assigned).to.deep.equal([null, 'jdoe']);
+      expect(management.selectedUser).to.equal('jdoe');
+      expect(management.page).to.equal('manage-user');
+      element.$$.restore();
+    });
+
     test('should reset to search page when entity is empty', () => {
       const searchEl = { _searchTermChanged: sinon.spy() };
       const management = { $$: sinon.stub().withArgs('nuxeo-user-group-search').returns(searchEl) };
