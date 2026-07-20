@@ -16,7 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 suite('fetch-types', () => {
-  /** Fresh module instance so module-level cache does not leak across tests or the rest of Karma. */
+  /** Fresh module instance so the module-level cache does not leak across tests or the rest of the suite. */
   let nonce = 0;
   const load = async () => {
     nonce += 1;

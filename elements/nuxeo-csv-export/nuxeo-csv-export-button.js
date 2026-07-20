@@ -114,6 +114,13 @@ Polymer({
     this._resolveSchemas();
   },
 
+  detached() {
+    // avoid leaking the current-page-changed listener when the element is removed (e.g. page/dom-if switch)
+    if (this._onProviderPageChanged && this.provider?.removeEventListener) {
+      this.provider.removeEventListener('current-page-changed', this._onProviderPageChanged);
+    }
+  },
+
   _providerChanged(provider, oldProvider) {
     if (!this._onProviderPageChanged) {
       this._onProviderPageChanged = () => this._resolveSchemas();

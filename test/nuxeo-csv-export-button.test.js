@@ -174,6 +174,32 @@ suite('nuxeo-csv-export-button', () => {
       element.provider = undefined;
       expect(element._resolvedSchemas).to.be.undefined;
     });
+
+    test('removes the current-page-changed listener on detach', () => {
+      const provider = makeProvider();
+      element.provider = provider;
+      provider.removeEventListener.resetHistory();
+      element.detached();
+      expect(provider.removeEventListener).to.have.been.calledWith('current-page-changed');
+    });
+
+    test('detach is a no-op when no provider listener was wired', () => {
+      expect(() => element.detached()).to.not.throw();
+    });
+
+    test('detach is a no-op after the provider has been cleared', () => {
+      const provider = makeProvider();
+      element.provider = provider;
+      element.provider = undefined;
+      provider.removeEventListener.resetHistory();
+      element.detached();
+      expect(provider.removeEventListener).to.not.have.been.called;
+    });
+
+    test('detach tolerates a provider without removeEventListener', () => {
+      element.provider = { schemas: 'dublincore' };
+      expect(() => element.detached()).to.not.throw();
+    });
   });
 
   suite('_fetchTypes', () => {
