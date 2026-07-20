@@ -1374,9 +1374,9 @@ suite('nuxeo-app', () => {
   });
 
   suite('_notify and snackbars', () => {
-    test('_getToastFor creates a command snackbar when missing', () => {
+    test('_getToastFor creates a command snackbar when missing', function () {
       if (!app.$.snackbarPanel) {
-        return;
+        this.skip();
       }
       sinon.stub(app.$.snackbarPanel, 'querySelector').returns(null);
       const append = sinon.stub(app.$.snackbarPanel, 'appendChild');
