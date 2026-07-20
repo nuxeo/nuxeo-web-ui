@@ -76,13 +76,16 @@ export const NuxeoInactivityBehavior = {
     if (!this._inactivityTimeoutMs) {
       return;
     }
-    // Throttle re-arming so continuous events (e.g. mousemove) don't clear/set the timer on every tick.
     const now = Date.now();
+    // Record local activity BEFORE the throttle can bail out: even on a throttled tick that doesn't re-arm
+    // the timer, the (already scheduled) timeout callback must still see this recent activity via
+    // _getLastActivity() and not log out a user who was active within the throttle window.
+    this._lastActivityTs = now;
+    // Throttle re-arming so continuous events (e.g. mousemove) don't clear/set the timer on every tick.
     if (this._lastInactivityReset && now - this._lastInactivityReset < 1000) {
       return;
     }
     this._lastInactivityReset = now;
-    this._lastActivityTs = now; // local fallback reference when localStorage is unavailable
     clearTimeout(this._inactivityTimer);
     this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs);
     // Broadcast this activity to other tabs (skip when the reset was itself triggered by another tab).
@@ -164,16 +167,11 @@ export const NuxeoInactivityBehavior = {
     if (!this._inactivityTimeoutMs) {
       return;
     }
-    // A tab may have been active while this one sat idle; only log out if every tab has been idle.
-    // Keyed off the shared (cross-tab) timestamp: this tab's own timer already elapsed, so its local
-    // activity is by definition older than the timeout — what matters is whether another tab was active.
-    let lastActivity = 0;
-    try {
-      lastActivity = Number(globalThis.localStorage.getItem(INACTIVITY_ACTIVITY_KEY)) || 0;
-    } catch (e) {
-      // localStorage unavailable; no cross-tab signal, so fall through to a per-tab logout.
-      this._inactivityStorageError = e;
-    }
+    // Only log out if every tab has been idle for the full period. Use _getLastActivity() so the decision
+    // reflects the most recent activity across this tab (local timestamp) AND other tabs (shared
+    // localStorage): recent local activity that the 1s throttle skipped re-arming must not still log out an
+    // otherwise-active user.
+    const lastActivity = this._getLastActivity();
     // Clamp to >= 0 for the same clock-skew reason as _checkInactivityOnResume(): a future lastActivity
     // must not extend the effective inactivity window beyond the configured timeout.
     const idleFor = Math.max(0, Date.now() - lastActivity);
