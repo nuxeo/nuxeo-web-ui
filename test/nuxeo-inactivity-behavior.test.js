@@ -120,6 +120,7 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       expect(scheduled).to.have.lengthOf(1);
       expect(scheduled[0].delay).to.equal(60000);
       window.localStorage.removeItem(ACTIVITY_KEY); // no tab has been active → real logout
+      host._lastActivityTs = 0; // simulate the full idle period having elapsed (no recent local activity)
       await scheduled[0].fn(); // simulate the idle period elapsing (async: ends session then navigates)
       expect(endSessionStub).to.have.been.calledWith('https://server/nuxeo/logout'); // session ended first
       expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/login.jsp?nxtimeout=true');
@@ -156,9 +157,30 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
+      host._lastActivityTs = 0; // this tab itself is idle; only the other tab is active (shared timestamp)
       window.localStorage.setItem(ACTIVITY_KEY, String(Date.now())); // another tab active just now
       lastScheduled().fn(); // this idle tab's timer fires
       expect(redirect).not.to.have.been.called; // re-armed instead of logging out
+      redirect.restore();
+    });
+
+    test('records local activity even when the reset is throttled', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      host._setupInactivityTimer();
+      host._lastActivityTs = 0;
+      host._lastInactivityReset = Date.now(); // within the 1s window → reset bails out before re-arming
+      host._resetInactivityTimer();
+      expect(host._lastActivityTs).to.be.greaterThan(0); // still recorded despite the throttle
+    });
+
+    test('does NOT log out when this tab had recent local activity (no shared timestamp)', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      const redirect = sinon.stub(host, '_redirect');
+      host._setupInactivityTimer();
+      window.localStorage.removeItem(ACTIVITY_KEY); // no cross-tab signal at all
+      host._lastActivityTs = Date.now(); // but this tab was active just now (throttle may have skipped re-arm)
+      lastScheduled().fn(); // timer fires
+      expect(redirect).not.to.have.been.called; // re-armed on recent local activity instead of logging out
       redirect.restore();
     });
 
@@ -166,6 +188,7 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
+      host._lastActivityTs = Date.now() - 120000; // this tab idle 2 min too (both local + shared are stale)
       window.localStorage.setItem(ACTIVITY_KEY, String(Date.now() - 120000)); // last activity 2 min ago
       await lastScheduled().fn();
       expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/login.jsp?nxtimeout=true');
@@ -288,6 +311,7 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
+      host._lastActivityTs = 0; // no recent local activity either → genuinely idle
       const getItem = sinon.stub(window.localStorage, 'getItem').throws(new Error('access denied'));
       await lastScheduled().fn(); // timer fires; getItem throws -> catch -> per-tab logout
       expect(host._inactivityStorageError).to.be.an('error');
