@@ -118,10 +118,10 @@ Polymer({
     if (!this._onProviderPageChanged) {
       this._onProviderPageChanged = () => this._resolveSchemas();
     }
-    if (oldProvider && oldProvider.removeEventListener) {
+    if (oldProvider?.removeEventListener) {
       oldProvider.removeEventListener('current-page-changed', this._onProviderPageChanged);
     }
-    if (provider && provider.addEventListener) {
+    if (provider?.addEventListener) {
       provider.addEventListener('current-page-changed', this._onProviderPageChanged);
     }
     this._resolveSchemas();
@@ -143,11 +143,11 @@ Polymer({
       return;
     }
     const schemas = new Set(this._toList(provider.schemas));
-    const types = [...new Set((provider.currentPage || []).map((doc) => doc && doc.type).filter(Boolean))];
-    if (types.length > 0 && this.$ && this.$.types) {
+    const types = [...new Set((provider.currentPage || []).map((doc) => doc?.type).filter(Boolean))];
+    if (types.length > 0 && this.$?.types) {
       try {
         const config = await this._fetchTypes();
-        const doctypes = (config && config.doctypes) || {};
+        const doctypes = config?.doctypes || {};
         types.forEach((type) => {
           const info = doctypes[type];
           if (info && Array.isArray(info.schemas)) {
@@ -156,6 +156,7 @@ Polymer({
         });
       } catch (e) {
         // keep the provider's display schemas when the types configuration cannot be fetched
+        console.warn(`nuxeo-csv-export-button: could not resolve schemas from config/types: ${e}`);
       }
     }
     // ignore stale resolutions superseded by a newer call (provider change or a rapid page change)
@@ -179,8 +180,7 @@ Polymer({
 
   _params() {
     const actionParams = {};
-    const schemas =
-      this.schemas != null ? this.schemas : this._resolvedSchemas || (this.provider && this.provider.schemas);
+    const schemas = this.schemas != null ? this.schemas : this._resolvedSchemas || this.provider?.schemas;
     if (schemas) {
       actionParams.schemas = this._toList(schemas);
     }

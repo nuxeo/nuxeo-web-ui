@@ -99,7 +99,7 @@ suite('nuxeo-csv-export-button', () => {
       sinon.stub(element, '_fetchTypes').resolves(typesConfig);
       element.provider = {
         schemas: 'dublincore,common',
-        currentPage: [{ type: 'Note' }, { type: 'File' }, { type: 'Note' }],
+        currentPage: [{ type: 'Note' }, null, { type: 'File' }, { type: 'Note' }],
       };
       await element._resolveSchemas();
       const parsed = JSON.parse(element._params().parameters);
