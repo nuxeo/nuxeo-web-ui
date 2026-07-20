@@ -297,12 +297,14 @@ export default class {
       true,
     );
     // overwrite element comands that previously took a selector as optional argument
-    browser.overwriteCommand(
-      'getText',
-      async function (cmd, selector) {
-        return selector ? cmd.call(this.element(selector)) : cmd();
-      },
-      true,
-    );
+    ['getText', 'click'].forEach((name) => {
+      browser.overwriteCommand(
+        name,
+        async function (cmd, selector) {
+          return selector ? cmd.call(this.element(selector)) : cmd();
+        },
+        true,
+      );
+    });
   }
 }

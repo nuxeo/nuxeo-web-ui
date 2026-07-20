@@ -292,8 +292,7 @@ export default class Browser extends BasePage {
       if (await rowEl.isExisting()) {
         // Match on textContent rather than getText()/isVisible(): on newer Chrome both are
         // empty/false for rows below the fold, so a child that isn't currently scrolled into
-        // view was never matched. The click auto-scrolls the row into view (and the click
-        // override recovers from any interception).
+        // view was never matched. Clicking the row scrolls it into view before the click lands.
         const text = ((await browser.execute((el) => el.textContent, rowEl)) || '').trim();
         if (text === title) {
           await row.click();
@@ -494,11 +493,15 @@ export default class Browser extends BasePage {
     // for rows below the fold on newer Chrome; the previous code filtered those empties out and
     // then indexed the UNFILTERED rows, so an off-screen target (e.g. "Kumquat") was not found and
     // rowTemp[-1] threw "Cannot read properties of undefined (reading 'isVisible')".
-    const titles = await rowTemp.map((row) =>
-      browser.execute((el) => {
-        const a = el.querySelector('nuxeo-data-table-cell a.title');
-        return a ? a.textContent.trim() : '';
-      }, row),
+    // Resolve every browser.execute() with Promise.all; a bare `await arr.map(...)` on the already
+    // resolved element array would leave an array of unsettled Promises and never match the title.
+    const titles = await Promise.all(
+      [...rowTemp].map((row) =>
+        browser.execute((el) => {
+          const a = el.querySelector('nuxeo-data-table-cell a.title');
+          return a ? a.textContent.trim() : '';
+        }, row),
+      ),
     );
     const index = titles.findIndex((currentTitle) => currentTitle === title);
     if (index < 0) {
