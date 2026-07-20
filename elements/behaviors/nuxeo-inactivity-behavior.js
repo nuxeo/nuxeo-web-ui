@@ -222,19 +222,16 @@ export const NuxeoInactivityBehavior = {
     const logoutUrl = this._logout();
     const timeoutLoginUrl = `${logoutUrl.replace(/\/logout\b.*$/, '/login.jsp')}?nxtimeout=true`;
     const proceed = () => this._redirect(timeoutLoginUrl);
-    const fallback = () => this._redirect(logoutUrl);
-    // The try only guards a synchronous throw from _endServerSession(); its async rejection is handled by
-    // the .then(proceed, fallback) below (kept outside the try so the promise itself is never in scope of
-    // the catch).
-    let sessionEnded;
-    try {
-      sessionEnded = this._endServerSession(logoutUrl);
-    } catch (e) {
+    const fallback = (e) => {
       this._inactivityLogoutError = e;
-      fallback();
-      return Promise.resolve();
-    }
-    return sessionEnded.then(proceed, fallback);
+      this._redirect(logoutUrl);
+    };
+    // Chain off a resolved promise so both a synchronous throw from _endServerSession() and an async
+    // rejection are funnelled through fallback — no try/catch (which Sonar flags for promise-returning
+    // calls) and the session is still terminated even when the timeout-login navigation can't be shown.
+    return Promise.resolve()
+      .then(() => this._endServerSession(logoutUrl))
+      .then(proceed, fallback);
   },
 
   // Background request that ends the server HTTP session (so the JSESSIONID is invalidated) without
