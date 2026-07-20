@@ -386,7 +386,9 @@ function groupByAuthor(prs) {
 }
 
 function escapeMd(text) {
-  return String(text).replace(/([[\]])/g, '\\$1');
+  // Escape the backslash first (via the character class) so existing backslashes
+  // in the input are not mistaken for escape sequences.
+  return String(text).replace(/([\\[\]])/g, '\\$1');
 }
 
 async function postToTeams(payload) {
