@@ -140,9 +140,13 @@ if (!config.dryRun && !config.webhookUrl) fail('TEAMS_WEBHOOK_URL is not set.');
 if (config.repos.length === 0) fail('SCAN_REPOS resolved to an empty list.');
 
 const PR_QUERY = `
-  query($owner: String!, $name: String!) {
+  query($owner: String!, $name: String!, $cursor: String) {
     repository(owner: $owner, name: $name) {
-      pullRequests(states: OPEN, first: 100, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      pullRequests(states: OPEN, first: 50, after: $cursor, orderBy: { field: UPDATED_AT, direction: DESC }) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
         nodes {
           number
           title
@@ -169,7 +173,7 @@ const PR_QUERY = `
               }
             }
           }
-          comments(last: 30) {
+          comments(first: 100) {
             nodes {
               author { login }
               body
@@ -189,28 +193,39 @@ const PR_QUERY = `
 `;
 
 async function fetchRepoPullRequests(owner, name) {
-  const response = await fetch(GITHUB_GRAPHQL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.token}`,
-      'Content-Type': 'application/json',
-      'User-Agent': 'pr-review-reminder',
-    },
-    body: JSON.stringify({ query: PR_QUERY, variables: { owner, name } }),
-  });
+  const all = [];
+  let cursor = null;
 
-  if (!response.ok) {
-    throw new Error(`GitHub API ${owner}/${name} responded ${response.status}: ${await response.text()}`);
-  }
+  // Paginate so repos with more than one page of open PRs are fully covered.
+  do {
+    const response = await fetch(GITHUB_GRAPHQL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.token}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'pr-review-reminder',
+      },
+      body: JSON.stringify({ query: PR_QUERY, variables: { owner, name, cursor } }),
+    });
 
-  const payload = await response.json();
-  if (payload.errors) {
-    throw new Error(`GitHub GraphQL error for ${owner}/${name}: ${JSON.stringify(payload.errors)}`);
-  }
-  if (!payload.data || !payload.data.repository) {
-    throw new Error(`No repository data returned for ${owner}/${name} (check token access).`);
-  }
-  return payload.data.repository.pullRequests.nodes;
+    if (!response.ok) {
+      throw new Error(`GitHub API ${owner}/${name} responded ${response.status}: ${await response.text()}`);
+    }
+
+    const payload = await response.json();
+    if (payload.errors) {
+      throw new Error(`GitHub GraphQL error for ${owner}/${name}: ${JSON.stringify(payload.errors)}`);
+    }
+    if (!payload.data || !payload.data.repository) {
+      throw new Error(`No repository data returned for ${owner}/${name} (check token access).`);
+    }
+
+    const connection = payload.data.repository.pullRequests;
+    all.push(...connection.nodes);
+    cursor = connection.pageInfo.hasNextPage ? connection.pageInfo.endCursor : null;
+  } while (cursor);
+
+  return all;
 }
 
 function evaluatePullRequest(pr, repoSlug) {
@@ -322,7 +337,6 @@ function buildAdaptiveCard(prs) {
       for (const pr of authorPrs) {
         const meta = [`${pr.repo} #${pr.number}`, `${pr.approvals} approval${pr.approvals === 1 ? '' : 's'}`];
         if (pr.coverage !== null && pr.coverage !== undefined) meta.push(`${pr.coverage}% new-code cov`);
-        if (pr.newIssues) meta.push(`${pr.newIssues} sonar issue${pr.newIssues === 1 ? '' : 's'}`);
 
         body.push({
           type: 'Container',

@@ -139,7 +139,7 @@ export default [
   },
 
   {
-    files: ['scripts/**/*.js', '.github/scripts/**/*.{js,mjs}'],
+    files: ['scripts/**/*.{js,mjs}', '.github/scripts/**/*.{js,mjs}'],
     languageOptions: {
       globals: {
         ...globals.node,
