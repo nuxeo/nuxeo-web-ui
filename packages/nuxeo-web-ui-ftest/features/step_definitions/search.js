@@ -240,29 +240,35 @@ Then(/^I can see more than (\d+) search results$/, async function (minNumberOfRe
   // of on-screen items and never reflects the true total. After clearing a filter the results also
   // re-fetch asynchronously, so nudge the page provider to refetch to cover Elasticsearch indexing /
   // refresh lag while waiting for the label to update.
-  await driver.waitUntil(
-    async () => {
-      try {
-        const outLabel = await results.resultsCountLabel;
-        if (!(await outLabel.isExisting()) || !(await outLabel.isDisplayed())) {
-          return false;
+  await driver
+    .waitUntil(
+      async () => {
+        try {
+          const outLabel = await results.resultsCountLabel;
+          if (!(await outLabel.isExisting()) || !(await outLabel.isDisplayed())) {
+            return false;
+          }
+          output = parseInt(await outLabel.getText(), 10);
+          if (output > min) {
+            return true;
+          }
+          const el = await results.el;
+          await driver.execute((r) => {
+            const pp = r && r.querySelector('nuxeo-page-provider');
+            if (pp && pp.fetch) pp.fetch();
+          }, el);
+        } catch (e) {
+          // best-effort refresh
         }
-        output = parseInt(await outLabel.getText(), 10);
-        if (output > min) {
-          return true;
-        }
-        const el = await results.el;
-        await driver.execute((r) => {
-          const pp = r && r.querySelector('nuxeo-page-provider');
-          if (pp && pp.fetch) pp.fetch();
-        }, el);
-      } catch (e) {
-        // best-effort refresh
-      }
-      return false;
-    },
-    { timeout: 20000, interval: 2000, timeoutMsg: `Expecting to get more than ${min} but found ${output}` },
-  );
+        return false;
+      },
+      // No timeoutMsg here: it is evaluated when waitUntil is called (output === min) and would report
+      // a stale value. Rethrow below with the last observed count instead.
+      { timeout: 20000, interval: 2000 },
+    )
+    .catch(() => {
+      throw new Error(`Expecting to get more than ${min} but found ${output}`);
+    });
   return true;
 });
 
