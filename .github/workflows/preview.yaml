@@ -88,7 +88,7 @@ jobs:
 
       - name: Prepare environment
         run: |
-          BASE_VERSION="$(npx -c 'echo "$npm_package_version"')"
+          BASE_VERSION="$(node -p 'require("./package.json").version')"
           # Image version: replace a -SNAPSHOT suffix with -preview, otherwise append -snapshot.
           if echo "$BASE_VERSION" | grep -qiE 'snapshot'; then
             IMAGE_VERSION="$(echo "$BASE_VERSION" | sed -E 's/-?snapshot/-preview/I')"
