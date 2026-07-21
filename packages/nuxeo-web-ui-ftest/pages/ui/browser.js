@@ -493,15 +493,18 @@ export default class Browser extends BasePage {
     // for rows below the fold on newer Chrome; the previous code filtered those empties out and
     // then indexed the UNFILTERED rows, so an off-screen target (e.g. "Kumquat") was not found and
     // rowTemp[-1] threw "Cannot read properties of undefined (reading 'isVisible')".
-    // Resolve every browser.execute() with Promise.all; a bare `await arr.map(...)` on the already
-    // resolved element array would leave an array of unsettled Promises and never match the title.
+    // Resolve the title element with WebdriverIO's `$` (which pierces shadow DOM via
+    // wdio-shadow-plugin) rather than a plain el.querySelector inside browser.execute (which would
+    // not cross the row's shadow root and resolve every title to ''), and settle all reads with
+    // Promise.all so `titles` holds strings — a bare `await arr.map(...)` would leave Promises.
     const titles = await Promise.all(
-      [...rowTemp].map((row) =>
-        browser.execute((el) => {
-          const a = el.querySelector('nuxeo-data-table-cell a.title');
-          return a ? a.textContent.trim() : '';
-        }, row),
-      ),
+      [...rowTemp].map(async (row) => {
+        const titleEl = await row.$('nuxeo-data-table-cell a.title');
+        if (!(await titleEl.isExisting())) {
+          return '';
+        }
+        return ((await browser.execute((el) => el.textContent, titleEl)) || '').trim();
+      }),
     );
     const index = titles.findIndex((currentTitle) => currentTitle === title);
     if (index < 0) {
