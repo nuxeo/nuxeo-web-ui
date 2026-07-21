@@ -307,6 +307,7 @@ function evaluatePullRequest(pr, repoSlug) {
     url: pr.url,
     author: pr.author?.login ?? 'unknown',
     approvals: approvers.size,
+    approvers: [...approvers],
     coverage: sonar.coverage,
     newIssues: sonar.newIssues,
     updatedAt: pr.updatedAt,
@@ -354,7 +355,11 @@ function buildAdaptiveCard(prs) {
       });
 
       for (const pr of authorPrs) {
-        const meta = [`${pr.repo} #${pr.number}`, `${pr.approvals} approval${pr.approvals === 1 ? '' : 's'}`];
+        const approvalLabel =
+          pr.approvals > 0
+            ? `${pr.approvals} approval${pr.approvals === 1 ? '' : 's'} (${pr.approvers.join(', ')})`
+            : '0 approvals';
+        const meta = [`${pr.repo} #${pr.number}`, approvalLabel];
         if (pr.coverage !== null && pr.coverage !== undefined) meta.push(`${pr.coverage}% new-code cov`);
 
         body.push({
@@ -452,7 +457,8 @@ async function main() {
 
   console.log(`Found ${pending.length} PR(s) awaiting review across ${config.repos.join(', ')}.`);
   for (const pr of pending) {
-    console.log(` - ${pr.repo} #${pr.number} (${pr.approvals} approval(s)): ${pr.title}`);
+    const approverStr = pr.approvals > 0 ? ` by ${pr.approvers.join(', ')}` : '';
+    console.log(` - ${pr.repo} #${pr.number} (${pr.approvals} approval(s)${approverStr}): ${pr.title}`);
   }
 
   if (pending.length === 0 && !config.postWhenEmpty) {
