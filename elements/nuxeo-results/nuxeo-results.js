@@ -1221,6 +1221,22 @@ Polymer({
         // This approach is future-proof: to add support for new customizable column properties,
         // just update the two sections marked with "EXTEND HERE" below.
 
+        // Remember each column's layout-declared width (from the `width` attribute), captured once.
+        view.columns.forEach((column) => {
+          if (
+            column &&
+            column._declaredWidth === undefined &&
+            typeof column.hasAttribute === 'function' &&
+            typeof column.getAttribute === 'function' &&
+            column.hasAttribute('width')
+          ) {
+            const declaredWidth = column.getAttribute('width');
+            if (declaredWidth) {
+              column._declaredWidth = declaredWidth;
+            }
+          }
+        });
+
         /**
          * Returns the default value for a given column property.
          *
@@ -1234,7 +1250,7 @@ Polymer({
             case 'order':
               return idx;
             case 'width':
-              return null;
+              return column._declaredWidth || null;
             case 'filterValue':
               return '';
             default:
