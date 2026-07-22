@@ -7,7 +7,7 @@ export default class DocumentComment {
 
   get author() {
     return (async () => {
-      const author = await this._el.element('.author');
+      const author = await this._el.element('nuxeo-user-tag');
       return author;
     })();
   }
