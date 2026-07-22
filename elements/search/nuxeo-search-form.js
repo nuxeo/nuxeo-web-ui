@@ -969,8 +969,8 @@ Polymer({
   _flattenSelectivityResults(results) {
     const flattened = [];
     const queue = Array.isArray(results) ? results.slice() : [];
-    while (queue.length) {
-      const item = queue.shift();
+    for (let i = 0; i < queue.length; i++) {
+      const item = queue[i];
       if (!item) {
         continue;
       }
