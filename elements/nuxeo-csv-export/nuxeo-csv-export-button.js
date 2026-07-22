@@ -70,7 +70,9 @@ Polymer({
     },
     /**
      * A comma separated list of schemas to be used to get the results.
-     * If `null` or `undefined`, the `provider`'s schemas will be used.
+     * If `null` or `undefined`, the schemas resolved from the `provider`'s result document types
+     * (`_resolvedSchemas`) are used, falling back to the `provider`'s own schemas when the resolved
+     * set is unavailable.
      */
     schemas: {
       type: String,
