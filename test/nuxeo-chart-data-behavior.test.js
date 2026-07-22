@@ -23,25 +23,62 @@ suite('ChartDataBehavior', () => {
   let removeEventListenerStub;
   let visualViewportAddListenerStub;
   let visualViewportRemoveListenerStub;
+  let visualViewportStubs;
+  let originalVisualViewportDescriptor;
   let visualViewport;
+  let originalResizeObserver;
 
   setup(() => {
     behavior = Object.create(ChartDataBehavior);
     addEventListenerStub = sinon.stub(window, 'addEventListener');
     removeEventListenerStub = sinon.stub(window, 'removeEventListener');
-    visualViewport = {
-      addEventListener: sinon.stub(),
-      removeEventListener: sinon.stub(),
-    };
-    visualViewportAddListenerStub = visualViewport.addEventListener;
-    visualViewportRemoveListenerStub = visualViewport.removeEventListener;
-    window.visualViewport = visualViewport;
+    originalVisualViewportDescriptor = Object.getOwnPropertyDescriptor(window, 'visualViewport');
+    originalResizeObserver = window.ResizeObserver;
+
+    if (
+      window.visualViewport &&
+      typeof window.visualViewport.addEventListener === 'function' &&
+      typeof window.visualViewport.removeEventListener === 'function'
+    ) {
+      visualViewport = window.visualViewport;
+      visualViewportStubs = {
+        add: sinon.stub(visualViewport, 'addEventListener'),
+        remove: sinon.stub(visualViewport, 'removeEventListener'),
+      };
+      visualViewportAddListenerStub = visualViewportStubs.add;
+      visualViewportRemoveListenerStub = visualViewportStubs.remove;
+    } else {
+      visualViewport = {
+        addEventListener: sinon.stub(),
+        removeEventListener: sinon.stub(),
+      };
+      visualViewportAddListenerStub = visualViewport.addEventListener;
+      visualViewportRemoveListenerStub = visualViewport.removeEventListener;
+      Object.defineProperty(window, 'visualViewport', {
+        configurable: true,
+        writable: true,
+        value: visualViewport,
+      });
+    }
   });
 
   teardown(() => {
     addEventListenerStub.restore();
     removeEventListenerStub.restore();
-    delete window.visualViewport;
+    if (visualViewportStubs) {
+      visualViewportStubs.add.restore();
+      visualViewportStubs.remove.restore();
+      visualViewportStubs = null;
+    } else if (originalVisualViewportDescriptor) {
+      Object.defineProperty(window, 'visualViewport', originalVisualViewportDescriptor);
+    } else {
+      delete window.visualViewport;
+    }
+    if (originalResizeObserver !== undefined) {
+      window.ResizeObserver = originalResizeObserver;
+    } else {
+      delete window.ResizeObserver;
+    }
   });
 
   suite('resize handling', () => {
@@ -72,9 +109,12 @@ suite('ChartDataBehavior', () => {
       expect(visualViewportRemoveListenerStub.callCount).to.be.greaterThanOrEqual(2);
     });
 
-    test('monitors devicePixelRatio for browser zoom changes', () => {
+    test('polls devicePixelRatio only when viewport and observer listeners are unavailable', () => {
       behavior._resizeCharts = sinon.spy();
       const originalRatio = window.devicePixelRatio;
+
+      delete window.visualViewport;
+      delete window.ResizeObserver;
 
       behavior.attached();
       expect(behavior._lastDevicePixelRatio).to.equal(originalRatio);
@@ -82,6 +122,30 @@ suite('ChartDataBehavior', () => {
 
       behavior.detached();
       expect(behavior._zoomCheckInterval).to.be.null;
+    });
+
+    test('registers and disconnects ResizeObserver when available on elements', () => {
+      const observeSpy = sinon.spy();
+      const disconnectSpy = sinon.spy();
+      window.ResizeObserver = function ResizeObserverMock(callback) {
+        this.callback = callback;
+        this.observe = observeSpy;
+        this.disconnect = disconnectSpy;
+      };
+
+      behavior = document.createElement('div');
+      Object.assign(behavior, ChartDataBehavior);
+      behavior._resizeCharts = sinon.spy();
+
+      behavior.attached();
+
+      expect(behavior._chartResizeObserver).to.exist;
+      expect(observeSpy).to.have.been.calledOnceWithExactly(behavior);
+
+      behavior.detached();
+
+      expect(disconnectSpy).to.have.been.calledOnce;
+      expect(behavior._chartResizeObserver).to.be.null;
     });
 
     test('resizes chart elements exposing resize()', () => {

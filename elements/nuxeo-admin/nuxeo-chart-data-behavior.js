@@ -26,19 +26,22 @@ export const ChartDataBehavior = {
     this._lastDevicePixelRatio = window.devicePixelRatio;
     window.addEventListener('resize', this._boundResizeCharts);
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', this._boundResizeCharts);
-      window.visualViewport.addEventListener('scroll', this._boundResizeCharts);
+      this._visualViewport = window.visualViewport;
+      this._visualViewport.addEventListener('resize', this._boundResizeCharts);
+      this._visualViewport.addEventListener('scroll', this._boundResizeCharts);
     }
-    // Monitor zoom changes via devicePixelRatio or MutationObserver on documentElement
-    this._zoomCheckInterval = setInterval(() => {
-      if (window.devicePixelRatio !== this._lastDevicePixelRatio) {
-        this._lastDevicePixelRatio = window.devicePixelRatio;
-        this._resizeCharts();
-      }
-    }, 250);
     if (typeof ResizeObserver !== 'undefined' && this instanceof Element) {
       this._chartResizeObserver = new ResizeObserver(this._boundResizeCharts);
       this._chartResizeObserver.observe(this);
+    }
+    // Poll devicePixelRatio only as fallback when viewport/observer listeners are unavailable.
+    if (!this._visualViewport && !this._chartResizeObserver) {
+      this._zoomCheckInterval = setInterval(() => {
+        if (window.devicePixelRatio !== this._lastDevicePixelRatio) {
+          this._lastDevicePixelRatio = window.devicePixelRatio;
+          this._resizeCharts();
+        }
+      }, 250);
     }
     this._resizeCharts();
   },
@@ -46,9 +49,10 @@ export const ChartDataBehavior = {
   detached() {
     if (this._boundResizeCharts) {
       window.removeEventListener('resize', this._boundResizeCharts);
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', this._boundResizeCharts);
-        window.visualViewport.removeEventListener('scroll', this._boundResizeCharts);
+      if (this._visualViewport) {
+        this._visualViewport.removeEventListener('resize', this._boundResizeCharts);
+        this._visualViewport.removeEventListener('scroll', this._boundResizeCharts);
+        this._visualViewport = null;
       }
       this._boundResizeCharts = null;
     }
