@@ -19,9 +19,88 @@ import { ChartDataBehavior } from '../elements/nuxeo-admin/nuxeo-chart-data-beha
 
 suite('ChartDataBehavior', () => {
   let behavior;
+  let addEventListenerStub;
+  let removeEventListenerStub;
+  let visualViewportAddListenerStub;
+  let visualViewportRemoveListenerStub;
+  let visualViewport;
 
   setup(() => {
     behavior = Object.create(ChartDataBehavior);
+    addEventListenerStub = sinon.stub(window, 'addEventListener');
+    removeEventListenerStub = sinon.stub(window, 'removeEventListener');
+    visualViewport = {
+      addEventListener: sinon.stub(),
+      removeEventListener: sinon.stub(),
+    };
+    visualViewportAddListenerStub = visualViewport.addEventListener;
+    visualViewportRemoveListenerStub = visualViewport.removeEventListener;
+    window.visualViewport = visualViewport;
+  });
+
+  teardown(() => {
+    addEventListenerStub.restore();
+    removeEventListenerStub.restore();
+    delete window.visualViewport;
+  });
+
+  suite('resize handling', () => {
+    test('registers and removes window resize listener', () => {
+      behavior._resizeCharts = sinon.spy();
+
+      behavior.attached();
+      expect(addEventListenerStub).to.have.been.calledWithExactly('resize', behavior._boundResizeCharts);
+      expect(visualViewportAddListenerStub).to.have.been.calledWithMatch('resize', behavior._boundResizeCharts);
+      expect(behavior._resizeCharts).to.have.been.calledOnce;
+
+      behavior.detached();
+      expect(removeEventListenerStub).to.have.been.calledWithExactly('resize', sinon.match.func);
+      expect(visualViewportRemoveListenerStub).to.have.been.calledWithMatch('resize', sinon.match.func);
+      expect(behavior._boundResizeCharts).to.be.null;
+    });
+
+    test('registers visualViewport scroll listener for zoom events', () => {
+      behavior._resizeCharts = sinon.spy();
+
+      behavior.attached();
+      // Check that scroll event is registered on visualViewport (for zoom changes)
+      expect(visualViewportAddListenerStub.callCount).to.be.greaterThanOrEqual(2);
+      const scrollCall = visualViewportAddListenerStub.getCalls().find((c) => c.args[0] === 'scroll');
+      expect(scrollCall).to.exist;
+
+      behavior.detached();
+      expect(visualViewportRemoveListenerStub.callCount).to.be.greaterThanOrEqual(2);
+    });
+
+    test('monitors devicePixelRatio for browser zoom changes', () => {
+      behavior._resizeCharts = sinon.spy();
+      const originalRatio = window.devicePixelRatio;
+
+      behavior.attached();
+      expect(behavior._lastDevicePixelRatio).to.equal(originalRatio);
+      expect(behavior._zoomCheckInterval).to.exist;
+
+      behavior.detached();
+      expect(behavior._zoomCheckInterval).to.be.null;
+    });
+
+    test('resizes chart elements exposing resize()', () => {
+      const chartWithResize = { resize: sinon.spy(), offsetWidth: 100, offsetHeight: 50 };
+      const chartWithoutResize = {};
+      const hiddenChart = { resize: sinon.spy(), offsetWidth: 0, offsetHeight: 0 };
+      behavior.root = {
+        querySelectorAll: sinon.stub().returns([chartWithResize, chartWithoutResize, hiddenChart]),
+      };
+      behavior.async = (fn) => fn();
+
+      behavior._resizeCharts();
+
+      expect(behavior.root.querySelectorAll).to.have.been.calledOnceWithExactly(
+        'chart-bar, chart-line, chart-pie, nuxeo-document-distribution-chart',
+      );
+      expect(chartWithResize.resize).to.have.been.calledOnce;
+      expect(hiddenChart.resize).to.not.have.been.called;
+    });
   });
 
   suite('_labels', () => {
