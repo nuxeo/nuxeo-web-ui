@@ -207,4 +207,47 @@ suite('nuxeo-document-activity', () => {
       expect(element._gatherDuplicatedActivities(original).length).to.equal(2);
     });
   });
+
+  suite('_resolvedPrincipal', () => {
+    test('should return entity when present in map', () => {
+      const entity = { 'entity-type': 'user', id: 'jdoe', properties: { firstName: 'Jane', lastName: 'Doe' } };
+      expect(element._resolvedPrincipal('jdoe', { jdoe: entity })).to.equal(entity);
+    });
+
+    test('should fall back to raw username when not resolved', () => {
+      expect(element._resolvedPrincipal('jdoe', {})).to.equal('jdoe');
+    });
+
+    test('should fall back to raw username when entities is null', () => {
+      expect(element._resolvedPrincipal('jdoe', null)).to.equal('jdoe');
+    });
+  });
+
+  suite('_fetchPrincipals', () => {
+    test('should skip when activities is empty', async () => {
+      const getSpy = sinon.spy(element.$.user, 'get');
+      await element._fetchPrincipals([]);
+      expect(getSpy).to.not.have.been.called;
+      getSpy.restore();
+    });
+
+    test('should fetch user entity for each unique principal', async () => {
+      const entity = { 'entity-type': 'user', id: 'jdoe', properties: { firstName: 'Jane', lastName: 'Doe' } };
+      sinon.stub(element.$.user, 'get').resolves(entity);
+      await element._fetchPrincipals([
+        { principalName: 'jdoe', eventId: 'view' },
+        { principalName: 'jdoe', eventId: 'download' },
+      ]);
+      expect(element.$.user.get).to.have.been.calledOnce;
+      expect(element._principalEntities).to.have.property('jdoe', entity);
+      element.$.user.get.restore();
+    });
+
+    test('should handle fetch failure gracefully', async () => {
+      sinon.stub(element.$.user, 'get').rejects(new Error('not found'));
+      await element._fetchPrincipals([{ principalName: 'unknown', eventId: 'view' }]);
+      expect(element._principalEntities).to.not.have.property('unknown');
+      element.$.user.get.restore();
+    });
+  });
 });

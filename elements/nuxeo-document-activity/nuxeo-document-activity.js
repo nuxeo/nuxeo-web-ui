@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -46,9 +47,14 @@ Polymer({
       }
     </style>
 
+    <nuxeo-resource id="user" path="/user"></nuxeo-resource>
+
     <template is="dom-repeat" items="[[activities]]">
       <div class="row">
-        <nuxeo-user-tag user="[[item.principalName]]" max-characters="15"></nuxeo-user-tag>
+        <nuxeo-user-tag
+          user="[[_resolvedPrincipal(item.principalName, _principalEntities, _principalsLoading)]]"
+          max-characters="15"
+        ></nuxeo-user-tag>
         <div class="value">
           <span>[[_activity(item)]]</span>
           <nuxeo-date class="datetime" datetime="[[item.eventDate]]" format="relative"></nuxeo-date>
@@ -70,6 +76,46 @@ Polymer({
       type: Array,
       value: [],
     },
+
+    _principalEntities: {
+      type: Object,
+      value: () => {
+        return {};
+      },
+    },
+    _principalsLoading: {
+      type: Boolean,
+      value: false,
+    },
+  },
+
+  observers: ['_fetchPrincipals(activities)'],
+
+  async _fetchPrincipals(activities) {
+    if (!activities || !activities.length) return;
+    this._principalsLoading = true;
+    const entities = {};
+    const seen = new Set();
+    for (const activity of activities) {
+      const principal = activity.principalName;
+      if (principal && typeof principal === 'string' && !seen.has(principal)) {
+        seen.add(principal);
+        try {
+          this.$.user.path = `/user/${principal}`;
+          const user = await this.$.user.get();
+          entities[principal] = user;
+        } catch (_) {
+          // keep the raw username if the fetch fails
+        }
+      }
+    }
+    this._principalEntities = entities;
+    this._principalsLoading = false;
+  },
+
+  _resolvedPrincipal(principalName, entities, loading) {
+    if (loading) return null;
+    return (entities && entities[principalName]) || principalName;
   },
 
   _activity(event) {

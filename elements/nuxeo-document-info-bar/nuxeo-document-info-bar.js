@@ -91,7 +91,9 @@ Polymer({
         <div class="item">
           <iron-icon class="icon" icon="icons:perm-data-setting"></iron-icon>
           <template is="dom-if" if="[[!_isCurrentUser(workflow.initiator, currentUser)]]">
-            <nuxeo-user-tag user="[[workflow.initiator]]"></nuxeo-user-tag>
+            <nuxeo-user-tag
+              user="[[_resolvedInitiator(workflow.initiator, _initiatorEntities, _initiatorsLoading)]]"
+            ></nuxeo-user-tag>
           </template>
           <span>[[_labelForInitiatedWf(workflow, currentUser)]]</span>
         </div>
@@ -202,10 +204,49 @@ Polymer({
       type: Object,
       computed: '_computeActionContext(document)',
     },
+    _initiatorEntities: {
+      type: Object,
+      value: () => {
+        return {};
+      },
+    },
+    _initiatorsLoading: {
+      type: Boolean,
+      value: false,
+    },
   },
+
+  observers: ['_fetchInitiators(workflows)'],
 
   _computeActionContext() {
     return { document: this.document };
+  },
+
+  async _fetchInitiators(workflows) {
+    if (!workflows || !workflows.length) return;
+    this._initiatorsLoading = true;
+    const entities = {};
+    const seen = new Set();
+    for (const wf of workflows) {
+      const initiator = wf.initiator;
+      if (initiator && typeof initiator === 'string' && !seen.has(initiator)) {
+        seen.add(initiator);
+        try {
+          this.$.user.path = `/user/${initiator}`;
+          const user = await this.$.user.get();
+          entities[initiator] = user;
+        } catch (_) {
+          // keep the raw username if the fetch fails
+        }
+      }
+    }
+    this._initiatorEntities = entities;
+    this._initiatorsLoading = false;
+  },
+
+  _resolvedInitiator(initiator, entities, loading) {
+    if (loading) return null;
+    return (entities && entities[initiator]) || initiator;
   },
 
   _computeRetentionUntiLabel(doc) {

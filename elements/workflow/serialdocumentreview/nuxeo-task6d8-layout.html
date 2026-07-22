@@ -29,13 +29,16 @@ limitations under the License.
         display: flex;
       }
     </style>
+
+    <nuxeo-resource id="user" path="/user"></nuxeo-resource>
+
     <div role="widget" class="participants">
       <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
       <template is="dom-if" if="[[_hasActorType(task.variables.participants, 'group')]]">
         <nuxeo-tags type="group" items="[[_getActorsByType(task.variables.participants, 'group')]]"></nuxeo-tags>
       </template>
-      <template is="dom-if" if="[[_hasActorType(task.variables.participants, 'user')]]">
-        <nuxeo-tags type="user" items="[[_getActorsByType(task.variables.participants, 'user')]]"></nuxeo-tags>
+      <template is="dom-if" if="[[_resolvedUserParticipants.length]]">
+        <nuxeo-tags type="user" items="[[_resolvedUserParticipants]]"></nuxeo-tags>
       </template>
     </div>
 
@@ -67,6 +70,35 @@ limitations under the License.
          * @task var_task6d8
          */
         task: Object,
+
+        _resolvedUserParticipants: {
+          type: Array,
+          value: () => [],
+        },
+      },
+
+      observers: ['_fetchUserParticipants(task.variables.participants)'],
+
+      async _fetchUserParticipants(participants) {
+        if (!participants || !Array.isArray(participants)) return;
+        const userActors = participants.filter((actor) => actor.startsWith('user:'));
+        if (!userActors.length) {
+          this._resolvedUserParticipants = [];
+          return;
+        }
+        const resolved = [];
+        for (const actor of userActors) {
+          const username = actor.replace('user:', '');
+          try {
+            this.$.user.path = `/user/${username}`;
+            const entity = await this.$.user.get();
+            resolved.push(entity);
+          } catch (_) {
+            // fall back to the raw prefixed string if fetch fails
+            resolved.push(actor);
+          }
+        }
+        this._resolvedUserParticipants = resolved;
       },
 
       _hasActorType(actors, type) {
