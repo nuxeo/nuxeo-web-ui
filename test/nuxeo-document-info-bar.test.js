@@ -118,4 +118,48 @@ suite('nuxeo-document-info-bar', () => {
       expect(result).to.be.a('string');
     });
   });
+
+  suite('_resolvedInitiator', () => {
+    test('should return entity when present in map', () => {
+      const entity = { 'entity-type': 'user', id: 'jdoe', properties: { firstName: 'Jane', lastName: 'Doe' } };
+      const result = element._resolvedInitiator('jdoe', { jdoe: entity });
+      expect(result).to.equal(entity);
+    });
+
+    test('should fall back to raw username when not resolved', () => {
+      expect(element._resolvedInitiator('jdoe', {})).to.equal('jdoe');
+    });
+
+    test('should fall back to raw username when entities is null', () => {
+      expect(element._resolvedInitiator('jdoe', null)).to.equal('jdoe');
+    });
+  });
+
+  suite('_fetchInitiators', () => {
+    test('should skip when workflows is empty', async () => {
+      const getSpy = sinon.spy(element.$.user, 'get');
+      await element._fetchInitiators([]);
+      expect(getSpy).to.not.have.been.called;
+      getSpy.restore();
+    });
+
+    test('should fetch user entity for each unique initiator', async () => {
+      const entity = { 'entity-type': 'user', id: 'jdoe', properties: { firstName: 'Jane', lastName: 'Doe' } };
+      sinon.stub(element.$.user, 'get').resolves(entity);
+      await element._fetchInitiators([
+        { initiator: 'jdoe', id: 'wf1' },
+        { initiator: 'jdoe', id: 'wf2' },
+      ]);
+      expect(element.$.user.get).to.have.been.calledOnce;
+      expect(element._initiatorEntities).to.have.property('jdoe', entity);
+      element.$.user.get.restore();
+    });
+
+    test('should keep raw username on fetch failure', async () => {
+      sinon.stub(element.$.user, 'get').rejects(new Error('not found'));
+      await element._fetchInitiators([{ initiator: 'unknown', id: 'wf1' }]);
+      expect(element._initiatorEntities).to.not.have.property('unknown');
+      element.$.user.get.restore();
+    });
+  });
 });
