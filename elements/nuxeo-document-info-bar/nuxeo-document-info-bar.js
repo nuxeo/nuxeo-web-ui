@@ -223,7 +223,7 @@ Polymer({
   },
 
   async _fetchInitiators(workflows) {
-    if (!workflows || !workflows.length) return;
+    if (!workflows?.length) return;
     this._initiatorsLoading = true;
     const entities = {};
     const seen = new Set();
@@ -236,7 +236,7 @@ Polymer({
           const user = await this.$.user.get();
           entities[initiator] = user;
         } catch (_) {
-          // keep the raw username if the fetch fails
+          void _; // system/deleted users — keep raw username as fallback
         }
       }
     }
@@ -246,7 +246,7 @@ Polymer({
 
   _resolvedInitiator(initiator, entities, loading) {
     if (loading) return null;
-    return (entities && entities[initiator]) || initiator;
+    return entities?.[initiator] || initiator;
   },
 
   _computeRetentionUntiLabel(doc) {

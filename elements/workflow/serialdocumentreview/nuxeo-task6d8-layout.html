@@ -94,7 +94,7 @@ limitations under the License.
             const entity = await this.$.user.get();
             resolved.push(entity);
           } catch (_) {
-            // fall back to the raw prefixed string if fetch fails
+            void _; // system/deleted users — fall back to raw prefixed string
             resolved.push(actor);
           }
         }
