@@ -58,6 +58,7 @@ Polymer({
 
       .flex-layout nuxeo-card {
         flex: 1 0 calc(33% - 2em);
+        max-width: calc(33% - 2em);
         margin: 0 8px 16px;
         text-align: center;
       }
@@ -89,6 +90,7 @@ Polymer({
       @media (max-width: 1024px) {
         .flex-layout nuxeo-card {
           flex: 1 0 calc(100% - 2em);
+          max-width: calc(100% - 2em);
         }
       }
     </style>

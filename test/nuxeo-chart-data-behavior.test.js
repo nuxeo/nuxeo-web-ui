@@ -19,9 +19,223 @@ import { ChartDataBehavior } from '../elements/nuxeo-admin/nuxeo-chart-data-beha
 
 suite('ChartDataBehavior', () => {
   let behavior;
+  let originalVisualViewportDescriptor;
+  let originalResizeObserver;
+  let addEventListenerStub;
+  let removeEventListenerStub;
+  let visualViewportAddListenerStub;
+  let visualViewportRemoveListenerStub;
+  let visualViewportStubs;
 
   setup(() => {
     behavior = Object.create(ChartDataBehavior);
+    originalVisualViewportDescriptor = Object.getOwnPropertyDescriptor(window, 'visualViewport');
+    originalResizeObserver = window.ResizeObserver;
+  });
+
+  teardown(() => {
+    if (addEventListenerStub) {
+      addEventListenerStub.restore();
+      addEventListenerStub = null;
+    }
+    if (removeEventListenerStub) {
+      removeEventListenerStub.restore();
+      removeEventListenerStub = null;
+    }
+    if (visualViewportStubs) {
+      visualViewportStubs.add.restore();
+      visualViewportStubs.remove.restore();
+      visualViewportStubs = null;
+    }
+    if (originalVisualViewportDescriptor) {
+      Object.defineProperty(window, 'visualViewport', originalVisualViewportDescriptor);
+    } else {
+      delete window.visualViewport;
+    }
+    if (originalResizeObserver !== undefined) {
+      window.ResizeObserver = originalResizeObserver;
+    } else {
+      delete window.ResizeObserver;
+    }
+  });
+
+  suite('resize handling', () => {
+    test('attaches and detaches viewport listeners', () => {
+      behavior._resizeCharts = sinon.spy();
+      addEventListenerStub = sinon.stub(window, 'addEventListener');
+      removeEventListenerStub = sinon.stub(window, 'removeEventListener');
+
+      if (
+        window.visualViewport &&
+        typeof window.visualViewport.addEventListener === 'function' &&
+        typeof window.visualViewport.removeEventListener === 'function'
+      ) {
+        visualViewportStubs = {
+          add: sinon.stub(window.visualViewport, 'addEventListener'),
+          remove: sinon.stub(window.visualViewport, 'removeEventListener'),
+        };
+        visualViewportAddListenerStub = visualViewportStubs.add;
+        visualViewportRemoveListenerStub = visualViewportStubs.remove;
+      } else {
+        Object.defineProperty(window, 'visualViewport', {
+          configurable: true,
+          writable: true,
+          value: {
+            addEventListener: sinon.stub(),
+            removeEventListener: sinon.stub(),
+          },
+        });
+        visualViewportAddListenerStub = window.visualViewport.addEventListener;
+        visualViewportRemoveListenerStub = window.visualViewport.removeEventListener;
+      }
+
+      behavior.attached();
+      const boundResizeCharts = behavior._boundResizeCharts;
+
+      expect(addEventListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
+      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
+      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('scroll', boundResizeCharts);
+      expect(behavior._resizeCharts).to.have.been.called;
+
+      behavior.detached();
+
+      expect(removeEventListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
+      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
+      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly('scroll', boundResizeCharts);
+      expect(behavior._boundResizeCharts).to.be.null;
+    });
+
+    test('polls devicePixelRatio when viewport and ResizeObserver are unavailable', () => {
+      const originalViewportDescriptor = Object.getOwnPropertyDescriptor(window, 'visualViewport');
+      const originalViewport = window.visualViewport;
+      const originalDpr = window.devicePixelRatio;
+      const setIntervalStub = sinon.stub(window, 'setInterval').callsFake((callback) => {
+        behavior._lastDevicePixelRatio = originalDpr - 1;
+        callback();
+        callback();
+        return 1;
+      });
+      const clearIntervalStub = sinon.stub(window, 'clearInterval');
+
+      behavior._resizeCharts = sinon.spy();
+      behavior.async = (fn) => fn();
+
+      Object.defineProperty(window, 'visualViewport', {
+        configurable: true,
+        writable: true,
+        value: undefined,
+      });
+      window.ResizeObserver = undefined;
+
+      behavior.attached();
+
+      expect(setIntervalStub).to.have.been.calledOnce;
+      expect(behavior._zoomCheckInterval).to.equal(1);
+      expect(behavior._resizeCharts).to.have.been.calledTwice;
+
+      behavior.detached();
+
+      expect(clearIntervalStub).to.have.been.calledOnceWithExactly(1);
+      expect(behavior._zoomCheckInterval).to.be.null;
+
+      setIntervalStub.restore();
+      clearIntervalStub.restore();
+      Object.defineProperty(
+        window,
+        'visualViewport',
+        originalViewportDescriptor || {
+          configurable: true,
+          writable: true,
+          value: originalViewport,
+        },
+      );
+      window.ResizeObserver = originalResizeObserver;
+    });
+
+    test('uses the fallback async wrapper when this.async is missing', () => {
+      const originalSetTimeout = window.setTimeout;
+      const setTimeoutStub = sinon.stub(window, 'setTimeout').callsFake((callback) => {
+        callback();
+        return 1;
+      });
+
+      behavior.root = null;
+      behavior.shadowRoot = { querySelectorAll: sinon.stub().returns([]) };
+
+      behavior._resizeCharts();
+
+      expect(setTimeoutStub).to.have.been.calledOnceWithExactly(sinon.match.func, 1);
+
+      setTimeoutStub.restore();
+      window.setTimeout = originalSetTimeout;
+    });
+
+    test('falls back to the element when root and shadowRoot are absent', () => {
+      behavior.querySelectorAll = sinon.stub().returns([]);
+      behavior.root = null;
+      behavior.shadowRoot = null;
+      behavior.async = (fn) => fn();
+
+      behavior._resizeCharts();
+
+      expect(behavior.querySelectorAll).to.have.been.calledOnceWithExactly(
+        'chart-bar, chart-line, chart-pie, nuxeo-document-distribution-chart',
+      );
+    });
+
+    test('detached is safe before attached', () => {
+      expect(() => behavior.detached()).to.not.throw();
+    });
+
+    test('registers and disconnects ResizeObserver when available on elements', () => {
+      const observeSpy = sinon.spy();
+      const disconnectSpy = sinon.spy();
+
+      window.ResizeObserver = function ResizeObserverMock(callback) {
+        this.callback = callback;
+        this.observe = observeSpy;
+        this.disconnect = disconnectSpy;
+      };
+
+      behavior = document.createElement('div');
+      Object.assign(behavior, ChartDataBehavior);
+      behavior._resizeCharts = sinon.spy();
+
+      behavior.attached();
+
+      expect(behavior._chartResizeObserver).to.exist;
+      expect(observeSpy).to.have.been.calledOnceWithExactly(behavior);
+
+      behavior.detached();
+
+      expect(disconnectSpy).to.have.been.calledOnce;
+      expect(behavior._chartResizeObserver).to.be.null;
+    });
+
+    test('returns early when no querySelectorAll is available', () => {
+      behavior.root = {};
+      behavior.async = (fn) => fn();
+
+      expect(() => behavior._resizeCharts()).to.not.throw();
+    });
+
+    test('resizes chart elements exposing resize()', () => {
+      const chartWithResize = { resize: sinon.spy(), offsetWidth: 100, offsetHeight: 50 };
+      const chartWithoutResize = {};
+      const hiddenChart = { resize: sinon.spy(), offsetWidth: 0, offsetHeight: 0 };
+      behavior.root = {
+        querySelectorAll: sinon.stub().returns([chartWithResize, chartWithoutResize, hiddenChart]),
+      };
+      behavior.async = (fn) => fn();
+
+      behavior._resizeCharts();
+
+      expect(behavior.root.querySelectorAll).to.have.been.calledOnceWithExactly(
+        'chart-bar, chart-line, chart-pie, nuxeo-document-distribution-chart',
+      );
+      expect(chartWithResize.resize).to.have.been.calledOnce;
+      expect(hiddenChart.resize).to.not.have.been.called;
+    });
   });
 
   suite('_labels', () => {

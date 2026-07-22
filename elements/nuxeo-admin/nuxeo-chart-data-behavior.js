@@ -21,6 +21,66 @@ import moment from '@nuxeo/moment';
  * @polymerBehavior Nuxeo.ChartDataBehavior
  */
 export const ChartDataBehavior = {
+  attached() {
+    this._boundResizeCharts = this._resizeCharts.bind(this);
+    this._lastDevicePixelRatio = window.devicePixelRatio;
+    window.addEventListener('resize', this._boundResizeCharts);
+    if (window.visualViewport) {
+      this._visualViewport = window.visualViewport;
+      this._visualViewport.addEventListener('resize', this._boundResizeCharts);
+      this._visualViewport.addEventListener('scroll', this._boundResizeCharts);
+    }
+    if (typeof ResizeObserver !== 'undefined' && this instanceof Element) {
+      this._chartResizeObserver = new ResizeObserver(this._boundResizeCharts);
+      this._chartResizeObserver.observe(this);
+    }
+    // Poll devicePixelRatio only as fallback when viewport/observer listeners are unavailable.
+    if (!this._visualViewport && !this._chartResizeObserver) {
+      this._zoomCheckInterval = setInterval(() => {
+        if (window.devicePixelRatio !== this._lastDevicePixelRatio) {
+          this._lastDevicePixelRatio = window.devicePixelRatio;
+          this._resizeCharts();
+        }
+      }, 250);
+    }
+    this._resizeCharts();
+  },
+
+  detached() {
+    if (this._boundResizeCharts) {
+      window.removeEventListener('resize', this._boundResizeCharts);
+      if (this._visualViewport) {
+        this._visualViewport.removeEventListener('resize', this._boundResizeCharts);
+        this._visualViewport.removeEventListener('scroll', this._boundResizeCharts);
+        this._visualViewport = null;
+      }
+      this._boundResizeCharts = null;
+    }
+    if (this._zoomCheckInterval) {
+      clearInterval(this._zoomCheckInterval);
+      this._zoomCheckInterval = null;
+    }
+    if (this._chartResizeObserver) {
+      this._chartResizeObserver.disconnect();
+      this._chartResizeObserver = null;
+    }
+  },
+
+  _resizeCharts() {
+    const async = typeof this.async === 'function' ? this.async.bind(this) : (fn, waitTime) => setTimeout(fn, waitTime);
+    async(() => {
+      const root = this.root || this.shadowRoot || this;
+      if (!root || typeof root.querySelectorAll !== 'function') {
+        return;
+      }
+      Array.from(root.querySelectorAll('chart-bar, chart-line, chart-pie, nuxeo-document-distribution-chart'))
+        .filter(
+          (chart) => chart && typeof chart.resize === 'function' && chart.offsetWidth > 0 && chart.offsetHeight > 0,
+        )
+        .forEach((chart) => chart.resize());
+    }, 1);
+  },
+
   _labels(data) {
     return data.map(function (entry) {
       if (Array.isArray(entry.value)) {
