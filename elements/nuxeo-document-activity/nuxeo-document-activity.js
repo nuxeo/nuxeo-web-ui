@@ -92,7 +92,7 @@ Polymer({
   observers: ['_fetchPrincipals(activities)'],
 
   async _fetchPrincipals(activities) {
-    if (!activities || !activities.length) return;
+    if (!activities?.length) return;
     this._principalsLoading = true;
     const entities = {};
     const seen = new Set();
@@ -105,7 +105,7 @@ Polymer({
           const user = await this.$.user.get();
           entities[principal] = user;
         } catch (_) {
-          // keep the raw username if the fetch fails
+          void _; // system/deleted users — keep raw username as fallback
         }
       }
     }
@@ -115,7 +115,7 @@ Polymer({
 
   _resolvedPrincipal(principalName, entities, loading) {
     if (loading) return null;
-    return (entities && entities[principalName]) || principalName;
+    return entities?.[principalName] || principalName;
   },
 
   _activity(event) {
