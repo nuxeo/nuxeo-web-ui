@@ -67,7 +67,7 @@ export const ChartDataBehavior = {
   },
 
   _resizeCharts() {
-    const async = typeof this.async === 'function' ? this.async.bind(this) : (fn) => setTimeout(fn, 1);
+    const async = typeof this.async === 'function' ? this.async.bind(this) : (fn, waitTime) => setTimeout(fn, waitTime);
     async(() => {
       const root = this.root || this.shadowRoot || this;
       if (!root || typeof root.querySelectorAll !== 'function') {
