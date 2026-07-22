@@ -148,9 +148,26 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       host._setupInactivityTimer();
       expect(scheduled).to.have.lengthOf(1);
       // Simulate another tab writing activity; the throttle must not swallow a remote signal.
-      host._lastInactivityReset = Date.now() - 2000;
       window.dispatchEvent(new StorageEvent('storage', { key: ACTIVITY_KEY, newValue: String(Date.now()) }));
       expect(scheduled).to.have.lengthOf(2); // re-armed from the remote activity
+    });
+
+    test('storage event re-arms for the REMAINING time based on the remote timestamp', () => {
+      getStub.withArgs('session.timeout', 60).returns(1); // 60000ms window
+      host._setupInactivityTimer();
+      const remoteTs = Date.now() - 20000; // the other tab was active 20s ago
+      window.dispatchEvent(new StorageEvent('storage', { key: ACTIVITY_KEY, newValue: String(remoteTs) }));
+      // ~40s remaining (60000 - 20000), NOT a fresh full 60000 keyed off the event delivery time.
+      expect(lastScheduled().delay).to.be.within(38000, 41000);
+    });
+
+    test('storage event older than the timeout does not re-arm (no window extension)', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      host._setupInactivityTimer();
+      const before = scheduled.length;
+      // Remote activity is already older than the window; our own timer must handle logout, not extend it.
+      window.dispatchEvent(new StorageEvent('storage', { key: ACTIVITY_KEY, newValue: String(Date.now() - 120000) }));
+      expect(scheduled).to.have.lengthOf(before); // no new timer scheduled
     });
 
     test('does NOT log out when another tab was active within the timeout', () => {

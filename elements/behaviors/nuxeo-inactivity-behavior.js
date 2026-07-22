@@ -139,10 +139,21 @@ export const NuxeoInactivityBehavior = {
 
   // Another tab recorded activity — re-arm this (possibly idle) tab without re-broadcasting.
   _onInactivityStorage(e) {
-    if (e?.key === INACTIVITY_ACTIVITY_KEY && e.newValue) {
-      this._lastInactivityReset = 0; // bypass throttle so the remote activity always re-arms us
-      this._resetInactivityTimer(false);
+    if (e?.key !== INACTIVITY_ACTIVITY_KEY || !e.newValue || !this._inactivityTimeoutMs) {
+      return;
     }
+    // Re-arm from the REMOTE activity timestamp (when the other tab was actually active), not this event's
+    // delivery time. Using delivery time (as a plain _resetInactivityTimer would) could extend the
+    // effective inactivity window beyond the real activity — weakening this security timer (CWE-613).
+    // Schedule only the remaining time, clamped to >= 0 for backward clock skew.
+    const remoteTs = Number(e.newValue) || 0;
+    this._lastActivityTs = Math.max(this._lastActivityTs || 0, remoteTs); // keep local ref in sync (monotonic)
+    const idleFor = Math.max(0, Date.now() - remoteTs);
+    if (idleFor >= this._inactivityTimeoutMs) {
+      return; // remote activity is already older than the window; our own timer will handle logout
+    }
+    clearTimeout(this._inactivityTimer);
+    this._inactivityTimer = setTimeout(() => this._onInactivityTimeout(), this._inactivityTimeoutMs - idleFor);
   },
 
   // On tab resume (visible/focused) reconcile against real elapsed time, since timers may have been
