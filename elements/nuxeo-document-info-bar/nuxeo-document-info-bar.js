@@ -236,7 +236,7 @@ Polymer({
           const user = await this.$.user.get();
           entities[initiator] = user;
         } catch (_) {
-          void _; // system/deleted users — keep raw username as fallback
+          entities[initiator] = initiator; // fallback: keep raw username for system/deleted users
         }
       }
     }
