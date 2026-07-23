@@ -93,7 +93,10 @@ limitations under the License.
             this.$.user.path = `/user/${username}`;
             const entity = await this.$.user.get();
             resolved.push(entity);
-          } catch (_) {
+          } catch (error) {
+            if (error.status && error.status !== 404) {
+              console.warn(`Unexpected error resolving user "${username}":`, error.message);
+            }
             // system/deleted users — fall back to raw prefixed string
             resolved.push(actor);
           }
