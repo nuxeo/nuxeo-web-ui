@@ -237,5 +237,23 @@ suite('nuxeo-document-info-bar', () => {
       expect(paths).to.deep.equal(['/user/a', '/user/b', '/user/c']);
       element.$.user.get.restore();
     });
+
+    test('should discard in-flight results when workflows is reset to empty mid-flight', async () => {
+      let resolveGet;
+      sinon.stub(element.$.user, 'get').returns(
+        new Promise((resolve) => {
+          resolveGet = resolve;
+        }),
+      );
+      const inFlight = element._fetchInitiators([{ initiator: 'jdoe', id: 'wf1' }]);
+      await new Promise((r) => setTimeout(r, 0)); // let the in-flight lookup start
+      element._fetchInitiators([]); // reset while the lookup is pending
+      expect(element._initiatorEntities).to.deep.equal({});
+      resolveGet({ 'entity-type': 'user', id: 'jdoe' });
+      await inFlight;
+      // The stale lookup must not repopulate the reset state.
+      expect(element._initiatorEntities).to.deep.equal({});
+      element.$.user.get.restore();
+    });
   });
 });

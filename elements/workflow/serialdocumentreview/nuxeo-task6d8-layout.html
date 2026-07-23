@@ -86,11 +86,15 @@ limitations under the License.
 
       _fetchUserParticipants(participants) {
         if (!participants || !Array.isArray(participants)) {
+          // Bump the request id so any in-flight resolve is invalidated and cannot
+          // repopulate the participants after this reset.
+          this._participantsRequestId += 1;
           this._resolvedUserParticipants = [];
           return undefined;
         }
         const userActors = participants.filter((actor) => typeof actor === 'string' && actor.startsWith('user:'));
         if (!userActors.length) {
+          this._participantsRequestId += 1;
           this._resolvedUserParticipants = [];
           return undefined;
         }
@@ -126,11 +130,19 @@ limitations under the License.
       },
 
       _hasActorType(actors, type) {
-        return actors && Array.isArray(actors) && actors.findIndex((actor) => actor.startsWith(type)) >= 0;
+        return (
+          actors &&
+          Array.isArray(actors) &&
+          actors.findIndex((actor) => typeof actor === 'string' && actor.startsWith(type)) >= 0
+        );
       },
 
       _getActorsByType(actors, type) {
-        return actors && Array.isArray(actors) && actors.filter((actor) => actor.startsWith(type));
+        return (
+          actors &&
+          Array.isArray(actors) &&
+          actors.filter((actor) => typeof actor === 'string' && actor.startsWith(type))
+        );
       },
     });
   </script>

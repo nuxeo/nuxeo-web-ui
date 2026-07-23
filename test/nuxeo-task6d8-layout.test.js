@@ -170,6 +170,24 @@ suite('nuxeo-task6d8-layout', () => {
       expect(paths).to.deep.equal(['/user/a', '/user/b', '/user/c']);
       element.$.user.get.restore();
     });
+
+    test('should discard in-flight results when participants are reset to empty mid-flight', async () => {
+      let resolveGet;
+      sinon.stub(element.$.user, 'get').returns(
+        new Promise((resolve) => {
+          resolveGet = resolve;
+        }),
+      );
+      const inFlight = element._fetchUserParticipants(['user:jdoe']);
+      await new Promise((r) => setTimeout(r, 0)); // let the in-flight lookup start
+      element._fetchUserParticipants([]); // reset while the lookup is pending
+      expect(element._resolvedUserParticipants).to.deep.equal([]);
+      resolveGet({ 'entity-type': 'user', id: 'jdoe' });
+      await inFlight;
+      // The stale lookup must not repopulate the reset state.
+      expect(element._resolvedUserParticipants).to.deep.equal([]);
+      element.$.user.get.restore();
+    });
   });
 
   suite('_hasActorType / _getActorsByType', () => {
@@ -185,12 +203,22 @@ suite('nuxeo-task6d8-layout', () => {
       expect(element._hasActorType(undefined, 'group')).to.be.not.ok;
     });
 
+    test('_hasActorType ignores non-string entries without throwing', () => {
+      expect(() => element._hasActorType([null, 42, { x: 1 }, 'group:members'], 'group')).to.not.throw();
+      expect(element._hasActorType([null, 42, 'group:members'], 'group')).to.be.true;
+      expect(element._hasActorType([null, 42], 'group')).to.be.false;
+    });
+
     test('_getActorsByType filters actors by type', () => {
       expect(element._getActorsByType(['user:jdoe', 'group:members'], 'user')).to.deep.equal(['user:jdoe']);
     });
 
     test('_getActorsByType handles non-array input', () => {
       expect(element._getActorsByType(undefined, 'user')).to.be.not.ok;
+    });
+
+    test('_getActorsByType ignores non-string entries without throwing', () => {
+      expect(element._getActorsByType([null, 42, { x: 1 }, 'user:jdoe'], 'user')).to.deep.equal(['user:jdoe']);
     });
   });
 });
