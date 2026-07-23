@@ -571,7 +571,7 @@ Polymer({
           let output = entry.id;
           let current = entry;
           while (current && current.properties && current.properties.parent) {
-            const parent = current.properties.parent;
+            const { parent } = current.properties;
             const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
             if (!parentId) break;
             output = `${parentId}`.concat('/', `${output}`);
@@ -873,7 +873,7 @@ Polymer({
   },
 
   _rehydrateDirectorySuggestionLabels() {
-    const form = this.form;
+    const { form } = this;
     if (!form) {
       return Promise.resolve();
     }
@@ -897,7 +897,7 @@ Polymer({
     if (!suggestion || !suggestion.$ || !suggestion.$.s2) {
       return Promise.resolve();
     }
-    const value = suggestion.value;
+    const { value } = suggestion;
     const ids = Array.isArray(value) ? value.filter((id) => id !== null && id !== undefined && id !== '') : [];
     if (!Array.isArray(value) && value !== null && value !== undefined && value !== '') {
       ids.push(value);
@@ -914,7 +914,7 @@ Polymer({
         resolvedEntries.forEach((entry) => suggestion._selectionFormatter(entry));
       }
       const selectivity = suggestion.$.s2._selectivity;
-      if (selectivity && typeof selectivity.setValue === 'function') {
+      if (typeof selectivity?.setValue === 'function') {
         const currentValue = Array.isArray(suggestion.value) ? suggestion.value.slice() : suggestion.value;
         selectivity.setValue(currentValue, { triggerChange: false });
       }
@@ -923,7 +923,7 @@ Polymer({
 
   _queryDirectorySuggestionEntry(suggestion, id) {
     return new Promise((resolve) => {
-      const s2 = suggestion && suggestion.$ && suggestion.$.s2;
+      const s2 = suggestion?.$?.s2;
       if (!s2 || typeof s2._query !== 'function') {
         resolve(null);
         return;
@@ -946,9 +946,7 @@ Polymer({
       s2._query({
         term: String(id),
         callback: (response) => {
-          const entries = this._flattenSelectivityResults(response && response.results).map(
-            (result) => result.item || result,
-          );
+          const entries = this._flattenSelectivityResults(response?.results).map((result) => result.item || result);
           const expectedId = String(id);
           const matchedEntry =
             entries.find((entry) => {
@@ -969,8 +967,7 @@ Polymer({
   _flattenSelectivityResults(results) {
     const flattened = [];
     const queue = Array.isArray(results) ? results.slice() : [];
-    for (let i = 0; i < queue.length; i++) {
-      const item = queue[i];
+    for (const item of queue) {
       if (!item) {
         continue;
       }
