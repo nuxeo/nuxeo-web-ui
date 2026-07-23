@@ -104,7 +104,10 @@ Polymer({
           this.$.user.path = `/user/${principal}`;
           const user = await this.$.user.get();
           entities[principal] = user;
-        } catch (_) {
+        } catch (error) {
+          if (error.status && error.status !== 404) {
+            console.warn(`Unexpected error resolving user "${principal}":`, error.message);
+          }
           entities[principal] = principal; // fallback: keep raw username for system/deleted users
         }
       }
