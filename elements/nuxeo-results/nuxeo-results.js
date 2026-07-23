@@ -1440,7 +1440,12 @@ Polymer({
       return;
     }
 
-    this._applyPrefsToView(view, settingsToApply);
+    const filteredSettings = this._filterSettingsByCapabilities(view, settingsToApply);
+    if (filteredSettings === undefined) {
+      return;
+    }
+
+    this._applyPrefsToView(view, filteredSettings);
   },
 
   // ------------------------------
@@ -1607,7 +1612,12 @@ Polymer({
       settingsToApply = {};
     }
 
-    this._applyPrefsToView(view, settingsToApply);
+    const filteredSettings = this._filterSettingsByCapabilities(view, settingsToApply);
+    if (filteredSettings === undefined) {
+      return;
+    }
+
+    this._applyPrefsToView(view, filteredSettings);
   },
   // -------------------------
   // Mode decision functions

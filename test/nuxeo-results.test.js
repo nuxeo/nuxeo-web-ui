@@ -1727,17 +1727,39 @@ suite('nuxeo-results', () => {
 
     test('_applyGlobalPrefs prefers backend prefs then local settings', () => {
       const applyStub = sinon.stub(results, '_applyPrefsToView');
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities');
+      const view = {};
+
+      results.document = null;
+      results._settings = { table: { from: 'local' } };
+      filterStub.returnsArg(1);
+      results._applyGlobalPrefs(true, { from: 'backend' }, view, 'table');
+      expect(applyStub).to.have.been.calledWith(view, { from: 'backend' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'backend' });
+
+      applyStub.resetHistory();
+      filterStub.resetHistory();
+      results._applyGlobalPrefs(true, {}, view, 'table');
+      expect(applyStub).to.have.been.calledWith(view, { from: 'local' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'local' });
+
+      filterStub.restore();
+      applyStub.restore();
+    });
+
+    test('_applyGlobalPrefs does not apply settings when capability filter returns undefined', () => {
+      const applyStub = sinon.stub(results, '_applyPrefsToView');
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(undefined);
       const view = {};
 
       results.document = null;
       results._settings = { table: { from: 'local' } };
       results._applyGlobalPrefs(true, { from: 'backend' }, view, 'table');
-      expect(applyStub).to.have.been.calledWith(view, { from: 'backend' });
 
-      applyStub.resetHistory();
-      results._applyGlobalPrefs(true, {}, view, 'table');
-      expect(applyStub).to.have.been.calledWith(view, { from: 'local' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'backend' });
+      expect(applyStub).to.not.have.been.called;
 
+      filterStub.restore();
       applyStub.restore();
     });
 
@@ -1829,23 +1851,49 @@ suite('nuxeo-results', () => {
 
     test('_applyDocPrefsImpl falls back from backend to local settings', () => {
       const applyStub = sinon.stub(results, '_applyPrefsToView');
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities');
       const view = {};
       results.displayMode = 'table';
       results._settings = { table: { from: 'local' } };
+      filterStub.returnsArg(1);
 
       results._applyDocPrefsImpl(true, { from: 'backend' }, view);
       expect(applyStub).to.have.been.calledWith(view, { from: 'backend' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'backend' });
 
       applyStub.resetHistory();
+      filterStub.resetHistory();
       results.__hasBackendDocPrefs = false;
       results._applyDocPrefsImpl(true, {}, view);
       expect(applyStub).to.have.been.calledWith(view, { from: 'local' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'local' });
 
       applyStub.resetHistory();
+      filterStub.resetHistory();
       results._settings = null;
       results.__hasBackendDocPrefs = true;
       results._applyDocPrefsImpl(true, {}, view);
       expect(applyStub).to.have.been.calledWith(view, {});
+      expect(filterStub).to.have.been.calledWith(view, {});
+
+      filterStub.restore();
+      applyStub.restore();
+    });
+
+    test('_applyDocPrefsImpl does not apply settings when capability filter returns undefined', () => {
+      const applyStub = sinon.stub(results, '_applyPrefsToView');
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(undefined);
+      const view = {};
+
+      results.displayMode = 'table';
+      results.__hasBackendDocPrefs = false;
+      results._settings = { table: { from: 'local' } };
+      results._applyDocPrefsImpl(true, { from: 'backend' }, view);
+
+      expect(filterStub).to.have.been.calledWith(view, { from: 'backend' });
+      expect(applyStub).to.not.have.been.called;
+
+      filterStub.restore();
       applyStub.restore();
     });
 
