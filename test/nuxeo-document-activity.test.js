@@ -249,5 +249,29 @@ suite('nuxeo-document-activity', () => {
       expect(element._principalEntities).to.have.property('unknown', 'unknown');
       element.$.user.get.restore();
     });
+
+    test('should warn on unexpected non-404 errors', async () => {
+      const error = new Error('internal error');
+      error.status = 500;
+      sinon.stub(element.$.user, 'get').rejects(error);
+      const warnSpy = sinon.spy(console, 'warn');
+      await element._fetchPrincipals([{ principalName: 'baduser', eventId: 'view' }]);
+      expect(element._principalEntities).to.have.property('baduser', 'baduser');
+      expect(warnSpy).to.have.been.calledOnce;
+      warnSpy.restore();
+      element.$.user.get.restore();
+    });
+
+    test('should not warn on 404 errors', async () => {
+      const error = new Error('not found');
+      error.status = 404;
+      sinon.stub(element.$.user, 'get').rejects(error);
+      const warnSpy = sinon.spy(console, 'warn');
+      await element._fetchPrincipals([{ principalName: 'deleted', eventId: 'view' }]);
+      expect(element._principalEntities).to.have.property('deleted', 'deleted');
+      expect(warnSpy).to.not.have.been.called;
+      warnSpy.restore();
+      element.$.user.get.restore();
+    });
   });
 });
