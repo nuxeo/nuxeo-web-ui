@@ -246,7 +246,7 @@ suite('nuxeo-document-activity', () => {
     test('should handle fetch failure gracefully', async () => {
       sinon.stub(element.$.user, 'get').rejects(new Error('not found'));
       await element._fetchPrincipals([{ principalName: 'unknown', eventId: 'view' }]);
-      expect(element._principalEntities).to.not.have.property('unknown');
+      expect(element._principalEntities).to.have.property('unknown', 'unknown');
       element.$.user.get.restore();
     });
   });
