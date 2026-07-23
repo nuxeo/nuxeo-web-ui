@@ -136,10 +136,12 @@ jobs:
       - name: Build Web UI marketplace package
         # Reuses the dist/ produced by the Webpack build above (-DskipInstall -DskipBuild),
         # then packages it into the Nuxeo Web UI marketplace zip installed in the image.
+        # Stamp the package version with the preview VERSION so the installed nuxeo-web-ui
+        # package matches the image tag and is unique per run (forces the env to install it).
         env:
           MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
-        run: mvn -B -ntp clean install -DskipTests -DskipInstall=true -DskipBuild=true
+        run: mvn -B -ntp clean install -DskipTests -DskipInstall=true -DskipBuild=true -Dwebui.package.version="$VERSION"
 
       - name: Stage Web UI marketplace package for offline install
         run: |
