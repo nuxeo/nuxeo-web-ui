@@ -135,14 +135,18 @@ jobs:
 
       - name: Build Web UI marketplace package
         # Reuses the dist/ produced by the Webpack build above (-DskipInstall -DskipBuild).
-        # Set the Maven reactor version to the preview VERSION so the built nuxeo-web-ui
-        # bundle (reported by /nuxeo/api/v1/management/distribution) and the marketplace
-        # package both carry the preview version — unique per run and matching the image tag.
+        # Rewrite the reactor version in the built poms (parent + addon + marketplace) to the
+        # preview VERSION so the nuxeo-web-ui bundle (reported by /nuxeo/api/v1/management/distribution)
+        # and the marketplace package both carry it — unique per run and matching the image tag.
+        # A plain sed avoids the slow versions-maven-plugin resolution (~4 min per run).
         env:
           MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
           MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
         run: |
-          mvn -B -ntp versions:set -DnewVersion="$VERSION" -DprocessAllModules=true -DgenerateBackupPoms=false
+          BASE_VERSION="$(node -p 'require("./package.json").version')"
+          for p in pom.xml plugin/web-ui/addon/pom.xml plugin/web-ui/marketplace/pom.xml; do
+            sed -i "s|<version>${BASE_VERSION}</version>|<version>${VERSION}</version>|g" "$p"
+          done
           mvn -B -ntp clean install -DskipTests -DskipInstall=true -DskipBuild=true
 
       - name: Stage Web UI marketplace package for offline install
