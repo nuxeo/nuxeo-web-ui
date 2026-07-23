@@ -228,6 +228,9 @@ Polymer({
 
   _fetchInitiators(workflows) {
     if (!workflows?.length) {
+      // Bump the request id so any in-flight resolve is invalidated and cannot
+      // repopulate the entities map after this reset.
+      this._initiatorsRequestId += 1;
       this._initiatorEntities = {};
       this._initiatorsLoading = false;
       return undefined;

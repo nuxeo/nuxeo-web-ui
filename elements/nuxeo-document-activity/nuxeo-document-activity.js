@@ -97,6 +97,9 @@ Polymer({
 
   _fetchPrincipals(activities) {
     if (!activities?.length) {
+      // Bump the request id so any in-flight resolve is invalidated and cannot
+      // repopulate the entities map after this reset.
+      this._principalsRequestId += 1;
       this._principalEntities = {};
       this._principalsLoading = false;
       return undefined;

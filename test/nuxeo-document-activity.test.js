@@ -323,5 +323,23 @@ suite('nuxeo-document-activity', () => {
       expect(paths).to.deep.equal(['/user/a', '/user/b', '/user/c']);
       element.$.user.get.restore();
     });
+
+    test('should discard in-flight results when activities is reset to empty mid-flight', async () => {
+      let resolveGet;
+      sinon.stub(element.$.user, 'get').returns(
+        new Promise((resolve) => {
+          resolveGet = resolve;
+        }),
+      );
+      const inFlight = element._fetchPrincipals([{ principalName: 'jdoe', eventId: 'view' }]);
+      await new Promise((r) => setTimeout(r, 0)); // let the in-flight lookup start
+      element._fetchPrincipals([]); // reset while the lookup is pending
+      expect(element._principalEntities).to.deep.equal({});
+      resolveGet({ 'entity-type': 'user', id: 'jdoe' });
+      await inFlight;
+      // The stale lookup must not repopulate the reset state.
+      expect(element._principalEntities).to.deep.equal({});
+      element.$.user.get.restore();
+    });
   });
 });
