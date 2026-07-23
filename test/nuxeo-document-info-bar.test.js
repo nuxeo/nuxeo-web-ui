@@ -158,7 +158,7 @@ suite('nuxeo-document-info-bar', () => {
     test('should keep raw username on fetch failure', async () => {
       sinon.stub(element.$.user, 'get').rejects(new Error('not found'));
       await element._fetchInitiators([{ initiator: 'unknown', id: 'wf1' }]);
-      expect(element._initiatorEntities).to.not.have.property('unknown');
+      expect(element._initiatorEntities).to.have.property('unknown', 'unknown');
       element.$.user.get.restore();
     });
   });
