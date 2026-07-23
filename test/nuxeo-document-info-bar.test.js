@@ -136,10 +136,14 @@ suite('nuxeo-document-info-bar', () => {
   });
 
   suite('_fetchInitiators', () => {
-    test('should skip when workflows is empty', async () => {
+    test('should skip fetching and reset state when workflows is empty', async () => {
+      element._initiatorEntities = { stale: { id: 'stale' } };
+      element._initiatorsLoading = true;
       const getSpy = sinon.spy(element.$.user, 'get');
       await element._fetchInitiators([]);
       expect(getSpy).to.not.have.been.called;
+      expect(element._initiatorEntities).to.deep.equal({});
+      expect(element._initiatorsLoading).to.be.false;
       getSpy.restore();
     });
 
@@ -157,8 +161,12 @@ suite('nuxeo-document-info-bar', () => {
 
     test('should keep raw username on fetch failure', async () => {
       sinon.stub(element.$.user, 'get').rejects(new Error('not found'));
+      const warnSpy = sinon.stub(console, 'warn');
       await element._fetchInitiators([{ initiator: 'unknown', id: 'wf1' }]);
       expect(element._initiatorEntities).to.have.property('unknown', 'unknown');
+      // A statusless (e.g. network/transport) error is unexpected and should be logged.
+      expect(warnSpy).to.have.been.calledOnce;
+      warnSpy.restore();
       element.$.user.get.restore();
     });
 
@@ -166,7 +174,7 @@ suite('nuxeo-document-info-bar', () => {
       const error = new Error('internal error');
       error.status = 500;
       sinon.stub(element.$.user, 'get').rejects(error);
-      const warnSpy = sinon.spy(console, 'warn');
+      const warnSpy = sinon.stub(console, 'warn');
       await element._fetchInitiators([{ initiator: 'baduser', id: 'wf2' }]);
       expect(element._initiatorEntities).to.have.property('baduser', 'baduser');
       expect(warnSpy).to.have.been.calledOnce;
@@ -178,11 +186,55 @@ suite('nuxeo-document-info-bar', () => {
       const error = new Error('not found');
       error.status = 404;
       sinon.stub(element.$.user, 'get').rejects(error);
-      const warnSpy = sinon.spy(console, 'warn');
+      const warnSpy = sinon.stub(console, 'warn');
       await element._fetchInitiators([{ initiator: 'deleted', id: 'wf3' }]);
       expect(element._initiatorEntities).to.have.property('deleted', 'deleted');
       expect(warnSpy).to.not.have.been.called;
       warnSpy.restore();
+      element.$.user.get.restore();
+    });
+
+    test('should URL-encode initiator ids in the request path', async () => {
+      const entity = { 'entity-type': 'user', id: 'a b/c' };
+      const getStub = sinon.stub(element.$.user, 'get').callsFake(() => {
+        expect(element.$.user.path).to.equal('/user/a%20b%2Fc');
+        return Promise.resolve(entity);
+      });
+      await element._fetchInitiators([{ initiator: 'a b/c', id: 'wf1' }]);
+      expect(getStub).to.have.been.calledOnce;
+      element.$.user.get.restore();
+    });
+
+    test('should discard stale responses via request-id guard', async () => {
+      const first = { 'entity-type': 'user', id: 'first' };
+      const second = { 'entity-type': 'user', id: 'second' };
+      sinon.stub(element.$.user, 'get').resolves(first);
+      // Start first fetch but do not await; bump the request id by starting a second.
+      const p1 = element._fetchInitiators([{ initiator: 'first', id: 'wf1' }]);
+      element.$.user.get.resolves(second);
+      const p2 = element._fetchInitiators([{ initiator: 'second', id: 'wf2' }]);
+      await Promise.all([p1, p2]);
+      // Only the latest fetch's results should be applied.
+      expect(element._initiatorEntities).to.have.property('second');
+      expect(element._initiatorEntities).to.not.have.property('first');
+      element.$.user.get.restore();
+    });
+
+    test('should serialize concurrent invocations on the shared resource', async () => {
+      const paths = [];
+      sinon.stub(element.$.user, 'get').callsFake(() => {
+        // Record the path each lookup requests; interleaved runs would corrupt the order.
+        paths.push(element.$.user.path);
+        return Promise.resolve({ 'entity-type': 'user', id: element.$.user.path });
+      });
+      const p1 = element._fetchInitiators([
+        { initiator: 'a', id: 'wf1' },
+        { initiator: 'b', id: 'wf2' },
+      ]);
+      const p2 = element._fetchInitiators([{ initiator: 'c', id: 'wf3' }]);
+      await Promise.all([p1, p2]);
+      // Serialized: first invocation's lookups (a, b) complete before the second's (c).
+      expect(paths).to.deep.equal(['/user/a', '/user/b', '/user/c']);
       element.$.user.get.restore();
     });
   });

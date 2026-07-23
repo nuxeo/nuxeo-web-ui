@@ -87,13 +87,33 @@ Polymer({
       type: Boolean,
       value: false,
     },
+    _principalsRequestId: {
+      type: Number,
+      value: 0,
+    },
   },
 
   observers: ['_fetchPrincipals(activities)'],
 
-  async _fetchPrincipals(activities) {
-    if (!activities?.length) return;
+  _fetchPrincipals(activities) {
+    if (!activities?.length) {
+      this._principalEntities = {};
+      this._principalsLoading = false;
+      return undefined;
+    }
+    const requestId = ++this._principalsRequestId;
     this._principalsLoading = true;
+    // Serialize invocations: the observer can re-fire while a previous fetch is still in
+    // flight, and every lookup mutates the `path` of a single shared <nuxeo-resource>
+    // (this.$.user). Chaining runs sequentially prevents concurrent path mutation and
+    // in-flight request aborts on that shared element.
+    const run = () => this._resolvePrincipals(activities, requestId);
+    const previous = this._principalsChain || Promise.resolve();
+    this._principalsChain = previous.catch(() => {}).then(run);
+    return this._principalsChain;
+  },
+
+  async _resolvePrincipals(activities, requestId) {
     const entities = {};
     const seen = new Set();
     for (const activity of activities) {
@@ -101,17 +121,18 @@ Polymer({
       if (principal && typeof principal === 'string' && !seen.has(principal)) {
         seen.add(principal);
         try {
-          this.$.user.path = `/user/${principal}`;
+          this.$.user.path = `/user/${encodeURIComponent(principal)}`;
           const user = await this.$.user.get();
           entities[principal] = user;
         } catch (error) {
-          if (error.status && error.status !== 404) {
-            console.warn(`Unexpected error resolving user "${principal}":`, error.message);
+          if (error.status !== 404) {
+            console.warn(`Unexpected error resolving user "${principal}":`, error);
           }
           entities[principal] = principal; // fallback: keep raw username for system/deleted users
         }
       }
     }
+    if (requestId !== this._principalsRequestId) return;
     this._principalEntities = entities;
     this._principalsLoading = false;
   },

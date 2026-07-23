@@ -214,6 +214,10 @@ Polymer({
       type: Boolean,
       value: false,
     },
+    _initiatorsRequestId: {
+      type: Number,
+      value: 0,
+    },
   },
 
   observers: ['_fetchInitiators(workflows)'],
@@ -222,9 +226,25 @@ Polymer({
     return { document: this.document };
   },
 
-  async _fetchInitiators(workflows) {
-    if (!workflows?.length) return;
+  _fetchInitiators(workflows) {
+    if (!workflows?.length) {
+      this._initiatorEntities = {};
+      this._initiatorsLoading = false;
+      return undefined;
+    }
+    const requestId = ++this._initiatorsRequestId;
     this._initiatorsLoading = true;
+    // Serialize invocations: the observer can re-fire while a previous fetch is still in
+    // flight, and every lookup mutates the `path` of a single shared <nuxeo-resource>
+    // (this.$.user). Chaining runs sequentially prevents concurrent path mutation and
+    // in-flight request aborts on that shared element.
+    const run = () => this._resolveInitiators(workflows, requestId);
+    const previous = this._initiatorsChain || Promise.resolve();
+    this._initiatorsChain = previous.catch(() => {}).then(run);
+    return this._initiatorsChain;
+  },
+
+  async _resolveInitiators(workflows, requestId) {
     const entities = {};
     const seen = new Set();
     for (const wf of workflows) {
@@ -232,17 +252,18 @@ Polymer({
       if (initiator && typeof initiator === 'string' && !seen.has(initiator)) {
         seen.add(initiator);
         try {
-          this.$.user.path = `/user/${initiator}`;
+          this.$.user.path = `/user/${encodeURIComponent(initiator)}`;
           const user = await this.$.user.get();
           entities[initiator] = user;
         } catch (error) {
-          if (error.status && error.status !== 404) {
-            console.warn(`Unexpected error resolving user "${initiator}":`, error.message);
+          if (error.status !== 404) {
+            console.warn(`Unexpected error resolving user "${initiator}":`, error);
           }
           entities[initiator] = initiator; // fallback: keep raw username for system/deleted users
         }
       }
     }
+    if (requestId !== this._initiatorsRequestId) return;
     this._initiatorEntities = entities;
     this._initiatorsLoading = false;
   },
