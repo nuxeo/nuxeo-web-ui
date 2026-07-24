@@ -318,6 +318,73 @@ suite('ChartDataBehavior', () => {
     });
   });
 
+  suite('_collectChartResizeSnapshot', () => {
+    test('resolves canvas via chart.$.canvas', () => {
+      const mockCanvas = document.createElement('canvas');
+      mockCanvas.width = 100;
+      mockCanvas.height = 50;
+      const chart = { $: { canvas: mockCanvas } };
+      const snapshot = behavior._collectChartResizeSnapshot(chart);
+      expect(snapshot.canvas.width).to.equal(100);
+      expect(snapshot.canvas.height).to.equal(50);
+    });
+
+    test('resolves canvas via chart.shadowRoot querySelector', () => {
+      const mockCanvas = document.createElement('canvas');
+      mockCanvas.width = 80;
+      mockCanvas.height = 40;
+      const chart = {
+        shadowRoot: { querySelector: sinon.stub().returns(mockCanvas) },
+      };
+      const snapshot = behavior._collectChartResizeSnapshot(chart);
+      expect(snapshot.canvas.width).to.equal(80);
+    });
+
+    test('collects full snapshot from a real DOM element with parent, canvas, and chartInstance', () => {
+      const container = document.createElement('div');
+      container.style.cssText = 'width:200px;height:100px;';
+      document.body.appendChild(container);
+
+      const chartEl = document.createElement('div');
+      chartEl.style.cssText = 'width:150px;height:80px;';
+      chartEl.chart = { width: 150, height: 80 };
+      container.appendChild(chartEl);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 150;
+      canvas.height = 80;
+      canvas.style.width = '150px';
+      canvas.style.height = '80px';
+      chartEl.appendChild(canvas);
+
+      const snapshot = behavior._collectChartResizeSnapshot(chartEl);
+
+      // computed styles (chart instanceof Element)
+      expect(snapshot.styles.display).to.be.a('string');
+      expect(snapshot.styles.width).to.be.a('string');
+
+      // chartInstance via chart.chart
+      expect(snapshot.chartInstance.width).to.equal(150);
+      expect(snapshot.chartInstance.height).to.equal(80);
+
+      // canvas via chart.querySelector('canvas')
+      expect(snapshot.canvas.width).to.equal(150);
+      expect(snapshot.canvas.height).to.equal(80);
+      expect(snapshot.canvas.cssWidth).to.equal('150px');
+      expect(snapshot.canvas.cssHeight).to.equal('80px');
+
+      // parent from parentElement
+      expect(snapshot.parent.offsetWidth).to.be.a('number');
+      expect(snapshot.parent.clientWidth).to.be.a('number');
+
+      // chartRect from getBoundingClientRect
+      expect(snapshot.chart.rectWidth).to.be.a('number');
+      expect(snapshot.chart.rectHeight).to.be.a('number');
+
+      document.body.removeChild(container);
+    });
+  });
+
   suite('_labels', () => {
     test('should extract keys from flat data', () => {
       const data = [
