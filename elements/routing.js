@@ -57,14 +57,19 @@ function encodeQueryParams(path) {
   return encodepath;
 }
 
-// Returns the name of the repository whose UI context is currently being browsed.
+// Returns the name of the repository whose UI context a given pathname is browsing.
 // In a multi-repository instance the active context is encoded in the path
 // (`.../repo/<name>/ui/`); the default repository is also served from the bare
 // `.../ui/` path, in which case we fall back to the repository flagged as default.
-function currentRepositoryName() {
+function repositoryNameForPath(pathname) {
   const repositories = Nuxeo?.UI?.repositories || [];
-  const current = repositories.find((repo) => repo.href && globalThis.location.pathname.startsWith(repo.href));
+  const current = repositories.find((repo) => repo.href && pathname.startsWith(repo.href));
   return (current || repositories.find((repo) => repo.isDefault))?.name;
+}
+
+// Convenience wrapper for the pathname currently being browsed.
+function currentRepositoryName() {
+  return repositoryNameForPath(globalThis.location.pathname);
 }
 
 // When reverse routing produces an absolute URL for a document (which happens in
@@ -79,13 +84,17 @@ function sameRepositoryClientPath(path) {
   if (url.origin !== globalThis.location.origin) {
     return null;
   }
-  const repositories = Nuxeo?.UI?.repositories || [];
-  const target = repositories.find((repo) => repo.href && url.pathname.startsWith(repo.href));
-  if (!target || target.name !== currentRepositoryName()) {
+  // Resolve the target path's repository the same way as the current one, so the default
+  // repository served from the bare `.../ui/` path (no `/repo/<name>/`) is matched too.
+  if (repositoryNameForPath(url.pathname) !== currentRepositoryName()) {
     return null;
   }
   const route = url.hash.replace(/^#!?/, '');
-  return route || null;
+  if (!route) {
+    return null;
+  }
+  // page() expects an app route starting with '/'; guard against hashes without one.
+  return route.startsWith('/') ? route : `/${route}`;
 }
 
 function _routeAdmin(selectedAdminTab, errorPath, routeData) {
