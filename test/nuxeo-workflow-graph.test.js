@@ -48,5 +48,16 @@ suite('nuxeo-workflow-graph', () => {
       expect(element.i18n).to.have.been.calledWith('command.remove');
       expect(labelOverlay[1].label).to.equal('<span title="Remove">Remove</span>');
     });
+
+    test('should escape HTML in the transition label to prevent injection (ELEMENTS-1595)', () => {
+      // Labels are admin/Studio-configured and their translations may contain quotes or markup;
+      // they must be escaped before being interpolated into the overlay HTML.
+      element.i18n.withArgs('evil').returns('"><img src=x onerror=alert(1)>');
+      const result = element._transitionOverlay({ label: 'evil', path: '1-2' });
+      const labelOverlay = result.find((overlay) => overlay[0] === 'Label');
+      expect(labelOverlay[1].label).to.not.contain('<img');
+      expect(labelOverlay[1].label).to.contain('&lt;img');
+      expect(labelOverlay[1].label).to.contain('&quot;');
+    });
   });
 });
