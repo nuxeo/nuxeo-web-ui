@@ -200,6 +200,22 @@ suite('nuxeo-csv-export-button', () => {
       element.provider = { schemas: 'dublincore' };
       expect(() => element.detached()).to.not.throw();
     });
+
+    test('re-attaches the current-page-changed listener on re-insert with the same provider', () => {
+      const provider = makeProvider();
+      element.provider = provider;
+      // simulate a detach/reattach cycle without changing the provider instance
+      element.detached();
+      provider.addEventListener.resetHistory();
+      element.attached();
+      expect(provider.addEventListener).to.have.been.calledWith('current-page-changed');
+    });
+
+    test('re-resolves the schemas on attach', () => {
+      const resolveSpy = sinon.spy(element, '_resolveSchemas');
+      element.attached();
+      expect(resolveSpy).to.have.been.called;
+    });
   });
 
   suite('_fetchTypes', () => {
