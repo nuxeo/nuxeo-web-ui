@@ -240,4 +240,39 @@ suite('nuxeo-document-create', () => {
       expect(element.$.pathSuggesterEdit.disabled).to.be.true;
     });
   });
+
+  suite('_create', () => {
+    let innerLayout;
+
+    setup(() => {
+      element.canCreate = true;
+      sinon.stub(element, '_isValidType').returns(true);
+      element.selectedDocType = { id: 'File', type: 'File' };
+      innerLayout = {
+        validate: sinon.stub(),
+        _getValidatableElements: sinon.stub().returns([]),
+        element: { root: document.createElement('div') },
+      };
+      element.$['document-create'].$.layout = innerLayout;
+    });
+
+    test('should notify the user with a reason on validation failure', async () => {
+      innerLayout.validate.resolves(false);
+      sinon.stub(element, 'notify');
+      await element._create();
+      expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify.firstCall.args[0].message).to.equal('documentCreationForm.requiredFieldsError');
+      expect(element.creating).to.be.false;
+    });
+
+    test('should scroll to and focus the invalid field on validation failure', async () => {
+      const invalidField = { invalid: true, scrollIntoView: sinon.spy(), focus: sinon.spy() };
+      innerLayout.validate.resolves(false);
+      innerLayout._getValidatableElements.returns([{ invalid: false }, invalidField]);
+      sinon.stub(element, 'notify');
+      await element._create();
+      expect(invalidField.scrollIntoView).to.have.been.calledOnce;
+      expect(invalidField.focus).to.have.been.calledOnce;
+    });
+  });
 });

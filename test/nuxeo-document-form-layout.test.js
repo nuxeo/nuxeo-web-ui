@@ -111,6 +111,14 @@ suite('nuxeo-document-form-layout', () => {
       expect(invalidField.focus).to.have.been.calledOnce;
     });
 
+    test('should notify the user with a reason on validation failure', async () => {
+      innerLayout.validate.resolves(false);
+      sinon.stub(element, 'notify');
+      await element._save();
+      expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify.firstCall.args[0].message).to.equal('documentCreationForm.requiredFieldsError');
+    });
+
     test('should call post when document has no uid (create)', async () => {
       innerLayout.validate.resolves(true);
       element.$.doc.post.resolves({});

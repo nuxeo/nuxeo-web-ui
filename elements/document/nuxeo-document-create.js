@@ -366,6 +366,10 @@ Polymer({
         invalidField.scrollIntoView();
         invalidField.focus();
       }
+      // Surface a reason for the blocked submission. Some required widgets (e.g. multivalued
+      // fields) only toggle their invalid state without rendering a per-field message, so
+      // without this the document would silently fail to create (WEBUI-180).
+      this.notify({ message: this.i18n('documentCreationForm.requiredFieldsError') });
       this._setCreating(false);
       return;
     }
