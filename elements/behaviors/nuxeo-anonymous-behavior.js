@@ -77,7 +77,8 @@ export const NuxeoAnonymousBehavior = {
     // Legitimate Web UI fragments never contain these; a crafted permalink could.
     const fragment = globalThis.location.hash.substring(1).replace(/[;\r\n]/g, '');
     document.cookie = `nuxeo.start.url.fragment=${fragment}; path=/`;
-    const baseUrl = this.$?.nxcon?.url || this.url || '';
+    // Strip any trailing slash so a NUXEO_URL configured as `.../nuxeo/` doesn't yield `.../nuxeo//logout`.
+    const baseUrl = (this.$?.nxcon?.url || this.url || '').replace(/\/+$/, '');
     // `requestedUrl` must be context-relative: an absolute URL would get the context path prepended by
     // the server, producing a broken redirect. Logging out invalidates the anonymous session and, since
     // the user was anonymous, Nuxeo forwards to `login.jsp?forceAnonymousLogin=true&requestedUrl=...`.
