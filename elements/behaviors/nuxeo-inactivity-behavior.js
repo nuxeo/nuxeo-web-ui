@@ -153,6 +153,12 @@ export const NuxeoInactivityBehavior = {
     // effective inactivity window beyond the real activity — weakening this security timer (CWE-613).
     // Schedule only the remaining time, clamped to >= 0 for backward clock skew.
     const remoteTs = Number(e.newValue) || 0;
+    // Ignore a future remote timestamp (backward clock adjustment): trusting it would clamp idleFor to 0
+    // and re-arm for a full timeout — and poison _lastActivityTs — extending the idle window across tabs.
+    // This mirrors _getLastActivity()'s rule; let this tab's own timer handle logout instead (CWE-613).
+    if (remoteTs > Date.now()) {
+      return;
+    }
     this._lastActivityTs = Math.max(this._lastActivityTs || 0, remoteTs); // keep local ref in sync (monotonic)
     const idleFor = Math.max(0, Date.now() - remoteTs);
     if (idleFor >= this._inactivityTimeoutMs) {
