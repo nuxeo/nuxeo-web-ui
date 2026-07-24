@@ -170,13 +170,13 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       expect(scheduled).to.have.lengthOf(before); // no new timer scheduled
     });
 
-    test('does NOT log out when another tab was active within the timeout', () => {
+    test('does NOT log out when another tab was active within the timeout', async () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
       host._lastActivityTs = 0; // this tab itself is idle; only the other tab is active (shared timestamp)
       window.localStorage.setItem(ACTIVITY_KEY, String(Date.now())); // another tab active just now
-      lastScheduled().fn(); // this idle tab's timer fires
+      await lastScheduled().fn(); // await: the callback can log out on a later microtask (Promise chain)
       expect(redirect).not.to.have.been.called; // re-armed instead of logging out
       redirect.restore();
     });
@@ -190,13 +190,13 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       expect(host._lastActivityTs).to.be.greaterThan(0); // still recorded despite the throttle
     });
 
-    test('does NOT log out when this tab had recent local activity (no shared timestamp)', () => {
+    test('does NOT log out when this tab had recent local activity (no shared timestamp)', async () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
       window.localStorage.removeItem(ACTIVITY_KEY); // no cross-tab signal at all
       host._lastActivityTs = Date.now(); // but this tab was active just now (throttle may have skipped re-arm)
-      lastScheduled().fn(); // timer fires
+      await lastScheduled().fn(); // await: the callback can log out on a later microtask (Promise chain)
       expect(redirect).not.to.have.been.called; // re-armed on recent local activity instead of logging out
       redirect.restore();
     });
