@@ -90,18 +90,26 @@ suite('ChartDataBehavior', () => {
       }
 
       behavior.attached();
-      const boundResizeCharts = behavior._boundResizeCharts;
+      const boundWindowResizeHandler = behavior._boundWindowResizeHandler;
+      const boundVisualViewportResizeHandler = behavior._boundVisualViewportResizeHandler;
+      const boundVisualViewportScrollHandler = behavior._boundVisualViewportScrollHandler;
 
-      expect(addEventListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
-      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
-      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('scroll', boundResizeCharts);
+      expect(addEventListenerStub).to.have.been.calledWithExactly('resize', boundWindowResizeHandler);
+      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('resize', boundVisualViewportResizeHandler);
+      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('scroll', boundVisualViewportScrollHandler);
       expect(behavior._resizeCharts).to.have.been.called;
 
       behavior.detached();
 
-      expect(removeEventListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
-      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
-      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly('scroll', boundResizeCharts);
+      expect(removeEventListenerStub).to.have.been.calledWithExactly('resize', boundWindowResizeHandler);
+      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly(
+        'resize',
+        boundVisualViewportResizeHandler,
+      );
+      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly(
+        'scroll',
+        boundVisualViewportScrollHandler,
+      );
       expect(behavior._boundResizeCharts).to.be.null;
     });
 
@@ -235,6 +243,145 @@ suite('ChartDataBehavior', () => {
       );
       expect(chartWithResize.resize).to.have.been.calledOnce;
       expect(hiddenChart.resize).to.not.have.been.called;
+    });
+
+    test('named event handlers invoke _resizeCharts with the correct trigger', () => {
+      behavior._resizeCharts = sinon.spy();
+      addEventListenerStub = sinon.stub(window, 'addEventListener');
+
+      Object.defineProperty(window, 'visualViewport', {
+        configurable: true,
+        writable: true,
+        value: {
+          addEventListener: sinon.stub(),
+          removeEventListener: sinon.stub(),
+        },
+      });
+
+      behavior.attached();
+
+      behavior._boundWindowResizeHandler();
+      behavior._boundVisualViewportResizeHandler();
+      behavior._boundVisualViewportScrollHandler();
+
+      const triggers = behavior._resizeCharts.args.map((a) => a[0]);
+      expect(triggers).to.include('window.resize');
+      expect(triggers).to.include('visualViewport.resize');
+      expect(triggers).to.include('visualViewport.scroll');
+
+      behavior.detached();
+    });
+
+    test('requestAnimationFrame callback skips falsy chart entries', () => {
+      const originalRaf = window.requestAnimationFrame;
+      window.requestAnimationFrame = (cb) => {
+        cb(performance.now());
+        return 1;
+      };
+
+      behavior.root = {
+        querySelectorAll: sinon.stub().returns([null]),
+      };
+      behavior.async = (fn) => fn();
+
+      expect(() => behavior._resizeCharts()).to.not.throw();
+
+      window.requestAnimationFrame = originalRaf;
+    });
+  });
+
+  suite('_logChartResizeDebug', () => {
+    let consoleDebugStub;
+
+    setup(() => {
+      consoleDebugStub = sinon.stub(console, 'debug');
+    });
+
+    teardown(() => {
+      consoleDebugStub.restore();
+    });
+
+    test('logs message with details when debug is enabled', () => {
+      behavior._chartDebugEnabled = true;
+      behavior._logChartResizeDebug('test.event', { key: 'value' });
+      expect(consoleDebugStub).to.have.been.calledOnce;
+      expect(consoleDebugStub.firstCall.args[0]).to.match(/\[nuxeo-chart-debug\].*test\.event/);
+      expect(consoleDebugStub.firstCall.args[1]).to.deep.equal({ key: 'value' });
+    });
+
+    test('logs message without details when debug is enabled', () => {
+      behavior._chartDebugEnabled = true;
+      behavior._logChartResizeDebug('test.event');
+      expect(consoleDebugStub).to.have.been.calledOnce;
+      expect(consoleDebugStub.firstCall.args[0]).to.match(/\[nuxeo-chart-debug\].*test\.event/);
+      expect(consoleDebugStub.firstCall.args).to.have.lengthOf(1);
+    });
+  });
+
+  suite('_collectChartResizeSnapshot', () => {
+    test('resolves canvas via chart.$.canvas', () => {
+      const mockCanvas = document.createElement('canvas');
+      mockCanvas.width = 100;
+      mockCanvas.height = 50;
+      const chart = { $: { canvas: mockCanvas } };
+      const snapshot = behavior._collectChartResizeSnapshot(chart);
+      expect(snapshot.canvas.width).to.equal(100);
+      expect(snapshot.canvas.height).to.equal(50);
+    });
+
+    test('resolves canvas via chart.shadowRoot querySelector', () => {
+      const mockCanvas = document.createElement('canvas');
+      mockCanvas.width = 80;
+      mockCanvas.height = 40;
+      const chart = {
+        shadowRoot: { querySelector: sinon.stub().returns(mockCanvas) },
+      };
+      const snapshot = behavior._collectChartResizeSnapshot(chart);
+      expect(snapshot.canvas.width).to.equal(80);
+    });
+
+    test('collects full snapshot from a real DOM element with parent, canvas, and chartInstance', () => {
+      const container = document.createElement('div');
+      container.style.cssText = 'width:200px;height:100px;';
+      document.body.appendChild(container);
+
+      const chartEl = document.createElement('div');
+      chartEl.style.cssText = 'width:150px;height:80px;';
+      chartEl.chart = { width: 150, height: 80 };
+      container.appendChild(chartEl);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 150;
+      canvas.height = 80;
+      canvas.style.width = '150px';
+      canvas.style.height = '80px';
+      chartEl.appendChild(canvas);
+
+      const snapshot = behavior._collectChartResizeSnapshot(chartEl);
+
+      // computed styles (chart instanceof Element)
+      expect(snapshot.styles.display).to.be.a('string');
+      expect(snapshot.styles.width).to.be.a('string');
+
+      // chartInstance via chart.chart
+      expect(snapshot.chartInstance.width).to.equal(150);
+      expect(snapshot.chartInstance.height).to.equal(80);
+
+      // canvas via chart.querySelector('canvas')
+      expect(snapshot.canvas.width).to.equal(150);
+      expect(snapshot.canvas.height).to.equal(80);
+      expect(snapshot.canvas.cssWidth).to.equal('150px');
+      expect(snapshot.canvas.cssHeight).to.equal('80px');
+
+      // parent from parentElement
+      expect(snapshot.parent.offsetWidth).to.be.a('number');
+      expect(snapshot.parent.clientWidth).to.be.a('number');
+
+      // chartRect from getBoundingClientRect
+      expect(snapshot.chart.rectWidth).to.be.a('number');
+      expect(snapshot.chart.rectHeight).to.be.a('number');
+
+      document.body.removeChild(container);
     });
   });
 
