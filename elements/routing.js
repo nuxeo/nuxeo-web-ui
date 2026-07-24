@@ -60,11 +60,18 @@ function encodeQueryParams(path) {
 // Returns the name of the repository whose UI context a given pathname is browsing.
 // In a multi-repository instance the active context is encoded in the path
 // (`.../repo/<name>/ui/`); the default repository is also served from the bare
-// `.../ui/` path, in which case we fall back to the repository flagged as default.
+// Web UI base path (`.../ui/`), in which case we fall back to the repository
+// flagged as default — but only when the path is actually under that base, so an
+// arbitrary same-origin URL is not misclassified as the default repository.
 function repositoryNameForPath(pathname) {
   const repositories = Nuxeo?.UI?.repositories || [];
   const current = repositories.find((repo) => repo.href && pathname.startsWith(repo.href));
-  return (current || repositories.find((repo) => repo.isDefault))?.name;
+  if (current) {
+    return current.name;
+  }
+  const base = (app.baseUrl || '').replace(/\/$/, '');
+  const underBase = !base || pathname === base || pathname.startsWith(`${base}/`);
+  return underBase ? repositories.find((repo) => repo.isDefault)?.name : undefined;
 }
 
 // Convenience wrapper for the pathname currently being browsed.
