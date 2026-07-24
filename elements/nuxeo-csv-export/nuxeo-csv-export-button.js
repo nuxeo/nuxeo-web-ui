@@ -165,7 +165,7 @@ Polymer({
         });
       } catch (e) {
         // keep the provider's display schemas when the types configuration cannot be fetched
-        console.warn(`nuxeo-csv-export-button: could not resolve schemas from config/types: ${e}`);
+        console.warn('nuxeo-csv-export-button: could not resolve schemas from config/types', e);
       }
     }
     // ignore stale resolutions superseded by a newer call (provider change or a rapid page change)
