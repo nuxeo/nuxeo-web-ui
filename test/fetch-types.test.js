@@ -45,4 +45,40 @@ suite('fetch-types', () => {
     expect(second.path).to.equal('should-not-change');
     expect(cached).to.deep.equal(payload);
   });
+
+  test('shares a single config/types request across concurrent callers', async () => {
+    const _fetchTypes = await load();
+    const payload = { doctypes: {} };
+    let resolveGet;
+    const get = sinon.stub().returns(
+      new Promise((resolve) => {
+        resolveGet = resolve;
+      }),
+    );
+    const resource = { path: 'x', get };
+    const p1 = _fetchTypes(resource);
+    const p2 = _fetchTypes(resource);
+    resolveGet(payload);
+    const [a, b] = await Promise.all([p1, p2]);
+    expect(get).to.have.been.calledOnce;
+    expect(a).to.equal(payload);
+    expect(b).to.equal(payload);
+  });
+
+  test('clears the cache on failure so a later call can retry', async () => {
+    const _fetchTypes = await load();
+    const failing = { path: 'x', get: sinon.stub().rejects(new Error('boom')) };
+    let rejected = false;
+    try {
+      await _fetchTypes(failing);
+    } catch (e) {
+      rejected = true;
+    }
+    expect(rejected).to.be.true;
+    const payload = { doctypes: {} };
+    const ok = { path: 'y', get: sinon.stub().resolves(payload) };
+    const result = await _fetchTypes(ok);
+    expect(ok.get).to.have.been.calledOnce;
+    expect(result).to.equal(payload);
+  });
 });
