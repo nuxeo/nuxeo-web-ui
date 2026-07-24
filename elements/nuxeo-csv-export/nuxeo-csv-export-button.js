@@ -116,24 +116,37 @@ Polymer({
     this._resolveSchemas();
   },
 
+  attached() {
+    // Re-wire the page-changed listener when the element is re-inserted with the SAME provider
+    // instance — `_providerChanged` won't fire in that case — and re-resolve to catch any page
+    // changes that happened while detached (otherwise `_resolvedSchemas` can be left stale).
+    this._bindProviderPageChanged(this.provider);
+    this._resolveSchemas();
+  },
+
   detached() {
     // avoid leaking the current-page-changed listener when the element is removed (e.g. page/dom-if switch)
-    if (this._onProviderPageChanged && this.provider?.removeEventListener) {
-      this.provider.removeEventListener('current-page-changed', this._onProviderPageChanged);
-    }
+    this._unbindProviderPageChanged(this.provider);
   },
 
   _providerChanged(provider, oldProvider) {
+    this._unbindProviderPageChanged(oldProvider);
+    this._bindProviderPageChanged(provider);
+    this._resolveSchemas();
+  },
+
+  _bindProviderPageChanged(provider) {
     if (!this._onProviderPageChanged) {
       this._onProviderPageChanged = () => this._resolveSchemas();
     }
-    if (oldProvider?.removeEventListener) {
-      oldProvider.removeEventListener('current-page-changed', this._onProviderPageChanged);
+    // addEventListener with the same listener reference is idempotent, so re-binding is safe.
+    provider?.addEventListener?.('current-page-changed', this._onProviderPageChanged);
+  },
+
+  _unbindProviderPageChanged(provider) {
+    if (this._onProviderPageChanged) {
+      provider?.removeEventListener?.('current-page-changed', this._onProviderPageChanged);
     }
-    if (provider?.addEventListener) {
-      provider.addEventListener('current-page-changed', this._onProviderPageChanged);
-    }
-    this._resolveSchemas();
   },
 
   /**
