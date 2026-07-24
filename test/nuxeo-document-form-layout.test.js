@@ -116,7 +116,7 @@ suite('nuxeo-document-form-layout', () => {
       sinon.stub(element, 'notify');
       await element._save();
       expect(element.notify).to.have.been.calledOnce;
-      expect(element.notify.firstCall.args[0].message).to.equal('documentCreationForm.requiredFieldsError');
+      expect(element.notify.firstCall.args[0].message).to.equal('documentForm.requiredFieldsError');
     });
 
     test('should call post when document has no uid (create)', async () => {
