@@ -175,7 +175,7 @@ export const ChartDataBehavior = {
       (chart && chart.querySelector && chart.querySelector('canvas'));
     const chartRect = chart && chart.getBoundingClientRect ? chart.getBoundingClientRect() : null;
     const parentRect = parent && parent.getBoundingClientRect ? parent.getBoundingClientRect() : null;
-    const computed = chart ? window.getComputedStyle(chart) : null;
+    const computed = chart instanceof Element ? window.getComputedStyle(chart) : null;
 
     return {
       viewport: {
