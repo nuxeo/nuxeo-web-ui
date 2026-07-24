@@ -176,6 +176,20 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       expect(scheduled).to.have.lengthOf(before); // no new timer scheduled
     });
 
+    test('storage event with a future timestamp is ignored (clock skew, no window extension)', () => {
+      getStub.withArgs('session.timeout', 60).returns(1);
+      host._setupInactivityTimer();
+      const before = scheduled.length;
+      host._lastActivityTs = 0;
+      // A future remote timestamp (backward clock adjustment) must not be trusted: it would clamp
+      // idleFor to 0, re-arm for a full timeout and poison _lastActivityTs.
+      window.dispatchEvent(
+        new StorageEvent('storage', { key: ACTIVITY_KEY, newValue: String(Date.now() + 60 * 60 * 1000) }),
+      );
+      expect(scheduled).to.have.lengthOf(before); // no re-arm from the bogus future value
+      expect(host._lastActivityTs).to.equal(0); // and the local reference is not poisoned
+    });
+
     test('does NOT log out when another tab was active within the timeout', async () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
