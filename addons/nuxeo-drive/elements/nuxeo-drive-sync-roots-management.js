@@ -107,7 +107,7 @@ Polymer({
         <template is="dom-repeat" items="[[roots]]" as="doc">
           <div class="row">
             <div class="cell flex-1"><a href$="[[urlFor(doc)]]">[[doc.title]]</a></div>
-            <div class="cell flex-3">[[doc.path]]</div>
+            <div class="cell flex-3"><a href$="[[urlFor(doc)]]">[[doc.path]]</a></div>
             <div class="cell actions">
               <paper-icon-button
                 icon="icons:clear"

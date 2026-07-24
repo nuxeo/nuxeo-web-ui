@@ -95,7 +95,7 @@ suite('nuxeo-drive-sync-roots-management', () => {
       });
     });
 
-    test('should render each root title (only) as a link to the document', async () => {
+    test('should render each root title and path as links to the document', async () => {
       element.roots = [
         { uid: 'root1', title: 'Root 1', path: '/root1', type: 'Folder' },
         { uid: 'root2', title: 'Root 2', path: '/root2', type: 'Folder' },
@@ -103,17 +103,18 @@ suite('nuxeo-drive-sync-roots-management', () => {
       await flush();
       const rows = element.shadowRoot.querySelectorAll('.table .row');
       expect(rows).to.have.lengthOf(2);
-      // Only the title cell links to the document; the path stays plain text.
-      const links = element.shadowRoot.querySelectorAll('.table .row .cell a');
-      expect(links).to.have.lengthOf(2);
-      expect(links[0].textContent.trim()).to.equal('Root 1');
-      expect(links[1].textContent.trim()).to.equal('Root 2');
-      expect(links[0].getAttribute('href')).to.equal('/ui/#!/browse/root1');
-      expect(links[1].getAttribute('href')).to.equal('/ui/#!/browse/root2');
-      // The path cell renders the text without an anchor.
-      const pathCell = rows[0].querySelector('.cell.flex-3');
-      expect(pathCell.querySelector('a')).to.be.null;
-      expect(pathCell.textContent.trim()).to.equal('/root1');
+      // Both the title and path cells link to the document.
+      rows.forEach((row, i) => {
+        const titleLink = row.querySelector('.cell.flex-1 a');
+        const pathLink = row.querySelector('.cell.flex-3 a');
+        const href = `/ui/#!/browse${element.roots[i].path}`;
+        expect(titleLink).to.be.ok;
+        expect(pathLink).to.be.ok;
+        expect(titleLink.textContent.trim()).to.equal(element.roots[i].title);
+        expect(pathLink.textContent.trim()).to.equal(element.roots[i].path);
+        expect(titleLink.getAttribute('href')).to.equal(href);
+        expect(pathLink.getAttribute('href')).to.equal(href);
+      });
       expect(element.urlFor).to.have.been.calledWith(element.roots[0]);
       expect(element.urlFor).to.have.been.calledWith(element.roots[1]);
     });
