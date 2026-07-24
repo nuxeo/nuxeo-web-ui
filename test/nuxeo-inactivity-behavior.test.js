@@ -330,6 +330,36 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       getItem.restore();
     });
 
+    test('_getLastActivity ignores future timestamps from a backward clock adjustment', () => {
+      const future = Date.now() + 60 * 60 * 1000;
+      window.localStorage.setItem(ACTIVITY_KEY, String(future));
+      host._lastActivityTs = future;
+      // a future value must not be trusted (would clamp idle to 0 and re-arm forever); fall back to 0
+      expect(host._getLastActivity()).to.equal(0);
+      window.localStorage.removeItem(ACTIVITY_KEY);
+    });
+
+    test('_getLastActivity returns the most recent non-future timestamp', () => {
+      const past = Date.now() - 1000;
+      window.localStorage.setItem(ACTIVITY_KEY, String(past));
+      host._lastActivityTs = 0;
+      expect(host._getLastActivity()).to.equal(past);
+      window.localStorage.removeItem(ACTIVITY_KEY);
+    });
+
+    test('_endServerSession sends credentials so a cross-origin /logout still invalidates the session', () => {
+      endSessionStub.restore();
+      const fetchStub = sinon.stub(globalThis, 'fetch').resolves({});
+      try {
+        host._endServerSession('https://server/nuxeo/logout');
+        expect(fetchStub).to.have.been.calledWithMatch('https://server/nuxeo/logout', { credentials: 'include' });
+      } finally {
+        fetchStub.restore();
+        // re-stub so the shared teardown's endSessionStub.restore() still has a valid wrapper
+        endSessionStub = sinon.stub(host, '_endServerSession').resolves({});
+      }
+    });
+
     test('logs out when the idle timer fires and reading shared activity throws', async () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
