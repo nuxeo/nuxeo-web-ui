@@ -127,6 +127,7 @@ export const NuxeoInactivityBehavior = {
   // Most recent activity across all tabs (shared timestamp), falling back to this tab's own when
   // localStorage is unavailable. Used to decide whether an elapsed timer should log out or re-arm.
   _getLastActivity() {
+    const now = Date.now();
     let shared = 0;
     try {
       shared = Number(globalThis.localStorage.getItem(INACTIVITY_ACTIVITY_KEY)) || 0;
@@ -134,7 +135,12 @@ export const NuxeoInactivityBehavior = {
       // localStorage unavailable; rely on this tab's local reference below.
       this._inactivityStorageError = e;
     }
-    return Math.max(shared, this._lastActivityTs || 0);
+    // Ignore timestamps in the future (e.g. recorded before a backward system-clock adjustment): a
+    // future value would clamp idle time to 0 and let the timer re-arm indefinitely, extending the
+    // inactivity window past the configured timeout — weakening this security timer (CWE-613). Falling
+    // back to 0 makes the tab look fully idle, keeping the timer bounded.
+    const candidates = [shared, this._lastActivityTs || 0].filter((ts) => ts <= now);
+    return candidates.length ? Math.max(...candidates) : 0;
   },
 
   // Another tab recorded activity — re-arm this (possibly idle) tab without re-broadcasting.
@@ -246,8 +252,12 @@ export const NuxeoInactivityBehavior = {
   // Background request that ends the server HTTP session (so the JSESSIONID is invalidated) without
   // following the redirect into the SPA. Isolated as a seam so tests can stub it without touching global
   // fetch. redirect:'manual' is enough: the server invalidates the session while handling GET /logout.
+  // credentials:'include' (not 'same-origin') so the session cookie is still sent when the Nuxeo server
+  // is on a different origin than Web UI; otherwise the /logout request would not invalidate the session
+  // (CWE-613). If CORS blocks the credentialed request the promise rejects and the caller's fallback
+  // navigation to /logout still terminates the session.
   _endServerSession(logoutUrl) {
-    return globalThis.fetch(logoutUrl, { credentials: 'same-origin', redirect: 'manual' });
+    return globalThis.fetch(logoutUrl, { credentials: 'include', redirect: 'manual' });
   },
 
   // Use replace() (not href) so the potentially sensitive page is not left as a navigable
