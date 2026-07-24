@@ -50,7 +50,8 @@ suite('nuxeo-document-list-item', () => {
     // cross-origin image cache poisoning under S3 direct download.
     test('requests its thumbnail with CORS enabled', () => {
       const thumbnail = element.shadowRoot.querySelector('.thumbnailContainer img');
-      expect(thumbnail.crossOrigin).to.equal('anonymous');
+      expect(thumbnail).to.be.ok;
+      expect(thumbnail.getAttribute('crossorigin')).to.equal('anonymous');
     });
   });
 
