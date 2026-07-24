@@ -230,14 +230,16 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       redirect.restore();
     });
 
-    test('does not log out on resume when activity was recent; re-arms instead', () => {
+    test('does not log out on resume when activity was recent; re-arms instead', async () => {
       getStub.withArgs('session.timeout', 60).returns(1);
       const redirect = sinon.stub(host, '_redirect');
       host._setupInactivityTimer();
       host._lastActivityTs = Date.now();
       window.localStorage.setItem(ACTIVITY_KEY, String(Date.now()));
       const before = scheduled.length;
-      host._checkInactivityOnResume();
+      // await so a regression into the async logout path (redirect on a later microtask) is caught
+      // deterministically instead of slipping past the not.called assertion.
+      await host._checkInactivityOnResume();
       expect(redirect).not.to.have.been.called;
       expect(scheduled.length).to.be.greaterThan(before); // re-armed for the remaining time
       redirect.restore();
