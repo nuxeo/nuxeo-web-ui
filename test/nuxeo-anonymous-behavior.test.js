@@ -85,19 +85,28 @@ suite('nuxeo-anonymous-behavior', () => {
 
   suite('_redirectAnonymousToLogin', () => {
     test('redirects through the logout endpoint preserving the requested URL', () => {
-      const redirect = sinon.stub(app, '_redirect');
-      app._redirectAnonymousToLogin();
-      expect(redirect.calledOnce).to.be.true;
-      const url = redirect.firstCall.args[0];
-      expect(url).to.contain('/logout?requestedUrl=');
-      // requestedUrl must be the context-relative path (no origin), url-encoded
-      const expected = encodeURIComponent(`${globalThis.location.pathname}${globalThis.location.search}`);
-      expect(url).to.contain(`requestedUrl=${expected}`);
-      // forceAnonymousLogin=true is required so the server renders the login form instead of silently
-      // re-authenticating the follow-up request as anonymous (which would loop back to the document)
-      expect(url).to.contain('&forceAnonymousLogin=true');
-      // the fragment (Web UI route) is re-appended so it survives the logout redirect chain
-      expect(url.endsWith(globalThis.location.hash)).to.be.true;
+      // Set a non-empty fragment (and restore it) so endsWith below actually verifies the fragment is
+      // appended — every string endsWith('') is true, so an empty hash would make the assertion vacuous.
+      const originalHash = globalThis.location.hash;
+      globalThis.location.hash = '#!/browse/default-domain';
+      try {
+        const redirect = sinon.stub(app, '_redirect');
+        app._redirectAnonymousToLogin();
+        expect(redirect.calledOnce).to.be.true;
+        const url = redirect.firstCall.args[0];
+        expect(url).to.contain('/logout?requestedUrl=');
+        // requestedUrl must be the context-relative path (no origin), url-encoded
+        const expected = encodeURIComponent(`${globalThis.location.pathname}${globalThis.location.search}`);
+        expect(url).to.contain(`requestedUrl=${expected}`);
+        // forceAnonymousLogin=true is required so the server renders the login form instead of silently
+        // re-authenticating the follow-up request as anonymous (which would loop back to the document)
+        expect(url).to.contain('&forceAnonymousLogin=true');
+        // the fragment (Web UI route) is re-appended so it survives the logout redirect chain
+        expect(globalThis.location.hash).to.not.equal('');
+        expect(url.endsWith(globalThis.location.hash)).to.be.true;
+      } finally {
+        globalThis.location.hash = originalHash;
+      }
     });
 
     test('stores the current URL fragment in a cookie for post-login restore', () => {
@@ -119,6 +128,14 @@ suite('nuxeo-anonymous-behavior', () => {
       app.$.nxcon.url = '/nuxeo';
       app._redirectAnonymousToLogin();
       expect(redirect.firstCall.args[0]).to.match(/^\/nuxeo\/logout\?/);
+    });
+
+    test('normalizes a trailing slash in the base URL', () => {
+      const redirect = sinon.stub(app, '_redirect');
+      app.$.nxcon.url = '/nuxeo/';
+      app._redirectAnonymousToLogin();
+      expect(redirect.firstCall.args[0]).to.match(/^\/nuxeo\/logout\?/);
+      expect(redirect.firstCall.args[0]).to.not.contain('//logout');
     });
 
     test('falls back to the element url when the connection has no URL', () => {
