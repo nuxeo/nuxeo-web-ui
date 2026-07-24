@@ -244,6 +244,78 @@ suite('ChartDataBehavior', () => {
       expect(chartWithResize.resize).to.have.been.calledOnce;
       expect(hiddenChart.resize).to.not.have.been.called;
     });
+
+    test('named event handlers invoke _resizeCharts with the correct trigger', () => {
+      behavior._resizeCharts = sinon.spy();
+      addEventListenerStub = sinon.stub(window, 'addEventListener');
+
+      Object.defineProperty(window, 'visualViewport', {
+        configurable: true,
+        writable: true,
+        value: {
+          addEventListener: sinon.stub(),
+          removeEventListener: sinon.stub(),
+        },
+      });
+
+      behavior.attached();
+
+      behavior._boundWindowResizeHandler();
+      behavior._boundVisualViewportResizeHandler();
+      behavior._boundVisualViewportScrollHandler();
+
+      const triggers = behavior._resizeCharts.args.map((a) => a[0]);
+      expect(triggers).to.include('window.resize');
+      expect(triggers).to.include('visualViewport.resize');
+      expect(triggers).to.include('visualViewport.scroll');
+
+      behavior.detached();
+    });
+
+    test('requestAnimationFrame callback skips falsy chart entries', () => {
+      const originalRaf = window.requestAnimationFrame;
+      window.requestAnimationFrame = (cb) => {
+        cb(performance.now());
+        return 1;
+      };
+
+      behavior.root = {
+        querySelectorAll: sinon.stub().returns([null]),
+      };
+      behavior.async = (fn) => fn();
+
+      expect(() => behavior._resizeCharts()).to.not.throw();
+
+      window.requestAnimationFrame = originalRaf;
+    });
+  });
+
+  suite('_logChartResizeDebug', () => {
+    let consoleDebugStub;
+
+    setup(() => {
+      consoleDebugStub = sinon.stub(console, 'debug');
+    });
+
+    teardown(() => {
+      consoleDebugStub.restore();
+    });
+
+    test('logs message with details when debug is enabled', () => {
+      behavior._chartDebugEnabled = true;
+      behavior._logChartResizeDebug('test.event', { key: 'value' });
+      expect(consoleDebugStub).to.have.been.calledOnce;
+      expect(consoleDebugStub.firstCall.args[0]).to.match(/\[nuxeo-chart-debug\].*test\.event/);
+      expect(consoleDebugStub.firstCall.args[1]).to.deep.equal({ key: 'value' });
+    });
+
+    test('logs message without details when debug is enabled', () => {
+      behavior._chartDebugEnabled = true;
+      behavior._logChartResizeDebug('test.event');
+      expect(consoleDebugStub).to.have.been.calledOnce;
+      expect(consoleDebugStub.firstCall.args[0]).to.match(/\[nuxeo-chart-debug\].*test\.event/);
+      expect(consoleDebugStub.firstCall.args).to.have.lengthOf(1);
+    });
   });
 
   suite('_labels', () => {
