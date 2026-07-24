@@ -90,6 +90,23 @@ suite('nuxeo-recent-documents', () => {
     });
   });
 
+  suite('add', () => {
+    test('should not throw when storage leaves documents null', () => {
+      element.documents = null;
+      sinon.stub(element.$.storage, 'add');
+      expect(() => element.add({ uid: '1', type: 'File' })).to.not.throw();
+    });
+
+    test('should trim the list to maxSize after a document is added', () => {
+      element.maxSize = 2;
+      element.documents = [{ uid: '1' }, { uid: '2' }];
+      // simulate the real storage side effect of prepending the added document
+      sinon.stub(element.$.storage, 'add').callsFake((doc) => element.unshift('documents', doc));
+      element.add({ uid: '4' });
+      expect(element.documents.map((d) => d.uid)).to.deep.equal(['4', '1']);
+    });
+  });
+
   suite('_currentDocumentChanged', () => {
     test('should not process trashed documents', () => {
       element.isTrashed.returns(true);
