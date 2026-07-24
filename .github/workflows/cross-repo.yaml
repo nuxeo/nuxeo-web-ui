@@ -48,11 +48,11 @@ on:
 
 # Cancel a superseded in-flight run for the same source branch when a newer commit is dispatched, so
 # rapid pushes don't stack multiple ~1h ftest runs (previously done by manually cancelling old runs).
-# Keyed by BOTH the target base branch (github.ref, e.g. lts-2025 vs maintenance-3.1.x) and the
-# dispatching source branch, so parallel runs for different bases never cancel each other even when
-# they share the same branch_name.
+# Keyed by BOTH the target base branch (github.ref_name, e.g. lts-2025 vs maintenance-3.1.x — the bare
+# name, without the refs/heads/ prefix) and the dispatching source branch, so parallel runs for
+# different bases never cancel each other even when they share the same branch_name.
 concurrency:
-  group: cross-repo-${{ github.ref }}-${{ github.event.inputs.branch_name }}
+  group: cross-repo-${{ github.ref_name }}-${{ github.event.inputs.branch_name }}
   cancel-in-progress: true
 
 env:
