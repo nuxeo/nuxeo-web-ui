@@ -77,6 +77,16 @@ suite('nuxeo-workflow-graph', () => {
       const result = element._transitionOverlay(transition);
       expect(result).to.be.an('array');
     });
+
+    test('should translate the transition label via i18n (ELEMENTS-1595)', () => {
+      // Custom transitions expose an i18n key (e.g. `command.remove`) rather than a resolved
+      // string; the overlay must display the translation, not the raw key.
+      element.i18n.withArgs('command.remove').returns('Remove');
+      const result = element._transitionOverlay({ label: 'command.remove', path: '1-2' });
+      const labelOverlay = result.find((overlay) => overlay[0] === 'Label');
+      expect(element.i18n).to.have.been.calledWith('command.remove');
+      expect(labelOverlay[1].label).to.equal('<span title="Remove">Remove</span>');
+    });
   });
 
   suite('show', () => {
