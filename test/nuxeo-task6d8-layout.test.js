@@ -97,6 +97,37 @@ suite('nuxeo-task6d8-layout', () => {
       element.$.user.get.restore();
     });
 
+    test('should de-duplicate repeated usernames before resolving', async () => {
+      const entity = { 'entity-type': 'user', id: 'jdoe', properties: { firstName: 'Jane', lastName: 'Doe' } };
+      sinon.stub(element.$.user, 'get').resolves(entity);
+      await element._fetchUserParticipants(['user:jdoe', 'user:jdoe', 'user:jdoe']);
+      // Only one lookup and one resolved entry despite the duplicates.
+      expect(element.$.user.get).to.have.been.calledOnce;
+      expect(element._resolvedUserParticipants).to.deep.equal([entity]);
+      element.$.user.get.restore();
+    });
+
+    test('should hide participants while loading and reveal once resolved', async () => {
+      let resolveGet;
+      sinon.stub(element.$.user, 'get').returns(
+        new Promise((resolve) => {
+          resolveGet = resolve;
+        }),
+      );
+      const inFlight = element._fetchUserParticipants(['user:jdoe']);
+      await new Promise((r) => setTimeout(r, 0)); // let the resolve start
+      // While loading, participants stay hidden.
+      expect(element._participantsLoading).to.be.true;
+      expect(element._showUserParticipants(element._resolvedUserParticipants, element._participantsLoading)).to.be
+        .false;
+      resolveGet({ 'entity-type': 'user', id: 'jdoe' });
+      await inFlight;
+      // Once resolved, loading clears and participants are shown.
+      expect(element._participantsLoading).to.be.false;
+      expect(element._showUserParticipants(element._resolvedUserParticipants, element._participantsLoading)).to.be.true;
+      element.$.user.get.restore();
+    });
+
     test('should URL-encode usernames in the request path', async () => {
       const entity = { 'entity-type': 'user', id: 'a b/c' };
       const getStub = sinon.stub(element.$.user, 'get').callsFake(() => {
@@ -219,6 +250,21 @@ suite('nuxeo-task6d8-layout', () => {
 
     test('_getActorsByType ignores non-string entries without throwing', () => {
       expect(element._getActorsByType([null, 42, { x: 1 }, 'user:jdoe'], 'user')).to.deep.equal(['user:jdoe']);
+    });
+  });
+
+  suite('_showUserParticipants', () => {
+    test('returns false while loading', () => {
+      expect(element._showUserParticipants([{ id: 'jdoe' }], true)).to.be.false;
+    });
+
+    test('returns false when there are no resolved participants', () => {
+      expect(element._showUserParticipants([], false)).to.be.false;
+      expect(element._showUserParticipants(undefined, false)).to.be.false;
+    });
+
+    test('returns true when resolved and not loading', () => {
+      expect(element._showUserParticipants([{ id: 'jdoe' }], false)).to.be.true;
     });
   });
 });

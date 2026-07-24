@@ -37,7 +37,7 @@ limitations under the License.
       <template is="dom-if" if="[[_hasActorType(task.variables.participants, 'group')]]">
         <nuxeo-tags type="group" items="[[_getActorsByType(task.variables.participants, 'group')]]"></nuxeo-tags>
       </template>
-      <template is="dom-if" if="[[_resolvedUserParticipants.length]]">
+      <template is="dom-if" if="[[_showUserParticipants(_resolvedUserParticipants, _participantsLoading)]]">
         <nuxeo-tags type="user" items="[[_resolvedUserParticipants]]"></nuxeo-tags>
       </template>
     </div>
@@ -80,6 +80,11 @@ limitations under the License.
           type: Number,
           value: 0,
         },
+
+        _participantsLoading: {
+          type: Boolean,
+          value: false,
+        },
       },
 
       observers: ['_fetchUserParticipants(task.variables.participants)'],
@@ -89,16 +94,25 @@ limitations under the License.
           // Bump the request id so any in-flight resolve is invalidated and cannot
           // repopulate the participants after this reset.
           this._participantsRequestId += 1;
+          this._participantsLoading = false;
           this._resolvedUserParticipants = [];
           return undefined;
         }
-        const userActors = participants.filter((actor) => typeof actor === 'string' && actor.startsWith('user:'));
+        // De-duplicate while preserving order so we don't issue redundant /user lookups
+        // or render duplicate participant tags.
+        const userActors = [
+          ...new Set(participants.filter((actor) => typeof actor === 'string' && actor.startsWith('user:'))),
+        ];
         if (!userActors.length) {
           this._participantsRequestId += 1;
+          this._participantsLoading = false;
           this._resolvedUserParticipants = [];
           return undefined;
         }
         const requestId = ++this._participantsRequestId;
+        // Hide the (possibly stale) participants until the new resolve completes so a task
+        // switch never shows the previous task's participants.
+        this._participantsLoading = true;
         // Serialize invocations: the observer can re-fire (task switch) while a previous fetch
         // is still in flight, and every lookup mutates the `path` of a single shared
         // <nuxeo-resource> (this.$.user). Chaining runs sequentially prevents concurrent path
@@ -127,13 +141,16 @@ limitations under the License.
         }
         if (requestId !== this._participantsRequestId) return;
         this._resolvedUserParticipants = resolved;
+        this._participantsLoading = false;
+      },
+
+      _showUserParticipants(resolved, loading) {
+        return !loading && !!(resolved && resolved.length);
       },
 
       _hasActorType(actors, type) {
         return (
-          actors &&
-          Array.isArray(actors) &&
-          actors.findIndex((actor) => typeof actor === 'string' && actor.startsWith(type)) >= 0
+          actors && Array.isArray(actors) && actors.some((actor) => typeof actor === 'string' && actor.startsWith(type))
         );
       },
 
