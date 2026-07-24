@@ -261,7 +261,7 @@ suite('nuxeo-document-create', () => {
       sinon.stub(element, 'notify');
       await element._create();
       expect(element.notify).to.have.been.calledOnce;
-      expect(element.notify.firstCall.args[0].message).to.equal('documentCreationForm.requiredFieldsError');
+      expect(element.notify.firstCall.args[0].message).to.equal('documentForm.requiredFieldsError');
       expect(element.creating).to.be.false;
     });
 
