@@ -317,12 +317,17 @@ Polymer({
   },
 
   _transitionOverlay(transition) {
+    // Transition labels come from the `/graph` REST endpoint exactly as configured in Studio.
+    // Built-in transitions expose a human-readable label, but custom transitions expose an i18n
+    // key (e.g. `command.remove`) that the platform does not resolve, so translate it here like
+    // every other Web UI label. `i18n` falls back to the key itself when no translation exists.
+    const label = this.i18n(transition.label);
     return [
       ['Arrow', { location: 0.8 }, { foldback: 0.9, fill: '#92e1aa', width: 14 }],
       [
         'Label',
         {
-          label: `<span title="${transition.label}">${transition.label}</span>`,
+          label: `<span title="${label}">${label}</span>`,
           cssClass: 'workflow_connection_label',
           location: 0.6,
         },
