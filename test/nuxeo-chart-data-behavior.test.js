@@ -90,18 +90,26 @@ suite('ChartDataBehavior', () => {
       }
 
       behavior.attached();
-      const boundResizeCharts = behavior._boundResizeCharts;
+      const boundWindowResizeHandler = behavior._boundWindowResizeHandler;
+      const boundVisualViewportResizeHandler = behavior._boundVisualViewportResizeHandler;
+      const boundVisualViewportScrollHandler = behavior._boundVisualViewportScrollHandler;
 
-      expect(addEventListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
-      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
-      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('scroll', boundResizeCharts);
+      expect(addEventListenerStub).to.have.been.calledWithExactly('resize', boundWindowResizeHandler);
+      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('resize', boundVisualViewportResizeHandler);
+      expect(visualViewportAddListenerStub).to.have.been.calledWithExactly('scroll', boundVisualViewportScrollHandler);
       expect(behavior._resizeCharts).to.have.been.called;
 
       behavior.detached();
 
-      expect(removeEventListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
-      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly('resize', boundResizeCharts);
-      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly('scroll', boundResizeCharts);
+      expect(removeEventListenerStub).to.have.been.calledWithExactly('resize', boundWindowResizeHandler);
+      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly(
+        'resize',
+        boundVisualViewportResizeHandler,
+      );
+      expect(visualViewportRemoveListenerStub).to.have.been.calledWithExactly(
+        'scroll',
+        boundVisualViewportScrollHandler,
+      );
       expect(behavior._boundResizeCharts).to.be.null;
     });
 
