@@ -62,10 +62,15 @@ const settle = () => new Promise((resolve) => window.setTimeout(resolve));
 suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
   let host;
   let endSessionStub;
+  let keepAliveStub;
 
   setup(async () => {
+    // The host's ready() arms the inactivity timer and fires an immediate keep-alive via
+    // <nuxeo-resource>.execute() DURING fixture creation. Stub execute on the prototype BEFORE the fixture
+    // so that first keep-alive can never hit the network — stubbing the instance after fixture() resolves
+    // would be too late (the initial request would already have gone out). WEBUI-1987: no real keep-alive.
+    keepAliveStub = sinon.stub(customElements.get('nuxeo-resource').prototype, 'execute').resolves({});
     host = await fixture(html`<nuxeo-inactivity-test-host></nuxeo-inactivity-test-host>`);
-    sinon.stub(host.$.keepAlive, 'execute').resolves({}); // WEBUI-1987: no real session keep-alive in tests
     // The logout flow ends the session with a background GET to /logout before navigating; stub that seam
     // so tests never hit the network and the timeout-login redirect (rather than the fallback) is exercised.
     endSessionStub = sinon.stub(host, '_endServerSession').resolves({});
@@ -74,6 +79,7 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
 
   teardown(() => {
     endSessionStub.restore();
+    keepAliveStub.restore();
   });
 
   suite('inactivity timer', () => {

@@ -24,6 +24,12 @@ suite('nuxeo-app', () => {
   let app;
 
   setup(async () => {
+    // nuxeo-app.ready() wires the inactivity timer, which fires an immediate keep-alive via
+    // <nuxeo-resource id="keepAlive">.execute() DURING fixture creation — before any instance stub below
+    // could be installed. Neutralize the keep-alive on the prototype BEFORE the fixture so the initial
+    // arm never attempts a real request (WEBUI-1987: no real session keep-alive in tests). Auto-restored
+    // by the global sinon teardown.
+    sinon.stub(customElements.get('nuxeo-app').prototype, '_maybeKeepServerSessionAlive');
     app = await fixture(html`<nuxeo-app></nuxeo-app>`);
     sinon.stub(app, 'i18n').callsFake((key) => key);
     if (app.$ && app.$.userWorkspace) {
