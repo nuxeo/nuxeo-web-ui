@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-data-grid/nuxeo-document-grid-thumbnail.js';
 
 suite('nuxeo-document-grid-thumbnail', () => {
@@ -166,13 +166,59 @@ suite('nuxeo-document-grid-thumbnail', () => {
     });
   });
 
-  suite('_computeTitle', () => {
-    test('includes title and i18n select key', () => {
-      expect(element._computeTitle({ title: 'Hello ' })).to.equal('Hello command.select');
+  suite('WEBUI-1736 screen reader', () => {
+    test('sets the host accessible name when doc changes to a titled document', async () => {
+      element.doc = { uid: 'd1', title: 'My Document' };
+      await flush();
+      expect(element.getAttribute('aria-label')).to.equal('My Document');
     });
 
-    test('handles missing doc title', () => {
-      expect(element._computeTitle({})).to.equal('undefinedcommand.select');
+    test('marks the host as a single link so the title is announced once, not the whole subtree', async () => {
+      element.doc = { uid: 'd1', title: 'My Document' };
+      await flush();
+      expect(element.getAttribute('role')).to.equal('link');
+    });
+
+    test('_updateAriaLabel removes the host role and aria-label when there is no document', () => {
+      element.setAttribute('role', 'link');
+      element.setAttribute('aria-label', 'stale');
+      element._updateAriaLabel(undefined);
+      expect(element.hasAttribute('aria-label')).to.be.false;
+      expect(element.hasAttribute('role')).to.be.false;
+    });
+
+    test('_updateAriaLabel removes the host role and aria-label when the document has no title', () => {
+      element.setAttribute('role', 'link');
+      element.setAttribute('aria-label', 'stale');
+      element._updateAriaLabel({ uid: 'd1' });
+      expect(element.hasAttribute('aria-label')).to.be.false;
+      expect(element.hasAttribute('role')).to.be.false;
+    });
+
+    suite('rendered markup', () => {
+      setup(async () => {
+        sinon.stub(element, 'urlFor').returns('/doc/doc-1');
+        element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
+        await flush();
+      });
+
+      test('title link exposes only the document title as its accessible name', () => {
+        const link = element.shadowRoot.querySelector('a.title');
+        expect(link, 'a.title should be stamped').to.exist;
+        expect(link.getAttribute('aria-label')).to.equal('My Document');
+      });
+
+      test('tooltip is hidden from assistive technology to avoid a duplicate title announcement', () => {
+        const tooltip = element.shadowRoot.querySelector('nuxeo-tooltip');
+        expect(tooltip, 'nuxeo-tooltip should be stamped').to.exist;
+        expect(tooltip.getAttribute('aria-hidden')).to.equal('true');
+      });
+
+      test('select control label is the select action only, without the document title', () => {
+        const button = element.shadowRoot.querySelector('.select paper-icon-button');
+        expect(button, 'select paper-icon-button should be stamped').to.exist;
+        expect(button.getAttribute('title')).to.equal('command.select');
+      });
     });
   });
 
