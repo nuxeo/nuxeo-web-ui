@@ -279,6 +279,7 @@ suite('ChartDataBehavior', () => {
         return 1;
       };
 
+      behavior._chartDebugEnabled = true;
       behavior.root = {
         querySelectorAll: sinon.stub().returns([null]),
       };
@@ -287,6 +288,16 @@ suite('ChartDataBehavior', () => {
       expect(() => behavior._resizeCharts()).to.not.throw();
 
       window.requestAnimationFrame = originalRaf;
+    });
+
+    test('collects before/afterSync snapshots only when debug is enabled', () => {
+      const chart = { resize: sinon.spy(), offsetWidth: 100, offsetHeight: 50 };
+      behavior._chartDebugEnabled = true;
+      behavior.root = { querySelectorAll: sinon.stub().returns([chart]) };
+      behavior.async = (fn) => fn();
+
+      expect(() => behavior._resizeCharts()).to.not.throw();
+      expect(chart.resize).to.have.been.calledOnce;
     });
   });
 

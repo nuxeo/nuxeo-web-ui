@@ -135,35 +135,38 @@ export const ChartDataBehavior = {
           });
           return;
         }
-        const before = this._collectChartResizeSnapshot(chart);
-        this._logChartResizeDebug('chart.resize.before', {
-          trigger,
-          chartIndex,
-          chartTag: chart.tagName,
-          snapshot: before,
-        });
+        if (this._chartDebugEnabled) {
+          this._logChartResizeDebug('chart.resize.before', {
+            trigger,
+            chartIndex,
+            chartTag: chart.tagName,
+            snapshot: this._collectChartResizeSnapshot(chart),
+          });
+        }
         chart.resize();
-        const afterSync = this._collectChartResizeSnapshot(chart);
-        this._logChartResizeDebug('chart.resize.afterSync', {
-          trigger,
-          chartIndex,
-          chartTag: chart.tagName,
-          snapshot: afterSync,
-        });
+        if (this._chartDebugEnabled) {
+          this._logChartResizeDebug('chart.resize.afterSync', {
+            trigger,
+            chartIndex,
+            chartTag: chart.tagName,
+            snapshot: this._collectChartResizeSnapshot(chart),
+          });
+        }
       });
 
-      requestAnimationFrame(() => {
-        charts.forEach((chart, chartIndex) => {
-          if (chart) {
-            this._logChartResizeDebug('chart.resize.afterRaf', {
-              trigger,
-              chartIndex,
-              chartTag: chart.tagName,
-              snapshot: this._collectChartResizeSnapshot(chart),
-            });
-          }
+      if (this._chartDebugEnabled) {
+        requestAnimationFrame(() => {
+          charts.forEach((chart) => {
+            if (chart) {
+              this._logChartResizeDebug('chart.resize.afterRaf', {
+                trigger,
+                chartTag: chart.tagName,
+                snapshot: this._collectChartResizeSnapshot(chart),
+              });
+            }
+          });
         });
-      });
+      }
     }, 1);
   },
 
