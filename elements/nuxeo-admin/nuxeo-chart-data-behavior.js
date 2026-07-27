@@ -45,30 +45,34 @@ export const ChartDataBehavior = {
     }
     if (typeof ResizeObserver !== 'undefined' && this instanceof Element) {
       this._chartResizeObserver = new ResizeObserver((entries) => {
-        this._logChartResizeDebug('ResizeObserver.callback', {
-          entries: entries.map((entry) => {
-            return {
-              target: entry.target?.tagName,
-              width: entry.contentRect?.width,
-              height: entry.contentRect?.height,
-            };
-          }),
-        });
+        if (this._chartDebugEnabled) {
+          this._logChartResizeDebug('ResizeObserver.callback', {
+            entries: entries.map((entry) => {
+              return {
+                target: entry.target?.tagName,
+                width: entry.contentRect?.width,
+                height: entry.contentRect?.height,
+              };
+            }),
+          });
+        }
         this._boundResizeCharts('ResizeObserver.callback');
       });
       this._chartResizeObserver.observe(this);
     }
-    this._zoomCheckInterval = setInterval(() => {
-      if (window.devicePixelRatio !== this._lastDevicePixelRatio) {
-        const previousDevicePixelRatio = this._lastDevicePixelRatio;
-        this._lastDevicePixelRatio = window.devicePixelRatio;
-        this._logChartResizeDebug('devicePixelRatio.changed', {
-          previousDevicePixelRatio,
-          currentDevicePixelRatio: this._lastDevicePixelRatio,
-        });
-        this._resizeCharts('devicePixelRatio.changed');
-      }
-    }, 250);
+    if (!window.visualViewport) {
+      this._zoomCheckInterval = setInterval(() => {
+        if (window.devicePixelRatio !== this._lastDevicePixelRatio) {
+          const previousDevicePixelRatio = this._lastDevicePixelRatio;
+          this._lastDevicePixelRatio = window.devicePixelRatio;
+          this._logChartResizeDebug('devicePixelRatio.changed', {
+            previousDevicePixelRatio,
+            currentDevicePixelRatio: this._lastDevicePixelRatio,
+          });
+          this._resizeCharts('devicePixelRatio.changed');
+        }
+      }, 250);
+    }
     this._resizeCharts('attached');
   },
 
