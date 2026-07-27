@@ -45,30 +45,34 @@ export const ChartDataBehavior = {
     }
     if (typeof ResizeObserver !== 'undefined' && this instanceof Element) {
       this._chartResizeObserver = new ResizeObserver((entries) => {
-        this._logChartResizeDebug('ResizeObserver.callback', {
-          entries: entries.map((entry) => {
-            return {
-              target: entry.target?.tagName,
-              width: entry.contentRect?.width,
-              height: entry.contentRect?.height,
-            };
-          }),
-        });
+        if (this._chartDebugEnabled) {
+          this._logChartResizeDebug('ResizeObserver.callback', {
+            entries: entries.map((entry) => {
+              return {
+                target: entry.target?.tagName,
+                width: entry.contentRect?.width,
+                height: entry.contentRect?.height,
+              };
+            }),
+          });
+        }
         this._boundResizeCharts('ResizeObserver.callback');
       });
       this._chartResizeObserver.observe(this);
     }
-    this._zoomCheckInterval = setInterval(() => {
-      if (window.devicePixelRatio !== this._lastDevicePixelRatio) {
-        const previousDevicePixelRatio = this._lastDevicePixelRatio;
-        this._lastDevicePixelRatio = window.devicePixelRatio;
-        this._logChartResizeDebug('devicePixelRatio.changed', {
-          previousDevicePixelRatio,
-          currentDevicePixelRatio: this._lastDevicePixelRatio,
-        });
-        this._resizeCharts('devicePixelRatio.changed');
-      }
-    }, 250);
+    if (!window.visualViewport) {
+      this._zoomCheckInterval = setInterval(() => {
+        if (window.devicePixelRatio !== this._lastDevicePixelRatio) {
+          const previousDevicePixelRatio = this._lastDevicePixelRatio;
+          this._lastDevicePixelRatio = window.devicePixelRatio;
+          this._logChartResizeDebug('devicePixelRatio.changed', {
+            previousDevicePixelRatio,
+            currentDevicePixelRatio: this._lastDevicePixelRatio,
+          });
+          this._resizeCharts('devicePixelRatio.changed');
+        }
+      }, 250);
+    }
     this._resizeCharts('attached');
   },
 
@@ -135,35 +139,38 @@ export const ChartDataBehavior = {
           });
           return;
         }
-        const before = this._collectChartResizeSnapshot(chart);
-        this._logChartResizeDebug('chart.resize.before', {
-          trigger,
-          chartIndex,
-          chartTag: chart.tagName,
-          snapshot: before,
-        });
+        if (this._chartDebugEnabled) {
+          this._logChartResizeDebug('chart.resize.before', {
+            trigger,
+            chartIndex,
+            chartTag: chart.tagName,
+            snapshot: this._collectChartResizeSnapshot(chart),
+          });
+        }
         chart.resize();
-        const afterSync = this._collectChartResizeSnapshot(chart);
-        this._logChartResizeDebug('chart.resize.afterSync', {
-          trigger,
-          chartIndex,
-          chartTag: chart.tagName,
-          snapshot: afterSync,
-        });
+        if (this._chartDebugEnabled) {
+          this._logChartResizeDebug('chart.resize.afterSync', {
+            trigger,
+            chartIndex,
+            chartTag: chart.tagName,
+            snapshot: this._collectChartResizeSnapshot(chart),
+          });
+        }
       });
 
-      requestAnimationFrame(() => {
-        charts.forEach((chart, chartIndex) => {
-          if (chart) {
-            this._logChartResizeDebug('chart.resize.afterRaf', {
-              trigger,
-              chartIndex,
-              chartTag: chart.tagName,
-              snapshot: this._collectChartResizeSnapshot(chart),
-            });
-          }
+      if (this._chartDebugEnabled) {
+        requestAnimationFrame(() => {
+          charts.forEach((chart) => {
+            if (chart) {
+              this._logChartResizeDebug('chart.resize.afterRaf', {
+                trigger,
+                chartTag: chart.tagName,
+                snapshot: this._collectChartResizeSnapshot(chart),
+              });
+            }
+          });
         });
-      });
+      }
     }, 1);
   },
 
