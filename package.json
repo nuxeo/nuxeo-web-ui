@@ -13,7 +13,7 @@
     "workboxCli": "7.4.1"
   },
   "overrides": {
-    "ws": "8.20.1",
+    "ws": "8.21.0",
     "tar-fs": "^3.0.9",
     "marked": "^4.0.17",
     "serialize-javascript": "^7.0.5",
