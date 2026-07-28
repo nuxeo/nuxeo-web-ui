@@ -274,13 +274,19 @@ Polymer({
    * (`"my file.pdf"` would be saved as `_my file.pdf_`).
    */
   _filenameFromContentDisposition(contentDisposition) {
-    const extended = contentDisposition.match(/filename\*\s*=\s*[^']*'[^']*'([^;\n]*)/i);
+    // The quoted and unquoted forms are matched separately so that no quantifier can consume the
+    // same character as the one after it, which keeps matching linear on long headers.
+    const extended = contentDisposition.match(/filename\*[ \t]*=[^';\n]*'[^';\n]*'([^;\n]*)/i);
     if (extended) {
       return decodeURIComponent(extended[1].trim());
     }
-    const plain = contentDisposition.match(/filename\s*=\s*("([^"]*)"|[^;\n]*)/i);
+    const quoted = contentDisposition.match(/filename[ \t]*=[ \t]*"([^"]*)"/i);
+    if (quoted) {
+      return decodeURI(quoted[1]);
+    }
+    const plain = contentDisposition.match(/filename[ \t]*=([^;\n]*)/i);
     if (plain) {
-      return decodeURI((plain[2] !== undefined ? plain[2] : plain[1]).trim());
+      return decodeURI(plain[1].trim());
     }
     return '';
   },
