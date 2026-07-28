@@ -264,13 +264,31 @@ Polymer({
     });
   },
 
+  /**
+   * Extracts the filename from a `Content-Disposition` header value.
+   *
+   * The RFC 5987 `filename*` form is preferred because it is percent-encoded and unquoted. The
+   * plain `filename` form is only a fallback, and its surrounding double quotes are stripped:
+   * servers quote the value whenever it is not a bare token (spaces, non-ASCII), and browsers
+   * replace those quotes with underscores when they end up in an anchor's `download` attribute
+   * (`"my file.pdf"` would be saved as `_my file.pdf_`).
+   */
+  _filenameFromContentDisposition(contentDisposition) {
+    const extended = contentDisposition.match(/filename\*\s*=\s*[^']*'[^']*'([^;\n]*)/i);
+    if (extended) {
+      return decodeURIComponent(extended[1].trim());
+    }
+    const plain = contentDisposition.match(/filename\s*=\s*("([^"]*)"|[^;\n]*)/i);
+    if (plain) {
+      return decodeURI((plain[2] !== undefined ? plain[2] : plain[1]).trim());
+    }
+    return '';
+  },
+
   _download(response) {
     const contentDisposition = response.headers.get('Content-Disposition');
     if (contentDisposition) {
-      const filenameMatches = contentDisposition
-        .match(/filename[^;=\n]*=([^;\n]*''([^;\n]*)|[^;\n]*)/)
-        .filter((match) => !!match);
-      const filename = decodeURI(filenameMatches[filenameMatches.length - 1]);
+      const filename = this._filenameFromContentDisposition(contentDisposition);
       return response.blob().then((blob) => {
         if (navigator.msSaveBlob) {
           // handle IE11 and Edge
