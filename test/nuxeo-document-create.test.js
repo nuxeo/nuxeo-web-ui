@@ -256,20 +256,41 @@ suite('nuxeo-document-create', () => {
       element.$['document-create'].$.layout = innerLayout;
     });
 
-    test('should notify the user with a reason on validation failure', async () => {
+    test('should show an inline required-fields error on validation failure', async () => {
       innerLayout.validate.resolves(false);
-      sinon.stub(element, 'notify');
       await element._create();
-      expect(element.notify).to.have.been.calledOnce;
-      expect(element.notify.firstCall.args[0].message).to.equal('documentForm.requiredFieldsError');
+      // Inline message (not a toast) because the create form is a modal and the toast renders behind it.
+      expect(element._requiredFieldsError).to.be.true;
       expect(element.creating).to.be.false;
+    });
+
+    test('should render the inline required-fields message in the dialog on validation failure', async () => {
+      element.stage = 'edit';
+      innerLayout.validate.resolves(false);
+      await element._create();
+      await flush();
+      const msg = element.shadowRoot.querySelector('.validationError');
+      expect(msg).to.be.ok;
+      expect(msg.hasAttribute('hidden')).to.be.false;
+      expect(msg.getAttribute('role')).to.equal('alert');
+    });
+
+    test('should clear the inline error when a new create attempt starts', async () => {
+      element._requiredFieldsError = true;
+      let flagAtValidate;
+      innerLayout.validate = sinon.stub().callsFake(() => {
+        flagAtValidate = element._requiredFieldsError;
+        return Promise.resolve(false);
+      });
+      await element._create();
+      // The flag is reset before validation runs, so a fresh attempt never shows a stale error.
+      expect(flagAtValidate).to.be.false;
     });
 
     test('should scroll to and focus the invalid field on validation failure', async () => {
       const invalidField = { invalid: true, scrollIntoView: sinon.spy(), focus: sinon.spy() };
       innerLayout.validate.resolves(false);
       innerLayout._getValidatableElements.returns([{ invalid: false }, invalidField]);
-      sinon.stub(element, 'notify');
       await element._create();
       expect(invalidField.scrollIntoView).to.have.been.calledOnce;
       expect(invalidField.focus).to.have.been.calledOnce;
