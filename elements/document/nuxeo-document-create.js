@@ -149,6 +149,14 @@ Polymer({
         padding-left: 8px;
       }
 
+      /* Inline validation message shown in the button bar so the reason for a blocked create is
+         visible inside the modal dialog (the app toast renders behind it). See WEBUI-180. */
+      .validationError {
+        margin-left: 12px;
+        color: var(--nuxeo-warn-text, #e53935);
+        font-size: 0.9rem;
+      }
+
       .suggester {
         background-color: var(--input-background, rgba(0, 0, 0, 0.05));
         padding: 8px 16px;
@@ -259,9 +267,12 @@ Polymer({
           </paper-dialog-scrollable>
         </div>
         <div class="buttons horizontal end-justified layout">
-          <div class="flex start-justified">
+          <div class="flex start-justified horizontal layout center">
             <paper-button class="secondary" noink dialog-dismiss on-tap="_cancel" disabled$="[[creating]]"
               >[[i18n('command.cancel')]]</paper-button
+            >
+            <span class="validationError" role="alert" aria-live="assertive" hidden$="[[!_requiredFieldsError]]"
+              >[[i18n('documentForm.requiredFieldsError')]]</span
             >
           </div>
           <paper-button class="secondary" noink on-tap="_back" disabled$="[[creating]]"
@@ -312,6 +323,13 @@ Polymer({
       type: String,
       computed: '_computeDocumentTypeOrder()',
     },
+
+    // Whether the last create attempt was blocked by required-field validation. Drives the inline
+    // message in the dialog button bar so the reason is visible within the modal (WEBUI-180).
+    _requiredFieldsError: {
+      type: Boolean,
+      value: false,
+    },
   },
 
   observers: ['_visibleOnStage(visible,stage)'],
@@ -357,6 +375,7 @@ Polymer({
       return;
     }
     const innerLayout = this.$['document-create'].$.layout;
+    this._requiredFieldsError = false;
     this._setCreating(true);
     const valid = await innerLayout.validate();
     if (!valid) {
@@ -366,10 +385,12 @@ Polymer({
         invalidField.scrollIntoView();
         invalidField.focus();
       }
-      // Surface a reason for the blocked submission. Some required widgets (e.g. multivalued
-      // fields) only toggle their invalid state without rendering a per-field message, so
-      // without this the document would silently fail to create (WEBUI-180).
-      this.notify({ message: this.i18n('documentForm.requiredFieldsError') });
+      // Surface a reason for the blocked submission inside the dialog. Some required widgets (e.g.
+      // multivalued fields) only toggle their invalid state without rendering a per-field message,
+      // so without this the document would silently fail to create (WEBUI-180). An inline message is
+      // used here (rather than a toast) because the create form is a modal and the app toast renders
+      // behind it.
+      this._requiredFieldsError = true;
       this._setCreating(false);
       return;
     }
@@ -411,6 +432,7 @@ Polymer({
   _clear() {
     this.stage = 'choose';
     this.selectedDocType = {};
+    this._requiredFieldsError = false;
   },
 
   _visibleOnStage() {
