@@ -266,6 +266,21 @@ suite('nuxeo-render-template-button', () => {
         expected: 'draft; final.pdf',
       },
       {
+        name: 'falls back to the plain form when filename* is malformed',
+        header: `attachment; filename="my file.pdf"; filename*=UTF-8''my%file.pdf`,
+        expected: 'my file.pdf',
+      },
+      {
+        name: 'keeps a malformed filename* raw when it is the only form sent',
+        header: `attachment; filename*=UTF-8''my%file.pdf`,
+        expected: 'my%file.pdf',
+      },
+      {
+        name: 'keeps a malformed plain filename raw',
+        header: 'attachment; filename="my%file.pdf"',
+        expected: 'my%file.pdf',
+      },
+      {
         name: 'returns an empty name when the header carries no filename',
         header: 'attachment',
         expected: '',
