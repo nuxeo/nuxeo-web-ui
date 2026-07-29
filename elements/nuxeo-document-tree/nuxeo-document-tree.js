@@ -149,8 +149,16 @@ Polymer({
         min-width: 1.3em;
       }
 
-      .parent {
+      /* Ancestor names wrap onto up to two lines before being clipped, so documents whose
+         names only differ near the end stay distinguishable in a narrow drawer. */
+      .parents .parent {
         padding: 0.12em 0 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: normal;
+        overflow-wrap: break-word;
+        line-height: 1.3em;
       }
 
       paper-spinner {
@@ -197,12 +205,17 @@ Polymer({
 
     <div class="content" role="tree">
       <div class="parents" hidden$="[[_noPermission]]">
-        <a href$="[[urlFor('document', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
+        <a
+          href$="[[urlFor('document', '/')]]"
+          class="layout horizontal"
+          hidden$="[[_hideRoot(document)]]"
+          title$="[[i18n('browse.root')]]"
+        >
           <span aria-hidden="true"><iron-icon icon="[[toggleChevronIcon]]"></iron-icon></span>
           <span class="parent">[[i18n('browse.root')]]</span>
         </a>
         <template is="dom-repeat" items="[[parents]]" as="item">
-          <a href$="[[urlFor(item)]]">
+          <a href$="[[urlFor(item)]]" title$="[[item.title]]">
             <span><iron-icon icon="[[toggleChevronIcon]]"></iron-icon></span>
             <span class="parent">[[item.title]]</span>
           </a>
@@ -228,7 +241,7 @@ Polymer({
               </template>
             </template>
             <span class="node-name flex">
-              <a href$="[[urlFor(item)]]">[[_title(item)]]</a>
+              <a href$="[[urlFor(item)]]" title$="[[_title(item)]]">[[_title(item)]]</a>
             </span>
           </div>
         </template>
