@@ -160,7 +160,7 @@ export const NuxeoCreateButtonCollisionBehavior = {
 
   /** The tray box as it would sit with no shift applied, or null while it is not rendered. */
   _trayRestingRect() {
-    const tray = this.$ && this.$.tray;
+    const tray = this.$?.tray;
     if (!tray) {
       return null;
     }
@@ -211,7 +211,8 @@ export const NuxeoCreateButtonCollisionBehavior = {
       const x = resting.left + 1 + (width * column) / steps;
       for (let row = 0; row <= steps; row += 1) {
         const y = resting.top + 1 + (height * row) / steps - shift;
-        if (x >= 0 && y >= 0 && x <= window.innerWidth && y <= window.innerHeight) {
+        // `elementFromPoint` needs coordinates strictly inside the viewport.
+        if (x >= 0 && y >= 0 && x < window.innerWidth && y < window.innerHeight) {
           points.push([x, y]);
         }
       }
@@ -223,8 +224,11 @@ export const NuxeoCreateButtonCollisionBehavior = {
   _controlFromPoint(x, y) {
     let node = document.elementFromPoint(x, y);
     while (node) {
-      if (node.matches(CONTROL_SELECTOR)) {
-        return node;
+      // `closest` covers the case where the point lands on a plain child of a control
+      // (an icon or a label inside a button); it stops at the current root.
+      const control = node.closest(CONTROL_SELECTOR);
+      if (control) {
+        return control;
       }
       if (!node.shadowRoot) {
         return null;
@@ -261,7 +265,7 @@ export const NuxeoCreateButtonCollisionBehavior = {
   },
 
   _applyTrayShift(shift) {
-    const tray = this.$ && this.$.tray;
+    const tray = this.$?.tray;
     if (!tray || shift === this._trayShift) {
       return;
     }
