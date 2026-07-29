@@ -678,7 +678,10 @@ Polymer({
       if (this._settings) {
         this.set('_settings.displayMode', this.displayMode);
         this.saveSettings();
-        view.settings = this._filterSettingsByCapabilities(view, this._settings[this.displayMode]);
+        const settings = this._filterSettingsByCapabilities(view, this._settings[this.displayMode]);
+        if (settings !== undefined) {
+          view.settings = settings;
+        }
       }
       // restore selection
       if (this.selectedItems) {
@@ -731,7 +734,10 @@ Polymer({
       const icon = view.getAttribute('icon');
       view.nxProvider = this.nxProvider;
       if (this._settings && view.settings) {
-        view.settings = this._filterSettingsByCapabilities(view, this._settings[name]);
+        const settings = this._filterSettingsByCapabilities(view, this._settings[name]);
+        if (settings !== undefined) {
+          view.settings = settings;
+        }
       }
       if (name === this.displayMode) {
         hasDisplayMode = true;
@@ -862,7 +868,10 @@ Polymer({
         this.displayMode = this._settings.displayMode;
       }
       if (this._settings[this.displayMode] && this.view) {
-        this.view.settings = this._filterSettingsByCapabilities(this.view, this._settings[this.displayMode]);
+        const settings = this._filterSettingsByCapabilities(this.view, this._settings[this.displayMode]);
+        if (settings !== undefined) {
+          this.view.settings = settings;
+        }
       }
     }
     this._isRestoring = false;
