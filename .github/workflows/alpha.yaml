@@ -1,0 +1,174 @@
+name: Alpha build
+
+# Manually-triggered build used for rebranding / work-in-progress branches.
+# It mirrors the RC build job in main.yaml but produces `-alpha.N` prereleases
+# instead of `-rc.N` and consumes the latest ALPHA nuxeo-elements packages
+# (falling back to the latest rc if no alpha elements exist yet).
+#
+# Order of operations for a rebranding deploy:
+#   1. Run alpha.yaml in nuxeo-elements against your branch (publishes -alpha elements to npm)
+#   2. Run this workflow against your branch (builds the marketplace zip, publishes to PREPROD)
+#
+# Dispatch against the branch you want to build (ref selector in the Actions
+# tab, or: gh workflow run alpha.yaml --ref <your-branch>).
+on:
+  workflow_dispatch:
+
+env:
+  PREID: alpha
+
+jobs:
+  # No lint/test/a11y/ftest/sonar gates here on purpose: those already run on
+  # every push to the rebranding PR (each check has an `on: pull_request`
+  # trigger against lts-2025). Re-running them here would just duplicate the
+  # same checks on the same commit. Dispatch this workflow from a commit whose
+  # PR checks are green.
+  build:
+    runs-on:
+      group: medium-4cpu-runners
+    permissions:
+      contents: write
+
+    steps:
+      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v6
+
+      - run: git config user.name "nuxeo-webui-jx-bot" && git config user.email "webui@hyland.com"
+
+      - uses: actions/setup-node@v6
+        with:
+          registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
+          scope: '@nuxeo'
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package.json', 'packages/nuxeo-web-ui-ftest/package.json', 'packages/nuxeo-designer-catalog/package.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+      - name: Setup Maven build
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
+        with:
+          java-version: '21'
+
+      - name: Purge cached Nuxeo artifacts
+        run: rm -rf ~/.m2/repository/org/nuxeo
+
+      - name: Prepare environment
+        run: |
+          echo "PACKAGE_VERSION=$(npx --no-install -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
+
+      - name: Get prerelease version
+        run: |
+          git fetch origin --tags
+          # Alpha tags live in their own namespace WITHOUT the leading "v" prefix
+          # (e.g. 2025.18.0-alpha.3) so they never match the rc pipeline's
+          # "v${version}*" tag glob and cannot corrupt rc version numbering.
+          LAST_TAG=$(git tag --list "${PACKAGE_VERSION/-SNAPSHOT}-${PREID}.*" | sort -V | tail -1 | tr -d '\n')
+          echo "VERSION=$(npx semver -i prerelease --preid ${PREID} ${LAST_TAG:-$PACKAGE_VERSION}  | tr -d '\n')" >> $GITHUB_ENV
+
+      - name: Update versions
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          find . -type f -not -path "./node_modules/*" -regex ".*\.\(yaml\|sample\|xml\)" -exec sed -i 's/'"$PACKAGE_VERSION"'/'"$VERSION"'/g' {} \;
+
+          # set padded version to build package for connect preprod
+          PADDED=$(printf '%03d' $(echo $VERSION | sed -r "s/[0-9]+\.[0-9]+\.[0-9]+-${PREID}\.([0-9]+)/\1/g"))
+          PADDED_VERSION=$(echo $VERSION | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-${PREID}\.)[0-9]+/\1$PADDED/g")
+          echo "PADDED_VERSION=$PADDED_VERSION" >> $GITHUB_ENV
+          sed -i -e 's/\${project.version}/'"$PADDED_VERSION"'/g' plugin/web-ui/marketplace/pom.xml
+
+          npm version ${VERSION} --no-git-tag-version
+
+          # Get latest ALPHA UI Elements version, fall back to latest rc if none published yet.
+          # `|| true` keeps a no-match grep (exit 1) from aborting the step under bash -eo
+          # pipefail, so the empty value reaches the fallback and the guard below.
+          ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-${PREID}\.[0-9]+$" | sort -V | tail -n1 || true)
+          if [ -z "$ELEMENTS_VERSION" ]; then
+            echo "No ${PREID} nuxeo-ui-elements found on npm, falling back to latest rc"
+            ELEMENTS_VERSION=$(npm view @nuxeo/nuxeo-ui-elements versions --json | jq -r '.[]' | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" | sort -V | tail -n1 || true)
+          fi
+
+          if [ -z "$ELEMENTS_VERSION" ]; then
+            echo "::error::Could not resolve any ${PREID} or rc @nuxeo/nuxeo-ui-elements version from npm" >&2
+            exit 1
+          fi
+
+          echo "Latest nuxeo-elements version: $ELEMENTS_VERSION"
+
+          # Update package.json dependencies and devDependencies
+          # Pin the EXACT elements version (no "~"). main.yaml uses "~$ELEMENTS_VERSION" for rc builds,
+          # where the final release isn't published yet, so the range effectively tracks rc updates.
+          # For alpha this is NOT safe: an alpha sorts below rc's of the same base (X.Y.Z-alpha.N < X.Y.Z-rc.M),
+          # so a "~" range lets npm resolve up to the latest rc and install rc elements instead of the alpha we built.
+          # Exact pin prevents that.
+          jq --arg ver "$ELEMENTS_VERSION" '
+            .dependencies."@nuxeo/nuxeo-dataviz-elements" = $ver |
+            .dependencies."@nuxeo/nuxeo-elements" = $ver |
+            .dependencies."@nuxeo/nuxeo-ui-elements" = $ver |
+            .devDependencies."@nuxeo/testing-helpers" = $ver
+          ' package.json > tmp.json && mv tmp.json package.json
+          echo "Updated all Nuxeo dependencies to version $ELEMENTS_VERSION"
+
+          # Sync lockfile after manual package.json edits
+          npm install --package-lock-only --ignore-scripts
+
+          pushd packages/nuxeo-web-ui-ftest
+          npm version ${VERSION} --no-git-tag-version
+          popd
+
+      - name: Install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          npm ci --ignore-scripts
+          (cd packages/nuxeo-web-ui-ftest && npm ci --ignore-scripts)
+          (cd packages/nuxeo-designer-catalog && npm ci --ignore-scripts)
+
+      - name: Build packages
+        env:
+          MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+        run: |
+          mvn -ntp install -DskipInstall
+          mvn -B -nsu -ntp -f plugin/itests/addon install
+          mvn -B -nsu -ntp -f plugin/itests/marketplace install
+
+      - name: Archive packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: |
+            plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip
+            plugin/itests/marketplace/target/nuxeo-web-ui-marketplace-itests-*.zip
+
+      - name: Tag
+        run: |
+          git add package-lock.json packages/nuxeo-web-ui-ftest/package-lock.json
+          git commit -a -m "Alpha release ${VERSION}"
+          # Tag without the "v" prefix to stay out of the rc pipeline's tag namespace
+          git tag -a ${VERSION} -m "Alpha release ${VERSION}"
+          git push origin ${VERSION}
+
+      - name: Publish Nuxeo packages
+        env:
+          CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+          CONNECT_PREPROD_AUTH: ${{ secrets.CONNECT_PREPROD_AUTH }}
+        run: |
+          PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
+          curl -fS -u "$CONNECT_PREPROD_AUTH" \
+               -F package=@$PACKAGE \
+               "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
+
+      - name: Publish Web UI FTest framework
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          cd packages/nuxeo-web-ui-ftest
+          npm publish --@nuxeo:registry=https://packages.nuxeo.com/repository/npm-public/ --tag ${PREID}

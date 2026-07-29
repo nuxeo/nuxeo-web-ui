@@ -1,0 +1,42 @@
+name: PR Review Reminder
+
+# Posts open PRs that are ready for review (checks green) but still need approval
+# to a Microsoft Teams channel, twice a day on weekdays.
+#
+# NOTE: scheduled workflows only run from the repository's DEFAULT branch, so this
+# file must be merged there for the cron triggers to fire. It can be tested from
+# any branch via the "Run workflow" button (workflow_dispatch).
+
+on:
+  schedule:
+    # Times are UTC. 05:30 UTC = 11:00 IST, 10:30 UTC = 16:00 IST (Mon-Fri).
+    - cron: '30 5 * * 1-5'
+    - cron: '30 10 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Log the Teams payload instead of posting it'
+        type: boolean
+        default: false
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Post PR review reminder
+        env:
+          # PAT (classic 'repo' read or fine-grained read) with access to every repo in SCAN_REPOS.
+          GH_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          PR_REVIEW_LEAD_LOGIN: ${{ vars.PR_REVIEW_LEAD_LOGIN }}
+          SCAN_REPOS: ${{ vars.PR_REVIEW_SCAN_REPOS || 'nuxeo/nuxeo-web-ui,nuxeo/nuxeo-elements' }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+        run: node .github/scripts/pr-review-reminder.mjs
