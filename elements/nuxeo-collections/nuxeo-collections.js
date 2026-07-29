@@ -145,18 +145,22 @@ Polymer({
 
       .list-item {
         cursor: pointer;
-        padding: 1em;
-        border-bottom: 1px solid var(--nuxeo-border);
+        padding: 0.7em 1em;
+        @apply --sat-drawer-item;
+      }
+
+      .list-item-title {
+        @apply --sat-drawer-item;
       }
 
       .list-item:hover {
-        @apply --nuxeo-block-hover;
+        @apply --sat-drawer-item-selected;
       }
 
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply --nuxeo-block-selected;
+        @apply --sat-drawer-item-selected;
       }
 
       .list-item iron-icon {
@@ -184,6 +188,10 @@ Polymer({
         @apply --layout-flex;
         @apply --layout-horizontal;
       }
+
+      .collection-header {
+        @apply --sat-section-header;
+      }
     </style>
 
     <nuxeo-operation op="Collection.RemoveFromCollection" id="removeFromCollectionOp"></nuxeo-operation>
@@ -204,7 +212,7 @@ Polymer({
         >
       </template>
       <template is="dom-if" if="[[!_isDisplayMembers]]">
-        <h5>[[i18n('collections.heading')]]</h5>
+        <h5 class="collection-header">[[i18n('collections.heading')]]</h5>
       </template>
     </div>
 

@@ -17,9 +17,9 @@ limitations under the License.
 */
 import '@polymer/polymer/polymer-legacy.js';
 
-import '@polymer/paper-fab/paper-fab.js';
+import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
+import '@polymer/iron-icon/iron-icon.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -31,30 +31,93 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 Polymer({
   _template: html`
     <style is="custom-style">
+      /*
+       * Labelled create shortcut chip (Satori FAB stack — Figma 128:53937):
+       * icon + label pill, 48px tall, 16px radius, shared FAB colors/shadow.
+       * Single focus target (.shortcut-container); icon is decorative only.
+       */
       :host {
         display: inline-block;
       }
 
-      #createBtn {
-        color: var(--nuxeo-button-primary-text);
-        --paper-fab-background: var(--nuxeo-button-primary);
-        --paper-fab-keyboard-focus-background: var(--nuxeo-button-primary-focus);
+      .shortcut-container {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        min-height: 48px;
+        gap: 8px;
+        cursor: pointer;
+        padding: 4px 12px 4px 4px;
+        border-radius: 16px;
+        background-color: var(--sat-document-create-button-background, var(--nuxeo-button-primary));
+        transition: background-color 0.2s ease;
+        box-shadow: var(
+          --sat-document-create-button-box-shadow,
+          0px 4px 8px 3px rgba(0, 0, 0, 0.15),
+          0px 1px 3px rgba(0, 0, 0, 0.3)
+        );
+        outline: none;
       }
 
-      paper-fab:hover,
-      paper-fab:focus {
-        background-color: var(--nuxeo-button-primary-focus);
+      :host-context([dir='rtl']) .shortcut-container {
+        flex-direction: row-reverse;
+        padding: 4px 4px 4px 12px;
       }
 
-      paper-fab {
-        --paper-fab-iron-icon: {
-          filter: brightness(100);
-        };
+      .shortcut-container:hover {
+        background-color: var(--sat-document-create-button-hover-background, var(--nuxeo-button-primary-focus));
+      }
+
+      .shortcut-container:focus-visible {
+        outline: auto;
+      }
+
+      .shortcut-icon {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        background-color: var(
+          --sat-document-create-shortcut-icon-color,
+          var(--sat-document-create-button-icon-color, var(--nuxeo-button-primary-text))
+        );
+        -webkit-mask-image: var(--shortcut-icon-mask);
+        mask-image: var(--shortcut-icon-mask);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: 24px 24px;
+        mask-size: 24px 24px;
+      }
+
+      .shortcut-label {
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 20px;
+        color: var(--sat-document-create-shortcut-label-color, var(--nuxeo-button-primary-text));
+        white-space: nowrap;
+        letter-spacing: 0.1px;
+        font-family: var(--sat-font-family-primary, var(--nuxeo-app-font));
       }
     </style>
 
-    <paper-fab mini noink id="createBtn" src="[[icon]]" on-tap="_tap"></paper-fab>
-    <nuxeo-tooltip for="createBtn" position="left">[[i18n(label)]]</nuxeo-tooltip>
+    <div
+      class="shortcut-container"
+      role="button"
+      tabindex="0"
+      aria-labelledby="shortcutLabel"
+      on-keydown="_handleKeydown"
+      on-tap="_tap"
+    >
+      <span
+        id="createBtn"
+        class="shortcut-icon"
+        style$="--shortcut-icon-mask: url([[icon]])"
+        tabindex="-1"
+        aria-hidden="true"
+      ></span>
+      <span id="shortcutLabel" class="shortcut-label">[[i18n(label)]]</span>
+    </div>
   `,
 
   is: 'nuxeo-document-create-shortcut',
@@ -64,6 +127,13 @@ Polymer({
     type: String,
     icon: String,
     label: String,
+  },
+
+  _handleKeydown(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._tap();
+    }
   },
 
   _tap() {

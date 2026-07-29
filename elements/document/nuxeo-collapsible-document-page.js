@@ -40,6 +40,13 @@ Polymer({
     <style include="nuxeo-styles">
       .page {
         @apply --layout-vertical;
+        background-color: transparent;
+        padding: 16px;
+      }
+
+      #detailsCard {
+        border-bottom: 1px solid var(--nuxeo-border);
+        box-shadow: none;
       }
 
       .details {

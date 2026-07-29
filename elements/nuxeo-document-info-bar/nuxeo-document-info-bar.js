@@ -47,7 +47,6 @@ Polymer({
         @apply --layout-justified;
         padding: 8px;
         margin-bottom: 16px;
-        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
         background-color: var(--nuxeo-box);
       }
 

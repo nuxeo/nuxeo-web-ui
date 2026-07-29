@@ -550,3 +550,250 @@ suite('nuxeo-document-tree', () => {
     });
   });
 });
+
+suite('nuxeo-document-tree unit behavior', () => {
+  let element;
+  let clock;
+
+  setup(async () => {
+    element = await fixture(html`<nuxeo-document-tree></nuxeo-document-tree>`);
+    sinon.stub(element, 'i18n').callsFake((key) => key);
+    await flush();
+  });
+
+  teardown(() => {
+    if (clock) {
+      clock.restore();
+      clock = null;
+    }
+    sessionStorage.removeItem('nuxeo.tree.selectedPath');
+    if (element._treeObserver) {
+      element._treeObserver.disconnect();
+      element._treeObserver = null;
+    }
+  });
+
+  test('_checkRtl and _onRtlChange follow document direction', () => {
+    document.documentElement.setAttribute('dir', 'rtl');
+    element._checkRtl();
+    expect(element._isRtl).to.be.true;
+    expect(element.toggleChevronIcon).to.equal('icons:chevron-right');
+
+    document.documentElement.setAttribute('dir', 'ltr');
+    element._checkRtl();
+    element._onRtlChange();
+    expect(element._isRtl).to.be.false;
+    expect(element.toggleChevronIcon).to.equal('icons:chevron-left');
+  });
+
+  test('_expandIcon and _leafClass helpers', () => {
+    element._isRtl = false;
+    expect(element._expandIcon(true)).to.equal('hardware:keyboard-arrow-down');
+    expect(element._expandIcon(false)).to.equal('hardware:keyboard-arrow-right');
+
+    element._isRtl = true;
+    expect(element._expandIcon(false)).to.equal('hardware:keyboard-arrow-left');
+    expect(element._leafClass(true)).to.equal('leaf');
+    expect(element._leafClass(false)).to.equal('');
+  });
+
+  test('_title uses i18n for Root type', () => {
+    expect(element._title({ type: 'Root', title: 'ignored' })).to.equal('browse.root');
+    expect(element._title({ type: 'Folder', title: 'My folder' })).to.equal('My folder');
+  });
+
+  test('_handleNodeClick stores path and debounces highlight update', () => {
+    const debounceSpy = sinon.spy(element, '_debounceHighlightUpdate');
+    const link = document.createElement('a');
+    link.setAttribute('data-path', '/ws/doc');
+
+    element._handleNodeClick({ currentTarget: link });
+
+    expect(sessionStorage.getItem('nuxeo.tree.selectedPath')).to.equal('/ws/doc');
+    expect(debounceSpy).to.have.been.calledWith('/ws/doc');
+    debounceSpy.restore();
+  });
+
+  test('_handleKeydown toggles treeitem and dispatches tree-node-toggled', () => {
+    const treeItem = document.createElement('div');
+    treeItem.setAttribute('role', 'treeitem');
+    treeItem.setAttribute('aria-expanded', 'false');
+
+    const icon = document.createElement('iron-icon');
+    icon.click = sinon.spy();
+    treeItem.appendChild(icon);
+
+    const preventDefault = sinon.spy();
+    const eventSpy = sinon.spy(element, 'dispatchEvent');
+
+    element._handleKeydown({
+      key: 'Enter',
+      target: icon,
+      preventDefault,
+    });
+
+    expect(treeItem.getAttribute('aria-expanded')).to.equal('true');
+    expect(icon.click).to.have.been.calledOnce;
+    expect(preventDefault).to.have.been.calledOnce;
+    expect(eventSpy).to.have.been.called;
+    const customEvent = eventSpy.getCalls().find((c) => c.args[0] && c.args[0].type === 'tree-node-toggled');
+    expect(customEvent).to.exist;
+    expect(customEvent.args[0].detail.expanded).to.be.true;
+    eventSpy.restore();
+  });
+
+  test('_debounceHighlightUpdate runs highlight after debounce', () => {
+    clock = sinon.useFakeTimers();
+    const highlightSpy = sinon.spy(element, '_updateSelectionHighlight');
+
+    element._debounceHighlightUpdate('/path');
+    expect(highlightSpy).to.not.have.been.called;
+
+    clock.tick(50);
+    expect(highlightSpy).to.have.been.calledWith('/path');
+    highlightSpy.restore();
+  });
+
+  test('_retryHighlightUpdate retries until highlight succeeds', () => {
+    clock = sinon.useFakeTimers();
+    const highlightStub = sinon.stub(element, '_updateSelectionHighlight');
+    highlightStub.onCall(0).returns(false);
+    highlightStub.onCall(1).returns(true);
+
+    element._retryHighlightUpdate('/path', 0);
+    clock.tick(100);
+    expect(highlightStub).to.have.been.calledOnce;
+
+    clock.tick(200);
+    expect(highlightStub).to.have.been.calledTwice;
+    highlightStub.restore();
+  });
+
+  test('_retryHighlightUpdate stops after max attempts', () => {
+    clock = sinon.useFakeTimers();
+    const highlightStub = sinon.stub(element, '_updateSelectionHighlight').returns(false);
+
+    element._retryHighlightUpdate('/missing', 0);
+    for (let i = 0; i < 12; i += 1) {
+      clock.tick(250);
+    }
+    expect(highlightStub.callCount).to.be.at.most(11);
+    highlightStub.restore();
+  });
+
+  test('_updateSelectionHighlight marks parent link and tree row', () => {
+    const parents = element.shadowRoot.querySelector('.parents');
+    const stale = document.createElement('a');
+    stale.setAttribute('data-path', '/other');
+    stale.classList.add('selected');
+    parents.appendChild(stale);
+
+    const target = document.createElement('a');
+    target.setAttribute('data-path', '/ws');
+    parents.appendChild(target);
+
+    const treeItem = document.createElement('div');
+    treeItem.setAttribute('role', 'treeitem');
+    const treeLink = document.createElement('a');
+    treeLink.setAttribute('data-path', '/Folder1');
+    treeItem.appendChild(treeLink);
+    element.shadowRoot.querySelector('.content').appendChild(treeItem);
+
+    expect(element._updateSelectionHighlight('/ws')).to.be.true;
+    expect(stale.classList.contains('selected')).to.be.false;
+    expect(target.classList.contains('selected')).to.be.true;
+
+    expect(element._updateSelectionHighlight('/Folder1')).to.be.true;
+    expect(treeLink.classList.contains('selected')).to.be.true;
+    expect(treeItem.classList.contains('selected')).to.be.true;
+  });
+
+  test('_updateSelectionHighlight uses sessionStorage when no argument', () => {
+    sessionStorage.setItem('nuxeo.tree.selectedPath', '/stored');
+
+    const parents = element.shadowRoot.querySelector('.parents');
+    const link = document.createElement('a');
+    link.setAttribute('data-path', '/stored');
+    parents.appendChild(link);
+
+    expect(element._updateSelectionHighlight()).to.be.true;
+    expect(link.classList.contains('selected')).to.be.true;
+  });
+
+  test('_updateSelectionHighlight searches tree shadow root links', () => {
+    const treeHost = document.createElement('div');
+    const treeShadow = treeHost.attachShadow({ mode: 'open' });
+    const treeItem = document.createElement('div');
+    treeItem.setAttribute('role', 'treeitem');
+    const link = document.createElement('a');
+    link.setAttribute('data-path', '/nested');
+    treeItem.appendChild(link);
+    treeShadow.appendChild(treeItem);
+    element.shadowRoot.querySelector('.content').appendChild(treeHost);
+    element.$ = { tree: treeHost };
+
+    expect(element._updateSelectionHighlight('/nested')).to.be.true;
+    expect(link.classList.contains('selected')).to.be.true;
+    expect(treeItem.classList.contains('selected')).to.be.true;
+  });
+
+  test('_updateSelectionHighlight returns false when no path is available', () => {
+    element.currentDocument = null;
+    sessionStorage.removeItem('nuxeo.tree.selectedPath');
+    expect(element._updateSelectionHighlight()).to.be.false;
+  });
+
+  test('_handlePopState and _handleLocationChanged schedule highlight retry', () => {
+    const retrySpy = sinon.spy(element, '_retryHighlightUpdate');
+    element._handlePopState();
+    element._handleLocationChanged();
+    expect(retrySpy).to.have.been.calledTwice;
+    retrySpy.restore();
+  });
+
+  test('_currentDocumentChanged handles Root documents and syncs selected path', () => {
+    sinon.stub(element, 'hasFacet').returns(false);
+    const retrySpy = sinon.spy(element, '_retryHighlightUpdate');
+    element.docPath = '/old';
+    element.currentDocument = {
+      type: 'Root',
+      path: '/',
+      contextParameters: { breadcrumb: { entries: [{ path: '/' }] } },
+    };
+
+    element._currentDocumentChanged();
+
+    expect(element.docPath).to.equal('/');
+    expect(sessionStorage.getItem('nuxeo.tree.selectedPath')).to.equal('/');
+    expect(retrySpy).to.have.been.calledWith('/');
+    element.hasFacet.restore();
+    retrySpy.restore();
+  });
+
+  test('_setupTreeObserver creates observer when missing and is idempotent otherwise', () => {
+    element._treeObserver = null;
+    element._setupTreeObserver();
+    const created = element._treeObserver;
+    expect(created).to.exist;
+
+    element._setupTreeObserver();
+    expect(element._treeObserver).to.equal(created);
+  });
+
+  test('detached disconnects navigation listeners and tree observer', () => {
+    const popSpy = sinon.spy(window, 'removeEventListener');
+    element._boundPopStateHandler = () => {};
+    element._boundLocationChangedHandler = () => {};
+    // Capture the spy up front: detached() nulls _treeObserver after disconnecting it.
+    const disconnectSpy = sinon.spy();
+    element._treeObserver = { disconnect: disconnectSpy };
+
+    element.detached();
+
+    expect(popSpy).to.have.been.calledWith('popstate', element._boundPopStateHandler);
+    expect(popSpy).to.have.been.calledWith('location-changed', element._boundLocationChangedHandler);
+    expect(disconnectSpy).to.have.been.calledOnce;
+    expect(element._treeObserver).to.be.null;
+    popSpy.restore();
+  });
+});

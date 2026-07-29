@@ -37,6 +37,8 @@ elements/             → ALL Polymer web components live here
   nuxeo-results/      → Result display
 addons/               → Optional feature bundles (each has index.js entry)
 i18n/                 → Translation JSON files (16 languages)
+themes/               → Visual themes (default, dark)
+test/                 → Unit tests (test/nuxeo-*.test.js)
 themes/               → Visual themes (default, dark, light, kawaii)
 test/                 → Unit tests (@web/test-runner + Mocha; sources in test/*.test.js)
 ftest/features/       → Functional test Gherkin scenarios
