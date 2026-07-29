@@ -306,6 +306,18 @@ This is the "commit and raise PR" trigger.
 gh pr view <pr> --repo nuxeo/nuxeo-web-ui --json statusCheckRollup \
   --jq '[.statusCheckRollup[]|{name:(.name//.context),conclusion:(.conclusion//.state)}]'
 ```
+> **Never wait on the functional tests.** The `ftest` / cross-repo `web-ui` checks take tens of
+> minutes (they boot a Nuxeo server and drive WebdriverIO), so polling them stalls the whole run.
+> Watch only the fast gating checks — **lint**, **unit tests**, and `a11y`/`sonar` once they report —
+> then move straight on to Phase 7.5. Snapshot the ftest state, don't block on it:
+> ```bash
+> gh pr view <pr> --repo nuxeo/nuxeo-web-ui --json statusCheckRollup \
+>   --jq '[.statusCheckRollup[]|select((.name//.context)|test("ftest|web-ui"))
+>     |{name:(.name//.context),status:(.conclusion//.state)}]'
+> ```
+> Report an unfinished ftest as *in progress, not waited on* (Phase 10) rather than calling it green.
+> Only read an ftest log when it has already come back **failed** — and if it fails on something the
+> change cannot plausibly touch, re-run it (`gh run rerun <run-id> --failed`) instead of investigating.
 - Real failure → read the failing job log (`gh api repos/nuxeo/nuxeo-web-ui/actions/jobs/<jobId>/logs`),
   fix on the branch, re-run the gate, push.
 - Known flake (e.g. `nuxeo-document-tree` "Tree should collapse…") that passes locally →
@@ -417,11 +429,17 @@ Evaluate page `4169400498` against both PRs and produce a Markdown table (Questi
 Y/N/NA | Comments). Check, per PR: review comments resolved; before/after evidence attached (screenshots **and the
 before/after videos** from Phase 2); both PRs linked on the ticket; no open Copilot threads (GraphQL
 `reviewThreads.isResolved`); all checks green; ≥2 approvals incl. lead; all commits Verified.
+
 > **This checklist is an internal readiness gate — output it in chat ONLY. Do NOT post it as a Jira
-> comment.** It's process/QA-tracking noise on the customer-facing ticket. (The ticket's own DoD
-> checklist field is updated separately by the team, not via a comment.) Flag what stays manual:
-> uploading the before/after videos to the ticket (MCP can't attach — see Phase 7.5), dev-panel PR
-> links, and approvals.
+> comment.** Print the table in your reply and stop there; do not call `addCommentToJiraIssue` with
+> it. It is process/QA-tracking noise on a customer-facing ticket, which gets only the two Phase 7.5
+> comments, and the ticket's own DoD checklist field is updated separately by the team rather than
+> via a comment. (If a checklist comment was posted by mistake, delete it:
+> `curl -u "$(cat ~/.jira_email):$(cat ~/.jira_token)" -X DELETE
+> https://hyland.atlassian.net/rest/api/3/issue/<TICKET-ID>/comment/<commentId>`.)
+
+Flag in the table what stays manual: uploading the before/after videos to the ticket (MCP can't
+attach — see Phase 7.5), dev-panel PR links, and approvals.
 
 ## Phase 9 — Final fix summary (always output)
 End every run with a single, structured summary — print it in chat **and** post it as the Jira
@@ -478,8 +496,10 @@ fix-summary comment (Phase 7.5). Use exactly these sections, in this order:
   `remove_container` with `force:true`, targeting only your `nx-<ticket>`). Never remove or disturb
   pre-existing/live containers.
 - Leave the evidence files in `~/Desktop/<TICKET-ID>/` so they can be attached to the ticket.
-- Report the final CI state of both PRs. If a long cross-repo check (e.g. `web-ui`) is still
-  running, say so explicitly — do **not** claim green until it is.
+- Report the final CI state of both PRs, check by check. End the run once lint and the unit tests
+  are green — do **not** keep the run alive polling `ftest` / the cross-repo `web-ui` check. List any
+  such check as "still running, not waited on" so nobody reads the summary as fully green, and say who
+  should look at it later (or offer to check back on request).
 
 ## Recommended extras (do these when applicable, still autonomously)
 - **Add/adjust a functional test.** For user-facing behavior, add a Gherkin scenario
@@ -488,8 +508,8 @@ fix-summary comment (Phase 7.5). Use exactly these sections, in this order:
 - **Regression sanity.** The local gate already runs the full unit suite; report the pass count.
 - **Keep both PRs identical.** Any later change (review feedback / CI fix) is committed once and
   cherry-picked onto the other base so the two PRs never diverge.
-- **Evaluate the Ready-for-QA checklist** (Phase 8) as an internal gate — output the table in chat, do
-  NOT post it to Jira.
+- **Evaluate the Ready-for-QA checklist** (Phase 8) and report it as a table in chat — never as a
+  Jira comment.
 - **Attach the videos.** MCP can't attach — provide the ready-to-run `curl` (Phase 7.5) or note the
   drag-and-drop fallback so QA gets the recordings.
 
