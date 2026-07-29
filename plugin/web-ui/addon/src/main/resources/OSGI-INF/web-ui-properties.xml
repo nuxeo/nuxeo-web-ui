@@ -67,5 +67,8 @@
 
  <!-- Control external permissions  -->
  <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
+
+ <!-- opt-in Hyland branding -->
+ <property name="org.nuxeo.web.ui.branding.rebrand">${org.nuxeo.web.ui.branding.rebrand:=false}</property>
   </extension>
 </component>

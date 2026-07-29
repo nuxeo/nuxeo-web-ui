@@ -44,17 +44,18 @@ Polymer({
       }
 
       :host(:hover) {
-        border-bottom: 2px solid var(--nuxeo-app-header-pill-hover);
+        border-bottom: 2.5px solid var(--nuxeo-app-header-pill-hover);
         color: var(--nuxeo-app-header-pill-hover);
       }
 
       :host(.iron-selected) {
-        border-bottom: 2px solid var(--nuxeo-app-header-pill-active);
+        border-bottom: 2.5px solid var(--nuxeo-app-header-pill-active);
         color: var(--nuxeo-app-header-pill-active);
       }
 
       :host(:focus) {
-        background-color: #dedfe3;
+        background-color: var(--hyland-page-tabs-selected-background, #dedfe3);
+        color: var(--hyland-page-tabs-active-text-color, var(--nuxeo-app-header-pill-active));
       }
       :host(:focus-visible) {
         outline: auto;

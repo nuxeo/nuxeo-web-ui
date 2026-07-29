@@ -40,6 +40,12 @@ Polymer({
     <style include="nuxeo-styles">
       .page {
         @apply --layout-vertical;
+        padding: var(--hyland-document-page-padding, 0);
+      }
+
+      #detailsCard {
+        border-bottom: var(--hyland-details-card-border-bottom, none);
+        box-shadow: var(--hyland-details-card-box-shadow, 0 3px 5px rgba(0, 0, 0, 0.04));
       }
 
       .details {

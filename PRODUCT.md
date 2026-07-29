@@ -80,13 +80,17 @@ Optional addons extend Web UI with additional capabilities:
 
 ## Themes
 
-Four visual themes are bundled:
+Four visual themes are bundled, offered in pairs according to the branding opt-in:
+
 - **Default** — Standard Nuxeo branding
 - **Dark** — Dark mode interface
-- **Light** — Light/minimal interface
-- **Kawaii** — Fun/playful theme
+- **Hyland Light** — Hyland branding
+- **Hyland Dark** — Hyland branding, dark mode
 
-Users can switch themes from their profile settings.
+A deployment sees only one pair: the classic Default/Dark themes normally, or the two Hyland
+themes when branding is enabled. Custom themes are never hidden.
+
+Users can switch between the offered themes from their profile settings.
 
 ## Internationalization
 

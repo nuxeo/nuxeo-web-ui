@@ -59,7 +59,7 @@ function noCoverageSummaryReporter() {
 }
 
 /** App sources included in coverage reports (mirrors former karma coverage globs). */
-const appSources = ['elements/**/*.js', 'addons/**/elements/**/*.js'];
+const appSources = ['elements/**/*.js', 'addons/**/elements/**/*.js', 'themes/theme-config.js', 'themes/loader.js'];
 
 export default {
   files: ['test/load-all-tests.js'],

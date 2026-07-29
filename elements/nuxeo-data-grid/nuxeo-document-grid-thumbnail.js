@@ -55,7 +55,7 @@ Polymer({
         position: relative;
         width: 220px;
         height: 260px;
-        background-color: var(--nuxeo-box);
+        background-color: var(--hyland-document-grid-thumbnail-background, var(--nuxeo-box));
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
         padding: 0;
         filter:

@@ -15,35 +15,40 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
+<!-- Import Hyland Design Tokens -->
+<link rel="stylesheet" href="../hyland-design-tokens.css" />
 <custom-style>
   <style is="custom-style">
     html {
       /* -- Nuxeo Branding colors -- */
-      --nuxeo-app-font: 'Inter', Arial, sans-serif;
-      --nuxeo-text-default: #32353f;
+      --nuxeo-app-font: 'Noto Sans';
+      --nuxeo-text-default: #1a1c1e;
 
-      --nuxeo-primary-color: #00aded;
-      --nuxeo-secondary-color: #73d2cf;
-      --nuxeo-button-secondary-text: #00aded;
+      --nuxeo-primary-color: #5654ac;
+      --nuxeo-secondary-color: #353483;
 
-      --nuxeo-page-background: #f7f7f7;
-      --nuxeo-border: rgba(0, 0, 0, 0.1);
+      /* App content canvas matches the Hyland page surface so all pages look like home. */
+      --nuxeo-page-background: var(--hyland-page-surface-background);
+      --nuxeo-border: rgba(0, 0, 0, 0.15);
 
       /* App Header */
       --nuxeo-app-header: var(--nuxeo-text-default);
       --nuxeo-app-header-background: #fff;
-      --nuxeo-app-header-pill: #ededef;
-      --nuxeo-app-header-pill-hover: var(--nuxeo-primary-color);
-      --nuxeo-app-header-pill-active: var(--nuxeo-secondary-color);
+      --nuxeo-app-header-pill: #ecf3f7;
+      --nuxeo-app-header-pill-hover: var(--nuxeo-secondary-color);
+      --nuxeo-app-header-pill-active: var(--nuxeo-primary-color);
 
       /* App Sidebar + Drawer*/
-      --nuxeo-sidebar-background: #32353f;
-      --nuxeo-sidebar-menu: rgba(255, 255, 255, 0.5);
-      --nuxeo-sidebar-menu-hover: rgba(255, 255, 255, 1);
-      --nuxeo-badge-background: var(--nuxeo-primary-color);
+      --nuxeo-sidebar-background: var(--nuxeo-primary-color);
+      --nuxeo-sidebar-menu: #ffffff;
+      --nuxeo-sidebar-menu-hover: #ffffff;
+      --nuxeo-sidebar-menu-icon: var(--nuxeo-sidebar-menu-hover);
+
+      --nuxeo-badge-background: #fb6107;
       --nuxeo-drawer-header: var(--nuxeo-text-default);
       --nuxeo-drawer-text: var(--nuxeo-text-default);
-      --nuxeo-drawer-background: #fff;
+      --nuxeo-drawer-background: #f4f3f7;
       --nuxeo-resize-handle-color: #989898;
 
       /* App Quick Search */
@@ -68,14 +73,18 @@ limitations under the License.
       --nuxeo-button-primary: var(--nuxeo-primary-color);
       --nuxeo-button-primary-focus: var(--nuxeo-secondary-color);
       --nuxeo-button-primary-text: #ffffff;
-      --nuxeo-button-disabled: rgba(0, 0, 0, 0.05);
-      --nuxeo-button-disabled-text: rgba(0, 0, 0, 0.1);
+      --nuxeo-button-secondary-text: var(--nuxeo-primary-color); /* Hyland primary */
+      --nuxeo-button-disabled: rgba(8, 8, 8, 0.148);
+      --nuxeo-button-disabled-text: rgba(0, 0, 0, 0.139);
       --nuxeo-link-color: var(--nuxeo-text-default);
       --nuxeo-link-hover-color: var(--nuxeo-primary-color);
 
+      --nuxeo-button-icon-margin: 4px;
+
       /* Custom Backgrounds */
       --nuxeo-container-hover: var(--nuxeo-page-background);
-      --nuxeo-dialog-buttons-bar: rgba(0, 0, 0, 0.05);
+      --nuxeo-dialog-buttons-bar: transparent;
+      --input-background: rgba(0, 0, 0, 0.05);
 
       /* Warn, Info, Error */
       --nuxeo-action-color-activated: var(--nuxeo-primary-color);
@@ -87,18 +96,18 @@ limitations under the License.
       --nuxeo-selection-toolbar-background: var(--nuxeo-primary-color);
       --nuxeo-selection-toolbar-text: #fff;
       --nuxeo-selection-toolbar-link: #fff;
-      --nuxeo-selection-toolbar-link-hover: #000;
+      --nuxeo-selection-toolbar-link-hover: #66ffff;
 
       /*-- Polymer Variables --*/
       --default-primary-color: var(--nuxeo-primary-color);
-      --dark-primary-color: #0086a7;
-      --light-primary-color: #f3f7f9;
+      --dark-primary-color: #213f7d;
+      --light-primary-color: #eff2f4;
       --text-primary-color: #ffffff;
       --accent-color: var(--nuxeo-primary-color);
-      --primary-background-color: #f8fafc;
-      --primary-text-color: #434343;
-      --secondary-text-color: #727272;
-      --disabled-text-color: #bdbdbd;
+      --primary-background-color: #eff2f4;
+      --primary-text-color: #243238;
+      --secondary-text-color: #939caa;
+      --disabled-text-color: #757575;
       --divider-color: var(--nuxeo-border);
 
       /* Tabs, Toolbars & Menus */
@@ -128,8 +137,8 @@ limitations under the License.
 
       --paper-input-container-color: var(--nuxeo-text-default);
       --paper-input-container-focus-color: var(--nuxeo-primary-color);
-      --paper-input-container-focus-background-color: #00aded1a;
-      --paper-input-container-invalid-color: #ff003c;
+      --paper-input-container-focus-background-color: #0066ff1a;
+      --paper-input-container-invalid-color: #de350b;
       --paper-input-container-input-color: var(--nuxeo-text-default);
 
       --paper-slider-knob-color: var(--nuxeo-primary-color);
@@ -153,14 +162,54 @@ limitations under the License.
       --paper-progress-secondary-color: var(--nuxeo-primary-color);
 
       --paper-spinner-layer-1-color: var(--nuxeo-primary-color);
-      --paper-spinner-layer-2-color: #0079b3;
-      --paper-spinner-layer-3-color: #0079b3;
+      --paper-spinner-layer-2-color: rgba(79, 230, 221, 0.8);
+      --paper-spinner-layer-3-color: #1f28bf;
       --paper-spinner-layer-4-color: var(--nuxeo-primary-color);
 
       /* Diff */
       --nuxeo-diff-added-color: #b4efcb;
       --nuxeo-diff-deleted-color: #e6b1b1;
       --nuxeo-diff-label-color: #d4d4d9;
+
+      /* ================================================================
+         TIER 3 — HYLAND COMPONENT TOKENS (--hyland-<component>-<property>)
+         Pattern: full words, no abbreviations, no -default suffixes.
+         ================================================================ */
+
+      /* Section header (used by home, clipboard, tasks, collections,
+         recent docs, document tree — applied via the --hyland-section-header mixin) */
+      --hyland-section-header-text-color: #474551;
+
+      /* App / page-level header bar */
+      --hyland-app-header-background: #f4f3f7;
+      --hyland-app-header-shadow: none;
+      --hyland-page-surface-background: #f4f3f7;
+
+      /* Drawer + Sidebar content */
+      --hyland-selection-pill-background: #e2dfff;
+      --hyland-sidebar-item-selected-background: rgba(255, 255, 255, 0.12);
+      --hyland-sidebar-item-hover-background: rgba(255, 255, 255, 0.12);
+
+      /* Document create button (FAB on the home dashboard) */
+      --hyland-document-create-button-icon-color: #3e3b92;
+      --hyland-document-create-button-background: #e2dfff;
+      --hyland-document-create-button-hover-background: #b6b0f1;
+      --hyland-document-create-button-box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+
+      /* Document view tabs */
+      --hyland-page-tabs-background: #f4f3f7;
+      --hyland-page-tabs-selected-background: #dadadd;
+      --hyland-page-tabs-active-text-color: #3e3b92;
+
+      /* Nuxeo Elements - Map to Hyland colors */
+      --nuxeo-checkmark-border-color: #474551;
+      --hyland-tooltip-text-color: #ffffff;
+      --hyland-document-grid-thumbnail-background: var(--nuxeo-box);
+      --hyland-nuxeo-card-background: var(--nuxeo-box);
+      --hyland-csv-import-background: #f7f6f6;
+      --hyland-path-suggestion-result-selected-background: #e8eaf6;
+
+      --hyland-data-table-row-border: none;
     }
   </style>
 </custom-style>

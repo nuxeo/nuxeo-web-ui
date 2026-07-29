@@ -63,7 +63,7 @@ Polymer({
         margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
         padding: 0.8em 1em;
-        background-color: white;
+        background-color: var(--hyland-nuxeo-card-background, var(--nuxeo-box));
         border: 1px solid var(--divider-color);
         position: relative;
       }
@@ -93,7 +93,7 @@ Polymer({
       }
 
       #dropzone {
-        background-color: #f7f6f6;
+        background-color: var(--hyland-csv-import-background, #f7f6f6);
         border: 2px dashed var(--divider-color);
         border-radius: 4px;
       }

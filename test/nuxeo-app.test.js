@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved.
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved.
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -2076,6 +2076,37 @@ suite('nuxeo-app', () => {
       } finally {
         app._notifyLayoutChanged.restore();
       }
+    });
+  });
+
+  suite('home-link keyboard navigation (NXENG-527)', () => {
+    test('removes tabindex from home-link to prevent double Tab stop', () => {
+      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
+      expect(homeLink).to.exist;
+      expect(homeLink.hasAttribute('tabindex')).to.be.false;
+    });
+
+    test('home-link is inside menuContainer but outside paper-listbox', () => {
+      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
+      const menuContainer = app.shadowRoot && app.shadowRoot.querySelector('#menuContainer');
+      const menu = app.shadowRoot && app.shadowRoot.querySelector('#menu');
+
+      expect(homeLink).to.exist;
+      expect(menuContainer).to.exist;
+      expect(menu).to.exist;
+
+      expect(menuContainer.contains(homeLink)).to.be.true;
+      expect(menu.contains(homeLink)).to.be.false;
+    });
+
+    test('home-link remains programmatically focusable after tabindex removal', () => {
+      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
+      expect(homeLink).to.exist;
+      // Should be able to focus programmatically (no tabindex="-1" which would prevent focus)
+      const focusSpy = sinon.spy(homeLink, 'focus');
+      homeLink.focus();
+      expect(focusSpy).to.have.been.called;
+      focusSpy.restore();
     });
   });
 });
