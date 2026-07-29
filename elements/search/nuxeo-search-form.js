@@ -238,12 +238,14 @@ Polymer({
       }
 
       /* Show the name on up to two lines before clipping it, so results sharing a long
-         prefix stay distinguishable. Overrides the single-line .ellipsis rule, which the
-         panel header still relies on. */
+         prefix stay distinguishable. Kept self-contained rather than leaning on the
+         .ellipsis class these spans also carry, which the panel header still needs for
+         single-line truncation. */
       .list-item-title {
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
+        overflow: hidden;
         overflow-wrap: break-word;
         white-space: normal;
       }
