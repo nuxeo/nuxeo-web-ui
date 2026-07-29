@@ -237,6 +237,17 @@ Polymer({
         @apply --layout-center;
       }
 
+      /* Show the name on up to two lines before clipping it, so results sharing a long
+         prefix stay distinguishable. Overrides the single-line .ellipsis rule, which the
+         panel header still relies on. */
+      .list-item-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow-wrap: break-word;
+        white-space: normal;
+      }
+
       .list-item-property {
         opacity: 0.5;
         margin-right: 0.2em;
@@ -364,7 +375,7 @@ Polymer({
                     <div class="vertical layout center">
                       <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
                     </div>
-                    <span class="list-item-title ellipsis">[[item.title]]</span>
+                    <span class="list-item-title ellipsis" on-mouseenter="_showTitleIfTruncated">[[item.title]]</span>
                   </div>
                 </div>
               </div>
@@ -771,6 +782,19 @@ Polymer({
       classes += ' selected';
     }
     return classes;
+  },
+
+  // Whether a name is clipped depends on rendered geometry, not on the document, so it
+  // cannot be expressed as a binding: the drawer is resizable and iron-list recycles rows
+  // into different documents. Measuring on hover keeps the tooltip accurate at the current
+  // width without re-measuring every row on resize or scroll.
+  _showTitleIfTruncated(e) {
+    const el = e.currentTarget;
+    if (el.scrollHeight > el.clientHeight + 1) {
+      el.setAttribute('title', el.textContent.trim());
+    } else {
+      el.removeAttribute('title');
+    }
   },
 
   _selectedDocChanged(doc, old) {
