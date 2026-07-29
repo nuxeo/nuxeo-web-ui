@@ -5,10 +5,12 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - lts-2025
+      - lts-2025-WEBUI-1935-POC-REBRANDING
 
   push:
     branches:
       - lts-2025
+      - lts-2025-WEBUI-1935-POC-REBRANDING
 
   workflow_dispatch:
 

@@ -140,6 +140,32 @@ suite('nuxeo-app', () => {
     localStorage.getItem.restore();
   });
 
+  test('_onProfileAvatarClick prevents navigation', () => {
+    const e = { preventDefault: sinon.spy() };
+    app._onProfileAvatarClick(e);
+    expect(e.preventDefault).to.have.been.calledOnce;
+  });
+
+  test('_userInitials derives display initials from user properties', () => {
+    expect(app._userInitials(null)).to.equal('');
+    expect(app._userInitials({ properties: { firstName: 'Jane', lastName: 'Doe' } })).to.equal('JD');
+    expect(app._userInitials({ properties: { firstName: 'Al' } })).to.equal('AL');
+    expect(app._userInitials({ properties: { firstName: 'Q' } })).to.equal('Q');
+    expect(app._userInitials({ properties: { lastName: 'Ng' } })).to.equal('NG');
+    expect(app._userInitials({ properties: { lastName: 'X' } })).to.equal('X');
+    expect(app._userInitials({ id: 'administrator', properties: {} })).to.equal('AD');
+    expect(app._userInitials({ properties: {} })).to.equal('??');
+  });
+
+  test('_resizeDuringAnimation schedules resize animation loop', () => {
+    app._resizeDuringAnimation();
+    expect(app._resizeLoop).to.exist;
+    if (app._resizeLoop) {
+      cancelAnimationFrame(app._resizeLoop);
+      app._resizeLoop = null;
+    }
+  });
+
   test('_baseUrlChanged assigns RoutingBehavior.baseUrl', () => {
     app.baseUrl = 'https://example/nuxeo/';
     app._baseUrlChanged();
@@ -471,6 +497,372 @@ suite('nuxeo-app', () => {
     app._directionChanged(false);
     expect(app.$.drawerPanel.getAttribute('align')).to.equal('start');
     expect(app.toggleChevronIcon).to.equal('icons:chevron-left');
+  });
+
+  suite('keyboard navigation helpers', () => {
+    test('home ArrowUp returns focus to logo', () => {
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      const logo = app.$.logo;
+      sinon.spy(logo, 'focus');
+
+      const event = new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true });
+      homeLink.dispatchEvent(event);
+
+      expect(event.defaultPrevented).to.be.true;
+      expect(logo.focus).to.have.been.calledOnce;
+      logo.focus.restore();
+    });
+
+    test('logo ArrowDown focuses home link when available', () => {
+      const logo = app.$.logo;
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      sinon.spy(homeLink, 'focus');
+
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+
+      expect(homeLink.focus).to.have.been.calledOnce;
+      homeLink.focus.restore();
+    });
+
+    test('home ArrowDown focuses first menu item via _setFocusedItem', () => {
+      const menu = app.$.menu;
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      sinon.stub(menu, '_setFocusedItem');
+
+      homeLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(menu._setFocusedItem).to.have.been.calledOnce;
+      menu._setFocusedItem.restore();
+    });
+
+    test('home ArrowDown with no visible menu items exits early', () => {
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      const menu = app.$.menu;
+
+      const prevItems = menu.items;
+      menu.items = [];
+
+      homeLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      menu.items = prevItems;
+    });
+
+    test('logo ArrowDown fallback path focuses first item when no home link exists', () => {
+      const logo = document.createElement('div');
+      const menu = document.createElement('div');
+      const menuContainer = document.createElement('div');
+      const item = document.createElement('div');
+      item.setAttribute('name', 'synthetic-item');
+
+      // Simulate paper-listbox public API consumed by logoToMenuNavigation.
+      menu.items = [item];
+      menu._setFocusedItem = undefined;
+      sinon.spy(item, 'setAttribute');
+      sinon.spy(item, 'focus');
+
+      app.logoToMenuNavigation.call({
+        $: {
+          logo,
+          menu,
+          menuContainer: {
+            querySelector: () => null,
+            addEventListener: menuContainer.addEventListener.bind(menuContainer),
+          },
+        },
+      });
+
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(item.setAttribute).to.have.been.calledWith('tabindex', '0');
+      expect(item.focus).to.have.been.calledOnce;
+      item.setAttribute.restore();
+      item.focus.restore();
+    });
+
+    test('menu ArrowUp on first item focuses home link and stops further handling', () => {
+      const menu = app.$.menu;
+      const homeLink = app.shadowRoot.querySelector('.home-link');
+      const visibleItems = (menu.items || []).filter((el) => !el.hasAttribute('hidden'));
+      const firstItem = visibleItems[0];
+      sinon.spy(homeLink, 'focus');
+
+      if (firstItem) {
+        firstItem.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+      }
+
+      expect(homeLink.focus).to.have.been.calledOnce;
+      homeLink.focus.restore();
+    });
+
+    test('menu ArrowDown on last item returns focus to logo', () => {
+      const menu = app.$.menu;
+      const logo = app.$.logo;
+      const visibleItems = (menu.items || []).filter((el) => !el.hasAttribute('hidden'));
+      const lastItem = visibleItems[visibleItems.length - 1];
+      sinon.spy(logo, 'focus');
+
+      if (lastItem) {
+        lastItem.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+      }
+
+      expect(logo.focus).to.have.been.calledOnce;
+      logo.focus.restore();
+    });
+
+    test('logo Enter toggles sidebar expanded state', () => {
+      const logo = app.$.logo;
+      expect(app.sidebarExpanded).to.be.false;
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      expect(app.sidebarExpanded).to.be.true;
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      expect(app.sidebarExpanded).to.be.false;
+    });
+  });
+
+  suite('expandable sidebar', () => {
+    test('_toggleDrawer collapses expanded sidebar when opening drawer', () => {
+      app.sidebarExpanded = true;
+      app.drawerOpened = false;
+      app._selected = '';
+      app._toggleDrawer({ type: 'iron-activate' }, { detail: { selected: 'browser' } });
+      expect(app.sidebarExpanded).to.be.false;
+      expect(app.drawerOpened).to.be.true;
+    });
+
+    test('_toggleDrawer collapses expanded sidebar when clicking the same item', async () => {
+      app.sidebarExpanded = true;
+      app.drawerOpened = true;
+      app._selected = 'browser';
+      app.selectedTab = 'browser';
+      app._toggleDrawer({ type: 'iron-activate', detail: { selected: 'browser' } });
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      expect(app.drawerOpened).to.be.true;
+      expect(app.sidebarExpanded).to.be.false;
+    });
+
+    test('logo keeps dynamic theme img src', () => {
+      const img = app.$.logo.querySelector('img');
+      expect(img.getAttribute('src')).to.include('themes/');
+    });
+
+    test('sidebarRail is fixed for width transition', () => {
+      const rail = app.$.sidebarRail;
+      expect(rail).to.exist;
+      expect(getComputedStyle(rail).position).to.equal('fixed');
+    });
+
+    test('sidebar scrim is presentational and stays hidden from AT', () => {
+      const scrim = app.$.sidebarExpandScrim;
+      expect(scrim.getAttribute('role')).to.equal('presentation');
+      expect(scrim.getAttribute('aria-hidden')).to.equal('true');
+    });
+
+    test('_logoAriaLabel uses the collapsed key with product title placeholder', () => {
+      app.productName = 'Nuxeo';
+      const fakeI18n = (key, ...args) =>
+        key === 'app.brandedProductName' ? 'Hyland Nuxeo' : `${key}|${args.join(',')}`;
+
+      expect(app._logoAriaLabel(false, fakeI18n)).to.equal('accessibility.sidebar.logoCollapsed|Hyland Nuxeo');
+    });
+
+    test('_logoAriaLabel uses the expanded key with product title placeholder', () => {
+      app.productName = 'Nuxeo';
+      const fakeI18n = (key, ...args) =>
+        key === 'app.brandedProductName' ? 'Hyland Nuxeo' : `${key}|${args.join(',')}`;
+
+      expect(app._logoAriaLabel(true, fakeI18n)).to.equal('accessibility.sidebar.logoExpanded|Hyland Nuxeo');
+    });
+
+    test('_syncSidebarExpandedTooltips hides profile tooltip on expand', () => {
+      sinon.stub(app, '_syncSidebarMenuTooltips');
+      const profileTooltip = app.$.profileTooltip;
+      sinon.stub(profileTooltip, 'hide');
+
+      app._syncSidebarExpandedTooltips(true);
+
+      expect(app._syncSidebarMenuTooltips).to.have.been.calledWith(true);
+      expect(profileTooltip.hide).to.have.been.calledOnce;
+
+      app._syncSidebarMenuTooltips.restore();
+      profileTooltip.hide.restore();
+    });
+
+    test('_syncSidebarExpandedTooltips does not call hide when collapsing', () => {
+      sinon.stub(app, '_syncSidebarMenuTooltips');
+      const profileTooltip = app.$.profileTooltip;
+      sinon.stub(profileTooltip, 'hide');
+
+      app._syncSidebarExpandedTooltips(false);
+
+      expect(profileTooltip.hide).to.not.have.been.called;
+      app._syncSidebarMenuTooltips.restore();
+      profileTooltip.hide.restore();
+    });
+
+    test('_syncSidebarMenuTooltips propagates expanded state to all icons', () => {
+      const iconA = {};
+      const iconB = {};
+      const originalMenuContainer = app.$.menuContainer;
+      app.$.menuContainer = { querySelectorAll: sinon.stub().returns([iconA, iconB]) };
+
+      app._syncSidebarMenuTooltips(true);
+      expect(iconA.expanded).to.be.true;
+      expect(iconB.expanded).to.be.true;
+
+      app._syncSidebarMenuTooltips(false);
+      expect(iconA.expanded).to.be.false;
+      expect(iconB.expanded).to.be.false;
+
+      app.$.menuContainer = originalMenuContainer;
+    });
+
+    test('_syncSidebarMenuTooltips returns early when menu container is missing', () => {
+      const ctx = { $: null };
+      expect(() => app._syncSidebarMenuTooltips.call(ctx, true)).to.not.throw();
+    });
+
+    test('_onSidebarNavClick collapses sidebar and resets task selection', () => {
+      sinon.stub(app, '_collapseSidebar');
+      sinon.stub(app, '_resetTaskSelection');
+
+      app._onSidebarNavClick();
+
+      expect(app._collapseSidebar).to.have.been.calledOnce;
+      expect(app._resetTaskSelection).to.have.been.calledOnce;
+      app._collapseSidebar.restore();
+      app._resetTaskSelection.restore();
+    });
+
+    test('_onLogoClick prevents default, stops propagation and toggles sidebar', () => {
+      sinon.stub(app, '_toggleSidebarExpanded');
+      const event = { preventDefault: sinon.spy(), stopPropagation: sinon.spy() };
+
+      app._onLogoClick(event);
+
+      expect(event.preventDefault).to.have.been.calledOnce;
+      expect(event.stopPropagation).to.have.been.calledOnce;
+      expect(app._toggleSidebarExpanded).to.have.been.calledOnce;
+      app._toggleSidebarExpanded.restore();
+    });
+
+    test('_onSidebarScrimClick collapses sidebar', () => {
+      sinon.stub(app, '_collapseSidebar');
+
+      app._onSidebarScrimClick();
+
+      expect(app._collapseSidebar).to.have.been.calledOnce;
+      app._collapseSidebar.restore();
+    });
+
+    test('_onSidebarEscape collapses sidebar when Escape is pressed and expanded', () => {
+      sinon.stub(app, '_collapseSidebar');
+      app.sidebarExpanded = true;
+
+      app._onSidebarEscape({ key: 'Escape' });
+
+      expect(app._collapseSidebar).to.have.been.calledOnce;
+      app._collapseSidebar.restore();
+    });
+
+    test('menu keyup listener delegates to _toggleDrawer', () => {
+      sinon.stub(app, '_toggleDrawer');
+      app.$.menu.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true, cancelable: true }));
+
+      expect(app._toggleDrawer.called).to.be.true;
+      app._toggleDrawer.restore();
+    });
+
+    test('drawer transition listeners call _resizeDuringAnimation', () => {
+      sinon.stub(app, '_resizeDuringAnimation');
+
+      app.$.drawer.dispatchEvent(new Event('transitionrun'));
+      app.$.drawer.dispatchEvent(new Event('transitionstart'));
+
+      expect(app._resizeDuringAnimation.callCount).to.equal(2);
+      app._resizeDuringAnimation.restore();
+    });
+
+    test('toast opening listener applies panel style tweaks', async () => {
+      app.$.toast.labelText = 'opening';
+      app.$.toast.show();
+      await app.$.toast.updateComplete;
+
+      const root = app.$.toast.mdcRoot;
+      const label = root && root.querySelector('.mdc-snackbar__label');
+      const surface = root && root.querySelector('.mdc-snackbar__surface');
+      expect(root).to.exist;
+      expect(root.style.position).to.equal('relative');
+      expect(label.style.webkitFontSmoothing).to.equal('auto');
+      expect(surface.style.width).to.equal('344px');
+      app.$.toast.close();
+    });
+
+    test('unhandledrejection listener reports 404 errors via showError', () => {
+      const originalAddEventListener = window.addEventListener;
+      let rejectionHandler;
+      window.addEventListener = (type, handler, ...rest) => {
+        if (type === 'unhandledrejection') {
+          rejectionHandler = handler;
+        }
+        return originalAddEventListener.call(window, type, handler, ...rest);
+      };
+
+      return fixture(html`<nuxeo-app></nuxeo-app>`)
+        .then((app2) => {
+          sinon.stub(app2, 'i18n').callsFake((key) => key);
+          sinon.stub(app2, 'showError');
+          sinon.stub(app2, '_errorUrl').returns('https://example/error-url');
+
+          rejectionHandler({ reason: { status: 404, message: 'Not found' } });
+
+          expect(app2.showError).to.have.been.calledWith(404, 'Not found', 'https://example/error-url');
+          app2.showError.restore();
+          app2._errorUrl.restore();
+          app2.i18n.restore();
+        })
+        .finally(() => {
+          window.addEventListener = originalAddEventListener;
+        });
+    });
+
+    test('menu mutation observer syncs tooltips when sidebar is expanded', async () => {
+      sinon.stub(app, '_syncSidebarMenuTooltips');
+      app.sidebarExpanded = true;
+
+      app.$.menu.appendChild(document.createElement('div'));
+      await flush();
+
+      expect(app._syncSidebarMenuTooltips).to.have.been.calledWith(true);
+      app._syncSidebarMenuTooltips.restore();
+    });
+  });
+
+  suite('skip link behavior', () => {
+    test('click on skip link focuses and scrolls main content', () => {
+      const { skipLink, mainContent } = app.$;
+      sinon.spy(mainContent, 'focus');
+      sinon.stub(mainContent, 'scrollIntoView');
+
+      skipLink.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+      expect(mainContent.focus).to.have.been.calledOnce;
+      expect(mainContent.scrollIntoView).to.have.been.calledWith({ behavior: 'smooth' });
+      mainContent.focus.restore();
+      mainContent.scrollIntoView.restore();
+    });
+
+    test('Enter on skip link activates main content', () => {
+      const { skipLink, mainContent } = app.$;
+      sinon.spy(mainContent, 'focus');
+      sinon.stub(mainContent, 'scrollIntoView');
+
+      skipLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+
+      expect(mainContent.focus).to.have.been.calledOnce;
+      expect(mainContent.scrollIntoView).to.have.been.calledWith({ behavior: 'smooth' });
+      mainContent.focus.restore();
+      mainContent.scrollIntoView.restore();
+    });
   });
 
   test('_documentRemovedFromCollection toasts', () => {
@@ -1516,19 +1908,45 @@ suite('nuxeo-app', () => {
   });
 
   suite('logo menu keyboard navigation', () => {
-    test('ArrowDown on logo focuses first menu item', () => {
+    test('ArrowDown on logo focuses home link when present', () => {
+      const logo = app.$.logo;
+      const menuContainer = app.$.menuContainer;
+      if (!logo || !menuContainer) {
+        return;
+      }
+      const homeLink = menuContainer.querySelector('.home-link');
+      if (!homeLink) {
+        return;
+      }
+      const focusSpy = sinon.spy(homeLink, 'focus');
+      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(focusSpy).to.have.been.called;
+      focusSpy.restore();
+    });
+
+    test('ArrowDown from home link focuses first menu item', () => {
       const logo = app.$.logo;
       const menu = app.$.menu;
-      if (!logo || !menu) {
+      const menuContainer = app.$.menuContainer;
+      if (!logo || !menu || !menuContainer) {
+        return;
+      }
+      const homeLink = menuContainer.querySelector('.home-link');
+      if (!homeLink) {
         return;
       }
       const item = document.createElement('div');
-      item.setAttribute('name', 'browse');
       const focusSpy = sinon.spy(item, 'focus');
-      sinon.stub(menu, 'querySelector').returns(item);
-      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      sinon.stub(menu, '_setFocusedItem').callsFake(() => item.focus());
+      Object.defineProperty(menu, 'items', { value: [item], configurable: true });
+      const evt = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true });
+      Object.defineProperty(evt, 'composedPath', {
+        value: () => [homeLink, menuContainer, app],
+        configurable: true,
+      });
+      menuContainer.dispatchEvent(evt);
       expect(focusSpy).to.have.been.called;
-      menu.querySelector.restore();
+      menu._setFocusedItem.restore();
       focusSpy.restore();
     });
   });
@@ -1931,16 +2349,14 @@ suite('nuxeo-app', () => {
       if (!logo || !menu) {
         return;
       }
-      app.logoToMenuNavigation();
       const first = document.createElement('div');
       const last = document.createElement('div');
-      sinon.stub(menu, 'querySelectorAll').returns([first, last]);
+      Object.defineProperty(menu, 'items', { value: [first, last], configurable: true });
       const focusSpy = sinon.spy(logo, 'focus');
       const evt = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true });
       Object.defineProperty(evt, 'target', { value: last, configurable: true });
       menu.dispatchEvent(evt);
       expect(focusSpy).to.have.been.called;
-      menu.querySelectorAll.restore();
       focusSpy.restore();
     });
   });
