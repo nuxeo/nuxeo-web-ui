@@ -1032,15 +1032,22 @@ Polymer({
       this.$.task
         .get()
         .then((task) => {
+          const targetDoc = task?.targetDocumentIds?.[0];
+          if (task?.state === 'ended' && targetDoc?.uid) {
+            this._loadDocument({ uid: targetDoc.uid, path: targetDoc.path, page: 'browse' }, { applyState: false })
+              .then((doc) => {
+                this._navigateAfterTaskProcessed(doc);
+              })
+              .catch((error) => {
+                this._handleTaskLoadError(error);
+              });
+            return;
+          }
           this._defineTaskAndNavigate(task);
           this.loading = false;
         })
         .catch((error) => {
-          if (error.status === 403) {
-            this._fetchTaskCount();
-            this.navigateTo('tasks');
-            this.loading = false;
-          }
+          this._handleTaskLoadError(error);
         });
     } else {
       this._defineTaskAndNavigate();
@@ -1050,6 +1057,40 @@ Polymer({
   _defineTaskAndNavigate(task) {
     this.currentTask = task;
     this.show('tasks');
+  },
+
+  _navigateAfterTaskProcessed(doc) {
+    if (!doc) {
+      this.loading = false;
+      return;
+    }
+    const nextTaskId = doc.contextParameters?.pendingTasks?.find((task) => task?.id)?.id;
+    if (nextTaskId) {
+      this.navigateTo('tasks', nextTaskId);
+      return;
+    }
+    this.show('browse');
+    this.navigateTo(doc);
+    this.loading = false;
+  },
+
+  _handleTaskLoadError(error) {
+    if (error?.status === 403) {
+      this._fetchTaskCount();
+      this.navigateTo('tasks');
+    } else {
+      this.showError(error?.status, this.i18n('browse.error'), error?.message);
+    }
+    this.loading = false;
+  },
+
+  _handleDocumentRefreshError(err) {
+    if (err?.['entity-type'] === 'exception' && err.status === 403) {
+      this.navigateTo('tasks');
+    } else {
+      this.showError(err?.status, this.i18n('browse.error'), err?.message);
+    }
+    this.loading = false;
   },
 
   _getSavedSearchForm() {
@@ -1083,7 +1124,7 @@ Polymer({
    * If the document is successfuly retrieved, it is retuned by the method, except if the document representes a saved
    * search, in which case `undefined` is returned.
    */
-  _loadDocument(docParam) {
+  _loadDocument(docParam, { applyState = true } = {}) {
     this.loading = true;
     this.docId = docParam.uid;
     this.docPath = docParam.path;
@@ -1099,17 +1140,23 @@ Polymer({
         this.loading = false;
         return;
       }
-      if (this.docId && !doc.isVersion) {
-        this.docId = '';
-        this.docPath = doc.path;
+      if (applyState) {
+        this._applyDocumentFromLoad(doc);
       }
-      this.currentParent = this.hasFacet(doc, 'Folderish')
-        ? doc
-        : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
-      this.set('currentDocument', doc);
       this.loading = false;
       return doc;
     });
+  },
+
+  _applyDocumentFromLoad(doc) {
+    if (this.docId && !doc.isVersion) {
+      this.docId = '';
+      this.docPath = doc.path;
+    }
+    this.currentParent = this.hasFacet(doc, 'Folderish')
+      ? doc
+      : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
+    this.set('currentDocument', doc);
   },
 
   load(page, uid, path, action) {
@@ -1373,20 +1420,21 @@ Polymer({
     });
   },
 
-  _refreshAndFetchTasks() {
+  _refreshAndFetchTasks(e) {
+    const taskProcessed = e?.type === 'workflowTaskProcessed';
     // let's refresh the current document since it might have been changed (ex: state and version)
     if (this.currentDocument) {
-      this._loadDocument(this.currentDocument)
-        .then(() => {
-          this.show('browse');
+      const loadOptions = taskProcessed ? { applyState: false } : {};
+      this._loadDocument(this.currentDocument, loadOptions)
+        .then((doc) => {
+          if (taskProcessed) {
+            this._navigateAfterTaskProcessed(doc);
+          } else {
+            this.show('browse');
+          }
         })
         .catch((err) => {
-          if (err['entity-type'] && err['entity-type'] === 'exception' && err.status === 403) {
-            this.loading = false;
-            this.navigateTo('tasks');
-          } else {
-            this.showError(err.status, this.i18n('browse.error'), err.message);
-          }
+          this._handleDocumentRefreshError(err);
         });
     }
     this._fetchTaskCount();

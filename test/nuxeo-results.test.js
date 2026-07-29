@@ -1490,6 +1490,77 @@ suite('nuxeo-results', () => {
       expect(() => results._applyPrefsToView(null, { any: true })).to.not.throw();
     });
 
+    test('_applyPrefsToView reset preserves layout-declared width attribute (WEBUI-2079)', () => {
+      // Column elements that expose hasAttribute/getAttribute (mimics a real DOM custom element).
+      // Title-like column has an explicit width="300px" attribute; the other has none.
+      // Set current widths to non-default values so view.set is invoked on reset.
+      const titleCol = {
+        hidden: false,
+        order: 0,
+        width: '120px',
+        hasAttribute: (name) => name === 'width',
+        getAttribute: (name) => (name === 'width' ? '300px' : null),
+      };
+      const otherCol = {
+        hidden: false,
+        order: 1,
+        width: '120px',
+        hasAttribute: () => false,
+        getAttribute: () => null,
+      };
+      const view = {
+        columns: [titleCol, otherCol],
+        sortOrder: [],
+        set: sinon.spy(),
+      };
+
+      results._applyPrefsToView(view, {});
+
+      // Declared width is captured on the column with an explicit width attribute only.
+      expect(titleCol._declaredWidth).to.equal('300px');
+      expect(otherCol._declaredWidth).to.be.undefined;
+
+      // Reset writes the captured declared width back; the other column resets to null (unchanged behavior).
+      expect(view.set.calledWith('columns.0.width', '300px')).to.be.true;
+      expect(view.set.calledWith('columns.1.width', null)).to.be.true;
+    });
+
+    test('_applyPrefsToView reset is idempotent and does not re-capture _declaredWidth', () => {
+      let getAttributeCalls = 0;
+      const col = {
+        hidden: false,
+        order: 0,
+        width: '300px',
+        hasAttribute: () => true,
+        getAttribute: () => {
+          getAttributeCalls += 1;
+          return '300px';
+        },
+      };
+      const view = { columns: [col], sortOrder: [], set: sinon.spy() };
+
+      results._applyPrefsToView(view, {});
+      const callsAfterFirst = getAttributeCalls;
+
+      // Mutate width at runtime to simulate a Polymer property change; getAttribute must not be re-read.
+      col.width = '500px';
+      results._applyPrefsToView(view, {});
+
+      expect(getAttributeCalls).to.equal(callsAfterFirst);
+      expect(col._declaredWidth).to.equal('300px');
+    });
+
+    test('_applyPrefsToView reset skips _declaredWidth capture for non-DOM mock columns', () => {
+      // Plain JS mock columns (no hasAttribute) must continue to reset width to null.
+      const col = { hidden: false, order: 0, width: 120 };
+      const view = { columns: [col], sortOrder: [], set: sinon.spy() };
+
+      expect(() => results._applyPrefsToView(view, {})).to.not.throw();
+
+      expect(col._declaredWidth).to.be.undefined;
+      expect(view.set.calledWith('columns.0.width', null)).to.be.true;
+    });
+
     test('_debounceSave stores debouncer object', () => {
       results._debounceSave('_prefsSaveDebouncer', () => {});
       expect(results._prefsSaveDebouncer).to.exist;

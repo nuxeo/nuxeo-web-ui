@@ -130,7 +130,7 @@ Polymer({
 
   add(doc) {
     this.$.storage.add(doc);
-    if (this.documents.length > this.maxSize) {
+    if (this.documents && this.documents.length > this.maxSize) {
       this.splice('documents', -1, 1);
     }
   },
