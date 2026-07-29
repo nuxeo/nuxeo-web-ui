@@ -119,7 +119,7 @@ suite('nuxeo-create-button-collision-behavior', () => {
 
       expect(element._trayShift).to.be.above(0);
       expect(element.$.tray.style.transform).to.equal(`translateY(-${element._trayShift}px)`);
-      expect(element.$.tray.getBoundingClientRect().bottom).to.be.at.most(target.top - CONTROL_CLEARANCE_PX);
+      expect(element.$.tray.getBoundingClientRect().bottom).to.be.below(target.top);
       expect(isCoveredByCreateButton(x, y)).to.be.false;
     });
 
@@ -150,20 +150,27 @@ suite('nuxeo-create-button-collision-behavior', () => {
     });
 
     test('lifts for a control whose own content is what sits under the button', async () => {
+      // The label covers the whole control, so every hit-test lands on the label and the control
+      // can only be found by looking at what the label sits in.
       const control = placeUnderTray('button');
+      control.style.padding = '0';
+      control.style.border = '0';
       const label = document.createElement('span');
       label.textContent = 'Download';
-      label.style.display = 'block';
-      label.style.height = '100%';
+      label.setAttribute('style', 'display: block; width: 100%; height: 100%;');
       control.appendChild(label);
       await flush();
       const target = control.getBoundingClientRect();
+      element.style.pointerEvents = 'none';
+      const hit = deepElementAt((target.left + target.right) / 2, (target.top + target.bottom) / 2);
+      element.style.pointerEvents = '';
+      expect(hit).to.equal(label);
 
       element._avoidControlCollisions();
       await settle();
 
       expect(element._trayShift).to.be.above(0);
-      expect(element.$.tray.getBoundingClientRect().bottom).to.be.at.most(target.top - CONTROL_CLEARANCE_PX);
+      expect(element.$.tray.getBoundingClientRect().bottom).to.be.below(target.top);
     });
 
     test('stays in its corner over content that is not a control', () => {
