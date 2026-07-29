@@ -51,11 +51,11 @@ it in Cursor:
 > You need Jira access to the **WEBUI** and **NXP** projects (via org SSO). Ask your lead if a call
 > returns "no accessible resources".
 
-### 2. Jira API token — needed to upload evidence (screenshots/videos) & some comment ops
+### 2. Jira API token — needed to upload evidence (screenshots/videos) & link PRs on the ticket
 
-The Atlassian MCP has **no attachment-upload tool**, so binary uploads go through the Jira REST API,
-which needs an API token. Store your credentials in two local files (kept out of git, **never
-commit**):
+The Atlassian MCP has **no attachment-upload tool** and **no create-remote-link tool**, so uploading
+evidence and adding each PR as a Jira **web link** both go through the Jira REST API, which needs an
+API token. Store your credentials in two local files (kept out of git, **never commit**):
 
 ```bash
 printf '%s' 'you@hyland.com' > ~/.jira_email

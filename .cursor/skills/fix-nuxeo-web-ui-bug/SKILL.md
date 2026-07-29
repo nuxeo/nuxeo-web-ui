@@ -332,6 +332,63 @@ This is the "commit and raise PR" trigger.
   `gh api repos/nuxeo/nuxeo-web-ui/commits/<sha> --jq '.commit.verification'` → `verified:true`.
   `unknown_key` means the signing key isn't added on GitHub as a **Signing Key** (separate
   from an Authentication key) — fix that, no re-push needed.
+- **Then go straight to Phase 6.5 and add each PR to the ticket as a remote web link.** A PR is not
+  "raised" until it is linked on the Jira issue; don't defer it to the end of the run.
+
+## Phase 6.5 — Link every PR on the Jira issue as a remote **web link** (MANDATORY)
+> ### ⛔ NON-NEGOTIABLE — this is a separate action, not a side effect of anything else
+> The moment a PR exists, add it to the ticket as a Jira **remote web link** (what shows under the
+> issue's *Web links* / *Links* section). This is the step that keeps getting skipped; treat it as part
+> of "raise the PR", not as paperwork for later.
+
+**None of these count as done.** If you only did one of them, the step is still outstanding:
+- ❌ pasting the PR URL inside a Jira **comment** (Phase 7.5 does that too — it is *not* a web link);
+- ❌ the **PR title / branch name containing `WEBUI-<id>`** (that is a GitHub-side convention);
+- ❌ a link **on the GitHub side** pointing at the Jira issue, or the Jira dev-panel/Smart-Commit
+  integration picking the key up (it may never fire — do not rely on it);
+- ❌ an **issue link** created with `createIssueLink` (that links Jira issue ↔ Jira issue only and
+  rejects a URL).
+
+**The Atlassian MCP cannot do this — there is no create-remote-link tool.** It exposes only
+`getJiraIssueRemoteIssueLinks` (read) and `createIssueLink` (issue↔issue). Reaching for MCP here finds
+nothing and is exactly the trap that makes this step get dropped. **The Jira REST `remotelink`
+endpoint is the required path**, with the same `~/.jira_email` / `~/.jira_token` credentials used for
+attachments (Phase 7.5).
+
+1. **Create one remote link per PR — including every backport** (so two links for the standard
+   `lts-2025` + `maintenance-3.1.x` pair). `globalId` = the PR URL makes it an **upsert**, so
+   re-running is idempotent and never duplicates:
+   ```bash
+   U="$(cat ~/.jira_email):$(cat ~/.jira_token)"
+   TICKET=WEBUI-<id>
+   SUMMARY="<the ticket summary>"
+   for E in <pr1>:lts-2025 <pr2>:maintenance-3.1.x; do   # one entry per PR opened for this ticket
+     N=${E%%:*}; B=${E##*:}; URL="https://github.com/nuxeo/nuxeo-web-ui/pull/$N"
+     curl -s -u "$U" -H "Content-Type: application/json" -X POST \
+       "https://hyland.atlassian.net/rest/api/3/issue/$TICKET/remotelink" \
+       -d "{\"globalId\":\"$URL\",
+            \"application\":{\"type\":\"com.github\",\"name\":\"GitHub\"},
+            \"relationship\":\"mentioned in\",
+            \"object\":{\"url\":\"$URL\",\"title\":\"PR #$N — $TICKET: $SUMMARY ($B)\",
+              \"icon\":{\"url16x16\":\"https://github.githubassets.com/favicon.ico\",\"title\":\"GitHub\"}}}"
+   done
+   ```
+   Expect `201` (created) or `200` (updated) per PR; anything else means it did **not** land.
+2. **Verify by reading the links back and asserting one per PR.** Do not take the POST response as
+   proof — `GET /remotelink` is the check, and it must list every PR:
+   ```bash
+   curl -s -u "$U" "https://hyland.atlassian.net/rest/api/3/issue/$TICKET/remotelink" \
+     | PRS="<pr1> <pr2>" python3 -c "
+   import json,os,sys
+   links=json.load(sys.stdin)
+   for l in links: print('•', l['object']['title'], '->', l['object']['url'])
+   have={(l.get('globalId') or '').rsplit('/',1)[-1] for l in links}
+   missing=set(os.environ['PRS'].split())-have
+   print('❌ MISSING remote web link for PR(s):', sorted(missing)) if missing else print('✅ one remote web link per PR')
+   sys.exit(1 if missing else 0)"
+   ```
+3. **Print the resulting link titles/URLs** in your summary so the state is on the record. If a PR is
+   opened later (e.g. a second backport), come back and add its link too.
 
 **Exit gate:** both PRs exist, target the two different bases, and every commit on each is
 `Verified`. One command, and it must list two rows with different bases:
@@ -459,19 +516,13 @@ curl -s -u "$U" "https://hyland.atlassian.net/rest/api/3/issue/<TICKET-ID>?field
 ```
 Both videos and your before/after screenshots must be listed with a non-trivial size. If any is
 missing, re-upload it; only then may the summary say "attached".
-**Add the PRs as Jira "web links" (remote links), not just URLs in a comment.** The Atlassian MCP has
-**no create-remote-link tool** (`getJiraIssueRemoteIssueLinks` is read-only; `createIssueLink` only
-links two Jira issues). So use the REST `remotelink` endpoint directly — one call per base PR, using a
-stable `globalId` so re-runs update in place instead of duplicating:
-```bash
-U="$(tr -d '\r\n' < ~/.jira_email):$(tr -d '\r\n' < ~/.jira_token)"
-for pr in <PR-lts> <PR-maint>; do
-  curl -s -u "$U" -X POST -H "Content-Type: application/json" \
-    "https://hyland.atlassian.net/rest/api/3/issue/<TICKET-ID>/remotelink" \
-    -d "{\"globalId\":\"pr-$pr\",\"object\":{\"url\":\"https://github.com/nuxeo/nuxeo-web-ui/pull/$pr\",\"title\":\"#$pr <TICKET-ID>: <pr-title>\"}}" \
-    -w '\nremotelink %{http_code}\n'   # expect 201 (created) or 200 (updated)
-done
-```
+
+**The PRs must also be Jira "web links" (remote links), not just URLs in this comment** — one link per
+PR, backports included. Don't repeat the recipe here: the canonical, idempotent `remotelink` call and
+its `GET /remotelink` assertion are **Phase 6.5**, and you should already have run them when each PR
+was opened. Re-check them here (and add a link for any PR opened since) rather than issuing a second
+`POST` with a different `globalId`, which would duplicate the link instead of updating it.
+
 If `~/.jira_token` is absent, have the user create it (`printf '%s' '<token>' > ~/.jira_token &&
 chmod 600 ~/.jira_token`) rather than pasting the token into chat. Drag-and-drop in the browser is the
 manual fallback.
@@ -495,8 +546,10 @@ curl -s -u "$U" "https://hyland.atlassian.net/rest/api/3/issue/<TICKET-ID>/comme
 ## Phase 8 — Ready for QA checklist (internal only — do NOT post to Jira)
 Evaluate page `4169400498` against both PRs and produce a Markdown table (Question | Link |
 Y/N/NA | Comments). Check, per PR: review comments resolved; before/after evidence attached (screenshots **and the
-before/after videos** from Phase 2); both PRs linked on the ticket; no open Copilot threads (GraphQL
-`reviewThreads.isResolved`); all checks green; ≥2 approvals incl. lead; all commits Verified.
+before/after videos** from Phase 2); **`GET /remotelink` returns a remote web link for every PR opened
+for this ticket** (Phase 6.5 — a PR URL inside a comment does **not** satisfy this; run the check, don't
+assume); no open Copilot threads (GraphQL `reviewThreads.isResolved`); all checks green; ≥2 approvals
+incl. lead; all commits Verified.
 
 > **This checklist is an internal readiness gate — output it in chat ONLY. Do NOT post it as a Jira
 > comment.** Print the table in your reply and stop there; do not call `addCommentToJiraIssue` with
@@ -506,8 +559,9 @@ before/after videos** from Phase 2); both PRs linked on the ticket; no open Copi
 > `curl -u "$(cat ~/.jira_email):$(cat ~/.jira_token)" -X DELETE
 > https://hyland.atlassian.net/rest/api/3/issue/<TICKET-ID>/comment/<commentId>`.)
 
-Flag in the table what stays manual: uploading the before/after videos to the ticket (MCP can't
-attach — see Phase 7.5), dev-panel PR links, and approvals.
+Flag in the table what stays genuinely manual: **approvals only.** Everything else — attaching the
+before/after videos (Phase 7.5) and the PR web links (Phase 6.5) — is automatable via Jira REST, so do
+it rather than flagging it.
 
 **Exit gate:** every row is Y or a justified NA — a row you never checked is not NA, it's unfinished,
 so go and check it. And confirm the checklist did **not** reach Jira: re-list the ticket's comments
@@ -602,6 +656,16 @@ It prints PASS/FAIL per gate and exits non-zero if any failed:
 exits `0` may you tell the user the run is complete or treat the ticket as Ready for QA. If a gate
 genuinely cannot pass (e.g. the Jira token needs a human to refresh it), say so explicitly in the
 summary as an outstanding item — never quietly drop it.
+
+### Done criteria — verify each one before you claim the run is complete
+Finishing with any of these unchecked is a **failed run**, not a partial success. Re-check by running
+the command, not from memory:
+- [ ] One PR per base, both pushed to `origin` and showing commits as **Verified**.
+- [ ] **`GET /rest/api/3/issue/<TICKET-ID>/remotelink` returns a remote web link for every PR opened
+      for this ticket** (Phase 6.5, step 2 — run the assertion; a PR URL in a comment does not count).
+- [ ] Fix-summary comment posted, in real Markdown (Phase 7.5).
+- [ ] Before/after screenshots **and** videos actually attached to the ticket (Phase 7.5).
+- [ ] Every review thread replied to **and** resolved on **both** PRs (Phase 7).
 
 ## Recommended extras (do these when applicable, still autonomously)
 - **Add/adjust a functional test.** For user-facing behavior, add a Gherkin scenario
