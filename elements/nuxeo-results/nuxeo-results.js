@@ -722,7 +722,12 @@ Polymer({
 
       // keep the scroll anchor fresh while the user scrolls; the position is
       // re-applied once rows load (see `_itemsChanged` → `_srMaybeRestore`).
-      afterNextRender(this, () => this._srArmScrollTracking(view));
+      // Guard against a stale deferred call after a fast view swap.
+      afterNextRender(this, () => {
+        if (this.view === view) {
+          this._srArmScrollTracking(view);
+        }
+      });
 
       this.fire('search-results-view', { view, name: this.name });
     }

@@ -58,6 +58,40 @@ function _setAnchor(name, anchor) {
  */
 export const NuxeoScrollRestoreBehavior = {
   /**
+   * The rows for a view, mirroring the `nuxeo-results` `items` getter: some views
+   * expose their data as `view.items`, others only via the underlying
+   * `view.$.list.items`. `firstVisibleIndex` / `scrollToIndex` are indexed against
+   * the iron-list, so prefer `$.list.items` (falling back to `view.items`) to keep
+   * the captured record id and the index aligned.
+   * @param {Object=} view the view to read from; defaults to `this.view`.
+   * @return {!Array} the rows array (possibly empty).
+   */
+  _srItems(view) {
+    const v = view || this.view;
+    if (!v) {
+      return [];
+    }
+    try {
+      const listItems = v.$?.list?.items;
+      if (Array.isArray(listItems) && listItems.length) {
+        return listItems;
+      }
+      if (Array.isArray(v.items) && v.items.length) {
+        return v.items;
+      }
+      if (Array.isArray(listItems)) {
+        return listItems;
+      }
+      if (Array.isArray(v.items)) {
+        return v.items;
+      }
+    } catch (e) {
+      /* unsafe read during attach/refresh — treat as no rows yet */
+    }
+    return [];
+  },
+
+  /**
    * Records the current top-of-viewport anchor for `this.name`.
    * @param {Object=} view the view to read from; defaults to `this.view`.
    */
@@ -71,8 +105,7 @@ export const NuxeoScrollRestoreBehavior = {
     if (typeof index !== 'number' || index < 0) {
       return;
     }
-    const items = Array.isArray(v.items) ? v.items : [];
-    const item = items[index];
+    const item = this._srItems(v)[index];
     _setAnchor(name, { uid: item?.uid || null, index });
   },
 
@@ -101,7 +134,7 @@ export const NuxeoScrollRestoreBehavior = {
     if (!view || typeof view.scrollToIndex !== 'function') {
       return;
     }
-    const items = Array.isArray(view.items) ? view.items : [];
+    const items = this._srItems(view);
     if (items.length === 0) {
       return; // rows not loaded yet; wait for the next items update
     }
@@ -111,6 +144,11 @@ export const NuxeoScrollRestoreBehavior = {
       return;
     }
     const { uid, index } = anchor;
+    // The user was at (or near) the top — a fresh list already renders from the
+    // top, so never jump, even if the anchored record has since moved down.
+    if (typeof index !== 'number' || index <= 0) {
+      return;
+    }
     // If the record is already loaded, jump straight to its real position
     // (record id wins over the possibly-stale index when the list reordered).
     const currentIndex = uid ? items.findIndex((it) => it && it.uid === uid) : -1;
@@ -123,11 +161,9 @@ export const NuxeoScrollRestoreBehavior = {
     }
     // Record not currently loaded: jump to the remembered index to bring that
     // (virtualized) region into view, then correct by record id once it loads.
-    if (typeof index === 'number' && index > 0) {
-      view.scrollToIndex(index);
-      if (uid) {
-        this._srScheduleVerify(uid, index, 0);
-      }
+    view.scrollToIndex(index);
+    if (uid) {
+      this._srScheduleVerify(uid, index, 0);
     }
   },
 
@@ -141,7 +177,7 @@ export const NuxeoScrollRestoreBehavior = {
       timeOut.after(RESTORE_VERIFY_DELAYS_MS[attempt]),
       () => {
         const view = this.view;
-        const items = view && Array.isArray(view.items) ? view.items : [];
+        const items = this._srItems(view);
         if (!view || items.length === 0) {
           return;
         }
@@ -162,7 +198,9 @@ export const NuxeoScrollRestoreBehavior = {
   /** Attaches a debounced scroll listener that keeps the anchor fresh. */
   _srArmScrollTracking(view) {
     this._srDisarmScrollTracking();
-    if (!view?.$?.list || typeof view.$.list.addEventListener !== 'function') {
+    // Guard against out-of-order deferred calls: only track the view that is still
+    // the active one, so a fast display-mode/view swap can't attach to a stale view.
+    if (view !== this.view || !view?.$?.list || typeof view.$.list.addEventListener !== 'function') {
       return;
     }
     const list = view.$.list;
@@ -184,6 +222,11 @@ export const NuxeoScrollRestoreBehavior = {
   _srDisarmScrollTracking() {
     if (this._srScrollList && this._srScrollHandler && typeof this._srScrollList.removeEventListener === 'function') {
       this._srScrollList.removeEventListener('scroll', this._srScrollHandler);
+    }
+    // Cancel any queued save so a late debounced callback can't overwrite the
+    // anchor with a stale index after the view was swapped or torn down.
+    if (this._srScrollDebouncer?.isActive?.()) {
+      this._srScrollDebouncer.cancel();
     }
     this._srScrollList = null;
     this._srScrollHandler = null;
