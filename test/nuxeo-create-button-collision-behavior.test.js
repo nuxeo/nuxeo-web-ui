@@ -149,6 +149,23 @@ suite('nuxeo-create-button-collision-behavior', () => {
       expect(Math.round(measured.top)).to.equal(Math.round(resting.top));
     });
 
+    test('lifts for a control whose own content is what sits under the button', async () => {
+      const control = placeUnderTray('button');
+      const label = document.createElement('span');
+      label.textContent = 'Download';
+      label.style.display = 'block';
+      label.style.height = '100%';
+      control.appendChild(label);
+      await flush();
+      const target = control.getBoundingClientRect();
+
+      element._avoidControlCollisions();
+      await settle();
+
+      expect(element._trayShift).to.be.above(0);
+      expect(element.$.tray.getBoundingClientRect().bottom).to.be.at.most(target.top - CONTROL_CLEARANCE_PX);
+    });
+
     test('stays in its corner over content that is not a control', () => {
       placeUnderTray('div');
 
