@@ -26,6 +26,14 @@ const makeDocs = (size) =>
 // Minimal host that mixes in the behavior, mimicking how `nuxeo-results` uses it.
 const makeHost = (name, view) => Object.assign(Object.create(NuxeoScrollRestoreBehavior), { name, view });
 
+// Wait a real (short) delay for a debounced callback to fire. Real timers are used
+// deliberately: sinon's global fake timers interfere with the shared web-test-runner
+// / Mocha scheduling across the aggregated suite.
+const wait = (ms) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 // A view stub exposing the surface the behavior relies on.
 const makeView = (items, firstVisibleIndex) => {
   return {
@@ -92,6 +100,18 @@ suite('NuxeoScrollRestoreBehavior', () => {
     expect(view2.scrollToIndex.called).to.equal(false);
   });
 
+  test('does not restore when left at the top, even if the top record moved', () => {
+    const view = makeView(makeDocs(60), 0); // doc-0 was at the top
+    makeHost(name, view)._srSaveAnchor();
+    // doc-0 has moved to index 8 while the user was away
+    const reordered = makeDocs(60);
+    const moved = reordered.splice(0, 1)[0];
+    reordered.splice(8, 0, moved);
+    const view2 = makeView(reordered, 0);
+    makeHost(name, view2)._srMaybeRestore();
+    expect(view2.scrollToIndex.called).to.equal(false);
+  });
+
   test('restores only once per (re)arm', () => {
     const view = makeView(makeDocs(60), 40);
     makeHost(name, view)._srSaveAnchor();
@@ -139,7 +159,7 @@ suite('NuxeoScrollRestoreBehavior', () => {
     });
     loaded[12] = { uid: 'doc-40' };
     view2.items = loaded;
-    await new Promise((r) => setTimeout(r, 350));
+    await wait(300);
     expect(view2.scrollToIndex.calledTwice).to.equal(true);
     expect(view2.scrollToIndex.secondCall.args[0]).to.equal(12);
   });
@@ -173,7 +193,7 @@ suite('NuxeoScrollRestoreBehavior', () => {
     expect(host._srScrollList).to.equal(null);
   });
 
-  test('scroll tracking keeps the anchor fresh', () => {
+  test('scroll tracking keeps the anchor fresh', async () => {
     const list = {
       firstVisibleIndex: 0,
       addEventListener: sinon.spy(),
@@ -186,17 +206,39 @@ suite('NuxeoScrollRestoreBehavior', () => {
     expect(list.addEventListener.calledOnce).to.equal(true);
     // simulate the user scrolling to index 25
     list.firstVisibleIndex = 25;
-    const handler = list.addEventListener.firstCall.args[1];
-    handler();
-    return new Promise((r) => setTimeout(r, 200)).then(() => {
-      // the fresh anchor is applied on the next mount
-      const view2 = makeView(makeDocs(60), 0);
-      makeHost(name, view2)._srMaybeRestore();
-      expect(view2.scrollToIndex.calledOnce).to.equal(true);
-      expect(view2.scrollToIndex.firstCall.args[0]).to.equal(25);
-      // and disarming removes the listener
-      host._srDisarmScrollTracking();
-      expect(list.removeEventListener.calledOnce).to.equal(true);
-    });
+    list.addEventListener.firstCall.args[1]();
+    await wait(200);
+    // the fresh anchor is applied on the next mount
+    const view2 = makeView(makeDocs(60), 0);
+    makeHost(name, view2)._srMaybeRestore();
+    expect(view2.scrollToIndex.calledOnce).to.equal(true);
+    expect(view2.scrollToIndex.firstCall.args[0]).to.equal(25);
+    // and disarming removes the listener
+    host._srDisarmScrollTracking();
+    expect(list.removeEventListener.calledOnce).to.equal(true);
+  });
+
+  test('disarming cancels a queued save so a late scroll cannot overwrite the anchor', async () => {
+    const list = {
+      firstVisibleIndex: 40,
+      addEventListener: sinon.spy(),
+      removeEventListener: sinon.spy(),
+    };
+    const view = { items: makeDocs(60), $: { list }, scrollToIndex: sinon.spy() };
+    const host = makeHost(name, view);
+    host._srDidInitialLoad = true;
+    host._srSaveAnchor(); // initial anchor at index 40
+    host._srArmScrollTracking(view);
+    // user scrolls to 5, queuing a debounced save
+    list.firstVisibleIndex = 5;
+    list.addEventListener.firstCall.args[1]();
+    expect(host._srScrollDebouncer.isActive()).to.equal(true); // save is queued
+    // the view is swapped/torn down: disarm before the debounce fires
+    host._srDisarmScrollTracking();
+    expect(host._srScrollDebouncer.isActive()).to.equal(false); // queued save was cancelled
+    const view2 = makeView(makeDocs(60), 0);
+    makeHost(name, view2)._srMaybeRestore();
+    // anchor is still the pre-scroll index 40, not the stale late 5
+    expect(view2.scrollToIndex.firstCall.args[0]).to.equal(40);
   });
 });
