@@ -34,7 +34,9 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
+import { NuxeoScrollRestoreBehavior } from '../behaviors/nuxeo-scroll-restore-behavior.js';
 
 const hasSelectAllEnabled = config.get('selection.selectAllEnabled', false);
 
@@ -271,7 +273,7 @@ Polymer({
   `,
 
   is: 'nuxeo-results',
-  behaviors: [RoutingBehavior, FormatBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, NuxeoScrollRestoreBehavior],
 
   properties: {
     /**
@@ -537,6 +539,9 @@ Polymer({
 
   detached() {
     if (this.view) {
+      // remember the scroll position so it can be restored when the user returns
+      this._srSaveAnchor();
+      this._srDisarmScrollTracking();
       this.unlisten(this.view, 'columns-changed', '_columnsChanged');
       this.unlisten(this.view, 'selected-items-changed', '_selectedItemsChanged');
       this.unlisten(this.view, 'settings-changed', '_saveViewSettings');
@@ -654,6 +659,11 @@ Polymer({
 
   _viewChanged(view, oldView) {
     if (oldView) {
+      // remember the current scroll position before swapping/tearing down the view,
+      // and re-arm restore so a display-mode switch keeps the position
+      this._srSaveAnchor(oldView);
+      this._srDisarmScrollTracking();
+      this._srRearmRestore();
       this.unlisten(oldView, 'columns-changed', '_columnsChanged');
       this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
       this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
@@ -709,6 +719,11 @@ Polymer({
 
       // fetch after state restore
       this.fetch();
+
+      // keep the scroll anchor fresh while the user scrolls; the position is
+      // re-applied once rows load (see `_itemsChanged` → `_srMaybeRestore`).
+      afterNextRender(this, () => this._srArmScrollTracking(view));
+
       this.fire('search-results-view', { view, name: this.name });
     }
   },
@@ -977,6 +992,8 @@ Polymer({
        */
       this.$.toolbar._resultsCount = this.resultsCount - this._excludedDocs;
     }
+    // rows (re)loaded — restore the remembered scroll position if one is pending
+    this._srMaybeRestore();
   },
 
   _handleViewQuickFiltersSync(e) {
