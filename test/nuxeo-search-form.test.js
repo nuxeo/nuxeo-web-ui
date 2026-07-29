@@ -598,6 +598,53 @@ suite('nuxeo-search-form', () => {
       expect(searchForm.$.provider.quickFilters).to.deep.equal([]);
     });
   });
+
+  suite('result name tooltip (WEBUI-2009)', () => {
+    // Result names wrap onto two lines and are clamped beyond that, so the tooltip is
+    // applied on hover only when the name is actually clipped. Heights are stubbed because
+    // a detached node has no layout.
+    const nameNode = (text, clientHeight, scrollHeight) => {
+      const node = document.createElement('span');
+      node.textContent = text;
+      Object.defineProperty(node, 'clientHeight', { value: clientHeight });
+      Object.defineProperty(node, 'scrollHeight', { value: scrollHeight });
+      return node;
+    };
+
+    test('adds the full name as a tooltip when the name is clipped', () => {
+      const name = 'D-DF-ASTURL61CZRIE-LSPS-PLANNING-PLATEFORME-SUD-2025-REVISION-A-01';
+      const node = nameNode(name, 40, 80);
+      searchForm._showTitleIfTruncated({ currentTarget: node });
+      expect(node.getAttribute('title')).to.equal(name);
+    });
+
+    test('adds no tooltip when the name fits within the two lines shown', () => {
+      const node = nameNode('Short name', 40, 40);
+      searchForm._showTitleIfTruncated({ currentTarget: node });
+      expect(node.hasAttribute('title')).to.be.false;
+    });
+
+    test('tolerates sub-pixel line-height rounding rather than reporting a false clip', () => {
+      const node = nameNode('Short name', 40, 41);
+      searchForm._showTitleIfTruncated({ currentTarget: node });
+      expect(node.hasAttribute('title')).to.be.false;
+    });
+
+    test('drops a stale tooltip when a recycled row now holds a name that fits', () => {
+      // iron-list reuses row nodes, so a node that was clipped can be rebound to a
+      // shorter name; the tooltip from the previous document must not survive.
+      const node = nameNode('Short name', 40, 40);
+      node.setAttribute('title', 'A much longer name from the document previously in this row');
+      searchForm._showTitleIfTruncated({ currentTarget: node });
+      expect(node.hasAttribute('title')).to.be.false;
+    });
+
+    test('trims surrounding whitespace so the tooltip matches the rendered name', () => {
+      const node = nameNode('  Padded name  ', 40, 80);
+      searchForm._showTitleIfTruncated({ currentTarget: node });
+      expect(node.getAttribute('title')).to.equal('Padded name');
+    });
+  });
 });
 
 /**
