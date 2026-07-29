@@ -336,6 +336,18 @@ Polymer({
       value: false,
     },
     /**
+     * If `true`, initializing a display mode does not fetch results, so no query is executed
+     * until a fetch is requested explicitly (e.g. by the enclosing search view's search button).
+     */
+    deferInitialFetch: {
+      type: Boolean,
+      value: false,
+    },
+    _fetched: {
+      type: Boolean,
+      value: false,
+    },
+    /**
      * Specify here a subset of quick filters in case you want to
      * specify the ones to be displayed on the search results.
      * Expected format : ['quickfilter1','quickfilter2']
@@ -632,6 +644,7 @@ Polymer({
   },
 
   fetch() {
+    this._fetched = true;
     return new Promise((resolve, error) => {
       this._fetchDebouncer = Debouncer.debounce(this._fetchDebouncer, timeOut.after(100), () => {
         if (this.view && typeof this.view.fetch === 'function') {
@@ -707,8 +720,10 @@ Polymer({
         view.quickFilters = restoredQuickFilters.slice();
       }
 
-      // fetch after state restore
-      this.fetch();
+      // fetch after state restore, unless the first fetch is deferred to an explicit search
+      if (!this.deferInitialFetch || this._fetched) {
+        this.fetch();
+      }
       this.fire('search-results-view', { view, name: this.name });
     }
   },
