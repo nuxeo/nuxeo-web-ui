@@ -51,6 +51,23 @@ Before the first run on a new machine, verify the environment is set up. If anyt
   GitHub (README §4). The repo requires signed commits.
 - **Local build**: Node ≥ 18 (`nvm use 22`) and `npm ci` done.
 
+### Helper MCP servers (use them when available; fall back to raw CLI if not)
+These MCPs make several phases more reliable. They are **optional accelerators** — if a server isn't
+listed/ready, fall back to the raw `curl`/`docker`/`gh` commands documented in each phase. None of
+them replace the repo-specific knowledge in this skill.
+- **`playwright` MCP** — drives a real browser as tool calls (navigate, click, fill, snapshot,
+  screenshot) for the Phase 2 repro + before/after screenshots. It does **not** record video, so
+  keep `puppeteer-screen-recorder` for the required `.mp4`s.
+- **`docker` MCP** — `run_container` / `fetch_container_logs` / `stop_container` / `remove_container`
+  etc. for the Phase 2 throwaway instance. **Never** stop/remove a container you didn't create — the
+  live instance (often `nuxeo` on port 8080) must stay untouched; filter by your `nx-<ticket>` name.
+- **`sonarqube` MCP** — `search_sonar_issues_in_projects` / `get_project_quality_gate_status` for
+  Phase 7 (project key `nuxeo_nuxeo-web-ui`, org `nuxeo`). Needs a SonarCloud **user** token in the
+  MCP config; if absent, fall back to the raw SonarCloud REST call shown in Phase 7.
+- **`context7` MCP** — up-to-date third-party docs. Use for Nuxeo REST/Automation payloads
+  (`/websites/doc_nuxeo_nxdoc`), Puppeteer (`/puppeteer/puppeteer`), and GitHub GraphQL/REST shapes.
+  It has **no** coverage of `nuxeo-web-ui`/`nuxeo-elements` internals — don't rely on it for those.
+
 Once verified (or on subsequent runs), proceed.
 
 ## Phase 0 — Plan (non-blocking)
@@ -75,8 +92,20 @@ git switch -c lts-2025 origin/lts-2025 2>/dev/null || git switch lts-2025 && git
 > below) — never touch a live/running container. Only fall back to another approach if Docker is
 > unavailable.
 >
+> **Prefer the `docker` MCP** for container lifecycle when it's available: `run_container` (never
+> `create_container`+`start_container`), `fetch_container_logs` to wait for readiness, and
+> `remove_container` for teardown. First `list_containers` to see which host ports are taken so you
+> don't collide with the live instance. The raw `docker` CLI recipe below is the fallback.
+>
 > **Always capture BOTH images and videos** — before *and* after. Screenshots for the ticket/summary,
 > screen recordings for QA. Capture both every time; never ask which format.
+>
+> **Prefer the `playwright` MCP** to drive the repro and take the before/after screenshots
+> (`browser_navigate` → `browser_snapshot`/`browser_find` → `browser_click`/`browser_type` →
+> `browser_take_screenshot`). Use `browser_snapshot` (accessibility tree) to locate elements — it
+> also sees into shadow DOM, avoiding the manual shadow-root walking below. **Video is the one gap:**
+> Playwright MCP can't record `.mp4`, so still use the `puppeteer-screen-recorder` recipe for the
+> required recordings. When you need a raw DOM probe, `browser_evaluate` runs JS on the page.
 
 Create the evidence folder up front and put **before/after** screenshots, **videos**, and logs there:
 ```bash
@@ -109,7 +138,9 @@ docker logs -f nx-<ticket>                 # until "Nuxeo Platform Started"
 curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8090/nuxeo/runningstatus   # 200
 ```
 Seed test data over REST + Automation (admin is `Administrator:Administrator`; **use explicit
-`curl` flags, not shell vars — quoting `-u`/`-H` into a var breaks auth and yields 401**):
+`curl` flags, not shell vars — quoting `-u`/`-H` into a var breaks auth and yields 401**). If you're
+unsure of the exact endpoint/payload for a REST or Automation operation, look it up via the
+`context7` MCP against `/websites/doc_nuxeo_nxdoc` rather than guessing:
 ```bash
 # create a folder/workspace
 curl -s -u Administrator:Administrator -H "Content-Type: application/json" -X POST \
@@ -236,6 +267,10 @@ Implement on `lts-2025` first, then cherry-pick to `maintenance-3.1.x` (see the 
   template/host truly needs (e.g. a method bound in the template, or a `<nuxeo-resource>` the behavior
   references via `this.$`); behavior methods are mixed into the host, so template bindings and host
   lifecycle calls to them still resolve. Verify the composition with the full unit-test suite.
+- For generic **third-party** API/syntax you're unsure about (Polymer lifecycle, a JS/DOM API, a
+  library method), consult the `context7` MCP for current docs instead of guessing. Keep using this
+  skill and the repo's `AGENTS.md`/existing elements as the source of truth for `nuxeo-web-ui` and
+  `nuxeo-elements` internals — Context7 does not index those.
 
 ## Phase 5 — Validate locally (gate before any push)
 Run the same checks the PR CI gates on:
@@ -280,9 +315,12 @@ gh pr view <pr> --repo nuxeo/nuxeo-web-ui --json statusCheckRollup \
   (Copilot/Sonar/reviewers), CI fixes, follow-ups — must land on **every** base branch, not just one.
   Commit once (signed), cherry-pick the same commit onto each other base, re-run the gate, push, and
   confirm CI reruns on both PRs. See the `nuxeo-web-ui-pr` skill ("Keep both PRs in sync").
-- Sonar surfaces new issues even when the Quality Gate passes — fetch them per PR from SonarCloud
-  (`GET https://sonarcloud.io/api/issues/search?componentKeys=nuxeo_nuxeo-web-ui&pullRequest=<pr>&resolved=false`)
-  and Copilot inline comments via `gh api repos/nuxeo/nuxeo-web-ui/pulls/<pr>/comments`; fix both.
+- Sonar surfaces new issues even when the Quality Gate passes. **Prefer the `sonarqube` MCP:**
+  `get_project_quality_gate_status` and `search_sonar_issues_in_projects` (projectKey
+  `nuxeo_nuxeo-web-ui`, `pullRequestId=<pr>`, `resolved=false`) — it returns structured issues and
+  the gate status directly. Fall back to the raw REST call if the MCP isn't configured (needs a
+  SonarCloud user token): `GET https://sonarcloud.io/api/issues/search?componentKeys=nuxeo_nuxeo-web-ui&pullRequest=<pr>&resolved=false`.
+  Get Copilot inline comments via `gh api repos/nuxeo/nuxeo-web-ui/pulls/<pr>/comments`; fix both.
 - **Close the loop on every review thread — reply *and* resolve.** After the fix for a comment is
   pushed to **all** bases, on **each** PR: (1) reply to the thread citing the commit
   (`gh api repos/<owner>/<repo>/pulls/<pr>/comments -f body='…' -F in_reply_to=<commentId>`), then
@@ -300,6 +338,12 @@ gh pr view <pr> --repo nuxeo/nuxeo-web-ui --json statusCheckRollup \
   ```
   Note: `<owner>/<repo>` is `nuxeo/nuxeo-elements` when the fix lands there (e.g. `WEBUI`/`ELEMENTS`
   fixes in shared UI components), otherwise `nuxeo/nuxeo-web-ui`.
+- **Keep review-process churn on GitHub — never on the Jira ticket.** Replies to Copilot/Sonar/
+  reviewer comments, "review feedback addressed" notes, i18n-key renames, CI-flake reruns, and any
+  other PR-mechanics updates belong on the **PR** (thread replies + commits), *not* as Jira comments.
+  The ticket is for the customer/QA-facing record only (see Phase 7.5). If a review change materially
+  alters the fix, update the existing fix-summary comment **in place** (same `commentId`) rather than
+  adding a new "addressed Copilot" comment.
 
 ## Phase 7.5 — Update the ticket with the fix
 > **Update the ticket autonomously (no confirmation).** Post the fix-summary comment as soon as the
@@ -308,8 +352,17 @@ gh pr view <pr> --repo nuxeo/nuxeo-web-ui --json statusCheckRollup \
 Post the **structured fix-summary comment** (the Phase 9 sections) on the Jira issue via
 `addCommentToJiraIssue` (cloudId above, `contentFormat:"markdown"`). Include: issue, root cause, the
 files changed, **both PR links** (one per base), verification (lint/test counts), reproduce +
-verify steps, and the names of the before/after recordings. Keep the wording honest — only say a
-file is "attached" once it actually is.
+verify steps, and the before/after evidence in the **two-block "Before fix / After fix" layout**
+from Phase 9 §7 (never a single run-on sentence). Keep the wording honest — only say a file is
+"attached" once it actually is.
+
+> **Only these two comment types go on the ticket:** (1) the fix-summary comment and (2) the
+> evidence/attachment update. The Ready-for-QA checklist (Phase 8) is an **internal** gate — output it
+> in chat, never as a Jira comment. **Do NOT** post PR-review churn to Jira — Copilot/Sonar/reviewer
+> replies, "review feedback addressed" / key-rename notes, and CI-flake reruns stay on the PR (see
+> Phase 7). Reviewers see the ticket; extra process comments are noise. If review changes materially
+> affect the fix, edit the existing fix-summary comment in place (same `commentId`) instead of adding
+> another comment.
 
 > **Write real Markdown, not Jira wiki markup.** With `contentFormat:"markdown"` the body must be
 > GitHub-flavoured Markdown — `###` headings, `**bold**`, `-`/`1.` lists, and triple-backtick fenced
@@ -328,7 +381,11 @@ Stored credentials (created for this account, outside the repo — never commit 
   https://id.atlassian.com/manage-profile/security/api-tokens if leaked)
 
 If `~/.jira_token` exists, upload attachments directly — no need to ask the user for a token. First
-verify auth (`GET /rest/api/3/myself`), then upload:
+verify auth (`GET /rest/api/3/myself` → expect `200`). If it returns **`401`** the stored token is
+expired/revoked, not missing: don't paste a token into chat — ask the user to refresh it at
+https://id.atlassian.com/manage-profile/security/api-tokens and re-save `~/.jira_token`, then retry
+the upload. Read the creds with the trailing newline stripped (`tr -d '\r\n'`) — a stray newline
+also yields a spurious `401`. Then upload:
 ```bash
 cd ~/Desktop/<TICKET-ID>
 U="$(cat ~/.jira_email):$(cat ~/.jira_token)"
@@ -338,18 +395,33 @@ for f in <TICKET-ID>-before.png <TICKET-ID>-before.mp4 <TICKET-ID>-after.png <TI
     | python3 -c "import sys,json;d=json.load(sys.stdin);print('OK', d[0]['filename']) if isinstance(d,list) and d else print('FAIL', d)"
 done
 ```
+**Add the PRs as Jira "web links" (remote links), not just URLs in a comment.** The Atlassian MCP has
+**no create-remote-link tool** (`getJiraIssueRemoteIssueLinks` is read-only; `createIssueLink` only
+links two Jira issues). So use the REST `remotelink` endpoint directly — one call per base PR, using a
+stable `globalId` so re-runs update in place instead of duplicating:
+```bash
+U="$(tr -d '\r\n' < ~/.jira_email):$(tr -d '\r\n' < ~/.jira_token)"
+for pr in <PR-lts> <PR-maint>; do
+  curl -s -u "$U" -X POST -H "Content-Type: application/json" \
+    "https://hyland.atlassian.net/rest/api/3/issue/<TICKET-ID>/remotelink" \
+    -d "{\"globalId\":\"pr-$pr\",\"object\":{\"url\":\"https://github.com/nuxeo/nuxeo-web-ui/pull/$pr\",\"title\":\"#$pr <TICKET-ID>: <pr-title>\"}}" \
+    -w '\nremotelink %{http_code}\n'   # expect 201 (created) or 200 (updated)
+done
+```
 If `~/.jira_token` is absent, have the user create it (`printf '%s' '<token>' > ~/.jira_token &&
 chmod 600 ~/.jira_token`) rather than pasting the token into chat. Drag-and-drop in the browser is the
 manual fallback.
 
-## Phase 8 — Ready for QA checklist
+## Phase 8 — Ready for QA checklist (internal only — do NOT post to Jira)
 Evaluate page `4169400498` against both PRs and produce a Markdown table (Question | Link |
 Y/N/NA | Comments). Check, per PR: review comments resolved; before/after evidence attached (screenshots **and the
 before/after videos** from Phase 2); both PRs linked on the ticket; no open Copilot threads (GraphQL
-`reviewThreads.isResolved`); all checks green; ≥2 approvals incl. lead; all commits Verified. Post
-the table as a JIRA comment (`addCommentToJiraIssue`) — no need to ask. Flag what stays manual:
-uploading the before/after videos to the ticket (MCP can't attach — see Phase 7.5), dev-panel PR
-links, and approvals.
+`reviewThreads.isResolved`); all checks green; ≥2 approvals incl. lead; all commits Verified.
+> **This checklist is an internal readiness gate — output it in chat ONLY. Do NOT post it as a Jira
+> comment.** It's process/QA-tracking noise on the customer-facing ticket. (The ticket's own DoD
+> checklist field is updated separately by the team, not via a comment.) Flag what stays manual:
+> uploading the before/after videos to the ticket (MCP can't attach — see Phase 7.5), dev-panel PR
+> links, and approvals.
 
 ## Phase 9 — Final fix summary (always output)
 End every run with a single, structured summary — print it in chat **and** post it as the Jira
@@ -381,11 +453,29 @@ fix-summary comment (Phase 7.5). Use exactly these sections, in this order:
      permissions table untouched; unit suite still green"). Keep it honest — only list something as
      unaffected once you've actually checked.
 
-Reference the evidence in both formats: `~/Desktop/<TICKET-ID>/<TICKET-ID>-before.{png,mp4}` and
-`-after.{png,mp4}`.
+7. **Evidence** — list the evidence files in **two clearly separated, labelled blocks**, never as one
+   run-on sentence. Use exactly this shape (each file on its own line; images *and* video in both
+   blocks), so QA can see at a glance which file is which state:
+
+   ```markdown
+   **Evidence**
+
+   Before fix:
+   - `<TICKET-ID>-before.mp4` — <one-line description>
+   - `<TICKET-ID>-01-<state>.png` — <one-line description>
+
+   After fix:
+   - `<TICKET-ID>-after.mp4` — <one-line description>
+   - `<TICKET-ID>-02-<state>.png` — <one-line description>
+   ```
+
+   Keep it honest: only say a file is "attached" once it actually is (see Phase 7.5). If an upload is
+   still pending (e.g. token refresh), say so under the relevant block rather than blurring it into the
+   list. Local paths live under `~/Desktop/<TICKET-ID>/` (`-before.{png,mp4}` / `-after.{png,mp4}`).
 
 ## Phase 10 — Clean up & report
-- Tear down the throwaway repro container(s): `docker rm -f nx-<ticket>`. Never remove or disturb
+- Tear down the throwaway repro container(s): `docker rm -f nx-<ticket>` (or the `docker` MCP's
+  `remove_container` with `force:true`, targeting only your `nx-<ticket>`). Never remove or disturb
   pre-existing/live containers.
 - Leave the evidence files in `~/Desktop/<TICKET-ID>/` so they can be attached to the ticket.
 - Report the final CI state of both PRs. If a long cross-repo check (e.g. `web-ui`) is still
@@ -398,7 +488,8 @@ Reference the evidence in both formats: `~/Desktop/<TICKET-ID>/<TICKET-ID>-befor
 - **Regression sanity.** The local gate already runs the full unit suite; report the pass count.
 - **Keep both PRs identical.** Any later change (review feedback / CI fix) is committed once and
   cherry-picked onto the other base so the two PRs never diverge.
-- **Evaluate the Ready-for-QA checklist** (Phase 8) and post it as a table.
+- **Evaluate the Ready-for-QA checklist** (Phase 8) as an internal gate — output the table in chat, do
+  NOT post it to Jira.
 - **Attach the videos.** MCP can't attach — provide the ready-to-run `curl` (Phase 7.5) or note the
   drag-and-drop fallback so QA gets the recordings.
 
