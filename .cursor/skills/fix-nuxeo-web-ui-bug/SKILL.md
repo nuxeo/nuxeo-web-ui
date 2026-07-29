@@ -8,16 +8,18 @@ description: >-
   and capture evidence (images AND videos) to ~/Desktop/<TICKET-ID>/ first, then branch from both
   lts-2025 and maintenance-3.1.x, fix without inducing regressions, run the PR gating
   checks, create signed-commit PRs on both bases, watch CI and fix/rerun
-  failures, then evaluate the Ready-for-QA checklist. Use when asked to fix a
-  WEBUI-/Jira bug, "commit and raise PR", or take a nuxeo-web-ui ticket to
-  Ready for QA.
+  failures, then evaluate the Ready-for-QA checklist. Every phase ends with an
+  executable exit gate, and a final verification sweep re-checks attachments,
+  ticket comments, PR links and CI against the live Jira/GitHub state, looping
+  until all of them pass. Use when asked to fix a WEBUI-/Jira bug, "commit and
+  raise PR", or take a nuxeo-web-ui ticket to Ready for QA.
 ---
 
 # Fix a Nuxeo Web UI bug — agentic, end-to-end
 
 Drive the whole fix in **YOLO mode: run the entire workflow end-to-end without pausing for
 confirmation between phases** — reproduce → fix → validate → commit → push → open PRs → update the
-ticket → summarize. State the plan up front for the record, then keep going. The only hard stops are
+ticket → summarize → verify. State the plan up front for the record, then keep going. The only hard stops are
 the safety **Guardrails** at the bottom (never force-push protected branches, never silently change
 global git config); YOLO relaxes the *confirmation* gates, not those. Use a TODO list to track
 phases. Delegate PR mechanics to the [`nuxeo-web-ui-pr`](../nuxeo-web-ui-pr/SKILL.md) skill and local
@@ -31,6 +33,15 @@ gating to the [`nuxeo-web-ui-pr-checks`](../nuxeo-web-ui-pr-checks/SKILL.md) ski
 > each named with the ticket id (`<type>-WEBUI-<id>-<kebab-summary>-<base>`), and **raise a PR
 > for each**. Two branches, two PRs — never fix on only one base. (If the ticket's `fixVersions`
 > genuinely exclude a base, state that explicitly in your summary and skip it — no need to ask.)
+
+> **Core rule — every phase ends with a verification gate. Never advance on intent.** Each phase
+> below has an **Exit gate**: a check you actually execute (an API call, a `curl`, a file listing)
+> that proves the phase did what it was supposed to. Confirm the gate before starting the next
+> phase, and fix-then-recheck if it fails — a phase is "done" only when its gate passes. Saying a
+> step happened is not evidence that it happened. Runs have repeatedly shipped with attachments that
+> never uploaded, a QA checklist comment that shouldn't be on the ticket, evidence QA couldn't read,
+> and a fix summary with no verification steps — every one of those is caught by a gate below.
+> Phase 11 re-checks all of them in one pass and is **mandatory** before you report the run finished.
 
 Useful constants:
 - Atlassian cloudId: `252cce86-035e-4b0e-abd2-3c002935632f` (site `hyland.atlassian.net`)
@@ -79,6 +90,10 @@ immediately proceed — do not wait for approval.** Re-plan on the fly if scope 
   If Atlassian tools aren't listed, call `mcp_auth` for the Atlassian server first.
 - Read the description **and every comment** (repro steps, expected vs actual, affected
   versions). Note `fixVersions` — they map to the base branches you must target.
+
+**Exit gate:** you can state, in one sentence each, the user-visible symptom, the expected
+behaviour, and which bases `fixVersions` requires. If any of the three is still a guess, keep
+reading the ticket — do not start reproducing against an assumed symptom.
 
 ## Phase 2 — Reproduce + capture evidence (first hands-on step)
 **Reproduce the bug on the `lts-2025` branch before creating any feature branch or touching code.**
@@ -235,6 +250,19 @@ is built and lazy-loads assets differently than `npm run build`), the safest way
 instance's root html tree into `ui/elements/` so they resolve. Patching the marketplace bundle's
 minified code is unreliable (the error-handling code path and property names drift between versions).
 
+**Exit gate — run it, don't assume it.** You need both videos (`-before.mp4`, `-after.mp4`) plus at
+least one screenshot per state (either `<TICKET-ID>-before.png` or numbered state shots like
+`<TICKET-ID>-before-1-scrolled.png`), and every file must be big enough to be real. A sub-10 KB
+`.mp4` is a black or truncated capture, and a black video is worse than none because it looks done.
+This is also the gate that catches "the recorder threw and nobody noticed":
+```bash
+ls -l ~/Desktop/<TICKET-ID>/
+find ~/Desktop/<TICKET-ID> -maxdepth 1 \( -name '*.mp4' -o -name '*.png' \) -size -10k -print  # must print nothing
+```
+The before/after pair must also show *different* states. If the two PNGs are byte-identical
+(`cmp -s`), the difference isn't visible in a still — hover the element or add a DOM probe (see the
+gotchas above) and re-capture, rather than shipping evidence QA can't interpret.
+
 ## Phase 3 — Branches (both bases)
 **Only after the bug is reproduced on `lts-2025`**, create one feature branch per base — cut from the
 bases, not from your local repro state — named per the `nuxeo-web-ui-pr` skill
@@ -279,6 +307,10 @@ bash .cursor/skills/nuxeo-web-ui-pr-checks/scripts/pr-checks.sh --fix
 ```
 Only proceed when it exits `0`. Revert incidental `package-lock.json` churn.
 
+**Exit gate:** `pr-checks.sh` exited `0`, and you have the actual lint/unit numbers to quote in the
+summary (e.g. "2327 unit tests passing"). "Tests pass" without a count usually means they weren't
+re-run after the last edit.
+
 > **No manual-verification pause.** In YOLO mode do not stop to ask for manual verification — the
 > automated before/after capture (Phase 2) already proves the fix. Instead, write the exact numbered
 > **"Steps to verify the fix"** and fold them into the final summary (Phase 9) and the Jira comment,
@@ -300,6 +332,17 @@ This is the "commit and raise PR" trigger.
   `gh api repos/nuxeo/nuxeo-web-ui/commits/<sha> --jq '.commit.verification'` → `verified:true`.
   `unknown_key` means the signing key isn't added on GitHub as a **Signing Key** (separate
   from an Authentication key) — fix that, no re-push needed.
+
+**Exit gate:** both PRs exist, target the two different bases, and every commit on each is
+`Verified`. One command, and it must list two rows with different bases:
+```bash
+for pr in <PR-lts> <PR-maint>; do
+  gh pr view "$pr" --repo nuxeo/nuxeo-web-ui --json number,baseRefName,url \
+    --jq '"#\(.number) → \(.baseRefName)"'
+  gh api repos/nuxeo/nuxeo-web-ui/pulls/"$pr"/commits \
+    --jq '[.[]|.commit.verification.verified]|"  verified: \(.)"'
+done
+```
 
 ## Phase 7 — Watch checks; fix or rerun
 ```bash
@@ -400,13 +443,22 @@ the upload. Read the creds with the trailing newline stripped (`tr -d '\r\n'`) �
 also yields a spurious `401`. Then upload:
 ```bash
 cd ~/Desktop/<TICKET-ID>
-U="$(cat ~/.jira_email):$(cat ~/.jira_token)"
+U="$(tr -d '\r\n' < ~/.jira_email):$(tr -d '\r\n' < ~/.jira_token)"
 for f in <TICKET-ID>-before.png <TICKET-ID>-before.mp4 <TICKET-ID>-after.png <TICKET-ID>-after.mp4; do
   curl -s -u "$U" -H "X-Atlassian-Token: no-check" -F "file=@$f" \
     https://hyland.atlassian.net/rest/api/3/issue/<TICKET-ID>/attachments \
     | python3 -c "import sys,json;d=json.load(sys.stdin);print('OK', d[0]['filename']) if isinstance(d,list) and d else print('FAIL', d)"
 done
 ```
+**The upload printing `OK` is not proof.** A 200 with an empty body, a silently skipped file, or a
+loop that never ran all read as "done" in a transcript. Read the attachments back off the ticket and
+compare against what you meant to upload — this is the single most-missed step in past runs:
+```bash
+curl -s -u "$U" "https://hyland.atlassian.net/rest/api/3/issue/<TICKET-ID>?fields=attachment" \
+  | python3 -c "import sys,json;[print(a['filename'], a['size']) for a in json.load(sys.stdin)['fields']['attachment']]"
+```
+Both videos and your before/after screenshots must be listed with a non-trivial size. If any is
+missing, re-upload it; only then may the summary say "attached".
 **Add the PRs as Jira "web links" (remote links), not just URLs in a comment.** The Atlassian MCP has
 **no create-remote-link tool** (`getJiraIssueRemoteIssueLinks` is read-only; `createIssueLink` only
 links two Jira issues). So use the REST `remotelink` endpoint directly — one call per base PR, using a
@@ -424,6 +476,22 @@ If `~/.jira_token` is absent, have the user create it (`printf '%s' '<token>' > 
 chmod 600 ~/.jira_token`) rather than pasting the token into chat. Drag-and-drop in the browser is the
 manual fallback.
 
+**Exit gate for Phase 7.5 — read the ticket back and check all four things:**
+1. Both videos and your before/after screenshots are listed by the attachments API (command above).
+2. Both PRs appear in `GET /issue/<TICKET-ID>/remotelink`.
+3. The fix-summary comment exists and actually contains the root cause, the changed files, both PR
+   links, the lint/test numbers, the numbered **steps for QA to verify**, and the two-block
+   Before fix / After fix evidence list.
+4. There is **no** Ready-for-QA checklist comment on the ticket.
+
+Read a rendered copy of what you posted rather than trusting the call you made — Markdown that
+silently rendered as literal `h3.` text, or a summary missing the verify steps, both look fine from
+the caller's side:
+```bash
+curl -s -u "$U" "https://hyland.atlassian.net/rest/api/3/issue/<TICKET-ID>/comment?maxResults=100" \
+  | python3 -c "import sys,json;[print('---',c['id'],json.dumps(c['body'])[:1200]) for c in json.load(sys.stdin)['comments']]"
+```
+
 ## Phase 8 — Ready for QA checklist (internal only — do NOT post to Jira)
 Evaluate page `4169400498` against both PRs and produce a Markdown table (Question | Link |
 Y/N/NA | Comments). Check, per PR: review comments resolved; before/after evidence attached (screenshots **and the
@@ -440,6 +508,11 @@ before/after videos** from Phase 2); both PRs linked on the ticket; no open Copi
 
 Flag in the table what stays manual: uploading the before/after videos to the ticket (MCP can't
 attach — see Phase 7.5), dev-panel PR links, and approvals.
+
+**Exit gate:** every row is Y or a justified NA — a row you never checked is not NA, it's unfinished,
+so go and check it. And confirm the checklist did **not** reach Jira: re-list the ticket's comments
+(Phase 7.5 gate) and verify none of them contains the table. If one was posted by mistake, delete it
+with the `curl -X DELETE` above and re-list to confirm it's gone.
 
 ## Phase 9 — Final fix summary (always output)
 End every run with a single, structured summary — print it in chat **and** post it as the Jira
@@ -491,6 +564,11 @@ fix-summary comment (Phase 7.5). Use exactly these sections, in this order:
    still pending (e.g. token refresh), say so under the relevant block rather than blurring it into the
    list. Local paths live under `~/Desktop/<TICKET-ID>/` (`-before.{png,mp4}` / `-after.{png,mp4}`).
 
+**Exit gate:** re-read your own summary as if you were the QA engineer who has never seen the ticket.
+It fails the gate if you cannot answer all three from the text alone: what was broken, what to click
+to see it fixed, and which file shows the before state. Sections 6 (verify steps) and 7 (evidence)
+are the ones that go missing under time pressure — both are mandatory, never "obvious from the PR".
+
 ## Phase 10 — Clean up & report
 - Tear down the throwaway repro container(s): `docker rm -f nx-<ticket>` (or the `docker` MCP's
   `remove_container` with `force:true`, targeting only your `nx-<ticket>`). Never remove or disturb
@@ -500,6 +578,30 @@ fix-summary comment (Phase 7.5). Use exactly these sections, in this order:
   are green — do **not** keep the run alive polling `ftest` / the cross-repo `web-ui` check. List any
   such check as "still running, not waited on" so nobody reads the summary as fully green, and say who
   should look at it later (or offer to check back on request).
+
+## Phase 11 — Final verification sweep (mandatory; loop until it passes)
+Individual exit gates catch a phase as it happens; this re-checks **every** one of them against live
+Jira and GitHub state at the end, so a gate that was skipped, or something that regressed later in
+the run, can't slip through. It is the last thing you do:
+```bash
+bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/verify-run.sh <TICKET-ID> <PR-lts> <PR-maint>
+```
+It prints PASS/FAIL per gate and exits non-zero if any failed:
+1. Jira credentials work (a 401 here means every later gate is a false failure, so it stops early).
+2. Both videos and at least one screenshot per state exist locally and are large enough to be real.
+3. They are **actually attached to the ticket**, read back from the attachments API.
+4. Both PRs are linked on the ticket as remote links.
+5. The fix-summary comment exists and covers root cause, lint/test verification, QA verify steps, and
+   both PR links.
+6. **No** Ready-for-QA checklist comment is on the ticket.
+7. Evidence in the comment uses the two Before fix / After fix blocks.
+8. Both PRs target different bases, all commits are Verified, and no review thread is unresolved.
+9. Gating checks are green; `ftest` is reported but never waited on.
+
+**Loop, don't report.** On any FAIL: fix that specific thing, re-run the script, repeat. Only when it
+exits `0` may you tell the user the run is complete or treat the ticket as Ready for QA. If a gate
+genuinely cannot pass (e.g. the Jira token needs a human to refresh it), say so explicitly in the
+summary as an outstanding item — never quietly drop it.
 
 ## Recommended extras (do these when applicable, still autonomously)
 - **Add/adjust a functional test.** For user-facing behavior, add a Gherkin scenario
