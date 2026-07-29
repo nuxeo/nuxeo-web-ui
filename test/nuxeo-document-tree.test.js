@@ -344,6 +344,48 @@ suite('nuxeo-document-tree', () => {
       isElementVisible(documentTree.shadowRoot.querySelector('.parents'));
     });
 
+    test('Tree nodes expose their full name in a tooltip', async () => {
+      const nodes = getTreeNodes(documentTree);
+      expect(nodes).to.be.not.empty;
+      nodes.forEach((node) => {
+        const anchor = node.querySelector('.node-name a');
+        expect(anchor).to.be.not.null;
+        expect(anchor.getAttribute('title')).to.be.equal(anchor.textContent.trim());
+      });
+    });
+
+    test('Breadcrumb ancestors expose their full name in a tooltip', async () => {
+      // set the new document so the breadcrumb is populated with an ancestor
+      const [doc] = levelThreeDocuments;
+      documentTree.currentDocument = doc;
+      await flush();
+      await waitForChildListMutation(documentTree.$.tree);
+      await waitForTreeNodeLoading(documentTree);
+      await waitForTreeNodeCount(documentTree, 3);
+
+      const ancestors = documentTree.shadowRoot.querySelectorAll('.parents a');
+      expect(ancestors).to.be.not.empty;
+      ancestors.forEach((anchor) => {
+        const name = anchor.querySelector('.parent');
+        expect(anchor.getAttribute('title')).to.be.equal(name.textContent.trim());
+      });
+    });
+
+    test('Breadcrumb ancestor names wrap instead of being clipped to a single line', async () => {
+      const [doc] = levelThreeDocuments;
+      documentTree.currentDocument = doc;
+      await flush();
+      await waitForChildListMutation(documentTree.$.tree);
+      await waitForTreeNodeLoading(documentTree);
+      await waitForTreeNodeCount(documentTree, 3);
+
+      const name = documentTree.shadowRoot.querySelector('.parents .parent');
+      expect(name).to.be.not.null;
+      const styles = getComputedStyle(name);
+      expect(styles.whiteSpace).to.be.equal('normal');
+      expect(styles.webkitLineClamp).to.be.equal('2');
+    });
+
     test('Tree breadcrumb is present with root document', async () => {
       // set the new document that contains the breadcrumb
 
