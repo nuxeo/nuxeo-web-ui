@@ -23,6 +23,12 @@ const makeDocs = (size) =>
     return { uid: `doc-${i}` };
   });
 
+// Rows for a virtualized region that has not loaded yet: present, but without uids.
+const placeholderRows = (size) =>
+  Array.from({ length: size }, () => {
+    return {};
+  });
+
 // Minimal host that mixes in the behavior, mimicking how `nuxeo-results` uses it.
 const makeHost = (name, view) => Object.assign(Object.create(NuxeoScrollRestoreBehavior), { name, view });
 
@@ -50,6 +56,22 @@ suite('NuxeoScrollRestoreBehavior', () => {
   setup(() => {
     // unique key per test — the anchor cache is module-scoped and shared
     name = `list-${Date.now()}-${counter++}`;
+  });
+
+  test('reports no rows when there is no view', () => {
+    expect(makeHost(name, undefined)._srItems()).to.deep.equal([]);
+  });
+
+  test('reports no rows when the view exposes neither list nor items', () => {
+    expect(makeHost(name, {})._srItems()).to.deep.equal([]);
+  });
+
+  test('prefers the iron-list rows over the view rows', () => {
+    const listItems = makeDocs(3);
+    const view = { items: makeDocs(60), $: { list: { firstVisibleIndex: 0, items: listItems } } };
+    // `firstVisibleIndex` / `scrollToIndex` are indexed against the iron-list, so
+    // its rows must win over `view.items` to keep the captured id and index aligned.
+    expect(makeHost(name, view)._srItems()).to.equal(listItems);
   });
 
   test('saves the top-of-viewport record id and index', () => {
@@ -112,6 +134,17 @@ suite('NuxeoScrollRestoreBehavior', () => {
     expect(view2.scrollToIndex.called).to.equal(false);
   });
 
+  test('does not restore when the anchored record has moved to the top', () => {
+    const view = makeView(makeDocs(60), 40); // doc-40 was at the top of the viewport
+    makeHost(name, view)._srSaveAnchor();
+    // while the user was away, doc-40 became the first row
+    const reordered = makeDocs(60);
+    reordered.unshift(reordered.splice(40, 1)[0]);
+    const view2 = makeView(reordered, 0);
+    makeHost(name, view2)._srMaybeRestore();
+    expect(view2.scrollToIndex.called).to.equal(false); // a fresh list already renders from the top
+  });
+
   test('restores only once per (re)arm', () => {
     const view = makeView(makeDocs(60), 40);
     makeHost(name, view)._srSaveAnchor();
@@ -144,24 +177,58 @@ suite('NuxeoScrollRestoreBehavior', () => {
     const view = makeView(makeDocs(60), 40); // doc-40 at the top
     makeHost(name, view)._srSaveAnchor();
     // on return the target region is not loaded yet (placeholders, no uids)
-    const placeholders = Array.from({ length: 60 }, () => {
-      return {};
-    });
-    const view2 = makeView(placeholders, 0);
+    const view2 = makeView(placeholderRows(60), 0);
     const host2 = makeHost(name, view2);
     host2._srMaybeRestore();
     // first it jumps to the remembered index hint
     expect(view2.scrollToIndex.calledOnce).to.equal(true);
     expect(view2.scrollToIndex.firstCall.args[0]).to.equal(40);
     // the region loads with doc-40 now at index 12 (list changed while away)
-    const loaded = Array.from({ length: 60 }, () => {
-      return {};
-    });
+    const loaded = placeholderRows(60);
     loaded[12] = { uid: 'doc-40' };
     view2.items = loaded;
     await wait(300);
     expect(view2.scrollToIndex.calledTwice).to.equal(true);
     expect(view2.scrollToIndex.secondCall.args[0]).to.equal(12);
+  });
+
+  test('leaves the hinted position alone when the region loads in the remembered order', async () => {
+    const view = makeView(makeDocs(60), 40); // doc-40 at the top
+    makeHost(name, view)._srSaveAnchor();
+    const view2 = makeView(placeholderRows(60), 0);
+    const host2 = makeHost(name, view2);
+    host2._srMaybeRestore();
+    expect(view2.scrollToIndex.calledOnce).to.equal(true);
+    // the region loads with doc-40 exactly where it was remembered
+    const loaded = placeholderRows(60);
+    loaded[40] = { uid: 'doc-40' };
+    view2.items = loaded;
+    await wait(300);
+    expect(view2.scrollToIndex.calledOnce).to.equal(true); // no correction needed
+  });
+
+  test('skips the re-check when the list is emptied before it runs', async () => {
+    const view = makeView(makeDocs(60), 40);
+    makeHost(name, view)._srSaveAnchor();
+    const view2 = makeView(placeholderRows(60), 0);
+    const host2 = makeHost(name, view2);
+    host2._srMaybeRestore();
+    expect(view2.scrollToIndex.calledOnce).to.equal(true);
+    view2.items = []; // the list is cleared (e.g. a refresh) before the re-check fires
+    await wait(300);
+    expect(view2.scrollToIndex.calledOnce).to.equal(true);
+  });
+
+  test('gives up re-checking when the record never loads', async () => {
+    const view = makeView(makeDocs(60), 40);
+    makeHost(name, view)._srSaveAnchor();
+    const view2 = makeView(placeholderRows(60), 0);
+    const host2 = makeHost(name, view2);
+    host2._srMaybeRestore();
+    expect(view2.scrollToIndex.calledOnce).to.equal(true);
+    // doc-40 is gone for good: every re-check misses and the retries run out
+    await wait(1000);
+    expect(view2.scrollToIndex.calledOnce).to.equal(true);
   });
 
   test('re-saving the same list refreshes its anchor in place', () => {
@@ -216,6 +283,23 @@ suite('NuxeoScrollRestoreBehavior', () => {
     // and disarming removes the listener
     host._srDisarmScrollTracking();
     expect(list.removeEventListener.calledOnce).to.equal(true);
+  });
+
+  test('ignores scrolls that happen before the one-shot restore has run', async () => {
+    const list = {
+      firstVisibleIndex: 25,
+      addEventListener: sinon.spy(),
+      removeEventListener: sinon.spy(),
+    };
+    const view = { items: makeDocs(60), $: { list }, scrollToIndex: sinon.spy() };
+    const host = makeHost(name, view);
+    // `_srDidInitialLoad` is still unset: this is an initial/programmatic scroll
+    host._srArmScrollTracking(view);
+    list.addEventListener.firstCall.args[1]();
+    await wait(200);
+    const view2 = makeView(makeDocs(60), 0);
+    makeHost(name, view2)._srMaybeRestore();
+    expect(view2.scrollToIndex.called).to.equal(false); // nothing was anchored
   });
 
   test('disarming cancels a queued save so a late scroll cannot overwrite the anchor', async () => {
