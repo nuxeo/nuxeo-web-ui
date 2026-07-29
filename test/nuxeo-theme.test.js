@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved.
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved.
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +15,56 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html } from '@nuxeo/testing-helpers';
+import { fixture, flush, html } from '@nuxeo/testing-helpers';
+import { config } from '@nuxeo/nuxeo-elements';
 import '../elements/nuxeo-themes/nuxeo-theme.js';
 
 suite('nuxeo-theme', () => {
+  let brandingEnabled;
+
+  setup(() => {
+    brandingEnabled = false;
+    sinon.stub(config, 'get').callsFake((path, fallback) => {
+      if (path === 'branding.rebrand') {
+        return brandingEnabled;
+      }
+      return fallback;
+    });
+  });
+
+  teardown(() => {
+    sinon.restore();
+  });
+
+  suite('hidden', () => {
+    test('hides Hyland built-in cards when branding is off', async () => {
+      brandingEnabled = false;
+      const el = await fixture(html`<nuxeo-theme name="hyland-light"></nuxeo-theme>`);
+      expect(el.hidden).to.be.true;
+    });
+
+    test('hides legacy built-in cards when branding is on', async () => {
+      brandingEnabled = true;
+      const el = await fixture(html`<nuxeo-theme name="default"></nuxeo-theme>`);
+      expect(el.hidden).to.be.true;
+    });
+
+    test('never hides custom themes', async () => {
+      brandingEnabled = true;
+      const el = await fixture(html`<nuxeo-theme name="my-custom-theme"></nuxeo-theme>`);
+      expect(el.hidden).to.be.false;
+    });
+
+    test('recomputes visibility when name changes after instantiation', async () => {
+      brandingEnabled = false;
+      const el = await fixture(html`<nuxeo-theme name="hyland-light"></nuxeo-theme>`);
+      expect(el.hidden).to.be.true;
+      el.name = 'default';
+      await flush();
+      expect(el.hidden).to.be.false;
+    });
+  });
+
   suite('_image', () => {
     test('uses preview URL when preview is set', async () => {
       const el = await fixture(html`<nuxeo-theme name="dark" preview="/custom.jpg"></nuxeo-theme>`);
@@ -46,12 +92,6 @@ suite('nuxeo-theme', () => {
   });
 
   suite('_selected', () => {
-    teardown(() => {
-      if (localStorage.getItem.restore) {
-        localStorage.getItem.restore();
-      }
-    });
-
     test('returns true when stored theme matches name', async () => {
       sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'ocean' : null));
       const el = await fixture(html`<nuxeo-theme name="ocean"></nuxeo-theme>`);
@@ -74,6 +114,52 @@ suite('nuxeo-theme', () => {
       sinon.stub(localStorage, 'getItem').callsFake(() => null);
       const el = await fixture(html`<nuxeo-theme name="kawaii"></nuxeo-theme>`);
       expect(el._selected('kawaii')).to.be.false;
+    });
+
+    test('maps a legacy stored theme to its branding equivalent when branding is on', async () => {
+      brandingEnabled = true;
+      sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'default' : null));
+      const el = await fixture(html`<nuxeo-theme name="hyland-light"></nuxeo-theme>`);
+      expect(el._selected('hyland-light')).to.be.true;
+      expect(el._selected('default')).to.be.false;
+    });
+
+    test('maps a branding stored theme to its legacy equivalent when branding is off', async () => {
+      brandingEnabled = false;
+      sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'hyland-dark' : null));
+      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
+      expect(el._selected('dark')).to.be.true;
+      expect(el._selected('hyland-dark')).to.be.false;
+    });
+
+    test('keeps a custom stored theme selected regardless of branding mode', async () => {
+      brandingEnabled = true;
+      sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'my-custom-theme' : null));
+      const el = await fixture(html`<nuxeo-theme name="my-custom-theme"></nuxeo-theme>`);
+      expect(el._selected('my-custom-theme')).to.be.true;
+    });
+
+    test('falls back to the default without throwing when storage access is blocked', async () => {
+      sinon.stub(localStorage, 'getItem').throws(new Error('storage blocked'));
+      const el = await fixture(html`<nuxeo-theme name="default"></nuxeo-theme>`);
+      expect(() => el._selected('default')).to.not.throw();
+      expect(el._selected('default')).to.be.true;
+      expect(el._selected('dark')).to.be.false;
+    });
+  });
+
+  suite('_storedTheme', () => {
+    test('returns the stored theme value', async () => {
+      sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'ocean' : null));
+      const el = await fixture(html`<nuxeo-theme name="ocean"></nuxeo-theme>`);
+      expect(el._storedTheme()).to.equal('ocean');
+    });
+
+    test('returns null without throwing when storage access is blocked', async () => {
+      sinon.stub(localStorage, 'getItem').throws(new Error('storage blocked'));
+      const el = await fixture(html`<nuxeo-theme name="default"></nuxeo-theme>`);
+      expect(() => el._storedTheme()).to.not.throw();
+      expect(el._storedTheme()).to.be.null;
     });
   });
 
@@ -123,12 +209,6 @@ suite('nuxeo-theme', () => {
   });
 
   suite('aria-label on apply button', () => {
-    teardown(() => {
-      if (localStorage.getItem.restore) {
-        localStorage.getItem.restore();
-      }
-    });
-
     test('apply button has aria-label attribute', async () => {
       sinon.stub(localStorage, 'getItem').callsFake(() => null);
       const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);
@@ -146,12 +226,6 @@ suite('nuxeo-theme', () => {
   });
 
   suite('_apply', () => {
-    teardown(() => {
-      if (localStorage.setItem.restore) {
-        localStorage.setItem.restore();
-      }
-    });
-
     test('persists theme and dispatches theme-changed', async () => {
       sinon.stub(localStorage, 'setItem');
       const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);

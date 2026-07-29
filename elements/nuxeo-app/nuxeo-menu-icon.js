@@ -40,13 +40,34 @@ Polymer({
         outline: none;
       }
 
-      :host(:focus-visible) {
+      /* Both the host and inner <a> can receive focus, so both need focus styles.
+         Only one is focused at a time, preventing a double outline. */
+      :host(:focus-visible),
+      a:focus-visible {
         outline: auto;
       }
 
       :host(.selected) paper-icon-button {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
+        background: var(--hyland-sidebar-item-selected-background, rgba(255, 255, 255, 0.12));
+        border-radius: 12px;
+        color: var(--nuxeo-sidebar-menu-icon, var(--nuxeo-sidebar-menu-hover));
+      }
+
+      /* Active item selection indicator: a white block pinned to the leading edge,
+         vertically centred, with the trailing corners rounded (per Figma). Logical
+         properties keep it on the correct side and round the correct corners in RTL. */
+      :host(.selected)::before {
+        content: '';
+        position: absolute;
+        inset-inline-start: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 20px;
+        background: var(--hyland-sidebar-selection-indicator, var(--nuxeo-sidebar-menu-icon, #fff));
+        border-start-end-radius: 16px;
+        border-end-end-radius: 16px;
+        z-index: 1;
       }
 
       paper-badge {
@@ -65,8 +86,9 @@ Polymer({
       }
 
       paper-icon-button:hover {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
+        background: var(--hyland-sidebar-item-hover-background, rgba(255, 255, 255, 0.12));
+        border-radius: 12px;
+        color: var(--nuxeo-sidebar-menu-icon, var(--nuxeo-sidebar-menu-hover));
       }
 
       paper-icon-button svg,

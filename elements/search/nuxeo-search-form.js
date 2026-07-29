@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,7 +77,6 @@ Polymer({
         right: 0;
         margin: 0;
         padding: 1rem;
-        background-color: var(--nuxeo-drawer-background);
       }
 
       .actions paper-button {
@@ -165,7 +164,6 @@ Polymer({
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
         @apply --layout-horizontal;
         @apply --layout-center;
-        background-color: var(--nuxeo-drawer-background);
       }
 
       .header h1 {
@@ -218,18 +216,29 @@ Polymer({
       .list-item {
         cursor: pointer;
         color: var(--nuxeo-drawer-text);
-        padding: 1em;
-        border-bottom: 1px solid var(--nuxeo-border);
+        padding: 0.7em 1em;
+        @apply --hyland-drawer-item;
       }
 
       .list-item:hover {
-        @apply --nuxeo-block-hover;
+        @apply --hyland-drawer-item-selected;
       }
 
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply --nuxeo-block-selected;
+        @apply --hyland-drawer-item-selected;
+      }
+
+        /* Keyboard focus ring: --hyland-drawer-item-selected removes outline, so we apply
+         --hyland-focus-ring here instead. Must follow the rules above with matching specificity. */
+      .list-item:focus-visible,
+      .list-item.selected:focus-visible {
+        @apply --hyland-focus-ring;
+      }
+
+      .list-item-title {
+        @apply --hyland-drawer-item;
       }
 
       .list-item-info {

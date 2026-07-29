@@ -78,6 +78,7 @@ Polymer({
         vertical-align: text-top;
         margin-left: 1.3em;
         word-break: break-word;
+        @apply --hyland-drawer-item;
       }
 
       :host([dir='rtl']) .node-name {
@@ -115,7 +116,7 @@ Polymer({
       }
 
       [toggle]:focus {
-        outline: 2px solid black;
+        outline: 2px solid var(--nuxeo-focus-ring-color, black);
         outline-offset: 0.2px;
         border-radius: 3px;
         box-shadow: 0 0 3px black;
@@ -139,6 +140,7 @@ Polymer({
         padding: 0.35em;
         color: var(--nuxeo-drawer-text);
         border-bottom: 1px solid var(--nuxeo-border);
+        @apply --hyland-drawer-item;
       }
 
       .parents span {
@@ -147,6 +149,7 @@ Polymer({
         white-space: nowrap;
         display: block;
         min-width: 1.3em;
+        @apply --hyland-drawer-item;
       }
 
       .parent {
@@ -168,6 +171,7 @@ Polymer({
       }
 
       .header h5 {
+        @apply --hyland-section-header;
         margin: 0;
       }
 

@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -154,12 +154,13 @@ Polymer({
       #logo {
         position: fixed;
         width: var(--nuxeo-sidebar-width);
-        height: 53px;
+        height: var(--nuxeo-drawer-header-height, 53px);
         top: var(--nuxeo-app-top);
         z-index: 102;
         box-sizing: border-box;
         outline: none;
         background-color: var(--nuxeo-sidebar-background);
+        display: block;
       }
 
       :host([dir='ltr']) #logo {
@@ -169,37 +170,75 @@ Polymer({
 
       #logo img {
         width: var(--nuxeo-sidebar-width);
-        height: 53px;
-      }
-
-      :host([dir='rtl']) #logo {
-        right: 0px;
-        height: 53px;
-        left: auto;
-      }
-
-      /* menu */
-      #menu {
-        @apply --nuxeo-sidebar;
-        position: fixed;
-        width: var(--nuxeo-sidebar-width);
-        height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
-        z-index: 100;
-        padding: 0;
-        padding-top: 54px;
-        overflow: auto;
-        display: flex;
-        flex-direction: column;
-      }
-
-      #logo:hover img {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
+        height: var(--nuxeo-drawer-header-height, 53px);
       }
 
       #logo:hover img {
         filter: brightness(110%);
         -webkit-filter: brightness(110%);
+      }
+
+      :host([dir='rtl']) #logo {
+        right: 0px;
+        height: var(--nuxeo-drawer-header-height, 53px);
+        left: auto;
+      }
+
+      /* NXENG-527: Single scrollable container for home shortcut and menu below the pinned logo.
+         Prevents scrollbar overlap by keeping it within the column boundary. */
+      #menuContainer {
+        position: fixed;
+        top: calc(var(--nuxeo-app-top, 0px) + var(--nuxeo-drawer-header-height, 53px));
+        height: calc(
+          100vh - var(--nuxeo-drawer-header-height, 53px) - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px))
+        );
+        width: var(--nuxeo-sidebar-width);
+        z-index: 100;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        overflow-y: auto;
+        background-color: var(--nuxeo-sidebar-background);
+        display: flex;
+        flex-direction: column;
+      }
+
+      :host([dir='ltr']) #menuContainer {
+        left: 0;
+        right: auto;
+      }
+
+      :host([dir='rtl']) #menuContainer {
+        right: 0;
+        left: auto;
+      }
+
+      /* NXENG-527: home shortcut positioned outside paper-listbox (navigation only, no drawer)
+         but inside scroll area with other icons. */
+      .home-link {
+        position: relative;
+        width: var(--nuxeo-sidebar-width);
+        flex-shrink: 0;
+        margin-top: 43px;
+        background-color: var(--nuxeo-sidebar-background);
+        display: block;
+        text-decoration: none;
+      }
+
+      /* menu */
+      #menu {
+        @apply --nuxeo-sidebar;
+        position: relative;
+        width: var(--nuxeo-sidebar-width);
+        z-index: 100;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      #menu nuxeo-menu-icon {
+        flex-shrink: 0;
       }
 
       /* Apply margin-top: auto to all settings and then reset them, except the first one */
@@ -229,6 +268,13 @@ Polymer({
         overflow: visible;
         width: var(--app-drawer-width, 350px);
         transition: width 0.3s ease;
+        /* Drawer separator border (Hyland themes) or none for classic theme */
+        border-right: var(--hyland-drawer-separator-border, none);
+      }
+      /* NXENG-527: mirror the separator for RTL layouts. */
+      :host([dir='rtl']) #drawer {
+        border-right: none;
+        border-left: var(--hyland-drawer-separator-border, none);
       }
 
       /* Disable transition while the user is actively dragging the drawer resize handle */
@@ -277,7 +323,9 @@ Polymer({
         width: calc(100% - var(--nuxeo-sidebar-width));
         height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         margin-left: var(--nuxeo-sidebar-width);
-        background-color: var(--nuxeo-drawer-background);
+        /* NXENG-527: the secondary nav (all drawer pages) shares the main content surface on Hyland
+           themes; classic falls back to the original drawer background. */
+        background-color: var(--hyland-page-surface-background, var(--nuxeo-drawer-background));
       }
 
       :host([dir='rtl']) #drawer iron-pages {
@@ -285,25 +333,19 @@ Polymer({
         margin-left: 0;
       }
 
-      #drawer nuxeo-menu-item:hover,
-      #drawer list-item:hover {
-        @apply --nuxeo-block-hover;
-      }
-
-      #drawer .list-item.selected,
-      #drawer nuxeo-menu-item.iron-selected,
-      #drawer .list-item:focus,
-      #drawer nuxeo-menu-item:focus,
-      #drawer .list-item.selected:focus,
-      #drawer nuxeo-menu-item.iron-selected:focus {
-        @apply --nuxeo-block-selected;
-      }
-
       #drawer nuxeo-menu-item {
         @apply --nuxeo-sidebar-item-theme;
         --nuxeo-menu-item-link {
           @apply --nuxeo-sidebar-item-link;
         }
+        /* NXENG-527: hover/selected styling now lives inside nuxeo-menu-item (via --hyland-drawer-item /
+           --hyland-drawer-item-selected), so drop the drawer-level pill border here. */
+        border: none !important;
+      }
+
+      /* NXENG-527: secondary-nav section header (Administration, user settings/profile). */
+      .header h5 {
+        @apply --hyland-section-header;
       }
 
       #drawer .profile nuxeo-menu-item:last-of-type {
@@ -448,38 +490,51 @@ Polymer({
           hidden$="[[isDrawerHidden(isNarrow, drawerOpened)]]"
         >
           <div role="list">
-            <!-- logo -->
             <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
               <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
             </a>
 
-            <!-- menu -->
-            <paper-listbox
-              id="menu"
-              selected="{{selectedTab}}"
-              attr-for-selected="name"
-              selected-class="selected"
-              on-iron-activate="_toggleDrawer"
-              aria-label$="[[i18n('app.drawer')]]"
-              aria-expanded="[[drawerOpened]]"
-              on-keyup="_toggleDrawer"
-            >
-              <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
+            <!-- Scrollable container for home shortcut and menu (below pinned logo) -->
+            <div id="menuContainer">
+              <!-- Home shortcut: placed outside paper-listbox to navigate home without triggering
+                   the secondary-nav drawer. Focus and activation are managed by nuxeo-menu-icon. -->
               <nuxeo-menu-icon
-                name="administration"
-                icon="nuxeo:admin"
-                label="app.administration"
-                class="settings"
-                hidden$="[[!hasAdministrationPermissions(currentUser)]]"
+                class="home-link"
+                name="home"
+                route="home"
+                icon="nuxeo:home"
+                label="app.home"
+                on-click="_resetTaskSelection"
               ></nuxeo-menu-icon>
-              <nuxeo-menu-icon
-                name="profile"
-                src="[[currentUser.contextParameters.userprofile.avatar.data]]"
-                icon="nuxeo:user-settings"
-                label="app.account"
-                class="settings"
-              ></nuxeo-menu-icon>
-            </paper-listbox>
+
+              <!-- menu -->
+              <paper-listbox
+                id="menu"
+                selected="{{selectedTab}}"
+                attr-for-selected="name"
+                selected-class="selected"
+                on-iron-activate="_toggleDrawer"
+                aria-label$="[[i18n('app.drawer')]]"
+                aria-expanded="[[drawerOpened]]"
+                on-keyup="_toggleDrawer"
+              >
+                <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
+                <nuxeo-menu-icon
+                  name="administration"
+                  icon="nuxeo:admin"
+                  label="app.administration"
+                  class="settings"
+                  hidden$="[[!hasAdministrationPermissions(currentUser)]]"
+                ></nuxeo-menu-icon>
+                <nuxeo-menu-icon
+                  name="profile"
+                  src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+                  icon="nuxeo:user-settings"
+                  label="app.account"
+                  class="settings"
+                ></nuxeo-menu-icon>
+              </paper-listbox>
+            </div>
 
             <!-- drawer content -->
             <div id="drawer" style="width: {{drawerWidth}}">
@@ -859,6 +914,17 @@ Polymer({
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
     });
+
+    // Remove the tabindex the home shortcut inherits from PaperItemBehavior to avoid a double Tab stop.
+    // It sits outside paper-listbox, but PaperItemBehavior still sets tabindex="0" on the
+    // <nuxeo-menu-icon> host, while its shadow root also contains a focusable <a> — that is two Tab
+    // stops for a single control. Removing the attribute takes the host out of the sequential tab
+    // order (a custom element with no tabindex is not keyboard-focusable), leaving the inner <a> as
+    // the single Tab stop; the link stays reachable by mouse and programmatically (focus()/click()).
+    const homeLink = this.shadowRoot && this.shadowRoot.querySelector('.home-link');
+    if (homeLink) {
+      homeLink.removeAttribute('tabindex');
+    }
 
     // fire resize event during drawer animation for elements that need to adapt to size changes (nuxeo-data-table etc)
     // Filter to transitions on the drawer element itself; descendant transitions
