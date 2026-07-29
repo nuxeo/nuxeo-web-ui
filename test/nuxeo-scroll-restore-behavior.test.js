@@ -144,6 +144,35 @@ suite('NuxeoScrollRestoreBehavior', () => {
     expect(view2.scrollToIndex.secondCall.args[0]).to.equal(12);
   });
 
+  test('re-saving the same list refreshes its anchor in place', () => {
+    const host = makeHost(name, makeView(makeDocs(60), 40));
+    host._srSaveAnchor(); // first save at index 40
+    host.view = makeView(makeDocs(60), 15);
+    host._srSaveAnchor(); // re-save same name at index 15 (LRU refresh path)
+    const view2 = makeView(makeDocs(60), 0);
+    makeHost(name, view2)._srMaybeRestore();
+    expect(view2.scrollToIndex.firstCall.args[0]).to.equal(15);
+  });
+
+  test('evicts the oldest anchor once the cap is exceeded', () => {
+    const firstName = `evict-${Date.now()}`;
+    makeHost(firstName, makeView(makeDocs(60), 40))._srSaveAnchor();
+    // save more than MAX_ANCHORS (100) other lists to push the first one out
+    for (let i = 0; i < 101; i++) {
+      makeHost(`evict-${Date.now()}-${i}`, makeView(makeDocs(60), 40))._srSaveAnchor();
+    }
+    const view2 = makeView(makeDocs(60), 0);
+    makeHost(firstName, view2)._srMaybeRestore();
+    expect(view2.scrollToIndex.called).to.equal(false); // anchor was evicted
+  });
+
+  test('arming scroll tracking is a no-op when the view has no list', () => {
+    const host = makeHost(name, {});
+    host._srArmScrollTracking({}); // no $.list — must not throw
+    host._srDisarmScrollTracking(); // nothing armed — must not throw
+    expect(host._srScrollList).to.equal(null);
+  });
+
   test('scroll tracking keeps the anchor fresh', () => {
     const list = {
       firstVisibleIndex: 0,

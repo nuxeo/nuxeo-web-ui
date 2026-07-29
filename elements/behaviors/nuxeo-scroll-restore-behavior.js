@@ -64,7 +64,7 @@ export const NuxeoScrollRestoreBehavior = {
   _srSaveAnchor(view) {
     const v = view || this.view;
     const name = this.name;
-    if (!name || !v || !v.$ || !v.$.list) {
+    if (!name || !v?.$?.list) {
       return;
     }
     const index = v.$.list.firstVisibleIndex;
@@ -73,7 +73,7 @@ export const NuxeoScrollRestoreBehavior = {
     }
     const items = Array.isArray(v.items) ? v.items : [];
     const item = items[index];
-    _setAnchor(name, { uid: (item && item.uid) || null, index });
+    _setAnchor(name, { uid: item?.uid || null, index });
   },
 
   /**
@@ -162,7 +162,7 @@ export const NuxeoScrollRestoreBehavior = {
   /** Attaches a debounced scroll listener that keeps the anchor fresh. */
   _srArmScrollTracking(view) {
     this._srDisarmScrollTracking();
-    if (!view || !view.$ || !view.$.list || typeof view.$.list.addEventListener !== 'function') {
+    if (!view?.$?.list || typeof view.$.list.addEventListener !== 'function') {
       return;
     }
     const list = view.$.list;
