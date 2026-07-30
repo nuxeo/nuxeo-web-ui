@@ -364,9 +364,10 @@ Polymer({
       const invalidField = elementsToValidate.find((node) => node.invalid);
       if (invalidField) {
         // `nearest` keeps the error summary that nuxeo-document-layout scrolled to the top of the
-        // form in view, instead of pushing it out by aligning the field with the top.
+        // form in view, instead of pushing it out by aligning the field with the top. Focusing
+        // would scroll again, undoing that.
         invalidField.scrollIntoView({ block: 'nearest' });
-        invalidField.focus();
+        invalidField.focus({ preventScroll: true });
       }
       this._setCreating(false);
       return;
