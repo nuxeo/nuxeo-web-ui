@@ -72,6 +72,10 @@ suite('focus-ring', () => {
       expect(FOCUS_RULE).to.contain('var(--nuxeo-focus-outline, none)');
     });
 
+    test('draws the ring inset so it is not clipped by overflow containers', () => {
+      expect(FOCUS_RULE).to.contain('outline-offset: -2px');
+    });
+
     test('is wrapped in :where() so it contributes zero specificity', () => {
       expect(FOCUS_RULE).to.contain(':where(');
     });
