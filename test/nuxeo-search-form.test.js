@@ -27,6 +27,13 @@ suite('nuxeo-search-form', () => {
     await flush();
   });
 
+  test('gives the saved searches dropdown an always visible label (WEBUI-489)', () => {
+    const actionsDropdown = searchForm.shadowRoot.querySelector('#actionsDropdown');
+    expect(actionsDropdown).to.exist;
+    expect(actionsDropdown.label).to.equal(searchForm.i18n('searchForm.searchFilters'));
+    expect(actionsDropdown.placeholder).to.equal(searchForm.i18n('searchForm.searchFilters.placeholder'));
+  });
+
   test('maps saved searches for selectivity data', () => {
     const data = searchForm._computeData([
       { id: 's1', title: 'Search 1' },
