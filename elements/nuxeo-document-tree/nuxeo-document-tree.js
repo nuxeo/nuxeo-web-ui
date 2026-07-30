@@ -116,10 +116,10 @@ Polymer({
       }
 
       [toggle]:focus {
-        outline: 2px solid var(--nuxeo-focus-ring-color, black);
+        outline: 2px solid var(--nuxeo-focus-ring-color, var(--nuxeo-primary-color, black));
         outline-offset: 0.2px;
         border-radius: 3px;
-        box-shadow: 0 0 3px black;
+        box-shadow: 0 0 3px var(--nuxeo-focus-ring-color, var(--nuxeo-primary-color, black));
         background-color: rgba(0, 0, 0, 0);
       }
 
