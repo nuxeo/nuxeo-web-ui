@@ -819,6 +819,7 @@ Polymer({
       const clonedParams = JSON.parse(JSON.stringify(search.params));
       this.params = this._mutateParams(clonedParams, true);
       this._navigateToResults();
+      this._scheduleDirectorySuggestionRehydration();
     } else {
       this._clear();
     }
@@ -859,6 +860,7 @@ Polymer({
     if (this.form) {
       this.form.searchTerm = this.searchTerm;
     }
+    this._scheduleDirectorySuggestionRehydration();
   },
 
   _scheduleDirectorySuggestionRehydration() {
@@ -923,44 +925,61 @@ Polymer({
 
   _queryDirectorySuggestionEntry(suggestion, id) {
     return new Promise((resolve) => {
-      const s2 = suggestion?.$?.s2;
-      if (!s2 || typeof s2._query !== 'function') {
+      const op = suggestion?.$?.s2?.$?.op;
+      if (!op) {
         resolve(null);
         return;
       }
 
       let done = false;
-      let fallbackTimeout;
-      const finish = (result) => {
+      const fallbackTimeout = setTimeout(() => {
         if (!done) {
           done = true;
-          if (fallbackTimeout) {
-            clearTimeout(fallbackTimeout);
-          }
-          resolve(result);
+          op.op = op.__savedOp;
+          op.params = op.__savedParams;
+          delete op.__savedOp;
+          delete op.__savedParams;
+          resolve(null);
         }
+      }, 3000);
+
+      op.__savedOp = op.op;
+      op.__savedParams = op.params;
+      op.op = 'Directory.GetEntry';
+      op.params = {
+        directoryName: suggestion.directoryName,
+        id: String(id),
+        localize: true,
+        dbl10n: suggestion.dbl10n || false,
+        lang:
+          window.nuxeo && window.nuxeo.I18n && window.nuxeo.I18n.language
+            ? window.nuxeo.I18n.language.split('-')[0]
+            : 'en',
       };
 
-      fallbackTimeout = setTimeout(() => finish(null), 3000);
-
-      s2._query({
-        term: String(id),
-        callback: (response) => {
-          const entries = this._flattenSelectivityResults(response?.results).map((result) => result.item || result);
-          const expectedId = String(id);
-          const matchedEntry =
-            entries.find((entry) => {
-              const entryId = typeof suggestion.idFunction === 'function' ? suggestion.idFunction(entry) : undefined;
-              return (
-                String(entryId) === expectedId ||
-                String(entry.id) === expectedId ||
-                String(entry.computedId) === expectedId
-              );
-            }) || null;
-          finish(matchedEntry);
-        },
-        error: () => finish(null),
-      });
+      op.execute()
+        .then((entry) => {
+          if (!done) {
+            done = true;
+            clearTimeout(fallbackTimeout);
+            op.op = op.__savedOp;
+            op.params = op.__savedParams;
+            delete op.__savedOp;
+            delete op.__savedParams;
+            resolve(entry || null);
+          }
+        })
+        .catch(() => {
+          if (!done) {
+            done = true;
+            clearTimeout(fallbackTimeout);
+            op.op = op.__savedOp;
+            op.params = op.__savedParams;
+            delete op.__savedOp;
+            delete op.__savedParams;
+            resolve(null);
+          }
+        });
     });
   },
 
