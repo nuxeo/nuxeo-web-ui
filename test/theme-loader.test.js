@@ -57,6 +57,14 @@ suite('theme-loader', () => {
       expect(() => safeSetTheme('dark')).to.not.throw();
       expect(warnStub).to.have.been.calledOnce;
     });
+
+    test('should warn using String(e) when the thrown value has no message', () => {
+      setItemStub.callsFake(() => {
+        throw 'boom';
+      });
+      expect(() => safeSetTheme('dark')).to.not.throw();
+      expect(warnStub).to.have.been.calledWith('Failed to persist theme preference:', 'boom');
+    });
   });
 
   suite('getValidTheme', () => {
@@ -86,6 +94,14 @@ suite('theme-loader', () => {
     test('should return the default theme when localStorage.getItem throws', () => {
       getItemStub.throws(new Error('SecurityError'));
       expect(getValidTheme()).to.equal(getDefaultTheme());
+    });
+
+    test('should warn using String(e) when getItem throws a value with no message', () => {
+      getItemStub.callsFake(() => {
+        throw 'nope';
+      });
+      expect(getValidTheme()).to.equal(getDefaultTheme());
+      expect(warnStub).to.have.been.calledWith('Failed to read theme preference:', 'nope');
     });
   });
 
