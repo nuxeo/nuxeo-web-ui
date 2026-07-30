@@ -2074,4 +2074,90 @@ suite('nuxeo-results', () => {
       expect(settings.columns['dc:title']).to.have.property('order', 1);
     });
   });
+
+  suite('Settings restore guards (WEBUI-2085)', () => {
+    test('_viewChanged applies filtered settings when the capability filter returns a value', () => {
+      const filtered = { columns: { 'dc:title': { hidden: false } } };
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(filtered);
+      const view = createMockView({ settings: { source: 'template' } });
+      results.displayMode = 'table';
+      results._settings = { table: { source: 'persisted' } };
+
+      results._viewChanged(view, null);
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(filtered);
+      filterStub.restore();
+    });
+
+    test('_viewChanged does not overwrite view settings when the capability filter returns undefined', () => {
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(undefined);
+      const templateSettings = { source: 'template' };
+      const view = createMockView({ settings: templateSettings });
+      results.displayMode = 'table';
+      results._settings = { table: { source: 'persisted' } };
+
+      results._viewChanged(view, null);
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(templateSettings);
+      filterStub.restore();
+    });
+
+    test('_updateViews applies filtered settings when the capability filter returns a value', async () => {
+      const resultsWithViews = await fixture(html`
+        <nuxeo-results name="test-update-views">
+          <div class="results" name="table" icon="icons:list"></div>
+        </nuxeo-results>
+      `);
+      await flush();
+      const view = resultsWithViews.$.views.items[0];
+      view.settings = { source: 'template' };
+      resultsWithViews._settings = { table: { source: 'persisted' } };
+      const filtered = { source: 'filtered' };
+      const filterStub = sinon.stub(resultsWithViews, '_filterSettingsByCapabilities').returns(filtered);
+
+      resultsWithViews._updateViews();
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(filtered);
+      filterStub.restore();
+    });
+
+    test('_updateViews does not overwrite view settings when the capability filter returns undefined', async () => {
+      const resultsWithViews = await fixture(html`
+        <nuxeo-results name="test-update-views-undefined">
+          <div class="results" name="table" icon="icons:list"></div>
+        </nuxeo-results>
+      `);
+      await flush();
+      const view = resultsWithViews.$.views.items[0];
+      const templateSettings = { source: 'template' };
+      view.settings = templateSettings;
+      resultsWithViews._settings = { table: { source: 'persisted' } };
+      const filterStub = sinon.stub(resultsWithViews, '_filterSettingsByCapabilities').returns(undefined);
+
+      resultsWithViews._updateViews();
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(templateSettings);
+      filterStub.restore();
+    });
+
+    test('restoreSettings does not overwrite view settings when the capability filter returns undefined', () => {
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(undefined);
+      const templateSettings = { source: 'template' };
+      const view = createMockView({ settings: templateSettings });
+      results.view = view;
+      results.name = 'test-results';
+      results.displayMode = 'table';
+      results._settings = { displayMode: 'table', table: { source: 'persisted' } };
+
+      results.restoreSettings();
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(templateSettings);
+      filterStub.restore();
+    });
+  });
 });
