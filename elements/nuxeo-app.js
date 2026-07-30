@@ -157,7 +157,6 @@ Polymer({
         top: var(--nuxeo-app-top);
         z-index: 102;
         box-sizing: border-box;
-        outline: none;
         background-color: var(--nuxeo-sidebar-background);
         display: block;
       }
@@ -170,11 +169,6 @@ Polymer({
       #logo img {
         width: var(--nuxeo-sidebar-width);
         height: var(--nuxeo-drawer-header-height, 53px);
-      }
-
-      #logo:hover img {
-        filter: brightness(110%);
-        -webkit-filter: brightness(110%);
       }
 
       :host([dir='rtl']) #logo {
@@ -484,9 +478,10 @@ Polymer({
           hidden$="[[isDrawerHidden(isNarrow, drawerOpened)]]"
         >
           <div role="list">
-            <a id="logo" href$="[[urlFor('home')]]" on-click="_resetTaskSelection">
+            <!-- Logo: decorative only, home navigation handled by menu shortcut below -->
+            <div id="logo">
               <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
-            </a>
+            </div>
 
             <!-- Scrollable container for home shortcut and menu (below pinned logo) -->
             <div id="menuContainer">
@@ -846,10 +841,9 @@ Polymer({
   ],
 
   ready() {
-    this.logoToMenuNavigation();
     this.skipLinkEvent();
     this._checkRtl();
-
+    this.homeToMenuNavigation();
     this._updateIsNarrow();
 
     const main = this.$.mainContent;
@@ -903,15 +897,15 @@ Polymer({
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
     });
 
-    // Remove the tabindex the home shortcut inherits from PaperItemBehavior to avoid a double Tab stop.
-    // It sits outside paper-listbox, but PaperItemBehavior still sets tabindex="0" on the
-    // <nuxeo-menu-icon> host, while its shadow root also contains a focusable <a> — that is two Tab
-    // stops for a single control. Removing the attribute takes the host out of the sequential tab
-    // order (a custom element with no tabindex is not keyboard-focusable), leaving the inner <a> as
-    // the single Tab stop; the link stays reachable by mouse and programmatically (focus()/click()).
-    const homeLink = this.shadowRoot && this.shadowRoot.querySelector('.home-link');
+    // Remove interactive attributes from home link to fix accessibility issue.
+    // PaperItemBehavior adds role/tabindex/aria-disabled to the host, but the inner <a>
+    // already provides the interactive control. This causes nested-interactive violations
+    // and double Tab stops. Strip these attributes to make the host a plain container.
+    const homeLink = this.shadowRoot?.querySelector('.home-link');
     if (homeLink) {
       homeLink.removeAttribute('tabindex');
+      homeLink.removeAttribute('role');
+      homeLink.removeAttribute('aria-disabled');
     }
 
     // fire resize event during drawer animation for elements that need to adapt to size changes (nuxeo-data-table etc)
@@ -958,35 +952,66 @@ Polymer({
     );
   },
 
-  logoToMenuNavigation() {
-    const { logo } = this.$;
+  // Arrow-key navigation between the home shortcut and the menu. Handlers are named methods
+  // (not inline closures) so they can be unit-tested without firing key events at the listbox.
+  homeToMenuNavigation() {
+    const home = this.shadowRoot && this.shadowRoot.querySelector('.home-link');
     const { menu } = this.$;
-    logo.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const firstItem = menu.querySelector('nuxeo-menu-icon, [name]');
-        if (firstItem) {
-          firstItem.focus();
-        }
-      }
-    });
+    if (!home || !menu) {
+      return;
+    }
+    this._homeMenuNav = { home, menu };
+    home.addEventListener('keydown', this._onHomeShortcutKeydown.bind(this));
+    menu.addEventListener('keydown', this._onMenuEdgeKeydown.bind(this));
+  },
 
-    menu.addEventListener('keydown', (e) => {
-      const items = Array.from(menu.querySelectorAll('nuxeo-menu-icon, [name]')).filter(
-        (el) => !el.hasAttribute('hidden'),
-      );
+  // Visible menu items, excluding hidden ones.
+  _homeMenuVisibleItems() {
+    const menu = this._homeMenuNav && this._homeMenuNav.menu;
+    if (!menu) {
+      return [];
+    }
+    return Array.from(menu.querySelectorAll('nuxeo-menu-icon, [name]')).filter((el) => !el.hasAttribute('hidden'));
+  },
 
-      if (!items.length) return;
+  // Focus the home shortcut's inner link, falling back to the host.
+  _focusHomeShortcut() {
+    const home = this._homeMenuNav && this._homeMenuNav.home;
+    if (!home) {
+      return;
+    }
+    const anchor = home.shadowRoot && home.shadowRoot.querySelector('a');
+    (anchor || home).focus();
+  },
 
-      const firstItem = items[0];
-      const lastItem = items[items.length - 1];
-      const active = e.target;
+  // On home: ArrowDown focuses the first menu item, ArrowUp the last.
+  _onHomeShortcutKeydown(e) {
+    const items = this._homeMenuVisibleItems();
+    if (!items.length) {
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      items[0].focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      items[items.length - 1].focus();
+    }
+  },
 
-      if ((e.key === 'ArrowUp' && active === firstItem) || (e.key === 'ArrowDown' && active === lastItem)) {
-        e.preventDefault();
-        logo.focus();
-      }
-    });
+  // On menu edges: ArrowUp on the first item or ArrowDown on the last returns focus to home.
+  _onMenuEdgeKeydown(e) {
+    const items = this._homeMenuVisibleItems();
+    if (!items.length) {
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = e.target;
+    if ((e.key === 'ArrowUp' && active === first) || (e.key === 'ArrowDown' && active === last)) {
+      e.preventDefault();
+      this._focusHomeShortcut();
+    }
   },
 
   detached() {

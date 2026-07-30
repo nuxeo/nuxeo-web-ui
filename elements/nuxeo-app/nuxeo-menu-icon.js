@@ -40,11 +40,17 @@ Polymer({
         outline: none;
       }
 
-      /* Both the host and inner <a> can receive focus, so both need focus styles.
-         Only one is focused at a time, preventing a double outline. */
+      /* Match the button box so the focus ring frames the whole icon, not a thin inline strip. */
+      a {
+        display: block;
+      }
+
+      /* Host or inner <a> can be focused (never both). Inset ring so it isn't clipped by
+         overflow:hidden containers. */
       :host(:focus-visible),
       a:focus-visible {
         outline: auto;
+        outline-offset: -2px;
       }
 
       :host(.selected) paper-icon-button {
