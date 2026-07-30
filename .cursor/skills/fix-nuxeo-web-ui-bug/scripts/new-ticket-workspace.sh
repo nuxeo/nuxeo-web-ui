@@ -355,6 +355,25 @@ if [ -d "$SCRIPT_ROOT/.cursor/skills" ] && [ "$SCRIPT_ROOT" != "$WT" ]; then
 fi
 
 step "Allocating host port"
+# Scanning for a free port and recording it must be atomic: two agents starting at the
+# same moment would otherwise both see the port as unclaimed and both take it. `mkdir`
+# is atomic on POSIX filesystems, so it serialises just this section.
+LOCK=$TICKETS_ROOT/.port.lock
+locked=0
+for _ in $(seq 1 150); do
+  if mkdir "$LOCK" 2>/dev/null; then
+    locked=1
+    trap 'rmdir "$LOCK" 2>/dev/null || true' EXIT
+    break
+  fi
+  # Reap a lock abandoned by a killed run (older than 2 minutes).
+  if [ -d "$LOCK" ] && [ -z "$(find "$LOCK" -maxdepth 0 -mmin -2 2>/dev/null)" ]; then
+    rmdir "$LOCK" 2>/dev/null || true
+  fi
+  sleep 0.2
+done
+[ "$locked" = 1 ] || note "WARNING: could not take the port lock; another run may pick the same port"
+
 PORT=$(allocate_port "$PORT_START")
 note "$PORT"
 
@@ -373,6 +392,12 @@ export NX_URL=http://localhost:$PORT/nuxeo
 export NX_DIST_PATCHED=$DIST_PATCHED
 export NX_DIST_UNPATCHED=$DIST_UNPATCHED
 EOF
+
+# env.sh is written, so the port is now claimed and the lock can go.
+if [ "$locked" = 1 ]; then
+  trap - EXIT
+  rmdir "$LOCK" 2>/dev/null || true
+fi
 
 # shellcheck disable=SC1091
 . "$TDIR/env.sh"
