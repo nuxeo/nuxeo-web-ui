@@ -630,6 +630,58 @@ suite('nuxeo-results', () => {
       results.nxProvider = null;
     });
 
+    test('_clearViewSettings logs and swallows a doc prefs backend failure', async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.name = 'default';
+      results.document = { path: '/default-domain' };
+      const debounceStub = sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').rejects(new Error('boom'));
+      const warnStub = sinon.stub(console, 'warn');
+
+      results._clearViewSettings();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(warnStub).to.have.been.calledWith(
+        'Failed to clear document results preferences in the backend',
+        sinon.match.object,
+      );
+
+      debounceStub.restore();
+      saveDocStub.restore();
+      warnStub.restore();
+      results.document = null;
+    });
+
+    test('_clearViewSettings logs and swallows a global prefs backend failure', async () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.document = null;
+      const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      const provider = createMockProvider();
+      provider.provider = 'default_search';
+      results.nxProvider = provider;
+      const debounceStub = sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveGlobalStub = sinon.stub(results, 'saveGlobalResultsPrefs').rejects(new Error('boom'));
+      const warnStub = sinon.stub(console, 'warn');
+
+      results._clearViewSettings();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(warnStub).to.have.been.calledWith(
+        'Failed to clear global results preferences in the backend',
+        sinon.match.instanceOf(Error),
+      );
+
+      debounceStub.restore();
+      saveGlobalStub.restore();
+      warnStub.restore();
+      allPrefsStub.restore();
+      results.nxProvider = null;
+    });
+
     test('_clearViewSettings leaves the backend alone outside the table display mode', () => {
       results._isRestoring = false;
       results.displayMode = 'grid';
