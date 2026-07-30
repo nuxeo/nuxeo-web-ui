@@ -630,6 +630,56 @@ suite('nuxeo-results', () => {
       results.nxProvider = null;
     });
 
+    test('_clearViewSettings drops the in-session doc prefs before the debounced backend write', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.name = 'default';
+      results._connectedUserId = 'jdoe';
+      results.document = { path: '/default-domain' };
+      results.docPrefs = { columns: { 'dc:title': { width: '620px' } } };
+      results.__hasBackendDocPrefs = true;
+      // Never run the backend call, so this asserts the state before it would have resolved.
+      const debounceStub = sinon.stub(results, '_debounceSave');
+
+      results._clearViewSettings();
+
+      expect(results.docPrefs).to.deep.equal({});
+      expect(results.__hasBackendDocPrefs).to.be.false;
+
+      // The module-level cache was cleared too, so re-loading does not resurrect the old prefs.
+      results.docPrefs = { columns: { 'dc:title': { width: '620px' } } };
+      results._loadDocPrefs(true, results.document, 'jdoe');
+      expect(results.docPrefs).to.deep.equal({});
+
+      debounceStub.restore();
+      results.document = null;
+      results._connectedUserId = null;
+    });
+
+    test('_clearViewSettings drops the in-session global prefs before the debounced backend write', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.document = null;
+      results._connectedUserId = 'jdoe';
+      const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      const provider = createMockProvider();
+      provider.provider = 'default_search';
+      results.nxProvider = provider;
+      results.globalPrefs = { columns: { 'dc:title': { width: '620px' } } };
+      const debounceStub = sinon.stub(results, '_debounceSave');
+
+      results._clearViewSettings();
+
+      expect(results.globalPrefs).to.deep.equal({});
+
+      debounceStub.restore();
+      allPrefsStub.restore();
+      results.nxProvider = null;
+      results._connectedUserId = null;
+    });
+
     test('_clearViewSettings logs and swallows a doc prefs backend failure', async () => {
       results._isRestoring = false;
       results.displayMode = 'table';
