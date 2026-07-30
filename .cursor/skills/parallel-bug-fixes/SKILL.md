@@ -89,7 +89,14 @@ WebUI/
 
 Override the location with `NX_TICKETS_ROOT`, but keep it **outside** the repo — a nested workspace
 becomes untracked content that `git status`, eslint and `prettier --list-different` all walk into.
-Re-running for an existing workspace is a no-op that just re-prints the environment.
+Re-running for an existing workspace is a no-op that just re-prints the environment. If a previous
+run was killed mid-provision (the clones are there but `env.sh`, which is written last, is not), the
+re-run **recovers automatically** — it discards the half-built workspace and rebuilds it, unless that
+clone has uncommitted changes or commits that are not on `origin/<base>`, in which case it refuses and
+asks you to inspect it or pass `--force`.
+
+`maintenance-3.0.x` is **deprecated**: the script rejects it outright, so only `lts-2025` and
+`maintenance-3.1.x` are valid bases.
 
 **Why a shared checkout cannot work.** One working tree holds one branch, so two agents in the same
 checkout fight over `HEAD`. A `git worktree` is not enough either: a clone shares its refs, its config
@@ -153,11 +160,14 @@ writes `origin/<base>`, and build the baseline worktree inside `$NX_WT/..` rathe
 ## Port allocation
 
 The script picks a deterministic starting port so re-runs for the same ticket tend to reuse the same
-one, and the three bases of a ticket never collide:
+one, and the two bases of a ticket never collide:
 
 ```
-PORT_START = 8100 + (<ticket-number> % 250) * 3 + <base-offset>    # lts-2025 0, 3.1.x 1, 3.0.x 2
+PORT_START = 8100 + (<ticket-number> % 250) * 3 + <base-offset>    # lts-2025 0, 3.1.x 1
 ```
+
+The stride is 3 with only two bases in use, so every ticket has a spare slot — harmless, and it keeps
+the derived ports stable for workspaces created before `maintenance-3.0.x` was dropped.
 
 From there it scans upward for a port that is both **genuinely free** (a real `bind`) and
 **unclaimed** by a sibling workspace's `env.sh` — a container that has not started yet still owns its
@@ -236,10 +246,12 @@ These are the three things that actually go wrong when you point this skill at a
   ticket, i.e. **50 workspaces for 25 tickets**. Resolve `fixVersions` per ticket (or state the
   intended bases explicitly in each agent's prompt) **before** fanning out.
 - **`ELEMENTS-*` children live in a different repo.** e.g. `ELEMENTS-1611` lands in
-  **`nuxeo/nuxeo-elements`**, not `nuxeo-web-ui`, and its bases are named differently (`3.0.x` /
-  `3.1.x` fixVersions rather than `lts-2025` / `maintenance-3.1.x`). The script clones elements per
-  ticket, so isolation still holds, but the branch naming, PR target repo and backport pair all
-  differ — say so in the agent's prompt instead of letting it assume `nuxeo-web-ui`.
+  **`nuxeo/nuxeo-elements`**, not `nuxeo-web-ui`, and its fixVersions are named differently — a
+  `3.x` line rather than `lts-2025` / `maintenance-3.1.x`. Only the **`3.1.x`** line is in scope;
+  **`3.0.x` is deprecated**, so ignore that fixVersion rather than opening a branch for it. The
+  script clones elements per ticket, so isolation still holds, but the branch naming, PR target repo
+  and backport pair all differ — say so in the agent's prompt instead of letting it assume
+  `nuxeo-web-ui`.
 - **Not every a11y child is a client-side bug with a minimal fix.** "PDF Documents: No accessibility
   tags on export" and "Integrated Video Player: no captions" need backend or third-party work, not a
   Web UI patch. Route those to [`jira/raise-backend-jira-ticket`](../jira/raise-backend-jira-ticket/SKILL.md)

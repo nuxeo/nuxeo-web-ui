@@ -29,7 +29,12 @@
 #                     symlinks at the shared reference checkout instead (read-only).
 #   --print           Print the workspace environment and exit.
 #   --remove          Remove the workspace, its container and its build dirs.
-#   --force           Recreate the workspace even if it already exists.
+#   --force           Recreate the workspace even if it already exists, and allow
+#                     --remove to delete a workspace with uncommitted changes.
+#
+# A workspace whose env.sh is missing was interrupted mid-provision; the script
+# recreates it automatically, unless its clone holds uncommitted changes or
+# commits that are not on origin/<base>.
 #
 # Environment overrides:
 #   NX_MAIN_REPO      Reference nuxeo-web-ui clone (default: this script's repo)
@@ -38,7 +43,8 @@
 
 set -euo pipefail
 
-BASES="lts-2025 maintenance-3.1.x maintenance-3.0.x"
+BASES="lts-2025 maintenance-3.1.x"
+DEPRECATED_BASES="maintenance-3.0.x"
 
 die() {
   printf 'error: %s\n' "$*" >&2
@@ -65,6 +71,9 @@ if [ $# -ge 1 ]; then
     *) BASE=$1; shift ;;
   esac
 fi
+case " $DEPRECATED_BASES " in
+  *" $BASE "*) die "base '$BASE' is deprecated and is no longer targeted; use one of: $BASES" ;;
+esac
 case " $BASES " in
   *" $BASE "*) ;;
   *) die "unknown base '$BASE' (expected one of: $BASES)" ;;
@@ -170,9 +179,9 @@ ticket_num=$(printf '%s' "$TICKET" | tr -cd '[:digit:]')
 base_offset=0
 case "$BASE" in
   maintenance-3.1.x) base_offset=1 ;;
-  maintenance-3.0.x) base_offset=2 ;;
 esac
-# Three consecutive ports per ticket (one per base), kept inside 8100..8849.
+# A stride of 3 per ticket (offsets 0 and 1 used, the third slot spare) keeps the
+# starting ports inside 8100..8849 and leaves headroom if a base is ever added.
 PORT_START=$((8100 + (${ticket_num:-0} % 250) * 3 + base_offset))
 
 # --------------------------------------------------------------------- output
@@ -253,7 +262,24 @@ if [ -d "$TDIR" ] && [ "$FORCE" = 0 ]; then
     print_env
     exit 0
   fi
-  die "$TDIR exists but has no env.sh; inspect it or re-run with --force"
+  # env.sh is written last, so its absence means provisioning was interrupted
+  # partway through. Recreate the workspace instead of blocking the next run —
+  # but only once the half-built clone is known to hold nothing worth keeping.
+  keep_reason=
+  if [ -d "$WT/.git" ]; then
+    if [ -n "$(git -C "$WT" status --porcelain 2>/dev/null)" ]; then
+      keep_reason="it has uncommitted changes"
+    elif [ "$(git -C "$WT" rev-list --count "origin/$BASE..HEAD" 2>/dev/null || echo 0)" != 0 ]; then
+      keep_reason="it has commits that are not on origin/$BASE"
+    fi
+  fi
+  if [ -n "$keep_reason" ]; then
+    note "$TDIR is half-provisioned (no env.sh), but $keep_reason"
+    die "refusing to discard work in $WT; inspect it or re-run with --force"
+  fi
+  step "Recovering interrupted provision for $TICKET ($BASE)"
+  note "no env.sh and nothing to keep in $TDIR — recreating it"
+  rm -rf "$TDIR"
 fi
 [ "$FORCE" = 0 ] || rm -rf "$TDIR"
 
