@@ -295,6 +295,10 @@ const template = html`
           background-color: var(--nuxeo-box);
         }
 
+        /*
+         * letter-spacing must stay overridable so users can apply their own text spacing
+         * (WCAG 2.1 AA, SC 1.4.12): !important here would outrank a user stylesheet.
+         */
         --nuxeo-label: {
           display: block;
           opacity: 0.9;
@@ -302,7 +306,7 @@ const template = html`
           overflow: hidden;
           text-overflow: ellipsis;
           font-weight: 400 !important;
-          letter-spacing: 0.005em !important;
+          letter-spacing: 0.005em;
           font-family: var(--nuxeo-app-font);
         }
 
