@@ -72,17 +72,15 @@ limitations under the License.
 
     <fieldset>
       <legend>[[i18n('defaultSearch.collections')]]</legend>
-      <template is="dom-if" if="[[_checkForCollectionTitle(params)]]">
-        <nuxeo-selectivity
-          operation="User.GetCollections"
-          min-chars="0"
-          placeholder="[[i18n('defaultSearch.collections.placeholder')]]"
-          value="{{params.ecm_collections}}"
-          multiple="true"
-          name="collections"
-        >
-        </nuxeo-selectivity>
-      </template>
+      <nuxeo-selectivity
+        operation="User.GetCollections"
+        min-chars="0"
+        placeholder="[[i18n('defaultSearch.collections.placeholder')]]"
+        value="{{params.ecm_collections}}"
+        multiple="true"
+        name="collections"
+      >
+      </nuxeo-selectivity>
     </fieldset>
 
     <fieldset>
@@ -186,14 +184,6 @@ limitations under the License.
         if (e.keyCode === 13) {
           this._search();
         }
-      },
-
-      _checkForCollectionTitle(params) {
-        return (
-          params == null ||
-          Object.keys(params).length === 0 ||
-          (params && params.ecm_collections.some((item) => item.displayLabel || item.title || item.text))
-        );
       },
     });
   </script>

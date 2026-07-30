@@ -44,7 +44,7 @@ suite('nuxeo-default-search-form', () => {
   // Each entry: [legendText, child selector]
   const groups = [
     ['authors', 'nuxeo-dropdown-aggregation[name="authors"]'],
-    ['collections', null], // child is inside a nested dom-if template
+    ['collections', 'nuxeo-selectivity[name="collections"]'],
     ['tags', 'nuxeo-tag-suggestion[name="tags"]'],
   ];
 
@@ -58,23 +58,12 @@ suite('nuxeo-default-search-form', () => {
       expect(fieldset, `fieldset with legend for "${name}" not found`).to.not.be.null;
     });
 
-    if (childSelector) {
-      test(`${name}: child input has no redundant aria-label`, () => {
-        const fieldsets = tmpl.content.querySelectorAll('fieldset');
-        const fieldset = Array.from(fieldsets).find((fs) => fs.querySelector(childSelector));
-        const child = fieldset.querySelector(childSelector);
-        expect(child, `${childSelector} not found`).to.not.be.null;
-        expect(child.hasAttribute('aria-label'), 'aria-label should be removed').to.be.false;
-      });
-    }
-  });
-
-  test('collections: nuxeo-selectivity inside dom-if has no redundant aria-label', () => {
-    const fieldsets = tmpl.content.querySelectorAll('fieldset');
-    const fieldset = Array.from(fieldsets).find((fs) => fs.querySelector('template'));
-    const innerTmpl = fieldset.querySelector('template');
-    const selectivity = innerTmpl.content.querySelector('nuxeo-selectivity[name="collections"]');
-    expect(selectivity, 'nuxeo-selectivity[name="collections"] not found').to.not.be.null;
-    expect(selectivity.hasAttribute('aria-label'), 'aria-label should be removed').to.be.false;
+    test(`${name}: child input has no redundant aria-label`, () => {
+      const fieldsets = tmpl.content.querySelectorAll('fieldset');
+      const fieldset = Array.from(fieldsets).find((fs) => fs.querySelector(childSelector));
+      const child = fieldset.querySelector(childSelector);
+      expect(child, `${childSelector} not found`).to.not.be.null;
+      expect(child.hasAttribute('aria-label'), 'aria-label should be removed').to.be.false;
+    });
   });
 });

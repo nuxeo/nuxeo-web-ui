@@ -70,6 +70,7 @@ suite('nuxeo-search-form', () => {
       },
     });
     sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
+    const scheduleSpy = sinon.spy(searchForm, '_scheduleLookupLabelResolution');
 
     searchForm._selectedSearchChanged({ id: 'two' });
 
@@ -77,8 +78,155 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.params).to.deep.equal({ ecm_fulltext: '*world*' });
     expect(searchForm.searchTerm).to.equal('world');
     expect(mockForm.searchTerm).to.equal('world');
+    expect(scheduleSpy).to.have.been.called;
     searchForm._mutateParams.restore();
+    scheduleSpy.restore();
     delete searchForm.form;
+  });
+
+  test('resolves a single saved lookup value from value and label options', async () => {
+    const setValue = sinon.spy();
+    const lookup = {
+      value: 'id_civil',
+      data: [{ value: 'id_civil', label: 'Civil' }],
+      _selectivity: { setValue },
+    };
+
+    await searchForm._resolveLookupLabel(lookup);
+
+    expect(setValue).to.have.been.calledOnceWithExactly(
+      {
+        value: 'id_civil',
+        label: 'Civil',
+        id: 'id_civil',
+        displayLabel: 'Civil',
+        text: 'Civil',
+      },
+      { triggerChange: false },
+    );
+    expect(lookup.value).to.equal('id_civil');
+  });
+
+  test('resolves multiple saved lookup values and falls back to a missing id', async () => {
+    const setValue = sinon.spy();
+    const lookup = {
+      value: ['id_residential', 'missing_id'],
+      options: [{ value: 'id_residential', label: 'Residential' }],
+      _selectivity: { setValue },
+    };
+
+    await searchForm._resolveLookupLabel(lookup);
+
+    expect(setValue).to.have.been.calledOnce;
+    expect(setValue.firstCall.args[0]).to.deep.equal([
+      {
+        value: 'id_residential',
+        label: 'Residential',
+        id: 'id_residential',
+        displayLabel: 'Residential',
+        text: 'Residential',
+      },
+      {
+        id: 'missing_id',
+        value: 'missing_id',
+        displayLabel: 'missing_id',
+        text: 'missing_id',
+      },
+    ]);
+    expect(lookup.value).to.deep.equal(['id_residential', 'missing_id']);
+  });
+
+  test('resolves multi-select lookup queries sequentially', async () => {
+    const setValue = sinon.spy();
+    let pendingQuery = false;
+    const lookup = {
+      value: ['id_civil', 'id_residential'],
+      _selectivity: { setValue },
+      _query({ term, callback }) {
+        expect(pendingQuery).to.be.false;
+        pendingQuery = true;
+        Promise.resolve().then(() => {
+          pendingQuery = false;
+          callback({ results: [{ value: term, label: `${term} label` }] });
+        });
+      },
+    };
+
+    await searchForm._resolveLookupLabel(lookup);
+
+    expect(setValue.firstCall.args[0].map((option) => option.id)).to.deep.equal(['id_civil', 'id_residential']);
+  });
+
+  test('resolves a saved lookup value from loaded selectivity options', async () => {
+    const setValue = sinon.spy();
+    const lookup = {
+      value: 'id_civil',
+      _selectivity: {
+        items: [{ id: 'id_civil', text: 'Civil', item: { value: 'id_civil', label: 'Civil' } }],
+        setValue,
+      },
+    };
+
+    await searchForm._resolveLookupLabel(lookup);
+
+    expect(setValue.firstCall.args[0]).to.deep.equal({
+      value: 'id_civil',
+      label: 'Civil',
+      id: 'id_civil',
+      displayLabel: 'Civil',
+      text: 'Civil',
+    });
+    expect(lookup.value).to.equal('id_civil');
+  });
+
+  test('resolves a saved directory value from the suggestion results', async () => {
+    const setValue = sinon.spy();
+    const lookup = {
+      value: 'id_civil',
+      idFunction: (option) => option.id,
+      $: {
+        s2: {
+          _query({ callback }) {
+            callback({ results: [{ id: 'id_civil', item: { id: 'id_civil', displayLabel: 'Civil' } }] });
+          },
+          _selectivity: { setValue },
+        },
+      },
+    };
+
+    await searchForm._resolveLookupLabel(lookup);
+
+    expect(setValue).to.have.been.calledOnceWithExactly(
+      {
+        id: 'id_civil',
+        displayLabel: 'Civil',
+        value: 'id_civil',
+        text: 'Civil',
+      },
+      { triggerChange: false },
+    );
+    expect(lookup.value).to.equal('id_civil');
+  });
+
+  test('preserves an already labeled saved lookup object', async () => {
+    const setValue = sinon.spy();
+    const lookup = {
+      value: { id: 'id_civil', displayLabel: 'Civil' },
+      _selectivity: { setValue },
+    };
+
+    await searchForm._resolveLookupLabel(lookup);
+
+    expect(setValue).to.have.been.calledOnceWithExactly(
+      {
+        id: 'id_civil',
+        displayLabel: 'Civil',
+        value: 'id_civil',
+        text: 'Civil',
+      },
+      { triggerChange: false },
+    );
+    expect(lookup.value).to.deep.equal({ id: 'id_civil', displayLabel: 'Civil' });
   });
 
   test('resets selected index when search id cannot be found', () => {

@@ -818,6 +818,7 @@ Polymer({
       this.selectedSearch = search;
       const clonedParams = JSON.parse(JSON.stringify(search.params));
       this.params = this._mutateParams(clonedParams, true);
+      this._scheduleLookupLabelResolution();
       this._navigateToResults();
       this._scheduleDirectorySuggestionRehydration();
     } else {
@@ -854,145 +855,176 @@ Polymer({
     const search = this._searches[idx];
     const clonedParams = JSON.parse(JSON.stringify(search.params));
     this.params = this._mutateParams(clonedParams, true);
+    this._scheduleLookupLabelResolution();
     this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
 
     // Ensure form stays synced
     if (this.form) {
       this.form.searchTerm = this.searchTerm;
     }
-    this._scheduleDirectorySuggestionRehydration();
   },
 
-  _scheduleDirectorySuggestionRehydration() {
-    if (this.__directorySuggestionRehydrationScheduled) {
+  _scheduleLookupLabelResolution() {
+    if (this.__lookupLabelResolutionScheduled) {
       return;
     }
-    this.__directorySuggestionRehydrationScheduled = true;
+    this.__lookupLabelResolutionScheduled = true;
     Promise.resolve().then(() => {
-      this.__directorySuggestionRehydrationScheduled = false;
-      return this._rehydrateDirectorySuggestionLabels();
+      this.__lookupLabelResolutionScheduled = false;
+      return this._resolveLookupLabels();
     });
   },
 
-  _rehydrateDirectorySuggestionLabels() {
+  _resolveLookupLabels() {
     const { form } = this;
     if (!form) {
       return Promise.resolve();
     }
-    const containers = [form];
-    if (form.shadowRoot) {
-      containers.unshift(form.shadowRoot);
-    }
-    const suggestions = containers.reduce((results, container) => {
-      if (typeof container.querySelectorAll === 'function') {
-        results.push(...Array.from(container.querySelectorAll('nuxeo-directory-suggestion')));
+    const roots = form.shadowRoot ? [form.shadowRoot, form] : [form];
+    const lookups = roots.reduce((result, root) => {
+      if (typeof root.querySelectorAll === 'function') {
+        root.querySelectorAll('nuxeo-directory-suggestion, nuxeo-selectivity').forEach((lookup) => result.add(lookup));
       }
-      return results;
-    }, []);
-    if (!suggestions.length) {
-      return Promise.resolve();
-    }
-    return Promise.all(suggestions.map((suggestion) => this._rehydrateDirectorySuggestionLabel(suggestion)));
+      return result;
+    }, new Set());
+    return Promise.all(Array.from(lookups, (lookup) => this._resolveLookupLabel(lookup)));
   },
 
-  _rehydrateDirectorySuggestionLabel(suggestion) {
-    if (!suggestion?.$?.s2) {
+  _resolveLookupLabel(lookup) {
+    const savedValue = lookup && lookup.value;
+    const savedValues = Array.isArray(savedValue)
+      ? savedValue.filter((value) => value !== null && value !== undefined && value !== '')
+      : savedValue !== null && savedValue !== undefined && savedValue !== ''
+        ? [savedValue]
+        : [];
+    if (!savedValues.length) {
       return Promise.resolve();
     }
-    const { value } = suggestion;
-    const ids = Array.isArray(value) ? value.filter((id) => id !== null && id !== undefined && id !== '') : [];
-    if (!Array.isArray(value) && value !== null && value !== undefined && value !== '') {
-      ids.push(value);
-    }
-    if (!ids.length) {
-      return Promise.resolve();
-    }
-    return Promise.all(ids.map((id) => this._queryDirectorySuggestionEntry(suggestion, id))).then((entries) => {
-      const resolvedEntries = entries.filter((entry) => !!entry);
-      if (!resolvedEntries.length) {
-        return;
-      }
-      if (typeof suggestion._selectionFormatter === 'function') {
-        resolvedEntries.forEach((entry) => suggestion._selectionFormatter(entry));
-      }
-      const selectivity = suggestion.$.s2._selectivity;
-      if (typeof selectivity?.setValue === 'function') {
-        const currentValue = Array.isArray(suggestion.value) ? suggestion.value.slice() : suggestion.value;
-        selectivity.setValue(currentValue, { triggerChange: false });
-      }
-    });
-  },
-
-  _queryDirectorySuggestionEntry(suggestion, id) {
-    return new Promise((resolve) => {
-      const op = suggestion?.$?.s2?.$?.op;
-      if (!op) {
-        resolve(null);
-        return;
-      }
-
-      let done = false;
-      const fallbackTimeout = setTimeout(() => {
-        if (!done) {
-          done = true;
-          op.op = op.__savedOp;
-          op.params = op.__savedParams;
-          delete op.__savedOp;
-          delete op.__savedParams;
-          resolve(null);
+    return savedValues
+      .reduce(
+        (promise, value) =>
+          promise.then((options) => this._resolveLookupOption(lookup, value).then((option) => options.concat(option))),
+        Promise.resolve([]),
+      )
+      .then((options) => {
+        const selectivity = lookup.$ && lookup.$.s2 ? lookup.$.s2._selectivity : lookup._selectivity;
+        if (selectivity && typeof selectivity.setValue === 'function') {
+          try {
+            selectivity.setValue(Array.isArray(savedValue) ? options : options[0], { triggerChange: false });
+          } catch (_) {
+            selectivity.setValue(savedValue, { triggerChange: false });
+          }
         }
-      }, 3000);
+      });
+  },
 
-      op.__savedOp = op.op;
-      op.__savedParams = op.params;
-      op.op = 'Directory.GetEntry';
-      op.params = {
-        directoryName: suggestion.directoryName,
-        id: String(id),
-        localize: true,
-        dbl10n: suggestion.dbl10n || false,
-        lang: window.nuxeo?.I18n?.language ? window.nuxeo.I18n.language.split('-')[0] : 'en',
+  _resolveLookupOption(lookup, savedValue) {
+    const savedId = this._lookupOptionValue(lookup, savedValue);
+    if (savedValue && typeof savedValue === 'object' && this._lookupOptionLabel(savedValue)) {
+      return Promise.resolve(this._toLookupSelection(savedValue, savedId));
+    }
+    const selectivityElement = lookup.$ && lookup.$.s2 ? lookup.$.s2 : lookup;
+    const selectivity = selectivityElement._selectivity;
+    const optionSources = [lookup.options, lookup.data, selectivityElement.data, selectivity && selectivity.items];
+    const option = optionSources.reduce(
+      (match, options) => match || this._findLookupOption(lookup, savedId, options),
+      null,
+    );
+    if (option) {
+      return Promise.resolve(this._toLookupSelection(option, savedId));
+    }
+
+    if (typeof selectivityElement._query !== 'function') {
+      return Promise.resolve(this._toLookupSelection(null, savedId));
+    }
+    return new Promise((resolve) => {
+      let timeout;
+      let resolved = false;
+      const finish = (result) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          resolve(this._toLookupSelection(result, savedId));
+        }
       };
-
-      op.execute()
-        .then((entry) => {
-          if (!done) {
-            done = true;
-            clearTimeout(fallbackTimeout);
-            op.op = op.__savedOp;
-            op.params = op.__savedParams;
-            delete op.__savedOp;
-            delete op.__savedParams;
-            resolve(entry || null);
-          }
-        })
-        .catch(() => {
-          if (!done) {
-            done = true;
-            clearTimeout(fallbackTimeout);
-            op.op = op.__savedOp;
-            op.params = op.__savedParams;
-            delete op.__savedOp;
-            delete op.__savedParams;
-            resolve(null);
-          }
+      timeout = setTimeout(() => finish(null), 3000);
+      try {
+        selectivityElement._query({
+          term: String(savedId),
+          callback: (response) => finish(this._findLookupOption(lookup, savedId, response && response.results)),
+          error: () => finish(null),
         });
+      } catch (_) {
+        finish(null);
+      }
     });
   },
 
-  _flattenSelectivityResults(results) {
+  _findLookupOption(lookup, savedValue, options) {
+    return this._flattenLookupOptions(options).find((option) => this._lookupOptionValue(lookup, option) === savedValue);
+  },
+
+  _flattenLookupOptions(options) {
     const flattened = [];
-    const queue = Array.isArray(results) ? results.slice() : [];
-    for (const item of queue) {
-      if (!item) {
+    const queue = Array.isArray(options)
+      ? options.slice()
+      : options && typeof options !== 'string' && typeof options[Symbol.iterator] === 'function'
+        ? Array.from(options)
+        : options
+          ? [options]
+          : [];
+    while (queue.length) {
+      const option = queue.shift();
+      if (!option) {
         continue;
       }
-      flattened.push(item);
-      if (Array.isArray(item.children)) {
-        queue.push(...item.children);
+      flattened.push(option);
+      if (Array.isArray(option.children)) {
+        queue.push(...option.children);
       }
     }
     return flattened;
+  },
+
+  _lookupOptionValue(lookup, option) {
+    if (option === null || option === undefined || typeof option !== 'object') {
+      return option;
+    }
+    if (Object.prototype.hasOwnProperty.call(option, 'value')) {
+      return option.value;
+    }
+    const item = option.item || option;
+    if (Object.prototype.hasOwnProperty.call(item, 'value')) {
+      return item.value;
+    }
+    const idFunction = lookup.idFunction || (lookup.$ && lookup.$.s2 && lookup.$.s2.idFunction);
+    if (typeof idFunction === 'function') {
+      try {
+        const value = idFunction(item);
+        if (value !== item) {
+          return value;
+        }
+      } catch (_) {
+        // Fall through to the standard option identifiers.
+      }
+    }
+    return item.computedId ?? item.uid ?? item.id ?? option.computedId ?? option.uid ?? option.id;
+  },
+
+  _lookupOptionLabel(option) {
+    const item = option && typeof option === 'object' ? option.item || option : null;
+    return item && (item.label || item.absoluteLabel || item.displayLabel || item.title || item.text);
+  },
+
+  _toLookupSelection(option, savedValue) {
+    const item = option && typeof option === 'object' ? option.item || option : null;
+    const label = this._lookupOptionLabel(option) || String(savedValue);
+    return Object.assign({}, item, {
+      id: savedValue,
+      value: savedValue,
+      displayLabel: label,
+      text: label,
+    });
   },
 
   _resultsElementChanged(results, oldResults) {
@@ -1260,9 +1292,7 @@ Polymer({
       (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
         this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
         // XXX rely on debouncer to update the results request with the saved search params
-        return this._fetch(this.results).then(() => {
-          this._scheduleDirectorySuggestionRehydration();
-        });
+        this._fetch(this.results).then(() => this._scheduleLookupLabelResolution());
       });
     if (this.results) {
       load();
