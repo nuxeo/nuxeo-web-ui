@@ -14,14 +14,15 @@ activates.
 
 | Skill | Use it when you… | Notes |
 |---|---|---|
-| [`fix-nuxeo-web-ui-bug`](fix-nuxeo-web-ui-bug/SKILL.md) | say "fix WEBUI-\<id>", paste a Jira URL, "commit and raise PR", "take this to Ready for QA" | **Orchestrator** — runs the full flow end-to-end. Delegates to the two PR skills below. |
+| [`fix-nuxeo-web-ui-bug`](fix-nuxeo-web-ui-bug/SKILL.md) | say "fix WEBUI-\<id>", paste a Jira URL, "commit and raise PR", "take this to Ready for QA" | **Orchestrator** — runs the full flow end-to-end for **one** ticket. Delegates to the two PR skills below. |
+| [`parallel-bug-fixes`](parallel-bug-fixes/SKILL.md) | "fix all children of \<epic>", "run these tickets in parallel", "one agent per ticket" | Fans out one isolated run of `fix-nuxeo-web-ui-bug` per ticket. Script: `parallel-bug-fixes/scripts/new-ticket-workspace.sh`. |
 | [`nuxeo-web-ui-pr`](nuxeo-web-ui-pr/SKILL.md) | open a PR, push a branch, backport to both bases | Branch naming, commit format, PR body, `lts-2025` + `maintenance-3.1.x` backport. |
 | [`nuxeo-web-ui-pr-checks`](nuxeo-web-ui-pr-checks/SKILL.md) | run the gating checks before pushing | Mirrors CI lint + unit tests. Script: `nuxeo-web-ui-pr-checks/scripts/pr-checks.sh`. |
 | [`jira/create-qa-subtask`](jira/create-qa-subtask/SKILL.md) | "create a QA task", "plan QA for this ticket" | Files a `QA task` sub-task with what/how to verify. |
 | [`jira/raise-backend-jira-ticket`](jira/raise-backend-jira-ticket/SKILL.md) | a fix needs a server-side change; "raise a backend/NXP ticket" | Files an NXP (`nxplatform`) ticket and links it as a blocker. |
 
-**Dependencies:** `fix-nuxeo-web-ui-bug` → `nuxeo-web-ui-pr` + `nuxeo-web-ui-pr-checks`. The Jira
-skills are independent and can be used on their own.
+**Dependencies:** `parallel-bug-fixes` → `fix-nuxeo-web-ui-bug` → `nuxeo-web-ui-pr` +
+`nuxeo-web-ui-pr-checks`. The Jira skills are independent and can be used on their own.
 
 ## One-time setup
 
@@ -118,55 +119,14 @@ Type these in Cursor chat — the right skill activates automatically:
 
 Do **not** point two agents at this checkout at the same time. One working tree holds one branch, so
 they will fight over `HEAD`; and a clone shares its refs, config and **stash stack** with all of its
-worktrees, so `git stash` in one ticket can be popped by another. Give each run its own workspace:
+worktrees, so `git stash` in one ticket can be popped by another. Each run needs its own clone,
+container, port and build dirs.
 
-```bash
-bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh WEBUI-2170 lts-2025
-bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh WEBUI-2170 maintenance-3.1.x
-```
-
-Then move that agent's root to the printed work tree and `. env.sh` before doing anything else. The
-`fix-nuxeo-web-ui-bug` skill does this for you in Phase 0.5.
-
-Each workspace is a full clone with its own `node_modules`, `nuxeo-elements` clone, Docker container
-name, host port and build directories — nothing is shared. It is cheap because `git clone --local`
-hardlinks the object store (~1s, a few hundred KB) and `cp -Rc` is an APFS copy-on-write clone of
-`node_modules` (~20s, no real disk), so setup is ~25s per base. Layout:
-
-```
-WebUI/
-  nuxeo-web-ui/                      # reference clone — agents never write here
-  nuxeo-elements/                    # reference clone
-  tickets/WEBUI-2170/lts-2025/       # web-ui/ + elements/ + env.sh
-  tickets/WEBUI-2170/maintenance-3.1.x/
-```
-
-Override the location with `NX_TICKETS_ROOT`, but keep it **outside** this repo — a nested workspace
-becomes untracked content that `git status`, eslint and `prettier --list-different` all walk into.
-Tear down with `--remove` (keeps the evidence folder, refuses to delete uncommitted work).
-
-This is for **new** work. Tickets already in flight in an existing checkout or worktree stay where
-they are — finish them there rather than migrating, since another agent may still be using it.
-
-### Bootstrapping while these skills are newer than the base branches
-
-`lts-2025` and `maintenance-3.1.x` still track an older copy of these skills, so until that lands
-there are two things to get right, and neither puts skill changes into your bug-fix PRs:
-
-1. **Symlink the skills into your personal folder** so an agent reads the current instructions even
-   before a ticket workspace exists (see [Using these skills in other repos](#using-these-skills-in-other-repos-optional)),
-   pointing at the checkout that has them.
-2. **The workspace script overlays them for you.** A fresh clone of a base would otherwise present
-   the stale copy to the agent working in it, so the script copies the current `.cursor/skills/` in
-   and hides it from git — tracked paths via `update-index --skip-worktree`, new ones via the clone's
-   `.git/info/exclude`. `git status` stays clean and the overlay cannot be committed.
-
-Once the skills are current on both bases, drop the symlinks and the overlay step. One caveat while
-it is in place: a cherry-pick that touches `.cursor/skills` needs
-`git update-index --no-skip-worktree <paths>` in that workspace first.
-
-Two rules that matter more than the tooling: never `git stash` (use a throwaway worktree of the base
-for a clean tree), and never hard-code a port or container name — use `$NX_PORT` / `$NX_CONTAINER`.
+The [`parallel-bug-fixes`](parallel-bug-fixes/SKILL.md) skill owns all of that: per-ticket workspaces
+via `parallel-bug-fixes/scripts/new-ticket-workspace.sh`, the `$NX_*` variables each run uses instead
+of literal ports and container names, how many repro containers this machine can actually hold, and
+how the current skills get overlaid into a workspace whose base branch still tracks an older copy.
+Read it before starting a batch.
 
 ## Troubleshooting
 
@@ -177,7 +137,7 @@ for a clean tree), and never hard-code a port or container name — use `$NX_POR
 | `gh` command fails | `gh auth status`; re-run `gh auth login`. |
 | Commit shows unsigned (`N`/`E`) | Re-check §4; the SSH key must be added to GitHub as a **Signing** key. |
 | Tests can't import `@nuxeo/*` | Re-link `nuxeo-elements` symlinks with **absolute** paths (see the PR skill). |
-| Two agents keep changing each other's branch | You are sharing one checkout — give each a workspace (see [Running several agents at once](#running-several-agents-at-once-different-tickets-in-parallel)). |
+| Two agents keep changing each other's branch | You are sharing one checkout — give each its own workspace (see [`parallel-bug-fixes`](parallel-bug-fixes/SKILL.md)). |
 | A build shows someone else's `nuxeo-elements` change | The `@nuxeo/*` symlinks are relative, so they resolve to the shared checkout. Re-run the workspace script to repoint them absolutely. |
 | Work vanished / an unexpected diff appeared | A stray `git stash`. Check `git stash list` in **both** repos; the stack is shared across a clone's worktrees. |
 
@@ -189,6 +149,7 @@ your personal skills folder:
 ```bash
 mkdir -p ~/.cursor/skills
 ln -s "$PWD/.cursor/skills/fix-nuxeo-web-ui-bug"   ~/.cursor/skills/fix-nuxeo-web-ui-bug
+ln -s "$PWD/.cursor/skills/parallel-bug-fixes"     ~/.cursor/skills/parallel-bug-fixes
 ln -s "$PWD/.cursor/skills/nuxeo-web-ui-pr"        ~/.cursor/skills/nuxeo-web-ui-pr
 ln -s "$PWD/.cursor/skills/nuxeo-web-ui-pr-checks" ~/.cursor/skills/nuxeo-web-ui-pr-checks
 ```
