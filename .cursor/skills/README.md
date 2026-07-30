@@ -114,6 +114,43 @@ Type these in Cursor chat — the right skill activates automatically:
 - **QA task:** "Create a QA task for WEBUI-1234."
 - **Backend ticket:** "This needs a server change — raise a backend NXP ticket and link it."
 
+## Running several agents at once (different tickets in parallel)
+
+Do **not** point two agents at this checkout at the same time. One working tree holds one branch, so
+they will fight over `HEAD`; and a clone shares its refs, config and **stash stack** with all of its
+worktrees, so `git stash` in one ticket can be popped by another. Give each run its own workspace:
+
+```bash
+bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh WEBUI-2170 lts-2025
+bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh WEBUI-2170 maintenance-3.1.x
+```
+
+Then move that agent's root to the printed work tree and `. env.sh` before doing anything else. The
+`fix-nuxeo-web-ui-bug` skill does this for you in Phase 0.5.
+
+Each workspace is a full clone with its own `node_modules`, `nuxeo-elements` clone, Docker container
+name, host port and build directories — nothing is shared. It is cheap because `git clone --local`
+hardlinks the object store (~1s, a few hundred KB) and `cp -Rc` is an APFS copy-on-write clone of
+`node_modules` (~20s, no real disk), so setup is ~25s per base. Layout:
+
+```
+WebUI/
+  nuxeo-web-ui/                      # reference clone — agents never write here
+  nuxeo-elements/                    # reference clone
+  tickets/WEBUI-2170/lts-2025/       # web-ui/ + elements/ + env.sh
+  tickets/WEBUI-2170/maintenance-3.1.x/
+```
+
+Override the location with `NX_TICKETS_ROOT`, but keep it **outside** this repo — a nested workspace
+becomes untracked content that `git status`, eslint and `prettier --list-different` all walk into.
+Tear down with `--remove` (keeps the evidence folder, refuses to delete uncommitted work).
+
+This is for **new** work. Tickets already in flight in an existing checkout or worktree stay where
+they are — finish them there rather than migrating, since another agent may still be using it.
+
+Two rules that matter more than the tooling: never `git stash` (use a throwaway worktree of the base
+for a clean tree), and never hard-code a port or container name — use `$NX_PORT` / `$NX_CONTAINER`.
+
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -122,7 +159,10 @@ Type these in Cursor chat — the right skill activates automatically:
 | Attachment upload 401/403 | Check `~/.jira_email` / `~/.jira_token`; regenerate the token if expired. |
 | `gh` command fails | `gh auth status`; re-run `gh auth login`. |
 | Commit shows unsigned (`N`/`E`) | Re-check §4; the SSH key must be added to GitHub as a **Signing** key. |
-| Tests can't import `@nuxeo/*` | Re-link `nuxeo-elements` symlinks (see the PR skill). |
+| Tests can't import `@nuxeo/*` | Re-link `nuxeo-elements` symlinks with **absolute** paths (see the PR skill). |
+| Two agents keep changing each other's branch | You are sharing one checkout — give each a workspace (see [Running several agents at once](#running-several-agents-at-once-different-tickets-in-parallel)). |
+| A build shows someone else's `nuxeo-elements` change | The `@nuxeo/*` symlinks are relative, so they resolve to the shared checkout. Re-run the workspace script to repoint them absolutely. |
+| Work vanished / an unexpected diff appeared | A stray `git stash`. Check `git stash list` in **both** repos; the stack is shared across a clone's worktrees. |
 
 ## Using these skills in other repos (optional)
 

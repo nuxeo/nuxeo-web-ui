@@ -71,7 +71,8 @@ them replace the repo-specific knowledge in this skill.
   keep `puppeteer-screen-recorder` for the required `.mp4`s.
 - **`docker` MCP** — `run_container` / `fetch_container_logs` / `stop_container` / `remove_container`
   etc. for the Phase 2 throwaway instance. **Never** stop/remove a container you didn't create — the
-  live instance (often `nuxeo` on port 8080) must stay untouched; filter by your `nx-<ticket>` name.
+  live instance (often `nuxeo` on port 8080) and other agents' containers must stay untouched; filter
+  by your own `$NX_CONTAINER` name (Phase 0.5).
 - **`sonarqube` MCP** — `search_sonar_issues_in_projects` / `get_project_quality_gate_status` for
   Phase 7 (project key `nuxeo_nuxeo-web-ui`, org `nuxeo`). Needs a SonarCloud **user** token in the
   MCP config; if absent, fall back to the raw SonarCloud REST call shown in Phase 7.
@@ -84,6 +85,51 @@ Once verified (or on subsequent runs), proceed.
 ## Phase 0 — Plan (non-blocking)
 Restate the goal and list the phases below as concrete steps (a TODO list). **Show the plan, then
 immediately proceed — do not wait for approval.** Re-plan on the fly if scope changes.
+
+## Phase 0.5 — Claim an isolated workspace (before touching anything)
+Several agents may be fixing different tickets at the same time. A shared checkout cannot support
+that: one working tree holds one branch, and the reference clone also shares its refs, config and
+**stash stack**. So every run gets its own clone, port, container and build dirs — created by one
+command per base:
+```bash
+bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> lts-2025
+bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> maintenance-3.1.x
+```
+It clones with `--local` (hardlinked objects: ~1s, a few hundred KB) and populates `node_modules`
+with `cp -Rc` (APFS copy-on-write: ~20s, no real disk), so a workspace costs seconds. It also
+repoints the `@nuxeo/*` dev symlinks at that ticket's **own** `nuxeo-elements` clone using absolute
+paths — the checked-in relative links (`../../../nuxeo-elements/core`) resolve to the one shared
+elements checkout from any depth, which silently makes agents build each other's elements branch.
+
+Then **move your agent root to the workspace** (`move_agent_to_root` → `$NX_WT`) and source its
+environment, so every later command is scoped to this ticket:
+```bash
+. <tickets-root>/<TICKET-ID>/<base>/env.sh   # NX_WT NX_ELEMENTS NX_PORT NX_CONTAINER NX_DIST_* NX_EVIDENCE
+cd "$NX_WT"
+```
+Use `$NX_PORT`, `$NX_CONTAINER` and `$NX_DIST_*` everywhere below instead of literal values — that
+is what keeps two concurrent runs from stealing each other's port or overwriting each other's build.
+Re-running the script for an existing workspace is a no-op that just re-prints the environment.
+
+Before any git write, assert you are in your own workspace and not the shared reference clone:
+```bash
+[ "$(git rev-parse --show-toplevel)" = "$NX_WT" ] || { echo "WRONG WORKSPACE"; exit 1; }
+```
+
+> **Applies to new runs only — never migrate work in progress.** If this ticket already has a
+> checkout with commits or uncommitted changes (an older per-ticket worktree, or a feature branch in
+> the reference clone), **keep working there**. Do not create a second workspace for it and do not
+> move, re-link or clean up the old one — another agent may still be using it. Set the variables by
+> hand for that run and carry on:
+> ```bash
+> export NX_WT="$(git rev-parse --show-toplevel)" NX_BASE=<base> NX_PORT=<a free port> \
+>        NX_CONTAINER=nx-<ticket>-<base> NX_EVIDENCE=~/Desktop/<TICKET-ID> \
+>        NX_DIST_PATCHED=/tmp/dist-<ticket>-patched NX_DIST_UNPATCHED=/tmp/dist-<ticket>-unpatched
+> ```
+> The one rule that applies everywhere, old checkouts included: **no `git stash`**.
+
+**Exit gate:** `git rev-parse --show-toplevel` prints your own workspace, `$NX_PORT` is free, and no
+other agent's container or build dir shares a name with yours.
 
 ## Phase 1 — Understand the ticket
 - `getJiraIssue` (cloudId above, `issueIdOrKey=WEBUI-<id>`, `fields:["*all"]` incl. `comment`).
@@ -98,10 +144,10 @@ reading the ticket — do not start reproducing against an assumed symptom.
 ## Phase 2 — Reproduce + capture evidence (first hands-on step)
 **Reproduce the bug on the `lts-2025` branch before creating any feature branch or touching code.**
 Confirming the bug exists — and capturing the "before" evidence — is the first thing you do after
-understanding the ticket. Check out the base first so the repro reflects released code:
+understanding the ticket. Your Phase 0.5 workspace is already checked out on its base and tracking
+`origin/<base>`, so just make sure it is current — inside `$NX_WT`, never in the reference clone:
 ```bash
-git fetch origin lts-2025
-git switch -c lts-2025 origin/lts-2025 2>/dev/null || git switch lts-2025 && git pull --ff-only
+cd "$NX_WT" && git pull --ff-only
 ```
 > **Reproduce autonomously (no confirmation).** Default to a **throwaway Docker container** (recipe
 > below) — never touch a live/running container. Only fall back to another approach if Docker is
@@ -122,9 +168,10 @@ git switch -c lts-2025 origin/lts-2025 2>/dev/null || git switch lts-2025 && git
 > Playwright MCP can't record `.mp4`, so still use the `puppeteer-screen-recorder` recipe for the
 > required recordings. When you need a raw DOM probe, `browser_evaluate` runs JS on the page.
 
-Create the evidence folder up front and put **before/after** screenshots, **videos**, and logs there:
+Create the evidence folder up front and put **before/after** screenshots, **videos**, and logs there
+(Phase 0.5 already created it as `$NX_EVIDENCE`):
 ```bash
-mkdir -p ~/Desktop/<TICKET-ID>   # e.g. WEBUI-1234 or ELEMENTS-1856
+mkdir -p "$NX_EVIDENCE"   # ~/Desktop/<TICKET-ID>, e.g. WEBUI-1234 or ELEMENTS-1856
 ```
 - Reproduce against a real instance. If the bug needs a special setup (e.g. multi-repository),
   stand up a throwaway Docker instance rather than touching any live container; remove it with
@@ -144,13 +191,14 @@ compose service DNS), so prefer a single container that serves Web UI directly a
 # Nuxeo Connect registration — without a CLID it fails with "Registration required"):
 CLID=$(docker inspect <existing-nuxeo> --format '{{range .Config.Env}}{{println .}}{{end}}' \
        | sed -n 's/^NUXEO_CLID=//p')
-# Pick a FREE host port (8080 is often taken by a live container — never disturb it):
-docker run -d --name nx-<ticket> -p 8090:8080 \
+# $NX_CONTAINER and $NX_PORT come from Phase 0.5 and are unique to this ticket+base. Never
+# hard-code a port: 8080 (and often 8090) belong to live containers — never disturb them.
+docker run -d --name "$NX_CONTAINER" -p "$NX_PORT":8080 \
   -e NUXEO_DEV_MODE=true -e NUXEO_PACKAGES="nuxeo-web-ui nuxeo-drive" -e NUXEO_CLID="$CLID" \
   docker-private.packages.nuxeo.com/nuxeo/nuxeo:2025
 # Wait for readiness, then verify:
-docker logs -f nx-<ticket>                 # until "Nuxeo Platform Started"
-curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8090/nuxeo/runningstatus   # 200
+docker logs -f "$NX_CONTAINER"             # until "Nuxeo Platform Started"
+curl -s -o /dev/null -w '%{http_code}\n' "$NX_URL/runningstatus"   # 200
 ```
 Seed test data over REST + Automation (admin is `Administrator:Administrator`; **use explicit
 `curl` flags, not shell vars — quoting `-u`/`-H` into a var breaks auth and yields 401**). If you're
@@ -159,26 +207,37 @@ unsure of the exact endpoint/payload for a REST or Automation operation, look it
 ```bash
 # create a folder/workspace
 curl -s -u Administrator:Administrator -H "Content-Type: application/json" -X POST \
-  http://localhost:8090/nuxeo/api/v1/path/default-domain/workspaces \
+  "$NX_URL/api/v1/path/default-domain/workspaces" \
   -d '{"entity-type":"document","name":"sync-root-a","type":"Workspace","properties":{"dc:title":"Marketing Assets"}}'
 # register it as a Drive sync root
 curl -s -u Administrator:Administrator -H "Content-Type: application/json" -X POST \
-  http://localhost:8090/nuxeo/site/automation/NuxeoDrive.SetSynchronization \
+  "$NX_URL/site/automation/NuxeoDrive.SetSynchronization" \
   -d '{"params":{"enable":true},"input":"doc:/default-domain/workspaces/sync-root-a"}'
 ```
 
 ### Skew-free A/B by deploying your own build for BOTH states
 `npm run build` is fast (~15s), so build twice and deploy each into the container's UI dir. Both
-captures then use the *same* dev build, differing only by your fix (eliminates marketplace skew):
+captures then use the *same* dev build, differing only by your fix (eliminates marketplace skew).
+
+> **Never use `git stash` for the baseline build.** The stash stack is shared by every worktree of a
+> clone and is trivially stranded when a run is interrupted, so a stash/pop pair around a build is how
+> work gets lost. Build the baseline from a throwaway worktree of the base instead — safe here because
+> the workspace clone is private to this run. Symlink `node_modules` so it needs no install.
+
 ```bash
-UI=$(docker exec nx-<ticket> sh -lc 'find /opt/nuxeo/server -type d -name ui -path "*nuxeo.war*"' | head -1)
-npm run build && cp -R dist /tmp/dist-patched                 # current tree (with fix)
-git stash && npm run build && cp -R dist /tmp/dist-unpatched && git stash pop   # baseline
-docker cp /tmp/dist-unpatched/. nx-<ticket>:"$UI/"            # deploy BEFORE, capture
-docker cp /tmp/dist-patched/.   nx-<ticket>:"$UI/"            # deploy AFTER,  capture
+UI=$(docker exec "$NX_CONTAINER" sh -lc 'find /opt/nuxeo/server -type d -name ui -path "*nuxeo.war*"' | head -1)
+
+npm run build && cp -R dist "$NX_DIST_PATCHED"                # current tree (with fix)
+
+git worktree add --detach "$NX_WT/../baseline" "origin/$NX_BASE"   # baseline, no stash
+ln -s "$NX_WT/node_modules" "$NX_WT/../baseline/node_modules"
+(cd "$NX_WT/../baseline" && npm run build && cp -R dist "$NX_DIST_UNPATCHED")
+
+docker cp "$NX_DIST_UNPATCHED/." "$NX_CONTAINER":"$UI/"       # deploy BEFORE, capture
+docker cp "$NX_DIST_PATCHED/."   "$NX_CONTAINER":"$UI/"       # deploy AFTER,  capture
 ```
 Confirm the deployed bundle actually changed (addon elements land in a hashed
-`dist/<addon>.<hash>.bundle.js`): `rg -c "<the-markup-you-added>" /tmp/dist-*/…bundle.js`.
+`dist/<addon>.<hash>.bundle.js`): `rg -c "<the-markup-you-added>" "$NX_DIST_"*/…bundle.js`.
 
 **Two deploy gotchas that silently break the deployed app (both cost real time):**
 - **`base-url` / broken links.** The dev build's `dist/index.html` hardcodes `<nuxeo-app base-url="/">`
@@ -204,7 +263,7 @@ stills. Record both `~/Desktop/WEBUI-<id>/WEBUI-<id>-before.mp4` and `-after.mp4
 Drive a headless Chrome with Puppeteer and record with `puppeteer-screen-recorder` (it bundles its
 own ffmpeg, so no system ffmpeg is needed). Do it in a throwaway repro dir, not the repo:
 ```bash
-mkdir -p ~/Desktop/WEBUI-<id>/repro && cd ~/Desktop/WEBUI-<id>/repro
+mkdir -p "$NX_EVIDENCE/repro" && cd "$NX_EVIDENCE/repro"
 [ -f package.json ] || echo '{"name":"repro","private":true}' > package.json
 npm install puppeteer puppeteer-screen-recorder
 ```
@@ -264,15 +323,26 @@ The before/after pair must also show *different* states. If the two PNGs are byt
 gotchas above) and re-capture, rather than shipping evidence QA can't interpret.
 
 ## Phase 3 — Branches (both bases)
-**Only after the bug is reproduced on `lts-2025`**, create one feature branch per base — cut from the
-bases, not from your local repro state — named per the `nuxeo-web-ui-pr` skill
-(`<type>-WEBUI-<id>-<kebab-summary>-<base>`):
+**Only after the bug is reproduced on `lts-2025`**, create one feature branch per base — cut from
+`origin/<base>`, not from your local repro state — named per the `nuxeo-web-ui-pr` skill
+(`<type>-WEBUI-<id>-<kebab-summary>-<base>`). Each base has **its own Phase 0.5 workspace**, so the
+two branches never share a working tree and you never `git switch` between tickets:
 ```bash
-git fetch origin lts-2025 maintenance-3.1.x
-git switch -c <type>-WEBUI-<id>-<summary>-lts-2025 origin/lts-2025
-git switch -c <type>-WEBUI-<id>-<summary>-maintenance-3.1.x origin/maintenance-3.1.x
+# in the lts-2025 workspace
+cd "$NX_WT" && git fetch origin lts-2025
+git checkout -b <type>-WEBUI-<id>-<summary>-lts-2025 origin/lts-2025
+
+# in the maintenance-3.1.x workspace (a different directory; source its env.sh first)
+cd "$NX_WT" && git fetch origin maintenance-3.1.x
+git checkout -b <type>-WEBUI-<id>-<summary>-maintenance-3.1.x origin/maintenance-3.1.x
 ```
-Implement on `lts-2025` first, then cherry-pick to `maintenance-3.1.x` (see the PR skill's backport section).
+Implement on `lts-2025` first and push it, then backport by fetching that branch from `origin` into
+the maintenance workspace and cherry-picking — the two clones share no refs, so go through `origin`:
+```bash
+git fetch origin <type>-WEBUI-<id>-<summary>-lts-2025
+git cherry-pick <sha>
+```
+See the PR skill's backport section.
 
 ## Phase 4 — Fix (no new induced issues)
 > **Fix autonomously (no confirmation).** Once the issue is reproduced and the "before" evidence is
@@ -624,10 +694,16 @@ to see it fixed, and which file shows the before state. Sections 6 (verify steps
 are the ones that go missing under time pressure — both are mandatory, never "obvious from the PR".
 
 ## Phase 10 — Clean up & report
-- Tear down the throwaway repro container(s): `docker rm -f nx-<ticket>` (or the `docker` MCP's
-  `remove_container` with `force:true`, targeting only your `nx-<ticket>`). Never remove or disturb
-  pre-existing/live containers.
-- Leave the evidence files in `~/Desktop/<TICKET-ID>/` so they can be attached to the ticket.
+- Tear down this run's workspace, container and build dirs in one step, per base. It refuses to
+  delete uncommitted work and always keeps the evidence folder:
+  ```bash
+  bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> <base> --remove
+  ```
+  Only ever remove **your own** `$NX_CONTAINER` and workspace (the `docker` MCP's `remove_container`
+  with `force:true` works too, targeting only your own name). Never remove or disturb pre-existing or
+  live containers, another ticket's workspace, or the shared reference clones.
+- Leave the evidence files in `$NX_EVIDENCE` (`~/Desktop/<TICKET-ID>/`) so they can be attached to
+  the ticket.
 - Report the final CI state of both PRs, check by check. End the run once lint and the unit tests
   are green — do **not** keep the run alive polling `ftest` / the cross-repo `web-ui` check. List any
   such check as "still running, not waited on" so nobody reads the summary as fully green, and say who
@@ -680,6 +756,14 @@ the command, not from memory:
   drag-and-drop fallback so QA gets the recordings.
 
 ## Guardrails (these still hold in YOLO mode)
+- **Work only inside your own Phase 0.5 workspace.** Never `git switch`, commit, or build in the
+  shared reference clones (`nuxeo-web-ui`, `nuxeo-elements`) or in another ticket's workspace —
+  another agent may be mid-run there. Assert `git rev-parse --show-toplevel` equals `$NX_WT` before
+  any git write.
+- **Never `git stash`.** It is the single easiest way to strand or cross-apply another run's work.
+  Use a throwaway worktree of the base (Phase 2) when you need a clean tree.
+- **Never hard-code a port, container name or build dir.** Use `$NX_PORT`, `$NX_CONTAINER`,
+  `$NX_DIST_PATCHED`/`$NX_DIST_UNPATCHED` so concurrent runs cannot collide.
 - Never force-push to `lts-2025` / `maintenance-3.1.x`; only to feature branches (`--force-with-lease`).
 - Never edit git config silently beyond the one-time signing setup; confirm global config changes.
 - Keep the PR scoped to the fix — never bundle unrelated files.
