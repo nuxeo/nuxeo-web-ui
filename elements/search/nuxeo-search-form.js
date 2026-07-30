@@ -896,7 +896,7 @@ Polymer({
   },
 
   _rehydrateDirectorySuggestionLabel(suggestion) {
-    if (!suggestion || !suggestion.$ || !suggestion.$.s2) {
+    if (!suggestion?.$?.s2) {
       return Promise.resolve();
     }
     const { value } = suggestion;
@@ -951,10 +951,7 @@ Polymer({
         id: String(id),
         localize: true,
         dbl10n: suggestion.dbl10n || false,
-        lang:
-          window.nuxeo && window.nuxeo.I18n && window.nuxeo.I18n.language
-            ? window.nuxeo.I18n.language.split('-')[0]
-            : 'en',
+        lang: window.nuxeo?.I18n?.language ? window.nuxeo.I18n.language.split('-')[0] : 'en',
       };
 
       op.execute()
