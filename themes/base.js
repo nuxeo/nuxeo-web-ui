@@ -296,8 +296,10 @@ const template = html`
         }
 
         /*
-         * letter-spacing must stay overridable so users can apply their own text spacing
-         * (WCAG 2.1 AA, SC 1.4.12): !important here would outrank a user stylesheet.
+         * Keep letter-spacing overridable (WCAG 2.1 AA, SC 1.4.12 Text Spacing). This mixin is
+         * expanded into each widget's shadow root, so !important on a label selector outranks the
+         * author-origin universal rule that text-spacing bookmarklets and browser extensions
+         * inject, leaving the spacing impossible to adjust.
          */
         --nuxeo-label: {
           display: block;
