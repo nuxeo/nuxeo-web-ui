@@ -974,6 +974,7 @@ Polymer({
     // ---- doc level (content views) ----
     if (this.document && this.document.path) {
       const docKey = this._getDocResultsPrefsKey();
+      this._clearCachedDocPrefs(this.document.path, docKey);
       this._debounceSave('_docPrefsSaveDebouncer', () => {
         this.saveDocPrefs(this.document.path, docKey, {}).catch((error) => {
           // eslint-disable-next-line no-console
@@ -989,6 +990,7 @@ Polymer({
 
     // ---- global level (search providers) ----
     if (this._shouldUseGlobalPrefs) {
+      this._clearCachedGlobalPrefs();
       this._debounceSave('_prefsSaveDebouncer', () => {
         this.saveGlobalResultsPrefs({}).catch((error) => {
           // eslint-disable-next-line no-console
@@ -996,6 +998,27 @@ Polymer({
         });
       });
     }
+  },
+
+  // The backend write is debounced, so drop the in-session copy up front. Until that write lands the
+  // _applyDocPrefs observer would otherwise re-apply the stale cached prefs and undo the reset.
+  _clearCachedDocPrefs(docPath, key) {
+    const userId = this._getUserId();
+    if (userId) {
+      __docPrefsCache.set(this._docCacheKey(userId, docPath, key), {});
+    }
+    this.__hasBackendDocPrefs = false;
+    this.docPrefs = {};
+  },
+
+  // Same reasoning as _clearCachedDocPrefs, for the global (search provider) preferences.
+  _clearCachedGlobalPrefs() {
+    const userId = this._getUserId();
+    const providerName = this._getProviderName(this.nxProvider);
+    if (userId && providerName) {
+      __globalPrefsCache.set(this._cacheKey(userId, providerName), {});
+    }
+    this.globalPrefs = {};
   },
 
   _providerChanged(provider, oldProvider) {
