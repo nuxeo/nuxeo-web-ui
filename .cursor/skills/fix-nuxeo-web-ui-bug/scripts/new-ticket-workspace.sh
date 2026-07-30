@@ -87,11 +87,14 @@ done
 
 # ------------------------------------------------------------------- geometry
 
+script_dir=$(cd "$(dirname "$0")" && pwd)
+# The checkout holding this script also holds the skill docs that go with it.
+SCRIPT_ROOT=$(git -C "$script_dir" rev-parse --show-toplevel)
+
 if [ -n "${NX_MAIN_REPO:-}" ]; then
   MAIN_REPO=$NX_MAIN_REPO
 else
-  script_dir=$(cd "$(dirname "$0")" && pwd)
-  MAIN_REPO=$(git -C "$script_dir" rev-parse --show-toplevel)
+  MAIN_REPO=$SCRIPT_ROOT
   # Invoked from a linked worktree? Its .git is a file, and the real clone is the
   # parent of the common git dir. Resolve it rather than failing.
   if [ ! -d "$MAIN_REPO/.git" ]; then
@@ -325,6 +328,30 @@ if [ -n "$BRANCH" ]; then
   step "Creating feature branch $BRANCH"
   git -C "$WT" checkout --quiet -b "$BRANCH" "origin/$BASE"
   note "$BRANCH (off origin/$BASE)"
+fi
+
+# The base branches still track an older copy of these skills, so a fresh clone would
+# present stale instructions to the agent working in it. Overlay the copy that ships
+# with this script, and mark those paths skip-worktree so the overlay can never show up
+# in `git status` or be committed into a fix PR. Drop this step once the skills are
+# current on both bases. (Caveat: a cherry-pick that touches .cursor/skills needs
+# `git update-index --no-skip-worktree` on those paths first.)
+if [ -d "$SCRIPT_ROOT/.cursor/skills" ] && [ "$SCRIPT_ROOT" != "$WT" ]; then
+  tracked=$(git -C "$WT" ls-files -- .cursor/skills)
+  if [ -n "$tracked" ]; then
+    step "Overlaying current skills (base still tracks an older copy)"
+    printf '%s\n' "$tracked" | tr '\n' '\0' |
+      xargs -0 git -C "$WT" update-index --skip-worktree
+    # skip-worktree only covers tracked paths; the overlay also brings files the base
+    # does not have at all, so exclude the whole tree from untracked listings too.
+    echo '/.cursor/skills/' >> "$WT/.git/info/exclude"
+    cp -R "$SCRIPT_ROOT/.cursor/skills/." "$WT/.cursor/skills/"
+    if [ -z "$(git -C "$WT" status --porcelain -- .cursor/skills)" ]; then
+      note "overlaid and hidden from git"
+    else
+      note "WARNING: the overlay is visible to git — keep it out of your commits"
+    fi
+  fi
 fi
 
 step "Allocating host port"

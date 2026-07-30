@@ -148,6 +148,23 @@ Tear down with `--remove` (keeps the evidence folder, refuses to delete uncommit
 This is for **new** work. Tickets already in flight in an existing checkout or worktree stay where
 they are — finish them there rather than migrating, since another agent may still be using it.
 
+### Bootstrapping while these skills are newer than the base branches
+
+`lts-2025` and `maintenance-3.1.x` still track an older copy of these skills, so until that lands
+there are two things to get right, and neither puts skill changes into your bug-fix PRs:
+
+1. **Symlink the skills into your personal folder** so an agent reads the current instructions even
+   before a ticket workspace exists (see [Using these skills in other repos](#using-these-skills-in-other-repos-optional)),
+   pointing at the checkout that has them.
+2. **The workspace script overlays them for you.** A fresh clone of a base would otherwise present
+   the stale copy to the agent working in it, so the script copies the current `.cursor/skills/` in
+   and hides it from git — tracked paths via `update-index --skip-worktree`, new ones via the clone's
+   `.git/info/exclude`. `git status` stays clean and the overlay cannot be committed.
+
+Once the skills are current on both bases, drop the symlinks and the overlay step. One caveat while
+it is in place: a cherry-pick that touches `.cursor/skills` needs
+`git update-index --no-skip-worktree <paths>` in that workspace first.
+
 Two rules that matter more than the tooling: never `git stash` (use a throwaway worktree of the base
 for a clean tree), and never hard-code a port or container name — use `$NX_PORT` / `$NX_CONTAINER`.
 
