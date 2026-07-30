@@ -36,7 +36,13 @@ limitations under the License.
  * root (and the main document):
  *
  *   :where(paper-icon-button, paper-button):focus-visible
- *     { outline: var(--nuxeo-focus-outline, none); }
+ *     { outline: var(--nuxeo-focus-outline, none); outline-offset: -2px; }
+ *
+ * The ring is drawn INSET (`outline-offset: -2px`) so it hugs the inner edge of the
+ * control. Without this, the outline is painted OUTSIDE the box and gets clipped —
+ * typically on the left/leading edge — whenever the primitive sits flush against an
+ * `overflow: hidden` container (toolbars, tight flex rows), which shows as a ring that
+ * is missing one side.
  *
  * - Dark themes define `--nuxeo-focus-outline` (a bright, high-contrast ring), so
  *   keyboard focus on these primitives becomes visible.
@@ -73,7 +79,7 @@ limitations under the License.
  */
 
 export const FOCUS_RULE =
-  ':where(paper-icon-button, paper-button):focus-visible { outline: var(--nuxeo-focus-outline, none); }';
+  ':where(paper-icon-button, paper-button):focus-visible { outline: var(--nuxeo-focus-outline, none); outline-offset: -2px; }';
 
 // Prefer a single shared constructable stylesheet (cheap to adopt into many roots).
 let focusStyleSheet = null;
