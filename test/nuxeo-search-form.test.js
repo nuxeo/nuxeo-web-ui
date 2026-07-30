@@ -600,49 +600,70 @@ suite('nuxeo-search-form', () => {
   });
 
   suite('result name tooltip (WEBUI-2009)', () => {
-    // Result names wrap onto two lines and are clamped beyond that, so the tooltip is
-    // applied on hover only when the name is actually clipped. Heights are stubbed because
-    // a detached node has no layout.
-    const nameNode = (text, clientHeight, scrollHeight) => {
-      const node = document.createElement('span');
-      node.textContent = text;
-      Object.defineProperty(node, 'clientHeight', { value: clientHeight });
-      Object.defineProperty(node, 'scrollHeight', { value: scrollHeight });
-      return node;
+    // Names stay truncated to one line, so every row carries a tooltip with the full name.
+    // These read the class-level template: iron-list templatizes the row template at
+    // runtime, which empties the instance's copy.
+    const rowTemplate = () => {
+      const template = searchForm.constructor.template.content.querySelector('#list template');
+      expect(template, 'result row template').to.not.be.null;
+      return template;
     };
+    const rowTooltip = () => rowTemplate().content.querySelector('nuxeo-tooltip');
+    const rowName = () => rowTemplate().content.querySelector('.list-item-title');
 
-    test('adds the full name as a tooltip when the name is clipped', () => {
-      const name = 'D-DF-ASTURL61CZRIE-LSPS-PLANNING-PLATEFORME-SUD-2025-REVISION-A-01';
-      const node = nameNode(name, 40, 80);
-      searchForm._showTitleIfTruncated({ currentTarget: node });
-      expect(node.getAttribute('title')).to.equal(name);
+    test('the tooltip exposes the untruncated name', () => {
+      const tooltip = rowTooltip();
+      expect(tooltip, 'result row tooltip').to.not.be.null;
+      expect(tooltip.textContent.trim()).to.equal('[[item.title]]');
     });
 
-    test('adds no tooltip when the name fits within the two lines shown', () => {
-      const node = nameNode('Short name', 40, 40);
-      searchForm._showTitleIfTruncated({ currentTarget: node });
-      expect(node.hasAttribute('title')).to.be.false;
+    test('the tooltip sits outside the name so the name text is unchanged', () => {
+      // Nesting it inside would append a duplicate of the title to the span's textContent.
+      expect(rowName().querySelector('nuxeo-tooltip')).to.be.null;
+      expect(rowName().textContent.trim()).to.equal('[[item.title]]');
     });
 
-    test('tolerates sub-pixel line-height rounding rather than reporting a false clip', () => {
-      const node = nameNode('Short name', 40, 41);
-      searchForm._showTitleIfTruncated({ currentTarget: node });
-      expect(node.hasAttribute('title')).to.be.false;
+    test('the tooltip is anchored on its parent row rather than by id', () => {
+      // The row template is stamped once per result into the same shadow root, so a "for"
+      // attribute would resolve every row's tooltip to the first matching id.
+      const tooltip = rowTooltip();
+      expect(tooltip.hasAttribute('for')).to.be.false;
+      expect(tooltip.parentElement.classList.contains('list-item-info')).to.be.true;
     });
 
-    test('drops a stale tooltip when a recycled row now holds a name that fits', () => {
-      // iron-list reuses row nodes, so a node that was clipped can be rebound to a
-      // shorter name; the tooltip from the previous document must not survive.
-      const node = nameNode('Short name', 40, 40);
-      node.setAttribute('title', 'A much longer name from the document previously in this row');
-      searchForm._showTitleIfTruncated({ currentTarget: node });
-      expect(node.hasAttribute('title')).to.be.false;
+    test('the tooltip is hidden from the accessibility tree', () => {
+      // The name is already exposed as row text; announcing it twice is noise.
+      expect(rowTooltip().getAttribute('aria-hidden')).to.equal('true');
     });
 
-    test('trims surrounding whitespace so the tooltip matches the rendered name', () => {
-      const node = nameNode('  Padded name  ', 40, 80);
-      searchForm._showTitleIfTruncated({ currentTarget: node });
-      expect(node.getAttribute('title')).to.equal('Padded name');
+    test('the name stays on a single truncated line', () => {
+      // .ellipsis supplies the single-line truncation; no local rule may reintroduce wrapping
+      expect(rowName().classList.contains('ellipsis')).to.be.true;
+      const styles = [...searchForm.constructor.template.content.querySelectorAll('style')]
+        .map((s) => s.textContent)
+        .join('\n');
+      expect(styles).to.not.contain('-webkit-line-clamp');
+    });
+
+    test('every rendered row gets its own tooltip', async () => {
+      searchForm.queue = true;
+      searchForm.$.list.items = [
+        { uid: '1', type: 'File', path: '/a', title: 'D-DF-ASTURL61CZRIE-LSPS-PLANNING-2025-REV-01' },
+        { uid: '2', type: 'File', path: '/b', title: 'D-DF-ASTURL61CZRIE-LSPS-PLANNING-2025-REV-02' },
+        { uid: '3', type: 'File', path: '/c', title: 'Short' },
+      ];
+      // iron-list decides how many rows to stamp, so poll rather than assume a count
+      for (let i = 0; i < 40 && searchForm.$.list.querySelectorAll('.list-item-info').length === 0; i++) {
+        await flush();
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      const rows = searchForm.$.list.querySelectorAll('.list-item-info');
+      expect(rows.length).to.be.at.least(1);
+      rows.forEach((row) => {
+        const name = row.querySelector('.list-item-title').textContent.trim();
+        expect(row.querySelector('nuxeo-tooltip'), `tooltip for "${name}"`).to.not.be.null;
+      });
     });
   });
 });
