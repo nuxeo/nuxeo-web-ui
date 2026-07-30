@@ -208,7 +208,7 @@ Four built-in themes in `themes/`. Which pair is offered depends on the branding
 
 | Theme | Directory | Offered when |
 |---|---|---|
-| Default | `themes/default/theme.html` | branding off|
+| Default | `themes/default/theme.html` | branding off |
 | Dark | `themes/dark/theme.html` | branding off |
 | Hyland Light | `themes/hyland-light/theme.html` | branding on |
 | Hyland Dark | `themes/hyland-dark/theme.html` | branding on |
