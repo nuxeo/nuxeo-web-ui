@@ -430,19 +430,20 @@ suite('nuxeo-search-form', () => {
     queryStub.restore();
   });
 
-  test('queryDirectorySuggestionEntry resolves matching entry from wrapped selectivity results', async () => {
+  test('queryDirectorySuggestionEntry resolves entry via Directory.GetEntry operation', async () => {
     const expected = { id: 'id_1', displayLabel: 'label_1' };
+    const opStub = {
+      op: '',
+      params: {},
+      execute: sinon.stub().resolves(expected),
+    };
     const suggestion = {
-      idFunction: (entry) => entry.id,
+      directoryName: 'myDirectory',
+      dbl10n: false,
       $: {
         s2: {
-          _query({ callback }) {
-            callback({
-              results: [
-                { id: 'id_1', item: expected },
-                { id: 'id_2', item: { id: 'id_2', displayLabel: 'label_2' } },
-              ],
-            });
+          $: {
+            op: opStub,
           },
         },
       },
@@ -463,11 +464,17 @@ suite('nuxeo-search-form', () => {
 
   test('queryDirectorySuggestionEntry returns null on query error', async () => {
     const clearTimeoutSpy = sinon.spy(globalThis, 'clearTimeout');
+    const opStub = {
+      op: '',
+      params: {},
+      execute: sinon.stub().rejects(new Error('query failed')),
+    };
     const suggestion = {
+      directoryName: 'myDirectory',
       $: {
         s2: {
-          _query({ error }) {
-            error(new Error('query failed'));
+          $: {
+            op: opStub,
           },
         },
       },
@@ -565,16 +572,20 @@ suite('nuxeo-search-form', () => {
     queryStub.restore();
   });
 
-  test('queryDirectorySuggestionEntry falls back to entry ids and clears timeout when idFunction is unavailable', async () => {
+  test('queryDirectorySuggestionEntry clears timeout and resolves entry on successful operation', async () => {
     const clearTimeoutSpy = sinon.spy(globalThis, 'clearTimeout');
     const expected = { id: 'id_1', displayLabel: 'label_1' };
+    const opStub = {
+      op: 'original-op',
+      params: { original: true },
+      execute: sinon.stub().resolves(expected),
+    };
     const suggestion = {
+      directoryName: 'myDirectory',
       $: {
         s2: {
-          _query({ callback }) {
-            callback({
-              results: [{ item: expected }],
-            });
+          $: {
+            op: opStub,
           },
         },
       },
