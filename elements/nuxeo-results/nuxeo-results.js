@@ -665,6 +665,13 @@ Polymer({
     }
   },
 
+  // fetch after state restore, unless the first fetch is deferred to an explicit search
+  _fetchOnViewInit() {
+    if (!this.deferInitialFetch || this._fetched) {
+      this.fetch();
+    }
+  },
+
   _viewChanged(view, oldView) {
     if (oldView) {
       this.unlisten(oldView, 'columns-changed', '_columnsChanged');
@@ -720,10 +727,7 @@ Polymer({
         view.quickFilters = restoredQuickFilters.slice();
       }
 
-      // fetch after state restore, unless the first fetch is deferred to an explicit search
-      if (!this.deferInitialFetch || this._fetched) {
-        this.fetch();
-      }
+      this._fetchOnViewInit();
       this.fire('search-results-view', { view, name: this.name });
     }
   },
