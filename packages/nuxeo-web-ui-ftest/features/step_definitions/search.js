@@ -209,6 +209,16 @@ Then(/^I can see more than (\d+) search results$/, async function (minNumberOfRe
   throw new Error(`Expecting to get more than ${minNumberOfResults} but found ${output}`);
 });
 
+Then(/^I can see no search results$/, async function () {
+  await driver.pause(1000);
+  const results = await this.ui.results;
+  const displayMode = await results.displayMode;
+  const output = await results.resultsCount(displayMode);
+  if (output !== 0) {
+    throw new Error(`Expecting to get no results but found ${output}`);
+  }
+});
+
 Then('I edit the results columns to show {string}', async function (heading) {
   const result = await this.ui.results;
   const actions = await result.actions;
