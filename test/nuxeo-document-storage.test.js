@@ -64,6 +64,18 @@ suite('nuxeo-document-storage', () => {
       expect(element.documents).to.have.lengthOf(1);
     });
 
+    test('should retain whether the document is a proxy', () => {
+      element.documents = [];
+      element.add(doc('1', { isProxy: true }));
+      expect(element.documents[0].isProxy).to.be.true;
+    });
+
+    test('should store a non-proxy document as not a proxy', () => {
+      element.documents = [];
+      element.add(doc('1'));
+      expect(element.documents[0].isProxy).to.be.false;
+    });
+
     test('should keep only whitelisted thumbnail context parameters', () => {
       element.documents = [];
       element.add(doc('1', { contextParameters: { thumbnail: { url: 'http://x/thumb.png' }, extra: 'drop' } }));

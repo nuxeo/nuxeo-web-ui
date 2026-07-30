@@ -268,9 +268,21 @@ Polymer({
     if (!documents || documents.length === 0 || !this.hasFacet(doc, 'Folderish')) {
       return false;
     }
-    return doc.contextParameters && doc.contextParameters.subtypes
-      ? documents.every((entry) => doc.contextParameters.subtypes.map((e) => e.type).indexOf(entry.type) > -1)
-      : true;
+    const subtypes = doc.contextParameters && doc.contextParameters.subtypes;
+    return documents.every((entry) => this._isAllowedInTarget(entry, doc, subtypes));
+  },
+
+  /**
+   * A proxy is only accepted in a publication space. The publishing service creates proxies
+   * there without consulting the accepted child types, so a section never lists the published
+   * document's type among its subtypes and the regular subtype check can't apply to it.
+   * Anywhere else, and for any non-proxy document, the target's accepted child types decide.
+   */
+  _isAllowedInTarget(entry, target, subtypes) {
+    if (this.isProxy(entry)) {
+      return this.hasFacet(target, 'PublishSpace');
+    }
+    return subtypes ? subtypes.some((subtype) => subtype.type === entry.type) : true;
   },
 
   execute(evt) {

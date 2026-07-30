@@ -63,6 +63,49 @@ Feature: Clipboard
     When I browse to the document with path "/default-domain"
     Then I can see clipboard actions disabled
 
+  Scenario: Move a published document to another section using the clipboard
+    Given I have the following documents
+      | doctype | title    | nature  | subjects           | coverage        | creator | path                     | collections | tag | file |
+      | Section | SectionA | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain/sections |             |     |      |
+      | Section | SectionB | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain/sections |             |     |      |
+    And I have the following permissions to the documents
+      | permission | path                              |
+      | ReadWrite  | /default-domain/sections/SectionA |
+      | ReadWrite  | /default-domain/sections/SectionB |
+    And I browse to the document with path "/default-domain/Src"
+    And I select the "File1" document
+    And I can see the selection toolbar
+    And I can publish selection to "SectionA"
+    When I browse to the document with path "/default-domain/sections/SectionA"
+    Then I can see the document has 1 children
+    When I select the "File1" document
+    And I can see the selection toolbar
+    And I can add selection to clipboard
+    And I browse to the document with path "/default-domain/sections/SectionB"
+    And I click the clipboard move action
+    Then I can see the document has 1 children
+    When I browse to the document with path "/default-domain/sections/SectionA"
+    Then I can see the document has 0 children
+
+  Scenario: Can't use clipboard to paste a published document outside the publication area
+    Given I have the following documents
+      | doctype | title    | nature  | subjects           | coverage        | creator | path                     | collections | tag | file |
+      | Section | SectionA | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain/sections |             |     |      |
+    And I have the following permissions to the documents
+      | permission | path                              |
+      | ReadWrite  | /default-domain/sections/SectionA |
+      | ReadWrite  | /default-domain/Dest              |
+    And I browse to the document with path "/default-domain/Src"
+    And I select the "File1" document
+    And I can see the selection toolbar
+    And I can publish selection to "SectionA"
+    When I browse to the document with path "/default-domain/sections/SectionA"
+    And I select the "File1" document
+    And I can see the selection toolbar
+    And I can add selection to clipboard
+    And I browse to the document with path "/default-domain/Dest"
+    Then I can see clipboard actions disabled
+
   Scenario: Clipboard is updated when document's title changes
     Given I have permission ReadWrite for the document with path "/default-domain/Src/File1"
     And I browse to the document with path "/default-domain/Src"
