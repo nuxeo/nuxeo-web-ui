@@ -543,6 +543,123 @@ suite('nuxeo-results', () => {
     });
   });
 
+  suite('Reset Clears Stored Prefs (WEBUI-2178)', () => {
+    test('_saveViewSettings clears stored prefs instead of saving them on a reset', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results.view = createMockView({ settings: { order: ['dc:title'] } });
+      const clearStub = sinon.stub(results, '_clearViewSettings');
+      const saveSpy = sinon.spy(results, 'saveSettings');
+
+      results._saveViewSettings({ detail: { source: 'reset' } });
+
+      expect(clearStub).to.have.been.calledOnce;
+      expect(saveSpy).to.not.have.been.called;
+
+      clearStub.restore();
+      saveSpy.restore();
+    });
+
+    test('_saveViewSettings still saves for other settings-changed sources', () => {
+      results._isRestoring = false;
+      results.displayMode = 'grid';
+      results._settings = {};
+      results.view = createMockView({ settings: { density: 'compact' } });
+      const clearStub = sinon.stub(results, '_clearViewSettings');
+
+      results._saveViewSettings({ detail: { source: 'column-resize' } });
+
+      expect(clearStub).to.not.have.been.called;
+      clearStub.restore();
+    });
+
+    test('_clearViewSettings empties the local storage entry for the display mode', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = { displayMode: 'table', table: { columns: { 'dc:title': { width: '400px' } } } };
+      results.document = null;
+      const saveSpy = sinon.spy(results, 'saveSettings');
+
+      results._clearViewSettings();
+
+      expect(results._settings.table).to.deep.equal({});
+      expect(results._settings.displayMode).to.equal('table');
+      expect(saveSpy).to.have.been.called;
+      saveSpy.restore();
+    });
+
+    test('_clearViewSettings writes empty doc prefs in document context', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.name = 'default';
+      results.document = { path: '/default-domain' };
+      const debounceStub = sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+      results._clearViewSettings();
+
+      expect(saveDocStub).to.have.been.calledWith('/default-domain', 'documentPrefs.default', {});
+
+      debounceStub.restore();
+      saveDocStub.restore();
+      results.document = null;
+    });
+
+    test('_clearViewSettings writes empty global prefs for search providers', () => {
+      results._isRestoring = false;
+      results.displayMode = 'table';
+      results._settings = {};
+      results.document = null;
+      // _shouldUseGlobalPrefs is computed, so drive it through its inputs rather than assigning it.
+      const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').resolves({});
+      const provider = createMockProvider();
+      provider.provider = 'default_search';
+      results.nxProvider = provider;
+      const debounceStub = sinon.stub(results, '_debounceSave').callsFake((_, fn) => fn());
+      const saveGlobalStub = sinon.stub(results, 'saveGlobalResultsPrefs').resolves();
+
+      results._clearViewSettings();
+
+      expect(results._shouldUseGlobalPrefs).to.be.true;
+      expect(saveGlobalStub).to.have.been.calledWith({});
+
+      debounceStub.restore();
+      saveGlobalStub.restore();
+      allPrefsStub.restore();
+      results.nxProvider = null;
+    });
+
+    test('_clearViewSettings leaves the backend alone outside the table display mode', () => {
+      results._isRestoring = false;
+      results.displayMode = 'grid';
+      results._settings = {};
+      results.document = { path: '/default-domain' };
+      const saveDocStub = sinon.stub(results, 'saveDocPrefs').resolves();
+
+      results._clearViewSettings();
+
+      expect(saveDocStub).to.not.have.been.called;
+
+      saveDocStub.restore();
+      results.document = null;
+    });
+
+    test('_clearViewSettings does nothing while restoring', () => {
+      results._isRestoring = true;
+      results.displayMode = 'table';
+      results._settings = { table: { columns: {} } };
+      const saveSpy = sinon.spy(results, 'saveSettings');
+
+      results._clearViewSettings();
+
+      expect(saveSpy).to.not.have.been.called;
+
+      saveSpy.restore();
+      results._isRestoring = false;
+    });
+  });
+
   suite('Column Management', () => {
     test('updates columns when columns-changed event is fired', () => {
       const newColumns = [
