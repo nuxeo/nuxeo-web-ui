@@ -889,7 +889,13 @@ Polymer({
     this.view.notifyResize();
   },
 
-  _saveViewSettings() {
+  _saveViewSettings(e) {
+    // A reset has to drop what is already stored; saving would just persist the defaults on top of it
+    // and the previous width/order would come back from the backend on the next load (WEBUI-2178).
+    if (e && e.detail && e.detail.source === 'reset') {
+      this._clearViewSettings();
+      return;
+    }
     if (this.view.settings && !this._isRestoring) {
       this.set('_settings.displayMode', this.displayMode);
       this.saveSettings();
@@ -947,6 +953,48 @@ Polymer({
       // This branch runs when neither doc nor global prefs are applicable
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
+    }
+  },
+
+  // Drops the stored table preferences for this result set, in local storage and in whichever backend
+  // holds them, so the layout defaults survive a reload. Mirrors the branches of _saveViewSettings.
+  _clearViewSettings() {
+    if (this._isRestoring) {
+      return;
+    }
+
+    // Empty settings read back as "no preferences", so the table falls through to its defaults.
+    this.set(`_settings.${this.displayMode}`, {});
+    this.saveSettings();
+
+    if (this.displayMode !== 'table') {
+      return;
+    }
+
+    // ---- doc level (content views) ----
+    if (this.document && this.document.path) {
+      const docKey = this._getDocResultsPrefsKey();
+      this._debounceSave('_docPrefsSaveDebouncer', () => {
+        this.saveDocPrefs(this.document.path, docKey, {}).catch((error) => {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to clear document results preferences in the backend', {
+            path: this.document && this.document.path,
+            key: docKey,
+            error,
+          });
+        });
+      });
+      return;
+    }
+
+    // ---- global level (search providers) ----
+    if (this._shouldUseGlobalPrefs) {
+      this._debounceSave('_prefsSaveDebouncer', () => {
+        this.saveGlobalResultsPrefs({}).catch((error) => {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to clear global results preferences in the backend', error);
+        });
+      });
     }
   },
 
