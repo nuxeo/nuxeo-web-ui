@@ -74,23 +74,26 @@ workbox.routing.registerRoute(
 );
 
 /* ================================
-   Entry bundle → ALWAYS revalidate (bypass HTTP cache)
+   Entry bundle → ALWAYS revalidate
    main.bundle.js embeds the webpack runtime chunk-hash map. It MUST be fresh so
    dynamically-imported chunks (e.g. addon bundles like nuxeo-platform-3d) resolve to
    content-hashed filenames that still exist on the server after an upgrade. A stale
    entry bundle references removed hashes → 404 (WEBUI-2061 prerequisite:
    Cache-Control: no-cache for main.bundle.js). Registered before the generic .js
-   route below so it always wins for the entry bundle, regardless of the `ts` param.
-   Uses `no-cache` (not `reload`) so the browser still revalidates with a conditional
-   request and reuses the cached bytes on a 304 — cheap when the bundle is unchanged.
+   route below so it always wins for the entry bundle.
+   `no-cache` forces the browser to revalidate with a conditional request (reusing the
+   cached bytes on a 304, cheap when unchanged); the `ts` server-start param — matching
+   the generic .js route — additionally busts intermediate/CDN caches on every upgrade.
 ================================ */
 workbox.routing.registerRoute(
   ({ url }) => url.pathname.endsWith('/main.bundle.js'),
-  async ({ event }) =>
-    fetch(event.request, {
+  async ({ event }) => {
+    const request = TS ? new Request(`${event.request.url}?ts=${TS}`, { credentials: 'same-origin' }) : event.request;
+    return fetch(request, {
       cache: 'no-cache', // force revalidation of the entry bundle on every load
       credentials: 'same-origin',
-    }),
+    });
+  },
 );
 
 /* ================================
