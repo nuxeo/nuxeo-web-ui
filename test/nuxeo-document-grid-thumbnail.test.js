@@ -305,10 +305,25 @@ suite('nuxeo-document-grid-thumbnail', () => {
       });
     });
 
-    ['a', 'Control', 'Meta', 'ArrowRight', 'Escape'].forEach((key) => {
+    ['a', 'Control', 'Meta', 'Shift', 'ArrowRight', 'Escape'].forEach((key) => {
       test(`keydown with ${key} does not toggle`, () => {
         sinon.spy(element, '_toogleSelect');
         element._onCheckBoxTap({ type: 'keydown', key, detail: { sourceEvent: {} } });
+        expect(element._toogleSelect).to.not.have.been.called;
+        element._toogleSelect.restore();
+      });
+    });
+
+    [
+      { key: 'Enter', ctrlKey: true, label: 'Ctrl+Enter' },
+      { key: 'Enter', metaKey: true, label: 'Meta+Enter' },
+      { key: 'Enter', shiftKey: true, label: 'Shift+Enter' },
+      { key: 'Enter', altKey: true, label: 'Alt+Enter' },
+      { key: ' ', ctrlKey: true, label: 'Ctrl+Space' },
+    ].forEach(({ label, ...modifiers }) => {
+      test(`keydown with ${label} does not toggle`, () => {
+        sinon.spy(element, '_toogleSelect');
+        element._onCheckBoxTap({ type: 'keydown', ...modifiers, detail: { sourceEvent: {} } });
         expect(element._toogleSelect).to.not.have.been.called;
         element._toogleSelect.restore();
       });
