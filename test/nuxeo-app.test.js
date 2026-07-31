@@ -775,28 +775,226 @@ suite('nuxeo-app', () => {
   });
 
   suite('loadTask with id', () => {
+    let navigateTo;
+
+    setup(() => {
+      navigateTo = sinon.stub(app, 'navigateTo');
+    });
+
+    teardown(() => {
+      navigateTo.restore();
+    });
+
     test('loadTask fetches task and navigates on success', async () => {
       const task = { id: 't1', name: 'Review' };
       sinon.stub(app.$.task, 'get').resolves(task);
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
+      await flush();
       expect(app.currentTask).to.equal(task);
       expect(app.page).to.equal('tasks');
       app.$.task.get.restore();
     });
 
     test('loadTask navigates to tasks on 403', async () => {
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon.stub(app.$.task, 'get').rejects({ status: 403 });
       sinon.stub(app, '_fetchTaskCount');
       app.loadTask('t1');
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(app.navigateTo).to.have.been.calledWith('tasks');
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks');
       expect(app.loading).to.be.false;
       app.$.task.get.restore();
       app._fetchTaskCount.restore();
+    });
+
+    test('loadTask shows error and resets loading on task fetch failure', async () => {
+      sinon.stub(app.$.task, 'get').rejects({ status: 500, message: 'server error' });
+      sinon.stub(app, 'showError');
+      app.loading = true;
+      app.loadTask('t1');
+      await flush();
+      expect(app.showError).to.have.been.calledWith(500, 'browse.error', 'server error');
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app.showError.restore();
+    });
+
+    test('_handleTaskLoadError resets loading on a null error without throwing', () => {
+      sinon.stub(app, 'showError');
+      app.loading = true;
+      app._handleTaskLoadError(null);
+      expect(app.loading).to.be.false;
+      expect(app.showError).to.have.been.calledWith(undefined, 'browse.error', undefined);
+      app.showError.restore();
+    });
+
+    test('loadTask redirects to next pending task when task is ended', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      const doc = {
+        uid: 'doc-1',
+        path: '/ws/file',
+        contextParameters: { pendingTasks: [{ id: 'task-next' }] },
+      };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      app.loadTask('t1');
+      await flush();
+      expect(app._loadDocument).to.have.been.calledWith(
+        { uid: 'doc-1', path: '/ws/file', page: 'browse' },
+        { applyState: false },
+      );
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+    });
+
+    test('loadTask redirects to document when ended task has no pending follow-up', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      const doc = { uid: 'doc-1', path: '/ws/file', contextParameters: { pendingTasks: [] } };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      app.loadTask('t1');
+      await flush();
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.have.been.calledWith(doc);
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+      app.show.restore();
+    });
+
+    test('loadTask ended task without target document uses standard task navigation', async () => {
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [] };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument');
+      sinon.stub(app, '_defineTaskAndNavigate');
+      app.loadTask('t1');
+      await flush();
+      expect(app._loadDocument).to.not.have.been.called;
+      expect(app._defineTaskAndNavigate).to.have.been.calledWith(task);
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+      app._defineTaskAndNavigate.restore();
+    });
+
+    test('loadTask ended task does not call _defineTaskAndNavigate when redirecting', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      const doc = {
+        uid: 'doc-1',
+        path: '/ws/file',
+        contextParameters: { pendingTasks: [{ id: 'task-next' }] },
+      };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, '_defineTaskAndNavigate');
+      app.loadTask('t1');
+      await flush();
+      expect(app._defineTaskAndNavigate).to.not.have.been.called;
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+      app._defineTaskAndNavigate.restore();
+    });
+
+    test('loadTask ended task navigates to tasks on document load 403', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').rejects({ status: 403 });
+      sinon.stub(app, '_fetchTaskCount');
+      app.loadTask('t1');
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks');
+      expect(app._fetchTaskCount).to.have.been.called;
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+      app._fetchTaskCount.restore();
+    });
+
+    test('loadTask ended task shows error on document load failure', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').rejects({ status: 500, message: 'server error' });
+      sinon.stub(app, 'showError');
+      app.loadTask('t1');
+      await flush();
+      expect(app.showError).to.have.been.calledWith(500, 'browse.error', 'server error');
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+      app.showError.restore();
+    });
+
+    test('loadTask ended task with pending task missing id falls back to document browse', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      const doc = { uid: 'doc-1', path: '/ws/file', contextParameters: { pendingTasks: [{}] } };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      app.loadTask('t1');
+      await flush();
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.have.been.calledWith(doc);
+      expect(navigateTo).to.not.have.been.calledWith('tasks', sinon.match.any);
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+      app.show.restore();
+    });
+
+    test('loadTask ended task skips pending tasks without id and navigates to next valid task', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      const doc = {
+        uid: 'doc-1',
+        path: '/ws/file',
+        contextParameters: { pendingTasks: [{ name: 'orphan' }, { id: 'task-next' }] },
+      };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      app.loadTask('t1');
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+    });
+
+    test('loadTask ended task with missing contextParameters falls back to document browse', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      const doc = { uid: 'doc-1', path: '/ws/file' };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      app.loadTask('t1');
+      await flush();
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.have.been.calledWith(doc);
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+      app.show.restore();
+    });
+
+    test('loadTask ended task does not navigate when document reload returns no document', async () => {
+      const targetDoc = { uid: 'doc-1', path: '/ws/file' };
+      const task = { id: 't1', state: 'ended', targetDocumentIds: [targetDoc] };
+      sinon.stub(app.$.task, 'get').resolves(task);
+      sinon.stub(app, '_loadDocument').resolves(null);
+      sinon.stub(app, 'show');
+      app.loadTask('t1');
+      await flush();
+      expect(app.show).to.not.have.been.called;
+      expect(navigateTo).to.not.have.been.called;
+      expect(app.loading).to.be.false;
+      app.$.task.get.restore();
+      app._loadDocument.restore();
+      app.show.restore();
     });
   });
 
@@ -997,7 +1195,106 @@ suite('nuxeo-app', () => {
   });
 
   suite('_refreshAndFetchTasks', () => {
-    test('refreshes document and fetches tasks when currentDocument is set', async () => {
+    const workflowTaskProcessed = { type: 'workflowTaskProcessed' };
+    const workflowStarted = { type: 'workflowStarted' };
+    let navigateTo;
+
+    setup(() => {
+      navigateTo = sinon.stub(app, 'navigateTo');
+    });
+
+    teardown(() => {
+      navigateTo.restore();
+    });
+
+    test('navigates to next pending task when document has pending tasks', async () => {
+      const doc = {
+        uid: '1',
+        path: '/p',
+        contextParameters: { pendingTasks: [{ id: 'task-next' }] },
+      };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks(workflowTaskProcessed);
+      await flush();
+      expect(app._loadDocument).to.have.been.calledWith(doc, { applyState: false });
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      expect(app._fetchTaskCount).to.have.been.called;
+      app._loadDocument.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('navigates to document when no pending tasks remain', async () => {
+      const doc = { uid: '1', path: '/p', contextParameters: { pendingTasks: [] } };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks(workflowTaskProcessed);
+      await flush();
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.have.been.calledWith(doc);
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('shows browse without navigating on workflowStarted', async () => {
+      const doc = {
+        uid: '1',
+        path: '/p',
+        contextParameters: { pendingTasks: [{ id: 'task-next' }] },
+      };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks(workflowStarted);
+      await flush();
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.not.have.been.called;
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('shows browse without navigating on workflowAbandoned', async () => {
+      const doc = {
+        uid: '1',
+        path: '/p',
+        contextParameters: { pendingTasks: [{ id: 'task-next' }] },
+      };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks({ type: 'workflowAbandoned' });
+      await flush();
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.not.have.been.called;
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('refreshes document and shows browse when called without event', async () => {
       const doc = { uid: '1', path: '/p' };
       app.currentDocument = doc;
       sinon.stub(app, '_loadDocument').resolves(doc);
@@ -1006,9 +1303,108 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '_resetTaskSelection');
       sinon.stub(app, '$$').returns({ visible: false });
       app._refreshAndFetchTasks();
-      await Promise.resolve();
+      await flush();
       expect(app._loadDocument).to.have.been.calledWith(doc);
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.not.have.been.called;
       expect(app._fetchTaskCount).to.have.been.called;
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('does not load document when currentDocument is missing', async () => {
+      app.currentDocument = null;
+      sinon.stub(app, '_loadDocument');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks();
+      expect(app._loadDocument).to.not.have.been.called;
+      expect(app._fetchTaskCount).to.have.been.called;
+      expect(app._resetTaskSelection).to.have.been.called;
+      app._loadDocument.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('shows browse when pending task has no id', async () => {
+      const doc = { uid: '1', path: '/p', contextParameters: { pendingTasks: [{ name: 'orphan' }] } };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks(workflowTaskProcessed);
+      await flush();
+      expect(app.show).to.have.been.calledWith('browse');
+      expect(navigateTo).to.have.been.calledWith(doc);
+      expect(navigateTo).to.not.have.been.calledWith('tasks', sinon.match.any);
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('navigates to first pending task with id when earlier entries lack id', async () => {
+      const doc = {
+        uid: '1',
+        path: '/p',
+        contextParameters: { pendingTasks: [{ name: 'orphan' }, { id: 'task-next' }] },
+      };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks(workflowTaskProcessed);
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      app._loadDocument.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('does not call show when navigating to pending task', async () => {
+      const doc = {
+        uid: '1',
+        path: '/p',
+        contextParameters: { pendingTasks: [{ id: 'task-next' }] },
+      };
+      app.currentDocument = doc;
+      sinon.stub(app, '_loadDocument').resolves(doc);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks(workflowTaskProcessed);
+      await flush();
+      expect(app.show).to.not.have.been.called;
+      expect(navigateTo).to.have.been.calledWith('tasks', 'task-next');
+      app._loadDocument.restore();
+      app.show.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('does not show browse when document reload returns no document', async () => {
+      app.currentDocument = { uid: '1', path: '/p' };
+      sinon.stub(app, '_loadDocument').resolves(null);
+      sinon.stub(app, 'show');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app._refreshAndFetchTasks(workflowTaskProcessed);
+      await flush();
+      expect(app.show).to.not.have.been.called;
+      expect(navigateTo).to.not.have.been.called;
       app._loadDocument.restore();
       app.show.restore();
       app._fetchTaskCount.restore();
@@ -1298,9 +1694,18 @@ suite('nuxeo-app', () => {
   });
 
   suite('_refreshAndFetchTasks errors', () => {
+    let navigateTo;
+
+    setup(() => {
+      navigateTo = sinon.stub(app, 'navigateTo');
+    });
+
+    teardown(() => {
+      navigateTo.restore();
+    });
+
     test('navigates to tasks on 403 when refreshing document', async () => {
       app.currentDocument = { uid: '1' };
-      Object.defineProperty(app, 'navigateTo', { value: sinon.stub(), configurable: true, writable: true });
       sinon
         .stub(app, '_loadDocument')
         .returns(Promise.reject({ 'entity-type': 'exception', status: 403, message: 'denied' }));
@@ -1308,11 +1713,29 @@ suite('nuxeo-app', () => {
       sinon.stub(app, '_resetTaskSelection');
       sinon.stub(app, '$$').returns({ visible: true, $: { tasks: { fetch: sinon.spy() } } });
       app._refreshAndFetchTasks();
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(app.navigateTo).to.have.been.calledWith('tasks');
+      await flush();
+      expect(navigateTo).to.have.been.calledWith('tasks');
       expect(app.loading).to.be.false;
       app._loadDocument.restore();
+      app._fetchTaskCount.restore();
+      app._resetTaskSelection.restore();
+      app.$$.restore();
+    });
+
+    test('shows error on non-403 failure when refreshing document', async () => {
+      app.currentDocument = { uid: '1' };
+      sinon.stub(app, '_loadDocument').rejects({ status: 500, message: 'server error' });
+      sinon.stub(app, 'showError');
+      sinon.stub(app, '_fetchTaskCount');
+      sinon.stub(app, '_resetTaskSelection');
+      sinon.stub(app, '$$').returns({ visible: false });
+      app.loading = true;
+      app._refreshAndFetchTasks();
+      await flush();
+      expect(app.showError).to.have.been.calledWith(500, 'browse.error', 'server error');
+      expect(app.loading).to.be.false;
+      app._loadDocument.restore();
+      app.showError.restore();
       app._fetchTaskCount.restore();
       app._resetTaskSelection.restore();
       app.$$.restore();
