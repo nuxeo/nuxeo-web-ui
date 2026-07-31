@@ -53,13 +53,13 @@ Polymer({
 
       #tray {
         position: absolute;
-        bottom: calc(32px + var(--nuxeo-app-bottom, 0));
-        right: 32px;
+        bottom: calc(var(--nuxeo-document-create-button-offset, 32px) + var(--nuxeo-app-bottom, 0));
+        right: var(--nuxeo-document-create-button-offset, 32px);
         z-index: 10;
       }
 
       :host([dir='rtl']) #tray {
-        left: 32px;
+        left: var(--nuxeo-document-create-button-offset, 32px);
         right: auto;
         overflow: hidden;
       }

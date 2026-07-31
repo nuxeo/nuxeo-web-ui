@@ -226,6 +226,17 @@ const template = html`
         --nuxeo-app-bottom: 0px;
         --nuxeo-app-header-box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0, 0, 0, 0.1);
 
+        /*
+         * Geometry of the floating document create button. The offset is the inset it keeps from
+         * the edges of the app; the safe area is the strip it paints over the page content — the
+         * button itself plus that same inset above and below it. Scrollable content regions
+         * reserve the safe area so nothing ends up permanently underneath the button.
+         */
+        --nuxeo-document-create-button-offset: 32px;
+        --nuxeo-document-create-button-safe-area: calc(
+          var(--nuxeo-document-create-button-height, 56px) + 2 * var(--nuxeo-document-create-button-offset, 32px)
+        );
+
         --nuxeo-link: {
           color: var(--nuxeo-link-color);
           text-decoration: none;
