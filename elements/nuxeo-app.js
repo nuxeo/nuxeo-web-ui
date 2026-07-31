@@ -973,9 +973,12 @@ Polymer({
     if (!home || !menu) {
       return;
     }
+    // Retain the bound handlers so detached() can remove them and re-adding is idempotent.
+    this._boundHomeShortcutKeydown = this._boundHomeShortcutKeydown || this._onHomeShortcutKeydown.bind(this);
+    this._boundMenuEdgeKeydown = this._boundMenuEdgeKeydown || this._onMenuEdgeKeydown.bind(this);
     this._homeMenuNav = { home, menu };
-    home.addEventListener('keydown', this._onHomeShortcutKeydown.bind(this));
-    menu.addEventListener('keydown', this._onMenuEdgeKeydown.bind(this));
+    home.addEventListener('keydown', this._boundHomeShortcutKeydown);
+    menu.addEventListener('keydown', this._boundMenuEdgeKeydown);
   },
 
   // Visible menu items, excluding hidden ones.
@@ -1046,6 +1049,10 @@ Polymer({
     this._teardownInactivityTimer();
     this._teardownUnauthorizedRedirect();
     this._inactivityNeedsRearm = true; // re-arm from the next attached()
+    if (this._homeMenuNav) {
+      this._homeMenuNav.home.removeEventListener('keydown', this._boundHomeShortcutKeydown);
+      this._homeMenuNav.menu.removeEventListener('keydown', this._boundMenuEdgeKeydown);
+    }
   },
 
   skipLinkEvent() {
