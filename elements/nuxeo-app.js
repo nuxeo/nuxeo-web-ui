@@ -545,11 +545,11 @@ Polymer({
               aria-label$="[[i18n('command.menu')]]"
               tabindex="-1"
             ></paper-icon-button>
+            <nuxeo-suggester id="suggester"></nuxeo-suggester>
           </app-toolbar>
         </app-header>
 
         <main id="mainContent" tabindex="-1">
-          <nuxeo-suggester id="suggester" tabindex="0"></nuxeo-suggester>
           <iron-pages id="pages" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
             <nuxeo-slot name="PAGES" model="[[actionContext]]"></nuxeo-slot>
 
