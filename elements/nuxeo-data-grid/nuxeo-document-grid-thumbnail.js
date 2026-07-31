@@ -326,8 +326,10 @@ Polymer({
   },
 
   _onCheckBoxTap(e) {
-    // WEBUI-1262 : prevents checkbox selection during tab navigation
-    if (e.type === 'tap' || (e.key !== 'Tab' && e.key !== 'Shift')) {
+    // WEBUI-1262 : prevents checkbox selection during tab navigation. Only Enter and Space activate
+    // a control, so every other key — arrows, modifiers, shortcuts such as Ctrl+Enter — has to leave
+    // the selection alone instead of silently flipping it while the user moves around the results.
+    if (e.type === 'tap' || e.key === 'Enter' || e.key === ' ') {
       this._toogleSelect(e);
     }
   },

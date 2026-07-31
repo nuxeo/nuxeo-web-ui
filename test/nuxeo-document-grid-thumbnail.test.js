@@ -296,11 +296,22 @@ suite('nuxeo-document-grid-thumbnail', () => {
       element._toogleSelect.restore();
     });
 
-    test('keydown non-Tab calls _toogleSelect', () => {
-      sinon.spy(element, '_toogleSelect');
-      element._onCheckBoxTap({ type: 'keydown', key: 'a', detail: { sourceEvent: {} } });
-      expect(element._toogleSelect).to.have.been.called;
-      element._toogleSelect.restore();
+    ['Enter', ' '].forEach((key) => {
+      test(`keydown with ${key === ' ' ? 'Space' : key} calls _toogleSelect`, () => {
+        sinon.spy(element, '_toogleSelect');
+        element._onCheckBoxTap({ type: 'keydown', key, detail: { sourceEvent: {} } });
+        expect(element._toogleSelect).to.have.been.called;
+        element._toogleSelect.restore();
+      });
+    });
+
+    ['a', 'Control', 'Meta', 'ArrowRight', 'Escape'].forEach((key) => {
+      test(`keydown with ${key} does not toggle`, () => {
+        sinon.spy(element, '_toogleSelect');
+        element._onCheckBoxTap({ type: 'keydown', key, detail: { sourceEvent: {} } });
+        expect(element._toogleSelect).to.not.have.been.called;
+        element._toogleSelect.restore();
+      });
     });
   });
 
