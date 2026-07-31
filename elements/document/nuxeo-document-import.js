@@ -292,6 +292,31 @@ Polymer({
 
       .buttons {
         @apply --buttons-bar;
+        @apply --layout-wrap;
+        flex-shrink: 0;
+        gap: 4px 8px;
+      }
+
+      /* Groups the navigation buttons so they wrap as a single block instead of each
+         inline-block button breaking onto a line of its own. */
+      .navigation {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-center-justified;
+        @apply --layout-wrap;
+        gap: 4px 8px;
+      }
+
+      /* paper-button's default horizontal margin is replaced by the flex gap, so that the
+         three buttons still fit on one line once the group has a row to itself. */
+      .navigation paper-button {
+        margin: 0;
+      }
+
+      /* Lets the editor/side-panel area give up space instead of pushing the action bar
+         past the bottom edge of the dialog. */
+      .customize-content {
+        min-height: 0;
       }
 
       .add-more .importActions {
@@ -305,6 +330,14 @@ Polymer({
       @media (max-width: 1024px) {
         .file-to-import {
           width: calc(100% - 2em);
+        }
+
+        /* Below this width the five action buttons no longer fit on a single line, which is
+           what happens at 400% zoom. Give the navigation group a row of its own above the
+           cancel/create row so none of the buttons is misaligned or clipped by the dialog. */
+        .navigation {
+          order: -1;
+          flex: 1 0 100%;
         }
       }
 
@@ -542,7 +575,7 @@ Polymer({
 
       <!--Stage: allow the user to fill in properties for the uploaded files and create the respective documents-->
       <div name="customize" class="vertical layout flex">
-        <div class="horizontal layout flex">
+        <div class="customize-content horizontal layout flex">
           <div id="blobEditor" class="vertical layout flex">
             <paper-dialog-scrollable>
               <div class="suggester">
@@ -654,7 +687,7 @@ Polymer({
             [[i18n('command.cancel')]]
           </paper-button>
 
-          <div>
+          <div class="navigation">
             <paper-button
               noink
               class="text"
