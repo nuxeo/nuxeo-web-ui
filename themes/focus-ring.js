@@ -95,7 +95,9 @@ if (supportsConstructableStyleSheets) {
     focusStyleSheet = new CSSStyleSheet();
     focusStyleSheet.replaceSync(FOCUS_RULE);
   } catch (e) {
+    // Reported as supported but still failed; fall back to <style> injection.
     focusStyleSheet = null;
+    console.warn('nuxeo focus-ring: constructable stylesheet unavailable, using <style> fallback', e);
   }
 }
 
@@ -126,7 +128,8 @@ export function applyToRoot(root) {
       target.appendChild(createFocusStyleElement());
     }
   } catch (e) {
-    /* no-op: styling is best-effort */
+    // Best-effort: focus styling must never break element construction.
+    console.warn('nuxeo focus-ring: failed to apply focus styles to a root', e);
   }
 }
 

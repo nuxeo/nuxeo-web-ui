@@ -955,7 +955,7 @@ Polymer({
   // Arrow-key navigation between the home shortcut and the menu. Handlers are named methods
   // (not inline closures) so they can be unit-tested without firing key events at the listbox.
   homeToMenuNavigation() {
-    const home = this.shadowRoot && this.shadowRoot.querySelector('.home-link');
+    const home = this.shadowRoot?.querySelector('.home-link');
     const { menu } = this.$;
     if (!home || !menu) {
       return;
@@ -967,7 +967,7 @@ Polymer({
 
   // Visible menu items, excluding hidden ones.
   _homeMenuVisibleItems() {
-    const menu = this._homeMenuNav && this._homeMenuNav.menu;
+    const menu = this._homeMenuNav?.menu;
     if (!menu) {
       return [];
     }
@@ -976,11 +976,11 @@ Polymer({
 
   // Focus the home shortcut's inner link, falling back to the host.
   _focusHomeShortcut() {
-    const home = this._homeMenuNav && this._homeMenuNav.home;
+    const home = this._homeMenuNav?.home;
     if (!home) {
       return;
     }
-    const anchor = home.shadowRoot && home.shadowRoot.querySelector('a');
+    const anchor = home.shadowRoot?.querySelector('a');
     (anchor || home).focus();
   },
 
