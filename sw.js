@@ -81,19 +81,27 @@ workbox.routing.registerRoute(
    entry bundle references removed hashes → 404 (WEBUI-2061 prerequisite:
    Cache-Control: no-cache for main.bundle.js). Registered before the generic .js
    route below so it always wins for the entry bundle.
-   `no-cache` forces the browser to revalidate with a conditional request (reusing the
-   cached bytes on a 304, cheap when unchanged); the `ts` server-start param — matching
-   the generic .js route — additionally busts intermediate/CDN caches on every upgrade.
+   NetworkFirst + `fetchOptions.cache: 'no-cache'` revalidates on every load (a stale
+   HTTP/CDN copy can never be served) while the `?ts` server-start key means any cached
+   fallback is same-version — so a transient network failure or offline reload still
+   boots from cache, and a cross-upgrade `?ts` change guarantees a fresh fetch.
 ================================ */
 workbox.routing.registerRoute(
   ({ url }) => url.pathname.endsWith('/main.bundle.js'),
-  async ({ event }) => {
-    const request = TS ? new Request(`${event.request.url}?ts=${TS}`, { credentials: 'same-origin' }) : event.request;
-    return fetch(request, {
-      cache: 'no-cache', // force revalidation of the entry bundle on every load
-      credentials: 'same-origin',
-    });
-  },
+  new workbox.strategies.NetworkFirst({
+    cacheName: JS_CACHE,
+    fetchOptions: { cache: 'no-cache', credentials: 'same-origin' },
+    plugins: [
+      {
+        requestWillFetch: async ({ request }) =>
+          TS ? new Request(`${request.url}?ts=${TS}`, { credentials: 'same-origin' }) : request,
+      },
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 50,
+        purgeOnQuotaError: true,
+      }),
+    ],
+  }),
 );
 
 /* ================================
