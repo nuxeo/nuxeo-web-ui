@@ -51,7 +51,7 @@ suite('nuxeo-search-result-tooltip-styles', () => {
     ensureSearchResultTooltipStyles();
     ensureSearchResultTooltipStyles();
 
-    expect(document.querySelectorAll(`#${STYLES_ID}`).length).to.equal(1);
+    expect(document.querySelectorAll(`#${STYLES_ID}`)).to.have.lengthOf(1);
     expect(document.getElementById(STYLES_ID)).to.equal(first);
   });
 
