@@ -49,7 +49,8 @@ export function getValidTheme() {
     }
     return resolved;
   }
-  // Invalid or missing theme; use deployment default and correct storage.
+  // Invalid or missing theme: use the deployment default. Only rewrite storage to correct an
+  // invalid stored value; when nothing was stored (raw === null) leave storage untouched.
   const fallback = getDefaultTheme();
   if (raw != null) {
     safeSetTheme(fallback);

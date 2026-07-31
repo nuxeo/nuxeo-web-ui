@@ -901,6 +901,7 @@ Polymer({
     // PaperItemBehavior adds role/tabindex/aria-disabled to the host, but the inner <a>
     // already provides the interactive control. This causes nested-interactive violations
     // and double Tab stops. Strip these attributes to make the host a plain container.
+    // The inner <a> carries its own aria-label (see nuxeo-menu-icon), so it stays named.
     const homeLink = this.shadowRoot?.querySelector('.home-link');
     if (homeLink) {
       homeLink.removeAttribute('tabindex');

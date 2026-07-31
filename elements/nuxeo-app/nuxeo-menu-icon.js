@@ -104,7 +104,7 @@ Polymer({
       }
     </style>
 
-    <a href$="[[_href(urlFor, route, link)]]">
+    <a href$="[[_href(urlFor, route, link)]]" aria-label$="[[i18n(label)]]">
       <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip" tabindex="-1"></paper-icon-button>
       <nuxeo-tooltip
         for="button"
