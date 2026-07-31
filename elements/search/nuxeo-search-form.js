@@ -44,6 +44,9 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import { ensureSearchResultTooltipStyles } from './nuxeo-search-result-tooltip-styles.js';
+
+ensureSearchResultTooltipStyles();
 
 /**
  `nuxeo-search-form`
@@ -366,8 +369,13 @@ Polymer({
                     </div>
                     <span class="list-item-title ellipsis">[[item.title]]</span>
                     <!-- Kept outside the span so the name text stays exactly the title, and
-                         anchored on the parent row since an id would not be unique per stamp. -->
-                    <nuxeo-tooltip aria-hidden="true">[[item.title]]</nuxeo-tooltip>
+                         anchored on the parent row since an id would not be unique per stamp.
+                         Opens to the right of the row so it never covers the result list, and the
+                         name is wrapped in an element so the document-level rule that caps its
+                         width can match it once nuxeo-tooltip clones it onto the body. -->
+                    <nuxeo-tooltip position="right" offset="8" aria-hidden="true"
+                      ><span class="nuxeo-search-result-tooltip-name">[[item.title]]</span></nuxeo-tooltip
+                    >
                   </div>
                 </div>
               </div>
