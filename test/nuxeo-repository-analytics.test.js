@@ -57,4 +57,57 @@ suite('nuxeo-repository-analytics', () => {
     expect(labels[0]).to.be.a('string');
     expect(labels[1]).to.equal('unknown/xyz');
   });
+
+  suite('_mimeName', () => {
+    test('returns the friendly name when the mime type defines one', () => {
+      expect(el._mimeName('application/pdf')).to.equal('PDF');
+    });
+
+    test('falls back to the uppercased first extension when there is no name', () => {
+      expect(el._mimeName('application/andrew-inset')).to.equal('EZ');
+    });
+
+    test('returns the raw key for unknown mime types', () => {
+      expect(el._mimeName('unknown/xyz')).to.equal('unknown/xyz');
+    });
+  });
+
+  suite('_chartAria', () => {
+    test('returns only the heading when data is undefined', () => {
+      expect(el._chartAria('repositoryAnalytics.documentTypes.heading', undefined, '', false)).to.equal(
+        'repositoryAnalytics.documentTypes.heading',
+      );
+    });
+
+    test('returns only the heading when data is empty', () => {
+      expect(el._chartAria('repositoryAnalytics.documentTypes.heading', [], '', false)).to.equal(
+        'repositoryAnalytics.documentTypes.heading',
+      );
+    });
+
+    test('composes heading with label/value pairs for non-empty data', () => {
+      const data = [
+        { key: 'nco-admin', value: 7 },
+        { key: 'system', value: 4 },
+      ];
+      expect(el._chartAria('repositoryAnalytics.topNCreators.heading', data, '10', false)).to.equal(
+        'repositoryAnalytics.topNCreators.heading. nco-admin: 7, system: 4',
+      );
+    });
+
+    test('uses mime-friendly names when useMimeNames is true', () => {
+      const data = [
+        { key: 'application/pdf', value: 5 },
+        { key: 'unknown/xyz', value: 2 },
+      ];
+      expect(el._chartAria('repositoryAnalytics.filesByMimeType.heading', data, '', true)).to.equal(
+        'repositoryAnalytics.filesByMimeType.heading. PDF: 5, unknown/xyz: 2',
+      );
+    });
+
+    test('passes the heading argument through to i18n', () => {
+      el._chartAria('repositoryAnalytics.topNCreators.heading', [], '10', false);
+      expect(el.i18n).to.have.been.calledWith('repositoryAnalytics.topNCreators.heading', '10');
+    });
+  });
 });
