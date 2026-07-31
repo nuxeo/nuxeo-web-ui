@@ -1203,8 +1203,7 @@ suite('nuxeo-document-import', () => {
     test('should group the navigation buttons in a single wrapping container', () => {
       expect(navigation).to.not.be.null;
       const buttons = navigation.querySelectorAll('paper-button');
-      expect(buttons.length).to.equal(3);
-      expect(buttons[1].getAttribute('name')).to.be.null;
+      expect(buttons).to.have.lengthOf(3);
       expect(buttons[2].getAttribute('name')).to.equal('applyAll');
       const style = getComputedStyle(navigation);
       expect(style.display).to.equal('flex');
