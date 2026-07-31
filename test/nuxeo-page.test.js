@@ -24,7 +24,9 @@ suite('nuxeo-page', () => {
   test('reserves no bottom space when nothing floats over the content region', async () => {
     const el = await fixture(html`<nuxeo-page><div>content</div></nuxeo-page>`);
     await flush();
-    expect(contentStyle(el).paddingBottom).to.equal('0px');
+    const style = contentStyle(el);
+    expect(style.paddingBottom).to.equal('0px');
+    expect(style.scrollPaddingBottom).to.equal('0px');
   });
 
   test('reserves the create button safe area so the last row can be scrolled clear of it', async () => {
