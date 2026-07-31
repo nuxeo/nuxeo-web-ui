@@ -45,6 +45,17 @@ Polymer({
         position: relative;
         overflow-y: auto;
         padding: 16px 16px 0 16px;
+
+        /*
+         * Reserve the strip covered by the floating document create button, published by nuxeo-app
+         * as --nuxeo-page-content-safe-area-bottom and 0 wherever no button floats over this
+         * region. padding-bottom extends the scrollable range so the last row can be scrolled
+         * clear of the button instead of staying permanently underneath it, and
+         * scroll-padding-bottom keeps anything scrolled into view - keyboard focus in particular -
+         * out from under it.
+         */
+        padding-bottom: var(--nuxeo-page-content-safe-area-bottom, 0px);
+        scroll-padding-bottom: var(--nuxeo-page-content-safe-area-bottom, 0px);
       }
 
       .toolbar {
