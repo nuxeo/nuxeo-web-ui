@@ -13,14 +13,14 @@
     "workboxCli": "7.4.1"
   },
   "overrides": {
-    "ws": "8.20.1",
+    "ws": "8.21.0",
     "tar-fs": "^3.0.9",
     "marked": "^4.0.17",
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.4",
     "cross-spawn": "^7.0.6",
     "qs": "^6.14.1",
-    "form-data": "^2.5.4",
+    "form-data": "^2.5.6",
     "@nuxeo/page": {
       "path-to-regexp": "^8.4.0"
     },
@@ -34,7 +34,10 @@
     "replace": {
       "minimatch": "^3.1.4"
     },
-    "launch-editor": "^2.14.1"
+    "launch-editor": "^2.14.1",
+    "nuxeo": {
+      "brace-expansion": "^2.1.4"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
