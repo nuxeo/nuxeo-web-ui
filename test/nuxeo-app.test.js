@@ -18,6 +18,7 @@ limitations under the License.
 import { config } from '@nuxeo/nuxeo-elements';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
+import { getValidTheme } from '../themes/loader.js';
 import '../elements/nuxeo-app.js';
 
 suite('nuxeo-app', () => {
@@ -139,13 +140,16 @@ suite('nuxeo-app', () => {
     expect(app._computeDrawerResizeHidden(true, false)).to.be.false;
   });
 
-  test('_logo builds theme logo URL from baseUrl and localStorage theme', () => {
+  test('_logo builds theme logo URL from baseUrl and the resolved theme', () => {
     sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'ocean' : null));
     expect(app._logo('https://host/nuxeo/')).to.equal('https://host/nuxeo/themes/ocean/logo.png');
     localStorage.getItem.restore();
 
+    // First-time user (nothing persisted): the logo must follow the loader's resolved theme
+    // (branding-aware default), not a hard-coded 'default'. getValidTheme() does not write
+    // storage in this case, so reading raw localStorage would give the wrong logo.
     sinon.stub(localStorage, 'getItem').callsFake(() => null);
-    expect(app._logo('https://host/')).to.equal('https://host/themes/default/logo.png');
+    expect(app._logo('https://host/')).to.equal(`https://host/themes/${getValidTheme()}/logo.png`);
     localStorage.getItem.restore();
   });
 
