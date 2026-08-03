@@ -84,6 +84,7 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 
 import { Performance } from './performance.js';
+import { getValidTheme } from '../themes/loader.js';
 
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
@@ -1365,7 +1366,11 @@ Polymer({
   },
 
   _logo(baseUrl) {
-    return `${baseUrl}themes/${localStorage.getItem('theme') || 'default'}/logo.png`;
+    // WEBUI-1935: resolve the logo from the same theme the loader applied. getValidTheme()
+    // handles branding-mode resolution and the deployment default even when nothing is
+    // persisted yet (first-time user); reading raw localStorage would wrongly fall back to
+    // 'default' and show the classic logo beside a Hyland UI.
+    return `${baseUrl}themes/${getValidTheme()}/logo.png`;
   },
 
   showHome(e) {
