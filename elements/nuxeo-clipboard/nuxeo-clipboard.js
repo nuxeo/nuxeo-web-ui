@@ -276,7 +276,8 @@ Polymer({
    * A proxy is only accepted in a publication space. The publishing service creates proxies
    * there without consulting the accepted child types, so a section never lists the published
    * document's type among its subtypes and the regular subtype check can't apply to it.
-   * Anywhere else, and for any non-proxy document, the target's accepted child types decide.
+   * Anywhere else, and for any non-proxy document, the target's accepted child types decide,
+   * falling back to allowing the paste when the target doesn't expose its subtypes.
    */
   _isAllowedInTarget(entry, target, subtypes) {
     if (this.isProxy(entry)) {

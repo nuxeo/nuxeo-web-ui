@@ -64,7 +64,7 @@ suite('nuxeo-document-storage', () => {
       expect(element.documents).to.have.lengthOf(1);
     });
 
-    test('should retain whether the document is a proxy', () => {
+    test('should copy the proxy flag into the stored document', () => {
       element.documents = [];
       element.add(doc('1', { isProxy: true }));
       expect(element.documents[0].isProxy).to.be.true;
