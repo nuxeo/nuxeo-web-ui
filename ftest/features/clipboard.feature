@@ -70,6 +70,7 @@ Feature: Clipboard
       | Section | SectionB | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain/sections |             |     |      |
     And I have the following permissions to the documents
       | permission | path                              |
+      | ReadWrite  | /default-domain/Src               |
       | ReadWrite  | /default-domain/sections/SectionA |
       | ReadWrite  | /default-domain/sections/SectionB |
     And I browse to the document with path "/default-domain/Src"
@@ -93,6 +94,7 @@ Feature: Clipboard
       | Section | SectionA | booklet | sciences/astronomy | europe/Portugal | BJones  | /default-domain/sections |             |     |      |
     And I have the following permissions to the documents
       | permission | path                              |
+      | ReadWrite  | /default-domain/Src               |
       | ReadWrite  | /default-domain/sections/SectionA |
       | ReadWrite  | /default-domain/Dest              |
     And I browse to the document with path "/default-domain/Src"
