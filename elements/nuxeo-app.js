@@ -69,7 +69,7 @@ import './nuxeo-document-storage/nuxeo-document-storage.js';
 import './nuxeo-results/nuxeo-results.js';
 import '../i18n/i18n.js';
 import '../themes/base.js';
-import '../themes/loader.js';
+import { getValidTheme } from '../themes/loader.js';
 import './nuxeo-search-page.js';
 import './search/nuxeo-search-form.js';
 // import './nuxeo-admin/nuxeo-user-group-management-page.js';
@@ -84,7 +84,6 @@ import { afterNextRender } from '@polymer/polymer/lib/utils/render-status.js';
 import { importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 
 import { Performance } from './performance.js';
-import { getValidTheme } from '../themes/loader.js';
 
 // temporary extensible doc type registry
 window.nuxeo = window.nuxeo || {};
