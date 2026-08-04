@@ -53,6 +53,14 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(img).to.be.ok;
       expect(img.getAttribute('crossorigin')).to.equal('anonymous');
     });
+
+    // ELEMENTS-1616: a failed (cross-origin) thumbnail should fall back to a
+    // transparent pixel instead of a broken-image icon.
+    test('_error swaps a failed thumbnail for a transparent pixel', () => {
+      const img = element.shadowRoot.querySelector('.thumbnailContainer img');
+      element._error({ target: img });
+      expect(img.src.startsWith('data:image/png;base64,')).to.be.true;
+    });
   });
 
   suite('_thumbnail', () => {
