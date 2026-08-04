@@ -203,6 +203,10 @@ Polymer({
         margin: 2em 0;
       }
 
+      .import-label {
+        color: var(--nuxeo-text-default);
+      }
+
       .line {
         @apply --layout-horizontal;
       }
@@ -319,13 +323,14 @@ Polymer({
 
         <div class="options" hidden="[[!canCreate]]">
           <div class="layout vertical">
-            <paper-toggle-button checked="{{receiveEmailReport}}"
-              >[[i18n('csv.import.option.emailReport')]]</paper-toggle-button
-            >
+            <paper-toggle-button checked="{{receiveEmailReport}}">
+              <span class="import-label">[[i18n('csv.import.option.emailReport')]]</span>
+            </paper-toggle-button>
             <paper-toggle-button
               checked="{{enableImportMode}}"
               disabled$="[[!hasAdministrationPermissions(currentUser)]]"
-              >[[i18n('csv.import.option.useImportMode')]]
+            >
+              <span class="import-label">[[i18n('csv.import.option.useImportMode')]]</span>
             </paper-toggle-button>
           </div>
         </div>

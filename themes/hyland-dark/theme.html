@@ -120,7 +120,11 @@ limitations under the License.
       --paper-toolbar-background: var(--nuxeo-box);
       --paper-toolbar-color: var(--nuxeo-text-default);
 
+      /* Must be set explicitly: paper-listbox falls back to --primary-text-color, but
+         paper-styles/default-theme declares that on `html` after this file, so its light
+         #212121 wins and turns dropdown labels and icons near-black on the dark panel. */
       --paper-listbox-background-color: #1a1c1e;
+      --paper-listbox-color: var(--nuxeo-text-default);
       --paper-menu-background-color: var(--nuxeo-box);
       --paper-menu-color: var(--nuxeo-text-default);
       --paper-menu-disabled-color: #e9eff3;
