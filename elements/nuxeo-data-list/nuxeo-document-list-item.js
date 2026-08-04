@@ -307,9 +307,10 @@ Polymer({
   // ELEMENTS-1616: fall back to a transparent pixel when the (cross-origin) thumbnail
   // request fails, so the list row doesn't render a broken-image icon.
   _error(event) {
-    event.target.src =
+    const blankPixel =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwC' +
       'AAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+    event.target.setAttribute('src', blankPixel);
   },
 
   isFollowRedirectEnabled() {
