@@ -55,10 +55,11 @@ suite('nuxeo-document-list-item', () => {
     });
 
     // ELEMENTS-1616: when the (cross-origin) thumbnail request fails, the row should
-    // render a transparent pixel rather than a broken-image icon.
-    test('replaces a broken thumbnail with an inline transparent image', () => {
+    // render a transparent pixel rather than a broken-image icon. Dispatch the actual
+    // error event so the declarative on-error="_onError" binding is covered as well.
+    test('falls back to an inline transparent image on thumbnail error', () => {
       const thumbnail = element.shadowRoot.querySelector('.thumbnailContainer img');
-      element._error({ target: thumbnail });
+      thumbnail.dispatchEvent(new Event('error'));
       expect(thumbnail.getAttribute('src')).to.contain('data:image/png;base64,');
     });
   });
