@@ -226,7 +226,7 @@ Polymer({
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
         <div class="vignette thumbnailContainer" on-tap="handleClick" on-keydown="_handleKeydown">
-          <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
+          <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_error" alt$="[[doc.title]]" />
         </div>
         <div class="dataContainer flex" on-tap="handleClick" on-keydown="_handleKeydown">
           <div class="horizontal layout center" tabindex="0">
@@ -302,6 +302,14 @@ Polymer({
       return doc.contextParameters.thumbnail.url;
     }
     return '';
+  },
+
+  // ELEMENTS-1616: fall back to a transparent pixel when the (cross-origin) thumbnail
+  // request fails, so the list row doesn't render a broken-image icon.
+  _error(event) {
+    event.target.src =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwC' +
+      'AAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
   },
 
   isFollowRedirectEnabled() {
