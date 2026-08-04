@@ -299,9 +299,11 @@ Polymer({
   // ELEMENTS-1616: show a transparent pixel instead of a broken-image icon when a
   // (cross-origin) thumbnail fails to load, matching nuxeo-document-thumbnail.
   _error(e) {
-    e.target.src =
+    e.target.setAttribute(
+      'src',
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAA' +
-      'C0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        'C0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+    );
   },
 
   isFollowRedirectEnabled() {
