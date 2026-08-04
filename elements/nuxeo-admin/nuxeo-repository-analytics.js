@@ -82,7 +82,7 @@ Polymer({
       chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
-        min-width: 30em;
+        min-width: 0;
         display: block;
         font-size: 0.8rem;
       }

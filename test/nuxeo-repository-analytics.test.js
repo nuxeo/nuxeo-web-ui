@@ -57,4 +57,25 @@ suite('nuxeo-repository-analytics', () => {
     expect(labels[0]).to.be.a('string');
     expect(labels[1]).to.equal('unknown/xyz');
   });
+
+  test('charts can shrink to fit their cards', async () => {
+    el.setProperties({
+      downloads: [],
+      downloadedDocs: [],
+      totalCount: 0,
+      typeCount: [],
+      topCreators: [],
+      docsCreatedPerWeek: [],
+      docsModifiedPerWeek: [],
+      filesByMimeType: [],
+      visible: true,
+    });
+    await flush();
+
+    const charts = el.root.querySelectorAll('chart-line, chart-pie');
+    expect(charts).to.have.lengthOf(5);
+    charts.forEach((chart) => {
+      expect(window.getComputedStyle(chart).minWidth).to.equal('0px');
+    });
+  });
 });
