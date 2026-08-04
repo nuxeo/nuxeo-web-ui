@@ -218,7 +218,7 @@ Polymer({
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
-        <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_error" alt$="[[doc.title]]" />
+        <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
         <a
@@ -364,7 +364,7 @@ Polymer({
 
   // ELEMENTS-1616: show a transparent pixel instead of a broken-image icon when a
   // (cross-origin) thumbnail fails to load, matching nuxeo-document-thumbnail.
-  _error(e) {
+  _onError(e) {
     applyThumbnailFallback(e.target);
   },
 });

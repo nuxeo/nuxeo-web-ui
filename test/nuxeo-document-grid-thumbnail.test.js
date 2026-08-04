@@ -55,10 +55,11 @@ suite('nuxeo-document-grid-thumbnail', () => {
     });
 
     // ELEMENTS-1616: a failed (cross-origin) thumbnail should fall back to a
-    // transparent pixel instead of a broken-image icon.
-    test('_error swaps a failed thumbnail for a transparent pixel', () => {
+    // transparent pixel instead of a broken-image icon. Fire the real error
+    // event so the on-error="_onError" template wiring is exercised too.
+    test('renders a transparent pixel when a thumbnail fails to load', () => {
       const img = element.shadowRoot.querySelector('.thumbnailContainer img');
-      element._error({ target: img });
+      img.dispatchEvent(new Event('error'));
       expect(img.src.startsWith('data:image/png;base64,')).to.be.true;
     });
   });
