@@ -26,7 +26,5 @@ export const BLANK_THUMBNAIL_SRC =
 
 // Swaps a failed thumbnail <img> for the transparent pixel above.
 export function applyThumbnailFallback(img) {
-  if (img) {
-    img.src = BLANK_THUMBNAIL_SRC;
-  }
+  img.src = BLANK_THUMBNAIL_SRC;
 }
