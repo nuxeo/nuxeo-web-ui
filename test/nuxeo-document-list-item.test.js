@@ -44,6 +44,15 @@ suite('nuxeo-document-list-item', () => {
     test('should default selectedItems to empty array', () => {
       expect(element.selectedItems).to.deep.equal([]);
     });
+
+    // ELEMENTS-1616: the list-item thumbnail must request the same URL with CORS
+    // so it stays consistent with the grid/preview <img> and avoids Chrome's
+    // cross-origin image cache poisoning under S3 direct download.
+    test('requests its thumbnail with CORS enabled', () => {
+      const thumbnail = element.shadowRoot.querySelector('.thumbnailContainer img');
+      expect(thumbnail).to.be.ok;
+      expect(thumbnail.getAttribute('crossorigin')).to.equal('anonymous');
+    });
   });
 
   suite('_thumbnail', () => {
