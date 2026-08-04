@@ -23,7 +23,7 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
-import { BLANK_THUMBNAIL_SRC } from '../nuxeo-thumbnail-fallback.js';
+import { applyThumbnailFallback } from '../nuxeo-thumbnail-fallback.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -304,12 +304,6 @@ Polymer({
     return '';
   },
 
-  // ELEMENTS-1616: show a transparent pixel instead of a broken-image icon when a
-  // (cross-origin) thumbnail fails to load, matching nuxeo-document-thumbnail.
-  _error(e) {
-    e.target.src = BLANK_THUMBNAIL_SRC;
-  },
-
   isFollowRedirectEnabled() {
     const followRedirect =
       Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.url && Nuxeo.UI.config.url.followRedirect;
@@ -366,5 +360,11 @@ Polymer({
       this.removeAttribute('role');
       this.removeAttribute('aria-label');
     }
+  },
+
+  // ELEMENTS-1616: show a transparent pixel instead of a broken-image icon when a
+  // (cross-origin) thumbnail fails to load, matching nuxeo-document-thumbnail.
+  _error(e) {
+    applyThumbnailFallback(e.target);
   },
 });

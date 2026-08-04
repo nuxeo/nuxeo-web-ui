@@ -23,3 +23,10 @@ limitations under the License.
 export const BLANK_THUMBNAIL_SRC =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAA' +
   'C0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+// Swaps a failed thumbnail <img> for the transparent pixel above.
+export function applyThumbnailFallback(img) {
+  if (img) {
+    img.src = BLANK_THUMBNAIL_SRC;
+  }
+}
