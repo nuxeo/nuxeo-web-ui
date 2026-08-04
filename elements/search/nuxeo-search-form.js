@@ -819,6 +819,7 @@ Polymer({
       const clonedParams = JSON.parse(JSON.stringify(search.params));
       this.params = this._mutateParams(clonedParams, true);
       this._navigateToResults();
+      this._scheduleDirectorySuggestionRehydration();
     } else {
       this._clear();
     }
@@ -859,6 +860,91 @@ Polymer({
     if (this.form) {
       this.form.searchTerm = this.searchTerm;
     }
+    this._scheduleDirectorySuggestionRehydration();
+  },
+
+  _scheduleDirectorySuggestionRehydration() {
+    if (this.__directorySuggestionRehydrationPromise) {
+      return this.__directorySuggestionRehydrationPromise;
+    }
+    this.__directorySuggestionRehydrationPromise = Promise.resolve()
+      .then(() => this._rehydrateDirectorySuggestionLabels())
+      .finally(() => {
+        this.__directorySuggestionRehydrationPromise = null;
+      });
+    return this.__directorySuggestionRehydrationPromise;
+  },
+
+  _rehydrateDirectorySuggestionLabels() {
+    const { form } = this;
+    if (!form) {
+      return Promise.resolve();
+    }
+    const roots = form.shadowRoot ? [form.shadowRoot, form] : [form];
+    const suggestions = roots.reduce((result, root) => {
+      if (typeof root.querySelectorAll === 'function') {
+        root.querySelectorAll('nuxeo-directory-suggestion').forEach((suggestion) => result.add(suggestion));
+      }
+      return result;
+    }, new Set());
+    return Promise.all(Array.from(suggestions, (suggestion) => this._rehydrateDirectorySuggestionLabel(suggestion)));
+  },
+
+  _rehydrateDirectorySuggestionLabel(suggestion) {
+    const selectivity = suggestion?.$?.s2?._selectivity;
+    const savedValue = suggestion?.value;
+    const ids = Array.isArray(savedValue)
+      ? savedValue.filter((id) => id !== null && id !== undefined && id !== '')
+      : savedValue !== null && savedValue !== undefined && savedValue !== ''
+        ? [savedValue]
+        : [];
+    if (!selectivity || !ids.length) {
+      return Promise.resolve();
+    }
+    let resolved = false;
+    return ids
+      .reduce(
+        (promise, id) =>
+          promise.then(() =>
+            this._queryDirectorySuggestionEntry(suggestion, id).then((entry) => {
+              if (entry && typeof suggestion._selectionFormatter === 'function') {
+                suggestion._selectionFormatter(entry);
+                resolved = true;
+              }
+            }),
+          ),
+        Promise.resolve(),
+      )
+      .then(() => {
+        if (resolved && typeof selectivity.setValue === 'function') {
+          selectivity.setValue(Array.isArray(savedValue) ? savedValue.slice() : savedValue, { triggerChange: false });
+        }
+      });
+  },
+
+  _queryDirectorySuggestionEntry(suggestion, id) {
+    const op = suggestion?.$?.s2?.$?.op;
+    if (!op) {
+      return Promise.resolve(null);
+    }
+    const savedOperation = op.op;
+    const savedParams = op.params;
+    op.op = 'Directory.GetEntry';
+    op.params = {
+      directoryName: suggestion.directoryName,
+      id: String(id),
+      localize: true,
+      dbl10n: suggestion.dbl10n || false,
+      lang: window.nuxeo?.I18n?.language ? window.nuxeo.I18n.language.split('-')[0] : 'en',
+    };
+    return Promise.resolve()
+      .then(() => op.execute())
+      .catch(() => null)
+      .then((entry) => entry || null)
+      .finally(() => {
+        op.op = savedOperation;
+        op.params = savedParams;
+      });
   },
 
   _resultsElementChanged(results, oldResults) {
@@ -1126,10 +1212,10 @@ Polymer({
       (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
         this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
         // XXX rely on debouncer to update the results request with the saved search params
-        this._fetch(this.results);
+        return this._fetch(this.results).then(() => this._scheduleDirectorySuggestionRehydration());
       });
     if (this.results) {
-      load();
+      return load();
     } else {
       this._loadSavedSearchListener = () => {
         if (this.results) {
@@ -1139,6 +1225,7 @@ Polymer({
       };
       this.addEventListener('results-changed', this._loadSavedSearchListener);
     }
+    return undefined;
   },
 
   // To fix NXP-27429 so action buttons can be displayed on mobile browsers
