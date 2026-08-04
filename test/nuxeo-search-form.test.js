@@ -240,6 +240,286 @@ suite('nuxeo-search-form', () => {
     navigateSpy.restore();
   });
 
+  suite('saved directory label rehydration', () => {
+    const suggestionWith = (value) => {
+      return {
+        value,
+        directoryName: 'building_picture_type',
+        dbl10n: false,
+        _selectionFormatter: sinon.spy(),
+        $: {
+          s2: {
+            _selectivity: { setValue: sinon.spy() },
+            $: {
+              op: {
+                op: 'Directory.SuggestEntries',
+                params: { directoryName: 'building_picture_type' },
+                execute: sinon.stub().resolves({ id: 'id_civil', displayLabel: 'label_Civil' }),
+              },
+            },
+          },
+        },
+      };
+    };
+
+    test('coalesces scheduled rehydration within the same microtask', async () => {
+      const rehydrateStub = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabels').resolves();
+
+      searchForm._scheduleDirectorySuggestionRehydration();
+      searchForm._scheduleDirectorySuggestionRehydration();
+
+      expect(searchForm.__directorySuggestionRehydrationScheduled).to.be.true;
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(rehydrateStub).to.have.been.calledOnce;
+      expect(searchForm.__directorySuggestionRehydrationScheduled).to.be.false;
+
+      searchForm._scheduleDirectorySuggestionRehydration();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(rehydrateStub).to.have.been.calledTwice;
+      rehydrateStub.restore();
+    });
+
+    test('handles missing forms and discovers suggestions in light and shadow DOM', async () => {
+      const rehydrateStub = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabel').resolves();
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return null;
+        },
+      });
+
+      await searchForm._rehydrateDirectorySuggestionLabels();
+      expect(rehydrateStub).to.not.have.been.called;
+
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return {};
+        },
+      });
+      await searchForm._rehydrateDirectorySuggestionLabels();
+      expect(rehydrateStub).to.not.have.been.called;
+
+      const lightSuggestion = suggestionWith('id_light');
+      const shadowSuggestion = suggestionWith('id_shadow');
+      const lightQuery = sinon.stub().returns([lightSuggestion]);
+      const shadowQuery = sinon.stub().returns([shadowSuggestion]);
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return {
+            querySelectorAll: lightQuery,
+            shadowRoot: { querySelectorAll: shadowQuery },
+          };
+        },
+      });
+
+      await searchForm._rehydrateDirectorySuggestionLabels();
+
+      expect(lightQuery).to.have.been.calledOnceWithExactly('nuxeo-directory-suggestion');
+      expect(shadowQuery).to.have.been.calledOnceWithExactly('nuxeo-directory-suggestion');
+      expect(rehydrateStub).to.have.been.calledTwice;
+      expect(rehydrateStub).to.have.been.calledWithExactly(lightSuggestion);
+      expect(rehydrateStub).to.have.been.calledWithExactly(shadowSuggestion);
+      rehydrateStub.restore();
+      delete searchForm.form;
+    });
+
+    test('skips unusable suggestions and values', async () => {
+      const querySpy = sinon.spy(searchForm, '_queryDirectorySuggestionEntry');
+
+      await searchForm._rehydrateDirectorySuggestionLabel(null);
+      await searchForm._rehydrateDirectorySuggestionLabel({});
+      await searchForm._rehydrateDirectorySuggestionLabel({ $: {} });
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(null));
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(undefined));
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(''));
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith([]));
+
+      expect(querySpy).to.not.have.been.called;
+      querySpy.restore();
+    });
+
+    test('rehydrates scalar and multiple values while ignoring unresolved entries', async () => {
+      const queryStub = sinon
+        .stub(searchForm, '_queryDirectorySuggestionEntry')
+        .callsFake((_suggestion, id) =>
+          Promise.resolve(id === 'id_missing' ? null : { id, displayLabel: `${id}_label` }),
+        );
+      const scalar = suggestionWith('id_scalar');
+      const multiple = suggestionWith(['id_multiple', null, undefined, '', 'id_missing']);
+
+      await searchForm._rehydrateDirectorySuggestionLabel(scalar);
+      await searchForm._rehydrateDirectorySuggestionLabel(multiple);
+
+      expect(queryStub).to.have.been.calledThrice;
+      expect(scalar._selectionFormatter).to.have.been.calledOnceWithExactly({
+        id: 'id_scalar',
+        displayLabel: 'id_scalar_label',
+      });
+      expect(multiple._selectionFormatter).to.have.been.calledOnceWithExactly({
+        id: 'id_multiple',
+        displayLabel: 'id_multiple_label',
+      });
+      expect(scalar.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly('id_scalar', {
+        triggerChange: false,
+      });
+      expect(multiple.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly(
+        ['id_multiple', null, undefined, '', 'id_missing'],
+        { triggerChange: false },
+      );
+
+      queryStub.resetBehavior();
+      queryStub.resolves(null);
+      const unresolved = suggestionWith('id_unresolved');
+      await searchForm._rehydrateDirectorySuggestionLabel(unresolved);
+      expect(unresolved._selectionFormatter).to.not.have.been.called;
+      expect(unresolved.$.s2._selectivity.setValue).to.not.have.been.called;
+
+      queryStub.resolves({ id: 'id_no_callbacks', displayLabel: 'No callbacks' });
+      const noCallbacks = suggestionWith('id_no_callbacks');
+      noCallbacks._selectionFormatter = null;
+      noCallbacks.$.s2._selectivity = {};
+      await searchForm._rehydrateDirectorySuggestionLabel(noCallbacks);
+
+      expect(queryStub.callCount).to.equal(5);
+      queryStub.restore();
+    });
+
+    test('queries localized entries and restores operation state on success and failure', async () => {
+      const originalNuxeo = window.nuxeo;
+      try {
+        const localized = suggestionWith('id_civil');
+        const localizedOperation = localized.$.s2.$.op;
+        let executedParams;
+        localized.dbl10n = true;
+        localizedOperation.execute.callsFake(() => {
+          executedParams = { ...localizedOperation.params };
+          return Promise.resolve({ id: 'id_civil', displayLabel: 'label_Civil' });
+        });
+        window.nuxeo = { I18n: { language: 'fr-FR' } };
+
+        expect(await searchForm._queryDirectorySuggestionEntry(localized, 'id_civil')).to.deep.equal({
+          id: 'id_civil',
+          displayLabel: 'label_Civil',
+        });
+        expect(executedParams).to.deep.equal({
+          directoryName: 'building_picture_type',
+          id: 'id_civil',
+          localize: true,
+          dbl10n: true,
+          lang: 'fr',
+        });
+        expect(localizedOperation.op).to.equal('Directory.SuggestEntries');
+        expect(localizedOperation.params).to.deep.equal({ directoryName: 'building_picture_type' });
+        expect(localizedOperation).to.not.have.property('__savedOp');
+        expect(localizedOperation).to.not.have.property('__savedParams');
+
+        const queryInEnglish = async (nuxeoValue, entry) => {
+          const suggestion = suggestionWith('id_english');
+          const operation = suggestion.$.s2.$.op;
+          window.nuxeo = nuxeoValue;
+          operation.execute.callsFake(() => {
+            expect(operation.params.lang).to.equal('en');
+            expect(operation.params.dbl10n).to.be.false;
+            return Promise.resolve(entry);
+          });
+          return searchForm._queryDirectorySuggestionEntry(suggestion, 42);
+        };
+
+        expect(await queryInEnglish(null, null)).to.be.null;
+        expect(await queryInEnglish({}, { id: 'id_empty_i18n' })).to.deep.equal({ id: 'id_empty_i18n' });
+        expect(await queryInEnglish({ I18n: {} }, { id: 'id_empty_language' })).to.deep.equal({
+          id: 'id_empty_language',
+        });
+
+        expect(await searchForm._queryDirectorySuggestionEntry(null, 'id_missing')).to.be.null;
+        const failed = suggestionWith('id_failed');
+        const failedOperation = failed.$.s2.$.op;
+        failedOperation.execute.rejects(new Error('failed'));
+
+        expect(await searchForm._queryDirectorySuggestionEntry(failed, 'id_failed')).to.be.null;
+        expect(failedOperation.op).to.equal('Directory.SuggestEntries');
+        expect(failedOperation.params).to.deep.equal({ directoryName: 'building_picture_type' });
+      } finally {
+        window.nuxeo = originalNuxeo;
+      }
+    });
+
+    test('ignores the fallback timeout after an operation completes', async () => {
+      let fallback;
+      const setTimeoutStub = sinon.stub(window, 'setTimeout').callsFake((callback) => {
+        fallback = callback;
+        return 1;
+      });
+      const clearTimeoutStub = sinon.stub(window, 'clearTimeout');
+      const suggestion = suggestionWith('id_complete');
+
+      expect(await searchForm._queryDirectorySuggestionEntry(suggestion, 'id_complete')).to.deep.equal({
+        id: 'id_civil',
+        displayLabel: 'label_Civil',
+      });
+      expect(clearTimeoutStub).to.have.been.calledOnceWithExactly(1);
+
+      fallback();
+      expect(suggestion.$.s2.$.op.op).to.equal('Directory.SuggestEntries');
+      setTimeoutStub.restore();
+      clearTimeoutStub.restore();
+    });
+
+    test('times out pending operations and ignores late resolution or rejection', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        let resolveLate;
+        const lateSuccess = suggestionWith('id_late_success');
+        lateSuccess.$.s2.$.op.execute.returns(
+          new Promise((resolve) => {
+            resolveLate = resolve;
+          }),
+        );
+
+        const lateSuccessResult = searchForm._queryDirectorySuggestionEntry(lateSuccess, 'id_late_success');
+        clock.tick(3000);
+        expect(await lateSuccessResult).to.be.null;
+        resolveLate({ id: 'id_late_success' });
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(lateSuccess.$.s2.$.op.op).to.equal('Directory.SuggestEntries');
+
+        let rejectLate;
+        const lateFailure = suggestionWith('id_late_failure');
+        lateFailure.$.s2.$.op.execute.returns(
+          new Promise((_resolve, reject) => {
+            rejectLate = reject;
+          }),
+        );
+
+        const lateFailureResult = searchForm._queryDirectorySuggestionEntry(lateFailure, 'id_late_failure');
+        clock.tick(3000);
+        expect(await lateFailureResult).to.be.null;
+        rejectLate(new Error('late failure'));
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(lateFailure.$.s2.$.op.op).to.equal('Directory.SuggestEntries');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('flattens nested selectivity results and skips empty entries', () => {
+      const grandchild = { id: 'grandchild' };
+      const child = { id: 'child', children: [grandchild] };
+      const parent = { id: 'parent', children: [child] };
+
+      expect(searchForm._flattenSelectivityResults()).to.deep.equal([]);
+      expect(searchForm._flattenSelectivityResults([null, parent])).to.deep.equal([parent, child, grandchild]);
+    });
+  });
+
   test('clear resets state and triggers search in manual mode', () => {
     const resetSpy = sinon.spy(searchForm, '_resetResults');
     const searchSpy = sinon.stub(searchForm, '_search');
