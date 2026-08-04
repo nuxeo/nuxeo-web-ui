@@ -28,6 +28,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
 import '../nuxeo-document-highlight/nuxeo-document-highlights.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { BLANK_THUMBNAIL_SRC } from '../nuxeo-thumbnail-fallback.js';
 
 /**
 `nuxeo-document-list-item`
@@ -307,10 +308,7 @@ Polymer({
   // ELEMENTS-1616: fall back to a transparent pixel when the (cross-origin) thumbnail
   // request fails, so the list row doesn't render a broken-image icon.
   _error(event) {
-    const blankPixel =
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwC' +
-      'AAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-    event.target.setAttribute('src', blankPixel);
+    event.target.setAttribute('src', BLANK_THUMBNAIL_SRC);
   },
 
   isFollowRedirectEnabled() {
