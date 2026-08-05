@@ -44,6 +44,24 @@ suite('nuxeo-document-list-item', () => {
     test('should default selectedItems to empty array', () => {
       expect(element.selectedItems).to.deep.equal([]);
     });
+
+    // ELEMENTS-1616: the list-item thumbnail must request the same URL with CORS
+    // so it stays consistent with the grid/preview <img> and avoids Chrome's
+    // cross-origin image cache poisoning under S3 direct download.
+    test('requests its thumbnail with CORS enabled', () => {
+      const thumbnail = element.shadowRoot.querySelector('.thumbnailContainer img');
+      expect(thumbnail).to.be.ok;
+      expect(thumbnail.getAttribute('crossorigin')).to.equal('anonymous');
+    });
+
+    // ELEMENTS-1616: when the (cross-origin) thumbnail request fails, the row should
+    // render a transparent pixel rather than a broken-image icon. Dispatch the actual
+    // error event so the declarative on-error="_onError" binding is covered as well.
+    test('falls back to an inline transparent image on thumbnail error', () => {
+      const thumbnail = element.shadowRoot.querySelector('.thumbnailContainer img');
+      thumbnail.dispatchEvent(new Event('error'));
+      expect(thumbnail.getAttribute('src')).to.contain('data:image/png;base64,');
+    });
   });
 
   suite('_thumbnail', () => {
