@@ -53,6 +53,7 @@ import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import { NuxeoAppDrawerResizeBehavior } from './behaviors/nuxeo-app-drawer-resize-behavior.js';
+import { NuxeoInactivityBehavior } from './behaviors/nuxeo-inactivity-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-task-page-provider.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
@@ -417,6 +418,11 @@ Polymer({
     </header>
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
+    <!-- WEBUI-1987: lightweight authenticated request used to renew the server HTTP session while the
+         user is active (session.timeout is the server session timeout, which plain client activity would
+         not otherwise keep alive). -->
+    <nuxeo-resource id="keepAlive" path="me"></nuxeo-resource>
+
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"></nuxeo-document>
 
     <nuxeo-sardine hidden></nuxeo-sardine>
@@ -626,7 +632,7 @@ Polymer({
   `,
 
   is: 'nuxeo-app',
-  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior, NuxeoAppDrawerResizeBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior, NuxeoAppDrawerResizeBehavior, NuxeoInactivityBehavior],
   importMeta: import.meta,
   properties: {
     productName: {
@@ -843,6 +849,12 @@ Polymer({
 
     this.removeAttribute('unresolved');
 
+    // WEBUI-1987: wire the inactivity timer + 401->logout redirect once here (ready() always runs).
+    // attached() only re-arms after a real detach (see _inactivityNeedsRearm), so the initial
+    // ready()+attached() sequence does not issue a duplicate startup keep-alive or churn listeners.
+    this._setupInactivityTimer();
+    this._setupUnauthorizedRedirect();
+
     Performance.mark('nuxeo-app.ready');
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
@@ -923,11 +935,25 @@ Polymer({
     });
   },
 
+  attached() {
+    // WEBUI-1987: only re-arm after a real detach/re-attach cycle. ready() already did the initial
+    // wiring, so re-running setup here on the first attach would issue a redundant keep-alive request
+    // and churn the activity listeners for no benefit.
+    if (this._inactivityNeedsRearm) {
+      this._inactivityNeedsRearm = false;
+      this._setupInactivityTimer();
+      this._setupUnauthorizedRedirect();
+    }
+  },
+
   detached() {
     if (this._boundUpdateIsNarrow) {
       window.removeEventListener('resize', this._boundUpdateIsNarrow);
     }
     this.removeEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
+    this._teardownInactivityTimer();
+    this._teardownUnauthorizedRedirect();
+    this._inactivityNeedsRearm = true; // re-arm from the next attached()
   },
 
   skipLinkEvent() {
@@ -1032,15 +1058,22 @@ Polymer({
       this.$.task
         .get()
         .then((task) => {
+          const targetDoc = task?.targetDocumentIds?.[0];
+          if (task?.state === 'ended' && targetDoc?.uid) {
+            this._loadDocument({ uid: targetDoc.uid, path: targetDoc.path, page: 'browse' }, { applyState: false })
+              .then((doc) => {
+                this._navigateAfterTaskProcessed(doc);
+              })
+              .catch((error) => {
+                this._handleTaskLoadError(error);
+              });
+            return;
+          }
           this._defineTaskAndNavigate(task);
           this.loading = false;
         })
         .catch((error) => {
-          if (error.status === 403) {
-            this._fetchTaskCount();
-            this.navigateTo('tasks');
-            this.loading = false;
-          }
+          this._handleTaskLoadError(error);
         });
     } else {
       this._defineTaskAndNavigate();
@@ -1050,6 +1083,40 @@ Polymer({
   _defineTaskAndNavigate(task) {
     this.currentTask = task;
     this.show('tasks');
+  },
+
+  _navigateAfterTaskProcessed(doc) {
+    if (!doc) {
+      this.loading = false;
+      return;
+    }
+    const nextTaskId = doc.contextParameters?.pendingTasks?.find((task) => task?.id)?.id;
+    if (nextTaskId) {
+      this.navigateTo('tasks', nextTaskId);
+      return;
+    }
+    this.show('browse');
+    this.navigateTo(doc);
+    this.loading = false;
+  },
+
+  _handleTaskLoadError(error) {
+    if (error?.status === 403) {
+      this._fetchTaskCount();
+      this.navigateTo('tasks');
+    } else {
+      this.showError(error?.status, this.i18n('browse.error'), error?.message);
+    }
+    this.loading = false;
+  },
+
+  _handleDocumentRefreshError(err) {
+    if (err?.['entity-type'] === 'exception' && err.status === 403) {
+      this.navigateTo('tasks');
+    } else {
+      this.showError(err?.status, this.i18n('browse.error'), err?.message);
+    }
+    this.loading = false;
   },
 
   _getSavedSearchForm() {
@@ -1083,7 +1150,7 @@ Polymer({
    * If the document is successfuly retrieved, it is retuned by the method, except if the document representes a saved
    * search, in which case `undefined` is returned.
    */
-  _loadDocument(docParam) {
+  _loadDocument(docParam, { applyState = true } = {}) {
     this.loading = true;
     this.docId = docParam.uid;
     this.docPath = docParam.path;
@@ -1099,17 +1166,23 @@ Polymer({
         this.loading = false;
         return;
       }
-      if (this.docId && !doc.isVersion) {
-        this.docId = '';
-        this.docPath = doc.path;
+      if (applyState) {
+        this._applyDocumentFromLoad(doc);
       }
-      this.currentParent = this.hasFacet(doc, 'Folderish')
-        ? doc
-        : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
-      this.set('currentDocument', doc);
       this.loading = false;
       return doc;
     });
+  },
+
+  _applyDocumentFromLoad(doc) {
+    if (this.docId && !doc.isVersion) {
+      this.docId = '';
+      this.docPath = doc.path;
+    }
+    this.currentParent = this.hasFacet(doc, 'Folderish')
+      ? doc
+      : doc.contextParameters.breadcrumb.entries.slice(-2, -1)[0];
+    this.set('currentDocument', doc);
   },
 
   load(page, uid, path, action) {
@@ -1373,20 +1446,21 @@ Polymer({
     });
   },
 
-  _refreshAndFetchTasks() {
+  _refreshAndFetchTasks(e) {
+    const taskProcessed = e?.type === 'workflowTaskProcessed';
     // let's refresh the current document since it might have been changed (ex: state and version)
     if (this.currentDocument) {
-      this._loadDocument(this.currentDocument)
-        .then(() => {
-          this.show('browse');
+      const loadOptions = taskProcessed ? { applyState: false } : {};
+      this._loadDocument(this.currentDocument, loadOptions)
+        .then((doc) => {
+          if (taskProcessed) {
+            this._navigateAfterTaskProcessed(doc);
+          } else {
+            this.show('browse');
+          }
         })
         .catch((err) => {
-          if (err['entity-type'] && err['entity-type'] === 'exception' && err.status === 403) {
-            this.loading = false;
-            this.navigateTo('tasks');
-          } else {
-            this.showError(err.status, this.i18n('browse.error'), err.message);
-          }
+          this._handleDocumentRefreshError(err);
         });
     }
     this._fetchTaskCount();
