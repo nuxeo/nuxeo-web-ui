@@ -898,11 +898,12 @@ Polymer({
   _rehydrateDirectorySuggestionLabel(suggestion) {
     const selectivity = suggestion?.$?.s2?._selectivity;
     const savedValue = suggestion?.value;
-    const ids = Array.isArray(savedValue)
-      ? savedValue.filter((id) => id !== null && id !== undefined && id !== '')
-      : savedValue !== null && savedValue !== undefined && savedValue !== ''
-        ? [savedValue]
-        : [];
+    let ids = [];
+    if (Array.isArray(savedValue)) {
+      ids = savedValue.filter((id) => id !== null && id !== undefined && id !== '');
+    } else if (savedValue !== null && savedValue !== undefined && savedValue !== '') {
+      ids = [savedValue];
+    }
     if (!selectivity || !ids.length) {
       return Promise.resolve();
     }
