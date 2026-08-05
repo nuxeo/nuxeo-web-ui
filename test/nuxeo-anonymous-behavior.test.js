@@ -138,6 +138,14 @@ suite('nuxeo-anonymous-behavior', () => {
       expect(redirect.firstCall.args[0]).to.not.contain('//logout');
     });
 
+    test('normalizes multiple trailing slashes in the base URL', () => {
+      const redirect = sinon.stub(app, '_redirect');
+      app.$.nxcon.url = '/nuxeo///';
+      app._redirectAnonymousToLogin();
+      expect(redirect.firstCall.args[0]).to.match(/^\/nuxeo\/logout\?/);
+      expect(redirect.firstCall.args[0]).to.not.contain('//logout');
+    });
+
     test('falls back to the element url when the connection has no URL', () => {
       const redirect = sinon.stub(app, '_redirect');
       app.$.nxcon.url = '';

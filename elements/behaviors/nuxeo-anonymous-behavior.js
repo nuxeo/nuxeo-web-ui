@@ -78,7 +78,11 @@ export const NuxeoAnonymousBehavior = {
     const fragment = globalThis.location.hash.substring(1).replace(/[;\r\n]/g, '');
     document.cookie = `nuxeo.start.url.fragment=${fragment}; path=/`;
     // Strip any trailing slash so a NUXEO_URL configured as `.../nuxeo/` doesn't yield `.../nuxeo//logout`.
-    const baseUrl = (this.$?.nxcon?.url || this.url || '').replace(/\/+$/, '');
+    // A plain loop avoids the super-linear backtracking of a `/\/+$/` regex on adversarial inputs.
+    let baseUrl = this.$?.nxcon?.url || this.url || '';
+    while (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.slice(0, -1);
+    }
     // `requestedUrl` must be context-relative: an absolute URL would get the context path prepended by
     // the server, producing a broken redirect. Logging out invalidates the anonymous session and, since
     // the user was anonymous, Nuxeo forwards to `login.jsp?forceAnonymousLogin=true&requestedUrl=...`.
