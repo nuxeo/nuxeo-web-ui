@@ -71,22 +71,18 @@ export const NuxeoScrollRestoreBehavior = {
     if (!v) {
       return [];
     }
-    try {
-      const listItems = v.$?.list?.items;
-      if (Array.isArray(listItems) && listItems.length) {
-        return listItems;
-      }
-      if (Array.isArray(v.items) && v.items.length) {
-        return v.items;
-      }
-      if (Array.isArray(listItems)) {
-        return listItems;
-      }
-      if (Array.isArray(v.items)) {
-        return v.items;
-      }
-    } catch (e) {
-      /* unsafe read during attach/refresh — treat as no rows yet */
+    const listItems = v.$?.list?.items;
+    if (Array.isArray(listItems) && listItems.length) {
+      return listItems;
+    }
+    if (Array.isArray(v.items) && v.items.length) {
+      return v.items;
+    }
+    if (Array.isArray(listItems)) {
+      return listItems;
+    }
+    if (Array.isArray(v.items)) {
+      return v.items;
     }
     return [];
   },
