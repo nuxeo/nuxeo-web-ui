@@ -257,7 +257,7 @@ suite('NuxeoScrollRestoreBehavior', () => {
     const host = makeHost(name, {});
     host._srArmScrollTracking({}); // no $.list — must not throw
     host._srDisarmScrollTracking(); // nothing armed — must not throw
-    expect(host._srScrollList).to.equal(null);
+    expect(host._srScrollList).to.be.null;
   });
 
   test('scroll tracking keeps the anchor fresh', async () => {
