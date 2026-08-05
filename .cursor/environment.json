@@ -1,6 +1,6 @@
 {
   "name": "Nuxeo Web UI",
-  "install": "cp -n .env.sample .env || true; npm install && npm run pretest",
+  "install": "[ -f .env ] || cp .env.sample .env; npm install && npm run pretest",
   "terminals": [
     {
       "name": "dev-server",
