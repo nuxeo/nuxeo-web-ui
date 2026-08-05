@@ -33,7 +33,8 @@
     },
     "replace": {
       "minimatch": "^3.1.4"
-    }
+    },
+    "brace-expansion": "2.1.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -108,7 +109,7 @@
     "build:analyze": "webpack --env production --analyze",
     "lint:eslint": "eslint .",
     "format:eslint": "eslint . --fix",
-    "lint:prettier": "prettier \"**/*.{js,html}\" --list-different || (echo '↑↑ these files are not prettier formatted ↑↑' && exit 1)",
+    "lint:prettier": "prettier \"**/*.{js,html}\" --list-different || (echo '\u2191\u2191 these files are not prettier formatted \u2191\u2191' && exit 1)",
     "format:prettier": "prettier \"**/*.{js,html}\" --write",
     "lint": " npm run lint:eslint && npm run lint:prettier",
     "win-lint": " npm run lint:eslint && npm run lint:prettier",
