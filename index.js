@@ -27,15 +27,18 @@ const loadAddons = async () => {
   // NXP-26977: await loading of addons
   await Promise.all(
     bundles.map((url) => {
-      if (url.endsWith('.html')) {
-        return new Promise((resolve, reject) => importHref(url, resolve, reject));
-      }
-      return import(
-        /* webpackChunkName: "[request]" */
-        /* webpackInclude: /addons\/[^\/]+\/index.js$/ */
-        // eslint-disable-next-line comma-dangle
-        `./addons/${url}`
-      ).catch(() => import(/* webpackIgnore: true */ `./${url}.bundle.js`));
+      const load = url.endsWith('.html')
+        ? new Promise((resolve, reject) => importHref(url, resolve, reject))
+        : import(
+            /* webpackChunkName: "[request]" */
+            /* webpackInclude: /addons\/[^\/]+\/index.js$/ */
+            // eslint-disable-next-line comma-dangle
+            `./addons/${url}`
+          ).catch(() => import(/* webpackIgnore: true */ `./${url}.bundle.js`));
+      // A missing or broken optional addon bundle (e.g. a server package like nuxeo-platform-3d
+      // that is installed on the server but has no resolvable client bundle) must not reject the
+      // whole bootstrap chain. Isolate each addon load and log a warning instead of failing startup.
+      return Promise.resolve(load).catch((e) => console.warn(`Failed to load addon bundle "${url}":`, e));
     }),
   );
 };
@@ -54,10 +57,13 @@ const setupApp = async () =>
   });
 const loadRouting = async () => {
   if (config.get('router.htmlImport')) {
-    importHref(Nuxeo.UI.app.resolveUrl('routing.html'));
-  } else {
-    return import(/* webpackMode: "eager" */ './elements/routing.js');
+    // Wrap importHref in a promise so the startup chain awaits routing.html actually loading
+    // and load errors reject (surface) instead of being swallowed, matching the import() branch.
+    return new Promise((resolve, reject) => {
+      importHref(Nuxeo.UI.app.resolveUrl('routing.html'), resolve, reject);
+    });
   }
+  return import(/* webpackMode: "eager" */ './elements/routing.js');
 };
 
 const ready =
@@ -74,5 +80,12 @@ ready
   .then(loadLegacy)
   .then(loadBundle)
   .then(setupApp)
-  .then(loadRouting)
-  .then(loadAddons);
+  // Load addons before routing: addons register their config contributions (e.g. blob
+  // enrichers like `wopi`) and slot content at import time. Routing dispatches the initial route
+  // when loaded, which triggers the first document fetch. If addons load after routing starts, that
+  // first fetch is sent without the addon enrichers, so enricher-dependent blob actions (e.g. the
+  // WOPI "open" icon) are missing until a client-side re-navigation re-fetches the document
+  // (WEBUI-1978, WEBUI-1715 regression). setupApp still runs first so Nuxeo.UI.app is available to
+  // addons.
+  .then(loadAddons)
+  .then(loadRouting);

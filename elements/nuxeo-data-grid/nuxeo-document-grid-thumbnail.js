@@ -217,14 +217,21 @@ Polymer({
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
-        <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
+        <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
-        <a class="title" href$="[[urlFor(doc)]]" on-tap="handleClick" on-keydown="_handleKeydown" tabindex="0">
+        <a
+          class="title"
+          href$="[[urlFor(doc)]]"
+          on-tap="handleClick"
+          on-keydown="_handleKeydown"
+          tabindex="0"
+          aria-label$="[[doc.title]]"
+        >
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
-            <nuxeo-tooltip for="title">[[doc.title]]</nuxeo-tooltip>
+            <nuxeo-tooltip for="title" aria-hidden="true">[[doc.title]]</nuxeo-tooltip>
           </div>
         </a>
         <div class="actions">
@@ -235,7 +242,7 @@ Polymer({
           <paper-icon-button
             noink
             icon="icons:check"
-            title="[[_computeTitle(doc)]]"
+            title="[[i18n('command.select')]]"
             on-tap="_onCheckBoxTap"
             on-keydown="_onCheckBoxTap"
             role="checkbox"
@@ -277,7 +284,7 @@ Polymer({
     },
   },
 
-  observers: ['_selectedItemsChanged(selectedItems.splices)'],
+  observers: ['_selectedItemsChanged(selectedItems.splices)', '_updateAriaLabel(doc)'],
 
   _thumbnail(doc) {
     if (
@@ -338,7 +345,19 @@ Polymer({
     return this.doc && this.doc.uid;
   },
 
-  _computeTitle(doc) {
-    return `${doc && doc.title}${this.i18n && this.i18n('command.select')}`;
+  _updateAriaLabel(doc) {
+    // The parent results view moves keyboard focus onto this host element itself. Without an explicit
+    // role and name, a screen reader announces the tile as a generic group and re-reads the whole
+    // subtree (title, thumbnail, type, actions, select), so the title is heard several times. Marking
+    // the host as a single labelled link makes it announce just the document title once; inner controls
+    // still announce their own labels when focus lands on them. This is a screen-reader-only hint: it
+    // adds no keyboard listener, so navigation and selection behavior are unchanged.
+    if (doc?.uid && doc.title) {
+      this.setAttribute('role', 'link');
+      this.setAttribute('aria-label', doc.title);
+    } else {
+      this.removeAttribute('role');
+      this.removeAttribute('aria-label');
+    }
   },
 });
