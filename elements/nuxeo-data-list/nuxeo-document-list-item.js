@@ -28,7 +28,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
 import '../nuxeo-document-highlight/nuxeo-document-highlights.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { applyThumbnailFallback } from '../nuxeo-thumbnail-fallback.js';
+import { applyThumbnailFallback } from '../common-utils.js';
 
 /**
 `nuxeo-document-list-item`
