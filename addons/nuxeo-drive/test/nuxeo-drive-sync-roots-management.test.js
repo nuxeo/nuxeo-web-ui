@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-drive-sync-roots-management.js';
 
 suite('nuxeo-drive-sync-roots-management', () => {
@@ -82,6 +82,41 @@ suite('nuxeo-drive-sync-roots-management', () => {
       const executeStub = sinon.stub(element.$.roots, 'execute').returns(Promise.resolve());
       element.refresh();
       expect(executeStub).to.have.been.calledWith(element);
+    });
+  });
+
+  suite('document links', () => {
+    // urlFor is a routing helper method provided by RoutingBehavior; shadow it with a stub for unit tests.
+    setup(() => {
+      Object.defineProperty(element, 'urlFor', {
+        value: sinon.stub().callsFake((doc) => `/ui/#!/browse${doc.path}`),
+        configurable: true,
+        writable: true,
+      });
+    });
+
+    test('should render each root title and path as links to the document', async () => {
+      element.roots = [
+        { uid: 'root1', title: 'Root 1', path: '/root1', type: 'Folder' },
+        { uid: 'root2', title: 'Root 2', path: '/root2', type: 'Folder' },
+      ];
+      await flush();
+      const rows = element.shadowRoot.querySelectorAll('.table .row');
+      expect(rows).to.have.lengthOf(2);
+      // Both the title and path cells link to the document.
+      rows.forEach((row, i) => {
+        const titleLink = row.querySelector('.cell.flex-1 a');
+        const pathLink = row.querySelector('.cell.flex-3 a');
+        const href = `/ui/#!/browse${element.roots[i].path}`;
+        expect(titleLink).to.be.ok;
+        expect(pathLink).to.be.ok;
+        expect(titleLink.textContent.trim()).to.equal(element.roots[i].title);
+        expect(pathLink.textContent.trim()).to.equal(element.roots[i].path);
+        expect(titleLink.getAttribute('href')).to.equal(href);
+        expect(pathLink.getAttribute('href')).to.equal(href);
+      });
+      expect(element.urlFor).to.have.been.calledWith(element.roots[0]);
+      expect(element.urlFor).to.have.been.calledWith(element.roots[1]);
     });
   });
 });

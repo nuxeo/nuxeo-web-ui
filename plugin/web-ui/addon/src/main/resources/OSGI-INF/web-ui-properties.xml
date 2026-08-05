@@ -51,21 +51,28 @@
     <!-- Properties to be fetched when loading the user object in user management, default is empty -->
     <property name="org.nuxeo.web.ui.user.management.fetch.document" list="true"></property>
 
-    <!-- Max results for nuxeo select options. default is 1000.-->
+    <!-- Max results for nuxeo select options. default is 1000. -->
     <property name="org.nuxeo.web.ui.pagination.nuxeoSelectOptions.listingMaxItems">${org.nuxeo.pagination.nuxeoSelectOptions.maxAllowedItems:=1000}</property>
-    <!-- allowed url to redirect -->
-   <property name="org.nuxeo.web.ui.trustedDomains">${org.nuxeo.web.ui.trustedDomains:=}</property>
 
-   <!-- Search result numberFormatting -->
-  <property name="org.nuxeo.web.ui.numberFormatting.enabled">${org.nuxeo.web.ui.numberFormatting.enabled:=}</property>
-  
-  <!-- Control eval allowed in CSP, default is true  -->
-  <property name="org.nuxeo.web.ui.expressions.eval">${org.nuxeo.web.ui.expressions.eval:=true}</property>
+    <!-- Allowed URL to redirect -->
+    <property name="org.nuxeo.web.ui.trustedDomains">${org.nuxeo.web.ui.trustedDomains:=}</property>
 
-  <!-- Specify the order of document types using a comma-separated list of their id -->
-  <property name="org.nuxeo.web.ui.document_type.order">${org.nuxeo.web.ui.document_type.order:=}</property>
+    <!-- Search result number formatting -->
+    <property name="org.nuxeo.web.ui.numberFormatting.enabled">${org.nuxeo.web.ui.numberFormatting.enabled:=}</property>
 
- <!-- Control external permissions  -->
- <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
+    <!-- Control eval allowed in CSP, default is true -->
+    <property name="org.nuxeo.web.ui.expressions.eval">${org.nuxeo.web.ui.expressions.eval:=true}</property>
+
+    <!-- Specify the order of document types using a comma-separated list of their id -->
+    <property name="org.nuxeo.web.ui.document_type.order">${org.nuxeo.web.ui.document_type.order:=}</property>
+
+    <!-- Control external permissions -->
+    <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
+
+    <!-- Hide date picker placeholder text (set org.nuxeo.web.ui.datePicker.hidePlaceholder=true in nuxeo.conf to hide) -->
+    <property name="org.nuxeo.web.ui.datePicker.hidePlaceholder">${org.nuxeo.web.ui.datePicker.hidePlaceholder:=false}</property>
+
+    <!-- Client-side inactivity timeout (minutes) after which the session is ended and the user is sent to the timeout login page (login.jsp?nxtimeout=true); backed by nuxeo.conf session.timeout. Any value that is not a positive number (<= 0, or non-numeric such as NaN) disables the timer. -->
+    <property name="org.nuxeo.web.ui.session.timeout">${session.timeout:=60}</property>
   </extension>
 </component>

@@ -43,6 +43,7 @@ Polymer({
         id="storage"
         name="[[_storageName]]"
         value="{{documents}}"
+        on-iron-localstorage-load="_normalizeLoadedValue"
         on-iron-localstorage-load-empty="initialize"
       >
       </iron-localstorage>
@@ -69,6 +70,15 @@ Polymer({
     this.documents = [];
   },
 
+  // iron-localstorage fires 'load' with a null value when the stored entry is missing or
+  // holds unparseable JSON. Normalize to an empty array so consumers never operate on a
+  // null list; setting documents also re-persists a valid value, healing the corrupted entry.
+  _normalizeLoadedValue() {
+    if (!Array.isArray(this.documents)) {
+      this.initialize();
+    }
+  },
+
   add(doc) {
     if (this.contains(doc)) {
       return;
@@ -84,6 +94,10 @@ Polymer({
     };
     if (doc.contextParameters && doc.contextParameters.thumbnail && doc.contextParameters.thumbnail.url) {
       document.contextParameters = { thumbnail: { url: doc.contextParameters.thumbnail.url } };
+    }
+    // guard against a null/undefined value persisted in localStorage, which would make unshift throw
+    if (!Array.isArray(this.documents)) {
+      this.documents = [];
     }
     return this.unshift('documents', document);
   },
@@ -117,6 +131,9 @@ Polymer({
   },
 
   _indexOf(doc) {
+    if (!Array.isArray(this.documents)) {
+      return -1;
+    }
     return this.documents.findIndex((e) => e.uid === doc.uid);
   },
 
