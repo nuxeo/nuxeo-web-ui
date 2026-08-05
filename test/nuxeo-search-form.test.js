@@ -376,11 +376,12 @@ suite('nuxeo-search-form', () => {
         id: 'id_residential',
         displayLabel: 'id_residential_label',
       });
-      expect(scalar.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly('id_civil', {
-        triggerChange: false,
-      });
+      expect(scalar.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly(
+        { id: 'id_civil', displayLabel: 'id_civil_label' },
+        { triggerChange: false },
+      );
       expect(multiple.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly(
-        ['id_residential', null, undefined, '', 'id_parking'],
+        [{ id: 'id_residential', displayLabel: 'id_residential_label' }, null, undefined, '', 'id_parking'],
         { triggerChange: false },
       );
       queryStub.restore();
@@ -414,60 +415,92 @@ suite('nuxeo-search-form', () => {
       queryStub.restore();
     });
 
-    test('queries localized entries and restores the suggestion operation', async () => {
+    test('queries directory entries through the REST resource', async () => {
       const suggestion = suggestionWith('id_civil');
-      const operation = suggestion.$.s2.$.op;
-      suggestion.dbl10n = true;
-      window.nuxeo = window.nuxeo || {};
-      const previousI18n = window.nuxeo.I18n;
-      window.nuxeo.I18n = { language: 'fr-FR' };
+      const response = { id: 'id_civil', displayLabel: 'label_Civil' };
+      const resource = {
+        get: sinon.stub().resolves(response),
+        headers: null,
+        path: null,
+      };
+      searchForm.$.directoryEntry = resource;
 
       const entry = await searchForm._queryDirectorySuggestionEntry(suggestion, 'id_civil');
 
-      expect(entry).to.deep.equal({ id: 'id_civil', displayLabel: 'label_Civil' });
-      expect(operation.execute).to.have.been.calledOnce;
-      expect(operation.op).to.equal('Directory.SuggestEntries');
-      expect(operation.params).to.deep.equal({ directoryName: 'building_picture_type' });
-      window.nuxeo.I18n = previousI18n;
+      expect(entry).to.deep.equal(response);
+      expect(resource.path).to.equal('/directory/building_picture_type/id_civil');
+      expect(resource.headers).to.deep.equal({
+        'fetch-directoryEntry': 'parent',
+        'translate-directoryEntry': 'label',
+      });
+      expect(resource.get).to.have.been.calledOnce;
     });
 
     test('returns null for missing, empty, and failed directory operations', async () => {
       expect(await searchForm._queryDirectorySuggestionEntry(null, 'id_civil')).to.be.null;
-
-      window.nuxeo = window.nuxeo || {};
-      const previousI18n = window.nuxeo.I18n;
-      window.nuxeo.I18n = { language: '' };
-
+      const resource = {
+        get: sinon.stub(),
+        headers: null,
+        path: null,
+      };
+      searchForm.$.directoryEntry = resource;
       const emptySuggestion = suggestionWith('id_civil');
-      emptySuggestion.$.s2.$.op.execute.resolves(null);
+      resource.get.onFirstCall().resolves(null);
       expect(await searchForm._queryDirectorySuggestionEntry(emptySuggestion, 'id_civil')).to.be.null;
 
       const failedSuggestion = suggestionWith('id_civil');
-      failedSuggestion.$.s2.$.op.execute.rejects(new Error('failed'));
+      resource.get.onSecondCall().rejects(new Error('failed'));
       expect(await searchForm._queryDirectorySuggestionEntry(failedSuggestion, 'id_civil')).to.be.null;
-      expect(failedSuggestion.$.s2.$.op.op).to.equal('Directory.SuggestEntries');
-      window.nuxeo.I18n = previousI18n;
     });
 
-    test('hydrates both scalar labels from the saved document payload', async () => {
+    test('renders labels for saved scalar and hierarchical directory values', async () => {
       const typeSuggestion = await fixture(
         html`<nuxeo-directory-suggestion directory-name="building_picture_type"></nuxeo-directory-suggestion>`,
       );
       const activitySuggestion = await fixture(
         html`<nuxeo-directory-suggestion directory-name="building_picture_activities"></nuxeo-directory-suggestion>`,
       );
+      typeSuggestion.value = 'id_civil';
+      activitySuggestion.value = 'id_residential/id_house';
+      await flush();
 
-      typeSuggestion._selectionFormatter({ id: 'id_civil', displayLabel: 'label_Civil' });
-      activitySuggestion._selectionFormatter({ id: 'id_residential', displayLabel: 'label_Residential' });
+      const paths = [];
+      const entries = {
+        '/directory/building_picture_type/id_civil': {
+          'entity-type': 'directoryEntry',
+          directoryName: 'building_picture_type',
+          properties: { id: 'id_civil', label: 'Civil' },
+        },
+        '/directory/building_picture_activities/id_residential%2Fid_house': {
+          'entity-type': 'directoryEntry',
+          directoryName: 'building_picture_activities',
+          properties: {
+            id: 'id_house',
+            label: 'House',
+            parent: {
+              'entity-type': 'directoryEntry',
+              directoryName: 'building_picture_activities',
+              properties: { id: 'id_residential', label: 'Residential' },
+            },
+          },
+        },
+      };
+      searchForm.$.directoryEntry = {
+        get: sinon.stub().callsFake(() => {
+          paths.push(searchForm.$.directoryEntry.path);
+          return Promise.resolve(entries[searchForm.$.directoryEntry.path]);
+        }),
+        headers: null,
+        path: null,
+      };
 
-      expect(typeSuggestion._resolveEntry('id_civil')).to.deep.equal({
-        id: 'id_civil',
-        displayLabel: 'label_Civil',
-      });
-      expect(activitySuggestion._resolveEntry('id_residential')).to.deep.equal({
-        id: 'id_residential',
-        displayLabel: 'label_Residential',
-      });
+      await searchForm._rehydrateDirectorySuggestionLabel(typeSuggestion);
+      await searchForm._rehydrateDirectorySuggestionLabel(activitySuggestion);
+      await flush();
+
+      expect(typeSuggestion.$.s2.$.input.textContent.trim()).to.equal('Civil');
+      expect(activitySuggestion.$.s2.$.input.textContent.trim()).to.equal('Residential/House');
+      expect(paths).to.deep.equal(Object.keys(entries));
     });
 
     test('rehydrates after direct and deferred saved-search loading', async () => {

@@ -26,6 +26,7 @@ import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-spinner/paper-spinner-lite.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-search.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
@@ -277,6 +278,7 @@ Polymer({
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
+    <nuxeo-resource id="directoryEntry"></nuxeo-resource>
 
     <div id="search-container">
       <div class="header ellipsis search-header">
@@ -887,7 +889,10 @@ Polymer({
       }
       return result;
     }, new Set());
-    return Promise.all(Array.from(suggestions, (suggestion) => this._rehydrateDirectorySuggestionLabel(suggestion)));
+    return Array.from(suggestions).reduce(
+      (promise, suggestion) => promise.then(() => this._rehydrateDirectorySuggestionLabel(suggestion)),
+      Promise.resolve(),
+    );
   },
 
   _rehydrateDirectorySuggestionLabel(suggestion) {
@@ -902,6 +907,7 @@ Polymer({
       return Promise.resolve();
     }
     let resolved = false;
+    const resolvedEntries = new Map();
     return ids
       .reduce(
         (promise, id) =>
@@ -909,6 +915,7 @@ Polymer({
             this._queryDirectorySuggestionEntry(suggestion, id).then((entry) => {
               if (entry && typeof suggestion._selectionFormatter === 'function') {
                 suggestion._selectionFormatter(entry);
+                resolvedEntries.set(id, entry);
                 resolved = true;
               }
             }),
@@ -917,34 +924,43 @@ Polymer({
       )
       .then(() => {
         if (resolved && typeof selectivity.setValue === 'function') {
-          selectivity.setValue(Array.isArray(savedValue) ? savedValue.slice() : savedValue, { triggerChange: false });
+          const hydratedValue = Array.isArray(savedValue)
+            ? savedValue.map((id) => resolvedEntries.get(id) || id)
+            : resolvedEntries.get(savedValue) || savedValue;
+          selectivity.setValue(hydratedValue, { triggerChange: false });
         }
       });
   },
 
   _queryDirectorySuggestionEntry(suggestion, id) {
-    const op = suggestion?.$?.s2?.$?.op;
-    if (!op) {
+    const resource = this.$.directoryEntry;
+    if (!resource || !suggestion?.directoryName) {
       return Promise.resolve(null);
     }
-    const savedOperation = op.op;
-    const savedParams = op.params;
-    op.op = 'Directory.GetEntry';
-    op.params = {
-      directoryName: suggestion.directoryName,
-      id: String(id),
-      localize: true,
-      dbl10n: suggestion.dbl10n || false,
-      lang: window.nuxeo?.I18n?.language ? window.nuxeo.I18n.language.split('-')[0] : 'en',
+    resource.path = `/directory/${encodeURIComponent(suggestion.directoryName)}/${encodeURIComponent(String(id))}`;
+    resource.headers = {
+      'fetch-directoryEntry': 'parent',
+      'translate-directoryEntry': 'label',
     };
-    return Promise.resolve()
-      .then(() => op.execute())
+    return resource
+      .get()
+      .then((entry) => {
+        if (!entry) {
+          return null;
+        }
+        const properties = entry.properties || {};
+        const formattedLabel =
+          typeof suggestion.formatDirectory === 'function'
+            ? suggestion.formatDirectory(entry, suggestion.separator)
+            : undefined;
+        return {
+          ...entry,
+          id: entry.id || properties.id || String(id),
+          displayLabel: entry.displayLabel || entry.absoluteLabel || formattedLabel || properties.label || String(id),
+        };
+      })
       .catch(() => null)
-      .then((entry) => entry || null)
-      .finally(() => {
-        op.op = savedOperation;
-        op.params = savedParams;
-      });
+      .then((entry) => entry || null);
   },
 
   _resultsElementChanged(results, oldResults) {
