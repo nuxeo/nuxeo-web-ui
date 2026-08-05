@@ -26,6 +26,7 @@ import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-spinner/paper-spinner-lite.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-search.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
@@ -277,6 +278,7 @@ Polymer({
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
+    <nuxeo-resource id="directoryEntry"></nuxeo-resource>
 
     <div id="search-container">
       <div class="header ellipsis search-header">
@@ -571,7 +573,7 @@ Polymer({
           let output = entry.id;
           let current = entry;
           while (current && current.properties && current.properties.parent) {
-            const { parent } = current.properties;
+            const parent = current.properties.parent;
             const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
             if (!parentId) break;
             output = `${parentId}`.concat('/', `${output}`);
@@ -818,7 +820,6 @@ Polymer({
       this.selectedSearch = search;
       const clonedParams = JSON.parse(JSON.stringify(search.params));
       this.params = this._mutateParams(clonedParams, true);
-      this._scheduleLookupLabelResolution();
       this._navigateToResults();
       this._scheduleDirectorySuggestionRehydration();
     } else {
@@ -855,176 +856,112 @@ Polymer({
     const search = this._searches[idx];
     const clonedParams = JSON.parse(JSON.stringify(search.params));
     this.params = this._mutateParams(clonedParams, true);
-    this._scheduleLookupLabelResolution();
     this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
 
     // Ensure form stays synced
     if (this.form) {
       this.form.searchTerm = this.searchTerm;
     }
+    this._scheduleDirectorySuggestionRehydration();
   },
 
-  _scheduleLookupLabelResolution() {
-    if (this.__lookupLabelResolutionScheduled) {
-      return;
+  _scheduleDirectorySuggestionRehydration() {
+    if (this.__directorySuggestionRehydrationPromise) {
+      return this.__directorySuggestionRehydrationPromise;
     }
-    this.__lookupLabelResolutionScheduled = true;
-    Promise.resolve().then(() => {
-      this.__lookupLabelResolutionScheduled = false;
-      return this._resolveLookupLabels();
-    });
+    this.__directorySuggestionRehydrationPromise = Promise.resolve()
+      .then(() => this._rehydrateDirectorySuggestionLabels())
+      .finally(() => {
+        this.__directorySuggestionRehydrationPromise = null;
+      });
+    return this.__directorySuggestionRehydrationPromise;
   },
 
-  _resolveLookupLabels() {
+  _rehydrateDirectorySuggestionLabels() {
     const { form } = this;
     if (!form) {
       return Promise.resolve();
     }
     const roots = form.shadowRoot ? [form.shadowRoot, form] : [form];
-    const lookups = roots.reduce((result, root) => {
+    const suggestions = roots.reduce((result, root) => {
       if (typeof root.querySelectorAll === 'function') {
-        root.querySelectorAll('nuxeo-directory-suggestion, nuxeo-selectivity').forEach((lookup) => result.add(lookup));
+        root.querySelectorAll('nuxeo-directory-suggestion').forEach((suggestion) => result.add(suggestion));
       }
       return result;
     }, new Set());
-    return Promise.all(Array.from(lookups, (lookup) => this._resolveLookupLabel(lookup)));
+    return Array.from(suggestions).reduce(
+      (promise, suggestion) => promise.then(() => this._rehydrateDirectorySuggestionLabel(suggestion)),
+      Promise.resolve(),
+    );
   },
 
-  _resolveLookupLabel(lookup) {
-    const savedValue = lookup && lookup.value;
-    const savedValues = Array.isArray(savedValue)
-      ? savedValue.filter((value) => value !== null && value !== undefined && value !== '')
-      : savedValue !== null && savedValue !== undefined && savedValue !== ''
-        ? [savedValue]
-        : [];
-    if (!savedValues.length) {
+  _rehydrateDirectorySuggestionLabel(suggestion) {
+    const selectivity = suggestion?.$?.s2?._selectivity;
+    const savedValue = suggestion?.value;
+    let ids = [];
+    if (Array.isArray(savedValue)) {
+      ids = savedValue.filter((id) => id !== null && id !== undefined && id !== '');
+    } else if (savedValue !== null && savedValue !== undefined && savedValue !== '') {
+      ids = [savedValue];
+    }
+    if (!selectivity || !ids.length) {
       return Promise.resolve();
     }
-    return savedValues
+    let resolved = false;
+    const resolvedEntries = new Map();
+    return ids
       .reduce(
-        (promise, value) =>
-          promise.then((options) => this._resolveLookupOption(lookup, value).then((option) => options.concat(option))),
-        Promise.resolve([]),
+        (promise, id) =>
+          promise.then(() =>
+            this._queryDirectorySuggestionEntry(suggestion, id).then((entry) => {
+              if (entry && typeof suggestion._selectionFormatter === 'function') {
+                suggestion._selectionFormatter(entry);
+                resolvedEntries.set(id, entry);
+                resolved = true;
+              }
+            }),
+          ),
+        Promise.resolve(),
       )
-      .then((options) => {
-        const selectivity = lookup.$ && lookup.$.s2 ? lookup.$.s2._selectivity : lookup._selectivity;
-        if (selectivity && typeof selectivity.setValue === 'function') {
-          try {
-            selectivity.setValue(Array.isArray(savedValue) ? options : options[0], { triggerChange: false });
-          } catch (_) {
-            selectivity.setValue(savedValue, { triggerChange: false });
-          }
+      .then(() => {
+        if (resolved && typeof selectivity.setValue === 'function') {
+          const hydratedValue = Array.isArray(savedValue)
+            ? savedValue.map((id) => resolvedEntries.get(id) || id)
+            : resolvedEntries.get(savedValue) || savedValue;
+          selectivity.setValue(hydratedValue, { triggerChange: false });
         }
       });
   },
 
-  _resolveLookupOption(lookup, savedValue) {
-    const savedId = this._lookupOptionValue(lookup, savedValue);
-    if (savedValue && typeof savedValue === 'object' && this._lookupOptionLabel(savedValue)) {
-      return Promise.resolve(this._toLookupSelection(savedValue, savedId));
+  _queryDirectorySuggestionEntry(suggestion, id) {
+    const resource = this.$.directoryEntry;
+    if (!resource || !suggestion?.directoryName) {
+      return Promise.resolve(null);
     }
-    const selectivityElement = lookup.$ && lookup.$.s2 ? lookup.$.s2 : lookup;
-    const selectivity = selectivityElement._selectivity;
-    const optionSources = [lookup.options, lookup.data, selectivityElement.data, selectivity && selectivity.items];
-    const option = optionSources.reduce(
-      (match, options) => match || this._findLookupOption(lookup, savedId, options),
-      null,
-    );
-    if (option) {
-      return Promise.resolve(this._toLookupSelection(option, savedId));
-    }
-
-    if (typeof selectivityElement._query !== 'function') {
-      return Promise.resolve(this._toLookupSelection(null, savedId));
-    }
-    return new Promise((resolve) => {
-      let timeout;
-      let resolved = false;
-      const finish = (result) => {
-        if (!resolved) {
-          resolved = true;
-          clearTimeout(timeout);
-          resolve(this._toLookupSelection(result, savedId));
+    resource.path = `/directory/${encodeURIComponent(suggestion.directoryName)}/${encodeURIComponent(String(id))}`;
+    resource.headers = {
+      'fetch-directoryEntry': 'parent',
+      'translate-directoryEntry': 'label',
+    };
+    return resource
+      .get()
+      .then((entry) => {
+        if (!entry) {
+          return null;
         }
-      };
-      timeout = setTimeout(() => finish(null), 3000);
-      try {
-        selectivityElement._query({
-          term: String(savedId),
-          callback: (response) => finish(this._findLookupOption(lookup, savedId, response && response.results)),
-          error: () => finish(null),
-        });
-      } catch (_) {
-        finish(null);
-      }
-    });
-  },
-
-  _findLookupOption(lookup, savedValue, options) {
-    return this._flattenLookupOptions(options).find((option) => this._lookupOptionValue(lookup, option) === savedValue);
-  },
-
-  _flattenLookupOptions(options) {
-    const flattened = [];
-    const queue = Array.isArray(options)
-      ? options.slice()
-      : options && typeof options !== 'string' && typeof options[Symbol.iterator] === 'function'
-        ? Array.from(options)
-        : options
-          ? [options]
-          : [];
-    while (queue.length) {
-      const option = queue.shift();
-      if (!option) {
-        continue;
-      }
-      flattened.push(option);
-      if (Array.isArray(option.children)) {
-        queue.push(...option.children);
-      }
-    }
-    return flattened;
-  },
-
-  _lookupOptionValue(lookup, option) {
-    if (option === null || option === undefined || typeof option !== 'object') {
-      return option;
-    }
-    if (Object.prototype.hasOwnProperty.call(option, 'value')) {
-      return option.value;
-    }
-    const item = option.item || option;
-    if (Object.prototype.hasOwnProperty.call(item, 'value')) {
-      return item.value;
-    }
-    const idFunction = lookup.idFunction || (lookup.$ && lookup.$.s2 && lookup.$.s2.idFunction);
-    if (typeof idFunction === 'function') {
-      try {
-        const value = idFunction(item);
-        if (value !== item) {
-          return value;
-        }
-      } catch (_) {
-        // Fall through to the standard option identifiers.
-      }
-    }
-    return item.computedId ?? item.uid ?? item.id ?? option.computedId ?? option.uid ?? option.id;
-  },
-
-  _lookupOptionLabel(option) {
-    const item = option && typeof option === 'object' ? option.item || option : null;
-    return item && (item.label || item.absoluteLabel || item.displayLabel || item.title || item.text);
-  },
-
-  _toLookupSelection(option, savedValue) {
-    const item = option && typeof option === 'object' ? option.item || option : null;
-    const label = this._lookupOptionLabel(option) || String(savedValue);
-    return Object.assign({}, item, {
-      id: savedValue,
-      value: savedValue,
-      displayLabel: label,
-      text: label,
-    });
+        const properties = entry.properties || {};
+        const formattedLabel =
+          typeof suggestion.formatDirectory === 'function'
+            ? suggestion.formatDirectory(entry, suggestion.separator)
+            : undefined;
+        return {
+          ...entry,
+          id: entry.id || properties.id || String(id),
+          displayLabel: entry.displayLabel || entry.absoluteLabel || formattedLabel || properties.label || String(id),
+        };
+      })
+      .catch(() => null)
+      .then((entry) => entry || null);
   },
 
   _resultsElementChanged(results, oldResults) {
@@ -1292,10 +1229,10 @@ Polymer({
       (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
         this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
         // XXX rely on debouncer to update the results request with the saved search params
-        this._fetch(this.results).then(() => this._scheduleLookupLabelResolution());
+        return this._fetch(this.results).then(() => this._scheduleDirectorySuggestionRehydration());
       });
     if (this.results) {
-      load();
+      return load();
     } else {
       this._loadSavedSearchListener = () => {
         if (this.results) {
@@ -1305,6 +1242,7 @@ Polymer({
       };
       this.addEventListener('results-changed', this._loadSavedSearchListener);
     }
+    return undefined;
   },
 
   // To fix NXP-27429 so action buttons can be displayed on mobile browsers

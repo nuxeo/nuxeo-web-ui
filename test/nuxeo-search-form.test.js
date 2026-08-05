@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import { fixture, html, flush } from '@nuxeo/testing-helpers';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-directory-suggestion.js';
 import '../elements/search/nuxeo-search-form.js';
 
 suite('nuxeo-search-form', () => {
@@ -70,7 +71,7 @@ suite('nuxeo-search-form', () => {
       },
     });
     sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
-    const scheduleSpy = sinon.spy(searchForm, '_scheduleLookupLabelResolution');
+    const scheduleStub = sinon.stub(searchForm, '_scheduleDirectorySuggestionRehydration').resolves();
 
     searchForm._selectedSearchChanged({ id: 'two' });
 
@@ -78,155 +79,10 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.params).to.deep.equal({ ecm_fulltext: '*world*' });
     expect(searchForm.searchTerm).to.equal('world');
     expect(mockForm.searchTerm).to.equal('world');
-    expect(scheduleSpy).to.have.been.called;
+    expect(scheduleStub).to.have.been.called;
     searchForm._mutateParams.restore();
-    scheduleSpy.restore();
+    scheduleStub.restore();
     delete searchForm.form;
-  });
-
-  test('resolves a single saved lookup value from value and label options', async () => {
-    const setValue = sinon.spy();
-    const lookup = {
-      value: 'id_civil',
-      data: [{ value: 'id_civil', label: 'Civil' }],
-      _selectivity: { setValue },
-    };
-
-    await searchForm._resolveLookupLabel(lookup);
-
-    expect(setValue).to.have.been.calledOnceWithExactly(
-      {
-        value: 'id_civil',
-        label: 'Civil',
-        id: 'id_civil',
-        displayLabel: 'Civil',
-        text: 'Civil',
-      },
-      { triggerChange: false },
-    );
-    expect(lookup.value).to.equal('id_civil');
-  });
-
-  test('resolves multiple saved lookup values and falls back to a missing id', async () => {
-    const setValue = sinon.spy();
-    const lookup = {
-      value: ['id_residential', 'missing_id'],
-      options: [{ value: 'id_residential', label: 'Residential' }],
-      _selectivity: { setValue },
-    };
-
-    await searchForm._resolveLookupLabel(lookup);
-
-    expect(setValue).to.have.been.calledOnce;
-    expect(setValue.firstCall.args[0]).to.deep.equal([
-      {
-        value: 'id_residential',
-        label: 'Residential',
-        id: 'id_residential',
-        displayLabel: 'Residential',
-        text: 'Residential',
-      },
-      {
-        id: 'missing_id',
-        value: 'missing_id',
-        displayLabel: 'missing_id',
-        text: 'missing_id',
-      },
-    ]);
-    expect(lookup.value).to.deep.equal(['id_residential', 'missing_id']);
-  });
-
-  test('resolves multi-select lookup queries sequentially', async () => {
-    const setValue = sinon.spy();
-    let pendingQuery = false;
-    const lookup = {
-      value: ['id_civil', 'id_residential'],
-      _selectivity: { setValue },
-      _query({ term, callback }) {
-        expect(pendingQuery).to.be.false;
-        pendingQuery = true;
-        Promise.resolve().then(() => {
-          pendingQuery = false;
-          callback({ results: [{ value: term, label: `${term} label` }] });
-        });
-      },
-    };
-
-    await searchForm._resolveLookupLabel(lookup);
-
-    expect(setValue.firstCall.args[0].map((option) => option.id)).to.deep.equal(['id_civil', 'id_residential']);
-  });
-
-  test('resolves a saved lookup value from loaded selectivity options', async () => {
-    const setValue = sinon.spy();
-    const lookup = {
-      value: 'id_civil',
-      _selectivity: {
-        items: [{ id: 'id_civil', text: 'Civil', item: { value: 'id_civil', label: 'Civil' } }],
-        setValue,
-      },
-    };
-
-    await searchForm._resolveLookupLabel(lookup);
-
-    expect(setValue.firstCall.args[0]).to.deep.equal({
-      value: 'id_civil',
-      label: 'Civil',
-      id: 'id_civil',
-      displayLabel: 'Civil',
-      text: 'Civil',
-    });
-    expect(lookup.value).to.equal('id_civil');
-  });
-
-  test('resolves a saved directory value from the suggestion results', async () => {
-    const setValue = sinon.spy();
-    const lookup = {
-      value: 'id_civil',
-      idFunction: (option) => option.id,
-      $: {
-        s2: {
-          _query({ callback }) {
-            callback({ results: [{ id: 'id_civil', item: { id: 'id_civil', displayLabel: 'Civil' } }] });
-          },
-          _selectivity: { setValue },
-        },
-      },
-    };
-
-    await searchForm._resolveLookupLabel(lookup);
-
-    expect(setValue).to.have.been.calledOnceWithExactly(
-      {
-        id: 'id_civil',
-        displayLabel: 'Civil',
-        value: 'id_civil',
-        text: 'Civil',
-      },
-      { triggerChange: false },
-    );
-    expect(lookup.value).to.equal('id_civil');
-  });
-
-  test('preserves an already labeled saved lookup object', async () => {
-    const setValue = sinon.spy();
-    const lookup = {
-      value: { id: 'id_civil', displayLabel: 'Civil' },
-      _selectivity: { setValue },
-    };
-
-    await searchForm._resolveLookupLabel(lookup);
-
-    expect(setValue).to.have.been.calledOnceWithExactly(
-      {
-        id: 'id_civil',
-        displayLabel: 'Civil',
-        value: 'id_civil',
-        text: 'Civil',
-      },
-      { triggerChange: false },
-    );
-    expect(lookup.value).to.deep.equal({ id: 'id_civil', displayLabel: 'Civil' });
   });
 
   test('resets selected index when search id cannot be found', () => {
@@ -369,6 +225,7 @@ suite('nuxeo-search-form', () => {
 
   test('selectedSearchIdxChanged populates params for known search', () => {
     const navigateSpy = sinon.spy(searchForm, '_navigateToResults');
+    const scheduleStub = sinon.stub(searchForm, '_scheduleDirectorySuggestionRehydration').resolves();
     sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
     searchForm._searches = [{ id: 'one', title: 'One', text: 'One', params: { ecm_fulltext: '*a*' } }];
     searchForm.selectedSearchIdx = 1;
@@ -382,369 +239,296 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.selectedSearch.id).to.equal('one');
     expect(searchForm.params).to.deep.equal({ ecm_fulltext: '*a*' });
     expect(navigateSpy).to.have.been.calledOnce;
+    expect(scheduleStub).to.have.been.called;
     expect(searchForm.dirty).to.be.false;
 
     searchForm._mutateParams.restore();
     navigateSpy.restore();
+    scheduleStub.restore();
   });
 
-  test('rehydrateDirectorySuggestionLabels reads suggestions from the layout shadow root', async () => {
-    const suggestion = { id: 'directory-suggestion' };
-    Object.defineProperty(searchForm, 'form', {
-      configurable: true,
-      get() {
-        return {
-          querySelectorAll: sinon.stub().returns([]),
-          shadowRoot: {
-            querySelectorAll: sinon.stub().withArgs('nuxeo-directory-suggestion').returns([suggestion]),
+  suite('saved directory labels', () => {
+    const suggestionWith = (value, overrides = {}) => {
+      return {
+        value,
+        directoryName: 'building_picture_type',
+        dbl10n: false,
+        _selectionFormatter: sinon.spy(),
+        $: {
+          s2: {
+            _selectivity: { setValue: sinon.spy() },
+            $: {
+              op: {
+                op: 'Directory.SuggestEntries',
+                params: { directoryName: 'building_picture_type' },
+                execute: sinon.stub().resolves({ id: 'id_civil', displayLabel: 'label_Civil' }),
+              },
+            },
           },
-        };
+        },
+        ...overrides,
+      };
+    };
+
+    const savedSearch = {
+      id: 'saved-search',
+      title: 'save1',
+      text: 'save1',
+      displaytext: 'save1',
+      params: {
+        'PP_BUILDING_PICTURES_pp:building_picture_type': 'id_civil',
+        'PP_BUILDING_PICTURES_pp:building_picture_activities': 'id_residential',
       },
-    });
-    const rehydrateSpy = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabel').resolves();
+    };
 
-    await searchForm._rehydrateDirectorySuggestionLabels();
+    test('coalesces requests until rehydration finishes', async () => {
+      let finish;
+      const pending = new Promise((resolve) => {
+        finish = resolve;
+      });
+      const rehydrateStub = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabels').returns(pending);
 
-    expect(rehydrateSpy).to.have.been.calledOnceWithExactly(suggestion);
+      const first = searchForm._scheduleDirectorySuggestionRehydration();
+      await Promise.resolve();
+      const second = searchForm._scheduleDirectorySuggestionRehydration();
 
-    rehydrateSpy.restore();
-    delete searchForm.form;
-  });
+      expect(first).to.equal(second);
+      expect(rehydrateStub).to.have.been.calledOnce;
 
-  test('scheduleDirectorySuggestionRehydration coalesces repeated calls', async () => {
-    const rehydrateSpy = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabels').resolves();
+      finish();
+      await first;
+      await searchForm._scheduleDirectorySuggestionRehydration();
 
-    searchForm._scheduleDirectorySuggestionRehydration();
-    searchForm._scheduleDirectorySuggestionRehydration();
-    await Promise.resolve();
-
-    expect(rehydrateSpy).to.have.been.calledOnce;
-
-    rehydrateSpy.restore();
-  });
-
-  test('rehydrateDirectorySuggestionLabels resolves without form or suggestions', async () => {
-    const rehydrateSpy = sinon.spy(searchForm, '_rehydrateDirectorySuggestionLabel');
-    Object.defineProperty(searchForm, 'form', {
-      configurable: true,
-      get() {
-        return null;
-      },
-    });
-
-    await searchForm._rehydrateDirectorySuggestionLabels();
-
-    expect(rehydrateSpy).to.not.have.been.called;
-
-    rehydrateSpy.restore();
-    delete searchForm.form;
-  });
-
-  test('rehydrateDirectorySuggestionLabels resolves when no suggestions are found', async () => {
-    const rehydrateSpy = sinon.spy(searchForm, '_rehydrateDirectorySuggestionLabel');
-    Object.defineProperty(searchForm, 'form', {
-      configurable: true,
-      get() {
-        return {
-          querySelectorAll: sinon.stub().returns([]),
-        };
-      },
+      expect(rehydrateStub).to.have.been.calledTwice;
+      rehydrateStub.restore();
     });
 
-    await searchForm._rehydrateDirectorySuggestionLabels();
+    test('handles missing forms and layout roots without query support', async () => {
+      const rehydrateSpy = sinon.spy(searchForm, '_rehydrateDirectorySuggestionLabel');
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return null;
+        },
+      });
 
-    expect(rehydrateSpy).to.not.have.been.called;
+      await searchForm._rehydrateDirectorySuggestionLabels();
+      expect(rehydrateSpy).to.not.have.been.called;
 
-    rehydrateSpy.restore();
-    delete searchForm.form;
-  });
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return {};
+        },
+      });
+      await searchForm._rehydrateDirectorySuggestionLabels();
 
-  test('rehydrateDirectorySuggestionLabel returns early when suggestion has no Select2 binding', async () => {
-    const querySpy = sinon.spy(searchForm, '_queryDirectorySuggestionEntry');
+      expect(rehydrateSpy).to.not.have.been.called;
+      rehydrateSpy.restore();
+      delete searchForm.form;
+    });
 
-    await searchForm._rehydrateDirectorySuggestionLabel({});
+    test('finds and deduplicates suggestions in light and shadow DOM', async () => {
+      const suggestion = suggestionWith('id_civil');
+      const querySelectorAll = sinon.stub().returns([suggestion]);
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return {
+            querySelectorAll,
+            shadowRoot: { querySelectorAll },
+          };
+        },
+      });
+      const rehydrateStub = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabel').resolves();
 
-    expect(querySpy).to.not.have.been.called;
+      await searchForm._rehydrateDirectorySuggestionLabels();
 
-    querySpy.restore();
-  });
+      expect(querySelectorAll).to.have.been.calledTwice;
+      expect(rehydrateStub).to.have.been.calledOnceWithExactly(suggestion);
+      rehydrateStub.restore();
+      delete searchForm.form;
+    });
 
-  test('rehydrateDirectorySuggestionLabel returns early when suggestion has no value', async () => {
-    const querySpy = sinon.spy(searchForm, '_queryDirectorySuggestionEntry');
-    const suggestion = {
-      value: '',
-      $: {
-        s2: {
-          _selectivity: {
-            setValue: sinon.spy(),
+    test('rehydrates scalar and multiple values sequentially', async () => {
+      const scalar = suggestionWith('id_civil');
+      const multiple = suggestionWith(['id_residential', null, undefined, '', 'id_parking']);
+      let queryPending = false;
+      const queryStub = sinon.stub(searchForm, '_queryDirectorySuggestionEntry').callsFake((_suggestion, id) => {
+        expect(queryPending).to.be.false;
+        queryPending = true;
+        const entry = id === 'id_parking' ? null : { id, displayLabel: `${id}_label` };
+        return Promise.resolve(entry).then((result) => {
+          queryPending = false;
+          return result;
+        });
+      });
+
+      await searchForm._rehydrateDirectorySuggestionLabel(scalar);
+      await searchForm._rehydrateDirectorySuggestionLabel(multiple);
+
+      expect(queryStub.callCount).to.equal(3);
+      expect(scalar._selectionFormatter).to.have.been.calledOnceWithExactly({
+        id: 'id_civil',
+        displayLabel: 'id_civil_label',
+      });
+      expect(multiple._selectionFormatter).to.have.been.calledOnceWithExactly({
+        id: 'id_residential',
+        displayLabel: 'id_residential_label',
+      });
+      expect(scalar.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly(
+        { id: 'id_civil', displayLabel: 'id_civil_label' },
+        { triggerChange: false },
+      );
+      expect(multiple.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly(
+        [{ id: 'id_residential', displayLabel: 'id_residential_label' }, null, undefined, '', 'id_parking'],
+        { triggerChange: false },
+      );
+      queryStub.restore();
+    });
+
+    test('skips unusable values, missing formatters, and missing setters', async () => {
+      const querySpy = sinon.spy(searchForm, '_queryDirectorySuggestionEntry');
+      const noSelectivity = suggestionWith('id_civil', { $: { s2: {} } });
+
+      await searchForm._rehydrateDirectorySuggestionLabel(null);
+      await searchForm._rehydrateDirectorySuggestionLabel(noSelectivity);
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(null));
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(undefined));
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(''));
+
+      expect(querySpy).to.not.have.been.called;
+      querySpy.restore();
+
+      const queryStub = sinon
+        .stub(searchForm, '_queryDirectorySuggestionEntry')
+        .resolves({ id: 'id_civil', displayLabel: 'label_Civil' });
+      const noFormatter = suggestionWith('id_civil', { _selectionFormatter: null });
+      const noSetter = suggestionWith('id_civil');
+      noSetter.$.s2._selectivity = {};
+
+      await searchForm._rehydrateDirectorySuggestionLabel(noFormatter);
+      await searchForm._rehydrateDirectorySuggestionLabel(noSetter);
+
+      expect(noFormatter.$.s2._selectivity.setValue).to.not.have.been.called;
+      expect(queryStub).to.have.been.calledTwice;
+      queryStub.restore();
+    });
+
+    test('queries directory entries through the REST resource', async () => {
+      const suggestion = suggestionWith('id_civil');
+      const response = { id: 'id_civil', displayLabel: 'label_Civil' };
+      const resource = {
+        get: sinon.stub().resolves(response),
+        headers: null,
+        path: null,
+      };
+      searchForm.$.directoryEntry = resource;
+
+      const entry = await searchForm._queryDirectorySuggestionEntry(suggestion, 'id_civil');
+
+      expect(entry).to.deep.equal(response);
+      expect(resource.path).to.equal('/directory/building_picture_type/id_civil');
+      expect(resource.headers).to.deep.equal({
+        'fetch-directoryEntry': 'parent',
+        'translate-directoryEntry': 'label',
+      });
+      expect(resource.get).to.have.been.calledOnce;
+    });
+
+    test('returns null for missing, empty, and failed directory operations', async () => {
+      expect(await searchForm._queryDirectorySuggestionEntry(null, 'id_civil')).to.be.null;
+      const resource = {
+        get: sinon.stub(),
+        headers: null,
+        path: null,
+      };
+      searchForm.$.directoryEntry = resource;
+      const emptySuggestion = suggestionWith('id_civil');
+      resource.get.onFirstCall().resolves(null);
+      expect(await searchForm._queryDirectorySuggestionEntry(emptySuggestion, 'id_civil')).to.be.null;
+
+      const failedSuggestion = suggestionWith('id_civil');
+      resource.get.onSecondCall().rejects(new Error('failed'));
+      expect(await searchForm._queryDirectorySuggestionEntry(failedSuggestion, 'id_civil')).to.be.null;
+    });
+
+    test('renders labels for saved scalar and hierarchical directory values', async () => {
+      const typeSuggestion = await fixture(
+        html`<nuxeo-directory-suggestion directory-name="building_picture_type"></nuxeo-directory-suggestion>`,
+      );
+      const activitySuggestion = await fixture(
+        html`<nuxeo-directory-suggestion directory-name="building_picture_activities"></nuxeo-directory-suggestion>`,
+      );
+      typeSuggestion.value = 'id_civil';
+      activitySuggestion.value = 'id_residential/id_house';
+      await flush();
+
+      const paths = [];
+      const entries = {
+        '/directory/building_picture_type/id_civil': {
+          'entity-type': 'directoryEntry',
+          directoryName: 'building_picture_type',
+          properties: { id: 'id_civil', label: 'Civil' },
+        },
+        '/directory/building_picture_activities/id_residential%2Fid_house': {
+          'entity-type': 'directoryEntry',
+          directoryName: 'building_picture_activities',
+          properties: {
+            id: 'id_house',
+            label: 'House',
+            parent: {
+              'entity-type': 'directoryEntry',
+              directoryName: 'building_picture_activities',
+              properties: { id: 'id_residential', label: 'Residential' },
+            },
           },
         },
-      },
-    };
+      };
+      searchForm.$.directoryEntry = {
+        get: sinon.stub().callsFake(() => {
+          paths.push(searchForm.$.directoryEntry.path);
+          return Promise.resolve(entries[searchForm.$.directoryEntry.path]);
+        }),
+        headers: null,
+        path: null,
+      };
 
-    await searchForm._rehydrateDirectorySuggestionLabel(suggestion);
+      await searchForm._rehydrateDirectorySuggestionLabel(typeSuggestion);
+      await searchForm._rehydrateDirectorySuggestionLabel(activitySuggestion);
+      await flush();
 
-    expect(querySpy).to.not.have.been.called;
+      expect(typeSuggestion.$.s2.$.input.textContent.trim()).to.equal('Civil');
+      expect(activitySuggestion.$.s2.$.input.textContent.trim()).to.equal('Residential/House');
+      expect(paths).to.deep.equal(Object.keys(entries));
+    });
 
-    querySpy.restore();
-  });
+    test('rehydrates after direct and deferred saved-search loading', async () => {
+      const rehydrateStub = sinon.stub(searchForm, '_scheduleDirectorySuggestionRehydration').resolves();
+      const fetchStub = sinon.stub(searchForm, '_fetch').resolves();
+      searchForm._searches = [savedSearch];
+      searchForm.results = {};
 
-  test('rehydrateDirectorySuggestionLabel handles scalar suggestion values', async () => {
-    const setValueSpy = sinon.spy();
-    const selectionFormatterSpy = sinon.spy();
-    const suggestion = {
-      value: 'id_1',
-      _selectionFormatter: selectionFormatterSpy,
-      $: {
-        s2: {
-          _selectivity: {
-            setValue: setValueSpy,
-          },
-        },
-      },
-    };
-    const queryStub = sinon.stub(searchForm, '_queryDirectorySuggestionEntry').resolves({ id: 'id_1' });
+      await searchForm._loadSavedSearch('saved-search');
 
-    await searchForm._rehydrateDirectorySuggestionLabel(suggestion);
+      expect(fetchStub).to.have.been.calledOnceWithExactly(searchForm.results);
+      expect(rehydrateStub).to.have.been.called;
 
-    expect(queryStub).to.have.been.calledOnceWithExactly(suggestion, 'id_1');
-    expect(selectionFormatterSpy).to.have.been.calledOnceWithExactly({ id: 'id_1' });
-    expect(setValueSpy).to.have.been.calledOnceWithExactly('id_1', { triggerChange: false });
+      fetchStub.resetHistory();
+      rehydrateStub.resetHistory();
+      searchForm.results = null;
 
-    queryStub.restore();
-  });
+      expect(searchForm._loadSavedSearch('saved-search')).to.be.undefined;
 
-  test('rehydrateDirectorySuggestionLabel skips updates when queries do not resolve entries', async () => {
-    const selectionFormatterSpy = sinon.spy();
-    const setValueSpy = sinon.spy();
-    const suggestion = {
-      value: ['missing-id'],
-      _selectionFormatter: selectionFormatterSpy,
-      $: {
-        s2: {
-          _selectivity: {
-            setValue: setValueSpy,
-          },
-        },
-      },
-    };
-    sinon.stub(searchForm, '_queryDirectorySuggestionEntry').resolves(null);
+      searchForm.results = {};
+      await Promise.resolve();
+      await Promise.resolve();
 
-    await searchForm._rehydrateDirectorySuggestionLabel(suggestion);
-
-    expect(selectionFormatterSpy).to.not.have.been.called;
-    expect(setValueSpy).to.not.have.been.called;
-
-    searchForm._queryDirectorySuggestionEntry.restore();
-  });
-
-  test('rehydrateDirectorySuggestionLabel tolerates suggestions without selectivity binding', async () => {
-    const selectionFormatterSpy = sinon.spy();
-    const queryStub = sinon.stub(searchForm, '_queryDirectorySuggestionEntry').resolves({ id: 'id_1' });
-    const suggestion = {
-      value: ['id_1'],
-      _selectionFormatter: selectionFormatterSpy,
-      $: {
-        s2: {},
-      },
-    };
-
-    await searchForm._rehydrateDirectorySuggestionLabel(suggestion);
-
-    expect(queryStub).to.have.been.calledOnceWithExactly(suggestion, 'id_1');
-    expect(selectionFormatterSpy).to.have.been.calledOnceWithExactly({ id: 'id_1' });
-
-    queryStub.restore();
-  });
-
-  test('rehydrateDirectorySuggestionLabel skips setValue when selectivity has no setter', async () => {
-    const selectionFormatterSpy = sinon.spy();
-    const suggestion = {
-      value: ['id_1'],
-      _selectionFormatter: selectionFormatterSpy,
-      $: {
-        s2: {
-          _selectivity: {},
-        },
-      },
-    };
-    const queryStub = sinon.stub(searchForm, '_queryDirectorySuggestionEntry').resolves({ id: 'id_1' });
-
-    await searchForm._rehydrateDirectorySuggestionLabel(suggestion);
-
-    expect(queryStub).to.have.been.calledOnceWithExactly(suggestion, 'id_1');
-    expect(selectionFormatterSpy).to.have.been.calledOnceWithExactly({ id: 'id_1' });
-
-    queryStub.restore();
-  });
-
-  test('queryDirectorySuggestionEntry resolves entry via Directory.GetEntry operation', async () => {
-    const expected = { id: 'id_1', displayLabel: 'label_1' };
-    const opStub = {
-      op: '',
-      params: {},
-      execute: sinon.stub().resolves(expected),
-    };
-    const suggestion = {
-      directoryName: 'myDirectory',
-      dbl10n: false,
-      $: {
-        s2: {
-          $: {
-            op: opStub,
-          },
-        },
-      },
-    };
-
-    const result = await searchForm._queryDirectorySuggestionEntry(suggestion, 'id_1');
-
-    expect(result).to.equal(expected);
-  });
-
-  test('queryDirectorySuggestionEntry returns null when query support is missing', async () => {
-    const suggestion = {};
-
-    const result = await searchForm._queryDirectorySuggestionEntry(suggestion, 'id_1');
-
-    expect(result).to.be.null;
-  });
-
-  test('queryDirectorySuggestionEntry returns null on query error', async () => {
-    const clearTimeoutSpy = sinon.spy(globalThis, 'clearTimeout');
-    const opStub = {
-      op: '',
-      params: {},
-      execute: sinon.stub().rejects(new Error('query failed')),
-    };
-    const suggestion = {
-      directoryName: 'myDirectory',
-      $: {
-        s2: {
-          $: {
-            op: opStub,
-          },
-        },
-      },
-    };
-
-    const result = await searchForm._queryDirectorySuggestionEntry(suggestion, 'id_1');
-
-    expect(result).to.be.null;
-    expect(clearTimeoutSpy).to.have.been.calledOnce;
-
-    clearTimeoutSpy.restore();
-  });
-
-  test('flattenSelectivityResults flattens nested child results', () => {
-    const results = [{ id: 'parent', children: [{ id: 'child' }] }];
-
-    expect(searchForm._flattenSelectivityResults(results)).to.deep.equal([
-      { id: 'parent', children: [{ id: 'child' }] },
-      { id: 'child' },
-    ]);
-  });
-
-  test('flattenSelectivityResults skips falsy items', () => {
-    const results = [null, { id: 'parent', children: [null, { id: 'child' }] }];
-
-    expect(searchForm._flattenSelectivityResults(results)).to.deep.equal([
-      { id: 'parent', children: [null, { id: 'child' }] },
-      { id: 'child' },
-    ]);
-  });
-
-  test('flattenSelectivityResults handles multiple nested child levels', () => {
-    const results = [{ id: 'parent', children: [{ id: 'child', children: [{ id: 'grandchild' }] }] }];
-
-    expect(searchForm._flattenSelectivityResults(results)).to.deep.equal([
-      { id: 'parent', children: [{ id: 'child', children: [{ id: 'grandchild' }] }] },
-      { id: 'child', children: [{ id: 'grandchild' }] },
-      { id: 'grandchild' },
-    ]);
-  });
-
-  test('flattenSelectivityResults returns empty array for non-array input', () => {
-    expect(searchForm._flattenSelectivityResults(null)).to.deep.equal([]);
-  });
-
-  test('rehydrateDirectorySuggestionLabel refreshes cached labels and re-applies selectivity value', async () => {
-    const setValueSpy = sinon.spy();
-    const selectionFormatterSpy = sinon.spy();
-    const suggestion = {
-      value: ['id_1', 'id_2'],
-      idFunction: (entry) => entry.id,
-      _selectionFormatter: selectionFormatterSpy,
-      $: {
-        s2: {
-          _selectivity: {
-            setValue: setValueSpy,
-          },
-        },
-      },
-    };
-    const queryStub = sinon.stub(searchForm, '_queryDirectorySuggestionEntry');
-    queryStub.onCall(0).resolves({ id: 'id_1', displayLabel: 'label_1' });
-    queryStub.onCall(1).resolves({ id: 'id_2', displayLabel: 'label_2' });
-
-    await searchForm._rehydrateDirectorySuggestionLabel(suggestion);
-
-    expect(queryStub).to.have.been.calledTwice;
-    expect(selectionFormatterSpy).to.have.been.calledTwice;
-    expect(setValueSpy).to.have.been.calledOnce;
-    expect(setValueSpy.firstCall.args[0]).to.deep.equal(['id_1', 'id_2']);
-    expect(setValueSpy.firstCall.args[1]).to.deep.equal({ triggerChange: false });
-
-    queryStub.restore();
-  });
-
-  test('rehydrateDirectorySuggestionLabel tolerates suggestions without selectionFormatter', async () => {
-    const setValueSpy = sinon.spy();
-    const suggestion = {
-      value: ['id_1'],
-      $: {
-        s2: {
-          _selectivity: {
-            setValue: setValueSpy,
-          },
-        },
-      },
-    };
-    const queryStub = sinon.stub(searchForm, '_queryDirectorySuggestionEntry').resolves({ id: 'id_1' });
-
-    await searchForm._rehydrateDirectorySuggestionLabel(suggestion);
-
-    expect(queryStub).to.have.been.calledOnce;
-    expect(setValueSpy).to.have.been.calledOnceWithExactly(['id_1'], { triggerChange: false });
-
-    queryStub.restore();
-  });
-
-  test('queryDirectorySuggestionEntry clears timeout and resolves entry on successful operation', async () => {
-    const clearTimeoutSpy = sinon.spy(globalThis, 'clearTimeout');
-    const expected = { id: 'id_1', displayLabel: 'label_1' };
-    const opStub = {
-      op: 'original-op',
-      params: { original: true },
-      execute: sinon.stub().resolves(expected),
-    };
-    const suggestion = {
-      directoryName: 'myDirectory',
-      $: {
-        s2: {
-          $: {
-            op: opStub,
-          },
-        },
-      },
-    };
-
-    const result = await searchForm._queryDirectorySuggestionEntry(suggestion, 'id_1');
-
-    expect(result).to.equal(expected);
-    expect(clearTimeoutSpy).to.have.been.calledOnce;
-
-    clearTimeoutSpy.restore();
+      expect(fetchStub).to.have.been.calledOnceWithExactly(searchForm.results);
+      expect(rehydrateStub).to.have.been.called;
+      fetchStub.restore();
+      rehydrateStub.restore();
+    });
   });
 
   test('clear resets state and triggers search in manual mode', () => {
