@@ -93,7 +93,7 @@ Polymer({
       }
 
       #dropzone {
-        background-color: var(--hyland-csv-import-background, #f7f6f6);
+        background-color: var(--hyland-csv-import-background, rgba(0, 0, 0, 0.05));
         border: 2px dashed var(--divider-color);
         border-radius: 4px;
       }
