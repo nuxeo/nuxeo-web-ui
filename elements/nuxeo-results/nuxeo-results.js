@@ -336,14 +336,12 @@ Polymer({
       value: false,
     },
     /**
-     * If `true`, initializing a display mode does not fetch results, so no query is executed
-     * until a fetch is requested explicitly (e.g. by the enclosing search view's search button).
+     * If `true`, initializing a display mode does not fetch results, so loading the page executes
+     * no query. Only the deferred *initial* fetch is suppressed: any user action that asks for
+     * results — the enclosing search view's Search button, a sort change, the toolbar refresh or a
+     * quick filter toggle — fetches as usual and lifts the deferral for later display-mode changes.
      */
     deferInitialFetch: {
-      type: Boolean,
-      value: false,
-    },
-    _fetched: {
       type: Boolean,
       value: false,
     },
@@ -485,6 +483,11 @@ Polymer({
 
   listeners: {
     'settings-changed': '_updateActionContext',
+  },
+
+  created() {
+    // whether a fetch has already been requested, which lifts any `deferInitialFetch` suppression
+    this._fetched = false;
   },
 
   ready() {
