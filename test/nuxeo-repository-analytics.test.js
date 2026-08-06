@@ -78,4 +78,30 @@ suite('nuxeo-repository-analytics', () => {
       expect(window.getComputedStyle(chart).minWidth).to.equal('0px');
     });
   });
+
+  test('pie charts grow to fill the available card height', async () => {
+    el.setProperties({
+      downloads: [],
+      downloadedDocs: [],
+      totalCount: 0,
+      typeCount: [],
+      topCreators: [],
+      docsCreatedPerWeek: [],
+      docsModifiedPerWeek: [],
+      filesByMimeType: [],
+      visible: true,
+    });
+    await flush();
+
+    const pieCards = el.root.querySelectorAll('nuxeo-card.pie-card');
+    expect(pieCards).to.have.lengthOf(3);
+    pieCards.forEach((card) => {
+      expect(window.getComputedStyle(card).display).to.equal('flex');
+      expect(window.getComputedStyle(card).flexDirection).to.equal('column');
+
+      const chart = card.querySelector('chart-pie');
+      expect(window.getComputedStyle(chart).flexGrow).to.equal('1');
+      expect(chart.options.maintainAspectRatio).to.be.false;
+    });
+  });
 });

@@ -63,6 +63,11 @@ Polymer({
         text-align: center;
       }
 
+      .flex-layout nuxeo-card.pie-card {
+        display: flex;
+        flex-direction: column;
+      }
+
       .message {
         color: #666666;
       }
@@ -85,6 +90,10 @@ Polymer({
         min-width: 0;
         display: block;
         font-size: 0.8rem;
+      }
+
+      .pie-card chart-pie {
+        flex: 1 1 auto;
       }
 
       @media (max-width: 1024px) {
@@ -167,8 +176,13 @@ Polymer({
         >
         </nuxeo-repository-data>
 
-        <nuxeo-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
-          <chart-pie values="[[_values(typeCount)]]" labels="[[_labels(typeCount)]]"> </chart-pie>
+        <nuxeo-card class="pie-card" heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
+          <chart-pie
+            values="[[_values(typeCount)]]"
+            labels="[[_labels(typeCount)]]"
+            options='{ "maintainAspectRatio": false }'
+          >
+          </chart-pie>
         </nuxeo-card>
 
         <!-- Top 10 creators -->
@@ -182,8 +196,13 @@ Polymer({
         >
         </nuxeo-repository-data>
 
-        <nuxeo-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
-          <chart-pie values="[[_values(topCreators)]]" labels="[[_labels(topCreators)]]"> </chart-pie>
+        <nuxeo-card class="pie-card" heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
+          <chart-pie
+            values="[[_values(topCreators)]]"
+            labels="[[_labels(topCreators)]]"
+            options='{ "maintainAspectRatio": false }'
+          >
+          </chart-pie>
         </nuxeo-card>
 
         <!-- Documents created per week -->
@@ -236,8 +255,13 @@ Polymer({
         >
         </nuxeo-repository-data>
 
-        <nuxeo-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
-          <chart-pie values="[[_values(filesByMimeType)]]" labels="[[_types(filesByMimeType)]]"> </chart-pie>
+        <nuxeo-card class="pie-card" heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
+          <chart-pie
+            values="[[_values(filesByMimeType)]]"
+            labels="[[_types(filesByMimeType)]]"
+            options='{ "maintainAspectRatio": false }'
+          >
+          </chart-pie>
         </nuxeo-card>
       </div>
     </template>
