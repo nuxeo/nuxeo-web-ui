@@ -210,8 +210,10 @@ Then(/^I can see more than (\d+) search results$/, async function (minNumberOfRe
 });
 
 Then(/^I can see no search results$/, async function () {
-  await driver.pause(1000);
   const results = await this.ui.results;
+  // wait for the results area to render rather than sleeping: resolving the display mode requires
+  // the layout to be in place, so an empty count afterwards means no query ran
+  await results.waitForVisible();
   const displayMode = await results.displayMode;
   const output = await results.resultsCount(displayMode);
   if (output !== 0) {
@@ -292,6 +294,12 @@ Then(/^I can view my saved search "(.+)" on "(.+)"$/, async function (savedSearc
 
 When(/^I click the QuickSearch button$/, async function () {
   const button = await this.ui.searchButton;
+  await button.waitForVisible();
+  await button.click();
+});
+
+When(/^I click the nxql search button$/, async function () {
+  const button = await this.ui.administration.nxqlSearchButton;
   await button.waitForVisible();
   await button.click();
 });
