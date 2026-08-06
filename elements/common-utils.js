@@ -52,3 +52,16 @@ export function handleVerticalKeyNavigation(e, itemSelector) {
     });
   }
 }
+
+// ELEMENTS-1616: shared transparent 1x1 pixel used as the thumbnail fallback when a
+// (cross-origin) image request fails to load, so views degrade gracefully instead of
+// showing a broken-image icon. Kept in one place so the grid and list thumbnails stay
+// consistent with nuxeo-document-thumbnail.
+export const BLANK_THUMBNAIL_SRC =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAA' +
+  'C0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+// Swaps a failed thumbnail <img> for the transparent pixel above.
+export function applyThumbnailFallback(img) {
+  img.src = BLANK_THUMBNAIL_SRC;
+}

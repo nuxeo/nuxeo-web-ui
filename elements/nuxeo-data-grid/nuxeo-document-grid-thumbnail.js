@@ -23,6 +23,7 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
+import { applyThumbnailFallback } from '../common-utils.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -217,7 +218,7 @@ Polymer({
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
-        <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
+        <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
         <a
@@ -359,5 +360,11 @@ Polymer({
       this.removeAttribute('role');
       this.removeAttribute('aria-label');
     }
+  },
+
+  // ELEMENTS-1616: show a transparent pixel instead of a broken-image icon when a
+  // (cross-origin) thumbnail fails to load, matching nuxeo-document-thumbnail.
+  _onError(e) {
+    applyThumbnailFallback(e.target);
   },
 });

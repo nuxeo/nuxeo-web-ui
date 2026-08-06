@@ -74,5 +74,8 @@
 
     <!-- opt-in Hyland branding -->
     <property name="org.nuxeo.web.ui.branding.rebrand">${org.nuxeo.web.ui.branding.rebrand:=false}</property>
+
+    <!-- Client-side inactivity timeout (minutes) after which the session is ended and the user is sent to the timeout login page (login.jsp?nxtimeout=true); backed by nuxeo.conf session.timeout. Any value that is not a positive number (<= 0, or non-numeric such as NaN) disables the timer. -->
+    <property name="org.nuxeo.web.ui.session.timeout">${session.timeout:=60}</property>
   </extension>
 </component>

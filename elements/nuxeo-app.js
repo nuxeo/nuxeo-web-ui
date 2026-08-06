@@ -53,6 +53,7 @@ import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import { NuxeoAppDrawerResizeBehavior } from './behaviors/nuxeo-app-drawer-resize-behavior.js';
+import { NuxeoInactivityBehavior } from './behaviors/nuxeo-inactivity-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-task-page-provider.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-data-table/iron-data-table.js';
@@ -453,6 +454,11 @@ Polymer({
     </header>
     <nuxeo-connection id="nxcon" user="{{currentUser}}" url="{{url}}"></nuxeo-connection>
 
+    <!-- WEBUI-1987: lightweight authenticated request used to renew the server HTTP session while the
+         user is active (session.timeout is the server session timeout, which plain client activity would
+         not otherwise keep alive). -->
+    <nuxeo-resource id="keepAlive" path="me"></nuxeo-resource>
+
     <nuxeo-document id="doc" doc-id="[[docId]]" doc-path="[[docPath]]"></nuxeo-document>
 
     <nuxeo-sardine hidden></nuxeo-sardine>
@@ -676,7 +682,7 @@ Polymer({
   `,
 
   is: 'nuxeo-app',
-  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior, NuxeoAppDrawerResizeBehavior],
+  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior, NuxeoAppDrawerResizeBehavior, NuxeoInactivityBehavior],
   importMeta: import.meta,
   properties: {
     productName: {
@@ -892,6 +898,12 @@ Polymer({
 
     this.removeAttribute('unresolved');
 
+    // WEBUI-1987: wire the inactivity timer + 401->logout redirect once here (ready() always runs).
+    // attached() only re-arms after a real detach (see _inactivityNeedsRearm), so the initial
+    // ready()+attached() sequence does not issue a duplicate startup keep-alive or churn listeners.
+    this._setupInactivityTimer();
+    this._setupUnauthorizedRedirect();
+
     Performance.mark('nuxeo-app.ready');
     this.$.menu.addEventListener('keyup', (event) => {
       this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
@@ -1018,6 +1030,17 @@ Polymer({
     }
   },
 
+  attached() {
+    // WEBUI-1987: only re-arm after a real detach/re-attach cycle. ready() already did the initial
+    // wiring, so re-running setup here on the first attach would issue a redundant keep-alive request
+    // and churn the activity listeners for no benefit.
+    if (this._inactivityNeedsRearm) {
+      this._inactivityNeedsRearm = false;
+      this._setupInactivityTimer();
+      this._setupUnauthorizedRedirect();
+    }
+  },
+
   detached() {
     if (this._boundUpdateIsNarrow) {
       window.removeEventListener('resize', this._boundUpdateIsNarrow);
@@ -1027,6 +1050,9 @@ Polymer({
       this._homeMenuNav.home.removeEventListener('keydown', this._boundHomeShortcutKeydown);
       this._homeMenuNav.menu.removeEventListener('keydown', this._boundMenuEdgeKeydown);
     }
+    this._teardownInactivityTimer();
+    this._teardownUnauthorizedRedirect();
+    this._inactivityNeedsRearm = true; // re-arm from the next attached()
   },
 
   skipLinkEvent() {

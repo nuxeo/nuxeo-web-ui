@@ -25,6 +25,7 @@ import '@polymer/paper-fab/paper-fab.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import '../nuxeo-keys/nuxeo-keys.js';
+import { NuxeoCreateButtonCollisionBehavior } from '../behaviors/nuxeo-create-button-collision-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -65,6 +66,7 @@ Polymer({
         bottom: calc(32px + var(--nuxeo-app-bottom, 0));
         right: 32px;
         z-index: 10;
+        transition: transform 0.25s ease-in-out;
       }
 
       :host([dir='rtl']) #tray {
@@ -116,7 +118,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-create-button',
-  behaviors: [I18nBehavior],
+  behaviors: [I18nBehavior, NuxeoCreateButtonCollisionBehavior],
 
   properties: {
     parent: {
@@ -177,6 +179,8 @@ Polymer({
         this.set('subtypes', filteredSubtypes);
       }
     }
+    // A new parent brings new page content, which may render controls under the button.
+    this._scheduleSettleRechecks();
   },
 
   _canCreateIn(document) {
