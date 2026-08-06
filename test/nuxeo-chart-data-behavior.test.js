@@ -231,8 +231,9 @@ suite('ChartDataBehavior', () => {
       const chartWithResize = { resize: sinon.spy(), offsetWidth: 100, offsetHeight: 50 };
       const chartWithoutResize = {};
       const hiddenChart = { resize: sinon.spy(), offsetWidth: 0, offsetHeight: 0 };
+      const collapsedPieChart = { resize: sinon.spy(), offsetWidth: 100, offsetHeight: 0 };
       behavior.root = {
-        querySelectorAll: sinon.stub().returns([chartWithResize, chartWithoutResize, hiddenChart]),
+        querySelectorAll: sinon.stub().returns([chartWithResize, chartWithoutResize, hiddenChart, collapsedPieChart]),
       };
       behavior.async = (fn) => fn();
 
@@ -243,6 +244,7 @@ suite('ChartDataBehavior', () => {
       );
       expect(chartWithResize.resize).to.have.been.calledOnce;
       expect(hiddenChart.resize).to.not.have.been.called;
+      expect(collapsedPieChart.resize).to.have.been.calledOnce;
     });
 
     test('named event handlers invoke _resizeCharts with the correct trigger', () => {

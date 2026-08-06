@@ -128,11 +128,11 @@ export const ChartDataBehavior = {
           });
           return;
         }
-        if (chart.offsetWidth <= 0 || chart.offsetHeight <= 0) {
+        if (chart.offsetWidth <= 0) {
           this._logChartResizeDebug('resizeCharts.chartSkipped', {
             trigger,
             chartIndex,
-            reason: 'non-positive-dimensions',
+            reason: 'non-positive-width',
             tagName: chart.tagName,
             offsetWidth: chart.offsetWidth,
             offsetHeight: chart.offsetHeight,
