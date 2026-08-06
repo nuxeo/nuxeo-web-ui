@@ -2,11 +2,11 @@ import { config } from '@nuxeo/nuxeo-elements';
 import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { loadTheme } from './themes/loader.js';
-import { installGlobalFocusRing } from './themes/focus-ring.js';
+import { installGlobalFocusRing } from './themes/dark-theme-focus-ring.js';
 
 // Install the themeable keyboard-focus ring before any custom element attaches its shadow root,
 // so every root gets the rule from first paint. Dark themes make the ring visible; other themes
-// keep the native user-agent ring unchanged. See themes/focus-ring.js.
+// keep the native user-agent ring unchanged. See themes/dark-theme-focus-ring.js.
 installGlobalFocusRing();
 
 // RTL configuration setup

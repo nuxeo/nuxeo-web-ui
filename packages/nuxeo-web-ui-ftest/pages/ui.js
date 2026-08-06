@@ -18,6 +18,7 @@ import { refresh, url } from './helpers.js';
 export default class UI extends BasePage {
   async goHome() {
     const homeEle = await this.drawer.home;
+    await homeEle.waitForExist();
     await homeEle.waitForVisible();
     await homeEle.click();
   }

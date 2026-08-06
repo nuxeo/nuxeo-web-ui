@@ -64,7 +64,7 @@ const appSources = [
   'addons/**/elements/**/*.js',
   'themes/theme-config.js',
   'themes/loader.js',
-  'themes/focus-ring.js',
+  'themes/dark-theme-focus-ring.js',
 ];
 
 export default {
