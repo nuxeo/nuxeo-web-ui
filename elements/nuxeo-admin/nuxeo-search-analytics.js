@@ -67,6 +67,11 @@ Polymer({
         text-align: center;
       }
 
+      .flex-layout nuxeo-card.pie-card {
+        display: flex;
+        flex-direction: column;
+      }
+
       nuxeo-data-table {
         height: 450px;
       }
@@ -75,8 +80,13 @@ Polymer({
       chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
+        min-width: 0;
         display: block;
         font-size: 0.8rem;
+      }
+
+      .pie-card chart-pie {
+        flex: 1 1 auto;
       }
 
       @media (max-width: 1024px) {
@@ -106,8 +116,13 @@ Polymer({
         >
         </nuxeo-search-data>
 
-        <nuxeo-card heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]">
-          <chart-pie values="[[_values(callsPerProvider)]]" labels="[[_labels(callsPerProvider)]]"> </chart-pie>
+        <nuxeo-card class="pie-card" heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]">
+          <chart-pie
+            values="[[_values(callsPerProvider)]]"
+            labels="[[_labels(callsPerProvider)]]"
+            options='{ "maintainAspectRatio": false }'
+          >
+          </chart-pie>
         </nuxeo-card>
 
         <!-- Number of calls per hour -->
