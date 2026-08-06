@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { FOCUS_RULE, applyToRoot, installGlobalFocusRing } from '../themes/focus-ring.js';
+import { FOCUS_RULE, applyToRoot, installGlobalFocusRing } from '../themes/dark-theme-focus-ring.js';
 
 // Collects the CSS text present in a root, whether the rule was adopted as a constructable
 // stylesheet or injected as a <style> fallback, so assertions work on both engine paths.
