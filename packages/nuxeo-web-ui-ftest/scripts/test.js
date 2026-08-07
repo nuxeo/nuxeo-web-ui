@@ -21,6 +21,8 @@
  *   --wdioConfig: pass a custom wdio config file
  *   --debug: allow node inspector to be attached
  *   --browser: the browser to be used (defaults to chrome)
+ *   --browserVersion: the browser version/channel to provision (e.g. 'stable' or '135.0.7049.114');
+ *                     falls back on the BROWSER_VERSION env var or 'stable'
  *   --runAll: do not apply fail fast premise which means that a scenario failure won't trigger feature failure
  *   --bail:  amount of tests that can fail before stopping the runner
  *            by default set to 0, which means don't bail, run all tests
@@ -96,6 +98,10 @@ if (argv.bail) {
 }
 
 process.env.BROWSER = argv.browser || process.env.BROWSER || 'chrome';
+
+if (argv.browserVersion) {
+  process.env.BROWSER_VERSION = argv.browserVersion;
+}
 
 process.env.FORCE_COLOR = true;
 

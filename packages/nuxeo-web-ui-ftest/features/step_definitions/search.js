@@ -103,22 +103,31 @@ Given('I have permission {word} for this saved search', function (permission) {
 
 When('I browse to the saved search', async function () {
   const savedSearchId = this.savedSearch.id;
-  const uiResult = await this.ui.results;
   const resultsRendered = async () => {
     try {
-      const label = await uiResult.resultsCountLabel;
-      return (await label.isExisting()) && (await label.isDisplayed()) && /\d/.test(await label.getText());
+      // Re-resolve the results page object each check: browser.results freezes the currently selected
+      // pill into its selector, so it must be re-derived after navigation rather than captured once.
+      const label = await (await this.ui.results).resultsCountLabel;
+      if (!(await label.isExisting()) || !(await label.isDisplayed())) {
+        return false;
+      }
+      // Require a positive count: "0 result(s)" means the view rendered but the saved search hasn't
+      // applied (or returned nothing), which is the race this loop retries past.
+      return parseInt((await label.getText()).trim(), 10) > 0;
     } catch (e) {
       return false;
     }
   };
   // Navigating to a saved search by id can intermittently land on a search page whose results view is
-  // not yet wired to the search form, so the saved search is never applied and no results render (the
-  // count label stays absent, i.e. "last seen: n/a"). This is a timing race that surfaces far more often
-  // on recent Chrome versions and under CI load. Re-navigate (via a neutral route so the next hop is a
-  // real route change) until the results actually render.
-  for (let attempt = 0; attempt < 5; attempt += 1) {
+  // not yet wired to the search form, so the saved search is never applied and no results render. This
+  // is a timing race that surfaces more often on recent Chrome versions and under CI load. Two attempts
+  // is the most that fits the Cucumber step timeout, keeping the final throw reachable.
+  const maxAttempts = 2;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     if (attempt > 0) {
+      console.warn(
+        `Saved search ${savedSearchId} results not rendered; re-navigating (attempt ${attempt + 1}/${maxAttempts})`,
+      );
       await url('#!/');
     }
     await url(`#!/doc/${savedSearchId}`);
@@ -129,9 +138,7 @@ When('I browse to the saved search', async function () {
       // results did not render on this attempt — re-navigate and retry
     }
   }
-  // Every attempt failed: fail the step explicitly rather than letting the scenario continue in a
-  // broken state, so later assertions don't fail misleadingly and the root cause stays visible.
-  throw new Error(`Saved search ${savedSearchId} did not render any results after 5 navigation attempts`);
+  throw new Error(`Saved search ${savedSearchId} did not render any results after ${maxAttempts} navigation attempts`);
 });
 
 Then('I can see that my saved search "{word}" on "{word}" is selected', async function (savedSearchName, searchName) {
@@ -206,8 +213,9 @@ Then(/^I can see (\d+) search results$/, async function (numberOfResults) {
               lastSeen = outText;
               if (parseInt(outText, 10) === numberOfResults) return true;
             }
-            // Count doesn't match yet — nudge the page provider to refetch, covering Elasticsearch
-            // indexing / refresh lag once results are shown.
+            // Count doesn't match yet (or the label isn't shown): nudge the page provider to refetch,
+            // covering Elasticsearch indexing / refresh lag. Runs on every poll, including before the
+            // label first appears.
             const el = await uiResult.el;
             await driver.execute((r) => {
               const pp = r && r.querySelector('nuxeo-page-provider');
@@ -223,23 +231,21 @@ Then(/^I can see (\d+) search results$/, async function (numberOfResults) {
     } catch (e) {
       throw new Error(`Expected ${numberOfResults} in results count label (last seen: "${lastSeen}")`, { cause: e });
     }
-    const outResult2 = await uiResult.resultsCount(displayMode);
-    if (outResult2 !== numberOfResults) {
-      throw new Error(`Expecting to get ${numberOfResults} results but found ${outResult2}`);
-    }
+    // The label wait above already asserts the exact total; a DOM-row recount here would only re-check
+    // the virtualized on-screen window and fail for counts larger than the rendered slice.
   }
 });
 
 Then(/^I can see more than (\d+) search results$/, async function (minNumberOfResults) {
   await driver.pause(1000);
   const results = await this.ui.results;
+  const displayMode = await results.displayMode;
   const min = parseInt(minNumberOfResults, 10);
-  let output = min;
+  let output = 'n/a';
   // Read the results count label rather than counting rendered rows: the result list is virtualized
-  // (iron-list only keeps a small window of rows in the DOM), so counting DOM rows caps at the number
-  // of on-screen items and never reflects the true total. After clearing a filter the results also
-  // re-fetch asynchronously, so nudge the page provider to refetch to cover Elasticsearch indexing /
-  // refresh lag while waiting for the label to update.
+  // (iron-list only keeps a small window of rows in the DOM), so counting DOM rows caps at the on-screen
+  // window. After clearing a filter the results also re-fetch asynchronously, so nudge the page provider
+  // to refetch to cover Elasticsearch indexing / refresh lag while waiting for the label to update.
   await driver
     .waitUntil(
       async () => {
@@ -262,13 +268,17 @@ Then(/^I can see more than (\d+) search results$/, async function (minNumberOfRe
         }
         return false;
       },
-      // No timeoutMsg here: it is evaluated when waitUntil is called (output === min) and would report
+      // No timeoutMsg here: it is evaluated when waitUntil is called (output === 'n/a') and would report
       // a stale value. Rethrow below with the last observed count instead.
       { timeout: 20000, interval: 2000 },
     )
-    .catch(() => {
-      throw new Error(`Expecting to get more than ${min} but found ${output}`);
+    .catch((e) => {
+      throw new Error(`Expecting to get more than ${min} but found ${output}`, { cause: e });
     });
+  // Guard against a page provider reporting a count over an empty list: ensure rows actually rendered.
+  if ((await results.resultsCount(displayMode)) === 0) {
+    throw new Error(`Results count label reports more than ${min} but no rows rendered`);
+  }
   return true;
 });
 

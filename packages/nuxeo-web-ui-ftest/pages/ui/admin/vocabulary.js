@@ -80,10 +80,10 @@ export default class Vocabulary extends BasePage {
     const deleteButton = await this.el.element(selector);
     await deleteButton.waitForVisible();
     await deleteButton.scrollIntoView(selector);
-    // Click, then accept the confirm dialog via alertAccept, which waits for the alert to appear.
-    // The previous code polled getAlertText() first, which logged a spurious "no such alert"
-    // WebDriver error on the initial poll before the dialog existed; relying on alertAccept's
-    // built-in wait covers the timing without that noise.
+    // Click once, then accept the confirm dialog via alertAccept (which waits for the alert). The
+    // previous code retried the click while polling getAlertText(), logging a spurious "no such alert"
+    // error before the dialog existed. The click retry is dropped deliberately: if the click is lost,
+    // alertAccept fails loudly rather than masking it.
     await deleteButton.click();
     await driver.alertAccept();
   }
