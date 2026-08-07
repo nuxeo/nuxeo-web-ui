@@ -293,7 +293,9 @@ export default class Browser extends BasePage {
         // Match on textContent rather than getText()/isVisible(): on newer Chrome both are
         // empty/false for rows below the fold, so a child that isn't currently scrolled into
         // view was never matched. Clicking the row scrolls it into view before the click lands.
-        const text = ((await browser.execute((el) => el.textContent, rowEl)) || '').trim();
+        // Skip rows iron-list recycled out of range: their div.item is [hidden] but keeps stale bound content.
+        const hidden = await browser.execute((el) => !!el.closest('div.item[hidden]'), row);
+        const text = hidden ? '' : ((await browser.execute((el) => el.textContent, rowEl)) || '').trim();
         if (text === title) {
           await row.click();
           return true; // Exit the loop once a match is found
@@ -315,9 +317,14 @@ export default class Browser extends BasePage {
             // Read textContent via JS rather than getText(): on newer Chrome getText() returns an
             // empty string for rows below the fold, so lower-positioned children (e.g. position 8)
             // were never matched even though their row exists in the DOM.
-            const text = ((await browser.execute((el) => el.textContent, cell)) || '').trim();
+            // Skip rows iron-list recycled out of range (div.item[hidden]) whose bound title is stale.
+            const hidden = await browser.execute((el) => !!el.closest('div.item[hidden]'), rows[i]);
+            const text = hidden ? '' : ((await browser.execute((el) => el.textContent, cell)) || '').trim();
             if (text === title) {
-              return { index: i };
+              // Use the row's bound virtual index (its true ordinal), not the DOM loop index, which
+              // drifts once iron-list recycles rows.
+              const boundIndex = Number(await rows[i].getAttribute('index'));
+              return { index: Number.isNaN(boundIndex) ? i : boundIndex };
             }
           }
         }
@@ -508,7 +515,8 @@ export default class Browser extends BasePage {
     );
     const index = titles.findIndex((currentTitle) => currentTitle === title);
     if (index < 0) {
-      return false;
+      // Fail loudly: callers discard the return value, so a missing document must not pass as a no-op.
+      throw new Error(`Child document "${title}" not found among ${titles.length} rows: ${JSON.stringify(titles)}`);
     }
     const targetRow = rowTemp[index];
     try {

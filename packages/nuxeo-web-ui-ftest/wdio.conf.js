@@ -280,40 +280,9 @@ export const config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  onPrepare: async () => {
+  onPrepare: () => {
     // eslint-disable-next-line no-console
     console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
-
-    // Report the browser version once, up front, before any worker starts. Provisioning is
-    // delegated to WebdriverIO's driver manager; when a channel (e.g. 'stable') is configured,
-    // resolve the concrete Chrome-for-Testing build purely for this log line. Best-effort: the
-    // fetch is bounded by a short abortable timeout so a slow/unreachable host can never block the
-    // run, and it falls back to the configured channel name if the lookup fails or times out.
-    const browserName = process.env.BROWSER || 'chrome';
-    const configuredVersion = process.env.BROWSER_VERSION || 'stable';
-    let resolvedVersion = configuredVersion;
-    if (browserName === 'chrome' && !/^\d/.test(configuredVersion)) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 3000);
-      try {
-        const res = await fetch('https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json', {
-          signal: controller.signal,
-        });
-        if (res.ok) {
-          const { channels = {} } = await res.json();
-          const channel = channels[configuredVersion.charAt(0).toUpperCase() + configuredVersion.slice(1)];
-          if (channel && channel.version) {
-            resolvedVersion = channel.version;
-          }
-        }
-      } catch (e) {
-        // best-effort: fall back to the configured channel name (also covers the abort timeout)
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-    // eslint-disable-next-line no-console
-    console.log(`Using ${browserName} ${resolvedVersion} (browserVersion: ${configuredVersion})`);
 
     // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines.
     const originalWrite = process.stdout.write.bind(process.stdout);
@@ -384,8 +353,14 @@ export const config = {
     try {
       await browser.setWindowSize(1920, 1080);
     } catch (e) {
-      console.error('Failed to set window size.');
+      // The deterministic viewport is the whole fix for "element click intercepted"; log the cause.
+      console.error('Failed to set window size:', e);
     }
+
+    // Report the browser this session actually resolved to, read from live capabilities so the log
+    // can never drift from the build that really runs (unlike a separate version lookup).
+    // eslint-disable-next-line no-console
+    console.log(`Using ${browser.capabilities.browserName} ${browser.capabilities.browserVersion}`);
 
     /**
      * Setup the Chai assertion framework

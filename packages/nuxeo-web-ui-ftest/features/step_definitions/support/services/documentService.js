@@ -125,7 +125,12 @@ class DocumentHelper {
       .repository()
       .delete(document.path)
       .then(() => {
-        this.liveDocuments.splice(this.liveDocuments.indexOf(document.uid), 1);
+        // Guard the index: indexOf === -1 would splice off the last (deepest) tracked doc, breaking
+        // reset()'s children-before-parents ordering and reintroducing the 409 cascade.
+        const i = this.liveDocuments.indexOf(document.uid);
+        if (i !== -1) {
+          this.liveDocuments.splice(i, 1);
+        }
       });
   }
 

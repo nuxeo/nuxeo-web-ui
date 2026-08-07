@@ -55,7 +55,10 @@ const suggestionSet = async (element, value) => {
         // typing, so the highlighted result is often not rendered on the first check. Wait for it
         // before selecting; without this the value is silently never applied and the search runs
         // unfiltered (e.g. an author facet returns every document instead of the filtered set).
-        await dropdownHighlight.waitForDisplayed({ timeout: 10000 }).catch(() => {});
+        await dropdownHighlight.waitForDisplayed({
+          timeout: 10000,
+          timeoutMsg: `No highlighted suggestion for "${values[i]}" — value would be silently ignored`,
+        });
         if (await dropdownHighlight.isVisible()) {
           const highLightText = await dropdownHighlight.getText();
           const hightlightTrimText = highLightText.trim();
@@ -67,7 +70,8 @@ const suggestionSet = async (element, value) => {
         }
         return false;
       } catch (e) {
-        return false;
+        // Surface the failure instead of silently leaving the field unset and the search unfiltered.
+        throw new Error(`Could not apply suggestion value "${values[i]}"`, { cause: e });
       }
     }
   }
