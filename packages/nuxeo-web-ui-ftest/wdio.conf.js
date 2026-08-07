@@ -1,4 +1,6 @@
 import { fileURLToPath } from 'url';
+import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import chai from 'chai';
 
@@ -33,6 +35,8 @@ const reporters = ['spec'];
 const _workerStartTimes = new Map();
 const _featureResults = [];
 let _browserLogged = false;
+const _browserVersionFile = path.join(os.tmpdir(), 'wdio-browser-version.txt');
+let _browserVersion = '';
 
 if (process.env.CUCUMBER_REPORT_PATH) {
   reporters.push([
@@ -291,6 +295,7 @@ export const config = {
     // eslint-disable-next-line no-control-regex
     const ansiRegex = /\x1b\[[0-9;]*m/g;
     const statusLineRegex = /\[(\d+-\d+)\] (?:PASSED|FAILED) in .* - /;
+    const runningLineRegex = /\[\d+-\d+\] RUNNING in .* - /;
     process.stdout.write = (chunk, ...args) => {
       if (typeof chunk === 'string') {
         chunk = chunk.replace(/file:\/\//g, '');
@@ -302,6 +307,19 @@ export const config = {
           if (start) {
             const elapsed = ((Date.now() - start) / 1000).toFixed(1);
             chunk = chunk.replace(/\n$/, '') + ` \x1b[1m( ${elapsed}s )\x1b[0m\n`;
+          }
+        } else if (runningLineRegex.test(plain) && !/\(\s*chrome\b/.test(plain)) {
+          // Annotate the RUNNING line with the resolved browser version rather than logging it as a
+          // separate per-spec line. The version is written by the first worker's `before` hook.
+          if (!_browserVersion) {
+            try {
+              _browserVersion = fs.readFileSync(_browserVersionFile, 'utf8').trim();
+            } catch (e) {
+              // not written yet; retry on the next RUNNING line
+            }
+          }
+          if (_browserVersion) {
+            chunk = chunk.replace(/\n$/, '') + ` \x1b[1m( ${_browserVersion} )\x1b[0m\n`;
           }
         }
       }
@@ -358,13 +376,18 @@ export const config = {
       console.error('Failed to set window size:', e);
     }
 
-    // Report the browser this session actually resolved to, read from live capabilities so the log
-    // can never drift from the build that really runs (unlike a separate version lookup). Logged once
-    // per worker process rather than per spec to avoid repeating on every feature.
+    // Record the resolved browser once per worker so the main process can annotate the RUNNING lines,
+    // read from live capabilities so it can't drift from the build that actually runs.
     if (!_browserLogged) {
       _browserLogged = true;
-      // eslint-disable-next-line no-console
-      console.log(`Using ${browser.capabilities.browserName} ${browser.capabilities.browserVersion}`);
+      try {
+        fs.writeFileSync(
+          _browserVersionFile,
+          `${browser.capabilities.browserName} ${browser.capabilities.browserVersion}`,
+        );
+      } catch (e) {
+        // best-effort: the RUNNING line just won't show the resolved version
+      }
     }
 
     /**
