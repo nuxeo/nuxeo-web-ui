@@ -20,7 +20,11 @@ import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html as polymerHtml } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
-import { INACTIVITY_ACTIVITY_KEY, NuxeoInactivityBehavior } from '../elements/behaviors/nuxeo-inactivity-behavior.js';
+import {
+  INACTIVITY_ACTIVITY_KEY,
+  INACTIVITY_REQUESTED_URL_KEY,
+  NuxeoInactivityBehavior,
+} from '../elements/behaviors/nuxeo-inactivity-behavior.js';
 
 // Minimal host that composes the behavior exactly like nuxeo-app does — a keepAlive
 // <nuxeo-resource> in the template, a _logout() URL helper, and setup/teardown wired from
@@ -463,6 +467,75 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       await host._logoutRedirect();
       expect(host._inactivityLogoutError).to.be.an('error');
       expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+    });
+  });
+
+  suite('WEBUI-2189: restore requested URL after re-login', () => {
+    const REQUESTED_URL_KEY = INACTIVITY_REQUESTED_URL_KEY; // reuse the behavior's exported key
+    let redirect;
+
+    setup(() => {
+      redirect = sinon.stub(host, '_redirect');
+      host._loggingOut = false;
+      window.sessionStorage.removeItem(REQUESTED_URL_KEY);
+    });
+
+    teardown(() => {
+      redirect.restore();
+      window.sessionStorage.removeItem(REQUESTED_URL_KEY);
+    });
+
+    test('_logoutRedirect saves the current page before navigating away', async () => {
+      await host._logoutRedirect();
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.equal(window.location.href);
+    });
+
+    test('_saveRequestedUrl records the error and does not throw when sessionStorage is unavailable', () => {
+      const setItem = sinon.stub(window.sessionStorage, 'setItem').throws(new Error('denied'));
+      host._saveRequestedUrl();
+      expect(host._inactivityStorageError).to.be.an('error');
+      setItem.restore();
+    });
+
+    test('restores a saved same-origin page and consumes the key', () => {
+      const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, target);
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).to.have.been.calledOnceWith(target);
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.equal(null); // consumed once, never loops
+    });
+
+    test('does NOT restore a cross-origin saved URL (open-redirect guard) but still clears it', () => {
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, 'https://evil.example.com/phish');
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.equal(null);
+    });
+
+    test('does NOT restore a look-alike host that merely prefixes the origin string', () => {
+      // e.g. https://localhost:8000.evil.example.com — starts with the origin but is a different host.
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, `${window.location.origin}.evil.example.com/phish`);
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+    });
+
+    test('does NOT redirect when the saved URL is the current page', () => {
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, window.location.href);
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+    });
+
+    test('is a no-op when there is nothing saved', () => {
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+    });
+
+    test('records the error and bails when reading sessionStorage throws', () => {
+      const getItem = sinon.stub(window.sessionStorage, 'getItem').throws(new Error('denied'));
+      host._restoreRequestedUrlAfterLogin();
+      expect(host._inactivityStorageError).to.be.an('error');
+      expect(redirect).not.to.have.been.called;
+      getItem.restore();
     });
   });
 });
