@@ -495,6 +495,9 @@ export default class Browser extends BasePage {
   }
 
   async _selectChildDocument(title, deselect) {
+    // Wait for child rows to load first (like clickChild/indexOfChild); otherwise a slow page
+    // provider yields 0 rows and the not-found throw below fires before the table has rendered.
+    await this.waitForChildren();
     const rowTemp = await this.rows;
     // Read each row's title via textContent (aligned with rowTemp indices). getText() returns ''
     // for rows below the fold on newer Chrome; the previous code filtered those empties out and
