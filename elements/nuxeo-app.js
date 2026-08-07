@@ -849,6 +849,9 @@ Polymer({
 
     this.removeAttribute('unresolved');
 
+    // WEBUI-2189: if the previous session ended via an inactivity/401 logout, return the user to the page
+    // they were on (saved on this tab) now that they have re-authenticated — before arming anything else.
+    this._restoreRequestedUrlAfterLogin();
     // WEBUI-1987: wire the inactivity timer + 401->logout redirect once here (ready() always runs).
     // attached() only re-arms after a real detach (see _inactivityNeedsRearm), so the initial
     // ready()+attached() sequence does not issue a duplicate startup keep-alive or churn listeners.

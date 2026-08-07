@@ -24,6 +24,14 @@ import { config } from '@nuxeo/nuxeo-elements';
 export const INACTIVITY_ACTIVITY_KEY = 'nuxeo-ui-inactivity-last-activity';
 
 /**
+ * WEBUI-2189: sessionStorage key holding the page the user was on when an inactivity/401 logout fired, so
+ * we can return them there after they re-authenticate. sessionStorage (not localStorage) scopes it to the
+ * originating tab and clears it when that tab closes — bounding its lifetime and avoiding a cross-tab
+ * hijack. It is consumed once, on the next app boot, and validated to be same-origin before navigating.
+ */
+export const INACTIVITY_REQUESTED_URL_KEY = 'nuxeo-ui-inactivity-requested-url';
+
+/**
  * Client-side session inactivity handling (WEBUI-1987, CWE-613 Insufficient Session Expiration).
  *
  * Arms an idle timer (from the `session.timeout` config, in minutes) that logs the user out after a
@@ -232,6 +240,9 @@ export const NuxeoInactivityBehavior = {
       return Promise.resolve();
     }
     this._loggingOut = true;
+    // WEBUI-2189: remember where the user was so we can bring them back after re-authentication. Only this
+    // inactivity/401 path saves it; the manual "Sign Out" link uses _logout() directly and must not.
+    this._saveRequestedUrl();
     // We want Nuxeo's native "Your session is inactive. Please log in." message, which login.jsp only
     // renders when it receives a top-level `nxtimeout` param. We can't reach that by navigating to /logout
     // with a requestedUrl: when anonymous auth is enabled the /ui SPA bounce re-nests our value inside its
@@ -270,6 +281,45 @@ export const NuxeoInactivityBehavior = {
   // history/bfcache entry after an inactivity-driven logout.
   _redirect(url) {
     globalThis.location.replace(url);
+  },
+
+  // WEBUI-2189: persist the current page (full hashbang URL) before an inactivity/401 logout navigation,
+  // so _restoreRequestedUrlAfterLogin() can return the user here once they log back in.
+  _saveRequestedUrl() {
+    try {
+      globalThis.sessionStorage.setItem(INACTIVITY_REQUESTED_URL_KEY, globalThis.location.href);
+    } catch (e) {
+      // sessionStorage may be unavailable (private mode/quota); skip — we just won't restore the page.
+      this._inactivityStorageError = e;
+    }
+  },
+
+  // WEBUI-2189: after re-authentication the app reloads at its root, losing the page the user was on when
+  // the session expired. If we saved one on this tab, send them back to it. Wired from the host's ready()
+  // so it runs once per boot, before the timer/401 handlers are armed. The saved value is consumed once
+  // and must be same-origin (open-redirect protection) and different from the current page before we
+  // navigate.
+  _restoreRequestedUrlAfterLogin() {
+    let requestedUrl;
+    try {
+      requestedUrl = globalThis.sessionStorage.getItem(INACTIVITY_REQUESTED_URL_KEY);
+      if (requestedUrl) {
+        globalThis.sessionStorage.removeItem(INACTIVITY_REQUESTED_URL_KEY); // consume once, never loop
+      }
+    } catch (e) {
+      // sessionStorage unavailable; nothing to restore.
+      this._inactivityStorageError = e;
+      return;
+    }
+    // Same-origin guard: compare against `origin + '/'`, not a bare `origin`, so a look-alike host such as
+    // https://evil-<origin-host> can't slip past the prefix check and cause an open redirect.
+    if (
+      requestedUrl &&
+      requestedUrl.startsWith(`${globalThis.location.origin}/`) &&
+      requestedUrl !== globalThis.location.href
+    ) {
+      this._redirect(requestedUrl);
+    }
   },
 
   _teardownInactivityTimer() {
