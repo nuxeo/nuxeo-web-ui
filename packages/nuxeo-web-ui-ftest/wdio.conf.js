@@ -34,9 +34,7 @@ const reporters = ['spec'];
 
 const _workerStartTimes = new Map();
 const _featureResults = [];
-let _browserLogged = false;
-const _browserVersionFile = path.join(os.tmpdir(), 'wdio-browser-version.txt');
-let _browserVersion = '';
+const _browserReconcileLock = path.join(os.tmpdir(), 'wdio-browser-reconciled.lock');
 
 if (process.env.CUCUMBER_REPORT_PATH) {
   reporters.push([
@@ -285,9 +283,54 @@ export const config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  onPrepare: () => {
+  onPrepare: async () => {
     // eslint-disable-next-line no-console
     console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
+
+    // Resolve and report the browser once, up front. Guard the two cases the review flagged where a
+    // resolved version could differ from what runs: a custom BROWSER_BINARY bypasses provisioning, and
+    // a pinned BROWSER_VERSION needs no lookup. For a channel (e.g. 'stable') the chrome-for-testing
+    // lookup returns the build the driver manager provisions on a clean runner; any residual drift
+    // (e.g. a stale local cache) is reconciled against the live session in `before`.
+    const browserName = process.env.BROWSER || 'chrome';
+    let browserLabel = '';
+    if (process.env.BROWSER_BINARY) {
+      // eslint-disable-next-line no-console
+      console.log(`Using ${browserName} from custom binary ${process.env.BROWSER_BINARY}`);
+    } else {
+      const configuredVersion = process.env.BROWSER_VERSION || 'stable';
+      let resolvedVersion = configuredVersion;
+      if (browserName === 'chrome' && !/^\d/.test(configuredVersion)) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 3000);
+        try {
+          const res = await fetch(
+            'https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json',
+            { signal: controller.signal },
+          );
+          if (res.ok) {
+            const { channels = {} } = await res.json();
+            const channel = channels[configuredVersion.charAt(0).toUpperCase() + configuredVersion.slice(1)];
+            if (channel && channel.version) {
+              resolvedVersion = channel.version;
+            }
+          }
+        } catch (e) {
+          // best-effort: fall back to the channel name (also covers the abort timeout)
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+      browserLabel = `${browserName} ${resolvedVersion}`;
+      // eslint-disable-next-line no-console
+      console.log(`Using ${browserLabel}`);
+    }
+    process.env.WDIO_BROWSER_LABEL = browserLabel;
+    try {
+      fs.unlinkSync(_browserReconcileLock);
+    } catch (e) {
+      // no stale reconcile lock to clear
+    }
 
     // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines.
     const originalWrite = process.stdout.write.bind(process.stdout);
@@ -295,7 +338,6 @@ export const config = {
     // eslint-disable-next-line no-control-regex
     const ansiRegex = /\x1b\[[0-9;]*m/g;
     const statusLineRegex = /\[(\d+-\d+)\] (?:PASSED|FAILED) in .* - /;
-    const runningLineRegex = /\[\d+-\d+\] RUNNING in .* - /;
     process.stdout.write = (chunk, ...args) => {
       if (typeof chunk === 'string') {
         chunk = chunk.replace(/file:\/\//g, '');
@@ -307,19 +349,6 @@ export const config = {
           if (start) {
             const elapsed = ((Date.now() - start) / 1000).toFixed(1);
             chunk = chunk.replace(/\n$/, '') + ` \x1b[1m( ${elapsed}s )\x1b[0m\n`;
-          }
-        } else if (runningLineRegex.test(plain) && !/\(\s*chrome\b/.test(plain)) {
-          // Annotate the RUNNING line with the resolved browser version rather than logging it as a
-          // separate per-spec line. The version is written by the first worker's `before` hook.
-          if (!_browserVersion) {
-            try {
-              _browserVersion = fs.readFileSync(_browserVersionFile, 'utf8').trim();
-            } catch (e) {
-              // not written yet; retry on the next RUNNING line
-            }
-          }
-          if (_browserVersion) {
-            chunk = chunk.replace(/\n$/, '') + ` \x1b[1m( ${_browserVersion} )\x1b[0m\n`;
           }
         }
       }
@@ -376,17 +405,18 @@ export const config = {
       console.error('Failed to set window size:', e);
     }
 
-    // Record the resolved browser once per worker so the main process can annotate the RUNNING lines,
-    // read from live capabilities so it can't drift from the build that actually runs.
-    if (!_browserLogged) {
-      _browserLogged = true;
+    // Reconcile the up-front browser label with what this session actually resolved to, so a wrong
+    // up-front version can never stand (per PR review). Log one correction globally if they differ.
+    const expectedBrowser = process.env.WDIO_BROWSER_LABEL;
+    const actualBrowser = `${browser.capabilities.browserName} ${browser.capabilities.browserVersion}`;
+    if (expectedBrowser && expectedBrowser !== actualBrowser) {
       try {
-        fs.writeFileSync(
-          _browserVersionFile,
-          `${browser.capabilities.browserName} ${browser.capabilities.browserVersion}`,
+        fs.writeFileSync(_browserReconcileLock, '', { flag: 'wx' });
+        console.warn(
+          `Browser mismatch: reported "${expectedBrowser}" up front but this session runs "${actualBrowser}"`,
         );
       } catch (e) {
-        // best-effort: the RUNNING line just won't show the resolved version
+        // another worker already logged the correction, or the lock write failed — ignore
       }
     }
 
