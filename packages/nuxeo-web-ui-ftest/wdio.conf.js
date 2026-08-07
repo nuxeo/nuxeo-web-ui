@@ -32,6 +32,7 @@ const reporters = ['spec'];
 
 const _workerStartTimes = new Map();
 const _featureResults = [];
+let _browserLogged = false;
 
 if (process.env.CUCUMBER_REPORT_PATH) {
   reporters.push([
@@ -358,9 +359,13 @@ export const config = {
     }
 
     // Report the browser this session actually resolved to, read from live capabilities so the log
-    // can never drift from the build that really runs (unlike a separate version lookup).
-    // eslint-disable-next-line no-console
-    console.log(`Using ${browser.capabilities.browserName} ${browser.capabilities.browserVersion}`);
+    // can never drift from the build that really runs (unlike a separate version lookup). Logged once
+    // per worker process rather than per spec to avoid repeating on every feature.
+    if (!_browserLogged) {
+      _browserLogged = true;
+      // eslint-disable-next-line no-console
+      console.log(`Using ${browser.capabilities.browserName} ${browser.capabilities.browserVersion}`);
+    }
 
     /**
      * Setup the Chai assertion framework
