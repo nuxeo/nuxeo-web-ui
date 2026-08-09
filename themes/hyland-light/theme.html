@@ -85,6 +85,8 @@ limitations under the License.
       --nuxeo-container-hover: var(--nuxeo-page-background);
       --nuxeo-dialog-buttons-bar: transparent;
       --input-background: rgba(0, 0, 0, 0.05);
+      --nuxeo-checkmark-border-color: #474551;
+      --nuxeo-checkmark-tick-color: var(--nuxeo-button-primary-text);
 
       /* Warn, Info, Error */
       --nuxeo-action-color-activated: var(--nuxeo-primary-color);
@@ -94,8 +96,8 @@ limitations under the License.
 
       /* Selection toolbar */
       --nuxeo-selection-toolbar-background: var(--nuxeo-primary-color);
-      --nuxeo-selection-toolbar-text: #fff;
-      --nuxeo-selection-toolbar-link: #fff;
+      --nuxeo-selection-toolbar-text: var(--nuxeo-button-primary-text);
+      --nuxeo-selection-toolbar-link: var(--nuxeo-button-primary-text);
       --nuxeo-selection-toolbar-link-hover: #66ffff;
 
       /*-- Polymer Variables --*/
@@ -201,14 +203,14 @@ limitations under the License.
       --hyland-page-tabs-selected-background: #dadadd;
       --hyland-page-tabs-active-text-color: #3e3b92;
 
-      /* Nuxeo Elements - Map to Hyland colors */
-      --nuxeo-checkmark-border-color: #474551;
-      --hyland-tooltip-text-color: #ffffff;
-      --hyland-document-grid-thumbnail-background: var(--nuxeo-box);
+      /*Document Create Dialog */ 
       --hyland-nuxeo-card-background: var(--nuxeo-box);
       --hyland-csv-import-background: #f7f6f6;
       --hyland-path-suggestion-result-selected-background: #e8eaf6;
 
+      /* Other Hyland colors */
+      --hyland-tooltip-text-color: var(--nuxeo-button-primary-text);
+      --hyland-document-grid-thumbnail-background: var(--nuxeo-box);
       --hyland-data-table-row-border: none;
     }
   </style>
