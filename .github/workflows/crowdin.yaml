@@ -23,13 +23,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: lts-2025
 
       - name: Crowdin Action
         id: crowdin-sync
-        uses: crowdin/github-action@v2.16.2
+        uses: crowdin/github-action@v2.17.0
         with:
           # Skip the action's internal ref checkout because this workflow already checks out lts-2025 explicitly.
           skip_ref_checkout: true
