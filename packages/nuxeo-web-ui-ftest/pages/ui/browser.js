@@ -289,12 +289,17 @@ export default class Browser extends BasePage {
     for (let i = 0; i < rowTemp.length; i++) {
       const row = rowTemp[i];
       const rowEl = await row.$('nuxeo-data-table-cell a.title');
-      const rowVisible = await rowEl.isVisible();
-      const getText = await rowEl.getText();
-      const rowText = (await getText.trim()) === title;
-      if (rowVisible && rowText) {
-        await row.click();
-        return true; // Exit the loop once a match is found
+      if (await rowEl.isExisting()) {
+        // Match on textContent rather than getText()/isVisible(): on newer Chrome both are
+        // empty/false for rows below the fold, so a child that isn't currently scrolled into
+        // view was never matched. Clicking the row scrolls it into view before the click lands.
+        // Skip rows iron-list recycled out of range: their div.item is [hidden] but keeps stale bound content.
+        const hidden = await browser.execute((el) => !!el.closest('div.item[hidden]'), row);
+        const text = hidden ? '' : ((await browser.execute((el) => el.textContent, rowEl)) || '').trim();
+        if (text === title) {
+          await row.click();
+          return true; // Exit the loop once a match is found
+        }
       }
     }
     return false;
@@ -309,9 +314,17 @@ export default class Browser extends BasePage {
         for (let i = 0; i < rows.length; i++) {
           const cell = await rows[i].$('nuxeo-data-table-cell a.title');
           if (await cell.isExisting()) {
-            const text = (await cell.getText()).trim();
+            // Read textContent via JS rather than getText(): on newer Chrome getText() returns an
+            // empty string for rows below the fold, so lower-positioned children (e.g. position 8)
+            // were never matched even though their row exists in the DOM.
+            // Skip rows iron-list recycled out of range (div.item[hidden]) whose bound title is stale.
+            const hidden = await browser.execute((el) => !!el.closest('div.item[hidden]'), rows[i]);
+            const text = hidden ? '' : ((await browser.execute((el) => el.textContent, cell)) || '').trim();
             if (text === title) {
-              return { index: i };
+              // Use the row's bound virtual index (its true ordinal), not the DOM loop index, which
+              // drifts once iron-list recycles rows.
+              const boundIndex = Number(await rows[i].getAttribute('index'));
+              return { index: Number.isNaN(boundIndex) ? i : boundIndex };
             }
           }
         }
@@ -482,17 +495,48 @@ export default class Browser extends BasePage {
   }
 
   async _selectChildDocument(title, deselect) {
+    // Wait for child rows to load first (like clickChild/indexOfChild); otherwise a slow page
+    // provider yields 0 rows and the not-found throw below fires before the table has rendered.
+    await this.waitForChildren();
     const rowTemp = await this.rows;
-    const elementTitle = await browser
-      .$$('nuxeo-data-table[name="table"] nuxeo-data-table-row:not([header])')
-      .map((img) => img.$('nuxeo-data-table-cell a.title').getText());
-    const nonEmptyTitles = elementTitle.filter((nonEmpty) => nonEmpty.trim() !== '');
-    const index = nonEmptyTitles.findIndex((currenTitle) => currenTitle === title);
+    // Read each row's title via textContent (aligned with rowTemp indices). getText() returns ''
+    // for rows below the fold on newer Chrome; the previous code filtered those empties out and
+    // then indexed the UNFILTERED rows, so an off-screen target (e.g. "Kumquat") was not found and
+    // rowTemp[-1] threw "Cannot read properties of undefined (reading 'isVisible')".
+    // Resolve the title element with WebdriverIO's `$` (which pierces shadow DOM via
+    // wdio-shadow-plugin) rather than a plain el.querySelector inside browser.execute (which would
+    // not cross the row's shadow root and resolve every title to ''), and settle all reads with
+    // Promise.all so `titles` holds strings — a bare `await arr.map(...)` would leave Promises.
+    const titles = await Promise.all(
+      [...rowTemp].map(async (row) => {
+        const titleEl = await row.$('nuxeo-data-table-cell a.title');
+        if (!(await titleEl.isExisting())) {
+          return '';
+        }
+        // Skip rows iron-list recycled out of range (div.item[hidden] keeps stale bound content), as
+        // clickChild/indexOfChild do, so findIndex can't match a hidden row and toggle the wrong one.
+        const hidden = await browser.execute((el) => !!el.closest('div.item[hidden]'), row);
+        return hidden ? '' : ((await browser.execute((el) => el.textContent, titleEl)) || '').trim();
+      }),
+    );
+    const index = titles.findIndex((currentTitle) => currentTitle === title);
+    if (index < 0) {
+      // Fail loudly: callers discard the return value, so a missing document must not pass as a no-op.
+      throw new Error(`Child document "${title}" not found among ${titles.length} rows: ${JSON.stringify(titles)}`);
+    }
+    const targetRow = rowTemp[index];
+    try {
+      // Bring the row into view so its checkbox is displayed/interactable (off-screen rows report
+      // isVisible() === false and can't be clicked).
+      await targetRow.scrollIntoView({ block: 'center', inline: 'center' });
+    } catch (e) {
+      // best-effort centring
+    }
     await driver.pause(1000);
-    const isCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox[checked]');
-    const isNotCheckedVisible = await rowTemp[index].isVisible('nuxeo-data-table-checkbox:not([checked])');
-    if ((deselect ? isCheckedVisible : isNotCheckedVisible) && index >= 0) {
-      const currentRow = await rowTemp[index].$('nuxeo-data-table-checkbox');
+    const isCheckedVisible = await targetRow.isVisible('nuxeo-data-table-checkbox[checked]');
+    const isNotCheckedVisible = await targetRow.isVisible('nuxeo-data-table-checkbox:not([checked])');
+    if (deselect ? isCheckedVisible : isNotCheckedVisible) {
+      const currentRow = await targetRow.$('nuxeo-data-table-checkbox');
       await currentRow.click();
       return true;
     }
