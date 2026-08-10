@@ -4,11 +4,11 @@
  * ones that still need review to a Microsoft Teams channel.
  *
  * "Still needs review" means, for an open, non-draft PR whose checks are all
- * green and which carries the "READY_FOR_REVIEW" label: it is NOT (approved by
- * one of the leads AND approved by >= 1 non-lead developer). A PR is
- * considered sufficiently reviewed and is skipped only once it has an
- * approval from at least one configured lead and at least one other
- * developer's approval.
+ * green and which carries the configured ready label (default
+ * "READY_FOR_REVIEW", see READY_LABEL_NAME below): it is NOT (approved by one
+ * of the leads AND approved by >= 1 non-lead developer). A PR is considered
+ * sufficiently reviewed and is skipped only once it has an approval from at
+ * least one configured lead and at least one other developer's approval.
  *
  * The Teams message is an Adaptive Card wrapped in the envelope expected by a
  * Power Automate "Workflows" incoming webhook (the successor to the retired
@@ -164,6 +164,11 @@ if (!config.token) fail('GH_TOKEN is not set.');
 if (config.leadLogins.length === 0) fail('PR_REVIEW_LEAD_LOGIN is not set.');
 if (!config.dryRun && !config.webhookUrl) fail('TEAMS_WEBHOOK_URL is not set.');
 if (config.repos.length === 0) fail('SCAN_REPOS resolved to an empty list.');
+if (config.requireReadyLabel && !config.readyLabelName) {
+  fail(
+    'READY_LABEL_NAME is empty while REQUIRE_READY_LABEL is enabled. Set a label name or set REQUIRE_READY_LABEL=false.',
+  );
+}
 
 const PR_QUERY = `
   query($owner: String!, $name: String!, $cursor: String) {
@@ -316,7 +321,7 @@ function evaluatePullRequest(pr, repoSlug) {
   // substantive review/CI/Sonar gates keeps those failure reasons visible first in any
   // future per-condition logging, and avoids masking a "sufficiently reviewed" PR (which
   // should just be silently skipped) behind a "not labeled ready" reason.
-  if (config.requireReadyLabel && config.readyLabelName) {
+  if (config.requireReadyLabel) {
     const hasReadyLabel = (pr.labels?.nodes || []).some(
       (l) => (l.name || '').toLowerCase() === config.readyLabelName.toLowerCase(),
     );
