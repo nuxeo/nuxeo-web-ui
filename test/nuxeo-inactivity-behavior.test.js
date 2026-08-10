@@ -477,6 +477,9 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
     setup(() => {
       redirect = sinon.stub(host, '_redirect');
       host._loggingOut = false;
+      // Clear any error recorded by an earlier test so the storage-error assertions below only pass when
+      // the code path under test actually records one (the host instance is reused across suites).
+      host._inactivityStorageError = undefined;
       window.sessionStorage.removeItem(REQUESTED_URL_KEY);
     });
 
@@ -493,7 +496,7 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
     test('_saveRequestedUrl records the error and does not throw when sessionStorage is unavailable', () => {
       const setItem = sinon.stub(window.sessionStorage, 'setItem').throws(new Error('denied'));
       host._saveRequestedUrl();
-      expect(host._inactivityStorageError).to.be.an('error');
+      expect(host._inactivityStorageError).to.be.an('error').with.property('message', 'denied');
       setItem.restore();
     });
 
@@ -502,14 +505,14 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       window.sessionStorage.setItem(REQUESTED_URL_KEY, target);
       host._restoreRequestedUrlAfterLogin();
       expect(redirect).to.have.been.calledOnceWith(target);
-      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.equal(null); // consumed once, never loops
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null; // consumed once, never loops
     });
 
     test('does NOT restore a cross-origin saved URL (open-redirect guard) but still clears it', () => {
       window.sessionStorage.setItem(REQUESTED_URL_KEY, 'https://evil.example.com/phish');
       host._restoreRequestedUrlAfterLogin();
       expect(redirect).not.to.have.been.called;
-      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.equal(null);
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
     });
 
     test('does NOT restore a look-alike host that merely prefixes the origin string', () => {
@@ -533,7 +536,7 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
     test('records the error and bails when reading sessionStorage throws', () => {
       const getItem = sinon.stub(window.sessionStorage, 'getItem').throws(new Error('denied'));
       host._restoreRequestedUrlAfterLogin();
-      expect(host._inactivityStorageError).to.be.an('error');
+      expect(host._inactivityStorageError).to.be.an('error').with.property('message', 'denied');
       expect(redirect).not.to.have.been.called;
       getItem.restore();
     });
