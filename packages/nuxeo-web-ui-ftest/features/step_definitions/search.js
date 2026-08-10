@@ -255,7 +255,10 @@ Then(/^I can see more than (\d+) search results$/, async function (minNumberOfRe
             return false;
           }
           output = parseInt(await outLabel.getText(), 10);
-          if (output > min) {
+          // Require both the label to exceed min AND rows to have painted, so a page provider reporting
+          // a count over an empty or not-yet-rendered list can't satisfy the step (and a transient
+          // count-before-paint after a refetch doesn't falsely fail it).
+          if (output > min && (await results.resultsCount(displayMode)) > 0) {
             return true;
           }
           const el = await results.el;
@@ -275,10 +278,6 @@ Then(/^I can see more than (\d+) search results$/, async function (minNumberOfRe
     .catch((e) => {
       throw new Error(`Expecting to get more than ${min} but found ${output}`, { cause: e });
     });
-  // Guard against a page provider reporting a count over an empty list: ensure rows actually rendered.
-  if ((await results.resultsCount(displayMode)) === 0) {
-    throw new Error(`Results count label reports more than ${min} but no rows rendered`);
-  }
   return true;
 });
 
