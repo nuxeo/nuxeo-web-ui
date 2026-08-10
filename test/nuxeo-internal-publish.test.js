@@ -25,6 +25,42 @@ const fullDoc = {
   properties: {
     'uid:major_version': 1,
     'uid:minor_version': 0,
+    'file:content': { name: 'test.pdf', 'mime-type': 'application/pdf' },
+  },
+};
+
+const bloblessDoc = {
+  uid: 'doc-2',
+  title: 'Empty Note',
+  type: 'Note',
+  properties: {
+    'uid:major_version': 1,
+    'uid:minor_version': 0,
+  },
+};
+
+// Folderish document with children: hasContent is true but there is no main blob.
+const folderDoc = {
+  uid: 'doc-3',
+  title: 'A Folder',
+  type: 'Folder',
+  facets: ['Folderish'],
+  contextParameters: { hasContent: true },
+  properties: {
+    'uid:major_version': 1,
+    'uid:minor_version': 0,
+  },
+};
+
+// Custom type whose binary lives at a non-standard xpath (not file:content).
+const customBlobDoc = {
+  uid: 'doc-4',
+  title: 'Custom Blob Doc',
+  type: 'CustomType',
+  properties: {
+    'uid:major_version': 1,
+    'uid:minor_version': 0,
+    'custom:content': { name: 'test.bin', 'mime-type': 'application/octet-stream' },
   },
 };
 
@@ -44,8 +80,8 @@ suite('nuxeo-internal-publish', () => {
   });
 
   suite('initial state', () => {
-    test('should default selectedRendition to default', () => {
-      expect(element.selectedRendition).to.equal('default');
+    test('should default selectedRendition to none', () => {
+      expect(element.selectedRendition).to.equal('none');
     });
 
     test('should default _isDisable to false', () => {
@@ -67,6 +103,42 @@ suite('nuxeo-internal-publish', () => {
 
     test('should return false when no documents set', () => {
       expect(element._computeMultiple()).to.be.false;
+    });
+  });
+
+  suite('blob-aware default rendition', () => {
+    test('should preselect the configured rendition when the document has a main blob', () => {
+      element.document = fullDoc;
+      expect(element.selectedRendition).to.equal('default');
+    });
+
+    test('should fall back to none when the document has no main blob', () => {
+      element.document = bloblessDoc;
+      expect(element.selectedRendition).to.equal('none');
+    });
+
+    test('should fall back to none for a folder even when hasContent is true', () => {
+      element.document = folderDoc;
+      expect(element.selectedRendition).to.equal('none');
+    });
+
+    test('should fall back to none for a custom type whose blob is not at file:content', () => {
+      element.document = customBlobDoc;
+      expect(element.selectedRendition).to.equal('none');
+    });
+
+    test('should fall back to none for a bulk selection even if a blob-bearing document is set', () => {
+      element.document = fullDoc;
+      element.documents = [fullDoc, bloblessDoc];
+      expect(element.selectedRendition).to.equal('none');
+    });
+
+    test('_hasMainBlob should detect file:content presence', () => {
+      expect(element._hasMainBlob(fullDoc)).to.be.true;
+      expect(element._hasMainBlob(bloblessDoc)).to.be.false;
+      expect(element._hasMainBlob(folderDoc)).to.be.false;
+      expect(element._hasMainBlob(customBlobDoc)).to.be.false;
+      expect(element._hasMainBlob(undefined)).to.be.false;
     });
   });
 

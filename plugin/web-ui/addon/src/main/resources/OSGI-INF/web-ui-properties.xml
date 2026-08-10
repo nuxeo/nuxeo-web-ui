@@ -68,6 +68,9 @@
 
     <!-- Control external permissions -->
     <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
+    
+    <!-- Rendition preselected in the publication popup when the document has a main blob: none | default | <renditionName> -->
+    <property name="org.nuxeo.web.ui.publishing.selectedRendition">${org.nuxeo.web.ui.publishing.selectedRendition:=default}</property> 
 
     <!-- Hide date picker placeholder text (set org.nuxeo.web.ui.datePicker.hidePlaceholder=true in nuxeo.conf to hide) -->
     <property name="org.nuxeo.web.ui.datePicker.hidePlaceholder">${org.nuxeo.web.ui.datePicker.hidePlaceholder:=false}</property>
