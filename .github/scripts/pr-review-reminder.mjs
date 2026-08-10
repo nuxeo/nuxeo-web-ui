@@ -5,9 +5,10 @@
  *
  * "Still needs review" means, for an open, non-draft PR whose checks are all
  * green and which carries the "READY_FOR_REVIEW" label: it is NOT (approved by
- * the lead AND approved by >= 1 non-lead developer). A PR is considered
- * sufficiently reviewed and is skipped only once it has both the lead's
- * approval and at least one other developer's approval.
+ * one of the leads AND approved by >= 1 non-lead developer). A PR is
+ * considered sufficiently reviewed and is skipped only once it has an
+ * approval from at least one configured lead and at least one other
+ * developer's approval.
  *
  * The Teams message is an Adaptive Card wrapped in the envelope expected by a
  * Power Automate "Workflows" incoming webhook (the successor to the retired
@@ -16,7 +17,9 @@
  * Configuration (environment variables):
  *   GH_TOKEN               GitHub token with read access to all scanned repos (required).
  *   TEAMS_WEBHOOK_URL      Power Automate Workflows webhook URL (required unless DRY_RUN).
- *   PR_REVIEW_LEAD_LOGIN   GitHub login of the lead reviewer (required).
+ *   PR_REVIEW_LEAD_LOGIN   Comma-separated GitHub login(s) of the lead reviewer(s) (required).
+ *                          A PR needs an approval from at least one of these logins, plus at
+ *                          least one approval from a non-lead developer, to count as reviewed.
  *   SCAN_REPOS             Comma-separated owner/name list.
  *                          Default: nuxeo/nuxeo-web-ui,nuxeo/nuxeo-elements
  *   REQUIRE_ALL_CHECKS     'true' (default) requires the check rollup to be SUCCESS.
@@ -120,7 +123,10 @@ const isBotAuthor = (login) => {
 const config = {
   token: env('GH_TOKEN'),
   webhookUrl: env('TEAMS_WEBHOOK_URL'),
-  leadLogin: (env('PR_REVIEW_LEAD_LOGIN') || '').trim(),
+  leadLogins: (env('PR_REVIEW_LEAD_LOGIN') || '')
+    .split(',')
+    .map((login) => login.trim().toLowerCase())
+    .filter(Boolean),
   repos: (env('SCAN_REPOS', 'nuxeo/nuxeo-web-ui,nuxeo/nuxeo-elements') || '')
     .split(',')
     .map((r) => r.trim())
@@ -155,7 +161,7 @@ const fail = (message) => {
 };
 
 if (!config.token) fail('GH_TOKEN is not set.');
-if (!config.leadLogin) fail('PR_REVIEW_LEAD_LOGIN is not set.');
+if (config.leadLogins.length === 0) fail('PR_REVIEW_LEAD_LOGIN is not set.');
 if (!config.dryRun && !config.webhookUrl) fail('TEAMS_WEBHOOK_URL is not set.');
 if (config.repos.length === 0) fail('SCAN_REPOS resolved to an empty list.');
 
@@ -176,7 +182,7 @@ const PR_QUERY = `
           baseRefName
           mergeable
           author { login }
-          labels(first: 20) {
+          labels(first: 100) {
             nodes { name }
           }
           latestOpinionatedReviews(first: 100) {
@@ -267,13 +273,6 @@ function evaluatePullRequest(pr, repoSlug) {
     return null;
   }
 
-  if (config.requireReadyLabel && config.readyLabelName) {
-    const hasReadyLabel = (pr.labels?.nodes || []).some(
-      (l) => (l.name || '').toLowerCase() === config.readyLabelName.toLowerCase(),
-    );
-    if (!hasReadyLabel) return null;
-  }
-
   if (config.skipUnresolvedCopilot && config.copilotRegex) {
     const hasOpenCopilotThread = (pr.reviewThreads?.nodes || []).some(
       (t) => t.isResolved === false && config.copilotRegex.test(t.comments?.nodes?.[0]?.author?.login || ''),
@@ -307,12 +306,22 @@ function evaluatePullRequest(pr, repoSlug) {
 
   if (config.skipChangesRequested && hasChangesRequested) return null;
 
-  const leadLower = config.leadLogin.toLowerCase();
-  const leadApproved = [...approvers].some((login) => login.toLowerCase() === leadLower);
-  const nonLeadApprovals = [...approvers].filter((login) => login.toLowerCase() !== leadLower).length;
+  const leadApproved = [...approvers].some((login) => config.leadLogins.includes(login.toLowerCase()));
+  const nonLeadApprovals = [...approvers].filter((login) => !config.leadLogins.includes(login.toLowerCase())).length;
 
   const sufficientlyReviewed = leadApproved && nonLeadApprovals >= 1;
   if (sufficientlyReviewed) return null;
+
+  // Keep the ready-label check last: it's cheap, but evaluating it after the more
+  // substantive review/CI/Sonar gates keeps those failure reasons visible first in any
+  // future per-condition logging, and avoids masking a "sufficiently reviewed" PR (which
+  // should just be silently skipped) behind a "not labeled ready" reason.
+  if (config.requireReadyLabel && config.readyLabelName) {
+    const hasReadyLabel = (pr.labels?.nodes || []).some(
+      (l) => (l.name || '').toLowerCase() === config.readyLabelName.toLowerCase(),
+    );
+    if (!hasReadyLabel) return null;
+  }
 
   return {
     repo: repoSlug,
