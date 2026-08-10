@@ -215,7 +215,7 @@ Polymer({
   },
 
   _hasMainBlob(document) {
-    return !!(document && document.properties && document.properties['file:content']);
+    return !!document?.properties?.['file:content'];
   },
 
   _computeRenditionOptions() {
