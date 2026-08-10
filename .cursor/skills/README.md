@@ -14,14 +14,15 @@ activates.
 
 | Skill | Use it when you… | Notes |
 |---|---|---|
-| [`fix-nuxeo-web-ui-bug`](fix-nuxeo-web-ui-bug/SKILL.md) | say "fix WEBUI-\<id>", paste a Jira URL, "commit and raise PR", "take this to Ready for QA" | **Orchestrator** — runs the full flow end-to-end. Delegates to the two PR skills below. |
+| [`fix-nuxeo-web-ui-bug`](fix-nuxeo-web-ui-bug/SKILL.md) | say "fix WEBUI-\<id>", paste a Jira URL, "commit and raise PR", "take this to Ready for QA" | **Orchestrator** — runs the full flow end-to-end for **one** ticket. Delegates to the two PR skills below. |
+| [`parallel-bug-fixes`](parallel-bug-fixes/SKILL.md) | "fix all children of \<epic>", "run these tickets in parallel", "one agent per ticket" | Fans out one isolated run of `fix-nuxeo-web-ui-bug` per ticket. Script: `parallel-bug-fixes/scripts/new-ticket-workspace.sh`. |
 | [`nuxeo-web-ui-pr`](nuxeo-web-ui-pr/SKILL.md) | open a PR, push a branch, backport to both bases | Branch naming, commit format, PR body, `lts-2025` + `maintenance-3.1.x` backport. |
 | [`nuxeo-web-ui-pr-checks`](nuxeo-web-ui-pr-checks/SKILL.md) | run the gating checks before pushing | Mirrors CI lint + unit tests. Script: `nuxeo-web-ui-pr-checks/scripts/pr-checks.sh`. |
 | [`jira/create-qa-subtask`](jira/create-qa-subtask/SKILL.md) | "create a QA task", "plan QA for this ticket" | Files a `QA task` sub-task with what/how to verify. |
 | [`jira/raise-backend-jira-ticket`](jira/raise-backend-jira-ticket/SKILL.md) | a fix needs a server-side change; "raise a backend/NXP ticket" | Files an NXP (`nxplatform`) ticket and links it as a blocker. |
 
-**Dependencies:** `fix-nuxeo-web-ui-bug` → `nuxeo-web-ui-pr` + `nuxeo-web-ui-pr-checks`. The Jira
-skills are independent and can be used on their own.
+**Dependencies:** `parallel-bug-fixes` → `fix-nuxeo-web-ui-bug` → `nuxeo-web-ui-pr` +
+`nuxeo-web-ui-pr-checks`. The Jira skills are independent and can be used on their own.
 
 ## One-time setup
 
@@ -51,11 +52,11 @@ it in Cursor:
 > You need Jira access to the **WEBUI** and **NXP** projects (via org SSO). Ask your lead if a call
 > returns "no accessible resources".
 
-### 2. Jira API token — needed to upload evidence (screenshots/videos) & some comment ops
+### 2. Jira API token — needed to upload evidence (screenshots/videos) & link PRs on the ticket
 
-The Atlassian MCP has **no attachment-upload tool**, so binary uploads go through the Jira REST API,
-which needs an API token. Store your credentials in two local files (kept out of git, **never
-commit**):
+The Atlassian MCP has **no attachment-upload tool** and **no create-remote-link tool**, so uploading
+evidence and adding each PR as a Jira **web link** both go through the Jira REST API, which needs an
+API token. Store your credentials in two local files (kept out of git, **never commit**):
 
 ```bash
 printf '%s' 'you@hyland.com' > ~/.jira_email
@@ -114,6 +115,19 @@ Type these in Cursor chat — the right skill activates automatically:
 - **QA task:** "Create a QA task for WEBUI-1234."
 - **Backend ticket:** "This needs a server change — raise a backend NXP ticket and link it."
 
+## Running several agents at once (different tickets in parallel)
+
+Do **not** point two agents at this checkout at the same time. One working tree holds one branch, so
+they will fight over `HEAD`; and a clone shares its refs, config and **stash stack** with all of its
+worktrees, so `git stash` in one ticket can be popped by another. Each run needs its own clone,
+container, port and build dirs.
+
+The [`parallel-bug-fixes`](parallel-bug-fixes/SKILL.md) skill owns all of that: per-ticket workspaces
+via `parallel-bug-fixes/scripts/new-ticket-workspace.sh`, the `$NX_*` variables each run uses instead
+of literal ports and container names, how many repro containers this machine can actually hold, and
+how the current skills get overlaid into a workspace whose base branch still tracks an older copy.
+Read it before starting a batch.
+
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -122,7 +136,10 @@ Type these in Cursor chat — the right skill activates automatically:
 | Attachment upload 401/403 | Check `~/.jira_email` / `~/.jira_token`; regenerate the token if expired. |
 | `gh` command fails | `gh auth status`; re-run `gh auth login`. |
 | Commit shows unsigned (`N`/`E`) | Re-check §4; the SSH key must be added to GitHub as a **Signing** key. |
-| Tests can't import `@nuxeo/*` | Re-link `nuxeo-elements` symlinks (see the PR skill). |
+| Tests can't import `@nuxeo/*` | Re-link `nuxeo-elements` symlinks with **absolute** paths (see the PR skill). |
+| Two agents keep changing each other's branch | You are sharing one checkout — give each its own workspace (see [`parallel-bug-fixes`](parallel-bug-fixes/SKILL.md)). |
+| A build shows someone else's `nuxeo-elements` change | The `@nuxeo/*` symlinks are relative, so they resolve to the shared checkout. Re-run the workspace script to repoint them absolutely. |
+| Work vanished / an unexpected diff appeared | A stray `git stash`. Check `git stash list` in **both** repos; the stack is shared across a clone's worktrees. |
 
 ## Using these skills in other repos (optional)
 
@@ -132,6 +149,7 @@ your personal skills folder:
 ```bash
 mkdir -p ~/.cursor/skills
 ln -s "$PWD/.cursor/skills/fix-nuxeo-web-ui-bug"   ~/.cursor/skills/fix-nuxeo-web-ui-bug
+ln -s "$PWD/.cursor/skills/parallel-bug-fixes"     ~/.cursor/skills/parallel-bug-fixes
 ln -s "$PWD/.cursor/skills/nuxeo-web-ui-pr"        ~/.cursor/skills/nuxeo-web-ui-pr
 ln -s "$PWD/.cursor/skills/nuxeo-web-ui-pr-checks" ~/.cursor/skills/nuxeo-web-ui-pr-checks
 ```

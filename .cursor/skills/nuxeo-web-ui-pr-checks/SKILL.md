@@ -21,10 +21,17 @@ run the same checks that gate the PR, and **only push if they pass**.
 | **Lint** (`lint.yaml`) | `npm run lint` (eslint + `prettier --list-different`) | Yes — fast |
 | **Test** (`test.yaml`) | `npm run test` (web-test-runner `--coverage`) | Yes — ~2 min |
 | A11y (`a11y.yaml`) | `mvn -B -ntp install` + `mvn -B -ntp -f plugin/a11y install` | Optional — needs Java + npm token + repo creds |
+| Ftest (`ftest`, cross-repo `web-ui`) | `npm run ftest` (WebdriverIO + a running Nuxeo server) | No — tens of minutes |
 | Sonar / full build | push-only (`main.yaml`) | No — not a PR gate |
 
 `npm run lint` and `npm run test` are the gate developers must reproduce locally.
 A11y/build/sonar need Maven and secrets, so they're not part of the fast pre-push loop.
+
+**Don't wait on the functional tests.** `ftest` (and the cross-repo `web-ui` check) boots a Nuxeo
+server and drives a browser suite, so it runs for tens of minutes — never poll it locally or in CI
+while a task is in flight. Push once lint + unit are green, snapshot the ftest state, and report it as
+"still running, not waited on". Look at it only once it has reported **failed**; if the failure can't
+plausibly come from the change, re-run the job rather than investigating it.
 
 ## Run the gate
 
