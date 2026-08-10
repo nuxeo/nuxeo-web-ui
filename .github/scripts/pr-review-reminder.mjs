@@ -4,9 +4,10 @@
  * ones that still need review to a Microsoft Teams channel.
  *
  * "Still needs review" means, for an open, non-draft PR whose checks are all
- * green: it is NOT (approved by the lead AND approved by >= 1 non-lead
- * developer). A PR is considered sufficiently reviewed and is skipped only once
- * it has both the lead's approval and at least one other developer's approval.
+ * green and which carries the "READY_FOR_REVIEW" label: it is NOT (approved by
+ * the lead AND approved by >= 1 non-lead developer). A PR is considered
+ * sufficiently reviewed and is skipped only once it has both the lead's
+ * approval and at least one other developer's approval.
  *
  * The Teams message is an Adaptive Card wrapped in the envelope expected by a
  * Power Automate "Workflows" incoming webhook (the successor to the retired
@@ -35,6 +36,10 @@
  *                          Default: 'copilot'.
  *   DONT_MERGE_LABEL_REGEX Case-insensitive regex; PRs with a matching label are skipped.
  *                          Default: "do\\s*n'?t\\s*merge|do\\s*not\\s*merge".
+ *   REQUIRE_READY_LABEL    'true' (default) requires PRs to carry the READY_LABEL_NAME label;
+ *                          PRs missing it are skipped (not yet marked ready for review).
+ *   READY_LABEL_NAME       Exact label name (case-insensitive) required when REQUIRE_READY_LABEL
+ *                          is enabled. Default: 'READY_FOR_REVIEW'.
  *   MAX_NEW_ISSUES         Skip PRs whose SonarCloud "New issues" count exceeds this. Default 0.
  *                          Coverage on New Code is gated on SonarCloud's own pass/fail for that
  *                          condition (the red-cross icon), not a raw percentage — so a
@@ -135,6 +140,8 @@ const config = {
     env('DONT_MERGE_LABEL_REGEX', "do\\s*n'?t\\s*merge|do\\s*not\\s*merge"),
     'DONT_MERGE_LABEL_REGEX',
   ),
+  requireReadyLabel: asBool(env('REQUIRE_READY_LABEL'), true),
+  readyLabelName: (env('READY_LABEL_NAME', 'READY_FOR_REVIEW') || '').trim(),
   maxNewIssues: asNumber(env('MAX_NEW_ISSUES', '0'), 0),
   sonarMissingPolicy: (env('SONAR_MISSING_POLICY', 'include') || 'include').toLowerCase(),
   postWhenEmpty: asBool(env('POST_WHEN_EMPTY'), false),
@@ -258,6 +265,13 @@ function evaluatePullRequest(pr, repoSlug) {
 
   if (config.dontMergeRegex && (pr.labels?.nodes || []).some((l) => config.dontMergeRegex.test(l.name || ''))) {
     return null;
+  }
+
+  if (config.requireReadyLabel && config.readyLabelName) {
+    const hasReadyLabel = (pr.labels?.nodes || []).some(
+      (l) => (l.name || '').toLowerCase() === config.readyLabelName.toLowerCase(),
+    );
+    if (!hasReadyLabel) return null;
   }
 
   if (config.skipUnresolvedCopilot && config.copilotRegex) {
