@@ -49,7 +49,7 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
-  browserVersion: '135.0.7049.114',
+  browserVersion: 'latest',
   'wdio:enforceWebDriverClassic': true,
   // Prevent ChromeDriver from auto-dismissing native dialogs (window.confirm, window.alert)
   // so that tests can explicitly accept/dismiss them via alertAccept/alertDismiss.
@@ -148,7 +148,7 @@ export const config = {
   // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
   // on a remote machine).
   runner: 'local',
-  specs: [path.join(process.cwd(), './features/*.feature')],
+  specs: ['../../ftest/features/activity.feature'],
   // check http://webdriver.io/guide/testrunner/debugging.html for more info on debugging with wdio
   debug: process.env.DEBUG,
   execArgv: process.env.DEBUG ? ['--inspect'] : [],

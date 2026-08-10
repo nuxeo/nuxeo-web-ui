@@ -13,8 +13,38 @@ export default class BasePage {
     return isDisplayed && size.width > 0 && size.height > 0;
   }
 
-  click(...args) {
-    return this.el.click(...args);
+  /**
+   * Central hardened click (Chrome 143+ safe)
+   */
+  async click() {
+    const elem = this.el; // this.el is always a WDIO element
+
+    await elem.waitForExist();
+    await elem.waitForDisplayed();
+
+    // Scroll into view (critical for Chrome 145)
+    await elem.scrollIntoView({ block: 'center', inline: 'center' });
+
+    // Wait until element has real size (WDIO v9-safe)
+    await browser.waitUntil(
+      async () => {
+        const size = await elem.getSize();
+        return size.width > 0 && size.height > 0;
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: 'Element has zero size, cannot click',
+      },
+    );
+
+    // Flush Polymer DOM updates if present
+    await browser.execute(() => {
+      if (window.Polymer?.dom?.flush) {
+        window.Polymer.dom.flush();
+      }
+    });
+
+    await elem.click();
   }
 
   isVisible(...args) {
