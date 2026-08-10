@@ -214,7 +214,11 @@ export const NuxeoScrollRestoreBehavior = {
     this._srScrollList = list;
   },
 
-  /** Detaches the scroll listener previously set up by `_srArmScrollTracking`. */
+  /**
+   * Detaches the scroll listener set up by `_srArmScrollTracking` and cancels any
+   * pending debounced work. Called on both `detached()` and view tear-down, so a
+   * late save or verify callback can't run against a torn-down/stale view.
+   */
   _srDisarmScrollTracking() {
     if (this._srScrollList && this._srScrollHandler && typeof this._srScrollList.removeEventListener === 'function') {
       this._srScrollList.removeEventListener('scroll', this._srScrollHandler);
@@ -223,6 +227,11 @@ export const NuxeoScrollRestoreBehavior = {
     // anchor with a stale index after the view was swapped or torn down.
     if (this._srScrollDebouncer?.isActive?.()) {
       this._srScrollDebouncer.cancel();
+    }
+    // Cancel any pending restore verification so it can't call scrollToIndex on a
+    // view that has since been detached or replaced.
+    if (this._srVerifyDebouncer?.isActive?.()) {
+      this._srVerifyDebouncer.cancel();
     }
     this._srScrollList = null;
     this._srScrollHandler = null;

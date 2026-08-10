@@ -231,6 +231,20 @@ suite('NuxeoScrollRestoreBehavior', () => {
     expect(view2.scrollToIndex.calledOnce).to.equal(true);
   });
 
+  test('cancels a pending restore verification on disarm so it cannot scroll a torn-down view', () => {
+    const view = makeView(makeDocs(60), 40); // doc-40 at the top
+    makeHost(name, view)._srSaveAnchor();
+    const view2 = makeView(placeholderRows(60), 0);
+    const host2 = makeHost(name, view2);
+    host2._srMaybeRestore();
+    // jumped to the index hint and scheduled a verify for once the region loads
+    expect(view2.scrollToIndex.calledOnce).to.equal(true);
+    expect(host2._srVerifyDebouncer.isActive()).to.equal(true); // a verify is queued
+    // the element detaches / the view is swapped before the verify fires
+    host2._srDisarmScrollTracking();
+    expect(host2._srVerifyDebouncer.isActive()).to.equal(false); // the pending verify was cancelled
+  });
+
   test('re-saving the same list refreshes its anchor in place', () => {
     const host = makeHost(name, makeView(makeDocs(60), 40));
     host._srSaveAnchor(); // first save at index 40
