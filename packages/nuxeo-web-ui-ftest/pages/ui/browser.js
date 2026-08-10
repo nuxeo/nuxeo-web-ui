@@ -513,7 +513,10 @@ export default class Browser extends BasePage {
         if (!(await titleEl.isExisting())) {
           return '';
         }
-        return ((await browser.execute((el) => el.textContent, titleEl)) || '').trim();
+        // Skip rows iron-list recycled out of range (div.item[hidden] keeps stale bound content), as
+        // clickChild/indexOfChild do, so findIndex can't match a hidden row and toggle the wrong one.
+        const hidden = await browser.execute((el) => !!el.closest('div.item[hidden]'), row);
+        return hidden ? '' : ((await browser.execute((el) => el.textContent, titleEl)) || '').trim();
       }),
     );
     const index = titles.findIndex((currentTitle) => currentTitle === title);
