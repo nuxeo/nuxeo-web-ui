@@ -208,9 +208,10 @@ Polymer({
   },
 
   // Preselect the configured rendition only for a single document that has a main blob; otherwise fall back to
-  // 'none'. Bulk selections can't be represented by one blob check, so they always fall back to 'none'.
+  // 'none'. Bulk and select-all selections can't be represented by one blob check, so they always fall back to 'none'.
   _updateDefaultRendition() {
-    const hasBlob = !this._computeMultiple() && this._hasMainBlob(this.document);
+    const isBulk = this._computeMultiple() || isPageProviderDisplayBehavior(this.documents);
+    const hasBlob = !isBulk && this._hasMainBlob(this.document);
     this.selectedRendition = hasBlob ? config.get('publishing.selectedRendition', 'default') : 'none';
   },
 
