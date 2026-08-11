@@ -290,7 +290,7 @@ export const NuxeoInactivityBehavior = {
     try {
       const payload = JSON.stringify({
         url: globalThis.location.href,
-        user: this.currentUser && this.currentUser.id,
+        user: this.currentUser?.id,
       });
       globalThis.sessionStorage.setItem(INACTIVITY_REQUESTED_URL_KEY, payload);
     } catch (e) {
@@ -346,7 +346,7 @@ export const NuxeoInactivityBehavior = {
     const baseUrl = this.baseUrl || '/';
     const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
     const base = `${globalThis.location.origin}${normalizedBase}`;
-    if (requestedUrl && requestedUrl.startsWith(base) && requestedUrl !== globalThis.location.href) {
+    if (requestedUrl?.startsWith(base) && requestedUrl !== globalThis.location.href) {
       this._redirect(requestedUrl);
     }
   },
