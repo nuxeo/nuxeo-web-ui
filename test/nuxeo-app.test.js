@@ -1431,6 +1431,30 @@ suite('nuxeo-app', () => {
       expect(app.$.tasksProvider.params).to.deep.equal({ userId: 'user-1' });
     });
 
+    // WEBUI-2189: the post-login restore is driven by the currentUser observer (not ready()), so it runs
+    // once a real user has authenticated and the router is already listening.
+    test('_observeCurrentUser triggers the post-login URL restore when a real user resolves', () => {
+      const restore = sinon.stub(app, '_restoreRequestedUrlAfterLogin');
+      try {
+        app.currentUser = { id: 'jdoe', isAnonymous: false, properties: {} };
+        app._observeCurrentUser();
+        expect(restore).to.have.been.calledOnce;
+      } finally {
+        restore.restore();
+      }
+    });
+
+    test('_observeCurrentUser does not restore when there is no resolved user', () => {
+      const restore = sinon.stub(app, '_restoreRequestedUrlAfterLogin');
+      try {
+        app.currentUser = null;
+        app._observeCurrentUser();
+        expect(restore).to.not.have.been.called;
+      } finally {
+        restore.restore();
+      }
+    });
+
     test('_onClipboardAction updates recents on Document.Move', () => {
       const update = sinon.spy();
       sinon.stub(app, '$$').withArgs('#recent').returns({ update });

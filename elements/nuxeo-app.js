@@ -849,9 +849,6 @@ Polymer({
 
     this.removeAttribute('unresolved');
 
-    // WEBUI-2189: if the previous session ended via an inactivity/401 logout, return the user to the page
-    // they were on (saved on this tab) now that they have re-authenticated — before arming anything else.
-    this._restoreRequestedUrlAfterLogin();
     // WEBUI-1987: wire the inactivity timer + 401->logout redirect once here (ready() always runs).
     // attached() only re-arms after a real detach (see _inactivityNeedsRearm), so the initial
     // ready()+attached() sequence does not issue a duplicate startup keep-alive or churn listeners.
@@ -1512,6 +1509,12 @@ Polymer({
 
   _observeCurrentUser() {
     if (this.currentUser) {
+      // WEBUI-2189: run the post-login restore here rather than from ready(): with anonymous auth enabled
+      // the app boots as Guest before a real user resolves, and restoring from ready() would consume the
+      // saved page for the wrong (or no) user. By the time a real currentUser resolves the router is
+      // listening, so navigating to the saved deep link works. The restore method itself skips anonymous
+      // users and only navigates for the user who saved the page.
+      this._restoreRequestedUrlAfterLogin();
       this.$.userWorkspace.execute().then((response) => {
         this.userWorkspace = response.path;
       });
