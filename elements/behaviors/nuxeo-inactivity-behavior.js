@@ -341,7 +341,11 @@ export const NuxeoInactivityBehavior = {
     }
     // Restrict to the UI base path (e.g. `/nuxeo/ui/`, which implies same-origin) so a saved value can't
     // slip past into an open redirect. baseUrl is absent in tests/edge cases → fall back to a bare '/'.
-    const base = `${globalThis.location.origin}${this.baseUrl || '/'}`;
+    // Normalize to a single trailing '/' (mirroring the origin `+ '/'` reasoning): without it a baseUrl of
+    // `/nuxeo/ui` would let a look-alike sibling path such as `${origin}/nuxeo/ui-foo/...` pass startsWith().
+    const baseUrl = this.baseUrl || '/';
+    const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+    const base = `${globalThis.location.origin}${normalizedBase}`;
     if (requestedUrl && requestedUrl.startsWith(base) && requestedUrl !== globalThis.location.href) {
       this._redirect(requestedUrl);
     }

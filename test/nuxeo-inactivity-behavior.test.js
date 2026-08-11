@@ -493,6 +493,7 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
     teardown(() => {
       redirect.restore();
       host.currentUser = undefined;
+      host.baseUrl = undefined; // reset any base-path override set by individual tests
       window.sessionStorage.removeItem(REQUESTED_URL_KEY);
     });
 
@@ -569,6 +570,25 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       );
       host._restoreRequestedUrlAfterLogin();
       expect(redirect).not.to.have.been.called;
+    });
+
+    test('does NOT restore a look-alike sibling path when baseUrl has no trailing slash', () => {
+      // baseUrl `/nuxeo/ui` (no trailing slash) must be normalized so a sibling path like
+      // `${origin}/nuxeo/ui-foo/...` (which shares the `/nuxeo/ui` prefix) can't slip past startsWith().
+      host.baseUrl = '/nuxeo/ui';
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(`${window.location.origin}/nuxeo/ui-foo/#!/x`));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null; // consumed but not navigated
+    });
+
+    test('restores a proper base-path URL even when baseUrl has no trailing slash (normalized)', () => {
+      host.baseUrl = '/nuxeo/ui'; // no trailing slash → normalized to `/nuxeo/ui/`
+      const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(target));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).to.have.been.calledOnceWith(target);
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
     });
 
     test('does NOT redirect when the saved URL is the current page', () => {
