@@ -398,6 +398,7 @@
   "documentContentView.datatable.header.title": "Title",
   "documentContentView.datatable.header.type": "Type",
   "documentContentView.datatable.header.version": "Version",
+  "documentContentView.datatable.picturebook.heading": "Picture Book Content",
   "documentContentView.drag.import": "Drop to import",
   "documentCreateButton.tooltip": "Add Content",
   "documentCreatePopup.create": "Create",
