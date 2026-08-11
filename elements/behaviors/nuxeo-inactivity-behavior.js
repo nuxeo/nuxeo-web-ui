@@ -284,10 +284,15 @@ export const NuxeoInactivityBehavior = {
   },
 
   // WEBUI-2189: persist the current page (full hashbang URL) before an inactivity/401 logout navigation,
-  // so _restoreRequestedUrlAfterLogin() can return the user here once they log back in.
+  // so _restoreRequestedUrlAfterLogin() can return the user here once they log back in. The owning user's
+  // id is stored alongside the URL so restore only ever returns a page to the same user who left it.
   _saveRequestedUrl() {
     try {
-      globalThis.sessionStorage.setItem(INACTIVITY_REQUESTED_URL_KEY, globalThis.location.href);
+      const payload = JSON.stringify({
+        url: globalThis.location.href,
+        user: this.currentUser && this.currentUser.id,
+      });
+      globalThis.sessionStorage.setItem(INACTIVITY_REQUESTED_URL_KEY, payload);
     } catch (e) {
       // sessionStorage may be unavailable (private mode/quota); skip — we just won't restore the page.
       this._inactivityStorageError = e;
@@ -295,15 +300,22 @@ export const NuxeoInactivityBehavior = {
   },
 
   // WEBUI-2189: after re-authentication the app reloads at its root, losing the page the user was on when
-  // the session expired. If we saved one on this tab, send them back to it. Wired from the host's ready()
-  // so it runs once per boot, before the timer/401 handlers are armed. The saved value is consumed once
-  // and must be same-origin (open-redirect protection) and different from the current page before we
-  // navigate.
+  // the session expired. If we saved one on this tab, send them back to it. Wired from the host's
+  // currentUser observer so it runs once a real user has resolved (the router is already listening by then).
+  // With anonymous auth enabled the /ui SPA first boots as Guest with nobody logging in, so we must NOT
+  // consume the key for an anonymous/absent user — it has to survive that boot for the real re-login. The
+  // saved value is consumed once, must belong to the current user, must sit under the UI base path
+  // (open-redirect protection) and must differ from the current page before we navigate.
   _restoreRequestedUrlAfterLogin() {
-    let requestedUrl;
+    const { currentUser } = this;
+    // No user yet, or an anonymous/Guest boot: leave the key untouched so the real re-login can restore it.
+    if (!currentUser || currentUser.isAnonymous || currentUser.id === 'Guest') {
+      return;
+    }
+    let stored;
     try {
-      requestedUrl = globalThis.sessionStorage.getItem(INACTIVITY_REQUESTED_URL_KEY);
-      if (requestedUrl) {
+      stored = globalThis.sessionStorage.getItem(INACTIVITY_REQUESTED_URL_KEY);
+      if (stored) {
         globalThis.sessionStorage.removeItem(INACTIVITY_REQUESTED_URL_KEY); // consume once, never loop
       }
     } catch (e) {
@@ -311,13 +323,26 @@ export const NuxeoInactivityBehavior = {
       this._inactivityStorageError = e;
       return;
     }
-    // Same-origin guard: compare against `origin + '/'`, not a bare `origin`, so a look-alike host such as
-    // https://evil-<origin-host> can't slip past the prefix check and cause an open redirect.
-    if (
-      requestedUrl &&
-      requestedUrl.startsWith(`${globalThis.location.origin}/`) &&
-      requestedUrl !== globalThis.location.href
-    ) {
+    if (!stored) {
+      return;
+    }
+    let requestedUrl;
+    let savedUser;
+    try {
+      ({ url: requestedUrl, user: savedUser } = JSON.parse(stored));
+    } catch (e) {
+      // Corrupt/unreadable payload — discard it (already consumed above) and don't navigate.
+      this._inactivityStorageError = e;
+      return;
+    }
+    // Never restore one user's page for another: only navigate when the saved user matches the current one.
+    if (savedUser !== currentUser.id) {
+      return;
+    }
+    // Restrict to the UI base path (e.g. `/nuxeo/ui/`, which implies same-origin) so a saved value can't
+    // slip past into an open redirect. baseUrl is absent in tests/edge cases → fall back to a bare '/'.
+    const base = `${globalThis.location.origin}${this.baseUrl || '/'}`;
+    if (requestedUrl && requestedUrl.startsWith(base) && requestedUrl !== globalThis.location.href) {
       this._redirect(requestedUrl);
     }
   },
