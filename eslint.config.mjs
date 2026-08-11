@@ -156,6 +156,20 @@ export default [
     },
   },
 
+  // Cursor Agent Skill helpers: plain CommonJS run by Node outside the app bundle.
+  {
+    files: ['.cursor/skills/**/scripts/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+      sourceType: 'commonjs',
+    },
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
   {
     files: ['addons/**/ftest/features/step_definitions/**/*.js'],
     rules: {
