@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-publication/nuxeo-internal-publish.js';
 
 const fullDoc = {
@@ -37,6 +38,12 @@ const bloblessDoc = {
     'uid:major_version': 1,
     'uid:minor_version': 0,
   },
+};
+
+// Simulates a select-all page-provider view: no .length, but recognized by isPageProviderDisplayBehavior.
+const selectAllDocuments = {
+  selectAllActive: true,
+  behaviors: [...PageProviderDisplayBehavior],
 };
 
 // Folderish document with children: hasContent is true but there is no main blob.
@@ -109,27 +116,39 @@ suite('nuxeo-internal-publish', () => {
   suite('blob-aware default rendition', () => {
     test('should preselect the configured rendition when the document has a main blob', () => {
       element.document = fullDoc;
+      element._updateDefaultRendition();
       expect(element.selectedRendition).to.equal('default');
     });
 
     test('should fall back to none when the document has no main blob', () => {
       element.document = bloblessDoc;
+      element._updateDefaultRendition();
       expect(element.selectedRendition).to.equal('none');
     });
 
     test('should fall back to none for a folder even when hasContent is true', () => {
       element.document = folderDoc;
+      element._updateDefaultRendition();
       expect(element.selectedRendition).to.equal('none');
     });
 
     test('should fall back to none for a custom type whose blob is not at file:content', () => {
       element.document = customBlobDoc;
+      element._updateDefaultRendition();
       expect(element.selectedRendition).to.equal('none');
     });
 
     test('should fall back to none for a bulk selection even if a blob-bearing document is set', () => {
       element.document = fullDoc;
       element.documents = [fullDoc, bloblessDoc];
+      element._updateDefaultRendition();
+      expect(element.selectedRendition).to.equal('none');
+    });
+
+    test('should fall back to none for a select-all selection even if a blob-bearing document is set', () => {
+      element.document = fullDoc;
+      element.documents = selectAllDocuments;
+      element._updateDefaultRendition();
       expect(element.selectedRendition).to.equal('none');
     });
 
