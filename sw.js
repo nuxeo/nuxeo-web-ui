@@ -74,6 +74,37 @@ workbox.routing.registerRoute(
 );
 
 /* ================================
+   Entry bundle → ALWAYS revalidate
+   main.bundle.js embeds the webpack runtime chunk-hash map. It MUST be fresh so
+   dynamically-imported chunks (e.g. addon bundles like nuxeo-platform-3d) resolve to
+   content-hashed filenames that still exist on the server after an upgrade. A stale
+   entry bundle references removed hashes → 404 (WEBUI-2061 prerequisite:
+   Cache-Control: no-cache for main.bundle.js). Registered before the generic .js
+   route below so it always wins for the entry bundle.
+   NetworkFirst + `fetchOptions.cache: 'no-cache'` revalidates on every load (a stale
+   HTTP/CDN copy can never be served) while the `?ts` server-start key means any cached
+   fallback is same-version — so a transient network failure or offline reload still
+   boots from cache, and a cross-upgrade `?ts` change guarantees a fresh fetch.
+================================ */
+workbox.routing.registerRoute(
+  ({ url }) => url.pathname.endsWith('/main.bundle.js'),
+  new workbox.strategies.NetworkFirst({
+    cacheName: JS_CACHE,
+    fetchOptions: { cache: 'no-cache', credentials: 'same-origin' },
+    plugins: [
+      {
+        requestWillFetch: async ({ request }) =>
+          TS ? new Request(`${request.url}?ts=${TS}`, { credentials: 'same-origin' }) : request,
+      },
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 50,
+        purgeOnQuotaError: true,
+      }),
+    ],
+  }),
+);
+
+/* ================================
    JS files (versioned via ts)
 ================================ */
 if (TS) {

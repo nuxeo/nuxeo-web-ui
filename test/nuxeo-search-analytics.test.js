@@ -51,4 +51,26 @@ suite('nuxeo-search-analytics', () => {
       expect(series[23]).to.equal(0);
     });
   });
+
+  test('pie chart resizes to fill the available card space', async () => {
+    el.setProperties({
+      callsPerProvider: [],
+      callsPerHour: [],
+      callPerNumberOfResults: [],
+      callsPerFT: [],
+      callPerNumberOfPages: [],
+      callByFilters: [],
+      visible: true,
+    });
+    await flush();
+
+    const card = el.root.querySelector('nuxeo-card.pie-card');
+    expect(window.getComputedStyle(card).display).to.equal('flex');
+    expect(window.getComputedStyle(card).flexDirection).to.equal('column');
+
+    const chart = card.querySelector('chart-pie');
+    expect(window.getComputedStyle(chart).minWidth).to.equal('0px');
+    expect(window.getComputedStyle(chart).flexGrow).to.equal('1');
+    expect(chart.options.maintainAspectRatio).to.be.false;
+  });
 });
