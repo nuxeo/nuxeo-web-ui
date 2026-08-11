@@ -1436,8 +1436,9 @@ suite('nuxeo-app', () => {
     test('_observeCurrentUser triggers the post-login URL restore when a real user resolves', () => {
       const restore = sinon.stub(app, '_restoreRequestedUrlAfterLogin');
       try {
+        // currentUser is observer-backed, so assigning it invokes _observeCurrentUser() (the wiring under
+        // test) exactly once — do not call it explicitly as well or the restore would fire twice.
         app.currentUser = { id: 'jdoe', isAnonymous: false, properties: {} };
-        app._observeCurrentUser();
         expect(restore).to.have.been.calledOnce;
       } finally {
         restore.restore();
