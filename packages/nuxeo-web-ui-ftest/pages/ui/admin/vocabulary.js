@@ -80,32 +80,12 @@ export default class Vocabulary extends BasePage {
     const deleteButton = await this.el.element(selector);
     await deleteButton.waitForVisible();
     await deleteButton.scrollIntoView(selector);
-
-    // Wait for the alert to appear, retrying the click if it didn't register
-    await driver.waitUntil(
-      async () => {
-        try {
-          await driver.getAlertText();
-          return true;
-        } catch (e) {
-          // Alert not present — retry the click and keep waiting
-          try {
-            await deleteButton.click();
-          } catch (clickError) {
-            // Ignore transient click failures so waitUntil can retry
-          }
-          return false;
-        }
-      },
-      {
-        timeout: 10000,
-        interval: 1000,
-        timeoutMsg: 'Expected confirmation alert did not appear',
-      },
-    );
-
-    // Alert is confirmed present — accept it directly (no retry needed)
-    await driver.acceptAlert();
+    // Click once, then accept the confirm dialog via alertAccept (which waits for the alert). The
+    // previous code retried the click while polling getAlertText(), logging a spurious "no such alert"
+    // error before the dialog existed. The click retry is dropped deliberately: if the click is lost,
+    // alertAccept fails loudly rather than masking it.
+    await deleteButton.click();
+    await driver.alertAccept();
   }
 
   async editEntry(index, label) {
