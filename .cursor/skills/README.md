@@ -20,9 +20,12 @@ activates.
 | [`nuxeo-web-ui-pr-checks`](nuxeo-web-ui-pr-checks/SKILL.md) | run the gating checks before pushing | Mirrors CI lint + unit tests. Script: `nuxeo-web-ui-pr-checks/scripts/pr-checks.sh`. |
 | [`jira/create-qa-subtask`](jira/create-qa-subtask/SKILL.md) | "create a QA task", "plan QA for this ticket" | Files a `QA task` sub-task with what/how to verify. |
 | [`jira/raise-backend-jira-ticket`](jira/raise-backend-jira-ticket/SKILL.md) | a fix needs a server-side change; "raise a backend/NXP ticket" | Files an NXP (`nxplatform`) ticket and links it as a blocker. |
+| [`dependabot-fix`](dependabot-fix/SKILL.md) | "work on"/"fix" a Dependabot or dependency-security ticket, a CVE, a `WEBUI-`/`ELEMENTS-` security bump, a Dependabot alert number, or a package name | End-to-end dependency-security workflow across `nuxeo-web-ui` **and** `nuxeo-elements`, both LTS lines: scope contract, cross-manifest scan, local validation gates, PRs + Jira comment. Uses `dependabot-impact-analyst` for blast-radius analysis. |
+| [`dependabot-impact-analyst`](dependabot-impact-analyst/SKILL.md) | need the blast radius of a dependency upgrade before writing the Jira/PR summary | Maps where a package is used across both repos, classifies risk, reads the changelog for breaking changes, and returns a concrete sanity-test checklist. Used by `dependabot-fix`. |
 
 **Dependencies:** `fix-nuxeo-web-ui-bug` → `nuxeo-web-ui-pr` + `nuxeo-web-ui-pr-checks`.
 `bug-fix-validation` runs standalone and hands back to `fix-nuxeo-web-ui-bug` when validation fails.
+`dependabot-fix` → `dependabot-impact-analyst` (for the impact report).
 The Jira skills are independent and can be used on their own.
 
 ## One-time setup
