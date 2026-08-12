@@ -6,7 +6,7 @@ Used by the `dependabot-fix` skill (Step 0 onward) when the ticket is an `ELEMEN
 - GitHub repo: `nuxeo/nuxeo-elements`
 - Jira: cloudId `hyland.atlassian.net`, project `ELEMENTS`
 - Branch mapping: **LTS-2025 → `lts-2025`**, **LTS-2023 → `maintenance-3.1.x`** (default branch) — same mapping as nuxeo-web-ui
-- Feature-branch naming (observed convention): `ELEMENTS-<num>-<slug>` (add an `-lts-2025`/`-3.1.x`-style suffix only when the same fix needs distinct commits per line; check recent branches with `gh api repos/nuxeo/nuxeo-elements/branches` if unsure)
+- Feature-branch naming: `ELEMENTS-<num>-<slug>-lts-2025` and `ELEMENTS-<num>-<slug>-lts-2023` — mirror the nuxeo-web-ui convention (always suffix the LTS line) so agent behaviour is symmetric across both repos and the target base stays unambiguous, since a fix lands on both lines as separate branches. As in web-ui, security-fix branches **drop** the `<type>-` prefix (`ELEMENTS-<num>-…`, not `fix-ELEMENTS-<num>-…`). (Some historical elements branches used a bare `ELEMENTS-<num>-<slug>`; check recent branches with `gh api repos/nuxeo/nuxeo-elements/branches` when matching an existing one.)
 - Downstream consumer (not a dependency of this repo): `../nuxeo-web-ui`
 
 ## Lockfile topology — npm workspaces, ONE shared lockfile
