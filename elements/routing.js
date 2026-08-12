@@ -57,6 +57,53 @@ function encodeQueryParams(path) {
   return encodepath;
 }
 
+// Returns the name of the repository whose UI context a given pathname is browsing.
+// In a multi-repository instance the active context is encoded in the path
+// (`.../repo/<name>/ui/`); the default repository is also served from the bare
+// Web UI base path (`.../ui/`), in which case we fall back to the repository
+// flagged as default — but only when the path is actually under that base, so an
+// arbitrary same-origin URL is not misclassified as the default repository.
+function repositoryNameForPath(pathname) {
+  const repositories = Nuxeo?.UI?.repositories || [];
+  const current = repositories.find((repo) => repo.href && pathname.startsWith(repo.href));
+  if (current) {
+    return current.name;
+  }
+  const base = (app.baseUrl || '').replace(/\/$/, '');
+  const underBase = !base || pathname === base || pathname.startsWith(`${base}/`);
+  return underBase ? repositories.find((repo) => repo.isDefault)?.name : undefined;
+}
+
+// Convenience wrapper for the pathname currently being browsed.
+function currentRepositoryName() {
+  return repositoryNameForPath(globalThis.location.pathname);
+}
+
+// When reverse routing produces an absolute URL for a document (which happens in
+// multi-repository instances), navigating to it would trigger a full page reload.
+// If that URL targets the repository we are already browsing, return the client-side
+// route (the part after the hashbang) so we can navigate without losing the current
+// search drawer/queue state. Returns null when the URL is external, points to a
+// different repository, or carries no hashbang route, where a full navigation is
+// still required.
+function sameRepositoryClientPath(path) {
+  const url = new URL(path);
+  if (url.origin !== globalThis.location.origin) {
+    return null;
+  }
+  // Resolve the target path's repository the same way as the current one, so the default
+  // repository served from the bare `.../ui/` path (no `/repo/<name>/`) is matched too.
+  if (repositoryNameForPath(url.pathname) !== currentRepositoryName()) {
+    return null;
+  }
+  const route = url.hash.replace(/^#!?/, '');
+  if (!route) {
+    return null;
+  }
+  // page() expects an app route starting with '/'; guard against hashes without one.
+  return route.startsWith('/') ? route : `/${route}`;
+}
+
 function _routeAdmin(selectedAdminTab, errorPath, routeData) {
   const hasPermission =
     app.currentUser.isAdministrator || app.currentUser.extendedGroups.find((grp) => grp.name === 'powerusers');
@@ -223,6 +270,11 @@ app.router = {
     }
     const isFullpath = /^http(s)?:\/\//.test(path);
     if (isFullpath) {
+      const clientPath = sameRepositoryClientPath(path);
+      if (clientPath != null) {
+        page(clientPath);
+        return;
+      }
       const isValidUrl = isTrustedDomain(path);
       if (isValidUrl) {
         const encodepath = encodeQueryParams(path);
