@@ -591,6 +591,26 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
     });
 
+    test('restores a same-origin absolute baseUrl (resolved via URL, not origin-concatenated)', () => {
+      // nuxeo-app's base-url may be an absolute URL (property contract): resolving it via URL() rather than
+      // string-concatenating location.origin keeps the restore working instead of failing every time.
+      host.baseUrl = `${window.location.origin}/nuxeo/ui/`;
+      const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(target));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).to.have.been.calledOnceWith(target);
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
+    });
+
+    test('ignores a non-string saved url without throwing (tampered payload)', () => {
+      // A valid-JSON but wrong-typed payload (e.g. { url: 1 }) must not reach startsWith() — otherwise it
+      // would throw and abort the currentUser observer that drives the restore.
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, JSON.stringify({ url: 1, user: CURRENT_USER.id }));
+      expect(() => host._restoreRequestedUrlAfterLogin()).to.not.throw();
+      expect(redirect).not.to.have.been.called;
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null; // consumed
+    });
+
     test('does NOT redirect when the saved URL is the current page', () => {
       window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(window.location.href));
       host._restoreRequestedUrlAfterLogin();
