@@ -328,6 +328,21 @@ suite('nuxeo-document-grid-thumbnail', () => {
         element._toogleSelect.restore();
       });
     });
+
+    // nuxeo-default-search-results._triggerItemToggle wraps a keydown on the tile in a synthetic tap.
+    test('synthetic tap wrapping an unmodified Enter calls _toogleSelect', () => {
+      sinon.spy(element, '_toogleSelect');
+      element._onCheckBoxTap({ type: 'tap', detail: { sourceEvent: { key: 'Enter' } } });
+      expect(element._toogleSelect).to.have.been.called;
+      element._toogleSelect.restore();
+    });
+
+    test('synthetic tap wrapping Ctrl+Enter does not toggle', () => {
+      sinon.spy(element, '_toogleSelect');
+      element._onCheckBoxTap({ type: 'tap', detail: { sourceEvent: { key: 'Enter', ctrlKey: true } } });
+      expect(element._toogleSelect).to.not.have.been.called;
+      element._toogleSelect.restore();
+    });
   });
 
   suite('_toogleSelect', () => {
