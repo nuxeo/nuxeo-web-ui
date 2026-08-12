@@ -339,14 +339,32 @@ export const NuxeoInactivityBehavior = {
     if (savedUser !== currentUser.id) {
       return;
     }
-    // Restrict to the UI base path (e.g. `/nuxeo/ui/`, which implies same-origin) so a saved value can't
-    // slip past into an open redirect. baseUrl is absent in tests/edge cases → fall back to a bare '/'.
-    // Normalize to a single trailing '/' (mirroring the origin `+ '/'` reasoning): without it a baseUrl of
-    // `/nuxeo/ui` would let a look-alike sibling path such as `${origin}/nuxeo/ui-foo/...` pass startsWith().
-    const baseUrl = this.baseUrl || '/';
-    const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-    const base = `${globalThis.location.origin}${normalizedBase}`;
-    if (requestedUrl?.startsWith(base) && requestedUrl !== globalThis.location.href) {
+    // The payload comes from (untrusted) sessionStorage: only a string URL is usable. Anything else — e.g. a
+    // tampered `{ "url": 1 }` — must be ignored, not fed to URL()/startsWith() below where it would throw and
+    // abort the currentUser observer that called us.
+    if (typeof requestedUrl !== 'string') {
+      return;
+    }
+    // Restrict the restore to the UI base path so a saved value can't slip past into an open redirect.
+    // baseUrl is usually a path (`/nuxeo/ui/`) but the property contract also allows an absolute URL, so
+    // resolve both it and the saved URL against the current origin. Normalize the base to a single trailing
+    // '/' — without it a base of `/nuxeo/ui` would let a sibling path like `${origin}/nuxeo/ui-foo/...` pass.
+    const rawBase = this.baseUrl || '/';
+    const normalizedBase = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+    const { origin } = globalThis.location;
+    let base;
+    let target;
+    try {
+      base = new URL(normalizedBase, origin);
+      target = new URL(requestedUrl, origin);
+    } catch (e) {
+      // Unparseable base or saved URL — discard (already consumed above) and don't navigate.
+      this._inactivityStorageError = e;
+      return;
+    }
+    // Require the saved URL to be same-origin with the window we're navigating (the real open-redirect
+    // guard) AND under the UI base path, and to differ from the current page.
+    if (target.origin === origin && target.href.startsWith(base.href) && target.href !== globalThis.location.href) {
       this._redirect(requestedUrl);
     }
   },
