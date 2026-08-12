@@ -18,6 +18,11 @@ limitations under the License.
 import { fixture, html, flush } from '@nuxeo/testing-helpers';
 import '../elements/search/nuxeo-search-form.js';
 
+window.nuxeo.I18n.language = 'en';
+window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
+window.nuxeo.I18n.en['searchForm.searchFilters'] = 'Search Filters';
+window.nuxeo.I18n.en['searchForm.searchFilters.placeholder'] = 'Select a saved search';
+
 suite('nuxeo-search-form', () => {
   let searchForm;
 
@@ -30,8 +35,19 @@ suite('nuxeo-search-form', () => {
   test('gives the saved searches dropdown an always visible label (WEBUI-489)', () => {
     const actionsDropdown = searchForm.shadowRoot.querySelector('#actionsDropdown');
     expect(actionsDropdown).to.exist;
-    expect(actionsDropdown.label).to.equal(searchForm.i18n('searchForm.searchFilters'));
-    expect(actionsDropdown.placeholder).to.equal(searchForm.i18n('searchForm.searchFilters.placeholder'));
+    expect(actionsDropdown.label).to.equal('Search Filters');
+    expect(actionsDropdown.placeholder).to.equal('Select a saved search');
+
+    const visibleLabel = actionsDropdown.shadowRoot.querySelector('label.label');
+    expect(visibleLabel).to.exist;
+    expect(visibleLabel.textContent.trim()).to.equal('Search Filters');
+    expect(visibleLabel.hasAttribute('hidden')).to.be.false;
+
+    const input = actionsDropdown.shadowRoot.querySelector(
+      '.selectivity-single-select-input, .selectivity-multiple-input',
+    );
+    expect(input).to.exist;
+    expect(input.getAttribute('aria-label')).to.equal('Search Filters');
   });
 
   test('maps saved searches for selectivity data', () => {

@@ -791,7 +791,11 @@ suite('nuxeo-results', () => {
       expect(results._sortOptions()).to.deep.equal(elementSortOptions);
     });
 
-    test('gives the sort selector an always visible label (WEBUI-489)', async () => {
+    test('passes an always visible label to the sort selector (WEBUI-489)', async () => {
+      window.nuxeo.I18n.language = 'en';
+      window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
+      window.nuxeo.I18n.en['results.sortBy'] = 'Sort by';
+
       const mockView = createMockView({ sortOptions: [{ field: 'dc:created', label: 'Created', order: 'desc' }] });
       mockView.setAttribute('display-sort', '');
       results.view = mockView;
@@ -800,7 +804,7 @@ suite('nuxeo-results', () => {
 
       const sortSelect = results.shadowRoot.querySelector('nuxeo-sort-select');
       expect(sortSelect).to.exist;
-      expect(sortSelect.label).to.equal(results.i18n('results.sortBy'));
+      expect(sortSelect.label).to.equal('Sort by');
     });
   });
 
