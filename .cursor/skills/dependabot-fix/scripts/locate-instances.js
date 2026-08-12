@@ -46,7 +46,12 @@ if (!l.packages) {
   process.exit(2);
 }
 for (const [k, v] of Object.entries(l.packages || {})) {
-  const d = { ...v.dependencies, ...v.devDependencies, ...v.peerDependencies, ...v.optionalDependencies };
+  const d = {
+    ...(v.dependencies || {}),
+    ...(v.devDependencies || {}),
+    ...(v.peerDependencies || {}),
+    ...(v.optionalDependencies || {}),
+  };
   if (d[pkg]) console.log((k || '<root>') + ' requires ' + pkg + '@' + d[pkg]);
   if (k === 'node_modules/' + pkg || k.endsWith('/node_modules/' + pkg)) {
     console.log(k + ' => ' + v.version + (v.dev ? ' (dev)' : ''));

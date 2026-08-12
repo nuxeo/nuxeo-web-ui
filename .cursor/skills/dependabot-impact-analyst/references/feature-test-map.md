@@ -6,8 +6,8 @@ This map is written from the **Web UI feature's** point of view and is used **re
 
 This is a *maintained* map — it will not cover every package. When a package isn't listed, fall back to grepping usage and reasoning from the nearest feature row. When you discover a new package↔feature link during an analysis, add a row here.
 
-Test files live in `test/*.test.js`. Run one with:
-`web-test-runner test/<name>.test.js` (or `npx web-test-runner test/<name>.test.js --group default`).
+Test files live in `test/*.test.js`, but a suite must load `test/setup.js` first (it defines the `expect`/`sinon` globals, via the generated `test/load-all-tests.js` barrel). So filter by **suite name** — never run a file directly:
+`npx web-test-runner --grep '<suite-name>'` (e.g. `--grep 'nuxeo-analytics'`). Running `--files test/<name>.test.js` on its own skips setup and fails on missing globals.
 
 | Package / category | Web UI feature | Unit test file(s) | Manual sanity (what to click, what "good" looks like) |
 | --- | --- | --- | --- |

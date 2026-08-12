@@ -40,12 +40,28 @@ if (res.status !== 0) {
   console.error('ERROR: `git ls-files` exited ' + res.status + ' — are you inside the repo?\n' + (res.stderr || ''));
   process.exit(2);
 }
-const files = (res.stdout || '')
+const allManifests = (res.stdout || '')
   .split('\n')
   .map((s) => s.trim())
   .filter(Boolean)
-  .filter((f) => !f.includes('node_modules'))
-  .filter((f) => f !== ticketManifest);
+  .filter((f) => !f.includes('node_modules'));
+
+// Normalise the caller-supplied ticket manifest (strip a leading ./) and require it
+// to be one of the tracked lockfiles. A typo or minor path mismatch would otherwise
+// leave the ticket's OWN manifest in the scan set and get reported as a bogus
+// "cross-manifest" duplicate — the exact false conclusion this guard prevents.
+const normalizedTicket = ticketManifest.replace(/^\.\//, '');
+if (!allManifests.includes(normalizedTicket)) {
+  console.error(
+    'ERROR: ticket manifest "' +
+      ticketManifest +
+      '" is not one of the tracked package-lock.json files.\n' +
+      "Pass it exactly as the alert's .dependency.manifest_path reports it (no leading ./). Tracked manifests:\n" +
+      allManifests.map((f) => '  ' + f).join('\n'),
+  );
+  process.exit(2);
+}
+const files = allManifests.filter((f) => f !== normalizedTicket);
 
 if (!files.length) {
   console.log('Cross-manifest scan: no other tracked package-lock.json manifests found.');
