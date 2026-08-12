@@ -512,6 +512,17 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       setItem.restore();
     });
 
+    test('_saveRequestedUrl skips the save when no user id is resolved (unrestorable payload)', () => {
+      // Without a resolved user the saved URL could never be matched to its owner on restore, so we must
+      // not write a `{ user: undefined }` payload that would be consumed-but-never-navigated.
+      host.currentUser = undefined;
+      const setItem = sinon.spy(window.sessionStorage, 'setItem');
+      host._saveRequestedUrl();
+      expect(setItem).not.to.have.been.called;
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
+      setItem.restore();
+    });
+
     test('restores a saved same-origin page for the matching user and consumes the key', () => {
       const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
       window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(target));

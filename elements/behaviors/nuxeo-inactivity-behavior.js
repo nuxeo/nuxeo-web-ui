@@ -287,10 +287,17 @@ export const NuxeoInactivityBehavior = {
   // so _restoreRequestedUrlAfterLogin() can return the user here once they log back in. The owning user's
   // id is stored alongside the URL so restore only ever returns a page to the same user who left it.
   _saveRequestedUrl() {
+    // Only persist a page we can actually return later: without a resolved user id we couldn't match the
+    // saved URL to its owner on restore, so it would be consumed but never navigated. Skip the save instead
+    // of writing an unrestorable `{ user: undefined }` payload.
+    const userId = this.currentUser?.id;
+    if (!userId) {
+      return;
+    }
     try {
       const payload = JSON.stringify({
         url: globalThis.location.href,
-        user: this.currentUser?.id,
+        user: userId,
       });
       globalThis.sessionStorage.setItem(INACTIVITY_REQUESTED_URL_KEY, payload);
     } catch (e) {
