@@ -410,6 +410,7 @@ Polymer({
     </style>
     <header role="banner">
       <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
+      <nuxeo-suggester id="suggester"></nuxeo-suggester>
 
       <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
@@ -545,7 +546,6 @@ Polymer({
               aria-label$="[[i18n('command.menu')]]"
               tabindex="-1"
             ></paper-icon-button>
-            <nuxeo-suggester id="suggester"></nuxeo-suggester>
           </app-toolbar>
         </app-header>
 
