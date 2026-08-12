@@ -6,9 +6,10 @@
  * "Still needs review" means, for an open, non-draft PR whose checks are all
  * green and which carries the configured ready label (default
  * "READY_FOR_REVIEW", see READY_LABEL_NAME below): it is NOT (approved by one
- * of the leads AND approved by >= 1 non-lead developer). A PR is considered
- * sufficiently reviewed and is skipped only once it has an approval from at
- * least one configured lead and at least one other developer's approval.
+ * of the leads AND approved by >= 2 distinct people overall). A PR is
+ * considered sufficiently reviewed and is skipped only once it has an
+ * approval from at least one configured lead plus a second, distinct
+ * approver -- who may be another lead.
  *
  * The Teams message is an Adaptive Card wrapped in the envelope expected by a
  * Power Automate "Workflows" incoming webhook (the successor to the retired
@@ -18,8 +19,9 @@
  *   GH_TOKEN               GitHub token with read access to all scanned repos (required).
  *   TEAMS_WEBHOOK_URL      Power Automate Workflows webhook URL (required unless DRY_RUN).
  *   PR_REVIEW_LEAD_LOGIN   Comma-separated GitHub login(s) of the lead reviewer(s) (required).
- *                          A PR needs an approval from at least one of these logins, plus at
- *                          least one approval from a non-lead developer, to count as reviewed.
+ *                          A PR needs an approval from at least one of these logins, plus a
+ *                          second, distinct approver (who may be another lead), to count as
+ *                          reviewed.
  *   SCAN_REPOS             Comma-separated owner/name list.
  *                          Default: nuxeo/nuxeo-web-ui,nuxeo/nuxeo-elements
  *   REQUIRE_ALL_CHECKS     'true' (default) requires the check rollup to be SUCCESS.
@@ -312,9 +314,11 @@ function evaluatePullRequest(pr, repoSlug) {
   if (config.skipChangesRequested && hasChangesRequested) return null;
 
   const leadApproved = [...approvers].some((login) => config.leadLogins.includes(login.toLowerCase()));
-  const nonLeadApprovals = [...approvers].filter((login) => !config.leadLogins.includes(login.toLowerCase())).length;
 
-  const sufficientlyReviewed = leadApproved && nonLeadApprovals >= 1;
+  // Require a lead's approval plus a second, distinct approver -- who may be another lead.
+  // Two leads approving is already a stronger signal than "lead + any developer", so it
+  // must not be treated as less sufficient than that.
+  const sufficientlyReviewed = leadApproved && approvers.size >= 2;
   if (sufficientlyReviewed) return null;
 
   // Keep the ready-label check last: it's cheap, but evaluating it after the more
@@ -366,7 +370,7 @@ function buildAdaptiveCard(prs) {
   } else {
     body.push({
       type: 'TextBlock',
-      text: 'Checks green, still need a lead approval and one other developer approval',
+      text: 'Checks green, still need a lead approval plus a second approval',
       wrap: true,
       isSubtle: true,
       spacing: 'None',
