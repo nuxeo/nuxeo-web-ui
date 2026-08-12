@@ -1851,14 +1851,18 @@ suite('nuxeo-app', () => {
   });
 
   suite('accessibility and menu keyboard', () => {
-    test('quick search sits in the app header, ahead of the main content landmark', () => {
+    test('quick search is tabbable before main content without a transformed ancestor', () => {
       const { suggester, mainContent } = app.$;
-      const toolbar = app.shadowRoot.querySelector('app-header app-toolbar');
+      const banner = app.shadowRoot.querySelector('header[role="banner"]');
+      const searchButton = suggester.shadowRoot.querySelector('#searchButton');
       expect(suggester).to.be.ok;
       expect(mainContent).to.be.ok;
-      expect(toolbar).to.be.ok;
+      expect(banner).to.be.ok;
       expect(mainContent.contains(suggester)).to.be.false;
-      expect(toolbar.contains(suggester)).to.be.true;
+      expect(banner.contains(suggester)).to.be.true;
+      expect(suggester.compareDocumentPosition(mainContent) & Node.DOCUMENT_POSITION_FOLLOWING).to.not.equal(0);
+      expect(searchButton.tabIndex).to.equal(0);
+      expect(suggester.closest('app-header')).to.be.null;
       // The focusable control is the inner search button; a tabindex on the wrapper
       // would add a tab stop on an element that renders nothing.
       expect(suggester.hasAttribute('tabindex')).to.be.false;
