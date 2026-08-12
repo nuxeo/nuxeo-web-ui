@@ -40,7 +40,10 @@ if (unstagedClean && stagedClean) {
   process.exit(2);
 }
 
-// npm exits non-zero when vulnerabilities exist, so read stdout regardless of status.
+// npm audit exits non-zero *when vulnerabilities exist* (normal — read stdout
+// regardless of status). But a spawn failure, empty stdout, non-JSON output, or a
+// JSON `{ error }` payload means the audit never really ran — that must fail loudly,
+// not be swallowed into an empty node list (a false "no vulnerabilities / no change").
 function auditNodes(manifestDir, name) {
   const res = spawnSync('npm', ['audit', '--package-lock-only', '--json'], {
     cwd: manifestDir,
@@ -48,11 +51,34 @@ function auditNodes(manifestDir, name) {
     shell: win, // npm is npm.cmd on Windows
     maxBuffer: 64 * 1024 * 1024,
   });
+  if (res.error) {
+    console.error('ERROR: could not run npm audit in ' + manifestDir + ' — ' + res.error.message);
+    process.exit(2);
+  }
+  if (!res.stdout || !res.stdout.trim()) {
+    console.error(
+      'ERROR: npm audit produced no output in ' +
+        manifestDir +
+        ' (exit ' +
+        res.status +
+        ')' +
+        (res.stderr ? ':\n' + res.stderr : '') +
+        '\nCannot trust an empty audit — check network/registry auth and retry.',
+    );
+    process.exit(2);
+  }
   let json;
   try {
-    json = JSON.parse(res.stdout || '{}');
-  } catch {
-    json = {};
+    json = JSON.parse(res.stdout);
+  } catch (e) {
+    console.error('ERROR: npm audit output was not valid JSON in ' + manifestDir + ' — ' + e.message);
+    process.exit(2);
+  }
+  // npm surfaces registry/other failures as a JSON `{ error: {...} }` payload.
+  if (json.error) {
+    const msg = json.error.summary || json.error.detail || JSON.stringify(json.error);
+    console.error('ERROR: npm audit reported an error in ' + manifestDir + ' — ' + msg);
+    process.exit(2);
   }
   const v = (json.vulnerabilities || {})[name];
   return (v && Array.isArray(v.nodes) ? v.nodes.slice() : []).sort();

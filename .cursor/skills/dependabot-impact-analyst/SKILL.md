@@ -71,7 +71,7 @@ Read `references/feature-test-map.md` first — it maps packages/features to the
 - ... (or "No direct usage; transitive via <dependent>, exercised only by <dev tooling / feature>")
 
 **Targeted tests to run (fast local signal):**
-- `web-test-runner test/<name>.test.js` — <feature> (nuxeo-web-ui)
+- `npx web-test-runner --grep '<suite-name>'` — <feature> (nuxeo-web-ui; filters the `test/load-all-tests.js` barrel so `test/setup.js` globals load — do not run `--files test/<name>.test.js` alone)
 - `npm run test:<workspace>` — <feature> (nuxeo-elements)
 - ... (or "none — dev/build-only")
 
