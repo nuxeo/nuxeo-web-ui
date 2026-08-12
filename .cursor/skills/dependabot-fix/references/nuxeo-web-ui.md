@@ -6,7 +6,7 @@ Used by the `dependabot-fix` skill (Step 0 onward) when the ticket is a `WEBUI-<
 - GitHub repo: `nuxeo/nuxeo-web-ui`
 - Jira: cloudId `hyland.atlassian.net`, project `WEBUI`
 - Branch mapping: **LTS-2025 → `lts-2025`**, **LTS-2023 → `maintenance-3.1.x`** (default branch)
-- Feature-branch naming: `WEBUI-<num>-<slug>-lts-2025` and `WEBUI-<num>-<slug>-lts-2023`
+- Feature-branch naming: `WEBUI-<num>-<slug>-lts-2025` and `WEBUI-<num>-<slug>-lts-2023`. Note: security-fix branches intentionally **drop** the `<type>-` prefix that the general `nuxeo-web-ui-pr` skill uses (i.e. `WEBUI-<num>-…`, not `fix-WEBUI-<num>-…`) — the ticket is already a `[Security]` task, so no `fix-`/`chore-` type prefix is added. Keep the LTS-line suffix so the target base stays unambiguous.
 - Sibling repo (published dependency, not vendored): `../nuxeo-elements`
 
 ## Lockfile topology — root + 3 independent sibling projects
