@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.nuxeo.web.ui</groupId>
     <artifactId>nuxeo-web-ui-parent</artifactId>
-    <version>2025.19.0-SNAPSHOT</version>
+    <version>2025.19.0-rc.14</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
@@ -12,7 +12,7 @@
   <name>Nuxeo Web UI - Marketplace Package</name>
 
   <properties>
-    <webui.package.version>${project.version}</webui.package.version>
+    <webui.package.version>2025.19.0-rc.014</webui.package.version>
   </properties>
 
   <dependencies>
