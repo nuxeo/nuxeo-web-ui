@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-date.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
@@ -46,9 +47,14 @@ Polymer({
       }
     </style>
 
+    <nuxeo-resource id="user" path="/user"></nuxeo-resource>
+
     <template is="dom-repeat" items="[[activities]]">
       <div class="row">
-        <nuxeo-user-tag user="[[item.principalName]]" max-characters="15"></nuxeo-user-tag>
+        <nuxeo-user-tag
+          user="[[_resolvedPrincipal(item.principalName, _principalEntities, _principalsLoading)]]"
+          max-characters="15"
+        ></nuxeo-user-tag>
         <div class="value">
           <span>[[_activity(item)]]</span>
           <nuxeo-date class="datetime" datetime="[[item.eventDate]]" format="relative"></nuxeo-date>
@@ -70,6 +76,73 @@ Polymer({
       type: Array,
       value: [],
     },
+
+    _principalEntities: {
+      type: Object,
+      value: () => {
+        return {};
+      },
+    },
+    _principalsLoading: {
+      type: Boolean,
+      value: false,
+    },
+    _principalsRequestId: {
+      type: Number,
+      value: 0,
+    },
+  },
+
+  observers: ['_fetchPrincipals(activities)'],
+
+  _fetchPrincipals(activities) {
+    if (!activities?.length) {
+      // Bump the request id so any in-flight resolve is invalidated and cannot
+      // repopulate the entities map after this reset.
+      this._principalsRequestId += 1;
+      this._principalEntities = {};
+      this._principalsLoading = false;
+      return undefined;
+    }
+    const requestId = ++this._principalsRequestId;
+    this._principalsLoading = true;
+    // Serialize invocations: the observer can re-fire while a previous fetch is still in
+    // flight, and every lookup mutates the `path` of a single shared <nuxeo-resource>
+    // (this.$.user). Chaining runs sequentially prevents concurrent path mutation and
+    // in-flight request aborts on that shared element.
+    const run = () => this._resolvePrincipals(activities, requestId);
+    const previous = this._principalsChain || Promise.resolve();
+    this._principalsChain = previous.catch(() => {}).then(run);
+    return this._principalsChain;
+  },
+
+  async _resolvePrincipals(activities, requestId) {
+    const entities = {};
+    const seen = new Set();
+    for (const activity of activities) {
+      const principal = activity.principalName;
+      if (principal && typeof principal === 'string' && !seen.has(principal)) {
+        seen.add(principal);
+        try {
+          this.$.user.path = `/user/${encodeURIComponent(principal)}`;
+          const user = await this.$.user.get();
+          entities[principal] = user;
+        } catch (error) {
+          if (error.status !== 404) {
+            console.warn(`Unexpected error resolving user "${principal}":`, error);
+          }
+          entities[principal] = principal; // fallback: keep raw username for system/deleted users
+        }
+      }
+    }
+    if (requestId !== this._principalsRequestId) return;
+    this._principalEntities = entities;
+    this._principalsLoading = false;
+  },
+
+  _resolvedPrincipal(principalName, entities, loading) {
+    if (loading) return null;
+    return entities?.[principalName] || principalName;
   },
 
   _activity(event) {
