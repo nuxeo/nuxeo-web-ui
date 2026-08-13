@@ -4,9 +4,12 @@
  * ones that still need review to a Microsoft Teams channel.
  *
  * "Still needs review" means, for an open, non-draft PR whose checks are all
- * green: it is NOT (approved by the lead AND approved by >= 1 non-lead
- * developer). A PR is considered sufficiently reviewed and is skipped only once
- * it has both the lead's approval and at least one other developer's approval.
+ * green and which carries the configured ready label (default
+ * "READY_FOR_REVIEW", see READY_LABEL_NAME below): it is NOT (approved by one
+ * of the leads AND approved by >= 2 distinct people overall). A PR is
+ * considered sufficiently reviewed and is skipped only once it has an
+ * approval from at least one configured lead plus a second, distinct
+ * approver -- who may be another lead.
  *
  * The Teams message is an Adaptive Card wrapped in the envelope expected by a
  * Power Automate "Workflows" incoming webhook (the successor to the retired
@@ -15,7 +18,10 @@
  * Configuration (environment variables):
  *   GH_TOKEN               GitHub token with read access to all scanned repos (required).
  *   TEAMS_WEBHOOK_URL      Power Automate Workflows webhook URL (required unless DRY_RUN).
- *   PR_REVIEW_LEAD_LOGIN   GitHub login of the lead reviewer (required).
+ *   PR_REVIEW_LEAD_LOGIN   Comma-separated GitHub login(s) of the lead reviewer(s) (required).
+ *                          A PR needs an approval from at least one of these logins, plus a
+ *                          second, distinct approver (who may be another lead), to count as
+ *                          reviewed.
  *   SCAN_REPOS             Comma-separated owner/name list.
  *                          Default: nuxeo/nuxeo-web-ui,nuxeo/nuxeo-elements
  *   REQUIRE_ALL_CHECKS     'true' (default) requires the check rollup to be SUCCESS.
@@ -35,6 +41,10 @@
  *                          Default: 'copilot'.
  *   DONT_MERGE_LABEL_REGEX Case-insensitive regex; PRs with a matching label are skipped.
  *                          Default: "do\\s*n'?t\\s*merge|do\\s*not\\s*merge".
+ *   REQUIRE_READY_LABEL    'true' (default) requires PRs to carry the READY_LABEL_NAME label;
+ *                          PRs missing it are skipped (not yet marked ready for review).
+ *   READY_LABEL_NAME       Exact label name (case-insensitive) required when REQUIRE_READY_LABEL
+ *                          is enabled. Default: 'READY_FOR_REVIEW'.
  *   MAX_NEW_ISSUES         Skip PRs whose SonarCloud "New issues" count exceeds this. Default 0.
  *                          Coverage on New Code is gated on SonarCloud's own pass/fail for that
  *                          condition (the red-cross icon), not a raw percentage — so a
@@ -115,7 +125,10 @@ const isBotAuthor = (login) => {
 const config = {
   token: env('GH_TOKEN'),
   webhookUrl: env('TEAMS_WEBHOOK_URL'),
-  leadLogin: (env('PR_REVIEW_LEAD_LOGIN') || '').trim(),
+  leadLogins: (env('PR_REVIEW_LEAD_LOGIN') || '')
+    .split(',')
+    .map((login) => login.trim().toLowerCase())
+    .filter(Boolean),
   repos: (env('SCAN_REPOS', 'nuxeo/nuxeo-web-ui,nuxeo/nuxeo-elements') || '')
     .split(',')
     .map((r) => r.trim())
@@ -135,6 +148,8 @@ const config = {
     env('DONT_MERGE_LABEL_REGEX', "do\\s*n'?t\\s*merge|do\\s*not\\s*merge"),
     'DONT_MERGE_LABEL_REGEX',
   ),
+  requireReadyLabel: asBool(env('REQUIRE_READY_LABEL'), true),
+  readyLabelName: (env('READY_LABEL_NAME', 'READY_FOR_REVIEW') || '').trim(),
   maxNewIssues: asNumber(env('MAX_NEW_ISSUES', '0'), 0),
   sonarMissingPolicy: (env('SONAR_MISSING_POLICY', 'include') || 'include').toLowerCase(),
   postWhenEmpty: asBool(env('POST_WHEN_EMPTY'), false),
@@ -148,9 +163,14 @@ const fail = (message) => {
 };
 
 if (!config.token) fail('GH_TOKEN is not set.');
-if (!config.leadLogin) fail('PR_REVIEW_LEAD_LOGIN is not set.');
+if (config.leadLogins.length === 0) fail('PR_REVIEW_LEAD_LOGIN is not set.');
 if (!config.dryRun && !config.webhookUrl) fail('TEAMS_WEBHOOK_URL is not set.');
 if (config.repos.length === 0) fail('SCAN_REPOS resolved to an empty list.');
+if (config.requireReadyLabel && !config.readyLabelName) {
+  fail(
+    'READY_LABEL_NAME is empty while REQUIRE_READY_LABEL is enabled. Set a label name or set REQUIRE_READY_LABEL=false.',
+  );
+}
 
 const PR_QUERY = `
   query($owner: String!, $name: String!, $cursor: String) {
@@ -169,7 +189,7 @@ const PR_QUERY = `
           baseRefName
           mergeable
           author { login }
-          labels(first: 20) {
+          labels(first: 100) {
             nodes { name }
           }
           latestOpinionatedReviews(first: 100) {
@@ -293,12 +313,24 @@ function evaluatePullRequest(pr, repoSlug) {
 
   if (config.skipChangesRequested && hasChangesRequested) return null;
 
-  const leadLower = config.leadLogin.toLowerCase();
-  const leadApproved = [...approvers].some((login) => login.toLowerCase() === leadLower);
-  const nonLeadApprovals = [...approvers].filter((login) => login.toLowerCase() !== leadLower).length;
+  const leadApproved = [...approvers].some((login) => config.leadLogins.includes(login.toLowerCase()));
 
-  const sufficientlyReviewed = leadApproved && nonLeadApprovals >= 1;
+  // Require a lead's approval plus a second, distinct approver -- who may be another lead.
+  // Two leads approving is already a stronger signal than "lead + any developer", so it
+  // must not be treated as less sufficient than that.
+  const sufficientlyReviewed = leadApproved && approvers.size >= 2;
   if (sufficientlyReviewed) return null;
+
+  // Keep the ready-label check last: it's cheap, but evaluating it after the more
+  // substantive review/CI/Sonar gates keeps those failure reasons visible first in any
+  // future per-condition logging, and avoids masking a "sufficiently reviewed" PR (which
+  // should just be silently skipped) behind a "not labeled ready" reason.
+  if (config.requireReadyLabel) {
+    const hasReadyLabel = (pr.labels?.nodes || []).some(
+      (l) => (l.name || '').toLowerCase() === config.readyLabelName.toLowerCase(),
+    );
+    if (!hasReadyLabel) return null;
+  }
 
   return {
     repo: repoSlug,
@@ -338,7 +370,7 @@ function buildAdaptiveCard(prs) {
   } else {
     body.push({
       type: 'TextBlock',
-      text: 'Checks green, still need a lead approval and one other developer approval',
+      text: 'Checks green, still need a lead approval plus a second approval',
       wrap: true,
       isSubtle: true,
       spacing: 'None',
