@@ -201,7 +201,7 @@ Polymer({
     },
   },
 
-  observers: ['_updateDefaultRendition(document, documents.length)'],
+  observers: ['_updateDefaultRendition(document, documents, documents.splices)'],
 
   _computeMultiple() {
     return !!(this.documents && this.documents.length > 0);

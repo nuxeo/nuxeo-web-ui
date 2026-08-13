@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { flush } from '@polymer/polymer/lib/utils/flush.js';
 import { PageProviderDisplayBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-page-provider-display-behavior.js';
 import '../elements/nuxeo-publication/nuxeo-internal-publish.js';
 
@@ -158,6 +159,39 @@ suite('nuxeo-internal-publish', () => {
       expect(element._hasMainBlob(folderDoc)).to.be.false;
       expect(element._hasMainBlob(customBlobDoc)).to.be.false;
       expect(element._hasMainBlob(undefined)).to.be.false;
+    });
+  });
+
+  // Drive the real Polymer observer by assigning properties (no direct method call) to lock in binding behaviour.
+  suite('blob-aware default rendition (via observer)', () => {
+    test('should preselect the configured rendition when a blob-bearing document is assigned', () => {
+      element.document = fullDoc;
+      flush();
+      expect(element.selectedRendition).to.equal('default');
+    });
+
+    test('should fall back to none when a blobless document is assigned', () => {
+      element.document = bloblessDoc;
+      flush();
+      expect(element.selectedRendition).to.equal('none');
+    });
+
+    test('should force none when documents becomes a select-all view after a blob-bearing document', () => {
+      element.document = fullDoc;
+      flush();
+      expect(element.selectedRendition).to.equal('default');
+      element.documents = selectAllDocuments;
+      flush();
+      expect(element.selectedRendition).to.equal('none');
+    });
+
+    test('should force none when documents becomes a bulk array after a blob-bearing document', () => {
+      element.document = fullDoc;
+      flush();
+      expect(element.selectedRendition).to.equal('default');
+      element.documents = [fullDoc, bloblessDoc];
+      flush();
+      expect(element.selectedRendition).to.equal('none');
     });
   });
 
