@@ -1555,20 +1555,27 @@ suite('nuxeo-app', () => {
       app._resizeDuringAnimation.restore();
     });
 
-    test('default toast opening listener applies snackbar layout hacks', () => {
+    test('default toast opening listener applies snackbar layout hacks and mutes the label', () => {
       const { toast } = app.$;
       if (!toast) {
         return;
       }
+      const label = { style: {}, setAttribute: sinon.spy() };
       Object.defineProperty(toast, 'mdcRoot', {
         configurable: true,
         value: {
           style: {},
-          querySelector: sinon.stub().returns({ style: {} }),
+          querySelector: sinon.stub().callsFake((sel) => (sel === '.mdc-snackbar__label' ? label : { style: {} })),
         },
       });
       toast.dispatchEvent(new Event('MDCSnackbar:opening'));
       expect(toast.mdcRoot.style.position).to.equal('relative');
+      expect(label.setAttribute).to.have.been.calledWith('aria-hidden', 'true');
+    });
+
+    test('_muteSnackbarLabel does nothing while the label is not rendered', () => {
+      expect(() => app._muteSnackbarLabel({})).to.not.throw();
+      expect(() => app._muteSnackbarLabel({ mdcRoot: { querySelector: () => null } })).to.not.throw();
     });
   });
 
@@ -1847,6 +1854,142 @@ suite('nuxeo-app', () => {
       app._notify({ detail: { commandId: 'cmd-2', close: true } });
       expect(close).to.have.been.called;
       app._getToastFor.restore();
+    });
+  });
+
+  // WEBUI-1880: the snackbar's own live region is built inside a hidden subtree, so the app owns a
+  // permanently visible live region and writes every toast message into it.
+  suite('toast screen reader announcements', () => {
+    function stubToast() {
+      return {
+        __state: {},
+        open: false,
+        close: sinon.spy(),
+        show: sinon.spy(),
+        querySelector: sinon.stub().returns({ hidden: false }),
+      };
+    }
+
+    test('the live region lives in the document body, not in shadow DOM', () => {
+      const announcer = app._getAnnouncer();
+      expect(announcer.parentNode).to.equal(document.body);
+      expect(announcer.getAttribute('role')).to.equal('status');
+      expect(announcer.getAttribute('aria-live')).to.equal('polite');
+      expect(announcer.getAttribute('aria-atomic')).to.equal('true');
+    });
+
+    test('_getAnnouncer reuses the single shared live region', () => {
+      expect(app._getAnnouncer()).to.equal(app._getAnnouncer());
+      expect(document.querySelectorAll('#nuxeo-toast-announcer')).to.have.lengthOf(1);
+    });
+
+    test('_announce fills the live region after the aria delay', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        expect(app._getAnnouncer().textContent).to.equal('');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_announce clears the region first so an identical message is announced again', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        await clock.tickAsync(650);
+        app._announce('CSV export is ready');
+        expect(app._getAnnouncer().textContent).to.equal('');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    // WEBUI-1880: finishing a CSV export notifies twice in the same tick, once from
+    // nuxeo-csv-export-button and once from nuxeo-operation-button. Neither may silence the other.
+    test('_announce speaks both messages when two arrive in the same tick', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        app._announce('Export CSV: completed successfully');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+        await clock.tickAsync(500);
+        expect(app._getAnnouncer().textContent).to.equal('');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('Export CSV: completed successfully');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_announce skips a duplicate of the message being announced', () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is running');
+        app._announce('CSV export is running');
+        expect(app._announceQueue).to.have.lengthOf(0);
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_announce caps the backlog and keeps the newest messages', () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        ['a', 'b', 'c', 'd', 'e'].forEach((m) => app._announce(m));
+        // 'a' is being announced already; 'b' is dropped so the three newest survive
+        expect(app._announceQueue).to.deep.equal(['c', 'd', 'e']);
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_announce ignores an empty message', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._getAnnouncer().textContent = 'previous';
+        app._announce('');
+        app._announce(undefined);
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('previous');
+      } finally {
+        clock.restore();
+      }
+    });
+
+    test('_notify announces the toast message', () => {
+      sinon.stub(app, '_getToastFor').returns(stubToast());
+      sinon.stub(app, '_announce');
+      app._notify({ detail: { commandId: 'cmd-3', message: 'CSV export is ready' } });
+      expect(app._announce).to.have.been.calledWith('CSV export is ready');
+      app._announce.restore();
+      app._getToastFor.restore();
+    });
+
+    test('_notify does not announce when the event carries no message', () => {
+      sinon.stub(app, '_getToastFor').returns(stubToast());
+      sinon.stub(app, '_announce');
+      app._notify({ detail: { commandId: 'cmd-4', close: true } });
+      expect(app._announce).to.not.have.been.called;
+      app._announce.restore();
+      app._getToastFor.restore();
+    });
+
+    test('detached cancels a pending announcement', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        app.detached();
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('');
+      } finally {
+        clock.restore();
+      }
     });
   });
 
