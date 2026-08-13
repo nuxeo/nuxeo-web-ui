@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush as flushRender, html, login } from '@nuxeo/testing-helpers';
 import '../elements/workflow/nuxeo-document-task.js';
 
 suite('nuxeo-document-task', () => {
@@ -73,6 +73,64 @@ suite('nuxeo-document-task', () => {
 
     test('should return false when delegated actors is null', () => {
       expect(element._delegatedActorsExist(null)).to.not.be.ok;
+    });
+  });
+
+  suite('_isDelegationDisabled', () => {
+    test('should return true when allowDelegate is explicitly false', () => {
+      expect(element._isDelegationDisabled({ taskInfo: { allowDelegate: false } })).to.be.true;
+    });
+
+    test('should return false when allowDelegate is true', () => {
+      expect(element._isDelegationDisabled({ taskInfo: { allowDelegate: true } })).to.be.false;
+    });
+
+    test('should return false when allowDelegate is undefined (legacy node)', () => {
+      expect(element._isDelegationDisabled({ taskInfo: {} })).to.be.false;
+    });
+
+    test('should return false when taskInfo is missing', () => {
+      expect(element._isDelegationDisabled({})).to.be.false;
+    });
+
+    test('should return false when task is falsy', () => {
+      expect(element._isDelegationDisabled(null)).to.be.false;
+    });
+  });
+
+  suite('delegate button visibility', () => {
+    const buildTask = (taskInfo) => {
+      return {
+        id: 't1',
+        state: 'opened',
+        nodeName: 'Task1',
+        workflowModelName: 'SerialDocumentReview',
+        taskInfo,
+      };
+    };
+
+    const getDelegateButton = async (taskInfo) => {
+      element.task = buildTask(taskInfo);
+      await flushRender();
+      return element.shadowRoot.querySelector('#delegateBtn');
+    };
+
+    test('should show the delegate button when allowDelegate is true', async () => {
+      const btn = await getDelegateButton({ allowDelegate: true });
+      expect(btn).to.be.ok;
+      expect(btn.hidden).to.be.false;
+    });
+
+    test('should show the delegate button for legacy nodes without allowDelegate', async () => {
+      const btn = await getDelegateButton({});
+      expect(btn).to.be.ok;
+      expect(btn.hidden).to.be.false;
+    });
+
+    test('should hide the delegate button when allowDelegate is false', async () => {
+      const btn = await getDelegateButton({ allowDelegate: false });
+      expect(btn).to.be.ok;
+      expect(btn.hidden).to.be.true;
     });
   });
 
