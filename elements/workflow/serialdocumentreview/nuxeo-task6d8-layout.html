@@ -29,13 +29,16 @@ limitations under the License.
         display: flex;
       }
     </style>
+
+    <nuxeo-resource id="user" path="/user"></nuxeo-resource>
+
     <div role="widget" class="participants">
       <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
       <template is="dom-if" if="[[_hasActorType(task.variables.participants, 'group')]]">
         <nuxeo-tags type="group" items="[[_getActorsByType(task.variables.participants, 'group')]]"></nuxeo-tags>
       </template>
-      <template is="dom-if" if="[[_hasActorType(task.variables.participants, 'user')]]">
-        <nuxeo-tags type="user" items="[[_getActorsByType(task.variables.participants, 'user')]]"></nuxeo-tags>
+      <template is="dom-if" if="[[_showUserParticipants(_resolvedUserParticipants, _participantsLoading)]]">
+        <nuxeo-tags type="user" items="[[_resolvedUserParticipants]]"></nuxeo-tags>
       </template>
     </div>
 
@@ -67,14 +70,96 @@ limitations under the License.
          * @task var_task6d8
          */
         task: Object,
+
+        _resolvedUserParticipants: {
+          type: Array,
+          value: () => [],
+        },
+
+        _participantsRequestId: {
+          type: Number,
+          value: 0,
+        },
+
+        _participantsLoading: {
+          type: Boolean,
+          value: false,
+        },
+      },
+
+      observers: ['_fetchUserParticipants(task.variables.participants)'],
+
+      _fetchUserParticipants(participants) {
+        if (!participants || !Array.isArray(participants)) {
+          // Bump the request id so any in-flight resolve is invalidated and cannot
+          // repopulate the participants after this reset.
+          this._participantsRequestId += 1;
+          this._participantsLoading = false;
+          this._resolvedUserParticipants = [];
+          return undefined;
+        }
+        // De-duplicate while preserving order so we don't issue redundant /user lookups
+        // or render duplicate participant tags.
+        const userActors = [
+          ...new Set(participants.filter((actor) => typeof actor === 'string' && actor.startsWith('user:'))),
+        ];
+        if (!userActors.length) {
+          this._participantsRequestId += 1;
+          this._participantsLoading = false;
+          this._resolvedUserParticipants = [];
+          return undefined;
+        }
+        const requestId = ++this._participantsRequestId;
+        // Hide the (possibly stale) participants until the new resolve completes so a task
+        // switch never shows the previous task's participants.
+        this._participantsLoading = true;
+        // Serialize invocations: the observer can re-fire (task switch) while a previous fetch
+        // is still in flight, and every lookup mutates the `path` of a single shared
+        // <nuxeo-resource> (this.$.user). Chaining runs sequentially prevents concurrent path
+        // mutation and in-flight request aborts on that shared element.
+        const run = () => this._resolveUserParticipants(userActors, requestId);
+        const previous = this._participantsChain || Promise.resolve();
+        this._participantsChain = previous.catch(() => {}).then(run);
+        return this._participantsChain;
+      },
+
+      async _resolveUserParticipants(userActors, requestId) {
+        const resolved = [];
+        for (const actor of userActors) {
+          const username = actor.replace('user:', '');
+          try {
+            this.$.user.path = `/user/${encodeURIComponent(username)}`;
+            const entity = await this.$.user.get();
+            resolved.push(entity);
+          } catch (error) {
+            if (error.status !== 404) {
+              console.warn(`Unexpected error resolving user "${username}":`, error);
+            }
+            // system/deleted users — fall back to raw prefixed string
+            resolved.push(actor);
+          }
+        }
+        if (requestId !== this._participantsRequestId) return;
+        this._resolvedUserParticipants = resolved;
+        this._participantsLoading = false;
+      },
+
+      _showUserParticipants(resolved, loading) {
+        return !loading && !!(resolved && resolved.length);
       },
 
       _hasActorType(actors, type) {
-        return actors && Array.isArray(actors) && actors.findIndex((actor) => actor.startsWith(type)) >= 0;
+        return (
+          actors && Array.isArray(actors) && actors.some((actor) => typeof actor === 'string' && actor.startsWith(type))
+        );
       },
 
       _getActorsByType(actors, type) {
-        return actors && Array.isArray(actors) && actors.filter((actor) => actor.startsWith(type));
+        return (
+          actors &&
+          Array.isArray(actors) &&
+          actors.filter((actor) => typeof actor === 'string' && actor.startsWith(type))
+        );
       },
     });
   </script>
