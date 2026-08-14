@@ -1943,7 +1943,7 @@ Polymer({
    * timer fires, so setting that instead would be undone (WEBUI-1880).
    */
   _muteSnackbarLabel(toast) {
-    const label = toast.mdcRoot && toast.mdcRoot.querySelector('.mdc-snackbar__label');
+    const label = toast.mdcRoot?.querySelector('.mdc-snackbar__label');
     if (label) {
       label.setAttribute('aria-hidden', 'true');
     }
@@ -1958,7 +1958,7 @@ Polymer({
    * Narrator does not reliably observe live regions nested in shadow DOM.
    */
   _getAnnouncer() {
-    if (!this._announcer || !this._announcer.isConnected) {
+    if (!this._announcer?.isConnected) {
       let announcer = document.getElementById(ANNOUNCER_ID);
       if (!announcer) {
         announcer = document.createElement('div');
@@ -1985,15 +1985,22 @@ Polymer({
    * tick by different elements: finishing a CSV export makes `nuxeo-csv-export-button` announce "CSV
    * export is ready" and, one microtask later, `nuxeo-operation-button` announce its own bulk summary.
    * Overwriting a pending message would silence the first of the pair (WEBUI-1880).
+   *
+   * A duplicate is only dropped while its twin has yet to be spoken — still queued, or still in the
+   * clear phase. Once the text has landed in the region it has been announced, so an identical message
+   * arriving later is a new event and is spoken again.
    */
   _announce(message) {
     if (!message) {
       return;
     }
     this._announceQueue = this._announceQueue || [];
-    const previous = this._announceQueue.length
-      ? this._announceQueue[this._announceQueue.length - 1]
-      : this._announcingMessage;
+    let previous = null;
+    if (this._announceQueue.length) {
+      previous = this._announceQueue[this._announceQueue.length - 1];
+    } else if (this._announceClearing) {
+      previous = this._announcingMessage;
+    }
     if (previous === message) {
       return; // the same event reported twice; no need to say it twice
     }
@@ -2011,11 +2018,13 @@ Polymer({
     const announcer = this._getAnnouncer();
     const message = this._announceQueue.shift();
     this._announcingMessage = message;
+    this._announceClearing = true;
     // A live region is only announced when its text changes, so clear it first: without this an
     // identical consecutive toast produces no mutation and stays silent.
     announcer.textContent = '';
     this._announceTimeout = setTimeout(() => {
       announcer.textContent = message;
+      this._announceClearing = false;
       this._announceTimeout = setTimeout(() => {
         this._announceTimeout = null;
         this._announcingMessage = null;
@@ -2030,6 +2039,7 @@ Polymer({
       this._announceTimeout = null;
     }
     this._announcingMessage = null;
+    this._announceClearing = false;
     this._announceQueue = [];
   },
 

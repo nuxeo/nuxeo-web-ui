@@ -1938,6 +1938,25 @@ suite('nuxeo-app', () => {
       }
     });
 
+    // The dedupe window must not outlive the clear phase. Once the text has landed in the region the
+    // message has been spoken, so an identical toast arriving later is a new event, not a replay.
+    test('_announce speaks a repeat that arrives after the message was spoken', async () => {
+      const clock = sinon.useFakeTimers();
+      try {
+        app._announce('CSV export is ready');
+        await clock.tickAsync(200); // past the aria delay, still inside the spacing window
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+        app._announce('CSV export is ready');
+        expect(app._announceQueue).to.deep.equal(['CSV export is ready']);
+        await clock.tickAsync(450); // spacing ends, the repeat is pumped and the region cleared
+        expect(app._getAnnouncer().textContent).to.equal('');
+        await clock.tickAsync(150);
+        expect(app._getAnnouncer().textContent).to.equal('CSV export is ready');
+      } finally {
+        clock.restore();
+      }
+    });
+
     test('_announce caps the backlog and keeps the newest messages', () => {
       const clock = sinon.useFakeTimers();
       try {
