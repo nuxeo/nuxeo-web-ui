@@ -892,7 +892,7 @@ Polymer({
   _saveViewSettings(e) {
     // A reset has to drop what is already stored; saving would just persist the defaults on top of it
     // and the previous width/order would come back from the backend on the next load (WEBUI-2178).
-    if (e && e.detail && e.detail.source === 'reset') {
+    if (e?.detail?.source === 'reset') {
       this._clearViewSettings();
       return;
     }
@@ -972,14 +972,14 @@ Polymer({
     }
 
     // ---- doc level (content views) ----
-    if (this.document && this.document.path) {
+    if (this.document?.path) {
       const docKey = this._getDocResultsPrefsKey();
       this._clearCachedDocPrefs(this.document.path, docKey);
       this._debounceSave('_docPrefsSaveDebouncer', () => {
         this.saveDocPrefs(this.document.path, docKey, {}).catch((error) => {
           // eslint-disable-next-line no-console
           console.warn('Failed to clear document results preferences in the backend', {
-            path: this.document && this.document.path,
+            path: this.document?.path,
             key: docKey,
             error,
           });
