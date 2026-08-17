@@ -77,7 +77,14 @@ Polymer({
     </style>
 
     <a href$="[[_href(urlFor, route, link)]]">
-      <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip" tabindex="-1"></paper-icon-button>
+      <paper-icon-button
+        noink
+        id="button"
+        name$="[[name]]"
+        aria-labelledby="tooltip"
+        tabindex="-1"
+        aria-expanded$="[[_ariaExpanded(expanded)]]"
+      ></paper-icon-button>
       <nuxeo-tooltip
         for="button"
         position="[[_tooltipPosition]]"
@@ -139,6 +146,19 @@ Polymer({
       type: String,
     },
 
+    /**
+     * Whether the drawer panel this item controls is currently open.
+     *
+     * The state is reflected onto the inner button, not the host: paper-listbox exposes the host as
+     * an `option` whose accessible name computes to empty, because the label lives in the shadow
+     * tooltip. A screen reader therefore announces the inner button, and a state set on the host is
+     * never read out with it. Left undefined for icons that only navigate, so that they are not
+     * announced as disclosure controls.
+     */
+    expanded: {
+      type: Boolean,
+    },
+
     _isRTL: {
       type: Boolean,
       value: false,
@@ -168,6 +188,12 @@ Polymer({
     } else {
       this._tooltipPosition = 'left';
     }
+  },
+
+  // Polymer serializes a bound boolean as '' or drops the attribute, neither of which is a valid
+  // aria-expanded value, so the state is stringified explicitly. Undefined leaves the attribute off.
+  _ariaExpanded(expanded) {
+    return expanded === undefined ? undefined : String(expanded);
   },
 
   _srcOrIcon() {

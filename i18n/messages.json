@@ -55,6 +55,7 @@
   "app.createdDocuments": "Created {0} documents.",
   "app.deleteSearch": "Delete",
   "app.drawer": "Drawer",
+  "app.drawer.collapse": "Collapse the side navigation panel",
   "app.drawer.resize": "Resize the side navigation panel. Use Left/Right arrow keys to adjust width, Home or End for minimum or maximum, Enter or Space to reset.",
   "app.document.addedToClipboard": "Document added to clipboard",
   "app.document.addedToCollection": "Document added to collection",

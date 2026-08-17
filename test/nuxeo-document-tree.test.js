@@ -421,6 +421,105 @@ suite('nuxeo-document-tree', () => {
     });
   });
 
+  // WEBUI-1877: the arrow is the control that takes focus, so it has to carry the expanded state
+  // itself; a screen reader does not read state off an ancestor treeitem.
+  suite('Toggle arrow accessibility', () => {
+    setup(async () => setupFixture());
+
+    const treeItemOf = (node) => node.querySelector('[role="treeitem"]');
+
+    test('The row reports its expanded state', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      expect(treeItemOf(node).getAttribute('aria-expanded')).to.equal('false');
+      tap(node.querySelector('iron-icon'));
+      await flush();
+      expect(treeItemOf(node).getAttribute('aria-expanded')).to.equal('true');
+    });
+
+    // The arrow duplicated the row's state and name, so screen readers announced each toggle twice.
+    test('The arrow is decorative and carries no state of its own', () => {
+      const icon = getTreeNodeByUid(documentTree, 4).querySelector('iron-icon');
+      expect(icon.getAttribute('aria-hidden')).to.equal('true');
+      expect(icon.hasAttribute('aria-expanded')).to.be.false;
+      expect(icon.hasAttribute('aria-label')).to.be.false;
+      // An aria-hidden node must not be reachable by keyboard.
+      expect(icon.hasAttribute('tabindex')).to.be.false;
+    });
+
+    test('Expandable rows take the focus and leaves do not', () => {
+      const expandable = getTreeNodeByUid(documentTree, 4);
+      expect(treeItemOf(expandable).getAttribute('tabindex')).to.equal('0');
+      const leaf = Array.from(getTreeNodes(documentTree)).find((node) => !node.querySelector('iron-icon[toggle]'));
+      expect(leaf, 'fixture should contain a leaf node').to.be.ok;
+      expect(treeItemOf(leaf).hasAttribute('tabindex')).to.be.false;
+    });
+
+    test('Enter expands the node and announces the new state', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      const toggled = sinon.spy();
+      documentTree.addEventListener('tree-node-toggled', toggled);
+      treeItemOf(node).dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await flush();
+      expect(node.opened).to.be.true;
+      expect(treeItemOf(node).getAttribute('aria-expanded')).to.equal('true');
+      expect(toggled).to.have.been.calledOnce;
+      expect(toggled.firstCall.args[0].detail.expanded).to.be.true;
+    });
+
+    test('Space toggles the row as well', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      treeItemOf(node).dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      await flush();
+      expect(node.opened).to.be.true;
+    });
+
+    // The row and the link it contains are both keyboard reachable, so the row handler has to keep
+    // its hands off Enter once focus has moved on to the link.
+    test('Enter on the document link navigates instead of toggling', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      const toggled = sinon.spy();
+      documentTree.addEventListener('tree-node-toggled', toggled);
+      node.querySelector('a').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await flush();
+      expect(node.opened).to.be.false;
+      expect(toggled).to.not.have.been.called;
+    });
+
+    test('ArrowDown is left to tree navigation and does not toggle', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      const toggled = sinon.spy();
+      documentTree.addEventListener('tree-node-toggled', toggled);
+      treeItemOf(node).dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      await flush();
+      expect(node.opened).to.be.false;
+      expect(toggled).to.not.have.been.called;
+    });
+
+    test('A row with no arrow ignores Enter', async () => {
+      const node = getTreeNodeByUid(documentTree, 4);
+      const item = treeItemOf(node);
+      const icon = node.querySelector('iron-icon');
+      icon.removeAttribute('toggle');
+      const toggled = sinon.spy();
+      documentTree.addEventListener('tree-node-toggled', toggled);
+      item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await flush();
+      expect(toggled).to.not.have.been.called;
+      icon.setAttribute('toggle', '');
+    });
+
+    test('_ariaExpanded stringifies the state', () => {
+      expect(documentTree._ariaExpanded(true)).to.equal('true');
+      expect(documentTree._ariaExpanded(false)).to.equal('false');
+      expect(documentTree._ariaExpanded(undefined)).to.equal('false');
+    });
+
+    test('_treeItemTabIndex only makes expandable rows focusable', () => {
+      expect(documentTree._treeItemTabIndex(false)).to.equal('0');
+      expect(documentTree._treeItemTabIndex(true)).to.be.undefined;
+    });
+  });
+
   suite('Updating the tree', () => {
     setup(async () => setupFixture());
 
