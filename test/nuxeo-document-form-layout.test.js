@@ -107,8 +107,10 @@ suite('nuxeo-document-form-layout', () => {
       innerLayout.validate.resolves(false);
       innerLayout._getValidatableElements.returns([{ invalid: false }, invalidField]);
       await element._save();
-      expect(invalidField.scrollIntoView).to.have.been.calledOnce;
-      expect(invalidField.focus).to.have.been.calledOnce;
+      // the options matter: `nearest` keeps the error summary in view and `preventScroll` stops
+      // the focus call from scrolling again, so assert them rather than just the call count
+      expect(invalidField.scrollIntoView).to.have.been.calledOnceWithExactly({ block: 'nearest' });
+      expect(invalidField.focus).to.have.been.calledOnceWithExactly({ preventScroll: true });
     });
 
     test('should call post when document has no uid (create)', async () => {

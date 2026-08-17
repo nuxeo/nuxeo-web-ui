@@ -240,4 +240,42 @@ suite('nuxeo-document-create', () => {
       expect(element.$.pathSuggesterEdit.disabled).to.be.true;
     });
   });
+
+  suite('_create', () => {
+    let innerLayout;
+
+    setup(() => {
+      innerLayout = {
+        validate: sinon.stub(),
+        _getValidatableElements: sinon.stub().returns([]),
+        element: { root: document.createElement('div') },
+      };
+      element.$['document-create'].$.layout = innerLayout;
+      sinon.stub(element, '_isValidType').returns(true);
+      element.canCreate = true;
+    });
+
+    test('should scroll to and focus the invalid field on validation failure', async () => {
+      const invalidField = { invalid: true, scrollIntoView: sinon.spy(), focus: sinon.spy() };
+      innerLayout.validate.resolves(false);
+      innerLayout._getValidatableElements.returns([{ invalid: false }, invalidField]);
+
+      await element._create();
+
+      // the options matter: `nearest` keeps the error summary in view and `preventScroll` stops
+      // the focus call from scrolling again, so assert them rather than just the call count
+      expect(invalidField.scrollIntoView).to.have.been.calledOnceWithExactly({ block: 'nearest' });
+      expect(invalidField.focus).to.have.been.calledOnceWithExactly({ preventScroll: true });
+      expect(element.creating).to.be.false;
+    });
+
+    test('should not throw when no field reports itself invalid', async () => {
+      innerLayout.validate.resolves(false);
+      innerLayout._getValidatableElements.returns([{ invalid: false }]);
+
+      await element._create();
+
+      expect(element.creating).to.be.false;
+    });
+  });
 });
