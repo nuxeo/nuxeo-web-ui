@@ -97,12 +97,20 @@ export const NuxeoScrollRestoreBehavior = {
     if (!name || !v?.$?.list) {
       return;
     }
+    const items = this._srItems(v);
+    // An empty view has no meaningful scroll position. Skipping it is essential
+    // on remount: returning via Back briefly shows the default (table) view with
+    // no rows before the persisted mode (e.g. grid) is re-applied, and that view
+    // swap would otherwise save `{index: 0}` over the still-pending anchor and
+    // defeat the restore (WEBUI-2186 — grid position lost on Back).
+    if (items.length === 0) {
+      return;
+    }
     const index = v.$.list.firstVisibleIndex;
     if (typeof index !== 'number' || index < 0) {
       return;
     }
-    const item = this._srItems(v)[index];
-    _setAnchor(name, { uid: item?.uid || null, index });
+    _setAnchor(name, { uid: items[index]?.uid || null, index });
   },
 
   /**
