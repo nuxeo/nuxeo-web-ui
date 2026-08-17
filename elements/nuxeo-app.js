@@ -1415,7 +1415,7 @@ Polymer({
   },
 
   _toggleDrawer(e) {
-    const selectedItemDetailSelected = (e && e.detail && e.detail.selected) || 0;
+    const selectedItemDetailSelected = e?.detail?.selected || 0;
     if (this._selected === selectedItemDetailSelected && this.drawerOpened) {
       requestAnimationFrame(() => {
         this._closeDrawer();
@@ -1444,7 +1444,7 @@ Polymer({
    * slotted item without a state until the first toggle.
    */
   _updateDrawerItemsAria() {
-    const menu = this.$ && this.$.menu;
+    const menu = this.$?.menu;
     if (!menu) {
       return;
     }

@@ -219,7 +219,7 @@ Polymer({
                arrow's label into the row name ("Expand Domain Domain"). -->
           <div
             role="treeitem"
-            aria-expanded$="[[_ariaExpanded(opened)]]"
+            aria-expanded$="[[_ariaExpanded(opened, isLeaf)]]"
             tabindex$="[[_treeItemTabIndex(isLeaf)]]"
             on-keydown="_handleKeydown"
           >
@@ -437,8 +437,12 @@ Polymer({
   },
 
   // Polymer serializes a bound boolean as '' or drops the attribute, neither of which is a valid
-  // aria-expanded value, so the state is stringified explicitly.
-  _ariaExpanded(opened) {
+  // aria-expanded value, so the state is stringified explicitly. Leaves get no attribute at all:
+  // aria-expanded="false" on an end node announces it as collapsed-but-expandable.
+  _ariaExpanded(opened, isLeaf) {
+    if (isLeaf) {
+      return undefined;
+    }
     return opened ? 'true' : 'false';
   },
 
