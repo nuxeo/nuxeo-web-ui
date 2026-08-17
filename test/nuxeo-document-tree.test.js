@@ -421,12 +421,18 @@ suite('nuxeo-document-tree', () => {
     });
   });
 
-  // WEBUI-1877: the arrow is the control that takes focus, so it has to carry the expanded state
-  // itself; a screen reader does not read state off an ancestor treeitem.
-  suite('Toggle arrow accessibility', () => {
+  // WEBUI-1877: the row is the disclosure control, so it owns the expanded state and the focus;
+  // the arrow inside it is decorative and must stay out of the accessibility tree.
+  suite('Tree row disclosure accessibility', () => {
     setup(async () => setupFixture());
 
     const treeItemOf = (node) => node.querySelector('[role="treeitem"]');
+
+    const leafNode = () => {
+      const leaf = Array.from(getTreeNodes(documentTree)).find((node) => !node.querySelector('iron-icon[toggle]'));
+      expect(leaf, 'fixture should contain a leaf node').to.be.ok;
+      return leaf;
+    };
 
     test('The row reports its expanded state', async () => {
       const node = getTreeNodeByUid(documentTree, 4);
@@ -449,9 +455,14 @@ suite('nuxeo-document-tree', () => {
     test('Expandable rows take the focus and leaves do not', () => {
       const expandable = getTreeNodeByUid(documentTree, 4);
       expect(treeItemOf(expandable).getAttribute('tabindex')).to.equal('0');
-      const leaf = Array.from(getTreeNodes(documentTree)).find((node) => !node.querySelector('iron-icon[toggle]'));
-      expect(leaf, 'fixture should contain a leaf node').to.be.ok;
+      const leaf = leafNode();
       expect(treeItemOf(leaf).hasAttribute('tabindex')).to.be.false;
+    });
+
+    // aria-expanded on an end node announces it as collapsed but expandable, which is the same
+    // wrong state this ticket is fixing elsewhere; the treeview pattern forbids it on leaves.
+    test('Leaf rows carry no expanded state', () => {
+      expect(treeItemOf(leafNode()).hasAttribute('aria-expanded')).to.be.false;
     });
 
     test('Enter expands the node and announces the new state', async () => {
@@ -508,10 +519,13 @@ suite('nuxeo-document-tree', () => {
       icon.setAttribute('toggle', '');
     });
 
-    test('_ariaExpanded stringifies the state', () => {
-      expect(documentTree._ariaExpanded(true)).to.equal('true');
-      expect(documentTree._ariaExpanded(false)).to.equal('false');
-      expect(documentTree._ariaExpanded(undefined)).to.equal('false');
+    test('_ariaExpanded stringifies the state and skips leaves', () => {
+      expect(documentTree._ariaExpanded(true, false)).to.equal('true');
+      expect(documentTree._ariaExpanded(false, false)).to.equal('false');
+      expect(documentTree._ariaExpanded(undefined, false)).to.equal('false');
+      // undefined makes Polymer drop the attribute rather than serialize a value.
+      expect(documentTree._ariaExpanded(false, true)).to.be.undefined;
+      expect(documentTree._ariaExpanded(true, true)).to.be.undefined;
     });
 
     test('_treeItemTabIndex only makes expandable rows focusable', () => {
