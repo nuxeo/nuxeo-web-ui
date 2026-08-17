@@ -86,6 +86,28 @@ suite('NuxeoScrollRestoreBehavior', () => {
     expect(view2.scrollToIndex.firstCall.args[0]).to.equal(40);
   });
 
+  test('does not save an anchor from an empty view (no meaningful position)', () => {
+    makeHost(name, makeView([], 0))._srSaveAnchor();
+    // nothing was saved, so a later populated view is left at the top
+    const view2 = makeView(makeDocs(60), 0);
+    makeHost(name, view2)._srMaybeRestore();
+    expect(view2.scrollToIndex.called).to.equal(false);
+  });
+
+  test('a torn-down empty view does not clobber a pending anchor (WEBUI-2186 grid remount)', () => {
+    // user scrolled the grid to index 35; saved on teardown when opening a document
+    makeHost(name, makeView(makeDocs(60), 35))._srSaveAnchor();
+    // on Back, the remounted results briefly shows the default (still-empty) table
+    // view, which is torn down as the persisted grid mode is applied. That teardown
+    // must NOT overwrite the good anchor with {index: 0}.
+    makeHost(name, makeView([], 0))._srSaveAnchor();
+    // grid re-populates and restores — it must still jump to the saved record (35)
+    const grid2 = makeView(makeDocs(60), 0);
+    makeHost(name, grid2)._srMaybeRestore();
+    expect(grid2.scrollToIndex.calledOnce).to.equal(true);
+    expect(grid2.scrollToIndex.firstCall.args[0]).to.equal(35);
+  });
+
   test('restores by record id when the list order changed (index is stale)', () => {
     const view = makeView(makeDocs(60), 40); // doc-40 was at the top
     makeHost(name, view)._srSaveAnchor();
@@ -100,7 +122,9 @@ suite('NuxeoScrollRestoreBehavior', () => {
   });
 
   test('falls back to the saved index when no record id was captured', () => {
-    const view = makeView([], 40); // no item at the anchor position
+    // rows are present but the top-of-viewport row is a not-yet-loaded placeholder
+    // (virtualized region), so no record id is captured — only the index.
+    const view = makeView(placeholderRows(60), 40);
     makeHost(name, view)._srSaveAnchor();
     const view2 = makeView(makeDocs(60), 0);
     makeHost(name, view2)._srMaybeRestore();
