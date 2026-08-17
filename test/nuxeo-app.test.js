@@ -1042,6 +1042,195 @@ suite('nuxeo-app', () => {
       expect(app.drawerOpened).to.be.false;
       expect(app.selectedTab).to.equal('');
     });
+
+    test('_toggleDrawer falls back to the first tab when the event carries no selection', () => {
+      sinon.stub(app, '_openDrawer');
+      app.drawerOpened = false;
+      app._selected = 'tasks';
+      app._toggleDrawer({});
+      expect(app._openDrawer).to.have.been.calledOnce;
+      expect(app._selected).to.equal(0);
+      app._openDrawer.restore();
+    });
+  });
+
+  // WEBUI-1877: the collapse chevron and the icon-rail items must expose their own expanded state,
+  // otherwise a screen reader stays silent when the drawer panel is shown or hidden.
+  suite('drawer expanded state announcements', () => {
+    const toggleButton = () => app.shadowRoot.querySelector('#drawer .toggle');
+
+    // iron-a11y-keys-behavior matches on key and keyCode depending on version, so send both.
+    // paper-item defers the synthesized click to a timer, so wait for the listbox to report the
+    // activation rather than guessing a delay. A timeout here means Enter never reached the listbox.
+    const pressEnter = async (node) => {
+      const activated = new Promise((resolve) => {
+        app.$.menu.addEventListener('iron-activate', resolve, { once: true });
+      });
+      node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true, composed: true }));
+      await activated;
+      await flush();
+    };
+
+    test('the collapse chevron is a labelled button that reports the drawer state', async () => {
+      app.drawerOpened = true;
+      await flush();
+      const toggle = toggleButton();
+      expect(toggle).to.be.ok;
+      expect(toggle.tagName).to.equal('BUTTON');
+      expect(toggle.getAttribute('aria-expanded')).to.equal('true');
+      expect(toggle.getAttribute('aria-controls')).to.equal('drawer-pages');
+      // The label is bound through i18n before the setup stub is installed, so assert it resolved
+      // to a translation rather than to the raw message key.
+      const label = toggle.getAttribute('aria-label');
+      expect(label).to.be.a('string').and.not.empty;
+      expect(label).to.not.equal('app.drawer.collapse');
+      expect(toggle.querySelector('iron-icon').getAttribute('aria-hidden')).to.equal('true');
+    });
+
+    test('the collapse chevron is keyboard reachable and closes the drawer', async () => {
+      app.drawerOpened = true;
+      await flush();
+      sinon.stub(app, '_closeDrawer');
+      const toggle = toggleButton();
+      expect(toggle.tabIndex).to.equal(0);
+      toggle.click();
+      expect(app._closeDrawer).to.have.been.calledOnce;
+      app._closeDrawer.restore();
+    });
+
+    test('aria-expanded is not on the listbox, which does not support it', () => {
+      expect(app.$.menu.hasAttribute('aria-expanded')).to.be.false;
+    });
+
+    // The keyup handlers that used to toggle the drawer are gone, so keyboard activation now relies
+    // solely on paper-item turning Enter into a click that paper-listbox reports as iron-activate.
+    // _openDrawer is stubbed throughout: letting the real modal drawer open locks body scrolling and
+    // moves focus into the drawer, which shifts viewport coordinates for later layout-sensitive
+    // suites. What matters here is that the keypress still reaches _toggleDrawer with the right tab.
+    test('Enter on an icon-rail item reaches _toggleDrawer with that tab selected', async () => {
+      const item = app.$.menu.querySelector('nuxeo-menu-icon[name="profile"]');
+      expect(item).to.be.ok;
+      sinon.stub(app, '_openDrawer');
+      const toggleSpy = sinon.spy(app, '_toggleDrawer');
+      app.drawerOpened = false;
+      app._selected = undefined;
+
+      await pressEnter(item);
+
+      expect(toggleSpy).to.have.been.calledOnce;
+      expect(toggleSpy.firstCall.args[0].detail.selected).to.equal('profile');
+      expect(app.selectedTab).to.equal('profile');
+      expect(app._openDrawer).to.have.been.calledOnce;
+      toggleSpy.restore();
+      app._openDrawer.restore();
+    });
+
+    test('Enter on the item of an already open panel collapses the drawer', async () => {
+      const item = app.$.menu.querySelector('nuxeo-menu-icon[name="profile"]');
+      sinon.stub(app, '_openDrawer');
+      sinon.stub(app, '_closeDrawer');
+      app._selected = 'profile';
+      app.drawerOpened = true;
+      await flush();
+
+      await pressEnter(item);
+      // _toggleDrawer defers the close to the next frame.
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      expect(app._closeDrawer).to.have.been.calledOnce;
+      expect(app._openDrawer).to.not.have.been.called;
+      app._openDrawer.restore();
+      app._closeDrawer.restore();
+    });
+
+    // paper-listbox exposes each item as an `option` whose accessible name is empty, since the label
+    // lives in the shadow tooltip. A screen reader reads the inner button instead, so that is where
+    // the state has to be for it to be announced at all.
+    const announcedState = (item) => item.$.button.getAttribute('aria-expanded');
+
+    test('only the icon-rail item owning the open panel is marked expanded', async () => {
+      app.drawerOpened = true;
+      app.selectedTab = 'profile';
+      await flush();
+      const items = app.$.menu.querySelectorAll('nuxeo-menu-icon');
+      expect(items.length).to.be.above(0);
+      items.forEach((item) => {
+        const expected = item.getAttribute('name') === 'profile' ? 'true' : 'false';
+        expect(announcedState(item)).to.equal(expected);
+      });
+    });
+
+    test('the expanded state sits on the named button, not the unnamed option host', async () => {
+      app.drawerOpened = true;
+      app.selectedTab = 'profile';
+      await flush();
+      const item = app.$.menu.querySelector('nuxeo-menu-icon[name="profile"]');
+      expect(item.hasAttribute('aria-expanded')).to.be.false;
+      expect(item.$.button.getAttribute('aria-expanded')).to.equal('true');
+      expect(item.$.button.getAttribute('aria-labelledby')).to.equal('tooltip');
+    });
+
+    test('closing the drawer marks every icon-rail item collapsed', async () => {
+      app.drawerOpened = true;
+      app.selectedTab = 'profile';
+      await flush();
+      app.drawerOpened = false;
+      await flush();
+      app.$.menu.querySelectorAll('nuxeo-menu-icon').forEach((item) => {
+        expect(announcedState(item)).to.equal('false');
+      });
+    });
+
+    test('_updateDrawerItemsAria is a no-op before the template is stamped', () => {
+      expect(() => app._updateDrawerItemsAria.call({ $: null })).to.not.throw();
+    });
+
+    // The real drawer items are stamped by <nuxeo-slot name="DRAWER_ITEMS"> after drawerOpened and
+    // selectedTab have already settled, so the property observers never see them. Without the
+    // iron-items-changed binding every slotted icon stays without aria-expanded until the first
+    // toggle, which is precisely the state a screen reader reads on a fresh page load.
+    test('an icon-rail item added after startup is still marked collapsed', async () => {
+      const late = document.createElement('nuxeo-menu-icon');
+      late.setAttribute('name', 'lateArrival');
+      app.$.menu.appendChild(late);
+      await flush();
+      expect(announcedState(late)).to.equal('false');
+      app.$.menu.removeChild(late);
+    });
+
+    test('an icon-rail item added while its own panel is open is marked expanded', async () => {
+      app.drawerOpened = true;
+      app.selectedTab = 'lateArrival';
+      await flush();
+      const late = document.createElement('nuxeo-menu-icon');
+      late.setAttribute('name', 'lateArrival');
+      app.$.menu.appendChild(late);
+      await flush();
+      expect(announcedState(late)).to.equal('true');
+      app.$.menu.removeChild(late);
+    });
+
+    // A menu icon that only navigates is not a disclosure control, so it must not claim to be one.
+    test('a menu icon nobody drives has no expanded state at all', async () => {
+      const standalone = document.createElement('nuxeo-menu-icon');
+      document.body.appendChild(standalone);
+      await flush();
+      expect(standalone.$.button.hasAttribute('aria-expanded')).to.be.false;
+      document.body.removeChild(standalone);
+    });
+
+    test('_ariaExpanded stringifies the state', () => {
+      expect(app._ariaExpanded(true)).to.equal('true');
+      expect(app._ariaExpanded(false)).to.equal('false');
+      expect(app._ariaExpanded(undefined)).to.equal('false');
+    });
+
+    test('a menu icon keeps the attribute off until it is given a state', () => {
+      const item = app.$.menu.querySelector('nuxeo-menu-icon[name="profile"]');
+      expect(item._ariaExpanded(undefined)).to.be.undefined;
+      expect(item._ariaExpanded(true)).to.equal('true');
+      expect(item._ariaExpanded(false)).to.equal('false');
+    });
   });
 
   suite('showDiff', () => {

@@ -244,6 +244,11 @@ Polymer({
         height: 100%;
         cursor: pointer;
         z-index: 10;
+        padding: 0;
+        border: none;
+        background: none;
+        color: inherit;
+        font: inherit;
       }
 
       :host([dir='rtl']) #drawer .toggle {
@@ -262,7 +267,8 @@ Polymer({
       }
 
       #drawer:hover .toggle iron-icon,
-      #drawer .toggle:hover iron-icon {
+      #drawer .toggle:hover iron-icon,
+      #drawer .toggle:focus-visible iron-icon {
         visibility: visible !important;
       }
 
@@ -460,9 +466,8 @@ Polymer({
               attr-for-selected="name"
               selected-class="selected"
               on-iron-activate="_toggleDrawer"
+              on-iron-items-changed="_updateDrawerItemsAria"
               aria-label$="[[i18n('app.drawer')]]"
-              aria-expanded="[[drawerOpened]]"
-              on-keyup="_toggleDrawer"
             >
               <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
               <nuxeo-menu-icon
@@ -514,9 +519,17 @@ Polymer({
                 </div>
               </iron-pages>
 
-              <div class="toggle" on-tap="_closeDrawer" hidden$="[[!drawerOpened]]">
-                <iron-icon icon="[[toggleChevronIcon]]"></iron-icon>
-              </div>
+              <button
+                type="button"
+                class="toggle"
+                on-tap="_closeDrawer"
+                hidden$="[[!drawerOpened]]"
+                aria-expanded$="[[_ariaExpanded(drawerOpened)]]"
+                aria-controls="drawer-pages"
+                aria-label$="[[i18n('app.drawer.collapse')]]"
+              >
+                <iron-icon icon="[[toggleChevronIcon]]" aria-hidden="true"></iron-icon>
+              </button>
 
               <nuxeo-resize-handle
                 id="drawerResizeHandle"
@@ -656,7 +669,10 @@ Polymer({
       observer: '_pageChanged',
     },
 
-    selectedTab: String,
+    selectedTab: {
+      type: String,
+      observer: '_updateDrawerItemsAria',
+    },
     selectedAdminTab: String,
 
     currentDocument: Object,
@@ -688,6 +704,7 @@ Polymer({
       type: Boolean,
       value: false,
       notify: true,
+      observer: '_updateDrawerItemsAria',
     },
 
     keyEventTarget: {
@@ -856,9 +873,6 @@ Polymer({
     this._setupUnauthorizedRedirect();
 
     Performance.mark('nuxeo-app.ready');
-    this.$.menu.addEventListener('keyup', (event) => {
-      this._toggleDrawer(event, { detail: { selected: event.target.getAttribute('name') } });
-    });
 
     // fire resize event during drawer animation for elements that need to adapt to size changes (nuxeo-data-table etc)
     // Filter to transitions on the drawer element itself; descendant transitions
@@ -1400,10 +1414,8 @@ Polymer({
     this.navigateTo('search', target.searchName);
   },
 
-  _toggleDrawer(e, selectedObj) {
-    const selectedItem = e.type === 'keyup' ? selectedObj : e;
-    const selectedItemDetailSelected =
-      selectedItem.detail && selectedItem.detail.selected ? selectedItem.detail.selected : 0;
+  _toggleDrawer(e) {
+    const selectedItemDetailSelected = (e && e.detail && e.detail.selected) || 0;
     if (this._selected === selectedItemDetailSelected && this.drawerOpened) {
       requestAnimationFrame(() => {
         this._closeDrawer();
@@ -1412,6 +1424,37 @@ Polymer({
       this._selected = this.selectedTab = selectedItemDetailSelected;
       this._openDrawer();
     }
+  },
+
+  // Polymer serializes a bound boolean as '' or drops the attribute, neither of which is a valid
+  // aria-expanded value, so the state is stringified explicitly.
+  _ariaExpanded(opened) {
+    return opened ? 'true' : 'false';
+  },
+
+  /**
+   * WEBUI-1877: each icon-rail item is the disclosure control for the drawer panel, so it has to
+   * carry the expanded state. `aria-expanded` is not allowed on the `listbox` role the surrounding
+   * paper-listbox exposes, where it was silently ignored. Setting the `expanded` property rather
+   * than the attribute lets nuxeo-menu-icon place the state on the button a screen reader actually
+   * announces; see the property docs there for why the host itself is the wrong element.
+   *
+   * Also bound to `iron-items-changed`: the DRAWER_ITEMS are stamped by `nuxeo-slot` after
+   * `drawerOpened`/`selectedTab` have already settled, so the property observers alone leave every
+   * slotted item without a state until the first toggle.
+   */
+  _updateDrawerItemsAria() {
+    const menu = this.$ && this.$.menu;
+    if (!menu) {
+      return;
+    }
+    menu.querySelectorAll('nuxeo-menu-icon').forEach((item) => {
+      const name = item.getAttribute('name');
+      if (!name) {
+        return;
+      }
+      item.expanded = !!this.drawerOpened && name === this.selectedTab;
+    });
   },
 
   /** Open drawer at stored/clamped width and sync the resize-handle ARIA values. */

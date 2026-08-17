@@ -114,7 +114,8 @@ Polymer({
         cursor: pointer;
       }
 
-      [toggle]:focus {
+      /* The row, not the arrow, is what takes focus now, so the ring has to follow it. */
+      [role='treeitem']:focus-visible {
         outline: 2px solid black;
         outline-offset: 0.2px;
         border-radius: 3px;
@@ -195,7 +196,7 @@ Polymer({
       <h5>[[i18n(label)]]</h5>
     </div>
 
-    <div class="content" role="tree">
+    <div class="content">
       <div class="parents" hidden$="[[_noPermission]]">
         <a href$="[[urlFor('document', '/')]]" class="layout horizontal" hidden$="[[_hideRoot(document)]]">
           <span aria-hidden="true"><iron-icon icon="[[toggleChevronIcon]]"></iron-icon></span>
@@ -208,21 +209,23 @@ Polymer({
           </a>
         </template>
       </div>
-      <nuxeo-tree id="tree" data="[[document]]" controller="[[controller]]" node-key="uid">
+      <!-- role="tree" belongs on the element that owns the treeitems; on the wrapper it also swallowed
+           the breadcrumb links, which a tree is not allowed to contain. -->
+      <nuxeo-tree id="tree" role="tree" data="[[document]]" controller="[[controller]]" node-key="uid">
         <template class="horizontal layout">
-          <div role="treeitem" aria-expanded="[[opened]]">
+          <!-- The row itself is the disclosure control, per the ARIA treeview pattern: it owns
+               aria-expanded and takes the focus, and the arrow is decorative. Duplicating the state
+               on an inner button made screen readers announce every toggle twice and folded the
+               arrow's label into the row name ("Expand Domain Domain"). -->
+          <div
+            role="treeitem"
+            aria-expanded$="[[_ariaExpanded(opened)]]"
+            tabindex$="[[_treeItemTabIndex(isLeaf)]]"
+            on-keydown="_handleKeydown"
+          >
             <template class="flex" is="dom-if" if="[[!isLeaf]]">
               <paper-spinner active$="[[loading]]" aria-hidden="true"></paper-spinner>
-              <iron-icon
-                icon="[[_expandIcon(opened)]]"
-                toggle
-                hidden$="[[loading]]"
-                tabindex="0"
-                role="button"
-                aria-hidden="false"
-                aria-label="Toggle expand/collapse"
-                on-keydown="_handleKeydown"
-              ></iron-icon>
+              <iron-icon icon="[[_expandIcon(opened)]]" toggle hidden$="[[loading]]" aria-hidden="true"></iron-icon>
               <template is="dom-if" if="[[loading]]">
                 <span class="loaddata" aria-live="polite">[[_loading(loading)]]</span>
               </template>
@@ -357,24 +360,30 @@ Polymer({
   },
 
   _handleKeydown(event) {
-    const icon = event.target;
-    const treeItem = icon.closest('[role="treeitem"]');
-    if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
-      // Toggle aria-expanded state
-      const expanded = treeItem.getAttribute('aria-expanded') === 'true';
-      treeItem.setAttribute('aria-expanded', !expanded);
-      // Manually trigger the click event on the chevron icon
-      icon.click();
-      // Dispatch custom event for external handling
-      this.dispatchEvent(
-        new CustomEvent('tree-node-toggled', {
-          detail: { expanded: !expanded, target: treeItem },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      event.preventDefault(); // Prevent default scrolling or focus behavior
+    // ArrowDown is reserved for moving focus down the tree, so only Enter and Space toggle here.
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
     }
+    // Enter on the document link nested in the row must still follow the link.
+    const treeItem = event.currentTarget;
+    if (event.target !== treeItem) {
+      return;
+    }
+    const icon = treeItem.querySelector('iron-icon[toggle]');
+    if (!icon) {
+      return;
+    }
+    const expanded = treeItem.getAttribute('aria-expanded') === 'true';
+    // Let nuxeo-tree-node flip `opened`; the aria-expanded binding follows from it.
+    icon.click();
+    this.dispatchEvent(
+      new CustomEvent('tree-node-toggled', {
+        detail: { expanded: !expanded, target: treeItem },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+    event.preventDefault(); // Prevent default scrolling or focus behavior
   },
 
   _currentDocumentChanged() {
@@ -420,6 +429,17 @@ Polymer({
   _expandIcon(opened) {
     const iconDirection = this._isRtl ? 'left' : 'right';
     return `hardware:keyboard-arrow-${opened ? 'down' : iconDirection}`;
+  },
+
+  // Only rows that can expand are focusable, so leaves do not add a tab stop that does nothing.
+  _treeItemTabIndex(isLeaf) {
+    return isLeaf ? undefined : '0';
+  },
+
+  // Polymer serializes a bound boolean as '' or drops the attribute, neither of which is a valid
+  // aria-expanded value, so the state is stringified explicitly.
+  _ariaExpanded(opened) {
+    return opened ? 'true' : 'false';
   },
 
   _icon(opened) {
