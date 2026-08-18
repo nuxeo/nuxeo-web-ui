@@ -114,8 +114,16 @@ Polymer({
         cursor: pointer;
       }
 
-      /* The row, not the arrow, is what takes focus now, so the ring has to follow it. */
+      /* The row takes the focus, but the ring is drawn on the arrow so the indicator stays on the
+         part of the row that actually expands. The row's own outline is suppressed only because the
+         arrow replaces it; the spinner is covered too, so expanding a node never leaves the focused
+         row with no visible indicator while its children load. */
       [role='treeitem']:focus-visible {
+        outline: none;
+      }
+
+      [role='treeitem']:focus-visible iron-icon[toggle]:not([hidden]),
+      [role='treeitem']:focus-visible paper-spinner[active] {
         outline: 2px solid black;
         outline-offset: 0.2px;
         border-radius: 3px;
