@@ -37,7 +37,7 @@ jobs:
           echo "Base branch: ${{ github.base_ref }}"
           echo "Ref: ${{ github.ref }}"
 
-      - uses: catchpoint/workflow-telemetry-action@v2
+      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
         with:
           comment_on_pr: false
 
@@ -54,7 +54,7 @@ jobs:
           scope: '@nuxeo'
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
           java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
 
