@@ -17,12 +17,22 @@ on:
         default: 'maintenance-3.1.x'
         type: string
         required: false
+      nuxeo_packages:
+        description: 'Space/comma-separated Web UI addons to bundle into the image (e.g. "nuxeo-drive nuxeo-csv"). Overrides the NUXEO_PACKAGES repository variable used for PR previews.'
+        default: ''
+        type: string
+        required: false
+      nuxeo_server_packages:
+        description: 'Space/comma-separated Nuxeo Connect server packages to pre-install. Overrides the NUXEO_SERVER_PACKAGES repository variable (which defaults to replace-administrator-user).'
+        default: ''
+        type: string
+        required: false
 
 env:
-  DOCKER_REGISTRY: us-east1-docker.pkg.dev
-  DOCKER_IMAGE: ${{ secrets.GKE_PROJECT }}/webui/nuxeo-web-ui
-  GKE_CLUSTER: jx-prod
-  GKE_ZONE: us-east1-b
+  REGISTRY: docker-internal.packages.nuxeo.com
+  REPOSITORY: nuxeo/nuxeo-web-ui
+  # Base Nuxeo server image tag; nuxeo-docker-build pulls docker-private.packages.nuxeo.com/nuxeo/nuxeo:<tag>.
+  BASE_IMAGE_TAG: '2023'
 
 jobs:
   id:
@@ -37,12 +47,13 @@ jobs:
     needs: id
     name: Setup
     outputs:
-      url: ${{ steps.preview.outputs.url }}
+      image: ${{ steps.preview.outputs.image }}
     if: >
       (github.event.action == 'labeled' && github.event.label.name == 'preview') ||
       contains(github.event.pull_request.labels.*.name, 'preview') ||
       github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: medium-4cpu-runners
     permissions:
       contents: read
       pull-requests: write
@@ -62,7 +73,6 @@ jobs:
             RAW_BRANCH="${{ github.event.inputs.branch_name }}"
           fi
           echo "BRANCH_NAME=$RAW_BRANCH" >> $GITHUB_ENV
-          echo "BRANCH_NAME_SANITIZED=$(echo $RAW_BRANCH | sed 's/[^[:alnum:]-]/-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
@@ -78,8 +88,15 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "VERSION=$(npx -c 'echo "$npm_package_version"')-$BRANCH_NAME_SANITIZED" >> $GITHUB_ENV
-          echo "PREVIEW_NAMESPACE=$(printf '%.53s' $(echo nuxeo-web-ui-$(echo $BRANCH_NAME_SANITIZED)))" >> $GITHUB_ENV
+          BASE_VERSION="$(node -p 'require("./package.json").version')"
+          # Image version: replace a -SNAPSHOT suffix with -preview, otherwise append -snapshot.
+          if echo "$BASE_VERSION" | grep -qiE 'snapshot'; then
+            IMAGE_VERSION="$(echo "$BASE_VERSION" | sed -E 's/-?snapshot/-preview/I')"
+          else
+            IMAGE_VERSION="${BASE_VERSION}-snapshot"
+          fi
+          # Uniquely identify this run by appending the workflow run id (dot-separated).
+          echo "VERSION=${IMAGE_VERSION}.${{ github.run_id }}" >> "$GITHUB_ENV"
 
       - name: Determine nuxeo-elements branch to use
         id: pick_nuxeo_elements_branch
@@ -107,73 +124,62 @@ jobs:
           npm install ./nuxeo-elements/dataviz
 
       - name: Webpack build
+        env:
+          NUXEO_PACKAGES: ${{ github.event.inputs.nuxeo_packages || vars.NUXEO_PACKAGES }}
         run: npm run build
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v4
+      - name: Set up Maven build
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
-          registry: ${{ env.DOCKER_REGISTRY }}
-          username: _json_key
-          password: ${{ secrets.GKE_SA_KEY }}
+          java-version: '17'
 
-      - name: Build and push server image
-        uses: docker/build-push-action@v7
-        with:
-          context: server
-          pull: true
-          push: true
-          file: server/Dockerfile
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          pull: true
-          push: true
-          file: Dockerfile
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
-          build-args: SERVER_IMAGE=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}/server:${{ env.VERSION }}
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v3
-        with:
-          credentials_json: ${{ secrets.GKE_SA_KEY }}
-
-      - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v3.0.0
-        with:
-          cluster_name: ${{ env.GKE_CLUSTER }}
-          location: ${{ env.GKE_ZONE }}
-          project_id: ${{ secrets.GKE_PROJECT }}
-
-      - name: Install preview
-        id: preview
-        working-directory: ./charts/preview
+      - name: Build Web UI marketplace package
+        # Reuses the dist/ produced by the Webpack build above (-DskipInstall -DskipBuild).
+        # Rewrite the reactor version in the built poms (parent + addon + marketplace) to the
+        # preview VERSION so the nuxeo-web-ui bundle (reported by /nuxeo/api/v1/management/distribution)
+        # and the marketplace package both carry it — unique per run and matching the image tag.
+        # A plain sed avoids the slow versions-maven-plugin resolution (~4 min per run).
+        env:
+          MVN_REPO_USERNAME: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          MVN_REPO_PASSWORD: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
         run: |
-          # add helm jx repo
-          helm repo add jx https://jenkins-x-charts.github.io/v2/
+          BASE_VERSION="$(node -p 'require("./package.json").version')"
+          for p in pom.xml plugin/web-ui/addon/pom.xml plugin/web-ui/marketplace/pom.xml; do
+            sed -i "s|<version>${BASE_VERSION}</version>|<version>${VERSION}</version>|g" "$p"
+          done
+          mvn -B -ntp clean install -DskipTests -DskipInstall=true -DskipBuild=true
 
-          # substitute env variables in values.yaml
-          mv values.yaml values.yaml.tosubst
-          envsubst < values.yaml.tosubst > values.yaml
+      - name: Stage Web UI marketplace package for offline install
+        run: |
+          mkdir -p local-modules
+          cp plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-*.zip local-modules/
 
-          # update helm deps
-          helm dependency update .
+      - name: Build and push combined Nuxeo + Web UI image
+        id: build
+        uses: nuxeo/gh-build-tools/.github/actions/nuxeo-docker-build@1b8eb07cc779f1c86ecaed70c021ab7c1f27b441 # v0.15.0
+        with:
+          base-image-tag: ${{ env.BASE_IMAGE_TAG }}
+          base-registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          base-registry-password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+          nuxeo-local-modules-path: local-modules
+          # Connect server packages to pre-install; defaults to replace-administrator-user when NUXEO_SERVER_PACKAGES is unset.
+          nuxeo-connect-modules: ${{ github.event.inputs.nuxeo_server_packages || vars.NUXEO_SERVER_PACKAGES || 'replace-administrator-user' }}
+          nuxeo-connect-url: https://connect.nuxeo.com/nuxeo/site/
+          nuxeo-clid: ${{ secrets.DEVOPS_CLID }}
+          registry: ${{ env.REGISTRY }}
+          registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
+          registry-password: ${{ secrets.REPOSITORY_MANAGER_PASSWORD }}
+          image-name: ${{ env.REPOSITORY }}
+          image-tag: ${{ env.VERSION }}
+          image-title: 'Nuxeo Web UI'
+          platforms: linux/amd64
+          push-image: 'true'
 
-          helm upgrade --install \
-            --namespace ${PREVIEW_NAMESPACE} \
-            --create-namespace \
-            ${PREVIEW_NAMESPACE} .
-
-          # ensure the deployment is restarted to pull the new preview image
-          kubectl rollout restart deployment ${PREVIEW_NAMESPACE}-preview --namespace ${PREVIEW_NAMESPACE}
-
-          echo "url=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_OUTPUT
-          echo "PREVIEW_URL=https://preview-${PREVIEW_NAMESPACE}.webui.dev.nuxeo.com" >> $GITHUB_ENV
+      - name: Set preview image reference
+        id: preview
+        run: |
+          echo "image=${{ steps.build.outputs.image-url }}" >> $GITHUB_OUTPUT
+          echo "PREVIEW_IMAGE=${{ steps.build.outputs.image-url }}" >> $GITHUB_ENV
 
       - uses: actions/github-script@v9.0.0
         if: github.event_name == 'pull_request'
@@ -184,15 +190,17 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `:star: PR built and available [here](${process.env.PREVIEW_URL})`
+              body: `:star: PR preview image published: \`${process.env.PREVIEW_IMAGE}\``
             })
 
   result:
-    name: "Result: ${{ needs.preview.outputs.url }}"
+    name: "Result: ${{ needs.preview.outputs.image }}"
     needs: preview
     runs-on: ubuntu-latest
     permissions:
       contents: read
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - run: echo ${{ needs.preview.outputs.url }}
+      - env:
+          IMAGE: ${{ needs.preview.outputs.image }}
+        run: echo "$IMAGE"

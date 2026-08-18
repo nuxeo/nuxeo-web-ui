@@ -15,13 +15,18 @@ activates.
 | Skill | Use it when you… | Notes |
 |---|---|---|
 | [`fix-nuxeo-web-ui-bug`](fix-nuxeo-web-ui-bug/SKILL.md) | say "fix WEBUI-\<id>", paste a Jira URL, "commit and raise PR", "take this to Ready for QA" | **Orchestrator** — runs the full flow end-to-end. Delegates to the two PR skills below. |
+| [`bug-fix-validation`](bug-fix-validation/SKILL.md) | "validate the fix for WEBUI-\<id>", "QA sign-off", "regression test this PR" | **Test Engineer 3 orchestrator** — runs the buggy and fixed branches side by side, validates the UI (incl. translations, RTL, browsers, accessibility) and publishes a validation report. Never edits code, never writes automated tests. |
 | [`nuxeo-web-ui-pr`](nuxeo-web-ui-pr/SKILL.md) | open a PR, push a branch, backport to both bases | Branch naming, commit format, PR body, `lts-2025` + `maintenance-3.1.x` backport. |
 | [`nuxeo-web-ui-pr-checks`](nuxeo-web-ui-pr-checks/SKILL.md) | run the gating checks before pushing | Mirrors CI lint + unit tests. Script: `nuxeo-web-ui-pr-checks/scripts/pr-checks.sh`. |
 | [`jira/create-qa-subtask`](jira/create-qa-subtask/SKILL.md) | "create a QA task", "plan QA for this ticket" | Files a `QA task` sub-task with what/how to verify. |
 | [`jira/raise-backend-jira-ticket`](jira/raise-backend-jira-ticket/SKILL.md) | a fix needs a server-side change; "raise a backend/NXP ticket" | Files an NXP (`nxplatform`) ticket and links it as a blocker. |
+| [`dependabot-fix`](dependabot-fix/SKILL.md) | "work on"/"fix" a Dependabot or dependency-security ticket, a CVE, a `WEBUI-`/`ELEMENTS-` security bump, a Dependabot alert number, or a package name | End-to-end dependency-security workflow across `nuxeo-web-ui` **and** `nuxeo-elements`, both LTS lines: scope contract, cross-manifest scan, local validation gates, PRs + Jira comment. Uses `dependabot-impact-analyst` for blast-radius analysis. |
+| [`dependabot-impact-analyst`](dependabot-impact-analyst/SKILL.md) | need the blast radius of a dependency upgrade before writing the Jira/PR summary | Maps where a package is used across both repos, classifies risk, reads the changelog for breaking changes, and returns a concrete sanity-test checklist. Used by `dependabot-fix`. |
 
-**Dependencies:** `fix-nuxeo-web-ui-bug` → `nuxeo-web-ui-pr` + `nuxeo-web-ui-pr-checks`. The Jira
-skills are independent and can be used on their own.
+**Dependencies:** `fix-nuxeo-web-ui-bug` → `nuxeo-web-ui-pr` + `nuxeo-web-ui-pr-checks`.
+`bug-fix-validation` runs standalone and hands back to `fix-nuxeo-web-ui-bug` when validation fails.
+`dependabot-fix` → `dependabot-impact-analyst` (for the impact report).
+The Jira skills are independent and can be used on their own.
 
 ## One-time setup
 
@@ -106,6 +111,9 @@ Type these in Cursor chat — the right skill activates automatically:
 - **Fix a bug end-to-end:** "Fix WEBUI-2138" or paste `https://hyland.atlassian.net/browse/WEBUI-2138`
   → reproduce (with before/after evidence) → fix → gating checks → signed-commit PRs on both bases →
   watch CI → Ready-for-QA check.
+- **Validate a delivered fix:** "Validate the fix for WEBUI-2138" → analyse the ticket and PRs → run the
+  buggy base and the fixed branch on separate ports → reproduce, verify, regression + blast-radius test
+  with full evidence → publish a validation report with a Pass/Fail recommendation.
 - **Just the PR:** "Open a PR for these changes and backport to both bases."
 - **Just local checks:** "Run the PR gating checks" — or directly:
   ```bash
@@ -123,6 +131,8 @@ Type these in Cursor chat — the right skill activates automatically:
 | `gh` command fails | `gh auth status`; re-run `gh auth login`. |
 | Commit shows unsigned (`N`/`E`) | Re-check §4; the SSH key must be added to GitHub as a **Signing** key. |
 | Tests can't import `@nuxeo/*` | Re-link `nuxeo-elements` symlinks (see the PR skill). |
+| Validation run can't start a container | `docker info` — start Docker Desktop (`open -a Docker`); a missing `NUXEO_CLID` shows up as "Registration required". |
+| Validation capture produces no video | Re-run `validation-init.sh <TICKET>`; it installs `puppeteer-screen-recorder` (which bundles ffmpeg) into the run's own harness. |
 
 ## Using these skills in other repos (optional)
 
@@ -132,6 +142,7 @@ your personal skills folder:
 ```bash
 mkdir -p ~/.cursor/skills
 ln -s "$PWD/.cursor/skills/fix-nuxeo-web-ui-bug"   ~/.cursor/skills/fix-nuxeo-web-ui-bug
+ln -s "$PWD/.cursor/skills/bug-fix-validation"     ~/.cursor/skills/bug-fix-validation
 ln -s "$PWD/.cursor/skills/nuxeo-web-ui-pr"        ~/.cursor/skills/nuxeo-web-ui-pr
 ln -s "$PWD/.cursor/skills/nuxeo-web-ui-pr-checks" ~/.cursor/skills/nuxeo-web-ui-pr-checks
 ```
