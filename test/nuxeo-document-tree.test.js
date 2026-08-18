@@ -465,6 +465,29 @@ suite('nuxeo-document-tree', () => {
       expect(treeItemOf(leafNode()).hasAttribute('aria-expanded')).to.be.false;
     });
 
+    // "collapsed" on its own does not tell the listener the row can be opened, so expandable rows
+    // are described by a hint that does.
+    test('Expandable rows are described by the toggle hint and leaves are not', () => {
+      const expandable = getTreeNodeByUid(documentTree, 4);
+      expect(treeItemOf(expandable).getAttribute('aria-describedby')).to.equal('toggleHint');
+      expect(treeItemOf(leafNode()).hasAttribute('aria-describedby')).to.be.false;
+    });
+
+    test('The hint resolves to a translated string the row can reference', () => {
+      const hint = documentTree.shadowRoot.querySelector('#toggleHint');
+      expect(hint, 'the hint node must exist for aria-describedby to resolve').to.be.ok;
+      // Same shadow root as the rows, otherwise the IDREF would not resolve.
+      expect(treeItemOf(getTreeNodeByUid(documentTree, 4)).getRootNode()).to.equal(hint.getRootNode());
+      const text = hint.textContent.trim();
+      expect(text).to.not.be.empty;
+      expect(text).to.not.equal('browse.tree.toggleHint');
+    });
+
+    test('_toggleHintId only describes expandable rows', () => {
+      expect(documentTree._toggleHintId(false)).to.equal('toggleHint');
+      expect(documentTree._toggleHintId(true)).to.be.undefined;
+    });
+
     test('Enter expands the node and announces the new state', async () => {
       const node = getTreeNodeByUid(documentTree, 4);
       const toggled = sinon.spy();
