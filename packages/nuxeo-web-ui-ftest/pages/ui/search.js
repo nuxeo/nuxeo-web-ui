@@ -111,12 +111,14 @@ export default class Search extends Results {
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
+      // Read via textContent: on newer Chrome getText() returns '' for these shadow-DOM dropdown
+      // items when they are not laid out on screen, so the name match would silently never hit.
       // eslint-disable-next-line no-await-in-loop
-      const text = await item.getText();
+      const text = await browser.execute((el) => el.textContent, item);
       // eslint-disable-next-line no-await-in-loop
       const className = await item.getAttribute('class');
 
-      if (text === savedSearchName && className.includes('highlight')) {
+      if ((text || '').trim() === savedSearchName && className.includes('highlight')) {
         return item;
       }
     }
