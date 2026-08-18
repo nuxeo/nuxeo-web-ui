@@ -709,6 +709,22 @@ suite('nuxeo-app', () => {
       app.hasFacet.restore();
     });
 
+    test('uses the localized root label instead of the uid for the Root document (WEBUI-1876)', () => {
+      sinon.stub(app, 'hasFacet').returns(false);
+      app.page = 'browse';
+      // The repository root has no dc:title; the server returns its uid as the title.
+      app.currentDocument = {
+        title: '0c5bf33e-86b4-486e-b6a5-f8fa2a85dbec',
+        uid: '0c5bf33e-86b4-486e-b6a5-f8fa2a85dbec',
+        type: 'Root',
+      };
+      app.productName = 'Nuxeo';
+      app._updateTitle();
+      expect(document.title).to.include('browse.root');
+      expect(document.title).to.not.include('0c5bf33e-86b4-486e-b6a5-f8fa2a85dbec');
+      app.hasFacet.restore();
+    });
+
     test('sets title for admin page', () => {
       app.page = 'admin';
       app.selectedAdminTab = 'users';
