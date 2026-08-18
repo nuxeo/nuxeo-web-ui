@@ -182,7 +182,7 @@
   "browse.noDocumentWhenFiltered": "There are no documents within these search criteria.",
   "browse.root": "Root",
   "browse.tree.noDocument": "There are no items to display in this location.",
-  "browse.tree.toggleHint": "Press Enter to expand or collapse",
+  "browse.tree.toggleHint": "Toggle button. Press Enter to expand or collapse.",
   "browser.annotations": "Annotations",
   "browser.edit": "Edit",
   "browser.history": "History",
