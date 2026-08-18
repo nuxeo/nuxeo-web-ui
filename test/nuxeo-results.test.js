@@ -1727,17 +1727,39 @@ suite('nuxeo-results', () => {
 
     test('_applyGlobalPrefs prefers backend prefs then local settings', () => {
       const applyStub = sinon.stub(results, '_applyPrefsToView');
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities');
+      const view = {};
+
+      results.document = null;
+      results._settings = { table: { from: 'local' } };
+      filterStub.returnsArg(1);
+      results._applyGlobalPrefs(true, { from: 'backend' }, view, 'table');
+      expect(applyStub).to.have.been.calledWith(view, { from: 'backend' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'backend' });
+
+      applyStub.resetHistory();
+      filterStub.resetHistory();
+      results._applyGlobalPrefs(true, {}, view, 'table');
+      expect(applyStub).to.have.been.calledWith(view, { from: 'local' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'local' });
+
+      filterStub.restore();
+      applyStub.restore();
+    });
+
+    test('_applyGlobalPrefs does not apply settings when capability filter returns undefined', () => {
+      const applyStub = sinon.stub(results, '_applyPrefsToView');
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(undefined);
       const view = {};
 
       results.document = null;
       results._settings = { table: { from: 'local' } };
       results._applyGlobalPrefs(true, { from: 'backend' }, view, 'table');
-      expect(applyStub).to.have.been.calledWith(view, { from: 'backend' });
 
-      applyStub.resetHistory();
-      results._applyGlobalPrefs(true, {}, view, 'table');
-      expect(applyStub).to.have.been.calledWith(view, { from: 'local' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'backend' });
+      expect(applyStub).to.not.have.been.called;
 
+      filterStub.restore();
       applyStub.restore();
     });
 
@@ -1829,23 +1851,49 @@ suite('nuxeo-results', () => {
 
     test('_applyDocPrefsImpl falls back from backend to local settings', () => {
       const applyStub = sinon.stub(results, '_applyPrefsToView');
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities');
       const view = {};
       results.displayMode = 'table';
       results._settings = { table: { from: 'local' } };
+      filterStub.returnsArg(1);
 
       results._applyDocPrefsImpl(true, { from: 'backend' }, view);
       expect(applyStub).to.have.been.calledWith(view, { from: 'backend' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'backend' });
 
       applyStub.resetHistory();
+      filterStub.resetHistory();
       results.__hasBackendDocPrefs = false;
       results._applyDocPrefsImpl(true, {}, view);
       expect(applyStub).to.have.been.calledWith(view, { from: 'local' });
+      expect(filterStub).to.have.been.calledWith(view, { from: 'local' });
 
       applyStub.resetHistory();
+      filterStub.resetHistory();
       results._settings = null;
       results.__hasBackendDocPrefs = true;
       results._applyDocPrefsImpl(true, {}, view);
       expect(applyStub).to.have.been.calledWith(view, {});
+      expect(filterStub).to.have.been.calledWith(view, {});
+
+      filterStub.restore();
+      applyStub.restore();
+    });
+
+    test('_applyDocPrefsImpl does not apply settings when capability filter returns undefined', () => {
+      const applyStub = sinon.stub(results, '_applyPrefsToView');
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(undefined);
+      const view = {};
+
+      results.displayMode = 'table';
+      results.__hasBackendDocPrefs = false;
+      results._settings = { table: { from: 'local' } };
+      results._applyDocPrefsImpl(true, { from: 'backend' }, view);
+
+      expect(filterStub).to.have.been.calledWith(view, { from: 'backend' });
+      expect(applyStub).to.not.have.been.called;
+
+      filterStub.restore();
       applyStub.restore();
     });
 
@@ -1939,6 +1987,177 @@ suite('nuxeo-results', () => {
       expect(setPaths).to.include('columns.0.order');
       expect(setPaths).to.include('columns.0.width');
       expect(setPaths).to.include('columns.0.filterValue');
+    });
+  });
+
+  suite('_filterSettingsByCapabilities', () => {
+    const buildSettings = () => {
+      return {
+        columns: {
+          'dc:title': { hidden: false, order: 1, width: '300px', resized: true },
+          'dc:modified': { hidden: true, order: 0, width: '150px', resized: true },
+        },
+        sortOrder: [{ path: 'dc:title', direction: 'asc' }],
+      };
+    };
+
+    const createTableView = (capabilities = {}) => {
+      const view = document.createElement('nuxeo-data-table');
+      view.settingsEnabled = true;
+      view.columnResizeEnabled = true;
+      view.columnReorderEnabled = true;
+      Object.assign(view, capabilities);
+      return view;
+    };
+
+    test('returns settings unchanged for non nuxeo-data-table views', () => {
+      const view = createMockView();
+      const settings = buildSettings();
+      expect(results._filterSettingsByCapabilities(view, settings)).to.equal(settings);
+    });
+
+    test('returns the value as-is when there are no settings', () => {
+      const view = createTableView();
+      expect(results._filterSettingsByCapabilities(view, undefined)).to.be.undefined;
+      expect(results._filterSettingsByCapabilities(view, null)).to.be.null;
+    });
+
+    test('does not restore any settings when settings-enabled is disabled', () => {
+      const view = createTableView({ settingsEnabled: false });
+      expect(results._filterSettingsByCapabilities(view, buildSettings())).to.be.undefined;
+    });
+
+    test('restores full settings when all capabilities are enabled', () => {
+      const view = createTableView();
+      const settings = buildSettings();
+      expect(results._filterSettingsByCapabilities(view, settings)).to.deep.equal(settings);
+    });
+
+    test('strips width and resized when column-resize-enabled is disabled', () => {
+      const view = createTableView({ columnResizeEnabled: false });
+      const result = results._filterSettingsByCapabilities(view, buildSettings());
+      expect(result.columns['dc:title']).to.not.have.property('width');
+      expect(result.columns['dc:title']).to.not.have.property('resized');
+      expect(result.columns['dc:modified']).to.not.have.property('width');
+      expect(result.columns['dc:modified']).to.not.have.property('resized');
+      // hidden and order are preserved
+      expect(result.columns['dc:title'].order).to.equal(1);
+      expect(result.columns['dc:modified'].hidden).to.be.true;
+    });
+
+    test('strips order when column-reorder-enabled is disabled', () => {
+      const view = createTableView({ columnReorderEnabled: false });
+      const result = results._filterSettingsByCapabilities(view, buildSettings());
+      expect(result.columns['dc:title']).to.not.have.property('order');
+      expect(result.columns['dc:modified']).to.not.have.property('order');
+      // hidden and width are preserved
+      expect(result.columns['dc:title'].width).to.equal('300px');
+      expect(result.columns['dc:modified'].hidden).to.be.true;
+    });
+
+    test('strips both width and order when resize and reorder are disabled', () => {
+      const view = createTableView({ columnResizeEnabled: false, columnReorderEnabled: false });
+      const result = results._filterSettingsByCapabilities(view, buildSettings());
+      Object.values(result.columns).forEach((column) => {
+        expect(column).to.not.have.property('width');
+        expect(column).to.not.have.property('resized');
+        expect(column).to.not.have.property('order');
+        expect(column).to.have.property('hidden');
+      });
+    });
+
+    test('does not mutate the original settings object', () => {
+      const view = createTableView({ columnResizeEnabled: false, columnReorderEnabled: false });
+      const settings = buildSettings();
+      results._filterSettingsByCapabilities(view, settings);
+      expect(settings.columns['dc:title']).to.have.property('width', '300px');
+      expect(settings.columns['dc:title']).to.have.property('order', 1);
+    });
+  });
+
+  suite('Settings restore guards (WEBUI-2085)', () => {
+    test('_viewChanged applies filtered settings when the capability filter returns a value', () => {
+      const filtered = { columns: { 'dc:title': { hidden: false } } };
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(filtered);
+      const view = createMockView({ settings: { source: 'template' } });
+      results.displayMode = 'table';
+      results._settings = { table: { source: 'persisted' } };
+
+      results._viewChanged(view, null);
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(filtered);
+      filterStub.restore();
+    });
+
+    test('_viewChanged does not overwrite view settings when the capability filter returns undefined', () => {
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(undefined);
+      const templateSettings = { source: 'template' };
+      const view = createMockView({ settings: templateSettings });
+      results.displayMode = 'table';
+      results._settings = { table: { source: 'persisted' } };
+
+      results._viewChanged(view, null);
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(templateSettings);
+      filterStub.restore();
+    });
+
+    test('_updateViews applies filtered settings when the capability filter returns a value', async () => {
+      const resultsWithViews = await fixture(html`
+        <nuxeo-results name="test-update-views">
+          <div class="results" name="table" icon="icons:list"></div>
+        </nuxeo-results>
+      `);
+      await flush();
+      const view = resultsWithViews.$.views.items[0];
+      view.settings = { source: 'template' };
+      resultsWithViews._settings = { table: { source: 'persisted' } };
+      const filtered = { source: 'filtered' };
+      const filterStub = sinon.stub(resultsWithViews, '_filterSettingsByCapabilities').returns(filtered);
+
+      resultsWithViews._updateViews();
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(filtered);
+      filterStub.restore();
+    });
+
+    test('_updateViews does not overwrite view settings when the capability filter returns undefined', async () => {
+      const resultsWithViews = await fixture(html`
+        <nuxeo-results name="test-update-views-undefined">
+          <div class="results" name="table" icon="icons:list"></div>
+        </nuxeo-results>
+      `);
+      await flush();
+      const view = resultsWithViews.$.views.items[0];
+      const templateSettings = { source: 'template' };
+      view.settings = templateSettings;
+      resultsWithViews._settings = { table: { source: 'persisted' } };
+      const filterStub = sinon.stub(resultsWithViews, '_filterSettingsByCapabilities').returns(undefined);
+
+      resultsWithViews._updateViews();
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(templateSettings);
+      filterStub.restore();
+    });
+
+    test('restoreSettings does not overwrite view settings when the capability filter returns undefined', () => {
+      const filterStub = sinon.stub(results, '_filterSettingsByCapabilities').returns(undefined);
+      const templateSettings = { source: 'template' };
+      const view = createMockView({ settings: templateSettings });
+      results.view = view;
+      results.name = 'test-results';
+      results.displayMode = 'table';
+      results._settings = { displayMode: 'table', table: { source: 'persisted' } };
+
+      results.restoreSettings();
+
+      expect(filterStub).to.have.been.calledWith(view, { source: 'persisted' });
+      expect(view.settings).to.equal(templateSettings);
+      filterStub.restore();
     });
   });
 });
