@@ -215,40 +215,17 @@ suite('nuxeo-document-list-item', () => {
     });
   });
 
-  // WEBUI-2056 / WEBUI-2175: after a mouse deselect the check button must lose focus so the
-  // `:host(:focus-within)` rule stops matching and the tick doesn't linger until the user
-  // clicks elsewhere. Keyboard toggles must keep focus so keyboard navigation still works.
-  suite('_blurOnPointerDeselect', () => {
-    let button;
-
-    setup(() => {
-      button = element.shadowRoot.querySelector('.select paper-icon-button');
-      // Make the control focusable/visible for the focus assertions.
+  // WEBUI-2056 / WEBUI-2175: integration check that a mouse deselect through `_toogleSelect`
+  // clears focus from the check button (the shared helper is unit-tested in common-utils).
+  suite('_toogleSelect blur-on-deselect wiring', () => {
+    test('mouse deselect clears shadowRoot.activeElement', () => {
+      const button = element.shadowRoot.querySelector('.select paper-icon-button');
       element.selected = true;
       button.focus();
-    });
-
-    test('blurs the focused check button on a mouse deselect', () => {
-      // Only run the focus assertion when the environment actually focused the button.
       expect(element.shadowRoot.activeElement).to.equal(button);
       element._toogleSelect({ type: 'tap', detail: { sourceEvent: new MouseEvent('click') } });
       expect(element.selected).to.be.false;
       expect(element.shadowRoot.activeElement).to.not.equal(button);
-    });
-
-    test('keeps focus on a keyboard deselect (synthesized tap with KeyboardEvent source)', () => {
-      expect(element.shadowRoot.activeElement).to.equal(button);
-      element._toogleSelect({ type: 'tap', detail: { sourceEvent: new KeyboardEvent('keydown', { key: ' ' }) } });
-      expect(element.selected).to.be.false;
-      expect(element.shadowRoot.activeElement).to.equal(button);
-    });
-
-    test('does not blur when the toggle selects (rather than deselects)', () => {
-      element.selected = true; // guard is `this.selected`: a selection must not blur
-      const spy = sinon.spy(button, 'blur');
-      element._blurOnPointerDeselect({ type: 'tap', detail: { sourceEvent: new MouseEvent('click') } });
-      expect(spy).to.not.have.been.called;
-      spy.restore();
     });
   });
 

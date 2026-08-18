@@ -347,51 +347,23 @@ suite('nuxeo-document-grid-thumbnail', () => {
     });
   });
 
-  // WEBUI-2056 / WEBUI-2175: after a mouse deselect the check button must lose focus so the
-  // `:host(:focus)` rule stops matching and the tick doesn't linger until the user clicks
-  // elsewhere. Keyboard toggles must keep focus so keyboard navigation still works.
-  suite('_blurOnPointerDeselect', () => {
-    let button;
-
-    setup(async () => {
+  // WEBUI-2056 / WEBUI-2175: integration check that a keyboard deselect through `_toogleSelect`
+  // keeps focus on the check button (the shared helper is unit-tested in common-utils).
+  suite('_toogleSelect blur-on-deselect wiring', () => {
+    test('keyboard deselect keeps shadowRoot.activeElement', async () => {
       // `.select` lives inside a dom-if that stamps `<a href$="[[urlFor(doc)]]">`; stub urlFor so the
-      // template stamps reliably (matching the "rendered markup" suite), otherwise the button is null.
+      // template stamps reliably, otherwise the button is null.
       sinon.stub(element, 'urlFor').returns('/doc/doc-1');
       element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
       await flush();
-      button = element.shadowRoot.querySelector('.select paper-icon-button');
+      const button = element.shadowRoot.querySelector('.select paper-icon-button');
       expect(button, 'select paper-icon-button should be stamped').to.exist;
-      element.selected = true; // make the control visible/focusable
+      element.selected = true;
       button.focus();
-    });
-
-    test('blurs the focused check button on a mouse deselect', () => {
-      expect(element.shadowRoot.activeElement).to.equal(button);
-      element._toogleSelect({ type: 'tap', detail: { sourceEvent: new MouseEvent('click') } });
-      expect(element.selected).to.be.false;
-      expect(element.shadowRoot.activeElement).to.not.equal(button);
-    });
-
-    test('keeps focus on a keyboard deselect (keydown event)', () => {
       expect(element.shadowRoot.activeElement).to.equal(button);
       element._toogleSelect(new KeyboardEvent('keydown', { key: ' ' }));
       expect(element.selected).to.be.false;
       expect(element.shadowRoot.activeElement).to.equal(button);
-    });
-
-    test('keeps focus on a keyboard deselect (synthesized tap with KeyboardEvent source)', () => {
-      expect(element.shadowRoot.activeElement).to.equal(button);
-      element._toogleSelect({ type: 'tap', detail: { sourceEvent: new KeyboardEvent('keydown', { key: ' ' }) } });
-      expect(element.selected).to.be.false;
-      expect(element.shadowRoot.activeElement).to.equal(button);
-    });
-
-    test('does not blur when the toggle selects (rather than deselects)', () => {
-      element.selected = true;
-      const spy = sinon.spy(button, 'blur');
-      element._blurOnPointerDeselect({ type: 'tap', detail: { sourceEvent: new MouseEvent('click') } });
-      expect(spy).to.not.have.been.called;
-      spy.restore();
     });
   });
 });

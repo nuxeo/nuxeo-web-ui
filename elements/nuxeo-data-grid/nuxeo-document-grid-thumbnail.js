@@ -23,7 +23,7 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
-import { applyThumbnailFallback } from '../common-utils.js';
+import { applyThumbnailFallback, blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -336,32 +336,9 @@ Polymer({
   _toogleSelect(e) {
     this.selected = !this.selected;
     this.fire('selected', { index: this.index, shiftKey: e.type === 'tap' ? e.detail.sourceEvent.shiftKey : false });
-    this._blurOnPointerDeselect(e);
-  },
-
-  // WEBUI-2056 / WEBUI-2175: after a pointer (mouse/touch) deselect, drop focus from the
-  // check button so the `:host(:focus)` rule stops matching and the selection tick does not
-  // linger until the user clicks elsewhere. Keyboard toggles keep focus so keyboard
-  // navigation/selection stays usable (keydown events, and the results view's synthesized
-  // `tap` whose `detail.sourceEvent` is the original KeyboardEvent, are both detected here).
-  _blurOnPointerDeselect(e) {
-    if (this.selected) {
-      return;
-    }
-    if (this._isKeyboardEvent(e) || this._isKeyboardEvent(e && e.detail && e.detail.sourceEvent)) {
-      return;
-    }
-    const focused = this.shadowRoot && this.shadowRoot.activeElement;
-    if (focused && typeof focused.blur === 'function') {
-      focused.blur();
-    }
-  },
-
-  _isKeyboardEvent(evt) {
-    return (
-      !!evt &&
-      ((typeof KeyboardEvent !== 'undefined' && evt instanceof KeyboardEvent) || /^key/.test(String(evt.type || '')))
-    );
+    // WEBUI-2056 / WEBUI-2175: clear focus from the check button on a pointer deselect so the
+    // `:host(:focus)` rule stops keeping the selection tick on screen (see common-utils).
+    blurSelectionCheckOnPointerDeselect(this, e);
   },
 
   _selectedItemsChanged() {

@@ -28,7 +28,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
 import '../nuxeo-document-highlight/nuxeo-document-highlights.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { applyThumbnailFallback } from '../common-utils.js';
+import { applyThumbnailFallback, blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
 
 /**
 `nuxeo-document-list-item`
@@ -326,32 +326,9 @@ Polymer({
   _toogleSelect(e) {
     this.selected = !this.selected;
     this.fire('selected', { index: this.index, shiftKey: e.detail.sourceEvent.shiftKey });
-    this._blurOnPointerDeselect(e);
-  },
-
-  // WEBUI-2056 / WEBUI-2175: after a pointer (mouse/touch) deselect, drop focus from the
-  // check button so the `:host(:focus-within)` rule stops matching and the selection tick
-  // does not linger until the user clicks elsewhere. Keyboard toggles keep focus so
-  // keyboard navigation/selection stays usable (the results view synthesizes a `tap` whose
-  // `detail.sourceEvent` is the original KeyboardEvent, so we detect it there).
-  _blurOnPointerDeselect(e) {
-    if (this.selected) {
-      return;
-    }
-    if (this._isKeyboardEvent(e) || this._isKeyboardEvent(e && e.detail && e.detail.sourceEvent)) {
-      return;
-    }
-    const focused = this.shadowRoot && this.shadowRoot.activeElement;
-    if (focused && typeof focused.blur === 'function') {
-      focused.blur();
-    }
-  },
-
-  _isKeyboardEvent(evt) {
-    return (
-      !!evt &&
-      ((typeof KeyboardEvent !== 'undefined' && evt instanceof KeyboardEvent) || /^key/.test(String(evt.type || '')))
-    );
+    // WEBUI-2056 / WEBUI-2175: clear focus from the check button on a pointer deselect so the
+    // `:host(:focus-within)` rule stops keeping the selection tick on screen (see common-utils).
+    blurSelectionCheckOnPointerDeselect(this, e);
   },
 
   _selectedItemsChanged() {
