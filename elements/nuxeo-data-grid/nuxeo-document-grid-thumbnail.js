@@ -336,6 +336,32 @@ Polymer({
   _toogleSelect(e) {
     this.selected = !this.selected;
     this.fire('selected', { index: this.index, shiftKey: e.type === 'tap' ? e.detail.sourceEvent.shiftKey : false });
+    this._blurOnPointerDeselect(e);
+  },
+
+  // WEBUI-2056 / WEBUI-2175: after a pointer (mouse/touch) deselect, drop focus from the
+  // check button so the `:host(:focus)` rule stops matching and the selection tick does not
+  // linger until the user clicks elsewhere. Keyboard toggles keep focus so keyboard
+  // navigation/selection stays usable (keydown events, and the results view's synthesized
+  // `tap` whose `detail.sourceEvent` is the original KeyboardEvent, are both detected here).
+  _blurOnPointerDeselect(e) {
+    if (this.selected) {
+      return;
+    }
+    if (this._isKeyboardEvent(e) || this._isKeyboardEvent(e && e.detail && e.detail.sourceEvent)) {
+      return;
+    }
+    const focused = this.shadowRoot && this.shadowRoot.activeElement;
+    if (focused && typeof focused.blur === 'function') {
+      focused.blur();
+    }
+  },
+
+  _isKeyboardEvent(evt) {
+    return (
+      !!evt &&
+      ((typeof KeyboardEvent !== 'undefined' && evt instanceof KeyboardEvent) || /^key/.test(String(evt.type || '')))
+    );
   },
 
   _selectedItemsChanged() {
