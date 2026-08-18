@@ -176,7 +176,6 @@ Polymer({
 
       .error {
         border-left: 4px solid var(--nuxeo-warn-text);
-        color: var(--primary-text-color);
         padding-left: 8px;
         color: var(--nuxeo-text-default);
       }
