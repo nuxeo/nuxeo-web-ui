@@ -148,6 +148,41 @@ suite('theme-loader', () => {
       xhrStub.restore();
     });
 
+    test('should fallback to the default theme when the theme file returns a 5xx error', () => {
+      getItemStub.returns('dark');
+      const fallback = getDefaultTheme();
+      fakeXhr = { open: sinon.stub(), send: sinon.stub(), readyState: 4, status: 500 };
+      fakeXhr.send.callsFake(function () {
+        fakeXhr.onreadystatechange();
+      });
+      xhrStub = sinon.stub(window, 'XMLHttpRequest').returns(fakeXhr);
+
+      loadTheme();
+
+      expect(setItemStub).to.have.been.calledWith('theme', fallback);
+      const link = document.querySelector(`link[rel="import"][href="themes/${fallback}/theme.html"]`);
+      expect(link).to.exist;
+      xhrStub.restore();
+    });
+
+    test('should keep the requested theme and not reset preference on a network error (status 0)', () => {
+      getItemStub.returns('dark');
+      const resolved = resolveTheme('dark');
+      fakeXhr = { open: sinon.stub(), send: sinon.stub(), readyState: 4, status: 0 };
+      fakeXhr.send.callsFake(function () {
+        fakeXhr.onreadystatechange();
+      });
+      xhrStub = sinon.stub(window, 'XMLHttpRequest').returns(fakeXhr);
+
+      loadTheme();
+
+      // No fallback persisted: a transient network failure must not overwrite the user's choice.
+      expect(setItemStub).to.not.have.been.calledWith('theme', getDefaultTheme());
+      const link = document.querySelector(`link[rel="import"][href="themes/${resolved}/theme.html"]`);
+      expect(link).to.exist;
+      xhrStub.restore();
+    });
+
     test('should skip link insertion when readyState is not DONE', () => {
       getItemStub.returns('dark');
       fakeXhr = { open: sinon.stub(), send: sinon.stub(), readyState: 3, status: 200 };
