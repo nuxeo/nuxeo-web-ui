@@ -104,7 +104,7 @@ Polymer({
       }
     </style>
 
-    <a href$="[[_href(urlFor, route, link)]]" aria-label$="[[i18n(label)]]">
+    <a href$="[[_href(urlFor, route, link)]]" aria-label$="[[_ariaLabel(label, urlFor, route, link)]]">
       <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip" tabindex="-1"></paper-icon-button>
       <nuxeo-tooltip
         for="button"
@@ -220,5 +220,14 @@ Polymer({
       const args = (parts[1] && parts[1].split('/')) || [];
       return this.urlFor(...[name].concat(args));
     }
+  },
+
+  // Only expose an accessible name on the anchor when it renders as a real link (i.e. it
+  // resolves to an href). Without an href the <a> has an implicit role of "generic", where
+  // aria-label is prohibited by ARIA (e.g. Administration/Profile, which activate via click,
+  // not navigation). In those cases the accessible name is carried by the inner icon button
+  // (aria-labelledby="tooltip") instead, so no label is lost.
+  _ariaLabel() {
+    return this._href() ? this.i18n(this.label) : undefined;
   },
 });

@@ -1572,6 +1572,20 @@ suite('nuxeo-app', () => {
       }
     });
 
+    test('attached() re-arms homeToMenuNavigation after a detach/re-attach cycle', () => {
+      const spy = sinon.spy(app, 'homeToMenuNavigation');
+      try {
+        // Simulate a real detach: this is what flags the element for re-arming.
+        app.detached();
+        expect(app._inactivityNeedsRearm).to.be.true;
+        app.attached();
+        expect(spy).to.have.been.calledOnce;
+        expect(app._inactivityNeedsRearm).to.be.false;
+      } finally {
+        spy.restore();
+      }
+    });
+
     test('_homeMenuVisibleItems returns [] when no menu is stashed', () => {
       app._homeMenuNav = null;
       expect(app._homeMenuVisibleItems()).to.deep.equal([]);
