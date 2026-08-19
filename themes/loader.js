@@ -65,10 +65,15 @@ export function loadTheme() {
   xhr.open('HEAD', url, false);
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
-      if (xhr.status === 404) {
-        // Theme file not found; fall back to default.
+      // A successful HEAD returns 2xx (or 304 from cache). Any 4xx/5xx means the server cannot
+      // serve the requested theme file, so appending its <link> would leave the app unstyled;
+      // fall back to the default theme instead. status === 0 (offline/aborted/blocked request) is
+      // intentionally NOT treated as a fallback so a transient network error does not wipe the
+      // user's stored theme preference.
+      if (xhr.status >= 400) {
+        // Theme file unavailable; fall back to default.
         const defaultTheme = getDefaultTheme();
-        console.warn(`"${resolvedTheme}" theme not found, fallback to "${defaultTheme}".`);
+        console.warn(`"${resolvedTheme}" theme not found (HTTP ${xhr.status}), fallback to "${defaultTheme}".`);
         resolvedTheme = defaultTheme;
         safeSetTheme(resolvedTheme);
       }
