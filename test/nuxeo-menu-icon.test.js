@@ -118,4 +118,43 @@ suite('nuxeo-menu-icon', () => {
       expect(element.urlFor.calledWith('document', 'uid1')).to.be.true;
     });
   });
+
+  suite('_ariaLabel', () => {
+    setup(() => {
+      Object.defineProperty(element, 'urlFor', {
+        value: sinon.stub().returns('/stubbed-url'),
+        configurable: true,
+        writable: true,
+      });
+    });
+
+    test('returns the localized label when the anchor resolves to an href', () => {
+      element.route = 'home';
+      element.label = 'app.home';
+      expect(element._ariaLabel()).to.equal('app.home');
+    });
+
+    test('returns undefined when there is no href (aria-label prohibited on generic anchor)', () => {
+      element.route = '';
+      element.link = '';
+      element.label = 'app.administration';
+      expect(element._ariaLabel()).to.equal(undefined);
+    });
+
+    test('omits aria-label attribute on the rendered anchor when route is empty', async () => {
+      element.route = '';
+      element.label = 'app.administration';
+      await flush();
+      const anchor = element.shadowRoot.querySelector('a');
+      expect(anchor.hasAttribute('aria-label')).to.be.false;
+    });
+
+    test('sets aria-label attribute on the rendered anchor when route is set', async () => {
+      element.route = 'home';
+      element.label = 'app.home';
+      await flush();
+      const anchor = element.shadowRoot.querySelector('a');
+      expect(anchor.getAttribute('aria-label')).to.equal('app.home');
+    });
+  });
 });

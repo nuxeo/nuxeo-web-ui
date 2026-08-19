@@ -1038,6 +1038,9 @@ Polymer({
       this._inactivityNeedsRearm = false;
       this._setupInactivityTimer();
       this._setupUnauthorizedRedirect();
+      // detached() removed the home<->menu arrow-key handlers; re-arm them here to mirror the
+      // inactivity timer. Re-adding is idempotent (bound handler refs are retained).
+      this.homeToMenuNavigation();
     }
   },
 
