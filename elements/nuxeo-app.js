@@ -1240,7 +1240,11 @@ Polymer({
     switch (this.page) {
       case 'browse':
         if (this.currentDocument && this.currentDocument.title) {
-          title.push(this.currentDocument.title);
+          // The repository root has no dc:title, so the server returns its uid as the title.
+          // Mirror the breadcrumb/clipboard behavior and show the localized root label instead
+          // of a raw UUID, so the browser tab title stays meaningful and consistent for
+          // screen-reader users navigating between tabs (WEBUI-1876).
+          title.push(this.currentDocument.type === 'Root' ? this.i18n('browse.root') : this.currentDocument.title);
           if (this.currentDocument.type === 'Collections') {
             title.push(this.i18n('app.title.collections'));
           } else if (this.hasFacet(this.currentDocument, 'Collection')) {

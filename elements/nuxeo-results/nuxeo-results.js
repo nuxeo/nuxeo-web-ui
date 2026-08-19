@@ -664,72 +664,89 @@ Polymer({
       this._srSaveAnchor(oldView);
       this._srDisarmScrollTracking();
       this._srRearmRestore();
-      this.unlisten(oldView, 'columns-changed', '_columnsChanged');
-      this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
-      this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
-      this.unlisten(oldView, 'items-changed', '_itemsChanged');
-      this.unlisten(oldView, 'quick-filters-changed', '_handleViewQuickFiltersSync');
-      this.unlisten(oldView, 'select-all-active-changed', '_selectAllActiveChanged');
-      this.unlisten(oldView, '_excluded-items-changed', '_excludedDocsChanged');
-      // we need to clear the selected items and selection (removes selection synchronization)
-      if (this.selectedItems) {
-        this.selectedItems = [];
-      }
-      this.selectAllActive = false;
+      this._teardownView(oldView);
     }
     if (view) {
-      // initialize columns
-      this.set('columns', view.columns);
-      if (Array.isArray(view.columns)) {
-        this.listen(view, 'columns-changed', '_columnsChanged');
+      this._setupView(view);
+    }
+  },
+
+  _teardownView(oldView) {
+    this.unlisten(oldView, 'columns-changed', '_columnsChanged');
+    this.unlisten(oldView, 'selected-items-changed', '_selectedItemsChanged');
+    this.unlisten(oldView, 'settings-changed', '_saveViewSettings');
+    this.unlisten(oldView, 'items-changed', '_itemsChanged');
+    this.unlisten(oldView, 'quick-filters-changed', '_handleViewQuickFiltersSync');
+    this.unlisten(oldView, 'select-all-active-changed', '_selectAllActiveChanged');
+    this.unlisten(oldView, '_excluded-items-changed', '_excludedDocsChanged');
+    // we need to clear the selected items and selection (removes selection synchronization)
+    if (this.selectedItems) {
+      this.selectedItems = [];
+    }
+    this.selectAllActive = false;
+  },
+
+  _setupView(view) {
+    // initialize columns
+    this.set('columns', view.columns);
+    if (Array.isArray(view.columns)) {
+      this.listen(view, 'columns-changed', '_columnsChanged');
+    }
+
+    // restore settings
+    this._restoreViewSettings(view);
+
+    // restore selection
+    if (this.selectedItems) {
+      this.selectedItems = []; // NXP-23186: this line removes selection synchronization between view modes
+      this.selectItems(this.selectedItems.slice());
+    }
+    // listen for columns, settings and selection changed
+    this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
+    this.listen(view, 'settings-changed', '_saveViewSettings');
+    this.listen(view, 'items-changed', '_itemsChanged');
+    this.listen(view, 'quick-filters-changed', '_handleViewQuickFiltersSync');
+    this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
+    this.listen(view, '_excluded-items-changed', '_excludedDocsChanged');
+    view.nxProvider = this.nxProvider;
+    // update view - now safe as reset/fetch have defensive checks
+    // reset first
+    this.reset();
+
+    // restore quick filters after reset — single clone shared safely across provider and view
+    const restoredQuickFilters = this._cloneQuickFilters(this.quickFilters);
+    if (this.nxProvider) {
+      this.set('nxProvider.quickFilters', restoredQuickFilters);
+    }
+
+    if (view.quickFilters !== undefined) {
+      view.quickFilters = restoredQuickFilters.slice();
+    }
+
+    // fetch after state restore
+    this.fetch();
+
+    // keep the scroll anchor fresh while the user scrolls; the position is
+    // re-applied once rows load (see `_itemsChanged` → `_srMaybeRestore`).
+    // Guard against a stale deferred call after a fast view swap.
+    afterNextRender(this, () => {
+      if (this.view === view) {
+        this._srArmScrollTracking(view);
       }
+    });
 
-      // restore settings
-      if (this._settings) {
-        this.set('_settings.displayMode', this.displayMode);
-        this.saveSettings();
-        view.settings = this._settings[this.displayMode];
-      }
-      // restore selection
-      if (this.selectedItems) {
-        this.selectedItems = []; // NXP-23186: this line removes selection synchronization between view modes
-        this.selectItems(this.selectedItems.slice());
-      }
-      // listen for columns, settings and selection changed
-      this.listen(view, 'selected-items-changed', '_selectedItemsChanged');
-      this.listen(view, 'settings-changed', '_saveViewSettings');
-      this.listen(view, 'items-changed', '_itemsChanged');
-      this.listen(view, 'quick-filters-changed', '_handleViewQuickFiltersSync');
-      this.listen(view, 'select-all-active-changed', '_selectAllActiveChanged');
-      this.listen(view, '_excluded-items-changed', '_excludedDocsChanged');
-      view.nxProvider = this.nxProvider;
-      // update view - now safe as reset/fetch have defensive checks
-      // reset first
-      this.reset();
+    this.fire('search-results-view', { view, name: this.name });
+  },
 
-      // restore quick filters after reset — single clone shared safely across provider and view
-      const restoredQuickFilters = this._cloneQuickFilters(this.quickFilters);
-      if (this.nxProvider) {
-        this.set('nxProvider.quickFilters', restoredQuickFilters);
-      }
-
-      if (view.quickFilters !== undefined) {
-        view.quickFilters = restoredQuickFilters.slice();
-      }
-
-      // fetch after state restore
-      this.fetch();
-
-      // keep the scroll anchor fresh while the user scrolls; the position is
-      // re-applied once rows load (see `_itemsChanged` → `_srMaybeRestore`).
-      // Guard against a stale deferred call after a fast view swap.
-      afterNextRender(this, () => {
-        if (this.view === view) {
-          this._srArmScrollTracking(view);
-        }
-      });
-
-      this.fire('search-results-view', { view, name: this.name });
+  _restoreViewSettings(view) {
+    if (!this._settings) {
+      return;
+    }
+    this.set('_settings.displayMode', this.displayMode);
+    this.saveSettings();
+    const settings = this._filterSettingsByCapabilities(view, this._settings[this.displayMode]);
+    if (settings !== undefined) {
+      view.settings = settings;
     }
   },
 
@@ -751,7 +768,10 @@ Polymer({
       const icon = view.getAttribute('icon');
       view.nxProvider = this.nxProvider;
       if (this._settings && view.settings) {
-        view.settings = this._settings[name];
+        const settings = this._filterSettingsByCapabilities(view, this._settings[name]);
+        if (settings !== undefined) {
+          view.settings = settings;
+        }
       }
       if (name === this.displayMode) {
         hasDisplayMode = true;
@@ -833,6 +853,47 @@ Polymer({
     this._settings = {};
   },
 
+  // Filters persisted view settings so that only capabilities enabled on the view are restored.
+  // This prevents saved layout (column visibility, width/resize, order) from overriding the
+  // template-declared layout when the corresponding capability is disabled on the view
+  // (`settings-enabled`, `column-resize-enabled`, `column-reorder-enabled`).
+  _filterSettingsByCapabilities(view, settings) {
+    if (!settings) {
+      return settings;
+    }
+    // Only nuxeo-data-table exposes column capability flags; other views (e.g. grid) restore as-is.
+    if (view?.localName !== 'nuxeo-data-table') {
+      return settings;
+    }
+    // Without the settings panel capability, do not restore any persisted layout;
+    // the template-declared layout must win.
+    if (!view.settingsEnabled) {
+      return undefined;
+    }
+    const resizeEnabled = !!view.columnResizeEnabled;
+    const reorderEnabled = !!view.columnReorderEnabled;
+    if (resizeEnabled && reorderEnabled) {
+      return settings;
+    }
+    const filtered = this._deepClone(settings);
+    if (filtered.columns) {
+      Object.keys(filtered.columns).forEach((key) => {
+        const column = filtered.columns[key];
+        if (!column) {
+          return;
+        }
+        if (!resizeEnabled) {
+          delete column.width;
+          delete column.resized;
+        }
+        if (!reorderEnabled) {
+          delete column.order;
+        }
+      });
+    }
+    return filtered;
+  },
+
   restoreSettings() {
     // XXX _isRestoring is a control flag to prevent restoring from triggering a save (see WEBUI-581)
     this._isRestoring = true;
@@ -841,7 +902,10 @@ Polymer({
         this.displayMode = this._settings.displayMode;
       }
       if (this._settings[this.displayMode] && this.view) {
-        this.view.settings = this._settings[this.displayMode];
+        const settings = this._filterSettingsByCapabilities(this.view, this._settings[this.displayMode]);
+        if (settings !== undefined) {
+          this.view.settings = settings;
+        }
       }
     }
     this._isRestoring = false;
@@ -1421,7 +1485,12 @@ Polymer({
       return;
     }
 
-    this._applyPrefsToView(view, settingsToApply);
+    const filteredSettings = this._filterSettingsByCapabilities(view, settingsToApply);
+    if (filteredSettings === undefined) {
+      return;
+    }
+
+    this._applyPrefsToView(view, filteredSettings);
   },
 
   // ------------------------------
@@ -1588,7 +1657,12 @@ Polymer({
       settingsToApply = {};
     }
 
-    this._applyPrefsToView(view, settingsToApply);
+    const filteredSettings = this._filterSettingsByCapabilities(view, settingsToApply);
+    if (filteredSettings === undefined) {
+      return;
+    }
+
+    this._applyPrefsToView(view, filteredSettings);
   },
   // -------------------------
   // Mode decision functions
