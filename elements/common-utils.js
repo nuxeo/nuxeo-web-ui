@@ -81,11 +81,12 @@ export function blurSelectionCheckOnPointerDeselect(host, e) {
   }
   const isKeyboardEvent = (evt) =>
     !!evt &&
-    ((typeof KeyboardEvent !== 'undefined' && evt instanceof KeyboardEvent) || /^key/.test(String(evt.type || '')));
-  if (isKeyboardEvent(e) || isKeyboardEvent(e && e.detail && e.detail.sourceEvent)) {
+    ((typeof KeyboardEvent !== 'undefined' && evt instanceof KeyboardEvent) ||
+      String(evt.type || '').startsWith('key'));
+  if (isKeyboardEvent(e) || isKeyboardEvent(e?.detail?.sourceEvent)) {
     return;
   }
-  const focused = host.shadowRoot && host.shadowRoot.activeElement;
+  const focused = host.shadowRoot?.activeElement;
   if (focused && typeof focused.blur === 'function') {
     focused.blur();
   }
