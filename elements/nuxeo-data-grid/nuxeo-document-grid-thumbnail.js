@@ -23,7 +23,7 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
-import { applyThumbnailFallback } from '../common-utils.js';
+import { applyThumbnailFallback, blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -336,6 +336,9 @@ Polymer({
   _toogleSelect(e) {
     this.selected = !this.selected;
     this.fire('selected', { index: this.index, shiftKey: e.type === 'tap' ? e.detail.sourceEvent.shiftKey : false });
+    // WEBUI-2056 / WEBUI-2175: clear focus from the check button on a pointer deselect so the
+    // `:host(:focus)` rule stops keeping the selection tick on screen (see common-utils).
+    blurSelectionCheckOnPointerDeselect(this, e);
   },
 
   _selectedItemsChanged() {
