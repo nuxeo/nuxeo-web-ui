@@ -138,7 +138,7 @@ suite('nuxeo-menu-icon', () => {
       element.route = '';
       element.link = '';
       element.label = 'app.administration';
-      expect(element._ariaLabel()).to.equal(undefined);
+      expect(element._ariaLabel()).to.be.undefined;
     });
 
     test('omits aria-label attribute on the rendered anchor when route is empty', async () => {
