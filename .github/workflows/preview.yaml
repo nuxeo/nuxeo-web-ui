@@ -59,7 +59,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
@@ -82,7 +82,7 @@ jobs:
           branch: ${{ env.BRANCH_NAME }}
           default-branch: maintenance-3.1.x
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
@@ -107,7 +107,7 @@ jobs:
           default-branch: maintenance-3.1.x
 
       - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
@@ -129,7 +129,7 @@ jobs:
         run: npm run build
 
       - name: Set up Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@b69f8529e843a9525310d704d1f7a8fe1f5d103b # v0.15.1
         with:
           java-version: '17'
 
@@ -156,7 +156,7 @@ jobs:
 
       - name: Build and push combined Nuxeo + Web UI image
         id: build
-        uses: nuxeo/gh-build-tools/.github/actions/nuxeo-docker-build@1b8eb07cc779f1c86ecaed70c021ab7c1f27b441 # v0.15.0
+        uses: nuxeo/gh-build-tools/.github/actions/nuxeo-docker-build@b69f8529e843a9525310d704d1f7a8fe1f5d103b # v0.15.1
         with:
           base-image-tag: ${{ env.BASE_IMAGE_TAG }}
           base-registry-username: ${{ secrets.REPOSITORY_MANAGER_USERNAME }}
