@@ -85,7 +85,7 @@ jobs:
           BUILD_PARAMS: ${{ toJSON(github.event.inputs) }}
         run: echo "$BUILD_PARAMS"
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
@@ -109,13 +109,13 @@ jobs:
           default-branch: ${{ env.REFERENCE_BRANCH }}
 
       - name: Checkout nuxeo-web-ui repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: nuxeo/nuxeo-web-ui
           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.15.1
         with:
           java-version: '21'
 
@@ -138,7 +138,7 @@ jobs:
         run: npm run lint
 
       - name: Checkout the nuxeo-elements repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: nuxeo/nuxeo-elements
           path: nuxeo-elements
