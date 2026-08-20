@@ -354,6 +354,10 @@ var global = window;
 
     load: {
       enumerable: true,
+      // writable/configurable so glTFLoader can override it via prototype assignment; ESM strict
+      // mode throws on assigning to an inherited read-only property (WEBUI-2180 regression from #3094)
+      writable: true,
+      configurable: true,
       value: function (userInfo, options) {
         var self = this;
         this._buildLoader(function loaderReady(reader) {

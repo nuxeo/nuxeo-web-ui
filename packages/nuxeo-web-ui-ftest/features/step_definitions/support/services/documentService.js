@@ -21,17 +21,26 @@ class DocumentHelper {
     );
   }
 
-  reset() {
-    return Promise.all(
-      this.liveDocuments.map((docUid) =>
-        this._retry(() =>
+  async reset() {
+    // Delete tracked documents sequentially, children before parents. The previous parallel
+    // Promise.all raced a parent's recursive delete against the explicit delete of its child, so
+    // Nuxeo threw ConcurrentUpdateException (409); the retries could not always win the race and the
+    // document leaked, inflating later features' search-result counts (a flaky "Expected N in results
+    // count label"). Documents are recorded in creation order (parents first), so iterating in reverse
+    // removes children first and each delete is a clean, un-contended operation.
+    const uids = this.liveDocuments.slice().reverse();
+    for (let i = 0; i < uids.length; i++) {
+      const docUid = uids[i];
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await this._retry(() =>
           nuxeo
             .repository()
             .delete(docUid)
             .catch((e) => {
               if (!e.response) throw e;
               const { status, statusText, url } = e.response;
-              // 404 means the document was already deleted (e.g. parent cascade) — ignore it
+              // 404 means the document was already deleted (e.g. by a parent cascade) — ignore it
               if (status === 404) {
                 return;
               }
@@ -41,17 +50,13 @@ class DocumentHelper {
                 throw e;
               }
             }),
-        ),
-      ),
-    )
-      .then(() => {
-        this.liveDocuments = [];
-      })
-      .catch((e) => {
+        );
+      } catch (e) {
+        // Log and continue so one stubborn document never blocks cleaning up the rest
         console.error(e);
-        // Clear liveDocuments even on failure to prevent re-deleting in subsequent After hooks
-        this.liveDocuments = [];
-      });
+      }
+    }
+    this.liveDocuments = [];
   }
 
   init(type = 'File', title = 'my document') {
@@ -120,7 +125,12 @@ class DocumentHelper {
       .repository()
       .delete(document.path)
       .then(() => {
-        this.liveDocuments.splice(this.liveDocuments.indexOf(document.uid), 1);
+        // Guard the index: indexOf === -1 would splice off the last (deepest) tracked doc, breaking
+        // reset()'s children-before-parents ordering and reintroducing the 409 cascade.
+        const i = this.liveDocuments.indexOf(document.uid);
+        if (i !== -1) {
+          this.liveDocuments.splice(i, 1);
+        }
       });
   }
 

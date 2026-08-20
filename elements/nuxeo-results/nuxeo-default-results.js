@@ -109,7 +109,7 @@ Polymer({
         column-resize-enabled
         column-reorder-enabled
         on-row-clicked="_navigate"
-        caption-text="[[i18n('documentContentView.datatable.heading')]]"
+        caption-text="[[i18n('documentContentView.datatable.defaultResults.heading')]]"
       >
         <nuxeo-data-table-column
           name="[[i18n('documentContentView.datatable.header.title')]]"

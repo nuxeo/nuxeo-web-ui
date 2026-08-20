@@ -264,13 +264,62 @@ Polymer({
     });
   },
 
+  /**
+   * Extracts the filename from a `Content-Disposition` header value.
+   *
+   * The RFC 5987 `filename*` form is preferred because it is percent-encoded and unquoted. The
+   * plain `filename` form is only a fallback, and its surrounding double quotes are stripped:
+   * servers quote the value whenever it is not a bare token (spaces, non-ASCII), and browsers
+   * replace those quotes with underscores when they end up in an anchor's `download` attribute
+   * (`"my file.pdf"` would be saved as `_my file.pdf_`).
+   */
+  _filenameFromContentDisposition(contentDisposition) {
+    // The quoted and unquoted forms are matched separately so that no quantifier can consume the
+    // same character as the one after it, which keeps matching linear on long headers.
+    const extended = contentDisposition.match(/filename\*[ \t]*=[^';\n]*'[^';\n]*'([^;\n]*)/i);
+    const quoted = contentDisposition.match(/filename[ \t]*=[ \t]*"([^"]*)"/i);
+    const plain = contentDisposition.match(/filename[ \t]*=([^;\n]*)/i);
+    if (extended) {
+      const value = extended[1].trim();
+      const decoded = this._decodeFilename(value, decodeURIComponent);
+      if (decoded !== null) {
+        return decoded;
+      }
+      // An undecodable `filename*` still leaves the plain form usable, so only take the raw value
+      // when the server sent nothing else.
+      if (!quoted && !plain) {
+        return value;
+      }
+    }
+    if (quoted) {
+      const decoded = this._decodeFilename(quoted[1], decodeURI);
+      return decoded === null ? quoted[1] : decoded;
+    }
+    if (plain) {
+      const value = plain[1].trim();
+      const decoded = this._decodeFilename(value, decodeURI);
+      return decoded === null ? value : decoded;
+    }
+    return '';
+  },
+
+  /**
+   * Decodes a filename read from the header, or returns `null` when it carries malformed
+   * percent-encoding: both decoders throw a `URIError` on such values, which would otherwise turn
+   * a cosmetic naming problem into a failed download.
+   */
+  _decodeFilename(value, decode) {
+    try {
+      return decode(value);
+    } catch (_) {
+      return null;
+    }
+  },
+
   _download(response) {
     const contentDisposition = response.headers.get('Content-Disposition');
     if (contentDisposition) {
-      const filenameMatches = contentDisposition
-        .match(/filename[^;=\n]*=([^;\n]*''([^;\n]*)|[^;\n]*)/)
-        .filter((match) => !!match);
-      const filename = decodeURI(filenameMatches[filenameMatches.length - 1]);
+      const filename = this._filenameFromContentDisposition(contentDisposition);
       return response.blob().then((blob) => {
         if (navigator.msSaveBlob) {
           // handle IE11 and Edge
