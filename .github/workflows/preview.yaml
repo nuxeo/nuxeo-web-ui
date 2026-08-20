@@ -119,9 +119,15 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm ci --ignore-scripts
-          npm install ./nuxeo-elements/core
-          npm install ./nuxeo-elements/ui
-          npm install ./nuxeo-elements/dataviz
+          # Pack each elements module and install the resulting tarball so the packages
+          # land as real files under node_modules/@nuxeo/... instead of a symlink.
+          # Webpack resolves symlinks to their real path, which otherwise rewrites
+          # lazily-loaded resource URLs under nuxeo-elements/ui/... and breaks document
+          # previews and admin layouts in the preview image (WEBUI-2222).
+          for module in core ui dataviz; do
+            tarball="$(cd "nuxeo-elements/${module}" && npm pack 2>&1 | tail -1)"
+            npm install --no-package-lock "nuxeo-elements/${module}/${tarball}"
+          done
 
       - name: Webpack build
         env:
