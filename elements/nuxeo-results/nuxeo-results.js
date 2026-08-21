@@ -242,6 +242,7 @@ Polymer({
           </template>
           <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
             <nuxeo-sort-select
+              label="[[i18n('results.sortBy')]]"
               options="[[_sortOptions(view, sortOptions)]]"
               selected="{{sortSelected}}"
               on-sort-order-changed="_sortChanged"
