@@ -51,4 +51,16 @@ suite('nuxeo-search-analytics', () => {
       expect(series[23]).to.equal(0);
     });
   });
+
+  suite('_chartAria', () => {
+    test('includes the chart heading and data points', () => {
+      const data = [
+        { key: 'Provider A', value: 4 },
+        { key: 'Provider B', value: 2 },
+      ];
+      expect(el._chartAria('searchAnalytics.callsPerPageProvider.heading', data)).to.equal(
+        'searchAnalytics.callsPerPageProvider.heading. Provider A: 4, Provider B: 2',
+      );
+    });
+  });
 });

@@ -42,6 +42,22 @@ export const ChartDataBehavior = {
       }),
     ];
   },
+  _chartAria(headingKey, data, headingArg) {
+    const heading = this.i18n(headingKey, headingArg);
+    if (!data || data.length === 0) {
+      return heading;
+    }
+    const points = data
+      .map((entry) => {
+        const value = Array.isArray(entry.value)
+          ? entry.value.map((item) => `${item.key}: ${item.value}`).join(', ')
+          : entry.value;
+        return `${entry.key}: ${value}`;
+      })
+      .join(', ');
+    return `${heading}. ${points}`;
+  },
+
   _extendEndDate(date) {
     if (date && moment) {
       return this._formatDate(moment(date).add(1, 'days').subtract(1, 'ms').toJSON());

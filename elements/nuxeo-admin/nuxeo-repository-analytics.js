@@ -123,7 +123,12 @@ Polymer({
         >
         </nuxeo-page-provider>
 
-        <nuxeo-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]">
+        <nuxeo-card
+          heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]"
+          role="region"
+          tabindex="0"
+          aria-label$="[[_cardAria('repositoryAnalytics.topDownloads.heading')]]"
+        >
           <template is="dom-if" if="[[!_isEmpty(downloads)]]">
             <nuxeo-data-table items="[[downloadedDocs]]" caption-text="[[i18n('table.caption.topDownloads')]]">
               <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file')]]">
@@ -149,7 +154,12 @@ Polymer({
         >
         </nuxeo-repository-data>
 
-        <nuxeo-card heading="[[i18n('repositoryAnalytics.documents.heading')]]">
+        <nuxeo-card
+          heading="[[i18n('repositoryAnalytics.documents.heading')]]"
+          role="region"
+          tabindex="0"
+          aria-label$="[[_cardAria('repositoryAnalytics.documents.heading', totalCount)]]"
+        >
           <iron-icon icon="icons:description"></iron-icon>
           <h1>[[totalCount]]</h1>
         </nuxeo-card>
@@ -168,6 +178,7 @@ Polymer({
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
           <chart-pie
             role="img"
+            tabindex="0"
             aria-label$="[[_chartAria('repositoryAnalytics.documentTypes.heading', typeCount, '', false)]]"
             values="[[_values(typeCount)]]"
             labels="[[_labels(typeCount)]]"
@@ -189,6 +200,7 @@ Polymer({
         <nuxeo-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
           <chart-pie
             role="img"
+            tabindex="0"
             aria-label$="[[_chartAria('repositoryAnalytics.topNCreators.heading', topCreators, '10', false)]]"
             values="[[_values(topCreators)]]"
             labels="[[_labels(topCreators)]]"
@@ -210,6 +222,7 @@ Polymer({
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading')]]">
           <chart-line
             role="img"
+            tabindex="0"
             aria-label$="[[_chartAria('repositoryAnalytics.documentsCreatedPerWeek.heading', docsCreatedPerWeek, '', false)]]"
             labels="[[_labels(docsCreatedPerWeek)]]"
             values="[[_values(docsCreatedPerWeek)]]"
@@ -232,6 +245,7 @@ Polymer({
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading')]]">
           <chart-line
             role="img"
+            tabindex="0"
             aria-label$="[[_chartAria('repositoryAnalytics.documentsModifiedPerWeek.heading', docsModifiedPerWeek, '', false)]]"
             labels="[[_labels(docsModifiedPerWeek)]]"
             values="[[_values(docsModifiedPerWeek)]]"
@@ -253,6 +267,7 @@ Polymer({
         <nuxeo-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
           <chart-pie
             role="img"
+            tabindex="0"
             aria-label$="[[_chartAria('repositoryAnalytics.filesByMimeType.heading', filesByMimeType, '', true)]]"
             values="[[_values(filesByMimeType)]]"
             labels="[[_types(filesByMimeType)]]"
@@ -314,6 +329,11 @@ Polymer({
       .map((entry) => `${useMimeNames ? this._mimeName(entry.key) : entry.key}: ${entry.value}`)
       .join(', ');
     return `${heading}. ${points}`;
+  },
+
+  _cardAria(headingKey, value) {
+    const heading = this.i18n(headingKey);
+    return value === undefined || value === null ? heading : `${heading}: ${value}`;
   },
 
   // builds page provider query to get info about downloaded docs
