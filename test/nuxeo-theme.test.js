@@ -72,8 +72,8 @@ suite('nuxeo-theme', () => {
     });
 
     test('uses themes folder when preview is not set', async () => {
-      const el = await fixture(html`<nuxeo-theme name="kawaii"></nuxeo-theme>`);
-      expect(el._image('kawaii')).to.equal('themes/kawaii/preview.jpg');
+      const el = await fixture(html`<nuxeo-theme name="default"></nuxeo-theme>`);
+      expect(el._image('default')).to.equal('themes/default/preview.jpg');
     });
   });
 
@@ -112,8 +112,8 @@ suite('nuxeo-theme', () => {
 
     test('returns false for non-default when no theme in storage', async () => {
       sinon.stub(localStorage, 'getItem').callsFake(() => null);
-      const el = await fixture(html`<nuxeo-theme name="kawaii"></nuxeo-theme>`);
-      expect(el._selected('kawaii')).to.be.false;
+      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
+      expect(el._selected('dark')).to.be.false;
     });
 
     test('maps a legacy stored theme to its branding equivalent when branding is on', async () => {
@@ -175,9 +175,9 @@ suite('nuxeo-theme', () => {
 
     test('uses apply i18n key when theme is not selected', async () => {
       const lsStub = sinon.stub(localStorage, 'getItem').callsFake(() => null);
-      const el = await fixture(html`<nuxeo-theme name="kawaii"></nuxeo-theme>`);
+      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
       const i18nStub = sinon.stub(el, 'i18n').callsFake((k) => k);
-      expect(el._button('kawaii')).to.equal('themes.apply');
+      expect(el._button('dark')).to.equal('themes.apply');
       i18nStub.restore();
       lsStub.restore();
     });
@@ -185,9 +185,9 @@ suite('nuxeo-theme', () => {
 
   suite('_ariaLabel', () => {
     test('calls themes.apply.ariaLabel i18n key with theme label', async () => {
-      const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);
+      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
       const i18nStub = sinon.stub(el, 'i18n').callsFake((k, ...args) => (args.length ? `${k}:${args[0]}` : k));
-      expect(el._ariaLabel('light')).to.equal('themes.apply.ariaLabel:themes.light');
+      expect(el._ariaLabel('dark')).to.equal('themes.apply.ariaLabel:themes.dark');
       i18nStub.restore();
     });
 
@@ -211,7 +211,7 @@ suite('nuxeo-theme', () => {
   suite('aria-label on apply button', () => {
     test('apply button has aria-label attribute', async () => {
       sinon.stub(localStorage, 'getItem').callsFake(() => null);
-      const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);
+      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
       const button = el.shadowRoot.querySelector('paper-button');
       expect(button.hasAttribute('aria-label')).to.be.true;
       expect(button.getAttribute('aria-label')).to.not.be.empty;
@@ -219,23 +219,23 @@ suite('nuxeo-theme', () => {
 
     test('aria-label reflects _ariaLabel method result', async () => {
       sinon.stub(localStorage, 'getItem').callsFake(() => null);
-      const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);
+      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
       const button = el.shadowRoot.querySelector('paper-button');
-      expect(button.getAttribute('aria-label')).to.equal(el._ariaLabel('light'));
+      expect(button.getAttribute('aria-label')).to.equal(el._ariaLabel('dark'));
     });
   });
 
   suite('_apply', () => {
     test('persists theme and dispatches theme-changed', async () => {
       sinon.stub(localStorage, 'setItem');
-      const el = await fixture(html`<nuxeo-theme name="light"></nuxeo-theme>`);
+      const el = await fixture(html`<nuxeo-theme name="dark"></nuxeo-theme>`);
       const listener = sinon.spy();
       el.addEventListener('theme-changed', listener);
       el._apply();
-      expect(localStorage.setItem).to.have.been.calledWith('theme', 'light');
+      expect(localStorage.setItem).to.have.been.calledWith('theme', 'dark');
       expect(listener).to.have.been.calledOnce;
       const [evt] = listener.firstCall.args;
-      expect(evt.detail.theme).to.equal('light');
+      expect(evt.detail.theme).to.equal('dark');
     });
   });
 });

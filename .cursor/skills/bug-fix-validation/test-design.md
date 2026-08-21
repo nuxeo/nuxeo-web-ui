@@ -63,7 +63,7 @@ Pick what applies to the change; skip the rest and say so.
 | **Workflow paths** | Every route into and out of the affected screen: deep link, breadcrumb, back button, drawer, search result, in-app link. |
 | **Permission-driven UI** | Administrator vs member vs reader: which actions are hidden, disabled, or read-only. Locked and archived documents. (UI state only — not the permission model.) |
 | **Layout** | 1280×800 and a narrow viewport, drawer open and closed, long titles, dense lists, zoom at 200%. |
-| **Theme** | Default, dark, light and kawaii themes — new colours must come from theme variables, not hardcoded values. |
+| **Theme** | Default (light), dark, hyland-light and hyland-dark themes — new colours must come from theme variables, not hardcoded values. |
 
 ## Corner cases
 
