@@ -24,6 +24,14 @@ import { config } from '@nuxeo/nuxeo-elements';
 export const INACTIVITY_ACTIVITY_KEY = 'nuxeo-ui-inactivity-last-activity';
 
 /**
+ * WEBUI-2189: sessionStorage key holding the page the user was on when an inactivity/401 logout fired, so
+ * we can return them there after they re-authenticate. sessionStorage (not localStorage) scopes it to the
+ * originating tab and clears it when that tab closes — bounding its lifetime and avoiding a cross-tab
+ * hijack. It is consumed once, on the next app boot, and validated to be same-origin before navigating.
+ */
+export const INACTIVITY_REQUESTED_URL_KEY = 'nuxeo-ui-inactivity-requested-url';
+
+/**
  * Client-side session inactivity handling (WEBUI-1987, CWE-613 Insufficient Session Expiration).
  *
  * Arms an idle timer (from the `session.timeout` config, in minutes) that logs the user out after a
@@ -232,6 +240,9 @@ export const NuxeoInactivityBehavior = {
       return Promise.resolve();
     }
     this._loggingOut = true;
+    // WEBUI-2189: remember where the user was so we can bring them back after re-authentication. Only this
+    // inactivity/401 path saves it; the manual "Sign Out" link uses _logout() directly and must not.
+    this._saveRequestedUrl();
     // We want Nuxeo's native "Your session is inactive. Please log in." message, which login.jsp only
     // renders when it receives a top-level `nxtimeout` param. We can't reach that by navigating to /logout
     // with a requestedUrl: when anonymous auth is enabled the /ui SPA bounce re-nests our value inside its
@@ -270,6 +281,99 @@ export const NuxeoInactivityBehavior = {
   // history/bfcache entry after an inactivity-driven logout.
   _redirect(url) {
     globalThis.location.replace(url);
+  },
+
+  // WEBUI-2189: persist the current page (full hashbang URL) before an inactivity/401 logout navigation,
+  // so _restoreRequestedUrlAfterLogin() can return the user here once they log back in. The owning user's
+  // id is stored alongside the URL so restore only ever returns a page to the same user who left it.
+  _saveRequestedUrl() {
+    // Only persist a page we can actually return later: without a resolved user id we couldn't match the
+    // saved URL to its owner on restore, so it would be consumed but never navigated. Skip the save instead
+    // of writing an unrestorable `{ user: undefined }` payload.
+    const userId = this.currentUser?.id;
+    if (!userId) {
+      return;
+    }
+    try {
+      const payload = JSON.stringify({
+        url: globalThis.location.href,
+        user: userId,
+      });
+      globalThis.sessionStorage.setItem(INACTIVITY_REQUESTED_URL_KEY, payload);
+    } catch (e) {
+      // sessionStorage may be unavailable (private mode/quota); skip — we just won't restore the page.
+      this._inactivityStorageError = e;
+    }
+  },
+
+  // WEBUI-2189: after re-authentication the app reloads at its root, losing the page the user was on when
+  // the session expired. If we saved one on this tab, send them back to it. Wired from the host's
+  // currentUser observer so it runs once a real user has resolved (the router is already listening by then).
+  // With anonymous auth enabled the /ui SPA first boots as Guest with nobody logging in, so we must NOT
+  // consume the key for an anonymous/absent user — it has to survive that boot for the real re-login. The
+  // saved value is consumed once, must belong to the current user, must sit under the UI base path
+  // (open-redirect protection) and must differ from the current page before we navigate.
+  _restoreRequestedUrlAfterLogin() {
+    const { currentUser } = this;
+    // No user yet, or an anonymous/Guest boot: leave the key untouched so the real re-login can restore it.
+    if (!currentUser || currentUser.isAnonymous || currentUser.id === 'Guest') {
+      return;
+    }
+    let stored;
+    try {
+      stored = globalThis.sessionStorage.getItem(INACTIVITY_REQUESTED_URL_KEY);
+      if (stored) {
+        globalThis.sessionStorage.removeItem(INACTIVITY_REQUESTED_URL_KEY); // consume once, never loop
+      }
+    } catch (e) {
+      // sessionStorage unavailable; nothing to restore.
+      this._inactivityStorageError = e;
+      return;
+    }
+    if (!stored) {
+      return;
+    }
+    let requestedUrl;
+    let savedUser;
+    try {
+      ({ url: requestedUrl, user: savedUser } = JSON.parse(stored));
+    } catch (e) {
+      // Corrupt/unreadable payload — discard it (already consumed above) and don't navigate.
+      this._inactivityStorageError = e;
+      return;
+    }
+    // Never restore one user's page for another: only navigate when the saved user matches the current one.
+    if (savedUser !== currentUser.id) {
+      return;
+    }
+    // The payload comes from (untrusted) sessionStorage: only a string URL is usable. Anything else — e.g. a
+    // tampered `{ "url": 1 }` — must be ignored, not fed to URL()/startsWith() below where it would throw and
+    // abort the currentUser observer that called us.
+    if (typeof requestedUrl !== 'string') {
+      return;
+    }
+    // Restrict the restore to the UI base path so a saved value can't slip past into an open redirect.
+    // baseUrl is usually a path (`/nuxeo/ui/`) but the property contract also allows an absolute URL, so
+    // resolve both it and the saved URL against the current origin. Normalize the base to a single trailing
+    // '/' — without it a base of `/nuxeo/ui` would let a sibling path like `${origin}/nuxeo/ui-foo/...` pass.
+    const rawBase = this.baseUrl || '/';
+    const normalizedBase = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+    const { origin } = globalThis.location;
+    let base;
+    let target;
+    try {
+      base = new URL(normalizedBase, origin);
+      target = new URL(requestedUrl, origin);
+    } catch (e) {
+      // Unparseable base or saved URL — discard (already consumed above) and don't navigate.
+      this._inactivityStorageError = e;
+      return;
+    }
+    // Require the saved URL to be same-origin with the window we're navigating (the real open-redirect
+    // guard) AND under the UI base path, and to differ from the current page.
+    if (target.origin === origin && target.href.startsWith(base.href) && target.href !== globalThis.location.href) {
+      this._redirect(requestedUrl);
+    }
   },
 
   _teardownInactivityTimer() {
