@@ -3,7 +3,15 @@ name: Crowdin Sync
 
 on:
   # Make workflow reusable, to be called by the scheduled crowdin workflow in the default branch
+  # Secrets are declared explicitly so callers pass only these three rather than inheriting every repository secret.
   workflow_call:
+    secrets:
+      CROWDIN_PROJECT_ID:
+        required: true
+      CROWDIN_PERSONAL_TOKEN:
+        required: true
+      WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN:
+        required: true
 
   # Sync when a commit is done on lts-2025
   push:
