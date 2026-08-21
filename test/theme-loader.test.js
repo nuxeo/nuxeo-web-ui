@@ -45,7 +45,7 @@ suite('theme-loader', () => {
     });
 
     test('should allow valid theme names', () => {
-      ['default', 'dark', 'light', 'kawaii', 'my-custom-theme'].forEach((value) => {
+      ['default', 'dark', 'hyland-light', 'hyland-dark', 'my-custom-theme'].forEach((value) => {
         expect(SAFE_THEME_PATTERN.test(value), `expected "${value}" to be allowed`).to.be.true;
       });
     });
