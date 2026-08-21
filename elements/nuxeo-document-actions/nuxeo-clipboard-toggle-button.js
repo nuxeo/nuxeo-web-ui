@@ -93,7 +93,7 @@ Polymer({
   },
 
   _isAvailable(doc) {
-    return !this.isTrashed(doc) && !this.hasType(doc, 'Favorites') && !this.isVersion(doc) && !this.isProxy(doc);
+    return !this.isTrashed(doc) && !this.hasType(doc, 'Favorites') && !this.isVersion(doc);
   },
 
   toggle() {

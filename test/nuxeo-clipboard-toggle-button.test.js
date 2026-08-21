@@ -70,10 +70,12 @@ suite('nuxeo-clipboard-toggle-button', () => {
       expect(element._isAvailable(doc)).to.be.false;
     });
 
-    test('should return false for proxy document', () => {
+    // a published document must be able to reach the clipboard so it can be reorganised
+    // within the publication area; where it may then be pasted is up to nuxeo-clipboard
+    test('should return true for proxy document', () => {
       const doc = { uid: '1', type: 'File' };
       element.isProxy.returns(true);
-      expect(element._isAvailable(doc)).to.be.false;
+      expect(element._isAvailable(doc)).to.be.true;
     });
   });
 

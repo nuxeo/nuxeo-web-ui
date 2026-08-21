@@ -78,6 +78,22 @@ suite('nuxeo-clipboard', () => {
   });
 
   suite('canPaste', () => {
+    // a section only ever accepts Section children, so a published File never matches its subtypes
+    const section = { uid: 's', type: 'Section', contextParameters: { subtypes: [{ type: 'Section' }] } };
+    const workspace = {
+      uid: 'w',
+      type: 'Workspace',
+      contextParameters: { subtypes: [{ type: 'File' }, { type: 'Folder' }] },
+    };
+    const proxy = { uid: 'p', type: 'File', isProxy: true };
+    const file = { uid: 'f', type: 'File' };
+
+    const folderish = (target, publishSpace) => {
+      element.hasFacet.withArgs(target, 'Folderish').returns(true);
+      element.hasFacet.withArgs(target, 'PublishSpace').returns(!!publishSpace);
+      return target;
+    };
+
     test('should return false when documents is empty', () => {
       expect(element.canPaste([], { uid: '1' })).to.be.false;
     });
@@ -89,6 +105,34 @@ suite('nuxeo-clipboard', () => {
     test('should return false when target is not Folderish', () => {
       element.hasFacet.returns(false);
       expect(element.canPaste([{ uid: '1' }], { uid: '2' })).to.be.false;
+    });
+
+    test('should allow a proxy in a publication space despite the accepted subtypes', () => {
+      expect(element.canPaste([proxy], folderish(section, true))).to.be.true;
+    });
+
+    test('should not allow a proxy outside a publication space', () => {
+      expect(element.canPaste([proxy], folderish(workspace, false))).to.be.false;
+    });
+
+    test('should allow a regular document whose type is an accepted subtype', () => {
+      expect(element.canPaste([file], folderish(workspace, false))).to.be.true;
+    });
+
+    test('should not allow a regular document in a publication space', () => {
+      expect(element.canPaste([file], folderish(section, true))).to.be.false;
+    });
+
+    test('should not allow a mixed selection of a proxy and a regular document in a publication space', () => {
+      expect(element.canPaste([proxy, file], folderish(section, true))).to.be.false;
+    });
+
+    test('should allow any regular document when the target does not expose subtypes', () => {
+      expect(element.canPaste([file], folderish({ uid: 'n', type: 'Folder' }, false))).to.be.true;
+    });
+
+    test('should not allow a proxy when the target exposes no subtypes and is not a publication space', () => {
+      expect(element.canPaste([proxy], folderish({ uid: 'n', type: 'Folder' }, false))).to.be.false;
     });
   });
 
