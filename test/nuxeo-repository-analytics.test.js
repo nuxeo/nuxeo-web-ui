@@ -52,6 +52,20 @@ suite('nuxeo-repository-analytics', () => {
     expect(el._numberOfDownloads({ uid: 'd2' })).to.equal(7);
   });
 
+  suite('_cardAria', () => {
+    test('returns the heading when the value is not available', () => {
+      expect(el._cardAria('repositoryAnalytics.topDownloads.heading')).to.equal(
+        'repositoryAnalytics.topDownloads.heading',
+      );
+    });
+
+    test('includes the value for the document count card', () => {
+      expect(el._cardAria('repositoryAnalytics.documents.heading', 42)).to.equal(
+        'repositoryAnalytics.documents.heading: 42',
+      );
+    });
+  });
+
   test('_types maps known mime keys through mime table', () => {
     const labels = el._types([{ key: 'text/plain' }, { key: 'unknown/xyz' }]);
     expect(labels[0]).to.be.a('string');
