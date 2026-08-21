@@ -127,13 +127,13 @@ jobs:
         run: |
           npm ci --ignore-scripts
           pushd packages/nuxeo-web-ui-ftest
-          npm ci
+          npm ci --ignore-scripts
           popd
           pushd plugin/a11y
-          npm ci
+          npm ci --ignore-scripts
           popd
           pushd packages/nuxeo-designer-catalog
-          npm ci
+          npm ci --ignore-scripts
           popd
 
       - name: Lint Web UI

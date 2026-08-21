@@ -64,7 +64,7 @@ jobs:
       run: |
           npm ci --ignore-scripts
           pushd packages/nuxeo-web-ui-ftest
-          npm ci
+          npm ci --ignore-scripts
           popd
     - name: Checkout the nuxeo-elements repo
       uses: actions/checkout@v6
