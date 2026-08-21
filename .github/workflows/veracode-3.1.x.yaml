@@ -32,7 +32,7 @@ jobs:
     runs-on:
       group: medium-4cpu-runners
     steps:
-    - uses: catchpoint/workflow-telemetry-action@v2
+    - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
       with:
         comment_on_pr: false
 
@@ -153,7 +153,7 @@ jobs:
           pwd
 
       - name: Veracode Upload And Scan
-        uses: veracode/veracode-uploadandscan-action@0.2.11
+        uses: veracode/veracode-uploadandscan-action@ddca86b1d1d45639d1c414003f3495f71851cfe2 # 0.2.11
         with:
           version: 'Nuxeo WebUI - LTS2023 - ${{ github.run_id }}'
           appname: 'Nuxeo Web UI'
