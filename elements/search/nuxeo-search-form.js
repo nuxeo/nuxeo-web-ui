@@ -175,7 +175,8 @@ Polymer({
       }
       #actionsDropdown {
         width: 82%;
-        padding: 19px 0 0 0;
+        /* No top padding: the always visible label now occupies the top of the header row. */
+        padding: 0;
         --selectivity-dropdown-min-width: auto;
         --selectivity-dropdown-max-width: 100%;
         --selectivity-result-item-white-space: normal;
@@ -289,7 +290,8 @@ Polymer({
         <template is="dom-if" if="[[!onlyQueue]]">
           <nuxeo-selectivity
             id="actionsDropdown"
-            placeholder="[[i18n('searchForm.searchFilters')]]"
+            label="[[i18n('searchForm.searchFilters')]]"
+            placeholder="[[i18n('searchForm.searchFilters.placeholder')]]"
             data="[[_computeData(_searches)]]"
             value="{{selectedSearch}}"
             min-chars="0"

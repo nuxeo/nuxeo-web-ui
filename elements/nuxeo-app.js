@@ -1513,6 +1513,12 @@ Polymer({
 
   _observeCurrentUser() {
     if (this.currentUser) {
+      // WEBUI-2189: run the post-login restore here rather than from ready(): with anonymous auth enabled
+      // the app boots as Guest before a real user resolves, and restoring from ready() would consume the
+      // saved page for the wrong (or no) user. By the time a real currentUser resolves the router is
+      // listening, so navigating to the saved deep link works. The restore method itself skips anonymous
+      // users and only navigates for the user who saved the page.
+      this._restoreRequestedUrlAfterLogin();
       this.$.userWorkspace.execute().then((response) => {
         this.userWorkspace = response.path;
       });
