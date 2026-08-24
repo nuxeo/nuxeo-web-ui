@@ -102,6 +102,36 @@ suite('LiveConnectBehavior', () => {
       addListenerSpy.restore();
       globalThis.open.restore();
     });
+
+    test('should ignore messages from unexpected origins or sources', () => {
+      const clock = sinon.useFakeTimers();
+      const fakePopup = { closed: false };
+      const onMessageReceive = sinon.spy();
+      sinon.stub(globalThis, 'open').returns(fakePopup);
+      const addListenerSpy = sinon.spy(globalThis, 'addEventListener');
+      const removeListenerSpy = sinon.spy(globalThis, 'removeEventListener');
+
+      behavior.openPopup('https://auth.example.com/oauth', { onMessageReceive });
+
+      const listener = addListenerSpy.firstCall.args[1];
+      listener({ origin: 'https://malicious.example.com', source: fakePopup, data: '{}' });
+      expect(onMessageReceive).to.not.have.been.called;
+
+      listener({ origin: 'https://auth.example.com', source: {}, data: '{}' });
+      expect(onMessageReceive).to.not.have.been.called;
+
+      listener({ origin: 'https://auth.example.com', source: fakePopup, data: '{}' });
+      expect(onMessageReceive).to.have.been.calledOnce;
+
+      fakePopup.closed = true;
+      clock.tick(100);
+      expect(removeListenerSpy).to.have.been.calledWith('message', listener);
+
+      removeListenerSpy.restore();
+      addListenerSpy.restore();
+      globalThis.open.restore();
+      clock.restore();
+    });
   });
 
   suite('updateProviderInfo', () => {

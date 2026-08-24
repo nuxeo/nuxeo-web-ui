@@ -67,6 +67,7 @@ export const LiveConnectBehavior = {
       onClose() {},
       onMessageReceive() {},
     };
+    const expectedOrigin = new URL(url, window.location.href).origin;
 
     if (options) {
       Object.assign(settings, options);
@@ -75,15 +76,19 @@ export const LiveConnectBehavior = {
     const left = window.screenX + window.outerWidth / 2 - settings.width / 2;
     const top = window.screenY + window.outerHeight / 2 - settings.height / 2;
 
+    let popup;
     let listener;
     if (typeof settings.onMessageReceive === 'function') {
       listener = function (event) {
+        if (event.origin !== expectedOrigin || event.source !== popup) {
+          return;
+        }
         settings.onMessageReceive(event);
       };
       window.addEventListener('message', listener);
     }
 
-    const popup = window.open(
+    popup = window.open(
       url,
       'popup',
       `height=${settings.height},width=${settings.width},top=${top},left=${left}`,
