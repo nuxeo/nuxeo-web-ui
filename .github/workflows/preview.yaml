@@ -125,7 +125,7 @@ jobs:
           # lazily-loaded resource URLs under nuxeo-elements/ui/... and breaks document
           # previews and admin layouts in the preview image (WEBUI-2222).
           for module in core ui dataviz; do
-            tarball="$(cd "nuxeo-elements/${module}" && npm pack 2>&1 | tail -1)"
+            tarball="$(cd "nuxeo-elements/${module}" && npm pack --silent)"
             npm install --no-package-lock "nuxeo-elements/${module}/${tarball}"
           done
 
