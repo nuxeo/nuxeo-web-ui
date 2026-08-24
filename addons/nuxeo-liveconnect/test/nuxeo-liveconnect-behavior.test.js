@@ -102,6 +102,17 @@ suite('LiveConnectBehavior', () => {
       addListenerSpy.restore();
       globalThis.open.restore();
     });
+
+    test('should invoke onClose and register no listener when the popup is blocked', () => {
+      sinon.stub(globalThis, 'open').returns(null);
+      const addListenerSpy = sinon.spy(globalThis, 'addEventListener');
+      const onClose = sinon.spy();
+      behavior.openPopup('https://auth.example.com', { onClose, onMessageReceive: sinon.spy() });
+      expect(onClose).to.have.been.calledOnce;
+      expect(addListenerSpy).to.not.have.been.calledWith('message', sinon.match.func);
+      addListenerSpy.restore();
+      globalThis.open.restore();
+    });
   });
 
   suite('openPopup message sender verification', () => {
@@ -123,6 +134,10 @@ suite('LiveConnectBehavior', () => {
     };
 
     setup(() => {
+      // openPopup polls the popup with setInterval; the fake popup never reports itself as
+      // closed, so fake timers keep that interval from leaking into the rest of the run
+      // (the global teardown restores the clock).
+      sinon.useFakeTimers();
       onMessageReceive = sinon.spy();
       listener = null;
       popup = null;
