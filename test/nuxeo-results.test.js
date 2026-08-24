@@ -429,6 +429,55 @@ suite('nuxeo-results', () => {
     });
   });
 
+  suite('Deferred Initial Fetch (WEBUI-1946)', () => {
+    test('fetches on view initialization by default', async () => {
+      const fetchSpy = sinon.spy(results, 'fetch');
+
+      results.view = createMockView();
+      await flush();
+
+      expect(fetchSpy).to.have.been.called;
+      fetchSpy.restore();
+    });
+
+    test('does not fetch on view initialization when deferInitialFetch is set', async () => {
+      results.deferInitialFetch = true;
+      const fetchSpy = sinon.spy(results, 'fetch');
+
+      results.view = createMockView();
+      await flush();
+
+      expect(fetchSpy).to.not.have.been.called;
+      fetchSpy.restore();
+    });
+
+    test('fetches on view initialization once an explicit fetch has happened', async () => {
+      results.deferInitialFetch = true;
+      results.view = createMockView();
+      await flush();
+      await results.fetch();
+      const fetchSpy = sinon.spy(results, 'fetch');
+
+      results.view = createMockView();
+      await flush();
+
+      expect(fetchSpy).to.have.been.called;
+      fetchSpy.restore();
+    });
+
+    test('an explicit fetch still reaches the view when deferInitialFetch is set', async () => {
+      results.deferInitialFetch = true;
+      const mockView = createMockView();
+      results.view = mockView;
+      await flush();
+      mockView.fetch.resetHistory();
+
+      await results.fetch();
+
+      expect(mockView.fetch).to.have.been.called;
+    });
+  });
+
   suite('Settings Persistence', () => {
     test('initializes empty settings', () => {
       results.initializeSettings();

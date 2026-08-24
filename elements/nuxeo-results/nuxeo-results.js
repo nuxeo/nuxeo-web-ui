@@ -339,6 +339,16 @@ Polymer({
       value: false,
     },
     /**
+     * If `true`, initializing a display mode does not fetch results, so loading the page executes
+     * no query. Only the deferred *initial* fetch is suppressed: any user action that asks for
+     * results — the enclosing search view's Search button, a sort change, the toolbar refresh or a
+     * quick filter toggle — fetches as usual and lifts the deferral for later display-mode changes.
+     */
+    deferInitialFetch: {
+      type: Boolean,
+      value: false,
+    },
+    /**
      * Specify here a subset of quick filters in case you want to
      * specify the ones to be displayed on the search results.
      * Expected format : ['quickfilter1','quickfilter2']
@@ -476,6 +486,11 @@ Polymer({
 
   listeners: {
     'settings-changed': '_updateActionContext',
+  },
+
+  created() {
+    // whether a fetch has already been requested, which lifts any `deferInitialFetch` suppression
+    this._fetched = false;
   },
 
   ready() {
@@ -638,6 +653,7 @@ Polymer({
   },
 
   fetch() {
+    this._fetched = true;
     return new Promise((resolve, error) => {
       this._fetchDebouncer = Debouncer.debounce(this._fetchDebouncer, timeOut.after(100), () => {
         if (this.view && typeof this.view.fetch === 'function') {
@@ -655,6 +671,13 @@ Polymer({
       if (typeof this.view.reset === 'function') {
         this.view.reset();
       }
+    }
+  },
+
+  // fetch after state restore, unless the first fetch is deferred to an explicit search
+  _fetchOnViewInit() {
+    if (!this.deferInitialFetch || this._fetched) {
+      this.fetch();
     }
   },
 
@@ -724,8 +747,7 @@ Polymer({
       view.quickFilters = restoredQuickFilters.slice();
     }
 
-    // fetch after state restore
-    this.fetch();
+    this._fetchOnViewInit();
 
     // keep the scroll anchor fresh while the user scrolls; the position is
     // re-applied once rows load (see `_itemsChanged` → `_srMaybeRestore`).
