@@ -44,6 +44,9 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import { ensureSearchResultTooltipStyles } from './nuxeo-search-result-tooltip-styles.js';
+
+ensureSearchResultTooltipStyles();
 
 /**
  `nuxeo-search-form`
@@ -175,7 +178,8 @@ Polymer({
       }
       #actionsDropdown {
         width: 82%;
-        padding: 19px 0 0 0;
+        /* No top padding: the always visible label now occupies the top of the header row. */
+        padding: 0;
         --selectivity-dropdown-min-width: auto;
         --selectivity-dropdown-max-width: 100%;
         --selectivity-result-item-white-space: normal;
@@ -289,7 +293,8 @@ Polymer({
         <template is="dom-if" if="[[!onlyQueue]]">
           <nuxeo-selectivity
             id="actionsDropdown"
-            placeholder="[[i18n('searchForm.searchFilters')]]"
+            label="[[i18n('searchForm.searchFilters')]]"
+            placeholder="[[i18n('searchForm.searchFilters.placeholder')]]"
             data="[[_computeData(_searches)]]"
             value="{{selectedSearch}}"
             min-chars="0"
@@ -365,6 +370,14 @@ Polymer({
                       <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
                     </div>
                     <span class="list-item-title ellipsis">[[item.title]]</span>
+                    <!-- Kept outside the span so the name text stays exactly the title, and
+                         anchored on the parent row since an id would not be unique per stamp.
+                         Opens to the right of the row so it never covers the result list, and the
+                         name is wrapped in an element so the document-level rule that caps its
+                         width can match it once nuxeo-tooltip clones it onto the body. -->
+                    <nuxeo-tooltip position="right" offset="8" aria-hidden="true"
+                      ><span class="nuxeo-search-result-tooltip-name">[[item.title]]</span></nuxeo-tooltip
+                    >
                   </div>
                 </div>
               </div>

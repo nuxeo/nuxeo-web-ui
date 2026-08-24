@@ -24,6 +24,12 @@ suite('nuxeo-app', () => {
   let app;
 
   setup(async () => {
+    // nuxeo-app.ready() wires the inactivity timer, which fires an immediate keep-alive via
+    // <nuxeo-resource id="keepAlive">.execute() DURING fixture creation — before any instance stub below
+    // could be installed. Neutralize the keep-alive on the prototype BEFORE the fixture so the initial
+    // arm never attempts a real request (WEBUI-1987: no real session keep-alive in tests). Auto-restored
+    // by the global sinon teardown.
+    sinon.stub(customElements.get('nuxeo-app').prototype, '_maybeKeepServerSessionAlive');
     app = await fixture(html`<nuxeo-app></nuxeo-app>`);
     sinon.stub(app, 'i18n').callsFake((key) => key);
     if (app.$ && app.$.userWorkspace) {
@@ -31,6 +37,9 @@ suite('nuxeo-app', () => {
     }
     if (app.$ && app.$.tasksProvider) {
       sinon.stub(app.$.tasksProvider, 'fetch').resolves({ resultsCount: 0 });
+    }
+    if (app.$ && app.$.keepAlive) {
+      sinon.stub(app.$.keepAlive, 'execute').resolves({}); // WEBUI-1987: no real session keep-alive in tests
     }
     await flush();
   });
@@ -693,6 +702,22 @@ suite('nuxeo-app', () => {
       app._updateTitle();
       expect(document.title).to.include('My Doc');
       expect(document.title).to.include('Nuxeo');
+      app.hasFacet.restore();
+    });
+
+    test('uses the localized root label instead of the uid for the Root document (WEBUI-1876)', () => {
+      sinon.stub(app, 'hasFacet').returns(false);
+      app.page = 'browse';
+      // The repository root has no dc:title; the server returns its uid as the title.
+      app.currentDocument = {
+        title: '0c5bf33e-86b4-486e-b6a5-f8fa2a85dbec',
+        uid: '0c5bf33e-86b4-486e-b6a5-f8fa2a85dbec',
+        type: 'Root',
+      };
+      app.productName = 'Nuxeo';
+      app._updateTitle();
+      expect(document.title).to.include('browse.root');
+      expect(document.title).to.not.include('0c5bf33e-86b4-486e-b6a5-f8fa2a85dbec');
       app.hasFacet.restore();
     });
 
@@ -1422,6 +1447,31 @@ suite('nuxeo-app', () => {
       expect(app.$.tasksProvider.params).to.deep.equal({ userId: 'user-1' });
     });
 
+    // WEBUI-2189: the post-login restore is driven by the currentUser observer (not ready()), so it runs
+    // once a real user has authenticated and the router is already listening.
+    test('_observeCurrentUser triggers the post-login URL restore when a real user resolves', () => {
+      const restore = sinon.stub(app, '_restoreRequestedUrlAfterLogin');
+      try {
+        // currentUser is observer-backed, so assigning it invokes _observeCurrentUser() (the wiring under
+        // test) exactly once — do not call it explicitly as well or the restore would fire twice.
+        app.currentUser = { id: 'jdoe', isAnonymous: false, properties: {} };
+        expect(restore).to.have.been.calledOnce;
+      } finally {
+        restore.restore();
+      }
+    });
+
+    test('_observeCurrentUser does not restore when there is no resolved user', () => {
+      const restore = sinon.stub(app, '_restoreRequestedUrlAfterLogin');
+      try {
+        app.currentUser = null;
+        app._observeCurrentUser();
+        expect(restore).to.not.have.been.called;
+      } finally {
+        restore.restore();
+      }
+    });
+
     test('_onClipboardAction updates recents on Document.Move', () => {
       const update = sinon.spy();
       sinon.stub(app, '$$').withArgs('#recent').returns({ update });
@@ -1794,9 +1844,9 @@ suite('nuxeo-app', () => {
   });
 
   suite('_notify and snackbars', () => {
-    test('_getToastFor creates a command snackbar when missing', () => {
+    test('_getToastFor creates a command snackbar when missing', function () {
       if (!app.$.snackbarPanel) {
-        return;
+        this.skip();
       }
       sinon.stub(app.$.snackbarPanel, 'querySelector').returns(null);
       const append = sinon.stub(app.$.snackbarPanel, 'appendChild');
@@ -2075,6 +2125,29 @@ suite('nuxeo-app', () => {
         expect(app.drawerOpened).to.be.false;
       } finally {
         app._notifyLayoutChanged.restore();
+      }
+    });
+
+    // WEBUI-1987: attached() must only re-arm the inactivity timer after a real detach
+    // (ready() already did the initial wiring), so the first attach is a no-op.
+    test('attached re-arms the inactivity timer only after a real detach', () => {
+      const setupTimer = sinon.stub(app, '_setupInactivityTimer');
+      const setup401 = sinon.stub(app, '_setupUnauthorizedRedirect');
+      try {
+        app._inactivityNeedsRearm = false; // as after ready()'s initial wiring
+        app.attached();
+        expect(setupTimer).to.not.have.been.called; // first attach does not re-arm
+
+        app.detached(); // a real detach arms the re-wire guard
+        expect(app._inactivityNeedsRearm).to.be.true;
+
+        app.attached(); // re-attach now re-arms exactly once
+        expect(setupTimer).to.have.been.calledOnce;
+        expect(setup401).to.have.been.called;
+        expect(app._inactivityNeedsRearm).to.be.false;
+      } finally {
+        setupTimer.restore();
+        setup401.restore();
       }
     });
   });

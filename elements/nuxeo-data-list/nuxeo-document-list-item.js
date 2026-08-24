@@ -28,6 +28,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
 import '../nuxeo-document-highlight/nuxeo-document-highlights.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { applyThumbnailFallback, blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
 
 /**
 `nuxeo-document-list-item`
@@ -226,7 +227,7 @@ Polymer({
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
         <div class="vignette thumbnailContainer" on-tap="handleClick" on-keydown="_handleKeydown">
-          <img src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
+          <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
         </div>
         <div class="dataContainer flex" on-tap="handleClick" on-keydown="_handleKeydown">
           <div class="horizontal layout center" tabindex="0">
@@ -325,6 +326,9 @@ Polymer({
   _toogleSelect(e) {
     this.selected = !this.selected;
     this.fire('selected', { index: this.index, shiftKey: e.detail.sourceEvent.shiftKey });
+    // WEBUI-2056 / WEBUI-2175: clear focus from the check button on a pointer deselect so the
+    // `:host(:focus-within)` rule stops keeping the selection tick on screen (see common-utils).
+    blurSelectionCheckOnPointerDeselect(this, e);
   },
 
   _selectedItemsChanged() {
@@ -342,5 +346,12 @@ Polymer({
         e.currentTarget.click();
       }
     }
+  },
+
+  // ELEMENTS-1616: fall back to a transparent pixel when the (cross-origin) thumbnail
+  // request fails, so the list row doesn't render a broken-image icon.
+  _onError(event) {
+    const thumbnail = event.target;
+    applyThumbnailFallback(thumbnail);
   },
 });

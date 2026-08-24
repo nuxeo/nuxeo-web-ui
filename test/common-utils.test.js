@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { handleVerticalKeyNavigation } from '../elements/common-utils.js';
+import { handleVerticalKeyNavigation, blurSelectionCheckOnPointerDeselect } from '../elements/common-utils.js';
 
 suite('common-utils', () => {
   suite('handleVerticalKeyNavigation', () => {
@@ -81,6 +81,58 @@ suite('common-utils', () => {
       const e = createEvent('ArrowDown', items[2]);
       handleVerticalKeyNavigation(e, '.item');
       expect(scrollToIndex).to.have.been.calledWith(3);
+    });
+  });
+
+  // WEBUI-2056 / WEBUI-2175: after a pointer (mouse/touch) deselect the focused check button
+  // must be blurred so `:host(:focus)` / `:host(:focus-within)` stops keeping the tick on
+  // screen. Keyboard toggles keep focus so keyboard navigation stays usable.
+  suite('blurSelectionCheckOnPointerDeselect', () => {
+    let control;
+    let host;
+
+    function makeHost(selected) {
+      return { selected, shadowRoot: { activeElement: control } };
+    }
+
+    setup(() => {
+      control = { blur: sinon.spy() };
+    });
+
+    test('blurs the focused control on a pointer/mouse deselect', () => {
+      host = makeHost(false);
+      blurSelectionCheckOnPointerDeselect(host, { type: 'tap', detail: { sourceEvent: new MouseEvent('click') } });
+      expect(control.blur).to.have.been.calledOnce;
+    });
+
+    test('does not blur on a raw KeyboardEvent deselect', () => {
+      host = makeHost(false);
+      blurSelectionCheckOnPointerDeselect(host, new KeyboardEvent('keydown', { key: ' ' }));
+      expect(control.blur).to.not.have.been.called;
+    });
+
+    test('does not blur on a synthesized tap whose sourceEvent is a KeyboardEvent', () => {
+      host = makeHost(false);
+      blurSelectionCheckOnPointerDeselect(host, {
+        type: 'tap',
+        detail: { sourceEvent: new KeyboardEvent('keydown', { key: ' ' }) },
+      });
+      expect(control.blur).to.not.have.been.called;
+    });
+
+    test('does not blur when host.selected is true (a selection, not a deselect)', () => {
+      host = makeHost(true);
+      blurSelectionCheckOnPointerDeselect(host, { type: 'tap', detail: { sourceEvent: new MouseEvent('click') } });
+      expect(control.blur).to.not.have.been.called;
+    });
+
+    test('is a no-op when there is no focused element', () => {
+      host = { selected: false, shadowRoot: { activeElement: null } };
+      expect(() => blurSelectionCheckOnPointerDeselect(host, new MouseEvent('click'))).to.not.throw();
+    });
+
+    test('is a no-op when there is no host', () => {
+      expect(() => blurSelectionCheckOnPointerDeselect(null, new MouseEvent('click'))).to.not.throw();
     });
   });
 });
