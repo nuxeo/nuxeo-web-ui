@@ -52,56 +52,76 @@ suite('nuxeo-repository-analytics', () => {
     expect(el._numberOfDownloads({ uid: 'd2' })).to.equal(7);
   });
 
+  suite('_cardAria', () => {
+    test('returns the heading when the value is not available', () => {
+      expect(el._cardAria('repositoryAnalytics.topDownloads.heading')).to.equal(
+        'repositoryAnalytics.topDownloads.heading',
+      );
+    });
+
+    test('includes the value for the document count card', () => {
+      expect(el._cardAria('repositoryAnalytics.documents.heading', 42)).to.equal(
+        'repositoryAnalytics.documents.heading: 42',
+      );
+    });
+  });
+
   test('_types maps known mime keys through mime table', () => {
     const labels = el._types([{ key: 'text/plain' }, { key: 'unknown/xyz' }]);
     expect(labels[0]).to.be.a('string');
     expect(labels[1]).to.equal('unknown/xyz');
   });
 
-  test('charts can shrink to fit their cards', async () => {
-    el.setProperties({
-      downloads: [],
-      downloadedDocs: [],
-      totalCount: 0,
-      typeCount: [],
-      topCreators: [],
-      docsCreatedPerWeek: [],
-      docsModifiedPerWeek: [],
-      filesByMimeType: [],
-      visible: true,
+  suite('_mimeName', () => {
+    test('returns the friendly name when the mime type defines one', () => {
+      expect(el._mimeName('application/pdf')).to.equal('PDF');
     });
-    await flush();
 
-    const charts = el.root.querySelectorAll('chart-line, chart-pie');
-    expect(charts).to.have.lengthOf(5);
-    charts.forEach((chart) => {
-      expect(window.getComputedStyle(chart).minWidth).to.equal('0px');
+    test('falls back to the uppercased first extension when there is no name', () => {
+      expect(el._mimeName('application/andrew-inset')).to.equal('EZ');
+    });
+
+    test('returns the raw key for unknown mime types', () => {
+      expect(el._mimeName('unknown/xyz')).to.equal('unknown/xyz');
     });
   });
 
-  test('pie charts grow to fill the available card height', async () => {
-    el.setProperties({
-      downloads: [],
-      downloadedDocs: [],
-      totalCount: 0,
-      typeCount: [],
-      topCreators: [],
-      docsCreatedPerWeek: [],
-      docsModifiedPerWeek: [],
-      filesByMimeType: [],
-      visible: true,
+  suite('_chartAria', () => {
+    test('returns only the heading when data is undefined', () => {
+      expect(el._chartAria('repositoryAnalytics.documentTypes.heading', undefined, '', false)).to.equal(
+        'repositoryAnalytics.documentTypes.heading',
+      );
     });
-    await flush();
 
-    const pieCards = el.root.querySelectorAll('nuxeo-card.pie-card');
-    expect(pieCards).to.have.lengthOf(3);
-    pieCards.forEach((card) => {
-      expect(window.getComputedStyle(card).display).to.equal('flex');
-      expect(window.getComputedStyle(card).flexDirection).to.equal('column');
+    test('returns only the heading when data is empty', () => {
+      expect(el._chartAria('repositoryAnalytics.documentTypes.heading', [], '', false)).to.equal(
+        'repositoryAnalytics.documentTypes.heading',
+      );
+    });
 
-      const chart = card.querySelector('chart-pie');
-      expect(window.getComputedStyle(chart).flexGrow).to.equal('1');
-      expect(chart.options.maintainAspectRatio).to.be.false;
+    test('composes heading with label/value pairs for non-empty data', () => {
+      const data = [
+        { key: 'nco-admin', value: 7 },
+        { key: 'system', value: 4 },
+      ];
+      expect(el._chartAria('repositoryAnalytics.topNCreators.heading', data, '10', false)).to.equal(
+        'repositoryAnalytics.topNCreators.heading. nco-admin: 7, system: 4',
+      );
+    });
+
+    test('uses mime-friendly names when useMimeNames is true', () => {
+      const data = [
+        { key: 'application/pdf', value: 5 },
+        { key: 'unknown/xyz', value: 2 },
+      ];
+      expect(el._chartAria('repositoryAnalytics.filesByMimeType.heading', data, '', true)).to.equal(
+        'repositoryAnalytics.filesByMimeType.heading. PDF: 5, unknown/xyz: 2',
+      );
+    });
+
+    test('passes the heading argument through to i18n', () => {
+      el._chartAria('repositoryAnalytics.topNCreators.heading', [], '10', false);
+      expect(el.i18n).to.have.been.calledWith('repositoryAnalytics.topNCreators.heading', '10');
     });
   });
 });

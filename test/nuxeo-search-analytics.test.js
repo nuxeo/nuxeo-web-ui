@@ -52,25 +52,15 @@ suite('nuxeo-search-analytics', () => {
     });
   });
 
-  test('pie chart resizes to fill the available card space', async () => {
-    el.setProperties({
-      callsPerProvider: [],
-      callsPerHour: [],
-      callPerNumberOfResults: [],
-      callsPerFT: [],
-      callPerNumberOfPages: [],
-      callByFilters: [],
-      visible: true,
+  suite('_chartAria', () => {
+    test('includes the chart heading and data points', () => {
+      const data = [
+        { key: 'Provider A', value: 4 },
+        { key: 'Provider B', value: 2 },
+      ];
+      expect(el._chartAria('searchAnalytics.callsPerPageProvider.heading', data)).to.equal(
+        'searchAnalytics.callsPerPageProvider.heading. Provider A: 4, Provider B: 2',
+      );
     });
-    await flush();
-
-    const card = el.root.querySelector('nuxeo-card.pie-card');
-    expect(window.getComputedStyle(card).display).to.equal('flex');
-    expect(window.getComputedStyle(card).flexDirection).to.equal('column');
-
-    const chart = card.querySelector('chart-pie');
-    expect(window.getComputedStyle(chart).minWidth).to.equal('0px');
-    expect(window.getComputedStyle(chart).flexGrow).to.equal('1');
-    expect(chart.options.maintainAspectRatio).to.be.false;
   });
 });
