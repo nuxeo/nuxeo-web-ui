@@ -46,6 +46,15 @@ on:
         type: string
         required: false
 
+# Cancel a superseded in-flight run for the same source branch when a newer commit is dispatched, so
+# rapid pushes don't stack multiple ~1h ftest runs (previously done by manually cancelling old runs).
+# Keyed by BOTH the target base branch (github.ref_name, e.g. lts-2025 vs maintenance-3.1.x — the bare
+# name, without the refs/heads/ prefix) and the dispatching source branch, so parallel runs for
+# different bases never cancel each other even when they share the same branch_name.
+concurrency:
+  group: cross-repo-${{ github.ref_name }}-${{ github.event.inputs.branch_name }}
+  cancel-in-progress: true
+
 env:
   REFERENCE_BRANCH: maintenance-3.1.x
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
@@ -69,7 +78,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: catchpoint/workflow-telemetry-action@v2
+      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
         with:
           comment_on_pr: false
 
@@ -108,7 +117,7 @@ jobs:
           ref: ${{ steps.pick_nuxeo_web_ui_branch.outputs.branch }}
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
           java-version: '17'
 
