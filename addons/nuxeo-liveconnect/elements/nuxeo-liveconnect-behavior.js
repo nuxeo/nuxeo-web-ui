@@ -84,9 +84,9 @@ export const LiveConnectBehavior = {
         // not a resolvable URL, nothing to allow
       }
     };
-    const resource = this.$ && this.$.oauth2;
-    const connection = resource && resource.$ && resource.$.nx;
-    addOrigin(connection && connection.url);
+    const resource = this.$?.oauth2;
+    const connection = resource?.$?.nx;
+    addOrigin(connection?.url);
     try {
       addOrigin(new URL(url, window.location.href).searchParams.get('redirect_uri'));
     } catch {
@@ -116,6 +116,16 @@ export const LiveConnectBehavior = {
       `height=${settings.height},width=${settings.width},top=${top},left=${left}`,
     );
 
+    // if the popup could not be opened (e.g. blocked by the browser) there is no window to
+    // authenticate messages against and nothing to poll; notify the caller and bail out rather
+    // than registering a listener and a timer that would never be cleared.
+    if (!popup) {
+      if (typeof settings.onClose === 'function') {
+        settings.onClose();
+      }
+      return;
+    }
+
     // the popup is opened before the listener is registered so that the listener can authenticate the
     // sender against it; nothing can be posted in between, both statements run in the same task
     let listener;
@@ -131,7 +141,7 @@ export const LiveConnectBehavior = {
     }
 
     const checkCompleted = setInterval(() => {
-      if (!popup || !popup.closed) {
+      if (!popup.closed) {
         return;
       }
 
