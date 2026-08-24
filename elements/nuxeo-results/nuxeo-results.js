@@ -156,9 +156,9 @@ Polymer({
       }
 
       .resultActions paper-icon-button {
-        width: 2em;
-        height: 2em;
-        padding: 0.3em;
+        width: 2.5em;
+        height: 2.5em;
+        padding: 0.4em;
         margin-left: 4px;
       }
 

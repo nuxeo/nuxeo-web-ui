@@ -1,6 +1,6 @@
 <!--
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,6 +55,36 @@ limitations under the License.
         height: 100%;
         max-width: var(--nuxeo-browser-actions-menu-max-width, 240px);
       }
+
+      /* Apply Hyland branding to the page header, toolbar, and surrounding surfaces when the rebrand attribute is set. */
+      :host([rebrand]) {
+        --nuxeo-page-host-background: var(--hyland-page-surface-background, transparent);
+        --nuxeo-page-content-background: var(--hyland-page-surface-background, transparent);
+        --nuxeo-page-toolbar-background: var(--hyland-app-header-background, var(--nuxeo-app-header-background));
+        --nuxeo-page-toolbar-box-shadow: var(--hyland-app-header-shadow, var(--nuxeo-app-header-box-shadow));
+      }
+
+      /* Document listing (folder or collection): floating card (rounded tabs on top, rounded content below, inset). */
+      :host([document-facets~='Folderish'][rebrand]) nuxeo-page,
+      :host([document-facets~='Collection'][rebrand]) nuxeo-page {
+        --nuxeo-page-tabs-background: var(--hyland-nuxeo-card-background, var(--nuxeo-app-header-background));
+        --nuxeo-page-tabs-box-shadow: var(--hyland-page-tabs-box-shadow, var(--nuxeo-app-header-box-shadow));
+        --nuxeo-page-tabs-border-radius: var(--hyland-browser-tabs-border-radius, 0);
+        --nuxeo-page-tabs-margin: var(--hyland-browser-tabs-margin, 1px 0 0 0);
+        --nuxeo-page-content-background: var(--hyland-nuxeo-card-background, transparent);
+        --nuxeo-page-content-border-radius: var(--hyland-browser-content-border-radius, 0);
+        --nuxeo-page-content-margin: var(--hyland-browser-content-margin, 0);
+        --nuxeo-page-content-padding: var(--hyland-browser-content-padding, 16px 16px 0 16px);
+      }
+
+      /* Single document view page (not a folder or collection): ensures visual continuity by applying
+         the same background color to tabs as the toolbar, and removes shadows to prevent visual seams
+         between the toolbar and tab surfaces. */
+      :host([rebrand]:not([document-facets~='Folderish']):not([document-facets~='Collection'])) nuxeo-page {
+        --nuxeo-page-tabs-background: var(--hyland-page-tabs-background, var(--nuxeo-app-header-background));
+        --nuxeo-page-tabs-box-shadow: var(--hyland-page-tabs-box-shadow, var(--nuxeo-app-header-box-shadow));
+        --nuxeo-page-content-padding: var(--hyland-browser-document-content-padding, 16px 16px 0 16px);
+      }
     </style>
 
     <!-- Main content -->
@@ -96,10 +126,11 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-browser',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior],
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.I18nBehavior, Nuxeo.FiltersBehavior, Nuxeo.BrandingBehavior],
       properties: {
         document: {
           type: Object,
+          observer: '_documentChanged',
         },
         selectedTab: {
           type: String,
@@ -133,6 +164,17 @@ limitations under the License.
 
       _documentUpdated() {
         this.fire('document-updated');
+      },
+
+      /* Reflect the document's facets onto an attribute so the branding CSS above can
+       distinguish document listings (folder or collection) from single-document views.
+       */
+      _documentChanged() {
+        if (this.document && this.document.facets) {
+          this.setAttribute('document-facets', this.document.facets.join(' '));
+        } else {
+          this.removeAttribute('document-facets');
+        }
       },
 
       download() {

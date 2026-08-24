@@ -17,9 +17,19 @@ import { refresh, url } from './helpers.js';
 
 export default class UI extends BasePage {
   async goHome() {
-    const logoEle = await this.drawer.logo;
-    await logoEle.waitForVisible();
-    await logoEle.click();
+    const homeEle = await this.drawer.home;
+    await homeEle.waitForExist();
+    await homeEle.waitForVisible();
+    await homeEle.click();
+  }
+
+  // Navigate off the dashboard (to the browse page) so home navigation can be
+  // genuinely verified — login already lands on home, so without this a home-click
+  // assertion would pass without proving anything.
+  async leaveHome() {
+    await url('#!/browse');
+    const browserEle = await this.browser;
+    await browserEle.waitForVisible();
   }
 
   async reload() {
