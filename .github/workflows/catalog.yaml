@@ -80,7 +80,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/nuxeo-designer-catalog
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Generate catalog
         working-directory: packages/nuxeo-designer-catalog
