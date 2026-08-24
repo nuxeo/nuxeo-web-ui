@@ -60,6 +60,41 @@ export const LiveConnectBehavior = {
     this.fire('nx-blob-picked', { blobs: Array.isArray(blobs) ? blobs : [blobs] });
   },
 
+  /**
+   * Origins allowed to post a message back to this window while an OAuth2 popup is open.
+   *
+   * The popup is sent to the provider's authorization page, but the window that ends up calling
+   * `window.opener.postMessage` is the Nuxeo OAuth2 callback page the provider redirects to, and it
+   * posts with a `*` target. Its origin is the one of the `redirect_uri` carried by the
+   * authorization URL, and it falls back to the Nuxeo server this element is connected to. The
+   * current origin is always accepted: a same-origin script already has full access to this window.
+   *
+   * Note this is only half of the check: `openPopup` also requires the message to come from the
+   * popup window it opened, so another window on an allowed origin cannot inject a token.
+   */
+  _allowedMessageOrigins(url) {
+    const origins = new Set([window.location.origin]);
+    const addOrigin = (value) => {
+      if (!value) {
+        return;
+      }
+      try {
+        origins.add(new URL(value, window.location.href).origin);
+      } catch {
+        // not a resolvable URL, nothing to allow
+      }
+    };
+    const resource = this.$ && this.$.oauth2;
+    const connection = resource && resource.$ && resource.$.nx;
+    addOrigin(connection && connection.url);
+    try {
+      addOrigin(new URL(url, window.location.href).searchParams.get('redirect_uri'));
+    } catch {
+      // authorization URL not parseable, rely on the connection origin
+    }
+    return origins;
+  },
+
   openPopup(url, options) {
     const settings = {
       width: '1000',
@@ -75,19 +110,25 @@ export const LiveConnectBehavior = {
     const left = window.screenX + window.outerWidth / 2 - settings.width / 2;
     const top = window.screenY + window.outerHeight / 2 - settings.height / 2;
 
-    let listener;
-    if (typeof settings.onMessageReceive === 'function') {
-      listener = function (event) {
-        settings.onMessageReceive(event);
-      };
-      window.addEventListener('message', listener);
-    }
-
     const popup = window.open(
       url,
       'popup',
       `height=${settings.height},width=${settings.width},top=${top},left=${left}`,
     );
+
+    // the popup is opened before the listener is registered so that the listener can authenticate the
+    // sender against it; nothing can be posted in between, both statements run in the same task
+    let listener;
+    if (typeof settings.onMessageReceive === 'function') {
+      const allowedOrigins = this._allowedMessageOrigins(url);
+      listener = function (event) {
+        if (event.source !== popup || !allowedOrigins.has(event.origin)) {
+          return;
+        }
+        settings.onMessageReceive(event);
+      };
+      window.addEventListener('message', listener);
+    }
 
     const checkCompleted = setInterval(() => {
       if (!popup || !popup.closed) {
