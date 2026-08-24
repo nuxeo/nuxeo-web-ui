@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved.
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved.
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ limitations under the License.
 import { config } from '@nuxeo/nuxeo-elements';
 import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
+import { getValidTheme } from '../themes/loader.js';
 import '../elements/nuxeo-app.js';
 
 suite('nuxeo-app', () => {
@@ -139,13 +140,16 @@ suite('nuxeo-app', () => {
     expect(app._computeDrawerResizeHidden(true, false)).to.be.false;
   });
 
-  test('_logo builds theme logo URL from baseUrl and localStorage theme', () => {
+  test('_logo builds theme logo URL from baseUrl and the resolved theme', () => {
     sinon.stub(localStorage, 'getItem').callsFake((k) => (k === 'theme' ? 'ocean' : null));
     expect(app._logo('https://host/nuxeo/')).to.equal('https://host/nuxeo/themes/ocean/logo.png');
     localStorage.getItem.restore();
 
+    // First-time user (nothing persisted): the logo must follow the loader's resolved theme
+    // (branding-aware default), not a hard-coded 'default'. getValidTheme() does not write
+    // storage in this case, so reading raw localStorage would give the wrong logo.
     sinon.stub(localStorage, 'getItem').callsFake(() => null);
-    expect(app._logo('https://host/')).to.equal('https://host/themes/default/logo.png');
+    expect(app._logo('https://host/')).to.equal(`https://host/themes/${getValidTheme()}/logo.png`);
     localStorage.getItem.restore();
   });
 
@@ -1565,21 +1569,155 @@ suite('nuxeo-app', () => {
     });
   });
 
-  suite('logo menu keyboard navigation', () => {
-    test('ArrowDown on logo focuses first menu item', () => {
-      const logo = app.$.logo;
-      const menu = app.$.menu;
-      if (!logo || !menu) {
-        return;
+  suite('home menu keyboard navigation', () => {
+    // Call the handlers directly with fake home/menu/event objects. Never dispatch key events at
+    // the real paper-listbox: that corrupts the shared fixture and hangs the run.
+    let savedNav;
+    const item = () => document.createElement('div');
+    const fakeMenu = (items) => {
+      return { querySelectorAll: () => items };
+    };
+    const fakeEvent = (key, target) => {
+      return { key, target, preventDefault: sinon.spy() };
+    };
+
+    setup(() => {
+      savedNav = app._homeMenuNav;
+    });
+    teardown(() => {
+      app._homeMenuNav = savedNav;
+    });
+
+    test('homeToMenuNavigation returns early when the home shortcut is missing', () => {
+      const stub = sinon.stub(app.shadowRoot, 'querySelector').returns(null);
+      try {
+        expect(() => app.homeToMenuNavigation()).to.not.throw();
+      } finally {
+        stub.restore();
       }
-      const item = document.createElement('div');
-      item.setAttribute('name', 'browse');
-      const focusSpy = sinon.spy(item, 'focus');
-      sinon.stub(menu, 'querySelector').returns(item);
-      logo.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-      expect(focusSpy).to.have.been.called;
-      menu.querySelector.restore();
-      focusSpy.restore();
+    });
+
+    test('attached() re-arms homeToMenuNavigation after a detach/re-attach cycle', () => {
+      const spy = sinon.spy(app, 'homeToMenuNavigation');
+      try {
+        // Simulate a real detach: this is what flags the element for re-arming.
+        app.detached();
+        expect(app._inactivityNeedsRearm).to.be.true;
+        app.attached();
+        expect(spy).to.have.been.calledOnce;
+        expect(app._inactivityNeedsRearm).to.be.false;
+      } finally {
+        spy.restore();
+      }
+    });
+
+    test('_homeMenuVisibleItems returns [] when no menu is stashed', () => {
+      app._homeMenuNav = null;
+      expect(app._homeMenuVisibleItems()).to.deep.equal([]);
+    });
+
+    test('_homeMenuVisibleItems excludes hidden items', () => {
+      const visible = item();
+      const hidden = item();
+      hidden.setAttribute('hidden', '');
+      app._homeMenuNav = { home: {}, menu: fakeMenu([visible, hidden]) };
+      expect(app._homeMenuVisibleItems()).to.deep.equal([visible]);
+    });
+
+    test('ArrowDown on home focuses the first visible menu item', () => {
+      const first = item();
+      const last = item();
+      const firstSpy = sinon.spy(first, 'focus');
+      app._homeMenuNav = { home: {}, menu: fakeMenu([first, last]) };
+      const e = fakeEvent('ArrowDown');
+      app._onHomeShortcutKeydown(e);
+      expect(e.preventDefault).to.have.been.called;
+      expect(firstSpy).to.have.been.called;
+    });
+
+    test('ArrowUp on home focuses the last visible menu item', () => {
+      const first = item();
+      const last = item();
+      const firstSpy = sinon.spy(first, 'focus');
+      const lastSpy = sinon.spy(last, 'focus');
+      app._homeMenuNav = { home: {}, menu: fakeMenu([first, last]) };
+      const e = fakeEvent('ArrowUp');
+      app._onHomeShortcutKeydown(e);
+      expect(e.preventDefault).to.have.been.called;
+      expect(lastSpy).to.have.been.called;
+      expect(firstSpy).to.not.have.been.called;
+    });
+
+    test('a non-arrow key on home does not move focus', () => {
+      const first = item();
+      const firstSpy = sinon.spy(first, 'focus');
+      app._homeMenuNav = { home: {}, menu: fakeMenu([first]) };
+      const e = fakeEvent('Enter');
+      app._onHomeShortcutKeydown(e);
+      expect(e.preventDefault).to.not.have.been.called;
+      expect(firstSpy).to.not.have.been.called;
+    });
+
+    test('home navigation is a no-op when there are no visible menu items', () => {
+      app._homeMenuNav = { home: {}, menu: fakeMenu([]) };
+      const e = fakeEvent('ArrowDown');
+      app._onHomeShortcutKeydown(e);
+      expect(e.preventDefault).to.not.have.been.called;
+    });
+
+    test('ArrowUp on the first menu item returns focus to the home anchor', () => {
+      const first = item();
+      const last = item();
+      const anchor = { focus: sinon.spy() };
+      const home = { shadowRoot: { querySelector: () => anchor } };
+      app._homeMenuNav = { home, menu: fakeMenu([first, last]) };
+      const e = fakeEvent('ArrowUp', first);
+      app._onMenuEdgeKeydown(e);
+      expect(e.preventDefault).to.have.been.called;
+      expect(anchor.focus).to.have.been.called;
+    });
+
+    test('ArrowDown on the last menu item returns focus to the home anchor', () => {
+      const first = item();
+      const last = item();
+      const anchor = { focus: sinon.spy() };
+      const home = { shadowRoot: { querySelector: () => anchor } };
+      app._homeMenuNav = { home, menu: fakeMenu([first, last]) };
+      const e = fakeEvent('ArrowDown', last);
+      app._onMenuEdgeKeydown(e);
+      expect(e.preventDefault).to.have.been.called;
+      expect(anchor.focus).to.have.been.called;
+    });
+
+    test('ArrowDown on a non-edge menu item does not return focus to home', () => {
+      const first = item();
+      const last = item();
+      const anchor = { focus: sinon.spy() };
+      const home = { shadowRoot: { querySelector: () => anchor } };
+      app._homeMenuNav = { home, menu: fakeMenu([first, last]) };
+      const e = fakeEvent('ArrowDown', first);
+      app._onMenuEdgeKeydown(e);
+      expect(e.preventDefault).to.not.have.been.called;
+      expect(anchor.focus).to.not.have.been.called;
+    });
+
+    test('menu navigation is a no-op when there are no visible items', () => {
+      app._homeMenuNav = { home: {}, menu: fakeMenu([]) };
+      const e = fakeEvent('ArrowUp', {});
+      app._onMenuEdgeKeydown(e);
+      expect(e.preventDefault).to.not.have.been.called;
+    });
+
+    test('_focusHomeShortcut falls back to the host when there is no inner anchor', () => {
+      const home = { shadowRoot: { querySelector: () => null }, focus: sinon.spy() };
+      app._homeMenuNav = { home, menu: fakeMenu([]) };
+      app._focusHomeShortcut();
+      expect(home.focus).to.have.been.called;
+    });
+
+    test('_focusHomeShortcut is a no-op when no home is stashed', () => {
+      app._homeMenuNav = null;
+      expect(() => app._focusHomeShortcut()).to.not.throw();
     });
   });
 
@@ -1974,25 +2112,6 @@ suite('nuxeo-app', () => {
       expect(focusSpy).to.not.have.been.called;
       focusSpy.restore();
     });
-
-    test('logoToMenuNavigation moves focus from last item to logo on ArrowDown', () => {
-      const logo = app.$.logo;
-      const menu = app.$.menu;
-      if (!logo || !menu) {
-        return;
-      }
-      app.logoToMenuNavigation();
-      const first = document.createElement('div');
-      const last = document.createElement('div');
-      sinon.stub(menu, 'querySelectorAll').returns([first, last]);
-      const focusSpy = sinon.spy(logo, 'focus');
-      const evt = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true });
-      Object.defineProperty(evt, 'target', { value: last, configurable: true });
-      menu.dispatchEvent(evt);
-      expect(focusSpy).to.have.been.called;
-      menu.querySelectorAll.restore();
-      focusSpy.restore();
-    });
   });
 
   suite('misc coverage', () => {
@@ -2149,6 +2268,37 @@ suite('nuxeo-app', () => {
         setupTimer.restore();
         setup401.restore();
       }
+    });
+  });
+
+  suite('home-link keyboard navigation (NXENG-527)', () => {
+    test('removes tabindex from home-link to prevent double Tab stop', () => {
+      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
+      expect(homeLink).to.exist;
+      expect(homeLink.hasAttribute('tabindex')).to.be.false;
+    });
+
+    test('home-link is inside menuContainer but outside paper-listbox', () => {
+      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
+      const menuContainer = app.shadowRoot && app.shadowRoot.querySelector('#menuContainer');
+      const menu = app.shadowRoot && app.shadowRoot.querySelector('#menu');
+
+      expect(homeLink).to.exist;
+      expect(menuContainer).to.exist;
+      expect(menu).to.exist;
+
+      expect(menuContainer.contains(homeLink)).to.be.true;
+      expect(menu.contains(homeLink)).to.be.false;
+    });
+
+    test('home-link remains programmatically focusable after tabindex removal', () => {
+      const homeLink = app.shadowRoot && app.shadowRoot.querySelector('.home-link');
+      expect(homeLink).to.exist;
+      // Should be able to focus programmatically (no tabindex="-1" which would prevent focus)
+      const focusSpy = sinon.spy(homeLink, 'focus');
+      homeLink.focus();
+      expect(focusSpy).to.have.been.called;
+      focusSpy.restore();
     });
   });
 });
