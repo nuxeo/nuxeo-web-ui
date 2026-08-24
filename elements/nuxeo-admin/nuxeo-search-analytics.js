@@ -62,14 +62,8 @@ Polymer({
 
       .flex-layout nuxeo-card {
         flex: 1 0 calc(33% - 2em);
-        max-width: calc(33% - 2em);
         margin: 0 8px 16px;
         text-align: center;
-      }
-
-      .flex-layout nuxeo-card.pie-card {
-        display: flex;
-        flex-direction: column;
       }
 
       nuxeo-data-table {
@@ -80,19 +74,13 @@ Polymer({
       chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
-        min-width: 0;
         display: block;
         font-size: 0.8rem;
-      }
-
-      .pie-card chart-pie {
-        flex: 1 1 auto;
       }
 
       @media (max-width: 1024px) {
         .flex-layout nuxeo-card {
           flex: 1 0 calc(100% - 2em);
-          max-width: calc(100% - 2em);
         }
       }
     </style>
@@ -116,11 +104,13 @@ Polymer({
         >
         </nuxeo-search-data>
 
-        <nuxeo-card class="pie-card" heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]">
+        <nuxeo-card heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]">
           <chart-pie
+            role="img"
+            tabindex="0"
+            aria-label$="[[_chartAria('searchAnalytics.callsPerPageProvider.heading', callsPerProvider)]]"
             values="[[_values(callsPerProvider)]]"
             labels="[[_labels(callsPerProvider)]]"
-            options='{ "maintainAspectRatio": false }'
           >
           </chart-pie>
         </nuxeo-card>
@@ -139,6 +129,9 @@ Polymer({
 
         <nuxeo-card heading="[[i18n('searchAnalytics.callsPerHour.heading')]]">
           <chart-bar
+            role="img"
+            tabindex="0"
+            aria-label$="[[_chartAria('searchAnalytics.callsPerHour.heading', callsPerHour)]]"
             labels="[[_range(0,23)]]"
             values="[[_aggregatePerHourOfDay(callsPerHour)]]"
             series="[[_range(0,23)]]"
