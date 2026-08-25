@@ -36,6 +36,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-document-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-select.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../nuxeo-document-versions/nuxeo-document-versions.js';
+import { config } from '@nuxeo/nuxeo-elements';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { isPageProviderDisplayBehavior } from '../select-all-helpers.js';
@@ -175,7 +176,7 @@ Polymer({
 
     selectedRendition: {
       type: String,
-      value: 'default',
+      value: 'none',
     },
 
     _isDisable: {
@@ -200,8 +201,22 @@ Polymer({
     },
   },
 
+  observers: ['_updateDefaultRendition(document, documents, documents.splices)'],
+
   _computeMultiple() {
     return !!(this.documents && this.documents.length > 0);
+  },
+
+  // Preselect the configured rendition only for a single document that has a main blob; otherwise fall back to
+  // 'none'. Bulk and select-all selections can't be represented by one blob check, so they always fall back to 'none'.
+  _updateDefaultRendition() {
+    const isBulk = this._computeMultiple() || isPageProviderDisplayBehavior(this.documents);
+    const hasBlob = !isBulk && this._hasMainBlob(this.document);
+    this.selectedRendition = hasBlob ? config.get('publishing.selectedRendition', 'default') : 'none';
+  },
+
+  _hasMainBlob(document) {
+    return !!document?.properties?.['file:content'];
   },
 
   _computeRenditionOptions() {
