@@ -103,13 +103,20 @@ suite('LiveConnectBehavior', () => {
       globalThis.open.restore();
     });
 
-    test('should invoke onClose and register no listener when the popup is blocked', () => {
+    test('should warn and register no listener when the popup is blocked', () => {
       sinon.stub(globalThis, 'open').returns(null);
       const addListenerSpy = sinon.spy(globalThis, 'addEventListener');
+      const warnStub = sinon.stub(console, 'warn');
       const onClose = sinon.spy();
-      behavior.openPopup('https://auth.example.com', { onClose, onMessageReceive: sinon.spy() });
-      expect(onClose).to.have.been.calledOnce;
+      const onMessageReceive = sinon.spy();
+      behavior.openPopup('https://auth.example.com', { onClose, onMessageReceive });
+      // a blocked popup never authenticated the user, so onClose must not fire (it would let a
+      // provider replay a stale token) and no message listener may be registered
+      expect(onClose).to.not.have.been.called;
+      expect(onMessageReceive).to.not.have.been.called;
       expect(addListenerSpy).to.not.have.been.calledWith('message', sinon.match.func);
+      expect(warnStub).to.have.been.calledOnce;
+      warnStub.restore();
       addListenerSpy.restore();
       globalThis.open.restore();
     });
@@ -193,6 +200,39 @@ suite('LiveConnectBehavior', () => {
       const event = { origin: 'https://nuxeo.example.com', source: popup, data: '{"token":"abc"}' };
       listener(event);
       expect(onMessageReceive).to.have.been.calledWith(event);
+    });
+
+    // some engines drop the sender reference once the popup is discarded; the origin allow-list is
+    // the real cross-origin guard, so a null source from an allowed origin must still be accepted
+    test('should accept messages from an allowed origin even when the source is null', () => {
+      open('https://auth.example.com');
+      const event = { origin: globalThis.location.origin, source: null, data: '{"token":"abc"}' };
+      listener(event);
+      expect(onMessageReceive).to.have.been.calledWith(event);
+    });
+
+    test('should still reject a null-source message when the origin is not allowed', () => {
+      open('https://auth.example.com');
+      listener({ origin: 'https://evil.example.com', source: null, data: '{"token":"stolen"}' });
+      expect(onMessageReceive).to.not.have.been.called;
+    });
+
+    test('should warn when the popup posts from an unexpected origin (likely misconfiguration)', () => {
+      const warnStub = sinon.stub(console, 'warn');
+      open('https://auth.example.com');
+      listener({ origin: 'https://evil.example.com', source: popup, data: '{"token":"stolen"}' });
+      expect(onMessageReceive).to.not.have.been.called;
+      expect(warnStub).to.have.been.calledOnce;
+      warnStub.restore();
+    });
+
+    test('should not warn for unrelated messages coming from another window', () => {
+      const warnStub = sinon.stub(console, 'warn');
+      open('https://auth.example.com');
+      listener({ origin: 'https://ads.example.com', source: {}, data: 'unrelated' });
+      expect(onMessageReceive).to.not.have.been.called;
+      expect(warnStub).to.not.have.been.called;
+      warnStub.restore();
     });
   });
 

@@ -116,13 +116,13 @@ export const LiveConnectBehavior = {
       `height=${settings.height},width=${settings.width},top=${top},left=${left}`,
     );
 
-    // if the popup could not be opened (e.g. blocked by the browser) there is no window to
-    // authenticate messages against and nothing to poll; notify the caller and bail out rather
-    // than registering a listener and a timer that would never be cleared.
+    // a blocked popup (browser popup blocker, extension, …) yields a falsy handle: there is no
+    // window to authenticate messages against and nothing to poll. Warn so the failure is not
+    // silent, then bail out without registering a listener or a timer that would never be cleared.
+    // onClose is intentionally NOT called: it signals "the auth popup was closed" and would let a
+    // provider replay a stale token even though no authentication ever happened.
     if (!popup) {
-      if (typeof settings.onClose === 'function') {
-        settings.onClose();
-      }
+      console.warn('nuxeo-liveconnect: the authentication popup could not be opened (blocked?); aborting.');
       return;
     }
 
@@ -132,7 +132,22 @@ export const LiveConnectBehavior = {
     if (typeof settings.onMessageReceive === 'function') {
       const allowedOrigins = this._allowedMessageOrigins(url);
       listener = function (event) {
-        if (event.source !== popup || !allowedOrigins.has(event.origin)) {
+        // A null/absent source is tolerated: some engines drop the sender reference once the
+        // popup is discarded, and the origin allow-list is the check that actually stops
+        // cross-origin forgery (S2819). A same-origin window keeps its source identity, so it is
+        // still rejected here and, being same-origin, needs no postMessage to script this element.
+        const fromPopup = !event.source || event.source === popup;
+        if (!fromPopup || !allowedOrigins.has(event.origin)) {
+          // Only surface the case that indicates a real allow-list/deployment misconfiguration —
+          // our popup posted but from an unexpected origin — so the console is not spammed with
+          // unrelated postMessage traffic coming from other windows on the page.
+          if (fromPopup) {
+            console.warn(
+              `nuxeo-liveconnect: ignored an OAuth message from unexpected origin "${event.origin}"; allowed: ${[
+                ...allowedOrigins,
+              ].join(', ')}.`,
+            );
+          }
           return;
         }
         settings.onMessageReceive(event);
