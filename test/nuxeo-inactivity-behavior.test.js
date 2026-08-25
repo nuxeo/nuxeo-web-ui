@@ -20,7 +20,11 @@ import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html as polymerHtml } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
-import { INACTIVITY_ACTIVITY_KEY, NuxeoInactivityBehavior } from '../elements/behaviors/nuxeo-inactivity-behavior.js';
+import {
+  INACTIVITY_ACTIVITY_KEY,
+  INACTIVITY_REQUESTED_URL_KEY,
+  NuxeoInactivityBehavior,
+} from '../elements/behaviors/nuxeo-inactivity-behavior.js';
 
 // Minimal host that composes the behavior exactly like nuxeo-app does — a keepAlive
 // <nuxeo-resource> in the template, a _logout() URL helper, and setup/teardown wired from
@@ -463,6 +467,185 @@ suite('nuxeo-inactivity-behavior (WEBUI-1987)', () => {
       await host._logoutRedirect();
       expect(host._inactivityLogoutError).to.be.an('error');
       expect(redirect).to.have.been.calledOnceWith('https://server/nuxeo/logout');
+    });
+  });
+
+  suite('WEBUI-2189: restore requested URL after re-login', () => {
+    const REQUESTED_URL_KEY = INACTIVITY_REQUESTED_URL_KEY; // reuse the behavior's exported key
+    let redirect;
+
+    // A resolved, non-anonymous user is the precondition for restore to proceed (see gating below); the
+    // saved payload also records the owning user so restore only ever returns a page to that same user.
+    const CURRENT_USER = { id: 'jdoe', isAnonymous: false };
+    // Build the JSON payload _saveRequestedUrl() writes, defaulting the owner to the current user.
+    const savedPayload = (url, user = CURRENT_USER.id) => JSON.stringify({ url, user });
+
+    setup(() => {
+      redirect = sinon.stub(host, '_redirect');
+      host._loggingOut = false;
+      host.currentUser = CURRENT_USER; // a real user has re-authenticated
+      // Clear any error recorded by an earlier test so the storage-error assertions below only pass when
+      // the code path under test actually records one (the host instance is reused across suites).
+      host._inactivityStorageError = undefined;
+      window.sessionStorage.removeItem(REQUESTED_URL_KEY);
+    });
+
+    teardown(() => {
+      redirect.restore();
+      host.currentUser = undefined;
+      host.baseUrl = undefined; // reset any base-path override set by individual tests
+      window.sessionStorage.removeItem(REQUESTED_URL_KEY);
+    });
+
+    test('_logoutRedirect saves the current page (with the owning user) before navigating away', async () => {
+      await host._logoutRedirect();
+      expect(JSON.parse(window.sessionStorage.getItem(REQUESTED_URL_KEY))).to.deep.equal({
+        url: window.location.href,
+        user: CURRENT_USER.id,
+      });
+    });
+
+    test('_saveRequestedUrl records the error and does not throw when sessionStorage is unavailable', () => {
+      const setItem = sinon.stub(window.sessionStorage, 'setItem').throws(new Error('denied'));
+      host._saveRequestedUrl();
+      expect(host._inactivityStorageError).to.be.an('error').with.property('message', 'denied');
+      setItem.restore();
+    });
+
+    test('_saveRequestedUrl skips the save when no user id is resolved (unrestorable payload)', () => {
+      // Without a resolved user the saved URL could never be matched to its owner on restore, so we must
+      // not write a `{ user: undefined }` payload that would be consumed-but-never-navigated.
+      host.currentUser = undefined;
+      const setItem = sinon.spy(window.sessionStorage, 'setItem');
+      host._saveRequestedUrl();
+      expect(setItem).not.to.have.been.called;
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
+      setItem.restore();
+    });
+
+    test('restores a saved same-origin page for the matching user and consumes the key', () => {
+      const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(target));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).to.have.been.calledOnceWith(target);
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null; // consumed once, never loops
+    });
+
+    test('does NOT restore (nor consume) the key for an anonymous/Guest boot', () => {
+      const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(target));
+      host.currentUser = { id: 'Guest', isAnonymous: true };
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+      // The key must survive the Guest boot so the real re-login on the next page load can restore it.
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.not.be.null;
+    });
+
+    test('does NOT restore when there is no resolved user yet (key survives)', () => {
+      const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(target));
+      host.currentUser = undefined;
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.not.be.null;
+    });
+
+    test('does NOT restore another user’s saved page but still consumes the key', () => {
+      const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(target, 'someone-else'));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called; // never restore one user's page for another
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null; // but the stale key is consumed
+    });
+
+    test('discards a corrupt payload without navigating', () => {
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, '{not-json');
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+      expect(host._inactivityStorageError).to.be.an('error');
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null; // consumed
+    });
+
+    test('does NOT restore a cross-origin saved URL (open-redirect guard) but still clears it', () => {
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload('https://evil.example.com/phish'));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
+    });
+
+    test('does NOT restore a look-alike host that merely prefixes the origin string', () => {
+      // e.g. https://localhost:8000.evil.example.com — starts with the origin but is a different host.
+      window.sessionStorage.setItem(
+        REQUESTED_URL_KEY,
+        savedPayload(`${window.location.origin}.evil.example.com/phish`),
+      );
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+    });
+
+    test('does NOT restore a look-alike sibling path when baseUrl has no trailing slash', () => {
+      // baseUrl `/nuxeo/ui` (no trailing slash) must be normalized so a sibling path like
+      // `${origin}/nuxeo/ui-foo/...` (which shares the `/nuxeo/ui` prefix) can't slip past startsWith().
+      host.baseUrl = '/nuxeo/ui';
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(`${window.location.origin}/nuxeo/ui-foo/#!/x`));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null; // consumed but not navigated
+    });
+
+    test('restores a proper base-path URL even when baseUrl has no trailing slash (normalized)', () => {
+      host.baseUrl = '/nuxeo/ui'; // no trailing slash → normalized to `/nuxeo/ui/`
+      const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(target));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).to.have.been.calledOnceWith(target);
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
+    });
+
+    test('restores a same-origin absolute baseUrl (resolved via URL, not origin-concatenated)', () => {
+      // nuxeo-app's base-url may be an absolute URL (property contract): resolving it via URL() rather than
+      // string-concatenating location.origin keeps the restore working instead of failing every time.
+      host.baseUrl = `${window.location.origin}/nuxeo/ui/`;
+      const target = `${window.location.origin}/nuxeo/ui/#!/browse/default-domain`;
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(target));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).to.have.been.calledOnceWith(target);
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
+    });
+
+    test('ignores a non-string saved url without throwing (tampered payload)', () => {
+      // A valid-JSON but wrong-typed payload (e.g. { url: 1 }) must not reach startsWith() — otherwise it
+      // would throw and abort the currentUser observer that drives the restore.
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, JSON.stringify({ url: 1, user: CURRENT_USER.id }));
+      expect(() => host._restoreRequestedUrlAfterLogin()).to.not.throw();
+      expect(redirect).not.to.have.been.called;
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null; // consumed
+    });
+
+    test('does NOT redirect when the saved URL is the current page', () => {
+      window.sessionStorage.setItem(REQUESTED_URL_KEY, savedPayload(window.location.href));
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+    });
+
+    test('is a no-op when there is nothing saved', () => {
+      host._restoreRequestedUrlAfterLogin();
+      expect(redirect).not.to.have.been.called;
+    });
+
+    test('records the error and bails when reading sessionStorage throws', () => {
+      const getItem = sinon.stub(window.sessionStorage, 'getItem').throws(new Error('denied'));
+      host._restoreRequestedUrlAfterLogin();
+      expect(host._inactivityStorageError).to.be.an('error').with.property('message', 'denied');
+      expect(redirect).not.to.have.been.called;
+      getItem.restore();
+    });
+
+    test('does NOT save the requested URL when a logout is already in progress (guard early-return)', async () => {
+      host._loggingOut = true; // a logout redirect is already underway
+      await host._logoutRedirect();
+      // The early-return path must not overwrite the URL saved by the first (real) logout.
+      expect(window.sessionStorage.getItem(REQUESTED_URL_KEY)).to.be.null;
     });
   });
 });

@@ -1,6 +1,6 @@
 <!--
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,13 @@ limitations under the License.
       --nuxeo-primary-color: #1f28bf;
       --nuxeo-secondary-color: #0066ff;
 
+      /* Brighter keyboard focus ring so it stays visible on the dark backgrounds (WCAG 2.4.13). */
+      --nuxeo-focus-ring-color: #4d9fff;
+      /* Full outline consumed by the global focus ring (themes/dark-theme-focus-ring.js). Defining it here makes
+         keyboard focus visible app-wide on dark backgrounds; other themes leave it unset and keep the
+         native user-agent ring. */
+      --nuxeo-focus-outline: 2px solid var(--nuxeo-focus-ring-color);
+
       --nuxeo-page-background: #060826;
       --nuxeo-border: rgba(0, 0, 0, 0.15);
 
@@ -39,6 +46,7 @@ limitations under the License.
       --nuxeo-sidebar-background: var(--nuxeo-primary-color);
       --nuxeo-sidebar-menu: rgba(255, 255, 255, 0.5);
       --nuxeo-sidebar-menu-hover: rgba(255, 255, 255, 1);
+      --nuxeo-sidebar-menu-icon: var(--nuxeo-sidebar-menu-hover);
       --nuxeo-badge-background: #fb6107;
       --nuxeo-drawer-header: var(--nuxeo-text-default);
       --nuxeo-drawer-text: var(--nuxeo-text-default);
@@ -110,6 +118,7 @@ limitations under the License.
       --paper-toolbar-color: var(--nuxeo-text-default);
 
       --paper-listbox-background-color: var(--nuxeo-box);
+      --paper-listbox-color: var(--nuxeo-text-default);
       --paper-menu-background-color: var(--nuxeo-box);
       --paper-menu-color: var(--nuxeo-text-default);
       --paper-menu-disabled-color: #e9eff3;
