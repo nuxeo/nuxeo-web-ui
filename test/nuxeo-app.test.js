@@ -2030,6 +2030,24 @@ suite('nuxeo-app', () => {
   });
 
   suite('accessibility and menu keyboard', () => {
+    test('quick search is tabbable before main content without a transformed ancestor', () => {
+      const { suggester, mainContent } = app.$;
+      const banner = app.shadowRoot.querySelector('header[role="banner"]');
+      expect(suggester).to.be.ok;
+      expect(mainContent).to.be.ok;
+      expect(banner).to.be.ok;
+      const searchButton = suggester.shadowRoot.querySelector('#searchButton');
+      expect(searchButton).to.be.ok;
+      expect(mainContent.contains(suggester)).to.be.false;
+      expect(banner.contains(suggester)).to.be.true;
+      expect(suggester.closest('app-header')).to.be.null;
+      expect(suggester.compareDocumentPosition(mainContent) & Node.DOCUMENT_POSITION_FOLLOWING).to.not.equal(0);
+      expect(searchButton.tabIndex).to.equal(0);
+      // The focusable control is the inner search button; a tabindex on the wrapper
+      // would add a tab stop on an element that renders nothing.
+      expect(suggester.hasAttribute('tabindex')).to.be.false;
+    });
+
     test('skipLinkEvent focuses main content on Enter', () => {
       const { skipLink, mainContent } = app.$;
       if (!skipLink || !mainContent) {
