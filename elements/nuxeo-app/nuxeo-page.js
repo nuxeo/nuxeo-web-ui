@@ -38,13 +38,20 @@ Polymer({
         height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         display: flex;
         flex-direction: column;
+        /* NXENG-527: Rebranded hosts set a custom background; classic pages default to transparent. */
+        background-color: var(--nuxeo-page-host-background, transparent);
       }
 
       #content {
         flex: 1 1 auto;
         position: relative;
+        padding: var(--nuxeo-page-content-padding, 16px 16px 0 16px);
         overflow-y: auto;
-        padding: 16px 16px 0 16px;
+        /* Content background: uses custom color for rebranded themes or transparent for classic. */
+        background-color: var(--nuxeo-page-content-background, transparent);
+        /* Apply border radius to content area for rebranded themes */
+        border-radius: var(--nuxeo-page-content-border-radius, 0);
+        margin: var(--nuxeo-page-content-margin, 0);
 
         /*
          * Reserve the strip covered by the floating document create button, published by nuxeo-app
@@ -52,7 +59,8 @@ Polymer({
          * region. padding-bottom extends the scrollable range so the last row can be scrolled
          * clear of the button instead of staying permanently underneath it, and
          * scroll-padding-bottom keeps anything scrolled into view - keyboard focus in particular -
-         * out from under it.
+         * out from under it. Both come after --nuxeo-page-content-padding so they win over the
+         * bottom value of that shorthand, which is 0 in every theme that sets it.
          */
         padding-bottom: var(--nuxeo-page-content-safe-area-bottom, 0px);
         scroll-padding-bottom: var(--nuxeo-page-content-safe-area-bottom, 0px);
@@ -64,8 +72,8 @@ Polymer({
         @apply --layout-center;
         height: var(--nuxeo-drawer-header-height);
         color: var(--nuxeo-app-header);
-        background: var(--nuxeo-app-header-background);
-        box-shadow: var(--nuxeo-app-header-box-shadow);
+        background: var(--nuxeo-page-toolbar-background, var(--nuxeo-app-header-background));
+        box-shadow: var(--nuxeo-page-toolbar-box-shadow, var(--nuxeo-app-header-box-shadow));
         overflow-x: auto;
       }
 
@@ -75,11 +83,13 @@ Polymer({
 
       #tabs {
         flex: 0 0 auto;
-        background: var(--nuxeo-app-header-background);
-        box-shadow: var(--nuxeo-app-header-box-shadow);
-        margin-top: 1px;
+        /* Use custom tabs styling if available, otherwise fall back to header styling */
+        background: var(--nuxeo-page-tabs-background, var(--nuxeo-app-header-background));
+        box-shadow: var(--nuxeo-page-tabs-box-shadow, var(--nuxeo-app-header-box-shadow));
+        margin: var(--nuxeo-page-tabs-margin, 1px 0 0 0);
         overflow-x: auto;
         z-index: 1;
+        border-radius: var(--nuxeo-page-tabs-border-radius, 0);
       }
 
       :host([dir='rtl']) #tabs {

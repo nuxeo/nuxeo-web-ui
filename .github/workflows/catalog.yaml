@@ -48,7 +48,7 @@ jobs:
           node-version: 18
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
           java-version: '17'
 
@@ -80,7 +80,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/nuxeo-designer-catalog
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Generate catalog
         working-directory: packages/nuxeo-designer-catalog

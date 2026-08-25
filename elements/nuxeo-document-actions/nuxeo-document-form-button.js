@@ -63,7 +63,7 @@ Polymer({
       <div class="container">
         <nuxeo-document-form-layout
           id="layout"
-          document="[[document]]"
+          document="[[_editedDocument]]"
           layout="[[layout]]"
           on-document-updated="_closeDialog"
         ></nuxeo-document-form-layout>
@@ -105,6 +105,13 @@ Polymer({
     icon: {
       type: String,
       value: 'nuxeo:edit',
+    },
+
+    /**
+     * The copy of the input document that the form edits.
+     */
+    _editedDocument: {
+      type: Object,
     },
   },
 
@@ -155,7 +162,14 @@ Polymer({
   },
 
   _openDialog() {
+    // the form edits a copy: widgets bound to complex or multivalued properties mutate the
+    // document in place, which would otherwise corrupt the layouts rendered behind the dialog
+    this._editedDocument = this._copyDocument(this.document);
     this.dialog.open();
+  },
+
+  _copyDocument(doc) {
+    return doc ? JSON.parse(JSON.stringify(doc)) : doc;
   },
 
   _closeDialog() {
