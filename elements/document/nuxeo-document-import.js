@@ -104,7 +104,7 @@ Polymer({
         position: relative;
         border: 2px dashed var(--divider-color);
         border-radius: 4px;
-        background-color: rgba(0, 0, 0, 0.05);
+        background-color: var(--hyland-csv-import-background, rgba(0, 0, 0, 0.05));
         min-height: 100px;
         margin: 1em 2em 5em;
       }
@@ -310,8 +310,8 @@ Polymer({
 
       .error {
         border-left: 4px solid var(--nuxeo-warn-text);
-        color: var(--primary-text-color);
         padding-left: 8px;
+        color: var(--nuxeo-text-default);
       }
 
       .upload-error {

@@ -156,9 +156,9 @@ Polymer({
       }
 
       .resultActions paper-icon-button {
-        width: 2em;
-        height: 2em;
-        padding: 0.3em;
+        width: 2.5em;
+        height: 2.5em;
+        padding: 0.4em;
         margin-left: 4px;
       }
 
@@ -242,6 +242,7 @@ Polymer({
           </template>
           <template is="dom-if" if="[[_displaySort(displaySort, view)]]">
             <nuxeo-sort-select
+              label="[[i18n('results.sortBy')]]"
               options="[[_sortOptions(view, sortOptions)]]"
               selected="{{sortSelected}}"
               on-sort-order-changed="_sortChanged"
@@ -334,6 +335,16 @@ Polymer({
      * page provider at the top of the search results.
      */
     displayQuickFilters: {
+      type: Boolean,
+      value: false,
+    },
+    /**
+     * If `true`, initializing a display mode does not fetch results, so loading the page executes
+     * no query. Only the deferred *initial* fetch is suppressed: any user action that asks for
+     * results — the enclosing search view's Search button, a sort change, the toolbar refresh or a
+     * quick filter toggle — fetches as usual and lifts the deferral for later display-mode changes.
+     */
+    deferInitialFetch: {
       type: Boolean,
       value: false,
     },
@@ -475,6 +486,11 @@ Polymer({
 
   listeners: {
     'settings-changed': '_updateActionContext',
+  },
+
+  created() {
+    // whether a fetch has already been requested, which lifts any `deferInitialFetch` suppression
+    this._fetched = false;
   },
 
   ready() {
@@ -637,6 +653,7 @@ Polymer({
   },
 
   fetch() {
+    this._fetched = true;
     return new Promise((resolve, error) => {
       this._fetchDebouncer = Debouncer.debounce(this._fetchDebouncer, timeOut.after(100), () => {
         if (this.view && typeof this.view.fetch === 'function') {
@@ -654,6 +671,13 @@ Polymer({
       if (typeof this.view.reset === 'function') {
         this.view.reset();
       }
+    }
+  },
+
+  // fetch after state restore, unless the first fetch is deferred to an explicit search
+  _fetchOnViewInit() {
+    if (!this.deferInitialFetch || this._fetched) {
+      this.fetch();
     }
   },
 
@@ -723,8 +747,7 @@ Polymer({
       view.quickFilters = restoredQuickFilters.slice();
     }
 
-    // fetch after state restore
-    this.fetch();
+    this._fetchOnViewInit();
 
     // keep the scroll anchor fresh while the user scrolls; the position is
     // re-applied once rows load (see `_itemsChanged` → `_srMaybeRestore`).
