@@ -353,11 +353,18 @@ export const DiffBehavior = {
     const deltas = originalValue.map((val, index) => {
       return { originalValue: val, modified: false, index: String(index), change: 'unchanged', newValue: null };
     });
-    // sort and reversing assures that we'll deal first with deletions
+    // descending numeric order assures that splicing an entry never shifts the ones still to be
+    // processed; the `_` prefix marks a deletion at the same position, which is handled first
     Object.keys(delta)
       .filter((key) => key !== '_t')
-      .sort()
-      .reverse()
+      .sort((a, b) => {
+        const indexA = Number(a.replace('_', ''));
+        const indexB = Number(b.replace('_', ''));
+        if (indexA !== indexB) {
+          return indexB - indexA;
+        }
+        return a.startsWith('_') ? -1 : 1;
+      })
       .forEach((index) => {
         let i;
         if (index.startsWith('_')) {
@@ -404,7 +411,7 @@ export const DiffBehavior = {
         }
         return a.change === 'added' ? 1 : -1;
       }
-      return a.index > b.index;
+      return Number(a.index) - Number(b.index);
     });
     return deltas;
   },

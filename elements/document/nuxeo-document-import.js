@@ -1239,7 +1239,7 @@ Polymer({
     for (let i = 0; i < args.length; i++) {
       const current = args[i];
       if (current && current.entries) {
-        response.entries.concat(current.entries);
+        response.entries.push(...current.entries);
       } else {
         response.entries.push(current);
       }
@@ -1305,15 +1305,14 @@ Polymer({
       if (errorFree.length < results.length) {
         this.set('_creating', false);
         this.set('_importWithPropertiesError', 'These documents could not be created.');
+        // splice from the highest index down, so that removals do not shift the indexes still to be removed
         localIndexes
-          .sort()
-          .reverse()
+          .sort((a, b) => b - a)
           .forEach((index) => {
             this.splice('localFiles', index, 1);
           });
         remoteIndexes
-          .sort()
-          .reverse()
+          .sort((a, b) => b - a)
           .forEach((index) => {
             this.splice('remoteFiles', index, 1);
           });
