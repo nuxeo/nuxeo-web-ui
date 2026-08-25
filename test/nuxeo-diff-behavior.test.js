@@ -325,6 +325,14 @@ suite('DiffBehavior', () => {
       expect(unchanged).to.not.include('item-10');
     });
 
+    test('should apply a deletion before the addition that takes the same position', () => {
+      const originalValue = items(12, (i) => `item-${i}`);
+      const delta = { _t: 'a', _3: ['item-3', 0, 0], 3: ['inserted'] };
+      const result = ctx._getArrayDelta(delta, originalValue, originalValue);
+      expect(result.filter((d) => d.index === '3').map((d) => d.change)).to.deep.equal(['deleted', 'added']);
+      expect(result.filter((d) => d.change === 'unchanged').map((d) => d.originalValue)).to.not.include('item-3');
+    });
+
     test('should order the resulting entries by numeric index', () => {
       const originalValue = items(12, (i) => `item-${i}`);
       const delta = { _t: 'a', 11: ['added'] };
