@@ -226,6 +226,34 @@ suite('Performance', () => {
       expect(result).to.have.property('size');
       expect(result.requestCount).to.be.a('number');
     });
+
+    test('should report zeroed sizes when no resource has been recorded', () => {
+      const stub = sinon.stub(NuxeoPerf, 'getResources').callsFake(() => []);
+      const result = NuxeoPerf.getNetworkStats();
+      expect(result.requestCount).to.equal(0);
+      expect(result.transferSize).to.equal(0);
+      expect(result.size).to.equal(0);
+      expect(result.finish).to.be.undefined;
+      stub.restore();
+    });
+
+    test('should report the finish time of the latest resource when resources are out of order', () => {
+      // the latest resource is first, and the list is long enough that an incorrect comparator
+      // leaves the order untouched instead of accidentally producing the right one
+      const build = () => [
+        { transfered: 10, size: 100, startTime: 1000, duration: 7 },
+        ...Array.from({ length: 29 }, (_, i) => {
+          return { transfered: 1, size: 2, startTime: i + 1, duration: 1 };
+        }),
+      ];
+      const stub = sinon.stub(NuxeoPerf, 'getResources').callsFake(build);
+      const result = NuxeoPerf.getNetworkStats();
+      expect(result.finish).to.equal(1007);
+      expect(result.requestCount).to.equal(30);
+      expect(result.transferSize).to.equal(39);
+      expect(result.size).to.equal(158);
+      stub.restore();
+    });
   });
 
   suite('mark and clearMarks', () => {
