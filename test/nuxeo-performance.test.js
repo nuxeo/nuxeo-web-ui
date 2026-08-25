@@ -237,6 +237,23 @@ suite('Performance', () => {
       stub.restore();
     });
 
+    test('should report zeroed stats when the resource timing API is unavailable', () => {
+      // getResources() returns null, not [], when PerformanceResourceTiming is undefined
+      const stub = sinon.stub(NuxeoPerf, 'getResources').callsFake(() => null);
+      const result = NuxeoPerf.getNetworkStats();
+      expect(result.requestCount).to.equal(0);
+      expect(result.transferSize).to.equal(0);
+      expect(result.size).to.equal(0);
+      expect(result.finish).to.be.undefined;
+      stub.restore();
+    });
+
+    test('should not throw from report() when the resource timing API is unavailable', () => {
+      const stub = sinon.stub(NuxeoPerf, 'getResources').callsFake(() => null);
+      expect(() => NuxeoPerf.report({ all: true })).to.not.throw();
+      stub.restore();
+    });
+
     test('should report the finish time of the latest resource when resources are out of order', () => {
       // the latest resource is first, and the list is long enough that an incorrect comparator
       // leaves the order untouched instead of accidentally producing the right one
