@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -183,6 +183,64 @@ const template = html`
           url('../fonts/Inter-Bold.woff?v=3.13') format('woff');
       }
 
+      /* Figtree — consumed only via the --hyland-section-header mixin */
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/figtree-latin-500-normal.woff2') format('woff2');
+      }
+
+      /* Noto Sans font family */
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 300;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-300-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-400-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-500-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-600-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-700-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 900;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-900-normal.woff2') format('woff2');
+      }
+
       html {
         font-weight: 400;
         font-size: 13px;
@@ -278,6 +336,40 @@ const template = html`
         --nuxeo-block-hover: {
           background-color: var(--nuxeo-container-hover);
           transition: background-color 0.2s ease-in-out;
+        }
+
+        /* Secondary navigation section header styles */
+        --hyland-section-header: {
+          font-weight: 500;
+          font-size: 26px;
+          color: var(--hyland-section-header-text-color, var(--nuxeo-drawer-text));
+          font-family: var(--hyland-font-family-secondary, var(--nuxeo-app-font));
+        }
+        /* Selected drawer item with pill-shaped background */
+        --hyland-drawer-item-selected: {
+          /* Background colour, from most to least specific: branding pill colour, then the generic
+             container-hover colour (which classic themes also use for the pill), then a hard fallback. */
+          background-color: var(
+            --hyland-selection-pill-background,
+            var(--nuxeo-container-hover, rgba(0, 0, 0, 0.14))
+          );
+          border-radius: 54px;
+          outline: 0;
+        }
+        /* Drawer list item typography and spacing */
+        --hyland-drawer-item: {
+          color: var(--nuxeo-drawer-text);
+          font-family: var(--nuxeo-app-font);
+          font-weight: 500;
+          font-size: 14px;
+          line-height: 20px;
+          letter-spacing: 0.1px;
+        }
+
+        /* Keyboard focus ring for accessibility, positioned inside the pill shape */
+        --hyland-focus-ring: {
+          outline: 2px solid var(--nuxeo-primary-color);
+          outline-offset: -2px;
         }
 
         --nuxeo-block-selected: {
@@ -443,6 +535,7 @@ const template = html`
           font-size: 1rem;
           font-family: var(--nuxeo-app-font);
           background-color: var(--nuxeo-sidebar-background);
+          color: var(--hyland-tooltip-text-color, var(--paper-tooltip-text-color, white));
         }
 
         --paper-card: {

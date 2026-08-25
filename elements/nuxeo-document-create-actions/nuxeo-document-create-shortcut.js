@@ -33,17 +33,27 @@ Polymer({
     <style is="custom-style">
       :host {
         display: inline-block;
+        position: relative;
       }
 
       #createBtn {
-        color: var(--nuxeo-button-primary-text);
-        --paper-fab-background: var(--nuxeo-button-primary);
-        --paper-fab-keyboard-focus-background: var(--nuxeo-button-primary-focus);
+        border-radius: 12px;
+        --paper-fab-background: var(--hyland-document-create-button-background, var(--nuxeo-button-primary));
+        --paper-fab-keyboard-focus-background: var(
+          --hyland-document-create-button-hover-background,
+          var(--nuxeo-button-primary-focus)
+        );
+        box-shadow: var(
+          --hyland-document-create-button-box-shadow,
+          0px 4px 8px 3px rgba(0, 0, 0, 0.15),
+          0px 1px 3px rgba(0, 0, 0, 0.3)
+        );
+        transition: background-color 0.25s ease-in-out;
       }
 
       paper-fab:hover,
       paper-fab:focus {
-        background-color: var(--nuxeo-button-primary-focus);
+        background-color: var(--hyland-document-create-button-hover-background, var(--nuxeo-button-primary-focus));
       }
 
       paper-fab {
