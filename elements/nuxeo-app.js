@@ -148,6 +148,15 @@ Polymer({
         display: flex;
         flex-direction: column;
         overflow: auto;
+
+        /*
+         * The document create button floats over the bottom-right corner of this area, so the end
+         * of a scrollable page always sits underneath it. That is barely noticeable at 100% zoom
+         * but costs half the viewport once the page reflows (400% zoom of 1280px leaves 320x256
+         * CSS px), leaving the last rows unreachable. Publish the strip the button covers so page
+         * content regions can reserve it and every row can be scrolled clear of the button.
+         */
+        --nuxeo-page-content-safe-area-bottom: var(--nuxeo-document-create-button-safe-area);
       }
 
       /* logo */
@@ -368,6 +377,11 @@ Polymer({
 
       nuxeo-document-create-button.admin {
         display: none;
+      }
+
+      /* The create button is hidden on the administration page, so nothing has to be reserved there. */
+      nuxeo-admin {
+        --nuxeo-page-content-safe-area-bottom: 0px;
       }
 
       #snackbarPanel {
