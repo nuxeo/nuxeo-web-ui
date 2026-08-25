@@ -353,18 +353,14 @@ export const DiffBehavior = {
     const deltas = originalValue.map((val, index) => {
       return { originalValue: val, modified: false, index: String(index), change: 'unchanged', newValue: null };
     });
-    // descending numeric order assures that splicing an entry never shifts the ones still to be
-    // processed; the `_` prefix marks a deletion at the same position, which is handled first
+    // delta keys are array indexes, with a `_` prefix marking a deletion. Descending index order
+    // assures that splicing an entry never shifts the ones still to be processed, and on a tie the
+    // deletion is applied before the entry that takes its position.
+    const indexOf = (key) => Number(key.replace('_', ''));
+    const rankOf = (key) => (key.startsWith('_') ? 0 : 1);
     Object.keys(delta)
       .filter((key) => key !== '_t')
-      .sort((a, b) => {
-        const indexA = Number(a.replace('_', ''));
-        const indexB = Number(b.replace('_', ''));
-        if (indexA !== indexB) {
-          return indexB - indexA;
-        }
-        return a.startsWith('_') ? -1 : 1;
-      })
+      .sort((a, b) => indexOf(b) - indexOf(a) || rankOf(a) - rankOf(b))
       .forEach((index) => {
         let i;
         if (index.startsWith('_')) {
