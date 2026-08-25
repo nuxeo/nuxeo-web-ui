@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,9 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import { ensureSearchResultTooltipStyles } from './nuxeo-search-result-tooltip-styles.js';
+
+ensureSearchResultTooltipStyles();
 
 /**
  `nuxeo-search-form`
@@ -77,7 +80,6 @@ Polymer({
         right: 0;
         margin: 0;
         padding: 1rem;
-        background-color: var(--nuxeo-drawer-background);
       }
 
       .actions paper-button {
@@ -165,7 +167,6 @@ Polymer({
         box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1) inset;
         @apply --layout-horizontal;
         @apply --layout-center;
-        background-color: var(--nuxeo-drawer-background);
       }
 
       .header h1 {
@@ -175,7 +176,8 @@ Polymer({
       }
       #actionsDropdown {
         width: 82%;
-        padding: 19px 0 0 0;
+        /* No top padding: the always visible label now occupies the top of the header row. */
+        padding: 0;
         --selectivity-dropdown-min-width: auto;
         --selectivity-dropdown-max-width: 100%;
         --selectivity-result-item-white-space: normal;
@@ -218,18 +220,29 @@ Polymer({
       .list-item {
         cursor: pointer;
         color: var(--nuxeo-drawer-text);
-        padding: 1em;
-        border-bottom: 1px solid var(--nuxeo-border);
+        padding: 0.7em 1em;
+        @apply --hyland-drawer-item;
       }
 
       .list-item:hover {
-        @apply --nuxeo-block-hover;
+        @apply --hyland-drawer-item-selected;
       }
 
       .list-item.selected,
       .list-item:focus,
       .list-item.selected:focus {
-        @apply --nuxeo-block-selected;
+        @apply --hyland-drawer-item-selected;
+      }
+
+        /* Keyboard focus ring: --hyland-drawer-item-selected removes outline, so we apply
+         --hyland-focus-ring here instead. Must follow the rules above with matching specificity. */
+      .list-item:focus-visible,
+      .list-item.selected:focus-visible {
+        @apply --hyland-focus-ring;
+      }
+
+      .list-item-title {
+        @apply --hyland-drawer-item;
       }
 
       .list-item-info {
@@ -289,7 +302,8 @@ Polymer({
         <template is="dom-if" if="[[!onlyQueue]]">
           <nuxeo-selectivity
             id="actionsDropdown"
-            placeholder="[[i18n('searchForm.searchFilters')]]"
+            label="[[i18n('searchForm.searchFilters')]]"
+            placeholder="[[i18n('searchForm.searchFilters.placeholder')]]"
             data="[[_computeData(_searches)]]"
             value="{{selectedSearch}}"
             min-chars="0"
@@ -365,6 +379,14 @@ Polymer({
                       <nuxeo-document-thumbnail document="[[item]]"></nuxeo-document-thumbnail>
                     </div>
                     <span class="list-item-title ellipsis">[[item.title]]</span>
+                    <!-- Kept outside the span so the name text stays exactly the title, and
+                         anchored on the parent row since an id would not be unique per stamp.
+                         Opens to the right of the row so it never covers the result list, and the
+                         name is wrapped in an element so the document-level rule that caps its
+                         width can match it once nuxeo-tooltip clones it onto the body. -->
+                    <nuxeo-tooltip position="right" offset="8" aria-hidden="true"
+                      ><span class="nuxeo-search-result-tooltip-name">[[item.title]]</span></nuxeo-tooltip
+                    >
                   </div>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,6 +35,10 @@ Polymer({
         padding: 0.7em 1em;
         display: block;
         border-top: 1px solid var(--nuxeo-border);
+      }
+
+      .header h5 {
+        @apply --hyland-section-header;
       }
     </style>
 

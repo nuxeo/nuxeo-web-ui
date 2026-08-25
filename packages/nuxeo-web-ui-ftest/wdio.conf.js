@@ -1,4 +1,6 @@
 import { fileURLToPath } from 'url';
+import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import chai from 'chai';
 
@@ -32,6 +34,7 @@ const reporters = ['spec'];
 
 const _workerStartTimes = new Map();
 const _featureResults = [];
+const _browserReconcileLock = path.join(os.tmpdir(), 'wdio-browser-reconciled.lock');
 
 if (process.env.CUCUMBER_REPORT_PATH) {
   reporters.push([
@@ -49,7 +52,11 @@ const capability = {
   maxInstances: 1,
   browserName: process.env.BROWSER,
   acceptInsecureCerts: true,
-  browserVersion: '135.0.7049.114',
+  // Let WebdriverIO's built-in driver manager provision the browser and its matching driver
+  // (e.g. Chrome-for-Testing + chromedriver, or Firefox + geckodriver) rather than a hard-pinned
+  // build. Defaults to the current stable channel; override via BROWSER_VERSION with an explicit
+  // version or a channel name (e.g. 'beta'/'dev'/'canary') when a specific build is required.
+  browserVersion: process.env.BROWSER_VERSION || 'stable',
   'wdio:enforceWebDriverClassic': true,
   // Prevent ChromeDriver from auto-dismissing native dialogs (window.confirm, window.alert)
   // so that tests can explicitly accept/dismiss them via alertAccept/alertDismiss.
@@ -113,13 +120,6 @@ switch (capability.browserName) {
 }
 
 const TIMEOUT = process.env.TIMEOUT ? Number(process.env.TIMEOUT) : 40000;
-
-// Allow overriding driver version
-const drivers = {};
-drivers[process.env.BROWSER] = {};
-if (process.env.DRIVER_VERSION) {
-  drivers[process.env.BROWSER].version = process.env.DRIVER_VERSION;
-}
 
 // transform nuxeo-web-ui-ftest requires
 import('@babel/register').then(({ default: register }) => {
@@ -283,11 +283,56 @@ export const config = {
   // resolved to continue.
   //
   // Gets executed once before all workers get launched.
-  onPrepare: () => {
+  onPrepare: async () => {
     // eslint-disable-next-line no-console
     console.log(`Starting ftests in ${process.env.HEADLESS === 'true' ? 'HEADLESS' : 'HEADFUL'} mode`);
 
-    // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines
+    // Resolve and report the browser once, up front. Guard the two cases the review flagged where a
+    // resolved version could differ from what runs: a custom BROWSER_BINARY bypasses provisioning, and
+    // a pinned BROWSER_VERSION needs no lookup. For a channel (e.g. 'stable') the chrome-for-testing
+    // lookup returns the build the driver manager provisions on a clean runner; any residual drift
+    // (e.g. a stale local cache) is reconciled against the live session in `before`.
+    const browserName = process.env.BROWSER || 'chrome';
+    let browserLabel = '';
+    if (process.env.BROWSER_BINARY) {
+      // eslint-disable-next-line no-console
+      console.log(`Using ${browserName} from custom binary ${process.env.BROWSER_BINARY}`);
+    } else {
+      const configuredVersion = process.env.BROWSER_VERSION || 'stable';
+      let resolvedVersion = configuredVersion;
+      if (browserName === 'chrome' && !/^\d/.test(configuredVersion)) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 3000);
+        try {
+          const res = await fetch(
+            'https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json',
+            { signal: controller.signal },
+          );
+          if (res.ok) {
+            const { channels = {} } = await res.json();
+            const channel = channels[configuredVersion.charAt(0).toUpperCase() + configuredVersion.slice(1)];
+            if (channel && channel.version) {
+              resolvedVersion = channel.version;
+            }
+          }
+        } catch (e) {
+          // best-effort: fall back to the channel name (also covers the abort timeout)
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+      browserLabel = `${browserName} ${resolvedVersion}`;
+      // eslint-disable-next-line no-console
+      console.log(`Using ${browserLabel}`);
+    }
+    process.env.WDIO_BROWSER_LABEL = browserLabel;
+    try {
+      fs.unlinkSync(_browserReconcileLock);
+    } catch (e) {
+      // no stale reconcile lock to clear
+    }
+
+    // Strip file:// prefix and append timing to WDIO's PASSED/FAILED lines.
     const originalWrite = process.stdout.write.bind(process.stdout);
     global._originalStdoutWrite = originalWrite;
     // eslint-disable-next-line no-control-regex
@@ -346,12 +391,33 @@ export const config = {
     });
 
     /*
-     * Increase window size to avoid hidden buttons
+     * Force a large, deterministic window size so tall dialogs and content keep their action
+     * buttons inside the viewport. `maximizeWindow()` must not be used here: in headless Chrome it
+     * resizes to a tiny default (~800x600, since there is no physical screen), overriding the
+     * `--window-size=1920,1080` launch argument. That small viewport pushed dialog/footer buttons
+     * off-screen, so WebDriver clicked an out-of-viewport point and reported "element click
+     * intercepted". `setWindowSize` works in both headless and headed modes and keeps them consistent.
      */
     try {
-      await browser.maximizeWindow();
+      await browser.setWindowSize(1920, 1080);
     } catch (e) {
-      console.error('Failed to maximize.');
+      // The deterministic viewport is the whole fix for "element click intercepted"; log the cause.
+      console.error('Failed to set window size:', e);
+    }
+
+    // Reconcile the up-front browser label with what this session actually resolved to, so a wrong
+    // up-front version can never stand (per PR review). Log one correction globally if they differ.
+    const expectedBrowser = process.env.WDIO_BROWSER_LABEL;
+    const actualBrowser = `${browser.capabilities.browserName} ${browser.capabilities.browserVersion}`;
+    if (expectedBrowser && expectedBrowser !== actualBrowser) {
+      try {
+        fs.writeFileSync(_browserReconcileLock, '', { flag: 'wx' });
+        console.warn(
+          `Browser mismatch: reported "${expectedBrowser}" up front but this session runs "${actualBrowser}"`,
+        );
+      } catch (e) {
+        // another worker already logged the correction, or the lock write failed — ignore
+      }
     }
 
     /**

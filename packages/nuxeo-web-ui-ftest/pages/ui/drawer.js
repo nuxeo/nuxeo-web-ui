@@ -21,6 +21,11 @@ export default class Drawer extends BasePage {
     return this.el.$('#logo');
   }
 
+  // Home navigation is the dedicated home shortcut, not the (now decorative) logo.
+  get home() {
+    return this.el.$('nuxeo-menu-icon[name="home"]');
+  }
+
   get browser() {
     return this._section('browser');
   }

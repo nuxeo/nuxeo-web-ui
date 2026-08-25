@@ -41,7 +41,7 @@ jobs:
           echo "Base branch: ${{ github.base_ref }}"
           echo "Ref: ${{ github.ref }}"
 
-      - uses: catchpoint/workflow-telemetry-action@v2
+      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
         with:
           comment_on_pr: false
 
@@ -56,7 +56,7 @@ jobs:
           node-version: 22
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
           java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
 
@@ -78,7 +78,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y imagemagick poppler-utils libreoffice ffmpeg libwpd-tools ghostscript exiftool
           sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
-          npm install -g bower gulp-cli
+          npm install -g --ignore-scripts bower@1.8.14 gulp-cli@3.1.0
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
@@ -95,10 +95,10 @@ jobs:
         run: |
           npm ci --ignore-scripts
           pushd packages/nuxeo-web-ui-ftest
-          npm ci
+          npm ci --ignore-scripts
           popd
           pushd packages/nuxeo-designer-catalog
-          npm ci
+          npm ci --ignore-scripts
           popd
 
       - name: Checkout the nuxeo-elements repo
@@ -135,7 +135,7 @@ jobs:
           RUN_ALL: false
           BAIL: 0
           HEADLESS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'video') && 'false' || 'true' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v17.6.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@157729461e042ea6cdcca867bed794bded85b303 # v17.6.2
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120

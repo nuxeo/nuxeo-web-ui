@@ -35,4 +35,6 @@ Feature: Admin center
     Then I can see the administration menu
     When I click "nxql" in the administration menu
     Then I can see the nxql search page
-    And I can see more than 1 search results
+    And I can see no search results
+    When I click the nxql search button
+    Then I can see more than 1 search results
