@@ -210,5 +210,85 @@ suite('nuxeo-render-template-button', () => {
         clickSpy.restore();
       }
     });
+
+    test('saves a filename with spaces without the quotes the server added', async () => {
+      const response = {
+        headers: {
+          get: (name) =>
+            name === 'Content-Disposition'
+              ? `attachment; filename="my file.pdf"; filename*=UTF-8''my%20file.pdf`
+              : null,
+        },
+        blob: () => Promise.resolve(new Blob(['x'])),
+      };
+      const createSpy = sinon.stub(URL, 'createObjectURL').returns('blob:mock-url');
+      const revokeSpy = sinon.stub(URL, 'revokeObjectURL');
+      let downloadAttr;
+      const clickSpy = sinon.stub(HTMLAnchorElement.prototype, 'click').callsFake(function () {
+        downloadAttr = this.getAttribute('download');
+      });
+      try {
+        await el._download(response);
+        expect(downloadAttr).to.equal('my file.pdf');
+      } finally {
+        createSpy.restore();
+        revokeSpy.restore();
+        clickSpy.restore();
+      }
+    });
+  });
+
+  suite('_filenameFromContentDisposition', () => {
+    [
+      {
+        name: 'prefers the unquoted filename* form over the quoted filename form',
+        header: `attachment; filename="my file.pdf"; filename*=UTF-8''my%20file.pdf`,
+        expected: 'my file.pdf',
+      },
+      {
+        name: 'reads an unquoted plain filename',
+        header: 'attachment; filename=plain.pdf',
+        expected: 'plain.pdf',
+      },
+      {
+        name: 'strips the quotes from a quoted plain filename',
+        header: 'attachment; filename="quoted file.pdf"',
+        expected: 'quoted file.pdf',
+      },
+      {
+        name: 'decodes a percent-encoded non-ASCII filename* value',
+        header: `attachment; filename*=UTF-8''rapport%20%C3%A9t%C3%A9.pdf`,
+        expected: 'rapport été.pdf',
+      },
+      {
+        name: 'keeps a semicolon that belongs to a quoted filename',
+        header: 'attachment; filename="draft; final.pdf"',
+        expected: 'draft; final.pdf',
+      },
+      {
+        name: 'falls back to the plain form when filename* is malformed',
+        header: `attachment; filename="my file.pdf"; filename*=UTF-8''my%file.pdf`,
+        expected: 'my file.pdf',
+      },
+      {
+        name: 'keeps a malformed filename* raw when it is the only form sent',
+        header: `attachment; filename*=UTF-8''my%file.pdf`,
+        expected: 'my%file.pdf',
+      },
+      {
+        name: 'keeps a malformed plain filename raw',
+        header: 'attachment; filename="my%file.pdf"',
+        expected: 'my%file.pdf',
+      },
+      {
+        name: 'returns an empty name when the header carries no filename',
+        header: 'attachment',
+        expected: '',
+      },
+    ].forEach(({ name, header, expected }) => {
+      test(name, () => {
+        expect(el._filenameFromContentDisposition(header)).to.equal(expected);
+      });
+    });
   });
 });

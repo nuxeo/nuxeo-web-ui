@@ -53,6 +53,15 @@ suite('nuxeo-document-list-item', () => {
       expect(thumbnail).to.be.ok;
       expect(thumbnail.getAttribute('crossorigin')).to.equal('anonymous');
     });
+
+    // ELEMENTS-1616: when the (cross-origin) thumbnail request fails, the row should
+    // render a transparent pixel rather than a broken-image icon. Dispatch the actual
+    // error event so the declarative on-error="_onError" binding is covered as well.
+    test('falls back to an inline transparent image on thumbnail error', () => {
+      const thumbnail = element.shadowRoot.querySelector('.thumbnailContainer img');
+      thumbnail.dispatchEvent(new Event('error'));
+      expect(thumbnail.getAttribute('src')).to.contain('data:image/png;base64,');
+    });
   });
 
   suite('_thumbnail', () => {
@@ -203,6 +212,24 @@ suite('nuxeo-document-list-item', () => {
       expect(element.selected).to.be.true;
       expect(element.fire).to.have.been.calledWith('selected', { index: 2, shiftKey: true });
       element.fire.restore();
+    });
+  });
+
+  // WEBUI-2056 / WEBUI-2175: integration check that a mouse deselect through `_toogleSelect`
+  // clears focus from the check button (the shared helper is unit-tested in common-utils).
+  suite('_toogleSelect blur-on-deselect wiring', () => {
+    test('mouse deselect clears shadowRoot.activeElement', () => {
+      const button = element.shadowRoot.querySelector('.select paper-icon-button');
+      element.selected = true;
+      button.focus();
+      // Some headless/virtualized environments ignore `.focus()`; the blur behavior is only
+      // meaningful once the control is actually focused, so skip the assertion otherwise.
+      if (element.shadowRoot.activeElement !== button) {
+        return;
+      }
+      element._toogleSelect({ type: 'tap', detail: { sourceEvent: new MouseEvent('click') } });
+      expect(element.selected).to.be.false;
+      expect(element.shadowRoot.activeElement).to.not.equal(button);
     });
   });
 

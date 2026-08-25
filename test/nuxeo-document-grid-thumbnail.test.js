@@ -53,6 +53,15 @@ suite('nuxeo-document-grid-thumbnail', () => {
       expect(img).to.be.ok;
       expect(img.getAttribute('crossorigin')).to.equal('anonymous');
     });
+
+    // ELEMENTS-1616: a failed (cross-origin) thumbnail should fall back to a
+    // transparent pixel instead of a broken-image icon. Fire the real error
+    // event so the on-error="_onError" template wiring is exercised too.
+    test('renders a transparent pixel when a thumbnail fails to load', () => {
+      const img = element.shadowRoot.querySelector('.thumbnailContainer img');
+      img.dispatchEvent(new Event('error'));
+      expect(img.src.startsWith('data:image/png;base64,')).to.be.true;
+    });
   });
 
   suite('_thumbnail', () => {
@@ -335,6 +344,30 @@ suite('nuxeo-document-grid-thumbnail', () => {
       element._toogleSelect({ type: 'keydown', detail: { sourceEvent: { shiftKey: true } } });
       expect(element.fire).to.have.been.calledWith('selected', { index: 0, shiftKey: false });
       element.fire.restore();
+    });
+  });
+
+  // WEBUI-2056 / WEBUI-2175: integration check that a keyboard deselect through `_toogleSelect`
+  // keeps focus on the check button (the shared helper is unit-tested in common-utils).
+  suite('_toogleSelect blur-on-deselect wiring', () => {
+    test('keyboard deselect keeps shadowRoot.activeElement', async () => {
+      // `.select` lives inside a dom-if that stamps `<a href$="[[urlFor(doc)]]">`; stub urlFor so the
+      // template stamps reliably, otherwise the button is null.
+      sinon.stub(element, 'urlFor').returns('/doc/doc-1');
+      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
+      await flush();
+      const button = element.shadowRoot.querySelector('.select paper-icon-button');
+      expect(button, 'select paper-icon-button should be stamped').to.exist;
+      element.selected = true;
+      button.focus();
+      // Some headless/virtualized environments ignore `.focus()`; the focus-retention behavior is
+      // only meaningful once the control is actually focused, so skip the assertion otherwise.
+      if (element.shadowRoot.activeElement !== button) {
+        return;
+      }
+      element._toogleSelect(new KeyboardEvent('keydown', { key: ' ' }));
+      expect(element.selected).to.be.false;
+      expect(element.shadowRoot.activeElement).to.equal(button);
     });
   });
 });

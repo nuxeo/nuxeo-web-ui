@@ -85,6 +85,9 @@ Polymer({
     }
     const document = {
       'entity-type': 'document',
+      // consumers need to tell a proxy apart from a regular document after a reload, since the
+      // stored entry is all they get back (the clipboard restricts where a proxy can be pasted)
+      isProxy: !!doc.isProxy,
       lastViewed: new Date(),
       path: doc.path,
       repository: doc.repository,

@@ -23,6 +23,7 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
+import { applyThumbnailFallback, blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -55,7 +56,7 @@ Polymer({
         position: relative;
         width: 220px;
         height: 260px;
-        background-color: var(--nuxeo-box);
+        background-color: var(--hyland-document-grid-thumbnail-background, var(--nuxeo-box));
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
         padding: 0;
         filter:
@@ -217,7 +218,7 @@ Polymer({
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
-        <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" alt$="[[doc.title]]" />
+        <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
         <a
@@ -335,6 +336,9 @@ Polymer({
   _toogleSelect(e) {
     this.selected = !this.selected;
     this.fire('selected', { index: this.index, shiftKey: e.type === 'tap' ? e.detail.sourceEvent.shiftKey : false });
+    // WEBUI-2056 / WEBUI-2175: clear focus from the check button on a pointer deselect so the
+    // `:host(:focus)` rule stops keeping the selection tick on screen (see common-utils).
+    blurSelectionCheckOnPointerDeselect(this, e);
   },
 
   _selectedItemsChanged() {
@@ -359,5 +363,11 @@ Polymer({
       this.removeAttribute('role');
       this.removeAttribute('aria-label');
     }
+  },
+
+  // ELEMENTS-1616: show a transparent pixel instead of a broken-image icon when a
+  // (cross-origin) thumbnail fails to load, matching nuxeo-document-thumbnail.
+  _onError(e) {
+    applyThumbnailFallback(e.target);
   },
 });
