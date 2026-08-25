@@ -63,7 +63,7 @@ Polymer({
         margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
         padding: 0.8em 1em;
-        background-color: white;
+        background-color: var(--hyland-nuxeo-card-background, var(--nuxeo-box));
         border: 1px solid var(--divider-color);
         position: relative;
       }
@@ -93,7 +93,7 @@ Polymer({
       }
 
       #dropzone {
-        background-color: #f7f6f6;
+        background-color: var(--hyland-csv-import-background, rgba(0, 0, 0, 0.05));
         border: 2px dashed var(--divider-color);
         border-radius: 4px;
       }
@@ -176,8 +176,8 @@ Polymer({
 
       .error {
         border-left: 4px solid var(--nuxeo-warn-text);
-        color: var(--primary-text-color);
         padding-left: 8px;
+        color: var(--nuxeo-text-default);
       }
 
       .importing-label {
@@ -201,6 +201,10 @@ Polymer({
 
       .report {
         margin: 2em 0;
+      }
+
+      .import-label {
+        color: var(--nuxeo-text-default);
       }
 
       .line {
@@ -319,13 +323,14 @@ Polymer({
 
         <div class="options" hidden="[[!canCreate]]">
           <div class="layout vertical">
-            <paper-toggle-button checked="{{receiveEmailReport}}"
-              >[[i18n('csv.import.option.emailReport')]]</paper-toggle-button
-            >
+            <paper-toggle-button checked="{{receiveEmailReport}}">
+              <span class="import-label">[[i18n('csv.import.option.emailReport')]]</span>
+            </paper-toggle-button>
             <paper-toggle-button
               checked="{{enableImportMode}}"
               disabled$="[[!hasAdministrationPermissions(currentUser)]]"
-              >[[i18n('csv.import.option.useImportMode')]]
+            >
+              <span class="import-label">[[i18n('csv.import.option.useImportMode')]]</span>
             </paper-toggle-button>
           </div>
         </div>

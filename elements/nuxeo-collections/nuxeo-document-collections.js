@@ -56,6 +56,7 @@ Polymer({
         padding: 0;
         margin: 0;
         background-color: transparent;
+        color: var(--nuxeo-text-default);
       }
 
       iron-icon:hover {

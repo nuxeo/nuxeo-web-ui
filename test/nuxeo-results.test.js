@@ -429,6 +429,55 @@ suite('nuxeo-results', () => {
     });
   });
 
+  suite('Deferred Initial Fetch (WEBUI-1946)', () => {
+    test('fetches on view initialization by default', async () => {
+      const fetchSpy = sinon.spy(results, 'fetch');
+
+      results.view = createMockView();
+      await flush();
+
+      expect(fetchSpy).to.have.been.called;
+      fetchSpy.restore();
+    });
+
+    test('does not fetch on view initialization when deferInitialFetch is set', async () => {
+      results.deferInitialFetch = true;
+      const fetchSpy = sinon.spy(results, 'fetch');
+
+      results.view = createMockView();
+      await flush();
+
+      expect(fetchSpy).to.not.have.been.called;
+      fetchSpy.restore();
+    });
+
+    test('fetches on view initialization once an explicit fetch has happened', async () => {
+      results.deferInitialFetch = true;
+      results.view = createMockView();
+      await flush();
+      await results.fetch();
+      const fetchSpy = sinon.spy(results, 'fetch');
+
+      results.view = createMockView();
+      await flush();
+
+      expect(fetchSpy).to.have.been.called;
+      fetchSpy.restore();
+    });
+
+    test('an explicit fetch still reaches the view when deferInitialFetch is set', async () => {
+      results.deferInitialFetch = true;
+      const mockView = createMockView();
+      results.view = mockView;
+      await flush();
+      mockView.fetch.resetHistory();
+
+      await results.fetch();
+
+      expect(mockView.fetch).to.have.been.called;
+    });
+  });
+
   suite('Settings Persistence', () => {
     test('initializes empty settings', () => {
       results.initializeSettings();
@@ -789,6 +838,22 @@ suite('nuxeo-results', () => {
       results.view = createMockView({ sortOptions: null });
 
       expect(results._sortOptions()).to.deep.equal(elementSortOptions);
+    });
+
+    test('passes an always visible label to the sort selector (WEBUI-489)', async () => {
+      window.nuxeo.I18n.language = 'en';
+      window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
+      window.nuxeo.I18n.en['results.sortBy'] = 'Sort by';
+
+      const mockView = createMockView({ sortOptions: [{ field: 'dc:created', label: 'Created', order: 'desc' }] });
+      mockView.setAttribute('display-sort', '');
+      results.view = mockView;
+      results.notifyPath('view');
+      await flush();
+
+      const sortSelect = results.shadowRoot.querySelector('nuxeo-sort-select');
+      expect(sortSelect).to.exist;
+      expect(sortSelect.label).to.equal('Sort by');
     });
   });
 

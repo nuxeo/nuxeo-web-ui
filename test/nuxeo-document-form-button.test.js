@@ -96,6 +96,55 @@ suite('nuxeo-document-form-button', () => {
     });
   });
 
+  suite('editing a copy of the document', () => {
+    let mockDialog;
+
+    setup(() => {
+      mockDialog = { opened: false, open: sinon.stub(), close: sinon.stub() };
+      Object.defineProperty(element, 'dialog', {
+        get: () => mockDialog,
+        configurable: true,
+      });
+    });
+
+    test('should hand the form a copy of the document when the dialog is opened', () => {
+      element.document = { uid: '1', type: 'File', properties: { 'dc:title': 'title' } };
+      element._openDialog();
+      expect(element._editedDocument).to.deep.equal(element.document);
+      expect(element._editedDocument).to.not.equal(element.document);
+      expect(mockDialog.open).to.have.been.calledOnce;
+    });
+
+    test('should not mutate the input document when the form edits a multivalued property', () => {
+      element.document = {
+        uid: '1',
+        type: 'File',
+        properties: { 'ard:renditions': [{ renditiontyp: 'txt' }, { renditiontyp: 'pdf' }] },
+      };
+      element._openDialog();
+
+      element._editedDocument.properties['ard:renditions'].splice(0, 1);
+
+      expect(element.document.properties['ard:renditions']).to.have.lengthOf(2);
+      expect(element.document.properties['ard:renditions'][0].renditiontyp).to.equal('txt');
+    });
+
+    test('should take a fresh copy every time the dialog is opened', () => {
+      element.document = { uid: '1', type: 'File', properties: { 'dc:title': 'title' } };
+      element._openDialog();
+      element._editedDocument.properties['dc:title'] = 'discarded';
+
+      element._openDialog();
+
+      expect(element._editedDocument.properties['dc:title']).to.equal('title');
+    });
+
+    test('should handle an undefined document', () => {
+      element._openDialog();
+      expect(element._editedDocument).to.not.be.ok;
+    });
+  });
+
   suite('Escape key handling', () => {
     let closeDialogStub;
     let mockDialog;
