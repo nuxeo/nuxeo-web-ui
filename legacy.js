@@ -35,6 +35,7 @@ import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploade
 import { DocumentContentBehavior } from './elements/nuxeo-results/nuxeo-document-content-behavior.js';
 import { ChartDataBehavior } from './elements/nuxeo-admin/nuxeo-chart-data-behavior.js';
 import { DocumentCreationBehavior } from './elements/nuxeo-document-creation/nuxeo-document-creation-behavior.js';
+import { BrandingBehavior } from './elements/behaviors/nuxeo-branding-behavior.js';
 
 window.moment = moment;
 window.page = page;
@@ -62,3 +63,4 @@ Nuxeo.PageProviderDisplayBehavior = PageProviderDisplayBehavior;
 Nuxeo.RoutingBehavior = RoutingBehavior;
 Nuxeo.UploaderBehavior = UploaderBehavior;
 Nuxeo.DocumentCreationBehavior = DocumentCreationBehavior;
+Nuxeo.BrandingBehavior = BrandingBehavior;

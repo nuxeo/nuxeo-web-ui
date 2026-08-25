@@ -65,3 +65,29 @@ export const BLANK_THUMBNAIL_SRC =
 export function applyThumbnailFallback(img) {
   img.src = BLANK_THUMBNAIL_SRC;
 }
+
+// WEBUI-2056 / WEBUI-2175: the list/grid selection tick is a `paper-icon-button` whose
+// visibility is held on screen by `:host(:focus)` / `:host(:focus-within)`. A mouse click
+// to deselect leaves that button focused, so the tick lingers until the user clicks
+// elsewhere. After a *pointer* (mouse/touch) deselect, blur the focused control so those
+// focus rules stop matching and the tick disappears immediately. *Keyboard* toggles keep
+// focus so keyboard navigation/selection stays usable — the results view synthesizes a
+// `tap` whose `detail.sourceEvent` is the original KeyboardEvent, and grid keydown events
+// are real KeyboardEvents; both are detected here and left untouched. Shared so the list
+// and grid items stay in sync.
+export function blurSelectionCheckOnPointerDeselect(host, e) {
+  if (!host || host.selected) {
+    return;
+  }
+  const isKeyboardEvent = (evt) =>
+    !!evt &&
+    ((typeof KeyboardEvent !== 'undefined' && evt instanceof KeyboardEvent) ||
+      String(evt.type || '').startsWith('key'));
+  if (isKeyboardEvent(e) || isKeyboardEvent(e?.detail?.sourceEvent)) {
+    return;
+  }
+  const focused = host.shadowRoot?.activeElement;
+  if (focused && typeof focused.blur === 'function') {
+    focused.blur();
+  }
+}

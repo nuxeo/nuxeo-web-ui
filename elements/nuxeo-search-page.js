@@ -67,6 +67,7 @@ Polymer({
           show-filters="[[showFilters]]"
           opened="[[opened]]"
           search-form="[[searchForm]]"
+          defer-initial-search="[[deferInitialSearch]]"
         ></nuxeo-results-view>
       </div>
     </nuxeo-page>
@@ -149,6 +150,14 @@ Polymer({
      * If `true`, display the top filtering panel.
      */
     showFilters: {
+      type: Boolean,
+      value: false,
+    },
+    /**
+     * If `true`, loading the page does not execute the initial query: the first search runs only
+     * when the user explicitly triggers one.
+     */
+    deferInitialSearch: {
       type: Boolean,
       value: false,
     },

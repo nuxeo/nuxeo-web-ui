@@ -33,7 +33,7 @@ jobs:
     runs-on:
       group: medium-4cpu-runners
     steps:
-      - uses: catchpoint/workflow-telemetry-action@v2
+      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
         with:
           comment_on_pr: false
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can
@@ -64,7 +64,7 @@ jobs:
         run: |
           npm ci --ignore-scripts
           pushd packages/nuxeo-web-ui-ftest
-          npm ci
+          npm ci --ignore-scripts
           popd
 
       - name: Checkout the nuxeo-elements repo
@@ -155,7 +155,7 @@ jobs:
           pwd
 
       - name: Veracode Upload And Scan
-        uses: veracode/veracode-uploadandscan-action@0.2.11
+        uses: veracode/veracode-uploadandscan-action@ddca86b1d1d45639d1c414003f3495f71851cfe2 # 0.2.11
         with:
           version: 'Nuxeo WebUI - LTS2025 - ${{ github.run_id }}'
           appname: 'Nuxeo Web UI'
