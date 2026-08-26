@@ -132,7 +132,7 @@ page('/browse', () => {
 });
 
 // /browse/<path>@<action>
-page(/\/browse\/([\s\S]*)?/, (data) => {
+page(/\/browse\/([\s\S]*)/, (data) => {
   if (!data.state.contentView) {
     app.currentContentView = null;
   }
