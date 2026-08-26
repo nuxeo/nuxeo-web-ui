@@ -228,7 +228,9 @@ limitations under the License.
 
       _getSenderRegexParts(item) {
         if (item && item.properties) {
-          const regex = /(.*)<([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})>/i;
+          // the domain is matched label by label so that `.` is never both inside the
+          // character class and required after it, which is what makes it backtrack
+          const regex = /(.*)<([A-Z0-9._%+-]+@(?:[A-Z0-9-]+\.)+[A-Z]{2,4})>/i;
           return regex.exec(item.properties['mail:sender']);
         }
       },

@@ -24,7 +24,9 @@ function generateTextDiffHunks(text) {
     .reduce((result, value, index, array) => {
       if (index % 2 === 0) {
         const pair = array.slice(index, index + 2);
-        let range = pair[0].match(/\d+,\d+/g);
+        // `\b` stops the scan from restarting inside a run of digits, which would make
+        // the failed match attempts quadratic in the length of the hunk header
+        let range = pair[0].match(/\b\d+,\d+/g);
         range = {
           original: range[0].split(',').map(Number),
           new: range[1].split(',').map(Number),

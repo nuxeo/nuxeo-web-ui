@@ -69,7 +69,7 @@ class Child {
    * Sets the grid column in which this element will be placed.
    */
   set column(val) {
-    return this._setAttribute(Child.ATTRS.COLUMN, val);
+    this._setAttribute(Child.ATTRS.COLUMN, val);
   }
 
   /**
@@ -83,7 +83,7 @@ class Child {
    * Sets the number of columns this element occupies.
    */
   set columnspan(val) {
-    return this._setAttribute(Child.ATTRS.COLUMNSPAN, val);
+    this._setAttribute(Child.ATTRS.COLUMNSPAN, val);
   }
 
   /**
@@ -97,7 +97,7 @@ class Child {
    * Sets the grid row in which this element will be placed.
    */
   set row(val) {
-    return this._setAttribute(Child.ATTRS.ROW, val);
+    this._setAttribute(Child.ATTRS.ROW, val);
   }
 
   /**
@@ -111,7 +111,7 @@ class Child {
    * Sets the number of rows this element occupies.
    */
   set rowspan(val) {
-    return this._setAttribute(Child.ATTRS.ROWSPAN, val);
+    this._setAttribute(Child.ATTRS.ROWSPAN, val);
   }
 
   /**
@@ -125,7 +125,7 @@ class Child {
    * Sets the vertical alignment of this element in the grid. Valid values are `stretch`, `center`, `start` and `end`.
    */
   set align(val) {
-    return this._setAttribute(Child.ATTRS.ALIGN, val);
+    this._setAttribute(Child.ATTRS.ALIGN, val);
   }
 
   /**
@@ -139,7 +139,7 @@ class Child {
    * Sets the horizontal alignment of this element in the grid. Valid values are `stretch`, `center`, `start` and `end`.
    */
   set justify(val) {
-    return this._setAttribute(Child.ATTRS.JUSTIFY, val);
+    this._setAttribute(Child.ATTRS.JUSTIFY, val);
   }
 }
 
@@ -157,7 +157,9 @@ function validateValue(value, regex, warn, property) {
 }
 
 function removeEmptyLines(str) {
-  return str.replace(/^\s*;?$(?:\r\n?|\n)/gm, '');
+  // `[^\S\r\n]` (horizontal whitespace only) keeps the match confined to a single
+  // line, so the quantifier cannot backtrack across line breaks.
+  return str.replace(/^[^\S\r\n]*;?$(?:\r\n?|\n)/gm, '');
 }
 
 function wrapMediaQuery(css, mquery) {
@@ -185,10 +187,11 @@ function buildGridStyle(grid, validate = true) {
 :host {
   display: grid;
   grid-template-columns: ${
-    cGrid.templateColumns || (cGrid.columns && cGrid.columns > 1 ? Array(cGrid.columns).fill('1fr').join(' ') : 'auto')
+    cGrid.templateColumns ||
+    (cGrid.columns && cGrid.columns > 1 ? new Array(cGrid.columns).fill('1fr').join(' ') : 'auto')
   };
   grid-template-rows: ${
-    cGrid.templateRows || (cGrid.rows && cGrid.rows > 1 ? Array(cGrid.rows).fill('auto').join(' ') : 'auto')
+    cGrid.templateRows || (cGrid.rows && cGrid.rows > 1 ? new Array(cGrid.rows).fill('auto').join(' ') : 'auto')
   };
   ${cGrid.gap ? `grid-gap: ${cGrid.gap}` : ''};
   ${cGrid.columnGap ? `grid-column-gap: ${cGrid.columnGap};` : ''}
