@@ -35,6 +35,16 @@ limitations under the License.
       .default.complex > .label {
         margin-bottom: 12px;
       }
+      .deleted {
+        white-space: normal;
+        word-break: normal !important;
+        overflow-wrap: break-word;
+      }
+      .added {
+        white-space: normal;
+        word-break: normal !important;
+        overflow-wrap: break-word;
+      }
     </style>
     <div class$="default [[_computeDefaultClass(delta, originalValue)]]">
       <template is="dom-if" if="[[displayLabel]]">
