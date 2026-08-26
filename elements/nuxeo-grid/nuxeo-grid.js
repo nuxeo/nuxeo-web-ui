@@ -164,7 +164,7 @@ function removeEmptyLines(str) {
   // `\r` and `\n` are split apart rather than treated as one terminator on purpose: in
   // multiline mode `^` also matched between them, so the `\n` of a CRLF pair counted as an
   // empty line of its own and was stripped. Splitting per character preserves that.
-  const parts = str.split(/(\r|\n)/);
+  const parts = str.split(/([\r\n])/);
   let result = '';
   for (let i = 0; i < parts.length; i += 2) {
     const content = parts[i];
