@@ -107,6 +107,7 @@ Polymer({
         <nuxeo-card heading="[[i18n('searchAnalytics.callsPerPageProvider.heading')]]">
           <chart-pie
             role="img"
+            tabindex="0"
             aria-label$="[[_chartAria('searchAnalytics.callsPerPageProvider.heading', callsPerProvider)]]"
             values="[[_values(callsPerProvider)]]"
             labels="[[_labels(callsPerProvider)]]"
@@ -129,6 +130,7 @@ Polymer({
         <nuxeo-card heading="[[i18n('searchAnalytics.callsPerHour.heading')]]">
           <chart-bar
             role="img"
+            tabindex="0"
             aria-label$="[[_chartAria('searchAnalytics.callsPerHour.heading', callsPerHour)]]"
             labels="[[_range(0,23)]]"
             values="[[_aggregatePerHourOfDay(callsPerHour)]]"
