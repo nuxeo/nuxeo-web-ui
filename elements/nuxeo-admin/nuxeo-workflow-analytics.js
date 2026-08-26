@@ -146,6 +146,7 @@ Polymer({
         <nuxeo-card heading="[[i18n('workflowAnalytics.workflowInitiators.heading')]]">
           <chart-pie
             role="img"
+            tabindex="0"
             aria-label$="[[_chartAria('workflowAnalytics.workflowInitiators.heading', initiators)]]"
             values="[[_values(initiators)]]"
             labels="[[_series(initiators)]]"
@@ -167,6 +168,7 @@ Polymer({
         <nuxeo-card heading="[[i18n('workflowAnalytics.actionsPerUser.heading')]]">
           <chart-bar
             role="img"
+            tabindex="0"
             aria-label$="[[_chartAria('workflowAnalytics.actionsPerUser.heading', numberOfActionsPerUser)]]"
             labels="[[_labels(numberOfActionsPerUser)]]"
             series="[[_series(numberOfActionsPerUser)]]"
