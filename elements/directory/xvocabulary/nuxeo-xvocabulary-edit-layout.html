@@ -62,12 +62,12 @@ limitations under the License.
     </nuxeo-input>
 
     <div role="widget">
-      <label id="label">[[i18n('vocabularyManagement.edit.obsolete')]]</label>
+      <span class="label" id="obsolete-label">[[i18n('vocabularyManagement.edit.obsolete')]]</span>
       <paper-toggle-button
         checked$="[[_isObsolete(entry.properties.obsolete)]]"
         on-change="_obsoleteChanged"
         noink
-        aria-labelledby="label"
+        aria-labelledby="obsolete-label"
       >
       </paper-toggle-button>
     </div>
