@@ -132,7 +132,10 @@ page('/browse', () => {
 });
 
 // /browse/<path>@<action>
-page(/\/browse\/([\s\S]*)/, (data) => {
+// Anchored so that `/browse/` is only recognised at the start of the route, matching the
+// other regex route below. Unanchored, a path such as `/admin/browse/x` matched here and
+// was loaded as a browse path, because page() tries routes in registration order.
+page(/^\/browse\/([\s\S]*)/, (data) => {
   if (!data.state.contentView) {
     app.currentContentView = null;
   }

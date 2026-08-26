@@ -156,10 +156,26 @@ function validateValue(value, regex, warn, property) {
   return value;
 }
 
+// Drops lines that hold nothing but whitespace and an optional trailing `;`, along with
+// their terminator. Matching that with one pattern needs a quantifier whose failure has to
+// retry every prefix length of the whitespace run, which is quadratic on a long line, so
+// the split and the emptiness test are done separately and each stays linear.
 function removeEmptyLines(str) {
-  // `[^\S\r\n]` (horizontal whitespace only) keeps the match confined to a single
-  // line, so the quantifier cannot backtrack across line breaks.
-  return str.replace(/^[^\S\r\n]*;?$(?:\r\n?|\n)/gm, '');
+  // `\r` and `\n` are split apart rather than treated as one terminator on purpose: in
+  // multiline mode `^` also matched between them, so the `\n` of a CRLF pair counted as an
+  // empty line of its own and was stripped. Splitting per character preserves that.
+  const parts = str.split(/(\r|\n)/);
+  let result = '';
+  for (let i = 0; i < parts.length; i += 2) {
+    const content = parts[i];
+    const terminator = parts[i + 1] || '';
+    const withoutTrailingSemiColon = content.endsWith(';') ? content.slice(0, -1) : content;
+    // an unterminated final line is always kept, as it was before
+    if (terminator === '' || withoutTrailingSemiColon.trim() !== '') {
+      result += content + terminator;
+    }
+  }
+  return result;
 }
 
 function wrapMediaQuery(css, mquery) {
