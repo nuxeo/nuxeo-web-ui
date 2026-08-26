@@ -19,7 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-element.js';
 
-class Child {
+export class Child {
   static get ATTRS() {
     return {
       COLUMN: 'data-column',
