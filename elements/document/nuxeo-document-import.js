@@ -317,6 +317,7 @@ Polymer({
          past the bottom edge of the dialog. */
       .customize-content {
         min-height: 0;
+        overflow: auto;
       }
 
       .add-more .importActions {

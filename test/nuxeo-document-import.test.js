@@ -1225,7 +1225,9 @@ suite('nuxeo-document-import', () => {
     test('should let the customize content shrink so the action bar stays visible', () => {
       const content = element.shadowRoot.querySelector('div[name="customize"] .customize-content');
       expect(content).to.not.be.null;
-      expect(getComputedStyle(content).minHeight).to.equal('0px');
+      const style = getComputedStyle(content);
+      expect(style.minHeight).to.equal('0px');
+      expect(style.overflow).to.equal('auto');
     });
   });
 });
