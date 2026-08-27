@@ -19,6 +19,9 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
  */
 package org.nuxeo.web.ui.url.codec;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,9 +62,9 @@ public class WebNotificationDocumentIdCodec extends AbstractDocumentViewCodec {
         StringBuilder url = new StringBuilder(WEB_UI_URL_PREFIX).append('/').append(getPrefix()).append('?');
         String serverName = docLoc.getServerName();
         if (serverName != null) {
-            url.append(REPOSITORY_PARAM).append('=').append(serverName).append('&');
+            url.append(REPOSITORY_PARAM).append('=').append(encode(serverName)).append('&');
         }
-        url.append(DOC_ID_PARAM).append('=').append(docRef);
+        url.append(DOC_ID_PARAM).append('=').append(encode(docRef.toString()));
         return url.toString();
     }
 
@@ -92,10 +95,14 @@ public class WebNotificationDocumentIdCodec extends AbstractDocumentViewCodec {
         for (String pair : query.split("&")) {
             int eq = pair.indexOf('=');
             if (eq > 0) {
-                params.put(pair.substring(0, eq), pair.substring(eq + 1));
+                params.put(pair.substring(0, eq), URLDecoder.decode(pair.substring(eq + 1), StandardCharsets.UTF_8));
             }
         }
         return params;
+    }
+
+    protected String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
 }
