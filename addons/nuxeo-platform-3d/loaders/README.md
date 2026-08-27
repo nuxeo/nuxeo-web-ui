@@ -13,7 +13,7 @@ The files in this directory are **third-party code copied from [three.js](https:
 
 ## Why the copies are still here
 
-[WEBUI-237](https://jira.nuxeo.com/browse/WEBUI-237) upgraded the `threejs` dependency from `v0.81.0` to `v0.125.0` (it is `^0.184.0` today). Current three.js no longer ships these ES5 example scripts, and its modern `GLTFLoader` reads glTF 2.0 only — it cannot load the glTF 1.0 models that existing 3D documents still hold. The r81 copies were therefore kept so that `nuxeo-3d-viewer` can continue to render them.
+[WEBUI-237](https://jira.nuxeo.com/browse/WEBUI-237) upgraded the `three` dependency from `v0.81.0` to `v0.125.0` (it is `^0.184.0` today). Current three.js no longer ships these ES5 example scripts, and its modern `GLTFLoader` reads glTF 2.0 only — it cannot load the glTF 1.0 models that existing 3D documents still hold. The r81 copies were therefore kept so that `nuxeo-3d-viewer` can continue to render them.
 
 Both loader generations are live; neither is dead code. `nuxeo-3d-viewer._loaderChanged()` picks between them by transmission format:
 
