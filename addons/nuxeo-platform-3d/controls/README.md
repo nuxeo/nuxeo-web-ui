@@ -4,7 +4,7 @@
 
 ## Why the copy is still here
 
-[WEBUI-237](https://jira.nuxeo.com/browse/WEBUI-237) upgraded the `threejs` dependency from `v0.81.0` to `v0.125.0` (it is `^0.184.0` today) and copied this file in so that the orbit/zoom/pan controls could be imported as an ES module. `nuxeo-3d-viewer._setupControls()` instantiates it for every 3D preview, so it is live code.
+[WEBUI-237](https://jira.nuxeo.com/browse/WEBUI-237) upgraded the `three` dependency from `v0.81.0` to `v0.125.0` (it is `^0.184.0` today) and copied this file in so that the orbit/zoom/pan controls could be imported as an ES module. `nuxeo-3d-viewer._setupControls()` instantiates it for every 3D preview, so it is live code.
 
 ## Local modifications
 
