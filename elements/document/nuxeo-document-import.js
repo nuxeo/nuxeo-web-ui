@@ -1103,7 +1103,6 @@ Polymer({
         // load the file's own data
         await this._loadFile(currentFile.docData);
       } else if (previousFile && previousFile.docData) {
-        // load the previous file's data
         // preserve type and parent from the previous file, but start with clean properties
         await this._loadFile(
           {
