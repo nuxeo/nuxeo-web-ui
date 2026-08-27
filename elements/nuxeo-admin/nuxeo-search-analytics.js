@@ -131,7 +131,7 @@ Polymer({
           <chart-bar
             role="img"
             tabindex="0"
-            aria-label$="[[_chartAria('searchAnalytics.callsPerHour.heading', callsPerHour)]]"
+            aria-label$="[[_callsPerHourAria('searchAnalytics.callsPerHour.heading', callsPerHour)]]"
             labels="[[_range(0,23)]]"
             values="[[_aggregatePerHourOfDay(callsPerHour)]]"
             series="[[_range(0,23)]]"
@@ -300,5 +300,13 @@ Polymer({
         return sum;
       }),
     ];
+  },
+
+  _callsPerHourAria(headingKey, data) {
+    const [values] = this._aggregatePerHourOfDay(data || []);
+    const entries = values.map((value, hour) => {
+      return { key: hour, value };
+    });
+    return this._chartAria(headingKey, entries);
   },
 });

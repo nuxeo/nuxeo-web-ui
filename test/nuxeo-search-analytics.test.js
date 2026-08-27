@@ -62,5 +62,16 @@ suite('nuxeo-search-analytics', () => {
         'searchAnalytics.callsPerPageProvider.heading. Provider A: 4, Provider B: 2',
       );
     });
+
+    test('uses aggregated values for the calls-per-hour chart', () => {
+      const data = [
+        { key: 9, value: 2 },
+        { key: 9, value: 3 },
+      ];
+      const label = el._callsPerHourAria('searchAnalytics.callsPerHour.heading', data);
+      expect(label).to.include('9: 5');
+      expect(label).to.not.include('9: 2');
+      expect(label).to.not.include('9: 3');
+    });
   });
 });
