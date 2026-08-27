@@ -51,7 +51,7 @@ public class DocumentPermalinkServlet extends HttpServlet {
             response.sendRedirect(getBaseUrl(request));
             return;
         }
-        // Strip CR/LF to guard against HTTP response splitting / header injection.
+        // Strip control characters to guard against HTTP response splitting / header injection.
         String sanitizedId = sanitize(id);
         String repository = request.getParameter(REPOSITORY_PARAM);
         String location;
@@ -68,7 +68,8 @@ public class DocumentPermalinkServlet extends HttpServlet {
     }
 
     protected String sanitize(String value) {
-        return value.replaceAll("[\\r\\n]", "");
+        // Remove all control characters (incl. CR/LF) to prevent HTTP response splitting.
+        return value.replaceAll("\\p{Cntrl}", "");
     }
 
     protected String getBaseUrl(HttpServletRequest request) {
@@ -77,7 +78,7 @@ public class DocumentPermalinkServlet extends HttpServlet {
         if (repository == null) {
             return context + "/ui/";
         }
-        return context + "/repo/" + repository + "/ui/";
+        return context + "/repo/" + sanitize(repository.toString()) + "/ui/";
     }
 
 }
