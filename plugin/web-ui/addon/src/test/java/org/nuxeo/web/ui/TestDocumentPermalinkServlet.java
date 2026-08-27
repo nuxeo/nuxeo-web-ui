@@ -111,12 +111,14 @@ public class TestDocumentPermalinkServlet {
     }
 
     @Test
-    public void testIdIsSanitizedAgainstHeaderInjection() throws IOException {
+    public void testMaliciousIdIsRejected() throws IOException {
         when(request.getParameter("id")).thenReturn("12345\r\nSet-Cookie: evil=1");
 
         servlet.doGet(request, response);
 
-        verify(response).setHeader("Location", "/nuxeo/ui/#!/doc/12345Set-Cookie: evil=1");
+        verify(response).sendRedirect("/nuxeo/ui/");
+        verify(response, never()).setHeader(org.mockito.ArgumentMatchers.eq("Location"),
+                org.mockito.ArgumentMatchers.anyString());
     }
 
     @Test
