@@ -17,6 +17,7 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
 package org.nuxeo.web.ui;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,41 +45,39 @@ public class DocumentPermalinkServlet extends HttpServlet {
 
     protected static final String REPOSITORY_PARAM = "repo";
 
+    // Allowlist for document ids and repository names. Rejecting anything else (in particular
+    // CR/LF and other control characters) prevents HTTP response splitting when a value is
+    // reflected into the Location header.
+    protected static final Pattern SAFE_VALUE = Pattern.compile("[\\w.\\-]+");
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String id = request.getParameter(DOC_ID_PARAM);
-        if (id == null || id.isBlank()) {
+        if (id == null || !SAFE_VALUE.matcher(id).matches()) {
             response.sendRedirect(getBaseUrl(request));
             return;
         }
-        // Strip control characters to guard against HTTP response splitting / header injection.
-        String sanitizedId = sanitize(id);
         String repository = request.getParameter(REPOSITORY_PARAM);
         String location;
-        if (repository != null && !repository.isBlank()) {
+        if (repository != null && SAFE_VALUE.matcher(repository).matches()) {
             // Notification-style permalink: the repository travels as a query parameter and is
             // mapped back into the hashbang route (/ui/#!/doc/<repo>/<id>).
-            location = request.getContextPath() + "/ui/#!/doc/" + sanitize(repository) + "/" + sanitizedId;
+            location = request.getContextPath() + "/ui/#!/doc/" + repository + "/" + id;
         } else {
             // Interactive permalink: the repository (if any) is already encoded in the request path.
-            location = getBaseUrl(request) + "#!/doc/" + sanitizedId;
+            location = getBaseUrl(request) + "#!/doc/" + id;
         }
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
         response.setHeader("Location", location);
     }
 
-    protected String sanitize(String value) {
-        // Remove all control characters (incl. CR/LF) to prevent HTTP response splitting.
-        return value.replaceAll("\\p{Cntrl}", "");
-    }
-
     protected String getBaseUrl(HttpServletRequest request) {
         String context = request.getContextPath();
         Object repository = request.getAttribute(REPOSITORY_ATTRIBUTE);
-        if (repository == null) {
+        if (repository == null || !SAFE_VALUE.matcher(repository.toString()).matches()) {
             return context + "/ui/";
         }
-        return context + "/repo/" + sanitize(repository.toString()) + "/ui/";
+        return context + "/repo/" + repository + "/ui/";
     }
 
 }
