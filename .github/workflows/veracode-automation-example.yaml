@@ -1,0 +1,176 @@
+# Example: Veracode Workflow with Automated Alerting
+# This is a SAMPLE implementation showing how to add automation to existing workflows
+# DO NOT use directly - review and adapt for your needs
+
+name: Veracode with Automated Alerts (EXAMPLE)
+
+on:
+  schedule:
+    - cron: '30 17 * * *'
+  workflow_dispatch: # Manual trigger for testing
+
+env:
+  REFERENCE_BRANCH: maintenance-3.1.x
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  BRANCH_NAME: 'maintenance-3.1.x'
+
+jobs:
+  # Existing build job (unchanged)
+  sast-scan-build:
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    runs-on:
+      group: medium-4cpu-runners
+    steps:
+      - uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
+
+      # ... (all existing build steps remain the same) ...
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - uses: actions/setup-node@v6
+        with:
+          registry-url: ${{ env.NPM_REPOSITORY }}
+          always-auth: true
+          node-version: 22
+          scope: '@nuxeo'
+
+      # (Include all other existing build steps here)
+
+      - name: Upload ZIP as artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuxeo-web-ui
+          path: nuxeo-web-ui.zip
+
+  # Existing scan job (mostly unchanged)
+  sast-scan:
+    needs: sast-scan-build
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    runs-on: ubuntu-latest
+    outputs:
+      scan-id: ${{ steps.veracode-scan.outputs.build-id }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: nuxeo-web-ui
+          path: .
+
+      - name: Veracode Upload And Scan
+        id: veracode-scan
+        uses: veracode/veracode-uploadandscan-action@0.2.11
+        with:
+          version: 'Nuxeo WebUI - ${{ env.BRANCH_NAME }} - ${{ github.run_id }}'
+          appname: 'Nuxeo Web UI'
+          createprofile: false
+          filepath: 'nuxeo-web-ui.zip'
+          vid: '${{ secrets.VERACODE_SECRET_API_ID }}'
+          vkey: '${{ secrets.VERACODE_SECRET_KEY }}'
+          sandboxname: 'master'
+          scantimeout: 1200
+          include: '*.war, *.zip, *.js, *.html, *.css, *.json'
+          criticality: 'High'
+          includenewmodules: 'true'
+
+  # NEW: Automated alert job
+  process-results:
+    needs: sast-scan
+    permissions:
+      contents: read
+      security-events: write
+      issues: write  # Required for creating issues
+      actions: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests veracode-api-py
+
+      - name: Fetch Veracode Results
+        id: fetch-results
+        env:
+          VERACODE_API_ID: ${{ secrets.VERACODE_SECRET_API_ID }}
+          VERACODE_API_KEY: ${{ secrets.VERACODE_SECRET_KEY }}
+          APP_NAME: 'Nuxeo Web UI'
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
+        run: |
+          python scripts/veracode-fetch-results.py
+
+      - name: Parse Results and Create Issues
+        id: create-issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
+          RESULTS_FILE: veracode-results.json
+        run: |
+          python scripts/veracode-create-issues.py
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: veracode-results.sarif
+
+      - name: Check Policy Violations
+        id: policy-check
+        run: |
+          CRITICAL_COUNT=$(jq '.findings[] | select(.severity=="Critical") | .severity' veracode-results.json | wc -l)
+          HIGH_COUNT=$(jq '.findings[] | select(.severity=="High") | .severity' veracode-results.json | wc -l)
+
+          echo "critical_count=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+          echo "high_count=$HIGH_COUNT" >> $GITHUB_OUTPUT
+
+          # Policy: Fail if any Critical or more than 5 High severity issues
+          if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$HIGH_COUNT" -gt 5 ]; then
+            echo "policy_violation=true" >> $GITHUB_OUTPUT
+            echo "::error::Policy violation: $CRITICAL_COUNT Critical, $HIGH_COUNT High severity findings"
+            exit 1
+          else
+            echo "policy_violation=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Summary
+        if: always()
+        run: |
+          echo "## Veracode Scan Results - ${{ env.BRANCH_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Scan Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Findings by Severity" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔴 Critical | ${{ steps.policy-check.outputs.critical_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟠 High | ${{ steps.policy-check.outputs.high_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Actions Taken" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Results uploaded to GitHub Security" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Issues created for new findings" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Existing issues updated/closed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View all security findings →](https://github.com/${{ github.repository }}/security/code-scanning)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notification on Failure
+        if: failure()
+        run: |
+          echo "🚨 Veracode scan found policy violations!"
+          echo "Check the Security tab and Issues for details."

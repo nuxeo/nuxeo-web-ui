@@ -1,0 +1,2 @@
+requests>=2.31.0
+veracode-api-py>=0.10.0
