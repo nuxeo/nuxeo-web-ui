@@ -46,7 +46,7 @@ export const ANNOUNCEMENT_UPDATED_EVENT = 'announcement-updated';
 export const ANNOUNCEMENT_MAX_LENGTH = 255;
 
 /** Only plain web links may be rendered, never `javascript:` or `data:` URLs. */
-const ALLOWED_LINK_PROTOCOLS = ['http:', 'https:'];
+const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:']);
 
 /**
  * Normalises an administrator supplied link and drops anything that is not a plain web link.
@@ -64,8 +64,10 @@ export function sanitizeAnnouncementLink(url) {
   }
   try {
     const parsed = new URL(trimmed, window.location.href);
-    return ALLOWED_LINK_PROTOCOLS.includes(parsed.protocol) ? parsed.href : '';
+    return ALLOWED_LINK_PROTOCOLS.has(parsed.protocol) ? parsed.href : '';
   } catch (e) {
+    // An unparseable link is simply not rendered: there is nothing to report to the user here, the
+    // administration screen is what validates and rejects the value while it is being entered.
     return '';
   }
 }

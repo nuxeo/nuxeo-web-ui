@@ -5,6 +5,14 @@ Given('I am on the announcement page', async function () {
   await this.ui.administration.goToAnnouncement();
 });
 
+Given('the announcement banner is turned off', async function () {
+  const page = await this.ui.administration.announcement;
+  await page.waitForVisible();
+  await page.setEnabled(false);
+  await page.save();
+  await AnnouncementBanner.waitForDisplayed(true);
+});
+
 Then('I can see the announcement page', async function () {
   const page = await this.ui.administration.announcement;
   const isVisible = await page.waitForVisible();

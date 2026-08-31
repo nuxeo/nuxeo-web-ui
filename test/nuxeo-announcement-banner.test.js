@@ -130,4 +130,59 @@ suite('nuxeo-announcement-banner', () => {
     element.user = null;
     expect(element._opened).to.be.false;
   });
+
+  test('ignores an entry that is not the reserved announcement', async () => {
+    sinon.stub(element.$.announcement, 'get').resolves({
+      entries: [{ id: 'something-else', properties: { enabled: true, message: 'Not an announcement' } }],
+    });
+    element.user = { id: 'Administrator' };
+    await element.refresh();
+    await flush();
+    expect(element._opened).to.be.false;
+  });
+
+  suite('overlapping lookups', () => {
+    let resolvers;
+
+    setup(() => {
+      resolvers = [];
+      sinon.stub(element.$.announcement, 'get').callsFake(
+        () =>
+          new Promise((resolve) => {
+            resolvers.push(resolve);
+          }),
+      );
+      element.user = { id: 'Administrator' };
+    });
+
+    test('keeps the newest response when an older one resolves last', async () => {
+      const first = element.refresh();
+      const second = element.refresh();
+      // resolve the newest first, then let the superseded one land
+      resolvers[resolvers.length - 1](entries({ enabled: true, message: 'Newest' }));
+      resolvers[resolvers.length - 2](entries({ enabled: true, message: 'Stale' }));
+      await Promise.all([first, second]);
+      await flush();
+      expect(element._message).to.equal('Newest');
+    });
+
+    test('drops a response that arrives after the user is disconnected', async () => {
+      const pending = element.refresh();
+      element.user = null;
+      resolvers[resolvers.length - 1](entries({ enabled: true, message: 'Too late' }));
+      await pending;
+      await flush();
+      expect(element._opened).to.be.false;
+      expect(element._message).to.equal('');
+    });
+
+    test('drops a response that arrives after the banner is detached', async () => {
+      const pending = element.refresh();
+      element.detached();
+      resolvers[resolvers.length - 1](entries({ enabled: true, message: 'Too late' }));
+      await pending;
+      await flush();
+      expect(element._opened).to.be.false;
+    });
+  });
 });
