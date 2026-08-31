@@ -67,6 +67,35 @@ suite('nuxeo-announcement-management', () => {
       expect(element._entry).to.deep.equal({ enabled: false, message: '', linkUrl: '', linkLabel: '' });
     });
 
+    test('ignores an entry that is not the reserved announcement', async () => {
+      sinon.stub(element.$.announcement, 'get').resolves({
+        entries: [{ id: 'something-else', properties: { enabled: true, message: 'Not an announcement' } }],
+      });
+      await element.refresh();
+      expect(element._exists).to.be.false;
+      expect(element._entry).to.deep.equal({ enabled: false, message: '', linkUrl: '', linkLabel: '' });
+    });
+
+    test('disables the form while loading and re-enables it once settled', async () => {
+      let resolve;
+      sinon.stub(element.$.announcement, 'get').returns(
+        new Promise((r) => {
+          resolve = r;
+        }),
+      );
+      const pending = element.refresh();
+      expect(element._loading).to.be.true;
+      resolve({ entries: [] });
+      await pending;
+      expect(element._loading).to.be.false;
+    });
+
+    test('re-enables the form when loading fails', async () => {
+      sinon.stub(element.$.announcement, 'get').rejects(new Error('boom'));
+      await element.refresh();
+      expect(element._loading).to.be.false;
+    });
+
     test('notifies the user when loading fails', async () => {
       sinon.stub(element.$.announcement, 'get').rejects(new Error('boom'));
       await element.refresh();
@@ -158,6 +187,16 @@ suite('nuxeo-announcement-management', () => {
       await element._save();
       expect(put).to.have.been.calledOnce;
       expect(element._messageInvalid).to.be.false;
+    });
+
+    test('does nothing while the announcement is still loading', async () => {
+      element._loading = true;
+      element._entry = { enabled: true, message: 'Maintenance', linkUrl: '', linkLabel: '' };
+      const put = sinon.stub(element.$.announcement, 'put');
+      const post = sinon.stub(element.$.announcement, 'post');
+      await element._save();
+      expect(put).to.not.have.been.called;
+      expect(post).to.not.have.been.called;
     });
   });
 });

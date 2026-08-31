@@ -79,7 +79,7 @@ Polymer({
         <iron-form id="form">
           <form>
             <div class="field">
-              <paper-toggle-button id="enabled" checked="{{_entry.enabled}}"
+              <paper-toggle-button id="enabled" checked="{{_entry.enabled}}" disabled$="[[_loading]]"
                 >[[i18n('announcementManagement.enabled')]]</paper-toggle-button
               >
               <div class="hint">[[i18n('announcementManagement.enabled.description')]]</div>
@@ -93,6 +93,7 @@ Polymer({
               label="[[i18n('announcementManagement.message')]]"
               value="{{_entry.message}}"
               required$="[[_entry.enabled]]"
+              disabled$="[[_loading]]"
               invalid="[[_messageInvalid]]"
               error-message="[[_messageError]]"
             ></nuxeo-textarea>
@@ -103,9 +104,10 @@ Polymer({
               name="linkUrl"
               type="url"
               label="[[i18n('announcementManagement.linkUrl')]]"
-              placeholder="https://example.com/maintenance"
+              placeholder="[[i18n('announcementManagement.linkUrl.placeholder')]]"
               maxlength="[[_maxLength]]"
               pattern="https?://.+"
+              disabled$="[[_loading]]"
               error-message="[[i18n('announcementManagement.linkUrl.invalid')]]"
               value="{{_entry.linkUrl}}"
             ></nuxeo-input>
@@ -117,13 +119,14 @@ Polymer({
               label="[[i18n('announcementManagement.linkLabel')]]"
               placeholder="[[i18n('announcementBanner.moreDetails')]]"
               maxlength="[[_maxLength]]"
+              disabled$="[[_loading]]"
               value="{{_entry.linkLabel}}"
             ></nuxeo-input>
           </form>
         </iron-form>
 
         <div class="buttons">
-          <paper-button id="save" name="save" noink class="primary" on-tap="_save"
+          <paper-button id="save" name="save" noink class="primary" disabled$="[[_loading]]" on-tap="_save"
             >[[i18n('command.save')]]</paper-button
           >
         </div>
@@ -150,6 +153,16 @@ Polymer({
 
     /** Whether the announcement already exists server side, which decides between POST and PUT. */
     _exists: {
+      type: Boolean,
+      value: false,
+    },
+
+    /**
+     * True while the announcement is being loaded. The form is disabled until then: `_exists` is
+     * not known yet, and a slow response would otherwise land on top of what the administrator has
+     * already typed.
+     */
+    _loading: {
       type: Boolean,
       value: false,
     },
@@ -184,24 +197,28 @@ Polymer({
   refresh() {
     this.$.announcement.path = ANNOUNCEMENT_ENTRY_PATH;
     this.$.announcement.data = null;
+    this._loading = true;
     return this.$.announcement.get().then(
       (response) => {
-        const entries = (response && response.entries) || [];
-        const entry = entries.find((e) => e && e.id === ANNOUNCEMENT_ENTRY_ID) || entries[0];
+        // Only the entry with the reserved id is the announcement; any other row of the directory
+        // is unrelated and must not be loaded into this form.
+        const entry = (response?.entries || []).find((e) => e?.id === ANNOUNCEMENT_ENTRY_ID);
         this._exists = !!entry;
         this._entry = {
-          enabled: !!(entry && entry.properties && entry.properties.enabled),
-          message: (entry && entry.properties && entry.properties.message) || '',
-          linkUrl: (entry && entry.properties && entry.properties.linkUrl) || '',
-          linkLabel: (entry && entry.properties && entry.properties.linkLabel) || '',
+          enabled: !!entry?.properties?.enabled,
+          message: entry?.properties?.message || '',
+          linkUrl: entry?.properties?.linkUrl || '',
+          linkLabel: entry?.properties?.linkLabel || '',
         };
         this._clearMessageError();
+        this._loading = false;
       },
       (err) => {
         this._exists = false;
+        this._loading = false;
         this.notify({
           message: `${this.i18n('label.error').toUpperCase()}: ${
-            err && err.message ? err.message : this.i18n('announcementManagement.errorLoading')
+            err?.message || this.i18n('announcementManagement.errorLoading')
           }`,
         });
       },
@@ -209,7 +226,7 @@ Polymer({
   },
 
   _save() {
-    if (!this._validate()) {
+    if (this._loading || !this._validate()) {
       return Promise.resolve();
     }
     const properties = {
@@ -244,7 +261,7 @@ Polymer({
       (err) => {
         this.notify({
           message: `${this.i18n('label.error').toUpperCase()}: ${
-            err && err.message ? err.message : this.i18n('announcementManagement.errorSaving')
+            err?.message || this.i18n('announcementManagement.errorSaving')
           }`,
         });
       },

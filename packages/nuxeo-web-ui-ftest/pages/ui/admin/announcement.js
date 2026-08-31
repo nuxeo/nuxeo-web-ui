@@ -33,7 +33,9 @@ export default class Announcement extends BasePage {
   async fillMessage(message) {
     const field = await this.messageInput;
     await field.waitForVisible();
-    const textarea = await field.$('paper-textarea');
+    // `nuxeo-textarea` is a wrapper; the editable control is the native textarea it exposes as
+    // `#textarea` — the same selector the functional-test field registry uses for this component.
+    const textarea = await field.$('#textarea');
     await textarea.setValue(message);
   }
 
@@ -41,12 +43,12 @@ export default class Announcement extends BasePage {
     if (linkUrl !== undefined) {
       const field = await this.linkUrlInput;
       await field.waitForVisible();
-      await (await field.$('paper-input')).setValue(linkUrl);
+      await (await field.$('.input-element input')).setValue(linkUrl);
     }
     if (linkLabel !== undefined) {
       const field = await this.linkLabelInput;
       await field.waitForVisible();
-      await (await field.$('paper-input')).setValue(linkLabel);
+      await (await field.$('.input-element input')).setValue(linkLabel);
     }
   }
 

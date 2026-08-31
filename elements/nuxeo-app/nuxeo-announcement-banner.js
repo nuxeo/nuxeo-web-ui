@@ -150,12 +150,23 @@ Polymer({
     },
   },
 
+  /**
+   * Incremented for every lookup, and whenever a lookup in flight must be abandoned (the user is
+   * disconnected, the element is detached). A response is only applied while it is still the
+   * newest one, so overlapping refreshes cannot resolve out of order and a late response cannot
+   * reopen the banner after logout.
+   */
+  _requestId: 0,
+
   attached() {
+    this._attachedToDom = true;
     this._boundRefresh = () => this.refresh();
     document.addEventListener(ANNOUNCEMENT_UPDATED_EVENT, this._boundRefresh);
   },
 
   detached() {
+    this._attachedToDom = false;
+    this._requestId += 1;
     if (this._boundRefresh) {
       document.removeEventListener(ANNOUNCEMENT_UPDATED_EVENT, this._boundRefresh);
       this._boundRefresh = null;
@@ -172,26 +183,37 @@ Polymer({
     if (!this.user) {
       return Promise.resolve();
     }
+    this._requestId += 1;
+    const requestId = this._requestId;
     return this.$.announcement.get().then(
-      (response) => this._update(response),
+      (response) => this._applyIfCurrent(requestId, response),
       // A server without the announcement directory (or an unreachable one) simply has no
       // announcement to show: stay hidden rather than failing the whole application shell.
-      () => this._update(null),
+      () => this._applyIfCurrent(requestId, null),
     );
+  },
+
+  _applyIfCurrent(requestId, response) {
+    if (requestId !== this._requestId || !this.user || this._attachedToDom === false) {
+      return;
+    }
+    this._update(response);
   },
 
   _userChanged(user) {
     if (user) {
       this.refresh();
     } else {
+      // Abandon anything in flight so it cannot reopen the banner for a user who just left.
+      this._requestId += 1;
       this._update(null);
     }
   },
 
   _update(response) {
     const entry = this._entryOf(response);
-    const message = entry && typeof entry.message === 'string' ? entry.message.trim() : '';
-    const enabled = !!(entry && entry.enabled);
+    const message = typeof entry?.message === 'string' ? entry.message.trim() : '';
+    const enabled = !!entry?.enabled;
     if (!enabled || !message) {
       this._message = '';
       this._linkUrl = '';
@@ -208,9 +230,10 @@ Polymer({
   },
 
   _entryOf(response) {
-    const entries = (response && response.entries) || [];
-    const entry = entries.find((e) => e && e.id === ANNOUNCEMENT_ENTRY_ID) || entries[0];
-    return entry ? entry.properties : null;
+    // The announcement is the entry with the reserved id. Any other entry of the directory belongs
+    // to nobody and must never be promoted to an instance wide banner.
+    const entry = (response?.entries || []).find((e) => e?.id === ANNOUNCEMENT_ENTRY_ID);
+    return entry?.properties || null;
   },
 
   _openedChanged(opened) {

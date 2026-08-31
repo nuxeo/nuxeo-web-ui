@@ -5,6 +5,10 @@ Feature: Admin announcements banner
 
   Background:
     Given I login as "Administrator"
+    # The announcement is persistent server-side state shared by every scenario, so start from a
+    # known "off" state instead of relying on whatever a previous run left behind.
+    And I am on the announcement page
+    And the announcement banner is turned off
 
   Scenario: Announcement page is reachable from the administration menu
     When I click the "administration" button
@@ -13,7 +17,6 @@ Feature: Admin announcements banner
     Then I can see the announcement page
 
   Scenario: Turning the announcement banner on and off
-    Given I am on the announcement page
     Then I cannot see the announcement banner
     When I enable the announcement banner with message "Scheduled maintenance on Saturday"
     Then I can see the announcement banner with message "Scheduled maintenance on Saturday"
@@ -21,7 +24,6 @@ Feature: Admin announcements banner
     Then I cannot see the announcement banner
 
   Scenario: Announcement banner with a link
-    Given I am on the announcement page
     When I enable the announcement banner with message "Read the maintenance plan" and link "https://example.com/maintenance"
     Then I can see the announcement banner with message "Read the maintenance plan"
     And the announcement banner has a link to "https://example.com/maintenance"
