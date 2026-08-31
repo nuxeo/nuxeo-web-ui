@@ -263,9 +263,11 @@ suite('nuxeo-document-create', () => {
       await element._create();
 
       // the options matter: `nearest` keeps the error summary in view and `preventScroll` stops
-      // the focus call from scrolling again, so assert them rather than just the call count
-      expect(invalidField.scrollIntoView).to.have.been.calledOnceWithExactly({ block: 'nearest' });
-      expect(invalidField.focus).to.have.been.calledOnceWithExactly({ preventScroll: true });
+      // the focus call from scrolling again, so assert them rather than just the call count.
+      // Compare the recorded args instead of using `calledOnceWithExactly`: a mismatch on the
+      // spy matcher never reaches the reporter and the runner session times out with no result.
+      expect(invalidField.scrollIntoView.args).to.deep.equal([[{ block: 'nearest' }]]);
+      expect(invalidField.focus.args).to.deep.equal([[{ preventScroll: true }]]);
       expect(element.creating).to.be.false;
     });
 
