@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.web.ui.announcement.contrib">
+
+  <documentation>
+    WEBUI-1786: storage for the Web UI administrator announcement banner.
+
+    The banner is held in a single directory entry whose id is `announcement`.
+    A directory is used rather than a document so that the value is invisible to
+    document navigation/search, and so that the platform's default directory
+    security applies: every authenticated user can read the entry (the banner has
+    to render for all users) while only administrators can write it.
+  </documentation>
+
+  <extension target="org.nuxeo.ecm.core.schema.TypeService" point="schema">
+    <schema name="webUIAnnouncement" src="schemas/webui-announcement.xsd"/>
+  </extension>
+
+  <extension target="org.nuxeo.ecm.directory.GenericDirectory" point="directories">
+    <directory name="webUIAnnouncement" extends="template-directory">
+      <schema>webUIAnnouncement</schema>
+      <table>webui_announcement</table>
+      <idField>id</idField>
+      <autoincrementIdField>false</autoincrementIdField>
+      <createTablePolicy>on_missing_columns</createTablePolicy>
+      <!-- `system` keeps the directory out of the Vocabularies administration screen -->
+      <types>
+        <type>system</type>
+      </types>
+    </directory>
+  </extension>
+
+</component>
