@@ -66,8 +66,10 @@ export function sanitizeAnnouncementLink(url) {
     const parsed = new URL(trimmed, window.location.href);
     return ALLOWED_LINK_PROTOCOLS.has(parsed.protocol) ? parsed.href : '';
   } catch (e) {
-    // An unparseable link is simply not rendered: there is nothing to report to the user here, the
-    // administration screen is what validates and rejects the value while it is being entered.
+    // The administration screen validates the link, so an unparseable value can only have been
+    // written by something else (a direct REST call, a data migration). Drop the link rather than
+    // render an unsafe href, and say why so it can be diagnosed.
+    console.warn(`nuxeo-announcement: ignoring an unparseable announcement link - ${e.message}`);
     return '';
   }
 }
