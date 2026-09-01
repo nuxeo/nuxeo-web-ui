@@ -243,7 +243,7 @@ Polymer({
   },
 
   _computeHtmlPreview(document) {
-    const content = (document && document.properties && document.properties['note:note']) || '';
+    const content = document?.properties?.['note:note'] || '';
     return `<!doctype html><html><head><meta charset="utf-8"><style>
       body { margin: 0; font-family: var(--nuxeo-app-font, Inter, sans-serif); font-size: 13px; color: #333; }
       table { border-collapse: collapse; }
@@ -253,7 +253,7 @@ Polymer({
 
   _resizeHtmlPreview(e) {
     const frame = e.target;
-    const body = frame.contentDocument && frame.contentDocument.body;
+    const body = frame.contentDocument?.body;
     if (body) {
       frame.style.height = `${body.scrollHeight + 32}px`;
     }
