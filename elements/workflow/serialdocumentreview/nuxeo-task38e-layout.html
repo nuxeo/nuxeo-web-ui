@@ -27,7 +27,7 @@ limitations under the License.
     <nuxeo-operation auto op="UserGroup.Suggestion" params="[[parameters]]" response="{{response}}"></nuxeo-operation>
 
     <nuxeo-user-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('wf.serialDocumentReview.participants')]]"
       search-type="USER_GROUP_TYPE"
       multiple="true"
@@ -38,7 +38,7 @@ limitations under the License.
     </nuxeo-user-suggestion>
 
     <nuxeo-select
-      role="widget"
+      data-widget
       label="[[i18n('wf.serialDocumentReview.review.type')]]"
       options="[[types]]"
       selected="{{task.variables.validationOrReview}}"
@@ -46,7 +46,7 @@ limitations under the License.
     </nuxeo-select>
 
     <nuxeo-textarea
-      role="widget"
+      data-widget
       label="[[i18n('wf.serialDocumentReview.comment')]]"
       value="{{task.variables.comment}}"
       always-float-label

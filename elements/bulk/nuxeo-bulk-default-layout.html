@@ -26,7 +26,7 @@ limitations under the License.
     <style include="nuxeo-styles"></style>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.nature')]]"
       name="nature"
       directory-name="nature"
@@ -38,7 +38,7 @@ limitations under the License.
 
     <nuxeo-directory-suggestion
       label="[[i18n('label.dublincore.subjects')]]"
-      role="widget"
+      data-widget
       directory-name="l10nsubjects"
       name="subjects"
       value="{{document.properties.dc:subjects}}"
@@ -50,7 +50,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.coverage')]]"
       directory-name="l10ncoverage"
       name="coverage"
@@ -62,7 +62,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-date-picker
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.expire')]]"
       name="expired"
       value="{{document.properties.dc:expired}}"
