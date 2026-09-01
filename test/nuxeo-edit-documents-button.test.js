@@ -118,6 +118,7 @@ const schemas = () =>
         blob: 'blob',
         blobRequired: 'blob',
         strings: 'string',
+        strings2: 'string',
         stringsRequired: 'string',
         complex: {
           fields: {
@@ -584,9 +585,9 @@ suite('nuxeo-edit-documents-button', () => {
 
     test('Should discover widgets marked with data-widget and the legacy role', async () => {
       button = await buildButton('datawidget');
-      // the layout declares six widgets: a wrapper div, a bare paper-checkbox, three inputs (one using the
-      // legacy marker, one using both) and a data table
-      expect(layoutRoot().querySelectorAll('nuxeo-bulk-widget').length).to.be.equals(6);
+      // the layout declares seven widgets: a wrapper div, a bare paper-checkbox, three inputs (one using the
+      // legacy marker, one using both) and two data tables
+      expect(layoutRoot().querySelectorAll('nuxeo-bulk-widget').length).to.be.equals(7);
     });
 
     test('Should wrap a widget carrying both markers exactly once', async () => {
@@ -621,9 +622,10 @@ suite('nuxeo-edit-documents-button', () => {
 
     test('Should leave no invalid role in the stamped layout other than the legacy widget wrapper', async () => {
       button = await buildButton('datawidget');
-      const invalidRoles = layoutRoot().querySelectorAll('[role="widget"]');
-      expect(invalidRoles.length).to.be.equals(1);
-      expect(invalidRoles[0].tagName.toLowerCase()).to.be.equals('nuxeo-bulk-widget');
+      const invalidRoles = Array.from(layoutRoot().querySelectorAll('[role="widget"]'));
+      // one per legacy authored widget: the description input and the legacy data table
+      expect(invalidRoles.length).to.be.equals(2);
+      invalidRoles.forEach((node) => expect(node.tagName.toLowerCase()).to.be.equals('nuxeo-bulk-widget'));
     });
 
     test('Should not displace the ARIA role of a widget that declares its own', async () => {
@@ -633,6 +635,15 @@ suite('nuxeo-edit-documents-button', () => {
       expect(checkbox.getAttribute('role')).to.be.equals('checkbox');
       const table = layoutRoot().querySelector('nuxeo-data-table[name="strings"]');
       expect(table.getAttribute('role')).to.be.equals('table');
+    });
+
+    test('Should not displace the ARIA role of a legacy widget that declares its own', async () => {
+      button = await buildButton('datawidget');
+      const table = layoutRoot().querySelector('nuxeo-data-table[name="strings2"]');
+      // the marker this widget was authored with has already been replaced by `role="table"`, so there is
+      // nothing to clear: moving the marker onto the wrapper must not take the table semantics with it
+      expect(table.getAttribute('role')).to.be.equals('table');
+      expect(getBulkWidget(table).getAttribute('role')).to.be.equals('widget');
     });
 
     test('Should drive the bulk widget from a data-widget marked field', async () => {

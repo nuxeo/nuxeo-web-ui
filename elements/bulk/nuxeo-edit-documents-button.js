@@ -537,19 +537,19 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
           bulkWidget.element = boundElement;
           // move the marker to the bulk widget, keeping whichever spelling the layout was authored with so
           // that layout scoped `[role='widget']` rules in customer layouts still match the wrapper
-          if (widget.hasAttribute('data-widget')) {
-            widget.removeAttribute('data-widget');
-            // `role` is only cleared when it holds the legacy marker: unlike `data-widget`, that marker
-            // occupies the `role` attribute, so an element declaring its own role (`paper-checkbox`,
-            // `nuxeo-data-table`) must keep it. A layout being migrated can carry both markers, and
-            // leaving the legacy one behind would let a later discovery pass wrap the widget twice.
-            if (widget.getAttribute('role') === 'widget') {
-              widget.removeAttribute('role');
-            }
-            bulkWidget.setAttribute('data-widget', '');
-          } else {
+          const legacyMarker = widget.dataset.widget === undefined;
+          delete widget.dataset.widget;
+          // `role` is only cleared when it holds the legacy marker: unlike `data-widget`, that marker
+          // occupies the `role` attribute, so an element declaring its own role (`paper-checkbox`,
+          // `nuxeo-data-table`) must keep it. A layout being migrated can carry both markers, and
+          // leaving the legacy one behind would let a later discovery pass wrap the widget twice.
+          if (widget.getAttribute('role') === 'widget') {
             widget.removeAttribute('role');
+          }
+          if (legacyMarker) {
             bulkWidget.setAttribute('role', 'widget');
+          } else {
+            bulkWidget.dataset.widget = '';
           }
           // move the `label` to the bulk widget
           if (boundElement.label) {
