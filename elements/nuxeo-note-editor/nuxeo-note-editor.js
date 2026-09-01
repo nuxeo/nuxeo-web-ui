@@ -49,12 +49,14 @@ Polymer({
         position: absolute;
       }
 
-      #editNote.edit {
+      #editNote.edit,
+      #editHtmlNote.edit {
         right: 10px;
         top: 10px;
       }
 
-      :host([dir='rtl']) #editNote.edit {
+      :host([dir='rtl']) #editNote.edit,
+      :host([dir='rtl']) #editHtmlNote.edit {
         left: 10px;
         right: auto;
       }
@@ -103,32 +105,48 @@ Polymer({
     <div class="main">
       <template is="dom-if" if="[[_isHTML(document)]]">
         <div class="html-editor-container">
-          <paper-icon-button
-            id="editHtml"
-            class="edit"
-            icon="[[_computeHtmlEditIcon(_viewMode)]]"
-            on-tap="_toggleHtmlSource"
-            hidden$="[[!_canEdit(document)]]"
-            aria-labelledby="editHtmlTooltip"
-          ></paper-icon-button>
-          <paper-tooltip for="editHtml" position="right" id="editHtmlTooltip"
-            >[[_computeHtmlEditLabel(_viewMode, i18n)]]</paper-tooltip
-          >
-          <template is="dom-if" if="[[_viewMode]]">
-            <nuxeo-html-editor value="{{_value}}" read-only="[[!_canEdit(document)]]"></nuxeo-html-editor>
-          </template>
-          <template is="dom-if" if="[[!_viewMode]]">
-            <paper-textarea
-              value="{{_value}}"
-              no-label-float
-              placeholder="[[i18n('noteViewLayout.placeholder')]]"
-            ></paper-textarea>
-          </template>
-          <div class="layout horizontal end-justified">
-            <paper-button name="editorSave" noink class="primary" on-tap="_editorSave" hidden$="[[!_canEdit(document)]]"
-              >[[i18n('command.save')]]</paper-button
+          <template is="dom-if" if="[[!_editing]]">
+            <paper-icon-button
+              id="editHtmlNote"
+              class="edit"
+              icon="nuxeo:edit"
+              on-tap="_editHtml"
+              hidden$="[[!_canEdit(document)]]"
+              aria-labelledby="editHtmlNoteTooltip"
+            ></paper-icon-button>
+            <paper-tooltip for="editHtmlNote" position="bottom" id="editHtmlNoteTooltip"
+              >[[i18n('command.edit')]]</paper-tooltip
             >
-          </div>
+            <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+          </template>
+          <template is="dom-if" if="[[_editing]]">
+            <paper-icon-button
+              id="editHtml"
+              class="edit"
+              icon="[[_computeHtmlEditIcon(_viewMode)]]"
+              on-tap="_toggleHtmlSource"
+              aria-labelledby="editHtmlTooltip"
+            ></paper-icon-button>
+            <paper-tooltip for="editHtml" position="right" id="editHtmlTooltip"
+              >[[_computeHtmlEditLabel(_viewMode, i18n)]]</paper-tooltip
+            >
+            <template is="dom-if" if="[[_viewMode]]">
+              <nuxeo-html-editor value="{{_value}}"></nuxeo-html-editor>
+            </template>
+            <template is="dom-if" if="[[!_viewMode]]">
+              <paper-textarea
+                value="{{_value}}"
+                no-label-float
+                placeholder="[[i18n('noteViewLayout.placeholder')]]"
+              ></paper-textarea>
+            </template>
+            <div class="layout horizontal end-justified">
+              <paper-button noink on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+              <paper-button name="editorSave" noink class="primary" on-tap="_editorSave"
+                >[[i18n('command.save')]]</paper-button
+              >
+            </div>
+          </template>
         </div>
       </template>
 
@@ -174,6 +192,14 @@ Polymer({
       type: Boolean,
       value: true,
     },
+    /**
+     * Whether an HTML note is being edited. HTML notes are displayed as stored until the user
+     * opts in to editing, because the rich text editor cannot represent every HTML construct.
+     */
+    _editing: {
+      type: Boolean,
+      value: false,
+    },
     _value: {
       type: String,
       value: '',
@@ -214,6 +240,7 @@ Polymer({
     this.$.note.put().then(() => {
       this.notify({ message: this.i18n('noteViewLayout.note.saved') });
       this._viewMode = true;
+      this._editing = false;
       this.fire('document-updated');
     });
   },
@@ -231,9 +258,16 @@ Polymer({
     this._viewMode = false;
   },
 
+  _editHtml() {
+    this._value = this.document.properties['note:note'];
+    this._viewMode = true;
+    this._editing = true;
+  },
+
   _cancel() {
     this._value = '';
     this._viewMode = true;
+    this._editing = false;
   },
 
   _toggleHtmlSource() {

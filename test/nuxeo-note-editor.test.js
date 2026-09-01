@@ -25,6 +25,7 @@ suite('nuxeo-note-editor', () => {
     return {
       uid: 'note-1',
       type: 'Note',
+      schemas: [{ name: 'note' }, { name: 'dublincore' }],
       properties: {
         'note:note': '<p>hello</p>',
         'note:mime_type': 'text/plain',
@@ -33,6 +34,9 @@ suite('nuxeo-note-editor', () => {
       ...overrides,
     };
   };
+
+  const htmlDoc = (note = '<table><thead><tr><th>h</th></tr></thead><tbody><tr><td>c</td></tr></tbody></table>') =>
+    noteDoc({ properties: { 'note:mime_type': 'text/html', 'note:note': note } });
 
   setup(async () => {
     el = await fixture(html`<nuxeo-note-editor></nuxeo-note-editor>`);
@@ -98,9 +102,11 @@ suite('nuxeo-note-editor', () => {
 
   test('_cancel resets value and returns to view mode', () => {
     el._viewMode = false;
+    el._editing = true;
     el._value = 'draft';
     el._cancel();
     expect(el._viewMode).to.be.true;
+    expect(el._editing).to.be.false;
     expect(el._value).to.equal('');
   });
 
@@ -127,9 +133,89 @@ suite('nuxeo-note-editor', () => {
     expect(el.notify).to.have.been.called;
     expect(el.fire).to.have.been.calledWith('document-updated');
     expect(el._viewMode).to.be.true;
+    expect(el._editing).to.be.false;
 
     el.$.note.put.restore();
     el.notify.restore();
     el.fire.restore();
+  });
+
+  suite('HTML notes are displayed as stored (ELEMENTS-1806)', () => {
+    // Quill cannot represent thead/tfoot/th/colgroup/colspan/rowspan or nested tables, so an
+    // HTML note must not be routed through the rich text editor just to be read.
+    const deepQuery = (selector) => {
+      const walk = (root) => {
+        const hit = root.querySelector(selector);
+        if (hit) {
+          return hit;
+        }
+        for (const child of root.querySelectorAll('*')) {
+          if (child.shadowRoot) {
+            const nested = walk(child.shadowRoot);
+            if (nested) {
+              return nested;
+            }
+          }
+        }
+        return null;
+      };
+      return walk(el.shadowRoot);
+    };
+
+    test('an HTML note starts in view mode, not in the editor', () => {
+      el.document = htmlDoc();
+      expect(el._editing).to.be.false;
+    });
+
+    test('view mode renders the preview and not the rich text editor', async () => {
+      el.document = htmlDoc();
+      await flush();
+      expect(deepQuery('nuxeo-document-preview')).to.not.be.null;
+      expect(deepQuery('nuxeo-html-editor')).to.be.null;
+    });
+
+    test('view mode offers an edit action when the user can edit', async () => {
+      el.document = htmlDoc();
+      await flush();
+      const button = deepQuery('#editHtmlNote');
+      expect(button).to.not.be.null;
+      expect(button.hidden).to.be.false;
+    });
+
+    test('view mode hides the edit action when the user cannot edit', async () => {
+      el.hasPermission.returns(false);
+      el.document = htmlDoc();
+      await flush();
+      expect(deepQuery('#editHtmlNote').hidden).to.be.true;
+      expect(deepQuery('nuxeo-html-editor')).to.be.null;
+    });
+
+    test('_editHtml opens the rich text editor with the stored content', () => {
+      const note = '<table><tfoot><tr><td colspan="2">t</td></tr></tfoot></table>';
+      el.document = htmlDoc(note);
+      el._editHtml();
+      expect(el._editing).to.be.true;
+      expect(el._viewMode).to.be.true;
+      expect(el._value).to.equal(note);
+    });
+
+    test('the rich text editor is only mounted once editing starts', async () => {
+      el.document = htmlDoc();
+      await flush();
+      expect(deepQuery('nuxeo-html-editor')).to.be.null;
+      el._editHtml();
+      await flush();
+      expect(deepQuery('nuxeo-html-editor')).to.not.be.null;
+    });
+
+    test('the HTML source view still shows the stored markup', async () => {
+      const note = '<table><thead><tr><th>kept</th></tr></thead></table>';
+      el.document = htmlDoc(note);
+      el._editHtml();
+      el._toggleHtmlSource();
+      await flush();
+      expect(el._viewMode).to.be.false;
+      expect(el._value).to.equal(note);
+    });
   });
 });
