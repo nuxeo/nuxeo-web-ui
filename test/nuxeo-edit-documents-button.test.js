@@ -114,6 +114,7 @@ const schemas = () =>
       '@prefix': 'custom',
       fields: {
         bool: 'boolean',
+        bool2: 'boolean',
         blob: 'blob',
         blobRequired: 'blob',
         strings: 'string',
@@ -573,6 +574,78 @@ suite('nuxeo-edit-documents-button', () => {
       const complexListBulkWidget = getBulkWidget(complexListWidget);
       const complexListAddValues = complexListBulkWidget.shadowRoot.getElementById('addValues');
       expect(complexListAddValues.disabled).to.be.false;
+    });
+  });
+
+  // WEBUI-2229: `data-widget` is the supported widget marker, `role="widget"` stays supported for layouts
+  // authored against the previous guidance (including customer-authored ones this code cannot see).
+  suite('Widget marker', () => {
+    const layoutRoot = () => button.$$('nuxeo-layout').element.shadowRoot;
+
+    test('Should discover widgets marked with data-widget and the legacy role', async () => {
+      button = await buildButton('datawidget');
+      // the layout declares six widgets: a wrapper div, a bare paper-checkbox, three inputs (one using the
+      // legacy marker, one using both) and a data table
+      expect(layoutRoot().querySelectorAll('nuxeo-bulk-widget').length).to.be.equals(6);
+    });
+
+    test('Should wrap a widget carrying both markers exactly once', async () => {
+      button = await buildButton('datawidget');
+      const coverage = layoutRoot().querySelector('nuxeo-input[name="coverage"]');
+      // neither marker may be left on the widget, otherwise a later discovery pass wraps it again
+      expect(coverage.hasAttribute('data-widget')).to.be.false;
+      expect(coverage.getAttribute('role')).to.not.be.equals('widget');
+      const wrapper = getBulkWidget(coverage);
+      expect(wrapper.hasAttribute('data-widget')).to.be.true;
+      expect(wrapper.querySelectorAll('nuxeo-bulk-widget').length).to.be.equals(0);
+    });
+
+    test('Should move the data-widget marker from the widget onto the wrapper', async () => {
+      button = await buildButton('datawidget');
+      const title = layoutRoot().querySelector('nuxeo-input[name="title"]');
+      expect(title.hasAttribute('data-widget')).to.be.false;
+      const wrapper = getBulkWidget(title);
+      expect(wrapper.tagName.toLowerCase()).to.be.equals('nuxeo-bulk-widget');
+      expect(wrapper.hasAttribute('data-widget')).to.be.true;
+      expect(wrapper.hasAttribute('role')).to.be.false;
+    });
+
+    test('Should keep moving the legacy role marker onto the wrapper', async () => {
+      button = await buildButton('datawidget');
+      const description = layoutRoot().querySelector('nuxeo-input[name="description"]');
+      expect(description.getAttribute('role')).to.not.be.equals('widget');
+      const wrapper = getBulkWidget(description);
+      expect(wrapper.getAttribute('role')).to.be.equals('widget');
+      expect(wrapper.hasAttribute('data-widget')).to.be.false;
+    });
+
+    test('Should leave no invalid role in the stamped layout other than the legacy widget wrapper', async () => {
+      button = await buildButton('datawidget');
+      const invalidRoles = layoutRoot().querySelectorAll('[role="widget"]');
+      expect(invalidRoles.length).to.be.equals(1);
+      expect(invalidRoles[0].tagName.toLowerCase()).to.be.equals('nuxeo-bulk-widget');
+    });
+
+    test('Should not displace the ARIA role of a widget that declares its own', async () => {
+      button = await buildButton('datawidget');
+      const checkbox = layoutRoot().querySelector('paper-checkbox[name="bool2"]');
+      expect(checkbox.hasAttribute('data-widget')).to.be.false;
+      expect(checkbox.getAttribute('role')).to.be.equals('checkbox');
+      const table = layoutRoot().querySelector('nuxeo-data-table[name="strings"]');
+      expect(table.getAttribute('role')).to.be.equals('table');
+    });
+
+    test('Should drive the bulk widget from a data-widget marked field', async () => {
+      button = await buildButton('datawidget');
+      const title = getWidget('dc:title');
+      const titleBulkWidget = getBulkWidget(title);
+      // open the bulk edit dialog
+      button.$$('.action').click();
+      expect(titleBulkWidget.updateMode).to.be.equals('keep');
+      title.value = 'a new title';
+      expect(titleBulkWidget.updateMode).to.be.equals('replace');
+      title.value = null;
+      expect(titleBulkWidget.updateMode).to.be.equals('keep');
     });
   });
 });

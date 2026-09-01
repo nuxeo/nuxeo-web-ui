@@ -513,15 +513,18 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
         // set the observer in the layout so that when a property gets updated, the callback is executed
         bulkLayout._createMethodObserver('_propertiesObserver(document.properties.*)', true);
         // replace all the widgets in the layout with bulk widget wrappers
-        // a widget is a node identified with the `role="widget"` attribute, it can be something as simple
-        // an input element bound to a property, or a complex DOM structure with an element somewhere inside
-        // bound to a property, example:
-        // <div role="widget"> (<- widget)
+        // a widget is a node identified with the `data-widget` attribute (or the legacy `role="widget"`),
+        // it can be something as simple an input element bound to a property, or a complex DOM structure
+        // with an element somewhere inside bound to a property, example:
+        // <div data-widget> (<- widget)
         //   <label>Description</label>
         //   <nuxeo-input value="{{document.properties.dc:description}}"></nuxeo-input> (<- bound element)
         // </div>
+        // XXX `role="widget"` is not a valid ARIA role and is deprecated in favour of `data-widget`, but it
+        // stays supported indefinitely because it is the documented marker for customer-authored layouts
+        // that this code cannot see (see WEBUI-2229)
         // XXX The data table selector is needed because it sets `role="table"` on itself (see ELEMENTS-1346)
-        const selector = '[role="widget"], nuxeo-data-table[role="table"]';
+        const selector = '[data-widget], [role="widget"], nuxeo-data-table[role="table"]';
         const widgets = Array.from(bulkLayout.shadowRoot.querySelectorAll(selector));
         widgets.forEach((widget) => {
           const { parentNode } = widget;
@@ -532,9 +535,22 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
           const boundElement = this._getBoundElement(widget, bulkLayout.__templateInfo);
           // keep a reference of this element in the bulk widget
           bulkWidget.element = boundElement;
-          // move the `role="widget"` to the bulk widget
-          widget.removeAttribute('role');
-          bulkWidget.setAttribute('role', 'widget');
+          // move the marker to the bulk widget, keeping whichever spelling the layout was authored with so
+          // that layout scoped `[role='widget']` rules in customer layouts still match the wrapper
+          if (widget.hasAttribute('data-widget')) {
+            widget.removeAttribute('data-widget');
+            // `role` is only cleared when it holds the legacy marker: unlike `data-widget`, that marker
+            // occupies the `role` attribute, so an element declaring its own role (`paper-checkbox`,
+            // `nuxeo-data-table`) must keep it. A layout being migrated can carry both markers, and
+            // leaving the legacy one behind would let a later discovery pass wrap the widget twice.
+            if (widget.getAttribute('role') === 'widget') {
+              widget.removeAttribute('role');
+            }
+            bulkWidget.setAttribute('data-widget', '');
+          } else {
+            widget.removeAttribute('role');
+            bulkWidget.setAttribute('role', 'widget');
+          }
           // move the `label` to the bulk widget
           if (boundElement.label) {
             bulkWidget.label = boundElement.label;

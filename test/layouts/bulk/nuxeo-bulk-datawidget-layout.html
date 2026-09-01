@@ -1,0 +1,97 @@
+<!--
+@license
+©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!--
+`nuxeo-bulk-datawidget-layout`
+
+Covers widget discovery through the `data-widget` marker, mixed with a legacy `role="widget"` widget so that
+the transitional state of a batched migration is exercised too. See WEBUI-2229.
+
+@group Nuxeo UI
+@element nuxeo-bulk-datawidget-layout
+-->
+<dom-module id="nuxeo-bulk-datawidget-layout">
+  <template>
+    <style include="nuxeo-styles"></style>
+
+    <!-- complex structure: the marker sits on a wrapper, the bound element is inside -->
+    <div data-widget>
+      <label id="boolField">Custom Boolean</label>
+      <paper-checkbox checked="{{document.properties.custom:bool}}" aria-labelledby="boolField" name="bool">
+      </paper-checkbox>
+    </div>
+
+    <!-- marker directly on an element that declares its own role: it must keep `role="checkbox"` -->
+    <paper-checkbox data-widget noink checked="{{document.properties.custom:bool2}}" name="bool2">
+      Custom Boolean 2
+    </paper-checkbox>
+
+    <nuxeo-input
+      data-widget
+      value="{{document.properties.dc:title}}"
+      label="Title"
+      type="text"
+      name="title"
+    ></nuxeo-input>
+
+    <!-- legacy marker, still supported for customer-authored layouts -->
+    <nuxeo-input
+      role="widget"
+      value="{{document.properties.dc:description}}"
+      label="Description"
+      type="text"
+      name="description"
+    ></nuxeo-input>
+
+    <!-- both markers, as a partly migrated layout would have -->
+    <nuxeo-input
+      data-widget
+      role="widget"
+      value="{{document.properties.dc:coverage}}"
+      label="Coverage"
+      type="text"
+      name="coverage"
+    ></nuxeo-input>
+
+    <nuxeo-data-table data-widget items="{{document.properties.custom:strings}}" editable="true" name="strings">
+      <nuxeo-data-table-column name="Strings">
+        <template> [[item]] </template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-form>
+        <template>
+          <nuxeo-input value="{{item}}" label="Custom Strings" type="text" name="strings"></nuxeo-input>
+        </template>
+      </nuxeo-data-table-form>
+    </nuxeo-data-table>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'nuxeo-bulk-datawidget-layout',
+      behaviors: [Nuxeo.LayoutBehavior],
+      properties: {
+        /**
+         * The document representation that holds the property changes to be applied to all documents in the selection.
+         */
+        document: {
+          type: Object,
+        },
+      },
+    });
+  </script>
+</dom-module>
