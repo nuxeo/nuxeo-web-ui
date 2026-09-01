@@ -68,7 +68,16 @@ the transitional state of a batched migration is exercised too. See WEBUI-2229.
       name="coverage"
     ></nuxeo-input>
 
-    <nuxeo-data-table data-widget items="{{document.properties.custom:strings}}" editable="true" name="strings">
+    <!-- `role="table"` is authored here rather than left to the element: only some of the supported
+         @nuxeo/nuxeo-ui-elements versions set it on the host, and the assertion is about the marker not
+         displacing a role the layout declares -->
+    <nuxeo-data-table
+      data-widget
+      role="table"
+      items="{{document.properties.custom:strings}}"
+      editable="true"
+      name="strings"
+    >
       <nuxeo-data-table-column name="Strings">
         <template> [[item]] </template>
       </nuxeo-data-table-column>
