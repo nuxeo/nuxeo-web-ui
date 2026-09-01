@@ -28,7 +28,7 @@ limitations under the License.
     </style>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       value="{{document.properties.dc:title}}"
       label="[[i18n('title')]]"
       type="text"
@@ -36,7 +36,7 @@ limitations under the License.
     ></nuxeo-input>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       value="{{document.properties.prot:email}}"
       label="[[i18n('label.mail.folder.email')]]"
       type="email"
@@ -44,7 +44,7 @@ limitations under the License.
     ></nuxeo-input>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       value="{{document.properties.prot:password}}"
       label="[[i18n('label.mail.folder.password')]]"
       type="password"
@@ -52,7 +52,7 @@ limitations under the License.
     ></nuxeo-input>
 
     <nuxeo-select
-      role="widget"
+      data-widget
       label="[[i18n('label.mail.folder.protocol_type')]]"
       options="[[protocols]]"
       selected="{{document.properties.prot:protocol_type}}"
@@ -60,43 +60,43 @@ limitations under the License.
     ></nuxeo-select>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       value="{{document.properties.prot:host}}"
       label="[[i18n('label.mail.folder.host')]]"
       type="text"
     ></nuxeo-input>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       value="{{document.properties.prot:port}}"
       label="[[i18n('label.mail.folder.port')]]"
       type="number"
     ></nuxeo-input>
 
-    <paper-checkbox role="widget" noink checked="{{document.properties.prot:socket_factory_fallback}}">
+    <paper-checkbox data-widget noink checked="{{document.properties.prot:socket_factory_fallback}}">
       [[i18n('label.mail.folder.socket_factory_fallback')]]
     </paper-checkbox>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       value="{{document.properties.prot:socket_factory_port}}"
       label="[[i18n('label.mail.folder.socket_factory_port')]]"
       type="number"
     ></nuxeo-input>
 
-    <paper-checkbox role="widget" noink checked="{{document.properties.prot:starttls_enable}}">
+    <paper-checkbox data-widget noink checked="{{document.properties.prot:starttls_enable}}">
       [[i18n('label.mail.folder.starttls_enable')]]
     </paper-checkbox>
 
     <nuxeo-select
-      role="widget"
+      data-widget
       label="[[i18n('label.mail.folder.ssl_protocols')]]"
       options="[[ssl_protocols]]"
       selected="{{document.properties.prot:ssl_protocols}}"
     ></nuxeo-select>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       value="{{document.properties.prot:emails_limit}}"
       label="[[i18n('label.mail.folder.emails_limit')]]"
       type="number"
