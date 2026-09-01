@@ -52,6 +52,18 @@ Polymer({
         /* Apply border radius to content area for rebranded themes */
         border-radius: var(--nuxeo-page-content-border-radius, 0);
         margin: var(--nuxeo-page-content-margin, 0);
+
+        /*
+         * Reserve the strip covered by the floating document create button, published by nuxeo-app
+         * as --nuxeo-page-content-safe-area-bottom and 0 wherever no button floats over this
+         * region. padding-bottom extends the scrollable range so the last row can be scrolled
+         * clear of the button instead of staying permanently underneath it, and
+         * scroll-padding-bottom keeps anything scrolled into view - keyboard focus in particular -
+         * out from under it. Both come after --nuxeo-page-content-padding so they win over the
+         * bottom value of that shorthand, which is 0 in every theme that sets it.
+         */
+        padding-bottom: var(--nuxeo-page-content-safe-area-bottom, 0px);
+        scroll-padding-bottom: var(--nuxeo-page-content-safe-area-bottom, 0px);
       }
 
       .toolbar {
