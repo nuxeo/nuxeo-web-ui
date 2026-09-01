@@ -12,9 +12,36 @@ export default class NoteEditor extends BasePage {
 
   get editButton() {
     return (async () => {
+      // Text, XML and Markdown notes expose #editNote; HTML notes expose #editHtmlNote.
       const editButton = await this.el.element('#editNote');
-      return editButton;
+      if (await editButton.isExisting()) {
+        return editButton;
+      }
+      return this.el.element('#editHtmlNote');
     })();
+  }
+
+  get htmlPreview() {
+    return this.el.element('#htmlPreview');
+  }
+
+  async hasHtmlContent(content) {
+    const frame = await this.htmlPreview;
+    await frame.waitForVisible();
+    await driver.waitUntil(
+      async () => {
+        try {
+          const srcdoc = await frame.getAttribute('srcdoc');
+          return srcdoc && srcdoc.includes(content);
+        } catch (e) {
+          return false;
+        }
+      },
+      {
+        timeoutMsg: 'The note preview does not have such content',
+      },
+    );
+    return true;
   }
 
   async hasContent(content) {

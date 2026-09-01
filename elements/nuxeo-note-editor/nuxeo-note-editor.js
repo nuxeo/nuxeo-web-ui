@@ -85,6 +85,14 @@ Polymer({
         min-height: calc(80vh - 90px);
       }
 
+      #htmlPreview {
+        display: block;
+        width: 100%;
+        min-height: calc(80vh - 90px);
+        border: none;
+        overflow: hidden;
+      }
+
       nuxeo-html-editor {
         min-height: calc(80vh - 90px);
         height: var(--nuxeo-note-editor-html-height);
@@ -117,7 +125,17 @@ Polymer({
             <paper-tooltip for="editHtmlNote" position="bottom" id="editHtmlNoteTooltip"
               >[[i18n('command.edit')]]</paper-tooltip
             >
-            <nuxeo-document-preview document="[[document]]"></nuxeo-document-preview>
+            <!-- The note is authored by users, so it is rendered in a sandbox without
+                 allow-scripts: no inline handler, javascript: URL or embedded script can run.
+                 allow-same-origin is granted only so the frame can be measured for sizing;
+                 without allow-scripts nothing inside the frame can act on that access. -->
+            <iframe
+              id="htmlPreview"
+              sandbox="allow-same-origin"
+              title$="[[i18n('noteEditor.htmlPreview')]]"
+              srcdoc$="[[_computeHtmlPreview(document)]]"
+              on-load="_resizeHtmlPreview"
+            ></iframe>
           </template>
           <template is="dom-if" if="[[_editing]]">
             <paper-icon-button
@@ -213,8 +231,32 @@ Polymer({
     }
   },
 
-  _documentChanged() {
+  _documentChanged(document, previous) {
     this._value = this.document.properties['note:note'];
+    // Editing state belongs to the document being edited: showing a different note must not
+    // drop the reader straight into the editor. A refresh of the same document is left alone
+    // so an in-progress edit survives it.
+    if (previous && previous.uid !== document.uid) {
+      this._viewMode = true;
+      this._editing = false;
+    }
+  },
+
+  _computeHtmlPreview(document) {
+    const content = (document && document.properties && document.properties['note:note']) || '';
+    return `<!doctype html><html><head><meta charset="utf-8"><style>
+      body { margin: 0; font-family: var(--nuxeo-app-font, Inter, sans-serif); font-size: 13px; color: #333; }
+      table { border-collapse: collapse; }
+      img { max-width: 100%; }
+    </style></head><body>${content}</body></html>`;
+  },
+
+  _resizeHtmlPreview(e) {
+    const frame = e.target;
+    const body = frame.contentDocument && frame.contentDocument.body;
+    if (body) {
+      frame.style.height = `${body.scrollHeight + 32}px`;
+    }
   },
 
   _isHTML() {

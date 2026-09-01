@@ -170,8 +170,38 @@ suite('nuxeo-note-editor', () => {
     test('view mode renders the preview and not the rich text editor', async () => {
       el.document = htmlDoc();
       await flush();
-      expect(deepQuery('nuxeo-document-preview')).to.not.be.null;
+      expect(deepQuery('#htmlPreview')).to.not.be.null;
       expect(deepQuery('nuxeo-html-editor')).to.be.null;
+    });
+
+    test('the preview keeps every structure Quill used to discard', async () => {
+      const note =
+        '<table><caption>c</caption><colgroup><col /></colgroup>' +
+        '<thead><tr><th rowspan="2">R</th><th colspan="2">H</th></tr></thead>' +
+        '<tbody><tr><td>a</td><td><table><tr><td>nested</td></tr></table></td></tr></tbody>' +
+        '<tfoot><tr><td colspan="3">f</td></tr></tfoot></table>';
+      el.document = htmlDoc(note);
+      await flush();
+      const rendered = new DOMParser().parseFromString(deepQuery('#htmlPreview').getAttribute('srcdoc'), 'text/html');
+      const table = rendered.querySelector('table');
+      expect(table, 'the note table should be rendered').to.not.be.null;
+      expect(table.querySelectorAll('th')).to.have.lengthOf(2);
+      expect(table.querySelectorAll('thead')).to.have.lengthOf(1);
+      expect(table.querySelectorAll('tfoot')).to.have.lengthOf(1);
+      expect(table.querySelectorAll('caption')).to.have.lengthOf(1);
+      expect(table.querySelectorAll('colgroup')).to.have.lengthOf(1);
+      expect(table.querySelectorAll('[colspan]')).to.have.lengthOf(2);
+      expect(table.querySelectorAll('[rowspan]')).to.have.lengthOf(1);
+      expect(table.querySelectorAll('table'), 'nested table').to.have.lengthOf(1);
+    });
+
+    test('the preview cannot execute scripts carried by the note', async () => {
+      el.document = htmlDoc('<img src="x" onerror="window.__noteXss = true">');
+      await flush();
+      const frame = deepQuery('#htmlPreview');
+      const sandbox = frame.getAttribute('sandbox');
+      expect(sandbox).to.not.be.null;
+      expect(sandbox.split(/\s+/)).to.not.include('allow-scripts');
     });
 
     test('view mode offers an edit action when the user can edit', async () => {
@@ -188,6 +218,24 @@ suite('nuxeo-note-editor', () => {
       await flush();
       expect(deepQuery('#editHtmlNote').hidden).to.be.true;
       expect(deepQuery('nuxeo-html-editor')).to.be.null;
+    });
+
+    test('switching to another note leaves the editor and returns to view mode', () => {
+      el.document = htmlDoc();
+      el._editHtml();
+      expect(el._editing).to.be.true;
+      el.document = { ...htmlDoc(), uid: 'note-2' };
+      expect(el._editing).to.be.false;
+      expect(el._viewMode).to.be.true;
+    });
+
+    test('refreshing the same note does not discard an edit in progress', () => {
+      el.document = htmlDoc();
+      el._editHtml();
+      el._toggleHtmlSource();
+      el.document = { ...htmlDoc(), properties: { ...htmlDoc().properties, 'dc:title': 'renamed' } };
+      expect(el._editing).to.be.true;
+      expect(el._viewMode).to.be.false;
     });
 
     test('_editHtml opens the rich text editor with the stored content', () => {
