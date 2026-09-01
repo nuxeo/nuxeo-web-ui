@@ -195,6 +195,42 @@ suite('nuxeo-note-editor', () => {
       expect(table.querySelectorAll('table'), 'nested table').to.have.lengthOf(1);
     });
 
+    test('the preview frame is sized to the note it renders', async () => {
+      el.document = htmlDoc('<p style="height: 400px">tall</p>');
+      await flush();
+      const frame = deepQuery('#htmlPreview');
+      await new Promise((resolve) => {
+        const ready = () => frame.contentDocument && frame.contentDocument.body;
+        if (ready()) {
+          resolve();
+        } else {
+          frame.addEventListener('load', resolve, { once: true });
+        }
+      });
+      // read the content height before resizing: growing the frame grows body.scrollHeight with it
+      const contentHeight = frame.contentDocument.body.scrollHeight;
+      expect(contentHeight).to.be.greaterThan(0);
+      el._resizeHtmlPreview({ target: frame });
+      expect(frame.style.height).to.equal(`${contentHeight + 32}px`);
+    });
+
+    test('sizing is skipped until the frame has a document to measure', () => {
+      const pending = { contentDocument: null, style: {} };
+      el._resizeHtmlPreview({ target: pending });
+      expect(pending.style.height).to.be.undefined;
+
+      const empty = { contentDocument: { body: null }, style: {} };
+      el._resizeHtmlPreview({ target: empty });
+      expect(empty.style.height).to.be.undefined;
+    });
+
+    test('a missing or empty note renders an empty preview', () => {
+      expect(el._computeHtmlPreview(undefined)).to.contain('<body></body>');
+      expect(el._computeHtmlPreview({})).to.contain('<body></body>');
+      expect(el._computeHtmlPreview({ properties: {} })).to.contain('<body></body>');
+      expect(el._computeHtmlPreview({ properties: { 'note:note': '' } })).to.contain('<body></body>');
+    });
+
     test('the preview cannot execute scripts carried by the note', async () => {
       el.document = htmlDoc('<img src="x" onerror="window.__noteXss = true">');
       await flush();
