@@ -87,6 +87,20 @@ the transitional state of a batched migration is exercised too. See WEBUI-2229.
         </template>
       </nuxeo-data-table-form>
     </nuxeo-data-table>
+
+    <!-- a legacy data table: by the time discovery runs the element has replaced the authored
+         `role="widget"` with its own `role="table"`, which is the state the third selector clause catches
+         and where the valid role has to survive the wrapping -->
+    <nuxeo-data-table role="table" items="{{document.properties.custom:strings2}}" editable="true" name="strings2">
+      <nuxeo-data-table-column name="Strings 2">
+        <template> [[item]] </template>
+      </nuxeo-data-table-column>
+      <nuxeo-data-table-form>
+        <template>
+          <nuxeo-input value="{{item}}" label="Custom Strings 2" type="text" name="strings2"></nuxeo-input>
+        </template>
+      </nuxeo-data-table-form>
+    </nuxeo-data-table>
   </template>
 
   <script>

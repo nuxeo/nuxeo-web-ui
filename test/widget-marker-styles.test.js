@@ -27,14 +27,19 @@ Polymer({
   _template: polymerHtml`
     <style include="nuxeo-styles"></style>
 
-    <div data-widget>
+    <div id="markerHost" data-widget>
       <div class="multiline" id="markerMultiline">value</div>
       <div id="markerPlain">value</div>
     </div>
 
-    <div role="widget">
+    <div id="legacyHost" role="widget">
       <div class="multiline" id="legacyMultiline">value</div>
       <div id="legacyPlain">value</div>
+    </div>
+
+    <!-- no marker: the baseline the widget mixin is measured against -->
+    <div id="unmarkedHost">
+      <div id="unmarkedPlain">value</div>
     </div>
   `,
 });
@@ -52,6 +57,14 @@ suite('widget marker styles', () => {
     // guards the comparison below: if the legacy rule ever stops applying, the assertion is void
     expect(legacy).to.be.equals('pre-line');
     expect(getComputedStyle(host.$.markerMultiline).whiteSpace).to.be.equals(legacy);
+  });
+
+  test('Should apply the shared widget mixin to a data-widget host', () => {
+    const legacy = getComputedStyle(host.$.legacyHost).marginBottom;
+    // guards the comparison below: without it the assertion would still hold if `--nuxeo-widget` stopped
+    // reaching either marker
+    expect(legacy).to.not.be.equals(getComputedStyle(host.$.unmarkedHost).marginBottom);
+    expect(getComputedStyle(host.$.markerHost).marginBottom).to.be.equals(legacy);
   });
 
   test('Should break long words in children of a data-widget', () => {
