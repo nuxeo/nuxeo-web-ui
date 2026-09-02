@@ -113,6 +113,24 @@ suite('nuxeo-document-grid-thumbnail', () => {
       await flush();
       expect(img.hasAttribute('loaded')).to.be.false;
     });
+
+    // The load event for an image that was still in flight when the tile moved on must not put the
+    // previous document's picture back on screen.
+    test('ignores a load event for a source that has been superseded', () => {
+      Object.defineProperty(img, 'currentSrc', {
+        configurable: true,
+        get: () => 'http://example.com/superseded.jpg',
+      });
+      Object.defineProperty(img, 'src', {
+        configurable: true,
+        get: () => 'http://example.com/current.jpg',
+      });
+
+      img.dispatchEvent(new Event('load'));
+
+      expect(element._thumbnailLoaded).to.be.false;
+      expect(img.hasAttribute('loaded')).to.be.false;
+    });
   });
 
   suite('_thumbnail', () => {
@@ -130,6 +148,18 @@ suite('nuxeo-document-grid-thumbnail', () => {
 
     test('should return empty string when doc is null', () => {
       expect(element._thumbnail(null)).to.equal('');
+    });
+
+    // WEBUI-340: a recycled tile meets the same document again every time the user scrolls back
+    // over it, so decorating the URL must neither accumulate nor rewrite the shared entry.
+    test('does not mutate the document and stays stable across repeated calls', () => {
+      const doc = { uid: '1', contextParameters: { thumbnail: { url: 'http://example.com/thumb.jpg' } } };
+
+      const first = element._thumbnail(doc);
+      const second = element._thumbnail(doc);
+
+      expect(second).to.equal(first);
+      expect(doc.contextParameters.thumbnail.url).to.equal('http://example.com/thumb.jpg');
     });
   });
 

@@ -118,6 +118,38 @@ suite('nuxeo-document-list-item', () => {
       await flush();
       expect(element.hasAttribute('placeholder')).to.be.false;
     });
+
+    // The load event for an image that was still in flight when the row moved on must not put the
+    // previous document's picture back on screen.
+    test('ignores a load event for a source that has been superseded', () => {
+      Object.defineProperty(img, 'currentSrc', {
+        configurable: true,
+        get: () => 'http://example.com/superseded.jpg',
+      });
+      Object.defineProperty(img, 'src', {
+        configurable: true,
+        get: () => 'http://example.com/current.jpg',
+      });
+
+      img.dispatchEvent(new Event('load'));
+
+      expect(element._thumbnailLoaded).to.be.false;
+      expect(img.hasAttribute('loaded')).to.be.false;
+    });
+
+    // A row is taken out of the tab order while it has nothing to announce, and put back exactly
+    // where the results view had it once the document arrives.
+    test('keeps a placeholder row out of the tab order and restores it', async () => {
+      element.setAttribute('tabindex', '0');
+
+      element.doc = {};
+      await flush();
+      expect(element.getAttribute('tabindex')).to.equal('-1');
+
+      element.doc = docWithThumbnail('4');
+      await flush();
+      expect(element.getAttribute('tabindex')).to.equal('0');
+    });
   });
 
   suite('_thumbnail', () => {
@@ -209,6 +241,26 @@ suite('nuxeo-document-list-item', () => {
         contextParameters: { thumbnail: { url: 'http://example.com/x.png?foo=1' } },
       };
       expect(element._thumbnail(doc)).to.include('&clientReason=view');
+    });
+
+    // WEBUI-340: a recycled row meets the same document again every time the user scrolls back
+    // over it, so decorating the URL must neither accumulate nor rewrite the shared entry.
+    test('does not mutate the document and stays stable across repeated calls', () => {
+      window.Nuxeo = window.Nuxeo || {};
+      window.Nuxeo.UI = window.Nuxeo.UI || {};
+      window.Nuxeo.UI.config = window.Nuxeo.UI.config || {};
+      window.Nuxeo.UI.config.url = { followRedirect: 'false' };
+      const doc = {
+        uid: '1',
+        contextParameters: { thumbnail: { url: 'http://example.com/x.png' } },
+      };
+
+      const first = element._thumbnail(doc);
+      const second = element._thumbnail(doc);
+
+      expect(first).to.equal('http://example.com/x.png?clientReason=view');
+      expect(second).to.equal(first);
+      expect(doc.contextParameters.thumbnail.url).to.equal('http://example.com/x.png');
     });
   });
 

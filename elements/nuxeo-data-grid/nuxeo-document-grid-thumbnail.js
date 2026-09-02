@@ -322,11 +322,14 @@ Polymer({
       doc.contextParameters.thumbnail &&
       doc.contextParameters.thumbnail.url
     ) {
-      if (!this.isFollowRedirectEnabled()) {
-        const splitter = doc.contextParameters.thumbnail.url.indexOf('?') > -1 ? '&' : '?';
-        doc.contextParameters.thumbnail.url = `${doc.contextParameters.thumbnail.url}${splitter}clientReason=view`;
+      const { url } = doc.contextParameters.thumbnail;
+      // Derive the decorated URL instead of writing it back onto the document. A recycled tile
+      // meets the same document again whenever the user scrolls back over it, and mutating the
+      // shared entry appended clientReason=view once per visit (...?clientReason=view&clientReason=view).
+      if (this.isFollowRedirectEnabled() || url.indexOf('clientReason=') > -1) {
+        return url;
       }
-      return doc.contextParameters.thumbnail.url;
+      return `${url}${url.indexOf('?') > -1 ? '&' : '?'}clientReason=view`;
     }
     return '';
   },
@@ -414,7 +417,15 @@ Polymer({
     applyThumbnailFallback(e.target);
   },
 
-  _onLoad() {
+  _onLoad(e) {
+    // A load event can still be delivered for a request that has since been superseded, because
+    // the tile was rebound to another document while that image was in flight. Honouring it would
+    // put the previous document's picture back on screen, so only trust a load whose completed
+    // candidate (currentSrc) is the one currently requested.
+    const img = e.target;
+    if (img.currentSrc && img.src && img.currentSrc !== img.src) {
+      return;
+    }
     this._thumbnailLoaded = true;
   },
 
