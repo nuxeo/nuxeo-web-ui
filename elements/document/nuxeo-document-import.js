@@ -295,6 +295,10 @@ Polymer({
         @apply --layout-wrap;
         flex-shrink: 0;
         gap: 4px 8px;
+        /* Lets the navigation group react to the bar's own rendered width instead of the
+           viewport's, so the layout below adapts the same way at any zoom level or screen
+           resolution instead of only around the width a fixed viewport breakpoint assumed. */
+        container-type: inline-size;
       }
 
       /* Groups the navigation buttons so they wrap as a single block instead of each
@@ -313,11 +317,39 @@ Polymer({
         margin: 0;
       }
 
+      /* Below this width the five action buttons no longer fit on a single line. Give the
+         navigation group a row of its own above the cancel/create row so none of the
+         buttons is misaligned or clipped by the dialog. */
+      @container (max-width: 620px) {
+        .navigation {
+          order: -1;
+          flex: 1 0 100%;
+        }
+      }
+
+      /* At higher zoom the group's own row can still be too narrow to fit all three
+         buttons side by side, which previously wrapped them unevenly (two on one line,
+         one alone) and grew the bar past the dialog's bottom edge. Stack them instead so
+         the group keeps working at any zoom level. */
+      @container (max-width: 340px) {
+        .navigation {
+          @apply --layout-vertical;
+        }
+      }
+
       /* Lets the editor/side-panel area give up space instead of pushing the action bar
          past the bottom edge of the dialog. */
       .customize-content {
         min-height: 0;
         overflow: auto;
+      }
+
+      /* At extreme zoom the dialog itself can be too short to fit the content area and
+         the (possibly stacked) action bar together, even with the content area shrunk to
+         nothing. Make the whole stage scrollable so the buttons stay reachable instead of
+         being clipped past the dialog's bottom edge. */
+      div[name='customize'] {
+        overflow-y: auto;
       }
 
       .add-more .importActions {
@@ -331,14 +363,6 @@ Polymer({
       @media (max-width: 1024px) {
         .file-to-import {
           width: calc(100% - 2em);
-        }
-
-        /* Below this width the five action buttons no longer fit on a single line, which is
-           what happens at 400% zoom. Give the navigation group a row of its own above the
-           cancel/create row so none of the buttons is misaligned or clipped by the dialog. */
-        .navigation {
-          order: -1;
-          flex: 1 0 100%;
         }
       }
 
