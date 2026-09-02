@@ -79,6 +79,9 @@ Polymer({
         border: none;
         cursor: pointer;
         font: inherit;
+        /* WCAG 2.1 SC 1.4.12: the UA stylesheet resets text spacing on form controls, so opt back in */
+        letter-spacing: inherit;
+        word-spacing: inherit;
       }
 
       button.link:hover {

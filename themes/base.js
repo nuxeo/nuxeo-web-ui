@@ -405,7 +405,11 @@ const template = html`
           overflow: hidden;
           text-overflow: ellipsis;
           font-weight: 400 !important;
-          letter-spacing: 0.005em !important;
+          /*
+           * WCAG 2.1 SC 1.4.12: labels live inside widget shadow roots, so pinning letter-spacing
+           * here makes it unreachable for a user text-spacing stylesheet. Inherit it instead.
+           */
+          letter-spacing: inherit;
           font-family: var(--nuxeo-app-font);
         }
 
