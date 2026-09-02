@@ -100,6 +100,15 @@ Polymer({
         left: 0;
         right: 0;
         margin: auto;
+        opacity: 0;
+      }
+
+      /* WEBUI-340: the transition lives on the loaded state only, so revealing the thumbnail fades
+         in while hiding it (on recycle) is instant — a fade-out would keep the stale image on
+         screen, which is exactly what we are trying to avoid. */
+      .thumbnailContainer img[loaded] {
+        opacity: 1;
+        transition: opacity 0.15s ease-in;
       }
 
       .dataContainer {
@@ -218,7 +227,14 @@ Polymer({
 
     <div class="bubbleBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="thumbnailContainer" on-tap="handleClick" tabindex="0">
-        <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
+        <img
+          crossorigin="anonymous"
+          src="[[_thumbnailSrc]]"
+          loaded$="[[_thumbnailLoaded]]"
+          on-load="_onLoad"
+          on-error="_onError"
+          alt$="[[doc.title]]"
+        />
       </div>
       <template is="dom-if" if="[[_hasDocument(doc)]]">
         <a
@@ -282,6 +298,17 @@ Polymer({
     index: {
       type: Number,
       reflectToAttribute: true,
+    },
+
+    _thumbnailSrc: {
+      type: String,
+      computed: '_thumbnail(doc)',
+      observer: '_thumbnailSrcChanged',
+    },
+
+    _thumbnailLoaded: {
+      type: Boolean,
+      value: false,
     },
   },
 
@@ -385,5 +412,20 @@ Polymer({
   // (cross-origin) thumbnail fails to load, matching nuxeo-document-thumbnail.
   _onError(e) {
     applyThumbnailFallback(e.target);
+  },
+
+  _onLoad() {
+    this._thumbnailLoaded = true;
+  },
+
+  // WEBUI-340: iron-list recycles a small pool of tiles, so this element is rebound to a different
+  // document as the user scrolls. Text bindings update synchronously but the browser keeps
+  // painting the previous document's thumbnail until the new one has been fetched and decoded,
+  // which shows the wrong picture under the right title. Dropping the loaded flag as soon as the
+  // source changes hides the image until its own load event, so the tile falls back to the neutral
+  // thumbnail box in the meantime. This is the behaviour iron-image provides and that the Polymer
+  // team recommends for recycled lists (PolymerElements/iron-list#481).
+  _thumbnailSrcChanged() {
+    this._thumbnailLoaded = false;
   },
 });

@@ -95,6 +95,24 @@ Polymer({
         left: 0;
         right: 0;
         margin: auto;
+        opacity: 0;
+      }
+
+      /* WEBUI-340: the transition lives on the loaded state only, so revealing the thumbnail fades
+         in while hiding it (on recycle) is instant — a fade-out would keep the stale image on
+         screen, which is exactly what we are trying to avoid. */
+      .thumbnailContainer img[loaded] {
+        opacity: 1;
+        transition: opacity 0.15s ease-in;
+      }
+
+      /* WEBUI-340: rows bound to a not-yet-fetched entry keep their box but show no text, instead
+         of an empty title and an empty type tag. Hiding by visibility keeps the layout stable (and
+         keeps the row out of the accessibility tree) where display none would make the list jump. */
+      :host([placeholder]) .dataContainer,
+      :host([placeholder]) .actions,
+      :host([placeholder]) .select {
+        visibility: hidden;
       }
 
       .dataContainer {
@@ -227,7 +245,14 @@ Polymer({
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
         <div class="vignette thumbnailContainer" on-tap="handleClick" on-keydown="_handleKeydown">
-          <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
+          <img
+            crossorigin="anonymous"
+            src="[[_thumbnailSrc]]"
+            loaded$="[[_thumbnailLoaded]]"
+            on-load="_onLoad"
+            on-error="_onError"
+            alt$="[[doc.title]]"
+          />
         </div>
         <div class="dataContainer flex" on-tap="handleClick" on-keydown="_handleKeydown">
           <div class="horizontal layout center" tabindex="0">
@@ -283,6 +308,23 @@ Polymer({
     index: {
       type: Number,
       reflectToAttribute: true,
+    },
+
+    placeholder: {
+      type: Boolean,
+      computed: '_isPlaceholder(doc)',
+      reflectToAttribute: true,
+    },
+
+    _thumbnailSrc: {
+      type: String,
+      computed: '_thumbnail(doc)',
+      observer: '_thumbnailSrcChanged',
+    },
+
+    _thumbnailLoaded: {
+      type: Boolean,
+      value: false,
     },
   },
 
@@ -353,5 +395,24 @@ Polymer({
   _onError(event) {
     const thumbnail = event.target;
     applyThumbnailFallback(thumbnail);
+  },
+
+  _onLoad() {
+    this._thumbnailLoaded = true;
+  },
+
+  // WEBUI-340: iron-list recycles a small pool of rows, so this element is rebound to a different
+  // document as the user scrolls. Text bindings update synchronously but the browser keeps
+  // painting the previous document's thumbnail until the new one has been fetched and decoded,
+  // which shows the wrong picture next to the right title. Dropping the loaded flag as soon as the
+  // source changes hides the image until its own load event, so the row falls back to the neutral
+  // thumbnail box in the meantime. This is the behaviour iron-image provides and that the Polymer
+  // team recommends for recycled lists (PolymerElements/iron-list#481).
+  _thumbnailSrcChanged() {
+    this._thumbnailLoaded = false;
+  },
+
+  _isPlaceholder(doc) {
+    return !doc || !doc.uid;
   },
 });
