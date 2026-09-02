@@ -206,7 +206,7 @@ Polymer({
       },
     ];
     Object.keys(e.detail.response.doctypes)
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
       .forEach((docType) => {
         docTypes.push({
           id: docType,

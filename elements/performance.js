@@ -152,15 +152,15 @@ export const Performance = {
   },
 
   getNetworkStats() {
-    const resources = this.getResources();
-    const lastResource = this.getResources()
-      .sort((a, b) => a.startTime > b.startTime)
-      .pop();
+    // getResources() reports null where the resource timing API is unavailable
+    const resources = this.getResources() || [];
+    // sort a copy, so that neither the ordering nor the length of the counted list is disturbed
+    const lastResource = [...resources].sort((a, b) => a.startTime - b.startTime).pop();
     return {
       finish: lastResource && lastResource.startTime + lastResource.duration,
       requestCount: resources.length,
-      transferSize: resources.map((resource) => resource.transfered).reduce((a, b) => a + b),
-      size: resources.map((resource) => resource.size).reduce((a, b) => a + b),
+      transferSize: resources.map((resource) => resource.transfered).reduce((a, b) => a + b, 0),
+      size: resources.map((resource) => resource.size).reduce((a, b) => a + b, 0),
     };
   },
 
