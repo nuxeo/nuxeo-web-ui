@@ -55,13 +55,7 @@ export const NuxeoRecycledThumbnailBehavior = {
   },
 
   _thumbnail(doc) {
-    if (
-      doc &&
-      doc.uid &&
-      doc.contextParameters &&
-      doc.contextParameters.thumbnail &&
-      doc.contextParameters.thumbnail.url
-    ) {
+    if (doc?.uid && doc.contextParameters?.thumbnail?.url) {
       const { url } = doc.contextParameters.thumbnail;
       // Derive the decorated URL instead of writing it back onto the document. A recycled host
       // meets the same document again whenever the user scrolls back over it, and mutating the
