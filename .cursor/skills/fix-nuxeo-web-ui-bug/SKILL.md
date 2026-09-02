@@ -63,10 +63,40 @@ immediately proceed — do not wait for approval.** Re-plan on the fly if scope 
 - Read the description **and every comment** (repro steps, expected vs actual, affected
   versions). Note `fixVersions` — they map to the base branches you must target.
 
+## Phase 1.5 — Take an isolated ticket workspace (before touching anything)
+**Never work on a ticket in the shared checkout, and never `git stash` to make room for it.** The
+shared clone is usually mid-flight on someone else's ticket, and a stash is a global stack: another
+agent can pop yours, or you can pop theirs. Instead give this ticket its own clone, node_modules,
+Docker container, host port and build dirs:
+```bash
+bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> <base> \
+  --branch <type>-WEBUI-<id>-<kebab-summary>-<base>
+. <printed path>/env.sh     # exports NX_WT, NX_BASE, NX_EVIDENCE, NX_CONTAINER, NX_PORT, NX_URL, NX_DIST_*
+```
+Do this **once per base** (`lts-2025` and `maintenance-3.1.x` each get their own workspace), then
+**move your working directory to `$NX_WT` and run every later command from there.** The script is
+idempotent — re-running it re-prints `env.sh` — and `--remove` tears the workspace down at the end
+(Phase 10) while keeping the evidence. See the header of the script for all options.
+
+Why it matters: one working tree can only be on one branch, so agents sharing the shared clone fight
+over `HEAD`, over `node_modules`, and over the stash stack. A git *worktree* is not enough — it still
+shares refs, config and stashes with its parent.
+
+**Parallel-safety rules that follow from this:**
+- Run everything from `$NX_WT`; never `git`-write in the shared reference checkout.
+- Never `git stash` anywhere. If you must set changes aside, use `git diff > /tmp/<ticket>.patch`.
+- Never kill processes by a shared pattern (`pkill -f web-test-runner`, `pkill -f node`, `docker rm`
+  on a container you did not create). Those match another agent's run and kill it mid-flight — a
+  suite that dies with "the browser disconnected" and exit code 143 is usually someone else's stray
+  `pkill`, not your change. Kill only PIDs you started, and only your own `$NX_CONTAINER`.
+- If the shared checkout is dirty when you arrive, **leave it alone** — the workspace means you
+  never need it to be clean.
+
 ## Phase 2 — Reproduce + capture evidence (first hands-on step)
-**Reproduce the bug on the `lts-2025` branch before creating any feature branch or touching code.**
-Confirming the bug exists — and capturing the "before" evidence — is the first thing you do after
-understanding the ticket. Check out the base first so the repro reflects released code:
+**Reproduce the bug on the base branch before writing any code.** Confirming the bug exists — and
+capturing the "before" evidence — is the first thing you do after taking the workspace. The
+workspace is already checked out at the base (or at the `--branch` you asked for, which is cut from
+it), so the repro reflects released code. Only if you are not using a workspace:
 ```bash
 git fetch origin lts-2025
 git switch -c lts-2025 origin/lts-2025 2>/dev/null || git switch lts-2025 && git pull --ff-only
@@ -205,9 +235,11 @@ instance's root html tree into `ui/elements/` so they resolve. Patching the mark
 minified code is unreliable (the error-handling code path and property names drift between versions).
 
 ## Phase 3 — Branches (both bases)
-**Only after the bug is reproduced on `lts-2025`**, create one feature branch per base — cut from the
-bases, not from your local repro state — named per the `nuxeo-web-ui-pr` skill
-(`<type>-WEBUI-<id>-<kebab-summary>-<base>`):
+**Only after the bug is reproduced on `lts-2025`**, make sure there is one feature branch per base —
+cut from the bases, not from your local repro state — named per the `nuxeo-web-ui-pr` skill
+(`<type>-WEBUI-<id>-<kebab-summary>-<base>`). If you passed `--branch` to
+`new-ticket-workspace.sh` (Phase 1.5) the branch already exists in each workspace and there is
+nothing to do here; each base lives in its own workspace, so you never switch branches. Otherwise:
 ```bash
 git fetch origin lts-2025 maintenance-3.1.x
 git switch -c <type>-WEBUI-<id>-<summary>-lts-2025 origin/lts-2025
@@ -385,8 +417,12 @@ Reference the evidence in both formats: `~/Desktop/<TICKET-ID>/<TICKET-ID>-befor
 `-after.{png,mp4}`.
 
 ## Phase 10 — Clean up & report
-- Tear down the throwaway repro container(s): `docker rm -f nx-<ticket>`. Never remove or disturb
-  pre-existing/live containers.
+- Tear down each ticket workspace once its PR is open — this also removes the container and the
+  build dirs, and keeps the evidence:
+  `bash .cursor/skills/fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh <TICKET-ID> <base> --remove`
+  (it refuses to delete uncommitted work unless you add `--force`). Without a workspace, remove the
+  throwaway repro container by hand: `docker rm -f nx-<ticket>`. Never remove or disturb
+  pre-existing/live containers, or another ticket's workspace.
 - Leave the evidence files in `~/Desktop/<TICKET-ID>/` so they can be attached to the ticket.
 - Report the final CI state of both PRs. If a long cross-repo check (e.g. `web-ui`) is still
   running, say so explicitly — do **not** claim green until it is.
@@ -404,6 +440,8 @@ Reference the evidence in both formats: `~/Desktop/<TICKET-ID>/<TICKET-ID>-befor
 
 ## Guardrails (these still hold in YOLO mode)
 - Never force-push to `lts-2025` / `maintenance-3.1.x`; only to feature branches (`--force-with-lease`).
+- Never `git stash`, never git-write in the shared reference checkout, and never kill processes or
+  containers by a pattern that could match another agent's run (Phase 1.5).
 - Never edit git config silently beyond the one-time signing setup; confirm global config changes.
 - Keep the PR scoped to the fix — never bundle unrelated files.
 - YOLO relaxes *confirmation gates only*. It does **not** authorize destructive/irreversible git

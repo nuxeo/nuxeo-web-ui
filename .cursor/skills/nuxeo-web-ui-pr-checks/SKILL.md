@@ -64,6 +64,19 @@ rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s ../../../nuxeo-elemen
 - **`package-lock.json` churn**: npm version differences add/remove `"peer": true`
   lines. Don't commit it: `git checkout -- package-lock.json`.
 
+- **"Tests were interrupted because the browser disconnected" with `0 passed, 0 failed`**: almost
+  never your change. `npm test` exiting `143` (SIGTERM) with no browser logs means something outside
+  the run killed it — most often another agent's helper script doing a machine-wide
+  `pkill -f web-test-runner`. Confirm with `pgrep -fl web-test-runner` (you will see the *other*
+  script's shell in the list), then either wait for it to finish or run the suite under a name that
+  pattern cannot match:
+
+```bash
+node node_modules/@web/test-runner/dist/bin.js --config web-test-runner.config.mjs
+```
+
+  Never write such a `pkill` yourself — kill only PIDs you started.
+
 - **Flaky `nuxeo-document-tree` test** (`test/nuxeo-document-tree.test.js` "Tree should
   collapse when clicking on a document"): timing flake unrelated to most changes. If it
   fails *only* in CI but passes locally, re-run the job instead of "fixing" it:
