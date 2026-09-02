@@ -23,7 +23,7 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
-import { applyThumbnailFallback } from '../common-utils.js';
+import { applyThumbnailFallback, blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -56,7 +56,7 @@ Polymer({
         position: relative;
         width: 220px;
         height: 260px;
-        background-color: var(--nuxeo-box);
+        background-color: var(--hyland-document-grid-thumbnail-background, var(--nuxeo-box));
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
         padding: 0;
         filter:
@@ -327,8 +327,24 @@ Polymer({
   },
 
   _onCheckBoxTap(e) {
-    // WEBUI-1262 : prevents checkbox selection during tab navigation
-    if (e.type === 'tap' || (e.key !== 'Tab' && e.key !== 'Shift')) {
+    // WEBUI-1262 : prevents checkbox selection during tab navigation. Only an unmodified Enter or
+    // Space activates a control, so everything else — arrows, bare modifiers, shortcuts such as
+    // Ctrl+Enter — has to leave the selection alone instead of silently flipping it while the user
+    // moves around the results. Mouse taps keep going through so shift-clicking still extends a
+    // range. A keyboard activation can also reach us as a synthetic tap wrapping the original
+    // keydown (nuxeo-default-search-results._triggerItemToggle), so the guard reads that source
+    // event rather than the wrapper.
+    const source = e.type === 'tap' ? e.detail?.sourceEvent || {} : e;
+    if (typeof source.key !== 'string') {
+      if (e.type === 'tap') {
+        this._toogleSelect(e);
+      }
+      return;
+    }
+    if (
+      (source.key === 'Enter' || source.key === ' ') &&
+      !(source.ctrlKey || source.metaKey || source.altKey || source.shiftKey)
+    ) {
       this._toogleSelect(e);
     }
   },
@@ -336,6 +352,9 @@ Polymer({
   _toogleSelect(e) {
     this.selected = !this.selected;
     this.fire('selected', { index: this.index, shiftKey: e.type === 'tap' ? e.detail.sourceEvent.shiftKey : false });
+    // WEBUI-2056 / WEBUI-2175: clear focus from the check button on a pointer deselect so the
+    // `:host(:focus)` rule stops keeping the selection tick on screen (see common-utils).
+    blurSelectionCheckOnPointerDeselect(this, e);
   },
 
   _selectedItemsChanged() {

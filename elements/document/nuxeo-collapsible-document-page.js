@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { BrandingBehavior } from '../behaviors/nuxeo-branding-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '../nuxeo-document-info-bar/nuxeo-document-info-bar.js';
@@ -40,6 +41,21 @@ Polymer({
     <style include="nuxeo-styles">
       .page {
         @apply --layout-vertical;
+        padding: 0;
+      }
+      /* WEBUI-1935 (gated): Hyland document-page padding only on branded themes. */
+      :host([rebrand]) .page {
+        padding: var(--hyland-document-page-padding, 0);
+      }
+
+      #detailsCard {
+        border-bottom: none;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+      }
+      /* WEBUI-1935 (gated): Hyland details-card border/shadow only on branded themes. */
+      :host([rebrand]) #detailsCard {
+        border-bottom: var(--hyland-details-card-border-bottom, none);
+        box-shadow: var(--hyland-details-card-box-shadow, 0 3px 5px rgba(0, 0, 0, 0.04));
       }
 
       .details {
@@ -119,7 +135,7 @@ Polymer({
   `,
 
   is: 'nuxeo-collapsible-document-page',
-  behaviors: [LayoutBehavior],
+  behaviors: [LayoutBehavior, BrandingBehavior],
 
   properties: {
     document: {

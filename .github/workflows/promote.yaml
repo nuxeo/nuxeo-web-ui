@@ -41,7 +41,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          OLD_VERSION=$(npx -c 'echo "$npm_package_version"')
+          OLD_VERSION=$(npx --no-install -c 'echo "$npm_package_version"')
           npm version $VERSION --no-git-tag-version
           pushd packages/nuxeo-web-ui-ftest/
           npm version $VERSION --no-git-tag-version
@@ -90,10 +90,11 @@ jobs:
         env:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+          CONNECT_PREPROD_AUTH: ${{ secrets.CONNECT_PREPROD_AUTH }}
         run: |
           PADDED=$(printf '%03d' $(echo ${{ github.event.inputs.version }} | sed -r s/[0-9]+\.[0-9]+\.[0-9]+-rc\.\([0-9]+\)/\\1/g))
           PADDED_VERSION=$(echo ${{ github.event.inputs.version }} | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+-rc\.)[0-9]+/\\1$PADDED/g")
-          curl -o $PACKAGE.zip -L -u "${{ secrets.CONNECT_PREPROD_AUTH }}" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=$PADDED_VERSION"
+          curl -o $PACKAGE.zip -L --proto '=https' --proto-redir '=https' -u "$CONNECT_PREPROD_AUTH" "$CONNECT_PREPROD_URL/site/marketplace/package/nuxeo-web-ui/download?version=$PADDED_VERSION"
           # Extract and remove RC from package.xml
           unzip -d $PACKAGE $PACKAGE.zip && rm $PACKAGE.zip
           pushd $PACKAGE
@@ -123,14 +124,16 @@ jobs:
         env:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
-        run: curl -i -u "${{ secrets.CONNECT_PREPROD_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
+          CONNECT_PREPROD_AUTH: ${{ secrets.CONNECT_PREPROD_AUTH }}
+        run: curl -i -u "$CONNECT_PREPROD_AUTH" -F package=@$PACKAGE.zip "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
 
       - name: Push promoted Web UI to Connect PROD
         if: ${{ github.event.inputs.dryRun == 'false' }}
         env:
           PACKAGE: nuxeo-web-ui-${{ env.VERSION }}
           CONNECT_URL: https://connect.nuxeo.com/nuxeo
-        run: curl -i -u "${{ secrets.CONNECT_AUTH }}" -F package=@$PACKAGE.zip "$CONNECT_URL/site/marketplace/upload?batch=true"
+          CONNECT_AUTH: ${{ secrets.CONNECT_AUTH }}
+        run: curl -i -u "$CONNECT_AUTH" -F package=@$PACKAGE.zip "$CONNECT_URL/site/marketplace/upload?batch=true"
 
       - uses: actions/checkout@v6
         with:
@@ -144,7 +147,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          OLD_SNAPSHOT=$(npx -c 'echo "$npm_package_version"')
+          OLD_SNAPSHOT=$(npx --no-install -c 'echo "$npm_package_version"')
           # bump version to next SNAPSHOT and align on the corresponding Elements release candidate
           NEW_SNAPSHOT=$NEW_VERSION-SNAPSHOT
           npm version $NEW_SNAPSHOT --no-git-tag-version

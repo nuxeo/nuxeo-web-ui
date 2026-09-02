@@ -3,7 +3,15 @@ name: Crowdin Sync
 
 on:
   # Make workflow reusable, to be called by the scheduled crowdin workflow in the default branch
+  # Secrets are declared explicitly so callers pass only these three rather than inheriting every repository secret.
   workflow_call:
+    secrets:
+      CROWDIN_PROJECT_ID:
+        required: true
+      CROWDIN_PERSONAL_TOKEN:
+        required: true
+      WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN:
+        required: true
 
   # Sync when a commit is done on lts-2025
   push:
@@ -29,7 +37,7 @@ jobs:
 
       - name: Crowdin Action
         id: crowdin-sync
-        uses: crowdin/github-action@v2.16.2
+        uses: crowdin/github-action@8868a33591d21088edfc398968173a3b98d51706 # v2.16.2
         with:
           # Skip the action's internal ref checkout because this workflow already checks out lts-2025 explicitly.
           skip_ref_checkout: true

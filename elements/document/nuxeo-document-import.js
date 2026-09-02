@@ -82,7 +82,7 @@ Polymer({
       }
 
       .file-to-import {
-        height: 58px;
+        min-height: 58px;
         margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
         padding: 0.8em 1em;
@@ -104,7 +104,7 @@ Polymer({
         position: relative;
         border: 2px dashed var(--divider-color);
         border-radius: 4px;
-        background-color: rgba(0, 0, 0, 0.05);
+        background-color: var(--hyland-csv-import-background, rgba(0, 0, 0, 0.05));
         min-height: 100px;
         margin: 1em 2em 5em;
       }
@@ -136,7 +136,7 @@ Polymer({
         display: block;
         font-weight: normal;
         font-size: 0.75rem;
-        line-height: 10px;
+        line-height: 1.5;
         margin-top: 4px;
       }
 
@@ -149,7 +149,7 @@ Polymer({
       }
 
       #dropzone .file-error {
-        white-space: nowrap;
+        white-space: normal;
       }
 
       #sidePanel {
@@ -188,7 +188,7 @@ Polymer({
         font-weight: bold;
         text-transform: none;
         color: var(--secondary-text-color);
-        height: 88px;
+        min-height: 88px;
       }
 
       .file-overview:hover {
@@ -212,7 +212,8 @@ Polymer({
         font-weight: bold;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
-        height: 40px; /* XXX: 2 * line height, consider extracting variable at the base theme leve */
+        /* min-height, not height: the two clamped lines must still fit when the user increases line spacing */
+        min-height: 40px;
         word-break: break-all;
         overflow: hidden;
       }
@@ -310,8 +311,8 @@ Polymer({
 
       .error {
         border-left: 4px solid var(--nuxeo-warn-text);
-        color: var(--primary-text-color);
         padding-left: 8px;
+        color: var(--nuxeo-text-default);
       }
 
       .upload-error {
@@ -369,6 +370,9 @@ Polymer({
         border: none;
         cursor: pointer;
         font: inherit;
+        /* WCAG 2.1 SC 1.4.12: the UA stylesheet resets text spacing on form controls, so opt back in */
+        letter-spacing: inherit;
+        word-spacing: inherit;
       }
 
       button.link:hover {

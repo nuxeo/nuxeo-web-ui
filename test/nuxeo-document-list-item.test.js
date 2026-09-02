@@ -215,6 +215,24 @@ suite('nuxeo-document-list-item', () => {
     });
   });
 
+  // WEBUI-2056 / WEBUI-2175: integration check that a mouse deselect through `_toogleSelect`
+  // clears focus from the check button (the shared helper is unit-tested in common-utils).
+  suite('_toogleSelect blur-on-deselect wiring', () => {
+    test('mouse deselect clears shadowRoot.activeElement', () => {
+      const button = element.shadowRoot.querySelector('.select paper-icon-button');
+      element.selected = true;
+      button.focus();
+      // Some headless/virtualized environments ignore `.focus()`; the blur behavior is only
+      // meaningful once the control is actually focused, so skip the assertion otherwise.
+      if (element.shadowRoot.activeElement !== button) {
+        return;
+      }
+      element._toogleSelect({ type: 'tap', detail: { sourceEvent: new MouseEvent('click') } });
+      expect(element.selected).to.be.false;
+      expect(element.shadowRoot.activeElement).to.not.equal(button);
+    });
+  });
+
   suite('_handleKeydown', () => {
     test('Enter on non-checkbox stops propagation and clicks target', () => {
       const clickSpy = sinon.spy();
