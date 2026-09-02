@@ -23,7 +23,8 @@ import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-download-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-favorites-toggle-button.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
-import { applyThumbnailFallback, blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
+import { blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
+import { NuxeoRecycledThumbnailBehavior } from '../behaviors/nuxeo-recycled-thumbnail-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
@@ -271,7 +272,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-grid-thumbnail',
-  behaviors: [FormatBehavior, RoutingBehavior],
+  behaviors: [FormatBehavior, RoutingBehavior, NuxeoRecycledThumbnailBehavior],
 
   properties: {
     doc: {
@@ -299,46 +300,9 @@ Polymer({
       type: Number,
       reflectToAttribute: true,
     },
-
-    _thumbnailSrc: {
-      type: String,
-      computed: '_thumbnail(doc)',
-      observer: '_thumbnailSrcChanged',
-    },
-
-    _thumbnailLoaded: {
-      type: Boolean,
-      value: false,
-    },
   },
 
   observers: ['_selectedItemsChanged(selectedItems.splices)', '_updateAriaLabel(doc)'],
-
-  _thumbnail(doc) {
-    if (
-      doc &&
-      doc.uid &&
-      doc.contextParameters &&
-      doc.contextParameters.thumbnail &&
-      doc.contextParameters.thumbnail.url
-    ) {
-      const { url } = doc.contextParameters.thumbnail;
-      // Derive the decorated URL instead of writing it back onto the document. A recycled tile
-      // meets the same document again whenever the user scrolls back over it, and mutating the
-      // shared entry appended clientReason=view once per visit (...?clientReason=view&clientReason=view).
-      if (this.isFollowRedirectEnabled() || url.indexOf('clientReason=') > -1) {
-        return url;
-      }
-      return `${url}${url.indexOf('?') > -1 ? '&' : '?'}clientReason=view`;
-    }
-    return '';
-  },
-
-  isFollowRedirectEnabled() {
-    const followRedirect =
-      Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.url && Nuxeo.UI.config.url.followRedirect;
-    return followRedirect ? String(followRedirect).toLowerCase() === 'true' : false;
-  },
 
   handleClick(e) {
     if (this.selectionMode) {
@@ -409,34 +373,5 @@ Polymer({
       this.removeAttribute('role');
       this.removeAttribute('aria-label');
     }
-  },
-
-  // ELEMENTS-1616: show a transparent pixel instead of a broken-image icon when a
-  // (cross-origin) thumbnail fails to load, matching nuxeo-document-thumbnail.
-  _onError(e) {
-    applyThumbnailFallback(e.target);
-  },
-
-  _onLoad(e) {
-    // A load event can still be delivered for a request that has since been superseded, because
-    // the tile was rebound to another document while that image was in flight. Honouring it would
-    // put the previous document's picture back on screen, so only trust a load whose completed
-    // candidate (currentSrc) is the one currently requested.
-    const img = e.target;
-    if (img.currentSrc && img.src && img.currentSrc !== img.src) {
-      return;
-    }
-    this._thumbnailLoaded = true;
-  },
-
-  // WEBUI-340: iron-list recycles a small pool of tiles, so this element is rebound to a different
-  // document as the user scrolls. Text bindings update synchronously but the browser keeps
-  // painting the previous document's thumbnail until the new one has been fetched and decoded,
-  // which shows the wrong picture under the right title. Dropping the loaded flag as soon as the
-  // source changes hides the image until its own load event, so the tile falls back to the neutral
-  // thumbnail box in the meantime. This is the behaviour iron-image provides and that the Polymer
-  // team recommends for recycled lists (PolymerElements/iron-list#481).
-  _thumbnailSrcChanged() {
-    this._thumbnailLoaded = false;
   },
 });
