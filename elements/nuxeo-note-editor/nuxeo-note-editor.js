@@ -232,13 +232,17 @@ Polymer({
   },
 
   _documentChanged(document, previous) {
-    this._value = this.document.properties['note:note'];
     // Editing state belongs to the document being edited: showing a different note must not
-    // drop the reader straight into the editor. A refresh of the same document is left alone
-    // so an in-progress edit survives it.
-    if (previous && previous.uid !== document.uid) {
+    // drop the reader straight into the editor.
+    if (previous && previous.uid !== this.document.uid) {
       this._viewMode = true;
       this._editing = false;
+    }
+    // A refresh of the same note -- a metadata or tag change re-fetches the document -- leaves
+    // an edit in progress alone, draft included. Copying the stored value back over _value
+    // here would silently discard whatever the user has typed.
+    if (!this._editing) {
+      this._value = this.document.properties['note:note'];
     }
   },
 
