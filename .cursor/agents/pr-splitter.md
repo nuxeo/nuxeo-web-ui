@@ -56,10 +56,16 @@ If one bucket is empty there is nothing to split — say so and stop rather than
 - **`.cursor/skills` is tracked, its mirrors are not.** `.agents/skills/**` is an untracked mirror
   and `.claude/skills` is a symlink to it. Commit the tracked copy, and make sure the mirror is
   byte-identical first (`diff -q`) so the next agent run does not read stale instructions.
-- **Never open a tooling PR from a per-ticket workspace.** `new-ticket-workspace.sh` overlays the
-  current skills into each workspace and marks those paths `skip-worktree`, so edits there are
-  invisible to git and will be silently lost. Tooling PRs come from the shared reference clone;
-  if you must use a workspace, run `git update-index --no-skip-worktree` on those paths first.
+- **A tooling PR needs its own workspace too, with the skills overlay switched off.** Do not commit
+  it from the shared reference clone — that is the shared-`HEAD` contention Phase 1.5 exists to
+  prevent. Take a workspace for the tooling ticket like any other, then undo the concealment
+  `new-ticket-workspace.sh` applies (it overlays the current skills and marks them `skip-worktree`,
+  so edits there are otherwise invisible to git and silently lost):
+  ```bash
+  git ls-files -- .cursor/skills | tr '\n' '\0' | xargs -0 git update-index --no-skip-worktree
+  grep -v '^/\.cursor/skills/$' .git/info/exclude > /tmp/ex && mv /tmp/ex .git/info/exclude
+  ```
+  Confirm with `git status --short` that the skill files you changed now appear before committing.
 - **A tooling change born out of a ticket keeps that ticket's id** (use type `task-`), because the
   reviewer needs the context for why the skill changed. If it has no ticket, ask for one instead of
   inventing a key.

@@ -68,14 +68,20 @@ rm -rf node_modules/@nuxeo/nuxeo-dataviz-elements && ln -s ../../../nuxeo-elemen
   never your change. `npm test` exiting `143` (SIGTERM) with no browser logs means something outside
   the run killed it — most often another agent's helper script doing a machine-wide
   `pkill -f web-test-runner`. Confirm with `pgrep -fl web-test-runner` (you will see the *other*
-  script's shell in the list), then either wait for it to finish or run the suite under a name that
-  pattern cannot match:
+  script's shell in the list), then either wait for it to finish or run the suite under a command
+  line that pattern cannot match. Note there must be **no `--config` argument**: the filename
+  `web-test-runner.config.mjs` contains the pattern, so passing it explicitly leaves you just as
+  killable. Web Test Runner picks that config up on its own. Keep the coverage steps so the run
+  stays equivalent to the gate:
 
 ```bash
-node node_modules/@web/test-runner/dist/bin.js --config web-test-runner.config.mjs
+npm run update-coverage-imports && npm run update-test-load-all \
+  && node node_modules/@web/test-runner/dist/bin.js --coverage \
+  && node scripts/test/unit/inject-zero-coverage.js
 ```
 
-  Never write such a `pkill` yourself — kill only PIDs you started.
+  Verify it is actually hidden with `pgrep -f web-test-runner` while it runs — that should list the
+  *other* script but not yours. Never write such a `pkill` yourself: kill only PIDs you started.
 
 - **Flaky `nuxeo-document-tree` test** (`test/nuxeo-document-tree.test.js` "Tree should
   collapse when clicking on a document"): timing flake unrelated to most changes. If it

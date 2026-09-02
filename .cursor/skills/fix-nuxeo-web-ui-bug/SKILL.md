@@ -153,14 +153,20 @@ curl -s -u Administrator:Administrator -H "Content-Type: application/json" -X PO
 
 ### Skew-free A/B by deploying your own build for BOTH states
 `npm run build` is fast (~15s), so build twice and deploy each into the container's UI dir. Both
-captures then use the *same* dev build, differing only by your fix (eliminates marketplace skew):
+captures then use the *same* dev build, differing only by your fix (eliminates marketplace skew).
+Set the fix aside with a **patch file, never `git stash`** — the stash stack is shared with every
+other worktree of the clone, so a stash here can be popped by (or strand) another ticket's agent:
 ```bash
-UI=$(docker exec nx-<ticket> sh -lc 'find /opt/nuxeo/server -type d -name ui -path "*nuxeo.war*"' | head -1)
-npm run build && cp -R dist /tmp/dist-patched                 # current tree (with fix)
-git stash && npm run build && cp -R dist /tmp/dist-unpatched && git stash pop   # baseline
-docker cp /tmp/dist-unpatched/. nx-<ticket>:"$UI/"            # deploy BEFORE, capture
-docker cp /tmp/dist-patched/.   nx-<ticket>:"$UI/"            # deploy AFTER,  capture
+UI=$(docker exec "$NX_CONTAINER" sh -lc 'find /opt/nuxeo/server -type d -name ui -path "*nuxeo.war*"' | head -1)
+npm run build && cp -R dist "$NX_DIST_PATCHED"                # current tree (with fix)
+git diff > /tmp/$NX_TICKET.patch && git checkout -- .         # set the fix aside
+npm run build && cp -R dist "$NX_DIST_UNPATCHED"              # baseline
+git apply /tmp/$NX_TICKET.patch                               # put the fix back
+docker cp "$NX_DIST_UNPATCHED/." "$NX_CONTAINER:$UI/"         # deploy BEFORE, capture
+docker cp "$NX_DIST_PATCHED/."   "$NX_CONTAINER:$UI/"         # deploy AFTER,  capture
 ```
+`git checkout -- .` only reverts tracked files, so check `git status` first and move any untracked
+work out of the way; confirm the fix is back (`git diff --stat`) before you commit anything.
 Confirm the deployed bundle actually changed (addon elements land in a hashed
 `dist/<addon>.<hash>.bundle.js`): `rg -c "<the-markup-you-added>" /tmp/dist-*/…bundle.js`.
 
