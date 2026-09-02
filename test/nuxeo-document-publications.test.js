@@ -337,6 +337,14 @@ suite('nuxeo-document-publications', () => {
       expect(executeSpy.callCount).to.equal(0);
     });
 
+    test('should do nothing when the event has no target', () => {
+      const executeSpy = sinon.spy(element.$.unpublishOp, 'execute');
+
+      expect(element._unpublish(undefined)).to.be.undefined;
+      expect(element._unpublish({})).to.be.undefined;
+      expect(executeSpy.callCount).to.equal(0);
+    });
+
     test('should notify success and refresh on unpublish success', async () => {
       const notifySpy = sinon.spy(element, 'notify');
       sinon.stub(window, 'confirm').returns(true);
@@ -368,6 +376,29 @@ suite('nuxeo-document-publications', () => {
       // The handler rethrows so callers can react; assert it so the rejection is not left unhandled.
       expect(rejection).to.be.an('error');
       expect(rejection.message).to.equal('Republish failed');
+    });
+
+    test('should notify success and fire events on republish success', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      sinon.stub(window, 'confirm').returns(true);
+      sinon.stub(element.$.publishOp, 'execute').resolves();
+      element._src = { uid: 'doc-src' };
+      const fired = [];
+      element.addEventListener('document-updated', () => fired.push('document-updated'));
+      element.addEventListener('nx-publish-success', () => fired.push('nx-publish-success'));
+
+      await element._republish(rowEvent({ uid: 'doc-1', parentRef: 'section-1', properties: {} }));
+
+      expect(notifiedMessages(notifySpy)).to.deep.equal(['publication.internal.publish.success']);
+      expect(fired).to.deep.equal(['document-updated', 'nx-publish-success']);
+    });
+
+    test('should do nothing when the event has no target', () => {
+      const executeSpy = sinon.spy(element.$.publishOp, 'execute');
+
+      expect(element._republish(undefined)).to.be.undefined;
+      expect(element._republish({})).to.be.undefined;
+      expect(executeSpy.callCount).to.equal(0);
     });
 
     test('should not proceed if user cancels republish confirmation', () => {
