@@ -13,6 +13,15 @@ export default class Administration extends BasePage {
     return this.el.element('nuxeo-search-page#nxql');
   }
 
+  // the Search button of the NXQL page's results view, which runs the query the page no longer
+  // executes on load
+  get nxqlSearchButton() {
+    return (async () => {
+      const page = await this.nxqlSearch;
+      return page.$('paper-button.search');
+    })();
+  }
+
   get userAndGroupManagement() {
     return this.el.element('nuxeo-user-group-management');
   }

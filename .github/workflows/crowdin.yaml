@@ -21,7 +21,11 @@ jobs:
   call-workflow-in-lts-2025:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     uses: nuxeo/nuxeo-web-ui/.github/workflows/crowdin.yaml@lts-2025
-    secrets: inherit
+    # Pass only the secrets the called workflow declares, rather than inheriting every repository secret.
+    secrets:
+      CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+      CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+      WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
     needs: crowdin
     permissions:
       contents: write
@@ -41,7 +45,7 @@ jobs:
 
       - name: Crowdin Action
         id: crowdin-sync
-        uses: crowdin/github-action@v2.16.2
+        uses: crowdin/github-action@8868a33591d21088edfc398968173a3b98d51706 # v2.16.2
         with:
           # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
           skip_ref_checkout: true

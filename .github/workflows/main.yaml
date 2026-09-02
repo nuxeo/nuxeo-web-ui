@@ -64,7 +64,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: catchpoint/workflow-telemetry-action@v2
+      - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
         with:
           comment_on_pr: false
 
@@ -86,7 +86,7 @@ jobs:
             npm-${{ runner.os }}-
 
       - name: Setup Maven build
-        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@v0.10.4
+        uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
           java-version: '17'
 
@@ -95,7 +95,7 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "PACKAGE_VERSION=$(npx -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
+          echo "PACKAGE_VERSION=$(npx --no-install -c 'echo "$npm_package_version"')" >> $GITHUB_ENV
 
       - name: Get prerelease version
         run: |
@@ -143,8 +143,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
           npm ci --ignore-scripts
-          (cd packages/nuxeo-web-ui-ftest && npm ci)
-          (cd packages/nuxeo-designer-catalog && npm ci)
+          (cd packages/nuxeo-web-ui-ftest && npm ci --ignore-scripts)
+          (cd packages/nuxeo-designer-catalog && npm ci --ignore-scripts)
 
       - name: Build packages
         env:
@@ -173,9 +173,10 @@ jobs:
       - name: Publish Nuxeo packages
         env:
           CONNECT_PREPROD_URL: https://nos-preprod-connect.nuxeocloud.com/nuxeo
+          CONNECT_PREPROD_AUTH: ${{ secrets.CONNECT_PREPROD_AUTH }}
         run: |
           PACKAGE="plugin/web-ui/marketplace/target/nuxeo-web-ui-marketplace-${PADDED_VERSION}.zip"
-          curl -fS -u "${{ secrets.CONNECT_PREPROD_AUTH }}" \
+          curl -fS -u "$CONNECT_PREPROD_AUTH" \
                -F package=@$PACKAGE \
                "$CONNECT_PREPROD_URL/site/marketplace/upload?batch=true"
 

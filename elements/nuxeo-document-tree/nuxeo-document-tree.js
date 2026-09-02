@@ -78,6 +78,7 @@ Polymer({
         vertical-align: text-top;
         margin-left: 1.3em;
         word-break: break-word;
+        @apply --hyland-drawer-item;
       }
 
       :host([dir='rtl']) .node-name {
@@ -117,17 +118,18 @@ Polymer({
       /* The row takes the focus, but the ring is drawn on the arrow so the indicator stays on the
          part of the row that actually expands. The row's own outline is suppressed only because the
          arrow replaces it; the spinner is covered too, so expanding a node never leaves the focused
-         row with no visible indicator while its children load. */
+         row with no visible indicator while its children load. The arrow is no longer focusable, so
+         the previous [toggle]:focus rule this replaces could never match. */
       [role='treeitem']:focus-visible {
         outline: none;
       }
 
       [role='treeitem']:focus-visible iron-icon[toggle]:not([hidden]),
       [role='treeitem']:focus-visible paper-spinner[active] {
-        outline: 2px solid black;
+        outline: 2px solid var(--nuxeo-focus-ring-color, var(--nuxeo-primary-color, black));
         outline-offset: 0.2px;
         border-radius: 3px;
-        box-shadow: 0 0 3px black;
+        box-shadow: 0 0 3px var(--nuxeo-focus-ring-color, var(--nuxeo-primary-color, black));
         background-color: rgba(0, 0, 0, 0);
       }
 
@@ -160,6 +162,7 @@ Polymer({
         padding: 0.35em;
         color: var(--nuxeo-drawer-text);
         border-bottom: 1px solid var(--nuxeo-border);
+        @apply --hyland-drawer-item;
       }
 
       .parents span {
@@ -168,6 +171,7 @@ Polymer({
         white-space: nowrap;
         display: block;
         min-width: 1.3em;
+        @apply --hyland-drawer-item;
       }
 
       .parent {
@@ -189,6 +193,7 @@ Polymer({
       }
 
       .header h5 {
+        @apply --hyland-section-header;
         margin: 0;
       }
 

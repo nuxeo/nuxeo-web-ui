@@ -1,6 +1,6 @@
 <!--
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,14 @@ limitations under the License.
 <dom-module id="nuxeo-home">
   <template>
     <style include="nuxeo-styles">
+      /* When rebrand flag is set, apply Hyland branding variables that cascade to nested <nuxeo-page> instances. */
+      :host([rebrand]) {
+        --nuxeo-page-host-background: var(--hyland-page-surface-background, transparent);
+        --nuxeo-page-content-background: var(--hyland-page-surface-background, transparent);
+        --nuxeo-page-toolbar-background: var(--hyland-app-header-background, var(--nuxeo-app-header-background));
+        --nuxeo-page-toolbar-box-shadow: var(--hyland-app-header-shadow, var(--nuxeo-app-header-box-shadow));
+      }
+
       .dashboard {
         display: flex;
         flex-direction: row;
@@ -31,9 +39,15 @@ limitations under the License.
         justify-content: space-between;
       }
 
+      /* Dashboard background: uses Hyland branding colors when rebranded, falls back to classic theme. */
+      :host([rebrand]) .dashboard {
+        background-color: var(--hyland-page-surface-background, var(--nuxeo-app-content-background));
+      }
+
       nuxeo-card {
         min-width: 25em;
         width: 49%;
+        border-radius: 12px;
       }
 
       @media (max-width: 1024px) {
@@ -46,6 +60,10 @@ limitations under the License.
       nuxeo-data-list {
         height: 350px;
         min-height: auto;
+      }
+
+      nuxeo-data-table {
+        --hyland-data-table-row-border: none;
       }
 
       .ellipsis {
@@ -84,7 +102,6 @@ limitations under the License.
       .list-item {
         cursor: pointer;
         padding: 1em;
-        border-bottom: 1px solid var(--nuxeo-border);
       }
 
       .list-item:hover {
@@ -103,13 +120,49 @@ limitations under the License.
         @apply --layout-horizontal;
         @apply --layout-center;
       }
+
+      /* NXENG-527: Home dashboard header: Applicable for all themes. */
+      .header {
+        @apply --hyland-section-header;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      /* NXENG-527: Align wordmark logo to the trailing edge in rebranded themes, with RTL support. */
+      :host([rebrand]) .header-logo {
+        margin-inline-start: auto;
+        margin-inline-end: 58px;
+      }
     </style>
 
     <nuxeo-connection id="nx"></nuxeo-connection>
     <nuxeo-page>
-      <div slot="header">
+      <div slot="header" class="header">
         <nuxeo-repositories></nuxeo-repositories>
         [[i18n('home.dashboard')]]
+        <template is="dom-if" if="[[rebrand]]">
+          <div class="header-logo">
+            <!--
+              Only render the image when a wordmark URL string is available.
+              Note: this only guards against an empty URL (e.g. when getValidTheme is
+              unavailable); it does not verify the file exists. In rebrand mode with a
+              theme lacking hyland-wordmark.svg, the request still fires and on-error
+              hides the broken image.
+            -->
+            <template is="dom-if" if="[[_wordmarkLogoUrl]]">
+              <img
+                src="[[_wordmarkLogoUrl]]"
+                alt="[[i18n('app.brandedProductName')]]"
+                width="110"
+                height="20"
+                hidden$="[[_wordmarkHidden]]"
+                on-error="_onWordmarkError"
+                on-load="_onWordmarkLoad"
+              />
+            </template>
+          </div>
+        </template>
       </div>
       <div>
         <section name="dashboard" class="dashboard">
@@ -280,7 +333,7 @@ limitations under the License.
   <script>
     Polymer({
       is: 'nuxeo-home',
-      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior],
+      behaviors: [Nuxeo.RoutingBehavior, Nuxeo.FormatBehavior, Nuxeo.BrandingBehavior],
       properties: {
         visible: {
           type: Boolean,
@@ -292,12 +345,25 @@ limitations under the License.
           value: [],
           observer: '_recentDocumentsChanged',
         },
+
+        // Indicates if wordmark image failed to load and is hidden.
+        _wordmarkHidden: {
+          type: Boolean,
+          value: false,
+        },
+
+        // NXENG-527: Wordmark logo URL, cached in ready() to avoid repeated lookups.
+        // Theme changes require a full page reload, so caching is safe.
+        _wordmarkLogoUrl: {
+          type: String,
+        },
       },
 
       ready() {
         if (!this.hasAttribute('dir')) {
           this.setAttribute('dir', getComputedStyle(this).direction);
         }
+        this._wordmarkLogoUrl = this.getWordmarkLogo();
       },
 
       observers: ['_processTask(_selection)'],
@@ -316,6 +382,22 @@ limitations under the License.
         if (visible) {
           this._refresh();
         }
+      },
+
+      getWordmarkLogo() {
+        /* Returns the wordmark SVG path for the current theme, or empty string if unavailable. */
+        const getValidTheme = Nuxeo.UI && Nuxeo.UI.getValidTheme;
+        return getValidTheme ? `themes/${getValidTheme()}/hyland-wordmark.svg` : '';
+      },
+
+      /* Hide wordmark if the image fails to load to prevent broken icon display. */
+      _onWordmarkError() {
+        this._wordmarkHidden = true;
+      },
+
+      /* Show the wordmark when the image loads successfully. */
+      _onWordmarkLoad() {
+        this._wordmarkHidden = false;
       },
 
       _refresh() {
