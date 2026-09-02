@@ -260,18 +260,28 @@ suite('nuxeo-note-editor', () => {
       el.document = htmlDoc();
       el._editHtml();
       expect(el._editing).to.be.true;
-      el.document = { ...htmlDoc(), uid: 'note-2' };
+      el.document = { ...htmlDoc('<p>the other note</p>'), uid: 'note-2' };
       expect(el._editing).to.be.false;
       expect(el._viewMode).to.be.true;
+      expect(el._value).to.equal('<p>the other note</p>');
     });
 
     test('refreshing the same note does not discard an edit in progress', () => {
       el.document = htmlDoc();
       el._editHtml();
       el._toggleHtmlSource();
+      el._value = '<p>unsaved draft</p>';
       el.document = { ...htmlDoc(), properties: { ...htmlDoc().properties, 'dc:title': 'renamed' } };
       expect(el._editing).to.be.true;
       expect(el._viewMode).to.be.false;
+      expect(el._value, 'the draft must survive a refresh of the same note').to.equal('<p>unsaved draft</p>');
+    });
+
+    test('refreshing the same note while not editing picks up the stored content', () => {
+      el.document = htmlDoc('<p>one</p>');
+      expect(el._value).to.equal('<p>one</p>');
+      el.document = htmlDoc('<p>two</p>');
+      expect(el._value).to.equal('<p>two</p>');
     });
 
     test('_editHtml opens the rich text editor with the stored content', () => {
