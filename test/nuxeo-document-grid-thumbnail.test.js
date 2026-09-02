@@ -64,6 +64,57 @@ suite('nuxeo-document-grid-thumbnail', () => {
     });
   });
 
+  // WEBUI-340: iron-list rebinds a recycled tile to another document while the user scrolls. The
+  // browser keeps painting the old thumbnail until the new one decodes, so the tile has to hide the
+  // image until its own load event rather than let the previous document's picture linger.
+  suite('thumbnail recycling', () => {
+    const docWithThumbnail = (uid) => {
+      return {
+        uid,
+        title: `doc-${uid}`,
+        contextParameters: { thumbnail: { url: `http://example.com/${uid}.jpg` } },
+      };
+    };
+
+    let img;
+
+    setup(async () => {
+      img = element.shadowRoot.querySelector('.thumbnailContainer img');
+      element.doc = docWithThumbnail('1');
+      await flush();
+    });
+
+    test('keeps the thumbnail hidden until it has loaded', () => {
+      expect(img.hasAttribute('loaded')).to.be.false;
+      img.dispatchEvent(new Event('load'));
+      expect(img.hasAttribute('loaded')).to.be.true;
+    });
+
+    test('hides the stale thumbnail as soon as the tile is bound to another document', async () => {
+      img.dispatchEvent(new Event('load'));
+      expect(img.hasAttribute('loaded')).to.be.true;
+
+      element.doc = docWithThumbnail('2');
+      await flush();
+
+      expect(img.hasAttribute('loaded')).to.be.false;
+    });
+
+    test('keeps the thumbnail visible when the tile is rebound to the same source', async () => {
+      img.dispatchEvent(new Event('load'));
+      element.doc = docWithThumbnail('1');
+      await flush();
+      expect(img.hasAttribute('loaded')).to.be.true;
+    });
+
+    test('hides the thumbnail for a tile bound to a not-yet-fetched entry', async () => {
+      img.dispatchEvent(new Event('load'));
+      element.doc = {};
+      await flush();
+      expect(img.hasAttribute('loaded')).to.be.false;
+    });
+  });
+
   suite('_thumbnail', () => {
     test('should return thumbnail URL with clientReason for doc with uid', () => {
       const doc = { uid: '1', contextParameters: { thumbnail: { url: 'http://example.com/thumb.jpg' } } };

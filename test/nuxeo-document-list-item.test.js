@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-data-list/nuxeo-document-list-item.js';
 
 suite('nuxeo-document-list-item', () => {
@@ -61,6 +61,62 @@ suite('nuxeo-document-list-item', () => {
       const thumbnail = element.shadowRoot.querySelector('.thumbnailContainer img');
       thumbnail.dispatchEvent(new Event('error'));
       expect(thumbnail.getAttribute('src')).to.contain('data:image/png;base64,');
+    });
+  });
+
+  // WEBUI-340: iron-list rebinds a recycled row to another document while the user scrolls. The
+  // browser keeps painting the old thumbnail until the new one decodes, so the row has to hide the
+  // image until its own load event rather than let the previous document's picture linger next to
+  // the new title. Rows bound to an entry the page provider has not fetched yet are marked as
+  // placeholders so they show no text at all.
+  suite('row recycling', () => {
+    const docWithThumbnail = (uid) => {
+      return {
+        uid,
+        title: `doc-${uid}`,
+        contextParameters: { thumbnail: { url: `http://example.com/${uid}.jpg` } },
+      };
+    };
+
+    let img;
+
+    setup(async () => {
+      img = element.shadowRoot.querySelector('.thumbnailContainer img');
+      element.doc = docWithThumbnail('1');
+      await flush();
+    });
+
+    test('keeps the thumbnail hidden until it has loaded', () => {
+      expect(img.hasAttribute('loaded')).to.be.false;
+      img.dispatchEvent(new Event('load'));
+      expect(img.hasAttribute('loaded')).to.be.true;
+    });
+
+    test('hides the stale thumbnail as soon as the row is bound to another document', async () => {
+      img.dispatchEvent(new Event('load'));
+      expect(img.hasAttribute('loaded')).to.be.true;
+
+      element.doc = docWithThumbnail('2');
+      await flush();
+
+      expect(img.hasAttribute('loaded')).to.be.false;
+    });
+
+    test('keeps the thumbnail visible when the row is rebound to the same source', async () => {
+      img.dispatchEvent(new Event('load'));
+      element.doc = docWithThumbnail('1');
+      await flush();
+      expect(img.hasAttribute('loaded')).to.be.true;
+    });
+
+    test('marks a row bound to a not-yet-fetched entry as a placeholder', async () => {
+      element.doc = {};
+      await flush();
+      expect(element.hasAttribute('placeholder')).to.be.true;
+
+      element.doc = docWithThumbnail('3');
+      await flush();
+      expect(element.hasAttribute('placeholder')).to.be.false;
     });
   });
 
