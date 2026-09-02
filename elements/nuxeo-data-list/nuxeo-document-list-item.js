@@ -359,7 +359,7 @@ Polymer({
   },
 
   _isPlaceholder(doc) {
-    return !doc || !doc.uid;
+    return !doc?.uid;
   },
 
   // The results view drives a roving tabindex over the rows from their index alone, so a row whose
