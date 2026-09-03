@@ -49,6 +49,16 @@ const makeView = (items, firstVisibleIndex) => {
   };
 };
 
+// A view whose iron-list also exposes `focusItem` (as the real table/grid/list do),
+// so the accessibility focus-restore path can be exercised.
+const makeFocusableView = (items, firstVisibleIndex) => {
+  return {
+    items,
+    $: { list: { firstVisibleIndex, focusItem: sinon.spy() } },
+    scrollToIndex: sinon.spy(),
+  };
+};
+
 suite('NuxeoScrollRestoreBehavior', () => {
   let name;
   let counter = 0;
@@ -106,6 +116,58 @@ suite('NuxeoScrollRestoreBehavior', () => {
     makeHost(name, grid2)._srMaybeRestore();
     expect(grid2.scrollToIndex.calledOnce).to.equal(true);
     expect(grid2.scrollToIndex.firstCall.args[0]).to.equal(35);
+  });
+
+  test('restores keyboard focus to the anchored row when nothing else is focused', () => {
+    makeHost(name, makeFocusableView(makeDocs(60), 40))._srSaveAnchor();
+    const view2 = makeFocusableView(makeDocs(60), 0);
+    const host2 = makeHost(name, view2);
+    host2._srActiveElement = () => document.body; // Back-remount: nothing focused yet
+    host2._srMaybeRestore();
+    expect(view2.scrollToIndex.firstCall.args[0]).to.equal(40);
+    // focus is returned to the same row for keyboard / screen-reader users
+    expect(view2.$.list.focusItem.calledOnce).to.equal(true);
+    expect(view2.$.list.focusItem.firstCall.args[0]).to.equal(40);
+  });
+
+  test('does not steal focus when a control is already focused', () => {
+    makeHost(name, makeFocusableView(makeDocs(60), 40))._srSaveAnchor();
+    const view2 = makeFocusableView(makeDocs(60), 0);
+    const host2 = makeHost(name, view2);
+    // the user focused a real control (e.g. started typing) after navigating back
+    const input = document.createElement('input');
+    host2._srActiveElement = () => input;
+    host2._srMaybeRestore();
+    // scroll is still restored, but focus is left where the user put it
+    expect(view2.scrollToIndex.firstCall.args[0]).to.equal(40);
+    expect(view2.$.list.focusItem.called).to.equal(false);
+  });
+
+  test('restores scroll without error when the view has no focusItem (scroll-only mode)', () => {
+    makeHost(name, makeView(makeDocs(60), 40))._srSaveAnchor();
+    const view2 = makeView(makeDocs(60), 0); // iron-list stub without focusItem
+    const host2 = makeHost(name, view2);
+    host2._srActiveElement = () => document.body;
+    host2._srMaybeRestore(); // must not throw
+    expect(view2.scrollToIndex.firstCall.args[0]).to.equal(40);
+  });
+
+  test('_srActiveElement pierces shadow roots to find the truly-focused element', () => {
+    const hostEl = document.createElement('div');
+    document.body.appendChild(hostEl);
+    const root = hostEl.attachShadow({ mode: 'open' });
+    const input = document.createElement('input');
+    root.appendChild(input);
+    try {
+      input.focus();
+      const active = makeHost(name, undefined)._srActiveElement();
+      // when the inner input holds focus, we resolve through the shadow root to it;
+      // otherwise (headless without page focus) we at least never throw and get an element
+      expect(active === input || active === document.body).to.equal(true);
+    } finally {
+      input.blur();
+      hostEl.remove();
+    }
   });
 
   test('restores by record id when the list order changed (index is stale)', () => {

@@ -160,7 +160,7 @@ export const NuxeoScrollRestoreBehavior = {
       return; // record is at the top — already there, nothing to restore
     }
     if (currentIndex > 0) {
-      view.scrollToIndex(currentIndex);
+      this._srRestoreTo(view, currentIndex);
       return;
     }
     // Record not currently loaded: jump to the remembered index to bring that
@@ -190,13 +190,64 @@ export const NuxeoScrollRestoreBehavior = {
         }
         const found = items.findIndex((it) => it && it.uid === uid);
         if (found > -1) {
-          view.scrollToIndex(found);
+          this._srRestoreTo(view, found);
         } else {
           // not loaded yet — try again on the next tick
           this._srScheduleVerify(uid, index, attempt + 1);
         }
       },
     );
+  },
+
+  /**
+   * Scrolls the anchored record back into view and — for accessibility — returns
+   * keyboard/screen-reader focus to that row, so a keyboard user resumes from
+   * where they left off rather than at the top of the list.
+   * @param {Object} view the active display view.
+   * @param {number} index the row to restore to.
+   */
+  _srRestoreTo(view, index) {
+    view.scrollToIndex(index);
+    this._srFocusRow(view, index);
+  },
+
+  /**
+   * Moves focus to the row at `index`, using the same `iron-list.focusItem`
+   * mechanism the views use for keyboard navigation (so it works across table,
+   * grid and list, and is a no-op for a display mode whose rows aren't focusable).
+   *
+   * Focus is only moved when nothing meaningful is focused yet — i.e. on the
+   * Back-remount, where the document has no active element. If the user has since
+   * focused a real control (started typing, tabbed elsewhere, switched display
+   * mode via its button), we leave their focus alone and only the scroll position
+   * is restored, so this never steals focus.
+   * @param {Object} view the active display view.
+   * @param {number} index the row to focus.
+   */
+  _srFocusRow(view, index) {
+    const list = view?.$?.list;
+    if (!list || typeof list.focusItem !== 'function') {
+      return; // display mode without focusable rows — scroll-only restore
+    }
+    const active = this._srActiveElement();
+    if (active && active !== document.body) {
+      return; // focus already placed on a real control — don't steal it
+    }
+    list.focusItem(index);
+  },
+
+  /**
+   * The truly-focused element, piercing nested shadow roots (Web UI nests content
+   * in many shadow roots, so `document.activeElement` alone only yields the
+   * outermost host).
+   * @return {?Element}
+   */
+  _srActiveElement() {
+    let el = document.activeElement;
+    while (el && el.shadowRoot && el.shadowRoot.activeElement) {
+      el = el.shadowRoot.activeElement;
+    }
+    return el;
   },
 
   /** Attaches a debounced scroll listener that keeps the anchor fresh. */
