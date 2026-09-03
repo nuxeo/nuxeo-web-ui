@@ -5,7 +5,7 @@ description: >-
   ELEMENTS-<id>/other ticket whose fix lands in nuxeo-web-ui) in the
   nuxeo-web-ui repo: runs fully autonomously end-to-end (YOLO mode, no
   confirmation gates), analyse the ticket + all comments, reproduce
-  and capture evidence (images AND videos) to ~/Desktop/<TICKET-ID>/ first, then branch from both
+  and capture evidence (images AND videos) to ~/Desktop/jira-evidence/<TICKET-ID>/fix/ first, then branch from both
   lts-2025 and maintenance-3.1.x, fix without inducing regressions, run the PR gating
   checks, create signed-commit PRs on both bases, watch CI and fix/rerun
   failures, then evaluate the Ready-for-QA checklist. Use when asked to fix a
@@ -36,6 +36,32 @@ Useful constants:
 - Atlassian cloudId: `252cce86-035e-4b0e-abd2-3c002935632f` (site `hyland.atlassian.net`)
 - Ready-for-QA checklist page: `4169400498` · Signed-commits guide: `4125330218`
 - Upstream repo: `nuxeo/nuxeo-web-ui` · bases: `lts-2025` and `maintenance-3.1.x`
+
+### Filesystem layout — write only inside these two roots
+Every file this skill creates belongs under one of these. Both are keyed by ticket id so a finished
+ticket is one `rm -rf` away, and neither ever puts a loose folder next to unrelated work.
+
+| What | Where |
+|---|---|
+| Evidence (screenshots, videos, logs, repro scratch) | `~/Desktop/jira-evidence/<TICKET-ID>/fix/` |
+| Code worktrees (extra checkouts for the second base or sibling repo) | `~/Desktop/Projects/WebUI/worktrees/<TICKET-ID>/<role>/` |
+
+> **Never create a folder directly on `~/Desktop`.** Evidence goes in the ticket's `fix/` subfolder;
+> `reproduce/` and `validation/` are sibling subfolders owned by the `reproduce-nuxeo-web-ui-bug` and
+> `bug-fix-validation` skills, so all three phases of a ticket collect in one place.
+>
+> **Never create a worktree directly in `~/Desktop/Projects/WebUI/`** — that directory holds the
+> primary `nuxeo-web-ui` / `nuxeo-elements` clones, and loose worktrees there accumulate silently
+> (each carries its own `node_modules`, ~1 GB apiece). `<role>` is one of `webui-lts`, `webui-m31`,
+> `elements-lts`, `elements-m31`. Phase 10 removes the ticket's worktree folder.
+
+Export both once at the start of the run and use the variables everywhere after:
+```bash
+TICKET=WEBUI-<id>                                   # or ELEMENTS-<id>
+EVID="$HOME/Desktop/jira-evidence/$TICKET/fix"
+WT="$HOME/Desktop/Projects/WebUI/worktrees/$TICKET"
+mkdir -p "$EVID"
+```
 
 ## Setup check — first-time users
 Before the first run on a new machine, verify the environment is set up. If anything is missing,
@@ -108,9 +134,10 @@ git switch -c lts-2025 origin/lts-2025 2>/dev/null || git switch lts-2025 && git
 > **Always capture BOTH images and videos** — before *and* after. Screenshots for the ticket/summary,
 > screen recordings for QA. Capture both every time; never ask which format.
 
-Create the evidence folder up front and put **before/after** screenshots, **videos**, and logs there:
+Create the evidence folder up front and put **before/after** screenshots, **videos**, and logs there.
+It is the ticket's `fix/` subfolder — never a folder directly on `~/Desktop`:
 ```bash
-mkdir -p ~/Desktop/<TICKET-ID>   # e.g. WEBUI-1234 or ELEMENTS-1856
+mkdir -p "$EVID"   # ~/Desktop/jira-evidence/WEBUI-1234/fix (or ELEMENTS-1856)
 ```
 - Reproduce against a real instance. If the bug needs a special setup (e.g. multi-repository),
   stand up a throwaway Docker instance rather than touching any live container; remove it with
@@ -189,12 +216,12 @@ Confirm the deployed bundle actually changed (addon elements land in a hashed
 
 ### Video capture (required — before AND after)
 QA and the Ready-for-QA checklist expect a short screen recording of the bug and the fix, not just
-stills. Record both `~/Desktop/WEBUI-<id>/WEBUI-<id>-before.mp4` and `-after.mp4`.
+stills. Record both `$EVID/<TICKET-ID>-before.mp4` and `-after.mp4`.
 
 Drive a headless Chrome with Puppeteer and record with `puppeteer-screen-recorder` (it bundles its
 own ffmpeg, so no system ffmpeg is needed). Do it in a throwaway repro dir, not the repo:
 ```bash
-mkdir -p ~/Desktop/WEBUI-<id>/repro && cd ~/Desktop/WEBUI-<id>/repro
+mkdir -p "$EVID/repro" && cd "$EVID/repro"
 [ -f package.json ] || echo '{"name":"repro","private":true}' > package.json
 npm install puppeteer puppeteer-screen-recorder
 ```
@@ -212,7 +239,9 @@ await page.evaluateOnNewDocument(() => { window.automationReady = true; });
 await page.setViewport({ width: 1280, height: 800 });
 await page.setCacheEnabled(false);
 const rec = new PuppeteerScreenRecorder(page, { fps: 25, videoFrame: { width: 1280, height: 800 } });
-await rec.start('/Users/<you>/Desktop/WEBUI-<id>/WEBUI-<id>-after.mp4');
+// Absolute path required — pass process.env.EVID rather than a literal, so it always lands in
+// ~/Desktop/jira-evidence/<TICKET-ID>/fix/ even when the MCP/recorder resolves cwd differently.
+await rec.start(`${process.env.EVID}/${process.env.TICKET}-after.mp4`);
 /* ...navigate + interact (type creds with { delay: 90 }, add short sleeps so the flow is followable)... */
 await rec.stop(); await browser.close();
 ```
@@ -252,6 +281,20 @@ git switch -c <type>-WEBUI-<id>-<summary>-lts-2025 origin/lts-2025
 git switch -c <type>-WEBUI-<id>-<summary>-maintenance-3.1.x origin/maintenance-3.1.x
 ```
 Implement on `lts-2025` first, then cherry-pick to `maintenance-3.1.x` (see the PR skill's backport section).
+
+### If you need both bases checked out at once, use `$WT` — not a loose folder
+Switching branches in the primary clone is enough for most fixes. Only when you genuinely need two
+bases (or a sibling `nuxeo-elements` checkout) live at the same time — a side-by-side build, an A/B
+capture — create worktrees, and create them **under the ticket's `$WT` folder**:
+```bash
+mkdir -p "$WT"
+git -C ~/Desktop/Projects/WebUI/nuxeo-web-ui   worktree add "$WT/webui-m31"    <branch-m31>
+git -C ~/Desktop/Projects/WebUI/nuxeo-elements worktree add "$WT/elements-lts" <branch-lts>
+```
+Roles are `webui-lts`, `webui-m31`, `elements-lts`, `elements-m31`. This keeps every checkout for the
+ticket in one deletable folder instead of scattering `wt-<ticket>-*` directories across
+`~/Desktop/Projects/WebUI/`, which is how ~100 stale worktrees and 36 GB once accumulated unnoticed.
+Tear them down in Phase 10.
 
 ## Phase 4 — Fix (no new induced issues)
 > **Fix autonomously (no confirmation).** Once the issue is reproduced and the "before" evidence is
@@ -368,7 +411,7 @@ Stored credentials (created for this account, outside the repo — never commit 
 If `~/.jira_token` exists, upload attachments directly — no need to ask the user for a token. First
 verify auth (`GET /rest/api/3/myself`), then upload:
 ```bash
-cd ~/Desktop/<TICKET-ID>
+cd "$EVID"
 U="$(cat ~/.jira_email):$(cat ~/.jira_token)"
 for f in <TICKET-ID>-before.png <TICKET-ID>-before.mp4 <TICKET-ID>-after.png <TICKET-ID>-after.mp4; do
   curl -s -u "$U" -H "X-Atlassian-Token: no-check" -F "file=@$f" \
@@ -419,8 +462,8 @@ fix-summary comment (Phase 7.5). Use exactly these sections, in this order:
      permissions table untouched; unit suite still green"). Keep it honest — only list something as
      unaffected once you've actually checked.
 
-Reference the evidence in both formats: `~/Desktop/<TICKET-ID>/<TICKET-ID>-before.{png,mp4}` and
-`-after.{png,mp4}`.
+Reference the evidence in both formats: `~/Desktop/jira-evidence/<TICKET-ID>/fix/<TICKET-ID>-before.{png,mp4}`
+and `-after.{png,mp4}`.
 
 ## Phase 10 — Clean up & report
 - Tear down each ticket workspace once its PR is open — this also removes the container and the
@@ -429,7 +472,21 @@ Reference the evidence in both formats: `~/Desktop/<TICKET-ID>/<TICKET-ID>-befor
   (it refuses to delete uncommitted work unless you add `--force`). Without a workspace, remove the
   throwaway repro container by hand: `docker rm -f nx-<ticket>`. Never remove or disturb
   pre-existing/live containers, or another ticket's workspace.
-- Leave the evidence files in `~/Desktop/<TICKET-ID>/` so they can be attached to the ticket.
+- If you created manual worktrees under `$WT`, remove every worktree before dropping the folder. Use
+  `git worktree remove` (not `rm -rf`) so each repo's `.git/worktrees` metadata is cleaned up at the
+  same time; the branches themselves survive, so nothing is lost:
+  ```bash
+  for repo in nuxeo-web-ui nuxeo-elements; do
+    R="$HOME/Desktop/Projects/WebUI/$repo"
+    git -C "$R" worktree list --porcelain | awk '/^worktree /{print $2}' | grep -F "/worktrees/$TICKET/" \
+      | while read -r w; do git -C "$R" worktree remove --force "$w"; done
+    git -C "$R" worktree prune
+  done
+  rmdir "$WT" 2>/dev/null   # empty once every worktree is removed
+  ```
+  Verify nothing is left: `git -C <repo> worktree list | grep "$TICKET"` prints nothing.
+- Leave the evidence files in `~/Desktop/jira-evidence/<TICKET-ID>/fix/` so they can be attached to
+  the ticket — evidence is the one thing that outlives the run.
 - Report the final CI state of both PRs. If a long cross-repo check (e.g. `web-ui`) is still
   running, say so explicitly — do **not** claim green until it is.
 
