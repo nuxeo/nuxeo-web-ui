@@ -161,7 +161,8 @@ const template = html`
         font-style: normal;
         font-weight: 400;
         font-display: swap;
-        src: url('../fonts/Inter-Regular.woff2?v=3.13') format('woff2'),
+        src:
+          url('../fonts/Inter-Regular.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-Regular.woff?v=3.13') format('woff');
       }
 
@@ -170,7 +171,8 @@ const template = html`
         font-style: normal;
         font-weight: 600;
         font-display: swap;
-        src: url('../fonts/Inter-SemiBold.woff2?v=3.13') format('woff2'),
+        src:
+          url('../fonts/Inter-SemiBold.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-SemiBold.woff?v=3.13') format('woff');
       }
 
@@ -179,7 +181,8 @@ const template = html`
         font-style: normal;
         font-weight: 700;
         font-display: swap;
-        src: url('../fonts/Inter-Bold.woff2?v=3.13') format('woff2'),
+        src:
+          url('../fonts/Inter-Bold.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-Bold.woff?v=3.13') format('woff');
       }
 
@@ -699,7 +702,7 @@ const template = html`
         /* layout rules */
         --nuxeo-widget: {
           margin-bottom: 16px;
-        }
+        };
       }
 
       @media (max-width: 1024px) {
@@ -711,7 +714,7 @@ const template = html`
           --nuxeo-dialog: {
             min-width: 0;
             width: 90%;
-          }
+          };
         }
       }
 
