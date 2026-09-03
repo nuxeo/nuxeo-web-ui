@@ -1,0 +1,41 @@
+name: CodeQL
+
+on:
+  pull_request:
+    branches:
+      - maintenance-3.1.x
+      - lts-2025
+
+  push:
+    branches:
+      - maintenance-3.1.x
+      - lts-2025
+
+  schedule:
+    - cron: '0 4 * * 1'
+
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze JavaScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: +security-extended,+security-and-quality
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4
