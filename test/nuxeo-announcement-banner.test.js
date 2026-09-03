@@ -131,6 +131,17 @@ suite('nuxeo-announcement-banner', () => {
     expect(element._opened).to.be.false;
   });
 
+  test('leaves no stale anchor behind when the link is removed', async () => {
+    await load({ enabled: true, message: 'With a link', linkUrl: 'https://x.test/a', linkLabel: 'Details' });
+    expect(element.shadowRoot.querySelector('a')).to.exist;
+    element.$.announcement.get.restore();
+    sinon.stub(element.$.announcement, 'get').resolves(entries({ enabled: true, message: 'Link removed' }));
+    await element.refresh();
+    await flush();
+    expect(element._linkUrl).to.equal('');
+    expect(element.shadowRoot.querySelector('a')).to.not.exist;
+  });
+
   test('ignores an entry that is not the reserved announcement', async () => {
     sinon.stub(element.$.announcement, 'get').resolves({
       entries: [{ id: 'something-else', properties: { enabled: true, message: 'Not an announcement' } }],

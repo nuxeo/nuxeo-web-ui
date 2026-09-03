@@ -62,6 +62,12 @@ Polymer({
         opacity: 0.7;
       }
 
+      .counter {
+        margin: -0.75rem 0 1rem;
+        max-width: 40rem;
+        text-align: right;
+      }
+
       .buttons {
         display: flex;
         justify-content: flex-end;
@@ -97,6 +103,13 @@ Polymer({
               invalid="[[_messageInvalid]]"
               error-message="[[_messageError]]"
             ></nuxeo-textarea>
+            <!--
+              nuxeo-textarea has no maxlength support, unlike the link fields below, so the limit is
+              applied in _messageChanged and surfaced by this counter instead.
+            -->
+            <div class="hint counter">
+              [[i18n('announcementManagement.message.counter', _messageLength, _maxLength)]]
+            </div>
 
             <nuxeo-input
               class="field"
@@ -173,6 +186,11 @@ Polymer({
       value: ANNOUNCEMENT_MAX_LENGTH,
     },
 
+    _messageLength: {
+      type: Number,
+      value: 0,
+    },
+
     _messageInvalid: {
       type: Boolean,
       value: false,
@@ -182,6 +200,22 @@ Polymer({
       type: String,
       value: '',
     },
+  },
+
+  observers: ['_messageChanged(_entry.message)'],
+
+  _messageChanged(message) {
+    if (typeof message === 'string' && message.length > ANNOUNCEMENT_MAX_LENGTH) {
+      // `nuxeo-textarea` cannot carry a `maxlength`, so mirror here what the attribute does natively
+      // on the link fields: the field never holds more than the directory column can store, which
+      // also means turning the banner off is never blocked by a message that is too long.
+      this.set('_entry.message', message.slice(0, ANNOUNCEMENT_MAX_LENGTH));
+      return;
+    }
+    this._messageLength = (message || '').length;
+    if (this._messageInvalid) {
+      this._clearMessageError();
+    }
   },
 
   _visibleChanged(visible) {

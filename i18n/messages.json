@@ -60,6 +60,7 @@
   "announcementManagement.linkUrl.invalid": "Enter a valid link starting with http:// or https://",
   "announcementManagement.linkUrl.placeholder": "https://example.com/maintenance",
   "announcementManagement.message": "Message",
+  "announcementManagement.message.counter": "{0} of {1} characters",
   "announcementManagement.message.required": "Enter the message to display, or turn the banner off.",
   "announcementManagement.message.tooLong": "The message cannot exceed {0} characters.",
   "announcementManagement.saved": "Announcement saved.",
