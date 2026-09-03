@@ -47,7 +47,9 @@ suite('nuxeo-search-form', () => {
       '.selectivity-single-select-input, .selectivity-multiple-input',
     );
     expect(input).to.exist;
-    expect(input.getAttribute('aria-label')).to.equal('Search Filters');
+    expect(input.getAttribute('aria-labelledby')).to.equal('label');
+    expect(input.hasAttribute('aria-label')).to.be.false;
+    expect(visibleLabel.getAttribute('for')).to.equal(input.id);
   });
 
   test('maps saved searches for selectivity data', () => {
