@@ -19,6 +19,7 @@ Contributors:
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { RoutingBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-routing-behavior.js';
 
 /**
 An element listing Nuxeo Drive synchronization roots.
@@ -66,6 +67,15 @@ Polymer({
         overflow: hidden;
       }
 
+      .cell a {
+        color: var(--nuxeo-primary-color, #0066ff);
+        text-decoration: underline;
+      }
+
+      .cell a:hover {
+        color: var(--nuxeo-link-hover-color, var(--nuxeo-primary-color, #0066ff));
+      }
+
       paper-icon-button:hover ::content iron-icon {
         color: var(--nuxeo-action-hover, #00adff);
       }
@@ -96,8 +106,8 @@ Polymer({
         </div>
         <template is="dom-repeat" items="[[roots]]" as="doc">
           <div class="row">
-            <div class="cell flex-1">[[doc.title]]</div>
-            <div class="cell flex-3">[[doc.path]]</div>
+            <div class="cell flex-1"><a href$="[[urlFor(doc)]]">[[doc.title]]</a></div>
+            <div class="cell flex-3"><a href$="[[urlFor(doc)]]">[[doc.path]]</a></div>
             <div class="cell actions">
               <paper-icon-button
                 icon="icons:clear"
@@ -123,7 +133,7 @@ Polymer({
     },
   },
 
-  behaviors: [I18nBehavior],
+  behaviors: [I18nBehavior, RoutingBehavior],
 
   _handleRoots(e) {
     this.roots = e.detail.response.entries;

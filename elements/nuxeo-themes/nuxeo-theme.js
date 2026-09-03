@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,7 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { resolveTheme, shouldHideTheme } from '../../themes/theme-config.js';
 
 /**
 `nuxeo-theme`
@@ -34,6 +35,11 @@ Polymer({
     <style>
       :host {
         display: block;
+      }
+
+      /* Hide cards for opposite branding mode using the hidden attribute to override :host display. */
+      :host([hidden]) {
+        display: none;
       }
 
       nuxeo-card[selected] {
@@ -82,9 +88,19 @@ Polymer({
   behaviors: [I18nBehavior],
 
   properties: {
-    name: String,
+    name: {
+      type: String,
+      observer: '_nameChanged',
+    },
     title: String,
     preview: String,
+  },
+
+  // NXENG-527: hide the built-in theme cards that belong to the opposite branding mode.
+  // Custom customer themes are never hidden (shouldHideTheme only matches known themes).
+  // Kept as an observer rather than a computed `hidden` so the native property stays writable.
+  _nameChanged(name) {
+    this.hidden = shouldHideTheme(name);
   },
 
   _image(name) {
@@ -107,8 +123,22 @@ Polymer({
   },
 
   _selected(name) {
-    const theme = localStorage.getItem('theme');
-    return theme ? theme === name : name === 'default';
+    // Compare against the resolved theme so the selection stays consistent with the branding
+    // remap (e.g. a legacy stored theme maps to its branding equivalent when branding is on).
+    // resolveTheme(null) returns the deployment default.
+    return name === resolveTheme(this._storedTheme());
+  },
+
+  /**
+   * Reads the stored theme defensively. Storage access can throw when it is blocked
+   * (private browsing / disabled storage); return null so callers fall back to the default.
+   */
+  _storedTheme() {
+    try {
+      return localStorage.getItem('theme');
+    } catch (e) {
+      return null;
+    }
   },
 
   _apply() {

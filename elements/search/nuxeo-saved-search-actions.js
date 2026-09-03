@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,7 +72,7 @@ Polymer({
         hidden$="[[!_showOtherSearchActions(searchDoc, isSavedSearch, _dirty, _isSearchFormVisible)]]"
       >
         <paper-icon-button
-          icon="icons:more-vert"
+          icon="nuxeo:more-vert"
           slot="dropdown-trigger"
           aria-label$="[[i18n('command.menu')]]"
         ></paper-icon-button>

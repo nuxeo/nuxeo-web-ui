@@ -1,6 +1,6 @@
 /**
 @license
-©2023 Hyland Software, Inc. and its affiliates. All rights reserved. 
+©2026 Hyland Software, Inc. and its affiliates. All rights reserved. 
 All Hyland product names are registered or unregistered trademarks of Hyland Software, Inc. or its affiliates.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -161,7 +161,8 @@ const template = html`
         font-style: normal;
         font-weight: 400;
         font-display: swap;
-        src: url('../fonts/Inter-Regular.woff2?v=3.13') format('woff2'),
+        src:
+          url('../fonts/Inter-Regular.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-Regular.woff?v=3.13') format('woff');
       }
 
@@ -170,7 +171,8 @@ const template = html`
         font-style: normal;
         font-weight: 600;
         font-display: swap;
-        src: url('../fonts/Inter-SemiBold.woff2?v=3.13') format('woff2'),
+        src:
+          url('../fonts/Inter-SemiBold.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-SemiBold.woff?v=3.13') format('woff');
       }
 
@@ -179,8 +181,67 @@ const template = html`
         font-style: normal;
         font-weight: 700;
         font-display: swap;
-        src: url('../fonts/Inter-Bold.woff2?v=3.13') format('woff2'),
+        src:
+          url('../fonts/Inter-Bold.woff2?v=3.13') format('woff2'),
           url('../fonts/Inter-Bold.woff?v=3.13') format('woff');
+      }
+
+      /* Figtree — consumed only via the --hyland-section-header mixin */
+      @font-face {
+        font-family: 'Figtree';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/figtree-latin-500-normal.woff2') format('woff2');
+      }
+
+      /* Noto Sans font family */
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 300;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-300-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-400-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-500-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-600-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-700-normal.woff2') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        font-style: normal;
+        font-weight: 900;
+        font-display: swap;
+        src: url('../fonts/noto-sans-latin-900-normal.woff2') format('woff2');
       }
 
       html {
@@ -226,6 +287,17 @@ const template = html`
         --nuxeo-app-bottom: 0px;
         --nuxeo-app-header-box-shadow: 1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 3px 5px rgba(0, 0, 0, 0.1);
 
+        /*
+         * Geometry of the floating document create button. The offset is the inset it keeps from
+         * the edges of the app; the safe area is the strip it paints over the page content — the
+         * button itself plus that same inset above and below it. Scrollable content regions
+         * reserve the safe area so nothing ends up permanently underneath the button.
+         */
+        --nuxeo-document-create-button-offset: 32px;
+        --nuxeo-document-create-button-safe-area: calc(
+          var(--nuxeo-document-create-button-height, 56px) + 2 * var(--nuxeo-document-create-button-offset, 32px)
+        );
+
         --nuxeo-link: {
           color: var(--nuxeo-link-color);
           text-decoration: none;
@@ -269,6 +341,40 @@ const template = html`
           transition: background-color 0.2s ease-in-out;
         }
 
+        /* Secondary navigation section header styles */
+        --hyland-section-header: {
+          font-weight: 500;
+          font-size: 26px;
+          color: var(--hyland-section-header-text-color, var(--nuxeo-drawer-text));
+          font-family: var(--hyland-font-family-secondary, var(--nuxeo-app-font));
+        }
+        /* Selected drawer item with pill-shaped background */
+        --hyland-drawer-item-selected: {
+          /* Background colour, from most to least specific: branding pill colour, then the generic
+             container-hover colour (which classic themes also use for the pill), then a hard fallback. */
+          background-color: var(
+            --hyland-selection-pill-background,
+            var(--nuxeo-container-hover, rgba(0, 0, 0, 0.14))
+          );
+          border-radius: 54px;
+          outline: 0;
+        }
+        /* Drawer list item typography and spacing */
+        --hyland-drawer-item: {
+          color: var(--nuxeo-drawer-text);
+          font-family: var(--nuxeo-app-font);
+          font-weight: 500;
+          font-size: 14px;
+          line-height: 20px;
+          letter-spacing: 0.1px;
+        }
+
+        /* Keyboard focus ring for accessibility, positioned inside the pill shape */
+        --hyland-focus-ring: {
+          outline: 2px solid var(--nuxeo-primary-color);
+          outline-offset: -2px;
+        }
+
         --nuxeo-block-selected: {
           background-color: var(--nuxeo-box);
           outline: 0;
@@ -302,7 +408,11 @@ const template = html`
           overflow: hidden;
           text-overflow: ellipsis;
           font-weight: 400 !important;
-          letter-spacing: 0.005em !important;
+          /*
+           * WCAG 2.1 SC 1.4.12: labels live inside widget shadow roots, so pinning letter-spacing
+           * here makes it unreachable for a user text-spacing stylesheet. Inherit it instead.
+           */
+          letter-spacing: inherit;
           font-family: var(--nuxeo-app-font);
         }
 
@@ -432,6 +542,7 @@ const template = html`
           font-size: 1rem;
           font-family: var(--nuxeo-app-font);
           background-color: var(--nuxeo-sidebar-background);
+          color: var(--hyland-tooltip-text-color, var(--paper-tooltip-text-color, white));
         }
 
         --paper-card: {
@@ -591,7 +702,7 @@ const template = html`
         /* layout rules */
         --nuxeo-widget: {
           margin-bottom: 16px;
-        }
+        };
       }
 
       @media (max-width: 1024px) {
@@ -603,7 +714,7 @@ const template = html`
           --nuxeo-dialog: {
             min-width: 0;
             width: 90%;
-          }
+          };
         }
       }
 
