@@ -118,7 +118,6 @@ step "Creating the evidence tree"
 for sub in Before After Videos Logs Console Network Traces Reports Reports/proposed-tests; do
   mkdir -p "$EVIDENCE/$sub"
 done
-mkdir -p "$DIR/src"
 note "$EVIDENCE"
 
 touch "$LOG"
@@ -132,7 +131,6 @@ export NX_VAL_EVIDENCE=$EVIDENCE
 export NX_VAL_HARNESS=$HARNESS_DIR
 export NX_VAL_LOG=$LOG
 export NX_VAL_REPO=$REPO
-export NX_VAL_SRC=$DIR/src
 
 # Append a timestamped line to the execution log. Every command, decision and
 # environment detail goes here so the run stays reproducible.

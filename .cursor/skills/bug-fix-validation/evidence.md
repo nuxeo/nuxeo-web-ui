@@ -19,7 +19,6 @@ if it is not captured, it did not happen.
     Traces/     # profiles, performance traces
     Reports/    # test-cases.md, validation-report.md, diff images, proposed-tests/
   harness/      # puppeteer + puppeteer-screen-recorder + nuxeo-capture.js
-  src/          # per-branch worktrees created by dual-branch-up.sh
   run.log       # execution log — every command, decision and environment detail
   env.sh        # NX_VAL_* variables; source it in every shell
 ```

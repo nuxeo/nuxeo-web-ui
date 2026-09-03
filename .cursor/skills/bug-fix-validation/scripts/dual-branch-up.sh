@@ -181,7 +181,7 @@ PY
 claimed_ports() {
   local f
   [ -d "$ROOT" ] || return 0
-  for f in "$ROOT"/*/runtime.sh; do
+  for f in "$ROOT"/*/validation/runtime.sh; do
     [ -f "$f" ] || continue
     [ "$f" = "$RUNTIME" ] && continue
     grep -h '_PORT=' "$f" 2>/dev/null | sed 's/.*=//'
