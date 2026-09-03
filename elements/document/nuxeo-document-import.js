@@ -327,16 +327,6 @@ Polymer({
         }
       }
 
-      /* At higher zoom the group's own row can still be too narrow to fit all three
-         buttons side by side, which previously wrapped them unevenly (two on one line,
-         one alone) and grew the bar past the dialog's bottom edge. Stack them instead so
-         the group keeps working at any zoom level. */
-      @container (max-width: 340px) {
-        .navigation {
-          @apply --layout-vertical;
-        }
-      }
-
       /* Lets the editor/side-panel area give up space instead of pushing the action bar
          past the bottom edge of the dialog. */
       .customize-content {
