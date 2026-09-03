@@ -44,12 +44,21 @@ Polymer({
         line-height: 2.2rem;
       }
 
+      /*
+        The label column is sized in em so it follows the label font size, and it opts out of the
+        --nuxeo-label truncation (nowrap + hidden overflow + ellipsis) so that labels wrap instead of
+        losing characters when the user overrides text spacing (WCAG 2.1 AA, 1.4.12).
+      */
       .item label {
         @apply --nuxeo-label;
         line-height: 2.2rem;
-        width: 90px;
-        min-width: 90px;
+        width: 7.5em;
+        min-width: 7.5em;
         font-size: 12px;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        overflow-wrap: break-word;
       }
     </style>
 

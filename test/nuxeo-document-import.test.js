@@ -764,14 +764,92 @@ suite('nuxeo-document-import', () => {
     test('should handle response with entries array', () => {
       const result = element._mergeResponses({ entries: [{ uid: '1' }] }, { 'entity-type': 'document', uid: '2' });
       expect(result['entity-type']).to.equal('Documents');
-      // entries from first arg are not concat'd due to bug in source (concat not assigned), but single docs are pushed
-      expect(result.entries).to.include.deep.members([{ 'entity-type': 'document', uid: '2' }]);
+      expect(result.entries).to.deep.equal([{ uid: '1' }, { 'entity-type': 'document', uid: '2' }]);
+    });
+
+    test('should return the union of the entries of every Documents response', () => {
+      const result = element._mergeResponses(
+        { 'entity-type': 'Documents', entries: [{ uid: '1' }, { uid: '2' }] },
+        { 'entity-type': 'Documents', entries: [{ uid: '3' }] },
+        { 'entity-type': 'Documents', entries: [{ uid: '4' }, { uid: '5' }] },
+      );
+      expect(result['entity-type']).to.equal('Documents');
+      expect(result.entries).to.have.length(5);
+      expect(result.entries.map((entry) => entry.uid)).to.deep.equal(['1', '2', '3', '4', '5']);
     });
 
     test('should handle single response', () => {
       const result = element._mergeResponses({ uid: '1' });
       expect(result['entity-type']).to.equal('Documents');
       expect(result.entries).to.have.length(1);
+    });
+  });
+
+  suite('_processFilesWithMetadata', () => {
+    const buildFiles = (count, prefix) =>
+      Array.from({ length: count }, (_, i) => {
+        return {
+          name: `${prefix}-${i}.txt`,
+          checked: true,
+          docData: { document: { properties: {} }, parent: '/default-domain', type: { id: 'File' } },
+        };
+      });
+
+    setup(() => {
+      sinon.stub(element, '_handleSuccess');
+      sinon.stub(element, '_selectDoc');
+    });
+
+    teardown(() => {
+      element._handleSuccess.restore();
+      element._selectDoc.restore();
+      if (element._processFileWithMetadata.restore) {
+        element._processFileWithMetadata.restore();
+      }
+    });
+
+    const stubImport = (failingNames) =>
+      sinon
+        .stub(element, '_processFileWithMetadata')
+        .callsFake((file) =>
+          failingNames.includes(file.name)
+            ? Promise.reject({ 'entity-type': 'exception', message: 'could not be created' })
+            : Promise.resolve({ 'entity-type': 'document', uid: file.name, type: 'File' }),
+        );
+
+    test('should keep exactly the failed local files when more than ten are imported', async () => {
+      element.localFiles = buildFiles(12, 'local');
+      element.remoteFiles = [];
+      stubImport(['local-3.txt', 'local-11.txt']);
+
+      element._processFilesWithMetadata();
+      await flush();
+
+      expect(element.localFiles.map((file) => file.name)).to.deep.equal(['local-3.txt', 'local-11.txt']);
+      expect(element._importWithPropertiesError).to.equal('These documents could not be created.');
+    });
+
+    test('should keep exactly the failed remote files when more than ten are imported', async () => {
+      element.localFiles = [];
+      element.remoteFiles = buildFiles(12, 'remote');
+      stubImport(['remote-0.txt', 'remote-10.txt']);
+
+      element._processFilesWithMetadata();
+      await flush();
+
+      expect(element.remoteFiles.map((file) => file.name)).to.deep.equal(['remote-0.txt', 'remote-10.txt']);
+    });
+
+    test('should leave the file lists untouched when every import succeeds', async () => {
+      element.localFiles = buildFiles(12, 'local');
+      element.remoteFiles = [];
+      stubImport([]);
+
+      element._processFilesWithMetadata();
+      await flush();
+
+      expect(element.localFiles).to.have.length(12);
+      expect(element._selectDoc).to.not.have.been.called;
     });
   });
 
