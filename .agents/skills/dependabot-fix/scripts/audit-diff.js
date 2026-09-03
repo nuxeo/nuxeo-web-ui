@@ -30,6 +30,17 @@ function git(args, opts = {}) {
   return spawnSync('git', args, { encoding: 'utf8', ...opts });
 }
 
+function auditError(message) {
+  const err = new Error(message);
+  err.exitCode = 2;
+  return err;
+}
+
+function exitAuditError(err) {
+  console.error(err.message);
+  process.exit(err.exitCode || 1);
+}
+
 // Refuse on a clean tree (ignores untracked files, same as `git diff --quiet`).
 const unstagedClean = git(['diff', '--quiet']).status === 0;
 const stagedClean = git(['diff', '--cached', '--quiet']).status === 0;
@@ -52,11 +63,10 @@ function auditNodes(manifestDir, name) {
     maxBuffer: 64 * 1024 * 1024,
   });
   if (res.error) {
-    console.error('ERROR: could not run npm audit in ' + manifestDir + ' — ' + res.error.message);
-    process.exit(2);
+    throw auditError('ERROR: could not run npm audit in ' + manifestDir + ' — ' + res.error.message);
   }
   if (!res.stdout || !res.stdout.trim()) {
-    console.error(
+    throw auditError(
       'ERROR: npm audit produced no output in ' +
         manifestDir +
         ' (exit ' +
@@ -65,26 +75,24 @@ function auditNodes(manifestDir, name) {
         (res.stderr ? ':\n' + res.stderr : '') +
         '\nCannot trust an empty audit — check network/registry auth and retry.',
     );
-    process.exit(2);
   }
   let json;
   try {
     json = JSON.parse(res.stdout);
   } catch (e) {
-    console.error('ERROR: npm audit output was not valid JSON in ' + manifestDir + ' — ' + e.message);
-    process.exit(2);
+    throw auditError('ERROR: npm audit output was not valid JSON in ' + manifestDir + ' — ' + e.message);
   }
   // npm surfaces registry/other failures as a JSON `{ error: {...} }` payload.
   if (json.error) {
     const msg = json.error.summary || json.error.detail || JSON.stringify(json.error);
-    console.error('ERROR: npm audit reported an error in ' + manifestDir + ' — ' + msg);
-    process.exit(2);
+    throw auditError('ERROR: npm audit reported an error in ' + manifestDir + ' — ' + msg);
   }
   const v = (json.vulnerabilities || {})[name];
   return (v && Array.isArray(v.nodes) ? v.nodes.slice() : []).sort();
 }
 
 let before;
+let beforeError;
 // `git stash push` with no pathspec stashes ALL tracked changes repo-wide — this
 // is deliberate: it produces a true, clean base for the "before" audit. Any
 // unrelated in-progress edits are stashed only for the duration of that one audit
@@ -96,6 +104,8 @@ if (stash.status !== 0) {
 }
 try {
   before = auditNodes(dir, pkg);
+} catch (e) {
+  beforeError = e;
 } finally {
   // `--index` restores the staged/unstaged split exactly as it was — without it,
   // a caller who had already `git add`-ed the lockfile would get it back unstaged.
@@ -108,7 +118,16 @@ try {
     process.exit(2);
   }
 }
-const after = auditNodes(dir, pkg);
+if (beforeError) {
+  exitAuditError(beforeError);
+}
+
+let after;
+try {
+  after = auditNodes(dir, pkg);
+} catch (e) {
+  exitAuditError(e);
+}
 
 const setBefore = new Set(before);
 const setAfter = new Set(after);

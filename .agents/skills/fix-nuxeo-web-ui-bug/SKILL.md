@@ -44,7 +44,7 @@ ticket is one `rm -rf` away, and neither ever puts a loose folder next to unrela
 | What | Where |
 |---|---|
 | Evidence (screenshots, videos, logs, repro scratch) | `~/Desktop/jira-evidence/<TICKET-ID>/fix/` |
-| Code worktrees (extra checkouts for the second base or sibling repo) | `~/Desktop/Projects/WebUI/worktrees/<TICKET-ID>/<role>/` |
+| Code workspaces (extra checkouts for the second base or sibling repo) | `~/Desktop/Projects/WebUI/worktrees/<TICKET-ID>/<base>/<repo-role>/` |
 
 > **Never create a folder directly on `~/Desktop`.** Evidence goes in the ticket's `fix/` subfolder;
 > `reproduce/` and `validation/` are sibling subfolders owned by the `reproduce-nuxeo-web-ui-bug` and
@@ -52,14 +52,14 @@ ticket is one `rm -rf` away, and neither ever puts a loose folder next to unrela
 >
 > **Never create a worktree directly in `~/Desktop/Projects/WebUI/`** — that directory holds the
 > primary `nuxeo-web-ui` / `nuxeo-elements` clones, and loose worktrees there accumulate silently
-> (each carries its own `node_modules`, ~1 GB apiece). `<role>` is one of `webui-lts`, `webui-m31`,
-> `elements-lts`, `elements-m31`. Phase 10 removes the ticket's worktree folder.
+> (each carries its own `node_modules`, ~1 GB apiece). `<repo-role>` is `web-ui` or `elements` under
+> the base-specific workspace. Phase 10 removes the ticket's worktree folder.
 
 Export both once at the start of the run and use the variables everywhere after:
 ```bash
-TICKET=WEBUI-<id>                                   # or ELEMENTS-<id>
-EVID="$HOME/Desktop/jira-evidence/$TICKET/fix"
-WT="$HOME/Desktop/Projects/WebUI/worktrees/$TICKET"
+export TICKET=WEBUI-<id>                            # or ELEMENTS-<id>
+export EVID="$HOME/Desktop/jira-evidence/$TICKET/fix"
+export WT="$HOME/Desktop/Projects/WebUI/worktrees/$TICKET"
 mkdir -p "$EVID"
 ```
 

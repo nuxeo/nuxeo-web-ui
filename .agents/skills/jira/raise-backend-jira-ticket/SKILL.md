@@ -155,6 +155,6 @@ Blocks **<INPUT>**. Web UI change is ready to consume this once available.
   `createIssueLink` MCP tool that means `inwardIssue` = new NXP (blocker), `outwardIssue` = input
   (blocked), type `Blocks`. (Raw REST is the opposite convention.) Verify after creating; don't invert it.
 
-- Don't fabricate a link/comment as done — issue links need REST (no MCP tool); state the real status.
+- Don't fabricate a link/comment as done — verify the issue link through MCP, REST, or the Jira UI before claiming success.
 - File backend work only when the client genuinely can't do it; confirm no existing endpoint/operation
   already covers the need before creating the ticket.
