@@ -109,6 +109,36 @@ suite('nuxeo-announcement-management', () => {
     });
   });
 
+  suite('message length', () => {
+    test('clamps the message to what the directory column can store', async () => {
+      element.set('_entry.message', 'a'.repeat(ANNOUNCEMENT_MAX_LENGTH + 100));
+      await flush();
+      expect(element._entry.message).to.have.lengthOf(ANNOUNCEMENT_MAX_LENGTH);
+      expect(element._messageLength).to.equal(ANNOUNCEMENT_MAX_LENGTH);
+    });
+
+    test('keeps a message that is exactly at the limit', async () => {
+      element.set('_entry.message', 'a'.repeat(ANNOUNCEMENT_MAX_LENGTH));
+      await flush();
+      expect(element._entry.message).to.have.lengthOf(ANNOUNCEMENT_MAX_LENGTH);
+    });
+
+    test('reports the current length for the counter', async () => {
+      element.set('_entry.message', 'Maintenance');
+      await flush();
+      expect(element._messageLength).to.equal('Maintenance'.length);
+    });
+
+    test('clears a pending validation error as soon as the message is edited', async () => {
+      element._messageInvalid = true;
+      element._messageError = 'boom';
+      element.set('_entry.message', 'Maintenance');
+      await flush();
+      expect(element._messageInvalid).to.be.false;
+      expect(element._messageError).to.equal('');
+    });
+  });
+
   suite('_save', () => {
     setup(() => {
       sinon.stub(element.$.form, 'validate').returns(true);
@@ -163,11 +193,27 @@ suite('nuxeo-announcement-management', () => {
       expect(element._messageInvalid).to.be.true;
     });
 
-    test('rejects a message longer than the directory column', async () => {
-      element._entry = { enabled: true, message: 'a'.repeat(ANNOUNCEMENT_MAX_LENGTH + 1), linkUrl: '', linkLabel: '' };
+    test('saves a clamped message when more than the limit was typed', async () => {
+      element._exists = false;
+      element.set('_entry.enabled', true);
+      element.set('_entry.message', 'a'.repeat(ANNOUNCEMENT_MAX_LENGTH + 1));
+      await flush();
+      const post = sinon.stub(element.$.announcement, 'post').resolves();
+      await element._save();
+      expect(post).to.have.been.calledOnce;
+      expect(element.$.announcement.data.properties.message).to.have.lengthOf(ANNOUNCEMENT_MAX_LENGTH);
+      expect(element._messageInvalid).to.be.false;
+    });
+
+    test('still refuses an over-long message that bypassed the clamp', async () => {
+      // direct mutation, so Polymer never notifies the observer that applies the limit
+      element._entry.message = 'a'.repeat(ANNOUNCEMENT_MAX_LENGTH + 1);
+      element._entry.enabled = true;
       const post = sinon.stub(element.$.announcement, 'post');
+      const put = sinon.stub(element.$.announcement, 'put');
       await element._save();
       expect(post).to.not.have.been.called;
+      expect(put).to.not.have.been.called;
       expect(element._messageInvalid).to.be.true;
     });
 
@@ -187,6 +233,19 @@ suite('nuxeo-announcement-management', () => {
       await element._save();
       expect(put).to.have.been.calledOnce;
       expect(element._messageInvalid).to.be.false;
+    });
+
+    test('lets the banner be turned off even after an over-long message was typed', async () => {
+      element._exists = true;
+      // what an administrator typing/pasting past the limit ends up with
+      element.set('_entry.message', 'a'.repeat(ANNOUNCEMENT_MAX_LENGTH + 45));
+      await flush();
+      element.set('_entry.enabled', false);
+      const put = sinon.stub(element.$.announcement, 'put').resolves();
+      await element._save();
+      expect(put).to.have.been.calledOnce;
+      expect(element._messageInvalid).to.be.false;
+      expect(element.$.announcement.data.properties.message).to.have.lengthOf(ANNOUNCEMENT_MAX_LENGTH);
     });
 
     test('does nothing while the announcement is still loading', async () => {

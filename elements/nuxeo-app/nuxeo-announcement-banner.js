@@ -102,7 +102,8 @@ Polymer({
     <div class="content" role="status" aria-live="polite">
       <iron-icon icon="icons:info-outline" aria-hidden="true"></iron-icon>
       <span class="message">[[_message]]</span>
-      <template is="dom-if" if="[[_linkUrl]]">
+      <!-- restamp: removing the link must not leave a hidden anchor behind holding the previous href -->
+      <template is="dom-if" if="[[_linkUrl]]" restamp>
         <a href$="[[_linkUrl]]" target="_blank" rel="noopener noreferrer">[[_linkLabel]]</a>
       </template>
     </div>
