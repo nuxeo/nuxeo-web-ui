@@ -20,6 +20,10 @@ npm test                     # Web Test Runner unit tests — must pass
 - Always run `npm run format` before committing. Pre-commit hooks enforce this.
 - Do NOT commit `.only` in test files — the `no-only-tests` ESLint rule blocks it.
 
+## CLA-safe commits
+
+`license/cla` fails if any commit or `Co-authored-by` trailer names `cursoragent@cursor.com`. Never add `Co-authored-by: Cursor` and never commit as the Cursor agent user. Husky runs `scripts/git/commit-msg-cla.sh` on every commit to block those trailers. If a PR branch is already polluted, squash on the PR base and rewrite with `git commit-tree` + a message file (agent `git commit` may re-inject Cursor trailers).
+
 ## Project Structure
 
 ```
