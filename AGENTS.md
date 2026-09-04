@@ -22,7 +22,16 @@ npm test                     # Web Test Runner unit tests — must pass
 
 ## CLA-safe commits
 
-`license/cla` fails if any commit or `Co-authored-by` trailer names `cursoragent@cursor.com`. Never add `Co-authored-by: Cursor` and never commit as the Cursor agent user. Husky runs `scripts/git/commit-msg-cla.sh` on every commit to block those trailers. If a PR branch is already polluted, squash on the PR base and rewrite with `git commit-tree` + a message file (agent `git commit` may re-inject Cursor trailers).
+`license/cla` fails if any commit or `Co-authored-by` trailer names `cursoragent@cursor.com`. Never add
+`Co-authored-by: Cursor` and never commit as the Cursor agent user. Husky runs
+`scripts/git/commit-msg-cla.sh` on every commit to block those trailers. If a PR branch is already
+polluted, squash on the PR base and rewrite with `git commit-tree` + a message file (agent
+`git commit` may re-inject Cursor trailers).
+
+Before marking a PR ready, verify the current head SHA has a successful `license/cla` status. If
+GitHub shows `license/cla Expected — Waiting for status to be reported`, first push a signed empty
+retrigger commit. If the legacy status provider still does not report, ask a repo maintainer to
+refresh the required check or CLA app configuration instead of leaving the PR blocked.
 
 ## Project Structure
 
@@ -70,6 +79,7 @@ Some elements are `.html` files with `<dom-module>` + inline `<script>` — this
 ### Server Communication
 
 Always use Nuxeo Elements for API calls, never `fetch()`:
+
 - `<nuxeo-operation>` — Automation operations
 - `<nuxeo-resource>` — REST endpoints
 - `<nuxeo-document>` — Document CRUD
@@ -139,8 +149,8 @@ PRs run lint and test workflows automatically.
 
 ## Environment Variables
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `NUXEO_URL` | `/nuxeo` | Server URL in the app |
-| `NUXEO_HOST` | `localhost:8080` | Dev proxy target |
+| Variable         | Default                                                                   | Purpose                                                           |
+| ---------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `NUXEO_URL`      | `/nuxeo`                                                                  | Server URL in the app                                             |
+| `NUXEO_HOST`     | `localhost:8080`                                                          | Dev proxy target                                                  |
 | `NUXEO_PACKAGES` | empty (no addon entry points imported; `nuxeo-spreadsheet` always loaded) | Addon JS entry points to import at runtime via `Nuxeo.UI.bundles` |
