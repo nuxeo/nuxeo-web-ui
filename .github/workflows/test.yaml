@@ -82,4 +82,7 @@ jobs:
         # pretest installs Puppeteer Chromium (npm ci --ignore-scripts skips its postinstall).
         # npm test: regenerate barrels, print WTR layout notice, then web-test-runner --coverage.
         # WTR reports "1/1 test files" (load-all-tests.js); Mocha pass/fail counts are individual tests.
+        # WTR_TRACE_TESTS logs "▶ <test>" per test so the last line before a freeze names the hung test.
+        env:
+          WTR_TRACE_TESTS: '1'
         run: npm run test

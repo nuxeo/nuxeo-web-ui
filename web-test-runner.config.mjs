@@ -32,14 +32,12 @@ const puppeteer = require('puppeteer');
 const rollupIstanbul = require('rollup-plugin-istanbul');
 const istanbulPlugin = fromRollup(rollupIstanbul);
 
-const chromeArgs = [
-  '--disable-gpu',
-  '--no-sandbox',
-  '--disable-dev-shm-usage',
-  '--disable-setuid-sandbox',
-];
+const chromeArgs = ['--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage', '--disable-setuid-sandbox'];
 
 const verbose = process.env.WTR_VERBOSE === '1';
+// Set WTR_TRACE_TESTS=1 to log each test name on start; the last line before a freeze names the
+// hanging test (mocha's timeout cannot interrupt a synchronous event-loop block).
+const traceTests = process.env.WTR_TRACE_TESTS === '1';
 
 const coverageEnabled = process.argv.includes('--coverage');
 
@@ -69,6 +67,8 @@ const appSources = [
 
 export default {
   files: ['test/load-all-tests.js'],
+  testRunnerHtml: (testFramework) =>
+    `<html><head><script>window.__WTR_TRACE_TESTS__ = ${traceTests};</script></head><body><script type="module" src="${testFramework}"></script></body></html>`,
   plugins: [
     nuxeoTestFallbackPlugin(),
     // Istanbul instrumentation (only when --coverage) — instruments app source files so function bodies
@@ -130,6 +130,10 @@ export default {
   browserLogs: true,
   filterBrowserLogs: (log) => {
     if (verbose) {
+      return true;
+    }
+    // Always surface test-start trace lines (WTR_TRACE_TESTS=1) so a hang's last line is the culprit.
+    if (traceTests && (log.args || []).some((arg) => typeof arg === 'string' && arg.startsWith('▶'))) {
       return true;
     }
     // Stringify so we can match against object args (e.g. `{ message: 'No message', status: 404 }`)
