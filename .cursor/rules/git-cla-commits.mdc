@@ -16,7 +16,9 @@ alwaysApply: true
 ## Always do this
 
 - Author and commit as the human contributor only, using the email address covered by their signed CLA.
-- Before pushing a PR branch, verify: `gh api repos/nuxeo/nuxeo-elements/pulls/<n>/commits --jq '.[].commit.author.email' | sort -u` (or the web-ui repo) shows only the contributor's email.
+- Before pushing a PR branch, inspect every author, committer, and commit message:
+  `gh api repos/nuxeo/nuxeo-elements/pulls/<n>/commits --jq '.[] | {sha, author: .commit.author.email, committer: .commit.committer.email, message: .commit.message}'`
+  (or the web-ui repo), and verify that no Cursor agent identity or co-author trailer is present.
 - If history is polluted, squash to one clean commit on the PR base, then rewrite with `git commit-tree` and a message file (normal `git commit` from the agent shell may re-inject Cursor co-author trailers).
 
 ## Local guard
