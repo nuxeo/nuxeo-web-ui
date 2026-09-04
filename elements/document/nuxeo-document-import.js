@@ -1480,7 +1480,7 @@ Polymer({
   },
 
   _filterImportDocTypes(type) {
-    return window.nuxeo.importBlacklist.indexOf(type.type) === -1;
+    return !window.nuxeo.importBlacklist.includes(type.type);
   },
 
   _computeImportDocTypes() {

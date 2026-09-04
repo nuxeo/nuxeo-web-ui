@@ -7,7 +7,7 @@
  */
 Handsontable.DataMap.prototype.get = function (row, prop) {
   row = Handsontable.hooks.execute(this.instance, 'modifyRow', row);
-  if (typeof prop === 'string' && prop.indexOf('.') > -1) {
+  if (typeof prop === 'string' && prop.includes('.')) {
     const sliced = prop.split('.');
     let out = this.dataSource[row];
     if (!out) {
@@ -50,7 +50,7 @@ Handsontable.DataMap.prototype.get = function (row, prop) {
  */
 Handsontable.DataMap.prototype.set = function (row, prop, value, source) {
   row = Handsontable.hooks.execute(this.instance, 'modifyRow', row, source || 'datamapGet');
-  if (typeof prop === 'string' && prop.indexOf('.') > -1) {
+  if (typeof prop === 'string' && prop.includes('.')) {
     const sliced = prop.split('.');
     let out = this.dataSource[row];
     let i;

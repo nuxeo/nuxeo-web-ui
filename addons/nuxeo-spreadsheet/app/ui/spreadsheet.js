@@ -67,8 +67,8 @@ class Spreadsheet {
     // get schemas prefixes from columns
     const schemasPrefixes = [];
     for (const c of columns) {
-      const schema = c.field.indexOf(':') > -1 ? c.field.split(':')[0] : undefined;
-      if (schema && schemasPrefixes.indexOf(schema) === -1) {
+      const schema = c.field.includes(':') ? c.field.split(':')[0] : undefined;
+      if (schema && !schemasPrefixes.includes(schema)) {
         schemasPrefixes.push(schema);
       }
     }
@@ -83,7 +83,7 @@ class Spreadsheet {
 
         // get field definition from schemas map
         let field; // <- explicitly set field as undefined in each iteration
-        if (c.field.indexOf(':') > -1) {
+        if (c.field.includes(':')) {
           const [s, f] = c.field.split(':');
           field = schemas[s].fields[f] || undefined;
           field = typeof field === 'string' ? { type: field } : field;
@@ -168,7 +168,7 @@ class Spreadsheet {
     const cell = {};
     const doc = this.getDataAtRow(row);
     const permissions = doc && doc.contextParameters && doc.contextParameters.permissions;
-    if (permissions && permissions.indexOf('Write') === -1) {
+    if (permissions && !permissions.includes('Write')) {
       cell.readOnly = true;
     }
     return cell;
