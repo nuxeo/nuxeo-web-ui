@@ -70,14 +70,14 @@ Polymer({
   _updateShortcuts() {
     const types = this.$.creationStats.lastType(1);
     this.$.creationStats.mostCommonType(2).forEach((type) => {
-      if (types.indexOf(type) < 0) {
+      if (!types.includes(type)) {
         types.push(type);
       }
     });
 
     const shorcuts = [];
     types.forEach((type) => {
-      if (this.subtypes && this.subtypes.indexOf(type) > -1) {
+      if (this.subtypes && this.subtypes.includes(type)) {
         const el = document.createElement('nuxeo-document-create-shortcut');
         el.type = type;
         el.icon = `images/doctypes/${type}.svg`;

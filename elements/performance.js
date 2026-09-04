@@ -59,7 +59,7 @@ export const Performance = {
     // returns “phone”, “tablet”, or “desktop”
     ua = (ua || this.getUserAgent()).toLowerCase();
     const find = function (str) {
-      return ua.indexOf(str) !== -1;
+      return ua.includes(str);
     };
 
     // windows

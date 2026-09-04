@@ -1351,8 +1351,8 @@ Polymer({
     this.show('diff');
     const params = [id1, id2];
     // let's keep current context only if it includes the ids already in the params
-    if (this.$.diff.docIds && params.every((el) => this.$.diff.docIds.indexOf(el) > -1)) {
-      const otherIds = this.$.diff.docIds.find((id) => params.indexOf(id) === -1);
+    if (this.$.diff.docIds && params.every((el) => this.$.diff.docIds.includes(el))) {
+      const otherIds = this.$.diff.docIds.find((id) => !params.includes(id));
       this.$.diff.docIds = null;
       this.$.diff.docIds = params.concat(otherIds).filter(Boolean);
     } else {
