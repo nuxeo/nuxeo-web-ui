@@ -225,10 +225,13 @@ Then(/^I can edit the (.*) Note$/, async function (format) {
 
   switch (format) {
     case 'HTML':
+      // An HTML note is displayed as stored until the user opts in to editing, so the rich
+      // text editor has to be opened before its content can be set.
       await noteEditor.waitForVisible();
+      await noteEditor.edit();
       await noteEditor.setContent(newContent);
       await noteEditor.save();
-      await driver.waitUntil(async () => noteEditor.hasContent(`<p>${newContent}</p>`), {
+      await driver.waitUntil(async () => noteEditor.hasHtmlContent(newContent), {
         timeoutMsg: 'step  definition document 230',
       });
       break;
