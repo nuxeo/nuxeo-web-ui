@@ -62,6 +62,9 @@ function noCoverageSummaryReporter() {
 const appSources = [
   'elements/**/*.js',
   'addons/**/elements/**/*.js',
+  // The spreadsheet app is not laid out under `elements/`, so name its unit-tested modules
+  // explicitly rather than pulling the whole untested app into the report.
+  'addons/nuxeo-spreadsheet/app/ui/optimistic-locking.js',
   'themes/theme-config.js',
   'themes/loader.js',
   'themes/dark-theme-focus-ring.js',

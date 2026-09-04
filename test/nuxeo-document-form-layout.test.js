@@ -172,6 +172,63 @@ suite('nuxeo-document-form-layout', () => {
       console.error.restore();
     });
 
+    test('should not treat a conflict while creating as a stale edit', async () => {
+      innerLayout.validate.resolves(true);
+      element.$.doc.post.rejects({ status: 409 });
+      const reload = sinon.spy();
+      element.addEventListener('document-updated', reload);
+      sinon.stub(element, 'notify');
+      sinon.stub(console, 'error');
+
+      await element._save();
+      await flush();
+
+      expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify.firstCall.args[0].message).to.equal('documentEdit.saveError');
+      expect(reload).to.not.have.been.called;
+      expect(element.saving).to.be.false;
+      console.error.restore();
+    });
+
+    // WEBUI-1820: the edit payload must carry the change token the document was read with,
+    // otherwise the server cannot reject a stale write and the last save silently wins.
+    test('should send the change token when editing', async () => {
+      element.document = { uid: 'doc-1', type: 'File', changeToken: '4-2', properties: { 'dc:title': 'Updated' } };
+      element._dirtyProperties = { 'dc:title': 'Updated' };
+      innerLayout.validate.resolves(true);
+      element.$.doc.put.resolves({});
+      sinon.stub(element, '_refresh');
+      await element._save();
+      await flush();
+      expect(element.$.doc.data).to.deep.equal({
+        'entity-type': 'document',
+        uid: 'doc-1',
+        properties: { 'dc:title': 'Updated' },
+        changeToken: '4-2',
+      });
+    });
+
+    test('should notify about the conflict and reload when the server rejects a stale write', async () => {
+      element.document = { uid: 'doc-1', type: 'File', changeToken: '4-2', properties: { 'dc:title': 'Updated' } };
+      innerLayout.validate.resolves(true);
+      element.$.doc.put.returns(
+        Promise.reject({ 'entity-type': 'exception', status: 409, message: 'Invalid change token' }),
+      );
+      const reload = sinon.spy();
+      element.addEventListener('document-updated', reload);
+      sinon.stub(element, 'notify');
+
+      await element._save();
+      await flush();
+
+      expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify.firstCall.args[0].message).to.equal('documentUpdate.conflict');
+      expect(reload).to.have.been.calledOnce;
+      // the generic "Failed to save." path must not also fire, and validation is not involved
+      expect(element.$.layout.reportValidation).to.not.have.been.called;
+      expect(element.saving).to.be.false;
+    });
+
     test('should set saving to false in finally block', async () => {
       innerLayout.validate.resolves(true);
       element.$.doc.post.resolves({});

@@ -21,8 +21,10 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@nuxeo/nuxeo-ui-elements/actions/nuxeo-action-button-styles.js';
 import { createNestedObject } from '@nuxeo/nuxeo-elements/utils.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import { NuxeoOptimisticLockingBehavior } from '../behaviors/nuxeo-optimistic-locking-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-dialog.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tooltip.js';
 import '../nuxeo-dropzone/nuxeo-dropzone.js';
@@ -86,7 +88,7 @@ Polymer({
    */
   is: 'nuxeo-replace-blob-button',
 
-  behaviors: [FormatBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, FormatBehavior, FiltersBehavior, NuxeoOptimisticLockingBehavior],
 
   properties: {
     /**
@@ -163,15 +165,18 @@ Polymer({
     this.set(rootProperty, this.get(rootProperty, this.document.properties), dirtyProperties);
     this.set(this.formatPropertyXpath(this.xpath), this.value, dirtyProperties);
 
-    this.$.doc.data = {
+    this.$.doc.data = this.withChangeToken({
       'entity-type': 'document',
       uid: this.document.uid,
       properties: dirtyProperties,
-    };
-    this.$.doc.put().then(() => {
-      this.value = null;
-      this.fire('document-updated');
     });
+    return this.$.doc
+      .put()
+      .then(() => {
+        this.value = null;
+        this.fire('document-updated');
+      })
+      .catch((err) => this.rejectUnlessConflict(err));
   },
 
   _toggleDialog() {

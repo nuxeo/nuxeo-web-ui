@@ -21,6 +21,7 @@ import { Query } from '../nuxeo/rpc/query';
 import { DirectoryEditor } from './editors/directory';
 import { Select2Editor } from './editors/select2';
 import { assign, hasProp } from '../utils';
+import { createDirtyDocument, markSaveError } from './optimistic-locking';
 
 /**
  * Spreadsheet backed by Hansontable
@@ -215,6 +216,7 @@ class Spreadsheet {
   }
 
   save() {
+    this.hasConflicts = false;
     return Promise.all(
       Object.keys(this._dirty).map((uid) =>
         this.connection
@@ -225,7 +227,9 @@ class Spreadsheet {
             return uid;
           })
           .catch((error) => {
-            this._dirty[uid]._error = error;
+            if (markSaveError(this._dirty[uid], error)) {
+              this.hasConflicts = true;
+            }
             throw new Error(error);
           }),
       ),
@@ -251,8 +255,9 @@ class Spreadsheet {
         if (oldV === newV) {
           continue;
         }
-        const uid = this.data[idx].uid;
-        const doc = (this._dirty[uid] = this._dirty[uid] || { 'entity-type': 'document', uid });
+        const sourceDocument = this.data[idx];
+        const uid = sourceDocument.uid;
+        const doc = (this._dirty[uid] = this._dirty[uid] || createDirtyDocument(sourceDocument));
 
         // Split csv values into array
         const column = this._columnsByField[field];
