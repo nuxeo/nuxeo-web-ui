@@ -368,7 +368,7 @@ Polymer({
 
     // clear when re-rendering
     while (this.$.container.firstChild) {
-      this.$.container.removeChild(this.$.container.firstChild);
+      this.$.container.firstChild.remove();
     }
     this._jsPlumbInstance.reset();
 

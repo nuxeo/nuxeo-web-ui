@@ -91,7 +91,7 @@ Polymer({
 
   _putNodes(parent, ...args) {
     while (parent.firstChild) {
-      parent.removeChild(parent.firstChild);
+      parent.firstChild.remove();
     }
     if (args && args.length > 0) {
       for (const arg of args) {
