@@ -18,6 +18,8 @@ export default [
       '**/target/**',
       '**/dist/**',
       '**/.tmp/**',
+      '**/.agents/skills/**',
+      '**/.claude/skills/**',
       'index.html',
       '**/vendor/**',
       'addons/nuxeo-platform-3d/controls/**',
