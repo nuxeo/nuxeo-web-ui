@@ -524,9 +524,8 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
         const selector = '[role="widget"], nuxeo-data-table[role="table"]';
         const widgets = Array.from(bulkLayout.shadowRoot.querySelectorAll(selector));
         widgets.forEach((widget) => {
-          const { parentNode } = widget;
           const bulkWidget = document.createElement('nuxeo-bulk-widget');
-          parentNode.replaceChild(bulkWidget, widget);
+          widget.replaceWith(bulkWidget);
           bulkWidget.appendChild(widget);
           // get the element that is bound to a property
           const boundElement = this._getBoundElement(widget, bulkLayout.__templateInfo);

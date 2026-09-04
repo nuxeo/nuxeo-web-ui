@@ -562,13 +562,9 @@ Polymer({
       value == null ||
       (Array.isArray(value) &&
         value.filter(
-          (file) =>
-            !Object.prototype.hasOwnProperty.call(
-              this.valueKey && file[this.valueKey] != null ? file[this.valueKey] : file,
-              'data',
-            ),
+          (file) => !Object.hasOwn(this.valueKey && file[this.valueKey] != null ? file[this.valueKey] : file, 'data'),
         ).length === 0) ||
-      Object.prototype.hasOwnProperty.call(value, 'data')
+      Object.hasOwn(value, 'data')
     ) {
       if (this.uploading) {
         this.cancelBatch();
@@ -674,14 +670,14 @@ Polymer({
       return false;
     }
     if (this.accept && this.files && this.files.length > 0) {
-      const accepted = this.accept.split(',').map((a) => a.trim().toLowerCase());
+      const accepted = new Set(this.accept.split(',').map((a) => a.trim().toLowerCase()));
 
       const invalidFile = this.files.find((file) => {
         const name = file.name || '';
         const extension = `.${name.split('.').pop().toLowerCase()}`;
         const mime = (file.type || '').toLowerCase();
 
-        return !accepted.includes(extension) && !accepted.includes(mime);
+        return !accepted.has(extension) && !accepted.has(mime);
       });
 
       if (invalidFile) {

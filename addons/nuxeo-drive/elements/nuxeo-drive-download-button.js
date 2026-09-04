@@ -214,7 +214,7 @@ class NuxeoDriveDownloadButton extends mixinBehaviors([I18nBehavior], PolymerEle
     const uuidBinary = [];
     allUuidHex.forEach((hexStr) => {
       for (let i = 0; i < hexStr.length; i += 2) {
-        uuidBinary.push(parseInt(hexStr.substr(i, 2), 16));
+        uuidBinary.push(Number.parseInt(hexStr.substr(i, 2), 16));
       }
     });
 

@@ -1402,8 +1402,7 @@ Polymer({
 
       case 'tasks':
         if (this.currentTask) {
-          title.push(this.i18n(this.currentTask.workflowModelName));
-          title.push(this.i18n(this.currentTask.name));
+          title.push(this.i18n(this.currentTask.workflowModelName), this.i18n(this.currentTask.name));
         } else {
           title.push(this.i18n(`app.title.${this.page}`));
         }
