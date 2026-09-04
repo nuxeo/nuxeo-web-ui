@@ -58,14 +58,8 @@ Polymer({
 
       .flex-layout nuxeo-card {
         flex: 1 0 calc(33% - 2em);
-        max-width: calc(33% - 2em);
         margin: 0 8px 16px;
         text-align: center;
-      }
-
-      .flex-layout nuxeo-card.pie-card {
-        display: flex;
-        flex-direction: column;
       }
 
       .message {
@@ -87,19 +81,13 @@ Polymer({
       chart-pie {
         margin: 25px auto 0 auto;
         width: 100% !important;
-        min-width: 0;
         display: block;
         font-size: 0.8rem;
-      }
-
-      .pie-card chart-pie {
-        flex: 1 1 auto;
       }
 
       @media (max-width: 1024px) {
         .flex-layout nuxeo-card {
           flex: 1 0 calc(100% - 2em);
-          max-width: calc(100% - 2em);
         }
       }
     </style>
@@ -134,7 +122,12 @@ Polymer({
         >
         </nuxeo-page-provider>
 
-        <nuxeo-card heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]">
+        <nuxeo-card
+          heading="[[i18n('repositoryAnalytics.topDownloads.heading')]]"
+          role="region"
+          tabindex="0"
+          aria-label$="[[_cardAria('repositoryAnalytics.topDownloads.heading')]]"
+        >
           <template is="dom-if" if="[[!_isEmpty(downloads)]]">
             <nuxeo-data-table items="[[downloadedDocs]]" caption-text="[[i18n('table.caption.topDownloads')]]">
               <nuxeo-data-table-column name="[[i18n('repositoryAnalytics.topDownloads.file')]]">
@@ -160,7 +153,12 @@ Polymer({
         >
         </nuxeo-repository-data>
 
-        <nuxeo-card heading="[[i18n('repositoryAnalytics.documents.heading')]]">
+        <nuxeo-card
+          heading="[[i18n('repositoryAnalytics.documents.heading')]]"
+          role="region"
+          tabindex="0"
+          aria-label$="[[_cardAria('repositoryAnalytics.documents.heading', totalCount)]]"
+        >
           <iron-icon icon="icons:description"></iron-icon>
           <h1>[[totalCount]]</h1>
         </nuxeo-card>
@@ -176,11 +174,13 @@ Polymer({
         >
         </nuxeo-repository-data>
 
-        <nuxeo-card class="pie-card" heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
+        <nuxeo-card heading="[[i18n('repositoryAnalytics.documentTypes.heading')]]">
           <chart-pie
+            role="img"
+            tabindex="0"
+            aria-label$="[[_chartAria('repositoryAnalytics.documentTypes.heading', typeCount, '', false)]]"
             values="[[_values(typeCount)]]"
             labels="[[_labels(typeCount)]]"
-            options='{ "maintainAspectRatio": false }'
           >
           </chart-pie>
         </nuxeo-card>
@@ -196,11 +196,13 @@ Polymer({
         >
         </nuxeo-repository-data>
 
-        <nuxeo-card class="pie-card" heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
+        <nuxeo-card heading="[[i18n('repositoryAnalytics.topNCreators.heading', '10')]]">
           <chart-pie
+            role="img"
+            tabindex="0"
+            aria-label$="[[_chartAria('repositoryAnalytics.topNCreators.heading', topCreators, '10', false)]]"
             values="[[_values(topCreators)]]"
             labels="[[_labels(topCreators)]]"
-            options='{ "maintainAspectRatio": false }'
           >
           </chart-pie>
         </nuxeo-card>
@@ -218,6 +220,9 @@ Polymer({
 
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsCreatedPerWeek.heading')]]">
           <chart-line
+            role="img"
+            tabindex="0"
+            aria-label$="[[_chartAria('repositoryAnalytics.documentsCreatedPerWeek.heading', docsCreatedPerWeek, '', false)]]"
             labels="[[_labels(docsCreatedPerWeek)]]"
             values="[[_values(docsCreatedPerWeek)]]"
             options='{ "legend": { "display": false }, "animation": false }'
@@ -238,6 +243,9 @@ Polymer({
 
         <nuxeo-card heading="[[i18n('repositoryAnalytics.documentsModifiedPerWeek.heading')]]">
           <chart-line
+            role="img"
+            tabindex="0"
+            aria-label$="[[_chartAria('repositoryAnalytics.documentsModifiedPerWeek.heading', docsModifiedPerWeek, '', false)]]"
             labels="[[_labels(docsModifiedPerWeek)]]"
             values="[[_values(docsModifiedPerWeek)]]"
             options='{ "legend": { "display": false }, "animation": false }'
@@ -255,11 +263,13 @@ Polymer({
         >
         </nuxeo-repository-data>
 
-        <nuxeo-card class="pie-card" heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
+        <nuxeo-card heading="[[i18n('repositoryAnalytics.filesByMimeType.heading')]]">
           <chart-pie
+            role="img"
+            tabindex="0"
+            aria-label$="[[_chartAria('repositoryAnalytics.filesByMimeType.heading', filesByMimeType, '', true)]]"
             values="[[_values(filesByMimeType)]]"
             labels="[[_types(filesByMimeType)]]"
-            options='{ "maintainAspectRatio": false }'
           >
           </chart-pie>
         </nuxeo-card>
@@ -289,19 +299,40 @@ Polymer({
   },
 
   _types(data) {
-    return data.map((obj) => {
-      const mimeType = mimeTypes[obj.key];
-      if (mimeType) {
-        if (mimeType.name) {
-          return mimeType.name;
-        }
-        if (mimeType.extensions && mimeType.extensions.length > 0) {
-          return mimeType.extensions[0].toUpperCase();
-        }
-        return obj.key;
+    return data.map((obj) => this._mimeName(obj.key));
+  },
+
+  // Resolves a raw mime-type key to a human-friendly label (name or extension).
+  _mimeName(key) {
+    const mimeType = mimeTypes[key];
+    if (mimeType) {
+      if (mimeType.name) {
+        return mimeType.name;
       }
-      return obj.key;
-    });
+      if (mimeType.extensions && mimeType.extensions.length > 0) {
+        return mimeType.extensions[0].toUpperCase();
+      }
+    }
+    return key;
+  },
+
+  // Builds a text alternative for a chart so assistive technologies convey the
+  // underlying data instead of announcing an unlabeled graphic (WCAG 1.1.1).
+  // Produces "<heading>. <label>: <value>, <label>: <value>, ...".
+  _chartAria(headingKey, data, headingArg, useMimeNames) {
+    const heading = this.i18n(headingKey, headingArg);
+    if (!data || data.length === 0) {
+      return heading;
+    }
+    const points = data
+      .map((entry) => `${useMimeNames ? this._mimeName(entry.key) : entry.key}: ${entry.value}`)
+      .join(', ');
+    return `${heading}. ${points}`;
+  },
+
+  _cardAria(headingKey, value) {
+    const heading = this.i18n(headingKey);
+    return value === undefined || value === null ? heading : `${heading}: ${value}`;
   },
 
   // builds page provider query to get info about downloaded docs
