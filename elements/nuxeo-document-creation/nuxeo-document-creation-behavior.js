@@ -218,7 +218,7 @@ export const DocumentCreationBehavior = [
       return (
         type &&
         this.subtypes &&
-        this.subtypes.findIndex((t) => t._id === type._id && t.type === type.type && t.icon === type.icon) > -1
+        this.subtypes.some((t) => t._id === type._id && t.type === type.type && t.icon === type.icon)
       );
     },
 

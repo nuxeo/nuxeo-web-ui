@@ -212,7 +212,7 @@ Polymer({
   selectTask(index, task, { offset, pageSize }) {
     let fetch;
     const tasks = this.$.list.items;
-    if (tasks.find((item) => item.id === task.id)) {
+    if (tasks.some((item) => item.id === task.id)) {
       fetch = Promise.resolve();
     } else {
       fetch = this.fetch(offset, pageSize);
