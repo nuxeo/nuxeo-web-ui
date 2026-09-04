@@ -94,13 +94,13 @@ Polymer({
       parent.removeChild(parent.firstChild);
     }
     if (args && args.length > 0) {
-      for (let i = 0; i < args.length; i++) {
-        if (Array.isArray(args[i])) {
-          for (let j = 0; j < args[i].length; j++) {
-            parent.appendChild(args[i][j]);
+      for (const arg of args) {
+        if (Array.isArray(arg)) {
+          for (const node of arg) {
+            parent.appendChild(node);
           }
         } else {
-          parent.appendChild(args[i]);
+          parent.appendChild(arg);
         }
       }
     }

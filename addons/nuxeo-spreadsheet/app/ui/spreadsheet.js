@@ -246,8 +246,7 @@ class Spreadsheet {
       return;
     }
     if (change !== null) {
-      for (let i = 0; i < change.length; i++) {
-        let [idx, field, oldV, newV] = change[i];
+      for (let [idx, field, oldV, newV] of change) {
         if (oldV === newV) {
           continue;
         }
