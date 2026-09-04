@@ -51,6 +51,7 @@ import './nuxeo-app/nuxeo-page.js';
 import './nuxeo-app/nuxeo-page-item.js';
 import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
+import './nuxeo-app/nuxeo-announcement-banner.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import { NuxeoAppDrawerResizeBehavior } from './behaviors/nuxeo-app-drawer-resize-behavior.js';
 import { NuxeoInactivityBehavior } from './behaviors/nuxeo-inactivity-behavior.js';
@@ -472,6 +473,11 @@ Polymer({
     <header role="banner">
       <a href="#mainContent" id="skipLink" class="skip-link">[[i18n('app.skiptoMainContent.message')]]</a>
       <nuxeo-suggester id="suggester"></nuxeo-suggester>
+
+      <!-- WEBUI-1786: administrator announcement. It is laid out in the flow, as the first thing in
+           the header, so it pushes the application down, and publishes its height as
+           --nuxeo-app-top so the viewport positioned chrome moves down with it. -->
+      <nuxeo-announcement-banner id="announcementBanner" user="[[currentUser]]"></nuxeo-announcement-banner>
 
       <nuxeo-offline-banner message="[[i18n('app.offlineBanner.message')]]"></nuxeo-offline-banner>
 
