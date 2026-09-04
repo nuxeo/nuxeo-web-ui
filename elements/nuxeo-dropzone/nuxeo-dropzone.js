@@ -472,28 +472,37 @@ Polymer({
     if (this.document && this.xpath) {
       this._legacyImportBatch(value);
     }
-    if (failed.length > 0) {
-      this.notify({
-        message: this.i18n('dropzone.toast.error', failed.map((f) => f.name).join(', ')),
-        duration: 0,
-        dismissible: true,
-      });
-    } else {
-      if (this.document && this.xpath) {
-        const updateSucceeded = await this._legacyUpdateDocument();
-        if (updateSucceeded === false) {
-          this._setHasFilesUploaded(true);
-          return;
-        }
-      }
-      this.notify({ message: this.i18n(this.uploadedMessage), close: true });
-      this.invalid = false;
+    if (!(await this._reportUploadOutcome(failed))) {
+      this._setHasFilesUploaded(true);
+      return;
     }
     if (this.invalid) {
       // if we're already displaying an error, we better update it, otherwise the user can be mislead
       this.validate();
     }
     this._setHasFilesUploaded(true);
+  },
+
+  /**
+   * Tells the user how the upload went, and persists it on the document when this dropzone owns
+   * one. Returns false when a stale write was rejected, so the caller stops rather than reporting
+   * a success that did not happen.
+   */
+  async _reportUploadOutcome(failed) {
+    if (failed.length > 0) {
+      this.notify({
+        message: this.i18n('dropzone.toast.error', failed.map((f) => f.name).join(', ')),
+        duration: 0,
+        dismissible: true,
+      });
+      return true;
+    }
+    if (this.document && this.xpath && (await this._legacyUpdateDocument()) === false) {
+      return false;
+    }
+    this.notify({ message: this.i18n(this.uploadedMessage), close: true });
+    this.invalid = false;
+    return true;
   },
 
   _getFiles(data) {
