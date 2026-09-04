@@ -53,6 +53,7 @@ import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import { NuxeoAppDrawerResizeBehavior } from './behaviors/nuxeo-app-drawer-resize-behavior.js';
+import { NuxeoAnonymousBehavior } from './behaviors/nuxeo-anonymous-behavior.js';
 import { NuxeoInactivityBehavior } from './behaviors/nuxeo-inactivity-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-task-page-provider.js';
@@ -706,7 +707,14 @@ Polymer({
   `,
 
   is: 'nuxeo-app',
-  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior, NuxeoAppDrawerResizeBehavior, NuxeoInactivityBehavior],
+  behaviors: [
+    RoutingBehavior,
+    FormatBehavior,
+    FiltersBehavior,
+    NuxeoAppDrawerResizeBehavior,
+    NuxeoAnonymousBehavior,
+    NuxeoInactivityBehavior,
+  ],
   importMeta: import.meta,
   properties: {
     productName: {
@@ -1327,6 +1335,12 @@ Polymer({
       })
       .catch((err) => {
         if (err && err.name === 'AbortError') {
+          return;
+        }
+        // WEBUI-1857: an anonymous user hitting a 403 is redirected to the login page (preserving the
+        // permalink) instead of being shown a dead-end permission error page.
+        if (this._isAnonymousForbidden(err)) {
+          this._redirectAnonymousToLogin();
           return;
         }
         this.showError(err.status, this.i18n('browse.error'), err.message);
