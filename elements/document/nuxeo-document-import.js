@@ -82,7 +82,7 @@ Polymer({
       }
 
       .file-to-import {
-        height: 58px;
+        min-height: 58px;
         margin: 0 0.3em 0.8em;
         width: calc(50% - 3em);
         padding: 0.8em 1em;
@@ -136,7 +136,7 @@ Polymer({
         display: block;
         font-weight: normal;
         font-size: 0.75rem;
-        line-height: 10px;
+        line-height: 1.5;
         margin-top: 4px;
       }
 
@@ -149,7 +149,7 @@ Polymer({
       }
 
       #dropzone .file-error {
-        white-space: nowrap;
+        white-space: normal;
       }
 
       #sidePanel {
@@ -188,7 +188,7 @@ Polymer({
         font-weight: bold;
         text-transform: none;
         color: var(--secondary-text-color);
-        height: 88px;
+        min-height: 88px;
       }
 
       .file-overview:hover {
@@ -212,7 +212,8 @@ Polymer({
         font-weight: bold;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
-        height: 40px; /* XXX: 2 * line height, consider extracting variable at the base theme leve */
+        /* min-height, not height: the two clamped lines must still fit when the user increases line spacing */
+        min-height: 40px;
         word-break: break-all;
         overflow: hidden;
       }
@@ -369,6 +370,9 @@ Polymer({
         border: none;
         cursor: pointer;
         font: inherit;
+        /* WCAG 2.1 SC 1.4.12: the UA stylesheet resets text spacing on form controls, so opt back in */
+        letter-spacing: inherit;
+        word-spacing: inherit;
       }
 
       button.link:hover {
@@ -1239,7 +1243,7 @@ Polymer({
     for (let i = 0; i < args.length; i++) {
       const current = args[i];
       if (current && current.entries) {
-        response.entries.concat(current.entries);
+        response.entries.push(...current.entries);
       } else {
         response.entries.push(current);
       }
@@ -1305,15 +1309,14 @@ Polymer({
       if (errorFree.length < results.length) {
         this.set('_creating', false);
         this.set('_importWithPropertiesError', 'These documents could not be created.');
+        // splice from the highest index down, so that removals do not shift the indexes still to be removed
         localIndexes
-          .sort()
-          .reverse()
+          .sort((a, b) => b - a)
           .forEach((index) => {
             this.splice('localFiles', index, 1);
           });
         remoteIndexes
-          .sort()
-          .reverse()
+          .sort((a, b) => b - a)
           .forEach((index) => {
             this.splice('remoteFiles', index, 1);
           });

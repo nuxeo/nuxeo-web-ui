@@ -62,4 +62,23 @@ suite('nuxeo-document-blob', () => {
       expect(element._getDownloadBlobUrl()).to.equal('');
     });
   });
+
+  suite('_deepFind', () => {
+    test('Should resolve a blob nested under an array property', () => {
+      const properties = {
+        'files:files': [{ file: { name: 'a.txt', data: 'a.txt?changeToken=1-0' } }],
+      };
+      const blob = element._deepFind(properties, 'files:files/0/file');
+      expect(blob.name).to.equal('a.txt');
+      expect(blob.downloadUrl).to.equal('a.txt?changeToken=1-0');
+    });
+
+    test('Should not resolve a blob when an intermediate value is an empty array', () => {
+      expect(element._deepFind({ 'files:files': [] }, 'files:files/0/file')).to.be.undefined;
+    });
+
+    test('Should not resolve a blob when the xpath does not match any property', () => {
+      expect(element._deepFind({}, 'file:content')).to.be.undefined;
+    });
+  });
 });
