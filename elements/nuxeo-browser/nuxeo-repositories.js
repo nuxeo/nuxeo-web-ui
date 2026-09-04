@@ -71,7 +71,9 @@ class Repositories extends mixinBehaviors([I18nBehavior, RoutingBehavior], Nuxeo
         type: Array,
         value() {
           if (Nuxeo.UI.repositories) {
-            return Nuxeo.UI.repositories.map((r) => Object.assign({}, r));
+            return Nuxeo.UI.repositories.map((r) => {
+              return { ...r };
+            });
           }
           return [];
         },

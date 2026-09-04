@@ -207,7 +207,7 @@ Polymer({
     let y2 = this._lastPointerEvent.y;
     x2 = x2 + w > window.innerWidth ? window.innerWidth - w : x2;
     y2 = y2 + h > window.innerHeight ? window.innerHeight - h : y2;
-    const dist = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+    const dist = Math.hypot(x1 - x2, y1 - y2);
     if (dist < 32) {
       if (this._unknownLocation) {
         this.feeling =
@@ -251,8 +251,8 @@ Polymer({
   },
 
   _lerp(value1, value2, amount) {
-    amount = amount < 0 ? 0 : amount;
-    amount = amount > 1 ? 1 : amount;
+    amount = Math.max(0, amount);
+    amount = Math.min(1, amount);
     return value1 + (value2 - value1) * amount;
   },
 });

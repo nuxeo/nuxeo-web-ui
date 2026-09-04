@@ -926,7 +926,7 @@ Polymer({
       this.fire('nx-creation-wizard-hide-tabs');
       // let's select the first file that's not disabled
       const toSelect = this._getAllFiles().findIndex((f) => !f.error);
-      this._selectDoc(toSelect < 0 ? 0 : toSelect);
+      this._selectDoc(Math.max(0, toSelect));
     } else {
       this.stage = 'upload';
       this.customizing = false;
@@ -1305,7 +1305,7 @@ Polymer({
           result['entity-type'] !== 'exception' &&
           result['entity-type'] !== 'validation_report',
       );
-      this._handleSuccess(this._mergeResponses.apply(null, errorFree), !(errorFree.length < results.length));
+      this._handleSuccess(this._mergeResponses.apply(null, errorFree), errorFree.length >= results.length);
       if (errorFree.length < results.length) {
         this.set('_creating', false);
         this.set('_importWithPropertiesError', 'These documents could not be created.');

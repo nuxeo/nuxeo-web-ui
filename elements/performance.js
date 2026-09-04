@@ -140,7 +140,7 @@ export const Performance = {
   },
 
   getLongTasks() {
-    if (typeof window.__lt === 'undefined') {
+    if (window.__lt === undefined) {
       return null;
     }
     return window.__lt.e.map((longTask) => {
@@ -202,7 +202,7 @@ export const Performance = {
   },
 
   report(options) {
-    if (typeof options === 'undefined') {
+    if (options === undefined) {
       options = {};
     }
     const result = {
