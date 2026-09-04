@@ -45,6 +45,7 @@ nuxeo.cors.urls=*
 | Lint | `npm run lint` | |
 | Format | `npm run format` | |
 | Unit tests | `npm test` | Web Test Runner; one runner file, ~1000+ Mocha tests |
+| Unit tests (watch) | `npm run test:watch` | Re-runs on file changes |
 | Functional tests | `npm run ftest` | |
 | Production build | `npm run build` | |
 | Bundle analysis | `npm run build:analyze` | |
