@@ -40,13 +40,40 @@ Polymer({
         outline: none;
       }
 
-      :host(:focus-visible) {
+      /* Match the button box so the focus ring frames the whole icon, not a thin inline strip. */
+      a {
+        display: block;
+      }
+
+      /* Host or inner <a> can be focused (never both). Inset ring so it isn't clipped by
+         overflow:hidden containers. */
+      :host(:focus-visible),
+      a:focus-visible {
         outline: auto;
+        outline-offset: -2px;
       }
 
       :host(.selected) paper-icon-button {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
+        background: var(--hyland-sidebar-item-selected-background, rgba(255, 255, 255, 0.12));
+        border-radius: 12px;
+        color: var(--nuxeo-sidebar-menu-icon, var(--nuxeo-sidebar-menu-hover));
+      }
+
+      /* Active item selection indicator: a white block pinned to the leading edge,
+         vertically centred, with the trailing corners rounded (per Figma). Logical
+         properties keep it on the correct side and round the correct corners in RTL. */
+      :host(.selected)::before {
+        content: '';
+        position: absolute;
+        inset-inline-start: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 20px;
+        background: var(--hyland-sidebar-selection-indicator, var(--nuxeo-sidebar-menu-icon, #fff));
+        border-start-end-radius: 16px;
+        border-end-end-radius: 16px;
+        z-index: 1;
       }
 
       paper-badge {
@@ -65,8 +92,9 @@ Polymer({
       }
 
       paper-icon-button:hover {
-        background: rgba(0, 0, 0, 0.2);
-        color: var(--nuxeo-sidebar-menu-hover);
+        background: var(--hyland-sidebar-item-hover-background, rgba(255, 255, 255, 0.12));
+        border-radius: 12px;
+        color: var(--nuxeo-sidebar-menu-icon, var(--nuxeo-sidebar-menu-hover));
       }
 
       paper-icon-button svg,
@@ -76,7 +104,7 @@ Polymer({
       }
     </style>
 
-    <a href$="[[_href(urlFor, route, link)]]">
+    <a href$="[[_href(urlFor, route, link)]]" aria-label$="[[_ariaLabel(label, urlFor, route, link)]]">
       <paper-icon-button noink id="button" name$="[[name]]" aria-labelledby="tooltip" tabindex="-1"></paper-icon-button>
       <nuxeo-tooltip
         for="button"
@@ -192,5 +220,14 @@ Polymer({
       const args = (parts[1] && parts[1].split('/')) || [];
       return this.urlFor(...[name].concat(args));
     }
+  },
+
+  // Only expose an accessible name on the anchor when it renders as a real link (i.e. it
+  // resolves to an href). Without an href the <a> has an implicit role of "generic", where
+  // aria-label is prohibited by ARIA (e.g. Administration/Profile, which activate via click,
+  // not navigation). In those cases the accessible name is carried by the inner icon button
+  // (aria-labelledby="tooltip") instead, so no label is lost.
+  _ariaLabel() {
+    return this._href() ? this.i18n(this.label) : undefined;
   },
 });

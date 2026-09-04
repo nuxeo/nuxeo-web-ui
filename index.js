@@ -1,6 +1,13 @@
 import { config } from '@nuxeo/nuxeo-elements';
 import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
+import { loadTheme } from './themes/loader.js';
+import { installGlobalFocusRing } from './themes/dark-theme-focus-ring.js';
+
+// Install the themeable keyboard-focus ring before any custom element attaches its shadow root,
+// so every root gets the rule from first paint. Dark themes make the ring visible; other themes
+// keep the native user-agent ring unchanged. See themes/dark-theme-focus-ring.js.
+installGlobalFocusRing();
 
 // RTL configuration setup
 const setupRTLSupport = () => {
@@ -27,15 +34,18 @@ const loadAddons = async () => {
   // NXP-26977: await loading of addons
   await Promise.all(
     bundles.map((url) => {
-      if (url.endsWith('.html')) {
-        return new Promise((resolve, reject) => importHref(url, resolve, reject));
-      }
-      return import(
-        /* webpackChunkName: "[request]" */
-        /* webpackInclude: /addons\/[^\/]+\/index.js$/ */
-        // eslint-disable-next-line comma-dangle
-        `./addons/${url}`
-      ).catch(() => import(/* webpackIgnore: true */ `./${url}.bundle.js`));
+      const load = url.endsWith('.html')
+        ? new Promise((resolve, reject) => importHref(url, resolve, reject))
+        : import(
+            /* webpackChunkName: "[request]" */
+            /* webpackInclude: /addons\/[^\/]+\/index.js$/ */
+            // eslint-disable-next-line comma-dangle
+            `./addons/${url}`
+          ).catch(() => import(/* webpackIgnore: true */ `./${url}.bundle.js`));
+      // A missing or broken optional addon bundle (e.g. a server package like nuxeo-platform-3d
+      // that is installed on the server but has no resolvable client bundle) must not reject the
+      // whole bootstrap chain. Isolate each addon load and log a warning instead of failing startup.
+      return Promise.resolve(load).catch((e) => console.warn(`Failed to load addon bundle "${url}":`, e));
     }),
   );
 };
@@ -73,6 +83,9 @@ const ready =
 ready
   .then(disableRobotoFont)
   .then(setupRTLSupport)
+  // Apply the theme early (before the app element loads) to avoid a flash of the wrong theme.
+  // loadTheme() is invoked explicitly here rather than as a themes/loader.js import side effect.
+  .then(loadTheme)
   .then(loadApp)
   .then(loadLegacy)
   .then(loadBundle)

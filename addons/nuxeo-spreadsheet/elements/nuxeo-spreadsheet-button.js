@@ -55,7 +55,7 @@ Polymer({
       </div>
     </template>
 
-    <paper-dialog id="dialog" class="dialog" with-backdrop>
+    <paper-dialog id="dialog" class="dialog" with-backdrop no-cancel-on-outside-click>
       <iframe id="iframe" frameborder="0" scrolling="auto" on-load="_onLoad"></iframe>
     </paper-dialog>
   `,

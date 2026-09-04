@@ -81,11 +81,13 @@ suite('nuxeo-clipboard-documents-button', () => {
       expect(element._isAvailable()).to.be.false;
     });
 
-    test('should return false when a document is a proxy', () => {
+    // a published document must be able to reach the clipboard so it can be reorganised
+    // within the publication area; where it may then be pasted is up to nuxeo-clipboard
+    test('should return true when a document is a proxy', () => {
       element.documents = [doc()];
       element.isCollectionMember.returns(true);
       element.isProxy.returns(true);
-      expect(element._isAvailable()).to.be.false;
+      expect(element._isAvailable()).to.be.true;
     });
   });
 

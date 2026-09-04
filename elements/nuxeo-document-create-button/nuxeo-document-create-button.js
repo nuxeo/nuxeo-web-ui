@@ -25,6 +25,7 @@ import '@polymer/paper-fab/paper-fab.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
 import '../nuxeo-document-creation-stats/nuxeo-document-creation-stats.js';
 import '../nuxeo-keys/nuxeo-keys.js';
+import { NuxeoCreateButtonCollisionBehavior } from '../behaviors/nuxeo-create-button-collision-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -39,27 +40,37 @@ Polymer({
       paper-fab {
         width: var(--nuxeo-document-create-button-width, 56px);
         height: var(--nuxeo-document-create-button-height, 56px);
-        color: var(--nuxeo-button-primary-text);
-        --paper-fab-background: var(--nuxeo-button-primary);
-        --paper-fab-keyboard-focus-background: var(--nuxeo-button-primary-focus);
+        border-radius: 16px;
+        color: var(--hyland-document-create-button-icon-color, var(--nuxeo-button-primary-text));
+        --paper-fab-background: var(--hyland-document-create-button-background, var(--nuxeo-button-primary));
+        --paper-fab-keyboard-focus-background: var(
+          --hyland-document-create-button-hover-background,
+          var(--nuxeo-button-primary-focus)
+        );
+        box-shadow: var(
+          --hyland-document-create-button-box-shadow,
+          0px 4px 8px 3px rgba(0, 0, 0, 0.15),
+          0px 1px 3px rgba(0, 0, 0, 0.3)
+        );
         @apply --nuxeo-document-create-button;
         transition: color 0.25s ease-in-out;
       }
 
       paper-fab:hover,
       paper-fab:focus {
-        background-color: var(--nuxeo-button-primary-focus);
+        background-color: var(--hyland-document-create-button-hover-background, var(--nuxeo-button-primary-focus));
       }
 
       #tray {
         position: absolute;
-        bottom: calc(32px + var(--nuxeo-app-bottom, 0));
-        right: 32px;
+        bottom: calc(var(--nuxeo-document-create-button-offset, 32px) + var(--nuxeo-app-bottom, 0));
+        right: var(--nuxeo-document-create-button-offset, 32px);
         z-index: 10;
+        transition: transform 0.25s ease-in-out;
       }
 
       :host([dir='rtl']) #tray {
-        left: 32px;
+        left: var(--nuxeo-document-create-button-offset, 32px);
         right: auto;
         overflow: hidden;
       }
@@ -91,7 +102,7 @@ Polymer({
       <paper-fab
         id="createBtn"
         noink
-        icon="nuxeo:add"
+        icon="nuxeo:create"
         on-tap="_displayWizard"
         aria-labelledby="createBtnTooltip"
       ></paper-fab>
@@ -107,7 +118,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-create-button',
-  behaviors: [I18nBehavior],
+  behaviors: [I18nBehavior, NuxeoCreateButtonCollisionBehavior],
 
   properties: {
     parent: {
@@ -168,6 +179,8 @@ Polymer({
         this.set('subtypes', filteredSubtypes);
       }
     }
+    // A new parent brings new page content, which may render controls under the button.
+    this._scheduleSettleRechecks();
   },
 
   _canCreateIn(document) {
