@@ -1,22 +1,22 @@
-version: '3.5'
+# Complete setup (default): a single Nuxeo image with the Web UI baked in, serving
+# both the backend and the Web UI at http://localhost:8080/nuxeo/ui.
+#
+# Build prerequisites (the image installs the locally-built marketplace package):
+#   npm run build
+#   mvn -ntp clean install -DskipTests -DskipInstall=true -DskipBuild=true
+#
+# For a faster, lighter local-dev loop (nginx serving dist/ + a separate Nuxeo
+# server), use the nginx setup instead:
+#   docker compose -f docker-compose.nginx.yml up
 services:
-  proxy:
-    image: docker.packages.nuxeo.com/nuxeo/nginx-centos7:0.0.1
-    volumes:
-      - ./server/nginx.proxy.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "8080:80"
-    links:
-      - nuxeo
-      - webui
-
-  webui:
+  web-ui:
     image: nuxeo-web-ui:${NUXEO_WEB_UI_VERSION}
     build:
       context: .
-    
-  nuxeo:
-    image: nuxeo/nuxeo:${NUXEO_VERSION}
+      args:
+        NUXEO_IMAGE: docker-private.packages.nuxeo.com/nuxeo/nuxeo:${NUXEO_VERSION}
+    ports:
+      - "8080:8080"
     environment:
       - NUXEO_DEV_MODE
       - NUXEO_PACKAGES
