@@ -228,7 +228,11 @@ limitations under the License.
 
       _getSenderRegexParts(item) {
         if (item && item.properties) {
-          const regex = /(.*)<([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})>/i;
+          // The domain is matched label by label so that `.` is never both inside the
+          // character class and required after it, and the whole pattern is anchored: a
+          // sender is a single header value, so leaving it unanchored only let a failed
+          // match restart at every position, which is quadratic on a long string.
+          const regex = /^(.*)<([A-Z0-9._%+-]+@(?:[A-Z0-9-]+\.)+[A-Z]{2,4})>/i;
           return regex.exec(item.properties['mail:sender']);
         }
       },

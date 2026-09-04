@@ -207,4 +207,53 @@ suite('DocumentCreationBehavior', () => {
       expect(ctx._getDocumentProperties()).to.be.null;
     });
   });
+
+  // The trailing slash is stripped off `targetPath` before it is compared to the parent path.
+  // Stripping every trailing slash would turn the repository root "/" into "", so the root
+  // would never match its parent and creation there would be reported as an invalid location.
+  suite('target path resolution', () => {
+    test('should accept a target path without a trailing slash', () => {
+      ctx.targetPath = '/default-domain/workspaces';
+      ctx._suggesterChildrenChanged();
+      expect(ctx.set).to.have.been.calledWith('isValidTargetPath', true);
+    });
+
+    test('should accept a target path with a trailing slash', () => {
+      ctx.targetPath = '/default-domain/workspaces/';
+      ctx._suggesterChildrenChanged();
+      expect(ctx.set).to.have.been.calledWith('isValidTargetPath', true);
+    });
+
+    test('should accept the repository root as a target path', () => {
+      ctx.parent.path = '/';
+      ctx.targetPath = '/';
+      ctx._suggesterChildrenChanged();
+      expect(ctx.set).to.have.been.calledWith('isValidTargetPath', true);
+    });
+
+    test('should reject a target path that is not the parent', () => {
+      ctx.targetPath = '/default-domain/somewhere-else';
+      ctx._suggesterChildrenChanged();
+      expect(ctx.set).to.have.been.calledWith('isValidTargetPath', false);
+    });
+
+    test('should keep targetPath when it differs from the parent only by a trailing slash', () => {
+      ctx.targetPath = '/default-domain/workspaces/';
+      ctx._parentChanged();
+      expect(ctx.set).to.not.have.been.calledWith('targetPath', '/default-domain/workspaces');
+    });
+
+    test('should keep targetPath at the repository root', () => {
+      ctx.parent.path = '/';
+      ctx.targetPath = '/';
+      ctx._parentChanged();
+      expect(ctx.set).to.not.have.been.calledWith('targetPath', '/');
+    });
+
+    test('should reset targetPath when it points somewhere other than the parent', () => {
+      ctx.targetPath = '/default-domain/somewhere-else';
+      ctx._parentChanged();
+      expect(ctx.set).to.have.been.calledWith('targetPath', '/default-domain/workspaces');
+    });
+  });
 });
