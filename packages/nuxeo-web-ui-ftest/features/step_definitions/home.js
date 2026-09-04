@@ -1,8 +1,11 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 
-When('I click the Nuxeo logo', async function () {
-  const home = await this.ui.goHome();
-  return home;
+Given('I am not on the home page', async function () {
+  await this.ui.leaveHome();
+});
+
+When('I click the home button', async function () {
+  await this.ui.goHome();
 });
 
 Then('I can see my home', async function () {

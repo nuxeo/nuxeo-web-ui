@@ -44,6 +44,24 @@ suite('nuxeo-document-grid-thumbnail', () => {
     test('should default selectedItems to empty array', () => {
       expect(element.selectedItems).to.deep.equal([]);
     });
+
+    // ELEMENTS-1616: consistent crossorigin across all elements that render the
+    // same thumbnail URL, otherwise a plain <img> poisons Chrome's cache and the
+    // crossorigin <img> (list/thumbnail view) fails to load under S3 direct download.
+    test('renders the thumbnail img with crossorigin="anonymous"', () => {
+      const img = element.shadowRoot.querySelector('.thumbnailContainer img');
+      expect(img).to.be.ok;
+      expect(img.getAttribute('crossorigin')).to.equal('anonymous');
+    });
+
+    // ELEMENTS-1616: a failed (cross-origin) thumbnail should fall back to a
+    // transparent pixel instead of a broken-image icon. Fire the real error
+    // event so the on-error="_onError" template wiring is exercised too.
+    test('renders a transparent pixel when a thumbnail fails to load', () => {
+      const img = element.shadowRoot.querySelector('.thumbnailContainer img');
+      img.dispatchEvent(new Event('error'));
+      expect(img.src.startsWith('data:image/png;base64,')).to.be.true;
+    });
   });
 
   suite('_thumbnail', () => {
@@ -296,10 +314,51 @@ suite('nuxeo-document-grid-thumbnail', () => {
       element._toogleSelect.restore();
     });
 
-    test('keydown non-Tab calls _toogleSelect', () => {
+    ['Enter', ' '].forEach((key) => {
+      test(`keydown with ${key === ' ' ? 'Space' : key} calls _toogleSelect`, () => {
+        sinon.spy(element, '_toogleSelect');
+        element._onCheckBoxTap({ type: 'keydown', key, detail: { sourceEvent: {} } });
+        expect(element._toogleSelect).to.have.been.called;
+        element._toogleSelect.restore();
+      });
+    });
+
+    ['a', 'Control', 'Meta', 'Shift', 'ArrowRight', 'Escape'].forEach((key) => {
+      test(`keydown with ${key} does not toggle`, () => {
+        sinon.spy(element, '_toogleSelect');
+        element._onCheckBoxTap({ type: 'keydown', key, detail: { sourceEvent: {} } });
+        expect(element._toogleSelect).to.not.have.been.called;
+        element._toogleSelect.restore();
+      });
+    });
+
+    [
+      { key: 'Enter', ctrlKey: true, label: 'Ctrl+Enter' },
+      { key: 'Enter', metaKey: true, label: 'Meta+Enter' },
+      { key: 'Enter', shiftKey: true, label: 'Shift+Enter' },
+      { key: 'Enter', altKey: true, label: 'Alt+Enter' },
+      { key: ' ', ctrlKey: true, label: 'Ctrl+Space' },
+    ].forEach(({ label, ...modifiers }) => {
+      test(`keydown with ${label} does not toggle`, () => {
+        sinon.spy(element, '_toogleSelect');
+        element._onCheckBoxTap({ type: 'keydown', ...modifiers, detail: { sourceEvent: {} } });
+        expect(element._toogleSelect).to.not.have.been.called;
+        element._toogleSelect.restore();
+      });
+    });
+
+    // nuxeo-default-search-results._triggerItemToggle wraps a keydown on the tile in a synthetic tap.
+    test('synthetic tap wrapping an unmodified Enter calls _toogleSelect', () => {
       sinon.spy(element, '_toogleSelect');
-      element._onCheckBoxTap({ type: 'keydown', key: 'a', detail: { sourceEvent: {} } });
+      element._onCheckBoxTap({ type: 'tap', detail: { sourceEvent: { key: 'Enter' } } });
       expect(element._toogleSelect).to.have.been.called;
+      element._toogleSelect.restore();
+    });
+
+    test('synthetic tap wrapping Ctrl+Enter does not toggle', () => {
+      sinon.spy(element, '_toogleSelect');
+      element._onCheckBoxTap({ type: 'tap', detail: { sourceEvent: { key: 'Enter', ctrlKey: true } } });
+      expect(element._toogleSelect).to.not.have.been.called;
       element._toogleSelect.restore();
     });
   });
@@ -326,6 +385,30 @@ suite('nuxeo-document-grid-thumbnail', () => {
       element._toogleSelect({ type: 'keydown', detail: { sourceEvent: { shiftKey: true } } });
       expect(element.fire).to.have.been.calledWith('selected', { index: 0, shiftKey: false });
       element.fire.restore();
+    });
+  });
+
+  // WEBUI-2056 / WEBUI-2175: integration check that a keyboard deselect through `_toogleSelect`
+  // keeps focus on the check button (the shared helper is unit-tested in common-utils).
+  suite('_toogleSelect blur-on-deselect wiring', () => {
+    test('keyboard deselect keeps shadowRoot.activeElement', async () => {
+      // `.select` lives inside a dom-if that stamps `<a href$="[[urlFor(doc)]]">`; stub urlFor so the
+      // template stamps reliably, otherwise the button is null.
+      sinon.stub(element, 'urlFor').returns('/doc/doc-1');
+      element.doc = { uid: 'doc-1', title: 'My Document', type: 'File' };
+      await flush();
+      const button = element.shadowRoot.querySelector('.select paper-icon-button');
+      expect(button, 'select paper-icon-button should be stamped').to.exist;
+      element.selected = true;
+      button.focus();
+      // Some headless/virtualized environments ignore `.focus()`; the focus-retention behavior is
+      // only meaningful once the control is actually focused, so skip the assertion otherwise.
+      if (element.shadowRoot.activeElement !== button) {
+        return;
+      }
+      element._toogleSelect(new KeyboardEvent('keydown', { key: ' ' }));
+      expect(element.selected).to.be.false;
+      expect(element.shadowRoot.activeElement).to.equal(button);
     });
   });
 });

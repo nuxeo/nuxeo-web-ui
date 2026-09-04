@@ -69,7 +69,16 @@
     <!-- Control external permissions -->
     <property name="org.nuxeo.web.ui.permissions.externalUsers">${org.nuxeo.web.ui.permissions.externalUsers:=true}</property>
 
+    <!-- Rendition preselected in the publication popup when the document has a main blob: none | default | <renditionName> -->
+    <property name="org.nuxeo.web.ui.publishing.selectedRendition">${org.nuxeo.web.ui.publishing.selectedRendition:=default}</property>
+
     <!-- Hide date picker placeholder text (set org.nuxeo.web.ui.datePicker.hidePlaceholder=true in nuxeo.conf to hide) -->
     <property name="org.nuxeo.web.ui.datePicker.hidePlaceholder">${org.nuxeo.web.ui.datePicker.hidePlaceholder:=false}</property>
+
+    <!-- Client-side inactivity timeout (minutes) after which the session is ended and the user is sent to the timeout login page (login.jsp?nxtimeout=true); backed by nuxeo.conf session.timeout. Any value that is not a positive number (<= 0, or non-numeric such as NaN) disables the timer. -->
+    <property name="org.nuxeo.web.ui.session.timeout">${session.timeout:=60}</property>
+
+    <!-- opt-in Hyland branding -->
+    <property name="org.nuxeo.web.ui.branding.rebrand">${org.nuxeo.web.ui.branding.rebrand:=false}</property>
   </extension>
 </component>

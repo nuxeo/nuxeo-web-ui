@@ -18,6 +18,11 @@ limitations under the License.
 import { fixture, html, flush } from '@nuxeo/testing-helpers';
 import '../elements/search/nuxeo-search-form.js';
 
+window.nuxeo.I18n.language = 'en';
+window.nuxeo.I18n.en = window.nuxeo.I18n.en || {};
+window.nuxeo.I18n.en['searchForm.searchFilters'] = 'Search Filters';
+window.nuxeo.I18n.en['searchForm.searchFilters.placeholder'] = 'Select a saved search';
+
 suite('nuxeo-search-form', () => {
   let searchForm;
 
@@ -25,6 +30,26 @@ suite('nuxeo-search-form', () => {
     searchForm = await fixture(html`<nuxeo-search-form provider="default_search"></nuxeo-search-form>`);
     searchForm.notify = sinon.spy();
     await flush();
+  });
+
+  test('gives the saved searches dropdown an always visible label (WEBUI-489)', () => {
+    const actionsDropdown = searchForm.shadowRoot.querySelector('#actionsDropdown');
+    expect(actionsDropdown).to.exist;
+    expect(actionsDropdown.label).to.equal('Search Filters');
+    expect(actionsDropdown.placeholder).to.equal('Select a saved search');
+
+    const visibleLabel = actionsDropdown.shadowRoot.querySelector('label.label');
+    expect(visibleLabel).to.exist;
+    expect(visibleLabel.textContent.trim()).to.equal('Search Filters');
+    expect(visibleLabel.hasAttribute('hidden')).to.be.false;
+
+    const input = actionsDropdown.shadowRoot.querySelector(
+      '.selectivity-single-select-input, .selectivity-multiple-input',
+    );
+    expect(input).to.exist;
+    expect(input.getAttribute('aria-labelledby')).to.equal('label');
+    expect(input.hasAttribute('aria-label')).to.be.false;
+    expect(visibleLabel.getAttribute('for')).to.equal(input.id);
   });
 
   test('maps saved searches for selectivity data', () => {
@@ -596,6 +621,131 @@ suite('nuxeo-search-form', () => {
 
       expect(searchForm._quickFilters).to.deep.equal([]);
       expect(searchForm.$.provider.quickFilters).to.deep.equal([]);
+    });
+  });
+
+  suite('result name tooltip (WEBUI-2009)', () => {
+    // Names stay truncated to one line, so every row carries a tooltip with the full name.
+    // These read the class-level template: iron-list templatizes the row template at
+    // runtime, which empties the instance's copy.
+    const rowTemplate = () => {
+      const template = searchForm.constructor.template.content.querySelector('#list template');
+      expect(template, 'result row template').to.not.be.null;
+      return template;
+    };
+    const rowTooltip = () => rowTemplate().content.querySelector('nuxeo-tooltip');
+    const rowName = () => rowTemplate().content.querySelector('.list-item-title');
+
+    test('the tooltip exposes the untruncated name', () => {
+      const tooltip = rowTooltip();
+      expect(tooltip, 'result row tooltip').to.not.be.null;
+      expect(tooltip.textContent.trim()).to.equal('[[item.title]]');
+    });
+
+    test('the tooltip sits outside the name so the name text is unchanged', () => {
+      // Nesting it inside would append a duplicate of the title to the span's textContent.
+      expect(rowName().querySelector('nuxeo-tooltip')).to.be.null;
+      expect(rowName().textContent.trim()).to.equal('[[item.title]]');
+    });
+
+    test('the tooltip is anchored on its parent row rather than by id', () => {
+      // The row template is stamped once per result into the same shadow root, so a "for"
+      // attribute would resolve every row's tooltip to the first matching id.
+      const tooltip = rowTooltip();
+      expect(tooltip.hasAttribute('for')).to.be.false;
+      expect(tooltip.parentElement.classList.contains('list-item-info')).to.be.true;
+    });
+
+    test('the tooltip is hidden from the accessibility tree', () => {
+      // The name is already exposed as row text; announcing it twice is noise.
+      expect(rowTooltip().getAttribute('aria-hidden')).to.equal('true');
+    });
+
+    test('the name stays on a single truncated line', () => {
+      // .ellipsis supplies the single-line truncation; no local rule may reintroduce wrapping
+      expect(rowName().classList.contains('ellipsis')).to.be.true;
+      const styles = [...searchForm.constructor.template.content.querySelectorAll('style')]
+        .map((s) => s.textContent)
+        .join('\n');
+      expect(styles).to.not.contain('-webkit-line-clamp');
+    });
+
+    const stampRows = async (items) => {
+      searchForm.queue = true;
+      searchForm.$.list.items = items;
+      // iron-list decides how many rows to stamp, so poll rather than assume a count
+      for (let i = 0; i < 40 && searchForm.$.list.querySelectorAll('.list-item-info').length === 0; i++) {
+        await flush();
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      const rows = searchForm.$.list.querySelectorAll('.list-item-info');
+      expect(rows.length).to.be.at.least(1);
+      return rows;
+    };
+
+    test('every rendered row gets its own tooltip', async () => {
+      const rows = await stampRows([
+        { uid: '1', type: 'File', path: '/a', title: 'D-DF-ASTURL61CZRIE-LSPS-PLANNING-2025-REV-01' },
+        { uid: '2', type: 'File', path: '/b', title: 'D-DF-ASTURL61CZRIE-LSPS-PLANNING-2025-REV-02' },
+        { uid: '3', type: 'File', path: '/c', title: 'Short' },
+      ]);
+      rows.forEach((row) => {
+        const name = row.querySelector('.list-item-title').textContent.trim();
+        expect(row.querySelector('nuxeo-tooltip'), `tooltip for "${name}"`).to.not.be.null;
+      });
+    });
+
+    test('the tooltip opens beside the row so it never covers the result list', () => {
+      const tooltip = rowTooltip();
+      expect(tooltip.getAttribute('position')).to.equal('right');
+      // Tighter than nuxeo-tooltip's default 14, which reads as a gap rather than a pointer
+      // when the tooltip sits alongside its row instead of below it.
+      expect(tooltip.getAttribute('offset')).to.equal('8');
+    });
+
+    test('the name is wrapped in an element the document-level cap can match', () => {
+      // nuxeo-tooltip clones its content onto document.body, so a rule in this shadow root
+      // would never reach it: the class travels with the clone and the cap lives on the
+      // document (see nuxeo-search-result-tooltip-styles). A bare text node could not be
+      // targeted at all.
+      const content = rowTooltip().firstElementChild;
+      expect(content, 'tooltip content element').to.not.be.null;
+      expect(content.classList.contains('nuxeo-search-result-tooltip-name')).to.be.true;
+      expect(content.textContent.trim()).to.equal('[[item.title]]');
+      expect(content.hasAttribute('style'), 'width cap belongs in the stylesheet, not inline').to.be.false;
+    });
+
+    test('a name with no break opportunity stays inside the viewport', async () => {
+      // paper-tooltip sets no max-width and its fitToVisibleBounds only repositions the box,
+      // so an unbreakable name used to lay out wider than the viewport with the start of the
+      // name pushed off-screen. Placement is asserted structurally above; here the box itself
+      // has to stay on screen whichever side fitToVisibleBounds settles on.
+      const rows = await stampRows([
+        { uid: '1', type: 'File', path: '/a', title: 'Short' },
+        { uid: '2', type: 'File', path: '/b', title: `D${'X'.repeat(240)}` },
+      ]);
+      const rowFor = (prefix) =>
+        [...rows].find((row) => row.querySelector('.list-item-title').textContent.trim().startsWith(prefix));
+
+      const measure = async (row) => {
+        const tooltip = row.querySelector('nuxeo-tooltip');
+        tooltip.show();
+        await flush();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        const rect = tooltip._tooltip.getBoundingClientRect();
+        tooltip.hide();
+        return rect;
+      };
+
+      const single = await measure(rowFor('Short'));
+      const wrapped = await measure(rowFor('DXXX'));
+
+      expect(wrapped.width).to.be.below(window.innerWidth);
+      expect(Math.floor(wrapped.left)).to.be.at.least(0);
+      expect(Math.ceil(wrapped.right)).to.be.at.most(window.innerWidth);
+      // Capped and wrapped onto several lines rather than stretched into one long one.
+      expect(wrapped.height).to.be.above(single.height);
     });
   });
 });

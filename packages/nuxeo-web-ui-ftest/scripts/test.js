@@ -21,6 +21,8 @@
  *   --wdioConfig: pass a custom wdio config file
  *   --debug: allow node inspector to be attached
  *   --browser: the browser to be used (defaults to chrome)
+ *   --browserVersion: the browser version/channel to provision (e.g. 'stable' or '135.0.7049.114');
+ *                     falls back on the BROWSER_VERSION env var or 'stable'
  *   --runAll: do not apply fail fast premise which means that a scenario failure won't trigger feature failure
  *   --bail:  amount of tests that can fail before stopping the runner
  *            by default set to 0, which means don't bail, run all tests
@@ -28,8 +30,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
-import chromeLauncher from 'chrome-launcher';
 import { fileURLToPath } from 'url';
 import minimist from 'minimist';
 const { Launcher: CliLauncher } = await import('@wdio/cli');
@@ -99,78 +99,22 @@ if (argv.bail) {
 
 process.env.BROWSER = argv.browser || process.env.BROWSER || 'chrome';
 
+if (argv.browserVersion) {
+  process.env.BROWSER_VERSION = argv.browserVersion;
+}
+
 process.env.FORCE_COLOR = true;
 
-let done = Promise.resolve();
-
-if (process.env.DRIVER_VERSION == null) {
-  const chromePath = chromeLauncher.Launcher.getFirstInstallation();
-  let version;
-  try {
-    version = execSync(`"${chromePath}" --version`).toString().trim();
-  } catch (e) {
-    console.error('unable to get Chrome version: ', e);
-  }
-  // eslint-disable-next-line no-console
-  console.log(`${version} detected.`);
-  const match = version && version.match(/([0-9]+)\./);
-  if (match) {
-    const checkVersion = match[1];
-    try {
-      done = fetch(`https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${checkVersion}`).then(
-        (response) => {
-          if (response.ok) {
-            return response
-              .text()
-              .then((newDriverVersion) => {
-                // eslint-disable-next-line no-console
-                console.log(`ChromeDriver ${newDriverVersion} needed.`);
-                process.env.DRIVER_VERSION = newDriverVersion;
-              })
-              .catch((e) => {
-                console.error('unable to parse ChromeDriver version: ', e);
-              });
-          }
-          console.error('unable to fetch ChromeDriver version: ', response);
-        },
-      );
-    } catch (e) {
-      console.error('unable to fetch ChromeDriver version: ', e);
-    }
-  }
-}
-try {
-  done = fetch(`https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json`).then(
-    (response) => {
-      if (response.ok) {
-        return response
-          .text()
-          .then((responseJSON) => {
-            const responseObj = JSON.parse(responseJSON);
-            const cftVersion = responseObj.channels.Stable.version;
-            // eslint-disable-next-line no-console
-            console.log(`ChromeForTesting ${cftVersion} detected.`);
-          })
-          .catch((e) => {
-            console.error('unable to parse Chrome for testing browser version: ', e);
-          });
-      }
-      console.error('unable to fetch Chrome for testing browser version: ', response);
-    },
-  );
-} catch (e) {
-  console.error('unable to fetch Chrome for testing browser version ', e);
-}
-
-done.finally(() => {
-  const wdio = new CliLauncher(args[0]);
-  wdio.run().then(
-    (code) => {
-      process.exit(code);
-    },
-    (error) => {
-      console.error('Launcher failed to start the test', error.stacktrace);
-      process.exit(1);
-    },
-  );
-});
+// Browser and matching driver provisioning is delegated to WebdriverIO's built-in driver
+// manager (see `browserVersion` in wdio.conf.js), so no manual Chrome/ChromeDriver version
+// resolution is required here.
+const wdio = new CliLauncher(args[0]);
+wdio.run().then(
+  (code) => {
+    process.exit(code);
+  },
+  (error) => {
+    console.error('Launcher failed to start the test', error.stacktrace);
+    process.exit(1);
+  },
+);

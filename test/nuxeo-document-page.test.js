@@ -847,4 +847,20 @@ suite('nuxeo-document-page', () => {
     });
     element._openedChanged();
   });
+
+  suite('tags section', () => {
+    test('renders the tags widget with a visible label instead of a detached heading', async () => {
+      const doc = { uid: '1', type: 'File' };
+      element.hasFacet.withArgs(doc, 'NXTag').returns(true);
+      element.document = doc;
+      await flush();
+
+      const tags = element.shadowRoot.querySelector('nuxeo-tag-suggestion');
+      expect(tags).to.exist;
+      expect(tags.label).to.equal(element.i18n('documentPage.tags'));
+      expect(tags.label).to.not.be.empty;
+      // the caption is now the widget's own label, not a heading detached from the field
+      expect(tags.parentElement.querySelector('h5')).to.not.exist;
+    });
+  });
 });

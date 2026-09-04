@@ -19,6 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
+import { BrandingBehavior } from '../behaviors/nuxeo-branding-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag-suggestion.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '../nuxeo-document-info-bar/nuxeo-document-info-bar.js';
@@ -40,6 +41,21 @@ Polymer({
     <style include="nuxeo-styles">
       .page {
         @apply --layout-vertical;
+        padding: 0;
+      }
+      /* WEBUI-1935 (gated): Hyland document-page padding only on branded themes. */
+      :host([rebrand]) .page {
+        padding: var(--hyland-document-page-padding, 0);
+      }
+
+      #detailsCard {
+        border-bottom: none;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+      }
+      /* WEBUI-1935 (gated): Hyland details-card border/shadow only on branded themes. */
+      :host([rebrand]) #detailsCard {
+        border-bottom: var(--hyland-details-card-border-bottom, none);
+        box-shadow: var(--hyland-details-card-box-shadow, 0 3px 5px rgba(0, 0, 0, 0.04));
       }
 
       .details {
@@ -53,6 +69,21 @@ Polymer({
         margin: 16px;
         min-width: 256px;
         max-width: 320px;
+      }
+
+      /* The tags field renders its own label, which replaces the h5 that used to sit above it.
+         Scoped to this layout so other tag suggestions keep the default label styling; the
+         !important declarations are needed to win over the theme's --nuxeo-label mixin. */
+      nuxeo-tag-suggestion {
+        --nuxeo-label: {
+          display: block;
+          font-family: var(--nuxeo-app-font);
+          font-weight: 700 !important;
+          font-size: 1.08rem;
+          letter-spacing: 0.24px !important;
+          line-height: 1.54rem;
+          margin: 0 0 0.8rem;
+        };
       }
 
       paper-icon-button {
@@ -93,10 +124,10 @@ Polymer({
           <!-- tags -->
           <template is="dom-if" if="[[hasFacet(document, 'NXTag')]]">
             <div class="section">
-              <h5>[[i18n('documentPage.tags')]]</h5>
               <nuxeo-tag-suggestion
                 document="[[document]]"
                 allow-new-tags
+                label="[[i18n('documentPage.tags')]]"
                 placeholder="[[i18n('documentPage.tags.placeholder')]]"
                 readonly="[[!hasPermission(document, 'WriteProperties')]]"
               >
@@ -119,7 +150,7 @@ Polymer({
   `,
 
   is: 'nuxeo-collapsible-document-page',
-  behaviors: [LayoutBehavior],
+  behaviors: [LayoutBehavior, BrandingBehavior],
 
   properties: {
     document: {
