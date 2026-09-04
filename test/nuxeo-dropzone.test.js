@@ -298,6 +298,29 @@ suite('nuxeo-dropzone', () => {
       legacyStub.restore();
     });
 
+    test('importBatch does not report success when the document update conflicts', async () => {
+      const notifySpy = sinon.spy(element, 'notify');
+      const legacyStub = sinon.stub(element, '_legacyUpdateDocument').resolves(false);
+      element.xpath = 'file:content';
+      element.document = { uid: 'doc-1' };
+      element.files = [{ name: 'ok.txt', index: 0 }];
+      element.uploadedFiles = [{ name: 'ok.txt' }];
+      element.invalid = true;
+
+      await element.importBatch({
+        type: 'batchFinished',
+        stopPropagation: sinon.spy(),
+        detail: { batchId: 'batch-3' },
+      });
+
+      expect(legacyStub).to.have.been.calledOnce;
+      expect(notifySpy).to.not.have.been.called;
+      expect(element.invalid).to.eql(true);
+      expect(element.hasFilesUploaded).to.eql(true);
+      notifySpy.restore();
+      legacyStub.restore();
+    });
+
     test('deleteFile prunes uploaded values in multiple mode', () => {
       sinon.stub(element, 'validate');
       element.required = false;
@@ -359,6 +382,56 @@ suite('nuxeo-dropzone', () => {
 
       abortSpy.restore();
       element.hasAbort.restore();
+    });
+  });
+
+  // WEBUI-1820: the legacy dropzone update is a document write, so it takes part in optimistic locking
+  suite('optimistic locking', () => {
+    setup(() => {
+      element.updateDocument = true;
+      element.xpath = 'file:content';
+      element.document = {
+        uid: 'doc-1',
+        repository: 'default',
+        changeToken: '5-2',
+        properties: { 'file:content': { name: 'new.pdf' } },
+      };
+      sinon.stub(element, 'notify');
+      sinon.stub(element, 'fire');
+    });
+
+    teardown(() => {
+      element.notify.restore();
+      element.fire.restore();
+      if (element.$.doc.put.restore) {
+        element.$.doc.put.restore();
+      }
+    });
+
+    test('sends the change token of the loaded document', async () => {
+      sinon.stub(element.$.doc, 'put').resolves({ uid: 'doc-1' });
+      const succeeded = await element._legacyUpdateDocument();
+      expect(element.$.doc.data.changeToken).to.eql('5-2');
+      expect(succeeded).to.eql(true);
+    });
+
+    test('reports a conflict and reloads when the write is stale', async () => {
+      sinon.stub(element.$.doc, 'put').rejects({ status: 409 });
+      const succeeded = await element._legacyUpdateDocument();
+      expect(succeeded).to.eql(false);
+      expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify.firstCall.args[0].message).to.eql(element.i18n('documentUpdate.conflict'));
+      expect(element.fire).to.have.been.calledWith('document-updated');
+    });
+
+    test('still rejects other failures', async () => {
+      sinon.stub(element.$.doc, 'put').rejects({ status: 500 });
+      let caught;
+      await element._legacyUpdateDocument().catch((err) => {
+        caught = err;
+      });
+      expect(caught).to.eql({ status: 500 });
+      expect(element.notify).to.not.have.been.called;
     });
   });
 });
