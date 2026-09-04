@@ -33,8 +33,8 @@
 #
 # Environment overrides:
 #   NX_MAIN_REPO      Reference nuxeo-web-ui clone (default: this script's repo)
-#   NX_TICKETS_ROOT   Where ticket workspaces live (default: <parent>/tickets)
-#   NX_EVIDENCE_ROOT  Where evidence is captured (default: ~/Desktop)
+#   NX_TICKETS_ROOT   Where ticket workspaces live (default: <parent>/worktrees)
+#   NX_EVIDENCE_ROOT  Where evidence is captured (default: ~/Desktop/jira-evidence)
 
 set -euo pipefail
 
@@ -106,8 +106,8 @@ fi
 [ -d "$MAIN_REPO/.git" ] || die "could not find a reference clone from $MAIN_REPO; set NX_MAIN_REPO"
 
 PARENT=$(dirname "$MAIN_REPO")
-TICKETS_ROOT=${NX_TICKETS_ROOT:-$PARENT/tickets}
-EVIDENCE_ROOT=${NX_EVIDENCE_ROOT:-$HOME/Desktop}
+TICKETS_ROOT=${NX_TICKETS_ROOT:-$PARENT/worktrees}
+EVIDENCE_ROOT=${NX_EVIDENCE_ROOT:-$HOME/Desktop/jira-evidence}
 
 # Nesting a ticket workspace inside the reference checkout would make it untracked
 # content that `git status`, eslint and prettier all walk into.
@@ -124,7 +124,7 @@ EL=$TDIR/elements
 CONTAINER=nx-$TICKET_SLUG-$BASE_SLUG
 DIST_PATCHED=/tmp/dist-$TICKET_SLUG-$BASE_SLUG-patched
 DIST_UNPATCHED=/tmp/dist-$TICKET_SLUG-$BASE_SLUG-unpatched
-EVIDENCE=$EVIDENCE_ROOT/$TICKET
+EVIDENCE=$EVIDENCE_ROOT/$TICKET/fix
 
 # ---------------------------------------------------------------------- ports
 
