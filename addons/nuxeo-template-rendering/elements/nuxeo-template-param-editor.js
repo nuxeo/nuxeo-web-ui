@@ -377,7 +377,7 @@ Polymer({
       const change = this._getParamAttribute(param, 'change');
       if (change) {
         if (change === 'deleted') {
-          this.params.querySelector('templateParams').removeChild(param);
+          param.remove();
         }
         this._removeParamAttribute(param, 'change');
       }

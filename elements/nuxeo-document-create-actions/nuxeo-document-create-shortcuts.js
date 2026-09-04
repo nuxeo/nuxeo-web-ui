@@ -70,14 +70,14 @@ Polymer({
   _updateShortcuts() {
     const types = this.$.creationStats.lastType(1);
     this.$.creationStats.mostCommonType(2).forEach((type) => {
-      if (types.indexOf(type) < 0) {
+      if (!types.includes(type)) {
         types.push(type);
       }
     });
 
     const shorcuts = [];
     types.forEach((type) => {
-      if (this.subtypes && this.subtypes.indexOf(type) > -1) {
+      if (this.subtypes?.includes(type)) {
         const el = document.createElement('nuxeo-document-create-shortcut');
         el.type = type;
         el.icon = `images/doctypes/${type}.svg`;
@@ -91,16 +91,16 @@ Polymer({
 
   _putNodes(parent, ...args) {
     while (parent.firstChild) {
-      parent.removeChild(parent.firstChild);
+      parent.firstChild.remove();
     }
     if (args && args.length > 0) {
-      for (let i = 0; i < args.length; i++) {
-        if (Array.isArray(args[i])) {
-          for (let j = 0; j < args[i].length; j++) {
-            parent.appendChild(args[i][j]);
+      for (const arg of args) {
+        if (Array.isArray(arg)) {
+          for (const node of arg) {
+            parent.appendChild(node);
           }
         } else {
-          parent.appendChild(args[i]);
+          parent.appendChild(arg);
         }
       }
     }

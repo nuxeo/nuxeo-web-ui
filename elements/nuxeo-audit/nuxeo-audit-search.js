@@ -291,9 +291,7 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
     if (moment(comment, moment.ISO_8601).isValid()) {
       return this.formatDateTime(comment);
     }
-    return clientReason && clientReason.toLowerCase().indexOf('view') > -1
-      ? `${this.i18n('command.view')}: [${comment}]`
-      : comment;
+    return clientReason?.toLowerCase().includes('view') ? `${this.i18n('command.view')}: [${comment}]` : comment;
   }
 }
 

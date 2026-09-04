@@ -28,7 +28,7 @@ class Widget {
     this.field = this.widget.fields[0].fieldName;
 
     // Rename data['schema']['property'] to data.schema.property
-    this.field = this.field.replace(/\['/g, '.').replace(/']/g, '');
+    this.field = this.field.replaceAll("['", '.').replaceAll("']", '');
 
     // In a listing, the layout is not usually rendered on the document, but on a PageSelection element,
     // wrapping the  DocumentModel to handle selection information.

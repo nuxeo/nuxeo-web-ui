@@ -875,7 +875,7 @@ Polymer({
     const search = this._searches[idx];
     const clonedParams = JSON.parse(JSON.stringify(search.params));
     this.params = this._mutateParams(clonedParams, true);
-    this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
+    this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replaceAll('*', '') : '';
 
     // Ensure form stays synced
     if (this.form) {

@@ -216,7 +216,7 @@ limitations under the License.
                 return !isNotLeaf && node.root !== true;
               }.bind(this),
             };
-            this.$.tree.open.apply(this.$.tree, ['root']);
+            this.$.tree.open('root');
           }
         }
       },
