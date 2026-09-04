@@ -28,10 +28,12 @@ npm test                     # Web Test Runner unit tests — must pass
 polluted, squash on the PR base and rewrite with `git commit-tree` + a message file (agent
 `git commit` may re-inject Cursor trailers).
 
-Before marking a PR ready, verify the current head SHA has a successful `license/cla` status. If
-GitHub shows `license/cla Expected — Waiting for status to be reported`, first push a signed empty
-retrigger commit. If the legacy status provider still does not report, ask a repo maintainer to
-refresh the required check or CLA app configuration instead of leaving the PR blocked.
+After creating a commit and before pushing a PR branch, verify the new commit is signed:
+`git log -1 --format='%G?'` should print `G`. Before marking a PR ready, verify the current head SHA
+has a successful `license/cla` status. If GitHub shows
+`license/cla Expected — Waiting for status to be reported`, first push a signed empty retrigger
+commit. If the legacy status provider still does not report, ask a repo maintainer to refresh the
+required check or CLA app configuration instead of leaving the PR blocked.
 
 ## Project Structure
 

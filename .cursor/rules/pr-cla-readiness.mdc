@@ -5,8 +5,9 @@ alwaysApply: true
 
 # PR CLA Readiness
 
-- Before committing for a PR, verify signing is enabled and the latest commit is
-  verified locally: `git log -1 --format='%G?'` should print `G`.
+- Before committing for a PR, verify signing is enabled.
+- After creating the commit and before pushing, verify the new commit is signed:
+  `git log -1 --format='%G?'` should print `G`.
 - Do not keep unknown agent/bot authors or co-author trailers in final PR commits.
   In particular, remove `Co-authored-by: Cursor <cursoragent@cursor.com>` before
   pushing a PR branch.
