@@ -1147,6 +1147,53 @@ suite('nuxeo-document-import', () => {
     });
   });
 
+  suite('_validate', () => {
+    let innerLayout;
+
+    setup(() => {
+      innerLayout = {
+        _getValidatableElements: sinon.stub().returns([]),
+        element: { root: document.createElement('div') },
+      };
+      sinon
+        .stub(element, '$$')
+        .withArgs('#document-import')
+        .returns({ $: { layout: innerLayout } });
+      sinon.stub(element.$.form, 'validate').returns(false);
+    });
+
+    teardown(() => {
+      element.$$.restore();
+      element.$.form.validate.restore();
+    });
+
+    test('should scroll to and focus invalid field on validation failure', () => {
+      const invalidField = { invalid: true, scrollIntoView: sinon.spy(), focus: sinon.spy() };
+      innerLayout._getValidatableElements.returns([{ invalid: false }, invalidField]);
+      element._validate();
+      // the options matter: `nearest` keeps the error summary in view and `preventScroll` stops
+      // the focus call from scrolling again, so assert them rather than just the call count.
+      // Compare the recorded args instead of using `calledOnceWithExactly`: a mismatch on the
+      // spy matcher never reaches the reporter and the runner session times out with no result.
+      expect(invalidField.scrollIntoView.args).to.deep.equal([[{ block: 'nearest' }]]);
+      expect(invalidField.focus.args).to.deep.equal([[{ preventScroll: true }]]);
+    });
+
+    test('should not scroll when no field reports itself invalid', () => {
+      const field = { invalid: false, scrollIntoView: sinon.spy(), focus: sinon.spy() };
+      innerLayout._getValidatableElements.returns([field]);
+      element._validate();
+      expect(field.scrollIntoView).to.not.have.been.called;
+      expect(field.focus).to.not.have.been.called;
+    });
+
+    test('should return true without scrolling when the form is valid', () => {
+      element.$.form.validate.returns(true);
+      expect(element._validate()).to.be.true;
+      expect(innerLayout._getValidatableElements).to.not.have.been.called;
+    });
+  });
+
   suite('_clear', () => {
     test('should reset all properties to initial state', () => {
       element.stage = 'customize';
