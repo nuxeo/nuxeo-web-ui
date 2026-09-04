@@ -33,18 +33,28 @@ limitations under the License.
     <nuxeo-resource id="user" path="/user"></nuxeo-resource>
 
     <div role="widget" class="participants">
-      <label>[[i18n('wf.serialDocumentReview.participants')]]</label>
+      <span class="label" id="participants-label">[[i18n('wf.serialDocumentReview.participants')]]</span>
       <template is="dom-if" if="[[_hasActorType(task.variables.participants, 'group')]]">
-        <nuxeo-tags type="group" items="[[_getActorsByType(task.variables.participants, 'group')]]"></nuxeo-tags>
+        <nuxeo-tags
+          role="definition"
+          aria-labelledby="participants-label"
+          type="group"
+          items="[[_getActorsByType(task.variables.participants, 'group')]]"
+        ></nuxeo-tags>
       </template>
       <template is="dom-if" if="[[_showUserParticipants(_resolvedUserParticipants, _participantsLoading)]]">
-        <nuxeo-tags type="user" items="[[_resolvedUserParticipants]]"></nuxeo-tags>
+        <nuxeo-tags
+          role="definition"
+          aria-labelledby="participants-label"
+          type="user"
+          items="[[_resolvedUserParticipants]]"
+        ></nuxeo-tags>
       </template>
     </div>
 
     <div role="widget">
-      <label>[[i18n('wf.serialDocumentReview.initiatorComment')]]</label>
-      <div>[[task.variables.initiatorComment]]</div>
+      <span class="label" id="initiatorComment-label">[[i18n('wf.serialDocumentReview.initiatorComment')]]</span>
+      <div role="definition" aria-labelledby="initiatorComment-label">[[task.variables.initiatorComment]]</div>
     </div>
 
     <nuxeo-textarea
