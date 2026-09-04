@@ -1240,8 +1240,7 @@ Polymer({
 
   _mergeResponses(...args) {
     const response = { 'entity-type': 'Documents', entries: [] };
-    for (let i = 0; i < args.length; i++) {
-      const current = args[i];
+    for (const current of args) {
       if (current && current.entries) {
         response.entries.push(...current.entries);
       } else {
@@ -1387,10 +1386,9 @@ Polymer({
 
   _batchReady(data) {
     data.stopPropagation();
-    this.properties = [];
-    for (let i = 0; i < this.localFiles.length; i++) {
-      this.properties.push({});
-    }
+    this.properties = this.localFiles.map(() => {
+      return {};
+    });
     const div = this.$$('div[name="upload"]');
     if (div) {
       div.focus();

@@ -565,9 +565,8 @@ Polymer({
     } else {
       const deltaObj = Array.isArray(delta) && delta.length > 0 ? delta[0] : delta;
       const properties = parentPath ? Object.keys(deltaObj) : this._getCommonSchemaProperties(schema, false, deltaObj);
-      for (let i = 0; i < properties.length; i++) {
-        const key = properties[i];
-        const subpath = path ? [path, key].join('.') : properties[i];
+      for (const key of properties) {
+        const subpath = path ? [path, key].join('.') : key;
         let type;
         let subSchema;
         if (typeof schema === 'string') {

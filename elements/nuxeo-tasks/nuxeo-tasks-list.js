@@ -235,9 +235,9 @@ Polymer({
     }
     const tasks = this.$.list.items;
     if (newVal && tasks) {
-      for (let i = 0; i < tasks.length; i++) {
-        if (tasks[i].id === newVal.id) {
-          this.$.list.selectItem(tasks[i]);
+      for (const task of tasks) {
+        if (task.id === newVal.id) {
+          this.$.list.selectItem(task);
           break;
         }
       }
