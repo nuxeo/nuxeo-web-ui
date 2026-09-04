@@ -30,6 +30,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-slots.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
 import { UploaderBehavior } from '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-uploader-behavior.js';
+import { NuxeoOptimisticLockingBehavior } from '../behaviors/nuxeo-optimistic-locking-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -238,7 +239,13 @@ Polymer({
   `,
 
   is: 'nuxeo-dropzone',
-  behaviors: [NotifyBehavior, UploaderBehavior, FormatBehavior, IronValidatableBehavior],
+  behaviors: [
+    NotifyBehavior,
+    UploaderBehavior,
+    FormatBehavior,
+    IronValidatableBehavior,
+    NuxeoOptimisticLockingBehavior,
+  ],
 
   properties: {
     /**
@@ -473,7 +480,11 @@ Polymer({
       });
     } else {
       if (this.document && this.xpath) {
-        await this._legacyUpdateDocument();
+        const updateSucceeded = await this._legacyUpdateDocument();
+        if (updateSucceeded === false) {
+          this._setHasFilesUploaded(true);
+          return;
+        }
       }
       this.notify({ message: this.i18n(this.uploadedMessage), close: true });
       this.invalid = false;
@@ -746,16 +757,25 @@ Polymer({
       const props = {};
       createNestedObject(props, this._parsedXpath.split('.'));
       this.set(this._parsedXpath, this.get(`document.properties.${this._parsedXpath}`), props);
-      this.$.doc.data = {
+      this.$.doc.data = this.withChangeToken({
         'entity-type': 'document',
         repository: this.document.repository,
         uid: this.document.uid,
         properties: props,
-      };
-      return this.$.doc.put().then((response) => {
-        this.document = response;
-        this.fire('document-updated');
       });
+      return this.$.doc
+        .put()
+        .then((response) => {
+          this.document = response;
+          this.fire('document-updated');
+          return true;
+        })
+        .catch((err) => {
+          if (this.handleConflictError(err)) {
+            return false;
+          }
+          throw err;
+        });
     }
     return Promise.resolve();
   },
