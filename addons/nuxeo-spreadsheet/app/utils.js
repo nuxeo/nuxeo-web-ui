@@ -28,7 +28,7 @@ export function parseParams() {
   for (const param of params) {
     // eslint-disable-next-line prefer-const
     let [k, v] = param.split('=');
-    v = v.replace(/\+/g, ' ');
+    v = v.replaceAll('+', ' ');
     parameters[k] = decodeURIComponent(v);
   }
   return parameters;
