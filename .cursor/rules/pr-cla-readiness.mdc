@@ -1,0 +1,18 @@
+---
+description: Prevent PRs from getting stuck on missing CLA status checks
+alwaysApply: true
+---
+
+# PR CLA Readiness
+
+- Before committing for a PR, verify signing is enabled and the latest commit is
+  verified locally: `git log -1 --format='%G?'` should print `G`.
+- Do not keep unknown agent/bot authors or co-author trailers in final PR commits.
+  In particular, remove `Co-authored-by: Cursor <cursoragent@cursor.com>` before
+  pushing a PR branch.
+- After pushing, verify the PR head commit has a successful `license/cla` status.
+  If GitHub shows `license/cla Expected — Waiting for status to be reported`, push a
+  signed empty retrigger commit first.
+- If the status still does not appear after a retrigger, treat it as a missing legacy
+  status-provider problem and ask a repo maintainer to refresh the required check or
+  CLA app configuration instead of leaving the PR blocked.
