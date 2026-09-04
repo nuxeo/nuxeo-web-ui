@@ -77,7 +77,7 @@ Polymer({
 
     const shorcuts = [];
     types.forEach((type) => {
-      if (this.subtypes && this.subtypes.includes(type)) {
+      if (this.subtypes?.includes(type)) {
         const el = document.createElement('nuxeo-document-create-shortcut');
         el.type = type;
         el.icon = `images/doctypes/${type}.svg`;
