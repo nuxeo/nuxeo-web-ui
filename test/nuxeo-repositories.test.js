@@ -43,6 +43,43 @@ suite('nuxeo-repositories', () => {
     });
   });
 
+  suite('repositories default value', () => {
+    let saved;
+
+    setup(() => {
+      saved = Nuxeo.UI.repositories;
+    });
+
+    teardown(() => {
+      Nuxeo.UI.repositories = saved;
+    });
+
+    test('should copy the known repositories rather than alias them', async () => {
+      const source = [
+        { name: 'default', isDefault: true },
+        { name: 'other', isDefault: false },
+      ];
+      Nuxeo.UI.repositories = source;
+
+      const el = await fixture(html`<nuxeo-repositories></nuxeo-repositories>`);
+
+      expect(el.repositories).to.deep.equal(source);
+      // Each entry must be its own object, so editing the element's copy cannot
+      // write back into the shared Nuxeo.UI state.
+      expect(el.repositories[0]).to.not.equal(source[0]);
+      el.repositories[0].name = 'mutated';
+      expect(source[0].name).to.equal('default');
+    });
+
+    test('should fall back to an empty list when no repositories are known', async () => {
+      Nuxeo.UI.repositories = undefined;
+
+      const el = await fixture(html`<nuxeo-repositories></nuxeo-repositories>`);
+
+      expect(el.repositories).to.deep.equal([]);
+    });
+  });
+
   suite('_updateSelected', () => {
     test('should use repository name from connection', () => {
       element.$.nx.repositoryName = 'myrepo';
