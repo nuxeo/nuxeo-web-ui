@@ -672,7 +672,7 @@ Polymer({
     if (this.accept && this.files && this.files.length > 0) {
       const accepted = new Set(this.accept.split(',').map((a) => a.trim().toLowerCase()));
 
-      const invalidFile = this.files.find((file) => {
+      const hasInvalidFile = this.files.some((file) => {
         const name = file.name || '';
         const extension = `.${name.split('.').pop().toLowerCase()}`;
         const mime = (file.type || '').toLowerCase();
@@ -680,7 +680,7 @@ Polymer({
         return !accepted.has(extension) && !accepted.has(mime);
       });
 
-      if (invalidFile) {
+      if (hasInvalidFile) {
         this._errorMessage = this.i18n('dropzone.invalid.file', this.accept);
         return false;
       }

@@ -471,8 +471,8 @@ Polymer({
   },
 
   _fetchCommonSchemas(left, right) {
-    const commonSchemas = left.schemas.filter(
-      (schema1) => !!right.schemas.find((schema2) => schema1.name === schema2.name),
+    const commonSchemas = left.schemas.filter((schema1) =>
+      right.schemas.some((schema2) => schema1.name === schema2.name),
     );
     return _fetchSchemas(this.$.schema).then((schemas) => {
       // populate the common schemas with the fields information
@@ -484,14 +484,13 @@ Polymer({
   },
 
   _getCommonProperties(left, right, schema, delta) {
-    return Object.keys(left.properties).filter(
-      (leftPropName) =>
-        !!Object.keys(right.properties).find(
-          (rightPropName) =>
-            leftPropName === rightPropName &&
-            (schema ? leftPropName.startsWith(`${schema.prefix ? schema.prefix : schema.name}:`) : true) &&
-            (delta ? delta[leftPropName] : true),
-        ),
+    return Object.keys(left.properties).filter((leftPropName) =>
+      Object.keys(right.properties).some(
+        (rightPropName) =>
+          leftPropName === rightPropName &&
+          (schema ? leftPropName.startsWith(`${schema.prefix ? schema.prefix : schema.name}:`) : true) &&
+          (delta ? delta[leftPropName] : true),
+      ),
     );
   },
 
