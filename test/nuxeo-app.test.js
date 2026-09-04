@@ -2002,6 +2002,52 @@ suite('nuxeo-app', () => {
       append.restore();
     });
 
+    suite('_newToast MDCSnackbar:closed handling', () => {
+      function closedToast(id, callback, state) {
+        const toast = app._newToast(id, callback);
+        document.body.appendChild(toast);
+        if (state !== undefined) {
+          toast.__state = state;
+        }
+        return toast;
+      }
+
+      function close(toast, reason) {
+        toast.dispatchEvent(new CustomEvent('MDCSnackbar:closed', { detail: { reason } }));
+      }
+
+      test('detaches the toast and runs the callback when the action aborts the command', () => {
+        const callback = sinon.spy();
+        const toast = closedToast('snack_abort', callback);
+
+        close(toast, 'action');
+
+        expect(callback).to.have.been.calledOnce;
+        expect(toast.__state).to.deep.equal({ dismissed: false, aborted: true });
+        expect(toast.parentNode).to.be.null;
+      });
+
+      test('detaches the toast when it is dismissed after the command has ended', () => {
+        const toast = closedToast('snack_ended', undefined, { ended: true });
+
+        close(toast, 'dismiss');
+
+        expect(toast.__state).to.be.null;
+        expect(toast.parentNode).to.be.null;
+      });
+
+      test('keeps the toast attached when dismissed while the command is still running', () => {
+        // Removing it here would make the snackbar reappear before the task finishes.
+        const toast = closedToast('snack_running', undefined, { ended: false });
+
+        close(toast, 'dismiss');
+
+        expect(toast.__state.dismissed).to.be.true;
+        expect(toast.parentNode).to.equal(document.body);
+        toast.remove();
+      });
+    });
+
     test('_notify shows message on command toast', () => {
       const show = sinon.spy();
       const toast = {
