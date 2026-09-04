@@ -67,7 +67,7 @@ limitations under the License.
         @apply --paper-card;
       }
     </style>
-    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    <nuxeo-document-viewer data-widget document="[[document]]"></nuxeo-document-viewer>
   </template>
 
   <script>
@@ -99,19 +99,19 @@ The edit layout provides form widgets for editing document properties.
     </style>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.title')]]"
       value="{{document.properties.dc:title}}"
     ></nuxeo-input>
 
     <nuxeo-textarea
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.description')]]"
       value="{{document.properties.dc:description}}"
     ></nuxeo-textarea>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.nature')]]"
       directory-name="nature"
       value="{{document.properties.dc:nature}}"
@@ -119,7 +119,7 @@ The edit layout provides form widgets for editing document properties.
     ></nuxeo-directory-suggestion>
 
     <nuxeo-tag-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.tags')]]"
       value="{{document.properties.nxtag:tags}}"
       allow-new-tags
@@ -152,31 +152,31 @@ The metadata layout shows document metadata in a card format (sidebar/info panel
     <style include="nuxeo-styles"></style>
 
     <nuxeo-data-table-row
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.title')]]"
       value="[[document.properties.dc:title]]"
     ></nuxeo-data-table-row>
 
     <nuxeo-data-table-row
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.description')]]"
       value="[[document.properties.dc:description]]"
     ></nuxeo-data-table-row>
 
     <nuxeo-data-table-row
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.created')]]"
       value="[[formatDate(document.properties.dc:created)]]"
     ></nuxeo-data-table-row>
 
     <nuxeo-data-table-row
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.lastModified')]]"
       value="[[formatDate(document.properties.dc:modified)]]"
     ></nuxeo-data-table-row>
 
     <nuxeo-data-table-row
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.contributors')]]"
       value="[[formatContributors(document.properties.dc:contributors)]]"
     ></nuxeo-data-table-row>
@@ -211,14 +211,14 @@ The create layout provides a form for creating new documents of this type.
     </style>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.title')]]"
       value="{{document.properties.dc:title}}"
       required
     ></nuxeo-input>
 
     <nuxeo-textarea
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.description')]]"
       value="{{document.properties.dc:description}}"
     ></nuxeo-textarea>
@@ -245,7 +245,7 @@ The create layout provides a form for creating new documents of this type.
 - Always include the **Hyland license header** as an HTML comment
 - Always use `Nuxeo.LayoutBehavior` (it includes I18nBehavior)
 - The `document` property with `@doctype` JSDoc tag is required
-- Use `role="widget"` on form widgets for layout rendering
+- Use `data-widget` on form widgets for layout rendering (the older `role="widget"` marker is still supported but is not a valid ARIA role, so new layouts must use `data-widget` — see WEBUI-2229)
 - Data binding: `[[…]]` for one-way (view/metadata), `{{…}}` for two-way (edit/create)
 - Available widgets from `@nuxeo/nuxeo-ui-elements`:
   - `nuxeo-input` — Text input

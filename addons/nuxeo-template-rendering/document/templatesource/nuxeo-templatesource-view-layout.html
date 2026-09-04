@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-templatesource-view-layout">
   <template>
     <style include="nuxeo-styles">
-      *[role='widget'] {
+      *[data-widget] {
         @apply --paper-card;
       }
       .ellipsis {
@@ -53,7 +53,7 @@ limitations under the License.
     >
     </nuxeo-page-provider>
 
-    <nuxeo-document-viewer role="widget" document="[[document]]"></nuxeo-document-viewer>
+    <nuxeo-document-viewer data-widget document="[[document]]"></nuxeo-document-viewer>
     <nuxeo-card heading="[[i18n('templateSourceViewLayout.templateBasedDocuments.heading')]]">
       <div class="vertical layout">
         <nuxeo-data-table
