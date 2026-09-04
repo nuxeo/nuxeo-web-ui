@@ -53,6 +53,7 @@ import './nuxeo-app/nuxeo-offline-banner.js';
 import './nuxeo-app/nuxeo-expired-session.js';
 import './nuxeo-document-creation/nuxeo-document-creation-behavior.js';
 import { NuxeoAppDrawerResizeBehavior } from './behaviors/nuxeo-app-drawer-resize-behavior.js';
+import { NuxeoAnonymousBehavior } from './behaviors/nuxeo-anonymous-behavior.js';
 import { NuxeoInactivityBehavior } from './behaviors/nuxeo-inactivity-behavior.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
 import '@nuxeo/nuxeo-elements/nuxeo-task-page-provider.js';
@@ -97,6 +98,16 @@ window.nuxeo.importBlacklist = window.nuxeo.importBlacklist || [
   'Root',
 ];
 const MAX_TOASTS = 3; // max number of toasts that can be displayed simultaneously besides the default one
+// Gap between clearing and refilling the live region. A synchronous clear/set pair is coalesced into a
+// single mutation, so without it a repeated message would not be announced again.
+const ARIA_ANNOUNCE_DELAY_MS = 150;
+// Gap between two consecutive messages, so each one lands as its own mutation and is queued by the
+// screen reader in order rather than overwriting the one before it.
+const ANNOUNCE_SPACING_MS = 500;
+// A long-running bulk operation reports progress every second; cap the backlog so those updates cannot
+// pile up faster than they are spoken. The newest messages are the ones worth keeping.
+const MAX_QUEUED_ANNOUNCEMENTS = 3;
+const ANNOUNCER_ID = 'nuxeo-toast-announcer';
 
 setPassiveTouchGestures(true);
 
@@ -696,7 +707,14 @@ Polymer({
   `,
 
   is: 'nuxeo-app',
-  behaviors: [RoutingBehavior, FormatBehavior, FiltersBehavior, NuxeoAppDrawerResizeBehavior, NuxeoInactivityBehavior],
+  behaviors: [
+    RoutingBehavior,
+    FormatBehavior,
+    FiltersBehavior,
+    NuxeoAppDrawerResizeBehavior,
+    NuxeoAnonymousBehavior,
+    NuxeoInactivityBehavior,
+  ],
   importMeta: import.meta,
   properties: {
     productName: {
@@ -897,7 +915,12 @@ Polymer({
       toast.mdcRoot.style.position = 'relative';
       toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
       toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
+      this._muteSnackbarLabel(toast);
     });
+
+    // Create the live region up front: screen readers track regions that were present before the text
+    // changed, and ignore one that appears already carrying its message.
+    this._getAnnouncer();
 
     window.addEventListener('unhandledrejection', (e) => {
       if (e.reason && e.reason.status === 404) {
@@ -1069,6 +1092,7 @@ Polymer({
     }
     this._teardownInactivityTimer();
     this._teardownUnauthorizedRedirect();
+    this._cancelPendingAnnouncement();
     this._inactivityNeedsRearm = true; // re-arm from the next attached()
   },
 
@@ -1311,6 +1335,12 @@ Polymer({
       })
       .catch((err) => {
         if (err && err.name === 'AbortError') {
+          return;
+        }
+        // WEBUI-1857: an anonymous user hitting a 403 is redirected to the login page (preserving the
+        // permalink) instead of being shown a dead-end permission error page.
+        if (this._isAnonymousForbidden(err)) {
+          this._redirectAnonymousToLogin();
           return;
         }
         this.showError(err.status, this.i18n('browse.error'), err.message);
@@ -1943,6 +1973,7 @@ Polymer({
       toast.mdcRoot.style.position = 'relative';
       toast.mdcRoot.querySelector('.mdc-snackbar__label').style.webkitFontSmoothing = 'auto';
       toast.mdcRoot.querySelector('.mdc-snackbar__surface').style.width = '344px';
+      this._muteSnackbarLabel(toast);
 
       const defaultAction = toast.mdcFoundation.handleActionButtonClick.bind(toast);
       toast.mdcFoundation.handleActionButtonClick = () => {
@@ -2043,7 +2074,117 @@ Polymer({
         toast.close();
       }
       toast.show();
+      this._announce(message);
     }
+  },
+
+  /**
+   * Takes the snackbar's own label out of the accessibility tree, so a message is not announced twice.
+   *
+   * From its second open onwards mwc-snackbar clears the label and restores it ARIA_LIVE_DELAY_MS later,
+   * precisely to provoke an announcement. That text is already spoken by our own region, and the two land
+   * about a second apart. `aria-hidden` is what silences it: the directive rewrites `aria-live` when its
+   * timer fires, so setting that instead would be undone (WEBUI-1880).
+   */
+  _muteSnackbarLabel(toast) {
+    const label = toast.mdcRoot?.querySelector('.mdc-snackbar__label');
+    if (label) {
+      label.setAttribute('aria-hidden', 'true');
+    }
+  },
+
+  /**
+   * Returns the shared live region, creating it on first use.
+   *
+   * WEBUI-1880: mwc-snackbar builds its own live region lazily, inside a subtree that is hidden until
+   * the toast opens, so screen readers never see the text change and stay silent. This region replaces
+   * it. It is appended to the document body rather than declared in this element's template because
+   * Narrator does not reliably observe live regions nested in shadow DOM.
+   */
+  _getAnnouncer() {
+    if (!this._announcer?.isConnected) {
+      let announcer = document.getElementById(ANNOUNCER_ID);
+      if (!announcer) {
+        announcer = document.createElement('div');
+        announcer.id = ANNOUNCER_ID;
+        announcer.setAttribute('role', 'status');
+        announcer.setAttribute('aria-live', 'polite');
+        announcer.setAttribute('aria-atomic', 'true');
+        // Clipped rather than hidden: display none, visibility hidden, zero height and zero opacity
+        // all take the node out of the accessibility tree, which would stop it announcing.
+        announcer.style.cssText =
+          'position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;' +
+          'clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;';
+        document.body.appendChild(announcer);
+      }
+      this._announcer = announcer;
+    }
+    return this._announcer;
+  },
+
+  /**
+   * Queues `message` for announcement by screen readers.
+   *
+   * Messages are queued rather than replaced because a single event is often reported twice in the same
+   * tick by different elements: finishing a CSV export makes `nuxeo-csv-export-button` announce "CSV
+   * export is ready" and, one microtask later, `nuxeo-operation-button` announce its own bulk summary.
+   * Overwriting a pending message would silence the first of the pair (WEBUI-1880).
+   *
+   * A duplicate is only dropped while its twin has yet to be spoken — still queued, or still in the
+   * clear phase. Once the text has landed in the region it has been announced, so an identical message
+   * arriving later is a new event and is spoken again.
+   */
+  _announce(message) {
+    if (!message) {
+      return;
+    }
+    this._announceQueue = this._announceQueue || [];
+    let previous = null;
+    if (this._announceQueue.length) {
+      previous = this._announceQueue[this._announceQueue.length - 1];
+    } else if (this._announceClearing) {
+      previous = this._announcingMessage;
+    }
+    if (previous === message) {
+      return; // the same event reported twice; no need to say it twice
+    }
+    this._announceQueue.push(message);
+    if (this._announceQueue.length > MAX_QUEUED_ANNOUNCEMENTS) {
+      this._announceQueue.shift();
+    }
+    this._pumpAnnouncements();
+  },
+
+  _pumpAnnouncements() {
+    if (this._announceTimeout || !this._announceQueue || this._announceQueue.length === 0) {
+      return;
+    }
+    const announcer = this._getAnnouncer();
+    const message = this._announceQueue.shift();
+    this._announcingMessage = message;
+    this._announceClearing = true;
+    // A live region is only announced when its text changes, so clear it first: without this an
+    // identical consecutive toast produces no mutation and stays silent.
+    announcer.textContent = '';
+    this._announceTimeout = setTimeout(() => {
+      announcer.textContent = message;
+      this._announceClearing = false;
+      this._announceTimeout = setTimeout(() => {
+        this._announceTimeout = null;
+        this._announcingMessage = null;
+        this._pumpAnnouncements();
+      }, ANNOUNCE_SPACING_MS);
+    }, ARIA_ANNOUNCE_DELAY_MS);
+  },
+
+  _cancelPendingAnnouncement() {
+    if (this._announceTimeout) {
+      clearTimeout(this._announceTimeout);
+      this._announceTimeout = null;
+    }
+    this._announcingMessage = null;
+    this._announceClearing = false;
+    this._announceQueue = [];
   },
 
   _clipboardUpdated(e) {
