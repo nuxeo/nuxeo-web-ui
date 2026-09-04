@@ -117,19 +117,26 @@ suite('nuxeo-document-grid-thumbnail', () => {
     // The load event for an image that was still in flight when the tile moved on must not put the
     // previous document's picture back on screen.
     test('ignores a load event for a source that has been superseded', () => {
+      // Only `currentSrc` is stubbed, and it is removed again afterwards. Overriding `src` with a
+      // getter would leave the element permanently unwritable, and every later Polymer flush that
+      // assigns to it throws inside `_flushProperties` — which takes unrelated elements in the
+      // same flush down with it, since the whole suite runs in one page.
       Object.defineProperty(img, 'currentSrc', {
         configurable: true,
         get: () => 'http://example.com/superseded.jpg',
       });
-      Object.defineProperty(img, 'src', {
-        configurable: true,
-        get: () => 'http://example.com/current.jpg',
-      });
 
-      img.dispatchEvent(new Event('load'));
+      try {
+        // `img.src` still holds the URL the binding set for the current document, so the completed
+        // candidate and the requested one disagree — exactly the superseded case.
+        expect(img.src).to.not.equal(img.currentSrc);
+        img.dispatchEvent(new Event('load'));
 
-      expect(element._thumbnailLoaded).to.be.false;
-      expect(img.hasAttribute('loaded')).to.be.false;
+        expect(element._thumbnailLoaded).to.be.false;
+        expect(img.hasAttribute('loaded')).to.be.false;
+      } finally {
+        delete img.currentSrc;
+      }
     });
   });
 
