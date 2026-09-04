@@ -79,4 +79,52 @@ suite('nuxeo-drive-sync-toggle-button', () => {
       expect(element._isAvailable()).to.be.false;
     });
   });
+
+  // Kept last: `_handleRoots` writes the module-level sync-root cache that `_update`
+  // reads, so these tests leave state behind that the suites above must not see.
+  suite('_update', () => {
+    function documentWithBreadcrumb(uid, parentRefs) {
+      const entries = parentRefs.map((parentRef) => {
+        return { parentRef };
+      });
+      return { uid, type: 'Folder', contextParameters: { breadcrumb: { entries } } };
+    }
+
+    function receiveRoots(uids) {
+      const entries = uids.map((uid) => {
+        return { uid };
+      });
+      element._handleRoots({ detail: { response: { entries } } });
+    }
+
+    teardown(() => {
+      receiveRoots([]);
+    });
+
+    test('should mark the document synchronized when it is itself a sync root', () => {
+      element.document = documentWithBreadcrumb('doc-1', ['root']);
+
+      receiveRoots(['doc-1']);
+
+      expect(element.synchronized).to.be.true;
+    });
+
+    test('should resolve the closest synchronized ancestor as the synchronization root', () => {
+      element.document = documentWithBreadcrumb('doc-1', ['root', 'ws-1']);
+
+      receiveRoots(['root', 'ws-1']);
+
+      // The breadcrumb is walked from the closest ancestor outwards, so `ws-1` wins over `root`.
+      expect(element.synchronizationRoot).to.equal('ws-1');
+    });
+
+    test('should clear the synchronization root when no ancestor is synchronized', () => {
+      element.document = documentWithBreadcrumb('doc-2', ['root', 'ws-1']);
+
+      receiveRoots(['unrelated']);
+
+      expect(element.synchronized).to.be.false;
+      expect(element.synchronizationRoot).to.be.null;
+    });
+  });
 });

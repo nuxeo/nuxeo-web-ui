@@ -314,10 +314,7 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       // get the bulk widget wrapper element
       const bulkWidget = this._getBulkWidget(boundElement);
       // get the path without the `document.properties.` part, replacing the `.` for `/` (complex fields)
-      const path = boundPath
-        .replace(/^(document\.properties\.)/, '')
-        .split('.')
-        .join('/');
+      const path = boundPath.replace(/^(document\.properties\.)/, '').replaceAll('.', '/');
       if (bulkWidget.updateMode === 'replace') {
         let value = bulkLayout.get(boundPath);
         if (this._shouldStringifyValue(value)) {
@@ -524,9 +521,8 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
         const selector = '[role="widget"], nuxeo-data-table[role="table"]';
         const widgets = Array.from(bulkLayout.shadowRoot.querySelectorAll(selector));
         widgets.forEach((widget) => {
-          const { parentNode } = widget;
           const bulkWidget = document.createElement('nuxeo-bulk-widget');
-          parentNode.replaceChild(bulkWidget, widget);
+          widget.replaceWith(bulkWidget);
           bulkWidget.appendChild(widget);
           // get the element that is bound to a property
           const boundElement = this._getBoundElement(widget, bulkLayout.__templateInfo);
