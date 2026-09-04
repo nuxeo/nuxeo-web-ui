@@ -1,9 +1,9 @@
 ---
-description: Keep git commits CLA-clean for nuxeo/nuxeo-elements and nuxeo/nuxeo-web-ui PRs
+description: Keep git commits CLA-clean for this repository
 alwaysApply: true
 ---
 
-# CLA-safe commits (nuxeo-elements / nuxeo-web-ui)
+# CLA-safe commits
 
 `license/cla` (cla-assistant.io) fails when a PR contains commits or co-authors that are not covered by the contributor's signed CLA.
 
@@ -17,10 +17,11 @@ alwaysApply: true
 
 - Author and commit as the human contributor only, using the email address covered by their signed CLA.
 - Before pushing a PR branch, inspect every author, committer, and commit message:
-  `gh api repos/nuxeo/nuxeo-elements/pulls/<n>/commits --jq '.[] | {sha, author: .commit.author.email, committer: .commit.committer.email, message: .commit.message}'`
-  (or the web-ui repo), and verify that no Cursor agent identity or co-author trailer is present.
+  `gh api repos/<owner>/<repo>/pulls/<n>/commits --jq '.[] | {sha, author: .commit.author.email, committer: .commit.committer.email, message: .commit.message}'`,
+  and verify that no Cursor agent identity or co-author trailer is present.
 - If history is polluted, squash to one clean commit on the PR base, then rewrite with `git commit-tree` and a message file (normal `git commit` from the agent shell may re-inject Cursor co-author trailers).
 
 ## Local guard
 
-Both repos run `scripts/git/commit-msg-cla.sh` via Husky `commit-msg`. Commits with Cursor co-author trailers are rejected before push.
+This repository runs `scripts/git/commit-msg-cla.sh` via Husky `commit-msg`. Commits with Cursor co-author trailers
+are rejected before push.
