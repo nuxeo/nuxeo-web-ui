@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Rendu généré avec le modèle \"{0}\".",
   "renderTemplateButton.toast.rendering": "Génération du rendu en cours",
   "renderTemplateButton.tooltip": "Générer le rendu avec un modèle",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Remplacer le fichier",
   "replaceBlobButton.dialog.cancel": "Annuler",
   "replaceBlobButton.dialog.replace": "Remplacer",

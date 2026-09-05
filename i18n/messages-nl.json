@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Document weergegeven met '{0}' sjabloon.",
   "renderTemplateButton.toast.rendering": "Bezig met weergeven document ...",
   "renderTemplateButton.tooltip": "Weergeven met sjabloon",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Bestand vervangen",
   "replaceBlobButton.dialog.cancel": "Annuleren",
   "replaceBlobButton.dialog.replace": "Vervangen",

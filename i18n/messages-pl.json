@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Dokument wyrenderowany z szablonem '{0}.",
   "renderTemplateButton.toast.rendering": "Renderowanie dokumentu...",
   "renderTemplateButton.tooltip": "Renderowanie z szablonem",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Zastąp plik",
   "replaceBlobButton.dialog.cancel": "Anuluj",
   "replaceBlobButton.dialog.replace": "Zastąp",

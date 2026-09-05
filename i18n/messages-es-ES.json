@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Documento renderizado con la plantilla '{0}'",
   "renderTemplateButton.toast.rendering": "Renderizando documento...",
   "renderTemplateButton.tooltip": "Renderizar con plantilla",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Reemplazar archivo",
   "replaceBlobButton.dialog.cancel": "Cancelar",
   "replaceBlobButton.dialog.replace": "Reemplazar",

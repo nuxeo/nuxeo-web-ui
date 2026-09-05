@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Dokument renderat med mallen '{0}'.",
   "renderTemplateButton.toast.rendering": "Renderar dokument...",
   "renderTemplateButton.tooltip": "Rendera med mall",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Ersätt fil",
   "replaceBlobButton.dialog.cancel": "Avbryt",
   "replaceBlobButton.dialog.replace": "Ersätt",
