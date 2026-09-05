@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Rendering con il modello “{0}” eseguito.",
   "renderTemplateButton.toast.rendering": "Rendering del documento in corso...",
   "renderTemplateButton.tooltip": "Rendering con modello",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Sostituisci file",
   "replaceBlobButton.dialog.cancel": "Annulla",
   "replaceBlobButton.dialog.replace": "Sostituisci",

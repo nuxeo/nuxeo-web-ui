@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "המסמך עובד עם התבנית '{0}'.",
   "renderTemplateButton.toast.rendering": "מעבד מסמך...",
   "renderTemplateButton.tooltip": "עיבוד עם תבנית",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "החלף קובץ",
   "replaceBlobButton.dialog.cancel": "בטל",
   "replaceBlobButton.dialog.replace": "החלפה",
