@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "用 \"{0}\" 模板呈现的文档。",
   "renderTemplateButton.toast.rendering": "正在呈现文档...",
   "renderTemplateButton.tooltip": "使用模板呈现",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "替换文件",
   "replaceBlobButton.dialog.cancel": "取消",
   "replaceBlobButton.dialog.replace": "Replace",

@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Dokumen yang diberikan dengan '{0}' Template.",
   "renderTemplateButton.toast.rendering": "Membuat dokumen...",
   "renderTemplateButton.tooltip": "Membuat dengan Template",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Replace File",
   "replaceBlobButton.dialog.cancel": "Batal",
   "replaceBlobButton.dialog.replace": "Ganti",

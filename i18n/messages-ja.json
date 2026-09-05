@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "文書が'{0}'テンプレートでレンダリングされました",
   "renderTemplateButton.toast.rendering": "文書をレンダリングしています...",
   "renderTemplateButton.tooltip": "テンプレートでレンダリング",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "ファイルを置換",
   "replaceBlobButton.dialog.cancel": "キャンセル",
   "replaceBlobButton.dialog.replace": "置換",

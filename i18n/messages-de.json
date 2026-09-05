@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Dokument wurde mit der Vorlage '{0}' wiedergegeben",
   "renderTemplateButton.toast.rendering": "Dokument wird wiedergegeben ...",
   "renderTemplateButton.tooltip": "Mit Vorlage wiedergeben",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Datei ersetzen",
   "replaceBlobButton.dialog.cancel": "Abbrechen",
   "replaceBlobButton.dialog.replace": "Ersetzen",

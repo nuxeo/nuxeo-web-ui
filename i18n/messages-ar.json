@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "تم عرض المستند باستخدام النموذج '{0}'.",
   "renderTemplateButton.toast.rendering": "جارٍ عرض المستند...",
   "renderTemplateButton.tooltip": "عرض باستخدام النموذج",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "استبدال ملف",
   "replaceBlobButton.dialog.cancel": "إلغاء",
   "replaceBlobButton.dialog.replace": "استبدال",

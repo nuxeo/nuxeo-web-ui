@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Documento processado com template '{0}'",
   "renderTemplateButton.toast.rendering": "Processando documento...",
   "renderTemplateButton.tooltip": "Processar com template",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Replace File",
   "replaceBlobButton.dialog.cancel": "Cancel",
   "replaceBlobButton.dialog.replace": "Replace",

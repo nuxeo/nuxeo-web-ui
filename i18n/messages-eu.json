@@ -1281,6 +1281,7 @@
   "renderTemplateButton.toast.rendered": "Dokumentua '{0}' txantiloiarekin errendatu da.",
   "renderTemplateButton.toast.rendering": "Dokumentua errendatzen...",
   "renderTemplateButton.tooltip": "Errendatu txantiloia erabiliz",
+  "replaceBlobButton.ariaLabel": "Replace the file",
   "replaceBlobButton.dialog.heading": "Ordezkatu fitxategia",
   "replaceBlobButton.dialog.cancel": "Utzi",
   "replaceBlobButton.dialog.replace": "Ordezkatu",
