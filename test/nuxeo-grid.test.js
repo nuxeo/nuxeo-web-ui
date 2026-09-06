@@ -191,6 +191,26 @@ suite('nuxeo-grid', () => {
       expectNoValidationWarning();
     });
 
+    test('Should place a span without a start line instead of emitting an invalid value', async () => {
+      grid.columns = 0;
+      grid.rows = 0;
+      grid.gap = '16px';
+
+      const [top, main] = grid.querySelectorAll('*');
+      top.setAttribute('data-column-span', '3');
+      main.setAttribute('data-row-span', '2');
+
+      await flush();
+      const style = getStyle(grid);
+      // A span with no explicit start line is valid CSS on its own — the grid auto-places the
+      // item and stretches it across `span n` tracks. Previously the absent line was interpolated
+      // into the shorthand, producing `grid-column: undefinedspan 3;`, which browsers discard.
+      expect(style).to.include('grid-column: span 3;');
+      expect(style).to.include('grid-row: span 2;');
+      expect(style).to.not.include('undefined');
+      expectNoValidationWarning();
+    });
+
     test('Should generate proper style when align and justify properties are set', async () => {
       grid.columns = 0;
       grid.rows = 0;
