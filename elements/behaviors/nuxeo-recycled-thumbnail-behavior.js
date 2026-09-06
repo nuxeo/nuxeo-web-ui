@@ -83,15 +83,23 @@ export const NuxeoRecycledThumbnailBehavior = {
     // put the previous document's picture back on screen, so only trust a load whose completed
     // candidate (currentSrc) is the one currently requested.
     const img = e.target;
-    if (img.currentSrc && img.src && img.currentSrc !== img.src) {
+    if (this._isSupersededThumbnailEvent(img)) {
       return;
     }
     this._thumbnailLoaded = true;
   },
 
+  _isSupersededThumbnailEvent(img) {
+    return img.currentSrc && img.src && img.currentSrc !== img.src;
+  },
+
   // ELEMENTS-1616: show a transparent pixel instead of a broken-image icon when a
   // (cross-origin) thumbnail fails to load.
   _onError(e) {
-    applyThumbnailFallback(e.target);
+    const img = e.target;
+    if (this._isSupersededThumbnailEvent(img)) {
+      return;
+    }
+    applyThumbnailFallback(img);
   },
 };

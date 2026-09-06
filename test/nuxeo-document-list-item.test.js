@@ -144,6 +144,22 @@ suite('nuxeo-document-list-item', () => {
       }
     });
 
+    test('ignores an error event for a source that has been superseded', () => {
+      Object.defineProperty(img, 'currentSrc', {
+        configurable: true,
+        get: () => 'http://example.com/superseded.jpg',
+      });
+
+      try {
+        expect(img.src).to.not.equal(img.currentSrc);
+        img.dispatchEvent(new Event('error'));
+
+        expect(img.src.startsWith('data:image/png;base64,')).to.be.false;
+      } finally {
+        delete img.currentSrc;
+      }
+    });
+
     // A row is taken out of the tab order while it has nothing to announce, and put back exactly
     // where the results view had it once the document arrives.
     test('keeps a placeholder row out of the tab order and restores it', async () => {
