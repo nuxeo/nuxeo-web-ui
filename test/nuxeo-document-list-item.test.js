@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { fixture, html, login } from '@nuxeo/testing-helpers';
+import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-data-list/nuxeo-document-list-item.js';
 
 suite('nuxeo-document-list-item', () => {
@@ -61,6 +61,101 @@ suite('nuxeo-document-list-item', () => {
       const thumbnail = element.shadowRoot.querySelector('.thumbnailContainer img');
       thumbnail.dispatchEvent(new Event('error'));
       expect(thumbnail.getAttribute('src')).to.contain('data:image/png;base64,');
+    });
+  });
+
+  // WEBUI-340: iron-list rebinds a recycled row to another document while the user scrolls. The
+  // browser keeps painting the old thumbnail until the new one decodes, so the row has to hide the
+  // image until its own load event rather than let the previous document's picture linger next to
+  // the new title. Rows bound to an entry the page provider has not fetched yet are marked as
+  // placeholders so they show no text at all.
+  suite('row recycling', () => {
+    const docWithThumbnail = (uid) => {
+      return {
+        uid,
+        title: `doc-${uid}`,
+        contextParameters: { thumbnail: { url: `http://example.com/${uid}.jpg` } },
+      };
+    };
+
+    let img;
+
+    setup(async () => {
+      img = element.shadowRoot.querySelector('.thumbnailContainer img');
+      element.doc = docWithThumbnail('1');
+      await flush();
+    });
+
+    test('keeps the thumbnail hidden until it has loaded', () => {
+      expect(img.hasAttribute('loaded')).to.be.false;
+      img.dispatchEvent(new Event('load'));
+      expect(img.hasAttribute('loaded')).to.be.true;
+    });
+
+    test('hides the stale thumbnail as soon as the row is bound to another document', async () => {
+      img.dispatchEvent(new Event('load'));
+      expect(img.hasAttribute('loaded')).to.be.true;
+
+      element.doc = docWithThumbnail('2');
+      await flush();
+
+      expect(img.hasAttribute('loaded')).to.be.false;
+    });
+
+    test('keeps the thumbnail visible when the row is rebound to the same source', async () => {
+      img.dispatchEvent(new Event('load'));
+      element.doc = docWithThumbnail('1');
+      await flush();
+      expect(img.hasAttribute('loaded')).to.be.true;
+    });
+
+    test('marks a row bound to a not-yet-fetched entry as a placeholder', async () => {
+      element.doc = {};
+      await flush();
+      expect(element.hasAttribute('placeholder')).to.be.true;
+
+      element.doc = docWithThumbnail('3');
+      await flush();
+      expect(element.hasAttribute('placeholder')).to.be.false;
+    });
+
+    // The load event for an image that was still in flight when the row moved on must not put the
+    // previous document's picture back on screen.
+    test('ignores a load event for a source that has been superseded', () => {
+      // Only `currentSrc` is stubbed, and it is removed again afterwards. Overriding `src` with a
+      // getter would leave the element permanently unwritable, and every later Polymer flush that
+      // assigns to it throws inside `_flushProperties` — which takes unrelated elements in the
+      // same flush down with it, since the whole suite runs in one page.
+      Object.defineProperty(img, 'currentSrc', {
+        configurable: true,
+        get: () => 'http://example.com/superseded.jpg',
+      });
+
+      try {
+        // `img.src` still holds the URL the binding set for the current document, so the completed
+        // candidate and the requested one disagree — exactly the superseded case.
+        expect(img.src).to.not.equal(img.currentSrc);
+        img.dispatchEvent(new Event('load'));
+
+        expect(element._thumbnailLoaded).to.be.false;
+        expect(img.hasAttribute('loaded')).to.be.false;
+      } finally {
+        delete img.currentSrc;
+      }
+    });
+
+    // A row is taken out of the tab order while it has nothing to announce, and put back exactly
+    // where the results view had it once the document arrives.
+    test('keeps a placeholder row out of the tab order and restores it', async () => {
+      element.setAttribute('tabindex', '0');
+
+      element.doc = {};
+      await flush();
+      expect(element.getAttribute('tabindex')).to.equal('-1');
+
+      element.doc = docWithThumbnail('4');
+      await flush();
+      expect(element.getAttribute('tabindex')).to.equal('0');
     });
   });
 
@@ -153,6 +248,26 @@ suite('nuxeo-document-list-item', () => {
         contextParameters: { thumbnail: { url: 'http://example.com/x.png?foo=1' } },
       };
       expect(element._thumbnail(doc)).to.include('&clientReason=view');
+    });
+
+    // WEBUI-340: a recycled row meets the same document again every time the user scrolls back
+    // over it, so decorating the URL must neither accumulate nor rewrite the shared entry.
+    test('does not mutate the document and stays stable across repeated calls', () => {
+      window.Nuxeo = window.Nuxeo || {};
+      window.Nuxeo.UI = window.Nuxeo.UI || {};
+      window.Nuxeo.UI.config = window.Nuxeo.UI.config || {};
+      window.Nuxeo.UI.config.url = { followRedirect: 'false' };
+      const doc = {
+        uid: '1',
+        contextParameters: { thumbnail: { url: 'http://example.com/x.png' } },
+      };
+
+      const first = element._thumbnail(doc);
+      const second = element._thumbnail(doc);
+
+      expect(first).to.equal('http://example.com/x.png?clientReason=view');
+      expect(second).to.equal(first);
+      expect(doc.contextParameters.thumbnail.url).to.equal('http://example.com/x.png');
     });
   });
 

@@ -28,7 +28,8 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-tag.js';
 import '../nuxeo-document-highlight/nuxeo-document-highlights.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { applyThumbnailFallback, blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
+import { blurSelectionCheckOnPointerDeselect } from '../common-utils.js';
+import { NuxeoRecycledThumbnailBehavior } from '../behaviors/nuxeo-recycled-thumbnail-behavior.js';
 
 /**
 `nuxeo-document-list-item`
@@ -95,6 +96,24 @@ Polymer({
         left: 0;
         right: 0;
         margin: auto;
+        opacity: 0;
+      }
+
+      /* WEBUI-340: the transition lives on the loaded state only, so revealing the thumbnail fades
+         in while hiding it (on recycle) is instant — a fade-out would keep the stale image on
+         screen, which is exactly what we are trying to avoid. */
+      .thumbnailContainer img[loaded] {
+        opacity: 1;
+        transition: opacity 0.15s ease-in;
+      }
+
+      /* WEBUI-340: rows bound to a not-yet-fetched entry keep their box but show no text, instead
+         of an empty title and an empty type tag. Hiding by visibility keeps the layout stable (and
+         keeps the row out of the accessibility tree) where display none would make the list jump. */
+      :host([placeholder]) .dataContainer,
+      :host([placeholder]) .actions,
+      :host([placeholder]) .select {
+        visibility: hidden;
       }
 
       .dataContainer {
@@ -227,7 +246,14 @@ Polymer({
     <div class="listBox grid-box" selection-mode$="[[selectionMode]]">
       <div class="horizontal layout">
         <div class="vignette thumbnailContainer" on-tap="handleClick" on-keydown="_handleKeydown">
-          <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
+          <img
+            crossorigin="anonymous"
+            src="[[_thumbnailSrc]]"
+            loaded$="[[_thumbnailLoaded]]"
+            on-load="_onLoad"
+            on-error="_onError"
+            alt$="[[doc.title]]"
+          />
         </div>
         <div class="dataContainer flex" on-tap="handleClick" on-keydown="_handleKeydown">
           <div class="horizontal layout center" tabindex="0">
@@ -256,7 +282,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-list-item',
-  behaviors: [FormatBehavior, RoutingBehavior],
+  behaviors: [FormatBehavior, RoutingBehavior, NuxeoRecycledThumbnailBehavior],
 
   properties: {
     doc: {
@@ -284,32 +310,16 @@ Polymer({
       type: Number,
       reflectToAttribute: true,
     },
+
+    placeholder: {
+      type: Boolean,
+      computed: '_isPlaceholder(doc)',
+      reflectToAttribute: true,
+      observer: '_placeholderChanged',
+    },
   },
 
   observers: ['_selectedItemsChanged(selectedItems.splices)'],
-
-  _thumbnail(doc) {
-    if (
-      doc &&
-      doc.uid &&
-      doc.contextParameters &&
-      doc.contextParameters.thumbnail &&
-      doc.contextParameters.thumbnail.url
-    ) {
-      if (!this.isFollowRedirectEnabled()) {
-        const splitter = doc.contextParameters.thumbnail.url.indexOf('?') > -1 ? '&' : '?';
-        doc.contextParameters.thumbnail.url = `${doc.contextParameters.thumbnail.url}${splitter}clientReason=view`;
-      }
-      return doc.contextParameters.thumbnail.url;
-    }
-    return '';
-  },
-
-  isFollowRedirectEnabled() {
-    const followRedirect =
-      Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.url && Nuxeo.UI.config.url.followRedirect;
-    return followRedirect ? String(followRedirect).toLowerCase() === 'true' : false;
-  },
 
   handleClick(e) {
     if (this.selectionMode) {
@@ -348,10 +358,27 @@ Polymer({
     }
   },
 
-  // ELEMENTS-1616: fall back to a transparent pixel when the (cross-origin) thumbnail
-  // request fails, so the list row doesn't render a broken-image icon.
-  _onError(event) {
-    const thumbnail = event.target;
-    applyThumbnailFallback(thumbnail);
+  _isPlaceholder(doc) {
+    return !doc?.uid;
+  },
+
+  // The results view drives a roving tabindex over the rows from their index alone, so a row whose
+  // entry has not been fetched yet still lands in the tab order while having nothing to announce.
+  // Take it out of the tab order while it is a placeholder, remembering the value the view gave us
+  // so the row is reachable again as soon as its document arrives.
+  _placeholderChanged(placeholder) {
+    if (placeholder) {
+      if (this._tabIndexBeforePlaceholder === undefined) {
+        this._tabIndexBeforePlaceholder = this.getAttribute('tabindex');
+      }
+      this.setAttribute('tabindex', '-1');
+    } else if (this._tabIndexBeforePlaceholder !== undefined) {
+      if (this._tabIndexBeforePlaceholder === null) {
+        this.removeAttribute('tabindex');
+      } else {
+        this.setAttribute('tabindex', this._tabIndexBeforePlaceholder);
+      }
+      this._tabIndexBeforePlaceholder = undefined;
+    }
   },
 });
