@@ -160,18 +160,32 @@ suite('nuxeo-document-list-item', () => {
       }
     });
 
-    // A row is taken out of the tab order while it has nothing to announce, and put back exactly
-    // where the results view had it once the document arrives.
-    test('keeps a placeholder row out of the tab order and restores it', async () => {
+    // A row is made inert while it has nothing to announce. The results view still owns tabindex.
+    test('makes a placeholder row inert without changing tabindex', async () => {
       element.setAttribute('tabindex', '0');
 
       element.doc = {};
       await flush();
-      expect(element.getAttribute('tabindex')).to.equal('-1');
+      expect(element.hasAttribute('inert')).to.be.true;
+      expect(element.getAttribute('tabindex')).to.equal('0');
 
       element.doc = docWithThumbnail('4');
       await flush();
+      expect(element.hasAttribute('inert')).to.be.false;
       expect(element.getAttribute('tabindex')).to.equal('0');
+    });
+
+    test('keeps a recycled placeholder row inert when its index changes', async () => {
+      element.doc = {};
+      element.setAttribute('tabindex', '0');
+      await flush();
+
+      element.index = 3;
+      element.setAttribute('tabindex', '3');
+      await flush();
+
+      expect(element.hasAttribute('inert')).to.be.true;
+      expect(element.getAttribute('tabindex')).to.equal('3');
     });
   });
 
