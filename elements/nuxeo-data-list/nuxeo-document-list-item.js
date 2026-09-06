@@ -364,21 +364,13 @@ Polymer({
 
   // The results view drives a roving tabindex over the rows from their index alone, so a row whose
   // entry has not been fetched yet still lands in the tab order while having nothing to announce.
-  // Take it out of the tab order while it is a placeholder, remembering the value the view gave us
-  // so the row is reachable again as soon as its document arrives.
+  // Keep the parent-owned tabindex untouched and make the whole placeholder subtree inert instead,
+  // so recycled placeholder rows stay unfocusable even when iron-list changes their index.
   _placeholderChanged(placeholder) {
     if (placeholder) {
-      if (this._tabIndexBeforePlaceholder === undefined) {
-        this._tabIndexBeforePlaceholder = this.getAttribute('tabindex');
-      }
-      this.setAttribute('tabindex', '-1');
-    } else if (this._tabIndexBeforePlaceholder !== undefined) {
-      if (this._tabIndexBeforePlaceholder === null) {
-        this.removeAttribute('tabindex');
-      } else {
-        this.setAttribute('tabindex', this._tabIndexBeforePlaceholder);
-      }
-      this._tabIndexBeforePlaceholder = undefined;
+      this.setAttribute('inert', '');
+    } else {
+      this.removeAttribute('inert');
     }
   },
 });
