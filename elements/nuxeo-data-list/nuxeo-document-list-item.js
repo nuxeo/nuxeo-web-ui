@@ -140,6 +140,14 @@ Polymer({
         display: block;
       }
 
+      /* The title is a link, so drop the browser default link colour and underline and keep the
+         row's own colour. The hover and focus rules above are more specific, so they still
+         recolor the title. */
+      a.title {
+        color: inherit;
+        text-decoration: none;
+      }
+
       .listBox .actions {
         display: none;
         background-color: var(--nuxeo-box);
@@ -231,7 +239,12 @@ Polymer({
         </div>
         <div class="dataContainer flex" on-tap="handleClick" on-keydown="_handleKeydown">
           <div class="horizontal layout center" tabindex="0">
-            <a class="title flex">
+            <!-- WEBUI-1882: the title holds the document URL so the browser context menu offers
+                 "Open Link in New Tab" and "Open Link in New Window", as it already does in the
+                 grid and table views. It stays out of the tab order because the row around it is
+                 already focusable and activates the item; a second tab stop would only repeat
+                 the same title. -->
+            <a class="title flex" href$="[[_documentUrl(doc, urlFor)]]" tabindex="-1" on-keydown="_onTitleKeydown">
               <div class="title">[[doc.title]]</div>
             </a>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
@@ -305,6 +318,23 @@ Polymer({
     return '';
   },
 
+  // Resolves the document URL for the title link. Reverse routing throws for an item that is not
+  // a routable document, and the list can hold such an item while it recycles its rows, so fall
+  // back to no href rather than letting the row fail to render. The link is then inert and the
+  // row still opens the document on click, as it always did.
+  // The binding also passes urlFor, which this method does not need: it makes the href recompute
+  // once the router is known, since urlFor is only resolved from the element when called.
+  _documentUrl(doc) {
+    if (!doc || !doc.uid) {
+      return '';
+    }
+    try {
+      return this.urlFor(doc) || '';
+    } catch {
+      return '';
+    }
+  },
+
   isFollowRedirectEnabled() {
     const followRedirect =
       Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.url && Nuxeo.UI.config.url.followRedirect;
@@ -312,9 +342,22 @@ Polymer({
   },
 
   handleClick(e) {
+    // A tap event carries no modifier keys, they belong to the click it was generated from.
+    // Direct callers (keyboard handling, tests) pass the original event instead.
+    const source = (e.detail && e.detail.sourceEvent) || e;
+    if (!this.selectionMode && (source.ctrlKey || source.shiftKey || source.metaKey || source.button === 1)) {
+      // These are the clicks the browser turns into a new tab or window on the title link, so
+      // leave them alone. Elsewhere in the row there is no link to follow.
+      return;
+    }
+    // The row handles the click itself, so the title link must not navigate on top of it. Polymer
+    // forwards this preventDefault to the click event the tap was generated from.
+    if (typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
     if (this.selectionMode) {
       this._toogleSelect(e);
-    } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
+    } else {
       this.fire('navigate', { item: this.doc, index: this.index });
     }
   },
@@ -346,6 +389,19 @@ Polymer({
         e.currentTarget.click();
       }
     }
+  },
+
+  // The title link is not in the tab order, but clicking it leaves focus on it, so Enter can
+  // still reach it. Turn the key into a click, the way the row handler does, and cancel its own
+  // action: otherwise the row handler and the browser following the link both activate the item,
+  // which in selection mode toggles it twice and leaves it unchanged.
+  _onTitleKeydown(e) {
+    if (e.key !== 'Enter') {
+      return;
+    }
+    e.stopPropagation();
+    e.preventDefault();
+    e.currentTarget.click();
   },
 
   // ELEMENTS-1616: fall back to a transparent pixel when the (cross-origin) thumbnail
