@@ -238,13 +238,14 @@ Polymer({
           <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
         </div>
         <div class="dataContainer flex" on-tap="handleClick" on-keydown="_handleKeydown">
-          <div class="horizontal layout center" tabindex="0">
+          <div class="horizontal layout center">
             <!-- WEBUI-1882: the title holds the document URL so the browser context menu offers
                  "Open Link in New Tab" and "Open Link in New Window", as it already does in the
-                 grid and table views. It stays out of the tab order because the row around it is
-                 already focusable and activates the item; a second tab stop would only repeat
-                 the same title. -->
-            <a class="title flex" href$="[[_documentUrl(doc, urlFor)]]" tabindex="-1" on-keydown="_onTitleKeydown">
+                 grid and table views. Being a real link, it is also the keyboard stop for the row
+                 content, which is why the div around it no longer carries one: a link announces
+                 itself and its menu can be opened with the context menu key, while a plain
+                 focusable div could do neither. -->
+            <a class="title flex" href$="[[_documentUrl(doc, urlFor)]]" on-keydown="_onTitleKeydown">
               <div class="title">[[doc.title]]</div>
             </a>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
@@ -325,13 +326,15 @@ Polymer({
   // The binding also passes urlFor, which this method does not need: it makes the href recompute
   // once the router is known, since urlFor is only resolved from the element when called.
   _documentUrl(doc) {
-    if (!doc || !doc.uid) {
-      return '';
+    if (!doc?.uid) {
+      return undefined;
     }
     try {
-      return this.urlFor(doc) || '';
+      // Anything falsy has to stay undefined, which is what makes Polymer drop the attribute.
+      // An empty string would be serialized into href="", a link back to the current page.
+      return this.urlFor(doc) || undefined;
     } catch {
-      return '';
+      return undefined;
     }
   },
 
@@ -344,7 +347,7 @@ Polymer({
   handleClick(e) {
     // A tap event carries no modifier keys, they belong to the click it was generated from.
     // Direct callers (keyboard handling, tests) pass the original event instead.
-    const source = (e.detail && e.detail.sourceEvent) || e;
+    const source = e.detail?.sourceEvent || e;
     if (!this.selectionMode && (source.ctrlKey || source.shiftKey || source.metaKey || source.button === 1)) {
       // These are the clicks the browser turns into a new tab or window on the title link, so
       // leave them alone. Elsewhere in the row there is no link to follow.
@@ -391,10 +394,10 @@ Polymer({
     }
   },
 
-  // The title link is not in the tab order, but clicking it leaves focus on it, so Enter can
-  // still reach it. Turn the key into a click, the way the row handler does, and cancel its own
-  // action: otherwise the row handler and the browser following the link both activate the item,
-  // which in selection mode toggles it twice and leaves it unchanged.
+  // Enter on the focused title link. Turn the key into a click, the way the row handler does, and
+  // cancel its own action: otherwise the row handler and the browser following the link both
+  // activate the item, which in selection mode toggles it twice and leaves it unchanged. Only
+  // Enter is taken, so Space still reaches the results view and (de)selects the row.
   _onTitleKeydown(e) {
     if (e.key !== 'Enter') {
       return;
