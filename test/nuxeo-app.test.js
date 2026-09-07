@@ -1111,6 +1111,40 @@ suite('nuxeo-app', () => {
       expect(document.title).to.include('wf');
       expect(document.title).to.include('step');
     });
+
+    // WEBUI-1119: an empty `org.nuxeo.ecm.product.name` reaches the element as product-name="",
+    // which used to leave the tab title ending with a dangling " - ".
+    test('omits the trailing separator when productName is empty (WEBUI-1119)', () => {
+      app.page = 'home';
+      app.productName = '';
+      app._updateTitle();
+      expect(document.title).to.equal('app.title.home');
+      expect(document.title).to.not.match(/ - $/);
+    });
+
+    test('omits the trailing separator when productName is blank (WEBUI-1119)', () => {
+      app.page = 'home';
+      app.productName = '   ';
+      app._updateTitle();
+      expect(document.title).to.equal('app.title.home');
+    });
+
+    test('still appends productName when it is configured (WEBUI-1119)', () => {
+      app.page = 'home';
+      app.productName = 'Nuxeo';
+      app._updateTitle();
+      expect(document.title).to.equal('app.title.home - Nuxeo');
+    });
+
+    test('joins document and productName without a dangling separator on browse (WEBUI-1119)', () => {
+      sinon.stub(app, 'hasFacet').returns(false);
+      app.page = 'browse';
+      app.currentDocument = { title: 'My Doc', type: 'File' };
+      app.productName = '';
+      app._updateTitle();
+      expect(document.title).to.equal('My Doc');
+      app.hasFacet.restore();
+    });
   });
 
   suite('keyboard shortcuts and wizards', () => {
