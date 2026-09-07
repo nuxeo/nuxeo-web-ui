@@ -389,7 +389,6 @@ class Grid extends Nuxeo.Element {
   connectedCallback() {
     super.connectedCallback();
     this._updateGrid();
-    const targetNode = this;
     const config = { attributes: true, childList: true, subtree: true };
     this.__observer = new MutationObserver((mutationList) => {
       if (
@@ -405,7 +404,7 @@ class Grid extends Nuxeo.Element {
         this._updateGrid();
       }
     });
-    this.__observer.observe(targetNode, config);
+    this.__observer.observe(this, config);
   }
 
   disconnectedCallback() {

@@ -26,6 +26,16 @@ import '../nuxeo-app/nuxeo-page.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
+// Moves tabindex onto the given tab item so only it is tabbable, then focuses it.
+function updateFocus(item) {
+  if (!item) return;
+  Array.from(item.parentElement.children).forEach((child) => {
+    child.setAttribute('tabindex', '-1');
+  });
+  item.setAttribute('tabindex', '0');
+  item.focus();
+}
+
 /**
 `nuxeo-analytics`
 @group Nuxeo UI
@@ -73,15 +83,6 @@ Polymer({
   ready() {
     if (super.ready) super.ready();
     const listbox = this.$$('paper-listbox');
-
-    function updateFocus(item) {
-      if (!item) return;
-      Array.from(item.parentElement.children).forEach((child) => {
-        child.setAttribute('tabindex', '-1');
-      });
-      item.setAttribute('tabindex', '0');
-      item.focus();
-    }
 
     listbox.addEventListener('click', (e) => {
       const item = e.target.closest('[name]');
