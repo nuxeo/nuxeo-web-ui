@@ -224,7 +224,7 @@ suite('nuxeo-document-list-item', () => {
 
     const title = () => element.shadowRoot.querySelector('a.title');
     const thumbnail = () => element.shadowRoot.querySelector('.thumbnailContainer');
-    const focusableRow = () => element.shadowRoot.querySelector('.dataContainer [tabindex="0"]');
+    const extraRowTabStop = () => element.shadowRoot.querySelector('.dataContainer [tabindex="0"]');
 
     function click(node, init = {}) {
       node.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true, cancelable: true, ...init }));
@@ -259,16 +259,54 @@ suite('nuxeo-document-list-item', () => {
       expect(title().getAttribute('href')).to.equal('/doc/doc-1');
     });
 
-    test('is left without an href when the item is not a routable document', () => {
+    // An href attribute must be absent rather than empty: href="" is a link back to the current
+    // page, so the browser menu would offer to open the search page instead of the document.
+    test('has no href attribute at all when the item is not a routable document', async () => {
       element.urlFor.throws(new Error('cannot resolve route'));
-      expect(element._documentUrl({ uid: 'no-route' })).to.equal('');
-      expect(element._documentUrl({})).to.equal('');
-      expect(element._documentUrl(undefined)).to.equal('');
+      element.doc = { uid: 'not-routable', title: 'No route', type: 'File' };
+      await flush();
+      expect(title().hasAttribute('href'), 'href should be removed, not empty').to.be.false;
     });
 
-    test('stays out of the tab order, the row around it is already focusable', () => {
-      expect(title().tabIndex).to.equal(-1);
-      expect(focusableRow(), 'the row should still have a tab stop').to.exist;
+    test('resolves no URL for an item that cannot be routed', () => {
+      element.urlFor.throws(new Error('cannot resolve route'));
+      expect(element._documentUrl({ uid: 'no-route' })).to.be.undefined;
+      element.urlFor.returns('');
+      expect(element._documentUrl({ uid: 'empty-url' })).to.be.undefined;
+      expect(element._documentUrl({})).to.be.undefined;
+      expect(element._documentUrl(undefined)).to.be.undefined;
+    });
+
+    test('is the keyboard stop for the row content, so its browser menu is reachable', () => {
+      expect(title().tabIndex, 'the link should be in the tab order').to.equal(0);
+      expect(extraRowTabStop(), 'the div around it should not repeat the stop').to.not.exist;
+    });
+
+    test('takes keyboard focus', () => {
+      title().focus();
+      // Some headless environments ignore focus(), and the assertion only means something once
+      // the link is actually focused.
+      if (element.shadowRoot.activeElement !== title()) {
+        return;
+      }
+      expect(element.shadowRoot.activeElement).to.equal(title());
+    });
+
+    // Space is how the results view (de)selects the focused row, so the link must not take it.
+    test('leaves Space to the results view', () => {
+      const event = new KeyboardEvent('keydown', {
+        key: ' ',
+        bubbles: true,
+        composed: true,
+        cancelable: true,
+      });
+      let reachedHost = false;
+      element.addEventListener('keydown', () => {
+        reachedHost = true;
+      });
+      title().dispatchEvent(event);
+      expect(reachedHost, 'Space should still bubble out of the element').to.be.true;
+      expect(event.defaultPrevented, 'Space should not be cancelled here').to.be.false;
     });
 
     test('a right-click opens the browser menu without navigating or selecting', () => {
@@ -361,9 +399,15 @@ suite('nuxeo-document-list-item', () => {
         expect(fired.navigate).to.equal(1);
       });
 
-      test('Enter on the focusable row still navigates once', () => {
+      test('Enter handled by the row itself still navigates once', () => {
         const fired = countEvents();
-        pressEnter(focusableRow());
+        pressEnter(element.shadowRoot.querySelector('.dataContainer'));
+        expect(fired.navigate).to.equal(1);
+      });
+
+      test('Enter on the thumbnail still navigates once', () => {
+        const fired = countEvents();
+        pressEnter(thumbnail());
         expect(fired.navigate).to.equal(1);
       });
 
