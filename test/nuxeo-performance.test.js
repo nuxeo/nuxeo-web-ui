@@ -481,11 +481,18 @@ suite('Performance', () => {
       Object.defineProperty(performance, 'getEntriesByType', { configurable: true, value: orig });
     });
 
-    test('getOnLoad reports loadEventEnd directly, not relative to fetchStart', () => {
-      // PerformanceNavigationTiming values are already relative to the start of the navigation.
-      // Carrying over the `- fetchStart` subtraction the epoch-based timings needed would report
-      // 934 here instead of the real 1235ms page load.
+    test('should keep the fetchStart baseline when the navigation was redirected', () => {
+      // fetchStart is only non-zero when something happened before the fetch (a redirect, the
+      // previous document unloading). Both fields are navigation-relative, so the subtraction
+      // reports the same duration the epoch-based timings did rather than folding that time in.
       const stub = stubNavigation([{ loadEventEnd: 1234.6, fetchStart: 300, domContentLoadedEventEnd: 567.4 }]);
+      expect(NuxeoPerf.getOnLoad()).to.equal(935);
+      expect(NuxeoPerf.getDomContentLoaded()).to.equal(267);
+      stub.restore();
+    });
+
+    test('should report the whole duration when the navigation was not redirected', () => {
+      const stub = stubNavigation([{ loadEventEnd: 1234.6, fetchStart: 0, domContentLoadedEventEnd: 567.4 }]);
       expect(NuxeoPerf.getOnLoad()).to.equal(1235);
       expect(NuxeoPerf.getDomContentLoaded()).to.equal(567);
       stub.restore();

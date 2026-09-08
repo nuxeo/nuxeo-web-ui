@@ -54,15 +54,18 @@ export const Performance = {
 
   getOnLoad() {
     const navigation = this.getNavigationTiming();
-    // Navigation timings are relative to the start of the navigation, so loadEventEnd is already
-    // the page load duration — subtracting fetchStart, as the epoch-based timings required, would
-    // report a nonsensical value. It stays 0 until the load event has fired.
-    return navigation && navigation.loadEventEnd ? Math.round(navigation.loadEventEnd) : null;
+    // Both fields are relative to the start of the navigation, unlike the epoch timestamps
+    // `performance.timing` exposed, so the difference keeps the fetchStart baseline the metric has
+    // always used. Reporting loadEventEnd on its own would silently fold in redirect and unload
+    // time. loadEventEnd stays 0 until the load event has fired.
+    return navigation?.loadEventEnd ? Math.round(navigation.loadEventEnd - navigation.fetchStart) : null;
   },
 
   getDomContentLoaded() {
     const navigation = this.getNavigationTiming();
-    return navigation && navigation.domContentLoadedEventEnd ? Math.round(navigation.domContentLoadedEventEnd) : null;
+    return navigation?.domContentLoadedEventEnd
+      ? Math.round(navigation.domContentLoadedEventEnd - navigation.fetchStart)
+      : null;
   },
 
   /** optional metrics * */
