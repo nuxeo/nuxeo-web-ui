@@ -48,9 +48,8 @@ Then("I can't see the blob replace button", async function () {
   await page.waitForVisible();
   const view = await page.view;
   await view.waitForVisible();
-  const ele = await view.el.element('nuxeo-replace-blob-button');
-  const isVisible = await view.isTrulyVisible(ele);
-  isVisible.should.be.false;
+  const result = await view.waitForNotVisible('nuxeo-replace-blob-button');
+  result.should.be.true;
 });
 
 Then('I can see the option to add new attachments', async function () {
