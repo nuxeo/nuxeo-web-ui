@@ -19,10 +19,11 @@ import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-app/nuxeo-announcement-banner.js';
 import { ANNOUNCEMENT_UPDATED_EVENT } from '../elements/nuxeo-app/nuxeo-announcement.js';
 
-const entries = (properties) => {
+const entry = (properties) => {
   return {
-    'entity-type': 'directoryEntries',
-    entries: [{ 'entity-type': 'directoryEntry', id: 'announcement', properties }],
+    'entity-type': 'directoryEntry',
+    id: 'announcement',
+    properties,
   };
 };
 
@@ -43,13 +44,13 @@ suite('nuxeo-announcement-banner', () => {
   });
 
   const load = (properties) => {
-    sinon.stub(element.$.announcement, 'get').resolves(properties ? entries(properties) : { entries: [] });
+    sinon.stub(element.$.announcement, 'get').resolves(properties ? entry(properties) : null);
     element.user = { id: 'Administrator' };
     return element.refresh().then(() => flush());
   };
 
   test('stays hidden until a user is connected', () => {
-    const get = sinon.stub(element.$.announcement, 'get').resolves(entries({ enabled: true, message: 'Hello' }));
+    const get = sinon.stub(element.$.announcement, 'get').resolves(entry({ enabled: true, message: 'Hello' }));
     return element.refresh().then(() => {
       expect(get).to.not.have.been.called;
       expect(element._opened).to.be.false;
@@ -135,21 +136,15 @@ suite('nuxeo-announcement-banner', () => {
     await load({ enabled: true, message: 'With a link', linkUrl: 'https://x.test/a', linkLabel: 'Details' });
     expect(element.shadowRoot.querySelector('a')).to.exist;
     element.$.announcement.get.restore();
-    sinon.stub(element.$.announcement, 'get').resolves(entries({ enabled: true, message: 'Link removed' }));
+    sinon.stub(element.$.announcement, 'get').resolves(entry({ enabled: true, message: 'Link removed' }));
     await element.refresh();
     await flush();
     expect(element._linkUrl).to.equal('');
     expect(element.shadowRoot.querySelector('a')).to.not.exist;
   });
 
-  test('ignores an entry that is not the reserved announcement', async () => {
-    sinon.stub(element.$.announcement, 'get').resolves({
-      entries: [{ id: 'something-else', properties: { enabled: true, message: 'Not an announcement' } }],
-    });
-    element.user = { id: 'Administrator' };
-    await element.refresh();
-    await flush();
-    expect(element._opened).to.be.false;
+  test('reads the reserved announcement entry directly', () => {
+    expect(element.$.announcement.path).to.equal('directory/webUIAnnouncement/announcement');
   });
 
   suite('overlapping lookups', () => {
@@ -170,8 +165,8 @@ suite('nuxeo-announcement-banner', () => {
       const first = element.refresh();
       const second = element.refresh();
       // resolve the newest first, then let the superseded one land
-      resolvers[resolvers.length - 1](entries({ enabled: true, message: 'Newest' }));
-      resolvers[resolvers.length - 2](entries({ enabled: true, message: 'Stale' }));
+      resolvers[resolvers.length - 1](entry({ enabled: true, message: 'Newest' }));
+      resolvers[resolvers.length - 2](entry({ enabled: true, message: 'Stale' }));
       await Promise.all([first, second]);
       await flush();
       expect(element._message).to.equal('Newest');
@@ -180,7 +175,7 @@ suite('nuxeo-announcement-banner', () => {
     test('drops a response that arrives after the user is disconnected', async () => {
       const pending = element.refresh();
       element.user = null;
-      resolvers[resolvers.length - 1](entries({ enabled: true, message: 'Too late' }));
+      resolvers[resolvers.length - 1](entry({ enabled: true, message: 'Too late' }));
       await pending;
       await flush();
       expect(element._opened).to.be.false;
@@ -189,8 +184,8 @@ suite('nuxeo-announcement-banner', () => {
 
     test('drops a response that arrives after the banner is detached', async () => {
       const pending = element.refresh();
-      element.detached();
-      resolvers[resolvers.length - 1](entries({ enabled: true, message: 'Too late' }));
+      element.disconnectedCallback();
+      resolvers[resolvers.length - 1](entry({ enabled: true, message: 'Too late' }));
       await pending;
       await flush();
       expect(element._opened).to.be.false;

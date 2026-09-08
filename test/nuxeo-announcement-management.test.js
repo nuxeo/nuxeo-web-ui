@@ -18,8 +18,8 @@ limitations under the License.
 import { fixture, flush, html, login } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-admin/nuxeo-announcement-management.js';
 import {
+  ANNOUNCEMENT_DIRECTORY_PATH,
   ANNOUNCEMENT_ENTRY_PATH,
-  ANNOUNCEMENT_ENTRY_UPDATE_PATH,
   ANNOUNCEMENT_MAX_LENGTH,
   ANNOUNCEMENT_UPDATED_EVENT,
 } from '../elements/nuxeo-app/nuxeo-announcement.js';
@@ -43,12 +43,8 @@ suite('nuxeo-announcement-management', () => {
   suite('refresh', () => {
     test('loads the existing announcement into the form', async () => {
       sinon.stub(element.$.announcement, 'get').resolves({
-        entries: [
-          {
-            id: 'announcement',
-            properties: { enabled: true, message: 'Maintenance', linkUrl: 'https://x.test', linkLabel: 'Info' },
-          },
-        ],
+        id: 'announcement',
+        properties: { enabled: true, message: 'Maintenance', linkUrl: 'https://x.test', linkLabel: 'Info' },
       });
       await element.refresh();
       expect(element._exists).to.be.true;
@@ -61,19 +57,17 @@ suite('nuxeo-announcement-management', () => {
     });
 
     test('starts from an empty announcement when none exists yet', async () => {
-      sinon.stub(element.$.announcement, 'get').resolves({ entries: [] });
+      sinon.stub(element.$.announcement, 'get').rejects({ status: 404 });
       await element.refresh();
       expect(element._exists).to.be.false;
       expect(element._entry).to.deep.equal({ enabled: false, message: '', linkUrl: '', linkLabel: '' });
+      expect(element.notify).to.not.have.been.called;
     });
 
-    test('ignores an entry that is not the reserved announcement', async () => {
-      sinon.stub(element.$.announcement, 'get').resolves({
-        entries: [{ id: 'something-else', properties: { enabled: true, message: 'Not an announcement' } }],
-      });
+    test('reads the reserved announcement entry directly', async () => {
+      sinon.stub(element.$.announcement, 'get').resolves({ id: 'announcement', properties: {} });
       await element.refresh();
-      expect(element._exists).to.be.false;
-      expect(element._entry).to.deep.equal({ enabled: false, message: '', linkUrl: '', linkLabel: '' });
+      expect(element.$.announcement.path).to.equal(ANNOUNCEMENT_ENTRY_PATH);
     });
 
     test('disables the form while loading and re-enables it once settled', async () => {
@@ -85,7 +79,7 @@ suite('nuxeo-announcement-management', () => {
       );
       const pending = element.refresh();
       expect(element._loading).to.be.true;
-      resolve({ entries: [] });
+      resolve({ id: 'announcement', properties: {} });
       await pending;
       expect(element._loading).to.be.false;
     });
@@ -100,12 +94,49 @@ suite('nuxeo-announcement-management', () => {
       sinon.stub(element.$.announcement, 'get').rejects(new Error('boom'));
       await element.refresh();
       expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify).to.have.been.calledWith({
+        message: 'LABEL.ERROR: announcementManagement.errorLoading',
+      });
     });
 
     test('is triggered when the page becomes visible', async () => {
       const refresh = sinon.stub(element, 'refresh').resolves();
       element.visible = true;
       expect(refresh).to.have.been.calledOnce;
+    });
+
+    test('keeps the newest response when overlapping refreshes settle out of order', async () => {
+      const resolvers = [];
+      sinon.stub(element.$.announcement, 'get').callsFake(
+        () =>
+          new Promise((resolve) => {
+            resolvers.push(resolve);
+          }),
+      );
+      const first = element.refresh();
+      const second = element.refresh();
+      resolvers[1]({ id: 'announcement', properties: { enabled: true, message: 'Newest' } });
+      resolvers[0]({ id: 'announcement', properties: { enabled: true, message: 'Stale' } });
+      await Promise.all([first, second]);
+      expect(element._entry.message).to.equal('Newest');
+    });
+
+    test('does not report an aborted superseded refresh', async () => {
+      let rejectFirst;
+      sinon
+        .stub(element.$.announcement, 'get')
+        .onFirstCall()
+        .returns(
+          new Promise((resolve, reject) => {
+            rejectFirst = reject;
+          }),
+        );
+      element.$.announcement.get.onSecondCall().resolves({ id: 'announcement', properties: {} });
+      const first = element.refresh();
+      const second = element.refresh();
+      rejectFirst({ name: 'AbortError' });
+      await Promise.all([first, second]);
+      expect(element.notify).to.not.have.been.called;
     });
   });
 
@@ -149,7 +180,7 @@ suite('nuxeo-announcement-management', () => {
       element._entry = { enabled: true, message: ' Maintenance ', linkUrl: '', linkLabel: '' };
       const post = sinon.stub(element.$.announcement, 'post').resolves();
       await element._save();
-      expect(element.$.announcement.path).to.equal(ANNOUNCEMENT_ENTRY_PATH);
+      expect(element.$.announcement.path).to.equal(ANNOUNCEMENT_DIRECTORY_PATH);
       expect(post).to.have.been.calledOnce;
       expect(element.$.announcement.data.properties.message).to.equal('Maintenance');
       expect(element._exists).to.be.true;
@@ -160,7 +191,7 @@ suite('nuxeo-announcement-management', () => {
       element._entry = { enabled: false, message: 'Maintenance', linkUrl: '', linkLabel: '' };
       const put = sinon.stub(element.$.announcement, 'put').resolves();
       await element._save();
-      expect(element.$.announcement.path).to.equal(ANNOUNCEMENT_ENTRY_UPDATE_PATH);
+      expect(element.$.announcement.path).to.equal(ANNOUNCEMENT_ENTRY_PATH);
       expect(put).to.have.been.calledOnce;
     });
 
@@ -181,6 +212,37 @@ suite('nuxeo-announcement-management', () => {
       sinon.stub(element.$.announcement, 'put').rejects(new Error('boom'));
       await element._save();
       expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify).to.have.been.calledWith({
+        message: 'LABEL.ERROR: announcementManagement.errorSaving',
+      });
+      expect(element._saving).to.be.false;
+    });
+
+    test('prevents a second save while the first is in flight', async () => {
+      let resolve;
+      element._exists = true;
+      element._entry = { enabled: true, message: 'Maintenance', linkUrl: '', linkLabel: '' };
+      const put = sinon.stub(element.$.announcement, 'put').returns(
+        new Promise((r) => {
+          resolve = r;
+        }),
+      );
+      const first = element._save();
+      const second = element._save();
+      expect(put).to.have.been.calledOnce;
+      expect(element._saving).to.be.true;
+      resolve();
+      await Promise.all([first, second]);
+      expect(element._saving).to.be.false;
+    });
+
+    test('does not report an aborted save', async () => {
+      element._exists = true;
+      element._entry = { enabled: true, message: 'Maintenance', linkUrl: '', linkLabel: '' };
+      sinon.stub(element.$.announcement, 'put').rejects({ name: 'AbortError' });
+      await element._save();
+      expect(element.notify).to.not.have.been.called;
+      expect(element._saving).to.be.false;
     });
 
     test('rejects an enabled announcement without a message', async () => {

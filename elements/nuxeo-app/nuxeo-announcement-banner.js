@@ -18,16 +18,12 @@ limitations under the License.
 import '@polymer/polymer/polymer-legacy.js';
 
 import '@polymer/iron-icon/iron-icon.js';
+import '@nuxeo/nuxeo-elements/nuxeo-element.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
-import {
-  ANNOUNCEMENT_ENTRY_ID,
-  ANNOUNCEMENT_ENTRY_PATH,
-  ANNOUNCEMENT_UPDATED_EVENT,
-  sanitizeAnnouncementLink,
-} from './nuxeo-announcement.js';
+import { ANNOUNCEMENT_ENTRY_PATH, ANNOUNCEMENT_UPDATED_EVENT, sanitizeAnnouncementLink } from './nuxeo-announcement.js';
 
 /**
 `nuxeo-announcement-banner`
@@ -45,127 +41,135 @@ pushes the application down instead of covering it.
 @group Nuxeo UI
 @element nuxeo-announcement-banner
 */
-Polymer({
-  _template: html`
-    <style>
-      /*
+class AnnouncementBanner extends mixinBehaviors([I18nBehavior], Nuxeo.Element) {
+  static get template() {
+    return html`
+      <style>
+        /*
        * The banner is laid out in the normal flow, as the first thing inside <header role="banner">,
        * so it pushes the whole application down instead of covering the top of the page. The fixed
        * chrome (drawer, logo, menu, toolbars) is viewport positioned and cannot be pushed that way,
        * so the height is also published as --nuxeo-app-top, which that chrome already honours.
        * The z-index stays below the skip link so the skip link remains visible when focused.
        */
-      :host {
-        display: none;
-        position: relative;
-        z-index: 999;
-        background: var(--nuxeo-announcement-banner-background, #fee066);
-        color: var(--nuxeo-announcement-banner-text, #3a3a54);
-        box-shadow: var(--nuxeo-app-header-box-shadow);
-        font-size: 0.9rem;
-      }
+        :host {
+          display: none;
+          position: relative;
+          z-index: 999;
+          background: var(--nuxeo-announcement-banner-background, #fee066);
+          color: var(--nuxeo-announcement-banner-text, #3a3a54);
+          box-shadow: var(--nuxeo-app-header-box-shadow);
+          font-size: 0.9rem;
+        }
 
-      :host([_opened]) {
-        display: block;
-      }
+        :host([_opened]) {
+          display: block;
+        }
 
-      .content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 8px;
-        min-height: 2.5rem;
-        padding: 0.5rem 1rem;
-        text-align: center;
-      }
+        .content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 8px;
+          min-height: 2.5rem;
+          padding: 0.5rem 1rem;
+          text-align: center;
+        }
 
-      iron-icon {
-        flex: none;
-        --iron-icon-height: 1.25rem;
-        --iron-icon-width: 1.25rem;
-      }
+        iron-icon {
+          flex: none;
+          --iron-icon-height: 1.25rem;
+          --iron-icon-width: 1.25rem;
+        }
 
-      .message {
-        overflow-wrap: anywhere;
-      }
+        .message {
+          overflow-wrap: anywhere;
+        }
 
-      a {
-        color: inherit;
-        font-weight: 700;
-        text-decoration: underline;
-      }
-    </style>
+        a {
+          color: inherit;
+          font-weight: 700;
+          text-decoration: underline;
+        }
+      </style>
 
-    <nuxeo-resource id="announcement" path="[[_path]]"></nuxeo-resource>
+      <nuxeo-resource id="announcement" path="[[_path]]"></nuxeo-resource>
 
-    <div class="content" role="status" aria-live="polite">
-      <iron-icon icon="icons:info-outline" aria-hidden="true"></iron-icon>
-      <span class="message">[[_message]]</span>
-      <!-- restamp: removing the link must not leave a hidden anchor behind holding the previous href -->
-      <template is="dom-if" if="[[_linkUrl]]" restamp>
-        <a href$="[[_linkUrl]]" target="_blank" rel="noopener noreferrer">[[_linkLabel]]</a>
-      </template>
-    </div>
-  `,
+      <div class="content" role="status" aria-live="polite">
+        <iron-icon icon="icons:info-outline" aria-hidden="true"></iron-icon>
+        <span class="message">[[_message]]</span>
+        <!-- restamp: removing the link must not leave a hidden anchor behind holding the previous href -->
+        <template is="dom-if" if="[[_linkUrl]]" restamp>
+          <a href$="[[_linkUrl]]" target="_blank" rel="noopener noreferrer">[[_linkLabel]]</a>
+        </template>
+      </div>
+    `;
+  }
 
-  is: 'nuxeo-announcement-banner',
-  behaviors: [I18nBehavior],
+  static get is() {
+    return 'nuxeo-announcement-banner';
+  }
 
-  properties: {
+  static get properties() {
+    return {
+      /**
+       * The connected user. Used only to defer the lookup until there is an
+       * authenticated session, and to refresh it when the user changes.
+       */
+      user: {
+        type: Object,
+        observer: '_userChanged',
+      },
+
+      _path: {
+        type: String,
+        readOnly: true,
+        value: ANNOUNCEMENT_ENTRY_PATH,
+      },
+
+      _opened: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+        observer: '_openedChanged',
+      },
+
+      _message: {
+        type: String,
+        value: '',
+      },
+
+      _linkUrl: {
+        type: String,
+        value: '',
+      },
+
+      _linkLabel: {
+        type: String,
+        value: '',
+      },
+    };
+  }
+
+  constructor() {
+    super();
     /**
-     * The connected user. Used only to defer the lookup until there is an
-     * authenticated session, and to refresh it when the user changes.
+     * Incremented for every lookup, and whenever a lookup in flight must be abandoned. A response
+     * is only applied while it is still the newest one, so overlapping refreshes cannot resolve out
+     * of order and a late response cannot reopen the banner after logout.
      */
-    user: {
-      type: Object,
-      observer: '_userChanged',
-    },
+    this._requestId = 0;
+  }
 
-    _path: {
-      type: String,
-      readOnly: true,
-      value: ANNOUNCEMENT_ENTRY_PATH,
-    },
-
-    _opened: {
-      type: Boolean,
-      value: false,
-      reflectToAttribute: true,
-      observer: '_openedChanged',
-    },
-
-    _message: {
-      type: String,
-      value: '',
-    },
-
-    _linkUrl: {
-      type: String,
-      value: '',
-    },
-
-    _linkLabel: {
-      type: String,
-      value: '',
-    },
-  },
-
-  /**
-   * Incremented for every lookup, and whenever a lookup in flight must be abandoned (the user is
-   * disconnected, the element is detached). A response is only applied while it is still the
-   * newest one, so overlapping refreshes cannot resolve out of order and a late response cannot
-   * reopen the banner after logout.
-   */
-  _requestId: 0,
-
-  attached() {
+  connectedCallback() {
+    super.connectedCallback();
     this._attachedToDom = true;
     this._boundRefresh = () => this.refresh();
     document.addEventListener(ANNOUNCEMENT_UPDATED_EVENT, this._boundRefresh);
-  },
+  }
 
-  detached() {
+  disconnectedCallback() {
     this._attachedToDom = false;
     this._requestId += 1;
     if (this._boundRefresh) {
@@ -174,7 +178,8 @@ Polymer({
     }
     this._disconnectResizeObserver();
     this._opened = false;
-  },
+    super.disconnectedCallback();
+  }
 
   /**
    * Reloads the announcement from the server and updates the banner.
@@ -192,14 +197,14 @@ Polymer({
       // announcement to show: stay hidden rather than failing the whole application shell.
       () => this._applyIfCurrent(requestId, null),
     );
-  },
+  }
 
   _applyIfCurrent(requestId, response) {
     if (requestId !== this._requestId || !this.user || this._attachedToDom === false) {
       return;
     }
     this._update(response);
-  },
+  }
 
   _userChanged(user) {
     if (user) {
@@ -209,10 +214,10 @@ Polymer({
       this._requestId += 1;
       this._update(null);
     }
-  },
+  }
 
   _update(response) {
-    const entry = this._entryOf(response);
+    const entry = response?.properties;
     const message = typeof entry?.message === 'string' ? entry.message.trim() : '';
     const enabled = !!entry?.enabled;
     if (!enabled || !message) {
@@ -228,14 +233,7 @@ Polymer({
     this._linkUrl = linkUrl;
     this._linkLabel = linkUrl ? linkLabel || this.i18n('announcementBanner.moreDetails') : '';
     this._opened = true;
-  },
-
-  _entryOf(response) {
-    // The announcement is the entry with the reserved id. Any other entry of the directory belongs
-    // to nobody and must never be promoted to an instance wide banner.
-    const entry = (response?.entries || []).find((e) => e?.id === ANNOUNCEMENT_ENTRY_ID);
-    return entry?.properties || null;
-  },
+  }
 
   _openedChanged(opened) {
     if (opened) {
@@ -244,7 +242,7 @@ Polymer({
       this._disconnectResizeObserver();
       this._setAppTop(null);
     }
-  },
+  }
 
   _observeHeight() {
     this._setAppTop(this.offsetHeight);
@@ -258,14 +256,14 @@ Polymer({
       }
     });
     this._resizeObserver.observe(this);
-  },
+  }
 
   _disconnectResizeObserver() {
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
-  },
+  }
 
   _setAppTop(height) {
     const root = document.documentElement;
@@ -277,5 +275,7 @@ Polymer({
     } else {
       root.style.removeProperty('--nuxeo-app-top');
     }
-  },
-});
+  }
+}
+
+customElements.define(AnnouncementBanner.is, AnnouncementBanner);
