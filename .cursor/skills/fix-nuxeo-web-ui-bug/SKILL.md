@@ -305,6 +305,9 @@ Tear them down in Phase 10.
   `nuxeo-elements` repo) before editing. **Print the root cause to the user** — a clear,
   explicit statement of what is actually causing the bug (file/function/line and why) — before
   making any change. Then make the **minimal** change in `nuxeo-web-ui`.
+- **When the fix lands in `nuxeo-elements`:** do **not** use optional chaining (`?.`) in
+  `core/`, `ui/`, or `dataviz/` source — Polymer lint/analyze cannot parse it and elements go
+  missing from `analysis.json`. Use explicit `&&` guards instead (see `nuxeo-elements/AGENTS.md`).
 - Keep the diff focused — do not bundle unrelated files. Capture the **after** evidence, including
   the **after video** (Phase 2 recipe) showing the fixed behavior end-to-end.
 - **Extract self-contained/cross-cutting client logic into a Polymer behavior**, don't inline it
