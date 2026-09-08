@@ -231,7 +231,10 @@ class Spreadsheet {
 
   _saveDirtyRows() {
     this.hasConflicts = false;
-    return Promise.all(
+    // Every PUT has to settle before the outcome is read: hasConflicts decides which message the
+    // caller shows, and Promise.all would hand back as soon as one row failed, so a non-conflict
+    // failure could report the generic error while a slower 409 was still in flight.
+    return Promise.allSettled(
       Object.entries(this._dirty).map(([uid, dirtyDocument]) =>
         this.connection
           .request(`/id/${uid}`)
@@ -252,18 +255,20 @@ class Spreadsheet {
             if (markSaveError(dirtyDocument, error)) {
               this.hasConflicts = true;
             }
-            throw new Error(error);
+            throw error;
           }),
       ),
-    )
-      .catch((err) => {
-        console.error(err);
-      })
-      .then((result) => {
-        this.ht.clearUndo();
-        this.ht.render();
-        return result;
-      });
+    ).then((outcomes) => {
+      this.ht.clearUndo();
+      this.ht.render();
+      const failures = outcomes.filter((outcome) => outcome.status === 'rejected');
+      if (failures.length > 0) {
+        failures.forEach(({ reason }) => console.error(reason));
+        // The caller tells a failed save from a successful one by the absence of a result.
+        return undefined;
+      }
+      return outcomes.map(({ value }) => value);
+    });
   }
 
   onChange(change, source) {
