@@ -260,6 +260,9 @@ class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavio
    * @return {Promise} resolved once the form reflects the server state.
    */
   refresh() {
+    if (this._saving) {
+      return Promise.resolve();
+    }
     const requestId = ++this._requestId;
     this.$.announcement.path = ANNOUNCEMENT_ENTRY_PATH;
     this._loading = true;
