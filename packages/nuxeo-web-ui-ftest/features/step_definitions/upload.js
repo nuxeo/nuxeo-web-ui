@@ -1,8 +1,36 @@
-import { Then } from '@cucumber/cucumber';
+import { Then, When } from '@cucumber/cucumber';
 
 Then(/^I upload file "(.+)" as document content/, async function (file) {
   const element = await this.ui.browser.el.element('nuxeo-dropzone');
   await fixtures.layouts.setValue(element, file);
+});
+
+// `chooseFile` drives the hidden file input, which can only ever carry one file on a single blob
+// dropzone. Dropping is the only way to hand the widget several files at once, so synthesise the
+// drag and drop in the page.
+When(/^I drop (\d+) files? at once as document content$/, async function (count) {
+  const element = await this.ui.browser.el.element('nuxeo-dropzone');
+  await element.waitForVisible();
+  await browser.execute(
+    (dropzone, total) => {
+      const dataTransfer = new DataTransfer();
+      for (let i = 0; i < total; i++) {
+        dataTransfer.items.add(new File([`content ${i}`], `dropped-${i}.txt`, { type: 'text/plain' }));
+      }
+      dropzone.shadowRoot
+        .querySelector('#dropzone')
+        .dispatchEvent(new DragEvent('drop', { dataTransfer, bubbles: true, cancelable: true }));
+    },
+    element,
+    Number(count),
+  );
+});
+
+Then('I can see an error on the document content dropzone', async function () {
+  const element = await this.ui.browser.el.element('nuxeo-dropzone');
+  await element.waitForVisible();
+  const invalid = await browser.execute((dropzone) => dropzone.invalid === true, element);
+  invalid.should.be.true;
 });
 
 Then('I can see the blob replace button', async function () {
