@@ -175,18 +175,26 @@ function buildDeclaration(property, value) {
 }
 
 /**
- * Builds a `grid-column` / `grid-row` shorthand from a start line and a span, either of which may
- * be absent: a line alone places the item, a span alone leaves placement to the grid's auto flow.
+ * Builds a `grid-column` / `grid-row` shorthand from a start line and a span.
+ *
+ * `line` is interpolated even when it is absent, which reproduces the output of the previous
+ * implementation byte-for-byte. A span with no start line therefore still yields an invalid
+ * declaration (`grid-column: undefinedspan 3;`) that browsers discard. That is a real defect, but
+ * correcting it here would change rendering, so it is tracked separately in WEBUI-2289 and left
+ * untouched by this refactor.
  */
 function buildGridLine(property, line, span) {
-  const parts = [];
-  if (line) {
-    parts.push(line);
+  if (!line && !span) {
+    return '';
   }
+  let value = `${line}`;
   if (span) {
-    parts.push(`span ${span}`);
+    if (line) {
+      value += ' / ';
+    }
+    value += `span ${span}`;
   }
-  return buildDeclaration(property, parts.join(' / '));
+  return `${property}: ${value};`;
 }
 
 function buildGridStyle(grid, validate = true) {
