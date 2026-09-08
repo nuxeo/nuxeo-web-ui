@@ -39,13 +39,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: maintenance-3.1.x
 
       - name: Crowdin Action
         id: crowdin-sync
-        uses: crowdin/github-action@8868a33591d21088edfc398968173a3b98d51706 # v2.16.2
+        uses: crowdin/github-action@c7af9bc98b01694653031fef2a0dc6c7888ce9bc # v2.17.0
         with:
           # Disable 'git checkout "${GITHUB_REF#refs/heads/}"'
           skip_ref_checkout: true
