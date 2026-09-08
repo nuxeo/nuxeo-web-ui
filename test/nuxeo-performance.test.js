@@ -83,7 +83,7 @@ suite('Performance', () => {
   });
 
   suite('getOnLoad', () => {
-    test('should return a number when performance.timing is available', () => {
+    test('should return a number when the navigation entry is available', () => {
       const result = NuxeoPerf.getOnLoad();
       if (result !== null) {
         expect(result).to.be.a('number');
@@ -92,7 +92,7 @@ suite('Performance', () => {
   });
 
   suite('getDomContentLoaded', () => {
-    test('should return a number when performance.timing is available', () => {
+    test('should return a number when the navigation entry is available', () => {
       const result = NuxeoPerf.getDomContentLoaded();
       if (result !== null) {
         expect(result).to.be.a('number');
@@ -412,43 +412,11 @@ suite('Performance', () => {
       stub.restore();
     });
 
-    test('getFirstPaint uses non-blank paint timing when paint API missing', () => {
+    test('getFirstPaint returns null when the paint timing type is missing', () => {
       const had = window.PerformancePaintTiming;
       try {
         delete window.PerformancePaintTiming;
-        const origTiming = performance.timing;
-        Object.defineProperty(performance, 'timing', {
-          configurable: true,
-          value: {
-            timeToNonBlankPaint: 900,
-            fetchStart: 100,
-            msFirstPaint: undefined,
-          },
-        });
-        expect(NuxeoPerf.getFirstPaint()).to.equal(800);
-        Object.defineProperty(performance, 'timing', { configurable: true, value: origTiming });
-      } finally {
-        if (had !== undefined) {
-          window.PerformancePaintTiming = had;
-        }
-      }
-    });
-
-    test('getFirstPaint uses msFirstPaint when timeToNonBlankPaint missing', () => {
-      const had = window.PerformancePaintTiming;
-      try {
-        delete window.PerformancePaintTiming;
-        const origTiming = performance.timing;
-        Object.defineProperty(performance, 'timing', {
-          configurable: true,
-          value: {
-            timeToNonBlankPaint: undefined,
-            fetchStart: 50,
-            msFirstPaint: 750,
-          },
-        });
-        expect(NuxeoPerf.getFirstPaint()).to.equal(700);
-        Object.defineProperty(performance, 'timing', { configurable: true, value: origTiming });
+        expect(NuxeoPerf.getFirstPaint()).to.be.null;
       } finally {
         if (had !== undefined) {
           window.PerformancePaintTiming = had;
@@ -483,21 +451,70 @@ suite('Performance', () => {
     });
   });
 
-  suite('branch coverage: performance guards', () => {
-    test('getOnLoad returns null when timing missing', () => {
-      const origTiming = performance.timing;
-      Object.defineProperty(performance, 'timing', { configurable: true, value: undefined });
+  suite('navigation timing', () => {
+    // Only the 'navigation' type is faked: the paint metrics and getResources() read the other
+    // types through the same method and must keep seeing the real entries.
+    const stubNavigation = (entries) => {
+      const real = performance.getEntriesByType.bind(performance);
+      return sinon
+        .stub(performance, 'getEntriesByType')
+        .callsFake((type) => (type === 'navigation' ? entries : real(type)));
+    };
+
+    test('getNavigationTiming returns the navigation entry', () => {
+      const entry = { loadEventEnd: 1234.6, domContentLoadedEventEnd: 567.4 };
+      const stub = stubNavigation([entry]);
+      expect(NuxeoPerf.getNavigationTiming()).to.equal(entry);
+      stub.restore();
+    });
+
+    test('getNavigationTiming returns null when no navigation entry has been recorded', () => {
+      const stub = stubNavigation([]);
+      expect(NuxeoPerf.getNavigationTiming()).to.be.null;
+      stub.restore();
+    });
+
+    test('getNavigationTiming returns null when the navigation timing API is unavailable', () => {
+      const orig = performance.getEntriesByType;
+      Object.defineProperty(performance, 'getEntriesByType', { configurable: true, value: undefined });
+      expect(NuxeoPerf.getNavigationTiming()).to.be.null;
+      Object.defineProperty(performance, 'getEntriesByType', { configurable: true, value: orig });
+    });
+
+    test('getOnLoad reports loadEventEnd directly, not relative to fetchStart', () => {
+      // PerformanceNavigationTiming values are already relative to the start of the navigation.
+      // Carrying over the `- fetchStart` subtraction the epoch-based timings needed would report
+      // 934 here instead of the real 1235ms page load.
+      const stub = stubNavigation([{ loadEventEnd: 1234.6, fetchStart: 300, domContentLoadedEventEnd: 567.4 }]);
+      expect(NuxeoPerf.getOnLoad()).to.equal(1235);
+      expect(NuxeoPerf.getDomContentLoaded()).to.equal(567);
+      stub.restore();
+    });
+
+    test('getOnLoad and getDomContentLoaded return null before the load event has fired', () => {
+      const stub = stubNavigation([{ loadEventEnd: 0, fetchStart: 300, domContentLoadedEventEnd: 0 }]);
       expect(NuxeoPerf.getOnLoad()).to.be.null;
-      Object.defineProperty(performance, 'timing', { configurable: true, value: origTiming });
-    });
-
-    test('getDomContentLoaded returns null when timing missing', () => {
-      const origTiming = performance.timing;
-      Object.defineProperty(performance, 'timing', { configurable: true, value: undefined });
       expect(NuxeoPerf.getDomContentLoaded()).to.be.null;
-      Object.defineProperty(performance, 'timing', { configurable: true, value: origTiming });
+      stub.restore();
     });
 
+    test('getOnLoad and getDomContentLoaded return null when there is no navigation entry', () => {
+      const stub = stubNavigation([]);
+      expect(NuxeoPerf.getOnLoad()).to.be.null;
+      expect(NuxeoPerf.getDomContentLoaded()).to.be.null;
+      stub.restore();
+    });
+
+    test('report() still returns both metrics when there is no navigation entry', () => {
+      const stub = stubNavigation([]);
+      const result = NuxeoPerf.report();
+      expect(result.onLoad).to.be.null;
+      expect(result.domContentLoaded).to.be.null;
+      stub.restore();
+    });
+  });
+
+  suite('branch coverage: performance guards', () => {
     test('getUserTiming returns null when PerformanceMark missing', () => {
       const had = window.PerformanceMark;
       try {
