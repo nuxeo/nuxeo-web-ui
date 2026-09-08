@@ -62,6 +62,9 @@ function noCoverageSummaryReporter() {
 const appSources = [
   'elements/**/*.js',
   'addons/**/elements/**/*.js',
+  // Plain ESM helpers with no jQuery/Handsontable coupling; sonar-project.properties keeps them in
+  // coverage scope while the rest of nuxeo-spreadsheet/app is excluded.
+  'addons/nuxeo-spreadsheet/app/utils.js',
   'themes/theme-config.js',
   'themes/loader.js',
   'themes/dark-theme-focus-ring.js',
