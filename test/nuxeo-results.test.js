@@ -1753,7 +1753,11 @@ suite('nuxeo-results', () => {
       allPrefsStub.restore();
     });
 
-    test('_loadGlobalPrefs falls back to defaults and warns when the request fails', async () => {
+    // `_getAllGlobalPreferences` catches a failed GET /me/preferences and resolves to {} (WEBUI-1759),
+    // so a request failure does not reject the loader. What still reaches this handler is a throw
+    // raised before the request is sent — `_configureAllGlobalPreferencesResource` runs outside that
+    // catch and dereferences `$.preferences`, which is absent on a detached element.
+    test('_loadGlobalPrefs falls back to defaults and warns when the preferences load rejects', async () => {
       const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').rejects(new Error('backend down'));
       const warnStub = sinon.stub(console, 'warn');
       results.document = null;
@@ -1765,6 +1769,20 @@ suite('nuxeo-results', () => {
       expect(warnStub).to.have.been.calledOnce;
       warnStub.restore();
       allPrefsStub.restore();
+    });
+
+    // Pins where a failed request is actually handled: one level below the loader, which is why the
+    // rejection never reaches `_loadGlobalPrefs`.
+    test('_getAllGlobalPreferences logs and resolves to an empty map when the request fails', async () => {
+      const getStub = sinon.stub(results.$.preferences, 'get').rejects(new Error('backend down'));
+      const errorStub = sinon.stub(console, 'error');
+
+      const prefs = await results._getAllGlobalPreferences();
+
+      expect(prefs).to.deep.equal({});
+      expect(errorStub).to.have.been.calledOnce;
+      errorStub.restore();
+      getStub.restore();
     });
 
     test('_loadGlobalPrefs skips provider prefs in document context', async () => {
