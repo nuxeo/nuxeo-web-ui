@@ -1,0 +1,27 @@
+---
+description: Keep git commits CLA-clean for this repository
+alwaysApply: true
+---
+
+# CLA-safe commits
+
+`license/cla` (cla-assistant.io) fails when a PR contains commits or co-authors that are not covered by the contributor's signed CLA.
+
+## Never do this
+
+- Do **not** add `Co-authored-by: Cursor <cursoragent@cursor.com>` (or any `cursoragent@` trailer).
+- Do **not** create commits authored/committed as `Cursor Agent <cursoragent@cursor.com>`.
+- Do **not** let cloud agents push commits directly to PR branches.
+
+## Always do this
+
+- Author and commit as the human contributor only, using the email address covered by their signed CLA.
+- Before pushing a PR branch, inspect every author, committer, and commit message:
+  `gh api repos/<owner>/<repo>/pulls/<n>/commits --jq '.[] | {sha, author: .commit.author.email, committer: .commit.committer.email, message: .commit.message}'`,
+  and verify that no Cursor agent identity or co-author trailer is present.
+- If history is polluted, squash to one clean commit on the PR base, then rewrite with `git commit-tree` and a message file (normal `git commit` from the agent shell may re-inject Cursor co-author trailers).
+
+## Local guard
+
+This repository runs `scripts/git/commit-msg-cla.sh` via Husky `commit-msg`. Commits with Cursor co-author trailers
+are rejected before push.

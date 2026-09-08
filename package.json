@@ -13,14 +13,12 @@
     "workboxCli": "7.4.1"
   },
   "overrides": {
-    "ws": "8.20.1",
     "tar-fs": "^3.0.9",
     "marked": "^4.0.17",
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.4",
     "cross-spawn": "^7.0.6",
     "qs": "^6.14.1",
-    "form-data": "^2.5.4",
     "@nuxeo/page": {
       "path-to-regexp": "^8.4.0"
     },
@@ -33,6 +31,10 @@
     },
     "replace": {
       "minimatch": "^3.1.4"
+    },
+    "launch-editor": "^2.14.1",
+    "nuxeo": {
+      "brace-expansion": "^2.1.4"
     }
   },
   "devDependencies": {
@@ -108,7 +110,7 @@
     "build:analyze": "webpack --env production --analyze",
     "lint:eslint": "eslint .",
     "format:eslint": "eslint . --fix",
-    "lint:prettier": "prettier \"**/*.{js,html}\" --list-different || (echo '↑↑ these files are not prettier formatted ↑↑' && exit 1)",
+    "lint:prettier": "prettier \"**/*.{js,html}\" --list-different || (echo '\u2191\u2191 these files are not prettier formatted \u2191\u2191' && exit 1)",
     "format:prettier": "prettier \"**/*.{js,html}\" --write",
     "lint": " npm run lint:eslint && npm run lint:prettier",
     "win-lint": " npm run lint:eslint && npm run lint:prettier",
@@ -215,7 +217,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged",
+      "commit-msg": "scripts/git/commit-msg-cla.sh"
     }
   },
   "lint-staged": {
