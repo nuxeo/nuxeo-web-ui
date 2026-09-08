@@ -341,7 +341,7 @@ suite('nuxeo-document-tree', () => {
       expect(documentTree.parents).to.be.not.empty;
       expect(documentTree.parents).to.have.length(1);
       expect(documentTree.parents[0].uid).to.be.equal(4);
-      isElementVisible(documentTree.shadowRoot.querySelector('.parents'));
+      expect(isElementVisible(documentTree.shadowRoot.querySelector('.parents'))).to.be.true;
     });
 
     test('Tree breadcrumb is present with root document', async () => {
@@ -417,7 +417,7 @@ suite('nuxeo-document-tree', () => {
       expect(documentTree.parents).to.be.not.empty;
       expect(documentTree.parents).to.have.length(1);
       expect(documentTree.parents[0].uid).to.be.equal(4);
-      expect(isElementVisible(documentTree.shadowRoot.querySelector('.parents')));
+      expect(isElementVisible(documentTree.shadowRoot.querySelector('.parents'))).to.be.true;
     });
   });
 
