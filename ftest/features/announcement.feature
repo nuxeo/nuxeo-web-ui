@@ -1,3 +1,4 @@
+@announcement
 Feature: Admin announcements banner
 
   As an Administrator I can display a message at the top of the application for every user
