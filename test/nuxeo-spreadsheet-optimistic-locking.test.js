@@ -15,7 +15,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import { createDirtyDocument, markSaveError } from '../addons/nuxeo-spreadsheet/app/ui/optimistic-locking.js';
+import {
+  applySavedChangeToken,
+  createDirtyDocument,
+  markSaveError,
+} from '../addons/nuxeo-spreadsheet/app/ui/optimistic-locking.js';
 
 suite('nuxeo-spreadsheet optimistic locking', () => {
   test('copies the loaded change token into the update payload', () => {
@@ -47,5 +51,37 @@ suite('nuxeo-spreadsheet optimistic locking', () => {
 
     expect(markSaveError(dirtyDocument, error)).to.be.false;
     expect(dirtyDocument._error).to.equal(error);
+  });
+
+  test('adopts the token the server returned for a saved row', () => {
+    const row = { uid: 'doc-1', changeToken: '3-1' };
+
+    applySavedChangeToken(row, { uid: 'doc-1', changeToken: '4-2' });
+
+    expect(row.changeToken).to.equal('4-2');
+  });
+
+  test('leaves the row alone when the response carries no token', () => {
+    const row = { uid: 'doc-1', changeToken: '3-1' };
+
+    applySavedChangeToken(row, { uid: 'doc-1' });
+    applySavedChangeToken(row, undefined);
+
+    expect(row.changeToken).to.equal('3-1');
+  });
+
+  test('tolerates a row that is no longer loaded', () => {
+    expect(() => applySavedChangeToken(undefined, { changeToken: '4-2' })).to.not.throw();
+  });
+
+  test('lets the same row be edited twice without a false conflict', () => {
+    // The spreadsheet never refetches after saving, so the second edit has to pick up the token
+    // the first save returned — otherwise the server rejects it as a stale write.
+    const row = { uid: 'doc-1', changeToken: '3-1' };
+
+    expect(createDirtyDocument(row).changeToken).to.equal('3-1');
+    applySavedChangeToken(row, { uid: 'doc-1', changeToken: '4-2' });
+
+    expect(createDirtyDocument(row).changeToken).to.equal('4-2');
   });
 });
