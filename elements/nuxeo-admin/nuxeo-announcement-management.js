@@ -20,20 +20,21 @@ import '@polymer/polymer/polymer-legacy.js';
 import '@polymer/iron-form/iron-form.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
+import '@nuxeo/nuxeo-elements/nuxeo-element.js';
 import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-card.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-input.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-textarea.js';
-import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { mixinBehaviors } from '@polymer/polymer/lib/legacy/class.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import '../nuxeo-app/nuxeo-page.js';
 import {
   ANNOUNCEMENT_DIRECTORY,
+  ANNOUNCEMENT_DIRECTORY_PATH,
   ANNOUNCEMENT_ENTRY_ID,
   ANNOUNCEMENT_ENTRY_PATH,
-  ANNOUNCEMENT_ENTRY_UPDATE_PATH,
   ANNOUNCEMENT_MAX_LENGTH,
   ANNOUNCEMENT_UPDATED_EVENT,
   sanitizeAnnouncementLink,
@@ -48,161 +49,184 @@ message and attach an optional link. The value is shared by every user of the in
 @group Nuxeo UI
 @element nuxeo-announcement-management
 */
-Polymer({
-  _template: html`
-    <style include="nuxeo-styles">
-      .field {
-        margin-bottom: 1rem;
-        max-width: 40rem;
-      }
+class AnnouncementManagement extends mixinBehaviors([I18nBehavior, NotifyBehavior], Nuxeo.Element) {
+  static get template() {
+    return html`
+      <style include="nuxeo-styles">
+        .field {
+          margin-bottom: 1rem;
+          max-width: 40rem;
+        }
 
-      .hint {
-        color: var(--nuxeo-text-default, #3a3a54);
-        font-size: 0.8rem;
-        opacity: 0.7;
-      }
+        .hint {
+          color: var(--nuxeo-text-default, #3a3a54);
+          font-size: 0.8rem;
+          opacity: 0.7;
+        }
 
-      .counter {
-        margin: -0.75rem 0 1rem;
-        max-width: 40rem;
-        text-align: right;
-      }
+        .counter {
+          margin: -0.75rem 0 1rem;
+          max-width: 40rem;
+          text-align: right;
+        }
 
-      .buttons {
-        display: flex;
-        justify-content: flex-end;
-      }
-    </style>
+        .buttons {
+          display: flex;
+          justify-content: flex-end;
+        }
+      </style>
 
-    <nuxeo-resource id="announcement"></nuxeo-resource>
+      <nuxeo-resource id="announcement"></nuxeo-resource>
 
-    <nuxeo-page>
-      <div slot="header">
-        <span class="flex">[[i18n('announcementManagement.heading')]]</span>
-      </div>
+      <nuxeo-page>
+        <div slot="header">
+          <span class="flex">[[i18n('announcementManagement.heading')]]</span>
+        </div>
 
-      <nuxeo-card heading="[[i18n('announcementManagement.banner')]]">
-        <iron-form id="form">
-          <form>
-            <div class="field">
-              <paper-toggle-button id="enabled" checked="{{_entry.enabled}}" disabled$="[[_loading]]"
-                >[[i18n('announcementManagement.enabled')]]</paper-toggle-button
-              >
-              <div class="hint">[[i18n('announcementManagement.enabled.description')]]</div>
-            </div>
+        <nuxeo-card heading="[[i18n('announcementManagement.banner')]]">
+          <iron-form id="form">
+            <form>
+              <div class="field">
+                <paper-toggle-button id="enabled" checked="{{_entry.enabled}}" disabled$="[[_busy]]"
+                  >[[i18n('announcementManagement.enabled')]]</paper-toggle-button
+                >
+                <div class="hint">[[i18n('announcementManagement.enabled.description')]]</div>
+              </div>
 
-            <nuxeo-textarea
-              class="field"
-              id="message"
-              name="message"
-              rows="3"
-              label="[[i18n('announcementManagement.message')]]"
-              value="{{_entry.message}}"
-              required$="[[_entry.enabled]]"
-              disabled$="[[_loading]]"
-              invalid="[[_messageInvalid]]"
-              error-message="[[_messageError]]"
-            ></nuxeo-textarea>
-            <!--
+              <nuxeo-textarea
+                class="field"
+                id="message"
+                name="message"
+                rows="3"
+                label="[[i18n('announcementManagement.message')]]"
+                value="{{_entry.message}}"
+                required$="[[_entry.enabled]]"
+                disabled$="[[_busy]]"
+                invalid="[[_messageInvalid]]"
+                error-message="[[_messageError]]"
+              ></nuxeo-textarea>
+              <!--
               nuxeo-textarea has no maxlength support, unlike the link fields below, so the limit is
               applied in _messageChanged and surfaced by this counter instead.
             -->
-            <div class="hint counter">
-              [[i18n('announcementManagement.message.counter', _messageLength, _maxLength)]]
-            </div>
+              <div class="hint counter">
+                [[i18n('announcementManagement.message.counter', _messageLength, _maxLength)]]
+              </div>
 
-            <nuxeo-input
-              class="field"
-              id="linkUrl"
-              name="linkUrl"
-              type="url"
-              label="[[i18n('announcementManagement.linkUrl')]]"
-              placeholder="[[i18n('announcementManagement.linkUrl.placeholder')]]"
-              maxlength="[[_maxLength]]"
-              pattern="https?://.+"
-              disabled$="[[_loading]]"
-              error-message="[[i18n('announcementManagement.linkUrl.invalid')]]"
-              value="{{_entry.linkUrl}}"
-            ></nuxeo-input>
+              <nuxeo-input
+                class="field"
+                id="linkUrl"
+                name="linkUrl"
+                type="url"
+                label="[[i18n('announcementManagement.linkUrl')]]"
+                placeholder="[[i18n('announcementManagement.linkUrl.placeholder')]]"
+                maxlength="[[_maxLength]]"
+                pattern="https?://.+"
+                disabled$="[[_busy]]"
+                error-message="[[i18n('announcementManagement.linkUrl.invalid')]]"
+                value="{{_entry.linkUrl}}"
+              ></nuxeo-input>
 
-            <nuxeo-input
-              class="field"
-              id="linkLabel"
-              name="linkLabel"
-              label="[[i18n('announcementManagement.linkLabel')]]"
-              placeholder="[[i18n('announcementBanner.moreDetails')]]"
-              maxlength="[[_maxLength]]"
-              disabled$="[[_loading]]"
-              value="{{_entry.linkLabel}}"
-            ></nuxeo-input>
-          </form>
-        </iron-form>
+              <nuxeo-input
+                class="field"
+                id="linkLabel"
+                name="linkLabel"
+                label="[[i18n('announcementManagement.linkLabel')]]"
+                placeholder="[[i18n('announcementBanner.moreDetails')]]"
+                maxlength="[[_maxLength]]"
+                disabled$="[[_busy]]"
+                value="{{_entry.linkLabel}}"
+              ></nuxeo-input>
+            </form>
+          </iron-form>
 
-        <div class="buttons">
-          <paper-button id="save" name="save" noink class="primary" disabled$="[[_loading]]" on-tap="_save"
-            >[[i18n('command.save')]]</paper-button
-          >
-        </div>
-      </nuxeo-card>
-    </nuxeo-page>
-  `,
+          <div class="buttons">
+            <paper-button id="save" name="save" noink class="primary" disabled$="[[_busy]]" on-tap="_save"
+              >[[i18n('command.save')]]</paper-button
+            >
+          </div>
+        </nuxeo-card>
+      </nuxeo-page>
+    `;
+  }
 
-  is: 'nuxeo-announcement-management',
-  behaviors: [I18nBehavior, NotifyBehavior],
+  static get is() {
+    return 'nuxeo-announcement-management';
+  }
 
-  properties: {
-    visible: {
-      type: Boolean,
-      value: false,
-      observer: '_visibleChanged',
-    },
-
-    _entry: {
-      type: Object,
-      value: () => {
-        return { enabled: false, message: '', linkUrl: '', linkLabel: '' };
+  static get properties() {
+    return {
+      visible: {
+        type: Boolean,
+        value: false,
+        observer: '_visibleChanged',
       },
-    },
 
-    /** Whether the announcement already exists server side, which decides between POST and PUT. */
-    _exists: {
-      type: Boolean,
-      value: false,
-    },
+      _entry: {
+        type: Object,
+        value: () => {
+          return { enabled: false, message: '', linkUrl: '', linkLabel: '' };
+        },
+      },
 
-    /**
-     * True while the announcement is being loaded. The form is disabled until then: `_exists` is
-     * not known yet, and a slow response would otherwise land on top of what the administrator has
-     * already typed.
-     */
-    _loading: {
-      type: Boolean,
-      value: false,
-    },
+      /** Whether the announcement already exists server side, which decides between POST and PUT. */
+      _exists: {
+        type: Boolean,
+        value: false,
+      },
 
-    _maxLength: {
-      type: Number,
-      readOnly: true,
-      value: ANNOUNCEMENT_MAX_LENGTH,
-    },
+      /**
+       * True while the announcement is being loaded. The form is disabled until then: `_exists` is
+       * not known yet, and a slow response would otherwise land on top of what the administrator has
+       * already typed.
+       */
+      _loading: {
+        type: Boolean,
+        value: false,
+      },
 
-    _messageLength: {
-      type: Number,
-      value: 0,
-    },
+      /** True while a save is in flight, preventing a second save from aborting the first one. */
+      _saving: {
+        type: Boolean,
+        value: false,
+      },
 
-    _messageInvalid: {
-      type: Boolean,
-      value: false,
-    },
+      _busy: {
+        type: Boolean,
+        computed: '_computeBusy(_loading, _saving)',
+      },
 
-    _messageError: {
-      type: String,
-      value: '',
-    },
-  },
+      _maxLength: {
+        type: Number,
+        readOnly: true,
+        value: ANNOUNCEMENT_MAX_LENGTH,
+      },
 
-  observers: ['_messageChanged(_entry.message)'],
+      _messageLength: {
+        type: Number,
+        value: 0,
+      },
+
+      _messageInvalid: {
+        type: Boolean,
+        value: false,
+      },
+
+      _messageError: {
+        type: String,
+        value: '',
+      },
+    };
+  }
+
+  static get observers() {
+    return ['_messageChanged(_entry.message)'];
+  }
+
+  constructor() {
+    super();
+    this._requestId = 0;
+  }
 
   _messageChanged(message) {
     if (typeof message === 'string' && message.length > ANNOUNCEMENT_MAX_LENGTH) {
@@ -216,51 +240,60 @@ Polymer({
     if (this._messageInvalid) {
       this._clearMessageError();
     }
-  },
+  }
 
   _visibleChanged(visible) {
     if (visible) {
       this.refresh();
+    } else {
+      this._requestId += 1;
+      this._loading = false;
     }
-  },
+  }
+
+  _computeBusy(loading, saving) {
+    return loading || saving;
+  }
 
   /**
    * Loads the current announcement.
    * @return {Promise} resolved once the form reflects the server state.
    */
   refresh() {
+    const requestId = ++this._requestId;
     this.$.announcement.path = ANNOUNCEMENT_ENTRY_PATH;
-    this.$.announcement.data = null;
     this._loading = true;
     return this.$.announcement.get().then(
       (response) => {
-        // Only the entry with the reserved id is the announcement; any other row of the directory
-        // is unrelated and must not be loaded into this form.
-        const entry = (response?.entries || []).find((e) => e?.id === ANNOUNCEMENT_ENTRY_ID);
-        this._exists = !!entry;
+        if (requestId !== this._requestId) {
+          return;
+        }
+        const properties = response?.properties || {};
+        this._exists = true;
         this._entry = {
-          enabled: !!entry?.properties?.enabled,
-          message: entry?.properties?.message || '',
-          linkUrl: entry?.properties?.linkUrl || '',
-          linkLabel: entry?.properties?.linkLabel || '',
+          enabled: !!properties.enabled,
+          message: properties.message || '',
+          linkUrl: properties.linkUrl || '',
+          linkLabel: properties.linkLabel || '',
         };
         this._clearMessageError();
         this._loading = false;
       },
       (err) => {
-        this._exists = false;
+        if (requestId !== this._requestId) {
+          return;
+        }
+        this._resetEntry();
         this._loading = false;
-        this.notify({
-          message: `${this.i18n('label.error').toUpperCase()}: ${
-            err?.message || this.i18n('announcementManagement.errorLoading')
-          }`,
-        });
+        if (!this._isNotFound(err) && !this._isAbortError(err)) {
+          this._notifyError('announcementManagement.errorLoading', err);
+        }
       },
     );
-  },
+  }
 
   _save() {
-    if (this._loading || !this._validate()) {
+    if (this._busy || !this._validate()) {
       return Promise.resolve();
     }
     const properties = {
@@ -276,31 +309,53 @@ Polymer({
       id: ANNOUNCEMENT_ENTRY_ID,
       properties,
     };
+    this._saving = true;
     if (this._exists) {
-      this.$.announcement.path = ANNOUNCEMENT_ENTRY_UPDATE_PATH;
+      this.$.announcement.path = ANNOUNCEMENT_ENTRY_PATH;
       return this._persist(this.$.announcement.put());
     }
-    this.$.announcement.path = ANNOUNCEMENT_ENTRY_PATH;
+    this.$.announcement.path = ANNOUNCEMENT_DIRECTORY_PATH;
     return this._persist(this.$.announcement.post());
-  },
+  }
 
   _persist(request) {
     return request.then(
       () => {
+        this._saving = false;
         this._exists = true;
         this.notify({ message: this.i18n('announcementManagement.saved') });
         // Let the banner of the current session pick the new value up without a reload.
         document.dispatchEvent(new CustomEvent(ANNOUNCEMENT_UPDATED_EVENT));
       },
       (err) => {
-        this.notify({
-          message: `${this.i18n('label.error').toUpperCase()}: ${
-            err?.message || this.i18n('announcementManagement.errorSaving')
-          }`,
-        });
+        this._saving = false;
+        if (!this._isAbortError(err)) {
+          this._notifyError('announcementManagement.errorSaving', err);
+        }
       },
     );
-  },
+  }
+
+  _resetEntry() {
+    this._exists = false;
+    this._entry = { enabled: false, message: '', linkUrl: '', linkLabel: '' };
+    this._clearMessageError();
+  }
+
+  _isNotFound(err) {
+    return err?.status === 404 || err?.statusCode === 404 || err?.response?.status === 404;
+  }
+
+  _isAbortError(err) {
+    return err?.name === 'AbortError';
+  }
+
+  _notifyError(messageKey, err) {
+    console.warn(`nuxeo-announcement-management: ${messageKey}`, err);
+    this.notify({
+      message: `${this.i18n('label.error').toUpperCase()}: ${this.i18n(messageKey)}`,
+    });
+  }
 
   _validate() {
     const message = (this._entry.message || '').trim();
@@ -321,16 +376,18 @@ Polymer({
       return false;
     }
     return true;
-  },
+  }
 
   _failMessageValidation(error) {
     this._messageError = error;
     this._messageInvalid = true;
     return false;
-  },
+  }
 
   _clearMessageError() {
     this._messageInvalid = false;
     this._messageError = '';
-  },
-});
+  }
+}
+
+customElements.define(AnnouncementManagement.is, AnnouncementManagement);

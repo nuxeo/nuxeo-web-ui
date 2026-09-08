@@ -21,12 +21,27 @@
       <table>webui_announcement</table>
       <idField>id</idField>
       <autoincrementIdField>false</autoincrementIdField>
+      <cacheEntryName>webUIAnnouncement-entry-cache</cacheEntryName>
+      <cacheEntryWithoutReferencesName>webUIAnnouncement-entry-cache-without-references</cacheEntryWithoutReferencesName>
       <createTablePolicy>on_missing_columns</createTablePolicy>
       <!-- `system` keeps the directory out of the Vocabularies administration screen -->
       <types>
         <type>system</type>
       </types>
     </directory>
+  </extension>
+
+  <extension target="org.nuxeo.ecm.core.cache.CacheService" point="caches">
+    <cache name="webUIAnnouncement-entry-cache">
+      <ttl>10</ttl>
+      <option name="maxSize">1</option>
+      <option name="concurrencyLevel">10</option>
+    </cache>
+    <cache name="webUIAnnouncement-entry-cache-without-references">
+      <ttl>10</ttl>
+      <option name="maxSize">1</option>
+      <option name="concurrencyLevel">10</option>
+    </cache>
   </extension>
 
 </component>

@@ -30,11 +30,11 @@ export const ANNOUNCEMENT_DIRECTORY = 'webUIAnnouncement';
 /** Id of the one and only entry of that directory. */
 export const ANNOUNCEMENT_ENTRY_ID = 'announcement';
 
-/** REST path (relative to the API root) used to read/create the announcement. */
-export const ANNOUNCEMENT_ENTRY_PATH = `directory/${ANNOUNCEMENT_DIRECTORY}`;
+/** REST path (relative to the API root) used to create the announcement. */
+export const ANNOUNCEMENT_DIRECTORY_PATH = `directory/${ANNOUNCEMENT_DIRECTORY}`;
 
-/** REST path used to update the announcement. */
-export const ANNOUNCEMENT_ENTRY_UPDATE_PATH = `${ANNOUNCEMENT_ENTRY_PATH}/${ANNOUNCEMENT_ENTRY_ID}`;
+/** REST path used to read and update the one announcement entry. */
+export const ANNOUNCEMENT_ENTRY_PATH = `${ANNOUNCEMENT_DIRECTORY_PATH}/${ANNOUNCEMENT_ENTRY_ID}`;
 
 /** Event fired on `document` when an administrator saves the announcement. */
 export const ANNOUNCEMENT_UPDATED_EVENT = 'announcement-updated';

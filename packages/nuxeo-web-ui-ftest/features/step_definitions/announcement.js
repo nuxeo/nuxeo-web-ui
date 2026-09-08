@@ -1,11 +1,32 @@
-import { Given, Then, When } from '@cucumber/cucumber';
+import { After, Given, Then, When } from '@cucumber/cucumber';
 import AnnouncementBanner from '../../pages/ui/announcementBanner.js';
+import nuxeo from './support/services/client.js';
+
+const announcementDirectory = nuxeo.directory('webUIAnnouncement');
+let announcementTouched = false;
+
+After({ order: 100 }, async () => {
+  if (!announcementTouched) {
+    return;
+  }
+  announcementTouched = false;
+  try {
+    const entry = await announcementDirectory.fetch('announcement');
+    entry.properties.enabled = false;
+    await announcementDirectory.update(entry);
+  } catch (err) {
+    if (err.response?.status !== 404) {
+      throw err;
+    }
+  }
+});
 
 Given('I am on the announcement page', async function () {
   await this.ui.administration.goToAnnouncement();
 });
 
 Given('the announcement banner is turned off', async function () {
+  announcementTouched = true;
   const page = await this.ui.administration.announcement;
   await page.waitForVisible();
   await page.setEnabled(false);
@@ -22,6 +43,7 @@ Then('I can see the announcement page', async function () {
 });
 
 When('I enable the announcement banner with message {string}', async function (message) {
+  announcementTouched = true;
   const page = await this.ui.administration.announcement;
   await page.setEnabled(true);
   await page.fillMessage(message);
@@ -29,6 +51,7 @@ When('I enable the announcement banner with message {string}', async function (m
 });
 
 When('I enable the announcement banner with message {string} and link {string}', async function (message, linkUrl) {
+  announcementTouched = true;
   const page = await this.ui.administration.announcement;
   await page.setEnabled(true);
   await page.fillMessage(message);
@@ -37,6 +60,7 @@ When('I enable the announcement banner with message {string} and link {string}',
 });
 
 When('I disable the announcement banner', async function () {
+  announcementTouched = true;
   const page = await this.ui.administration.announcement;
   await page.setEnabled(false);
   await page.save();
