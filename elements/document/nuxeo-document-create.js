@@ -493,6 +493,7 @@ Polymer({
 
       return result;
     } catch (error) {
+      console.warn('Cannot order document types, falling back to the unordered list', { orderConfig, error });
       return subtypesCopy;
     }
   },

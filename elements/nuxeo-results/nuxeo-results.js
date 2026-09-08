@@ -523,7 +523,7 @@ Polymer({
         const listItems = this.view.$.list.items;
         return Array.isArray(listItems) ? listItems : [];
       }
-    } catch (e) {
+    } catch {
       /* Unsafe read during attach/refresh; treat as no rows yet */
       return [];
     }
@@ -1249,7 +1249,8 @@ Polymer({
       const decoded = textarea.value;
       const parsed = JSON.parse(decoded);
       return parsed;
-    } catch (e) {
+    } catch {
+      /* Stored preference values are user data and may predate the current format; fall back to defaults */
       return {};
     }
   },
@@ -1452,7 +1453,12 @@ Polymer({
       const parsed = this._parsePrefMapValue(prefsMap[providerName]);
       __globalPrefsCache.set(cacheKey, parsed);
       this.globalPrefs = parsed;
-    } catch (e) {
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to load global results preferences, falling back to defaults', {
+        provider: providerName,
+        error,
+      });
       this.globalPrefs = {};
     }
   },
@@ -1608,7 +1614,8 @@ Polymer({
 
         const parsed = JSON.parse(decoded);
         return parsed;
-      } catch (e) {
+      } catch {
+        /* Stored preference values are user data and may predate the current format; fall back to defaults */
         return null;
       }
     }
