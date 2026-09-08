@@ -215,23 +215,41 @@ class Spreadsheet {
     return this._fetch();
   }
 
+  /**
+   * Saves every dirty row, one batch at a time.
+   *
+   * Autosave calls this on each edit without waiting for the previous batch. Overlapping batches
+   * would send the same change token twice for a row, and the one that landed second would be
+   * rejected as a stale write by the row's own earlier save — a conflict reported to the user
+   * with no other user involved. Queueing the batches also means each one sends the token the
+   * previous one brought back.
+   */
   save() {
+    this._saving = (this._saving || Promise.resolve()).then(() => this._saveDirtyRows());
+    return this._saving;
+  }
+
+  _saveDirtyRows() {
     this.hasConflicts = false;
     return Promise.all(
-      Object.keys(this._dirty).map((uid) =>
+      Object.entries(this._dirty).map(([uid, dirtyDocument]) =>
         this.connection
           .request(`/id/${uid}`)
-          .put({ body: this._dirty[uid] })
+          .put({ body: dirtyDocument })
           .then((response) => {
             applySavedChangeToken(
               this.data.find((document) => document.uid === uid),
               response,
             );
-            delete this._dirty[uid];
+            // Only drop the entry this request saved. Holding the reference also means a failed
+            // save reports against the payload it actually sent, never against `undefined`.
+            if (this._dirty[uid] === dirtyDocument) {
+              delete this._dirty[uid];
+            }
             return uid;
           })
           .catch((error) => {
-            if (markSaveError(this._dirty[uid], error)) {
+            if (markSaveError(dirtyDocument, error)) {
               this.hasConflicts = true;
             }
             throw new Error(error);
