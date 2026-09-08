@@ -21,7 +21,7 @@ import { Query } from '../nuxeo/rpc/query';
 import { DirectoryEditor } from './editors/directory';
 import { Select2Editor } from './editors/select2';
 import { assign, hasProp } from '../utils';
-import { createDirtyDocument, markSaveError } from './optimistic-locking';
+import { applySavedChangeToken, createDirtyDocument, markSaveError } from './optimistic-locking';
 
 /**
  * Spreadsheet backed by Hansontable
@@ -222,7 +222,11 @@ class Spreadsheet {
         this.connection
           .request(`/id/${uid}`)
           .put({ body: this._dirty[uid] })
-          .then(() => {
+          .then((response) => {
+            applySavedChangeToken(
+              this.data.find((document) => document.uid === uid),
+              response,
+            );
             delete this._dirty[uid];
             return uid;
           })

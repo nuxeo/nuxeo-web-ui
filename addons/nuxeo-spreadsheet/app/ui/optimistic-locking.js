@@ -19,6 +19,19 @@ export function createDirtyDocument(document) {
   return dirtyDocument;
 }
 
+/**
+ * Copies the change token the server returned for a saved row back onto the loaded document.
+ *
+ * The spreadsheet never refetches after a save, so without this the row keeps the token it was
+ * originally fetched with. Because supplying a token bumps the user half of it, the next edit to
+ * that same row would be rejected as a stale write even though nobody else touched it.
+ */
+export function applySavedChangeToken(document, response) {
+  if (document && response?.changeToken) {
+    document.changeToken = response.changeToken;
+  }
+}
+
 export function markSaveError(dirtyDocument, error) {
   dirtyDocument._error = error;
   return error?.status === CONFLICT_STATUS;
