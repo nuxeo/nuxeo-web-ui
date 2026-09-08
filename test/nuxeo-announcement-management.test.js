@@ -236,6 +236,23 @@ suite('nuxeo-announcement-management', () => {
       expect(element._saving).to.be.false;
     });
 
+    test('does not refresh while a save is in flight', async () => {
+      let resolve;
+      element._exists = true;
+      element._entry = { enabled: true, message: 'Maintenance', linkUrl: '', linkLabel: '' };
+      sinon.stub(element.$.announcement, 'put').returns(
+        new Promise((r) => {
+          resolve = r;
+        }),
+      );
+      const get = sinon.stub(element.$.announcement, 'get');
+      const save = element._save();
+      await element.refresh();
+      expect(get).to.not.have.been.called;
+      resolve();
+      await save;
+    });
+
     test('does not report an aborted save', async () => {
       element._exists = true;
       element._entry = { enabled: true, message: 'Maintenance', linkUrl: '', linkLabel: '' };
