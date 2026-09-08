@@ -13,7 +13,6 @@
     "node": ">=18.0.0"
   },
   "overrides": {
-    "ws": "8.20.1",
     "tar-fs": "^3.0.9",
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.4",
