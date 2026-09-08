@@ -48,8 +48,11 @@ Then("I can't see the blob replace button", async function () {
   await page.waitForVisible();
   const view = await page.view;
   await view.waitForVisible();
-  const result = await view.waitForNotVisible('nuxeo-replace-blob-button');
-  result.should.be.true;
+  const ele = await view.el.element('nuxeo-replace-blob-button');
+  // The button is rendered but zero sized when the user cannot write, and absent altogether when
+  // the document has no main blob, so it has to be found before it can be measured.
+  const isVisible = (await ele.isExisting()) && (await view.isTrulyVisible(ele));
+  isVisible.should.be.false;
 });
 
 Then('I can see the option to add new attachments', async function () {
