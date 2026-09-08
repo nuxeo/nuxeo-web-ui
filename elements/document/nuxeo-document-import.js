@@ -1310,16 +1310,14 @@ Polymer({
         this.set('_creating', false);
         this.set('_importWithPropertiesError', 'These documents could not be created.');
         // splice from the highest index down, so that removals do not shift the indexes still to be removed
-        localIndexes
-          .sort((a, b) => b - a)
-          .forEach((index) => {
-            this.splice('localFiles', index, 1);
-          });
-        remoteIndexes
-          .sort((a, b) => b - a)
-          .forEach((index) => {
-            this.splice('remoteFiles', index, 1);
-          });
+        localIndexes.sort((a, b) => b - a);
+        localIndexes.forEach((index) => {
+          this.splice('localFiles', index, 1);
+        });
+        remoteIndexes.sort((a, b) => b - a);
+        remoteIndexes.forEach((index) => {
+          this.splice('remoteFiles', index, 1);
+        });
         /*
          * XXX Prevent this._selectDoc(0) from storing the previously selected file,
          * in case it was saved and removed from localFiles.

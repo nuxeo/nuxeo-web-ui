@@ -109,6 +109,22 @@ suite('DocumentCreationBehavior', () => {
     });
   });
 
+  suite('_parentChanged', () => {
+    test('should set the creatable subtypes sorted by id', () => {
+      ctx.parent.contextParameters.subtypes = [
+        { type: 'Picture', facets: [] },
+        { type: 'File', facets: [] },
+        { type: 'Folder', facets: [] },
+        { type: 'Internal', facets: ['HiddenInCreation'] },
+      ];
+
+      ctx._parentChanged();
+
+      const call = ctx.set.getCalls().find((c) => c.args[0] === 'subtypes');
+      expect(call.args[1].map((type) => type.id)).to.deep.equal(['file', 'folder', 'picture']);
+    });
+  });
+
   suite('_getTypeLabel', () => {
     test('should return formatted doc type when type is valid', () => {
       const type = { _id: '1', type: 'File', id: 'file', icon: 'file-icon' };

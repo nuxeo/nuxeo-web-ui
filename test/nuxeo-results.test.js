@@ -1753,6 +1753,20 @@ suite('nuxeo-results', () => {
       allPrefsStub.restore();
     });
 
+    test('_loadGlobalPrefs falls back to defaults and warns when the request fails', async () => {
+      const allPrefsStub = sinon.stub(results, '_getAllGlobalPreferencesOnce').rejects(new Error('backend down'));
+      const warnStub = sinon.stub(console, 'warn');
+      results.document = null;
+      results.globalPrefs = { stale: true };
+
+      await results._loadGlobalPrefs(true, { provider: 'default_search' }, 'failing-request-user');
+
+      expect(results.globalPrefs).to.deep.equal({});
+      expect(warnStub).to.have.been.calledOnce;
+      warnStub.restore();
+      allPrefsStub.restore();
+    });
+
     test('_loadGlobalPrefs skips provider prefs in document context', async () => {
       results.document = { path: '/default-domain' };
       results.globalPrefs = { stale: true };
