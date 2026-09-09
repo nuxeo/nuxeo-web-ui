@@ -113,6 +113,74 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.selectedSearchIdx).to.equal(0);
   });
 
+  suite('saved search params are deep-cloned (WEBUI-2249)', () => {
+    // A savedSearch entity is REST JSON: date-range aggregates arrive as ISO strings and
+    // never as Date instances, so the clone must hand the provider back the same field types.
+    const savedSearch = () => {
+      return {
+        id: 'saved-1',
+        title: 'Saved 1',
+        params: {
+          ecm_fulltext: '*report*',
+          dc_created_agg: ['last24h'],
+          dc_modified_min: '2024-01-31T10:15:00.000Z',
+          dc_modified_max: '2024-02-28T10:15:00.000Z',
+          system_primaryType_agg: [],
+          nested: { enabled: true, threshold: 5, label: null },
+        },
+      };
+    };
+
+    ['_selectedSearchIdxChanged', '_selectedSearchChanged'].forEach((method) => {
+      test(`${method} preserves param field types and does not alias the saved search`, () => {
+        const search = savedSearch();
+        searchForm._searches = [search];
+        sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
+        sinon.stub(searchForm, '_navigateToResults');
+
+        if (method === '_selectedSearchIdxChanged') {
+          searchForm.selectedSearchIdx = 1;
+          searchForm._selectedSearchIdxChanged();
+        } else {
+          searchForm._selectedSearchChanged({ id: 'saved-1' });
+        }
+
+        const { params } = searchForm;
+        expect(params).to.deep.equal(search.params);
+        expect(params).to.not.equal(search.params);
+        expect(params.ecm_fulltext).to.be.a('string');
+        expect(params.dc_modified_min).to.be.a('string');
+        expect(params.dc_created_agg).to.be.an('array');
+        expect(params.system_primaryType_agg).to.deep.equal([]);
+        expect(params.nested.enabled).to.equal(true);
+        expect(params.nested.threshold).to.be.a('number');
+        expect(params.nested.label).to.be.null;
+
+        // the form mutates params as the user edits filters; _searches must stay pristine
+        params.dc_created_agg.push('lastWeek');
+        params.nested.enabled = false;
+        expect(search.params.dc_created_agg).to.deep.equal(['last24h']);
+        expect(search.params.nested.enabled).to.equal(true);
+
+        searchForm._mutateParams.restore();
+        searchForm._navigateToResults.restore();
+      });
+    });
+
+    test('a saved search without params yields undefined params instead of throwing', () => {
+      // JSON.parse(JSON.stringify(undefined)) threw a SyntaxError here; structuredClone returns undefined
+      searchForm._searches = [{ id: 'no-params', title: 'No params' }];
+      sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
+      sinon.stub(searchForm, '_navigateToResults');
+
+      expect(() => searchForm._selectedSearchChanged({ id: 'no-params' })).to.not.throw();
+      expect(searchForm.params).to.be.undefined;
+
+      searchForm._mutateParams.restore();
+      searchForm._navigateToResults.restore();
+    });
+  });
+
   test('switches between queue and filters', () => {
     const displayFiltersSpy = sinon.spy(searchForm, 'displayFilters');
     const displayQueueSpy = sinon.spy(searchForm, 'displayQueue');

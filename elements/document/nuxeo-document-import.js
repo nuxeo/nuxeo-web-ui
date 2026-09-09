@@ -998,6 +998,10 @@ Polymer({
     let copiedDocData = {};
 
     if (docData && Object.keys(docData).length > 0) {
+      // Deliberately not structuredClone (sonar javascript:S7784): docData.document is mutated in
+      // place by the widgets of the runtime-resolved `nuxeo-<type>-import-layout`, which deployments
+      // may override, so the JSON round-trip's lossy strip is what keeps a non-cloneable property
+      // from aborting the import with a DataCloneError. See WEBUI-2249.
       copiedDocData = JSON.parse(JSON.stringify(docData));
     }
     copiedDocData.document.properties['dc:title'] = destFile.name;
@@ -1015,6 +1019,7 @@ Polymer({
       }
       this.set([propName, pos, 'docData'].join('.'), {
         parent: this.targetPath,
+        // Lossy JSON clone on purpose — see _copyFileData (sonar javascript:S7784, WEBUI-2249).
         document: JSON.parse(JSON.stringify(this.document)),
         type: this.selectedDocType,
       });
@@ -1028,6 +1033,7 @@ Polymer({
     if (docData && Object.keys(docData).length > 0) {
       this.targetPath = docData.parent;
       this.selectedDocType = this._importDocTypes.find((type) => type.id === docData.type.id);
+      // Lossy JSON clone on purpose — see _copyFileData (sonar javascript:S7784, WEBUI-2249).
       ({ properties } = JSON.parse(JSON.stringify(docData.document)));
     }
     if (title) {
