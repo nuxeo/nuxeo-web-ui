@@ -131,12 +131,14 @@ suite('nuxeo-search-form', () => {
       };
     };
 
+    // Spy rather than stub, so paramMutator keeps running: the value handed to _mutateParams is
+    // the structuredClone output itself, which is what this change affects. Asserting on
+    // searchForm.params instead would assert the mutator's filtering, not the clone.
     ['_selectedSearchIdxChanged', '_selectedSearchChanged'].forEach((method) => {
       test(`${method} preserves param field types and does not alias the saved search`, () => {
         const search = savedSearch();
         searchForm._searches = [search];
-        sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
-        sinon.stub(searchForm, '_navigateToResults');
+        const mutate = sinon.spy(searchForm, '_mutateParams');
 
         if (method === '_selectedSearchIdxChanged') {
           searchForm.selectedSearchIdx = 1;
@@ -145,39 +147,39 @@ suite('nuxeo-search-form', () => {
           searchForm._selectedSearchChanged({ id: 'saved-1' });
         }
 
-        const { params } = searchForm;
-        expect(params).to.deep.equal(search.params);
-        expect(params).to.not.equal(search.params);
-        expect(params.ecm_fulltext).to.be.a('string');
-        expect(params.dc_modified_min).to.be.a('string');
-        expect(params.dc_created_agg).to.be.an('array');
-        expect(params.system_primaryType_agg).to.deep.equal([]);
-        expect(params.nested.enabled).to.equal(true);
-        expect(params.nested.threshold).to.be.a('number');
-        expect(params.nested.label).to.be.null;
+        const clone = mutate.firstCall.args[0];
+        expect(clone).to.deep.equal(search.params);
+        expect(clone).to.not.equal(search.params);
+        expect(clone.ecm_fulltext).to.be.a('string');
+        expect(clone.dc_modified_min).to.be.a('string');
+        expect(clone.dc_created_agg).to.be.an('array');
+        expect(clone.system_primaryType_agg).to.deep.equal([]);
+        expect(clone.nested.enabled).to.equal(true);
+        expect(clone.nested.threshold).to.be.a('number');
+        expect(clone.nested.label).to.be.null;
 
-        // the form mutates params as the user edits filters; _searches must stay pristine
-        params.dc_created_agg.push('lastWeek');
-        params.nested.enabled = false;
+        // the form mutates the clone as the user edits filters; _searches must stay pristine
+        clone.dc_created_agg.push('lastWeek');
+        clone.nested.enabled = false;
         expect(search.params.dc_created_agg).to.deep.equal(['last24h']);
         expect(search.params.nested.enabled).to.equal(true);
 
-        searchForm._mutateParams.restore();
-        searchForm._navigateToResults.restore();
+        mutate.restore();
       });
     });
 
-    test('a saved search without params yields undefined params instead of throwing', () => {
-      // JSON.parse(JSON.stringify(undefined)) threw a SyntaxError here; structuredClone returns undefined
+    test('a saved search without params is handled instead of throwing', () => {
+      // JSON.parse(JSON.stringify(undefined)) threw a SyntaxError before reaching the mutator;
+      // structuredClone yields undefined, which paramMutator turns into an empty param set.
       searchForm._searches = [{ id: 'no-params', title: 'No params' }];
-      sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
-      sinon.stub(searchForm, '_navigateToResults');
+      const mutate = sinon.spy(searchForm, '_mutateParams');
 
       expect(() => searchForm._selectedSearchChanged({ id: 'no-params' })).to.not.throw();
-      expect(searchForm.params).to.be.undefined;
+      expect(mutate.firstCall.args[0]).to.be.undefined;
+      expect(searchForm.params).to.deep.equal({});
+      expect(searchForm.searchTerm).to.equal('');
 
-      searchForm._mutateParams.restore();
-      searchForm._navigateToResults.restore();
+      mutate.restore();
     });
   });
 
