@@ -293,6 +293,54 @@ Polymer({
 
       .buttons {
         @apply --buttons-bar;
+        @apply --layout-wrap;
+        flex-shrink: 0;
+        gap: 4px 8px;
+        /* Lets the navigation group react to the bar's own rendered width instead of the
+           viewport's, so the layout below adapts the same way at any zoom level or screen
+           resolution instead of only around the width a fixed viewport breakpoint assumed. */
+        container-type: inline-size;
+      }
+
+      /* Groups the navigation buttons so they wrap as a single block instead of each
+         inline-block button breaking onto a line of its own. */
+      .navigation {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-center-justified;
+        @apply --layout-wrap;
+        gap: 4px 8px;
+      }
+
+      /* paper-button's default horizontal margin is replaced by the flex gap, so that the
+         three buttons still fit on one line once the group has a row to itself. */
+      .navigation paper-button {
+        margin: 0;
+      }
+
+      /* Below this width the five action buttons no longer fit on a single line. Give the
+         navigation group a row of its own above the cancel/create row so none of the
+         buttons is misaligned or clipped by the dialog. */
+      @container (max-width: 620px) {
+        .navigation {
+          order: -1;
+          flex: 1 0 100%;
+        }
+      }
+
+      /* Lets the editor/side-panel area give up space instead of pushing the action bar
+         past the bottom edge of the dialog. */
+      .customize-content {
+        min-height: 0;
+        overflow: auto;
+      }
+
+      /* At extreme zoom the dialog itself can be too short to fit the content area and
+         the (possibly stacked) action bar together, even with the content area shrunk to
+         nothing. Make the whole stage scrollable so the buttons stay reachable instead of
+         being clipped past the dialog's bottom edge. */
+      div[name='customize'] {
+        overflow-y: auto;
       }
 
       .add-more .importActions {
@@ -546,7 +594,7 @@ Polymer({
 
       <!--Stage: allow the user to fill in properties for the uploaded files and create the respective documents-->
       <div name="customize" class="vertical layout flex">
-        <div class="horizontal layout flex">
+        <div class="customize-content horizontal layout flex">
           <div id="blobEditor" class="vertical layout flex">
             <paper-dialog-scrollable>
               <div class="suggester">
@@ -658,7 +706,7 @@ Polymer({
             [[i18n('command.cancel')]]
           </paper-button>
 
-          <div>
+          <div class="navigation">
             <paper-button
               noink
               class="text"
