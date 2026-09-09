@@ -200,7 +200,7 @@ class CloudConsumers extends mixinBehaviors([NotifyBehavior, FormatBehavior], Nu
   }
 
   _editEntry(e) {
-    const entry = JSON.parse(JSON.stringify(e.target.parentNode.item));
+    const entry = structuredClone(e.target.parentNode.item);
     if (Array.isArray(entry.redirectURIs)) {
       entry.redirectURIs = entry.redirectURIs.join();
     }
