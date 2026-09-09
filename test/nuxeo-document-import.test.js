@@ -1268,4 +1268,44 @@ suite('nuxeo-document-import', () => {
       expect(element._getDocumentProperties()).to.deep.equal({});
     });
   });
+
+  suite('customize stage action bar', () => {
+    let bar;
+    let navigation;
+
+    setup(() => {
+      bar = element.shadowRoot.querySelector('div[name="customize"] .buttons');
+      navigation = bar.querySelector('.navigation');
+    });
+
+    test('should group the navigation buttons in a single wrapping container', () => {
+      expect(navigation).to.not.be.null;
+      const buttons = navigation.querySelectorAll('paper-button');
+      expect(buttons).to.have.lengthOf(3);
+      expect(buttons[2].getAttribute('name')).to.equal('applyAll');
+      const style = getComputedStyle(navigation);
+      expect(style.display).to.equal('flex');
+      expect(style.flexWrap).to.equal('wrap');
+    });
+
+    test('should let the action bar wrap instead of overflowing', () => {
+      expect(getComputedStyle(bar).flexWrap).to.equal('wrap');
+    });
+
+    test('should not add horizontal margins to the navigation buttons', () => {
+      navigation.querySelectorAll('paper-button').forEach((button) => {
+        const style = getComputedStyle(button);
+        expect(style.marginLeft).to.equal('0px');
+        expect(style.marginRight).to.equal('0px');
+      });
+    });
+
+    test('should let the customize content shrink so the action bar stays visible', () => {
+      const content = element.shadowRoot.querySelector('div[name="customize"] .customize-content');
+      expect(content).to.not.be.null;
+      const style = getComputedStyle(content);
+      expect(style.minHeight).to.equal('0px');
+      expect(style.overflow).to.equal('auto');
+    });
+  });
 });
