@@ -222,6 +222,388 @@ suite('nuxeo-search-form', () => {
     selectSpy.restore();
   });
 
+  test('keeps the selected document when toggling back to the queue (WEBUI-1881)', async () => {
+    searchForm.visible = true;
+    const entries = [
+      { uid: 'uid-1', path: '/default-domain/doc-1' },
+      { uid: 'uid-2', path: '/default-domain/doc-2' },
+      { uid: 'uid-3', path: '/default-domain/doc-3' },
+    ];
+    const fetchStub = sinon.stub(searchForm.$.list, 'fetch').callsFake(() => {
+      // a fetch replaces the entries with new object instances
+      searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
+      return Promise.resolve();
+    });
+    const scrollSpy = sinon.spy(searchForm.$.list, 'scrollToIndex');
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    // the third document was opened from the queue, then the filters view was displayed
+    searchForm.selectedDocument = entries[2];
+    searchForm.currentDocument = null;
+
+    searchForm.displayQueueAndNavigateToFirst();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(scrollSpy).to.have.been.calledWith(2);
+    expect(selectSpy).to.have.been.calledWith(2);
+    expect(navigateToSpy).to.have.been.calledOnce;
+    expect(navigateToSpy.firstCall.args[0].uid).to.equal('uid-3');
+
+    fetchStub.restore();
+    scrollSpy.restore();
+    selectSpy.restore();
+    delete searchForm.navigateTo;
+  });
+
+  test('falls back to the first queue entry when the selection is gone (WEBUI-1881)', async () => {
+    searchForm.visible = true;
+    const fetchStub = sinon.stub(searchForm.$.list, 'fetch').callsFake(() => {
+      searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }];
+      return Promise.resolve();
+    });
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    // the previously selected document is no longer part of the results
+    searchForm.selectedDocument = { uid: 'gone', path: '/default-domain/gone' };
+    searchForm.currentDocument = null;
+
+    searchForm.displayQueueAndNavigateToFirst();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(selectSpy).to.have.been.calledWith(0);
+    expect(navigateToSpy.firstCall.args[0].uid).to.equal('uid-1');
+
+    fetchStub.restore();
+    selectSpy.restore();
+    delete searchForm.navigateTo;
+  });
+
+  test('opens the restored document even when currentDocument is stale (WEBUI-1881)', async () => {
+    searchForm.visible = true;
+    const fetchStub = sinon.stub(searchForm.$.list, 'fetch').callsFake(() => {
+      searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }];
+      return Promise.resolve();
+    });
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    searchForm.selectedDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+    // `navigateTo` never fires the `navigate` event, so currentDocument still points at the
+    // document the filters view navigated away from and must not suppress the navigation
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    searchForm.displayQueueAndNavigateToFirst();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(navigateToSpy).to.have.been.calledOnce;
+    expect(navigateToSpy.firstCall.args[0].uid).to.equal('uid-1');
+
+    fetchStub.restore();
+    delete searchForm.navigateTo;
+  });
+
+  test('opens the document when the already-selected queue row is tapped (WEBUI-2300)', () => {
+    // real row element, classed exactly as the queue template classes it
+    const row = document.createElement('div');
+    row.className = searchForm._computedClass(true);
+    searchForm.selectedDocument = { uid: 'uid-2', path: '/default-domain/doc-2' };
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: row, stopPropagation });
+
+    // the tap must not reach iron-list, which would deselect the row and open nothing
+    expect(stopPropagation).to.have.been.calledOnce;
+    expect(navigateToSpy).to.have.been.calledOnce;
+    expect(navigateToSpy.firstCall.args[0].uid).to.equal('uid-2');
+    expect(searchForm.currentDocument.uid).to.equal('uid-2');
+
+    delete searchForm.navigateTo;
+  });
+
+  test('lets iron-list handle a tap on an unselected queue row (WEBUI-2300)', () => {
+    const row = document.createElement('div');
+    row.className = searchForm._computedClass(false);
+    searchForm.selectedDocument = { uid: 'uid-2', path: '/default-domain/doc-2' };
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: row, stopPropagation });
+
+    // selecting a new row is iron-list's job; the selection observer navigates from there
+    expect(stopPropagation).to.not.have.been.called;
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('ignores a queue tap when nothing is selected yet (WEBUI-2300)', () => {
+    const row = document.createElement('div');
+    row.className = searchForm._computedClass(true);
+    searchForm.selectedDocument = undefined;
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: row, stopPropagation });
+
+    expect(stopPropagation).to.not.have.been.called;
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('queue rows are wired to the tap handler (WEBUI-2300)', () => {
+    // iron-list does not stamp rows in the unit-test environment, so assert the binding Polymer
+    // parsed out of the queue row template - that is what makes _queueItemTapped reachable
+    const listTemplate = searchForm.shadowRoot.querySelector('#list template');
+    expect(listTemplate).to.exist;
+    const events = (listTemplate._templateInfo.nodeInfoList || []).reduce(
+      (acc, node) => acc.concat((node.events || []).map((event) => `${event.name}:${event.value}`)),
+      [],
+    );
+    expect(events).to.contain('tap:_queueItemTapped');
+    expect(typeof searchForm._queueItemTapped).to.equal('function');
+  });
+
+  test('reopens a document that was opened earlier in the queue (WEBUI-2300)', async () => {
+    const doc7 = { uid: 'uid-7', path: '/default-domain/doc-7' };
+    const doc3 = { uid: 'uid-3', path: '/default-domain/doc-3' };
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    // doc 7 opened from the queue (as the filter/queue toggle does)
+    searchForm._openDocument(doc7);
+    expect(navigateToSpy.lastCall.args[0].uid).to.equal('uid-7');
+
+    // another row is clicked: iron-list moves the selection, the observer navigates
+    searchForm.selectedDocument = doc3;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(navigateToSpy.lastCall.args[0].uid).to.equal('uid-3');
+
+    // back to doc 7: currentDocument must have followed doc 3, otherwise the observer guard
+    // compares against a stale doc 7 and silently skips this navigation
+    searchForm.selectedDocument = doc7;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(navigateToSpy.lastCall.args[0].uid).to.equal('uid-7');
+    expect(navigateToSpy).to.have.been.calledThrice;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('_openDocument keeps currentDocument in step with the navigation (WEBUI-2300)', () => {
+    const doc = { uid: 'uid-9', path: '/default-domain/doc-9' };
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    searchForm._openDocument(doc);
+
+    expect(navigateToSpy).to.have.been.calledWith(doc);
+    expect(searchForm.currentDocument).to.equal(doc);
+
+    delete searchForm.navigateTo;
+  });
+
+  test('follows the displayed document in the queue selection (WEBUI-2301)', () => {
+    searchForm.queue = true;
+    searchForm.$.list.items = [
+      { uid: 'uid-1', path: '/default-domain/doc-1' },
+      { uid: 'uid-2', path: '/default-domain/doc-2' },
+    ];
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+    const clearSpy = sinon.spy(searchForm.$.list, 'clearSelection');
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    // the host pushes down the document the router loaded, e.g. after browser back
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    expect(selectSpy).to.have.been.calledWith(0);
+    // the previous row has to be cleared through the behaviour, otherwise it stays highlighted
+    // as well and two rows look selected at once
+    expect(clearSpy).to.have.been.calledBefore(selectSpy);
+    // syncing the selection from the route must never navigate, or the two would loop
+    expect(navigateToSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+    clearSpy.restore();
+    delete searchForm.navigateTo;
+  });
+
+  test('does not touch the selection while the filters view is shown (WEBUI-2301)', () => {
+    searchForm.queue = false;
+    searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }];
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    expect(selectSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+  });
+
+  test('leaves the selection alone for a document outside the queue (WEBUI-2301)', () => {
+    searchForm.queue = true;
+    searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }];
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+    const clearSpy = sinon.spy(searchForm.$.list, 'clearSelection');
+
+    // a child document opened from the main content area is not part of the result set
+    searchForm.currentDocument = { uid: 'uid-child', path: '/default-domain/doc-1/child' };
+
+    expect(selectSpy).to.not.have.been.called;
+    expect(clearSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+    clearSpy.restore();
+  });
+
+  test('ignores documents without a uid and an empty queue (WEBUI-2301)', () => {
+    searchForm.queue = true;
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+    // the global `navigate` listener sets undefined whenever the event carries `doc` not `item`
+    searchForm.currentDocument = undefined;
+    searchForm.currentDocument = { path: '/default-domain/no-uid' };
+    searchForm.$.list.items = [];
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    expect(selectSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+  });
+
+  test('reselecting the displayed document does not re-enter the navigation (WEBUI-2301)', () => {
+    const doc = { uid: 'uid-2', path: '/default-domain/doc-2' };
+    searchForm.queue = true;
+    searchForm.$.list.items = [{ uid: 'uid-1', path: '/default-domain/doc-1' }, doc];
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    // _openDocument writes currentDocument, which now has an observer: the selection it syncs
+    // must be recognised as already displayed so _selectedDocChanged does not navigate again
+    searchForm._openDocument(doc);
+    searchForm.selectedDocument = doc;
+
+    expect(navigateToSpy).to.have.been.calledOnce;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('does not re-select the document that is already selected (WEBUI-2301)', () => {
+    const doc = { uid: 'uid-1', path: '/default-domain/doc-1' };
+    searchForm.queue = true;
+    searchForm.$.list.items = [doc];
+    searchForm.selectedDocument = doc;
+    // iron-list.selectIndex clears the selection before selecting, so a redundant call would
+    // push a transient null through selectedDocument on every navigation
+    const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+    searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+
+    expect(selectSpy).to.not.have.been.called;
+
+    selectSpy.restore();
+  });
+
+  test('a focused queue row is not styled as selected (WEBUI-2301)', () => {
+    const styles = Array.from(searchForm.shadowRoot.querySelectorAll('style'))
+      .map((style) => style.textContent)
+      .join('');
+    // sanity check that the element's own CSS was read, so the assertions below cannot pass
+    // vacuously. Mixin names are gone by now - Polymer's ApplyShim expands `@apply` at runtime -
+    // so assert on the selectors, which survive.
+    expect(styles).to.contain('.list-item.selected');
+    expect(styles).to.contain('.list-item:hover');
+
+    // The defect was `.list-item:focus` being grouped with `.list-item.selected`, so a focused
+    // row inherited the selected background. Once the queue selection follows the displayed
+    // document, a row left focused behind it kept looking selected and two rows appeared
+    // highlighted at once. A standalone `:focus` rule (outline, radius) is fine - only the
+    // grouping is forbidden, which is what the trailing commas below detect.
+    // The rendered background cannot be asserted here: the theme that defines
+    // --hyland-drawer-item-selected is not loaded in the unit-test fixture.
+    expect(styles).to.not.contain('.list-item:focus,');
+    expect(styles).to.not.contain('.list-item.selected:focus {');
+    // keyboard focus stays visible through the focus-visible ring
+    expect(styles).to.contain('.list-item:focus-visible');
+  });
+
+  test('queue lookups tolerate a list with no items yet (WEBUI-1881)', () => {
+    searchForm.$.list.items = undefined;
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+
+    // no entries to search: the caller's fallback index is returned untouched
+    expect(searchForm._queueIndexOf('uid-1', 7)).to.equal(7);
+    // and nothing is opened rather than throwing on an absent items array
+    searchForm._navigateToQueueItem(0);
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('ignores a queue tap that carries no row (WEBUI-2300)', () => {
+    const doc = { uid: 'uid-1', path: '/default-domain/doc-1' };
+    // prime currentDocument so the debounced selection observer treats this document as already
+    // displayed and does not fire a navigation 150ms later, after this test has torn down
+    searchForm.currentDocument = doc;
+    searchForm.selectedDocument = doc;
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: null, stopPropagation });
+
+    expect(stopPropagation).to.not.have.been.called;
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('does not open a selected row whose document has no path (WEBUI-2300)', () => {
+    const row = document.createElement('div');
+    row.className = searchForm._computedClass(true);
+    searchForm.selectedDocument = { uid: 'uid-1' };
+    const navigateToSpy = sinon.spy();
+    Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
+    const stopPropagation = sinon.spy();
+
+    searchForm._queueItemTapped({ currentTarget: row, stopPropagation });
+
+    expect(stopPropagation).to.not.have.been.called;
+    expect(navigateToSpy).to.not.have.been.called;
+
+    delete searchForm.navigateTo;
+  });
+
+  test('ignores a route change before the list exists (WEBUI-2301)', () => {
+    searchForm.queue = true;
+    const list = searchForm.$.list;
+    // `currentDocument` can be pushed in by the host before the template is stamped
+    delete searchForm.$.list;
+
+    expect(() => {
+      searchForm.currentDocument = { uid: 'uid-1', path: '/default-domain/doc-1' };
+    }).to.not.throw();
+
+    searchForm.$.list = list;
+  });
+
+  test('queue lookup skips holes in the results array (WEBUI-1881)', () => {
+    // a page provider can leave gaps in `items` for ranges that were never fetched
+    searchForm.$.list.items = [null, { uid: 'uid-2', path: '/default-domain/doc-2' }];
+
+    expect(searchForm._queueIndexOf('uid-2', 9)).to.equal(1);
+    expect(searchForm._queueIndexOf('uid-missing', 9)).to.equal(9);
+  });
+
   test('resetResults invokes list reset when required inputs exist', () => {
     const resetSpy = sinon.spy(searchForm.$.list, '_resetResults');
     searchForm.provider = 'default_search';
