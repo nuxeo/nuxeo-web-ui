@@ -855,6 +855,14 @@ Polymer({
       // highlighted.
       list.clearSelection();
       list.selectIndex(index);
+      // Selecting writes `selectedDocument`, which schedules `_selectedDocChanged`'s debounced
+      // navigation. This observer must only ever move the highlight: the route already shows this
+      // document. Leaving the timer armed lets it fire after a later host-driven `currentDocument`
+      // change that is not in the queue, navigating back to the stale document and overriding the
+      // external navigation.
+      if (this.__renderDebouncer) {
+        this.__renderDebouncer.cancel();
+      }
     }
   },
 
