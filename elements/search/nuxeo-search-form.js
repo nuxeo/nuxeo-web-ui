@@ -792,7 +792,7 @@ Polymer({
     // The tapped row carries the `selected` class from `_computedClass`, and when it is the
     // selected one `selectedDocument` is by definition that document, so no index lookup is
     // needed (the row's `index` binding sets a property, not an attribute).
-    if (!row || !row.classList.contains('selected')) {
+    if (!row?.classList.contains('selected')) {
       return;
     }
     const doc = this.selectedDocument;
@@ -829,7 +829,7 @@ Polymer({
     // the displayed document - browser back/forward, a breadcrumb, a deep link, a child document
     // opened from the main content area - left the highlight on the previous document
     // (WEBUI-2301). Follow the displayed document instead.
-    if (!this.queue || !doc || !doc.uid) {
+    if (!this.queue || !doc?.uid) {
       return;
     }
     // The list is guarded because `currentDocument` is bound from the host and can be pushed in
