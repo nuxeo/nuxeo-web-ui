@@ -329,7 +329,11 @@ suite('nuxeo-search-form', () => {
   test('lets iron-list handle a tap on an unselected queue row (WEBUI-2300)', () => {
     const row = document.createElement('div');
     row.className = searchForm._computedClass(false);
-    searchForm.selectedDocument = { uid: 'uid-2', path: '/default-domain/doc-2' };
+    const doc = { uid: 'uid-2', path: '/default-domain/doc-2' };
+    // prime currentDocument so the debounced selection observer treats this document as already
+    // displayed and does not fire a navigation 150ms later, after this test has torn down
+    searchForm.currentDocument = doc;
+    searchForm.selectedDocument = doc;
     const navigateToSpy = sinon.spy();
     Object.defineProperty(searchForm, 'navigateTo', { value: navigateToSpy, configurable: true, writable: true });
     const stopPropagation = sinon.spy();
