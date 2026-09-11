@@ -319,7 +319,7 @@ Polymer({
   _processLoad(data) {
     const object = data.scene;
 
-    if (data.cameras && data.cameras.length) {
+    if (data.cameras?.length) {
       for (let i = 0; i < data.cameras.length; i++) {
         const dataCamera = data.cameras[i];
         const cameraName = dataCamera.parent.name;
@@ -327,7 +327,7 @@ Polymer({
       }
     }
 
-    if (data.animations && data.animations.length) {
+    if (data.animations?.length) {
       for (let i = 0; i < data.animations.length; i++) {
         const animation = data.animations[i];
         animation.loop = true;
@@ -370,7 +370,7 @@ Polymer({
         obj.geometry.verticesNeedUpdate = true;
         obj.geometry.normalsNeedUpdate = true;
       }
-      if (obj.material && obj.material.bumpMap) {
+      if (obj.material?.bumpMap) {
         obj.material.bumpScale = scale;
       }
     };
