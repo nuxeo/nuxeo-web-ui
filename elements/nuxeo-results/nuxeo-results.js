@@ -1521,13 +1521,12 @@ Polymer({
   // ------------------------------
 
   // Configures the nuxeo-resource instance to PUT doc-level preferences to /path/<docPath>/@preferences.
+  // The path is left unencoded on purpose: the Nuxeo JS client percent-encodes the whole request path
+  // when it builds the URL, so encoding it here would double-encode names holding a space or any other
+  // reserved character (`My Content` -> `My%2520Content`), which the server resolves to a missing document.
   _configureDocPreferencesResource(docPath) {
     const normalized = docPath.startsWith('/') ? docPath.substring(1) : docPath;
-    const encodedPath = normalized
-      .split('/')
-      .map((segment) => encodeURIComponent(segment))
-      .join('/');
-    this.$.preferences.path = `/path/${encodedPath}/@preferences`;
+    this.$.preferences.path = `/path/${normalized}/@preferences`;
     this.$.preferences.params = null;
     this.$.preferences.enrichers = {};
     this.$.preferences.headers = { accept: 'application/json' };
