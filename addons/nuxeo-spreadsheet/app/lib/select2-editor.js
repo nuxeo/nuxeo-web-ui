@@ -73,7 +73,7 @@ const onBeforeKeyDown = function onBeforeKeyDown(event) {
 
   // eslint-disable-next-line default-case
   switch (event.keyCode) {
-    case keyCodes.ENTER:
+    case keyCodes.ENTER: {
       const selected = that.instance.getSelected();
       const isMultipleSelection = !(selected[0] === selected[2] && selected[1] === selected[3]);
       if ((ctrlDown && !isMultipleSelection) || event.altKey) {
@@ -88,18 +88,17 @@ const onBeforeKeyDown = function onBeforeKeyDown(event) {
       }
       event.preventDefault(); // don't add newline to field
       break;
+    }
 
+    // A, X, C and V — with or without CTRL — plus home and end should only work locally when the
+    // cell is edited, not in the table context.
     case keyCodes.A:
     case keyCodes.X:
     case keyCodes.C:
     case keyCodes.V:
-      if (ctrlDown) {
-        event.stopImmediatePropagation(); // CTRL+A, CTRL+C, CTRL+V, CTRL+X should only work locally when cell is edited (not in table context)
-        break;
-      }
     case keyCodes.HOME:
     case keyCodes.END:
-      event.stopImmediatePropagation(); // home, end should only work locally when cell is edited (not in table context)
+      event.stopImmediatePropagation();
       break;
   }
 };
