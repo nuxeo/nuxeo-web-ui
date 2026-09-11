@@ -133,18 +133,16 @@ export const DocumentCreationBehavior = [
             }
           });
         }
-        this.set(
-          'subtypes',
-          filteredSubtypes.sort((a, b) => {
-            if (a.id < b.id) {
-              return -1;
-            }
-            if (a.id > b.id) {
-              return 1;
-            }
-            return 0;
-          }),
-        );
+        filteredSubtypes.sort((a, b) => {
+          if (a.id < b.id) {
+            return -1;
+          }
+          if (a.id > b.id) {
+            return 1;
+          }
+          return 0;
+        });
+        this.set('subtypes', filteredSubtypes);
       }
       this._validateLocation();
     },

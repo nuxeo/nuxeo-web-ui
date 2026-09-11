@@ -48,7 +48,7 @@ suite('nuxeo-dropzone', () => {
     test('builds single upload payload for uploader batch', () => {
       const data = { type: 'batchFinished', detail: { batchId: 'batch-1' } };
 
-      expect(element._getFiles(data)).to.eql({
+      expect(element._getFile(data)).to.eql({
         'upload-batch': 'batch-1',
         'upload-fileId': '0',
       });
@@ -60,7 +60,7 @@ suite('nuxeo-dropzone', () => {
         detail: { blobs: [{ providerId: 'drive', user: 'jdoe', fileId: 'blob-id' }] },
       };
 
-      expect(element._getFiles(data)).to.eql({
+      expect(element._getFile(data)).to.eql({
         providerId: 'drive',
         user: 'jdoe',
         fileId: 'blob-id',
@@ -72,7 +72,7 @@ suite('nuxeo-dropzone', () => {
       element.valueKey = 'file';
       element.files = [{ index: 0 }, { index: 1, error: true }, { index: 2 }];
 
-      const files = element._getFiles({ type: 'batchFinished', detail: { batchId: 'batch-2' } });
+      const files = element._getFileList({ type: 'batchFinished', detail: { batchId: 'batch-2' } });
 
       expect(files).to.eql([
         { file: { 'upload-batch': 'batch-2', 'upload-fileId': '0' } },
@@ -87,12 +87,28 @@ suite('nuxeo-dropzone', () => {
         { providerId: 'drive', user: 'jdoe', fileId: 'f-2' },
       ];
 
-      const files = element._getFiles({ type: 'nx-blob-picked', detail: {} });
+      const files = element._getFileList({ type: 'nx-blob-picked', detail: {} });
 
       expect(files).to.eql([
         { providerId: 'drive', user: 'jdoe', fileId: 'f-1' },
         { providerId: 'drive', user: 'jdoe', fileId: 'f-2' },
       ]);
+    });
+
+    test('importBatch stores a list for blobList and an object for a single blob', async () => {
+      const batch = (batchId) => {
+        return { type: 'batchFinished', detail: { batchId }, stopPropagation: () => {} };
+      };
+
+      element.files = [{ index: 0 }];
+      element.blobList = true;
+      await element.importBatch(batch('batch-3'));
+      expect(element.value).to.eql([{ 'upload-batch': 'batch-3', 'upload-fileId': '0' }]);
+
+      element.files = [{ index: 0 }];
+      element.blobList = false;
+      await element.importBatch(batch('batch-4'));
+      expect(element.value).to.eql({ 'upload-batch': 'batch-4', 'upload-fileId': '0' });
     });
   });
 
