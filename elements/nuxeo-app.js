@@ -1379,8 +1379,8 @@ Polymer({
     this.show('diff');
     const params = [id1, id2];
     // let's keep current context only if it includes the ids already in the params
-    if (this.$.diff.docIds && params.every((el) => this.$.diff.docIds.indexOf(el) > -1)) {
-      const otherIds = this.$.diff.docIds.find((id) => params.indexOf(id) === -1);
+    if (this.$.diff.docIds && params.every((el) => this.$.diff.docIds.includes(el))) {
+      const otherIds = this.$.diff.docIds.find((id) => !params.includes(id));
       this.$.diff.docIds = null;
       this.$.diff.docIds = params.concat(otherIds).filter(Boolean);
     } else {
@@ -1430,8 +1430,7 @@ Polymer({
 
       case 'tasks':
         if (this.currentTask) {
-          title.push(this.i18n(this.currentTask.workflowModelName));
-          title.push(this.i18n(this.currentTask.name));
+          title.push(this.i18n(this.currentTask.workflowModelName), this.i18n(this.currentTask.name));
         } else {
           title.push(this.i18n(`app.title.${this.page}`));
         }
@@ -2036,13 +2035,13 @@ Polymer({
         toast.__state = { dismissed: false, aborted: true };
         callback();
         // remove the toast if the action was aborted
-        toast.parentNode.removeChild(toast);
+        toast.remove();
       } else if (e.detail.reason === 'dismiss') {
         const state = toast.__state;
         if (state && state.ended) {
           toast.__state = null;
           // remove the toast if the action has ended
-          toast.parentNode.removeChild(toast);
+          toast.remove();
         } else {
           // do not remove the toast, otherwise it will show up before the end of the task
           toast.__state.dismissed = true;

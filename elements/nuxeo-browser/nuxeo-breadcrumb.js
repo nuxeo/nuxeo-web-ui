@@ -190,7 +190,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
         this.document.contextParameters &&
         this.document.contextParameters.breadcrumb &&
         this.document.contextParameters.breadcrumb.entries;
-      return breadcrumbEntries && breadcrumbEntries.slice(0, breadcrumbEntries.length - 1);
+      return breadcrumbEntries && breadcrumbEntries.slice(0, -1);
     }
 
     get _contentWidth() {
@@ -249,7 +249,7 @@ import { microTask } from '@polymer/polymer/lib/utils/async.js';
           this._contentWidth + this.lastDeletedNodeWidth < this._ancestors.offsetWidth &&
           this.deletedNodes.length > 0
         ) {
-          this._ancestors.insertBefore(this.deletedNodes[this.deletedNodes.length - 1], this._ancestors.childNodes[1]);
+          this._ancestors.insertBefore(this.deletedNodes.at(-1), this._ancestors.childNodes[1]);
           this.deletedNodes.pop();
           if (this.deletedNodes.length === 0) {
             const ellipsisListItem = this.shadowRoot.getElementById('ellipsis').parentElement;

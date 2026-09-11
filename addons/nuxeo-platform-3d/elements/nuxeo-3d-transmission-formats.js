@@ -179,7 +179,7 @@ Polymer({
     if (value < base) {
       return `${value} ${unit}`;
     }
-    const exp = parseInt(Math.log(value) / Math.log(base), 0);
+    const exp = Number.parseInt(Math.log(value) / Math.log(base), 0);
     const pre = String('kMGTPE'.charAt(exp - 1));
     return `${Math.round((value / base ** exp) * 10) / 10} ${pre}${unit}`;
   },
