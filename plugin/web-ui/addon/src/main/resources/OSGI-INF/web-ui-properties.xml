@@ -80,5 +80,9 @@
 
     <!-- opt-in Hyland branding -->
     <property name="org.nuxeo.web.ui.branding.rebrand">${org.nuxeo.web.ui.branding.rebrand:=false}</property>
+
+    <!--nuxeo timezone setting-->
+    <property name="org.nuxeo.web.ui.timezone">${org.nuxeo.web.ui.timezone:=}</property>
+
   </extension>
 </component>
