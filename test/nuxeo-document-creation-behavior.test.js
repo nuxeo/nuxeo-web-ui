@@ -109,6 +109,57 @@ suite('DocumentCreationBehavior', () => {
     });
   });
 
+  suite('_parentChanged', () => {
+    function parentWith(permissions, subtypes) {
+      return {
+        path: '/default-domain/workspaces',
+        contextParameters: { permissions, subtypes },
+        isTrashed: false,
+      };
+    }
+
+    function subtypesSetTo() {
+      return ctx.set.getCalls().find((call) => call.args[0] === 'subtypes');
+    }
+
+    test('should drop subtypes flagged HiddenInCreation and keep the rest sorted by id', () => {
+      ctx.parent = parentWith(
+        ['AddChildren'],
+        [
+          { type: 'Picture', facets: ['Commentable'] },
+          { type: 'Note', facets: ['HiddenInCreation'] },
+          { type: 'File', facets: [] },
+        ],
+      );
+
+      ctx._parentChanged();
+
+      expect(subtypesSetTo().args[1].map((type) => type.type)).to.deep.equal(['File', 'Picture']);
+    });
+
+    test('should keep every subtype when none is hidden in creation', () => {
+      ctx.parent = parentWith(
+        ['AddChildren'],
+        [
+          { type: 'File', facets: [] },
+          { type: 'Picture', facets: ['Commentable'] },
+        ],
+      );
+
+      ctx._parentChanged();
+
+      expect(subtypesSetTo().args[1].map((type) => type.type)).to.deep.equal(['File', 'Picture']);
+    });
+
+    test('should set no subtypes when the parent cannot be created in', () => {
+      ctx.parent = parentWith(['Read'], [{ type: 'File', facets: [] }]);
+
+      ctx._parentChanged();
+
+      expect(subtypesSetTo().args[1]).to.deep.equal([]);
+    });
+  });
+
   suite('_getTypeLabel', () => {
     test('should return formatted doc type when type is valid', () => {
       const type = { _id: '1', type: 'File', id: 'file', icon: 'file-icon' };

@@ -241,7 +241,7 @@ app.router = {
   },
 
   tasks(id) {
-    return `/tasks${typeof id === 'undefined' ? '' : `/${id}`}`;
+    return `/tasks${id === undefined ? '' : `/${id}`}`;
   },
 
   administration(tab) {
