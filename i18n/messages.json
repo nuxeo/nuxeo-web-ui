@@ -547,6 +547,7 @@
   "dropzone.add": "Upload main file",
   "dropzone.invalid.error": "Invalid content",
   "dropzone.invalid.file": "Only {0} files are allowed",
+  "dropzone.invalid.multipleFiles": "This field accepts only one file. Please drop a single file.",
   "dropzone.invalid.uploading": "File upload pending",
   "dropzone.dropFile": "Drop your file",
   "dropzone.toast.error": "Upload failed: {0}",
