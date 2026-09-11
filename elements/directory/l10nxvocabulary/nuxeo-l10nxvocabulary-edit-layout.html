@@ -42,8 +42,12 @@ limitations under the License.
           display: inline-block;
           vertical-align: text-top;
           margin-left: 1.3em;
-          word-break: break-word;
+          /* `anywhere`, not `break-word`: only `anywhere` feeds break opportunities into
+             min-content sizing, which an inline-block needs to shrink around a long unbroken
+             value. It is what the deprecated `word-break: break-word` resolved to here. */
+          overflow-wrap: anywhere;
         }
+      ;
       }
 
       .node-name {
@@ -51,7 +55,8 @@ limitations under the License.
         display: inline-block;
         vertical-align: text-top;
         margin-left: 1.3em;
-        word-break: break-word;
+        /* see --nuxeo-tree-node-more-theme above: inline-block needs `anywhere`, not `break-word` */
+        overflow-wrap: anywhere;
       }
       iron-icon {
         opacity: 0.3;
