@@ -58,10 +58,10 @@ public class TestWebNotificationCodec {
         assertNotNull(codecService.getCodec("notificationDocId"));
 
         assertNull(codecService.getDocumentViewFromUrl("notificationDocId", "bad/URL", false, null));
-        assertNull(
-                codecService.getDocumentViewFromUrl("notificationDocId", "ui/#!/badPrefix/default/12345", false, null));
+        assertNull(codecService.getDocumentViewFromUrl("notificationDocId", "ui/badPrefix?repo=default&id=12345", false,
+                null));
 
-        DocumentView docView = codecService.getDocumentViewFromUrl("notificationDocId", "ui/#!/doc/default/12345",
+        DocumentView docView = codecService.getDocumentViewFromUrl("notificationDocId", "ui/doc?repo=default&id=12345",
                 false, null);
         assertNotNull(docView);
         DocumentLocation docLocation = docView.getDocumentLocation();
@@ -73,7 +73,7 @@ public class TestWebNotificationCodec {
 
         String url = codecService.getUrlFromDocumentView("notificationDocId",
                 new DocumentViewImpl(new DocumentLocationImpl("default", new IdRef("12345"))), false, null);
-        assertEquals("ui/#!/doc/default/12345", url);
+        assertEquals("ui/doc?repo=default&id=12345", url);
     }
 
 }
