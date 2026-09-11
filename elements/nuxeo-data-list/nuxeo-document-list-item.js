@@ -140,6 +140,14 @@ Polymer({
         display: block;
       }
 
+      /* The title is a link, so drop the browser default link colour and underline and keep the
+         row's own colour. The hover and focus rules above are more specific, so they still
+         recolor the title. */
+      a.title {
+        color: inherit;
+        text-decoration: none;
+      }
+
       .listBox .actions {
         display: none;
         background-color: var(--nuxeo-box);
@@ -230,8 +238,14 @@ Polymer({
           <img crossorigin="anonymous" src="[[_thumbnail(doc)]]" on-error="_onError" alt$="[[doc.title]]" />
         </div>
         <div class="dataContainer flex" on-tap="handleClick" on-keydown="_handleKeydown">
-          <div class="horizontal layout center" tabindex="0">
-            <a class="title flex">
+          <div class="horizontal layout center">
+            <!-- WEBUI-1882: the title holds the document URL so the browser context menu offers
+                 "Open Link in New Tab" and "Open Link in New Window", as it already does in the
+                 grid and table views. Being a real link, it is also the keyboard stop for the row
+                 content, which is why the div around it no longer carries one: a link announces
+                 itself and its menu can be opened with the context menu key, while a plain
+                 focusable div could do neither. -->
+            <a class="title flex" href$="[[_documentUrl(doc, urlFor)]]" on-keydown="_onTitleKeydown">
               <div class="title">[[doc.title]]</div>
             </a>
             <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
@@ -305,6 +319,25 @@ Polymer({
     return '';
   },
 
+  // Resolves the document URL for the title link. Reverse routing throws for an item that is not
+  // a routable document, and the list can hold such an item while it recycles its rows, so fall
+  // back to no href rather than letting the row fail to render. The link is then inert and the
+  // row still opens the document on click, as it always did.
+  // The binding also passes urlFor, which this method does not need: it makes the href recompute
+  // once the router is known, since urlFor is only resolved from the element when called.
+  _documentUrl(doc) {
+    if (!doc?.uid) {
+      return undefined;
+    }
+    try {
+      // Anything falsy has to stay undefined, which is what makes Polymer drop the attribute.
+      // An empty string would be serialized into href="", a link back to the current page.
+      return this.urlFor(doc) || undefined;
+    } catch {
+      return undefined;
+    }
+  },
+
   isFollowRedirectEnabled() {
     const followRedirect =
       Nuxeo && Nuxeo.UI && Nuxeo.UI.config && Nuxeo.UI.config.url && Nuxeo.UI.config.url.followRedirect;
@@ -312,9 +345,22 @@ Polymer({
   },
 
   handleClick(e) {
+    // A tap event carries no modifier keys, they belong to the click it was generated from.
+    // Direct callers (keyboard handling, tests) pass the original event instead.
+    const source = e.detail?.sourceEvent || e;
+    if (!this.selectionMode && (source.ctrlKey || source.shiftKey || source.metaKey || source.button === 1)) {
+      // These are the clicks the browser turns into a new tab or window on the title link, so
+      // leave them alone. Elsewhere in the row there is no link to follow.
+      return;
+    }
+    // The row handles the click itself, so the title link must not navigate on top of it. Polymer
+    // forwards this preventDefault to the click event the tap was generated from.
+    if (typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
     if (this.selectionMode) {
       this._toogleSelect(e);
-    } else if (!(e.ctrlKey || e.shiftKey || e.metaKey || e.button === 1)) {
+    } else {
       this.fire('navigate', { item: this.doc, index: this.index });
     }
   },
@@ -346,6 +392,19 @@ Polymer({
         e.currentTarget.click();
       }
     }
+  },
+
+  // Enter on the focused title link. Turn the key into a click, the way the row handler does, and
+  // cancel its own action: otherwise the row handler and the browser following the link both
+  // activate the item, which in selection mode toggles it twice and leaves it unchanged. Only
+  // Enter is taken, so Space still reaches the results view and (de)selects the row.
+  _onTitleKeydown(e) {
+    if (e.key !== 'Enter') {
+      return;
+    }
+    e.stopPropagation();
+    e.preventDefault();
+    e.currentTarget.click();
   },
 
   // ELEMENTS-1616: fall back to a transparent pixel when the (cross-origin) thumbnail
