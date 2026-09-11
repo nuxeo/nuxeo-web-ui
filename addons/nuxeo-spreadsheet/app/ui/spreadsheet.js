@@ -21,6 +21,7 @@ import { Query } from '../nuxeo/rpc/query';
 import { DirectoryEditor } from './editors/directory';
 import { Select2Editor } from './editors/select2';
 import { assign, hasProp } from '../utils';
+import { applySavedChangeToken, createDirtyDocument, markSaveError } from './optimistic-locking';
 
 /**
  * Spreadsheet backed by Hansontable
@@ -214,30 +215,60 @@ class Spreadsheet {
     return this._fetch();
   }
 
+  /**
+   * Saves every dirty row, one batch at a time.
+   *
+   * Autosave calls this on each edit without waiting for the previous batch. Overlapping batches
+   * would send the same change token twice for a row, and the one that landed second would be
+   * rejected as a stale write by the row's own earlier save — a conflict reported to the user
+   * with no other user involved. Queueing the batches also means each one sends the token the
+   * previous one brought back.
+   */
   save() {
-    return Promise.all(
-      Object.keys(this._dirty).map((uid) =>
+    this._saving = (this._saving || Promise.resolve()).then(() => this._saveDirtyRows());
+    return this._saving;
+  }
+
+  _saveDirtyRows() {
+    this.hasConflicts = false;
+    // Every PUT has to settle before the outcome is read: hasConflicts decides which message the
+    // caller shows, and Promise.all would hand back as soon as one row failed, so a non-conflict
+    // failure could report the generic error while a slower 409 was still in flight.
+    return Promise.allSettled(
+      Object.entries(this._dirty).map(([uid, dirtyDocument]) =>
         this.connection
           .request(`/id/${uid}`)
-          .put({ body: this._dirty[uid] })
-          .then(() => {
-            delete this._dirty[uid];
+          .put({ body: dirtyDocument })
+          .then((response) => {
+            applySavedChangeToken(
+              this.data.find((document) => document.uid === uid),
+              response,
+            );
+            // Only drop the entry this request saved. Holding the reference also means a failed
+            // save reports against the payload it actually sent, never against `undefined`.
+            if (this._dirty[uid] === dirtyDocument) {
+              delete this._dirty[uid];
+            }
             return uid;
           })
           .catch((error) => {
-            this._dirty[uid]._error = error;
-            throw new Error(error);
+            if (markSaveError(dirtyDocument, error)) {
+              this.hasConflicts = true;
+            }
+            throw error;
           }),
       ),
-    )
-      .catch((err) => {
-        console.error(err);
-      })
-      .then((result) => {
-        this.ht.clearUndo();
-        this.ht.render();
-        return result;
-      });
+    ).then((outcomes) => {
+      this.ht.clearUndo();
+      this.ht.render();
+      const failures = outcomes.filter((outcome) => outcome.status === 'rejected');
+      if (failures.length > 0) {
+        failures.forEach(({ reason }) => console.error(reason));
+        // The caller tells a failed save from a successful one by the absence of a result.
+        return undefined;
+      }
+      return outcomes.map(({ value }) => value);
+    });
   }
 
   onChange(change, source) {
@@ -251,8 +282,9 @@ class Spreadsheet {
         if (oldV === newV) {
           continue;
         }
-        const uid = this.data[idx].uid;
-        const doc = (this._dirty[uid] = this._dirty[uid] || { 'entity-type': 'document', uid });
+        const sourceDocument = this.data[idx];
+        const uid = sourceDocument.uid;
+        const doc = (this._dirty[uid] = this._dirty[uid] || createDirtyDocument(sourceDocument));
 
         // Split csv values into array
         const column = this._columnsByField[field];

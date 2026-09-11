@@ -26,6 +26,7 @@ import '@nuxeo/nuxeo-ui-elements/nuxeo-icons.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-preview.js';
 import { LayoutBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-layout-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-html-editor.js';
+import { NuxeoOptimisticLockingBehavior } from '../behaviors/nuxeo-optimistic-locking-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -163,7 +164,7 @@ Polymer({
   `,
 
   is: 'nuxeo-note-editor',
-  behaviors: [NotifyBehavior, LayoutBehavior],
+  behaviors: [NotifyBehavior, LayoutBehavior, NuxeoOptimisticLockingBehavior],
 
   properties: {
     document: {
@@ -204,18 +205,21 @@ Polymer({
   },
 
   _editorSave() {
-    this.$.note.data = {
+    this.$.note.data = this.withChangeToken({
       'entity-type': 'document',
       uid: this.document.uid,
       properties: {
         'note:note': this._value,
       },
-    };
-    this.$.note.put().then(() => {
-      this.notify({ message: this.i18n('noteViewLayout.note.saved') });
-      this._viewMode = true;
-      this.fire('document-updated');
     });
+    return this.$.note
+      .put()
+      .then(() => {
+        this.notify({ message: this.i18n('noteViewLayout.note.saved') });
+        this._viewMode = true;
+        this.fire('document-updated');
+      })
+      .catch((err) => this.rejectUnlessConflict(err));
   },
 
   _isMutable(document) {

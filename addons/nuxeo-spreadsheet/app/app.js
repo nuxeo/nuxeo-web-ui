@@ -49,7 +49,7 @@ function setupUI() {
     log.info(i18n('saving'));
     sheet.save().then((results) => {
       if (!results) {
-        log.error(i18n('failedSave'));
+        log.error(i18n(sheet.hasConflicts ? 'conflictSave' : 'failedSave'));
         return;
       }
       let msg;
