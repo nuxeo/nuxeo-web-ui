@@ -143,7 +143,6 @@ Polymer({
 
       .delegatedActions {
         @apply --iron-data-table-header;
-        margin-top: 13px;
       }
 
       .delegatedActions > *:not(:last-child) {

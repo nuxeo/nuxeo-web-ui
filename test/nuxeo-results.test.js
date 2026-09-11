@@ -855,6 +855,18 @@ suite('nuxeo-results', () => {
       expect(sortSelect).to.exist;
       expect(sortSelect.label).to.equal('Sort by');
     });
+
+    test('aligns the sort selector with the results header (WEBUI-2217)', async () => {
+      const mockView = createMockView({ sortOptions: [{ field: 'dc:created', label: 'Created', order: 'desc' }] });
+      mockView.setAttribute('display-sort', '');
+      results.view = mockView;
+      results.notifyPath('view');
+      await flush();
+
+      const delegatedActions = results.shadowRoot.querySelector('.delegatedActions');
+      expect(delegatedActions).to.exist;
+      expect(getComputedStyle(delegatedActions).marginTop).to.equal('0px');
+    });
   });
 
   suite('Display Mode Features', () => {
