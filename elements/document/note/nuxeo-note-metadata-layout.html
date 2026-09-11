@@ -25,23 +25,23 @@ limitations under the License.
   <template>
     <style include="nuxeo-styles"></style>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('label.dublincore.title')]]</label>
       <div name="title">[[document.properties.dc:title]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:description]]">
+    <div data-widget hidden$="[[!document.properties.dc:description]]">
       <label>[[i18n('label.dublincore.description')]]</label>
       <div name="description" class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:nature]]">
+    <div data-widget hidden$="[[!document.properties.dc:nature]]">
       <label>[[i18n('label.dublincore.nature')]]</label>
       <div name="nature">[[formatDirectory(document.properties.dc:nature)]]</div>
     </div>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.subjects')]]"
       directory-name="l10nsubjects"
       name="subjects"
@@ -53,12 +53,12 @@ limitations under the License.
     >
     </nuxeo-directory-suggestion>
 
-    <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
+    <div data-widget hidden$="[[!document.properties.dc:coverage]]">
       <label>[[i18n('label.dublincore.coverage')]]</label>
       <div name="coverage">[[formatDirectory(document.properties.dc:coverage)]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:expired]]">
+    <div data-widget hidden$="[[!document.properties.dc:expired]]">
       <label>[[i18n('label.dublincore.expire')]]</label>
       <nuxeo-date
         name="expired"
@@ -67,12 +67,12 @@ limitations under the License.
       ></nuxeo-date>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('noteMetadataLayout.format')]]</label>
       <div>[[formatMimeType(document.properties.note:mime_type)]]</div>
     </div>
 
-    <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
+    <nuxeo-document-attachments data-widget document="[[document]]"></nuxeo-document-attachments>
   </template>
 
   <script>
