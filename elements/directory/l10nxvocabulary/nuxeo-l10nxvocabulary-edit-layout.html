@@ -65,7 +65,7 @@ limitations under the License.
       }
     </style>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('vocabularyManagement.edit.parent')]]</label>
       <paper-button id="selectParent" class="text" on-tap="_toggleParent">[[_parentLabel]]</paper-button>
       <nuxeo-dialog id="parentDialog" with-backdrop>
@@ -93,7 +93,7 @@ limitations under the License.
     </div>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('vocabularyManagement.edit.id')]]"
       name="id"
       value="{{entry.properties.id::change}}"
@@ -103,7 +103,7 @@ limitations under the License.
     </nuxeo-input>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('vocabularyManagement.edit.label_en')]]"
       name="label"
       value="{{entry.properties.label_en::change}}"
@@ -111,14 +111,14 @@ limitations under the License.
     </nuxeo-input>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('vocabularyManagement.edit.label_fr')]]"
       name="label"
       value="{{entry.properties.label_fr::change}}"
     >
     </nuxeo-input>
 
-    <div role="widget">
+    <div data-widget>
       <label id="label">[[i18n('vocabularyManagement.edit.obsolete')]]</label>
       <paper-toggle-button
         checked$="[[_isObsolete(entry.properties.obsolete)]]"
@@ -130,7 +130,7 @@ limitations under the License.
     </div>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('vocabularyManagement.edit.ordering')]]"
       name="ordering"
       type="number"

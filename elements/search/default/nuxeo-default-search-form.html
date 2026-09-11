@@ -36,7 +36,7 @@ limitations under the License.
     </style>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       id="searchInput"
       type="search"
       label="[[i18n('defaultSearch.fullText')]]"
@@ -48,7 +48,7 @@ limitations under the License.
     >
     </nuxeo-input>
 
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_modified_agg]]"
         value="{{params.dc_modified_agg}}"
@@ -97,7 +97,7 @@ limitations under the License.
       </nuxeo-tag-suggestion>
     </fieldset>
 
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_nature_agg]]"
         value="{{params.dc_nature_agg}}"
@@ -108,7 +108,7 @@ limitations under the License.
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_subjects_agg]]"
         value="{{params.dc_subjects_agg}}"
@@ -119,7 +119,7 @@ limitations under the License.
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.dc_coverage_agg]]"
         value="{{params.dc_coverage_agg}}"
@@ -130,7 +130,7 @@ limitations under the License.
       </nuxeo-checkbox-aggregation>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <nuxeo-checkbox-aggregation
         data="[[aggregations.common_size_agg]]"
         value="{{params.common_size_agg}}"
