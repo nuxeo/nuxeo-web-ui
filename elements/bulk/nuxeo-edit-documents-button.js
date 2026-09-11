@@ -314,10 +314,7 @@ class NuxeoEditDocumentsButton extends mixinBehaviors([I18nBehavior, FiltersBeha
       // get the bulk widget wrapper element
       const bulkWidget = this._getBulkWidget(boundElement);
       // get the path without the `document.properties.` part, replacing the `.` for `/` (complex fields)
-      const path = boundPath
-        .replace(/^(document\.properties\.)/, '')
-        .split('.')
-        .join('/');
+      const path = boundPath.replace(/^(document\.properties\.)/, '').replaceAll('.', '/');
       if (bulkWidget.updateMode === 'replace') {
         let value = bulkLayout.get(boundPath);
         if (this._shouldStringifyValue(value)) {
