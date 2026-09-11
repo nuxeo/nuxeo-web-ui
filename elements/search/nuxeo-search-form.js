@@ -838,7 +838,7 @@ Polymer({
     if (search) {
       this.isSavedSearch = this._isSavedSearch();
       this.selectedSearch = search;
-      const clonedParams = JSON.parse(JSON.stringify(search.params));
+      const clonedParams = structuredClone(search.params);
       this.params = this._mutateParams(clonedParams, true);
       this._navigateToResults();
     } else {
@@ -873,7 +873,7 @@ Polymer({
 
     // Populate params
     const search = this._searches[idx];
-    const clonedParams = JSON.parse(JSON.stringify(search.params));
+    const clonedParams = structuredClone(search.params);
     this.params = this._mutateParams(clonedParams, true);
     this.searchTerm = this.params && this.params.ecm_fulltext ? this.params.ecm_fulltext.replace(/\*/g, '') : '';
 
