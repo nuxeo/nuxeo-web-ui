@@ -59,12 +59,7 @@ Polymer({
         background-color: var(--hyland-document-grid-thumbnail-background, var(--nuxeo-box));
         box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
         padding: 0;
-        filter:
-          0.1s ease-out,
-          filter 0.1s ease-out;
-        -webkit-filter:
-          0.1s ease-out,
-          filter 0.1s ease-out;
+        transition: 0.1s ease-out;
         border: 2px solid transparent;
       }
 
@@ -144,6 +139,12 @@ Polymer({
         display: block;
       }
 
+      .bubbleBox .badges {
+        position: absolute;
+        inset-block-start: 0;
+        inset-block-end: 0;
+      }
+
       .bubbleBox .actions {
         background-color: var(--nuxeo-box);
         position: absolute;
@@ -198,21 +199,21 @@ Polymer({
       .bubbleBox:hover .select,
       .bubbleBox[selection-mode] .select {
         opacity: 1;
-        height: auto;
+        scale : 1;
+        transform: scale(1);
         overflow: visible;
-        transition:
-          opacity 0.2s ease,
-          height 0.2s ease;
       }
 
       .bubbleBox .actions,
       .bubbleBox .select {
         opacity: 0;
-        height: 0;
+        transform: scale(1 , 0); /* old way of scale for browser support */
+        scale: 1 0;
         overflow: hidden;
         transition:
-          opacity 0.2s ease,
-          height 0.2s ease;
+            opacity 0.2s ease,
+            transform 0.2s ease,
+            scale 0.2s ease;
       }
     </style>
 
@@ -231,13 +232,21 @@ Polymer({
         >
           <div class="dataContainer">
             <div class="title" id="title">[[doc.title]]</div>
-            <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
+              <slot name="tag">
+                <nuxeo-tag>[[formatDocType(doc.type)]]</nuxeo-tag>
+              </slot>
             <nuxeo-tooltip for="title" aria-hidden="true">[[doc.title]]</nuxeo-tooltip>
           </div>
         </a>
+        <div class="badges">
+          <slot name="badges"></slot>
+        </div>
         <div class="actions">
-          <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
-          <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
+          <slot name="primary-actions">
+            <nuxeo-favorites-toggle-button document="[[doc]]"></nuxeo-favorites-toggle-button>
+            <nuxeo-download-button document="[[doc]]"></nuxeo-download-button>
+          </slot>
+          <slot name="actions"></slot>
         </div>
         <div class="select">
           <paper-icon-button
@@ -276,7 +285,7 @@ Polymer({
 
     selectedItems: {
       type: Array,
-      value: [],
+      value: () => ([]),
     },
 
     index: {
@@ -349,7 +358,7 @@ Polymer({
     }
   },
 
-  _toogleSelect(e) {
+  _toogleSelect(e) { /* typo toggleSelect ? */
     this.selected = !this.selected;
     this.fire('selected', { index: this.index, shiftKey: e.type === 'tap' ? e.detail.sourceEvent.shiftKey : false });
     // WEBUI-2056 / WEBUI-2175: clear focus from the check button on a pointer deselect so the
