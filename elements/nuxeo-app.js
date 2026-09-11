@@ -1447,8 +1447,12 @@ Polymer({
       default:
         title.push(this.i18n(`app.title.${this.page}`));
     }
+    // WEBUI-1119: `org.nuxeo.ecm.product.name` may be configured empty, in which case index.jsp
+    // renders `product-name=""` and that empty attribute overrides the 'Nuxeo' default. Joining a
+    // blank segment left the browser tab title with a dangling " - ", so drop blank segments
+    // instead of appending a separator with nothing after it.
     title.push(this.productName);
-    document.title = title.join(' - ');
+    document.title = title.filter((segment) => segment && String(segment).trim()).join(' - ');
   },
 
   _baseUrlChanged() {
