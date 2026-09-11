@@ -116,7 +116,7 @@ Select2Editor.prototype.open = function () {
     'min-width': $(this.TD).width(),
   });
 
-  const isMultiple = !!(this.cellProperties && this.cellProperties.multiple);
+  const isMultiple = !!this.cellProperties?.multiple;
 
   this.TEXTAREA.multiple = isMultiple;
 
@@ -185,7 +185,7 @@ Select2Editor.prototype.open = function () {
 };
 
 Select2Editor.prototype.getSelectionText = function (value) {
-  if (this.cellLabels && this.cellLabels[value]) {
+  if (this.cellLabels?.[value]) {
     return this.cellLabels[value];
   }
   return value || '';
