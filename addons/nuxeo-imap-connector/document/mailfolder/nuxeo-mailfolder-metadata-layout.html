@@ -24,18 +24,20 @@ limitations under the License.
     <style include="nuxeo-styles"></style>
 
     <div role="widget">
-      <label>[[i18n('label.dublincore.title')]]</label>
-      <div>[[document.properties.dc:title]]</div>
+      <span class="label" id="title-label">[[i18n('label.dublincore.title')]]</span>
+      <div role="definition" aria-labelledby="title-label">[[document.properties.dc:title]]</div>
     </div>
 
     <div role="widget">
-      <label>[[i18n('label.mail.folder.email')]]</label>
-      <div>[[document.properties.prot:email]]</div>
+      <span class="label" id="email-label">[[i18n('label.mail.folder.email')]]</span>
+      <div role="definition" aria-labelledby="email-label">[[document.properties.prot:email]]</div>
     </div>
 
     <div role="widget">
-      <label>[[i18n('label.mail.folder.protocol_type')]]</label>
-      <div class="protocol">[[document.properties.prot:protocol_type]]</div>
+      <span class="label" id="protocol_type-label">[[i18n('label.mail.folder.protocol_type')]]</span>
+      <div role="definition" aria-labelledby="protocol_type-label" class="protocol">
+        [[document.properties.prot:protocol_type]]
+      </div>
     </div>
   </template>
   <script>

@@ -144,42 +144,44 @@ The edit layout provides form widgets for editing document properties.
 
 ## Template: Metadata Layout
 
-The metadata layout shows document metadata in a card format (sidebar/info panel).
+The metadata layout shows document metadata in a card format (sidebar/info panel). Each field is a
+read-only name/value pair, not a form control, so the name goes in a `<span class="label">` and the
+value carries `role="definition"` with `aria-labelledby` pointing back at it. Never use `<label>`
+here — `for` may only reference a labelable form element, and an unassociated `<label>` is both a
+SonarCloud `Web:S6853` finding and a real screen-reader defect.
 
 ```html
 <dom-module id="nuxeo-<doctype>-metadata-layout">
   <template>
     <style include="nuxeo-styles"></style>
 
-    <nuxeo-data-table-row
-      role="widget"
-      label="[[i18n('label.dublincore.title')]]"
-      value="[[document.properties.dc:title]]"
-    ></nuxeo-data-table-row>
+    <div role="widget">
+      <span class="label" id="title-label">[[i18n('label.dublincore.title')]]</span>
+      <div role="definition" aria-labelledby="title-label" name="title">[[document.properties.dc:title]]</div>
+    </div>
 
-    <nuxeo-data-table-row
-      role="widget"
-      label="[[i18n('label.dublincore.description')]]"
-      value="[[document.properties.dc:description]]"
-    ></nuxeo-data-table-row>
+    <div role="widget" hidden$="[[!document.properties.dc:description]]">
+      <span class="label" id="description-label">[[i18n('label.dublincore.description')]]</span>
+      <!-- prettier-ignore -->
+      <div role="definition" aria-labelledby="description-label" name="description" class="multiline">[[document.properties.dc:description]]</div>
+    </div>
 
-    <nuxeo-data-table-row
-      role="widget"
-      label="[[i18n('label.dublincore.created')]]"
-      value="[[formatDate(document.properties.dc:created)]]"
-    ></nuxeo-data-table-row>
+    <div role="widget">
+      <span class="label" id="created-label">[[i18n('label.dublincore.created')]]</span>
+      <nuxeo-date
+        role="definition"
+        aria-labelledby="created-label"
+        name="created"
+        datetime="[[document.properties.dc:created]]"
+      ></nuxeo-date>
+    </div>
 
-    <nuxeo-data-table-row
-      role="widget"
-      label="[[i18n('label.dublincore.lastModified')]]"
-      value="[[formatDate(document.properties.dc:modified)]]"
-    ></nuxeo-data-table-row>
-
-    <nuxeo-data-table-row
-      role="widget"
-      label="[[i18n('label.dublincore.contributors')]]"
-      value="[[formatContributors(document.properties.dc:contributors)]]"
-    ></nuxeo-data-table-row>
+    <div role="widget">
+      <span class="label" id="contributors-label">[[i18n('label.dublincore.contributors')]]</span>
+      <div role="definition" aria-labelledby="contributors-label" name="contributors">
+        [[formatContributors(document.properties.dc:contributors)]]
+      </div>
+    </div>
   </template>
 
   <script>
@@ -247,6 +249,11 @@ The create layout provides a form for creating new documents of this type.
 - The `document` property with `@doctype` JSDoc tag is required
 - Use `role="widget"` on form widgets for layout rendering
 - Data binding: `[[…]]` for one-way (view/metadata), `{{…}}` for two-way (edit/create)
+- Never hand-roll a `<label>`: pass `label="…"` to widgets that accept one, otherwise use
+  `<span class="label" id="…">` with `role="definition"` + `aria-labelledby` on the value element.
+  `id`s are shadow-root scoped, so name them `<field>-label`; never use a bare `id="label"`
+- Values with `class="multiline"` are styled `white-space: pre-line` — keep the binding on the same
+  source line as its tags so the indentation does not render as a blank line
 - Available widgets from `@nuxeo/nuxeo-ui-elements`:
   - `nuxeo-input` — Text input
   - `nuxeo-textarea` — Multi-line text

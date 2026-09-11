@@ -25,8 +25,12 @@ limitations under the License.
 <dom-module id="nuxeo-task2169-layout">
   <template>
     <div role="widget">
-      <label>[[i18n('wf.parallelDocumentReview.consolidate.form.review_brief')]]</label>
+      <span class="label" id="review_brief-label"
+        >[[i18n('wf.parallelDocumentReview.consolidate.form.review_brief')]]</span
+      >
       <nuxeo-document-task-review-result
+        role="definition"
+        aria-labelledby="review_brief-label"
         class="review-result"
         result="[[task.variables.review_result]]"
       ></nuxeo-document-task-review-result>
