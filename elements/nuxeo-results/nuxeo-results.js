@@ -1255,6 +1255,9 @@ Polymer({
   },
 
   // Creates a JSON-safe deep copy of an object to avoid mutating cached/shared preference references.
+  // Deliberately not structuredClone (sonar javascript:S7784): the clone is persisted as JSON to the
+  // preference store, and the `{}` fallback below would turn a DataCloneError into a silent write of
+  // empty preferences, discarding the user's saved column layout instead of surfacing an error.
   _deepClone(obj) {
     try {
       return JSON.parse(JSON.stringify(obj || {}));
