@@ -16,8 +16,10 @@ limitations under the License.
 */
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 import { FormatBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-format-behavior.js';
+import { NuxeoOptimisticLockingBehavior } from '../../../elements/behaviors/nuxeo-optimistic-locking-behavior.js';
 import './nuxeo-template-param-editor.js';
 
 /**
@@ -150,7 +152,7 @@ Polymer({
   `,
 
   is: 'nuxeo-template-rendering-page',
-  behaviors: [I18nBehavior, FormatBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, FormatBehavior, NuxeoOptimisticLockingBehavior],
 
   properties: {
     document: {
@@ -242,9 +244,14 @@ Polymer({
     const changedvalue = this._findChangedValues(originalDocument, modified);
 
     this.editedDocument.properties = changedvalue;
-    return this.$.doc.put().then(() => {
-      this.originalDocument = this._parseJSON(this.editedDocument);
-    });
+    // `editedDocument` is a copy of the server response, so it already carries the changeToken
+    // that makes this PUT subject to optimistic locking; only the rejection needs handling.
+    return this.$.doc
+      .put()
+      .then(() => {
+        this.originalDocument = this._parseJSON(this.editedDocument);
+      })
+      .catch((err) => this.rejectUnlessConflict(err));
   },
 
   _editConfig() {
