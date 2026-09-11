@@ -254,7 +254,12 @@ limitations under the License.
               name="nuxeo-recent-documents"
               documents="{{_recentDocuments}}"
             ></nuxeo-document-storage>
-            <nuxeo-page-provider id="recentProvider" page-size="15" schemas="uid"></nuxeo-page-provider>
+            <nuxeo-page-provider
+              id="recentProvider"
+              provider="webui_recently_viewed"
+              page-size="15"
+              schemas="uid"
+            ></nuxeo-page-provider>
             <nuxeo-data-table
               id="latestViewedDocs"
               wrapper-height="350px"
@@ -449,8 +454,7 @@ limitations under the License.
         if (docs && docs.length > 0) {
           const storage = this.$.recentStorage;
           const provider = this.$.recentProvider;
-          const ids = docs.map((doc) => `'${doc.uid}'`).join(',');
-          provider.query = `SELECT * FROM Document WHERE ecm:uuid IN (${ids}) AND ecm:isTrashed = 0`;
+          provider.params = [docs.map((doc) => doc.uid)];
           provider.fetch().then((result) => {
             docs.forEach((doc) => {
               if (result.entries.findIndex((entry) => entry.uid === doc.uid) === -1) {

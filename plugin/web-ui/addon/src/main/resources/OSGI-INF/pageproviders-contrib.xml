@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.web.ui.pageproviders">
+
+  <extension target="org.nuxeo.ecm.platform.query.api.PageProviderService" point="providers">
+
+    <coreQueryPageProvider name="webui_recently_viewed">
+      <pattern>
+        SELECT * FROM Document WHERE ecm:uuid IN (?) AND ecm:isTrashed = 0
+      </pattern>
+      <pageSize>15</pageSize>
+    </coreQueryPageProvider>
+
+  </extension>
+
+</component>
