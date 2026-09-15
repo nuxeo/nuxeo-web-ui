@@ -24,6 +24,7 @@ import { FiltersBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-filters-behavior
 import '@nuxeo/nuxeo-ui-elements/nuxeo-document-preview.js';
 import '../nuxeo-document-blob/nuxeo-document-blob.js';
 import '../nuxeo-dropzone/nuxeo-dropzone.js';
+import { NuxeoOptimisticLockingBehavior } from '../behaviors/nuxeo-optimistic-locking-behavior.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
@@ -66,7 +67,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-viewer',
-  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior],
+  behaviors: [NotifyBehavior, I18nBehavior, FiltersBehavior, NuxeoOptimisticLockingBehavior],
 
   properties: {
     document: Object,
@@ -82,17 +83,8 @@ Polymer({
     }
     const props = {};
     props['file:content'] = this.document.properties['file:content'];
-    this.$.doc.data = {
-      'entity-type': 'document',
-      repository: this.document.repository,
-      uid: this.document.uid,
-      properties: props,
-    };
-
-    this.$.doc.put().then((response) => {
-      this.document = response;
+    return this.updateDocumentProperties(props, () => {
       this.notify({ message: this.i18n(this.uploadedMessage) });
-      this.fire('document-updated');
     });
   },
 
