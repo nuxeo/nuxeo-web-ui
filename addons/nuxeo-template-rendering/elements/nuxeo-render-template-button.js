@@ -250,8 +250,8 @@ Polymer({
           }
         }),
       )
-      .catch((response) => {
-        this._toast(this.i18n('renderTemplateButton.toast.render.error', response.message));
+      .catch((error) => {
+        this._toast(this.i18n('renderTemplateButton.toast.render.error', error.message));
       });
   },
 
