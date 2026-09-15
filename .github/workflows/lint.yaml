@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
-          node-version: 22
+          node-version: 24
           scope: '@nuxeo'
 
       - name: Cache npm dependencies
