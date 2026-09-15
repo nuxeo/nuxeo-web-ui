@@ -47,7 +47,7 @@ jobs:
       with:
           registry-url: ${{ env.NPM_REPOSITORY }}
           always-auth: true
-          node-version: 22
+          node-version: 24
           scope: '@nuxeo'
 
     - name: Determine nuxeo-elements branch to link

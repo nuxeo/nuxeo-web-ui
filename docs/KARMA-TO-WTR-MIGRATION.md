@@ -41,7 +41,7 @@
 | **Puppeteer integration** | Uses a bundled Chromium via `puppeteer`; no system Chrome version mismatches in CI. |
 | **Simpler configuration** | Single `web-test-runner.config.mjs` replaces Karma config + Karma plugins + ESM config. |
 | **Better error reporting** | Stack traces are source-mapped; browser logs are filterable; uncaught errors are attributed to tests. |
-| **Node ≥ 18 native** | No hacks or legacy providers needed. |
+| **Node ≥ 22 native** | No hacks or legacy providers needed. |
 
 ---
 
@@ -424,7 +424,7 @@ If overall coverage drops significantly, it likely means new untested modules we
 | Coverage engine | Istanbul (source transform) | Istanbul (rollup-plugin-istanbul, no Babel) |
 | Coverage % (lcov) | reported by Karma at the end of the run | reported by `inject-zero-coverage.js` at the end of `npm test`; current baseline tracked in SonarCloud |
 | Browser | System ChromeHeadless | Puppeteer bundled Chromium |
-| Node requirement | ≥18 (with --openssl-legacy-provider) | ≥18 (no hacks) |
+| Node requirement | ≥18 (with --openssl-legacy-provider) | ≥22 (no hacks) |
 | Karma plugins | 8 packages | 0 |
 | WTR plugins | 0 | 1 custom (fallback) |
 | CI stability | Intermittent race conditions | Deterministic (single-entry barrel) |
