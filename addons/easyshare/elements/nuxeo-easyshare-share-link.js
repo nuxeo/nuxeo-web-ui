@@ -147,7 +147,7 @@ Polymer({
   },
 
   _isEasyshare(document) {
-    return document && document.type === 'EasyShareFolder';
+    return document?.type === 'EasyShareFolder';
   },
 
   _buildPermalink(document) {
@@ -168,12 +168,7 @@ Polymer({
     const link = shareButton.previousElementSibling;
 
     const otherShareButton = shareButton.id === 'easyShareIcon' ? this.$.permalinkIcon : this.$$('#easyShareIcon');
-    if (
-      otherShareButton &&
-      otherShareButton.display !== 'none' &&
-      otherShareButton._debouncer &&
-      otherShareButton._debouncer.isActive()
-    ) {
+    if (otherShareButton && otherShareButton.display !== 'none' && otherShareButton._debouncer?.isActive()) {
       otherShareButton._debouncer = otherShareButton._debouncer.flush();
     }
 
