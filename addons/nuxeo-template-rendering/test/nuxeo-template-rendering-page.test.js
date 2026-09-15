@@ -202,4 +202,42 @@ suite('nuxeo-template-rendering-page', () => {
       expect(el._getTemplateData()).to.equal(el.editedDocument.properties['tmpl:templateData']);
     });
   });
+
+  // WEBUI-1820: the template config save is a document write, so it takes part in optimistic locking
+  suite('_save conflict handling', () => {
+    setup(async () => {
+      el.document = baseDocument();
+      await flush();
+      sinon.stub(el, 'notify');
+      sinon.stub(el, 'fire');
+    });
+
+    teardown(() => {
+      el.notify.restore();
+      el.fire.restore();
+      el.$.doc.put.restore();
+    });
+
+    test('reports a conflict and reloads when the write is stale', async () => {
+      sinon.stub(el.$.doc, 'put').rejects({ status: 409 });
+
+      await el._save();
+
+      expect(el.notify).to.have.been.calledOnce;
+      expect(el.notify.firstCall.args[0].message).to.equal(el.i18n('documentUpdate.conflict'));
+      expect(el.fire).to.have.been.calledWith('document-updated');
+    });
+
+    test('still rejects other failures', async () => {
+      sinon.stub(el.$.doc, 'put').rejects({ status: 500 });
+
+      let caught;
+      await el._save().catch((err) => {
+        caught = err;
+      });
+
+      expect(caught).to.deep.equal({ status: 500 });
+      expect(el.notify).to.not.have.been.called;
+    });
+  });
 });

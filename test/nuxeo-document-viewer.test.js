@@ -64,4 +64,50 @@ suite('nuxeo-document-viewer', () => {
       expect(element._isDropzoneAvailable(doc)).to.be.false;
     });
   });
+
+  // WEBUI-1820: dropping a new rendition is a document write, so it takes part in optimistic locking
+  suite('optimistic locking', () => {
+    setup(() => {
+      element.document = {
+        uid: 'doc-1',
+        repository: 'default',
+        changeToken: '5-2',
+        properties: { 'file:content': { name: 'new.pdf' } },
+      };
+      sinon.stub(element, 'notify');
+      sinon.stub(element, 'fire');
+    });
+
+    teardown(() => {
+      element.notify.restore();
+      element.fire.restore();
+      if (element.$.doc.put.restore) {
+        element.$.doc.put.restore();
+      }
+    });
+
+    test('sends the change token of the loaded document', async () => {
+      sinon.stub(element.$.doc, 'put').resolves({ uid: 'doc-1' });
+      await element._valueChanged({ name: 'new.pdf' });
+      expect(element.$.doc.data.changeToken).to.eql('5-2');
+    });
+
+    test('reports a conflict and reloads when the write is stale', async () => {
+      sinon.stub(element.$.doc, 'put').rejects({ status: 409 });
+      await element._valueChanged({ name: 'new.pdf' });
+      expect(element.notify).to.have.been.calledOnce;
+      expect(element.notify.firstCall.args[0].message).to.eql(element.i18n('documentUpdate.conflict'));
+      expect(element.fire).to.have.been.calledWith('document-updated');
+    });
+
+    test('still rejects other failures', async () => {
+      sinon.stub(element.$.doc, 'put').rejects({ status: 500 });
+      let caught;
+      await element._valueChanged({ name: 'new.pdf' }).catch((err) => {
+        caught = err;
+      });
+      expect(caught).to.eql({ status: 500 });
+      expect(element.notify).to.not.have.been.called;
+    });
+  });
 });

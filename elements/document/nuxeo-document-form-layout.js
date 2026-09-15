@@ -26,6 +26,7 @@ import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { IronResizableBehavior } from '@polymer/iron-resizable-behavior/iron-resizable-behavior.js';
 import { I18nBehavior } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
+import { NuxeoOptimisticLockingBehavior } from '../behaviors/nuxeo-optimistic-locking-behavior.js';
 
 /**
 `nuxeo-document-form-layout`
@@ -100,7 +101,7 @@ Polymer({
   `,
 
   is: 'nuxeo-document-form-layout',
-  behaviors: [NotifyBehavior, IronResizableBehavior, I18nBehavior],
+  behaviors: [NotifyBehavior, IronResizableBehavior, I18nBehavior, NuxeoOptimisticLockingBehavior],
   importMeta: import.meta,
 
   properties: {
@@ -141,18 +142,19 @@ Polymer({
       this._setSaving(false);
       return;
     }
+    const isEdit = Boolean(this.document.uid);
     let action;
-    if (!this.document.uid) {
+    if (!isEdit) {
       // create
       this.$.doc.data = this.document;
       action = this.$.doc.post();
     } else {
       // edit
-      this.$.doc.data = {
+      this.$.doc.data = this.withChangeToken({
         'entity-type': 'document',
         uid: this.document.uid,
         properties: this._dirtyProperties,
-      };
+      });
       action = this.$.doc.put();
     }
     action
@@ -160,6 +162,9 @@ Polymer({
         this._refresh(this);
       })
       .catch((err) => {
+        if (isEdit && this.handleConflictError(err)) {
+          return;
+        }
         if (err && err['entity-type'] === 'validation_report') {
           this.$.layout.reportValidation(err);
         } else {
