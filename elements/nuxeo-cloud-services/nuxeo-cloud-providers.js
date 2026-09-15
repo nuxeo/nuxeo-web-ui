@@ -207,7 +207,7 @@ Polymer({
 
   _editEntry(e) {
     this._isNew = false;
-    this._selectedEntry = JSON.parse(JSON.stringify(e.target.parentNode.item));
+    this._selectedEntry = structuredClone(e.target.parentNode.item);
     this._selectedServiceName = this._selectedEntry.serviceName;
     if (Array.isArray(this._selectedEntry.scopes)) {
       this._selectedEntry.scopes = this._selectedEntry.scopes.join();
