@@ -128,26 +128,32 @@ Polymer({
       const principal = activity.principalName;
       if (principal && typeof principal === 'string' && !seen.has(principal)) {
         seen.add(principal);
-        if (INTERNAL_PRINCIPALS.has(principal)) {
-          // Never resolvable: skip the request entirely and display the raw name.
-          entities[principal] = principal;
-        } else {
-          try {
-            this.$.user.path = `/user/${encodeURIComponent(principal)}`;
-            const user = await this.$.user.get();
-            entities[principal] = user;
-          } catch (error) {
-            if (error.status !== 404) {
-              console.warn(`Unexpected error resolving user "${principal}":`, error);
-            }
-            entities[principal] = principal; // fallback: keep raw username for deleted users
-          }
-        }
+        entities[principal] = await this._resolveUser(principal);
       }
     }
     if (requestId !== this._principalsRequestId) return;
     this._principalEntities = entities;
     this._principalsLoading = false;
+  },
+
+  /**
+   * Resolves a principal name to a user entity, or returns the raw name when it cannot be
+   * resolved, which is what the template renders as-is.
+   */
+  async _resolveUser(name) {
+    if (INTERNAL_PRINCIPALS.has(name)) {
+      // Never resolvable: skip the request entirely and display the raw name.
+      return name;
+    }
+    try {
+      this.$.user.path = `/user/${encodeURIComponent(name)}`;
+      return await this.$.user.get();
+    } catch (error) {
+      if (error.status !== 404) {
+        console.warn(`Unexpected error resolving user "${name}":`, error);
+      }
+      return name; // fallback: keep raw username for deleted users
+    }
   },
 
   _resolvedPrincipal(principalName, entities, loading) {
