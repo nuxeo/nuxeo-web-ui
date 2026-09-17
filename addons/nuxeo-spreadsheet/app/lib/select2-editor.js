@@ -41,7 +41,6 @@ Select2Editor.prototype.createElements = function () {
   this.instance.rootElement[0].appendChild(this.TEXTAREA_PARENT);
 
   Handsontable.hooks.add('afterRender', () => {
-    // TODO(nfgs) - was that.instance.registerTimeout
     this.instance._registerTimeout(
       'refresh_editor_dimensions',
       () => {
