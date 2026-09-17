@@ -121,7 +121,8 @@ suite('nuxeo-easyshare-share-link', () => {
   suite('links', () => {
     test('should build a permalink to the document', () => {
       const base = window.location.origin + window.location.pathname;
-      expect(element._buildPermalink({ uid: 'doc-1' })).to.equal(`${base}#!/doc/doc-1`);
+      const separator = base.endsWith('/') ? '' : '/';
+      expect(element._buildPermalink({ uid: 'doc-1' })).to.equal(`${base}${separator}doc?id=doc-1`);
     });
 
     test('should return an empty permalink when there is no document', () => {
