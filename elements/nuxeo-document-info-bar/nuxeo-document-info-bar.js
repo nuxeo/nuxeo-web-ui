@@ -33,6 +33,11 @@ import '../nuxeo-workflow-graph/nuxeo-workflow-graph.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
+// Principals the platform creates internally and never stores in the user directory.
+// Resolving one via /user/<name> always 404s and makes the server log a WARN for every
+// call, which floods server.log (WEBUI-2309), so we never ask the server for them.
+const INTERNAL_PRINCIPALS = new Set(['system']);
+
 /**
 `nuxeo-document-info-bar`
 @group Nuxeo UI
@@ -254,15 +259,20 @@ Polymer({
       const initiator = wf.initiator;
       if (initiator && typeof initiator === 'string' && !seen.has(initiator)) {
         seen.add(initiator);
-        try {
-          this.$.user.path = `/user/${encodeURIComponent(initiator)}`;
-          const user = await this.$.user.get();
-          entities[initiator] = user;
-        } catch (error) {
-          if (error.status !== 404) {
-            console.warn(`Unexpected error resolving user "${initiator}":`, error);
+        if (INTERNAL_PRINCIPALS.has(initiator)) {
+          // Never resolvable: skip the request entirely and display the raw name.
+          entities[initiator] = initiator;
+        } else {
+          try {
+            this.$.user.path = `/user/${encodeURIComponent(initiator)}`;
+            const user = await this.$.user.get();
+            entities[initiator] = user;
+          } catch (error) {
+            if (error.status !== 404) {
+              console.warn(`Unexpected error resolving user "${initiator}":`, error);
+            }
+            entities[initiator] = initiator; // fallback: keep raw username for deleted users
           }
-          entities[initiator] = initiator; // fallback: keep raw username for system/deleted users
         }
       }
     }
