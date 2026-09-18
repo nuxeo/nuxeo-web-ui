@@ -64,9 +64,14 @@ make them sum to 4.00: the author needs to know what was genuinely weak and what
 5. `hidden: false` on a release that has not shipped yet.
 6. An internal identifier leaks into customer prose — Jira key, PR number, branch name, element
    name, file path, CSS variable, CVE id, or the words Sonar / SonarQube / SonarCloud / Veracode.
-7. The LTS 2025 and LTS 2023 pages differ beyond the heading line (LTS line + version). There is
-   no exception: the codebase is shared, so a content difference is always a defect in the notes
-   — including when the two buckets are uneven, which is written once onto both pages.
+7. The **customer-facing bodies** of the LTS 2025 and LTS 2023 pages differ. Compare only what
+   sits inside the `web-ui-updates` block, minus the `## What’s New …` heading line. The
+   frontmatter legitimately differs on four lines — `title`, `description`, `tree_item_index`
+   and the heading — so a raw full-file diff of a correct pair shows exactly **8 differing
+   lines** (four pairs); that is the expected result, not a failure. Beyond those, the codebase
+   is shared and a body difference is always a defect in the notes — including when the two
+   buckets are uneven, which is written once onto both pages. `lint-page.sh` performs exactly
+   this comparison.
 8. Security or Sonar work is itemised by package, version, CVE or rule instead of collapsed into
    the single security sentence.
 9. A forward-looking promise outside the accessibility-conformance convention (see

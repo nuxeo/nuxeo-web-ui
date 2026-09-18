@@ -52,11 +52,18 @@ printf '  %-16s %-18s %s\n' "$(basename "$ELEMENTS")" maintenance-3.1.x "${e31:-
 
 V2025=$w25; V31=$w31
 if [ -n "${1:-}" ]; then           # a pinned version: accept either line, derive the other
-  case "$1" in
-    2025.[0-9]*.0) V2025=$1; V31="3.1.$(( $(counter "$1") + 15 ))" ;;
-    3.1.[0-9]*)    V31=$1;   V2025="2025.$(( $(counter "$1") - 15 )).0" ;;
-    *) bad "'$1' is not a release version — expected 2025.N.0 or 3.1.Z"; exit 1 ;;
-  esac
+  # Anchored regex, not a glob: '3.1.[0-9]*' would accept 3.1.35.1 and silently yield 2025.-14.0.
+  if [[ $1 =~ ^2025\.([0-9]+)\.0$ ]]; then
+    V2025=$1; V31="3.1.$(( ${BASH_REMATCH[1]} + 15 ))"
+  elif [[ $1 =~ ^3\.1\.([0-9]+)$ ]]; then
+    V31=$1
+    if [ "${BASH_REMATCH[1]}" -le 15 ]; then
+      bad "'$1' predates the 2025 line (needs Z > 15); the LTS mapping page is authoritative"; exit 1
+    fi
+    V2025="2025.$(( ${BASH_REMATCH[1]} - 15 )).0"
+  else
+    bad "'$1' is not a release version — expected 2025.N.0 or 3.1.Z"; exit 1
+  fi
 fi
 [ -n "$V2025" ] && [ -n "$V31" ] || { bad "could not resolve a version pair"; exit 1; }
 

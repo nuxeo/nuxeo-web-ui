@@ -345,8 +345,10 @@ It checks every mechanical thing the review skill scores:
 - and it diffs the two bodies to enforce the twins rule.
 
 **Get it clean before Step 8.** The docs repo has no CI and no markdown lint, so this script is
-the only automated check that exists anywhere in the pipeline. `--released` inverts the `hidden`
-expectation for the post-release flip commit.
+the only automated check that exists anywhere in the pipeline.
+
+`--released` inverts the `hidden` expectation, so use it for the **outgoing** page this PR flips
+to `false` (Step 9) — not for the incoming one, which stays `true`.
 
 **Lint what is committed, not the working tree.** The two pages live on two branches in one
 clone, so a `git checkout` between them can leave one branch holding a stale copy while the
@@ -409,7 +411,12 @@ Hand the subagent only:
 
 - the two page files and the index-page diffs,
 - the version pair and the two bucket queries,
-- the path to the review skill, and nothing else — no ledger, no rationale, no draft history.
+- **the Step 6 coverage ledger** — the reviewer has to compare it against the buckets, and
+  without it a deliberate exclusion is indistinguishable from a dropped ticket (that is hard
+  failure 2),
+- the path to the review skill, and nothing else. Withhold your *reasoning* — the drafting
+  rationale, the rejected wordings, the history of what you changed and why. The ledger is
+  evidence to be checked; your reasoning is what the reviewer must not be able to lean on.
 
 Then:
 
