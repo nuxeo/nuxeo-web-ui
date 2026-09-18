@@ -320,9 +320,11 @@ Build both files exactly as `references/format-template.md` specifies: filename 
 (the `tree_item_index` formula and the `hidden` lifecycle), the handlebars multiexcerpt wrappers,
 the `What’s New …` heading naming the right LTS line and version, and the trailing `<br/>`.
 
-Pick the layout per `references/published-patterns.md`. The two pages are near-identical twins,
-differing only in the heading's LTS line and version — 2025.18.0 and 3.1.33 are byte-identical
-apart from that line.
+Pick the layout per `references/published-patterns.md`. The two pages are twins: their
+**customer-facing bodies** — everything inside the `web-ui-updates` block bar the
+`## What’s New …` heading — are identical. The frontmatter is not, and must not be: `title`,
+`description` and `tree_item_index` are per-line values. So a raw diff of a correct pair shows
+exactly **8 lines** (those three plus the heading, two sides each), which is a pass.
 
 Then lint them, before anyone reads them:
 

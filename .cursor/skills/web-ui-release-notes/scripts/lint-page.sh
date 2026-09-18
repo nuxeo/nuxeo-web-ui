@@ -193,6 +193,21 @@ body() {
 }
 if [ "$#" -eq 2 ]; then
   echo "== twins (the customer-facing body must be identical apart from the heading line)"
+  # The pair must be the matching LTS pair. Without this, a 2025.20.0 page and a 3.1.34 page
+  # with identical bodies pass, approving the wrong release combination.
+  n25=""; n31=""
+  for f in "$1" "$2"; do
+    b=$(basename "$f" .md); b=${b#web-ui-release-notes-}
+    if [[ $b =~ ^2025-([0-9]+)-0$ ]]; then n25=${BASH_REMATCH[1]}
+    elif [[ $b =~ ^3-1-([0-9]+)$ ]]; then n31=${BASH_REMATCH[1]}; fi
+  done
+  if [ -z "$n25" ] || [ -z "$n31" ]; then
+    FAIL "the twin check needs one 2025-N-0 page and one 3-1-Z page; got '$(basename "$1")' and '$(basename "$2")'"
+  elif [ "$n31" -ne "$((n25 + 15))" ]; then
+    FAIL "these are not the matching LTS pair: 2025.$n25.0 pairs with 3.1.$((n25 + 15)), not 3.1.$n31"
+  else
+    OK "matching LTS pair (2025.$n25.0 / 3.1.$n31)"
+  fi
   # -B: the real published pair 2025.18.0 / 3.1.33 differs by blank-line placement only.
   # Content parity is the rule; whitespace drift between the two branches is not a defect.
   if diff -B <(body "$1") <(body "$2") > "$TMP/twin"; then
