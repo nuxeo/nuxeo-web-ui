@@ -25,6 +25,11 @@ import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-user-tag.js';
 import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
+// Principals the platform creates internally and never stores in the user directory.
+// Resolving one via /user/<name> always 404s and makes the server log a WARN for every
+// call, which floods server.log (WEBUI-2309), so we never ask the server for them.
+const INTERNAL_PRINCIPALS = new Set(['system']);
+
 /**
 `nuxeo-document-activity`
 @group Nuxeo UI
@@ -123,21 +128,32 @@ Polymer({
       const principal = activity.principalName;
       if (principal && typeof principal === 'string' && !seen.has(principal)) {
         seen.add(principal);
-        try {
-          this.$.user.path = `/user/${encodeURIComponent(principal)}`;
-          const user = await this.$.user.get();
-          entities[principal] = user;
-        } catch (error) {
-          if (error.status !== 404) {
-            console.warn(`Unexpected error resolving user "${principal}":`, error);
-          }
-          entities[principal] = principal; // fallback: keep raw username for system/deleted users
-        }
+        entities[principal] = await this._resolveUser(principal);
       }
     }
     if (requestId !== this._principalsRequestId) return;
     this._principalEntities = entities;
     this._principalsLoading = false;
+  },
+
+  /**
+   * Resolves a principal name to a user entity, or returns the raw name when it cannot be
+   * resolved, which is what the template renders as-is.
+   */
+  async _resolveUser(name) {
+    if (INTERNAL_PRINCIPALS.has(name)) {
+      // Never resolvable: skip the request entirely and display the raw name.
+      return name;
+    }
+    try {
+      this.$.user.path = `/user/${encodeURIComponent(name)}`;
+      return await this.$.user.get();
+    } catch (error) {
+      if (error.status !== 404) {
+        console.warn(`Unexpected error resolving user "${name}":`, error);
+      }
+      return name; // fallback: keep raw username for deleted users
+    }
   },
 
   _resolvedPrincipal(principalName, entities, loading) {
