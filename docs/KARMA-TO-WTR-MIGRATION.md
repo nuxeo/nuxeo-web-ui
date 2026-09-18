@@ -41,7 +41,7 @@
 | **Puppeteer integration** | Uses a bundled Chromium via `puppeteer`; no system Chrome version mismatches in CI. |
 | **Simpler configuration** | Single `web-test-runner.config.mjs` replaces Karma config + Karma plugins + ESM config. |
 | **Better error reporting** | Stack traces are source-mapped; browser logs are filterable; uncaught errors are attributed to tests. |
-| **Node ≥ 22 native** | No hacks or legacy providers needed. |
+| **Node ≥ 22.13 native** | No hacks or legacy providers needed. |
 
 ---
 

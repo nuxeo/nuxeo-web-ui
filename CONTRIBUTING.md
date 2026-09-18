@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- **Node.js** ≥ 22.13 (`.nvmrc` pins 24 — run `nvm use` or `fnm use` in the repo root)
+- **Node.js** 22.13+ or 24+, not 23 (`.nvmrc` pins 24 — run `nvm use` or `fnm use` in the repo root)
 - **npm** (bundled with Node — no yarn or pnpm)
 - **Maven** and **Java 21** for marketplace builds
 - A running **Nuxeo Server** at `localhost:8080` for development and functional testing
