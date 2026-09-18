@@ -319,17 +319,15 @@ Polymer({
   _processLoad(data) {
     const object = data.scene;
 
-    if (data.cameras && data.cameras.length) {
-      for (let i = 0; i < data.cameras.length; i++) {
-        const dataCamera = data.cameras[i];
+    if (data.cameras?.length) {
+      for (const dataCamera of data.cameras) {
         const cameraName = dataCamera.parent.name;
         this.cameras[cameraName] = dataCamera;
       }
     }
 
-    if (data.animations && data.animations.length) {
-      for (let i = 0; i < data.animations.length; i++) {
-        const animation = data.animations[i];
+    if (data.animations?.length) {
+      for (const animation of data.animations) {
         animation.loop = true;
         animation.play();
         this.animations.push(animation);
@@ -370,7 +368,7 @@ Polymer({
         obj.geometry.verticesNeedUpdate = true;
         obj.geometry.normalsNeedUpdate = true;
       }
-      if (obj.material && obj.material.bumpMap) {
+      if (obj.material?.bumpMap) {
         obj.material.bumpScale = scale;
       }
     };

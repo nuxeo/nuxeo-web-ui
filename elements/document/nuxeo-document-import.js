@@ -974,7 +974,7 @@ Polymer({
       this.fire('nx-creation-wizard-hide-tabs');
       // let's select the first file that's not disabled
       const toSelect = this._getAllFiles().findIndex((f) => !f.error);
-      this._selectDoc(toSelect < 0 ? 0 : toSelect);
+      this._selectDoc(Math.max(0, toSelect));
     } else {
       this.stage = 'upload';
       this.customizing = false;
@@ -1046,6 +1046,10 @@ Polymer({
     let copiedDocData = {};
 
     if (docData && Object.keys(docData).length > 0) {
+      // Deliberately not structuredClone (sonar javascript:S7784): docData.document is mutated in
+      // place by the widgets of the runtime-resolved `nuxeo-<type>-import-layout`, which deployments
+      // may override, so the JSON round-trip's lossy strip is what keeps a non-cloneable property
+      // from aborting the import with a DataCloneError. See WEBUI-2249.
       copiedDocData = JSON.parse(JSON.stringify(docData));
     }
     copiedDocData.document.properties['dc:title'] = destFile.name;
@@ -1063,6 +1067,7 @@ Polymer({
       }
       this.set([propName, pos, 'docData'].join('.'), {
         parent: this.targetPath,
+        // Lossy JSON clone on purpose — see _copyFileData (sonar javascript:S7784, WEBUI-2249).
         document: JSON.parse(JSON.stringify(this.document)),
         type: this.selectedDocType,
       });
@@ -1076,6 +1081,7 @@ Polymer({
     if (docData && Object.keys(docData).length > 0) {
       this.targetPath = docData.parent;
       this.selectedDocType = this._importDocTypes.find((type) => type.id === docData.type.id);
+      // Lossy JSON clone on purpose — see _copyFileData (sonar javascript:S7784, WEBUI-2249).
       ({ properties } = JSON.parse(JSON.stringify(docData.document)));
     }
     if (title) {
@@ -1291,8 +1297,7 @@ Polymer({
 
   _mergeResponses(...args) {
     const response = { 'entity-type': 'Documents', entries: [] };
-    for (let i = 0; i < args.length; i++) {
-      const current = args[i];
+    for (const current of args) {
       if (current && current.entries) {
         response.entries.push(...current.entries);
       } else {
@@ -1356,21 +1361,19 @@ Polymer({
           result['entity-type'] !== 'exception' &&
           result['entity-type'] !== 'validation_report',
       );
-      this._handleSuccess(this._mergeResponses.apply(null, errorFree), !(errorFree.length < results.length));
+      this._handleSuccess(this._mergeResponses.apply(null, errorFree), errorFree.length >= results.length);
       if (errorFree.length < results.length) {
         this.set('_creating', false);
         this.set('_importWithPropertiesError', 'These documents could not be created.');
         // splice from the highest index down, so that removals do not shift the indexes still to be removed
-        localIndexes
-          .sort((a, b) => b - a)
-          .forEach((index) => {
-            this.splice('localFiles', index, 1);
-          });
-        remoteIndexes
-          .sort((a, b) => b - a)
-          .forEach((index) => {
-            this.splice('remoteFiles', index, 1);
-          });
+        localIndexes.sort((a, b) => b - a);
+        localIndexes.forEach((index) => {
+          this.splice('localFiles', index, 1);
+        });
+        remoteIndexes.sort((a, b) => b - a);
+        remoteIndexes.forEach((index) => {
+          this.splice('remoteFiles', index, 1);
+        });
         /*
          * XXX Prevent this._selectDoc(0) from storing the previously selected file,
          * in case it was saved and removed from localFiles.
@@ -1438,10 +1441,9 @@ Polymer({
 
   _batchReady(data) {
     data.stopPropagation();
-    this.properties = [];
-    for (let i = 0; i < this.localFiles.length; i++) {
-      this.properties.push({});
-    }
+    this.properties = this.localFiles.map(() => {
+      return {};
+    });
     const div = this.$$('div[name="upload"]');
     if (div) {
       div.focus();
@@ -1531,7 +1533,7 @@ Polymer({
   },
 
   _filterImportDocTypes(type) {
-    return window.nuxeo.importBlacklist.indexOf(type.type) === -1;
+    return !window.nuxeo.importBlacklist.includes(type.type);
   },
 
   _computeImportDocTypes() {

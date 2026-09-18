@@ -445,7 +445,7 @@ Polymer({
     } else {
       data.stopPropagation();
     }
-    const value = this._getFiles(data);
+    const value = this.multiple || this.blobList ? this._getFileList(data) : this._getFile(data);
     const failed = this.files.filter((f) => f.error);
     if (this.multiple) {
       if (!this.value || !Array.isArray(this.value)) {
@@ -485,50 +485,52 @@ Polymer({
     this._setHasFilesUploaded(true);
   },
 
-  _getFiles(data) {
-    let uploadedFile;
-    if (this.multiple || this.blobList) {
-      const files = [];
-      this.files
-        .filter((file) => !file.error)
-        .forEach((file) => {
-          if (data.type === 'nx-blob-picked') {
-            uploadedFile = {
-              providerId: file.providerId,
-              user: file.user,
-              fileId: file.fileId,
-            };
-          } else {
-            uploadedFile = {
-              'upload-batch': data.detail.batchId,
-              'upload-fileId': file.index.toString(),
-            };
-          }
+  // Upload payloads for every successfully uploaded file, for the `multiple` and `blobList` modes
+  // whose `value` is an array.
+  _getFileList(data) {
+    const files = [];
+    this.files
+      .filter((file) => !file.error)
+      .forEach((file) => {
+        let uploadedFile;
+        if (data.type === 'nx-blob-picked') {
+          uploadedFile = {
+            providerId: file.providerId,
+            user: file.user,
+            fileId: file.fileId,
+          };
+        } else {
+          uploadedFile = {
+            'upload-batch': data.detail.batchId,
+            'upload-fileId': file.index.toString(),
+          };
+        }
 
-          if (this.valueKey) {
-            const wrappedFile = {};
-            wrappedFile[this.valueKey] = uploadedFile;
-            files.push(wrappedFile);
-          } else {
-            files.push(uploadedFile);
-          }
-        });
-      return files;
-    }
+        if (this.valueKey) {
+          const wrappedFile = {};
+          wrappedFile[this.valueKey] = uploadedFile;
+          files.push(wrappedFile);
+        } else {
+          files.push(uploadedFile);
+        }
+      });
+    return files;
+  },
+
+  // Upload payload for the single-blob mode, whose `value` is one object.
+  _getFile(data) {
     if (data.type === 'nx-blob-picked') {
       const file = data.detail.blobs[0];
-      uploadedFile = {
+      return {
         providerId: file.providerId,
         user: file.user,
         fileId: file.fileId,
       };
-    } else {
-      uploadedFile = {
-        'upload-batch': data.detail.batchId,
-        'upload-fileId': '0',
-      };
     }
-    return uploadedFile;
+    return {
+      'upload-batch': data.detail.batchId,
+      'upload-fileId': '0',
+    };
   },
 
   _deleteFile(e) {
@@ -562,13 +564,9 @@ Polymer({
       value == null ||
       (Array.isArray(value) &&
         value.filter(
-          (file) =>
-            !Object.prototype.hasOwnProperty.call(
-              this.valueKey && file[this.valueKey] != null ? file[this.valueKey] : file,
-              'data',
-            ),
+          (file) => !Object.hasOwn(this.valueKey && file[this.valueKey] != null ? file[this.valueKey] : file, 'data'),
         ).length === 0) ||
-      Object.prototype.hasOwnProperty.call(value, 'data')
+      Object.hasOwn(value, 'data')
     ) {
       if (this.uploading) {
         this.cancelBatch();
@@ -638,7 +636,7 @@ Polymer({
       document.retainedProperties &&
       document.retainedProperties.length > 0
     ) {
-      if (document.retainedProperties.indexOf(this.xpath) !== -1) {
+      if (document.retainedProperties.includes(this.xpath)) {
         return false;
       }
     }
@@ -674,17 +672,17 @@ Polymer({
       return false;
     }
     if (this.accept && this.files && this.files.length > 0) {
-      const accepted = this.accept.split(',').map((a) => a.trim().toLowerCase());
+      const accepted = new Set(this.accept.split(',').map((a) => a.trim().toLowerCase()));
 
-      const invalidFile = this.files.find((file) => {
+      const hasInvalidFile = this.files.some((file) => {
         const name = file.name || '';
         const extension = `.${name.split('.').pop().toLowerCase()}`;
         const mime = (file.type || '').toLowerCase();
 
-        return !accepted.includes(extension) && !accepted.includes(mime);
+        return !accepted.has(extension) && !accepted.has(mime);
       });
 
-      if (invalidFile) {
+      if (hasInvalidFile) {
         this._errorMessage = this.i18n('dropzone.invalid.file', this.accept);
         return false;
       }

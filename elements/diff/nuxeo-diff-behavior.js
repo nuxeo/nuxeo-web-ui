@@ -24,7 +24,9 @@ function generateTextDiffHunks(text) {
     .reduce((result, value, index, array) => {
       if (index % 2 === 0) {
         const pair = array.slice(index, index + 2);
-        let range = pair[0].match(/\d+,\d+/g);
+        // `\b` stops the scan from restarting inside a run of digits, which would make
+        // the failed match attempts quadratic in the length of the hunk header
+        let range = pair[0].match(/\b\d+,\d+/g);
         range = {
           original: range[0].split(',').map(Number),
           new: range[1].split(',').map(Number),
@@ -245,7 +247,7 @@ export const DiffBehavior = {
     } else if (this._hasTextDiff(delta)) {
       [value] = delta;
     } else if (this._hasArrayInnerChanges(delta)) {
-      const aKey = Object.keys(delta).filter((key) => key !== '_t')[0];
+      const aKey = Object.keys(delta).find((key) => key !== '_t');
       value = Array.isArray(delta[aKey]) ? delta[aKey][0] : delta[aKey];
     }
     return value;
@@ -256,9 +258,11 @@ export const DiffBehavior = {
   },
 
   _isSimple(delta, originalValue) {
-    return delta
-      ? this._isSimpleDelta(delta)
-      : !this._isObject(Array.isArray(originalValue) && originalValue.length > 0 ? originalValue[0] : originalValue);
+    if (delta) {
+      return this._isSimpleDelta(delta);
+    }
+    const value = Array.isArray(originalValue) && originalValue.length > 0 ? originalValue[0] : originalValue;
+    return !this._isObject(value);
   },
 
   _getAllKeys(delta, originalValue, showAll) {

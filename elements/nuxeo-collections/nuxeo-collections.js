@@ -539,7 +539,7 @@ Polymer({
     if (collection && collection.contextParameters && collection.contextParameters.permissions) {
       // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
       // Action will therefore not be available
-      return collection.contextParameters.permissions.indexOf('ReadCanCollect') > -1;
+      return collection.contextParameters.permissions.includes('ReadCanCollect');
     }
     return false;
   },

@@ -123,7 +123,7 @@ Polymer({
         validKey = 'space';
       } else if (/^escape$/.test(lKey)) {
         validKey = 'esc';
-      } else if (/^arrow/.test(lKey)) {
+      } else if (lKey.startsWith('arrow')) {
         validKey = lKey.replace('arrow', '');
       } else if (lKey === 'multiply') {
         validKey = '*';

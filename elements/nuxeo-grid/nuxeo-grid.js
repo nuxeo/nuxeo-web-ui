@@ -19,7 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-element.js';
 
-class Child {
+export class Child {
   static get ATTRS() {
     return {
       COLUMN: 'data-column',
@@ -69,7 +69,7 @@ class Child {
    * Sets the grid column in which this element will be placed.
    */
   set column(val) {
-    return this._setAttribute(Child.ATTRS.COLUMN, val);
+    this._setAttribute(Child.ATTRS.COLUMN, val);
   }
 
   /**
@@ -83,7 +83,7 @@ class Child {
    * Sets the number of columns this element occupies.
    */
   set columnspan(val) {
-    return this._setAttribute(Child.ATTRS.COLUMNSPAN, val);
+    this._setAttribute(Child.ATTRS.COLUMNSPAN, val);
   }
 
   /**
@@ -97,7 +97,7 @@ class Child {
    * Sets the grid row in which this element will be placed.
    */
   set row(val) {
-    return this._setAttribute(Child.ATTRS.ROW, val);
+    this._setAttribute(Child.ATTRS.ROW, val);
   }
 
   /**
@@ -111,7 +111,7 @@ class Child {
    * Sets the number of rows this element occupies.
    */
   set rowspan(val) {
-    return this._setAttribute(Child.ATTRS.ROWSPAN, val);
+    this._setAttribute(Child.ATTRS.ROWSPAN, val);
   }
 
   /**
@@ -125,7 +125,7 @@ class Child {
    * Sets the vertical alignment of this element in the grid. Valid values are `stretch`, `center`, `start` and `end`.
    */
   set align(val) {
-    return this._setAttribute(Child.ATTRS.ALIGN, val);
+    this._setAttribute(Child.ATTRS.ALIGN, val);
   }
 
   /**
@@ -139,7 +139,7 @@ class Child {
    * Sets the horizontal alignment of this element in the grid. Valid values are `stretch`, `center`, `start` and `end`.
    */
   set justify(val) {
-    return this._setAttribute(Child.ATTRS.JUSTIFY, val);
+    this._setAttribute(Child.ATTRS.JUSTIFY, val);
   }
 }
 
@@ -156,8 +156,26 @@ function validateValue(value, regex, warn, property) {
   return value;
 }
 
+// Drops lines that hold nothing but whitespace and an optional trailing `;`, along with
+// their terminator. Matching that with one pattern needs a quantifier whose failure has to
+// retry every prefix length of the whitespace run, which is quadratic on a long line, so
+// the split and the emptiness test are done separately and each stays linear.
 function removeEmptyLines(str) {
-  return str.replace(/^\s*;?$(?:\r\n?|\n)/gm, '');
+  // `\r` and `\n` are split apart rather than treated as one terminator on purpose: in
+  // multiline mode `^` also matched between them, so the `\n` of a CRLF pair counted as an
+  // empty line of its own and was stripped. Splitting per character preserves that.
+  const parts = str.split(/([\r\n])/);
+  let result = '';
+  for (let i = 0; i < parts.length; i += 2) {
+    const content = parts[i];
+    const terminator = parts[i + 1] || '';
+    const withoutTrailingSemiColon = content.endsWith(';') ? content.slice(0, -1) : content;
+    // an unterminated final line is always kept, as it was before
+    if (terminator === '' || withoutTrailingSemiColon.trim() !== '') {
+      result += content + terminator;
+    }
+  }
+  return result;
 }
 
 function wrapMediaQuery(css, mquery) {
@@ -168,6 +186,33 @@ function wrapMediaQuery(css, mquery) {
 ${css.replace(/^(.+)$/gm, '  $1') /* apply indentation */}
 }
 `);
+}
+
+function buildDeclaration(property, value) {
+  return value ? `${property}: ${value};` : '';
+}
+
+/**
+ * Builds a `grid-column` / `grid-row` shorthand from a start line and a span.
+ *
+ * `line` is interpolated even when it is absent, which reproduces the output of the previous
+ * implementation byte-for-byte. A span with no start line therefore still yields an invalid
+ * declaration (`grid-column: undefinedspan 3;`) that browsers discard. That is a real defect, but
+ * correcting it here would change rendering, so it is tracked separately in WEBUI-2289 and left
+ * untouched by this refactor.
+ */
+function buildGridLine(property, line, span) {
+  if (!line && !span) {
+    return '';
+  }
+  let value = `${line}`;
+  if (span) {
+    if (line) {
+      value += ' / ';
+    }
+    value += `span ${span}`;
+  }
+  return `${property}: ${value};`;
 }
 
 function buildGridStyle(grid, validate = true) {
@@ -185,10 +230,11 @@ function buildGridStyle(grid, validate = true) {
 :host {
   display: grid;
   grid-template-columns: ${
-    cGrid.templateColumns || (cGrid.columns && cGrid.columns > 1 ? Array(cGrid.columns).fill('1fr').join(' ') : 'auto')
+    cGrid.templateColumns ||
+    (cGrid.columns && cGrid.columns > 1 ? new Array(cGrid.columns).fill('1fr').join(' ') : 'auto')
   };
   grid-template-rows: ${
-    cGrid.templateRows || (cGrid.rows && cGrid.rows > 1 ? Array(cGrid.rows).fill('auto').join(' ') : 'auto')
+    cGrid.templateRows || (cGrid.rows && cGrid.rows > 1 ? new Array(cGrid.rows).fill('auto').join(' ') : 'auto')
   };
   ${cGrid.gap ? `grid-gap: ${cGrid.gap}` : ''};
   ${cGrid.columnGap ? `grid-column-gap: ${cGrid.columnGap};` : ''}
@@ -214,20 +260,10 @@ function buidChildStyle(child, validate = true) {
   }
   const css = `
 ::slotted([${Child.ATTRS.CHILDID}="${cChild.id}"]) {
-  ${
-    cChild.column || cChild.columnspan
-      ? `grid-column: ${cChild.column}${
-          cChild.columnspan ? `${cChild.column ? ' / ' : ''}span ${cChild.columnspan}` : ''
-        };`
-      : ''
-  }
-  ${
-    cChild.row || cChild.rowspan
-      ? `grid-row: ${cChild.row}${cChild.rowspan ? `${cChild.row ? ' / ' : ''}span ${cChild.rowspan}` : ''};`
-      : ''
-  }
-  ${cChild.align ? `align-self: ${cChild.align};` : ''}
-  ${cChild.justify ? `justify-self: ${cChild.justify};` : ''}
+  ${buildGridLine('grid-column', cChild.column, cChild.columnspan)}
+  ${buildGridLine('grid-row', cChild.row, cChild.rowspan)}
+  ${buildDeclaration('align-self', cChild.align)}
+  ${buildDeclaration('justify-self', cChild.justify)}
 }
 `;
   return removeEmptyLines(css);
@@ -380,19 +416,14 @@ class Grid extends Nuxeo.Element {
   connectedCallback() {
     super.connectedCallback();
     this._updateGrid();
-    const targetNode = this;
     const config = { attributes: true, childList: true, subtree: true };
     this.__observer = new MutationObserver((mutationList) => {
       if (
-        mutationList.some((mutation) => {
-          if (
+        mutationList.some(
+          (mutation) =>
             mutation.target === this ||
-            (mutation.type === 'attributes' && Object.values(Child.ATTRS).includes(mutation.attributeName))
-          ) {
-            return true;
-          }
-          return false;
-        })
+            (mutation.type === 'attributes' && Object.values(Child.ATTRS).includes(mutation.attributeName)),
+        )
       ) {
         // refresh the grid when there is a mutation in:
         // - the grid, for any type of mutation
@@ -400,7 +431,7 @@ class Grid extends Nuxeo.Element {
         this._updateGrid();
       }
     });
-    this.__observer.observe(targetNode, config);
+    this.__observer.observe(this, config);
   }
 
   disconnectedCallback() {

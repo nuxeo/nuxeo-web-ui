@@ -102,8 +102,8 @@ limitations under the License.
           this.tokens = response.entries;
           if (this.tokens.length > 0) {
             this.$.clients.get().then((innerResponse) => {
-              this.clients = innerResponse.entries.filter(
-                (client) => this.tokens.findIndex((token) => token.clientId === client.id) > -1,
+              this.clients = innerResponse.entries.filter((client) =>
+                this.tokens.some((token) => token.clientId === client.id),
               );
             });
           } else {
