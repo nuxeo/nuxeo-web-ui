@@ -33,7 +33,7 @@ The Jira skills are independent and can be used on their own.
 
 ## One-time setup
 
-Prerequisites: [Cursor](https://cursor.com), Node ≥ 18 (repo uses `nvm`), the
+Prerequisites: [Cursor](https://cursor.com), Node ≥ 22.13 (repo uses `nvm`; `.nvmrc` pins 24), the
 [GitHub CLI](https://cli.github.com) (`gh`), and `git`. Do the following once per machine.
 
 ### 1. Atlassian (Jira/Confluence) MCP server — needed for every Jira-touching skill
@@ -99,7 +99,7 @@ New SSH key → Key type: *Signing Key*). Verify a commit shows `signed:G` via
 ### 5. Local dev/test prerequisites (for the bug-fix gating checks)
 
 ```bash
-nvm use 22        # or any Node ≥ 18
+nvm use           # reads .nvmrc (24); minimum is 22.13
 npm ci
 ```
 
