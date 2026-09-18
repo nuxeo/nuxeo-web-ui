@@ -106,6 +106,11 @@ Every time the docs repo costs you time with something not written down here, ad
 same session**, then mirror the file into the other skill trees (Step 10 of `SKILL.md`). This
 table is the whole point of that step.
 
+**Human review comments on the release-notes PRs land here too.** When a reviewer points out a
+convention this file does not carry, that is a surprise like any other — add the row, with the
+date and the PR it came from. See Step 11 of `SKILL.md` for the full loop, including recording it
+on the release's NXDOC ticket.
+
 | Date | What surprised us | What to do about it |
 |---|---|---|
 | 2026-08 | Review comments on real PRs were pure formatting — commits titled `format` and `Removed extra blank lines` | Formatting is reviewed strictly; run the review skill before pushing |
