@@ -1644,6 +1644,13 @@ suite('nuxeo-results', () => {
       expect(results.$.preferences.headers).to.deep.equal({ accept: 'application/json' });
     });
 
+    test('_configureDocPreferencesResource leaves reserved characters to the client encoder', () => {
+      // The Nuxeo JS client percent-encodes the request path, so encoding it here too would send
+      // `My%2520Content` and make the server report a missing document (WEBUI-2027).
+      results._configureDocPreferencesResource('/default-domain/My Content');
+      expect(results.$.preferences.path).to.equal('/path/default-domain/My Content/@preferences');
+    });
+
     test('_getDocPrefsFromEnricher reads and parses preference payloads', () => {
       const doc = {
         contextParameters: {
