@@ -64,6 +64,10 @@ Polymer({
         border: 2px dashed var(--paper-input-container-invalid-color, #de350b);
       }
 
+      :host([invalid]) label {
+        color: var(--paper-input-container-invalid-color, #de350b);
+      }
+
       label[required]::after {
         display: inline-block;
         content: '*';
