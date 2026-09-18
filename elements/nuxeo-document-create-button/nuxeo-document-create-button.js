@@ -161,13 +161,10 @@ Polymer({
       ) {
         this.$.defaultDoc.get();
       } else {
-        const subtypes =
-          this.parent.contextParameters && this.parent.contextParameters.subtypes
-            ? this.parent.contextParameters.subtypes.map((type) => {
-                type.id = type.type.toLowerCase();
-                return type;
-              })
-            : [];
+        const subtypes = this.parent.contextParameters.subtypes.map((type) => {
+          type.id = type.type.toLowerCase();
+          return type;
+        });
         const filteredSubtypes = [];
         if (this._canCreateIn(this.parent)) {
           subtypes.forEach((type) => {
