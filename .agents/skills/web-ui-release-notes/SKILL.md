@@ -65,6 +65,7 @@ Never write from memory or from a code diff alone. These are the only authoritat
 | Release process | Confluence **WEB UI Release Checklist** (page `4276715819`) |
 | Scope verification *(upstream — not this skill's job)* | Confluence **WEB UI and Elements Release Ticket Verification Guide** (page `4277207540`) |
 | Version pairing | Confluence **Nuxeo Web UI LTS 2023 & 2025 Release mapping** (page `3523969324`) |
+| Lessons from past releases | Confluence **Web UI Release Notes — Feedback & Lessons Log** (page `4309167086`) — **read it before drafting**; write to it per Step 11 |
 
 Reference files in this skill:
 
@@ -153,6 +154,11 @@ trusting this list or the arithmetic.
 
 **If `nuxeo-web-ui` and `nuxeo-elements` disagree on the version for the same line**, the
 promotion/alignment cycle is mid-flight. Stop and report it; do not pick one.
+
+**Read the Feedback & Lessons Log first** (page `4309167086`). It is the register of what went
+wrong on previous releases and what was done about it, including issues that were captured but
+not yet fixed. Rows still marked **Captured** are live traps — check whether any applies to this
+release before you draft, not after a reviewer finds it again.
 
 Report back what you resolved before continuing: the two versions, the planned release date and
 the ticket count per bucket. Report the counts as information, not as a gate — an uneven pair is
@@ -473,8 +479,10 @@ If you hit anything not already documented here — a frontmatter key you had to
 `npm run verify` failure, a changed template convention, a new category name, a reviewer
 preference — then **in the same session**:
 
-1. Add the fact to the right reference file (repo mechanics → `references/doc-repo.md`, and log
-   it in that file's **Surprises log** table with the date and what it cost).
+1. Add **the rule** to the right reference file (repo mechanics → `references/doc-repo.md`, under
+   *Conventions learned the hard way*). Write it as a rule — "do this, not that" — **not** as a
+   story about what went wrong. The narrative belongs in the Confluence log (Step 11); keeping it
+   in both places is how a register stops being trusted.
 2. Mirror the change into every tree the repo keeps in sync.
 
    **Edit `.cursor/skills/…` — it is the canonical tree** (see `.agents/skills/README.md`).
@@ -534,7 +542,7 @@ unsupported sentence slips in.
 | The comment was… | Then |
 |---|---|
 | **A fact about this release** — wrong ticket detail, a sentence they want phrased differently | Fix the page. Nothing to learn; the skill was not wrong. |
-| **A rule this skill has wrong, or does not have at all** — a convention, a category name, a template detail, a house style preference, something the linter should have caught | **Fix the skill**, per Step 10: the right reference file, a dated row in the `doc-repo.md` **Surprises log**, and mirror the trees. If a script could have caught it, add the check. |
+| **A rule this skill has wrong, or does not have at all** — a convention, a category name, a template detail, a house style preference, something the linter should have caught | **Fix the skill**, per Step 10: the rule into the right reference file, and mirror the trees. If a script could have caught it, add the check. The *issue* is recorded in the Confluence log, not in the skill. |
 
 Be precise about which it is. **Fixing the page without fixing the skill guarantees the same
 comment next release** — and the reviewer will rightly be less patient the second time.
@@ -544,25 +552,49 @@ Check the published pages first, then either correct the skill *with that eviden
 explain to the reviewer why the current form is what the published pages use. Both outcomes are
 fine; guessing is not.
 
-**6. Record it in Jira, on this release's NXDOC ticket.** The skill files are the durable fix;
-the Jira comment is the audit trail, and it is what the *next* release's author sees without
-having to read a skill diff. Post one comment covering the whole review round:
+**6. Write it to the Feedback & Lessons Log — always.** Confluence page `4309167086`, in the
+user's personal space. This is the one destination that is **not** conditional: even an issue you
+are not fixing today goes here, which is the whole reason it exists. Add a row per issue, newest
+first:
+
+| Column | What goes in it |
+|---|---|
+| Date, Release | `YYYY-MM-DD`, and the version pair (or `n/a (skill PR)`) |
+| Source | `Review gate`, `PR review — <reviewer>`, `Release execution`, `Jira scope`, `Historic` |
+| What went wrong | The observable problem, specifically. Not "formatting issue". |
+| Root cause | Why it happened — the rule that was missing or wrong |
+| Fix / Action | What was done, or why it was not done yet |
+| Status | `Skill updated` · `Captured` · `Upstream` · `Won't fix` |
+
+Use `Captured` honestly. A row that claims `Skill updated` when nothing changed is worse than no
+row, because the next run will trust it.
+
+**7. Point the NXDOC ticket at the log — do not duplicate it there.** One short comment, so the
+release ticket is discoverable from the record and no more:
 
 ```
-Release-notes review feedback — <version pair>
-
-| Reviewer asked | What changed on the page | Skill updated? |
-|---|---|---|
-| <the comment, in a line> | <the fix> | yes — references/<file>.md + Surprises log / no — one-off |
-
+Release-notes review feedback for <version pair> is recorded in
+"Web UI Release Notes — Feedback & Lessons Log" (Confluence page 4309167086):
+<n> issues, <n> of which changed the skill.
 Re-scored after the content changes: <score>/5.
 ```
 
-Then tell the user the same thing in the handover, so nothing depends on someone reading Jira.
+Issue detail lives in **one** place. A Jira comment that restates the table will drift from it,
+and then nobody can tell which one is current.
 
-**Why both places.** The skill update stops recurrence; the Jira comment makes the history
-searchable per release and survives someone rewriting the skill later. Neither replaces the
-other.
+Then tell the user the same thing in the handover, so nothing depends on someone reading a page.
+
+**One register, one fix, one pointer.** In priority order:
+
+| Destination | Job | Written when |
+|---|---|---|
+| **The Feedback & Lessons Log** (Confluence `4309167086`) | **The register.** The single canonical record of what went wrong, why, and what was decided — including issues captured but not yet fixed. It survives a skill rewrite and spans releases. | **Always** |
+| The skill's reference files | **The fix.** The corrected rule only, phrased as a rule — never the incident narrative. | Only for a rule-level issue |
+| A comment on the release's NXDOC ticket | **A pointer**, so the release ticket is discoverable from the register. Never a copy of it. | Once per review round |
+
+The reason the register is not kept in the skill or in Jira is that both get lost: a skill file
+is rewritten and its history goes with it, and a Jira comment is buried on a ticket nobody opens
+again. One durable page, linked from both.
 
 ### Step 12 — After publication
 
