@@ -66,6 +66,12 @@ check_page() {
 
   # --- frontmatter -------------------------------------------------------------
   [ "$(head -1 "$f")" = "---" ] || FAIL "file must open with the '---' frontmatter fence"
+  # Both fences, not just the opener: without the closing one the renderer treats the whole
+  # page as frontmatter and publishes nothing. Nothing below can be trusted either, so stop.
+  if ! awk 'NR>1&&/^---$/{found=1;exit} END{exit !found}' "$f"; then
+    FAIL "frontmatter has no closing '---' fence — the renderer would swallow the page body and publish a blank page"
+    return
+  fi
   for k in title description toc tree_item_index hidden; do
     [ -n "$(fm "$f" "$k")" ] || FAIL "frontmatter: missing '$k'"
   done
@@ -222,7 +228,13 @@ fi
 # --- index page ----------------------------------------------------------------
 if [ -n "$INDEX" ]; then
   echo "== $INDEX (index page)"
-  if [ ! -f "$INDEX" ]; then FAIL "index page does not exist: $INDEX"; else
+  if [ ! -f "$INDEX" ]; then FAIL "index page does not exist: $INDEX"
+  elif [ "$(head -1 "$INDEX")" != "---" ] \
+    || ! awk 'NR>1&&/^---$/{found=1;exit} END{exit !found}' "$INDEX"; then
+    # Same failure mode as a release page: without both fences the renderer swallows the
+    # index body, so the transclusion never resolves.
+    FAIL "the index page's frontmatter is missing its opening or closing '---' fence"
+  else
     newslug=$(basename "$1" .md); newslug=${newslug#web-ui-release-notes-}
     newver=$(echo "$newslug" | sed 's/^2025-/2025./; s/-/./g')
     if grep -qF "{{{multiexcerpt 'web-ui-updates' page='web-ui-release-notes-$newslug'}}}" "$INDEX"; then
