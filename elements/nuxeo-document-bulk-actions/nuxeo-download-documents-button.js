@@ -85,9 +85,9 @@ Polymer({
   _params() {
     const params = {};
     if (this.document && (this.hasFacet(this.document, 'Collection') || this.hasFacet(this.document, 'Folderish'))) {
-      params.filename = `${this.document.title}_${new Date().getTime()}.zip`;
+      params.filename = `${this.document.title}_${Date.now()}.zip`;
     } else {
-      params.filename = `${this.i18n('bulkDownload.filename.selection')}-${new Date().getTime()}.zip`;
+      params.filename = `${this.i18n('bulkDownload.filename.selection')}-${Date.now()}.zip`;
     }
     return params;
   },

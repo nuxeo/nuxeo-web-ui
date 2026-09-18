@@ -23,7 +23,7 @@ limitations under the License.
 <dom-module id="nuxeo-webtemplatesource-view-layout">
   <template>
     <style include="nuxeo-styles">
-      *[role='widget'] {
+      *[data-widget] {
         @apply --paper-card;
       }
       .queue-thumbnail {
@@ -45,7 +45,7 @@ limitations under the License.
     >
     </nuxeo-page-provider>
 
-    <nuxeo-note-editor role="widget" document="[[document]]"></nuxeo-note-editor>
+    <nuxeo-note-editor data-widget document="[[document]]"></nuxeo-note-editor>
 
     <nuxeo-card heading="[[i18n('templateSourceViewLayout.templateBasedDocuments.heading')]]">
       <div class="vertical layout">
@@ -59,7 +59,7 @@ limitations under the License.
         >
           <nuxeo-data-table-column name="[[i18n('documentContentView.datatable.header.title')]]" flex="100">
             <template>
-              <img class="queue-thumbnail" src="[[_thumbnail(item)]]" alt$="[[document.title]]" />
+              <img class="queue-thumbnail" src="[[_thumbnail(item)]]" alt="" />
               <a href$="[[urlFor(item)]]">[[item.title]]</a>
             </template>
           </nuxeo-data-table-column>
