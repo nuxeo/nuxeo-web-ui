@@ -126,7 +126,7 @@ function run({ baseURL = '/nuxeo', resultColumns, pageProviderName, queryParamet
       for (const k in searchDocument.properties) {
         const v = searchDocument.properties[k];
         // skip empty values
-        if (typeof v.length !== 'undefined' && v.length === 0) {
+        if (v.length !== undefined && v.length === 0) {
           continue;
         }
         namedParameters[k] = typeof v === 'string' ? v : JSON.stringify(v);

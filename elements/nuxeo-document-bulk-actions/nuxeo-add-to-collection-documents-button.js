@@ -219,7 +219,7 @@ class NuxeoAddToCollectionDocumentsButton extends mixinBehaviors(
   }
 
   _resultsFilter(entry) {
-    return entry.id && entry.id.indexOf('-999999') === -1;
+    return entry.id && !entry.id.includes('-999999');
   }
 
   _resultAndSelectionFormatter(item) {
