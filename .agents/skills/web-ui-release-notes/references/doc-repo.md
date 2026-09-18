@@ -100,27 +100,25 @@ review stands between your draft and the published page** — which is why the
 - Documentation-wide conventions live under `src/nxdoc/contributing-to-nuxeo` — consult it before
   inventing a convention.
 
-## Surprises log
+## Conventions learned the hard way
 
-Every time the docs repo costs you time with something not written down here, add a row **in the
-same session**, then mirror the file into the other skill trees (Step 10 of `SKILL.md`). This
-table is the whole point of that step.
+These are **rules**, not history. Each one cost somebody time once; it is written here so it
+costs nobody time again.
 
-**Human review comments on the release-notes PRs land here too.** When a reviewer points out a
-convention this file does not carry, that is a surprise like any other — add the row, with the
-date and the PR it came from. See Step 11 of `SKILL.md` for the full loop, including recording it
-on the release's NXDOC ticket.
+**The issue history does not live here.** When something goes wrong, the *narrative* — what
+happened, why, and what was decided — goes to the Confluence **Web UI Release Notes — Feedback &
+Lessons Log** (page `4309167086`). Only the resulting rule comes back into this file. Keeping
+incident notes in two places is how a register stops being trusted; see `SKILL.md` Step 11.
 
-| Date | What surprised us | What to do about it |
-|---|---|---|
-| 2026-08 | Review comments on real PRs were pure formatting — commits titled `format` and `Removed extra blank lines` | Formatting is reviewed strictly; run the review skill before pushing |
-| 2026-05 | `hidden: false` was flipped in a separate later commit (`added hidden:false 3.1.29`) | A one-off correction, **not** the convention — see the row below |
-| 2026-09-18 | The `hidden: false` flip for the outgoing version is made **inside the next release's PR**, same commit (`ab2cba8e` flipped 2025.18.0 while adding 2025.19.0) | Every release PR touches three files per branch: new page `true`, outgoing page `false`, index |
-| — | Frontmatter carries an **empty** `labels:` key above `tree_item_index` | Keep it; do not "tidy" it away |
-| — | `## What’s New …` uses a **curly** apostrophe | Copy the heading, do not retype it |
-| — | `npm run verify` passes even when content is broken | Never treat a green local build as validation |
-| 2026-09-18 | `git clone git@github.com:…` failed — no SSH key available in the agent environment | Clone with `gh repo clone` over HTTPS; shallow, then fetch the second branch |
-| 2026-09-18 | The index table has a `\| Version \| Summary \|` header **and** a separator row, undocumented here | Keep them; add the new row below the separator |
-| 2026-09-18 | The `2023` branch index has a `---` rule after the transclusion and writes the commented row as `\|-->`; the `2025` branch has neither | Match each branch's own local convention; do not normalise across branches |
-| 2026-09-18 | One clone + two branches let a stale page get committed on one branch while its twin was current | Lint the **committed** files, or use one `git worktree` per branch (`SKILL.md` Step 5) |
-| 2026-09-18 | A bucket query returns ~160 KB and overflows the tool result | Request only the needed fields and read the spilled file with `jq` (`SKILL.md` Step 2) |
+| Convention | What to do |
+|---|---|
+| The frontmatter carries an **empty** `labels:` key above `tree_item_index` | Keep it; do not "tidy" it away |
+| `## What’s New …` uses a **curly** apostrophe | Copy the heading, do not retype it |
+| `npm run verify` passes even when the content is broken | Never treat a green local build as validation |
+| `git clone git@github.com:…` fails where no SSH key is available | Clone with `gh repo clone` over HTTPS; shallow, then fetch the second branch |
+| The index table has a `\| Version \| Summary \|` header **and** a separator row | Keep them; add the new row below the separator |
+| The `2023` branch index has a `---` rule after the transclusion and writes the commented row as `\|-->`; the `2025` branch has neither | Match each branch's own local convention; do not normalise across branches |
+| The `hidden: false` flip for the outgoing version happens **inside the next release's PR**, same commit | Every release PR touches three files per branch: new page `true`, outgoing page `false`, index |
+| One clone plus two branches lets a stale page get committed on one branch while its twin is current | Lint the **committed** files, or use one `git worktree` per branch (`SKILL.md` Step 5) |
+| A bucket query returns ~160 KB and overflows the tool result | Request only the needed fields and read the spilled file with `jq` (`SKILL.md` Step 2) |
+| Formatting is reviewed strictly on the real PRs | Run `lint-page.sh` and the review gate before pushing, not after |
