@@ -36,7 +36,7 @@ export const Performance = {
   getFirstPaint() {
     // The legacy `performance.timing.msFirstPaint` / `timeToNonBlankPaint` substitutes only ever
     // existed on the removed PerformanceTiming interface, in EdgeHTML and behind a Firefox pref.
-    // Every browser Web UI supports implements Paint Timing, so there is nothing to fall back to.
+    // Every browser that Web UI supports implements Paint Timing, so there is nothing to fall back to.
     if (typeof PerformancePaintTiming === 'undefined') {
       return null;
     }
