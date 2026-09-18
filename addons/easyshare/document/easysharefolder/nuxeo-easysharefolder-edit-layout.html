@@ -24,7 +24,7 @@ limitations under the License.
 <dom-module id="nuxeo-easysharefolder-edit-layout">
   <template>
     <nuxeo-input
-      role="widget"
+      data-widget
       label="[[i18n('title')]]"
       name="title"
       value="{{document.properties.dc:title}}"
@@ -34,7 +34,7 @@ limitations under the License.
     </nuxeo-input>
 
     <nuxeo-textarea
-      role="widget"
+      data-widget
       label="[[i18n('label.description')]]"
       name="description"
       value="{{document.properties.dc:description}}"
@@ -42,7 +42,7 @@ limitations under the License.
     </nuxeo-textarea>
 
     <nuxeo-date-picker
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.expire')]]"
       name="expired"
       value="{{document.properties.dc:expired}}"
@@ -55,7 +55,7 @@ limitations under the License.
     </paper-checkbox>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       name="email"
       type="email"
       label="[[i18n('easysharefolder.contactEmail')]]"
