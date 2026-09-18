@@ -1394,58 +1394,74 @@ Polymer({
     this.$.diff.docIds = e.detail.documents.map((doc) => doc.uid);
   },
 
+  _browseTitle() {
+    const title = [];
+    if (this.currentDocument && this.currentDocument.title) {
+      // The repository root has no dc:title, so the server returns its uid as the title.
+      // Mirror the breadcrumb/clipboard behavior and show the localized root label instead
+      // of a raw UUID, so the browser tab title stays meaningful and consistent for
+      // screen-reader users navigating between tabs (WEBUI-1876).
+      title.push(this.currentDocument.type === 'Root' ? this.i18n('browse.root') : this.currentDocument.title);
+      if (this.currentDocument.type === 'Collections') {
+        title.push(this.i18n('app.title.collections'));
+      } else if (this.hasFacet(this.currentDocument, 'Collection')) {
+        title.push(
+          this.currentDocument.type === 'Favorites'
+            ? this.i18n('app.title.favorites')
+            : this.i18n('app.title.collection'),
+        );
+      }
+    }
+    return title;
+  },
+
+  _searchTitle() {
+    const title = [];
+    if (this.searchForm) {
+      if (this.searchForm.selectedSearch && this.searchForm.selectedSearch.title) {
+        title.push(this.searchForm.selectedSearch.title);
+      } else if (this.searchForm.searchName) {
+        title.push(this.i18n(`app.title.search.${this.searchForm.searchName}`));
+      }
+    }
+    title.push(this.i18n('app.title.search'));
+    return title;
+  },
+
+  _tasksTitle() {
+    if (this.currentTask) {
+      return [this.i18n(this.currentTask.workflowModelName), this.i18n(this.currentTask.name)];
+    }
+    return [this.i18n(`app.title.${this.page}`)];
+  },
+
+  _adminTitle() {
+    const title = [];
+    if (this.selectedAdminTab) {
+      title.push(this.i18n(`app.title.admin.${this.selectedAdminTab}`));
+    }
+    title.push(this.i18n(`app.title.${this.page}`));
+    return title;
+  },
+
   _updateTitle() {
     if (!this.page) return;
-    const title = [];
+    let title;
     switch (this.page) {
       case 'browse':
-        if (this.currentDocument && this.currentDocument.title) {
-          // The repository root has no dc:title, so the server returns its uid as the title.
-          // Mirror the breadcrumb/clipboard behavior and show the localized root label instead
-          // of a raw UUID, so the browser tab title stays meaningful and consistent for
-          // screen-reader users navigating between tabs (WEBUI-1876).
-          title.push(this.currentDocument.type === 'Root' ? this.i18n('browse.root') : this.currentDocument.title);
-          if (this.currentDocument.type === 'Collections') {
-            title.push(this.i18n('app.title.collections'));
-          } else if (this.hasFacet(this.currentDocument, 'Collection')) {
-            if (this.currentDocument.type === 'Favorites') {
-              title.push(this.i18n('app.title.favorites'));
-            } else {
-              title.push(this.i18n('app.title.collection'));
-            }
-          }
-        }
+        title = this._browseTitle();
         break;
-
       case 'search':
-        if (this.searchForm) {
-          if (this.searchForm.selectedSearch && this.searchForm.selectedSearch.title) {
-            title.push(this.searchForm.selectedSearch.title);
-          } else if (this.searchForm.searchName) {
-            title.push(this.i18n(`app.title.search.${this.searchForm.searchName}`));
-          }
-        }
-        title.push(this.i18n('app.title.search'));
+        title = this._searchTitle();
         break;
-
       case 'tasks':
-        if (this.currentTask) {
-          title.push(this.i18n(this.currentTask.workflowModelName));
-          title.push(this.i18n(this.currentTask.name));
-        } else {
-          title.push(this.i18n(`app.title.${this.page}`));
-        }
+        title = this._tasksTitle();
         break;
-
       case 'admin':
-        if (this.selectedAdminTab) {
-          title.push(this.i18n(`app.title.admin.${this.selectedAdminTab}`));
-        }
-        title.push(this.i18n(`app.title.${this.page}`));
+        title = this._adminTitle();
         break;
-
       default:
-        title.push(this.i18n(`app.title.${this.page}`));
+        title = [this.i18n(`app.title.${this.page}`)];
     }
     title.push(this.productName);
     document.title = title.join(' - ');

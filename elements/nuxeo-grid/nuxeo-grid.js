@@ -170,6 +170,33 @@ ${css.replace(/^(.+)$/gm, '  $1') /* apply indentation */}
 `);
 }
 
+function buildDeclaration(property, value) {
+  return value ? `${property}: ${value};` : '';
+}
+
+/**
+ * Builds a `grid-column` / `grid-row` shorthand from a start line and a span.
+ *
+ * `line` is interpolated even when it is absent, which reproduces the output of the previous
+ * implementation byte-for-byte. A span with no start line therefore still yields an invalid
+ * declaration (`grid-column: undefinedspan 3;`) that browsers discard. That is a real defect, but
+ * correcting it here would change rendering, so it is tracked separately in WEBUI-2289 and left
+ * untouched by this refactor.
+ */
+function buildGridLine(property, line, span) {
+  if (!line && !span) {
+    return '';
+  }
+  let value = `${line}`;
+  if (span) {
+    if (line) {
+      value += ' / ';
+    }
+    value += `span ${span}`;
+  }
+  return `${property}: ${value};`;
+}
+
 function buildGridStyle(grid, validate = true) {
   const cGrid = {};
   cGrid.templateColumns = validateValue(grid.templateColumns, /^(\d+fr|\d+px|auto)$/, validate, 'template-columns');
@@ -214,20 +241,10 @@ function buidChildStyle(child, validate = true) {
   }
   const css = `
 ::slotted([${Child.ATTRS.CHILDID}="${cChild.id}"]) {
-  ${
-    cChild.column || cChild.columnspan
-      ? `grid-column: ${cChild.column}${
-          cChild.columnspan ? `${cChild.column ? ' / ' : ''}span ${cChild.columnspan}` : ''
-        };`
-      : ''
-  }
-  ${
-    cChild.row || cChild.rowspan
-      ? `grid-row: ${cChild.row}${cChild.rowspan ? `${cChild.row ? ' / ' : ''}span ${cChild.rowspan}` : ''};`
-      : ''
-  }
-  ${cChild.align ? `align-self: ${cChild.align};` : ''}
-  ${cChild.justify ? `justify-self: ${cChild.justify};` : ''}
+  ${buildGridLine('grid-column', cChild.column, cChild.columnspan)}
+  ${buildGridLine('grid-row', cChild.row, cChild.rowspan)}
+  ${buildDeclaration('align-self', cChild.align)}
+  ${buildDeclaration('justify-self', cChild.justify)}
 }
 `;
   return removeEmptyLines(css);
@@ -380,19 +397,14 @@ class Grid extends Nuxeo.Element {
   connectedCallback() {
     super.connectedCallback();
     this._updateGrid();
-    const targetNode = this;
     const config = { attributes: true, childList: true, subtree: true };
     this.__observer = new MutationObserver((mutationList) => {
       if (
-        mutationList.some((mutation) => {
-          if (
+        mutationList.some(
+          (mutation) =>
             mutation.target === this ||
-            (mutation.type === 'attributes' && Object.values(Child.ATTRS).includes(mutation.attributeName))
-          ) {
-            return true;
-          }
-          return false;
-        })
+            (mutation.type === 'attributes' && Object.values(Child.ATTRS).includes(mutation.attributeName)),
+        )
       ) {
         // refresh the grid when there is a mutation in:
         // - the grid, for any type of mutation
@@ -400,7 +412,7 @@ class Grid extends Nuxeo.Element {
         this._updateGrid();
       }
     });
-    this.__observer.observe(targetNode, config);
+    this.__observer.observe(this, config);
   }
 
   disconnectedCallback() {
