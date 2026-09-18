@@ -27,6 +27,14 @@ jobs:
       group: medium-4cpu-runners
     permissions:
       contents: read
+    strategy:
+      # 24 is the CI runtime; 22.13.0 is the exact floor declared in
+      # engines.node and must keep passing. Pinned to the patch version on
+      # purpose — `22` resolves to the newest 22.x, which would leave the
+      # version we actually promise untested.
+      fail-fast: false
+      matrix:
+        node-version: ['22.13.0', 24]
 
     steps:
       - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
@@ -41,7 +49,7 @@ jobs:
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
 
       - name: Cache npm dependencies
         uses: actions/cache@v5
