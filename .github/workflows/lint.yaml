@@ -23,6 +23,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      # The eslint stack is what sets engines.node, so the floor has to be
+      # linted, not just tested. 22.13.0 is pinned exactly: `22` would resolve
+      # to the newest 22.x and never exercise the version we actually promise.
+      fail-fast: false
+      matrix:
+        node-version: ['22.13.0', 24]
 
     steps:
       - uses: actions/checkout@v6
@@ -32,7 +39,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           scope: '@nuxeo'
 
       - name: Cache npm dependencies
