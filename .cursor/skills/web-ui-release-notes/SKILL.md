@@ -466,10 +466,12 @@ The docs repo is a **different repo** from the one this skill lives in, so nothi
 enforced by its CI and conventions there can drift without warning. Treat every surprise as a
 defect in this skill.
 
-If, while writing or raising the PR, you hit anything not already documented here — a review
-comment on the doc PR, a frontmatter key you had to add, a build or `npm run verify` failure, a
-changed template convention, a new category name, a reviewer preference — then **in the same
-session**:
+This step covers what you learn *while drafting*. For what the human reviewers tell you *after*
+the PRs are open — the richer source — see **Step 11**.
+
+If you hit anything not already documented here — a frontmatter key you had to add, a build or
+`npm run verify` failure, a changed template convention, a new category name, a reviewer
+preference — then **in the same session**:
 
 1. Add the fact to the right reference file (repo mechanics → `references/doc-repo.md`, and log
    it in that file's **Surprises log** table with the date and what it cost).
@@ -509,7 +511,60 @@ session**:
 
 4. Tell the user what you changed and why, so the next run does not pay the same cost.
 
-### Step 11 — After publication
+### Step 11 — Act on the human review comments, and close the loop
+
+The PRs get reviewed by people, usually days after the drafting session ended. **Those comments
+are the most valuable signal this skill will ever get**: someone who owns this documentation is
+telling you, for free, exactly where the skill is wrong. Work them as follows.
+
+**1. Fix the comment on both pages.** A comment on one line's PR almost always applies to its
+twin — the bodies are identical, so a wording fix on one is a wording fix on both. Apply it to
+each branch, re-run `lint-page.sh`, and push both.
+
+**2. Re-score if the content changed.** A formatting or typo fix needs no re-score. A changed
+claim, a merged or split bullet, or a new or removed item does: hand it back to
+`web-ui-release-notes-review` (Step 8) before pushing, because a late edit is exactly where an
+unsupported sentence slips in.
+
+**3. Reply to the comment saying what changed, then resolve it.** Name the fix, not just
+"done" — the reviewer needs to see that you understood the point.
+
+**4. Classify the comment. This is the step that makes the skill improve.**
+
+| The comment was… | Then |
+|---|---|
+| **A fact about this release** — wrong ticket detail, a sentence they want phrased differently | Fix the page. Nothing to learn; the skill was not wrong. |
+| **A rule this skill has wrong, or does not have at all** — a convention, a category name, a template detail, a house style preference, something the linter should have caught | **Fix the skill**, per Step 10: the right reference file, a dated row in the `doc-repo.md` **Surprises log**, and mirror the trees. If a script could have caught it, add the check. |
+
+Be precise about which it is. **Fixing the page without fixing the skill guarantees the same
+comment next release** — and the reviewer will rightly be less patient the second time.
+
+**5. If the comment contradicts a convention this skill documents**, do not silently switch.
+Check the published pages first, then either correct the skill *with that evidence recorded*, or
+explain to the reviewer why the current form is what the published pages use. Both outcomes are
+fine; guessing is not.
+
+**6. Record it in Jira, on this release's NXDOC ticket.** The skill files are the durable fix;
+the Jira comment is the audit trail, and it is what the *next* release's author sees without
+having to read a skill diff. Post one comment covering the whole review round:
+
+```
+Release-notes review feedback — <version pair>
+
+| Reviewer asked | What changed on the page | Skill updated? |
+|---|---|---|
+| <the comment, in a line> | <the fix> | yes — references/<file>.md + Surprises log / no — one-off |
+
+Re-scored after the content changes: <score>/5.
+```
+
+Then tell the user the same thing in the handover, so nothing depends on someone reading Jira.
+
+**Why both places.** The skill update stops recurrence; the Jira comment makes the history
+searchable per release and survives someone rewriting the skill later. Neither replaces the
+other.
+
+### Step 12 — After publication
 
 Check the live page renders, the new version appears in the left-hand navigation, and the index
 page shows the release. Publication lags by a few hours, so do not promise a live link before it
