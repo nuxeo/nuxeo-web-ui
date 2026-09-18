@@ -3,7 +3,7 @@
 #
 # Usage: scripts/lint-page.sh <lts-2025-page.md> <lts-2023-page.md>
 #        scripts/lint-page.sh <page.md>                 # single page, skips the twin check
-#        scripts/lint-page.sh --released <page.md> ...  # expect hidden:false (post-release flip)
+#        scripts/lint-page.sh --released <page.md> ...  # the OUTGOING page, flipped to false
 #        scripts/lint-page.sh --index <index.md> <page.md> ...   # also check the index page
 #
 # Covers every mechanical item in the review rubric's "Structure and format fidelity"
@@ -17,7 +17,8 @@ RELEASED=0; INDEX=""
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --released) RELEASED=1; shift ;;
-    --index)    INDEX=${2:-}; shift 2 || true ;;
+    --index)    [ "$#" -ge 2 ] || { echo "error: --index needs a file argument." >&2; exit 2; }
+                INDEX=$2; shift 2 ;;
     --) shift; break ;;
     -*) echo "unknown flag: $1" >&2; exit 2 ;;
     *) break ;;
@@ -54,12 +55,14 @@ check_page() {
   [ "$slug" != "$base" ] || { FAIL "filename must be web-ui-release-notes-<slug>.md"; return; }
 
   # slug -> version, and which LTS line it belongs to
-  case "$slug" in
-    2025-*) ver="2025.$(echo "${slug#2025-}" | tr '-' '.')"
-            seg=$(echo "$slug" | cut -d- -f2); line="LTS 2025" ;;
-    3-1-*)  ver="3.1.${slug#3-1-}";  seg=${slug#3-1-};        line="LTS 2023" ;;
-    *)      FAIL "slug '$slug' is neither a 2025-N-0 nor a 3-1-Z form"; return ;;
-  esac
+  # Exact shapes only: 2025-N-0 and 3-1-Z. A prefix match would accept 2025-20-1.
+  if [[ $slug =~ ^2025-([0-9]+)-0$ ]]; then
+    seg=${BASH_REMATCH[1]}; ver="2025.$seg.0"; line="LTS 2025"
+  elif [[ $slug =~ ^3-1-([0-9]+)$ ]]; then
+    seg=${BASH_REMATCH[1]}; ver="3.1.$seg"; line="LTS 2023"
+  else
+    FAIL "slug '$slug' is neither a 2025-N-0 nor a 3-1-Z form"; return
+  fi
 
   # --- frontmatter -------------------------------------------------------------
   [ "$(head -1 "$f")" = "---" ] || FAIL "file must open with the '---' frontmatter fence"
@@ -80,7 +83,7 @@ check_page() {
       || FAIL "frontmatter: --released was passed, so hidden must be false; found '$(fm "$f" hidden)'"
   else
     [ "$(fm "$f" hidden)" = "true" ] \
-      || FAIL "frontmatter: hidden is '$(fm "$f" hidden)' — must be true until the release ships. The flip to false is its own post-release commit; pass --released when linting that commit."
+      || FAIL "frontmatter: hidden is '$(fm "$f" hidden)' — the incoming release's page must be true. The outgoing page is flipped to false in this same PR; lint that one with --released."
   fi
 
   # tree_item_index = 1001 - the segment that increments per release
@@ -102,8 +105,10 @@ check_page() {
     ol=$(grep -nF "{{! multiexcerpt name='web-ui-updates'}}" "$f" | cut -d: -f1)
     cl=$(grep -nF "{{! /multiexcerpt}}" "$f" | cut -d: -f1)
     [ "$ol" -lt "$cl" ] || FAIL "the closing multiexcerpt directive (line $cl) precedes the opening one (line $ol)"
-    awk -v o="$ol" -v c="$cl" 'NR>o&&NR<c&&/^<br\/>$/{found=1} END{exit !found}' "$f" \
-      || FAIL "no '<br/>' inside the web-ui-updates block — every page ends with one before the close"
+    # Must be the LAST nonblank line before the close, not merely present somewhere.
+    last=$(awk -v o="$ol" -v c="$cl" 'NR>o&&NR<c&&NF{l=$0} END{print l}' "$f")
+    [ "$last" = "<br/>" ] \
+      || FAIL "the last line before the closing multiexcerpt must be '<br/>', found '${last:-<nothing>}'"
   fi
 
   # --- heading ------------------------------------------------------------------
@@ -217,10 +222,28 @@ if [ -n "$INDEX" ]; then
     # ... but it should have the pre-staged commented row ready for next time
     grep -qE "^<!--[[:space:]]*\|.*web-ui-release-notes-$newslug'" "$INDEX" \
       && OK "pre-staged commented row present for $newver" \
-      || WARN "no pre-staged commented row for $newver — the convention is to leave one ready to uncomment next release"
+      || FAIL "no pre-staged commented row for $newver — format-template.md requires one, ready to uncomment next release"
     hits "raw URL in the Previous Release Notes table — use {{page page='…'}}" "" \
       grep -nE '^\|.*https?://' "$INDEX"
-    grep -qE '^# |^## Previous Release Notes' "$INDEX" || WARN "no '## Previous Release Notes' heading found — check the index structure by hand"
+    grep -qE '^##[[:space:]]+Previous Release Notes[[:space:]]*$' "$INDEX" \
+      || FAIL "no '## Previous Release Notes' heading in the index"
+
+    # The inverse half of the index update: the OUTGOING version must now sit in the table,
+    # uncommented. Derived from the incoming version; skipped when there is no predecessor.
+    prevslug=""
+    if [[ $newslug =~ ^2025-([0-9]+)-0$ ]]; then
+      [ "${BASH_REMATCH[1]}" -gt 1 ] && prevslug="2025-$((BASH_REMATCH[1] - 1))-0"
+    elif [[ $newslug =~ ^3-1-([0-9]+)$ ]]; then
+      [ "${BASH_REMATCH[1]}" -gt 1 ] && prevslug="3-1-$((BASH_REMATCH[1] - 1))"
+    fi
+    if [ -n "$prevslug" ] && [ -f "$(dirname "$1")/web-ui-release-notes-$prevslug.md" ]; then
+      if grep -qE "^\|.*web-ui-release-notes-$prevslug'" "$INDEX"; then
+        OK "outgoing version $prevslug moved into Previous Release Notes"
+      else
+        FAIL "the outgoing version $prevslug is not an uncommented row in Previous Release Notes — Step 7 moves it there as this release becomes 'recent'"
+        grep -nE "web-ui-release-notes-$prevslug'" "$INDEX" | head -3 | sed 's/^/        /'
+      fi
+    fi
   fi
   echo
 fi
