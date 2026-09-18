@@ -484,12 +484,14 @@ Polymer({
   },
 
   _getCommonProperties(left, right, schema, delta) {
+    // `schema` does not change across the iteration, so the prefix is resolved once up front.
+    const schemaPrefix = schema ? `${schema.prefix || schema.name}:` : null;
     return Object.keys(left.properties).filter(
       (leftPropName) =>
         !!Object.keys(right.properties).find(
           (rightPropName) =>
             leftPropName === rightPropName &&
-            (schema ? leftPropName.startsWith(`${schema.prefix ? schema.prefix : schema.name}:`) : true) &&
+            (schemaPrefix ? leftPropName.startsWith(schemaPrefix) : true) &&
             (delta ? delta[leftPropName] : true),
         ),
     );

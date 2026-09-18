@@ -256,9 +256,11 @@ export const DiffBehavior = {
   },
 
   _isSimple(delta, originalValue) {
-    return delta
-      ? this._isSimpleDelta(delta)
-      : !this._isObject(Array.isArray(originalValue) && originalValue.length > 0 ? originalValue[0] : originalValue);
+    if (delta) {
+      return this._isSimpleDelta(delta);
+    }
+    const value = Array.isArray(originalValue) && originalValue.length > 0 ? originalValue[0] : originalValue;
+    return !this._isObject(value);
   },
 
   _getAllKeys(delta, originalValue, showAll) {
