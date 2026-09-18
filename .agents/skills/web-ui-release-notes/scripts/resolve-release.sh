@@ -45,12 +45,24 @@ done
 [ "$fail" = 1 ] && exit 1
 
 # The versions are read from origin/<branch>, so stale remote-tracking refs would silently
-# resolve the PREVIOUS release pair. Refresh them; warn rather than fail when offline.
+# resolve the PREVIOUS release pair. Refresh them first.
 for r in "$WEBUI" "$ELEMENTS"; do
-  git -C "$r" fetch origin lts-2025 maintenance-3.1.x --quiet 2>/dev/null \
-    || WARNED=1
+  git -C "$r" fetch origin lts-2025 maintenance-3.1.x --quiet 2>/dev/null || STALE=1
 done
-[ "${WARNED:-0}" = 1 ] && printf '  !! could not fetch origin — remote-tracking refs may be stale,\n     so these versions may be the previous release pair. Check connectivity.\n'
+
+# A failed refresh must not be survivable in auto-detect mode: warning and then printing OK
+# would produce exactly the wrong answer the refresh exists to prevent.
+if [ "${STALE:-0}" = 1 ]; then
+  if [ -n "${1:-}" ]; then
+    printf '  !! could not fetch origin. The pinned version is unaffected; LAST-TAG may be stale.\n'
+  elif [ "${NX_ALLOW_STALE:-0}" = 1 ]; then
+    printf '  !! could not fetch origin, and NX_ALLOW_STALE=1 — continuing from possibly stale refs.\n'
+    printf '     The resolved pair MAY BE THE PREVIOUS RELEASE. Confirm against Jira before drafting.\n'
+  else
+    bad "could not fetch origin in one or both repos, so auto-detection cannot be trusted: stale remote-tracking refs resolve the PREVIOUS release pair. Fix connectivity, pass the version explicitly (e.g. $(basename "$0") 2025.20.0), or set NX_ALLOW_STALE=1 to override deliberately."
+    exit 1
+  fi
+fi
 
 echo "== snapshot versions on the release branches"
 read -r w25 w25k <<< "$(snapshot "$WEBUI" lts-2025)"
