@@ -106,7 +106,7 @@ class Spreadsheet {
                   column.widget.type = field.type === 'string[]' ? 'suggestManyDirectory' : 'suggestOneDirectory';
                   column.widget.properties = { dbl10n: true, directoryName: constraint.parameters.directory };
                   break;
-                case 'userManagerResolver':
+                case 'userManagerResolver': {
                   column.widget.type = field.type === 'string[]' ? 'multipleUsersSuggestion' : 'singleUserSuggestion';
                   let searchType;
                   if (constraint.parameters.includeGroups === 'true' && constraint.parameters.includeUsers === 'true') {
@@ -122,6 +122,7 @@ class Spreadsheet {
                     },
                   };
                   break;
+                }
               }
             }
           }
