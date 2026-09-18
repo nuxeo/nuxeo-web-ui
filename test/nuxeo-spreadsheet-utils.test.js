@@ -89,12 +89,31 @@ suite('nuxeo-spreadsheet utils', () => {
   });
 
   suite('parseParams', () => {
-    // Reads window.location.search directly, so it cannot be given a query string without navigating
-    // the test runner page. Assert only the shape of the result against whatever URL we run under.
-    test('returns the current query string as an object', () => {
-      const params = parseParams();
-      expect(params).to.be.an('object');
-      Object.values(params).forEach((value) => expect(value).to.be.a('string'));
+    // Reads window.location.search directly. history.replaceState swaps the query in place without
+    // navigating, so the parsing loop runs for real instead of returning at the empty-query guard.
+    const originalUrl = window.location.href;
+    const withQuery = (query) => {
+      window.history.replaceState(null, '', `${window.location.pathname}${query}`);
+      return parseParams();
+    };
+
+    teardown(() => {
+      window.history.replaceState(null, '', originalUrl);
+    });
+
+    test('returns an empty object when there is no query string', () => {
+      expect(withQuery('')).to.deep.equal({});
+    });
+
+    test('parses each key/value pair of the query string', () => {
+      expect(withQuery('?repo=default&size=40')).to.deep.equal({ repo: 'default', size: '40' });
+    });
+
+    test('decodes + as a space and percent-encoded characters', () => {
+      expect(withQuery('?query=my+file&path=%2Fdefault-domain')).to.deep.equal({
+        query: 'my file',
+        path: '/default-domain',
+      });
     });
   });
 
