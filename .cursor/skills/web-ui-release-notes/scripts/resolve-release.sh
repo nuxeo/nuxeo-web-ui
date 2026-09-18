@@ -20,10 +20,15 @@ fail=0
 note() { printf '  %s\n' "$*"; }
 bad()  { printf '  !! %s\n' "$*"; fail=1; }
 
-snapshot() { # <repo> <branch> -> bare version ('' if unreadable)
+# Reports the bare version, and whether package.json actually carried -SNAPSHOT. A branch
+# holding a bare released version is mid-promotion: its version is the release that just
+# shipped, not the next one.
+snapshot() { # <repo> <branch> -> "<version> <SNAPSHOT|BARE>" ('' if unreadable)
   git -C "$1" show "origin/$2:package.json" 2>/dev/null \
     | python3 -c 'import json,sys
-try: print(json.load(sys.stdin)["version"].replace("-SNAPSHOT",""))
+try:
+    v = json.load(sys.stdin)["version"]
+    print(v.replace("-SNAPSHOT",""), "SNAPSHOT" if v.endswith("-SNAPSHOT") else "BARE")
 except Exception: pass' 2>/dev/null
 }
 lasttag() { # <repo> <glob> -> newest stable tag
@@ -39,9 +44,30 @@ for r in "$WEBUI" "$ELEMENTS"; do
 done
 [ "$fail" = 1 ] && exit 1
 
+# The versions are read from origin/<branch>, so stale remote-tracking refs would silently
+# resolve the PREVIOUS release pair. Refresh them; warn rather than fail when offline.
+for r in "$WEBUI" "$ELEMENTS"; do
+  git -C "$r" fetch origin lts-2025 maintenance-3.1.x --quiet 2>/dev/null \
+    || WARNED=1
+done
+[ "${WARNED:-0}" = 1 ] && printf '  !! could not fetch origin — remote-tracking refs may be stale,\n     so these versions may be the previous release pair. Check connectivity.\n'
+
 echo "== snapshot versions on the release branches"
-w25=$(snapshot "$WEBUI" lts-2025);     w31=$(snapshot "$WEBUI" maintenance-3.1.x)
-e25=$(snapshot "$ELEMENTS" lts-2025);  e31=$(snapshot "$ELEMENTS" maintenance-3.1.x)
+read -r w25 w25k <<< "$(snapshot "$WEBUI" lts-2025)"
+read -r w31 w31k <<< "$(snapshot "$WEBUI" maintenance-3.1.x)"
+read -r e25 e25k <<< "$(snapshot "$ELEMENTS" lts-2025)"
+read -r e31 e31k <<< "$(snapshot "$ELEMENTS" maintenance-3.1.x)"
+# NOTE: do not use `set --` here; it would clear "$@" and discard a pinned version argument.
+check_kind() { # <kind> <repo-label> <branch>
+  if [ "${1:-}" = "BARE" ]; then
+    bad "$2 $3: package.json holds a bare version, not <next>-SNAPSHOT — that branch is mid-promotion, so this is the release that just shipped. Stop and report it."
+  fi
+  return 0
+}
+check_kind "${w25k:-}" "$(basename "$WEBUI")"    lts-2025
+check_kind "${w31k:-}" "$(basename "$WEBUI")"    maintenance-3.1.x
+check_kind "${e25k:-}" "$(basename "$ELEMENTS")" lts-2025
+check_kind "${e31k:-}" "$(basename "$ELEMENTS")" maintenance-3.1.x
 printf '  %-16s %-18s %s\n' "$(basename "$WEBUI")"    lts-2025          "${w25:-<unreadable>}"
 printf '  %-16s %-18s %s\n' "$(basename "$WEBUI")"    maintenance-3.1.x "${w31:-<unreadable>}"
 printf '  %-16s %-18s %s\n' "$(basename "$ELEMENTS")" lts-2025          "${e25:-<unreadable>}"

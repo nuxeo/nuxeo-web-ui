@@ -200,7 +200,9 @@ list what remains: the decision to raise anyway then belongs to the user, not to
 ## Reviewing a single ticket summary (Mode A)
 
 For one Release Notes Summary field, score only dimensions 1, 3 and 4 and apply hard failures 1,
-6 and 8. Those three weigh `1.50 + 1.00 + 0.75 = 3.25`, so **rescale by `5 / 3.25`** (multiply the
+6 and 8 — with hard failure 1 **rescoped**: the sentence must be traceable to *the ticket under
+review*, not to a release bucket. A Mode A request usually arrives before the ticket has a
+`fixVersion` at all, so requiring bucket membership would fail every legitimate one. Those three weigh `1.50 + 1.00 + 0.75 = 3.25`, so **rescale by `5 / 3.25`** (multiply the
 sum by `1.538`) to keep the 4.5 pass mark meaning the same thing it means for a page. Keep it to a
 couple of lines of feedback: the field is one sentence, and the review should not be longer than
 the thing it reviews.
