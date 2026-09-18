@@ -243,6 +243,11 @@ if [ -n "$INDEX" ]; then
       FAIL "the 'Recently Released Changes' transclusion is not repointed at web-ui-release-notes-$newslug"
       grep -n "multiexcerpt 'web-ui-updates'" "$INDEX" | sed 's/^/        /'
     fi
+    # Repointing means REPLACING. Adding the new line without removing the old one stacks two
+    # releases under "Recently Released Changes", and a presence check alone would pass.
+    txcount=$(grep -cF "multiexcerpt 'web-ui-updates'" "$INDEX")
+    [ "$txcount" -eq 1 ] \
+      || FAIL "expected exactly 1 'web-ui-updates' transclusion in the index, found $txcount — the previous one was not removed"
     # the incoming version is 'recent', so it must not also sit in the Previous table
     hits "the incoming version already has an uncommented row in Previous Release Notes — it belongs in 'Recently Released Changes' until it is superseded" "" \
       grep -nE "^\|.*web-ui-release-notes-$newslug'" "$INDEX"
@@ -257,13 +262,23 @@ if [ -n "$INDEX" ]; then
 
     # The inverse half of the index update: the OUTGOING version must now sit in the table,
     # uncommented. Derived from the incoming version; skipped when there is no predecessor.
-    prevslug=""
+    # Walk back to the newest predecessor that actually exists. A blind N-1 would silently
+    # disable this check if a release number were ever skipped.
+    prevslug=""; pagedir=$(dirname "$1")
     if [[ $newslug =~ ^2025-([0-9]+)-0$ ]]; then
-      [ "${BASH_REMATCH[1]}" -gt 1 ] && prevslug="2025-$((BASH_REMATCH[1] - 1))-0"
+      i=$(( ${BASH_REMATCH[1]} - 1 ))
+      while [ "$i" -ge 1 ]; do
+        [ -f "$pagedir/web-ui-release-notes-2025-$i-0.md" ] && { prevslug="2025-$i-0"; break; }
+        i=$((i - 1))
+      done
     elif [[ $newslug =~ ^3-1-([0-9]+)$ ]]; then
-      [ "${BASH_REMATCH[1]}" -gt 1 ] && prevslug="3-1-$((BASH_REMATCH[1] - 1))"
+      i=$(( ${BASH_REMATCH[1]} - 1 ))
+      while [ "$i" -ge 1 ]; do
+        [ -f "$pagedir/web-ui-release-notes-3-1-$i.md" ] && { prevslug="3-1-$i"; break; }
+        i=$((i - 1))
+      done
     fi
-    if [ -n "$prevslug" ] && [ -f "$(dirname "$1")/web-ui-release-notes-$prevslug.md" ]; then
+    if [ -n "$prevslug" ]; then
       if grep -qE "^\|.*web-ui-release-notes-$prevslug'" "$INDEX"; then
         OK "outgoing version $prevslug moved into Previous Release Notes"
       else
