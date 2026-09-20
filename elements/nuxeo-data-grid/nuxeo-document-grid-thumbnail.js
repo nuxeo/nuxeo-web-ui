@@ -142,7 +142,7 @@ Polymer({
       .bubbleBox .badges {
         position: absolute;
         inset-block-start: 0;
-        inset-block-end: 0;
+        inset-inline-end: 0;
       }
 
       .bubbleBox .actions {
