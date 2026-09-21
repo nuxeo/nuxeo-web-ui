@@ -99,7 +99,7 @@ New SSH key → Key type: *Signing Key*). Verify a commit shows `signed:G` via
 ### 5. Local dev/test prerequisites (for the bug-fix gating checks)
 
 ```bash
-nvm use           # reads .nvmrc (24); minimum is 22.13
+nvm use           # reads .nvmrc (24); minimum is 22
 npm ci
 ```
 
