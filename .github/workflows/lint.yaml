@@ -23,6 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # Branch protection requires a check named exactly "lint", so the Node 24
+    # leg must keep that name. Without this the matrix would report only
+    # "lint (22.13.0)" / "lint (24)" and the required check would wait forever.
+    name: ${{ matrix.node-version == 24 && 'lint' || format('lint (node {0})', matrix.node-version) }}
     strategy:
       # The eslint stack is what sets engines.node, so the floor has to be
       # linted, not just tested. 22.13.0 is pinned exactly: `22` would resolve
