@@ -14,8 +14,7 @@
   "overrides": {
     "serialize-javascript": "^7.0.5",
     "tar-fs": "^3.0.9",
-    "deepmerge-ts": "^8.0.0",
-    "@puppeteer/browsers": "^3.2.2"
+    "deepmerge-ts": "^8.0.0"
   },
   "dependencies": {
     "@babel/core": "^7.15.0",
