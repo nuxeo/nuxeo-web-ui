@@ -33,7 +33,7 @@ The Jira skills are independent and can be used on their own.
 
 ## One-time setup
 
-Prerequisites: [Cursor](https://cursor.com), Node ≥ 18 (repo uses `nvm`), the
+Prerequisites: [Cursor](https://cursor.com), Node ≥ 22 (repo uses `nvm`; `.nvmrc` pins 24), the
 [GitHub CLI](https://cli.github.com) (`gh`), and `git`. Do the following once per machine.
 
 ### 1. Atlassian (Jira/Confluence) MCP server — needed for every Jira-touching skill
