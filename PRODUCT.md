@@ -90,7 +90,12 @@ Six visual themes are bundled, offered as two sets according to the branding opt
 - **Hyland Dark** — Hyland branding, dark mode
 
 A deployment sees only one set: the four classic themes normally, or the two Hyland themes
-when branding is enabled. Custom themes are never hidden.
+when branding is enabled.
+
+Custom themes are shown in both modes, with one caveat: visibility is decided by **name**, so a
+custom theme called `default`, `dark`, `kawaii`, `light`, `hyland-light` or `hyland-dark` is treated
+as the built-in of that name and hidden in the opposite branding mode. Extension authors should
+avoid those six reserved names.
 
 Users can switch between the offered themes from their profile settings.
 
