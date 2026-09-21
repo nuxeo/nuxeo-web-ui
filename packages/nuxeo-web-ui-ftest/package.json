@@ -16,6 +16,7 @@
     "tar-fs": "^3.0.9",
     "serialize-javascript": "^7.0.5",
     "tmp": "^0.2.4",
+    "deepmerge-ts": "^8.0.0",
     "uuid": "^13.0.1"
   },
   "dependencies": {
