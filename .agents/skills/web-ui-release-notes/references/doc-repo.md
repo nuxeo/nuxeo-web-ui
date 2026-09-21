@@ -121,4 +121,6 @@ incident notes in two places is how a register stops being trusted; see `SKILL.m
 | The `hidden: false` flip for the outgoing version happens **inside the next release's PR**, same commit | Every release PR touches three files per branch: new page `true`, outgoing page `false`, index |
 | One clone plus two branches lets a stale page get committed on one branch while its twin is current | Lint the **committed** files, or use one `git worktree` per branch (`SKILL.md` Step 5) |
 | A bucket query returns ~160 KB and overflows the tool result | Request only the needed fields and read the spilled file with `jq` (`SKILL.md` Step 2) |
+| `lint-page.sh` validates the **filename slug**, so extracting a committed page to `/tmp/page.md` fails three unrelated checks | Extract each file under its real name into its own directory — `/tmp/<x>/a/web-ui-release-notes-2025-N-0.md`, `/tmp/<x>/b/web-ui-release-notes-3-1-Z.md`, and the index as `web-ui-release-notes.md` beside each |
+| The ledger quotes page bullets, so a review fix round silently makes the quotations stale | After every fix round, re-check each quoted bullet against the **committed** page before resubmitting. Truncate long quotations with `…` and compare on the prefix |
 | Formatting is reviewed strictly on the real PRs | Run `lint-page.sh` and the review gate before pushing, not after |
