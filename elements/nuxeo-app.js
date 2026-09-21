@@ -1015,10 +1015,6 @@ Polymer({
     this._teardownUnauthorizedRedirect();
     this._cancelPendingAnnouncement();
     this._inactivityNeedsRearm = true; // re-arm from the next attached()
-    if (this._homeMenuNav) {
-      this._homeMenuNav.home.removeEventListener('keydown', this._boundHomeShortcutKeydown);
-      this._homeMenuNav.menu.removeEventListener('keydown', this._boundMenuEdgeKeydown);
-    }
   },
 
   skipLinkEvent() {
