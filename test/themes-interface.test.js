@@ -25,11 +25,16 @@ limitations under the License.
 
 const THEMES = ['default', 'dark', 'kawaii', 'light', 'hyland-light', 'hyland-dark'];
 
-// Custom properties the base.js mixins read WITHOUT a var() fallback, so a theme that omits
-// one leaves the declaration unresolved rather than degrading gracefully.
-const REQUIRED_BY_BASE = ['--nuxeo-container-hover', '--nuxeo-drawer-text', '--nuxeo-app-font'];
+// Custom properties base.js reads WITHOUT a var() fallback are DERIVED from base.js itself rather
+// than hardcoded: a hand-maintained list silently stops matching the moment someone adds a new
+// no-fallback reference, which is exactly the drift this suite exists to catch.
+//
+// Excluded because they are supplied by the app at runtime, not by themes -- nuxeo-app.js sets them
+// on the host, so no theme.html defines them and requiring one would be wrong.
+const APP_PROVIDED = new Set(['--nuxeo-app-top', '--nuxeo-app-bottom']);
 
-// Properties consumed as a colour. A background shorthand here is silently dropped.
+// Properties consumed somewhere as a bare colour. A background shorthand here is silently dropped.
+
 const COLOUR_ONLY = ['--nuxeo-container-hover'];
 
 const declarations = (css) => {
@@ -58,6 +63,7 @@ const resolve = (map, name, seen = new Set()) => {
 
 suite('themes: shared custom-property interface', () => {
   const parsed = new Map();
+  let requiredByBase = [];
 
   suiteSetup(async () => {
     await Promise.all(
@@ -67,14 +73,23 @@ suite('themes: shared custom-property interface', () => {
         parsed.set(name, declarations(await res.text()));
       }),
     );
+
+    const baseRes = await fetch('/themes/base.js');
+    expect(baseRes.ok, 'could not load themes/base.js').to.be.true;
+    const baseSrc = await baseRes.text();
+    // var(--x) with no comma => no fallback, so an undefined property kills the declaration.
+    const refs = baseSrc.match(/var\(\s*--[a-zA-Z0-9-]+\s*\)/g) || [];
+    requiredByBase = [...new Set(refs.map((r) => r.replace(/var\(\s*|\s*\)/g, '')))]
+      .filter((prop) => !APP_PROVIDED.has(prop))
+      .sort();
+    expect(requiredByBase.length, 'expected base.js to read theme properties without fallbacks').to.be.above(10);
   });
 
   THEMES.forEach((name) => {
     test(`${name} defines every custom property base.js reads without a fallback`, () => {
       const map = parsed.get(name);
-      REQUIRED_BY_BASE.forEach((prop) => {
-        expect(map.has(prop), `themes/${name}/theme.html is missing ${prop}`).to.be.true;
-      });
+      const missing = requiredByBase.filter((prop) => !map.has(prop));
+      expect(missing, `themes/${name}/theme.html is missing ${missing.join(', ')}`).to.be.empty;
     });
 
     test(`${name} resolves colour-only custom properties to a valid colour`, () => {
