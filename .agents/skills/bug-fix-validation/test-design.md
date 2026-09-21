@@ -216,4 +216,4 @@ Execute the rows the risk matrix flags, plus the always-on core. Every row gets 
 | R-18 | Publication | Publish, unpublish, publication tree |
 | R-19 | Admin screens | Users, groups, vocabularies, audit views |
 | R-20 | Home & dashboards | Home widgets, recent documents |
-| R-21 | Cross-cutting | All four themes, locale switch, RTL, no new console errors |
+| R-21 | Cross-cutting | All six themes, locale switch, RTL, no new console errors |
