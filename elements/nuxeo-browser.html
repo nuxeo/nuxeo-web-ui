@@ -56,6 +56,11 @@ limitations under the License.
         max-width: var(--nuxeo-browser-actions-menu-max-width, 240px);
       }
 
+      nuxeo-page {
+        --nuxeo-page-content-safe-area-bottom: 0px;
+        --nuxeo-page-height: 100%;
+      }
+
       /* Apply Hyland branding to the page header, toolbar, and surrounding surfaces when the rebrand attribute is set. */
       :host([rebrand]) {
         --nuxeo-page-host-background: var(--hyland-page-surface-background, transparent);
