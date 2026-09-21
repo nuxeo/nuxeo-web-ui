@@ -18,6 +18,18 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-app/nuxeo-page.js';
 
+let browserTemplate;
+
+suiteSetup(async () => {
+  const url = '/elements/nuxeo-browser.html';
+  const response = await fetch(url);
+  expect(response.ok, `Failed to fetch ${url}: ${response.status} ${response.statusText}`).to.be.true;
+  const text = await response.text();
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  browserTemplate = doc.querySelector('dom-module#nuxeo-browser template');
+  expect(browserTemplate, 'nuxeo-browser template not found').to.not.be.null;
+});
+
 suite('nuxeo-page', () => {
   const contentStyle = (el) => getComputedStyle(el.shadowRoot.querySelector('#content'));
 
@@ -37,5 +49,14 @@ suite('nuxeo-page', () => {
     const style = contentStyle(el);
     expect(style.paddingBottom).to.equal('120px');
     expect(style.scrollPaddingBottom).to.equal('120px');
+  });
+
+  test('does not reserve the create button safe area in the document browser', () => {
+    const pageRule = Array.from(browserTemplate.content.querySelectorAll('style')).find((style) =>
+      style.textContent.includes('--nuxeo-page-content-safe-area-bottom: 0px;'),
+    );
+    expect(pageRule).to.exist;
+    expect(pageRule.textContent).to.include('--nuxeo-page-content-safe-area-bottom: 0px;');
+    expect(pageRule.textContent).to.include('--nuxeo-page-height: 100%;');
   });
 });
