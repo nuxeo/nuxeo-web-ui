@@ -385,6 +385,15 @@ Every ticket appears exactly once — mapped to a bullet, or excluded with a sta
 cannot account for a ticket, you are not finished. Show the ledger with the draft; it is what
 makes the notes reviewable.
 
+**The ledger quotes the page, so it goes stale the moment you fix a review finding.** Re-check
+every quoted bullet against the committed page before resubmitting to the review gate and before
+raising the PRs — a ledger that quotes wording which shipped nowhere is worse than no quotation,
+because it is the audit trail someone reads months later.
+
+Where a ticket carries several findings and only some produce a bullet, **record the ones you
+deliberately left out**, with the reason. A reader cannot otherwise tell a considered omission
+from an oversight.
+
 ### Step 7 — Update the index page
 
 On each branch, `src/nxdoc/web-ui/web-ui-release-notes.md` needs the "Recently Released Changes"
@@ -554,12 +563,15 @@ fine; guessing is not.
 
 **6. Write it to the Feedback & Lessons Log — always.** Confluence page `4309167086`, in the
 user's personal space. This is the one destination that is **not** conditional: even an issue you
-are not fixing today goes here, which is the whole reason it exists. Add a row per issue, newest
-first:
+are not fixing today goes here, which is the whole reason it exists.
+
+**The page is grouped by release, one `##` section per release, newest first.** Find that
+section and add a row to its table; add the section if this is the release's first entry. The
+release is therefore carried by the heading and is *not* repeated in a column:
 
 | Column | What goes in it |
 |---|---|
-| Date, Release | `YYYY-MM-DD`, and the version pair (or `n/a (skill PR)`) |
+| Date | `YYYY-MM-DD` |
 | Source | `Review gate`, `PR review — <reviewer>`, `Release execution`, `Jira scope`, `Historic` |
 | What went wrong | The observable problem, specifically. Not "formatting issue". |
 | Root cause | Why it happened — the rule that was missing or wrong |

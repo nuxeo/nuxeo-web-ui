@@ -86,29 +86,36 @@ Run these before handing over a draft. Any failure is a blocker, not a nit.
    on the page.
 2. **No unsupported generalisation.** A fix to one widget is not "improved forms throughout the
    application". Claim exactly the scope that shipped.
-3. **Read past the title.** Ticket titles describe the symptom as first reported and are often
+3. **Never supply a WCAG version the ticket does not state.** Accessibility tickets routinely
+   cite a bare criterion number ("Success Criterion 2.5.7: Dragging Movements"). Look the
+   criterion up rather than assuming it belongs to whichever version the neighbouring bullets
+   use — 1.4.12 and 1.4.13 are WCAG 2.1, 2.5.7 is WCAG **2.2**, and 1.4.1, 3.3.2 and 3.3.3 are
+   WCAG 2.0. A wrong version is a false public conformance claim that customers quote back in
+   procurement. Cite every criterion in the same shape: version, level where the page states
+   one, number, and the official name in parentheses.
+4. **Read past the title.** Ticket titles describe the symptom as first reported and are often
    wrong about the cause and sometimes about the fix. Use the description, the comments and the
    linked PR. Where the ticket is thin, read the diff.
-4. **Both lines say the same thing — always.** The codebase is shared, so there is no such
+5. **Both lines say the same thing — always.** The codebase is shared, so there is no such
    thing as a functional change that ships on one LTS line and not the other. The two pages
    describe an identical set of changes: each change is written once, and that same text appears
    on both pages. If the two buckets are uneven, the change is still written once and still
    appears on both — say so in the handover and keep going. Reconciling the buckets is not this
    skill's job (`SKILL.md`, *What this skill does not do*).
-5. **Every sentence comes from a ticket in the bucket.** The buckets define what shipped, and
+6. **Every sentence comes from a ticket in the bucket.** The buckets define what shipped, and
    this skill trusts them; verification happens upstream. What you must not do is write from
    memory, from a code diff, or from a ticket that is not in either bucket.
-6. **Nothing dropped.** Every in-scope ticket is either a bullet or an explicit, reasoned
+7. **Nothing dropped.** Every in-scope ticket is either a bullet or an explicit, reasoned
    exclusion.
-7. **No forward promises.** Never say a change is "coming", "planned" or "will be improved".
+8. **No forward promises.** Never say a change is "coming", "planned" or "will be improved".
    The notes describe what shipped.
    *One sanctioned exception:* an accessibility conformance page may carry **Known Accessibility
    Issues**, **Coming up next** and **Evaluation Methods Used** sections, because conformance
    reporting is expected to disclose known gaps and planned remediation. 2025.7.0 is the
    published precedent. Do not extend this to any other subject.
-8. **A flag-gated feature states both states.** Rare — see `format-template.md`. When it does
+9. **A flag-gated feature states both states.** Rare — see `format-template.md`. When it does
    apply, describe flag-off and flag-on behaviour and give the property. Do not invent a
    flag-on/flag-off split for an ordinary change.
-9. **No security detail.** No CVE ids, package names, versions, severities, vulnerability
+10. **No security detail.** No CVE ids, package names, versions, severities, vulnerability
    classes or scanner names (Sonar, SonarCloud, Veracode, Dependabot). One security sentence —
    see `classification-rules.md`.
