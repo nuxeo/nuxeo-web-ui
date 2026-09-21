@@ -199,13 +199,17 @@ Polymer({
       }
 
       /* WEBUI-2315: the logo is the Home link again, so it needs a hover affordance and a
-         visible focus ring. The ring is inset so it is not clipped by the pinned header box. */
+         visible focus ring. The ring is inset so it is not clipped by the pinned header box.
+         The anchor is not one of the primitives themes/dark-theme-focus-ring.js allowlists, so
+         it consumes --nuxeo-focus-outline itself: the browser's 'auto' ring uses a fixed system
+         colour that is effectively invisible on the dark themes (WCAG 2.4.11 / 2.4.13). Both
+         dark themes define the token; light themes leave it unset and fall back to 'auto'. */
       #logo:hover img {
         filter: brightness(110%);
       }
 
       #logo:focus-visible {
-        outline: auto;
+        outline: var(--nuxeo-focus-outline, auto);
         outline-offset: -2px;
       }
 
