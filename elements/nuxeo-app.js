@@ -198,8 +198,21 @@ Polymer({
         left: auto;
       }
 
-      /* NXENG-527: Single scrollable container for home shortcut and menu below the pinned logo.
-         Prevents scrollbar overlap by keeping it within the column boundary. */
+      /* WEBUI-2315: the logo is the Home link again, so it needs a hover affordance and a
+         visible focus ring. The ring is inset so it is not clipped by the pinned header box. */
+      #logo:hover img {
+        filter: brightness(110%);
+      }
+
+      #logo:focus-visible {
+        outline: auto;
+        outline-offset: -2px;
+      }
+
+      /* NXENG-527: Scrollable container for the menu below the pinned logo. Prevents scrollbar
+         overlap by keeping it within the column boundary. WEBUI-2315 removed the home shortcut it
+         also held; the wrapper stays because the pinned-logo layout and this scroll region depend
+         on it (without it #menu would have to go back to position:fixed + padding-top). */
       #menuContainer {
         position: fixed;
         top: calc(var(--nuxeo-app-top, 0px) + var(--nuxeo-drawer-header-height, 53px));
@@ -224,18 +237,6 @@ Polymer({
       :host([dir='rtl']) #menuContainer {
         right: 0;
         left: auto;
-      }
-
-      /* NXENG-527: home shortcut positioned outside paper-listbox (navigation only, no drawer)
-         but inside scroll area with other icons. */
-      .home-link {
-        position: relative;
-        width: var(--nuxeo-sidebar-width);
-        flex-shrink: 0;
-        margin-top: 43px;
-        background-color: var(--nuxeo-sidebar-background);
-        display: block;
-        text-decoration: none;
       }
 
       /* menu */
@@ -516,24 +517,15 @@ Polymer({
           hidden$="[[isDrawerHidden(isNarrow, drawerOpened)]]"
         >
           <div role="list">
-            <!-- Logo: decorative only, home navigation handled by menu shortcut below -->
-            <div id="logo">
+            <!-- WEBUI-2315: the logo is the Home link, in both branding modes. The image alt only
+                 describes the logo, so the anchor carries its own label naming the destination
+                 (WCAG 2.4.4 Link Purpose); it is a single Tab stop with no nested interactive. -->
+            <a id="logo" href$="[[urlFor('home')]]" aria-label$="[[i18n('app.home')]]" on-click="_resetTaskSelection">
               <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
-            </div>
+            </a>
 
-            <!-- Scrollable container for home shortcut and menu (below pinned logo) -->
+            <!-- Scrollable container for the menu (below the pinned logo) -->
             <div id="menuContainer">
-              <!-- Home shortcut: placed outside paper-listbox to navigate home without triggering
-                   the secondary-nav drawer. Focus and activation are managed by nuxeo-menu-icon. -->
-              <nuxeo-menu-icon
-                class="home-link"
-                name="home"
-                route="home"
-                icon="nuxeo:home"
-                label="app.home"
-                on-click="_resetTaskSelection"
-              ></nuxeo-menu-icon>
-
               <!-- menu -->
               <paper-listbox
                 id="menu"
@@ -898,7 +890,6 @@ Polymer({
   ready() {
     this.skipLinkEvent();
     this._checkRtl();
-    this.homeToMenuNavigation();
     this._updateIsNarrow();
 
     const main = this.$.mainContent;
@@ -960,18 +951,6 @@ Polymer({
 
     Performance.mark('nuxeo-app.ready');
 
-    // Remove interactive attributes from home link to fix accessibility issue.
-    // PaperItemBehavior adds role/tabindex/aria-disabled to the host, but the inner <a>
-    // already provides the interactive control. This causes nested-interactive violations
-    // and double Tab stops. Strip these attributes to make the host a plain container.
-    // The inner <a> carries its own aria-label (see nuxeo-menu-icon), so it stays named.
-    const homeLink = this.shadowRoot?.querySelector('.home-link');
-    if (homeLink) {
-      homeLink.removeAttribute('tabindex');
-      homeLink.removeAttribute('role');
-      homeLink.removeAttribute('aria-disabled');
-    }
-
     // fire resize event during drawer animation for elements that need to adapt to size changes (nuxeo-data-table etc)
     // Filter to transitions on the drawer element itself; descendant transitions
     // (e.g. resize-handle hover) bubble up and would otherwise spuriously start the resize loop.
@@ -1016,71 +995,6 @@ Polymer({
     );
   },
 
-  // Arrow-key navigation between the home shortcut and the menu. Handlers are named methods
-  // (not inline closures) so they can be unit-tested without firing key events at the listbox.
-  homeToMenuNavigation() {
-    const home = this.shadowRoot?.querySelector('.home-link');
-    const { menu } = this.$;
-    if (!home || !menu) {
-      return;
-    }
-    // Retain the bound handlers so detached() can remove them and re-adding is idempotent.
-    this._boundHomeShortcutKeydown = this._boundHomeShortcutKeydown || this._onHomeShortcutKeydown.bind(this);
-    this._boundMenuEdgeKeydown = this._boundMenuEdgeKeydown || this._onMenuEdgeKeydown.bind(this);
-    this._homeMenuNav = { home, menu };
-    home.addEventListener('keydown', this._boundHomeShortcutKeydown);
-    menu.addEventListener('keydown', this._boundMenuEdgeKeydown);
-  },
-
-  // Visible menu items, excluding hidden ones.
-  _homeMenuVisibleItems() {
-    const menu = this._homeMenuNav?.menu;
-    if (!menu) {
-      return [];
-    }
-    return Array.from(menu.querySelectorAll('nuxeo-menu-icon, [name]')).filter((el) => !el.hasAttribute('hidden'));
-  },
-
-  // Focus the home shortcut's inner link, falling back to the host.
-  _focusHomeShortcut() {
-    const home = this._homeMenuNav?.home;
-    if (!home) {
-      return;
-    }
-    const anchor = home.shadowRoot?.querySelector('a');
-    (anchor || home).focus();
-  },
-
-  // On home: ArrowDown focuses the first menu item, ArrowUp the last.
-  _onHomeShortcutKeydown(e) {
-    const items = this._homeMenuVisibleItems();
-    if (!items.length) {
-      return;
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      items[0].focus();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      items[items.length - 1].focus();
-    }
-  },
-
-  // On menu edges: ArrowUp on the first item or ArrowDown on the last returns focus to home.
-  _onMenuEdgeKeydown(e) {
-    const items = this._homeMenuVisibleItems();
-    if (!items.length) {
-      return;
-    }
-    const first = items[0];
-    const last = items[items.length - 1];
-    const active = e.target;
-    if ((e.key === 'ArrowUp' && active === first) || (e.key === 'ArrowDown' && active === last)) {
-      e.preventDefault();
-      this._focusHomeShortcut();
-    }
-  },
-
   attached() {
     // WEBUI-1987: only re-arm after a real detach/re-attach cycle. ready() already did the initial
     // wiring, so re-running setup here on the first attach would issue a redundant keep-alive request
@@ -1089,9 +1003,6 @@ Polymer({
       this._inactivityNeedsRearm = false;
       this._setupInactivityTimer();
       this._setupUnauthorizedRedirect();
-      // detached() removed the home<->menu arrow-key handlers; re-arm them here to mirror the
-      // inactivity timer. Re-adding is idempotent (bound handler refs are retained).
-      this.homeToMenuNavigation();
     }
   },
 
@@ -1100,10 +1011,6 @@ Polymer({
       window.removeEventListener('resize', this._boundUpdateIsNarrow);
     }
     this.removeEventListener('nuxeo-layout-updated', this._onDescendantLayoutUpdated);
-    if (this._homeMenuNav) {
-      this._homeMenuNav.home.removeEventListener('keydown', this._boundHomeShortcutKeydown);
-      this._homeMenuNav.menu.removeEventListener('keydown', this._boundMenuEdgeKeydown);
-    }
     this._teardownInactivityTimer();
     this._teardownUnauthorizedRedirect();
     this._cancelPendingAnnouncement();
