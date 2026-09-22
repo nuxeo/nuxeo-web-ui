@@ -75,7 +75,7 @@ Before the first run on a new machine, verify the environment is set up. If anyt
 - **GitHub CLI**: `gh auth status` is logged in with push access to `nuxeo/nuxeo-web-ui`.
 - **Signed commits**: `git config commit.gpgsign` is `true` with an SSH signing key registered on
   GitHub (README §4). The repo requires signed commits.
-- **Local build**: Node ≥ 22 (`nvm use` reads `.nvmrc`) and `npm ci` done.
+- **Local build**: Node ≥ 22.13 (`nvm use` reads `.nvmrc`) and `npm ci` done.
 
 Once verified (or on subsequent runs), proceed.
 
