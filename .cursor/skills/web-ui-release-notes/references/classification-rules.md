@@ -145,6 +145,15 @@ Rules that hold either way:
 - **Sub-group headings** (Layout B) follow `Improved <Area>` or `Enhanced <Area>`:
   *Improved Navigation Experience*, *Improved Session Management*, *Enhanced Search
   Experience*, *Enhanced CSV Exports*.
+- **Place an item by the concern a reader would scan for, not by the mechanism of the fix.**
+  This is the grouping form of "outcome first, mechanism second", and it is where placement
+  goes wrong. Alt text on functional images *is* a labelling change, but a reader looks for it
+  under screen reader support, because what changed is what a screen reader announces.
+  **Where the ticket title names the concern — `Screen Reader: …`, `Drag and Drop: …`,
+  `Search Filters: …` — that is the sub-group**, and it beats any reasoning of your own about
+  which mechanism the fix belongs to. 2025.20.0 shipped the alt-text bullet under
+  *Improved Labelling and Error Reporting* and a reviewer moved it to *Improved Screen Reader
+  Support* on both pages.
 
 ## Recording the decision
 
