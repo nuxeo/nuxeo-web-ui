@@ -122,7 +122,7 @@ Useful constants:
 Verify before the first run on a machine; if something is missing, point the user at
 [`.cursor/skills/README.md`](../README.md) "One-time setup" rather than silently continuing:
 Atlassian MCP authenticated (`atlassianUserInfo` succeeds; else `mcp_auth`) · `~/.jira_email` +
-`~/.jira_token` present for attachments · `gh auth status` logged in · Node ≥ 22 (`nvm use`) and
+`~/.jira_token` present for attachments · `gh auth status` logged in · Node ≥ 22.13 (`nvm use`) and
 `npm ci` done · Docker Desktop installed (`docker info` succeeds, or `open -a Docker`).
 
 ---
@@ -215,7 +215,7 @@ ticket, say so explicitly in the report — that gap is itself a finding. See
 ## Phase 4 — Environment preparation
 
 Detect what the change needs, then set it up — see [`environment.md`](environment.md) for the full
-matrix and recipes. For this repo the default is **npm** (Node ≥ 22) to build the UI and **Docker** for
+matrix and recipes. For this repo the default is **npm** (Node ≥ 22.13) to build the UI and **Docker** for
 a throwaway Nuxeo server to serve it.
 
 ```bash
