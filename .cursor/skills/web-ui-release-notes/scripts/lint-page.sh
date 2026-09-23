@@ -142,10 +142,11 @@ check_page() {
   # Scoped to the transcluded block: a heading outside it leaves the index transcluding a body
   # with no release heading at all.
   expect_line="## What’s New in Web UI for $line (Version $ver)"
+  # Full-line equality, not a substring: '… (Version 2025.20.0) extra' is not the heading.
   if awk -v o="${ol:-0}" -v c="${cl:-999999}" -v want="$expect_line" \
-         'NR>o&&NR<c&&index($0,want){found=1} END{exit !found}' "$f"; then
+         'NR>o&&NR<c&&$0==want{found=1} END{exit !found}' "$f"; then
     OK "heading: $expect_line"
-  elif grep -qF "$expect_line" "$f"; then
+  elif grep -qxF "$expect_line" "$f"; then
     FAIL "the heading is present but must sit inside the web-ui-updates block (lines ${ol:-?}-${cl:-?})"
     grep -nF "$expect_line" "$f" | sed 's/^/        found at: /'
   else
