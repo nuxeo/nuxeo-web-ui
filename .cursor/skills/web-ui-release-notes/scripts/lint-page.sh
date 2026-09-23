@@ -75,11 +75,14 @@ check_page() {
   for k in title description toc tree_item_index hidden; do
     [ -n "$(fm "$f" "$k")" ] || FAIL "frontmatter: missing '$k'"
   done
-  grep -qE '^labels:[[:space:]]*$' "$f" || FAIL "frontmatter: the empty 'labels:' key must be present (do not tidy it away)"
-  grep -qE '^review:$'             "$f" || FAIL "frontmatter: missing 'review:' block"
-  grep -qE "^  comment: ''$"       "$f" || FAIL "frontmatter: review.comment must be ''"
-  grep -qE "^  date: '[0-9]{4}-[0-9]{2}-[0-9]{2}'$" "$f" || FAIL "frontmatter: review.date must be a quoted YYYY-MM-DD"
-  grep -qE '^  status: ok$'        "$f" || FAIL "frontmatter: review.status must be ok"
+  # Match inside the block only: the same line in the body or a code sample would otherwise
+  # stand in for a key that is actually missing from the frontmatter.
+  awk 'NR==1&&$0=="---"{f=1;next} f&&$0=="---"{exit} f' "$f" > "$TMP/frontmatter"
+  grep -qE '^labels:[[:space:]]*$' "$TMP/frontmatter" || FAIL "frontmatter: the empty 'labels:' key must be present (do not tidy it away)"
+  grep -qE '^review:$'             "$TMP/frontmatter" || FAIL "frontmatter: missing 'review:' block"
+  grep -qE "^  comment: ''$"       "$TMP/frontmatter" || FAIL "frontmatter: review.comment must be ''"
+  grep -qE "^  date: '[0-9]{4}-[0-9]{2}-[0-9]{2}'$" "$TMP/frontmatter" || FAIL "frontmatter: review.date must be a quoted YYYY-MM-DD"
+  grep -qE '^  status: ok$'        "$TMP/frontmatter" || FAIL "frontmatter: review.status must be ok"
   [ "$(fm "$f" toc)" = "true" ]         || FAIL "frontmatter: toc must be true"
   [ "$(fm "$f" title)" = "Version $ver" ] || FAIL "frontmatter: title is '$(fm "$f" title)', expected 'Version $ver'"
   [ "$(fm "$f" description)" = "Discover what's new in Web UI $ver." ] \
@@ -167,8 +170,13 @@ check_page() {
   else
     OK "single layout ($([ "$b" -gt 0 ] && echo 'B — sectioned' || echo 'A — compact'))"
   fi
-  # heading levels not skipped
-  grep -qE '^#### ' "$f" && ! grep -qE '^### ' "$f" && FAIL "'####' used with no '###' above it" || true
+  # heading levels not skipped — a '###' must come BEFORE the first '####', not merely exist
+  local h3 h4
+  h3=$(grep -nE '^### '  "$f" | head -1 | cut -d: -f1)
+  h4=$(grep -nE '^#### ' "$f" | head -1 | cut -d: -f1)
+  if [ -n "$h4" ] && { [ -z "$h3" ] || [ "$h4" -lt "$h3" ]; }; then
+    FAIL "'####' at line $h4 has no '###' above it"
+  fi
   grep -qE '^# [^#]' "$f" && FAIL "a top-level '#' heading in the body (the H2 is the page title)" || true
 
   # --- leaks --------------------------------------------------------------------
