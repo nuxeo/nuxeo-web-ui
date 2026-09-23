@@ -248,6 +248,13 @@ assert "index with tree_item_index != 500" fails --because "tree_item_index must
 I="$WORK/idxtrunc"; index "$I"
 sed -i.bak 's/ | Next release. | -->/ | Next release. |/' "$I/web-ui-release-notes.md" && rm -f "$I/web-ui-release-notes.md.bak"
 assert "pre-staged row with no closing -->" fails --because "pre-staged commented row" --index "$I/web-ui-release-notes.md" "$G/web-ui-release-notes-2025-20-0.md"
+# Index mode needs the same fence-before-body rule the page mode has: a '---' below the
+# transclusion satisfies "a second fence" while the renderer eats the index.
+I="$WORK/idxfence"; index "$I"
+grep -v '^---$' "$I/web-ui-release-notes.md" | sed '1i\
+---' | awk 'index($0,"multiexcerpt \47web-ui-updates\47"){print; print "---"; next} {print}' \
+  > "$I/tmp" && mv "$I/tmp" "$I/web-ui-release-notes.md"
+assert "index fence sits after the body" fails --because "must come before" --index "$I/web-ui-release-notes.md" "$G/web-ui-release-notes-2025-20-0.md"
 
 echo
 echo "== resolve-release.sh pinned versions"

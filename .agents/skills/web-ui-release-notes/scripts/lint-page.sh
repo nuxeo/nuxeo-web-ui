@@ -112,9 +112,11 @@ check_page() {
   # unchecked pairs free to be wrong, which is how a fence sitting after the shared
   # transclusion passed. The whole skeleton is one order, so assert it as one.
   local mn o c mnl ol cl
-  mn=$(grep -cF "{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}" "$f")
-  o=$(grep -cF "{{! multiexcerpt name='web-ui-updates'}}" "$f")
-  c=$(grep -cF "{{! /multiexcerpt}}" "$f")
+  # -o not -c: grep -c counts matching LINES, so two directives sharing one physical line
+  # would count as one and slip past the exactly-one checks below.
+  mn=$(grep -oF "{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}" "$f" | wc -l | tr -d ' ')
+  o=$(grep -oF "{{! multiexcerpt name='web-ui-updates'}}" "$f" | wc -l | tr -d ' ')
+  c=$(grep -oF "{{! /multiexcerpt}}" "$f" | wc -l | tr -d ' ')
   [ "$mn" = 1 ] \
     || FAIL "expected exactly 1 shared upgrade-notes transclusion {{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}, found $mn"
   [ "$o" = 1 ] || FAIL "expected exactly 1 opening {{! multiexcerpt name='web-ui-updates'}}, found $o"
@@ -268,12 +270,17 @@ fi
 # --- index page ----------------------------------------------------------------
 if [ -n "$INDEX" ]; then
   echo "== $INDEX (index page)"
+  ixfmend=$(awk 'NR>1&&/^---$/{print NR; exit}' "$INDEX" 2>/dev/null)
+  ixbody=$(grep -nF "multiexcerpt 'web-ui-updates'" "$INDEX" 2>/dev/null | head -1 | cut -d: -f1)
   if [ ! -f "$INDEX" ]; then FAIL "index page does not exist: $INDEX"
-  elif [ "$(head -1 "$INDEX")" != "---" ] \
-    || ! awk 'NR>1&&/^---$/{found=1;exit} END{exit !found}' "$INDEX"; then
+  elif [ "$(head -1 "$INDEX")" != "---" ] || [ -z "$ixfmend" ]; then
     # Same failure mode as a release page: without both fences the renderer swallows the
     # index body, so the transclusion never resolves.
     FAIL "the index page's frontmatter is missing its opening or closing '---' fence"
+  elif [ -n "$ixbody" ] && [ "$ixfmend" -ge "$ixbody" ]; then
+    # And the fence must come before the body, for the same reason it must on a page: a later
+    # '---' is a horizontal rule, not the fence.
+    FAIL "the index page's frontmatter closing fence (line $ixfmend) must come before the 'web-ui-updates' transclusion (line $ixbody)"
   else
     # format-template.md: the index carries tree_item_index: 500 and NO hidden key. Without
     # these the navigation metadata can be wrong and still reach a PR.
@@ -296,7 +303,7 @@ if [ -n "$INDEX" ]; then
     fi
     # Repointing means REPLACING. Adding the new line without removing the old one stacks two
     # releases under "Recently Released Changes", and a presence check alone would pass.
-    txcount=$(grep -cF "multiexcerpt 'web-ui-updates'" "$INDEX")
+    txcount=$(grep -oF "multiexcerpt 'web-ui-updates'" "$INDEX" | wc -l | tr -d ' ')
     [ "$txcount" -eq 1 ] \
       || FAIL "expected exactly 1 'web-ui-updates' transclusion in the index, found $txcount — the previous one was not removed"
     # the incoming version is 'recent', so it must not also sit in the Previous table
