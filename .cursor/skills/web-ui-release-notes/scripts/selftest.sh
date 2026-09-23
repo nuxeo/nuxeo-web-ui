@@ -189,7 +189,7 @@ grep -vF "{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}" \
   "$G/web-ui-release-notes-2025-20-0.md" \
   | awk "/^## What’s New/{print \"{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}\"; print \"\"} {print}" \
   > "$D/web-ui-release-notes-2025-20-0.md"
-assert "matching-notes inside the wrapper block" fails --because "must stand before the opening" "$D/web-ui-release-notes-2025-20-0.md"
+assert "matching-notes inside the wrapper block" fails --because "must come after" "$D/web-ui-release-notes-2025-20-0.md"
 D="$WORK/nobr"; mkdir -p "$D"
 grep -v '^<br/>$' "$G/web-ui-release-notes-2025-20-0.md" > "$D/web-ui-release-notes-2025-20-0.md"
 assert "missing trailing <br/>"              fails --because "must be '<br/>'" "$D/web-ui-release-notes-2025-20-0.md"
@@ -198,7 +198,21 @@ assert "missing trailing <br/>"              fails --because "must be '<br/>'" "
 D="$WORK/fenceafter"; mkdir -p "$D"
 sed '12d' "$G/web-ui-release-notes-2025-20-0.md" \
   | awk '/^<br\/>$/{print "---"; print ""} {print}' > "$D/web-ui-release-notes-2025-20-0.md"
-assert "closing fence sits after the body"   fails --because "must come before" "$D/web-ui-release-notes-2025-20-0.md"
+assert "closing fence sits after the body"   fails --because "must come after" "$D/web-ui-release-notes-2025-20-0.md"
+# Every adjacent pair in the skeleton, not just the ones that happened to be compared.
+# fence AFTER the shared transclusion: the transclusion is then parsed as frontmatter.
+D="$WORK/fenceafter_mn"; mkdir -p "$D"
+grep -v '^---$' "$G/web-ui-release-notes-2025-20-0.md" | sed '1i\
+---' | awk "/{{! multiexcerpt name='web-ui-updates'}}/{print \"---\"} {print}" \
+  > "$D/web-ui-release-notes-2025-20-0.md"
+assert "fence after the upgrade-notes line" fails --because "must come after" "$D/web-ui-release-notes-2025-20-0.md"
+# closing directive before the opening one
+D="$WORK/blockrev"; mkdir -p "$D"
+sed -e "s|{{! multiexcerpt name='web-ui-updates'}}|@@OPEN@@|" \
+    -e "s|{{! /multiexcerpt}}|{{! multiexcerpt name='web-ui-updates'}}|" \
+    -e "s|@@OPEN@@|{{! /multiexcerpt}}|" \
+    "$G/web-ui-release-notes-2025-20-0.md" > "$D/web-ui-release-notes-2025-20-0.md"
+assert "block directives reversed"           fails --because "must come after" "$D/web-ui-release-notes-2025-20-0.md"
 # The heading must be inside the transcluded block. Outside it, the index transcludes a body
 # with no release heading.
 D="$WORK/headout"; mkdir -p "$D"

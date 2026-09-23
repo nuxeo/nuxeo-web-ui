@@ -106,36 +106,42 @@ check_page() {
   idx=$(fm "$f" tree_item_index)
   [ "$idx" = "$want" ] || FAIL "tree_item_index is $idx, expected $want (1001 - $seg)"
 
-  # --- multiexcerpt wrappers ---------------------------------------------------
-  local mn o c
+  # --- page structure ------------------------------------------------------------
+  # The landmarks are resolved ONCE and validated as a single ordered chain. Comparing
+  # selected pairs instead — fence before block, transclusion before block — leaves the
+  # unchecked pairs free to be wrong, which is how a fence sitting after the shared
+  # transclusion passed. The whole skeleton is one order, so assert it as one.
+  local mn o c mnl ol cl
   mn=$(grep -cF "{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}" "$f")
-  [ "$mn" = 1 ] \
-    || FAIL "expected exactly 1 shared upgrade-notes transclusion {{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}, found $mn"
   o=$(grep -cF "{{! multiexcerpt name='web-ui-updates'}}" "$f")
   c=$(grep -cF "{{! /multiexcerpt}}" "$f")
+  [ "$mn" = 1 ] \
+    || FAIL "expected exactly 1 shared upgrade-notes transclusion {{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}, found $mn"
   [ "$o" = 1 ] || FAIL "expected exactly 1 opening {{! multiexcerpt name='web-ui-updates'}}, found $o"
   [ "$c" = 1 ] || FAIL "expected exactly 1 closing {{! /multiexcerpt}}, found $c"
-  if [ "$o" = 1 ] && [ "$c" = 1 ]; then
-    local ol cl
+  if [ "$mn" = 1 ] && [ "$o" = 1 ] && [ "$c" = 1 ]; then
+    mnl=$(grep -nF "{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}" "$f" | cut -d: -f1)
     ol=$(grep -nF "{{! multiexcerpt name='web-ui-updates'}}" "$f" | cut -d: -f1)
     cl=$(grep -nF "{{! /multiexcerpt}}" "$f" | cut -d: -f1)
-    [ "$ol" -lt "$cl" ] || FAIL "the closing multiexcerpt directive (line $cl) precedes the opening one (line $ol)"
-    # A '---' anywhere below satisfies "a second fence", so the fence must also come BEFORE the
-    # body. Otherwise the frontmatter is really unterminated and the renderer eats the page.
-    [ "$fmend" -lt "$ol" ] \
-      || FAIL "the frontmatter closing fence (line $fmend) must come before the opening web-ui-updates directive (line $ol) — a later '---' is a horizontal rule, not the fence"
-    # The shared upgrade note stands ALONE, before the block. Inside it, the index transcludes
-    # the upgrade callout along with the release bullets.
-    if [ "$mn" = 1 ]; then
-      local mnl
-      mnl=$(grep -nF "{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}" "$f" | cut -d: -f1)
-      [ "$mnl" -lt "$ol" ] \
-        || FAIL "the shared upgrade-notes transclusion (line $mnl) must stand before the opening web-ui-updates directive (line $ol), not inside or after the block"
+    local prev_name prev_line item name pos ordered=1
+    prev_name="frontmatter closing fence"; prev_line=$fmend
+    for item in "shared upgrade-notes transclusion|$mnl" \
+                "opening web-ui-updates directive|$ol" \
+                "closing multiexcerpt directive|$cl"; do
+      name=${item%|*}; pos=${item##*|}
+      if [ "$prev_line" -ge "$pos" ]; then
+        FAIL "page skeleton out of order: the $name (line $pos) must come after the $prev_name (line $prev_line)"
+        ordered=0; break
+      fi
+      prev_name=$name; prev_line=$pos
+    done
+    if [ "$ordered" = 1 ]; then
+      OK "skeleton in order: fence $fmend < upgrade-notes $mnl < block $ol-$cl"
+      # Must be the LAST nonblank line before the close, not merely present somewhere.
+      last=$(awk -v o="$ol" -v c="$cl" 'NR>o&&NR<c&&NF{l=$0} END{print l}' "$f")
+      [ "$last" = "<br/>" ] \
+        || FAIL "the last line before the closing multiexcerpt must be '<br/>', found '${last:-<nothing>}'"
     fi
-    # Must be the LAST nonblank line before the close, not merely present somewhere.
-    last=$(awk -v o="$ol" -v c="$cl" 'NR>o&&NR<c&&NF{l=$0} END{print l}' "$f")
-    [ "$last" = "<br/>" ] \
-      || FAIL "the last line before the closing multiexcerpt must be '<br/>', found '${last:-<nothing>}'"
   fi
 
   # --- heading ------------------------------------------------------------------
