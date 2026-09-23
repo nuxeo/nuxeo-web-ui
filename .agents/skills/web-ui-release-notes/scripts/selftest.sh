@@ -209,6 +209,11 @@ grep -v '^## What’s New' "$G/web-ui-release-notes-2025-20-0.md" | cat -s \
   | awk -v h="$hline" "/{{! multiexcerpt name='web-ui-updates'}}/{print h} {print}" \
   > "$D/web-ui-release-notes-2025-20-0.md"
 assert "heading outside the wrapper block"   fails --because "must sit inside" "$D/web-ui-release-notes-2025-20-0.md"
+# The heading is specified exactly, so trailing text on the line is not the heading.
+D="$WORK/headextra"; mkdir -p "$D"
+sed 's/^\(## What’s New .*\)$/\1 extra/' "$G/web-ui-release-notes-2025-20-0.md" \
+  > "$D/web-ui-release-notes-2025-20-0.md"
+assert "heading with trailing text"          fails --because "heading must be exactly" "$D/web-ui-release-notes-2025-20-0.md"
 
 echo
 echo "== twins"
