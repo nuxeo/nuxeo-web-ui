@@ -365,9 +365,14 @@ happened on 2026-09-18. Either give each branch its own `git worktree`, or extra
 the committed files:
 
 ```shell
-git show <2025-branch>:<path-to-2025-page> > /tmp/web-ui-release-notes-<2025-slug>.md
-git show <2023-branch>:<path-to-2023-page> > /tmp/web-ui-release-notes-<2023-slug>.md
-"$SKILL/scripts/lint-page.sh" /tmp/web-ui-release-notes-*.md
+# A private directory, and both names passed explicitly: a glob over shared /tmp picks up
+# pages left by an earlier run and hands the linter more than the two files it takes.
+# Each file keeps its real name — the linter validates the filename slug (`doc-repo.md`).
+rn=$(mktemp -d) && trap 'rm -rf "$rn"' EXIT
+git show <2025-branch>:<path-to-2025-page> > "$rn/web-ui-release-notes-<2025-slug>.md"
+git show <2023-branch>:<path-to-2023-page> > "$rn/web-ui-release-notes-<2023-slug>.md"
+"$SKILL/scripts/lint-page.sh" "$rn/web-ui-release-notes-<2025-slug>.md" \
+                              "$rn/web-ui-release-notes-<2023-slug>.md"
 ```
 
 The safest way to keep the twins honest is to write one page, commit it, then **derive the other
