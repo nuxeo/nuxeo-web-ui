@@ -46,7 +46,7 @@ fm() { # <file> <key> -> value from the frontmatter block
 }
 
 check_page() {
-  local f=$1 base ver slug seg line expect_line
+  local f=$1 base ver slug seg line expect_line fmend
   echo "== $f"
   [ -f "$f" ] || { FAIL "file does not exist"; return; }
 
@@ -70,7 +70,8 @@ check_page() {
   [ "$(head -1 "$f")" = "---" ] || FAIL "file must open with the '---' frontmatter fence"
   # Both fences, not just the opener: without the closing one the renderer treats the whole
   # page as frontmatter and publishes nothing. Nothing below can be trusted either, so stop.
-  if ! awk 'NR>1&&/^---$/{found=1;exit} END{exit !found}' "$f"; then
+  fmend=$(awk 'NR>1&&/^---$/{print NR; exit}' "$f")
+  if [ -z "$fmend" ]; then
     FAIL "frontmatter has no closing '---' fence — the renderer would swallow the page body and publish a blank page"
     return
   fi
@@ -119,6 +120,10 @@ check_page() {
     ol=$(grep -nF "{{! multiexcerpt name='web-ui-updates'}}" "$f" | cut -d: -f1)
     cl=$(grep -nF "{{! /multiexcerpt}}" "$f" | cut -d: -f1)
     [ "$ol" -lt "$cl" ] || FAIL "the closing multiexcerpt directive (line $cl) precedes the opening one (line $ol)"
+    # A '---' anywhere below satisfies "a second fence", so the fence must also come BEFORE the
+    # body. Otherwise the frontmatter is really unterminated and the renderer eats the page.
+    [ "$fmend" -lt "$ol" ] \
+      || FAIL "the frontmatter closing fence (line $fmend) must come before the opening web-ui-updates directive (line $ol) — a later '---' is a horizontal rule, not the fence"
     # The shared upgrade note stands ALONE, before the block. Inside it, the index transcludes
     # the upgrade callout along with the release bullets.
     if [ "$mn" = 1 ]; then
@@ -134,8 +139,15 @@ check_page() {
   fi
 
   # --- heading ------------------------------------------------------------------
+  # Scoped to the transcluded block: a heading outside it leaves the index transcluding a body
+  # with no release heading at all.
   expect_line="## What’s New in Web UI for $line (Version $ver)"
-  if grep -qF "$expect_line" "$f"; then OK "heading: $expect_line"
+  if awk -v o="${ol:-0}" -v c="${cl:-999999}" -v want="$expect_line" \
+         'NR>o&&NR<c&&index($0,want){found=1} END{exit !found}' "$f"; then
+    OK "heading: $expect_line"
+  elif grep -qF "$expect_line" "$f"; then
+    FAIL "the heading is present but must sit inside the web-ui-updates block (lines ${ol:-?}-${cl:-?})"
+    grep -nF "$expect_line" "$f" | sed 's/^/        found at: /'
   else
     FAIL "heading must be exactly: $expect_line"
     grep -n '^## ' "$f" | sed 's/^/        found: /'
@@ -284,9 +296,11 @@ if [ -n "$INDEX" ]; then
     hits "the incoming version already has an uncommented row in Previous Release Notes — it belongs in 'Recently Released Changes' until it is superseded" "" \
       grep -nE "^\|.*web-ui-release-notes-$newslug'" "$INDEX"
     # ... but it should have the pre-staged commented row ready for next time
-    grep -qE "^<!--[[:space:]]*\|.*web-ui-release-notes-$newslug'" "$INDEX" \
+    # The comment must be closed: an unterminated <!-- swallows everything after it, so the
+    # row renders as broken content rather than waiting to be uncommented.
+    grep -qE "^<!--[[:space:]]*\|.*web-ui-release-notes-$newslug'.*-->[[:space:]]*$" "$INDEX" \
       && OK "pre-staged commented row present for $newver" \
-      || FAIL "no pre-staged commented row for $newver — format-template.md requires one, ready to uncomment next release"
+      || FAIL "no complete pre-staged commented row for $newver — format-template.md requires one, opened with '<!--' and closed with '-->', ready to uncomment next release"
     hits "raw URL in the Previous Release Notes table — use {{page page='…'}}" "" \
       grep -nE '^\|.*https?://' "$INDEX"
     grep -qE '^##[[:space:]]+Previous Release Notes[[:space:]]*$' "$INDEX" \
