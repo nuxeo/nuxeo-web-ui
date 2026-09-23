@@ -107,6 +107,14 @@ if [ -n "${1:-}" ]; then           # a pinned version: accept either line, deriv
 fi
 [ -n "$V2025" ] && [ -n "$V31" ] || { bad "could not resolve a version pair"; exit 1; }
 
+# Guard both paths, not just the pinned one: an auto-detected version comes straight from
+# package.json and would otherwise reach the arithmetic below unchecked, where a padded
+# segment is read as octal.
+[[ $V2025 =~ ^2025\.[1-9][0-9]*\.0$ ]] \
+  || { bad "'$V2025' is not a canonical 2025.N.0 version (no zero padding) — refusing to derive a release from it"; exit 1; }
+[[ $V31 =~ ^3\.1\.[1-9][0-9]*$ ]] \
+  || { bad "'$V31' is not a canonical 3.1.Z version (no zero padding) — refusing to derive a release from it"; exit 1; }
+
 n=$(counter "$V2025"); z=$(counter "$V31")
 [ "$z" = "$((n + 15))" ] || bad "pair looks wrong: $V2025 <-> $V31 (expected 3.1.$((n + 15))). The LTS mapping Confluence page is authoritative — read it."
 
