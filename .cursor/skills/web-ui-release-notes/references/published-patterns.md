@@ -10,6 +10,7 @@ older ones as legacy when you read them.
 | Page | Top-level bullets | Words | Categories |
 |---|---|---|---|
 | 2025.2.0 | 4 | 59 | 1 |
+| 2025.3.0 | 8 | 132 | 2 |
 | 2025.4.0 | 14 | 419 | 1 |
 | 2025.5.0 | 11 | 253 | 1 |
 | 2025.6.0 | 7 | 168 | 4 |
@@ -27,7 +28,7 @@ older ones as legacy when you read them.
 | 2025.18.0 | 16 | 510 | 5 |
 | 2025.19.0 | 44 | 851 | 9 |
 
-Median: **11 bullets, 370 words, 3 categories**. The trend is clearly upward — recent releases
+Median across all 18: **11 bullets, 344 words, 3 categories**. The trend is clearly upward — recent releases
 run 16–21 bullets in 4–5 categories, around 400–550 words. If your draft for a normal release is
 under ~8 bullets, you have probably lost tickets in Step 2; if it is over ~25, you have probably
 failed to merge duplicate pairs.

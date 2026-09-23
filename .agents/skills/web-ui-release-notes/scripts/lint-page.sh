@@ -56,12 +56,14 @@ check_page() {
 
   # slug -> version, and which LTS line it belongs to
   # Exact shapes only: 2025-N-0 and 3-1-Z. A prefix match would accept 2025-20-1.
-  if [[ $slug =~ ^2025-([0-9]+)-0$ ]]; then
+  # [1-9][0-9]* not [0-9]+: slugs carry no zero padding (format-template.md), and a padded
+  # segment would reach the arithmetic below as an octal literal.
+  if [[ $slug =~ ^2025-([1-9][0-9]*)-0$ ]]; then
     seg=${BASH_REMATCH[1]}; ver="2025.$seg.0"; line="LTS 2025"
-  elif [[ $slug =~ ^3-1-([0-9]+)$ ]]; then
+  elif [[ $slug =~ ^3-1-([1-9][0-9]*)$ ]]; then
     seg=${BASH_REMATCH[1]}; ver="3.1.$seg"; line="LTS 2023"
   else
-    FAIL "slug '$slug' is neither a 2025-N-0 nor a 3-1-Z form"; return
+    FAIL "slug '$slug' is neither a 2025-N-0 nor a 3-1-Z form (no zero padding)"; return
   fi
 
   # --- frontmatter -------------------------------------------------------------
@@ -97,14 +99,17 @@ check_page() {
 
   # tree_item_index = 1001 - the segment that increments per release
   # (N in 2025.N.0, Z in 3.1.Z — NOT the trailing 0 of the 2025 form)
-  local idx want=$((1001 - seg))
+  # 10# forces base 10: belt and braces, so a future slip in the slug pattern cannot turn a
+  # padded segment into an octal literal, which errors out without recording a failure.
+  local idx want=$((1001 - 10#$seg))
   idx=$(fm "$f" tree_item_index)
   [ "$idx" = "$want" ] || FAIL "tree_item_index is $idx, expected $want (1001 - $seg)"
 
   # --- multiexcerpt wrappers ---------------------------------------------------
-  grep -qF "{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}" "$f" \
-    || FAIL "missing the shared upgrade-notes transclusion: {{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}"
-  local o c
+  local mn o c
+  mn=$(grep -cF "{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}" "$f")
+  [ "$mn" = 1 ] \
+    || FAIL "expected exactly 1 shared upgrade-notes transclusion {{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}, found $mn"
   o=$(grep -cF "{{! multiexcerpt name='web-ui-updates'}}" "$f")
   c=$(grep -cF "{{! /multiexcerpt}}" "$f")
   [ "$o" = 1 ] || FAIL "expected exactly 1 opening {{! multiexcerpt name='web-ui-updates'}}, found $o"
@@ -114,6 +119,14 @@ check_page() {
     ol=$(grep -nF "{{! multiexcerpt name='web-ui-updates'}}" "$f" | cut -d: -f1)
     cl=$(grep -nF "{{! /multiexcerpt}}" "$f" | cut -d: -f1)
     [ "$ol" -lt "$cl" ] || FAIL "the closing multiexcerpt directive (line $cl) precedes the opening one (line $ol)"
+    # The shared upgrade note stands ALONE, before the block. Inside it, the index transcludes
+    # the upgrade callout along with the release bullets.
+    if [ "$mn" = 1 ]; then
+      local mnl
+      mnl=$(grep -nF "{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}" "$f" | cut -d: -f1)
+      [ "$mnl" -lt "$ol" ] \
+        || FAIL "the shared upgrade-notes transclusion (line $mnl) must stand before the opening web-ui-updates directive (line $ol), not inside or after the block"
+    fi
     # Must be the LAST nonblank line before the close, not merely present somewhere.
     last=$(awk -v o="$ol" -v c="$cl" 'NR>o&&NR<c&&NF{l=$0} END{print l}' "$f")
     [ "$last" = "<br/>" ] \
@@ -212,8 +225,8 @@ if [ "$#" -eq 2 ]; then
   n25=""; n31=""
   for f in "$1" "$2"; do
     b=$(basename "$f" .md); b=${b#web-ui-release-notes-}
-    if [[ $b =~ ^2025-([0-9]+)-0$ ]]; then n25=${BASH_REMATCH[1]}
-    elif [[ $b =~ ^3-1-([0-9]+)$ ]]; then n31=${BASH_REMATCH[1]}; fi
+    if [[ $b =~ ^2025-([1-9][0-9]*)-0$ ]]; then n25=${BASH_REMATCH[1]}
+    elif [[ $b =~ ^3-1-([1-9][0-9]*)$ ]]; then n31=${BASH_REMATCH[1]}; fi
   done
   if [ -z "$n25" ] || [ -z "$n31" ]; then
     FAIL "the twin check needs one 2025-N-0 page and one 3-1-Z page; got '$(basename "$1")' and '$(basename "$2")'"
@@ -243,6 +256,17 @@ if [ -n "$INDEX" ]; then
     # index body, so the transclusion never resolves.
     FAIL "the index page's frontmatter is missing its opening or closing '---' fence"
   else
+    # format-template.md: the index carries tree_item_index: 500 and NO hidden key. Without
+    # these the navigation metadata can be wrong and still reach a PR.
+    awk 'NR==1&&$0=="---"{f=1;next} f&&$0=="---"{exit} f' "$INDEX" > "$TMP/indexfm"
+    grep -qE '^tree_item_index: 500$' "$TMP/indexfm" \
+      || FAIL "index frontmatter: tree_item_index must be 500, found '$(fm "$INDEX" tree_item_index)'"
+    grep -qE '^hidden:' "$TMP/indexfm" \
+      && FAIL "index frontmatter: the index must not carry a 'hidden' key (format-template.md)" || true
+    for k in title description toc; do
+      [ -n "$(fm "$INDEX" "$k")" ] || FAIL "index frontmatter: missing '$k'"
+    done
+
     newslug=$(basename "$1" .md); newslug=${newslug#web-ui-release-notes-}
     newver=$(echo "$newslug" | sed 's/^2025-/2025./; s/-/./g')
     if grep -qF "{{{multiexcerpt 'web-ui-updates' page='web-ui-release-notes-$newslug'}}}" "$INDEX"; then
@@ -273,13 +297,13 @@ if [ -n "$INDEX" ]; then
     # Walk back to the newest predecessor that actually exists. A blind N-1 would silently
     # disable this check if a release number were ever skipped.
     prevslug=""; pagedir=$(dirname "$1")
-    if [[ $newslug =~ ^2025-([0-9]+)-0$ ]]; then
+    if [[ $newslug =~ ^2025-([1-9][0-9]*)-0$ ]]; then
       i=$(( ${BASH_REMATCH[1]} - 1 ))
       while [ "$i" -ge 1 ]; do
         [ -f "$pagedir/web-ui-release-notes-2025-$i-0.md" ] && { prevslug="2025-$i-0"; break; }
         i=$((i - 1))
       done
-    elif [[ $newslug =~ ^3-1-([0-9]+)$ ]]; then
+    elif [[ $newslug =~ ^3-1-([1-9][0-9]*)$ ]]; then
       i=$(( ${BASH_REMATCH[1]} - 1 ))
       while [ "$i" -ge 1 ]; do
         [ -f "$pagedir/web-ui-release-notes-3-1-$i.md" ] && { prevslug="3-1-$i"; break; }

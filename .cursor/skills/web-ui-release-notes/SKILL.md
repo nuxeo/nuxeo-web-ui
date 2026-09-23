@@ -75,7 +75,7 @@ Reference files in this skill:
 - `references/classification-rules.md` — what goes in, what stays out, which category
 - `references/format-template.md` — page skeleton, frontmatter, layouts, index update
 - `references/writing-and-accuracy.md` — voice, vocabulary, accuracy gates
-- `references/published-patterns.md` — what 15 published releases actually look like
+- `references/published-patterns.md` — what 18 published releases actually look like
 - `references/example-2025-18-0.md` — one release traced ticket by ticket
 
 ---
@@ -354,6 +354,19 @@ It checks every mechanical thing the review skill scores:
 
 **Get it clean before Step 8.** The docs repo has no CI and no markdown lint, so this script is
 the only automated check that exists anywhere in the pipeline.
+
+**If you change either script, run its self-test.** Nothing in this repo's CI executes them —
+`prettier` globs `**/*.{js,html}` and `eslint` matches only `.cursor/skills/**/scripts/**/*.js`,
+so a `.sh` file is never run. Every defect found in review so far has been a check that could
+not fail, and reading bash does not find those:
+
+```shell
+"$SKILL/scripts/selftest.sh"     # 25 cases, no network; exit 0 only if all behave as asserted
+```
+
+It asserts **why** each negative case fails, not just that it did. A case that fails for an
+unrelated reason is a test that passes without testing anything — which is how a padded segment
+read as octal (`3.1.035` → `1001 - 29`) looked like a working rejection.
 
 `--released` inverts the `hidden` expectation, so use it for the **outgoing** page this PR flips
 to `false` (Step 9) — not for the incoming one, which stays `true`.
