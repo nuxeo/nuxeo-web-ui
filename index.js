@@ -3,6 +3,7 @@ import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js'
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { loadTheme } from './themes/loader.js';
 import { installGlobalFocusRing } from './themes/dark-theme-focus-ring.js';
+import { i18nReady } from './i18n/i18n.js';
 
 // Install the themeable keyboard-focus ring before any custom element attaches its shadow root,
 // so every root gets the rule from first paint. Dark themes make the ring visible; other themes
@@ -81,6 +82,7 @@ const ready =
       });
 
 ready
+  .then(() => i18nReady)
   .then(disableRobotoFont)
   .then(setupRTLSupport)
   // Apply the theme early (before the app element loads) to avoid a flash of the wrong theme.
