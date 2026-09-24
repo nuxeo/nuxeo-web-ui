@@ -178,8 +178,8 @@ Polymer({
         top: var(--nuxeo-app-top);
         z-index: 102;
         box-sizing: border-box;
+        outline: none;
         background-color: var(--nuxeo-sidebar-background);
-        display: block;
       }
 
       :host([dir='ltr']) #logo {
@@ -198,66 +198,39 @@ Polymer({
         left: auto;
       }
 
-      /* WEBUI-2315: the logo is the Home link again, so it needs a hover affordance and a
-         visible focus ring. The ring is inset so it is not clipped by the pinned header box.
-         The anchor is not one of the primitives themes/dark-theme-focus-ring.js allowlists, so
-         it consumes --nuxeo-focus-outline itself: the browser's 'auto' ring uses a fixed system
-         colour that is effectively invisible on the dark themes (WCAG 2.4.11 / 2.4.13). Both
-         dark themes define the token; light themes leave it unset and fall back to 'auto'. */
-      #logo:hover img {
-        filter: brightness(110%);
-      }
-
-      #logo:focus-visible {
-        outline: var(--nuxeo-focus-outline, auto);
-        outline-offset: -2px;
-      }
-
-      /* NXENG-527: Scrollable container for the menu below the pinned logo. Prevents scrollbar
-         overlap by keeping it within the column boundary. WEBUI-2315 removed the home shortcut it
-         also held; the wrapper stays because the pinned-logo layout and this scroll region depend
-         on it (without it #menu would have to go back to position:fixed + padding-top). */
-      #menuContainer {
-        position: fixed;
-        top: calc(var(--nuxeo-app-top, 0px) + var(--nuxeo-drawer-header-height, 53px));
-        height: calc(
-          100vh - var(--nuxeo-drawer-header-height, 53px) - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px))
-        );
-        width: var(--nuxeo-sidebar-width);
-        z-index: 100;
-        box-sizing: border-box;
-        overflow-x: hidden;
-        overflow-y: auto;
-        background-color: var(--nuxeo-sidebar-background);
-        display: flex;
-        flex-direction: column;
-      }
-
-      :host([dir='ltr']) #menuContainer {
-        left: 0;
-        right: auto;
-      }
-
-      :host([dir='rtl']) #menuContainer {
-        right: 0;
-        left: auto;
-      }
-
       /* menu */
       #menu {
         @apply --nuxeo-sidebar;
-        position: relative;
+        position: fixed;
         width: var(--nuxeo-sidebar-width);
+        height: calc(100vh - 54px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
         z-index: 100;
         padding: 0;
+        padding-top: 54px;
+        overflow: auto;
         display: flex;
         flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0;
       }
 
-      #menu nuxeo-menu-icon {
-        flex-shrink: 0;
+      #logo:hover img {
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--nuxeo-sidebar-menu-hover);
+      }
+
+      #logo:hover img {
+        filter: brightness(110%);
+        -webkit-filter: brightness(110%);
+      }
+
+      /* WEBUI-2315: the logo is a link again, so keyboard focus needs to be visible. The ring is
+         inset so it is not clipped by the pinned header box. The anchor is not one of the
+         primitives themes/dark-theme-focus-ring.js allowlists, so it consumes
+         --nuxeo-focus-outline itself: the browser's 'auto' ring uses a fixed system colour that is
+         effectively invisible on the dark themes (WCAG 2.4.11 / 2.4.13). Both dark themes define
+         the token; light themes leave it unset and fall back to 'auto'. */
+      #logo:focus-visible {
+        outline: var(--nuxeo-focus-outline, auto);
+        outline-offset: -2px;
       }
 
       /* Apply margin-top: auto to all settings and then reset them, except the first one */
@@ -528,35 +501,32 @@ Polymer({
               <img src$="[[_logo(baseUrl)]]" alt="[[i18n('accessibility.logo')]]" />
             </a>
 
-            <!-- Scrollable container for the menu (below the pinned logo) -->
-            <div id="menuContainer">
-              <!-- menu -->
-              <paper-listbox
-                id="menu"
-                selected="{{selectedTab}}"
-                attr-for-selected="name"
-                selected-class="selected"
-                on-iron-activate="_toggleDrawer"
-                on-iron-items-changed="_updateDrawerItemsAria"
-                aria-label$="[[i18n('app.drawer')]]"
-              >
-                <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
-                <nuxeo-menu-icon
-                  name="administration"
-                  icon="nuxeo:admin"
-                  label="app.administration"
-                  class="settings"
-                  hidden$="[[!hasAdministrationPermissions(currentUser)]]"
-                ></nuxeo-menu-icon>
-                <nuxeo-menu-icon
-                  name="profile"
-                  src="[[currentUser.contextParameters.userprofile.avatar.data]]"
-                  icon="nuxeo:user-settings"
-                  label="app.account"
-                  class="settings"
-                ></nuxeo-menu-icon>
-              </paper-listbox>
-            </div>
+            <!-- menu -->
+            <paper-listbox
+              id="menu"
+              selected="{{selectedTab}}"
+              attr-for-selected="name"
+              selected-class="selected"
+              on-iron-activate="_toggleDrawer"
+              on-iron-items-changed="_updateDrawerItemsAria"
+              aria-label$="[[i18n('app.drawer')]]"
+            >
+              <nuxeo-slot name="DRAWER_ITEMS" model="[[actionContext]]"></nuxeo-slot>
+              <nuxeo-menu-icon
+                name="administration"
+                icon="nuxeo:admin"
+                label="app.administration"
+                class="settings"
+                hidden$="[[!hasAdministrationPermissions(currentUser)]]"
+              ></nuxeo-menu-icon>
+              <nuxeo-menu-icon
+                name="profile"
+                src="[[currentUser.contextParameters.userprofile.avatar.data]]"
+                icon="nuxeo:user-settings"
+                label="app.account"
+                class="settings"
+              ></nuxeo-menu-icon>
+            </paper-listbox>
 
             <!-- drawer content -->
             <div id="drawer" style="width: {{drawerWidth}}">
