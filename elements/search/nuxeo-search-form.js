@@ -734,7 +734,7 @@ Polymer({
         }
       }
       if (this.queue) {
-        this.$.list.fetch();
+        this.$.list.fetch().then(() => this._selectPendingCurrentDocument());
       } else if (this.auto) {
         this._fetch(this.$.provider);
       }
@@ -774,10 +774,14 @@ Polymer({
       const selectedUid = restoreSelection ? this.selectedDocument?.uid : null;
       this.$.list.fetch().then(() => {
         if (typeof index === 'number') {
+          // An explicit index is the caller's own selection and wins over a pending replay.
+          this.__queueSelectionPending = false;
           const targetIndex = this._queueIndexOf(selectedUid, index);
           this.$.list.scrollToIndex(targetIndex);
           this.$.list.selectIndex(targetIndex);
           this._navigateToQueueItem(targetIndex);
+        } else {
+          this._selectPendingCurrentDocument();
         }
       });
     }
@@ -834,8 +838,31 @@ Polymer({
     }
     // The list is guarded because `currentDocument` is bound from the host and can be pushed in
     // before the template is stamped, and `queue` is set as an attribute on some search forms.
+    // Such a form can be handed the document while still un-fetched, and an observer only runs
+    // on a change, so ask the queue fetch to replay the lookup instead (WEBUI-2303).
     const list = this.$?.list;
-    if (!list) {
+    if (!list || !list.items?.length) {
+      this.__queueSelectionPending = true;
+      return;
+    }
+    this._selectCurrentDocumentInQueue();
+  },
+
+  _selectPendingCurrentDocument() {
+    // Replay once, never after every fetch: sort, column filter and a new search each clear the
+    // selection and then fetch, and re-selecting there would fight them (WEBUI-2303).
+    if (!this.__queueSelectionPending) {
+      return;
+    }
+    this.__queueSelectionPending = false;
+    this._selectCurrentDocumentInQueue();
+  },
+
+  _selectCurrentDocumentInQueue() {
+    // Read `currentDocument` fresh: the route may have moved on since the replay was armed.
+    const doc = this.currentDocument;
+    const list = this.$?.list;
+    if (!this.queue || !doc?.uid || !list) {
       return;
     }
     // Nothing to do when the displayed document is already the selected one. This guard matters:
@@ -856,8 +883,8 @@ Polymer({
       list.clearSelection();
       list.selectIndex(index);
       // Selecting writes `selectedDocument`, which schedules `_selectedDocChanged`'s debounced
-      // navigation. This observer must only ever move the highlight: the route already shows this
-      // document. Leaving the timer armed lets it fire after a later host-driven `currentDocument`
+      // navigation. Following the route must only ever move the highlight: the route already
+      // shows this document. Leaving the timer armed lets it fire after a later `currentDocument`
       // change that is not in the queue, navigating back to the stale document and overriding the
       // external navigation.
       if (this.__renderDebouncer) {
