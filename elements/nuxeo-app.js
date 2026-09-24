@@ -207,7 +207,9 @@ Polymer({
         z-index: 100;
         padding: 0;
         padding-top: 54px;
-        overflow: auto;
+        /* Icons are column-width, so a vertical scrollbar makes them overflow sideways. */
+        overflow-x: hidden;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
       }
@@ -222,12 +224,7 @@ Polymer({
         -webkit-filter: brightness(110%);
       }
 
-      /* WEBUI-2315: the logo is a link again, so keyboard focus needs to be visible. The ring is
-         inset so it is not clipped by the pinned header box. The anchor is not one of the
-         primitives themes/dark-theme-focus-ring.js allowlists, so it consumes
-         --nuxeo-focus-outline itself: the browser's 'auto' ring uses a fixed system colour that is
-         effectively invisible on the dark themes (WCAG 2.4.11 / 2.4.13). Both dark themes define
-         the token; light themes leave it unset and fall back to 'auto'. */
+      /* 'auto' is invisible on the dark themes, which define --nuxeo-focus-outline instead. */
       #logo:focus-visible {
         outline: var(--nuxeo-focus-outline, auto);
         outline-offset: -2px;
