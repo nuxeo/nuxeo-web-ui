@@ -608,6 +608,173 @@ suite('nuxeo-search-form', () => {
     expect(searchForm._queueIndexOf('uid-missing', 9)).to.equal(9);
   });
 
+  suite('queue selection catches up once the queue is first populated (WEBUI-2303)', () => {
+    // The Expired Search drawer page has `queue` set as an attribute, so it can be handed the
+    // document while still un-fetched, leaving the observer nothing to look it up in.
+    const entries = [
+      { uid: 'uid-1', path: '/default-domain/doc-1' },
+      { uid: 'uid-2', path: '/default-domain/doc-2' },
+    ];
+    // a fetch replaces the entries with new object instances, as the page provider does
+    const stubFetch = (form) =>
+      sinon.stub(form.$.list, 'fetch').callsFake(() => {
+        form.$.list.items = entries.map((entry) => Object.assign({}, entry));
+        return Promise.resolve();
+      });
+    // the selection happens in the fetch promise's continuation
+    const settle = async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    };
+
+    setup(() => {
+      // `visible` first, or `_visibleChanged` issues a real fetch before `fetch` is stubbed
+      searchForm.visible = true;
+      searchForm.queue = true;
+      searchForm.$.list.items = [];
+      Object.defineProperty(searchForm, 'navigateTo', { value: sinon.spy(), configurable: true, writable: true });
+    });
+
+    teardown(() => {
+      delete searchForm.navigateTo;
+    });
+
+    test('selects the displayed document once the queue is first populated', async () => {
+      searchForm.currentDocument = entries[1];
+      const fetchStub = stubFetch(searchForm);
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+      searchForm._visibleChanged();
+      await settle();
+
+      expect(selectSpy).to.have.been.calledWith(1);
+      // following the route must never navigate, or the two would loop
+      expect(searchForm.navigateTo).to.not.have.been.called;
+
+      fetchStub.restore();
+      selectSpy.restore();
+    });
+
+    test('follows the route rather than the document known when the queue was armed', async () => {
+      searchForm.currentDocument = entries[1];
+      // the user navigated again before the queue came back
+      searchForm.currentDocument = entries[0];
+      const fetchStub = stubFetch(searchForm);
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+      searchForm._visibleChanged();
+      await settle();
+
+      expect(selectSpy).to.have.been.calledOnce;
+      expect(selectSpy).to.have.been.calledWith(0);
+
+      fetchStub.restore();
+      selectSpy.restore();
+    });
+
+    test('a queue displayed without an explicit index also catches up', async () => {
+      // _formChanged reaches displayQueue with no index once the search layout is loaded
+      searchForm.currentDocument = entries[0];
+      const fetchStub = stubFetch(searchForm);
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+      searchForm.displayQueue();
+      await settle();
+
+      expect(selectSpy).to.have.been.calledWith(0);
+
+      fetchStub.restore();
+      selectSpy.restore();
+    });
+
+    test('later fetches do not pull the selection back to the displayed document', async () => {
+      // sort, column filter and a new search all clearSelection() and then fetch
+      searchForm.currentDocument = entries[0];
+      const fetchStub = stubFetch(searchForm);
+      searchForm._visibleChanged();
+      await settle();
+
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      searchForm.$.list.clearSelection();
+      searchForm._visibleChanged();
+      await settle();
+      searchForm.displayQueue();
+      await settle();
+
+      expect(selectSpy).to.not.have.been.called;
+
+      fetchStub.restore();
+      selectSpy.restore();
+    });
+
+    test('a populated queue is synchronised by the observer, leaving nothing pending', async () => {
+      // the normal WEBUI-2301 path: nothing is armed, so a later fetch stays inert
+      searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
+      searchForm.currentDocument = entries[1];
+      expect(searchForm.__queueSelectionPending).to.not.be.true;
+
+      const fetchStub = stubFetch(searchForm);
+      searchForm.$.list.clearSelection();
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+      searchForm._visibleChanged();
+      await settle();
+
+      expect(selectSpy).to.not.have.been.called;
+
+      fetchStub.restore();
+      selectSpy.restore();
+    });
+
+    test('an explicit index wins over a pending replay (WEBUI-1881)', async () => {
+      // the filters/queue toggle restores the document the user opened from the queue
+      searchForm.currentDocument = entries[0];
+      searchForm.selectedDocument = entries[1];
+      const fetchStub = stubFetch(searchForm);
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+      searchForm.displayQueueAndNavigateToFirst();
+      await settle();
+
+      expect(selectSpy).to.have.been.calledOnce;
+      expect(selectSpy).to.have.been.calledWith(1);
+      expect(searchForm.__queueSelectionPending).to.not.be.true;
+
+      fetchStub.restore();
+      selectSpy.restore();
+    });
+
+    test('does not select a displayed document that is outside the queue', async () => {
+      searchForm.currentDocument = { uid: 'uid-child', path: '/default-domain/doc-1/child' };
+      const fetchStub = stubFetch(searchForm);
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      const clearSpy = sinon.spy(searchForm.$.list, 'clearSelection');
+
+      searchForm._visibleChanged();
+      await settle();
+
+      expect(selectSpy).to.not.have.been.called;
+      expect(clearSpy).to.not.have.been.called;
+
+      fetchStub.restore();
+      selectSpy.restore();
+      clearSpy.restore();
+    });
+
+    test('does nothing when the filters view is showing by the time the queue arrives', () => {
+      searchForm.currentDocument = entries[0];
+      searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+      searchForm.queue = false;
+
+      searchForm._selectPendingCurrentDocument();
+
+      expect(selectSpy).to.not.have.been.called;
+
+      selectSpy.restore();
+    });
+  });
+
   test('resetResults invokes list reset when required inputs exist', () => {
     const resetSpy = sinon.spy(searchForm.$.list, '_resetResults');
     searchForm.provider = 'default_search';
