@@ -147,33 +147,45 @@ jobs:
         if: steps.sonar_scan.outcome == 'success'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          PR_KEY: ${{ github.event.pull_request.number }}
-          BRANCH: ${{ steps.project_meta.outputs.branch }}
         run: |
           set -euo pipefail
 
-          project_key=$(sed -n 's/^sonar\.projectKey=//p' sonar-project.properties)
-          if [ -z "$project_key" ]; then
-            echo "❌ Could not read sonar.projectKey from sonar-project.properties."
+          # Bind to the analysis this run produced. Querying by pullRequest or branch
+          # would read that scope's latest analysis, which an overlapping synchronize run
+          # can replace between the scan and this check.
+          report=.scannerwork/report-task.txt
+          if [ ! -f "$report" ]; then
+            echo "❌ $report not found — cannot identify this run's analysis."
             exit 1
           fi
 
-          if [ -n "${PR_KEY:-}" ]; then
-            scope="pullRequest=${PR_KEY}"
-          else
-            scope="branch=${BRANCH}"
+          ce_task_id=$(sed -n 's/^ceTaskId=//p' "$report")
+          if [ -z "$ce_task_id" ]; then
+            echo "❌ No ceTaskId in $report."
+            exit 1
+          fi
+
+          task=$(curl -sSf -u "${SONAR_TOKEN}:" "https://sonarcloud.io/api/ce/task?id=${ce_task_id}")
+          analysis_id=$(jq -r '.task.analysisId // empty' <<<"$task")
+          if [ -z "$analysis_id" ]; then
+            echo "❌ Task ${ce_task_id} finished as $(jq -r '.task.status // "UNKNOWN"' <<<"$task") without an analysis id."
+            exit 1
           fi
 
           status=$(curl -sSf -u "${SONAR_TOKEN}:" \
-            "https://sonarcloud.io/api/qualitygates/project_status?projectKey=${project_key}&${scope}")
+            "https://sonarcloud.io/api/qualitygates/project_status?analysisId=${analysis_id}")
 
           if [ "$(jq -r '.projectStatus.ignoredConditions' <<<"$status")" = "true" ]; then
             echo "::warning::SonarCloud ignored its coverage/duplication conditions on this changeset (under 20 new lines). Re-evaluating them here."
           fi
 
-          # Conditions with no measured value are skipped: a change touching only
-          # coverage-excluded files (**/*.html, **/*.test.js, .github/**) has no coverable
-          # new line, so there is no coverage percentage to hold it to.
+          # A condition with no measured value cannot be judged. For coverage that is
+          # legitimate when the change adds no coverable line, but it does mean the 90%
+          # bar went unapplied, so say so instead of reporting a clean pass.
+          if ! jq -e '.projectStatus.conditions[]? | select(.metricKey == "new_coverage" and .actualValue != null)' >/dev/null <<<"$status"; then
+            echo "::warning::No new_coverage measure on this analysis, so the 90% bar was not applied. Expected only when the change adds no coverable line (see sonar.coverage.exclusions)."
+          fi
+
           violations=$(jq -r '
             .projectStatus.conditions[]
             | select(.actualValue != null)
