@@ -17,7 +17,6 @@ limitations under the License.
 */
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-app/nuxeo-page.js';
-import '../elements/nuxeo-browser.html';
 
 suite('nuxeo-page', () => {
   const contentStyle = (el) => getComputedStyle(el.shadowRoot.querySelector('#content'));
@@ -40,10 +39,13 @@ suite('nuxeo-page', () => {
     expect(style.scrollPaddingBottom).to.equal('120px');
   });
 
-  test('uses the containing height and inherited safe area in the document browser', async () => {
-    const browser = await fixture(html`<nuxeo-browser style="height: 480px;"></nuxeo-browser>`);
+  test('uses the configured height and safe area for the document browser', async () => {
+    const page = await fixture(
+      html`<nuxeo-page style="height: 480px; --nuxeo-page-height: 100%; --nuxeo-page-content-safe-area-bottom: 0px;"
+        ><div>content</div></nuxeo-page
+      >`,
+    );
     await flush();
-    const page = browser.shadowRoot.querySelector('nuxeo-page');
     const pageStyle = getComputedStyle(page.shadowRoot.querySelector('.page'));
     const contentStyle = getComputedStyle(page.shadowRoot.querySelector('#content'));
     expect(pageStyle.height).to.equal('480px');
