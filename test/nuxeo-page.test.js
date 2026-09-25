@@ -18,6 +18,19 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-app/nuxeo-page.js';
 
+let browserStyle;
+
+suiteSetup(async () => {
+  const url = '/elements/nuxeo-browser.html';
+  const response = await fetch(url);
+  expect(response.ok, `Failed to fetch ${url}: ${response.status} ${response.statusText}`).to.be.true;
+  const text = await response.text();
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  const template = document.createElement('template');
+  template.innerHTML = doc.querySelector('dom-module#nuxeo-browser template').innerHTML;
+  browserStyle = template.content.querySelector('style').textContent;
+});
+
 suite('nuxeo-page', () => {
   const contentStyle = (el) => getComputedStyle(el.shadowRoot.querySelector('#content'));
 
@@ -39,16 +52,21 @@ suite('nuxeo-page', () => {
     expect(style.scrollPaddingBottom).to.equal('120px');
   });
 
-  test('uses the configured height and safe area for the document browser', async () => {
-    const page = await fixture(
-      html`<nuxeo-page style="height: 480px; --nuxeo-page-height: 100%; --nuxeo-page-content-safe-area-bottom: 0px;"
-        ><div>content</div></nuxeo-page
-      >`,
+  test('uses the browser-specific height and safe area', async () => {
+    const style = document.createElement('style');
+    style.textContent = browserStyle;
+    document.head.appendChild(style);
+    const browser = await fixture(
+      html`<div style="display: flex; flex-direction: column; height: 480px;">
+        <nuxeo-page style="flex: 1; min-height: 0;"><div>content</div></nuxeo-page>
+      </div>`,
     );
     await flush();
+    const page = browser.querySelector('nuxeo-page');
     const pageStyle = getComputedStyle(page.shadowRoot.querySelector('.page'));
     const contentStyle = getComputedStyle(page.shadowRoot.querySelector('#content'));
     expect(pageStyle.height).to.equal('480px');
+    expect(page.shadowRoot.querySelector('.page').getBoundingClientRect().height).to.equal(480);
     expect(contentStyle.paddingBottom).to.equal('0px');
     expect(contentStyle.scrollPaddingBottom).to.equal('0px');
   });
