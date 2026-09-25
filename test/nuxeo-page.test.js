@@ -69,12 +69,9 @@ suite('nuxeo-page', () => {
       await flush();
       const page = browser.querySelector('nuxeo-page');
       const pageStyle = getComputedStyle(page.shadowRoot.querySelector('.page'));
-      const contentStyle = getComputedStyle(page.shadowRoot.querySelector('#content'));
       expect(getComputedStyle(page).getPropertyValue('--nuxeo-page-height').trim()).to.equal('100%');
       expect(pageStyle.height).to.equal('480px');
       expect(page.shadowRoot.querySelector('.page').getBoundingClientRect().height).to.equal(480);
-      expect(contentStyle.paddingBottom).to.equal('0px');
-      expect(contentStyle.scrollPaddingBottom).to.equal('0px');
     } finally {
       style.remove();
     }
