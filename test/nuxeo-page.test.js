@@ -52,7 +52,7 @@ suite('nuxeo-page', () => {
     expect(style.scrollPaddingBottom).to.equal('120px');
   });
 
-  test('uses the browser-specific height and safe area', async () => {
+  test('uses the browser-specific height', async () => {
     const style = document.createElement('style');
     style.textContent = `${browserStyle}\nnuxeo-page { height: 480px; }`;
     document.head.appendChild(style);
