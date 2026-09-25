@@ -23,7 +23,19 @@ const baseUrl = window.nuxeo.I18n.baseUrl || window.location.origin + window.loc
 const msgFolder = `${baseUrl + (baseUrl.endsWith('/') ? '' : '/')}i18n`;
 window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';
 window.nuxeo.I18n.localeResolver = new XHRLocaleResolver(msgFolder);
-export const i18nReady = window.nuxeo.I18n.loadLocale().then(() => {
-  /* Set html lang attribute. Required by the better-dateinput element */
-  document.getElementsByTagName('html')[0].lang = window.nuxeo.I18n.language;
+const I18N_LOAD_TIMEOUT = 10000;
+const i18nLoadTimeout = new Promise((resolve) => {
+  setTimeout(() => {
+    console.warn(`Locale loading timed out after ${I18N_LOAD_TIMEOUT}ms. Starting the application with fallback keys.`);
+    resolve();
+  }, I18N_LOAD_TIMEOUT);
 });
+
+export const i18nReady = Promise.race([window.nuxeo.I18n.loadLocale(), i18nLoadTimeout])
+  .catch((error) => {
+    console.error('Failed to load locale. Starting the application with fallback keys.', error);
+  })
+  .then(() => {
+    /* Set html lang attribute. Required by the better-dateinput element */
+    document.getElementsByTagName('html')[0].lang = window.nuxeo.I18n.language;
+  });
