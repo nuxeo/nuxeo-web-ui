@@ -54,13 +54,13 @@ suite('nuxeo-page', () => {
 
   test('uses the browser-specific height and safe area', async () => {
     const style = document.createElement('style');
-    style.textContent = browserStyle;
+    style.textContent = `${browserStyle}\nnuxeo-page { height: 480px; }`;
     document.head.appendChild(style);
     try {
       const browser = await fixture(
         html`<main style="display: flex; flex-direction: column; height: 480px;">
           <div style="display: block; height: 100%;">
-            <div style="display: block; height: 100%;">
+            <div style="display: block; height: 480px;">
               <nuxeo-page><div>content</div></nuxeo-page>
             </div>
           </div>
@@ -71,8 +71,8 @@ suite('nuxeo-page', () => {
       const pageStyle = getComputedStyle(page.shadowRoot.querySelector('.page'));
       const contentStyle = getComputedStyle(page.shadowRoot.querySelector('#content'));
       expect(getComputedStyle(page).getPropertyValue('--nuxeo-page-height').trim()).to.equal('100%');
-      expect(pageStyle.height).to.match(/px$/);
-      expect(page.shadowRoot.querySelector('.page').getBoundingClientRect().height).to.be.greaterThan(0);
+      expect(pageStyle.height).to.equal('480px');
+      expect(page.shadowRoot.querySelector('.page').getBoundingClientRect().height).to.equal(480);
       expect(contentStyle.paddingBottom).to.equal('0px');
       expect(contentStyle.scrollPaddingBottom).to.equal('0px');
     } finally {
