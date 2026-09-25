@@ -82,12 +82,17 @@ const ready =
       });
 
 ready
-  .then(() => i18nReady)
   .then(disableRobotoFont)
   .then(setupRTLSupport)
   // Apply the theme early (before the app element loads) to avoid a flash of the wrong theme.
   // loadTheme() is invoked explicitly here rather than as a themes/loader.js import side effect.
   .then(loadTheme)
+  // Wait for the translations before loading the app element. Elements resolve their
+  // `[[i18n(...)]]` bindings on first render and some widgets (e.g. nuxeo-selectivity) latch the
+  // resolved value into their internal options, so a locale that arrives after first render leaves
+  // raw keys such as `defaultSearch.collections.placeholder` on screen (WEBUI-1570). i18n/i18n.js
+  // issues the request at import time, so this gate usually resolves without adding any latency.
+  .then(() => i18nReady)
   .then(loadApp)
   .then(loadLegacy)
   .then(loadBundle)
