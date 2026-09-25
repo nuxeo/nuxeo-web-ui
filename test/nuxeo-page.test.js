@@ -17,18 +17,7 @@ limitations under the License.
 */
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-app/nuxeo-page.js';
-
-let browserTemplate;
-
-suiteSetup(async () => {
-  const url = '/elements/nuxeo-browser.html';
-  const response = await fetch(url);
-  expect(response.ok, `Failed to fetch ${url}: ${response.status} ${response.statusText}`).to.be.true;
-  const text = await response.text();
-  const doc = new DOMParser().parseFromString(text, 'text/html');
-  browserTemplate = doc.querySelector('dom-module#nuxeo-browser template');
-  expect(browserTemplate, 'nuxeo-browser template not found').to.not.be.null;
-});
+import '../elements/nuxeo-browser.html';
 
 suite('nuxeo-page', () => {
   const contentStyle = (el) => getComputedStyle(el.shadowRoot.querySelector('#content'));
@@ -51,12 +40,14 @@ suite('nuxeo-page', () => {
     expect(style.scrollPaddingBottom).to.equal('120px');
   });
 
-  test('does not reserve the create button safe area in the document browser', () => {
-    const pageRule = Array.from(browserTemplate.content.querySelectorAll('style')).find((style) =>
-      style.textContent.includes('--nuxeo-page-content-safe-area-bottom: 0px;'),
-    );
-    expect(pageRule).to.exist;
-    expect(pageRule.textContent).to.include('--nuxeo-page-content-safe-area-bottom: 0px;');
-    expect(pageRule.textContent).to.include('--nuxeo-page-height: 100%;');
+  test('uses the containing height and inherited safe area in the document browser', async () => {
+    const browser = await fixture(html`<nuxeo-browser style="height: 480px;"></nuxeo-browser>`);
+    await flush();
+    const page = browser.shadowRoot.querySelector('nuxeo-page');
+    const pageStyle = getComputedStyle(page.shadowRoot.querySelector('.page'));
+    const contentStyle = getComputedStyle(page.shadowRoot.querySelector('#content'));
+    expect(pageStyle.height).to.equal('480px');
+    expect(contentStyle.paddingBottom).to.equal('0px');
+    expect(contentStyle.scrollPaddingBottom).to.equal('0px');
   });
 });
