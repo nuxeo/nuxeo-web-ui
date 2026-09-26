@@ -31,23 +31,23 @@ Contributors:
       }
     </style>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('label.dublincore.title')]]</label>
       <div>[[document.properties.dc:title]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:description]]">
+    <div data-widget hidden$="[[!document.properties.dc:description]]">
       <label>[[i18n('label.dublincore.description')]]</label>
       <div class="multiline">[[document.properties.dc:description]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:nature]]">
+    <div data-widget hidden$="[[!document.properties.dc:nature]]">
       <label>[[i18n('label.dublincore.nature')]]</label>
       <div>[[formatDirectory(document.properties.dc:nature)]]</div>
     </div>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       label="[[i18n('label.dublincore.subjects')]]"
       directory-name="l10nsubjects"
       value="{{document.properties.dc:subjects}}"
@@ -58,12 +58,12 @@ Contributors:
     >
     </nuxeo-directory-suggestion>
 
-    <div role="widget" hidden$="[[!document.properties.dc:coverage]]">
+    <div data-widget hidden$="[[!document.properties.dc:coverage]]">
       <label>[[i18n('label.dublincore.coverage')]]</label>
       <div>[[formatDirectory(document.properties.dc:coverage)]]</div>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.dc:expired]]">
+    <div data-widget hidden$="[[!document.properties.dc:expired]]">
       <label>[[i18n('label.dublincore.expire')]]</label>
       <nuxeo-date name="expired" datetime="[[document.properties.dc:expired]]"></nuxeo-date>
     </div>
