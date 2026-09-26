@@ -210,20 +210,21 @@ app.router = {
   useHashbang: true,
 
   browse(path, subPage) {
-    return `/browse${
-      path
-        ? path
-            .split('/')
-            .map((n) => encodeURIComponent(n))
-            .join('/')
-        : ''
-    }${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
+    const encodedPath = path
+      ? path
+          .split('/')
+          .map((n) => encodeURIComponent(n))
+          .join('/')
+      : '';
+    const query = subPage ? `?p=${encodeURIComponent(subPage)}` : '';
+    return `/browse${encodedPath}${query}`;
   },
 
   document(idOrPath, subPage) {
     const isId = idOrPath && !idOrPath.startsWith('/');
     if (isId) {
-      return `/doc/${idOrPath}${subPage ? `?p=${encodeURIComponent(subPage)}` : ''}`;
+      const query = subPage ? `?p=${encodeURIComponent(subPage)}` : '';
+      return `/doc/${idOrPath}${query}`;
     }
     return app.router.browse(idOrPath, subPage);
   },
@@ -241,7 +242,8 @@ app.router = {
   },
 
   tasks(id) {
-    return `/tasks${typeof id === 'undefined' ? '' : `/${id}`}`;
+    const suffix = id === undefined ? '' : `/${id}`;
+    return `/tasks${suffix}`;
   },
 
   administration(tab) {
