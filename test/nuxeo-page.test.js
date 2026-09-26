@@ -18,6 +18,19 @@ limitations under the License.
 import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-app/nuxeo-page.js';
 
+let browserStyle;
+
+suiteSetup(async () => {
+  const url = '/elements/nuxeo-browser.html';
+  const response = await fetch(url);
+  expect(response.ok, `Failed to fetch ${url}: ${response.status} ${response.statusText}`).to.be.true;
+  const text = await response.text();
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  const template = document.createElement('template');
+  template.innerHTML = doc.querySelector('dom-module#nuxeo-browser template').innerHTML;
+  browserStyle = template.content.querySelector('style').textContent;
+});
+
 suite('nuxeo-page', () => {
   const contentStyle = (el) => getComputedStyle(el.shadowRoot.querySelector('#content'));
 
@@ -37,5 +50,30 @@ suite('nuxeo-page', () => {
     const style = contentStyle(el);
     expect(style.paddingBottom).to.equal('120px');
     expect(style.scrollPaddingBottom).to.equal('120px');
+  });
+
+  test('uses the browser-specific height', async () => {
+    const style = document.createElement('style');
+    style.textContent = `${browserStyle}\nnuxeo-page { height: 480px; }`;
+    document.head.appendChild(style);
+    try {
+      const browser = await fixture(
+        html`<main style="display: flex; flex-direction: column; height: 480px;">
+          <div style="display: block; height: 100%;">
+            <div style="display: block; height: 480px;">
+              <nuxeo-page><div>content</div></nuxeo-page>
+            </div>
+          </div>
+        </main>`,
+      );
+      await flush();
+      const page = browser.querySelector('nuxeo-page');
+      const pageStyle = getComputedStyle(page.shadowRoot.querySelector('.page'));
+      expect(getComputedStyle(page).getPropertyValue('--nuxeo-page-height').trim()).to.equal('100%');
+      expect(pageStyle.height).to.equal('480px');
+      expect(page.shadowRoot.querySelector('.page').getBoundingClientRect().height).to.equal(480);
+    } finally {
+      style.remove();
+    }
   });
 });
