@@ -81,6 +81,33 @@ elements/search/<name>/
 </dom-module>
 ```
 
+## Labelling filter widgets
+
+Widgets that accept a `label` attribute (`nuxeo-input`, `nuxeo-textarea`, `nuxeo-select`,
+`nuxeo-path-suggestion`, `nuxeo-checkbox-aggregation`) associate the label with their internal control
+themselves — pass the label in and add no markup label.
+
+Where a filter needs a visible label in markup, use a `<span class="label">` rather than a `<label>`:
+a `<label>` with no `for` and no nested control is reported as SonarCloud `Web:S6853` and gives a
+screen-reader user no relationship to the control beside it.
+
+```html
+<div role="widget">
+  <span class="label" id="authors-label">[[i18n('defaultSearch.authors')]]</span>
+  <nuxeo-dropdown-aggregation
+    placeholder="[[i18n('defaultSearch.authors.placeholder')]]"
+    data="[[aggregations.dc_creator_agg]]"
+    value="{{params.dc_creator_agg}}"
+    multiple="true"
+    aria-label$="[[i18n('defaultSearch.authors')]]"
+  >
+  </nuxeo-dropdown-aggregation>
+</div>
+```
+
+`nuxeo-dropdown-aggregation` does not forward a `label`, so the control keeps its own `aria-label$`
+to give the inner input an accessible name.
+
 ## Key Patterns
 
 - **Aggregation widgets**: Bind `data` to `[[aggregations.<agg_name>]]` and `value` to `{{params.<agg_name>}}`
