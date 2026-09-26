@@ -23,12 +23,15 @@ activates.
 | [`jira/raise-backend-jira-ticket`](jira/raise-backend-jira-ticket/SKILL.md) | a fix needs a server-side change; "raise a backend/NXP ticket" | Files an NXP (`nxplatform`) ticket and links it as a blocker. |
 | [`dependabot-fix`](dependabot-fix/SKILL.md) | "work on"/"fix" a Dependabot or dependency-security ticket, a CVE, a `WEBUI-`/`ELEMENTS-` security bump, a Dependabot alert number, or a package name | End-to-end dependency-security workflow across `nuxeo-web-ui` **and** `nuxeo-elements`, both LTS lines: scope contract, cross-manifest scan, local validation gates, PRs + Jira comment. Uses `dependabot-impact-analyst` for blast-radius analysis. |
 | [`dependabot-impact-analyst`](dependabot-impact-analyst/SKILL.md) | need the blast radius of a dependency upgrade before writing the Jira/PR summary | Maps where a package is used across both repos, classifies risk, reads the changelog for breaking changes, and returns a concrete sanity-test checklist. Used by `dependabot-fix`. |
+| [`web-ui-release-notes`](web-ui-release-notes/SKILL.md) | write the release notes for a version (`2025.N.0` + its paired `3.1.Z`), or the per-ticket "Release Notes Summary" | Works out the next version itself for both LTS lines, takes scope from the **WEBUI + ELEMENTS** release buckets, fills in and reports any missing per-ticket summary, then produces the `doc.nuxeo.com-content` pages plus index updates for both lines, with a coverage ledger. Bucket verification is assumed done upstream. Gated by `web-ui-release-notes-review`. |
+| [`web-ui-release-notes-review`](web-ui-release-notes-review/SKILL.md) | "review/rate these release notes", before raising a release-notes PR | Independently scores a draft out of 5 on accuracy, structure, language, customer framing and cross-line parity. **Must reach 4.5/5 with no hard failures before the PR is raised.** Used by `web-ui-release-notes`. |
 
 **Dependencies:** `fix-nuxeo-web-ui-bug` → `nuxeo-web-ui-pr` + `nuxeo-web-ui-pr-checks`.
 `parallel-bug-fixes` → `fix-nuxeo-web-ui-bug` (one run per ticket), and uses that skill's
 `new-ticket-workspace.sh` to isolate each run.
 `bug-fix-validation` runs standalone and hands back to `fix-nuxeo-web-ui-bug` when validation fails.
 `dependabot-fix` → `dependabot-impact-analyst` (for the impact report).
+`web-ui-release-notes` → `web-ui-release-notes-review` (mandatory 4.5/5 gate before the PR).
 The Jira skills are independent and can be used on their own.
 
 ## One-time setup
@@ -124,6 +127,10 @@ Type these in Cursor chat — the right skill activates automatically:
   ```
 - **QA task:** "Create a QA task for WEBUI-1234."
 - **Backend ticket:** "This needs a server change — raise a backend NXP ticket and link it."
+- **Release notes:** "Write the release notes for 2025.20.0" → take the scope from the two Jira
+  release buckets → merge, classify and group → both LTS pages plus the index update, with a
+  coverage ledger accounting for every ticket → scored 4.5/5 before the PRs are raised. Or, for
+  one ticket: "Release notes summary for WEBUI-2108."
 
 ## Where the skills write files
 
@@ -141,6 +148,10 @@ worktree in `~/Desktop/Projects/WebUI/`**, which is where the primary clones liv
     webui-lts/ webui-m31/ elements-lts/ elements-m31/   # fix skill roles
     target/ fixed/                                      # validation skill roles
 ```
+
+`web-ui-release-notes` is the exception: it writes nothing under either root. Its output is a
+clone of the **`nuxeo/doc.nuxeo.com-content`** repo (release-notes paths only, two branches) plus
+the `Release Notes Summary` field on tickets that are missing one.
 
 All three phases of a ticket therefore collect under one evidence folder. Evidence is kept after a
 run (QA needs it); worktrees are removed, because each carries its own `node_modules` at roughly 1 GB
