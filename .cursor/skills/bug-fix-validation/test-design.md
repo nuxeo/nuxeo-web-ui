@@ -63,7 +63,7 @@ Pick what applies to the change; skip the rest and say so.
 | **Workflow paths** | Every route into and out of the affected screen: deep link, breadcrumb, back button, drawer, search result, in-app link. |
 | **Permission-driven UI** | Administrator vs member vs reader: which actions are hidden, disabled, or read-only. Locked and archived documents. (UI state only — not the permission model.) |
 | **Layout** | 1280×800 and a narrow viewport, drawer open and closed, long titles, dense lists, zoom at 200%. |
-| **Theme** | Default (light), dark, hyland-light and hyland-dark themes — new colours must come from theme variables, not hardcoded values. |
+| **Theme** | Nuxeo (default), dark, kawaii, light, hyland-light and hyland-dark themes — new colours must come from theme variables, not hardcoded values. |
 
 ## Corner cases
 
@@ -216,4 +216,4 @@ Execute the rows the risk matrix flags, plus the always-on core. Every row gets 
 | R-18 | Publication | Publish, unpublish, publication tree |
 | R-19 | Admin screens | Users, groups, vocabularies, audit views |
 | R-20 | Home & dashboards | Home widgets, recent documents |
-| R-21 | Cross-cutting | All four themes, locale switch, RTL, no new console errors |
+| R-21 | Cross-cutting | All six themes, locale switch, RTL, no new console errors |

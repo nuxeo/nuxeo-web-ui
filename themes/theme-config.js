@@ -29,7 +29,7 @@ import { config } from '@nuxeo/nuxeo-elements';
  */
 
 // Classic Nuxeo themes when branding is OFF.
-const LEGACY_THEMES = Object.freeze(['default', 'dark']);
+const LEGACY_THEMES = Object.freeze(['default', 'dark', 'kawaii', 'light']);
 
 // New Hyland themes when branding is ON.
 const BRANDING_THEMES = Object.freeze(['hyland-light', 'hyland-dark']);
@@ -39,6 +39,12 @@ const BRANDING_THEMES = Object.freeze(['hyland-light', 'hyland-dark']);
 const LEGACY_TO_BRANDING = Object.assign(Object.create(null), {
   default: 'hyland-light',
   dark: 'hyland-dark',
+  // WEBUI-2294: both restored classic themes are light, so they fold into hyland-light when
+  // branding is switched on. There is deliberately no reverse mapping -- hyland-light already
+  // maps back to 'default' (the legacy default), and one branding theme cannot resolve back to
+  // three different legacy ones.
+  kawaii: 'hyland-light',
+  light: 'hyland-light',
 });
 const BRANDING_TO_LEGACY = Object.assign(Object.create(null), {
   'hyland-light': 'default',
@@ -74,8 +80,8 @@ export function getDefaultTheme() {
 /**
  * Determines if a theme should be hidden based on current branding mode.
  * Hides only built-in themes from the opposite mode; custom themes are shown
- * unless they use a reserved built-in name (`default`, `dark`, `hyland-light`,
- * `hyland-dark`), in which case they are treated as built-in.
+ * unless they use a reserved built-in name (`default`, `dark`, `kawaii`, `light`,
+ * `hyland-light`, `hyland-dark`), in which case they are treated as built-in.
  * @param {string} name - theme name
  * @returns {boolean} true if theme should be hidden
  */
