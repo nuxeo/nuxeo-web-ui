@@ -9,7 +9,7 @@ Detect from the repo, not from habit. Run the checks, then set up only what the 
 
 | Signal in the repo | Runtime | Setup command |
 |---|---|---|
-| `package.json` + `package-lock.json` | **npm** (this repo — Node ≥ 18) | `nvm use 22 && npm ci` |
+| `package.json` + `package-lock.json` | **npm** (this repo — Node ≥ 22.13) | `nvm use && npm ci` |
 | `yarn.lock` / `pnpm-lock.yaml` | yarn / pnpm | `yarn install --frozen-lockfile` / `pnpm i --frozen-lockfile` |
 | `pom.xml`, `plugin/*/pom.xml` | **Maven + Java 21** (`lts-2025`; Java 17 on `maintenance-3.1.x`) | `mvn -B -ntp install` |
 | `build.gradle` | Gradle | `./gradlew build` |
