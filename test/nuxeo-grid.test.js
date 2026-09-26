@@ -16,7 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import { fixture, html, flush } from '@nuxeo/testing-helpers';
-import '../elements/nuxeo-grid/nuxeo-grid.js';
+import { Child } from '../elements/nuxeo-grid/nuxeo-grid.js';
 
 function getStyle(grid) {
   return grid.shadowRoot.querySelector('style').textContent;
@@ -330,5 +330,83 @@ suite('nuxeo-grid', () => {
     expect(console.warn.calledWith('"right" is an invalid value for justify-items')).to.be.true;
     expect(console.warn.calledWith('"min-content" is an invalid value for template-columns')).to.be.true;
     expect(console.warn.calledWith('"max-content" is an invalid value for template-rows')).to.be.true;
+  });
+});
+
+// `Child` wraps a slotted element and maps its grid placement onto `data-*` attributes.
+// `nuxeo-grid` itself only ever assigns `id`, so the placement setters are exercised here
+// directly; a setter's return value is unobservable in JavaScript, so these assert the
+// attribute that gets written and the value the matching getter reads back.
+suite('nuxeo-grid Child', () => {
+  let element;
+  let child;
+
+  setup(() => {
+    element = document.createElement('div');
+    child = new Child(element);
+  });
+
+  test('should write the child id', () => {
+    child.id = '7';
+    expect(element.getAttribute(Child.ATTRS.CHILDID)).to.equal('7');
+    expect(child.id).to.equal('7');
+  });
+
+  test('should write the grid column', () => {
+    child.column = '2';
+    expect(element.getAttribute(Child.ATTRS.COLUMN)).to.equal('2');
+    expect(child.column).to.equal('2');
+  });
+
+  test('should write the column span', () => {
+    child.columnspan = '3';
+    expect(element.getAttribute(Child.ATTRS.COLUMNSPAN)).to.equal('3');
+    expect(child.columnspan).to.equal('3');
+  });
+
+  test('should write the grid row', () => {
+    child.row = '4';
+    expect(element.getAttribute(Child.ATTRS.ROW)).to.equal('4');
+    expect(child.row).to.equal('4');
+  });
+
+  test('should write the row span', () => {
+    child.rowspan = '5';
+    expect(element.getAttribute(Child.ATTRS.ROWSPAN)).to.equal('5');
+    expect(child.rowspan).to.equal('5');
+  });
+
+  test('should write the vertical alignment', () => {
+    child.align = 'center';
+    expect(element.getAttribute(Child.ATTRS.ALIGN)).to.equal('center');
+    expect(child.align).to.equal('center');
+  });
+
+  test('should write the horizontal alignment', () => {
+    child.justify = 'end';
+    expect(element.getAttribute(Child.ATTRS.JUSTIFY)).to.equal('end');
+    expect(child.justify).to.equal('end');
+  });
+
+  test('should overwrite a placement that was already set', () => {
+    child.column = '1';
+    child.column = '2';
+    expect(element.getAttribute(Child.ATTRS.COLUMN)).to.equal('2');
+    expect(child.column).to.equal('2');
+  });
+
+  test('should read unset placements as an empty string', () => {
+    expect(child.column).to.equal('');
+    expect(child.columnspan).to.equal('');
+    expect(child.row).to.equal('');
+    expect(child.rowspan).to.equal('');
+    expect(child.align).to.equal('');
+  });
+
+  // `justify` is the one getter without an `|| ''` fallback, so it reads back as null.
+  // `buidChildStyle` only tests it for truthiness, so both spellings behave the same.
+  test('should read an unset justify as null', () => {
+    expect(child.justify).to.be.null;
+    expect(child.id).to.be.null;
   });
 });
