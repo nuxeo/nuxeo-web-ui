@@ -10,12 +10,14 @@ applyTo: "themes/**"
 themes/
   base.js          → Shared styles module (`nuxeo-styles` dom-module), imported by all elements
   loader.js        → Theme bootstrapper (reads localStorage, loads theme.html via link import)
-  default (light)/ → Default theme
+  default (Nuxeo)/ → Default theme
     theme.html     → CSS custom properties in <custom-style>
     logo.png       → App logo
     preview.jpg    → Theme preview thumbnail
     README.md      → Theme description
   dark/            → Dark theme (same structure)
+  kawaii/          → Kawaii demo theme (same structure, plus background.png)
+  light/           → Light theme (same structure)
   hyland-light/    → Hyland light theme (branding mode, same structure)
   hyland-dark/     → Hyland dark theme (branding mode, same structure)
 ```
@@ -73,7 +75,7 @@ This provides layout utilities, button styles, and common CSS rules used across 
 ## Rules
 
 - Always use CSS custom properties (e.g., `var(--nuxeo-primary-color)`) — never hardcode colors
-- Test changes against all 4 themes (default (light), dark, hyland-light, hyland-dark)
+- Test changes against all 6 themes (default (Nuxeo), dark, kawaii, light, hyland-light, hyland-dark)
 - Keep the same custom property interface across themes — all themes must define the same set of variables
 - New custom properties should be added to all theme files simultaneously
 - `base.js` changes affect every component — modify with care
