@@ -996,7 +996,13 @@ Polymer({
     this.view.notifyResize();
   },
 
-  _saveViewSettings() {
+  _saveViewSettings(e) {
+    // A reset has to drop what is already stored; saving would just persist the defaults on top of it
+    // and the previous width/order would come back from the backend on the next load (WEBUI-2178).
+    if (e?.detail?.source === 'reset') {
+      this._clearViewSettings();
+      return;
+    }
     if (this.view.settings && !this._isRestoring) {
       this.set('_settings.displayMode', this.displayMode);
       this.saveSettings();
@@ -1055,6 +1061,71 @@ Polymer({
       this.set(`_settings.${this.displayMode}`, this.view.settings);
       this.saveSettings();
     }
+  },
+
+  // Drops the stored table preferences for this result set, in local storage and in whichever backend
+  // holds them, so the layout defaults survive a reload. Mirrors the branches of _saveViewSettings.
+  _clearViewSettings() {
+    if (this._isRestoring) {
+      return;
+    }
+
+    // Empty settings read back as "no preferences", so the table falls through to its defaults.
+    this.set(`_settings.${this.displayMode}`, {});
+    this.saveSettings();
+
+    if (this.displayMode !== 'table') {
+      return;
+    }
+
+    // ---- doc level (content views) ----
+    if (this.document?.path) {
+      const docKey = this._getDocResultsPrefsKey();
+      this._clearCachedDocPrefs(this.document.path, docKey);
+      this._debounceSave('_docPrefsSaveDebouncer', () => {
+        this.saveDocPrefs(this.document.path, docKey, {}).catch((error) => {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to clear document results preferences in the backend', {
+            path: this.document?.path,
+            key: docKey,
+            error,
+          });
+        });
+      });
+      return;
+    }
+
+    // ---- global level (search providers) ----
+    if (this._shouldUseGlobalPrefs) {
+      this._clearCachedGlobalPrefs();
+      this._debounceSave('_prefsSaveDebouncer', () => {
+        this.saveGlobalResultsPrefs({}).catch((error) => {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to clear global results preferences in the backend', error);
+        });
+      });
+    }
+  },
+
+  // The backend write is debounced, so drop the in-session copy up front. Until that write lands the
+  // _applyDocPrefs observer would otherwise re-apply the stale cached prefs and undo the reset.
+  _clearCachedDocPrefs(docPath, key) {
+    const userId = this._getUserId();
+    if (userId) {
+      __docPrefsCache.set(this._docCacheKey(userId, docPath, key), {});
+    }
+    this.__hasBackendDocPrefs = false;
+    this.docPrefs = {};
+  },
+
+  // Same reasoning as _clearCachedDocPrefs, for the global (search provider) preferences.
+  _clearCachedGlobalPrefs() {
+    const userId = this._getUserId();
+    const providerName = this._getProviderName(this.nxProvider);
+    if (userId && providerName) {
+      __globalPrefsCache.set(this._cacheKey(userId, providerName), {});
+    }
+    this.globalPrefs = {};
   },
 
   _providerChanged(provider, oldProvider) {
