@@ -214,6 +214,72 @@ suite('nuxeo-dropzone', () => {
       expect(uploadSpy.calledOnceWithExactly(event.dataTransfer.files)).to.eql(true);
     });
 
+    test('drop of several files is rejected when multiple is false', () => {
+      const uploadStub = sinon.stub(element, '_upload');
+      sinon.stub(element, 'validate').returns(true);
+      element.multiple = false;
+      element.files = [{ name: 'kept.txt' }];
+      const event = {
+        preventDefault: sinon.spy(),
+        dataTransfer: { files: [{ name: 'f1.txt' }, { name: 'f2.txt' }] },
+      };
+
+      element._drop(event);
+
+      expect(uploadStub).to.not.have.been.called;
+      expect(element.files).to.eql([{ name: 'kept.txt' }]);
+      expect(element.invalid).to.eql(true);
+      expect(element._errorMessage).to.eql('dropzone.invalid.multipleFiles');
+      element.validate.restore();
+      uploadStub.restore();
+    });
+
+    test('drop of a single file is still accepted when multiple is false', () => {
+      const uploadStub = sinon.stub(element, '_upload');
+      sinon.stub(element, 'validate').returns(true);
+      element.multiple = false;
+      const files = [{ name: 'f1.txt' }];
+      const event = { preventDefault: sinon.spy(), dataTransfer: { files } };
+
+      element._drop(event);
+
+      expect(uploadStub).to.have.been.calledOnceWithExactly(files);
+      expect(element.files).to.eql(files);
+      element.validate.restore();
+      uploadStub.restore();
+    });
+
+    test('drop of several files is accepted when multiple is true', () => {
+      const uploadStub = sinon.stub(element, '_upload');
+      sinon.stub(element, 'validate').returns(true);
+      element.multiple = true;
+      const files = [{ name: 'f1.txt' }, { name: 'f2.txt' }];
+      const event = { preventDefault: sinon.spy(), dataTransfer: { files } };
+
+      element._drop(event);
+
+      expect(uploadStub).to.have.been.calledOnceWithExactly(files);
+      expect(element.files).to.eql(files);
+      element.validate.restore();
+      uploadStub.restore();
+    });
+
+    test('drop of several files is accepted for a legacy blob list', () => {
+      const uploadStub = sinon.stub(element, '_upload');
+      sinon.stub(element, 'validate').returns(true);
+      element.multiple = false;
+      element.blobList = true;
+      const files = [{ name: 'f1.txt' }, { name: 'f2.txt' }];
+      const event = { preventDefault: sinon.spy(), dataTransfer: { files } };
+
+      element._drop(event);
+
+      expect(uploadStub).to.have.been.calledOnceWithExactly(files);
+      expect(element.files).to.eql(files);
+      element.validate.restore();
+      uploadStub.restore();
+    });
+
     test('upload keeps uploaded files for single and multiple mode', () => {
       const uploadFilesSpy = sinon.spy(element, 'uploadFiles');
       const firstFile = { name: 'f1.txt' };
