@@ -23,37 +23,37 @@ limitations under the License.
   <template>
     <style include="nuxeo-styles"></style>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('label.mail.message.subject')]]</label>
       <div name="title">[[document.properties.dc:title]]</div>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('label.mail.message.sender')]]</label>
       <div name="title">[[document.properties.mail:sender]]</div>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('label.mail.message.sending_date')]]</label>
       <nuxeo-date datetime="[[document.properties.mail:sending_date]]"></nuxeo-date>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('label.mail.message.importing_date')]]</label>
       <nuxeo-date datetime="[[document.properties.dc:created]]"></nuxeo-date>
     </div>
 
-    <div role="widget">
+    <div data-widget>
       <label>[[i18n('label.mail.message.recipients')]]</label>
       <nuxeo-tags items="[[document.properties.mail:recipients]]"></nuxeo-tags>
     </div>
 
-    <div role="widget" hidden$="[[!document.properties.mail:cc_recipients.length]]">
+    <div data-widget hidden$="[[!document.properties.mail:cc_recipients.length]]">
       <label>[[i18n('label.mail.message.cc_recipients')]]</label>
       <nuxeo-tags items="[[document.properties.mail:cc_recipients]]"></nuxeo-tags>
     </div>
 
-    <nuxeo-document-attachments role="widget" document="[[document]]"></nuxeo-document-attachments>
+    <nuxeo-document-attachments data-widget document="[[document]]"></nuxeo-document-attachments>
   </template>
   <script>
     Polymer({

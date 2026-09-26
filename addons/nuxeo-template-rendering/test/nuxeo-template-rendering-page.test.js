@@ -65,14 +65,43 @@ suite('nuxeo-template-rendering-page', () => {
     });
   });
 
-  suite('_parseJSON and _findChangedValues', () => {
-    test('_parseJSON deep-clones objects', () => {
+  suite('_deepClone and _findChangedValues', () => {
+    test('_deepClone deep-clones objects', () => {
       const src = { a: 1, nested: { b: 2 } };
-      const copy = el._parseJSON(src);
+      const copy = el._deepClone(src);
       expect(copy).to.deep.equal(src);
       expect(copy).to.not.equal(src);
       copy.nested.b = 3;
       expect(src.nested.b).to.equal(2);
+    });
+
+    test('_deepClone preserves the field types of a template document (WEBUI-2249)', () => {
+      // The template document is REST JSON: tmpl:templateData is a serialized XML string and
+      // dc:modified an ISO string, so the clone must not turn either into another type.
+      const src = {
+        uid: 'doc-1',
+        type: 'TemplateSource',
+        properties: {
+          'dc:modified': '2024-01-31T10:15:00.000Z',
+          'dc:description': null,
+          'tmpl:allowOverride': true,
+          'tmpl:applicableTypes': ['File', 'Note'],
+          'tmpl:templateData': '<nxdt:templateParams xmlns:nxdt="http://www.nuxeo.org/DocumentTemplate"/>',
+        },
+      };
+
+      const copy = el._deepClone(src);
+
+      expect(copy).to.deep.equal(src);
+      expect(copy.properties['dc:modified']).to.be.a('string');
+      expect(copy.properties['dc:description']).to.be.null;
+      expect(copy.properties['tmpl:allowOverride']).to.equal(true);
+      expect(copy.properties['tmpl:applicableTypes']).to.be.an('array');
+      expect(copy.properties['tmpl:templateData']).to.be.a('string');
+      expect(copy.properties).to.not.equal(src.properties);
+
+      copy.properties['tmpl:applicableTypes'].push('Picture');
+      expect(src.properties['tmpl:applicableTypes']).to.deep.equal(['File', 'Note']);
     });
 
     test('_findChangedValues detects scalar and object changes for keys present in original', () => {
@@ -82,6 +111,24 @@ suite('nuxeo-template-rendering-page', () => {
       expect(diff.a).to.equal(2);
       expect(diff.obj).to.deep.equal({ x: 2 });
       expect(diff.extra).to.equal(3);
+    });
+
+    test('_findChangedValues still diffs cloned template properties correctly', () => {
+      const original = el._deepClone({
+        'tmpl:allowOverride': true,
+        'tmpl:applicableTypes': ['File'],
+        'tmpl:templateType': 'Freemarker',
+      });
+      const modified = el._deepClone({
+        'tmpl:allowOverride': false,
+        'tmpl:applicableTypes': ['File'],
+        'tmpl:templateType': 'Freemarker',
+      });
+
+      const diff = el._findChangedValues(original, modified);
+
+      expect(Object.keys(diff)).to.deep.equal(['tmpl:allowOverride']);
+      expect(diff['tmpl:allowOverride']).to.equal(false);
     });
   });
 
