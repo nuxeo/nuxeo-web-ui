@@ -35,7 +35,7 @@ Polymer({
       }
 
       .page {
-        height: calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        height: var(--nuxeo-page-height, calc(100vh - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0))));
         display: flex;
         flex-direction: column;
         /* NXENG-527: Rebranded hosts set a custom background; classic pages default to transparent. */
