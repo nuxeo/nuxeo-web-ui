@@ -175,9 +175,11 @@ Polymer({
         font-weight: 500;
       }
       #actionsDropdown {
+        box-sizing: border-box;
         width: 82%;
         /* No top padding: the always visible label now occupies the top of the header row. */
         padding: 0;
+        overflow-y: hidden;
         --selectivity-dropdown-min-width: auto;
         --selectivity-dropdown-max-width: 100%;
         --selectivity-result-item-white-space: normal;
