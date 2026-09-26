@@ -255,7 +255,7 @@ Polymer({
   add(docs) {
     let uids = [];
 
-    if (docs instanceof Array) {
+    if (Array.isArray(docs)) {
       docs.forEach((doc) => {
         this.$.storage.add(doc);
       });
