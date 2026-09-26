@@ -112,7 +112,7 @@ jobs:
           args: >
             -Dsonar.projectVersion=${{ steps.project_meta.outputs.version }}
             -Dsonar.scm.revision=${{ github.sha }}
-            -Dsonar.qualitygate.wait=false
+            -Dsonar.qualitygate.wait=true
             ${{ github.event_name == 'pull_request' &&
               format('-Dsonar.pullrequest.key={0} -Dsonar.pullrequest.branch={1} -Dsonar.pullrequest.base={2}',
                 github.event.pull_request.number,
@@ -121,16 +121,83 @@ jobs:
               || format('-Dsonar.branch.name={0}', steps.project_meta.outputs.branch) }}
 
       - name: Enforce Quality Gate
-        # TODO: Temporarily non-blocking due to revert PR baseline issue. Revert to exit 1 once
-        # SonarCloud new-code baseline resets (after next version bump or baseline reconfiguration).
+        # Fails if sonar scan was skipped (e.g. prior step failed) or gate not passed.
         if: always()
         run: |
           if [ "${{ steps.sonar_scan.outcome }}" = "skipped" ]; then
-            echo "⚠️ SonarCloud scan was skipped — a prior step (e.g. coverage baseline) failed."
-          elif [ "${{ steps.sonar_scan.outcome }}" != "success" ]; then
-            echo "⚠️ SonarCloud Quality Gate did not pass (non-blocking, baseline issue)."
+            echo "❌ SonarCloud scan was skipped — a prior step (e.g. coverage baseline) failed."
+            exit 1
+          fi
+          if [ "${{ steps.sonar_scan.outcome }}" != "success" ]; then
+            echo "❌ SonarCloud Quality Gate FAILED. Fix flagged issues before merging."
             echo "   • New-code coverage must be ≥ 90 %"
             echo "   • No unresolved code-quality issues on new/changed code"
-          else
-            echo "✅ SonarCloud Quality Gate passed."
+            exit 1
           fi
+          echo "✅ SonarCloud Quality Gate passed."
+
+      # SonarQube's compute engine drops a failing new_coverage / new_*_coverage /
+      # new_duplicated_lines_* condition to OK when the changeset has fewer than 20 new
+      # lines, and stamps the analysis "ignoredConditions": true. The cutoff is hardcoded
+      # in the engine, so no gate condition or scanner property can override it — a small
+      # PR merges at any coverage. This step re-derives each verdict from the comparator
+      # and threshold the gate already published, so the gate stays the only place
+      # thresholds are defined (WEBUI-2311).
+      - name: Re-evaluate gate without the small-changeset exemption
+        if: steps.sonar_scan.outcome == 'success'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Bind to the analysis this run produced. Querying by pullRequest or branch
+          # would read that scope's latest analysis, which an overlapping synchronize run
+          # can replace between the scan and this check.
+          report=.scannerwork/report-task.txt
+          if [ ! -f "$report" ]; then
+            echo "❌ $report not found — cannot identify this run's analysis."
+            exit 1
+          fi
+
+          ce_task_id=$(sed -n 's/^ceTaskId=//p' "$report")
+          if [ -z "$ce_task_id" ]; then
+            echo "❌ No ceTaskId in $report."
+            exit 1
+          fi
+
+          task=$(curl -sSf -u "${SONAR_TOKEN}:" "https://sonarcloud.io/api/ce/task?id=${ce_task_id}")
+          analysis_id=$(jq -r '.task.analysisId // empty' <<<"$task")
+          if [ -z "$analysis_id" ]; then
+            echo "❌ Task ${ce_task_id} finished as $(jq -r '.task.status // "UNKNOWN"' <<<"$task") without an analysis id."
+            exit 1
+          fi
+
+          status=$(curl -sSf -u "${SONAR_TOKEN}:" \
+            "https://sonarcloud.io/api/qualitygates/project_status?analysisId=${analysis_id}")
+
+          if [ "$(jq -r '.projectStatus.ignoredConditions' <<<"$status")" = "true" ]; then
+            echo "::warning::SonarCloud ignored its coverage/duplication conditions on this changeset (under 20 new lines). Re-evaluating them here."
+          fi
+
+          # A condition with no measured value cannot be judged. For coverage that is
+          # legitimate when the change adds no coverable line, but it does mean the 90%
+          # bar went unapplied, so say so instead of reporting a clean pass.
+          if ! jq -e '.projectStatus.conditions[]? | select(.metricKey == "new_coverage" and .actualValue != null)' >/dev/null <<<"$status"; then
+            echo "::warning::No new_coverage measure on this analysis, so the 90% bar was not applied. Expected only when the change adds no coverable line (see sonar.coverage.exclusions)."
+          fi
+
+          violations=$(jq -r '
+            .projectStatus.conditions[]
+            | select(.actualValue != null)
+            | select(
+                (.comparator == "LT" and (.actualValue | tonumber) < (.errorThreshold | tonumber)) or
+                (.comparator == "GT" and (.actualValue | tonumber) > (.errorThreshold | tonumber)))
+            | "\(.metricKey) = \(.actualValue), fails \(.comparator) \(.errorThreshold)"' <<<"$status")
+
+          if [ -n "$violations" ]; then
+            echo "❌ Quality gate conditions are violated on new code:"
+            printf '   • %s\n' "$violations"
+            echo "   SonarCloud reported these as passing; see WEBUI-2311."
+            exit 1
+          fi
+          echo "✅ Every condition with a measured value genuinely passes."
