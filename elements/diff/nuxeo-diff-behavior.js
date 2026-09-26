@@ -245,7 +245,7 @@ export const DiffBehavior = {
     } else if (this._hasTextDiff(delta)) {
       [value] = delta;
     } else if (this._hasArrayInnerChanges(delta)) {
-      const aKey = Object.keys(delta).filter((key) => key !== '_t')[0];
+      const aKey = Object.keys(delta).find((key) => key !== '_t');
       value = Array.isArray(delta[aKey]) ? delta[aKey][0] : delta[aKey];
     }
     return value;
