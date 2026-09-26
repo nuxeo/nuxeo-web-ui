@@ -129,7 +129,7 @@
     "test:watch": "npm run update-coverage-imports && npm run update-test-load-all && node scripts/test/unit/print-test-runner-notice.js && web-test-runner --watch"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1003.0",
+    "@aws-sdk/client-s3": "^3.1130.0",
     "@aws-sdk/lib-storage": "^3.1003.0",
     "@material/mwc-snackbar": "^0.26.1",
     "@nuxeo/chart-elements": "^4.0.0-nx.1",
