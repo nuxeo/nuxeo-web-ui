@@ -86,7 +86,8 @@ Polymer({
       }
     });
 
-    this._putNodes(dom(this.$.shortcuts), shorcuts.reverse());
+    shorcuts.reverse();
+    this._putNodes(dom(this.$.shortcuts), shorcuts);
   },
 
   _putNodes(parent, ...args) {
