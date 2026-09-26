@@ -1,0 +1,17 @@
+{
+  "name": "Nuxeo Web UI",
+  "install": "[ -f .env ] || cp .env.sample .env; npm install && npm run pretest",
+  "terminals": [
+    {
+      "name": "dev-server",
+      "command": "npm start",
+      "description": "Webpack dev server for Nuxeo Web UI on http://localhost:5000. Proxies /nuxeo to NUXEO_HOST (default localhost:8080); backend API calls fail with 504 until a Nuxeo server is available, but the SPA builds and serves."
+    }
+  ],
+  "ports": [
+    {
+      "name": "web-ui-dev-server",
+      "port": 5000
+    }
+  ]
+}
