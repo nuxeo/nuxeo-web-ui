@@ -136,7 +136,7 @@
     "@nuxeo/moment": "2.30.1-nx.1",
     "@nuxeo/nuxeo-dataviz-elements": "~3.1.36-rc",
     "@nuxeo/nuxeo-elements": "~3.1.36-rc",
-    "@nuxeo/nuxeo-ui-elements": "~3.1.36-rc",
+    "@nuxeo/nuxeo-ui-elements": "~2025.19.0",
     "@nuxeo/page": "1.11.4-nx.1",
     "@polymer/app-layout": "^3.1.0",
     "@polymer/iron-a11y-announcer": "^3.2.0",
