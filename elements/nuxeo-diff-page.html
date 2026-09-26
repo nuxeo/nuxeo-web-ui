@@ -27,14 +27,28 @@ limitations under the License.
       a {
         color: var(--nuxeo-link-hover_-_color);
       }
+
+      .title {
+        display: flex;
+        width: 100%;
+      }
+
+      .title > a {
+        flex: 0 0 45%;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 0 10px;
+      }
     </style>
     <nuxeo-page>
       <div class="header" slot="header">
-        <span>
+        <span class="title">
           [[i18n('app.title.diff')]]
-          <a href$="[[_buildPermalink(_left)]]">[[_left.title]]</a>
+          <a href$="[[_buildPermalink(_left)]]" title$="[[_left.title]]">[[_left.title]]</a>
           [[i18n('diffPage.versus')]]
-          <a href$="[[_buildPermalink(_right)]]">[[_right.title]]</a>
+          <a href$="[[_buildPermalink(_right)]]" title$="[[_right.title]]">[[_right.title]]</a>
         </span>
       </div>
       <div class="content">
