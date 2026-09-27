@@ -87,7 +87,7 @@ workbox.routing.registerRoute(
    boots from cache, and a cross-upgrade `?ts` change guarantees a fresh fetch.
 ================================ */
 workbox.routing.registerRoute(
-  ({ url }) => url.pathname.endsWith('/main.bundle.js'),
+  ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('/main.bundle.js'),
   new workbox.strategies.NetworkFirst({
     cacheName: JS_CACHE,
     fetchOptions: { cache: 'no-cache', credentials: 'same-origin' },
@@ -106,10 +106,13 @@ workbox.routing.registerRoute(
 
 /* ================================
    JS files (versioned via ts)
+   Same-origin only: intercepting cross-origin scripts would rebuild the request in
+   CORS mode and break external `<script src>` loads (WEBUI-2240). CSP governs which
+   external scripts may execute — not the service worker.
 ================================ */
 if (TS) {
   workbox.routing.registerRoute(
-    ({ url }) => url.pathname.endsWith('.js'),
+    ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('.js'),
     new workbox.strategies.NetworkFirst({
       cacheName: JS_CACHE,
       plugins: [
