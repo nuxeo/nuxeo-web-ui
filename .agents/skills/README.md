@@ -15,6 +15,7 @@ activates.
 | Skill | Use it when you… | Notes |
 |---|---|---|
 | [`fix-nuxeo-web-ui-bug`](fix-nuxeo-web-ui-bug/SKILL.md) | say "fix WEBUI-\<id>", paste a Jira URL, "commit and raise PR", "take this to Ready for QA" | **Orchestrator** — runs the full flow end-to-end. Delegates to the two PR skills below. |
+| [`parallel-bug-fixes`](parallel-bug-fixes/SKILL.md) | "fix all children of \<epic>", "run these tickets in parallel", "one agent per ticket" | **Batch orchestrator** — turns a ticket list into N isolated workspaces and runs `fix-nuxeo-web-ui-bug` in each, in waves that fit the Docker memory budget. |
 | [`bug-fix-validation`](bug-fix-validation/SKILL.md) | "validate the fix for WEBUI-\<id>", "QA sign-off", "regression test this PR" | **Test Engineer 3 orchestrator** — runs the buggy and fixed branches side by side, validates the UI (incl. translations, RTL, browsers, accessibility) and publishes a validation report. Never edits code, never writes automated tests. |
 | [`nuxeo-web-ui-pr`](nuxeo-web-ui-pr/SKILL.md) | open a PR, push a branch, backport to both bases | Branch naming, commit format, PR body, `lts-2025` + `maintenance-3.1.x` backport. |
 | [`nuxeo-web-ui-pr-checks`](nuxeo-web-ui-pr-checks/SKILL.md) | run the gating checks before pushing | Mirrors CI lint + unit tests. Script: `nuxeo-web-ui-pr-checks/scripts/pr-checks.sh`. |
@@ -24,6 +25,8 @@ activates.
 | [`dependabot-impact-analyst`](dependabot-impact-analyst/SKILL.md) | need the blast radius of a dependency upgrade before writing the Jira/PR summary | Maps where a package is used across both repos, classifies risk, reads the changelog for breaking changes, and returns a concrete sanity-test checklist. Used by `dependabot-fix`. |
 
 **Dependencies:** `fix-nuxeo-web-ui-bug` → `nuxeo-web-ui-pr` + `nuxeo-web-ui-pr-checks`.
+`parallel-bug-fixes` → `fix-nuxeo-web-ui-bug` (one run per ticket), and uses that skill's
+`new-ticket-workspace.sh` to isolate each run.
 `bug-fix-validation` runs standalone and hands back to `fix-nuxeo-web-ui-bug` when validation fails.
 `dependabot-fix` → `dependabot-impact-analyst` (for the impact report).
 The Jira skills are independent and can be used on their own.
@@ -173,6 +176,7 @@ ln -s "$PWD/.cursor/skills/fix-nuxeo-web-ui-bug"   ~/.cursor/skills/fix-nuxeo-we
 ln -s "$PWD/.cursor/skills/bug-fix-validation"     ~/.cursor/skills/bug-fix-validation
 ln -s "$PWD/.cursor/skills/nuxeo-web-ui-pr"        ~/.cursor/skills/nuxeo-web-ui-pr
 ln -s "$PWD/.cursor/skills/nuxeo-web-ui-pr-checks" ~/.cursor/skills/nuxeo-web-ui-pr-checks
+ln -s "$PWD/.cursor/skills/parallel-bug-fixes"     ~/.cursor/skills/parallel-bug-fixes
 ```
 
 `git pull` on this repo then updates them everywhere (symlinks, so no re-copy needed).

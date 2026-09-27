@@ -49,12 +49,14 @@ Polymer({
         position: absolute;
       }
 
-      #editNote.edit {
+      #editNote.edit,
+      #editHtmlNote.edit {
         right: 10px;
         top: 10px;
       }
 
-      :host([dir='rtl']) #editNote.edit {
+      :host([dir='rtl']) #editNote.edit,
+      :host([dir='rtl']) #editHtmlNote.edit {
         left: 10px;
         right: auto;
       }
@@ -83,6 +85,14 @@ Polymer({
         min-height: calc(80vh - 90px);
       }
 
+      #htmlPreview {
+        display: block;
+        width: 100%;
+        min-height: calc(80vh - 90px);
+        border: none;
+        overflow: hidden;
+      }
+
       nuxeo-html-editor {
         min-height: calc(80vh - 90px);
         height: var(--nuxeo-note-editor-html-height);
@@ -103,32 +113,58 @@ Polymer({
     <div class="main">
       <template is="dom-if" if="[[_isHTML(document)]]">
         <div class="html-editor-container">
-          <paper-icon-button
-            id="editHtml"
-            class="edit"
-            icon="[[_computeHtmlEditIcon(_viewMode)]]"
-            on-tap="_toggleHtmlSource"
-            hidden$="[[!_canEdit(document)]]"
-            aria-labelledby="editHtmlTooltip"
-          ></paper-icon-button>
-          <paper-tooltip for="editHtml" position="right" id="editHtmlTooltip"
-            >[[_computeHtmlEditLabel(_viewMode, i18n)]]</paper-tooltip
-          >
-          <template is="dom-if" if="[[_viewMode]]">
-            <nuxeo-html-editor value="{{_value}}" read-only="[[!_canEdit(document)]]"></nuxeo-html-editor>
-          </template>
-          <template is="dom-if" if="[[!_viewMode]]">
-            <paper-textarea
-              value="{{_value}}"
-              no-label-float
-              placeholder="[[i18n('noteViewLayout.placeholder')]]"
-            ></paper-textarea>
-          </template>
-          <div class="layout horizontal end-justified">
-            <paper-button name="editorSave" noink class="primary" on-tap="_editorSave" hidden$="[[!_canEdit(document)]]"
-              >[[i18n('command.save')]]</paper-button
+          <template is="dom-if" if="[[!_editing]]">
+            <paper-icon-button
+              id="editHtmlNote"
+              class="edit"
+              icon="nuxeo:edit"
+              on-tap="_editHtml"
+              hidden$="[[!_canEdit(document)]]"
+              aria-labelledby="editHtmlNoteTooltip"
+            ></paper-icon-button>
+            <paper-tooltip for="editHtmlNote" position="bottom" id="editHtmlNoteTooltip"
+              >[[i18n('command.edit')]]</paper-tooltip
             >
-          </div>
+            <!-- The note is authored by users, so it is rendered in a sandbox without
+                 allow-scripts: no inline handler, javascript: URL or embedded script can run.
+                 allow-same-origin is granted only so the frame can be measured for sizing;
+                 without allow-scripts nothing inside the frame can act on that access. -->
+            <iframe
+              id="htmlPreview"
+              sandbox="allow-same-origin"
+              title$="[[i18n('noteEditor.htmlPreview')]]"
+              srcdoc$="[[_computeHtmlPreview(document)]]"
+              on-load="_resizeHtmlPreview"
+            ></iframe>
+          </template>
+          <template is="dom-if" if="[[_editing]]">
+            <paper-icon-button
+              id="editHtml"
+              class="edit"
+              icon="[[_computeHtmlEditIcon(_viewMode)]]"
+              on-tap="_toggleHtmlSource"
+              aria-labelledby="editHtmlTooltip"
+            ></paper-icon-button>
+            <paper-tooltip for="editHtml" position="right" id="editHtmlTooltip"
+              >[[_computeHtmlEditLabel(_viewMode, i18n)]]</paper-tooltip
+            >
+            <template is="dom-if" if="[[_viewMode]]">
+              <nuxeo-html-editor value="{{_value}}"></nuxeo-html-editor>
+            </template>
+            <template is="dom-if" if="[[!_viewMode]]">
+              <paper-textarea
+                value="{{_value}}"
+                no-label-float
+                placeholder="[[i18n('noteViewLayout.placeholder')]]"
+              ></paper-textarea>
+            </template>
+            <div class="layout horizontal end-justified">
+              <paper-button noink on-tap="_cancel">[[i18n('command.cancel')]]</paper-button>
+              <paper-button name="editorSave" noink class="primary" on-tap="_editorSave"
+                >[[i18n('command.save')]]</paper-button
+              >
+            </div>
+          </template>
         </div>
       </template>
 
@@ -174,6 +210,14 @@ Polymer({
       type: Boolean,
       value: true,
     },
+    /**
+     * Whether an HTML note is being edited. HTML notes are displayed as stored until the user
+     * opts in to editing, because the rich text editor cannot represent every HTML construct.
+     */
+    _editing: {
+      type: Boolean,
+      value: false,
+    },
     _value: {
       type: String,
       value: '',
@@ -187,8 +231,36 @@ Polymer({
     }
   },
 
-  _documentChanged() {
-    this._value = this.document.properties['note:note'];
+  _documentChanged(document, previous) {
+    // Editing state belongs to the document being edited: showing a different note must not
+    // drop the reader straight into the editor.
+    if (previous && previous.uid !== this.document.uid) {
+      this._viewMode = true;
+      this._editing = false;
+    }
+    // A refresh of the same note -- a metadata or tag change re-fetches the document -- leaves
+    // an edit in progress alone, draft included. Copying the stored value back over _value
+    // here would silently discard whatever the user has typed.
+    if (!this._editing) {
+      this._value = this.document.properties['note:note'];
+    }
+  },
+
+  _computeHtmlPreview(document) {
+    const content = document?.properties?.['note:note'] || '';
+    return `<!doctype html><html><head><meta charset="utf-8"><style>
+      body { margin: 0; font-family: var(--nuxeo-app-font, Inter, sans-serif); font-size: 13px; color: #333; }
+      table { border-collapse: collapse; }
+      img { max-width: 100%; }
+    </style></head><body>${content}</body></html>`;
+  },
+
+  _resizeHtmlPreview(e) {
+    const frame = e.target;
+    const body = frame.contentDocument?.body;
+    if (body) {
+      frame.style.height = `${body.scrollHeight + 32}px`;
+    }
   },
 
   _isHTML() {
@@ -214,6 +286,7 @@ Polymer({
     this.$.note.put().then(() => {
       this.notify({ message: this.i18n('noteViewLayout.note.saved') });
       this._viewMode = true;
+      this._editing = false;
       this.fire('document-updated');
     });
   },
@@ -231,9 +304,16 @@ Polymer({
     this._viewMode = false;
   },
 
+  _editHtml() {
+    this._value = this.document.properties['note:note'];
+    this._viewMode = true;
+    this._editing = true;
+  },
+
   _cancel() {
     this._value = '';
     this._viewMode = true;
+    this._editing = false;
   },
 
   _toggleHtmlSource() {
