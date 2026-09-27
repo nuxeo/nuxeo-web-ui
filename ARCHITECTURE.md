@@ -203,15 +203,21 @@ Addon loading is a two-step process. During the build, webpack injects `Nuxeo.UI
 
 ## Theming
 
-Four built-in themes in `themes/`. Which pair is offered depends on the branding opt-in
+Six built-in themes in `themes/`. Which set is offered depends on the branding opt-in
 (`org.nuxeo.web.ui.branding.rebrand`, see `themes/theme-config.js`):
 
 | Theme | Directory | Offered when |
 |---|---|---|
-| Default | `themes/default/theme.html` | branding off |
+| Nuxeo | `themes/default/theme.html` | branding off |
 | Dark | `themes/dark/theme.html` | branding off |
+| Kawaii | `themes/kawaii/theme.html` | branding off |
+| Light | `themes/light/theme.html` | branding off |
 | Hyland Light | `themes/hyland-light/theme.html` | branding on |
 | Hyland Dark | `themes/hyland-dark/theme.html` | branding on |
+
+The classic set is the Nuxeo default plus Dark, Kawaii and Light; the Hyland pair replaces
+them entirely when branding is on. Kawaii is deliberately unconventional: it exists to
+demonstrate how far the UI can be themed, not as a production look.
 
 Structural (non-colour) tokens shared by the two Hyland themes live in
 `themes/hyland-design-tokens.css`, which only those themes import.

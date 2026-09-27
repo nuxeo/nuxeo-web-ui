@@ -128,6 +128,25 @@ suite('nuxeo-task6d8-layout', () => {
       element.$.user.get.restore();
     });
 
+    test('should not call the server for the internal system principal', async () => {
+      const getStub = sinon.stub(element.$.user, 'get').resolves({ 'entity-type': 'user', id: 'x' });
+      await element._fetchUserParticipants(['user:system']);
+      // WEBUI-2309: /user/system always 404s and floods server.log with WARNs.
+      expect(getStub).to.not.have.been.called;
+      expect(element._resolvedUserParticipants).to.deep.equal(['user:system']);
+      element.$.user.get.restore();
+    });
+
+    test('should resolve real participants while skipping the system principal', async () => {
+      const entity = { 'entity-type': 'user', id: 'jdoe', properties: { firstName: 'Jane', lastName: 'Doe' } };
+      const getStub = sinon.stub(element.$.user, 'get').resolves(entity);
+      await element._fetchUserParticipants(['user:system', 'user:jdoe']);
+      expect(getStub).to.have.been.calledOnce;
+      expect(element.$.user.path).to.equal('/user/jdoe');
+      expect(element._resolvedUserParticipants).to.deep.equal(['user:system', entity]);
+      element.$.user.get.restore();
+    });
+
     test('should URL-encode usernames in the request path', async () => {
       const entity = { 'entity-type': 'user', id: 'a b/c' };
       const getStub = sinon.stub(element.$.user, 'get').callsFake(() => {
