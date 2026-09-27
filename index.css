@@ -44,7 +44,9 @@ nuxeo-app[unresolved] {
 }
 
 [unresolved] #container {
-  background-color: var(--nuxeo-page-background);
+  /* Shorthand, not background-color: --nuxeo-page-background is a full background value in the
+     kawaii theme (image + colour), which a colour-only property rejects outright. */
+  background: var(--nuxeo-page-background);
   float: left;
   width: calc(100% - 52px);
   height: 100%;
