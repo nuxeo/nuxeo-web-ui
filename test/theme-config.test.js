@@ -107,6 +107,20 @@ suite('theme-config', () => {
       expect(shouldHideTheme('dark')).to.be.true;
       expect(shouldHideTheme('my-custom-theme')).to.be.false;
     });
+
+    // WEBUI-2294: the restored classic themes belong to the legacy set -- offered with branding
+    // off, hidden with branding on, exactly like default/dark.
+    test('offers the restored classic themes only when branding is off', () => {
+      brandingEnabled = false;
+      expect(shouldHideTheme('kawaii')).to.be.false;
+      expect(shouldHideTheme('light')).to.be.false;
+    });
+
+    test('hides the restored classic themes when branding is on', () => {
+      brandingEnabled = true;
+      expect(shouldHideTheme('kawaii')).to.be.true;
+      expect(shouldHideTheme('light')).to.be.true;
+    });
   });
 
   suite('resolveTheme', () => {
@@ -129,6 +143,20 @@ suite('theme-config', () => {
       expect(resolveTheme('default')).to.equal('hyland-light');
       expect(resolveTheme('dark')).to.equal('hyland-dark');
       expect(resolveTheme('my-custom-theme')).to.equal('my-custom-theme');
+    });
+
+    // WEBUI-2294: both restored themes are light, so they fold into hyland-light rather than
+    // leaving a user stranded on a theme the branding mode does not offer.
+    test('folds the restored classic themes into hyland-light when branding is on', () => {
+      brandingEnabled = true;
+      expect(resolveTheme('kawaii')).to.equal('hyland-light');
+      expect(resolveTheme('light')).to.equal('hyland-light');
+    });
+
+    test('leaves the restored classic themes untouched when branding is off', () => {
+      brandingEnabled = false;
+      expect(resolveTheme('kawaii')).to.equal('kawaii');
+      expect(resolveTheme('light')).to.equal('light');
     });
   });
 });
