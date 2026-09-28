@@ -44,6 +44,21 @@ limitations under the License.
  */
 const CREDENTIAL_PARAMS = ['token'];
 
+/** Matches a credential parameter embedded in a value, i.e. the residue of an earlier corruption. */
+const EMBEDDED_CREDENTIAL = new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=`);
+
+/**
+ * Parse a query string that a previous visit may already have corrupted.
+ *
+ * Users bookmark and re-share the addresses this bug produced, so those shapes have to be repaired
+ * rather than carried forward. A bare `?` inside a query string is always the residue of the
+ * concatenation described above — a `?` that genuinely belongs to a value is percent-encoded, since
+ * that is what `URLSearchParams` emits — so it is treated as the separator it was meant to be.
+ */
+function parseQuery(query) {
+  return new URLSearchParams(query.replaceAll('?', '&'));
+}
+
 /**
  * Compute the URL the app should start from, given the current `location` parts.
  *
@@ -62,19 +77,35 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
   // The parameters that survive normalization, and where they end up: on the route when there is
   // one (page.js would fold them there anyway, just malformed), otherwise back on `location.search`.
   const routeQuery = queryIndex > -1 ? route.slice(queryIndex + 1) : '';
-  const params = new URLSearchParams(isRoute ? routeQuery : search);
+  const params = parseQuery(isRoute ? routeQuery : search);
   if (isRoute) {
-    new URLSearchParams(search).forEach((value, key) => params.append(key, value));
+    parseQuery(search).forEach((value, key) => params.append(key, value));
   }
 
   // Re-serializing an already-clean URL would needlessly rewrite its percent-encoding, so bail out
-  // unless there is a query string to fold onto the route or a credential to drop.
-  if (!search && !CREDENTIAL_PARAMS.some((param) => params.has(param))) {
+  // unless there is a query string to fold onto the route or a credential to drop. A credential can
+  // also be hiding percent-encoded inside a value, left there by an address this bug already broke.
+  const hasCredential =
+    CREDENTIAL_PARAMS.some((param) => params.has(param)) ||
+    [...params].some(([, value]) => EMBEDDED_CREDENTIAL.test(value));
+  if (!search && !hasCredential) {
     return null;
   }
   CREDENTIAL_PARAMS.forEach((param) => params.delete(param));
 
-  const query = params.toString();
+  // Keep the first value of each parameter, and discard any value that still carries a credential
+  // inside it — an already-corrupted address holds the usable value first and the mangled copy
+  // after. Every route reads its parameters with `URLSearchParams.get()`, which returns the first
+  // value, so collapsing the duplicates changes nothing except that the address bar comes out clean.
+  const query = [...params]
+    .filter(([, value]) => !EMBEDDED_CREDENTIAL.test(value))
+    .reduce((deduped, [key, value]) => {
+      if (!deduped.has(key)) {
+        deduped.set(key, value);
+      }
+      return deduped;
+    }, new URLSearchParams())
+    .toString();
   const suffix = query ? `?${query}` : '';
   const normalized = isRoute ? `${pathname}#!${routePath}${suffix}` : `${pathname}${suffix}${hash}`;
   return normalized === `${pathname}${search}${hash}` ? null : normalized;
