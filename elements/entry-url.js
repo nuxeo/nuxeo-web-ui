@@ -48,15 +48,20 @@ const CREDENTIAL_PARAMS = ['token'];
 const EMBEDDED_CREDENTIAL = new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=`);
 
 /**
- * Parse a query string that a previous visit may already have corrupted.
- *
- * Users bookmark and re-share the addresses this bug produced, so those shapes have to be repaired
- * rather than carried forward. A bare `?` inside a query string is always the residue of the
- * concatenation described above — a `?` that genuinely belongs to a value is percent-encoded, since
- * that is what `URLSearchParams` emits — so it is treated as the separator it was meant to be.
+ * Matches only the `?` that page.js left behind when it appended `location.search` to a route that
+ * already carried a query. A literal `?` is valid inside query data, so it is not enough that one is
+ * present: the separator is identified by the credential assignment that immediately follows it,
+ * which is the shape this bug produced. Anything else is left as data.
+ */
+const DUPLICATED_CREDENTIAL_SEPARATOR = new RegExp(`\\?(?=(?:${CREDENTIAL_PARAMS.join('|')})=)`, 'g');
+
+/**
+ * Parse a query string that a previous visit may already have corrupted. Users bookmark and
+ * re-share the addresses this bug produced, so those shapes have to be repaired rather than carried
+ * forward.
  */
 function parseQuery(query) {
-  return new URLSearchParams(query.replaceAll('?', '&'));
+  return new URLSearchParams(query.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&'));
 }
 
 /**
