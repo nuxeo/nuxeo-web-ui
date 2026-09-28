@@ -53,7 +53,7 @@ const EMBEDDED_CREDENTIAL = new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=`
  * present: the separator is identified by the credential assignment that immediately follows it,
  * which is the shape this bug produced. Anything else is left as data.
  */
-const DUPLICATED_CREDENTIAL_SEPARATOR = new RegExp(`\\?(?=(?:${CREDENTIAL_PARAMS.join('|')})=)`, 'g');
+const DUPLICATED_CREDENTIAL_SEPARATOR = new RegExp(String.raw`\?(?=(?:${CREDENTIAL_PARAMS.join('|')})=)`, 'g');
 
 /**
  * Parse a query string that a previous visit may already have corrupted. Users bookmark and
