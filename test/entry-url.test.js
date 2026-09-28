@@ -95,6 +95,15 @@ suite('entry-url', () => {
       );
     });
 
+    test('keeps a literal question mark that is genuinely part of a value', () => {
+      // A `?` is valid inside query data, so only a `?` followed by a credential is a separator.
+      // Both spellings normalize to the same encoded value, which still reads back as `why?now`.
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/search/full?q=why?now'))).to.equal(
+        '/nuxeo/ui/#!/search/full?q=why%3Fnow',
+      );
+      expect(new URLSearchParams('q=why%3Fnow').get('q')).to.equal('why?now');
+    });
+
     test('preserves an encoded route path', () => {
       expect(
         normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/browse/default-domain/My%20Folder')),
