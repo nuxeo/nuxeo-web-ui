@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import page from '@nuxeo/page/page.mjs';
+import { normalizeCurrentEntryUrl } from './entry-url.js';
 
 const { app } = Nuxeo.UI;
 
@@ -293,5 +294,11 @@ app.router = {
 // (RoutingBehavior) are only available once `app.router` is set, so it must be registered before
 // this initial dispatch, otherwise elements rendered by the first route can hit
 // "navigateTo is not a function" (WEBUI-1715).
+//
+// Normalize the entry URL first: in hashbang mode page.js appends `location.search` to the route
+// verbatim and then rewrites only the fragment, leaving those parameters in the address bar twice
+// and corrupting a route that already had a query. Doing this before the initial dispatch also
+// keeps the server-consumed `token` credential out of the address bar (WEBUI-2316).
+normalizeCurrentEntryUrl();
 // add #! before urls
 page({ hashbang: true, click: false, decodeURLComponents: false });
