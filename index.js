@@ -3,6 +3,7 @@ import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js'
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import { loadTheme } from './themes/loader.js';
 import { installGlobalFocusRing } from './themes/dark-theme-focus-ring.js';
+import { normalizeCurrentEntryUrl } from './elements/entry-url.js';
 
 // Install the themeable keyboard-focus ring before any custom element attaches its shadow root,
 // so every root gets the rule from first paint. Dark themes make the ring visible; other themes
@@ -63,6 +64,13 @@ const setupApp = async () =>
     }
   });
 const loadRouting = async () => {
+  // Normalize the entry URL before either router implementation starts. Both run page.js in
+  // hashbang mode, where it appends `location.search` to the route verbatim and then rewrites only
+  // the fragment — leaving those parameters in the address bar twice and corrupting a route that
+  // already had a query. This also keeps the server-consumed `token` credential out of the address
+  // bar. It lives here rather than in `elements/routing.js` so that deployments shipping their own
+  // `routing.html` (`router.htmlImport`) are covered too (WEBUI-2316).
+  normalizeCurrentEntryUrl();
   if (config.get('router.htmlImport')) {
     // Wrap importHref in a promise so the startup chain awaits routing.html actually loading
     // and load errors reject (surface) instead of being swallowed, matching the import() branch.
