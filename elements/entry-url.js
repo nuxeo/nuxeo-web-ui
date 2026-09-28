@@ -112,7 +112,19 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
     }, new URLSearchParams())
     .toString();
   const suffix = query ? `?${query}` : '';
-  const normalized = isRoute ? `${pathname}#!${routePath}${suffix}` : `${pathname}${suffix}${hash}`;
+  let normalized;
+  if (isRoute) {
+    normalized = `${pathname}#!${routePath}${suffix}`;
+  } else if (hash) {
+    // A plain anchor is not a route, so there is nowhere to move the query onto: keep both as they are.
+    normalized = `${pathname}${suffix}${hash}`;
+  } else {
+    // No fragment at all. Parameters cannot be left in `location.search` either, because page.js
+    // reads the route from the fragment and falls back to `location.search` as the route itself, so
+    // `?lang=fr` would be dispatched as the path `?lang=fr` and end on the 404 handler. Put them on
+    // an explicit root route instead, which keeps them addressable and lets the root handler run.
+    normalized = query ? `${pathname}#!/${suffix}` : pathname;
+  }
   return normalized === `${pathname}${search}${hash}` ? null : normalized;
 }
 

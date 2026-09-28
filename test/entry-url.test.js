@@ -57,7 +57,13 @@ suite('entry-url', () => {
 
     test('drops the token from a permalink that carries no route', () => {
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', ''))).to.equal('/nuxeo/ui/');
-      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123&lang=fr', ''))).to.equal('/nuxeo/ui/?lang=fr');
+    });
+
+    test('moves surviving parameters onto an explicit root route when there is no fragment', () => {
+      // Left in `location.search` they would be dispatched as the path `?lang=fr` and 404; on the
+      // root route the root handler runs and they stay addressable.
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123&lang=fr', ''))).to.equal('/nuxeo/ui/#!/?lang=fr');
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?lang=fr', ''))).to.equal('/nuxeo/ui/#!/?lang=fr');
     });
 
     test('preserves a plain anchor, which page.js does not route on', () => {
