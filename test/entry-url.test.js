@@ -65,6 +65,36 @@ suite('entry-url', () => {
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#section'))).to.be.null;
     });
 
+    test('repairs an address the old page.js behavior already corrupted', () => {
+      // Users bookmark and re-share these, so the mangled shapes have to be repaired, not carried on.
+      expect(
+        normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/doc/xyz?p=permissions?token=abc123')),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions');
+      expect(
+        normalizeEntryUrl(
+          location(
+            '/nuxeo/ui/',
+            '?token=abc123',
+            '#!/doc/xyz?p=permissions?token=abc123&p=permissions%3Ftoken%3Dabc123',
+          ),
+        ),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions');
+    });
+
+    test('drops a parameter whose only value still hides a credential', () => {
+      // Nothing usable is left to recover, so the route falls back to its default tab rather than
+      // rendering an empty page.
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/doc/xyz?p=permissions%3Ftoken%3Dabc123'))).to.equal(
+        '/nuxeo/ui/#!/doc/xyz',
+      );
+    });
+
+    test('keeps a percent-encoded question mark that is genuinely part of a value', () => {
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/search/full?q=why%3F'))).to.equal(
+        '/nuxeo/ui/#!/search/full?q=why%3F',
+      );
+    });
+
     test('preserves an encoded route path', () => {
       expect(
         normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/browse/default-domain/My%20Folder')),
