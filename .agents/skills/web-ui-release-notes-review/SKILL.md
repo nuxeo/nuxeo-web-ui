@@ -63,7 +63,9 @@ make them sum to 4.00: the author needs to know what was genuinely weak and what
    or the page is on the wrong branch for its LTS line.
 5. `hidden: false` on a release that has not shipped yet.
 6. An internal identifier leaks into customer prose — Jira key, PR number, branch name, element
-   name, file path, CSS variable, CVE id, or the words Sonar / SonarQube / SonarCloud / Veracode.
+   name, file path, CSS variable, CVE id, or the name of a scanner: Sonar / SonarQube /
+   SonarCloud / Veracode / Dependabot. Keep this list in step with the one `lint-page.sh`
+   greps for, or the same leak is a hard failure in one place and invisible in the other.
 7. The **customer-facing bodies** of the LTS 2025 and LTS 2023 pages differ. Compare only what
    sits inside the `web-ui-updates` block, minus the `## What’s New …` heading line. The
    frontmatter legitimately differs on four lines — `title`, `description`, `tree_item_index`
@@ -144,7 +146,10 @@ Deduct 0.15 per bullet written from the engineer's point of view rather than the
 
 ### 5. Parity and coverage — 0.75
 
-- The two pages are twins apart from the heading line (the linter's twins check proves this).
+- The **customer-facing bodies** of the two pages are identical — compare what sits inside the
+  `web-ui-updates` block, minus the `## What’s New …` heading, exactly as hard failure 7 and the
+  linter's twins check do. `title`, `description` and `tree_item_index` are per-line values and
+  *must* differ; do not deduct for them.
 - **Re-derive the ticket list from both buckets yourself** and compare it against the ledger.
   Every ticket in either bucket must be accounted for. Where the buckets are uneven, confirm the
   change was written once and placed on **both** pages — that is correct, not a defect.

@@ -266,7 +266,7 @@ assert_resolve "2025.08.0 padded" rejected 2025.08.0 "is not a release version"
 assert_resolve "3.1.035 padded"   rejected 3.1.035   "is not a release version"
 assert_resolve "3.1.35.1 extra"   rejected 3.1.35.1  "is not a release version"
 assert_resolve "2025.19.1 extra"  rejected 2025.19.1 "is not a release version"
-assert_resolve "3.1.9 pre-2025"   rejected 3.1.9     "predates the 2025 line"
+assert_resolve "3.1.9 pre-2025"   rejected 3.1.9     "predates 3.1.18"
 assert_resolve "garbage"          rejected foo       "is not a release version"
 
 # Auto-detect reads package.json directly and never went through the pinned-version pattern,
@@ -282,6 +282,87 @@ else
   printf '%s\n' "$out" | sed 's/^/          /' | head -8
   fail=$((fail + 1))
 fi
+
+echo
+echo "== review block scoping, stray headings, index schema (Copilot round 10)"
+# The three review children must be nested under 'review:', not merely present somewhere in the
+# frontmatter. Here 'review:' is empty and the children hang off 'labels:' — different YAML,
+# which satisfied three independent greps.
+D="$WORK/revblock"; mkdir -p "$D"
+cat > "$D/web-ui-release-notes-2025-20-0.md" <<'MALFORMED'
+---
+title: Version 2025.20.0
+description: Discover what's new in Web UI 2025.20.0.
+review:
+toc: true
+labels:
+  comment: ''
+  date: '2026-09-23'
+  status: ok
+tree_item_index: 981
+hidden: true
+---
+
+{{{multiexcerpt 'matching-notes' page='web-ui-release-notes'}}}
+
+{{! multiexcerpt name='web-ui-updates'}}
+
+## What’s New in Web UI for LTS 2025 (Version 2025.20.0)
+
+**User Experience Improvements**
+
+- ***Improved Document Import:***
+    - Users can now import documents without the dialog closing early.
+
+<br/>
+{{! /multiexcerpt}}
+MALFORMED
+assert "review children nested under another key" fails --because "inside the review block" "$D/web-ui-release-notes-2025-20-0.md"
+
+# A second '##' renders as a sibling section wherever the block is transcluded; body() strips
+# only the '## What's New' line, so the twins diff would not reveal it either.
+D="$WORK/twoh2"; page "$D" 2025-20-0 2025.20.0 "LTS 2025" 981
+awk '{print} /^## What/{print "";print "## Extra Section"}' "$D/web-ui-release-notes-2025-20-0.md" > "$D/t" && mv "$D/t" "$D/web-ui-release-notes-2025-20-0.md"
+assert "a stray second H2 inside the wrapper" fails --because "exactly 1 '##' heading" "$D/web-ui-release-notes-2025-20-0.md"
+
+I="$WORK/idxtoc"; index "$I"; sed -i.bak 's/^toc: true$/toc: false/' "$I/web-ui-release-notes.md"
+assert "index with toc: false" fails --because "toc must be true" --index "$I/web-ui-release-notes.md" "$G/web-ui-release-notes-2025-20-0.md"
+
+I="$WORK/idxnolabels"; index "$I"; sed -i.bak '/^labels:$/d' "$I/web-ui-release-notes.md"
+assert "index with the labels key removed" fails --because "empty 'labels:' key" --index "$I/web-ui-release-notes.md" "$G/web-ui-release-notes-2025-20-0.md"
+
+I="$WORK/idxnoreview"; index "$I"; sed -i.bak "/^review:$/,+3d" "$I/web-ui-release-notes.md"
+assert "index with the review block removed" fails --because "missing 'review:' block" --index "$I/web-ui-release-notes.md" "$G/web-ui-release-notes-2025-20-0.md"
+
+echo
+echo "== resolver: worktrees and the pre-2025.3 mapping (Copilot round 10)"
+# A linked worktree's '.git' is a FILE. A '-d' test rejected it, although every git command
+# below works there — and this repo's agent workflows hand out worktrees.
+mkrepo "$WORK/wt/nuxeo-web-ui"  2025.21.0-SNAPSHOT 3.1.36-SNAPSHOT
+mkrepo "$WORK/wt/nuxeo-elements" 2025.21.0-SNAPSHOT 3.1.36-SNAPSHOT
+git -C "$WORK/wt/nuxeo-web-ui"  worktree add -q --detach "$WORK/wt/linked-web-ui"  HEAD 2>/dev/null
+git -C "$WORK/wt/nuxeo-elements" worktree add -q --detach "$WORK/wt/linked-elements" HEAD 2>/dev/null
+if [ -f "$WORK/wt/linked-web-ui/.git" ]; then
+  out=$(NX_ALLOW_STALE=1 NX_WEBUI="$WORK/wt/linked-web-ui" NX_ELEMENTS="$WORK/wt/linked-elements" \
+        "$RESOLVE" 2>&1); rc=$?
+  # Strictly exit 0. Accepting "no rejection message" instead would pass against the old
+  # script too, whose wording differed — a case that passes without testing anything.
+  if [ "$rc" -eq 0 ]; then
+    printf '  ok    %s\n' "linked worktree (.git is a file) is accepted"; pass=$((pass + 1))
+  else
+    printf '  FAIL  %s — the resolver still rejects a linked worktree\n' "linked worktree (.git is a file) is accepted"
+    printf '%s\n' "$out" | sed 's/^/          /' | head -6
+    fail=$((fail + 1))
+  fi
+else
+  printf '  ok    %s (skipped: git worktree unavailable)\n' "linked worktree"; pass=$((pass + 1))
+fi
+
+# SKILL.md only guarantees the +15 offset from 2025.3.0 / 3.1.18 onward, so anything below that
+# must be referred to the mapping page rather than derived arithmetically.
+assert_resolve "pinned 2025.2.0 (predates the +15 offset)" rejected 2025.2.0 "mapping page"
+assert_resolve "pinned 3.1.17 (predates the +15 offset)"   rejected 3.1.17   "mapping page"
+assert_resolve "pinned 2025.3.0 (first offset-backed pair)" ok       2025.3.0
 
 echo
 printf -- '-----\n'

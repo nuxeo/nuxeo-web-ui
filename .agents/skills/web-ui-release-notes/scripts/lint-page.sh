@@ -45,6 +45,11 @@ fm() { # <file> <key> -> value from the frontmatter block
                  f&&index($0,k": ")==1{sub("^"k": ",""); print; exit}' "$1"
 }
 
+# <frontmatter-file> -> the indented lines nested under 'review:', and nothing else.
+# Scoping the children to their parent is the point: validated against the whole frontmatter
+# they are satisfied by identical lines nested under any other key.
+review_block() { awk '/^review:$/{r=1;next} r&&/^[^[:space:]]/{exit} r' "$1"; }
+
 check_page() {
   local f=$1 base ver slug seg line expect_line fmend
   echo "== $f"
@@ -83,9 +88,14 @@ check_page() {
   awk 'NR==1&&$0=="---"{f=1;next} f&&$0=="---"{exit} f' "$f" > "$TMP/frontmatter"
   grep -qE '^labels:[[:space:]]*$' "$TMP/frontmatter" || FAIL "frontmatter: the empty 'labels:' key must be present (do not tidy it away)"
   grep -qE '^review:$'             "$TMP/frontmatter" || FAIL "frontmatter: missing 'review:' block"
-  grep -qE "^  comment: ''$"       "$TMP/frontmatter" || FAIL "frontmatter: review.comment must be ''"
-  grep -qE "^  date: '[0-9]{4}-[0-9]{2}-[0-9]{2}'$" "$TMP/frontmatter" || FAIL "frontmatter: review.date must be a quoted YYYY-MM-DD"
-  grep -qE '^  status: ok$'        "$TMP/frontmatter" || FAIL "frontmatter: review.status must be ok"
+  # The children must sit INSIDE the review block, so scope them to it. Grepped against the
+  # whole frontmatter they would be satisfied by indented lines hanging off any other key —
+  # an empty 'review:' with comment/date/status nested under 'labels:' is different YAML that
+  # passed all four checks.
+  review_block "$TMP/frontmatter" > "$TMP/review"
+  grep -qE "^  comment: ''$"       "$TMP/review" || FAIL "frontmatter: review.comment must be '' inside the review block"
+  grep -qE "^  date: '[0-9]{4}-[0-9]{2}-[0-9]{2}'$" "$TMP/review" || FAIL "frontmatter: review.date must be a quoted YYYY-MM-DD inside the review block"
+  grep -qE '^  status: ok$'        "$TMP/review" || FAIL "frontmatter: review.status must be ok inside the review block"
   [ "$(fm "$f" toc)" = "true" ]         || FAIL "frontmatter: toc must be true"
   [ "$(fm "$f" title)" = "Version $ver" ] || FAIL "frontmatter: title is '$(fm "$f" title)', expected 'Version $ver'"
   [ "$(fm "$f" description)" = "Discover what's new in Web UI $ver." ] \
@@ -212,6 +222,13 @@ check_page() {
     FAIL "'####' at line $h4 has no '###' above it"
   fi
   grep -qE '^# [^#]' "$f" && FAIL "a top-level '#' heading in the body (the H2 is the page title)" || true
+  # Exactly one H2, and the checks above already pinned it to the release heading. A second
+  # '##' renders as a sibling section wherever the block is transcluded, and body() strips
+  # '## What’s New' lines before the twins diff, so parity would not catch it either.
+  local h2count
+  h2count=$(awk -v o="${ol:-0}" -v c="${cl:-99999}" 'NR>o&&NR<c&&/^## /' "$f" | wc -l | tr -d ' ')
+  [ "$h2count" -eq 1 ] \
+    || FAIL "expected exactly 1 '##' heading inside the web-ui-updates block, found $h2count — the release heading is the only H2"
 
   # --- leaks --------------------------------------------------------------------
   awk -v o="${ol:-1}" -v c="${cl:-99999}" 'NR>o&&NR<c' "$f" > "$TMP/body"
@@ -289,9 +306,19 @@ if [ -n "$INDEX" ]; then
       || FAIL "index frontmatter: tree_item_index must be 500, found '$(fm "$INDEX" tree_item_index)'"
     grep -qE '^hidden:' "$TMP/indexfm" \
       && FAIL "index frontmatter: the index must not carry a 'hidden' key (format-template.md)" || true
-    for k in title description toc; do
+    # format-template.md: "the index page uses the same frontmatter shape" apart from those two.
+    # Checking only that the keys are non-empty accepted 'toc: false', and said nothing at all
+    # about the review block or the empty labels key, so a malformed index reported clean.
+    for k in title description; do
       [ -n "$(fm "$INDEX" "$k")" ] || FAIL "index frontmatter: missing '$k'"
     done
+    grep -qE '^toc: true$'             "$TMP/indexfm" || FAIL "index frontmatter: toc must be true, found '$(fm "$INDEX" toc)'"
+    grep -qE '^labels:[[:space:]]*$'   "$TMP/indexfm" || FAIL "index frontmatter: the empty 'labels:' key must be present (do not tidy it away)"
+    grep -qE '^review:$'               "$TMP/indexfm" || FAIL "index frontmatter: missing 'review:' block"
+    review_block "$TMP/indexfm" > "$TMP/indexreview"
+    grep -qE "^  comment: ''$"         "$TMP/indexreview" || FAIL "index frontmatter: review.comment must be '' inside the review block"
+    grep -qE "^  date: '[0-9]{4}-[0-9]{2}-[0-9]{2}'$" "$TMP/indexreview" || FAIL "index frontmatter: review.date must be a quoted YYYY-MM-DD inside the review block"
+    grep -qE '^  status: ok$'          "$TMP/indexreview" || FAIL "index frontmatter: review.status must be ok inside the review block"
 
     newslug=$(basename "$1" .md); newslug=${newslug#web-ui-release-notes-}
     newver=$(echo "$newslug" | sed 's/^2025-/2025./; s/-/./g')

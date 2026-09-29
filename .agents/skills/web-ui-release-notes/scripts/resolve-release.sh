@@ -40,7 +40,11 @@ lasttag() { # <repo> <glob> -> newest stable tag
 counter() { case "$1" in 2025.*) v=${1#2025.}; printf '%s' "${v%.0}" ;; *) printf '%s' "${1##*.}" ;; esac; }
 
 for r in "$WEBUI" "$ELEMENTS"; do
-  [ -d "$r/.git" ] || bad "not a git repo: $r (set NX_WEBUI / NX_ELEMENTS)"
+  # Ask git, do not stat '.git'. In a linked worktree '.git' is a FILE pointing at the parent's
+  # gitdir, so a directory test rejects a perfectly usable checkout — and this repo's own agent
+  # workflows hand out worktrees (see fix-nuxeo-web-ui-bug/scripts/new-ticket-workspace.sh).
+  git -C "$r" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+    || bad "not a git work tree: $r (set NX_WEBUI / NX_ELEMENTS)"
 done
 [ "$fail" = 1 ] && exit 1
 
@@ -93,12 +97,18 @@ if [ -n "${1:-}" ]; then           # a pinned version: accept either line, deriv
   # Anchored regex, not a glob: '3.1.[0-9]*' would accept 3.1.35.1 and silently yield 2025.-14.0.
   # [1-9][0-9]* not [0-9]+: a padded segment such as 2025.08.0 or 3.1.035 is not a real version,
   # and bash would read it as octal — erroring on 08/09, or deriving the wrong pair from 035.
+  # Deriving the twin only works where the +15 offset is known to hold, which is 2025.3.0 /
+  # 3.1.18 onward (SKILL.md). Below that the pair is whatever the mapping page says, so refuse
+  # rather than return an arithmetic guess that looks authoritative.
   if [[ $1 =~ ^2025\.([1-9][0-9]*)\.0$ ]]; then
+    if [ "${BASH_REMATCH[1]}" -lt 3 ]; then
+      bad "'$1' predates 2025.3.0, where the +15 offset starts; read the LTS mapping page for its pair"; exit 1
+    fi
     V2025=$1; V31="3.1.$(( ${BASH_REMATCH[1]} + 15 ))"
   elif [[ $1 =~ ^3\.1\.([1-9][0-9]*)$ ]]; then
     V31=$1
-    if [ "${BASH_REMATCH[1]}" -le 15 ]; then
-      bad "'$1' predates the 2025 line (needs Z > 15); the LTS mapping page is authoritative"; exit 1
+    if [ "${BASH_REMATCH[1]}" -lt 18 ]; then
+      bad "'$1' predates 3.1.18, where the +15 offset starts; read the LTS mapping page for its pair"; exit 1
     fi
     V2025="2025.$(( ${BASH_REMATCH[1]} - 15 )).0"
   else
