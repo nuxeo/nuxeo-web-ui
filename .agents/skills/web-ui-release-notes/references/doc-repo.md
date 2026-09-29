@@ -38,6 +38,8 @@ Real merged examples, most recent first:
 
 | Branch / PR title | Into | PR |
 |---|---|---|
+| branch `NXDOC-PENDING-Release-Notes-For-WebUI-2025.21.0`, title `NXDOC-3030-Release-Notes-For-WebUI-2025.21.0` | `2025` | #2850 |
+| branch `NXDOC-PENDING-Release-Notes-For-WebUI-3-1-36`, title `NXDOC-3031-Release-Notes-For-WebUI-3-1-36` | `2023` | #2851 |
 | `NXDOC-3007-Release-Notes-For-WebUI-2025.19.0` | `2025` | #2819 |
 | `NXDOC-3008-Release-Notes-For-WebUI-3-1-34_Update` | `2023` | #2823 |
 | `NXDOC-2991-Release-Notes-For-WebUI-2025.18.0` | `2025` | #2792 |
@@ -47,10 +49,17 @@ Real merged examples, most recent first:
 
 Points to take from that:
 
-- **Two NXDOC tickets per release, one per line, ids usually consecutive** — `2983`/`2984`,
-  `2991`/`2992`, `3007`/`3008`. Ticket summary is `Release notes for WEBUI <version>`. They are
-  normally raised and owned by the Product Owner, so **do not file them uninvited** — if there is
-  no ticket, say so.
+- **Two NXDOC tickets per release, one per line, ids consecutive** — `2983`/`2984`,
+  `2991`/`2992`, `3007`/`3008`, `3030`/`3031`, LTS 2025 taking the lower id. You file them
+  yourself, *after* the PRs, per `SKILL.md` Step 10 — but search first, because the Product
+  Owner sometimes raises them ahead of time in their own wording (`Release notes for WebUI
+  2025.20.0` → `NXDOC-3027`), and a duplicate pair is worse than a late one.
+- **Two summary styles exist.** A ticket the PO raised first reads `Release notes for WEBUI
+  <version>`; one filed after the PR reads `Release-Notes-For-WebUI-<version-slug>- #<pr>`, with
+  the PR number, and repeats that string as an H1 description. Step 10 writes the second form.
+- **The branch keeps the `NXDOC-PENDING-` prefix; only the PR title gets the real id.** Renaming
+  it from the CLI means pushing the new name and deleting the old, which closes the PR, so the
+  mismatch between branch and title is deliberate.
 - The version slug is inconsistent in history (`2025.17.0`, `2025-15-0`, `3-1-32`). Prefer dots
   for the 2025 line and dashes for the 3.1 line, matching the most recent pair, but do not
   "correct" an existing branch name.
@@ -108,7 +117,7 @@ costs nobody time again.
 **The issue history does not live here.** When something goes wrong, the *narrative* — what
 happened, why, and what was decided — goes to the Confluence **Web UI Release Notes — Feedback &
 Lessons Log** (page `4309167086`). Only the resulting rule comes back into this file. Keeping
-incident notes in two places is how a register stops being trusted; see `SKILL.md` Step 11.
+incident notes in two places is how a register stops being trusted; see `SKILL.md` Step 12.
 
 | Convention | What to do |
 |---|---|
@@ -120,6 +129,8 @@ incident notes in two places is how a register stops being trusted; see `SKILL.m
 | The `2023` branch index has a `---` rule after the transclusion and writes the commented row as `\|-->`; the `2025` branch has neither | Match each branch's own local convention; do not normalise across branches |
 | The `hidden: false` flip for the outgoing version happens **inside the next release's PR**, same commit | Every release PR touches three files per branch: new page `true`, outgoing page `false`, index |
 | One clone plus two branches lets a stale page get committed on one branch while its twin is current | Lint the **committed** files, or use one `git worktree` per branch (`SKILL.md` Step 5) |
+| The NXDOC ticket cannot be filed before its PR, because its summary carries the PR number | Raise the PR on an `NXDOC-PENDING-…` branch, file the ticket (`SKILL.md` Step 10), then rewrite only the PR title |
+| Re-pointing an open PR at a renamed branch from the CLI (push new, delete old) closes the PR | Leave the branch as `NXDOC-PENDING-…` permanently; only the title carries the id |
 | A bucket query returns ~160 KB and overflows the tool result | Request only the needed fields and read the spilled file with `jq` (`SKILL.md` Step 2) |
 | `lint-page.sh` validates the **filename slug**, so extracting a committed page to `/tmp/page.md` fails three unrelated checks | Extract each file under its real name into its own directory — `/tmp/<x>/a/web-ui-release-notes-2025-N-0.md`, `/tmp/<x>/b/web-ui-release-notes-3-1-Z.md`, and the index as `web-ui-release-notes.md` beside each |
 | The ledger quotes page bullets, so a review fix round silently makes the quotations stale | After every fix round, re-check each quoted bullet against the **committed** page before resubmitting. Truncate long quotations with `…` and compare on the prefix |
