@@ -365,6 +365,46 @@ assert_resolve "pinned 3.1.17 (predates the +15 offset)"   rejected 3.1.17   "ma
 assert_resolve "pinned 2025.3.0 (first offset-backed pair)" ok       2025.3.0
 
 echo
+echo "== leak checks and single-branch clones (Copilot round 11)"
+for probe in "--nuxeo-primary-color" "nuxeo-data-table" "#3384"; do
+  D="$WORK/leak$(printf '%s' "$probe" | tr -cd 'a-z0-9')"; page "$D" 2025-20-0 2025.20.0 "LTS 2025" 981
+  # drop it into a bullet, i.e. inside the wrapper where customer prose lives
+  awk -v p="$probe" '{print} /^- \*\*\*Improved Document Import:\*\*\*$/{print "    - Now honours " p "."}' \
+      "$D/web-ui-release-notes-2025-20-0.md" > "$D/t" && mv "$D/t" "$D/web-ui-release-notes-2025-20-0.md"
+  assert "leaked '$probe' in customer prose" fails "$D/web-ui-release-notes-2025-20-0.md"
+done
+# 'Nuxeo Web UI' is the product name in ordinary prose and must NOT trip the element-name check.
+D="$WORK/leakok"; page "$D" 2025-20-0 2025.20.0 "LTS 2025" 981
+awk '{print} /^- \*\*\*Improved Document Import:\*\*\*$/{print "    - Nuxeo Web UI now keeps the dialog open."}' \
+    "$D/web-ui-release-notes-2025-20-0.md" > "$D/t" && mv "$D/t" "$D/web-ui-release-notes-2025-20-0.md"
+assert "the product name 'Nuxeo Web UI' is not an element name" clean "$D/web-ui-release-notes-2025-20-0.md"
+
+# A single-branch clone configures a narrow refspec, so 'fetch origin <branch>' never creates
+# the OTHER branch's remote-tracking ref and snapshot() reads nothing from it.
+ORIGIN="$WORK/sb/origin.git"; mkdir -p "$WORK/sb" && git init -q --bare "$ORIGIN"
+git clone -q "$ORIGIN" "$WORK/sb/seed" 2>/dev/null
+( cd "$WORK/sb/seed" && git config user.email t@e && git config user.name t && git config commit.gpgsign false
+  printf '{"version":"2025.21.0-SNAPSHOT"}\n' > package.json && git add package.json && git commit -qm a
+  git branch -M lts-2025 && git push -q origin lts-2025
+  git checkout -qb maintenance-3.1.x && printf '{"version":"3.1.36-SNAPSHOT"}\n' > package.json
+  git commit -qam b && git push -q origin maintenance-3.1.x ) 2>/dev/null
+for r in nuxeo-web-ui nuxeo-elements; do
+  git clone -q --single-branch --branch lts-2025 "$ORIGIN" "$WORK/sb/$r" 2>/dev/null
+done
+if [ -d "$WORK/sb/nuxeo-web-ui" ]; then
+  out=$(NX_WEBUI="$WORK/sb/nuxeo-web-ui" NX_ELEMENTS="$WORK/sb/nuxeo-elements" "$RESOLVE" 2>&1); rc=$?
+  if [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -q "3.1.36"; then
+    printf '  ok    %s\n' "single-branch clone resolves both branches"; pass=$((pass + 1))
+  else
+    printf '  FAIL  %s — exit %s; the second branch ref was never created\n' "single-branch clone resolves both branches" "$rc"
+    printf '%s\n' "$out" | sed 's/^/          /' | head -8
+    fail=$((fail + 1))
+  fi
+else
+  printf '  ok    %s (skipped: clone unavailable)\n' "single-branch clone"; pass=$((pass + 1))
+fi
+
+echo
 printf -- '-----\n'
 if [ "$fail" = 0 ]; then
   printf '%s case(s) passed\n' "$pass"

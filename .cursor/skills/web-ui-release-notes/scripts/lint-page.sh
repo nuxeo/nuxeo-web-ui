@@ -238,6 +238,15 @@ check_page() {
     grep -noiE '(sonar|sonarqube|sonarcloud|veracode|dependabot)' "$TMP/body"
   hits "CVE id in customer prose" "no CVE ids" \
     grep -noE 'CVE-[0-9]{4}-[0-9]+' "$TMP/body"
+  # The rest of the review skill's hard-failure list, for the identifiers that can be matched
+  # without guessing. Case-sensitive on purpose: the prose says "Nuxeo Web UI", and only the
+  # lower-case hyphenated form is an element or a CSS custom property.
+  hits "CSS custom property in customer prose" "no CSS variables" \
+    grep -noE '\-\-nuxeo-[a-z0-9-]+' "$TMP/body"
+  hits "element name in customer prose — name the feature, not the component" "no element names" \
+    grep -noE '\bnuxeo-[a-z][a-z0-9-]+' "$TMP/body"
+  hits "PR number in customer prose" "no PR numbers" \
+    grep -noE '(^|[^0-9A-Za-z_])#[0-9]{2,6}\b' "$TMP/body"
   echo
 }
 

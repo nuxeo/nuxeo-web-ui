@@ -50,8 +50,15 @@ done
 
 # The versions are read from origin/<branch>, so stale remote-tracking refs would silently
 # resolve the PREVIOUS release pair. Refresh them first.
+#
+# Name the destination refs explicitly. `fetch origin <branch>` only updates the
+# remote-tracking ref as an opportunistic side effect of the configured refspec, so in a
+# single-branch clone — which is exactly how references/doc-repo.md says to clone — the
+# second branch's ref is never created and snapshot() reads nothing from it.
 for r in "$WEBUI" "$ELEMENTS"; do
-  git -C "$r" fetch origin lts-2025 maintenance-3.1.x --quiet 2>/dev/null || STALE=1
+  git -C "$r" fetch origin --quiet \
+    "+refs/heads/lts-2025:refs/remotes/origin/lts-2025" \
+    "+refs/heads/maintenance-3.1.x:refs/remotes/origin/maintenance-3.1.x" 2>/dev/null || STALE=1
 done
 
 # A failed refresh must not be survivable in auto-detect mode: warning and then printing OK
