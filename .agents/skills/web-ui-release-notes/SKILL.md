@@ -469,13 +469,13 @@ Read `references/doc-repo.md` first. Summary of what matters:
 
 - **Two PRs, one per line**: branch `2025` for the LTS 2025 page, branch `2023` for the LTS 2023
   page, both against `nuxeo/doc.nuxeo.com-content`.
-- **Two NXDOC tickets**, one per line, with consecutive ids (2025.17.0 → `NXDOC-2983`,
-  3.1.32 → `NXDOC-2984`). You raise the PRs *first* and file the tickets in **Step 10**, because
-  each ticket's summary carries its PR number — so cut the branch as
-  `NXDOC-PENDING-Release-Notes-For-WebUI-<version-slug>` and set the PR title to match. Step 10
-  rewrites the title to `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>` once the id exists.
-  **Never guess an id**: they are allocated in pairs and a wrong guess collides with another
-  team's ticket.
+- **Name the branch `webui-release-notes-<version-slug>`** — lower case, and with no NXDOC id in
+  it, ever. The id is not known yet (Step 10 files the tickets, because each ticket's summary
+  carries its PR number), and a branch that never claims an id never needs renaming. Open the PR
+  with the plain title `Release-Notes-For-WebUI-<version-slug>`.
+- **The PR title always ends up as `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>`.** Step 10
+  rewrites it once the ticket exists; the branch is left alone. **Never guess an id** — they are
+  allocated in pairs and a wrong guess collides with another team's ticket.
 - Scope each PR to the release-notes paths only. This repo holds every Nuxeo/Hyland doc space;
   incidental edits elsewhere are a serious review problem.
 - **Flip the *previous* version's page to `hidden: false` in this same PR.** Verified against
@@ -490,11 +490,11 @@ Read `references/doc-repo.md` first. Summary of what matters:
   and cleaning up a published page inside a release-notes PR is exactly the kind of incidental
   edit reviewers challenge. 2025.19.0, for instance, carries a stray double blank line at
   line 149; it stays.
-- **The branch name keeps the `NXDOC-PENDING-` prefix for good.** Re-pointing a PR at a renamed
-  branch from the CLI means pushing the new name and deleting the old one, which closes the PR,
-  so only the *title* is corrected in Step 10. Verified on the 2025.21.0 pair: PRs
-  #2850 and #2851 are titled `NXDOC-3030-…` / `NXDOC-3031-…` while their branches still read
-  `NXDOC-PENDING-…`. Leave the mismatch; it is expected.
+- **Never rename the branch to add the id.** Re-pointing a PR at a renamed branch from the CLI
+  means pushing the new name and deleting the old one, which closes the PR. This is exactly why
+  the branch carries no id in the first place: `webui-release-notes-<version-slug>` is correct
+  before and after the ticket exists, so only the title ever changes. Older PRs used an
+  `NXDOC-PENDING-…` branch and are left as they are — do not tidy them.
 
 ### Step 10 — File the two NXDOC tickets and point them at the PRs
 
@@ -538,7 +538,9 @@ Then, per ticket:
    `https://github.com/nuxeo/doc.nuxeo.com-content/pull/<pr>`, which Jira renders as a smart link.
    That comment is the only place the ticket links its PR, so it is not optional.
 2. **Rewrite the PR title** to `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>`:
-   `gh pr edit <pr> --repo nuxeo/doc.nuxeo.com-content --title '…'`. Leave the branch alone.
+   `gh pr edit <pr> --repo nuxeo/doc.nuxeo.com-content --title '…'`. Leave the branch
+   (`webui-release-notes-<version-slug>`) alone — renaming it would close the PR, and it is
+   already correct because it never carried an id.
 3. **Read both tickets back** and confirm the summary, description and comment actually landed. A
    create that silently drops a field looks identical to success.
 
