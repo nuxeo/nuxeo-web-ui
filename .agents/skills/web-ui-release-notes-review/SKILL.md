@@ -64,8 +64,13 @@ make them sum to 4.00: the author needs to know what was genuinely weak and what
 5. `hidden: false` on a release that has not shipped yet.
 6. An internal identifier leaks into customer prose — Jira key, PR number, branch name, element
    name, file path, CSS variable, CVE id, or the name of a scanner: Sonar / SonarQube /
-   SonarCloud / Veracode / Dependabot. Keep this list in step with the one `lint-page.sh`
-   greps for, or the same leak is a hard failure in one place and invisible in the other.
+   SonarCloud / Veracode / Dependabot.
+
+   `lint-page.sh` catches the ones that can be matched without guessing: Jira keys, CVE ids,
+   scanner names, CSS custom properties, `nuxeo-` element names and `#<number>` PR references.
+   **Branch names and file paths are yours to spot** — no regex separates `maintenance-3.1.x`
+   or `nxserver/nuxeo.war` from ordinary prose without firing on legitimate sentences. A clean
+   lint is therefore not evidence that this rule passed; read the bullets.
 7. The **customer-facing bodies** of the LTS 2025 and LTS 2023 pages differ. Compare only what
    sits inside the `web-ui-updates` block, minus the `## What’s New …` heading line. The
    frontmatter legitimately differs on four lines — `title`, `description`, `tree_item_index`

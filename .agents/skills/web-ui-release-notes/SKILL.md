@@ -91,8 +91,10 @@ Reference files in this skill:
 3. **Write one sentence, two at most**, per `references/writing-and-accuracy.md`. Outcome first,
    mechanism second or not at all. No ticket keys, element names, stack traces, PR or branch
    references.
-4. **Write it into Release Notes Summary** (`customfield_13954`), plain single-line text, via
-   the Atlassian MCP `editJiraIssue` tool:
+4. **Write it into Release Notes Summary** (`customfield_13954`) — but only if the field is
+   **empty**. Filling an empty one is in scope (see Guardrails); overwriting a summary a human
+   already wrote is not, so if there is one, stop and do step 5 instead. Plain single-line text,
+   via the Atlassian MCP `editJiraIssue` tool:
 
    - `cloudId` is `252cce86-035e-4b0e-abd2-3c002935632f` (site `hyland.atlassian.net`) — every
      Jira call needs it; `getAccessibleAtlassianResources` re-derives it if that ever changes.
