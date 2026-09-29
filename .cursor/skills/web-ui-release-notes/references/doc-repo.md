@@ -52,21 +52,25 @@ Points to take from that:
 
 - **Two NXDOC tickets per release, one per line, ids consecutive** — `2983`/`2984`,
   `2991`/`2992`, `3007`/`3008`, `3030`/`3031`, LTS 2025 taking the lower id. You file them
-  yourself, *after* the PRs, per `SKILL.md` Step 10 — but search first, because the Product
-  Owner sometimes raises them ahead of time in their own wording (`Release notes for WebUI
-  2025.20.0` → `NXDOC-3027`), and a duplicate pair is worse than a late one.
-- **Two summary styles exist.** A ticket the PO raised first reads `Release notes for WEBUI
-  <version>`; one filed after the PR reads `Release-Notes-For-WebUI-<version-slug>- #<pr>`, with
-  the PR number, and repeats that string as an H1 description. Step 10 writes the second form.
-- **Branch `webui-release-notes-<version-slug>`, title `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>`.**
-  The branch carries no id: it cannot, since the ticket is filed after the PR, and a branch that
-  never claims an id never has to be renamed — renaming it from the CLI means pushing the new
-  name and deleting the old, which closes the PR. Open the PR titled
-  `Release-Notes-For-WebUI-<version-slug>` and let Step 10 prepend the id. Earlier PRs used an
-  `NXDOC-PENDING-…` branch (#2850, #2851) or a real id in the branch; leave those as they are.
-- The version slug is inconsistent in history (`2025.17.0`, `2025-15-0`, `3-1-32`). Use dots for
-  the 2025 line and dashes for the 3.1 line — `2025.21.0` and `3-1-36` — in both the branch and
-  the title, so one release has one spelling. Do not "correct" an existing branch name.
+  yourself *before* the PRs, per `SKILL.md` Step 9, so the PR title carries its id from the
+  start — but search first, because the Product Owner often raises them ahead of time in their
+  own wording (`Release notes for WebUI 2025.20.0` → `NXDOC-3027`), and a duplicate pair is
+  worse than a late one.
+- **The summary gains its PR number afterwards.** Step 9 creates
+  `Release-Notes-For-WebUI-<version-slug>` (repeated as an H1 description); Step 10 appends
+  `- #<pr>` once the PR exists, giving the `NXDOC-3030` / `NXDOC-3031` form. A ticket the PO
+  raised reads `Release notes for WEBUI <version>` instead — reuse it as it is, do not rename it.
+- **Branch `webui-release-notes-<dashed-version>`, title
+  `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>`.** The branch is lower case, dashed on both
+  lines (`webui-release-notes-2025-21-0`, `webui-release-notes-3-1-36`) and carries **no** id, so
+  it never has to be renamed — renaming it from the CLI means pushing the new name and deleting
+  the old, which closes the PR. The title carries the id from the start, because Step 9 files the
+  tickets first. Earlier PRs put an id or an `NXDOC-PENDING-…` prefix in the branch (#2850,
+  #2851); leave those as they are.
+- **Two spellings, one per place.** The *title* keeps the historical per-line form — dots on the
+  2025 line (`2025.21.0`), dashes on the 3.1 line (`3-1-36`). The *branch* is dashed on both
+  lines (`2025-21-0`, `3-1-36`), matching the page filenames. Do not "correct" an existing
+  branch name.
 - Duplicate/retried branches (`…-02`, `…-N`) exist because these PRs do get reworked after
   review. Expect review comments.
 
@@ -78,7 +82,7 @@ gh repo clone nuxeo/doc.nuxeo.com-content docs -- --depth 1 --branch 2025 --no-s
 cd docs
 git fetch --depth 1 origin 2023:2023      # the second version branch, shallow
 git checkout 2025          # or 2023
-git checkout -b webui-release-notes-<version-slug>     # no NXDOC id — see the naming rule above
+git checkout -b webui-release-notes-<dashed-version>   # e.g. webui-release-notes-2025-21-0
 ```
 
 Optional local preview — heavy, and rarely worth it for a release-notes page:
@@ -133,8 +137,8 @@ incident notes in two places is how a register stops being trusted; see `SKILL.m
 | The `2023` branch index has a `---` rule after the transclusion and writes the commented row as `\|-->`; the `2025` branch has neither | Match each branch's own local convention; do not normalise across branches |
 | The `hidden: false` flip for the outgoing version happens **inside the next release's PR**, same commit | Every release PR touches three files per branch: new page `true`, outgoing page `false`, index |
 | One clone plus two branches lets a stale page get committed on one branch while its twin is current | Lint the **committed** files, or use one `git worktree` per branch (`SKILL.md` Step 5) |
-| The NXDOC ticket cannot be filed before its PR, because its summary carries the PR number | Raise the PR on `webui-release-notes-<version-slug>`, file the ticket (`SKILL.md` Step 10), then rewrite only the PR title |
-| Re-pointing an open PR at a renamed branch from the CLI (push new, delete old) closes the PR | Keep the id out of the branch entirely: `webui-release-notes-<version-slug>` needs no rename |
+| A ticket filed before its PR cannot yet carry the PR number its final summary needs | File it without the number (`SKILL.md` Step 9) and append `- #<pr>` once the PR is open (Step 10) |
+| Re-pointing an open PR at a renamed branch from the CLI (push new, delete old) closes the PR | Keep the id out of the branch entirely: `webui-release-notes-<dashed-version>` needs no rename |
 | A bucket query returns ~160 KB and overflows the tool result | Request only the needed fields and read the spilled file with `jq` (`SKILL.md` Step 2) |
 | `lint-page.sh` validates the **filename slug**, so extracting a committed page to `/tmp/page.md` fails three unrelated checks | Extract each file under its real name into its own directory — `/tmp/<x>/a/web-ui-release-notes-2025-N-0.md`, `/tmp/<x>/b/web-ui-release-notes-3-1-Z.md`, and the index as `web-ui-release-notes.md` beside each |
 | The ledger quotes page bullets, so a review fix round silently makes the quotations stale | After every fix round, re-check each quoted bullet against the **committed** page before resubmitting. Truncate long quotations with `…` and compare on the prefix |

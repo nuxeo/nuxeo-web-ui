@@ -369,7 +369,7 @@ unrelated reason is a test that passes without testing anything — which is how
 read as octal (`3.1.035` → `1001 - 29`) looked like a working rejection.
 
 `--released` inverts the `hidden` expectation, so use it for the **outgoing** page this PR flips
-to `false` (Step 9) — not for the incoming one, which stays `true`.
+to `false` (Step 10) — not for the incoming one, which stays `true`.
 
 **Lint what is committed, not the working tree.** The two pages live on two branches in one
 clone, so a `git checkout` between them can leave one branch holding a stale copy while the
@@ -455,7 +455,8 @@ Hand the subagent only:
 
 Then:
 
-- **Below 4.5 → do not open a PR.** Fix the findings and re-score.
+- **Below 4.5 → file no ticket and open no PR.** Fix the findings and re-score. Steps 9 and 10
+  both wait on this gate; a ticket raised for a draft that then changes shape is noise.
 - **Cap it at three rounds.** If it is still short after the third, stop looping: report the
   standing score, the findings you did not resolve and why, and hand the decision to the user.
   An unbounded loop over 0.10 formatting deductions converges on nothing.
@@ -463,19 +464,58 @@ Then:
   formatting defects, and a review round should never be spent on a nit the script can catch.
 - Report the final score and the fixes made along the way.
 
-### Step 9 — Raise the PRs
+### Step 9 — File the two NXDOC tickets
+
+The tickets come **before** the PRs, so the PR can carry its ticket id from the moment it is
+opened and nothing has to be renamed afterwards.
+
+**First, check whether the Product Owner already raised them.** They often do, in their own
+wording (`Release notes for WebUI 2025.20.0` → `NXDOC-3027`). A duplicate pair is worse than a
+late one:
+
+```
+project = NXDOC AND summary ~ "WebUI" AND created >= -60d ORDER BY created DESC
+```
+
+If a ticket for this version already exists, **use it** — do not create a second one — and say so
+in the handover.
+
+Otherwise create one ticket per line with the Atlassian MCP `createJiraIssue`, **LTS 2025 first**
+so it takes the lower id, matching every previous pair:
+
+| Field | Value |
+|---|---|
+| `cloudId` | `252cce86-035e-4b0e-abd2-3c002935632f` |
+| Project | `NXDOC` ("Nuxeo Documentation") |
+| Issue type | **Task** |
+| Summary | `Release-Notes-For-WebUI-<version-slug>` |
+| Description | `# Release-Notes-For-WebUI-<version-slug>` — the summary again, as an H1 |
+| Priority | Medium |
+| Assignee / Reporter | you (`atlassianUserInfo`), unless the user names someone |
+| Labels, Components, Fix Version | leave **empty** |
+
+`<version-slug>` here is the **title** spelling: dots on the 2025 line (`2025.21.0`), dashes on
+the 3.1 line (`3-1-36`). The branch uses a different spelling — see Step 10.
+
+**Read both tickets back** and confirm the fields landed. A create that silently drops a field
+looks identical to success. Note the two ids: LTS 2025 has the lower one, and Step 10 needs both.
+
+Step 10 finishes each ticket off once its PR exists, by appending the PR number to the summary
+and commenting the PR URL.
+
+### Step 10 — Raise the PRs and close the loop on the tickets
 
 Read `references/doc-repo.md` first. Summary of what matters:
 
 - **Two PRs, one per line**: branch `2025` for the LTS 2025 page, branch `2023` for the LTS 2023
   page, both against `nuxeo/doc.nuxeo.com-content`.
-- **Name the branch `webui-release-notes-<version-slug>`** — lower case, and with no NXDOC id in
-  it, ever. The id is not known yet (Step 10 files the tickets, because each ticket's summary
-  carries its PR number), and a branch that never claims an id never needs renaming. Open the PR
-  with the plain title `Release-Notes-For-WebUI-<version-slug>`.
-- **The PR title always ends up as `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>`.** Step 10
-  rewrites it once the ticket exists; the branch is left alone. **Never guess an id** — they are
-  allocated in pairs and a wrong guess collides with another team's ticket.
+- **Branch `webui-release-notes-<dashed-version>`, PR title
+  `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>`.** The branch is lower case, uses dashes on
+  both lines (`webui-release-notes-2025-21-0`, `webui-release-notes-3-1-36`), and **never carries
+  an NXDOC id** — so it never has to be renamed, and renaming a branch under an open PR would
+  close it. The title carries the id from Step 9, so it is correct from the moment the PR opens.
+  Older PRs used an id or an `NXDOC-PENDING-…` prefix in the branch; leave those alone.
+- **Never invent an id.** Both ids come from the tickets you created in Step 9.
 - Scope each PR to the release-notes paths only. This repo holds every Nuxeo/Hyland doc space;
   incidental edits elsewhere are a serious review problem.
 - **Flip the *previous* version's page to `hidden: false` in this same PR.** Verified against
@@ -490,59 +530,16 @@ Read `references/doc-repo.md` first. Summary of what matters:
   and cleaning up a published page inside a release-notes PR is exactly the kind of incidental
   edit reviewers challenge. 2025.19.0, for instance, carries a stray double blank line at
   line 149; it stays.
-- **Never rename the branch to add the id.** Re-pointing a PR at a renamed branch from the CLI
-  means pushing the new name and deleting the old one, which closes the PR. This is exactly why
-  the branch carries no id in the first place: `webui-release-notes-<version-slug>` is correct
-  before and after the ticket exists, so only the title ever changes. Older PRs used an
-  `NXDOC-PENDING-…` branch and are left as they are — do not tidy them.
 
-### Step 10 — File the two NXDOC tickets and point them at the PRs
+Once both PRs are open, finish each ticket:
 
-The tickets come **after** the PRs, not before, because a ticket's summary and description both
-carry its PR number and its only body is a comment linking the PR. You cannot write any of that
-until the PR exists. Do not file them earlier and do not leave them for someone else.
-
-**First, check whether the Product Owner already raised them.** They sometimes do, in their own
-wording (`Release notes for WebUI 2025.20.0` → `NXDOC-3027`). A duplicate pair is worse than a
-late one:
-
-```
-project = NXDOC AND summary ~ "WebUI" AND created >= -60d ORDER BY created DESC
-```
-
-If a ticket for this version already exists, **use it** — skip creation, go straight to the
-comment and the PR-title rewrite below, and say so in the handover.
-
-Otherwise create one ticket per line with the Atlassian MCP `createJiraIssue`, **LTS 2025 first**
-so it takes the lower id, matching every previous pair:
-
-| Field | Value |
-|---|---|
-| `cloudId` | `252cce86-035e-4b0e-abd2-3c002935632f` |
-| Project | `NXDOC` ("Nuxeo Documentation") |
-| Issue type | **Task** |
-| Summary | `Release-Notes-For-WebUI-<version-slug>- #<pr-number>` |
-| Description | `# Release-Notes-For-WebUI-<version-slug>- #<pr-number>` — the summary again, as an H1 |
-| Priority | Medium |
-| Assignee / Reporter | you (`atlassianUserInfo`), unless the user names someone |
-| Labels, Components, Fix Version | leave **empty** |
-
-`<version-slug>` is whatever the PR title already uses, and the two lines genuinely differ: the
-LTS 2025 line keeps the dots (`2025.21.0`), the LTS 2023 line uses dashes (`3-1-36`). Copy the
-PR title rather than normalising — `NXDOC-3030` and `NXDOC-3031` are the worked pair. Note the
-odd `- #` before the PR number, space and all; it is in both real tickets, so reproduce it.
-
-Then, per ticket:
-
-1. **Comment the PR URL** on it (`addCommentToJiraIssue`) — a bare
+1. **Append the PR number to the summary and description**, giving
+   `Release-Notes-For-WebUI-<version-slug>- #<pr-number>` — the odd `- #`, space and all, is what
+   `NXDOC-3030` and `NXDOC-3031` carry, so reproduce it. Use `editJiraIssue`.
+2. **Comment the PR URL** on the ticket (`addCommentToJiraIssue`) — a bare
    `https://github.com/nuxeo/doc.nuxeo.com-content/pull/<pr>`, which Jira renders as a smart link.
-   That comment is the only place the ticket links its PR, so it is not optional.
-2. **Rewrite the PR title** to `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>`:
-   `gh pr edit <pr> --repo nuxeo/doc.nuxeo.com-content --title '…'`. Leave the branch
-   (`webui-release-notes-<version-slug>`) alone — renaming it would close the PR, and it is
-   already correct because it never carried an id.
-3. **Read both tickets back** and confirm the summary, description and comment actually landed. A
-   create that silently drops a field looks identical to success.
+   That comment is how the ticket links its PR, so it is not optional.
+3. **Read both tickets back** and confirm the appended summary and the comment actually landed.
 
 Report the two ticket keys with their PRs in the handover.
 
@@ -705,10 +702,10 @@ resolves. The release checklist expects the notes PRs merged in **Phase 5.3 (Wra
   customer-confidential, nothing internal-only, and no edits outside the release-notes paths.
 - **Ask before writing to Jira or opening PRs on someone else's ticket.** Filling an empty
   Release Notes Summary during a release you were asked to write is in scope, as is filing the
-  release's own two NXDOC tickets (Step 10). Transitioning tickets, editing someone's existing
+  release's own two NXDOC tickets (Step 9). Transitioning tickets, editing someone's existing
   summary, and filing any *other* new ticket are not.
 - **Never invent an NXDOC id.** Ids are allocated in pairs and a guess collides with another
   team's ticket. Take the id from the ticket you actually created, and search for an existing
-  pair before creating anything (Step 10).
+  pair before creating anything (Step 9).
 - **Always produce the draft.** This skill's output is two pages and a ledger. Anything odd
   about the buckets is reported alongside them, never instead of them.
