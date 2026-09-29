@@ -363,7 +363,7 @@ so a `.sh` file is never run. Every defect found in review so far has been a che
 not fail, and reading bash does not find those:
 
 ```shell
-"$SKILL/scripts/selftest.sh"     # 42 cases, no network; exit 0 only if all behave as asserted
+"$SKILL/scripts/selftest.sh"     # no network; exit 0 only if every case behaves as asserted
 ```
 
 It asserts **why** each negative case fails, not just that it did. A case that fails for an

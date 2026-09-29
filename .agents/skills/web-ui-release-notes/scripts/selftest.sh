@@ -405,6 +405,25 @@ else
 fi
 
 echo
+echo "== content outside the wrapper block (Copilot round 12)"
+# Everything that judges customer prose - the heading rule, the leak scan, the twins diff - is
+# scoped to the web-ui-updates block. A line outside it therefore renders on the release page
+# having been checked by nothing, which is why ordering the landmarks was not sufficient.
+D="$WORK/afterclose"; page "$D" 2025-20-0 2025.20.0 "LTS 2025" 981
+printf '\n## Stray Section\n\nLeaked WEBUI-1234 and --nuxeo-primary-color here.\n' >> "$D/web-ui-release-notes-2025-20-0.md"
+assert "stray section after the closing directive" fails --because "outside the web-ui-updates block" "$D/web-ui-release-notes-2025-20-0.md"
+
+D="$WORK/beforeopen"; page "$D" 2025-20-0 2025.20.0 "LTS 2025" 981
+awk '{print} /matching-notes/{print "";print "Stray preamble that renders but is never checked."}' \
+    "$D/web-ui-release-notes-2025-20-0.md" > "$D/t" && mv "$D/t" "$D/web-ui-release-notes-2025-20-0.md"
+assert "stray prose between the transclusion and the wrapper" fails --because "outside the web-ui-updates block" "$D/web-ui-release-notes-2025-20-0.md"
+
+D="$WORK/afterfence"; page "$D" 2025-20-0 2025.20.0 "LTS 2025" 981
+awk 'BEGIN{f=0} {print} /^---$/{f++; if(f==2){print "";print "Stray line straight after the frontmatter."}}' \
+    "$D/web-ui-release-notes-2025-20-0.md" > "$D/t" && mv "$D/t" "$D/web-ui-release-notes-2025-20-0.md"
+assert "stray prose between the fence and the transclusion" fails --because "outside the web-ui-updates block" "$D/web-ui-release-notes-2025-20-0.md"
+
+echo
 printf -- '-----\n'
 if [ "$fail" = 0 ]; then
   printf '%s case(s) passed\n' "$pass"

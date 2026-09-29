@@ -153,6 +153,18 @@ check_page() {
       last=$(awk -v o="$ol" -v c="$cl" 'NR>o&&NR<c&&NF{l=$0} END{print l}' "$f")
       [ "$last" = "<br/>" ] \
         || FAIL "the last line before the closing multiexcerpt must be '<br/>', found '${last:-<nothing>}'"
+      # Ordering the four landmarks never said that nothing ELSE may sit outside the block.
+      # It must: the heading, leak and twins checks are all scoped to the wrapper, so a line
+      # outside it renders on the release page having been checked by nothing at all.
+      local stray
+      stray=$(awk -v fe="$fmend" -v mn="$mnl" -v o="$ol" -v c="$cl" '
+        (NR>fe && NR<mn) || (NR>mn && NR<o) || NR>c { if (NF) print "line "NR": "$0 }' "$f")
+      if [ -n "$stray" ]; then
+        FAIL "content outside the web-ui-updates block — it renders on the page but is checked by nothing: not the heading rule, not the leak scan, not the twins diff"
+        printf '%s\n' "$stray" | sed 's/^/        /'
+      else
+        OK "nothing outside the web-ui-updates block"
+      fi
     fi
   fi
 
