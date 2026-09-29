@@ -65,7 +65,7 @@ Never write from memory or from a code diff alone. These are the only authoritat
 | Release process | Confluence **WEB UI Release Checklist** (page `4276715819`) |
 | Scope verification *(upstream — not this skill's job)* | Confluence **WEB UI and Elements Release Ticket Verification Guide** (page `4277207540`) |
 | Version pairing | Confluence **Nuxeo Web UI LTS 2023 & 2025 Release mapping** (page `3523969324`) |
-| Lessons from past releases | Confluence **Web UI Release Notes — Feedback & Lessons Log** (page `4309167086`) — **read it before drafting**; write to it per Step 11 |
+| Lessons from past releases | Confluence **Web UI Release Notes — Feedback & Lessons Log** (page `4309167086`) — **read it before drafting**; write to it per Step 12 |
 
 Reference files in this skill:
 
@@ -469,9 +469,13 @@ Read `references/doc-repo.md` first. Summary of what matters:
 
 - **Two PRs, one per line**: branch `2025` for the LTS 2025 page, branch `2023` for the LTS 2023
   page, both against `nuxeo/doc.nuxeo.com-content`.
-- **Two NXDOC tickets**, one per line, usually consecutive ids (2025.17.0 → `NXDOC-2983`,
-  3.1.32 → `NXDOC-2984`). Branch and PR title follow
-  `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>`.
+- **Two NXDOC tickets**, one per line, with consecutive ids (2025.17.0 → `NXDOC-2983`,
+  3.1.32 → `NXDOC-2984`). You raise the PRs *first* and file the tickets in **Step 10**, because
+  each ticket's summary carries its PR number — so cut the branch as
+  `NXDOC-PENDING-Release-Notes-For-WebUI-<version-slug>` and set the PR title to match. Step 10
+  rewrites the title to `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>` once the id exists.
+  **Never guess an id**: they are allocated in pairs and a wrong guess collides with another
+  team's ticket.
 - Scope each PR to the release-notes paths only. This repo holds every Nuxeo/Hyland doc space;
   incidental edits elsewhere are a serious review problem.
 - **Flip the *previous* version's page to `hidden: false` in this same PR.** Verified against
@@ -486,21 +490,68 @@ Read `references/doc-repo.md` first. Summary of what matters:
   and cleaning up a published page inside a release-notes PR is exactly the kind of incidental
   edit reviewers challenge. 2025.19.0, for instance, carries a stray double blank line at
   line 149; it stays.
-- **If no NXDOC ticket exists yet** — and it usually will not, since the Product Owner raises
-  them close to release — say so rather than filing one uninvited, and do not invent an id. Ask
-  whether to hold the PRs until the tickets exist, or to raise them now on a branch named
-  `<something>-Release-Notes-For-WebUI-<version-slug>` with a placeholder prefix that is
-  obviously not an NXDOC id, and rename once the ticket lands. Never guess the next id: they are
-  allocated in pairs and a wrong guess collides with another team's ticket.
+- **The branch name keeps the `NXDOC-PENDING-` prefix for good.** Re-pointing a PR at a renamed
+  branch from the CLI means pushing the new name and deleting the old one, which closes the PR,
+  so only the *title* is corrected in Step 10. Verified on the 2025.21.0 pair: PRs
+  #2850 and #2851 are titled `NXDOC-3030-…` / `NXDOC-3031-…` while their branches still read
+  `NXDOC-PENDING-…`. Leave the mismatch; it is expected.
 
-### Step 10 — Feed what you learned back into this skill
+### Step 10 — File the two NXDOC tickets and point them at the PRs
+
+The tickets come **after** the PRs, not before, because a ticket's summary and description both
+carry its PR number and its only body is a comment linking the PR. You cannot write any of that
+until the PR exists. Do not file them earlier and do not leave them for someone else.
+
+**First, check whether the Product Owner already raised them.** They sometimes do, in their own
+wording (`Release notes for WebUI 2025.20.0` → `NXDOC-3027`). A duplicate pair is worse than a
+late one:
+
+```
+project = NXDOC AND summary ~ "WebUI" AND created >= -60d ORDER BY created DESC
+```
+
+If a ticket for this version already exists, **use it** — skip creation, go straight to the
+comment and the PR-title rewrite below, and say so in the handover.
+
+Otherwise create one ticket per line with the Atlassian MCP `createJiraIssue`, **LTS 2025 first**
+so it takes the lower id, matching every previous pair:
+
+| Field | Value |
+|---|---|
+| `cloudId` | `252cce86-035e-4b0e-abd2-3c002935632f` |
+| Project | `NXDOC` ("Nuxeo Documentation") |
+| Issue type | **Task** |
+| Summary | `Release-Notes-For-WebUI-<version-slug>- #<pr-number>` |
+| Description | `# Release-Notes-For-WebUI-<version-slug>- #<pr-number>` — the summary again, as an H1 |
+| Priority | Medium |
+| Assignee / Reporter | you (`atlassianUserInfo`), unless the user names someone |
+| Labels, Components, Fix Version | leave **empty** |
+
+`<version-slug>` is whatever the PR title already uses, and the two lines genuinely differ: the
+LTS 2025 line keeps the dots (`2025.21.0`), the LTS 2023 line uses dashes (`3-1-36`). Copy the
+PR title rather than normalising — `NXDOC-3030` and `NXDOC-3031` are the worked pair. Note the
+odd `- #` before the PR number, space and all; it is in both real tickets, so reproduce it.
+
+Then, per ticket:
+
+1. **Comment the PR URL** on it (`addCommentToJiraIssue`) — a bare
+   `https://github.com/nuxeo/doc.nuxeo.com-content/pull/<pr>`, which Jira renders as a smart link.
+   That comment is the only place the ticket links its PR, so it is not optional.
+2. **Rewrite the PR title** to `NXDOC-<id>-Release-Notes-For-WebUI-<version-slug>`:
+   `gh pr edit <pr> --repo nuxeo/doc.nuxeo.com-content --title '…'`. Leave the branch alone.
+3. **Read both tickets back** and confirm the summary, description and comment actually landed. A
+   create that silently drops a field looks identical to success.
+
+Report the two ticket keys with their PRs in the handover.
+
+### Step 11 — Feed what you learned back into this skill
 
 The docs repo is a **different repo** from the one this skill lives in, so nothing here is
 enforced by its CI and conventions there can drift without warning. Treat every surprise as a
 defect in this skill.
 
 This step covers what you learn *while drafting*. For what the human reviewers tell you *after*
-the PRs are open — the richer source — see **Step 11**.
+the PRs are open — the richer source — see **Step 12**.
 
 If you hit anything not already documented here — a frontmatter key you had to add, a build or
 `npm run verify` failure, a changed template convention, a new category name, a reviewer
@@ -508,7 +559,7 @@ preference — then **in the same session**:
 
 1. Add **the rule** to the right reference file (repo mechanics → `references/doc-repo.md`, under
    *Conventions learned the hard way*). Write it as a rule — "do this, not that" — **not** as a
-   story about what went wrong. The narrative belongs in the Confluence log (Step 11); keeping it
+   story about what went wrong. The narrative belongs in the Confluence log (Step 12); keeping it
    in both places is how a register stops being trusted.
 2. Mirror the change into every tree the repo keeps in sync.
 
@@ -546,7 +597,7 @@ preference — then **in the same session**:
 
 4. Tell the user what you changed and why, so the next run does not pay the same cost.
 
-### Step 11 — Act on the human review comments, and close the loop
+### Step 12 — Act on the human review comments, and close the loop
 
 The PRs get reviewed by people, usually days after the drafting session ended. **Those comments
 are the most valuable signal this skill will ever get**: someone who owns this documentation is
@@ -569,7 +620,7 @@ unsupported sentence slips in.
 | The comment was… | Then |
 |---|---|
 | **A fact about this release** — wrong ticket detail, a sentence they want phrased differently | Fix the page. Nothing to learn; the skill was not wrong. |
-| **A rule this skill has wrong, or does not have at all** — a convention, a category name, a template detail, a house style preference, something the linter should have caught | **Fix the skill**, per Step 10: the rule into the right reference file, and mirror the trees. If a script could have caught it, add the check. The *issue* is recorded in the Confluence log, not in the skill. |
+| **A rule this skill has wrong, or does not have at all** — a convention, a category name, a template detail, a house style preference, something the linter should have caught | **Fix the skill**, per Step 11: the rule into the right reference file, and mirror the trees. If a script could have caught it, add the check. The *issue* is recorded in the Confluence log, not in the skill. |
 
 Be precise about which it is. **Fixing the page without fixing the skill guarantees the same
 comment next release** — and the reviewer will rightly be less patient the second time.
@@ -626,7 +677,7 @@ The reason the register is not kept in the skill or in Jira is that both get los
 is rewritten and its history goes with it, and a Jira comment is buried on a ticket nobody opens
 again. One durable page, linked from both.
 
-### Step 12 — After publication
+### Step 13 — After publication
 
 Check the live page renders, the new version appears in the left-hand navigation, and the index
 page shows the release. Publication lags by a few hours, so do not promise a live link before it
@@ -651,7 +702,11 @@ resolves. The release checklist expects the notes PRs merged in **Phase 5.3 (Wra
 - **The docs repo is public and shared across all of Nuxeo/Hyland documentation.** Nothing
   customer-confidential, nothing internal-only, and no edits outside the release-notes paths.
 - **Ask before writing to Jira or opening PRs on someone else's ticket.** Filling an empty
-  Release Notes Summary during a release you were asked to write is in scope; transitioning
-  tickets, editing someone's existing summary, or filing new tickets is not.
+  Release Notes Summary during a release you were asked to write is in scope, as is filing the
+  release's own two NXDOC tickets (Step 10). Transitioning tickets, editing someone's existing
+  summary, and filing any *other* new ticket are not.
+- **Never invent an NXDOC id.** Ids are allocated in pairs and a guess collides with another
+  team's ticket. Take the id from the ticket you actually created, and search for an existing
+  pair before creating anything (Step 10).
 - **Always produce the draft.** This skill's output is two pages and a ledger. Anything odd
   about the buckets is reported alongside them, never instead of them.
