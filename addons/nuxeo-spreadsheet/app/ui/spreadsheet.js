@@ -167,8 +167,8 @@ class Spreadsheet {
   createCell(row) {
     const cell = {};
     const doc = this.getDataAtRow(row);
-    const permissions = doc && doc.contextParameters && doc.contextParameters.permissions;
-    if (permissions && permissions.indexOf('Write') === -1) {
+    const permissions = doc?.contextParameters?.permissions;
+    if (permissions?.indexOf('Write') === -1) {
       cell.readOnly = true;
     }
     return cell;
@@ -307,7 +307,7 @@ class Spreadsheet {
         const formattedLabel = editor.formatter(dataEntry);
         if (!formattedLabel) {
           // resolved || unresolved (when just filled in)
-          const id = (dataEntry.properties && dataEntry.properties.id) || dataEntry;
+          const id = dataEntry.properties?.id || dataEntry;
           const cell = ht.getCellMeta(i, j);
           if (!cell._labels) {
             cell._labels = {};
