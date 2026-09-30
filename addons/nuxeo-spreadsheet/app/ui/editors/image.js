@@ -18,7 +18,7 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
  */
 
 const ImageRenderer = (instance, td, row, col, prop, value, cellProperties) => {
-  if (value && value.data) {
+  if (value?.data) {
     const img = document.createElement('img');
     img.src = value.data;
     if (cellProperties.width) {

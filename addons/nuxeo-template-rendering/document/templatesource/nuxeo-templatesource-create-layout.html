@@ -25,7 +25,7 @@ limitations under the License.
     <style include="nuxeo-styles"></style>
 
     <nuxeo-input
-      role="widget"
+      data-widget
       name="title"
       label="[[i18n('title')]]"
       value="{{document.properties.dc:title}}"
@@ -34,7 +34,7 @@ limitations under the License.
     ></nuxeo-input>
 
     <nuxeo-textarea
-      role="widget"
+      data-widget
       name="description"
       label="[[i18n('label.description')]]"
       always-float-label
@@ -42,14 +42,14 @@ limitations under the License.
     ></nuxeo-textarea>
 
     <nuxeo-dropzone
-      role="widget"
+      data-widget
       name="dropzone"
       label="[[i18n('file.content')]]"
       value="{{document.properties.file:content}}"
     ></nuxeo-dropzone>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       name="nature"
       label="[[i18n('label.dublincore.nature')]]"
       directory-name="nature"
@@ -60,7 +60,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       name="subjects"
       label="[[i18n('label.dublincore.subjects')]]"
       directory-name="l10nsubjects"
@@ -73,7 +73,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-directory-suggestion
-      role="widget"
+      data-widget
       name="coverage"
       label="[[i18n('label.dublincore.coverage')]]"
       directory-name="l10ncoverage"
@@ -85,7 +85,7 @@ limitations under the License.
     </nuxeo-directory-suggestion>
 
     <nuxeo-date-picker
-      role="widget"
+      data-widget
       name="expireDate"
       label="[[i18n('label.dublincore.expire')]]"
       value="{{document.properties.dc:expired}}"

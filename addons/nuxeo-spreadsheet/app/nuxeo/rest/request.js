@@ -44,7 +44,7 @@ class Request {
       .request(path || this.path)
       .repositoryName(undefined)
       .headers(this._headers)
-      .queryParams(Object.assign({}, this._params, params))
+      .queryParams({ ...this._params, ...params })
       [method]();
   }
 }
