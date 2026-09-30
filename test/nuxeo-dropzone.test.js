@@ -15,7 +15,7 @@ All Hyland product names are registered or unregistered trademarks of Hyland Sof
  See the License for the specific language governing permissions and
  limitations under the License.
  */
-import { fixture, html } from '@nuxeo/testing-helpers';
+import { fixture, flush, html } from '@nuxeo/testing-helpers';
 import '../elements/nuxeo-dropzone/nuxeo-dropzone.js';
 
 suite('nuxeo-dropzone', () => {
@@ -359,6 +359,45 @@ suite('nuxeo-dropzone', () => {
 
       abortSpy.restore();
       element.hasAbort.restore();
+    });
+  });
+
+  suite('invalid state error highlighting (ELEMENTS-1887)', () => {
+    const invalidColor = 'rgb(222, 53, 11)';
+
+    test('highlights the label in red when invalid', async () => {
+      element.label = 'Main file';
+      element.invalid = true;
+      await flush();
+      const label = element.shadowRoot.querySelector('#label');
+      expect(label).to.not.be.null;
+      expect(getComputedStyle(label).color).to.equal(invalidColor);
+    });
+
+    test('does not highlight the label when valid', async () => {
+      element.label = 'Main file';
+      await flush();
+      const label = element.shadowRoot.querySelector('#label');
+      expect(getComputedStyle(label).color).to.not.equal(invalidColor);
+    });
+
+    test('shows a red dashed border around the dropzone container when invalid', async () => {
+      element.invalid = true;
+      await flush();
+      const container = element.shadowRoot.querySelector('#container');
+      const style = getComputedStyle(container);
+      expect(style.borderStyle).to.equal('dashed');
+      expect(style.borderColor).to.equal(invalidColor);
+    });
+
+    test('shows a red asterisk after the label when required', async () => {
+      element.label = 'Main file';
+      element.required = true;
+      await flush();
+      const label = element.shadowRoot.querySelector('#label');
+      const after = getComputedStyle(label, '::after');
+      expect(after.content.replace(/"/g, '')).to.equal('*');
+      expect(after.color).to.equal(invalidColor);
     });
   });
 });
