@@ -75,6 +75,37 @@ suite('TokenBehavior', () => {
       expect(arg).to.not.equal(item);
       expect(dialog.toggle).to.have.been.called;
     });
+
+    test('should clone the row deeply without altering its field types', () => {
+      const item = {
+        nuxeoLogin: 'user1',
+        clientId: 'client-1',
+        serviceName: 'google',
+        // _save() feeds creationDate to formatDate, which expects the REST payload's ISO string
+        creationDate: '2024-01-31T10:15:00.000Z',
+        sharedWith: ['groupA', 'groupB'],
+        clientDetails: { name: 'My client', isAutoGrant: true },
+        'entity-type': 'nuxeoOAuth2Token',
+      };
+      ctx.$ = { dialog: { toggle: sinon.spy() } };
+      ctx._set_selectedEntry = sinon.stub();
+
+      ctx._editEntry({ target: { parentNode: { item } } });
+      const entry = ctx._set_selectedEntry.firstCall.args[0];
+
+      expect(entry).to.not.equal(item);
+      expect(entry.creationDate).to.be.a('string');
+      expect(entry.creationDate).to.equal('2024-01-31T10:15:00.000Z');
+      expect(entry.sharedWith).to.be.an('array');
+      expect(entry.clientDetails.isAutoGrant).to.equal(true);
+      expect(entry.clientDetails).to.not.equal(item.clientDetails);
+
+      // _save() rewrites creationDate on the copy; the row backing the table must be untouched
+      entry.creationDate = '2024-01-31 10:15:00';
+      entry.clientDetails.name = 'renamed';
+      expect(item.creationDate).to.equal('2024-01-31T10:15:00.000Z');
+      expect(item.clientDetails.name).to.equal('My client');
+    });
   });
 
   suite('_deleteEntry', () => {
