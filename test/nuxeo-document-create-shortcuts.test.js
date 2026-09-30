@@ -46,6 +46,8 @@ suite('nuxeo-document-create-shortcuts', () => {
     const nodes = Array.from(el.$.shortcuts.children);
     expect(nodes.length).to.equal(2);
     expect(nodes.every((n) => n.tagName.toLowerCase() === 'nuxeo-document-create-shortcut')).to.be.true;
+    // the most common types come first, the last used type last
+    expect(nodes.map((n) => n.type)).to.deep.equal(['Workspace', 'File']);
     el.$.creationStats.lastType.restore();
     el.$.creationStats.mostCommonType.restore();
     el.formatDocType.restore();
