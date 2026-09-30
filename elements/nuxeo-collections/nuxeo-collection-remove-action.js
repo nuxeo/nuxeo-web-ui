@@ -85,7 +85,7 @@ class NuxeoCollectionRemoveAction extends mixinBehaviors([NotifyBehavior, I18nBe
     if (collection && collection.contextParameters && collection.contextParameters.permissions) {
       // NXP-21408: prior to 8.10-HF01 the permissions enricher wouldn't return ReadCanCollect
       // Action will therefore not be available
-      return collection.contextParameters.permissions.indexOf('WriteProperties') < 0;
+      return !collection.contextParameters.permissions.includes('WriteProperties');
     }
     return true;
   }

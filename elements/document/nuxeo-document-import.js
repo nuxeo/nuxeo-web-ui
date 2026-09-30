@@ -974,7 +974,7 @@ Polymer({
       this.fire('nx-creation-wizard-hide-tabs');
       // let's select the first file that's not disabled
       const toSelect = this._getAllFiles().findIndex((f) => !f.error);
-      this._selectDoc(toSelect < 0 ? 0 : toSelect);
+      this._selectDoc(Math.max(0, toSelect));
     } else {
       this.stage = 'upload';
       this.customizing = false;
@@ -1291,8 +1291,7 @@ Polymer({
 
   _mergeResponses(...args) {
     const response = { 'entity-type': 'Documents', entries: [] };
-    for (let i = 0; i < args.length; i++) {
-      const current = args[i];
+    for (const current of args) {
       if (current && current.entries) {
         response.entries.push(...current.entries);
       } else {
@@ -1356,7 +1355,7 @@ Polymer({
           result['entity-type'] !== 'exception' &&
           result['entity-type'] !== 'validation_report',
       );
-      this._handleSuccess(this._mergeResponses.apply(null, errorFree), !(errorFree.length < results.length));
+      this._handleSuccess(this._mergeResponses.apply(null, errorFree), errorFree.length >= results.length);
       if (errorFree.length < results.length) {
         this.set('_creating', false);
         this.set('_importWithPropertiesError', 'These documents could not be created.');
@@ -1438,10 +1437,9 @@ Polymer({
 
   _batchReady(data) {
     data.stopPropagation();
-    this.properties = [];
-    for (let i = 0; i < this.localFiles.length; i++) {
-      this.properties.push({});
-    }
+    this.properties = this.localFiles.map(() => {
+      return {};
+    });
     const div = this.$$('div[name="upload"]');
     if (div) {
       div.focus();
@@ -1531,7 +1529,7 @@ Polymer({
   },
 
   _filterImportDocTypes(type) {
-    return window.nuxeo.importBlacklist.indexOf(type.type) === -1;
+    return !window.nuxeo.importBlacklist.includes(type.type);
   },
 
   _computeImportDocTypes() {

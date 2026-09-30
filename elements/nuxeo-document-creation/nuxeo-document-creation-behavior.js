@@ -128,7 +128,7 @@ export const DocumentCreationBehavior = [
         const filteredSubtypes = [];
         if (this._canCreateIn(this.parent)) {
           subtypes.forEach((type) => {
-            if (type.facets.indexOf('HiddenInCreation') === -1) {
+            if (!type.facets.includes('HiddenInCreation')) {
               filteredSubtypes.push(type);
             }
           });
@@ -205,7 +205,7 @@ export const DocumentCreationBehavior = [
 
     _canCreateIn(document) {
       if (document && document.contextParameters && document.contextParameters.permissions) {
-        return document.contextParameters.permissions.indexOf('AddChildren') > -1;
+        return document.contextParameters.permissions.includes('AddChildren');
       }
       return false;
     },
@@ -215,11 +215,7 @@ export const DocumentCreationBehavior = [
     },
 
     _isValidType(type) {
-      return (
-        type &&
-        this.subtypes &&
-        this.subtypes.findIndex((t) => t._id === type._id && t.type === type.type && t.icon === type.icon) > -1
-      );
+      return type && this.subtypes?.some((t) => t._id === type._id && t.type === type.type && t.icon === type.icon);
     },
 
     _getTypeLabel(type) {

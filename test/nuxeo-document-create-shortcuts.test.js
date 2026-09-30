@@ -67,4 +67,18 @@ suite('nuxeo-document-create-shortcuts', () => {
     el._putNodes(parent);
     expect(parent.children.length).to.equal(0);
   });
+
+  test('_putNodes appends a node passed outside an array and detaches the previous children', () => {
+    const parent = document.createElement('div');
+    const stale = document.createElement('i');
+    parent.appendChild(stale);
+    const solo = document.createElement('span');
+    solo.id = 'solo';
+
+    el._putNodes(parent, solo);
+
+    expect(parent.children.length).to.equal(1);
+    expect(parent.querySelector('#solo')).to.exist;
+    expect(stale.parentNode).to.be.null;
+  });
 });
