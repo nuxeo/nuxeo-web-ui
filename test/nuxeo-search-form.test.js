@@ -113,6 +113,76 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.selectedSearchIdx).to.equal(0);
   });
 
+  suite('saved search params are deep-cloned (WEBUI-2249)', () => {
+    // A savedSearch entity is REST JSON: date-range aggregates arrive as ISO strings and
+    // never as Date instances, so the clone must hand the provider back the same field types.
+    const savedSearch = () => {
+      return {
+        id: 'saved-1',
+        title: 'Saved 1',
+        params: {
+          ecm_fulltext: '*report*',
+          dc_created_agg: ['last24h'],
+          dc_modified_min: '2024-01-31T10:15:00.000Z',
+          dc_modified_max: '2024-02-28T10:15:00.000Z',
+          system_primaryType_agg: [],
+          nested: { enabled: true, threshold: 5, label: null },
+        },
+      };
+    };
+
+    // Spy rather than stub, so paramMutator keeps running: the value handed to _mutateParams is
+    // the structuredClone output itself, which is what this change affects. Asserting on
+    // searchForm.params instead would assert the mutator's filtering, not the clone.
+    ['_selectedSearchIdxChanged', '_selectedSearchChanged'].forEach((method) => {
+      test(`${method} preserves param field types and does not alias the saved search`, () => {
+        const search = savedSearch();
+        searchForm._searches = [search];
+        const mutate = sinon.spy(searchForm, '_mutateParams');
+
+        if (method === '_selectedSearchIdxChanged') {
+          searchForm.selectedSearchIdx = 1;
+          searchForm._selectedSearchIdxChanged();
+        } else {
+          searchForm._selectedSearchChanged({ id: 'saved-1' });
+        }
+
+        const clone = mutate.firstCall.args[0];
+        expect(clone).to.deep.equal(search.params);
+        expect(clone).to.not.equal(search.params);
+        expect(clone.ecm_fulltext).to.be.a('string');
+        expect(clone.dc_modified_min).to.be.a('string');
+        expect(clone.dc_created_agg).to.be.an('array');
+        expect(clone.system_primaryType_agg).to.deep.equal([]);
+        expect(clone.nested.enabled).to.equal(true);
+        expect(clone.nested.threshold).to.be.a('number');
+        expect(clone.nested.label).to.be.null;
+
+        // the form mutates the clone as the user edits filters; _searches must stay pristine
+        clone.dc_created_agg.push('lastWeek');
+        clone.nested.enabled = false;
+        expect(search.params.dc_created_agg).to.deep.equal(['last24h']);
+        expect(search.params.nested.enabled).to.equal(true);
+
+        mutate.restore();
+      });
+    });
+
+    test('a saved search without params is handled instead of throwing', () => {
+      // JSON.parse(JSON.stringify(undefined)) threw a SyntaxError before reaching the mutator;
+      // structuredClone yields undefined, which paramMutator turns into an empty param set.
+      searchForm._searches = [{ id: 'no-params', title: 'No params' }];
+      const mutate = sinon.spy(searchForm, '_mutateParams');
+
+      expect(() => searchForm._selectedSearchChanged({ id: 'no-params' })).to.not.throw();
+      expect(mutate.firstCall.args[0]).to.be.undefined;
+      expect(searchForm.params).to.deep.equal({});
+      expect(searchForm.searchTerm).to.equal('');
+
+      mutate.restore();
+    });
+  });
+
   test('switches between queue and filters', () => {
     const displayFiltersSpy = sinon.spy(searchForm, 'displayFilters');
     const displayQueueSpy = sinon.spy(searchForm, 'displayQueue');

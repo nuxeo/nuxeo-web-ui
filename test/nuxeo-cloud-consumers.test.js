@@ -61,6 +61,39 @@ suite('nuxeo-cloud-consumers', () => {
       expect(element._selectedEntry.redirectURIs).to.include('http://localhost:8080/callback');
       expect(element._selectedClientId).to.equal('client1');
     });
+
+    test('should clone the row deeply without altering its field types', () => {
+      const item = {
+        id: 'client1',
+        name: 'My client',
+        secret: null,
+        isEnabled: true,
+        isAutoGrant: false,
+        redirectURIs: ['http://localhost:8080/callback'],
+        metadata: { createdBy: 'Administrator', createdAt: '2024-01-31T10:15:00.000Z' },
+        'entity-type': 'oauth2Client',
+      };
+
+      element._editEntry({ target: { parentNode: { item } } });
+      const entry = element._selectedEntry;
+
+      expect(entry).to.not.equal(item);
+      expect(entry.id).to.be.a('string');
+      expect(entry.secret).to.be.null;
+      expect(entry.isEnabled).to.equal(true);
+      expect(entry.isAutoGrant).to.equal(false);
+      // ISO timestamps stay strings — the entry is REST JSON, never a Date instance
+      expect(entry.metadata.createdAt).to.be.a('string');
+      expect(entry.metadata).to.not.equal(item.metadata);
+      expect(entry.metadata).to.deep.equal(item.metadata);
+
+      // editing the dialog copy must not write through to the row backing the table
+      entry.metadata.createdBy = 'someone-else';
+      entry.isEnabled = false;
+      expect(item.metadata.createdBy).to.equal('Administrator');
+      expect(item.isEnabled).to.equal(true);
+      expect(item.redirectURIs).to.deep.equal(['http://localhost:8080/callback']);
+    });
   });
 
   suite('_save', () => {
