@@ -115,7 +115,7 @@ export const DocumentCreationBehavior = [
 
     _parentChanged() {
       if (this.parent) {
-        if (!this.targetPath || this.targetPath.replace(/(.+)\/$/, '$1') !== this.parent.path) {
+        if (!this.targetPath || this.targetPath.replace(/(.)\/$/, '$1') !== this.parent.path) {
           this.set('targetPath', this.parent.path);
         }
         const subtypes =
@@ -151,8 +151,8 @@ export const DocumentCreationBehavior = [
 
     _suggesterChildrenChanged() {
       const valid =
-        (this.parent ? this.targetPath.replace(/(.+)\/$/, '$1') === this.parent.path : false) ||
-        (this.suggesterParent ? this.targetPath.replace(/(.+)\/$/, '$1') === this.suggesterParent.path : false) ||
+        (this.parent ? this.targetPath.replace(/(.)\/$/, '$1') === this.parent.path : false) ||
+        (this.suggesterParent ? this.targetPath.replace(/(.)\/$/, '$1') === this.suggesterParent.path : false) ||
         (this.suggesterChildren ? this.suggesterChildren.some((child) => this.targetPath === child.path) : false);
       this.set('isValidTargetPath', valid);
       this.fire('nx-document-creation-suggester-parent-changed', {

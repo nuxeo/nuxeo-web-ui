@@ -19,7 +19,7 @@ import '@polymer/polymer/polymer-legacy.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import '@nuxeo/nuxeo-elements/nuxeo-element.js';
 
-class Child {
+export class Child {
   static get ATTRS() {
     return {
       COLUMN: 'data-column',
@@ -69,7 +69,7 @@ class Child {
    * Sets the grid column in which this element will be placed.
    */
   set column(val) {
-    return this._setAttribute(Child.ATTRS.COLUMN, val);
+    this._setAttribute(Child.ATTRS.COLUMN, val);
   }
 
   /**
@@ -83,7 +83,7 @@ class Child {
    * Sets the number of columns this element occupies.
    */
   set columnspan(val) {
-    return this._setAttribute(Child.ATTRS.COLUMNSPAN, val);
+    this._setAttribute(Child.ATTRS.COLUMNSPAN, val);
   }
 
   /**
@@ -97,7 +97,7 @@ class Child {
    * Sets the grid row in which this element will be placed.
    */
   set row(val) {
-    return this._setAttribute(Child.ATTRS.ROW, val);
+    this._setAttribute(Child.ATTRS.ROW, val);
   }
 
   /**
@@ -111,7 +111,7 @@ class Child {
    * Sets the number of rows this element occupies.
    */
   set rowspan(val) {
-    return this._setAttribute(Child.ATTRS.ROWSPAN, val);
+    this._setAttribute(Child.ATTRS.ROWSPAN, val);
   }
 
   /**
@@ -125,7 +125,7 @@ class Child {
    * Sets the vertical alignment of this element in the grid. Valid values are `stretch`, `center`, `start` and `end`.
    */
   set align(val) {
-    return this._setAttribute(Child.ATTRS.ALIGN, val);
+    this._setAttribute(Child.ATTRS.ALIGN, val);
   }
 
   /**
@@ -139,7 +139,7 @@ class Child {
    * Sets the horizontal alignment of this element in the grid. Valid values are `stretch`, `center`, `start` and `end`.
    */
   set justify(val) {
-    return this._setAttribute(Child.ATTRS.JUSTIFY, val);
+    this._setAttribute(Child.ATTRS.JUSTIFY, val);
   }
 }
 
@@ -156,8 +156,26 @@ function validateValue(value, regex, warn, property) {
   return value;
 }
 
+// Drops lines that hold nothing but whitespace and an optional trailing `;`, along with
+// their terminator. Matching that with one pattern needs a quantifier whose failure has to
+// retry every prefix length of the whitespace run, which is quadratic on a long line, so
+// the split and the emptiness test are done separately and each stays linear.
 function removeEmptyLines(str) {
-  return str.replace(/^\s*;?$(?:\r\n?|\n)/gm, '');
+  // `\r` and `\n` are split apart rather than treated as one terminator on purpose: in
+  // multiline mode `^` also matched between them, so the `\n` of a CRLF pair counted as an
+  // empty line of its own and was stripped. Splitting per character preserves that.
+  const parts = str.split(/([\r\n])/);
+  let result = '';
+  for (let i = 0; i < parts.length; i += 2) {
+    const content = parts[i];
+    const terminator = parts[i + 1] || '';
+    const withoutTrailingSemiColon = content.endsWith(';') ? content.slice(0, -1) : content;
+    // an unterminated final line is always kept, as it was before
+    if (terminator === '' || withoutTrailingSemiColon.trim() !== '') {
+      result += content + terminator;
+    }
+  }
+  return result;
 }
 
 function wrapMediaQuery(css, mquery) {
@@ -185,10 +203,11 @@ function buildGridStyle(grid, validate = true) {
 :host {
   display: grid;
   grid-template-columns: ${
-    cGrid.templateColumns || (cGrid.columns && cGrid.columns > 1 ? Array(cGrid.columns).fill('1fr').join(' ') : 'auto')
+    cGrid.templateColumns ||
+    (cGrid.columns && cGrid.columns > 1 ? new Array(cGrid.columns).fill('1fr').join(' ') : 'auto')
   };
   grid-template-rows: ${
-    cGrid.templateRows || (cGrid.rows && cGrid.rows > 1 ? Array(cGrid.rows).fill('auto').join(' ') : 'auto')
+    cGrid.templateRows || (cGrid.rows && cGrid.rows > 1 ? new Array(cGrid.rows).fill('auto').join(' ') : 'auto')
   };
   ${cGrid.gap ? `grid-gap: ${cGrid.gap}` : ''};
   ${cGrid.columnGap ? `grid-column-gap: ${cGrid.columnGap};` : ''}
