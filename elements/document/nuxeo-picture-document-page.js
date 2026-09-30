@@ -51,19 +51,19 @@ Polymer({
 
     <div class="additional">
       <nuxeo-card heading="[[i18n('pictureViewLayout.info')]]">
-        <nuxeo-picture-info role="widget" document="[[document]]"></nuxeo-picture-info>
+        <nuxeo-picture-info data-widget document="[[document]]"></nuxeo-picture-info>
       </nuxeo-card>
 
       <nuxeo-card heading="[[i18n('pictureViewLayout.formats')]]">
-        <nuxeo-picture-formats role="widget" document="[[document]]"></nuxeo-picture-formats>
+        <nuxeo-picture-formats data-widget document="[[document]]"></nuxeo-picture-formats>
       </nuxeo-card>
 
       <nuxeo-card heading="[[i18n('pictureViewLayout.exif')]]">
-        <nuxeo-picture-exif role="widget" document="[[document]]"></nuxeo-picture-exif>
+        <nuxeo-picture-exif data-widget document="[[document]]"></nuxeo-picture-exif>
       </nuxeo-card>
 
       <nuxeo-card heading="[[i18n('pictureViewLayout.iptc')]]">
-        <nuxeo-picture-iptc role="widget" document="[[document]]"></nuxeo-picture-iptc>
+        <nuxeo-picture-iptc data-widget document="[[document]]"></nuxeo-picture-iptc>
       </nuxeo-card>
     </div>
   `,

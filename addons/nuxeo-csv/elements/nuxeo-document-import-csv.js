@@ -560,12 +560,12 @@ Polymer({
   },
 
   _filterImportDocTypes(type) {
-    return window.nuxeo.importBlacklist.indexOf(type.type) === -1;
+    return !window.nuxeo.importBlacklist.includes(type.type);
   },
 
   _observeFiles(changeRecord) {
     if (changeRecord) {
-      if (changeRecord.path === 'files.splices' && changeRecord.value && changeRecord.value.indexSplices) {
+      if (changeRecord.path === 'files.splices' && changeRecord.value?.indexSplices) {
         if (this.files && this.files.length > 0) {
           [this.file] = this.files;
           this.hasFile = true;
