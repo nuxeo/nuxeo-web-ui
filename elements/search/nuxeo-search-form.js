@@ -48,6 +48,21 @@ import { ensureSearchResultTooltipStyles } from './nuxeo-search-result-tooltip-s
 
 ensureSearchResultTooltipStyles();
 
+// Walks the parent chain of a vocabulary entry and reconstructs the full hierarchical path string.
+// Handles properties.parent as a string id, an object with .id, or an object with .properties.id.
+function toHierarchicalPath(entry) {
+  let output = entry.id;
+  let current = entry;
+  while (current && current.properties && current.properties.parent) {
+    const parent = current.properties.parent;
+    const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
+    if (!parentId) break;
+    output = `${parentId}`.concat('/', `${output}`);
+    current = typeof parent === 'string' ? null : parent;
+  }
+  return output;
+}
+
 /**
  `nuxeo-search-form`
  @group Nuxeo UI
@@ -587,21 +602,6 @@ Polymer({
     paramMutator: {
       type: Function,
       value() {
-        // Walks the parent chain of a vocabulary entry and reconstructs the full hierarchical path string.
-        // Handles properties.parent as a string id, an object with .id, or an object with .properties.id.
-        function toHierarchicalPath(entry) {
-          let output = entry.id;
-          let current = entry;
-          while (current && current.properties && current.properties.parent) {
-            const parent = current.properties.parent;
-            const parentId = typeof parent === 'string' ? parent : (parent.id ?? parent?.properties?.id);
-            if (!parentId) break;
-            output = `${parentId}`.concat('/', `${output}`);
-            current = typeof parent === 'string' ? null : parent;
-          }
-          return output;
-        }
-
         return function (params, modifyPayload = false) {
           const result = {};
           if (params) {

@@ -40,13 +40,12 @@ Select2Editor.prototype.createElements = function () {
 
   this.instance.rootElement[0].appendChild(this.TEXTAREA_PARENT);
 
-  const that = this;
   Handsontable.hooks.add('afterRender', () => {
     // TODO(nfgs) - was that.instance.registerTimeout
-    that.instance._registerTimeout(
+    this.instance._registerTimeout(
       'refresh_editor_dimensions',
       () => {
-        that.refreshDimensions();
+        this.refreshDimensions();
       },
       0,
     );
@@ -54,8 +53,7 @@ Select2Editor.prototype.createElements = function () {
 };
 
 const onBeforeKeyDown = function onBeforeKeyDown(event) {
-  const instance = this;
-  const that = instance.getActiveEditor();
+  const that = this.getActiveEditor();
 
   const keyCodes = Handsontable.helper.keyCode;
   const ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey; // catch CTRL but not right ALT (which in some systems triggers ALT+CTRL)
