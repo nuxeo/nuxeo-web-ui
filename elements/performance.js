@@ -19,14 +19,29 @@ limitations under the License.
 export const Performance = {
   /** metrics * */
 
-  getFirstPaint() {
-    if (typeof PerformancePaintTiming !== 'undefined') {
-      const fp = performance.getEntriesByType('paint').find((entry) => entry.name === 'first-paint');
-      return fp ? Math.round(fp.startTime) : null;
+  /**
+   * The PerformanceNavigationTiming entry for the current document, or null when it is not
+   * available. Unlike the removed `performance.timing`, which always exposed an object, the
+   * navigation entry list is empty before the navigation is recorded and in contexts that have
+   * no navigation of their own, so callers must not index into it blindly.
+   */
+  getNavigationTiming() {
+    if (typeof performance.getEntriesByType !== 'function') {
+      return null;
     }
-    // fallback for Edge and FF if dom.performance.time_to_non_blank_paint.enabled:true
-    const fpt = performance.timing.timeToNonBlankPaint || performance.timing.msFirstPaint;
-    return fpt ? fpt - performance.timing.fetchStart : null;
+    const [navigation] = performance.getEntriesByType('navigation');
+    return navigation || null;
+  },
+
+  getFirstPaint() {
+    // The legacy `performance.timing.msFirstPaint` / `timeToNonBlankPaint` substitutes only ever
+    // existed on the removed PerformanceTiming interface, in EdgeHTML and behind a Firefox pref.
+    // Every browser Web UI supports implements Paint Timing, so there is nothing to fall back to.
+    if (typeof PerformancePaintTiming === 'undefined') {
+      return null;
+    }
+    const fp = performance.getEntriesByType('paint').find((entry) => entry.name === 'first-paint');
+    return fp ? Math.round(fp.startTime) : null;
   },
 
   getFirstContentfulPaint() {
@@ -38,17 +53,19 @@ export const Performance = {
   },
 
   getOnLoad() {
-    if (!performance || !performance.timing) {
-      return null;
-    }
-    return performance.timing.loadEventEnd - performance.timing.fetchStart;
+    const navigation = this.getNavigationTiming();
+    // Both fields are relative to the start of the navigation, unlike the epoch timestamps
+    // `performance.timing` exposed, so the difference keeps the fetchStart baseline the metric has
+    // always used. Reporting loadEventEnd on its own would silently fold in redirect and unload
+    // time. loadEventEnd stays 0 until the load event has fired.
+    return navigation?.loadEventEnd ? Math.round(navigation.loadEventEnd - navigation.fetchStart) : null;
   },
 
   getDomContentLoaded() {
-    if (!performance || !performance.timing) {
-      return null;
-    }
-    return performance.timing.domContentLoadedEventEnd - performance.timing.fetchStart;
+    const navigation = this.getNavigationTiming();
+    return navigation?.domContentLoadedEventEnd
+      ? Math.round(navigation.domContentLoadedEventEnd - navigation.fetchStart)
+      : null;
   },
 
   /** optional metrics * */
