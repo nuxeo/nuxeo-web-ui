@@ -52,6 +52,13 @@ suite('nuxeo-search-form', () => {
     expect(visibleLabel.getAttribute('for')).to.equal(input.id);
   });
 
+  test('prevents actionsDropdown from showing a phantom vertical scrollbar', () => {
+    const dropdown = searchForm.shadowRoot.querySelector('#actionsDropdown');
+    const style = getComputedStyle(dropdown);
+    expect(style.boxSizing).to.equal('border-box');
+    expect(style.overflowY).to.equal('hidden');
+  });
+
   test('maps saved searches for selectivity data', () => {
     const data = searchForm._computeData([
       { id: 's1', title: 'Search 1' },
