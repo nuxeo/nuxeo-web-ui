@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 import { fixture, html, flush } from '@nuxeo/testing-helpers';
+import '@nuxeo/nuxeo-ui-elements/widgets/nuxeo-directory-suggestion.js';
 import '../elements/search/nuxeo-search-form.js';
 
 window.nuxeo.I18n.language = 'en';
@@ -95,6 +96,7 @@ suite('nuxeo-search-form', () => {
       },
     });
     sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
+    const scheduleStub = sinon.stub(searchForm, '_scheduleDirectorySuggestionRehydration').resolves();
 
     searchForm._selectedSearchChanged({ id: 'two' });
 
@@ -102,7 +104,9 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.params).to.deep.equal({ ecm_fulltext: '*world*' });
     expect(searchForm.searchTerm).to.equal('world');
     expect(mockForm.searchTerm).to.equal('world');
+    expect(scheduleStub).to.have.been.called;
     searchForm._mutateParams.restore();
+    scheduleStub.restore();
     delete searchForm.form;
   });
 
@@ -246,6 +250,7 @@ suite('nuxeo-search-form', () => {
 
   test('selectedSearchIdxChanged populates params for known search', () => {
     const navigateSpy = sinon.spy(searchForm, '_navigateToResults');
+    const scheduleStub = sinon.stub(searchForm, '_scheduleDirectorySuggestionRehydration').resolves();
     sinon.stub(searchForm, '_mutateParams').callsFake((p) => p);
     searchForm._searches = [{ id: 'one', title: 'One', text: 'One', params: { ecm_fulltext: '*a*' } }];
     searchForm.selectedSearchIdx = 1;
@@ -259,10 +264,296 @@ suite('nuxeo-search-form', () => {
     expect(searchForm.selectedSearch.id).to.equal('one');
     expect(searchForm.params).to.deep.equal({ ecm_fulltext: '*a*' });
     expect(navigateSpy).to.have.been.calledOnce;
+    expect(scheduleStub).to.have.been.called;
     expect(searchForm.dirty).to.be.false;
 
     searchForm._mutateParams.restore();
     navigateSpy.restore();
+    scheduleStub.restore();
+  });
+
+  suite('saved directory labels', () => {
+    const suggestionWith = (value, overrides = {}) => {
+      return {
+        value,
+        directoryName: 'building_picture_type',
+        dbl10n: false,
+        _selectionFormatter: sinon.spy(),
+        $: {
+          s2: {
+            _selectivity: { setValue: sinon.spy() },
+            $: {
+              op: {
+                op: 'Directory.SuggestEntries',
+                params: { directoryName: 'building_picture_type' },
+                execute: sinon.stub().resolves({ id: 'id_civil', displayLabel: 'label_Civil' }),
+              },
+            },
+          },
+        },
+        ...overrides,
+      };
+    };
+
+    const savedSearch = {
+      id: 'saved-search',
+      title: 'save1',
+      text: 'save1',
+      displaytext: 'save1',
+      params: {
+        'PP_BUILDING_PICTURES_pp:building_picture_type': 'id_civil',
+        'PP_BUILDING_PICTURES_pp:building_picture_activities': 'id_residential',
+      },
+    };
+
+    test('coalesces requests until rehydration finishes', async () => {
+      let finish;
+      const pending = new Promise((resolve) => {
+        finish = resolve;
+      });
+      const rehydrateStub = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabels').returns(pending);
+
+      const first = searchForm._scheduleDirectorySuggestionRehydration();
+      await Promise.resolve();
+      const second = searchForm._scheduleDirectorySuggestionRehydration();
+
+      expect(first).to.equal(second);
+      expect(rehydrateStub).to.have.been.calledOnce;
+
+      finish();
+      await first;
+      await searchForm._scheduleDirectorySuggestionRehydration();
+
+      expect(rehydrateStub).to.have.been.calledTwice;
+      rehydrateStub.restore();
+    });
+
+    test('handles missing forms and layout roots without query support', async () => {
+      const rehydrateSpy = sinon.spy(searchForm, '_rehydrateDirectorySuggestionLabel');
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return null;
+        },
+      });
+
+      await searchForm._rehydrateDirectorySuggestionLabels();
+      expect(rehydrateSpy).to.not.have.been.called;
+
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return {};
+        },
+      });
+      await searchForm._rehydrateDirectorySuggestionLabels();
+
+      expect(rehydrateSpy).to.not.have.been.called;
+      rehydrateSpy.restore();
+      delete searchForm.form;
+    });
+
+    test('finds and deduplicates suggestions in light and shadow DOM', async () => {
+      const suggestion = suggestionWith('id_civil');
+      const querySelectorAll = sinon.stub().returns([suggestion]);
+      Object.defineProperty(searchForm, 'form', {
+        configurable: true,
+        get() {
+          return {
+            querySelectorAll,
+            shadowRoot: { querySelectorAll },
+          };
+        },
+      });
+      const rehydrateStub = sinon.stub(searchForm, '_rehydrateDirectorySuggestionLabel').resolves();
+
+      await searchForm._rehydrateDirectorySuggestionLabels();
+
+      expect(querySelectorAll).to.have.been.calledTwice;
+      expect(rehydrateStub).to.have.been.calledOnceWithExactly(suggestion);
+      rehydrateStub.restore();
+      delete searchForm.form;
+    });
+
+    test('rehydrates scalar and multiple values sequentially', async () => {
+      const scalar = suggestionWith('id_civil');
+      const multiple = suggestionWith(['id_residential', null, undefined, '', 'id_parking']);
+      let queryPending = false;
+      const queryStub = sinon.stub(searchForm, '_queryDirectorySuggestionEntry').callsFake((_suggestion, id) => {
+        expect(queryPending).to.be.false;
+        queryPending = true;
+        const entry = id === 'id_parking' ? null : { id, displayLabel: `${id}_label` };
+        return Promise.resolve(entry).then((result) => {
+          queryPending = false;
+          return result;
+        });
+      });
+
+      await searchForm._rehydrateDirectorySuggestionLabel(scalar);
+      await searchForm._rehydrateDirectorySuggestionLabel(multiple);
+
+      expect(queryStub.callCount).to.equal(3);
+      expect(scalar._selectionFormatter).to.have.been.calledOnceWithExactly({
+        id: 'id_civil',
+        displayLabel: 'id_civil_label',
+      });
+      expect(multiple._selectionFormatter).to.have.been.calledOnceWithExactly({
+        id: 'id_residential',
+        displayLabel: 'id_residential_label',
+      });
+      expect(scalar.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly(
+        { id: 'id_civil', displayLabel: 'id_civil_label' },
+        { triggerChange: false },
+      );
+      expect(multiple.$.s2._selectivity.setValue).to.have.been.calledOnceWithExactly(
+        [{ id: 'id_residential', displayLabel: 'id_residential_label' }, null, undefined, '', 'id_parking'],
+        { triggerChange: false },
+      );
+      queryStub.restore();
+    });
+
+    test('skips unusable values, missing formatters, and missing setters', async () => {
+      const querySpy = sinon.spy(searchForm, '_queryDirectorySuggestionEntry');
+      const noSelectivity = suggestionWith('id_civil', { $: { s2: {} } });
+
+      await searchForm._rehydrateDirectorySuggestionLabel(null);
+      await searchForm._rehydrateDirectorySuggestionLabel(noSelectivity);
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(null));
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(undefined));
+      await searchForm._rehydrateDirectorySuggestionLabel(suggestionWith(''));
+
+      expect(querySpy).to.not.have.been.called;
+      querySpy.restore();
+
+      const queryStub = sinon
+        .stub(searchForm, '_queryDirectorySuggestionEntry')
+        .resolves({ id: 'id_civil', displayLabel: 'label_Civil' });
+      const noFormatter = suggestionWith('id_civil', { _selectionFormatter: null });
+      const noSetter = suggestionWith('id_civil');
+      noSetter.$.s2._selectivity = {};
+
+      await searchForm._rehydrateDirectorySuggestionLabel(noFormatter);
+      await searchForm._rehydrateDirectorySuggestionLabel(noSetter);
+
+      expect(noFormatter.$.s2._selectivity.setValue).to.not.have.been.called;
+      expect(queryStub).to.have.been.calledTwice;
+      queryStub.restore();
+    });
+
+    test('queries directory entries through the REST resource', async () => {
+      const suggestion = suggestionWith('id_civil');
+      const response = { id: 'id_civil', displayLabel: 'label_Civil' };
+      const resource = {
+        get: sinon.stub().resolves(response),
+        headers: null,
+        path: null,
+      };
+      searchForm.$.directoryEntry = resource;
+
+      const entry = await searchForm._queryDirectorySuggestionEntry(suggestion, 'id_civil');
+
+      expect(entry).to.deep.equal(response);
+      expect(resource.path).to.equal('/directory/building_picture_type/id_civil');
+      expect(resource.headers).to.deep.equal({
+        'fetch-directoryEntry': 'parent',
+        'translate-directoryEntry': 'label',
+      });
+      expect(resource.get).to.have.been.calledOnce;
+    });
+
+    test('returns null for missing, empty, and failed directory operations', async () => {
+      expect(await searchForm._queryDirectorySuggestionEntry(null, 'id_civil')).to.be.null;
+      const resource = {
+        get: sinon.stub(),
+        headers: null,
+        path: null,
+      };
+      searchForm.$.directoryEntry = resource;
+      const emptySuggestion = suggestionWith('id_civil');
+      resource.get.onFirstCall().resolves(null);
+      expect(await searchForm._queryDirectorySuggestionEntry(emptySuggestion, 'id_civil')).to.be.null;
+
+      const failedSuggestion = suggestionWith('id_civil');
+      resource.get.onSecondCall().rejects(new Error('failed'));
+      expect(await searchForm._queryDirectorySuggestionEntry(failedSuggestion, 'id_civil')).to.be.null;
+    });
+
+    test('renders labels for saved scalar and hierarchical directory values', async () => {
+      const typeSuggestion = await fixture(
+        html`<nuxeo-directory-suggestion directory-name="building_picture_type"></nuxeo-directory-suggestion>`,
+      );
+      const activitySuggestion = await fixture(
+        html`<nuxeo-directory-suggestion directory-name="building_picture_activities"></nuxeo-directory-suggestion>`,
+      );
+      typeSuggestion.value = 'id_civil';
+      activitySuggestion.value = 'id_residential/id_house';
+      await flush();
+
+      const paths = [];
+      const entries = {
+        '/directory/building_picture_type/id_civil': {
+          'entity-type': 'directoryEntry',
+          directoryName: 'building_picture_type',
+          properties: { id: 'id_civil', label: 'Civil' },
+        },
+        '/directory/building_picture_activities/id_residential%2Fid_house': {
+          'entity-type': 'directoryEntry',
+          directoryName: 'building_picture_activities',
+          properties: {
+            id: 'id_house',
+            label: 'House',
+            parent: {
+              'entity-type': 'directoryEntry',
+              directoryName: 'building_picture_activities',
+              properties: { id: 'id_residential', label: 'Residential' },
+            },
+          },
+        },
+      };
+      searchForm.$.directoryEntry = {
+        get: sinon.stub().callsFake(() => {
+          paths.push(searchForm.$.directoryEntry.path);
+          return Promise.resolve(entries[searchForm.$.directoryEntry.path]);
+        }),
+        headers: null,
+        path: null,
+      };
+
+      await searchForm._rehydrateDirectorySuggestionLabel(typeSuggestion);
+      await searchForm._rehydrateDirectorySuggestionLabel(activitySuggestion);
+      await flush();
+
+      expect(typeSuggestion.$.s2.$.input.textContent.trim()).to.equal('Civil');
+      expect(activitySuggestion.$.s2.$.input.textContent.trim()).to.equal('Residential/House');
+      expect(paths).to.deep.equal(Object.keys(entries));
+    });
+
+    test('rehydrates after direct and deferred saved-search loading', async () => {
+      const rehydrateStub = sinon.stub(searchForm, '_scheduleDirectorySuggestionRehydration').resolves();
+      const fetchStub = sinon.stub(searchForm, '_fetch').resolves();
+      searchForm._searches = [savedSearch];
+      searchForm.results = {};
+
+      await searchForm._loadSavedSearch('saved-search');
+
+      expect(fetchStub).to.have.been.calledOnceWithExactly(searchForm.results);
+      expect(rehydrateStub).to.have.been.called;
+
+      fetchStub.resetHistory();
+      rehydrateStub.resetHistory();
+      searchForm.results = null;
+
+      expect(searchForm._loadSavedSearch('saved-search')).to.be.undefined;
+
+      searchForm.results = {};
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(fetchStub).to.have.been.calledOnceWithExactly(searchForm.results);
+      expect(rehydrateStub).to.have.been.called;
+      fetchStub.restore();
+      rehydrateStub.restore();
+    });
   });
 
   test('clear resets state and triggers search in manual mode', () => {

@@ -26,6 +26,7 @@ import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-spinner/paper-spinner-lite.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
 import '@nuxeo/nuxeo-elements/nuxeo-page-provider.js';
+import '@nuxeo/nuxeo-elements/nuxeo-resource.js';
 import '@nuxeo/nuxeo-elements/nuxeo-search.js';
 import { NotifyBehavior } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
 import '@nuxeo/nuxeo-ui-elements/nuxeo-layout.js';
@@ -290,6 +291,7 @@ Polymer({
     </nuxeo-page-provider>
 
     <nuxeo-search id="saved-search"></nuxeo-search>
+    <nuxeo-resource id="directoryEntry"></nuxeo-resource>
 
     <div id="search-container">
       <div class="header ellipsis search-header">
@@ -841,6 +843,7 @@ Polymer({
       const clonedParams = JSON.parse(JSON.stringify(search.params));
       this.params = this._mutateParams(clonedParams, true);
       this._navigateToResults();
+      this._scheduleDirectorySuggestionRehydration();
     } else {
       this._clear();
     }
@@ -881,6 +884,106 @@ Polymer({
     if (this.form) {
       this.form.searchTerm = this.searchTerm;
     }
+    this._scheduleDirectorySuggestionRehydration();
+  },
+
+  _scheduleDirectorySuggestionRehydration() {
+    if (this.__directorySuggestionRehydrationPromise) {
+      return this.__directorySuggestionRehydrationPromise;
+    }
+    this.__directorySuggestionRehydrationPromise = Promise.resolve()
+      .then(() => this._rehydrateDirectorySuggestionLabels())
+      .finally(() => {
+        this.__directorySuggestionRehydrationPromise = null;
+      });
+    return this.__directorySuggestionRehydrationPromise;
+  },
+
+  _rehydrateDirectorySuggestionLabels() {
+    const { form } = this;
+    if (!form) {
+      return Promise.resolve();
+    }
+    const roots = form.shadowRoot ? [form.shadowRoot, form] : [form];
+    const suggestions = roots.reduce((result, root) => {
+      if (typeof root.querySelectorAll === 'function') {
+        root.querySelectorAll('nuxeo-directory-suggestion').forEach((suggestion) => result.add(suggestion));
+      }
+      return result;
+    }, new Set());
+    return Array.from(suggestions).reduce(
+      (promise, suggestion) => promise.then(() => this._rehydrateDirectorySuggestionLabel(suggestion)),
+      Promise.resolve(),
+    );
+  },
+
+  _rehydrateDirectorySuggestionLabel(suggestion) {
+    const selectivity = suggestion?.$?.s2?._selectivity;
+    const savedValue = suggestion?.value;
+    let ids = [];
+    if (Array.isArray(savedValue)) {
+      ids = savedValue.filter((id) => id !== null && id !== undefined && id !== '');
+    } else if (savedValue !== null && savedValue !== undefined && savedValue !== '') {
+      ids = [savedValue];
+    }
+    if (!selectivity || !ids.length) {
+      return Promise.resolve();
+    }
+    let resolved = false;
+    const resolvedEntries = new Map();
+    return ids
+      .reduce(
+        (promise, id) =>
+          promise.then(() =>
+            this._queryDirectorySuggestionEntry(suggestion, id).then((entry) => {
+              if (entry && typeof suggestion._selectionFormatter === 'function') {
+                suggestion._selectionFormatter(entry);
+                resolvedEntries.set(id, entry);
+                resolved = true;
+              }
+            }),
+          ),
+        Promise.resolve(),
+      )
+      .then(() => {
+        if (resolved && typeof selectivity.setValue === 'function') {
+          const hydratedValue = Array.isArray(savedValue)
+            ? savedValue.map((id) => resolvedEntries.get(id) || id)
+            : resolvedEntries.get(savedValue) || savedValue;
+          selectivity.setValue(hydratedValue, { triggerChange: false });
+        }
+      });
+  },
+
+  _queryDirectorySuggestionEntry(suggestion, id) {
+    const resource = this.$.directoryEntry;
+    if (!resource || !suggestion?.directoryName) {
+      return Promise.resolve(null);
+    }
+    resource.path = `/directory/${encodeURIComponent(suggestion.directoryName)}/${encodeURIComponent(String(id))}`;
+    resource.headers = {
+      'fetch-directoryEntry': 'parent',
+      'translate-directoryEntry': 'label',
+    };
+    return resource
+      .get()
+      .then((entry) => {
+        if (!entry) {
+          return null;
+        }
+        const properties = entry.properties || {};
+        const formattedLabel =
+          typeof suggestion.formatDirectory === 'function'
+            ? suggestion.formatDirectory(entry, suggestion.separator)
+            : undefined;
+        return {
+          ...entry,
+          id: entry.id || properties.id || String(id),
+          displayLabel: entry.displayLabel || entry.absoluteLabel || formattedLabel || properties.label || String(id),
+        };
+      })
+      .catch(() => null)
+      .then((entry) => entry || null);
   },
 
   _resultsElementChanged(results, oldResults) {
@@ -1148,10 +1251,10 @@ Polymer({
       (!this._searches ? this.$['saved-searches'].get() : Promise.resolve()).then(() => {
         this.selectedSearchIdx = this._searches.findIndex((s) => s.id === id) + 1;
         // XXX rely on debouncer to update the results request with the saved search params
-        this._fetch(this.results);
+        return this._fetch(this.results).then(() => this._scheduleDirectorySuggestionRehydration());
       });
     if (this.results) {
-      load();
+      return load();
     } else {
       this._loadSavedSearchListener = () => {
         if (this.results) {
@@ -1161,6 +1264,7 @@ Polymer({
       };
       this.addEventListener('results-changed', this._loadSavedSearchListener);
     }
+    return undefined;
   },
 
   // To fix NXP-27429 so action buttons can be displayed on mobile browsers
