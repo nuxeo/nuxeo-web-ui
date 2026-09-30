@@ -28,7 +28,7 @@ export function parseParams() {
   for (const param of params) {
     // eslint-disable-next-line prefer-const
     let [k, v] = param.split('=');
-    v = v.replace(/\+/g, ' ');
+    v = v.replaceAll('+', ' ');
     parameters[k] = decodeURIComponent(v);
   }
   return parameters;
@@ -39,7 +39,7 @@ export function b64DecodeUnicode(str) {
   return decodeURIComponent(
     atob(str)
       .split('')
-      .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+      .map((c) => `%${`00${c.codePointAt(0).toString(16)}`.slice(-2)}`)
       .join(''),
   );
 }

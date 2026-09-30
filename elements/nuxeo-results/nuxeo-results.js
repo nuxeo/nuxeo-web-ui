@@ -1443,7 +1443,7 @@ Polymer({
     try {
       const prefsMap = await this._getAllGlobalPreferencesOnce();
 
-      if (!Object.prototype.hasOwnProperty.call(prefsMap, providerName)) {
+      if (!Object.hasOwn(prefsMap, providerName)) {
         const empty = {};
         __globalPrefsCache.set(cacheKey, empty);
         this.globalPrefs = empty;

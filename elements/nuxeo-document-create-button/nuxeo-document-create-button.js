@@ -171,7 +171,7 @@ Polymer({
         const filteredSubtypes = [];
         if (this._canCreateIn(this.parent)) {
           subtypes.forEach((type) => {
-            if (type.facets.indexOf('HiddenInCreation') === -1) {
+            if (!type.facets.includes('HiddenInCreation')) {
               filteredSubtypes.push(type.id);
             }
           });
@@ -185,7 +185,7 @@ Polymer({
 
   _canCreateIn(document) {
     if (document && document.contextParameters && document.contextParameters.permissions) {
-      return document.contextParameters.permissions.indexOf('AddChildren') > -1;
+      return document.contextParameters.permissions.includes('AddChildren');
     }
     return false;
   },

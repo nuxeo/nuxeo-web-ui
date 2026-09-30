@@ -59,7 +59,7 @@ export const Performance = {
     // returns “phone”, “tablet”, or “desktop”
     ua = (ua || this.getUserAgent()).toLowerCase();
     const find = function (str) {
-      return ua.indexOf(str) !== -1;
+      return ua.includes(str);
     };
 
     // windows
@@ -140,7 +140,7 @@ export const Performance = {
   },
 
   getLongTasks() {
-    if (typeof window.__lt === 'undefined') {
+    if (window.__lt === undefined) {
       return null;
     }
     return window.__lt.e.map((longTask) => {
@@ -202,7 +202,7 @@ export const Performance = {
   },
 
   report(options) {
-    if (typeof options === 'undefined') {
+    if (options === undefined) {
       options = {};
     }
     const result = {
