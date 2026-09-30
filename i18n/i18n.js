@@ -17,11 +17,37 @@ limitations under the License.
 */
 import { XHRLocaleResolver } from '@nuxeo/nuxeo-ui-elements/nuxeo-i18n-behavior.js';
 
+window.nuxeo = window.nuxeo || {};
+window.nuxeo.I18n = window.nuxeo.I18n || {};
 const baseUrl = window.nuxeo.I18n.baseUrl || window.location.origin + window.location.pathname;
 const msgFolder = `${baseUrl + (baseUrl.endsWith('/') ? '' : '/')}i18n`;
 window.nuxeo.I18n.language = navigator.language || navigator.userLanguage || 'en';
 window.nuxeo.I18n.localeResolver = new XHRLocaleResolver(msgFolder);
-window.nuxeo.I18n.loadLocale().then(() => {
-  /* Set html lang attribute. Required by the better-dateinput element */
-  document.getElementsByTagName('html')[0].lang = window.nuxeo.I18n.language;
+// `XHRLocaleResolver` only settles its promise on HTTP 200, or on a 404 that falls back to
+// messages.json. Network errors, other 4xx/5xx responses and malformed JSON leave it pending
+// forever. Since the bootstrap chain in index.js waits for `i18nReady` before loading the app,
+// an unsettled promise would leave the user stuck on the unresolved loading shell. Cap the wait
+// so a failed locale load degrades to untranslated keys instead of a blank UI.
+//
+// Because the resolver never reports a failure, this cap is also the only way a broken locale
+// endpoint is ever discovered, so its value is the delay a user pays in that case. 5s is a generous
+// ceiling for a request that normally completes in well under a second.
+const LOCALE_LOAD_TIMEOUT = 5000;
+let onLocaleLoadTimeout;
+const localeLoadTimeout = new Promise((resolve) => {
+  onLocaleLoadTimeout = resolve;
 });
+const timeoutId = setTimeout(() => {
+  console.warn(`Loading the locale timed out after ${LOCALE_LOAD_TIMEOUT}ms, starting with untranslated keys.`);
+  onLocaleLoadTimeout();
+}, LOCALE_LOAD_TIMEOUT);
+
+export const i18nReady = Promise.race([window.nuxeo.I18n.loadLocale(), localeLoadTimeout])
+  .catch((error) => {
+    console.warn('Failed to load the locale, starting with untranslated keys.', error);
+  })
+  .then(() => {
+    clearTimeout(timeoutId);
+    /* Set html lang attribute. Required by the better-dateinput element */
+    document.getElementsByTagName('html')[0].lang = window.nuxeo.I18n.language;
+  });
