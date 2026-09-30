@@ -200,6 +200,9 @@ Polymer({
   _computeParams() {
     if (this._src) {
       const { uid } = this._src;
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uid)) {
+        return;
+      }
       return {
         queryParams: `${'SELECT * FROM Document WHERE ecm:isProxy = 1 AND ecm:isTrashed = 0 AND (rend:sourceVersionableId = "'}${uid}" OR ecm:proxyVersionableId = "${uid}")`,
       };
