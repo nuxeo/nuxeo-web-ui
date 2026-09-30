@@ -42,7 +42,6 @@ Select2Editor.prototype.createElements = function () {
 
   const that = this;
   Handsontable.hooks.add('afterRender', () => {
-    // TODO(nfgs) - was that.instance.registerTimeout
     that.instance._registerTimeout(
       'refresh_editor_dimensions',
       () => {
