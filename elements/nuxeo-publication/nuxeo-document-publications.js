@@ -215,11 +215,12 @@ Polymer({
   _unpublish(e) {
     if (e && e.target) {
       if (!window.confirm(this.i18n('publication.unpublish.confirm'))) {
-        return;
+        return undefined;
       }
       const doc = e.target.parentNode.item;
       this.$.unpublishOp.input = doc;
-      this.$.unpublishOp
+      // Returned so callers (and tests) can await the operation; the template's on-tap ignores it.
+      return this.$.unpublishOp
         .execute()
         .then(() => {
           this.notify({ message: this.i18n('publication.unpublish.success') });
@@ -229,12 +230,13 @@ Polymer({
           this.notify({ message: this.i18n('publication.unpublish.error') });
         });
     }
+    return undefined;
   },
 
   _republish(e) {
     if (e && e.target) {
       if (!window.confirm(this.i18n('publication.republish.confirm'))) {
-        return;
+        return undefined;
       }
       const obsolete = e.target.parentNode.item;
       this.$.publishOp.params = {
@@ -243,7 +245,8 @@ Polymer({
         renditionName: obsolete.properties['rend:renditionName'],
       };
       this.$.publishOp.input = this._src.uid;
-      this.$.publishOp
+      // Returned so callers (and tests) can await the operation; the template's on-tap ignores it.
+      return this.$.publishOp
         .execute()
         .then(() => {
           this.notify({
@@ -259,6 +262,7 @@ Polymer({
           throw err;
         });
     }
+    return undefined;
   },
 
   _canUnpublish(doc) {
@@ -287,9 +291,10 @@ Polymer({
 
   _unpublishAll() {
     if (!window.confirm(this.i18n('publication.unpublish.all.confirm'))) {
-      return;
+      return undefined;
     }
-    this.$.unpublishAllOp
+    // Returned so callers (and tests) can await the operation; the template's on-tap ignores it.
+    return this.$.unpublishAllOp
       .execute()
       .then(() => {
         this.notify({ message: this.i18n('publication.unpublish.all.success') });
