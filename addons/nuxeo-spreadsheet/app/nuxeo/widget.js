@@ -24,7 +24,7 @@ class Widget {
       return;
     }
 
-    // TODO(nfgs): Handle multiple fields
+    // Only the first field of a multi-field widget is bound; see WEBUI-2285.
     this.field = this.widget.fields[0].fieldName;
 
     // Rename data['schema']['property'] to data.schema.property
