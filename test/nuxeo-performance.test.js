@@ -398,9 +398,9 @@ suite('Performance', () => {
   });
 
   suite('branch coverage: paint and timing fallbacks', () => {
-    test('getFirstPaint returns null when no first-paint entry', () => {
+    test('getFirstPaint returns null when no first-paint entry', function () {
       if (typeof PerformancePaintTiming === 'undefined') {
-        return;
+        this.skip();
       }
       const stub = sinon.stub(performance, 'getEntriesByType').callsFake((type) => {
         if (type === 'paint') {
@@ -468,9 +468,9 @@ suite('Performance', () => {
       }
     });
 
-    test('getFirstContentfulPaint returns null when no fcp entry', () => {
+    test('getFirstContentfulPaint returns null when no fcp entry', function () {
       if (typeof PerformancePaintTiming === 'undefined') {
-        return;
+        this.skip();
       }
       const stub = sinon.stub(performance, 'getEntriesByType').callsFake((type) => {
         if (type === 'paint') {
