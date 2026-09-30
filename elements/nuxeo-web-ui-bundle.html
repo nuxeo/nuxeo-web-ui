@@ -513,6 +513,7 @@
 <nuxeo-slot-content name="defaultSearchMenuPage" slot="DRAWER_PAGES">
   <template>
     <nuxeo-search-form
+      current-document="[[document]]"
       name="defaultSearch"
       search-name="default"
       auto
@@ -529,6 +530,7 @@
 <nuxeo-slot-content name="expiredSearchMenuPage" slot="DRAWER_PAGES">
   <template>
     <nuxeo-search-form
+      current-document="[[document]]"
       name="expiredSearch"
       search-name="expired"
       queue
@@ -549,6 +551,7 @@
 <nuxeo-slot-content name="damSearchMenuButtons" slot="DRAWER_PAGES">
   <template>
     <nuxeo-search-form
+      current-document="[[document]]"
       name="assetsSearch"
       search-name="assets"
       auto
@@ -638,6 +641,7 @@
 <nuxeo-slot-content name="trashMenuPage" slot="DRAWER_PAGES">
   <template>
     <nuxeo-search-form
+      current-document="[[document]]"
       name="trash"
       search-name="trash"
       auto
