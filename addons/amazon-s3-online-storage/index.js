@@ -164,7 +164,7 @@ class S3Provider {
   }
 
   _refreshBatchInfo() {
-    if (!this._currentCredentials || !this._currentCredentials.expiration) {
+    if (!this._currentCredentials?.expiration) {
       return Promise.resolve();
     }
     if (new Date() < this._currentCredentials.expiration) {
@@ -274,12 +274,6 @@ UploaderBehavior.registerProvider('s3', S3Provider);
 
 // if S3 direct upload is enabled set it as default upload provider
 // config values from configuration service are strings
-if (
-  Nuxeo &&
-  Nuxeo.UI &&
-  Nuxeo.UI.config &&
-  Nuxeo.UI.config.s3 &&
-  String(Nuxeo.UI.config.s3.useDirectUpload) === 'true'
-) {
+if (Nuxeo?.UI?.config?.s3 && String(Nuxeo.UI.config.s3.useDirectUpload) === 'true') {
   UploaderBehavior.defaultProvider = 's3';
 }
