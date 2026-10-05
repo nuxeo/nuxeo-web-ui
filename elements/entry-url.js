@@ -45,11 +45,21 @@ limitations under the License.
 const CREDENTIAL_PARAMS = ['token'];
 
 /**
- * Matches a credential embedded in a value — the residue of an earlier corruption. Decoded,
- * `permissions?token=<t>` (residue) and `https://example.test/?token=public` (data) look alike, so
- * this is only applied when the address still carries a real credential parameter.
+ * Matches this address's own credential embedded in a value — the residue page.js left when it
+ * appended `location.search`. The value is matched, not just the parameter name, because decoded
+ * residue and ordinary data look alike: `permissions?token=<t>` is wreckage, but
+ * `https://example.test/?token=public` is a link somebody searched for. Only the former repeats
+ * the credential the address was opened with.
+ *
+ * @param {string[]} credentials the credential values found on the address
+ * @return {?RegExp} the matcher, or `null` when the address carries no usable credential
  */
-const EMBEDDED_CREDENTIAL = new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=`);
+function embeddedCredential(credentials) {
+  const values = credentials.filter(Boolean).map((value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return values.length
+    ? new RegExp(String.raw`[?&](?:${CREDENTIAL_PARAMS.join('|')})=(?:${values.join('|')})(?=&|$)`)
+    : null;
+}
 
 /**
  * Matches only the `?` that page.js left behind when it appended `location.search` to a route that
@@ -93,18 +103,17 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
 
   // Re-serializing an already-clean URL would needlessly rewrite its percent-encoding, so bail out
   // unless there is a query string to fold onto the route or a credential to drop.
-  const hasCredential = CREDENTIAL_PARAMS.some((param) => params.has(param));
-  if (!search && !hasCredential) {
+  const credentials = CREDENTIAL_PARAMS.flatMap((param) => params.getAll(param));
+  if (!search && !credentials.length) {
     return null;
   }
   CREDENTIAL_PARAMS.forEach((param) => params.delete(param));
 
   // Repeated keys are kept, in order, because a route may read them with `getAll()`. A value that
-  // still hides a credential is dropped as corruption residue — but only on an address that
-  // carried a real credential, which a corrupted one always does. Elsewhere it is ordinary data.
-  const query = new URLSearchParams(
-    [...params].filter(([, value]) => !hasCredential || !EMBEDDED_CREDENTIAL.test(value)),
-  ).toString();
+  // repeats this address's own credential is corruption residue and is dropped; any other value is
+  // data and survives untouched.
+  const residue = embeddedCredential(credentials);
+  const query = new URLSearchParams([...params].filter(([, value]) => !residue || !residue.test(value))).toString();
   const suffix = query ? `?${query}` : '';
   let normalized;
   if (isRoute) {

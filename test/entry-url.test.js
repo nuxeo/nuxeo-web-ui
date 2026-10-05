@@ -103,6 +103,22 @@ suite('entry-url', () => {
       ).to.be.null;
     });
 
+    test('keeps a value holding a different credential than the one on the address', () => {
+      // A real permalink does carry a token, so presence alone cannot mark the value as residue.
+      // Residue repeats the address's own credential; this `q` holds someone else's and is data.
+      expect(
+        normalizeEntryUrl(
+          location('/nuxeo/ui/', '?token=abc123', '#!/search/full?q=https%3A%2F%2Fexample.test%2F%3Ftoken%3Dpublic'),
+        ),
+      ).to.equal('/nuxeo/ui/#!/search/full?q=https%3A%2F%2Fexample.test%2F%3Ftoken%3Dpublic');
+    });
+
+    test('matches a credential value that contains regular expression characters', () => {
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=a.b*c', '#!/doc/xyz?p=perm%3Ftoken%3Da.b*c'))).to.equal(
+        '/nuxeo/ui/#!/doc/xyz',
+      );
+    });
+
     test('preserves repeated values of the same parameter', () => {
       // Routes reading a parameter with `getAll()` need every value, so duplicates are not collapsed.
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/custom?tag=a&tag=b'))).to.equal(
