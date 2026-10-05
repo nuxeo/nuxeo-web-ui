@@ -60,8 +60,9 @@ suite('entry-url', () => {
     });
 
     test('moves surviving parameters onto an explicit root route when there is no fragment', () => {
-      // Left in `location.search` they would be dispatched as the path `?lang=fr` and 404; on the
-      // root route the root handler runs and they stay addressable.
+      // This changes the address bar, not the destination: `page('/')` is compiled non-strict, so
+      // it matches the empty pathname `Route.match` derives from a query-only route and redirects
+      // to `/home` either way. Moving them onto the root route is what clears `location.search`.
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123&lang=fr', ''))).to.equal('/nuxeo/ui/#!/?lang=fr');
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?lang=fr', ''))).to.equal('/nuxeo/ui/#!/?lang=fr');
     });
