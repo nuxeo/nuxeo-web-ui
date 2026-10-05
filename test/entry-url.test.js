@@ -69,6 +69,7 @@ suite('entry-url', () => {
     test('preserves a plain anchor, which page.js does not route on', () => {
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#section'))).to.equal('/nuxeo/ui/#section');
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#section'))).to.be.null;
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?q=a%20b', '#section'))).to.be.null;
     });
 
     test('repairs an address the old page.js behavior already corrupted', () => {
@@ -114,7 +115,7 @@ suite('entry-url', () => {
     });
 
     test('keeps an unencoded value that reads like a credential', () => {
-      // Only a `?` followed by the address's own credential is a separator page.js left behind.
+      // Only an exact copy of the address's own query string is something page.js appended.
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/search/full?q=https://example.test/?token=public'))).to.be
         .null;
       expect(
@@ -130,6 +131,59 @@ suite('entry-url', () => {
           location('/nuxeo/ui/', '?token=abc123', '#!/doc/xyz?p=permissions?token=abc123?token=abc123'),
         ),
       ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions');
+    });
+
+    test('removes every appended copy of the query, wherever the token sits in it', () => {
+      expect(
+        normalizeEntryUrl(
+          location('/nuxeo/ui/', '?lang=fr&token=abc123', '#!/doc/xyz?p=permissions?lang=fr&token=abc123'),
+        ),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions&lang=fr');
+      expect(
+        normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123&lang=fr', '#!/doc/xyz?token=abc123&lang=fr')),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz?lang=fr');
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?lang=fr', '#!/doc/xyz?p=metadata?lang=fr'))).to.equal(
+        '/nuxeo/ui/#!/doc/xyz?p=metadata&lang=fr',
+      );
+    });
+
+    test('repairs the document tab after the login redirect dropped the query string', () => {
+      // The appended query is read back from the tab, which can never contain a `?` itself.
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/doc/xyz?p=permissions?token=abc123'))).to.equal(
+        '/nuxeo/ui/#!/doc/xyz?p=permissions',
+      );
+      expect(
+        normalizeEntryUrl(
+          location('/nuxeo/ui/', '', '#!/doc/xyz?p=permissions?lang=fr&token=abc123?lang=fr&token=abc123'),
+        ),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions&lang=fr');
+    });
+
+    test('keeps a document tab whose question mark is not followed by a credential', () => {
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/doc/xyz?p=a?b'))).to.be.null;
+    });
+
+    test('only treats a whole parameter as an appended copy or as residue', () => {
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?a=1', '#!/doc/xyz?a=10'))).to.equal(
+        '/nuxeo/ui/#!/doc/xyz?a=10&a=1',
+      );
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=t', '#!/search/full?q=xtoken%3Dt'))).to.equal(
+        '/nuxeo/ui/#!/search/full?q=xtoken%3Dt',
+      );
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=t', '#!/search/full?q=a%3Ftoken%3Dtt'))).to.equal(
+        '/nuxeo/ui/#!/search/full?q=a%3Ftoken%3Dtt',
+      );
+    });
+
+    test('handles an arbitrarily long address', () => {
+      // A crafted link must not be able to stop the app from starting.
+      const long = 'a'.repeat(40000);
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', `?token=t&q=${long}`, '#!/doc/xyz'))).to.equal(
+        `/nuxeo/ui/#!/doc/xyz?q=${long}`,
+      );
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', `#!/doc/xyz?p=perm&token=${long}`))).to.equal(
+        '/nuxeo/ui/#!/doc/xyz?p=perm',
+      );
     });
 
     test('matches a credential value that contains regular expression characters', () => {
@@ -153,7 +207,7 @@ suite('entry-url', () => {
     });
 
     test('keeps a literal question mark that is genuinely part of a value', () => {
-      // A `?` is valid inside query data, so only a `?` followed by a credential is a separator.
+      // A `?` is valid inside query data; only an appended copy of the query string is removed.
       // Both spellings normalize to the same encoded value, which still reads back as `why?now`.
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/search/full?q=why?now'))).to.equal(
         '/nuxeo/ui/#!/search/full?q=why%3Fnow',

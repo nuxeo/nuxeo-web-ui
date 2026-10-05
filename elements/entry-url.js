@@ -44,46 +44,66 @@ limitations under the License.
  */
 const CREDENTIAL_PARAMS = ['token'];
 
+/** The document tab parameter, and the query appended to its value. Tab names never contain `?`. */
+const TAB_PARAM = 'p';
+const APPENDED_TO_TAB = new RegExp(String.raw`[?&]${TAB_PARAM}=[^&?]*(\?[^?]*)`);
+
 /**
- * Source for a `token=<value>` assignment matching any of the given credential values.
+ * Remove every copy of `copy` from `query` that ends a parameter, i.e. is followed by `&`, `?` or
+ * the end. Plain string matching, not a regular expression built from the text: the URL can be
+ * arbitrarily long.
  *
- * @param {string[]} values the credential values, as they appear in the text being matched
- * @return {string} the regular expression source
+ * @param {string} query the raw query
+ * @param {string} copy the raw text to remove
+ * @return {string} the query without those copies
  */
-function credentialAssignment(values) {
-  const escaped = values.map((value) => value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`));
-  return `(?:${CREDENTIAL_PARAMS.join('|')})=(?:${escaped.join('|')})`;
+function removeCopies(query, copy) {
+  const [head, ...rest] = query.split(copy);
+  return rest.reduce((result, part) => result + (part === '' || '&?'.includes(part[0]) ? '' : copy) + part, head);
 }
 
 /**
- * Matches this address's own credential embedded in a decoded value — the residue page.js left when
- * it appended `location.search`. `permissions?token=<t>` is residue, but
- * `https://example.test/?token=public` is data: only the former repeats the address's credential.
+ * Whether a decoded value embeds this address's own credential, as page.js residue does.
+ * `permissions?token=<t>` is residue, but `https://example.test/?token=public` is data: only the
+ * former repeats the address's credential.
  *
+ * @param {string} value the decoded parameter value
  * @param {string[]} credentials the credential values found on the address
- * @return {?RegExp} the matcher, or `null` when the address carries no usable credential
+ * @return {boolean} whether the value is residue
  */
-function embeddedCredential(credentials) {
-  const values = credentials.filter(Boolean);
-  return values.length ? new RegExp(`[?&]${credentialAssignment(values)}(?=&|$)`) : null;
+function repeatsCredential(value, credentials) {
+  const assignments = CREDENTIAL_PARAMS.flatMap((param) => credentials.map((credential) => `${param}=${credential}`));
+  const startsParameter = (start, assignment) => {
+    const end = start + assignment.length;
+    return value.startsWith(assignment, start) && (end === value.length || value[end] === '&');
+  };
+  for (let i = 0; i < value.length; i++) {
+    if (
+      (value[i] === '?' || value[i] === '&') &&
+      assignments.some((assignment) => startsParameter(i + 1, assignment))
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
- * Matches the `?` page.js left inside the route when it appended `location.search` to a route that
- * already had a query. A `?` is valid inside query data, so it only counts as a separator when it is
- * followed by the exact credential `location.search` carries, which is what page.js appended.
+ * The query page.js appended to the route on earlier visits. It is `location.search`, unless the
+ * server's login redirect has since dropped that: then it can still be read from the document tab,
+ * where it starts at the `?` a tab name never contains, but only when it carries a credential.
  *
  * @param {string} search the raw `location.search`
- * @return {?RegExp} the matcher, or `null` when `location.search` carries no credential
+ * @param {string} routeQuery the raw route query, `?` included
+ * @return {string} the raw appended query, `?` included, or `''`
  */
-function duplicatedSeparator(search) {
-  const values = search
-    .slice(1)
-    .split('&')
-    .map((pair) => /^([^=]*)=(.+)$/.exec(pair))
-    .filter((match) => CREDENTIAL_PARAMS.includes(match?.[1]))
-    .map((match) => match[2]);
-  return values.length ? new RegExp(String.raw`\?(?=${credentialAssignment(values)}(?:[&?]|$))`, 'g') : null;
+function appendedQuery(search, routeQuery) {
+  if (search) {
+    return search;
+  }
+  const candidate = APPENDED_TO_TAB.exec(routeQuery)?.[1] ?? '';
+  const params = new URLSearchParams(candidate);
+  return CREDENTIAL_PARAMS.some((param) => params.has(param)) ? candidate : '';
 }
 
 /**
@@ -103,17 +123,19 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
 
   // The parameters that survive normalization, and where they end up: on the route when there is
   // one (page.js would fold them there anyway, just malformed), otherwise back on `location.search`.
-  // Users bookmark and re-share the addresses this bug produced, so a duplicated separator inside the
-  // route is repaired rather than carried forward.
-  const routeQuery = queryIndex > -1 ? route.slice(queryIndex + 1) : '';
-  const separator = duplicatedSeparator(search);
-  const params = new URLSearchParams(separator ? routeQuery.replace(separator, '&') : routeQuery);
-  new URLSearchParams(search).forEach((value, key) => params.append(key, value));
+  // page.js appended the raw `location.search` to the route on every visit. Users bookmark and
+  // re-share those addresses, so every copy is removed and the query is merged back once.
+  const routeQuery = queryIndex > -1 ? route.slice(queryIndex) : '';
+  const appended = appendedQuery(search, routeQuery);
+  const params = new URLSearchParams(appended ? removeCopies(routeQuery, appended) : routeQuery);
+  new URLSearchParams(appended).forEach((value, key) => params.append(key, value));
 
   // Re-serializing an already-clean URL would needlessly rewrite its percent-encoding, so bail out
-  // unless there is a query string to fold onto the route or a credential to drop.
+  // unless there is a credential to drop or a query string to fold onto a route. A plain anchor has
+  // no route to fold onto.
   const credentials = CREDENTIAL_PARAMS.flatMap((param) => params.getAll(param));
-  if (!search && !credentials.length) {
+  const foldsQuery = appended && (isRoute || !hash);
+  if (!foldsQuery && !credentials.length) {
     return null;
   }
   CREDENTIAL_PARAMS.forEach((param) => params.delete(param));
@@ -121,8 +143,9 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
   // Repeated keys are kept, in order, because a route may read them with `getAll()`. A value that
   // repeats this address's own credential is corruption residue and is dropped; any other value is
   // data and survives untouched.
-  const residue = embeddedCredential(credentials);
-  const query = new URLSearchParams([...params].filter(([, value]) => !residue?.test(value))).toString();
+  const residue = credentials.filter(Boolean);
+  const kept = [...params].filter(([, value]) => !repeatsCredential(value, residue));
+  const query = new URLSearchParams(kept).toString();
   const suffix = query ? `?${query}` : '';
   let normalized;
   if (isRoute) {
@@ -135,7 +158,7 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
     // `/home`, so this does not change where the app lands — it clears the address bar.
     normalized = query ? `${pathname}#!/${suffix}` : pathname;
   }
-  return normalized === `${pathname}${search}${hash}` ? null : normalized;
+  return normalized;
 }
 
 /**
