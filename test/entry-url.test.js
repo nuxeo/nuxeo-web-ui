@@ -113,6 +113,25 @@ suite('entry-url', () => {
       ).to.equal('/nuxeo/ui/#!/search/full?q=https%3A%2F%2Fexample.test%2F%3Ftoken%3Dpublic');
     });
 
+    test('keeps an unencoded value that reads like a credential', () => {
+      // Only a `?` followed by the address's own credential is a separator page.js left behind.
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/search/full?q=https://example.test/?token=public'))).to.be
+        .null;
+      expect(
+        normalizeEntryUrl(
+          location('/nuxeo/ui/', '?token=abc123', '#!/search/full?q=https://example.test/?token=public'),
+        ),
+      ).to.equal('/nuxeo/ui/#!/search/full?q=https%3A%2F%2Fexample.test%2F%3Ftoken%3Dpublic');
+    });
+
+    test('repairs a separator duplicated on every visit', () => {
+      expect(
+        normalizeEntryUrl(
+          location('/nuxeo/ui/', '?token=abc123', '#!/doc/xyz?p=permissions?token=abc123?token=abc123'),
+        ),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions');
+    });
+
     test('matches a credential value that contains regular expression characters', () => {
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=a.b*c', '#!/doc/xyz?p=perm%3Ftoken%3Da.b*c'))).to.equal(
         '/nuxeo/ui/#!/doc/xyz',

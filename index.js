@@ -10,8 +10,8 @@ import { normalizeCurrentEntryUrl } from './elements/entry-url.js';
 // keep the native user-agent ring unchanged. See themes/dark-theme-focus-ring.js.
 installGlobalFocusRing();
 
-// Strip the spent `token` from the address bar before anything else runs (WEBUI-2316), so it is
-// not sent in the `Referer` of the startup requests and is still removed if bootstrap fails.
+// Strip the spent `token` from the address bar as soon as the app bundle runs (WEBUI-2316), so the
+// requests the app makes do not carry it in their `Referer` and it is removed even if bootstrap fails.
 normalizeCurrentEntryUrl();
 
 // RTL configuration setup

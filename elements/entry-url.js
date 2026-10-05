@@ -45,35 +45,45 @@ limitations under the License.
 const CREDENTIAL_PARAMS = ['token'];
 
 /**
- * Matches this address's own credential embedded in a value — the residue page.js left when it
- * appended `location.search`. The value is matched, not just the parameter name, because decoded
- * residue and ordinary data look alike: `permissions?token=<t>` is wreckage, but
- * `https://example.test/?token=public` is a link somebody searched for. Only the former repeats
- * the credential the address was opened with.
+ * Source for a `token=<value>` assignment matching any of the given credential values.
+ *
+ * @param {string[]} values the credential values, as they appear in the text being matched
+ * @return {string} the regular expression source
+ */
+function credentialAssignment(values) {
+  const escaped = values.map((value) => value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`));
+  return `(?:${CREDENTIAL_PARAMS.join('|')})=(?:${escaped.join('|')})`;
+}
+
+/**
+ * Matches this address's own credential embedded in a decoded value — the residue page.js left when
+ * it appended `location.search`. `permissions?token=<t>` is residue, but
+ * `https://example.test/?token=public` is data: only the former repeats the address's credential.
  *
  * @param {string[]} credentials the credential values found on the address
  * @return {?RegExp} the matcher, or `null` when the address carries no usable credential
  */
 function embeddedCredential(credentials) {
-  const values = credentials.filter(Boolean).map((value) => value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`));
-  return values.length ? new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=(?:${values.join('|')})(?=&|$)`) : null;
+  const values = credentials.filter(Boolean);
+  return values.length ? new RegExp(`[?&]${credentialAssignment(values)}(?=&|$)`) : null;
 }
 
 /**
- * Matches only the `?` that page.js left behind when it appended `location.search` to a route that
- * already carried a query. A literal `?` is valid inside query data, so it is not enough that one is
- * present: the separator is identified by the credential assignment that immediately follows it,
- * which is the shape this bug produced. Anything else is left as data.
+ * Matches the `?` page.js left inside the route when it appended `location.search` to a route that
+ * already had a query. A `?` is valid inside query data, so it only counts as a separator when it is
+ * followed by the exact credential `location.search` carries, which is what page.js appended.
+ *
+ * @param {string} search the raw `location.search`
+ * @return {?RegExp} the matcher, or `null` when `location.search` carries no credential
  */
-const DUPLICATED_CREDENTIAL_SEPARATOR = new RegExp(String.raw`\?(?=(?:${CREDENTIAL_PARAMS.join('|')})=)`, 'g');
-
-/**
- * Parse a query string that a previous visit may already have corrupted. Users bookmark and
- * re-share the addresses this bug produced, so those shapes have to be repaired rather than carried
- * forward.
- */
-function parseQuery(query) {
-  return new URLSearchParams(query.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&'));
+function duplicatedSeparator(search) {
+  const values = search
+    .slice(1)
+    .split('&')
+    .map((pair) => /^([^=]*)=(.+)$/.exec(pair))
+    .filter((match) => CREDENTIAL_PARAMS.includes(match?.[1]))
+    .map((match) => match[2]);
+  return values.length ? new RegExp(String.raw`\?(?=${credentialAssignment(values)}(?:[&?]|$))`, 'g') : null;
 }
 
 /**
@@ -93,11 +103,12 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
 
   // The parameters that survive normalization, and where they end up: on the route when there is
   // one (page.js would fold them there anyway, just malformed), otherwise back on `location.search`.
+  // Users bookmark and re-share the addresses this bug produced, so a duplicated separator inside the
+  // route is repaired rather than carried forward.
   const routeQuery = queryIndex > -1 ? route.slice(queryIndex + 1) : '';
-  const params = parseQuery(isRoute ? routeQuery : search);
-  if (isRoute) {
-    parseQuery(search).forEach((value, key) => params.append(key, value));
-  }
+  const separator = duplicatedSeparator(search);
+  const params = new URLSearchParams(separator ? routeQuery.replace(separator, '&') : routeQuery);
+  new URLSearchParams(search).forEach((value, key) => params.append(key, value));
 
   // Re-serializing an already-clean URL would needlessly rewrite its percent-encoding, so bail out
   // unless there is a query string to fold onto the route or a credential to drop.
