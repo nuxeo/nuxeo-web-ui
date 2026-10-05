@@ -44,7 +44,11 @@ limitations under the License.
  */
 const CREDENTIAL_PARAMS = ['token'];
 
-/** Matches a credential parameter embedded in a value, i.e. the residue of an earlier corruption. */
+/**
+ * Matches a credential embedded in a value — the residue of an earlier corruption. Decoded,
+ * `permissions?token=<t>` (residue) and `https://example.test/?token=public` (data) look alike, so
+ * this is only applied when the address still carries a real credential parameter.
+ */
 const EMBEDDED_CREDENTIAL = new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=`);
 
 /**
@@ -88,29 +92,19 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
   }
 
   // Re-serializing an already-clean URL would needlessly rewrite its percent-encoding, so bail out
-  // unless there is a query string to fold onto the route or a credential to drop. A credential can
-  // also be hiding percent-encoded inside a value, left there by an address this bug already broke.
-  const hasCredential =
-    CREDENTIAL_PARAMS.some((param) => params.has(param)) ||
-    [...params].some(([, value]) => EMBEDDED_CREDENTIAL.test(value));
+  // unless there is a query string to fold onto the route or a credential to drop.
+  const hasCredential = CREDENTIAL_PARAMS.some((param) => params.has(param));
   if (!search && !hasCredential) {
     return null;
   }
   CREDENTIAL_PARAMS.forEach((param) => params.delete(param));
 
-  // Keep the first value of each parameter, and discard any value that still carries a credential
-  // inside it — an already-corrupted address holds the usable value first and the mangled copy
-  // after. Every route reads its parameters with `URLSearchParams.get()`, which returns the first
-  // value, so collapsing the duplicates changes nothing except that the address bar comes out clean.
-  const query = [...params]
-    .filter(([, value]) => !EMBEDDED_CREDENTIAL.test(value))
-    .reduce((deduped, [key, value]) => {
-      if (!deduped.has(key)) {
-        deduped.set(key, value);
-      }
-      return deduped;
-    }, new URLSearchParams())
-    .toString();
+  // Repeated keys are kept, in order, because a route may read them with `getAll()`. A value that
+  // still hides a credential is dropped as corruption residue — but only on an address that
+  // carried a real credential, which a corrupted one always does. Elsewhere it is ordinary data.
+  const query = new URLSearchParams(
+    [...params].filter(([, value]) => !hasCredential || !EMBEDDED_CREDENTIAL.test(value)),
+  ).toString();
   const suffix = query ? `?${query}` : '';
   let normalized;
   if (isRoute) {
@@ -119,12 +113,8 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
     // A plain anchor is not a route, so there is nowhere to move the query onto: keep both as they are.
     normalized = `${pathname}${suffix}${hash}`;
   } else {
-    // No fragment at all. page.js falls back to `location.search` as the route; `Route.match`
-    // truncates that at the `?`, and `page('/')` — compiled non-strict, so the leading slash is
-    // optional — matches the resulting empty pathname and redirects to `/home`. This branch
-    // therefore does not change where the app lands; it exists to clear the spent credential, and
-    // anything sitting beside it, out of the address bar. The redirect drops the query either way,
-    // and nothing in the app reads these parameters from `location.search`.
+    // No fragment at all. `page('/')` matches the empty pathname either way and redirects to
+    // `/home`, so this does not change where the app lands — it clears the address bar.
     normalized = query ? `${pathname}#!/${suffix}` : pathname;
   }
   return normalized === `${pathname}${search}${hash}` ? null : normalized;
