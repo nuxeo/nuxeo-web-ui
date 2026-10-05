@@ -96,6 +96,16 @@ suite('entry-url', () => {
       );
     });
 
+    test('repairs the separator whatever order the appended query is in', () => {
+      // page.js appends `location.search` verbatim, so the credential is not always the first
+      // parameter of the copy. Keying the repair on `?token=` alone left the tab corrupted here.
+      expect(
+        normalizeEntryUrl(
+          location('/nuxeo/ui/', '?lang=fr&token=abc123', '#!/doc/xyz?p=permissions?lang=fr&token=abc123'),
+        ),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions&lang=fr');
+    });
+
     test('recovers the tab without truncating a sibling value that holds a question mark', () => {
       // The separator is identified by the credential that follows it, so the `?` inside
       // `q` is left as data while the one that swallowed the tab name is repaired. Reconstructing

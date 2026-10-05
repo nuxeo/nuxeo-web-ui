@@ -60,8 +60,29 @@ const DUPLICATED_CREDENTIAL_SEPARATOR = new RegExp(String.raw`\?(?=(?:${CREDENTI
  * re-share the addresses this bug produced, so those shapes have to be repaired rather than carried
  * forward.
  */
-function parseQuery(query) {
-  return new URLSearchParams(query.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&'));
+/**
+ * Two limits are deliberate, because closing either costs more on the addresses that do occur than
+ * it saves on the ones that do not. Every query parameter this app reads or writes is `p`, the
+ * document tab (`nuxeo-browser._updateUrl`, `routing.js`), whose values are tab names.
+ *
+ * - A `?<credential>=` inside a value that is genuinely data is treated as a lost separator. Only a
+ *   parameter the app never writes could carry one; identifying residue by the credential's value
+ *   instead stops a bookmark being repaired once the login redirect has cleared `location.search`.
+ * - Repeated keys collapse to the first value. `URLSearchParams.get()` already returned that, and
+ *   collapsing them is what folds the appended copies back into one clean address.
+ */
+function parseQuery(query, appended) {
+  // page.js appended `location.search` verbatim, so while we still have that string the lost
+  // separator is just the `?` that begins the literal copy - whatever order its parameters are in,
+  // and once per visit. Repair those first, then fall back to the credential heuristic below for a
+  // copy whose `location.search` the server's login redirect has since dropped.
+  let repaired = query;
+  if (appended && appended.length > 1) {
+    while (repaired.endsWith(appended)) {
+      repaired = `${repaired.slice(0, -appended.length)}&${appended.slice(1)}`;
+    }
+  }
+  return new URLSearchParams(repaired.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&'));
 }
 
 /**
@@ -82,7 +103,7 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
   // The parameters that survive normalization, and where they end up: on the route when there is
   // one (page.js would fold them there anyway, just malformed), otherwise back on `location.search`.
   const routeQuery = queryIndex > -1 ? route.slice(queryIndex + 1) : '';
-  const params = parseQuery(isRoute ? routeQuery : search);
+  const params = parseQuery(isRoute ? routeQuery : search, isRoute ? search : '');
   if (isRoute) {
     parseQuery(search).forEach((value, key) => params.append(key, value));
   }
