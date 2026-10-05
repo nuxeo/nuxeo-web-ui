@@ -77,15 +77,6 @@ suite('entry-url', () => {
       expect(
         normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/doc/xyz?p=permissions?token=abc123')),
       ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions');
-      expect(
-        normalizeEntryUrl(
-          location(
-            '/nuxeo/ui/',
-            '?token=abc123',
-            '#!/doc/xyz?p=permissions?token=abc123&p=permissions%3Ftoken%3Dabc123',
-          ),
-        ),
-      ).to.equal('/nuxeo/ui/#!/doc/xyz?p=permissions');
     });
 
     test('drops a parameter whose only value still hides a credential', () => {
@@ -142,9 +133,24 @@ suite('entry-url', () => {
       expect(
         normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123&lang=fr', '#!/doc/xyz?token=abc123&lang=fr')),
       ).to.equal('/nuxeo/ui/#!/doc/xyz?lang=fr');
-      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?lang=fr', '#!/doc/xyz?p=metadata?lang=fr'))).to.equal(
-        '/nuxeo/ui/#!/doc/xyz?p=metadata&lang=fr',
+    });
+
+    test('keeps route data that matches a query string without a credential', () => {
+      // Without a credential there is no evidence page.js appended it, so nothing is removed.
+      expect(
+        normalizeEntryUrl(
+          location('/nuxeo/ui/', '?lang=fr', '#!/search/full?q=https://example.test/?lang=fr&sort=date'),
+        ),
+      ).to.equal('/nuxeo/ui/#!/search/full?q=https%3A%2F%2Fexample.test%2F%3Flang%3Dfr&sort=date&lang=fr');
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?p=metadata', '#!/doc/xyz?p=metadata&p=permissions'))).to.equal(
+        '/nuxeo/ui/#!/doc/xyz?p=metadata&p=permissions&p=metadata',
       );
+    });
+
+    test('only reads the document tab from a top-level parameter', () => {
+      expect(
+        normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/search/full?q=https://example.test/?p=metadata?token=public')),
+      ).to.be.null;
     });
 
     test('repairs the document tab after the login redirect dropped the query string', () => {
@@ -172,6 +178,12 @@ suite('entry-url', () => {
       );
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=t', '#!/search/full?q=a%3Ftoken%3Dtt'))).to.equal(
         '/nuxeo/ui/#!/search/full?q=a%3Ftoken%3Dtt',
+      );
+    });
+
+    test('drops a tab value that still holds the address credential before another question mark', () => {
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/doc/xyz?p=perm?token=t?token=t?lang=fr'))).to.equal(
+        '/nuxeo/ui/#!/doc/xyz',
       );
     });
 

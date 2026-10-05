@@ -44,22 +44,31 @@ limitations under the License.
  */
 const CREDENTIAL_PARAMS = ['token'];
 
+/** Longest credential searched for as residue. Real tokens are short; longer ones only cost time. */
+const MAX_CREDENTIAL_LENGTH = 256;
+
 /** The document tab parameter, and the query appended to its value. Tab names never contain `?`. */
 const TAB_PARAM = 'p';
-const APPENDED_TO_TAB = new RegExp(String.raw`[?&]${TAB_PARAM}=[^&?]*(\?[^?]*)`);
+const APPENDED_TO_TAB = new RegExp(String.raw`(?:^\?|&)${TAB_PARAM}=[^&?]*(\?[^?]*)`);
 
 /**
- * Remove every copy of `copy` from `query` that ends a parameter, i.e. is followed by `&`, `?` or
- * the end. Plain string matching, not a regular expression built from the text: the URL can be
- * arbitrarily long.
+ * Remove the copies of `copy` page.js appended to the end of `query`, one per visit.
  *
  * @param {string} query the raw query
- * @param {string} copy the raw text to remove
+ * @param {string} copy the raw text page.js appended
  * @return {string} the query without those copies
  */
-function removeCopies(query, copy) {
-  const [head, ...rest] = query.split(copy);
-  return rest.reduce((result, part) => result + (part === '' || '&?'.includes(part[0]) ? '' : copy) + part, head);
+function removeTrailingCopies(query, copy) {
+  let result = query;
+  while (result.endsWith(copy)) {
+    result = result.slice(0, -copy.length);
+  }
+  return result;
+}
+
+function carriesCredential(query) {
+  const params = new URLSearchParams(query);
+  return CREDENTIAL_PARAMS.some((param) => params.has(param));
 }
 
 /**
@@ -75,7 +84,7 @@ function repeatsCredential(value, credentials) {
   const assignments = CREDENTIAL_PARAMS.flatMap((param) => credentials.map((credential) => `${param}=${credential}`));
   const startsParameter = (start, assignment) => {
     const end = start + assignment.length;
-    return value.startsWith(assignment, start) && (end === value.length || value[end] === '&');
+    return value.startsWith(assignment, start) && (end === value.length || '&?'.includes(value[end]));
   };
   for (let i = 0; i < value.length; i++) {
     if (
@@ -89,21 +98,18 @@ function repeatsCredential(value, credentials) {
 }
 
 /**
- * The query page.js appended to the route on earlier visits. It is `location.search`, unless the
- * server's login redirect has since dropped that: then it can still be read from the document tab,
- * where it starts at the `?` a tab name never contains, but only when it carries a credential.
+ * The query page.js appended to the route on earlier visits, identified by the credential it
+ * carries: matching text without one is data. It is `location.search`, unless the server's login
+ * redirect has since dropped that: then it can still be read from the document tab, where it starts
+ * at the `?` a tab name never contains.
  *
  * @param {string} search the raw `location.search`
  * @param {string} routeQuery the raw route query, `?` included
  * @return {string} the raw appended query, `?` included, or `''`
  */
 function appendedQuery(search, routeQuery) {
-  if (search) {
-    return search;
-  }
-  const candidate = APPENDED_TO_TAB.exec(routeQuery)?.[1] ?? '';
-  const params = new URLSearchParams(candidate);
-  return CREDENTIAL_PARAMS.some((param) => params.has(param)) ? candidate : '';
+  const candidate = search || (APPENDED_TO_TAB.exec(routeQuery)?.[1] ?? '');
+  return carriesCredential(candidate) ? candidate : '';
 }
 
 /**
@@ -123,18 +129,19 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
 
   // The parameters that survive normalization, and where they end up: on the route when there is
   // one (page.js would fold them there anyway, just malformed), otherwise back on `location.search`.
-  // page.js appended the raw `location.search` to the route on every visit. Users bookmark and
-  // re-share those addresses, so every copy is removed and the query is merged back once.
+  // page.js appended the raw `location.search` to the end of the route on every visit. Users
+  // bookmark and re-share those addresses, so the copies are removed and the query merged back once.
   const routeQuery = queryIndex > -1 ? route.slice(queryIndex) : '';
   const appended = appendedQuery(search, routeQuery);
-  const params = new URLSearchParams(appended ? removeCopies(routeQuery, appended) : routeQuery);
-  new URLSearchParams(appended).forEach((value, key) => params.append(key, value));
+  const outer = search || appended;
+  const params = new URLSearchParams(appended ? removeTrailingCopies(routeQuery, appended) : routeQuery);
+  new URLSearchParams(outer).forEach((value, key) => params.append(key, value));
 
   // Re-serializing an already-clean URL would needlessly rewrite its percent-encoding, so bail out
   // unless there is a credential to drop or a query string to fold onto a route. A plain anchor has
   // no route to fold onto.
   const credentials = CREDENTIAL_PARAMS.flatMap((param) => params.getAll(param));
-  const foldsQuery = appended && (isRoute || !hash);
+  const foldsQuery = outer && (isRoute || !hash);
   if (!foldsQuery && !credentials.length) {
     return null;
   }
@@ -143,7 +150,7 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
   // Repeated keys are kept, in order, because a route may read them with `getAll()`. A value that
   // repeats this address's own credential is corruption residue and is dropped; any other value is
   // data and survives untouched.
-  const residue = credentials.filter(Boolean);
+  const residue = credentials.filter((credential) => credential && credential.length <= MAX_CREDENTIAL_LENGTH);
   const kept = [...params].filter(([, value]) => !repeatsCredential(value, residue));
   const query = new URLSearchParams(kept).toString();
   const suffix = query ? `?${query}` : '';
