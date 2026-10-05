@@ -60,9 +60,8 @@ suite('entry-url', () => {
     });
 
     test('moves surviving parameters onto an explicit root route when there is no fragment', () => {
-      // This changes the address bar, not the destination: `page('/')` is compiled non-strict, so
-      // it matches the empty pathname `Route.match` derives from a query-only route and redirects
-      // to `/home` either way. Moving them onto the root route is what clears `location.search`.
+      // Changes the address bar, not the destination: `page('/')` matches either way and redirects
+      // to `/home`.
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123&lang=fr', ''))).to.equal('/nuxeo/ui/#!/?lang=fr');
       expect(normalizeEntryUrl(location('/nuxeo/ui/', '?lang=fr', ''))).to.equal('/nuxeo/ui/#!/?lang=fr');
     });
@@ -89,11 +88,27 @@ suite('entry-url', () => {
     });
 
     test('drops a parameter whose only value still hides a credential', () => {
-      // Nothing usable is left to recover, so the route falls back to its default tab rather than
-      // rendering an empty page.
-      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/doc/xyz?p=permissions%3Ftoken%3Dabc123'))).to.equal(
-        '/nuxeo/ui/#!/doc/xyz',
+      // Nothing usable is left, so the route falls back to its default tab instead of a blank page.
+      expect(
+        normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/doc/xyz?p=permissions%3Ftoken%3Dabc123')),
+      ).to.equal('/nuxeo/ui/#!/doc/xyz');
+    });
+
+    test('keeps a value that merely reads like a credential when the address carries none', () => {
+      // Looks like residue once decoded, but the address carries no `token`, so it is data.
+      expect(
+        normalizeEntryUrl(
+          location('/nuxeo/ui/', '', '#!/search/full?q=https%3A%2F%2Fexample.test%2F%3Ftoken%3Dpublic'),
+        ),
+      ).to.be.null;
+    });
+
+    test('preserves repeated values of the same parameter', () => {
+      // Routes reading a parameter with `getAll()` need every value, so duplicates are not collapsed.
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '?token=abc123', '#!/custom?tag=a&tag=b'))).to.equal(
+        '/nuxeo/ui/#!/custom?tag=a&tag=b',
       );
+      expect(normalizeEntryUrl(location('/nuxeo/ui/', '', '#!/custom?tag=a&tag=b'))).to.be.null;
     });
 
     test('keeps a percent-encoded question mark that is genuinely part of a value', () => {

@@ -10,6 +10,10 @@ import { normalizeCurrentEntryUrl } from './elements/entry-url.js';
 // keep the native user-agent ring unchanged. See themes/dark-theme-focus-ring.js.
 installGlobalFocusRing();
 
+// Strip the spent `token` from the address bar before anything else runs (WEBUI-2316), so it is
+// not sent in the `Referer` of the startup requests and is still removed if bootstrap fails.
+normalizeCurrentEntryUrl();
+
 // RTL configuration setup
 const setupRTLSupport = () => {
   window.nuxeo = window.nuxeo || {};
@@ -64,13 +68,7 @@ const setupApp = async () =>
     }
   });
 const loadRouting = async () => {
-  // Normalize the entry URL before either router implementation starts. Both run page.js in
-  // hashbang mode, where it appends `location.search` to the route verbatim and then rewrites only
-  // the fragment — leaving those parameters in the address bar twice and corrupting a route that
-  // already had a query. This also keeps the server-consumed `token` credential out of the address
-  // bar. It lives here rather than in `elements/routing.js` so that deployments shipping their own
-  // `routing.html` (`router.htmlImport`) are covered too (WEBUI-2316).
-  normalizeCurrentEntryUrl();
+  // The entry URL is normalized at module scope, above (WEBUI-2316).
   if (config.get('router.htmlImport')) {
     // Wrap importHref in a promise so the startup chain awaits routing.html actually loading
     // and load errors reject (surface) instead of being swallowed, matching the import() branch.
