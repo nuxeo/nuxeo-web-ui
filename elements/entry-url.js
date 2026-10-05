@@ -55,10 +55,8 @@ const CREDENTIAL_PARAMS = ['token'];
  * @return {?RegExp} the matcher, or `null` when the address carries no usable credential
  */
 function embeddedCredential(credentials) {
-  const values = credentials.filter(Boolean).map((value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  return values.length
-    ? new RegExp(String.raw`[?&](?:${CREDENTIAL_PARAMS.join('|')})=(?:${values.join('|')})(?=&|$)`)
-    : null;
+  const values = credentials.filter(Boolean).map((value) => value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`));
+  return values.length ? new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=(?:${values.join('|')})(?=&|$)`) : null;
 }
 
 /**
@@ -113,7 +111,7 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
   // repeats this address's own credential is corruption residue and is dropped; any other value is
   // data and survives untouched.
   const residue = embeddedCredential(credentials);
-  const query = new URLSearchParams([...params].filter(([, value]) => !residue || !residue.test(value))).toString();
+  const query = new URLSearchParams([...params].filter(([, value]) => !residue?.test(value))).toString();
   const suffix = query ? `?${query}` : '';
   let normalized;
   if (isRoute) {
