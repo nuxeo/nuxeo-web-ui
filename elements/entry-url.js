@@ -119,10 +119,12 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
     // A plain anchor is not a route, so there is nowhere to move the query onto: keep both as they are.
     normalized = `${pathname}${suffix}${hash}`;
   } else {
-    // No fragment at all. Parameters cannot be left in `location.search` either, because page.js
-    // reads the route from the fragment and falls back to `location.search` as the route itself, so
-    // `?lang=fr` would be dispatched as the path `?lang=fr` and end on the 404 handler. Put them on
-    // an explicit root route instead, which keeps them addressable and lets the root handler run.
+    // No fragment at all. page.js falls back to `location.search` as the route; `Route.match`
+    // truncates that at the `?`, and `page('/')` — compiled non-strict, so the leading slash is
+    // optional — matches the resulting empty pathname and redirects to `/home`. This branch
+    // therefore does not change where the app lands; it exists to clear the spent credential, and
+    // anything sitting beside it, out of the address bar. The redirect drops the query either way,
+    // and nothing in the app reads these parameters from `location.search`.
     normalized = query ? `${pathname}#!/${suffix}` : pathname;
   }
   return normalized === `${pathname}${search}${hash}` ? null : normalized;
