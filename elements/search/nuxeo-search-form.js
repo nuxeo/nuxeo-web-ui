@@ -845,6 +845,11 @@ Polymer({
       this.__queueSelectionPending = true;
       return;
     }
+    // The entries are already in, so this lookup is the synchronisation a replay would have run.
+    // Spend a flag armed earlier against an empty queue: `refresh()`, which the quick filters
+    // fire, populates the entries without consuming it, and leaving it armed would let a later
+    // fetch re-select the displayed document after a deliberate clear.
+    this.__queueSelectionPending = false;
     this._selectCurrentDocumentInQueue();
   },
 
