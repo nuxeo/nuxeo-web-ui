@@ -44,72 +44,24 @@ limitations under the License.
  */
 const CREDENTIAL_PARAMS = ['token'];
 
-/** Longest credential searched for as residue. Real tokens are short; longer ones only cost time. */
-const MAX_CREDENTIAL_LENGTH = 256;
-
-/** The document tab parameter, and the query appended to its value. Tab names never contain `?`. */
-const TAB_PARAM = 'p';
-const APPENDED_TO_TAB = new RegExp(String.raw`(?:^\?|&)${TAB_PARAM}=[^&?]*(\?[^?]*)`);
+/** Matches a credential parameter embedded in a value, i.e. the residue of an earlier corruption. */
+const EMBEDDED_CREDENTIAL = new RegExp(`[?&](?:${CREDENTIAL_PARAMS.join('|')})=`);
 
 /**
- * Remove the copies of `copy` page.js appended to the end of `query`, one per visit.
- *
- * @param {string} query the raw query
- * @param {string} copy the raw text page.js appended
- * @return {string} the query without those copies
+ * Matches only the `?` that page.js left behind when it appended `location.search` to a route that
+ * already carried a query. A literal `?` is valid inside query data, so it is not enough that one is
+ * present: the separator is identified by the credential assignment that immediately follows it,
+ * which is the shape this bug produced. Anything else is left as data.
  */
-function removeTrailingCopies(query, copy) {
-  let result = query;
-  while (result.endsWith(copy)) {
-    result = result.slice(0, -copy.length);
-  }
-  return result;
-}
-
-function carriesCredential(query) {
-  const params = new URLSearchParams(query);
-  return CREDENTIAL_PARAMS.some((param) => params.has(param));
-}
+const DUPLICATED_CREDENTIAL_SEPARATOR = new RegExp(String.raw`\?(?=(?:${CREDENTIAL_PARAMS.join('|')})=)`, 'g');
 
 /**
- * Whether a decoded value embeds this address's own credential, as page.js residue does.
- * `permissions?token=<t>` is residue, but `https://example.test/?token=public` is data: only the
- * former repeats the address's credential.
- *
- * @param {string} value the decoded parameter value
- * @param {string[]} credentials the credential values found on the address
- * @return {boolean} whether the value is residue
+ * Parse a query string that a previous visit may already have corrupted. Users bookmark and
+ * re-share the addresses this bug produced, so those shapes have to be repaired rather than carried
+ * forward.
  */
-function repeatsCredential(value, credentials) {
-  const assignments = CREDENTIAL_PARAMS.flatMap((param) => credentials.map((credential) => `${param}=${credential}`));
-  const startsParameter = (start, assignment) => {
-    const end = start + assignment.length;
-    return value.startsWith(assignment, start) && (end === value.length || '&?'.includes(value[end]));
-  };
-  for (let i = 0; i < value.length; i++) {
-    if (
-      (value[i] === '?' || value[i] === '&') &&
-      assignments.some((assignment) => startsParameter(i + 1, assignment))
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * The query page.js appended to the route on earlier visits, identified by the credential it
- * carries: matching text without one is data. It is `location.search`, unless the server's login
- * redirect has since dropped that: then it can still be read from the document tab, where it starts
- * at the `?` a tab name never contains.
- *
- * @param {string} search the raw `location.search`
- * @param {string} routeQuery the raw route query, `?` included
- * @return {string} the raw appended query, `?` included, or `''`
- */
-function appendedQuery(search, routeQuery) {
-  const candidate = search || (APPENDED_TO_TAB.exec(routeQuery)?.[1] ?? '');
-  return carriesCredential(candidate) ? candidate : '';
+function parseQuery(query) {
+  return new URLSearchParams(query.replace(DUPLICATED_CREDENTIAL_SEPARATOR, '&'));
 }
 
 /**
@@ -129,30 +81,36 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
 
   // The parameters that survive normalization, and where they end up: on the route when there is
   // one (page.js would fold them there anyway, just malformed), otherwise back on `location.search`.
-  // page.js appended the raw `location.search` to the end of the route on every visit. Users
-  // bookmark and re-share those addresses, so the copies are removed and the query merged back once.
-  const routeQuery = queryIndex > -1 ? route.slice(queryIndex) : '';
-  const appended = appendedQuery(search, routeQuery);
-  const outer = search || appended;
-  const params = new URLSearchParams(appended ? removeTrailingCopies(routeQuery, appended) : routeQuery);
-  new URLSearchParams(outer).forEach((value, key) => params.append(key, value));
+  const routeQuery = queryIndex > -1 ? route.slice(queryIndex + 1) : '';
+  const params = parseQuery(isRoute ? routeQuery : search);
+  if (isRoute) {
+    parseQuery(search).forEach((value, key) => params.append(key, value));
+  }
 
   // Re-serializing an already-clean URL would needlessly rewrite its percent-encoding, so bail out
-  // unless there is a credential to drop or a query string to fold onto a route. A plain anchor has
-  // no route to fold onto.
-  const credentials = CREDENTIAL_PARAMS.flatMap((param) => params.getAll(param));
-  const foldsQuery = outer && (isRoute || !hash);
-  if (!foldsQuery && !credentials.length) {
+  // unless there is a query string to fold onto the route or a credential to drop. A credential can
+  // also be hiding percent-encoded inside a value, left there by an address this bug already broke.
+  const hasCredential =
+    CREDENTIAL_PARAMS.some((param) => params.has(param)) ||
+    [...params].some(([, value]) => EMBEDDED_CREDENTIAL.test(value));
+  if (!search && !hasCredential) {
     return null;
   }
   CREDENTIAL_PARAMS.forEach((param) => params.delete(param));
 
-  // Repeated keys are kept, in order, because a route may read them with `getAll()`. A value that
-  // repeats this address's own credential is corruption residue and is dropped; any other value is
-  // data and survives untouched.
-  const residue = credentials.filter((credential) => credential && credential.length <= MAX_CREDENTIAL_LENGTH);
-  const kept = [...params].filter(([, value]) => !repeatsCredential(value, residue));
-  const query = new URLSearchParams(kept).toString();
+  // Keep the first value of each parameter, and discard any value that still carries a credential
+  // inside it — an already-corrupted address holds the usable value first and the mangled copy
+  // after. Every route reads its parameters with `URLSearchParams.get()`, which returns the first
+  // value, so collapsing the duplicates changes nothing except that the address bar comes out clean.
+  const query = [...params]
+    .filter(([, value]) => !EMBEDDED_CREDENTIAL.test(value))
+    .reduce((deduped, [key, value]) => {
+      if (!deduped.has(key)) {
+        deduped.set(key, value);
+      }
+      return deduped;
+    }, new URLSearchParams())
+    .toString();
   const suffix = query ? `?${query}` : '';
   let normalized;
   if (isRoute) {
@@ -161,11 +119,15 @@ export function normalizeEntryUrl({ pathname, search, hash }) {
     // A plain anchor is not a route, so there is nowhere to move the query onto: keep both as they are.
     normalized = `${pathname}${suffix}${hash}`;
   } else {
-    // No fragment at all. `page('/')` matches the empty pathname either way and redirects to
-    // `/home`, so this does not change where the app lands — it clears the address bar.
+    // No fragment at all. page.js falls back to `location.search` as the route; `Route.match`
+    // truncates that at the `?`, and `page('/')` — compiled non-strict, so the leading slash is
+    // optional — matches the resulting empty pathname and redirects to `/home`. This branch
+    // therefore does not change where the app lands; it exists to clear the spent credential, and
+    // anything sitting beside it, out of the address bar. The redirect drops the query either way,
+    // and nothing in the app reads these parameters from `location.search`.
     normalized = query ? `${pathname}#!/${suffix}` : pathname;
   }
-  return normalized;
+  return normalized === `${pathname}${search}${hash}` ? null : normalized;
 }
 
 /**
