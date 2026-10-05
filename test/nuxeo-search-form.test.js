@@ -761,6 +761,35 @@ suite('nuxeo-search-form', () => {
       clearSpy.restore();
     });
 
+    test('a lookup against a populated queue spends an earlier pending replay', async () => {
+      // the entries are not in yet, so the observer can only arm the replay
+      searchForm.currentDocument = entries[0];
+      expect(searchForm.__queueSelectionPending).to.be.true;
+
+      // `refresh()`, which the quick filters fire, populates the queue without consuming it
+      const fetchStub = stubFetch(searchForm);
+      searchForm.refresh();
+      await settle();
+
+      // the next document change finds the entries and synchronises on the spot, which has to
+      // spend the replay rather than leave it armed for a later fetch
+      searchForm.currentDocument = entries[1];
+      expect(searchForm.__queueSelectionPending).to.not.be.true;
+
+      // a deliberate clear - sort, column filter - must survive the fetch that follows it
+      searchForm.$.list.clearSelection();
+      searchForm.selectedDocument = null;
+      const selectSpy = sinon.spy(searchForm.$.list, 'selectIndex');
+
+      searchForm._visibleChanged();
+      await settle();
+
+      expect(selectSpy).to.not.have.been.called;
+
+      fetchStub.restore();
+      selectSpy.restore();
+    });
+
     test('does nothing when the filters view is showing by the time the queue arrives', () => {
       searchForm.currentDocument = entries[0];
       searchForm.$.list.items = entries.map((entry) => Object.assign({}, entry));
