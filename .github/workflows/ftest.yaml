@@ -5,6 +5,7 @@ on:
     branches:
       - maintenance-3.1.x
       - lts-2025
+      - 'develop-20[0-9][0-9]'
 
   workflow_call:
     inputs:
@@ -55,10 +56,21 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
+      - name: Resolve JDK version
+        id: jdk
+        run: |
+          # Derived from the version being built, not the branch name, so it stays correct on
+          # dev branches. LTS 2023 (3.1.x) builds on Java 17; 2025 and later on Java 21.
+          PACKAGE_VERSION=$(jq -r .version package.json)
+          case "$PACKAGE_VERSION" in
+            3.1.*) echo "version=17" >> "$GITHUB_OUTPUT" ;;
+            *)     echo "version=21" >> "$GITHUB_OUTPUT" ;;
+          esac
+
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
-          java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
+          java-version: ${{ steps.jdk.outputs.version }}
 
       - name: Purge cached Nuxeo artifacts
         run: rm -rf ~/.m2/repository/org/nuxeo
@@ -82,12 +94,14 @@ jobs:
 
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
-        run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.REFERENCE_BRANCH }}; then
-            echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
-          else
-            echo "branch=${{ github.base_ref || env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
-          fi
+        # Was inline shell whose fallback resolved to the same branch it had just failed to find,
+        # so a missing nuxeo-elements branch produced a bare git checkout error. This is the same
+        # action preview.yaml already uses, and it falls back to the line's release branch.
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
+        with:
+          repository: nuxeo/nuxeo-elements
+          branch: ${{ env.REFERENCE_BRANCH }}
+          default-branch: lts-2025
 
       - name: Install Web UI
         env:

@@ -54,7 +54,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REFERENCE_BRANCH: lts-2025
+  # The base branch this run targets. The Elements cross-repo check dispatches this workflow
+  # against that ref, so github.ref_name is it — as the concurrency comment above also relies on.
+  # Was hardcoded to lts-2025, which made a maintenance-3.1.x run fall back across release lines,
+  # and would send a develop-2025 run to released code instead of the dev branch.
+  REFERENCE_BRANCH: ${{ github.ref_name }}
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:

@@ -5,10 +5,12 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - lts-2025
+      - 'develop-20[0-9][0-9]'
 
   push:
     branches:
       - lts-2025
+      - 'develop-20[0-9][0-9]'
 
   workflow_dispatch:
 
@@ -23,6 +25,11 @@ on:
         required: true
       SONAR_TOKEN:
         required: true
+
+env:
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  # Branch this run targets. Used to pick the matching nuxeo-elements branch to build against.
+  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
 
 jobs:
   sonar:
@@ -65,27 +72,46 @@ jobs:
         run: npm ci --ignore-scripts
         working-directory: ${{ github.workspace }}
 
-      - name: Ensure latest @nuxeo RC packages
+      # Elements is built from the paired branch's source rather than resolved from the registry.
+      # The registry lookup only ever matched `-rc` versions, which are published from the release
+      # branches, so on a dev branch it resolved whichever release candidate happened to be newest
+      # and never saw that cycle's Elements work. This is the same approach ftest.yaml and
+      # cross-repo.yaml already use.
+      - name: Determine nuxeo-elements branch to link
+        id: pick_nuxeo_elements_branch
+        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
+        with:
+          repository: nuxeo/nuxeo-elements
+          branch: ${{ env.REFERENCE_BRANCH }}
+          default-branch: lts-2025
+
+      - name: Checkout the nuxeo-elements repo
+        uses: actions/checkout@v6
+        with:
+          repository: nuxeo/nuxeo-elements
+          path: nuxeo-elements
+          fetch-depth: 1
+          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+
+      - name: Pack Elements modules
+        run: |
+          pushd nuxeo-elements
+          for d in core ui dataviz testing-helpers; do
+            pushd $d
+            echo "ELEMENTS_$(echo $d | tr 'a-z-' 'A-Z_')=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+            popd
+          done
+          popd
+        working-directory: ${{ github.workspace }}
+
+      - name: Link elements to Web UI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          ELEMENTS_VERSION=$(
-            for pkg in @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers; do
-              npm view "$pkg" versions --json | jq -r '.[]'
-            done | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
-                 | sort | uniq -c | awk '$1 == 4 {print $2}' | sort -V | tail -n1
-          )
-          echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
-          if [ -z "$ELEMENTS_VERSION" ]; then
-            echo "::error::Could not resolve a common RC version across all @nuxeo packages"
-            exit 1
-          fi
-
-          npm install --no-package-lock \
-            @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
-            @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
-            @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
-            @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
         working-directory: ${{ github.workspace }}
 
       - name: Run unit tests with coverage

@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened, labeled]
     branches:
       - lts-2025
+      - 'develop-20[0-9][0-9]'
 
   workflow_dispatch:
     inputs:
