@@ -30,12 +30,22 @@ limitations under the License.
 
       .title {
         display: flex;
+        align-items: center;
         width: 100%;
       }
 
       .title > a {
-        flex: 0 0 45%;
+        /*
+         * WEBUI-1491: keep each title on one line and ellipsize it rather than letting the header
+         * wrap out of the toolbar. The titles size to their content and give way before the
+         * surrounding labels do, capped at 45% so neither can crowd the other out. They have to
+         * stay shrinkable: a fixed basis plus the labels overflows the header on narrower windows,
+         * and the slotted header hides that overflow, which takes the ellipsis with it.
+         */
+        flex: 0 1 auto;
+        max-width: 45%;
         min-width: 0;
+        box-sizing: border-box;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
