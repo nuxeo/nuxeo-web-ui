@@ -1,6 +1,12 @@
 import { config } from '@nuxeo/nuxeo-elements';
 import { importHTML, importHref } from '@nuxeo/nuxeo-ui-elements/import-href.js';
 import { setFallbackNotificationTarget } from '@nuxeo/nuxeo-elements/nuxeo-notify-behavior.js';
+// themes/base.js and every themes/<name>/theme.html declare their custom properties on the same
+// `html` selector, so a theme only overrides a base default when its stylesheet is applied later.
+// base.js appends its <custom-style> when the module is evaluated, so importing it here installs
+// the defaults before loadTheme() appends the theme <link> below. loadApp() imports base.js too,
+// but by then the theme would already have lost the cascade (WEBUI-2306).
+import './themes/base.js';
 import { loadTheme } from './themes/loader.js';
 import { installGlobalFocusRing } from './themes/dark-theme-focus-ring.js';
 
