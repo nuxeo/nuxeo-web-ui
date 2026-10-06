@@ -56,7 +56,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REFERENCE_BRANCH: maintenance-3.1.x
+  # The base branch this run targets. The Elements cross-repo check dispatches this workflow
+  # against that ref, so github.ref_name is it — as the concurrency comment above also relies on.
+  # Was hardcoded, which made a cross-line run fall back to the wrong release line, and would
+  # send a develop-20XX run to released code instead of the dev branch.
+  REFERENCE_BRANCH: ${{ github.ref_name }}
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:

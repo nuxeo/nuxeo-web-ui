@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - maintenance-3.1.x
+      - 'develop-20[0-9][0-9]'
 
   workflow_call:
     inputs:
