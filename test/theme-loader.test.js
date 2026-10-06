@@ -254,4 +254,61 @@ suite('theme-loader', () => {
       expect(descriptor.enumerable).to.be.true;
     });
   });
+
+  // WEBUI-2306: themes/base.js and every themes/<name>/theme.html declare their custom properties
+  // on the same `html` selector, so a theme only overrides a base default when its stylesheet is
+  // applied LATER. base.js appends its <custom-style> when the module is evaluated and loadTheme()
+  // appends the theme <link> when it runs, so the winner is decided purely by which of the two
+  // happens first during bootstrap. Moving loadTheme() ahead of loadApp() (which is what used to
+  // pull in base.js) inverted that order and pinned --nuxeo-app-top/--nuxeo-app-bottom to the base
+  // 0px for every custom theme, so the documented header/footer customization stopped having any
+  // effect and the app painted over the customer's header and footer.
+  suite('base-before-theme cascade order', () => {
+    test('the bootstrap evaluates themes/base.js before it can apply a theme', async () => {
+      const res = await fetch('/index.js');
+      expect(res.ok, 'could not load /index.js').to.be.true;
+      const src = await res.text();
+
+      const baseImport = src.search(/^import\s+['"]\.\/themes\/base\.js['"]/m);
+      expect(
+        baseImport,
+        'index.js must import ./themes/base.js so the base defaults are installed first',
+      ).to.be.at.least(0);
+
+      // Static imports are evaluated in source order, so the base import has to precede the
+      // loader import for base.js to win even if loader.js ever applies a theme at import time.
+      const loaderImport = src.search(/^import\s+\{[^}]*\}\s+from\s+['"]\.\/themes\/loader\.js['"]/m);
+      expect(loaderImport, 'index.js must import ./themes/loader.js').to.be.at.least(0);
+      expect(baseImport, 'themes/base.js must be imported before themes/loader.js').to.be.below(loaderImport);
+
+      const applyTheme = src.search(/\.then\(\s*loadTheme\b/);
+      expect(applyTheme, 'index.js must apply the theme from the bootstrap chain').to.be.at.least(0);
+      expect(baseImport, 'themes/base.js must be imported before loadTheme() runs').to.be.below(applyTheme);
+    });
+
+    test('loadTheme appends the theme stylesheet after a base stylesheet already in the document', () => {
+      getItemStub.returns('my-custom-theme');
+      const fakeXhr = { open: sinon.stub(), send: sinon.stub(), readyState: 4, status: 200 };
+      fakeXhr.send.callsFake(() => fakeXhr.onreadystatechange());
+      const xhrStub = sinon.stub(window, 'XMLHttpRequest').returns(fakeXhr);
+
+      // stands in for the <custom-style> themes/base.js appends at module-evaluation time
+      const base = document.createElement('style');
+      base.textContent = 'html { --nuxeo-app-top: 0px; }';
+      document.head.appendChild(base);
+
+      try {
+        loadTheme();
+        const link = document.querySelector('link[rel="import"][href="themes/my-custom-theme/theme.html"]');
+        expect(link, 'expected the custom theme to be linked').to.exist;
+        // DOCUMENT_POSITION_FOLLOWING: the theme comes after the base, so it wins the cascade
+        /* eslint-disable-next-line no-bitwise */
+        expect(base.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING).to.be.above(0);
+        link.remove();
+      } finally {
+        base.remove();
+        xhrStub.restore();
+      }
+    });
+  });
 });
