@@ -17,7 +17,7 @@ on:
         required: true
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'lts-2025' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.ref_name }}
 
 jobs:
   lint:
