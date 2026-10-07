@@ -108,10 +108,13 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/core/${ELEMENTS_CORE}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/ui/${ELEMENTS_UI}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ}
-          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
+          # One invocation: the root preinstall hook runs npm ci in three subpackages, so
+          # installing the tarballs one at a time repeats that work four times over.
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" \
+            nuxeo-elements/core/${ELEMENTS_CORE} \
+            nuxeo-elements/ui/${ELEMENTS_UI} \
+            nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ} \
+            nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
         working-directory: ${{ github.workspace }}
 
       - name: Run unit tests with coverage
