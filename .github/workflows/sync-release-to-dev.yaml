@@ -73,10 +73,19 @@ jobs:
           # Point the throwaway head at the release branch, creating it if this is the first run
           # and fast-forwarding it otherwise. Reusing one name per line keeps an unmerged sync
           # pull request updated instead of opening a second one.
+          #
+          # The update is deliberately NOT forced. If somebody has resolved conflicts on an open
+          # sync pull request, or pressed "Update branch", its head carries commits the release
+          # branch does not, and a force update would silently throw that work away. A rejected
+          # fast-forward means exactly that, so stop and let a person finish it by hand.
           SHA=$(git rev-parse "origin/$RELEASE_BRANCH")
           if gh api "repos/$GITHUB_REPOSITORY/git/refs/heads/$HEAD_BRANCH" >/dev/null 2>&1; then
-            gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/$HEAD_BRANCH" \
-              -F sha="$SHA" -F force=true >/dev/null
+            if ! gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/$HEAD_BRANCH" \
+                   -F sha="$SHA" >/dev/null 2>&1; then
+              echo "::error::$HEAD_BRANCH cannot fast-forward to $RELEASE_BRANCH - it carries commits the release branch does not."
+              echo "::error::Merge $RELEASE_BRANCH into the open sync pull request by hand; re-running this would discard that work."
+              exit 1
+            fi
           else
             gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
               -f ref="refs/heads/$HEAD_BRANCH" -f sha="$SHA" >/dev/null
