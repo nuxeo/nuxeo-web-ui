@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-      - lts-2025
+      - 'lts-20[0-9][0-9]'
       - 'develop-20[0-9][0-9]'
 
   workflow_dispatch:
@@ -82,7 +82,7 @@ jobs:
           # from a feature branch would otherwise name a ref the sibling repository does not have.
           REFERENCE_BRANCH="${{ github.base_ref || github.ref_name }}"
           case "$REFERENCE_BRANCH" in
-            lts-2025 | develop-20[0-9][0-9]) ;;
+            lts-20[0-9][0-9] | develop-20[0-9][0-9]) ;;
             *) REFERENCE_BRANCH=lts-2025 ;;
           esac
           echo "REFERENCE_BRANCH=$REFERENCE_BRANCH" >> $GITHUB_ENV
