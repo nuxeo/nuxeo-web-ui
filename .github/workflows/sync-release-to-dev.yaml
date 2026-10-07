@@ -1,0 +1,101 @@
+name: Sync release branch to dev
+
+# Run this after a release has been promoted.
+#
+# The release job leaves the version bump on the release branch. The dev branch needs
+# that bump before the next cycle's work builds against the right version, and it also
+# needs any hotfix that went straight to the release branch. This opens the pull request
+# that carries both.
+#
+# Nothing here edits files. The pull request is the release branch merged into the dev
+# branch, so git resolves the version files on its own: the dev branch never touches them
+# during a cycle, so the merge takes the release branch's side without a conflict.
+on:
+  workflow_dispatch:
+    inputs:
+      release_branch:
+        description: 'Release branch that was just promoted'
+        required: true
+        type: choice
+        options:
+          - lts-2025
+          - maintenance-3.1.x
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve the dev branch for this line
+        id: branches
+        env:
+          RELEASE_BRANCH: ${{ inputs.release_branch }}
+        run: |
+          case "$RELEASE_BRANCH" in
+            lts-2025)          DEV_BRANCH=develop-2025 ;;
+            maintenance-3.1.x) DEV_BRANCH=develop-2023 ;;
+            *)
+              echo "::error::No dev branch mapped for $RELEASE_BRANCH"
+              exit 1
+              ;;
+          esac
+          echo "dev=$DEV_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Syncing $RELEASE_BRANCH into $DEV_BRANCH"
+
+      - name: Open the sync pull request
+        env:
+          # A PAT rather than GITHUB_TOKEN: a pull request opened by GITHUB_TOKEN does not
+          # trigger other workflows, so the sync PR would get no checks.
+          GH_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+          RELEASE_BRANCH: ${{ inputs.release_branch }}
+          DEV_BRANCH: ${{ steps.branches.outputs.dev }}
+        run: |
+          existing=$(gh pr list --repo "$GITHUB_REPOSITORY" \
+                       --base "$DEV_BRANCH" --head "$RELEASE_BRANCH" \
+                       --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            echo "::notice::Sync pull request already open: #$existing"
+            exit 0
+          fi
+
+          ahead=$(git rev-list --count "origin/$DEV_BRANCH..origin/$RELEASE_BRANCH")
+          if [ "$ahead" = "0" ]; then
+            echo "::notice::$DEV_BRANCH already contains everything on $RELEASE_BRANCH. Nothing to sync."
+            exit 0
+          fi
+          echo "$RELEASE_BRANCH is $ahead commit(s) ahead of $DEV_BRANCH."
+
+          {
+            echo "Opened automatically after promoting a release on \`$RELEASE_BRANCH\`."
+            echo
+            echo "## What this carries"
+            echo
+            echo "- the post-release version bump, so the next cycle builds against the right version"
+            echo "- any hotfix that went straight to the release branch"
+            echo
+            echo "## Merge it before the next release starts"
+            echo
+            echo "While this is open, \`$DEV_BRANCH\` is on the previous version and is missing"
+            echo "anything that went straight to the release branch. A hotfix left unmerged here"
+            echo "also still needs porting to the other LTS line, which no merge does"
+            echo "automatically, because the two lines share no history."
+            echo
+            echo "## Expected to merge cleanly"
+            echo
+            echo "\`$DEV_BRANCH\` does not touch version files during a cycle, so git takes this"
+            echo "branch's side on them without a conflict. If it does conflict, something has"
+            echo "been pushed directly to \`$RELEASE_BRANCH\`, which is worth understanding before"
+            echo "merging."
+          } > sync-pr-body.md
+
+          gh pr create --repo "$GITHUB_REPOSITORY" \
+            --base "$DEV_BRANCH" \
+            --head "$RELEASE_BRANCH" \
+            --title "Sync $RELEASE_BRANCH into $DEV_BRANCH after release" \
+            --body-file sync-pr-body.md
