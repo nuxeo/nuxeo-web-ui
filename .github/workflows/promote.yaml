@@ -170,7 +170,11 @@ jobs:
           git commit -a -m "Update $OLD_SNAPSHOT to $NEW_SNAPSHOT"
 
       - if: ${{ github.event.inputs.dryRun == 'false' }}
-        run: git push origin ${{ github.event.inputs.referenceBranch }}
+        env:
+          # Via the environment, never interpolated into the command: referenceBranch is
+          # free text from workflow_dispatch.
+          REFERENCE_BRANCH: ${{ github.event.inputs.referenceBranch }}
+        run: git push origin "$REFERENCE_BRANCH"
 
       # Opens the pull request carrying this bump to the dev branch. Runs last and cannot
       # fail the release: by this point the release is already published.
