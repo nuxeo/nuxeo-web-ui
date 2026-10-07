@@ -60,20 +60,49 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: npm ci --ignore-scripts
 
+      # A release build must test the artifact it is about to publish, which takes Elements from
+      # the registry via the -rc range in package.json. A pull request must test the Elements
+      # branch it is paired with, which exists only as source. Hence the split below.
+      - name: Ensure latest @nuxeo RC packages
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          ELEMENTS_VERSION=$(
+            for pkg in @nuxeo/nuxeo-elements @nuxeo/nuxeo-ui-elements @nuxeo/nuxeo-dataviz-elements @nuxeo/testing-helpers; do
+              npm view "$pkg" versions --json | jq -r '.[]'
+            done | grep -E "2025\.[0-9]+\.[0-9]+-rc\.[0-9]+$" \
+                 | sort | uniq -c | awk '$1 == 4 {print $2}' | sort -V | tail -n1
+          )
+          echo "Resolved latest nuxeo-elements RC: $ELEMENTS_VERSION"
+          if [ -z "$ELEMENTS_VERSION" ]; then
+            echo "::error::Could not resolve a common RC version across all @nuxeo packages"
+            exit 1
+          fi
+
+          npm install --no-package-lock \
+            @nuxeo/nuxeo-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
+            @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
+
+
       # Elements is built from the paired branch's source rather than resolved from the registry.
       # The registry lookup only ever matched `-rc` versions, which are published from the release
       # branches, so on a dev branch it resolved whichever release candidate happened to be newest
       # and never saw that cycle's Elements work. This is the same approach ftest.yaml and
       # cross-repo.yaml already use.
       - name: Determine nuxeo-elements branch to link
+        if: ${{ github.event_name == 'pull_request' }}
         id: pick_nuxeo_elements_branch
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
           repository: nuxeo/nuxeo-elements
-          branch: ${{ env.REFERENCE_BRANCH }}
-          default-branch: lts-2025
+          branch: ${{ github.head_ref || env.REFERENCE_BRANCH }}
+          default-branch: ${{ env.REFERENCE_BRANCH }}
 
       - name: Checkout the nuxeo-elements repo
+        if: ${{ github.event_name == 'pull_request' }}
         uses: actions/checkout@v6
         with:
           repository: nuxeo/nuxeo-elements
@@ -82,6 +111,7 @@ jobs:
           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
 
       - name: Pack Elements modules
+        if: ${{ github.event_name == 'pull_request' }}
         run: |
           pushd nuxeo-elements
           for d in core ui dataviz testing-helpers; do
@@ -92,6 +122,7 @@ jobs:
           popd
 
       - name: Link elements to Web UI
+        if: ${{ github.event_name == 'pull_request' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
