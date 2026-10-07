@@ -1,10 +1,13 @@
 version: 2
 
-# Dependency updates target the development branches, not the release branches.
-# A PR raised against a release branch would bypass the dev branch entirely, so the
-# update would never appear in any dev build and would land on a release branch that
-# is meant to hold released code only. It would also change dependency and lockfile
-# entries there, which stops the post-release sync PR merging cleanly.
+# Dependency updates target the development branches, not the release branches. A pull
+# request raised against a release branch bypasses the dev branch entirely, so the update
+# would never appear in a dev build, and it would land on a branch meant to hold released
+# code only.
+#
+# The trade is that the dev branch now rewrites package.json and the lockfile during a
+# cycle, while the release job rewrites the same files at release time. The post-release
+# sync pull request can therefore conflict on them; its body says which side to take.
 #
 # Every entry sets target-branch explicitly, including the one for the repository's
 # default branch, so the target does not silently move if the default ever changes.
