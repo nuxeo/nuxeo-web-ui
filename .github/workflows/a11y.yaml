@@ -127,14 +127,23 @@ jobs:
       # branches, so on a dev branch it resolved whichever release candidate happened to be newest
       # and never saw that cycle's Elements work. This is the same approach ftest.yaml and
       # cross-repo.yaml already use.
+      # Inlined rather than using ui-team-gh-actions/get-branch: that action interpolates its
+      # branch input straight into a shell command, and github.head_ref is controlled by whoever
+      # opens the pull request - a git ref may legally contain $( ) or backticks.
       - name: Determine nuxeo-elements branch to link
         if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
         id: pick_nuxeo_elements_branch
-        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
-        with:
-          repository: nuxeo/nuxeo-elements
-          branch: ${{ github.head_ref || env.REFERENCE_BRANCH }}
-          default-branch: ${{ env.REFERENCE_BRANCH }}
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          FALLBACK: ${{ env.REFERENCE_BRANCH }}
+        run: |
+          BRANCH="$FALLBACK"
+          if [ -n "$HEAD_REF" ] && git ls-remote --exit-code --heads \
+               https://github.com/nuxeo/nuxeo-elements "$HEAD_REF" >/dev/null 2>&1; then
+            BRANCH="$HEAD_REF"
+          fi
+          echo "Pairing with nuxeo-elements branch: $BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Checkout the nuxeo-elements repo
         if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
