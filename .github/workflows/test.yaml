@@ -103,8 +103,11 @@ jobs:
           FALLBACK: ${{ env.REFERENCE_BRANCH }}
         run: |
           BRANCH="$FALLBACK"
+          # Queried as a full ref: ls-remote matches patterns against the tail of a ref name,
+          # so a bare "fix/foo" would also match a branch called "feature/fix/foo" and we would
+          # then try to check out a branch that does not exist.
           if [ -n "$HEAD_REF" ] && git ls-remote --exit-code --heads \
-               https://github.com/nuxeo/nuxeo-elements "$HEAD_REF" >/dev/null 2>&1; then
+               https://github.com/nuxeo/nuxeo-elements "refs/heads/$HEAD_REF" >/dev/null 2>&1; then
             BRANCH="$HEAD_REF"
           fi
           echo "Pairing with nuxeo-elements branch: $BRANCH"

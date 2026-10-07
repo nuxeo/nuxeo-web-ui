@@ -69,12 +69,14 @@ jobs:
       # release candidate built from unreleased code.
       - name: Refuse to publish from a non-release branch
         env:
-          REF_NAME: ${{ github.ref_name }}
+          # The full ref, not ref_name: a workflow_dispatch can target a tag, and a tag named
+          # like a release branch would otherwise satisfy the check and publish its code.
+          REF: ${{ github.ref }}
         run: |
-          case "$REF_NAME" in
-            maintenance-3.1.x | lts-20[0-9][0-9]) ;;
+          case "$REF" in
+            refs/heads/maintenance-3.1.x | refs/heads/lts-20[0-9][0-9]) ;;
             *)
-              echo "::error::This workflow publishes release candidates and must run on a release branch, not $REF_NAME."
+              echo "::error::This workflow publishes release candidates and must run on a release branch, not $REF."
               exit 1
               ;;
           esac
