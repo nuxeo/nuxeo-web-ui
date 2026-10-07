@@ -34,9 +34,6 @@ env:
   REPOSITORY: nuxeo/nuxeo-web-ui
   # Base Nuxeo server image tag; nuxeo-docker-build pulls docker-private.packages.nuxeo.com/nuxeo/nuxeo:<tag>.
   BASE_IMAGE_TAG: '2023'
-  # The line this run belongs to. BRANCH_NAME below is the pull request head ref, which rarely
-  # exists in the sibling repository, so this is what the branch lookups actually fall back to.
-  REFERENCE_BRANCH: ${{ github.base_ref || github.ref_name }}
 
 jobs:
   id:
@@ -77,6 +74,18 @@ jobs:
             RAW_BRANCH="${{ github.event.inputs.branch_name }}"
           fi
           echo "BRANCH_NAME=$RAW_BRANCH" >> $GITHUB_ENV
+
+          # The line to pair the two repositories on, used as the fallback for the lookups below.
+          # BRANCH_NAME is a feature ref, which rarely exists in the sibling repository, so the
+          # fallback is what actually gets used. Only a release or dev branch is usable here:
+          # get-branch returns default-branch without checking it exists, so a manual run started
+          # from a feature branch would otherwise name a ref the sibling repository does not have.
+          REFERENCE_BRANCH="${{ github.base_ref || github.ref_name }}"
+          case "$REFERENCE_BRANCH" in
+            maintenance-3.1.x | develop-20[0-9][0-9]) ;;
+            *) REFERENCE_BRANCH=maintenance-3.1.x ;;
+          esac
+          echo "REFERENCE_BRANCH=$REFERENCE_BRANCH" >> $GITHUB_ENV
 
       - name: Determine nuxeo-web-ui branch to use
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
