@@ -64,7 +64,7 @@ jobs:
       # the registry via the -rc range in package.json. A pull request must test the Elements
       # branch it is paired with, which exists only as source. Hence the split below.
       - name: Ensure latest @nuxeo RC packages
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.event_name != 'pull_request' && !startsWith(env.REFERENCE_BRANCH, 'develop-') }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
@@ -93,7 +93,7 @@ jobs:
       # and never saw that cycle's Elements work. This is the same approach ftest.yaml and
       # cross-repo.yaml already use.
       - name: Determine nuxeo-elements branch to link
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
         id: pick_nuxeo_elements_branch
         uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
         with:
@@ -102,7 +102,7 @@ jobs:
           default-branch: ${{ env.REFERENCE_BRANCH }}
 
       - name: Checkout the nuxeo-elements repo
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
         uses: actions/checkout@v6
         with:
           repository: nuxeo/nuxeo-elements
@@ -111,7 +111,7 @@ jobs:
           ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
 
       - name: Pack Elements modules
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
         run: |
           pushd nuxeo-elements
           for d in core ui dataviz testing-helpers; do
@@ -122,7 +122,7 @@ jobs:
           popd
 
       - name: Link elements to Web UI
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
