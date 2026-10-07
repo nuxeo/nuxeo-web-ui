@@ -64,6 +64,21 @@ jobs:
       contents: write
 
     steps:
+      # main.yaml tags, pushes to Connect and publishes to npm. workflow_dispatch has no branch
+      # restriction, so without this a run started from a dev or feature branch would publish a
+      # release candidate built from unreleased code.
+      - name: Refuse to publish from a non-release branch
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          case "$REF_NAME" in
+            maintenance-3.1.x | lts-20[0-9][0-9]) ;;
+            *)
+              echo "::error::This workflow publishes release candidates and must run on a release branch, not $REF_NAME."
+              exit 1
+              ;;
+          esac
+
       - uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2
         with:
           comment_on_pr: false

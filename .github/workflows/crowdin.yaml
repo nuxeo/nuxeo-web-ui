@@ -64,11 +64,11 @@ jobs:
           auto_approve_imported: true
 
           # Name of the branch where to merge the translations
-          localization_branch_name: crowdin-translations-update-lts-2023
+          localization_branch_name: crowdin-translations-update-develop-2023
           pull_request_base_branch_name: develop-2023
           create_pull_request: true
-          pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
-          pull_request_body: 'New Crowdin pull request with translations lts 2023'
+          pull_request_title: 'New Crowdin translations by GitHub Action (develop-2023)'
+          pull_request_body: 'New Crowdin pull request with translations develop-2023'
 
           # The commit message
           commit_message: 'Automatic update of translations from Crowdin lts 2023'
