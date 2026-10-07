@@ -171,3 +171,17 @@ jobs:
 
       - if: ${{ github.event.inputs.dryRun == 'false' }}
         run: git push origin ${{ github.event.inputs.referenceBranch }}
+
+      # Opens the pull request carrying this bump to the dev branch. Runs last and cannot
+      # fail the release: by this point the release is already published.
+      #
+      # Without --ref this resolves the workflow on the repository default branch, where it
+      # lives. If the default branch moves, the workflow has to move with it.
+      - name: Open the pull request syncing this bump to the dev branch
+        if: ${{ github.event.inputs.dryRun == 'false' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GIT_ADMIN_TOKEN }}
+        run: |
+          gh workflow run sync-release-to-dev.yaml --repo "$GITHUB_REPOSITORY" \
+            -f release_branch=${{ github.event.inputs.referenceBranch }}
