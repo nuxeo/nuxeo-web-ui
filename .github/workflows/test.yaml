@@ -20,7 +20,7 @@ on:
         required: false
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || 'maintenance-3.1.x' }}
+  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.ref_name }}
   # Branch this PR targets. Used to pick the matching nuxeo-elements branch to build against.
   REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
