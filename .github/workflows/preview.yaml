@@ -34,6 +34,9 @@ env:
   REPOSITORY: nuxeo/nuxeo-web-ui
   # Base Nuxeo server image tag; nuxeo-docker-build pulls docker-private.packages.nuxeo.com/nuxeo/nuxeo:<tag>.
   BASE_IMAGE_TAG: '2023'
+  # The line this run belongs to. BRANCH_NAME below is the pull request head ref, which rarely
+  # exists in the sibling repository, so this is what the branch lookups actually fall back to.
+  REFERENCE_BRANCH: ${{ github.base_ref || github.ref_name }}
 
 jobs:
   id:
@@ -81,7 +84,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-web-ui
           branch: ${{ env.BRANCH_NAME }}
-          default-branch: maintenance-3.1.x
+          default-branch: ${{ env.REFERENCE_BRANCH }}
 
       - uses: actions/checkout@v6
         with:
@@ -105,7 +108,7 @@ jobs:
         with:
           repository: nuxeo/nuxeo-elements
           branch: ${{ env.BRANCH_NAME }}
-          default-branch: maintenance-3.1.x
+          default-branch: ${{ env.REFERENCE_BRANCH }}
 
       - name: Checkout the nuxeo-elements repo
         uses: actions/checkout@v6
