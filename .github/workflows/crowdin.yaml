@@ -6,9 +6,10 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-  # Sync when a commit is done on maintenance-3.1.x
+  # Sync when a commit is done on develop-2023. New strings now land on the dev branch, so
+  # syncing from maintenance-3.1.x would only reach translators at release time.
   push:
-    branches: ["maintenance-3.1.x"]
+    branches: ["develop-2023"]
     paths:
       - 'i18n/messages.json'
 
@@ -41,7 +42,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: maintenance-3.1.x
+          ref: develop-2023
 
       - name: Crowdin Action
         id: crowdin-sync
@@ -63,14 +64,14 @@ jobs:
           auto_approve_imported: true
 
           # Name of the branch where to merge the translations
-          localization_branch_name: crowdin-translations-update-lts-2023
-          pull_request_base_branch_name: maintenance-3.1.x
+          localization_branch_name: crowdin-translations-update-develop-2023
+          pull_request_base_branch_name: develop-2023
           create_pull_request: true
-          pull_request_title: 'New Crowdin translations by GitHub Action (lts-2023)'
-          pull_request_body: 'New Crowdin pull request with translations lts 2023'
+          pull_request_title: 'New Crowdin translations by GitHub Action (develop-2023)'
+          pull_request_body: 'New Crowdin pull request with translations develop-2023'
 
           # The commit message
-          commit_message: 'Automatic update of translations from Crowdin lts 2023'
+          commit_message: 'Automatic update of translations from Crowdin'
 
           # Automatically download all the new translations
           download_translations: true

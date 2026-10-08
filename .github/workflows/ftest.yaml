@@ -4,7 +4,8 @@ on:
   pull_request:
     branches:
       - maintenance-3.1.x
-      - lts-2025
+      - 'lts-20[0-9][0-9]'
+      - 'develop-20[0-9][0-9]'
 
   workflow_call:
     inputs:
@@ -47,6 +48,10 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          # Honour an explicit workflow_call branch. Empty on pull_request, which leaves
+          # checkout on the PR merge commit instead of the head branch.
+          ref: ${{ inputs.branch }}
 
       - uses: actions/setup-node@v6
         with:
@@ -55,10 +60,27 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
+      - name: Resolve JDK version
+        id: jdk
+        run: |
+          # Derived from the version being built, not the branch name, so it stays correct on
+          # dev branches. LTS 2023 (3.1.x) builds on Java 17; 2025 and later on Java 21.
+          PACKAGE_VERSION=$(jq -r .version package.json)
+          case "$PACKAGE_VERSION" in
+            3.1.*)    echo "version=17" >> "$GITHUB_OUTPUT" ;;
+            20[0-9][0-9].*) echo "version=21" >> "$GITHUB_OUTPUT" ;;
+            *)
+              # Explicit rather than defaulting: an unreadable package.json or a version shape
+              # nobody has taught this about should stop the build, not silently pick a JDK.
+              echo "::error::Cannot derive a JDK version from package.json version '$PACKAGE_VERSION'."
+              exit 1
+              ;;
+          esac
+
       - name: Setup Maven build
         uses: nuxeo/gh-build-tools/.github/actions/setup-maven-build@314c39e8c2e913db2dc63a31670612ccb2b6e569 # v0.10.4
         with:
-          java-version: ${{ (github.base_ref || inputs.branch || github.ref_name) == 'lts-2025' && 21 || 17 }}
+          java-version: ${{ steps.jdk.outputs.version }}
 
       - name: Purge cached Nuxeo artifacts
         run: rm -rf ~/.m2/repository/org/nuxeo
@@ -80,14 +102,29 @@ jobs:
           sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
           npm install -g --ignore-scripts bower@1.8.14 gulp-cli@3.1.0
 
+      # Inlined rather than using ui-team-gh-actions/get-branch: that action interpolates its
+      # branch input straight into a shell command, and github.head_ref is controlled by whoever
+      # opens the pull request - a git ref may legally contain $( ) or backticks.
       - name: Determine nuxeo-elements branch to link
         id: pick_nuxeo_elements_branch
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          FALLBACK: ${{ env.REFERENCE_BRANCH }}
         run: |
-          if git ls-remote --exit-code --heads https://github.com/nuxeo/nuxeo-elements ${{ env.REFERENCE_BRANCH }}; then
-            echo "branch=${{ env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
-          else
-            echo "branch=${{ github.base_ref || env.REFERENCE_BRANCH }}" >> $GITHUB_OUTPUT
+          BRANCH="$FALLBACK"
+          # Both repositories generate sync/<release>-to-<dev> from the same template, so a match
+          # on that name means "a workflow made one here too", not "the paired work lives here".
+          # Pairing on it would test the merged dev work against the other repo's release snapshot.
+          case "$HEAD_REF" in sync/*) HEAD_REF="" ;; esac
+          # Queried as a full ref: ls-remote matches patterns against the tail of a ref name,
+          # so a bare "fix/foo" would also match a branch called "feature/fix/foo" and we would
+          # then try to check out a branch that does not exist.
+          if [ -n "$HEAD_REF" ] && git ls-remote --exit-code --heads \
+               https://github.com/nuxeo/nuxeo-elements "refs/heads/$HEAD_REF" >/dev/null 2>&1; then
+            BRANCH="$HEAD_REF"
           fi
+          echo "Pairing with nuxeo-elements branch: $BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Install Web UI
         env:

@@ -7,7 +7,6 @@ on:
     inputs:
       branch_name:
         description: 'The name of the branch to build.'
-        default: 'maintenance-3.1.x'
         type: string
         required: true
       sauce_labs:
@@ -42,7 +41,6 @@ on:
         required: false
       caller_id:
         description: 'run identifier'
-        default: 'maintenance-3.1.x'
         type: string
         required: false
 
@@ -56,7 +54,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REFERENCE_BRANCH: maintenance-3.1.x
+  # The base branch this run targets. The Elements cross-repo check dispatches this workflow
+  # against that ref, so github.ref_name is it — as the concurrency comment above also relies on.
+  # Was hardcoded to this line's release branch. Elements dispatches each line's own copy,
+  # so that matched until now; a develop-20XX run would have been sent to released code.
+  REFERENCE_BRANCH: ${{ github.ref_name }}
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
 
 jobs:
@@ -94,21 +96,57 @@ jobs:
           scope: '@nuxeo'
           node-version: 22
 
-      - name: Determine nuxeo-web-ui branch to use
-        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
-        id: pick_nuxeo_web_ui_branch
-        with:
-          repository: nuxeo/nuxeo-web-ui
-          branch: ${{ github.event.inputs.branch_name }}
-          default-branch: ${{ env.REFERENCE_BRANCH }}
+      # get-branch returns default-branch without checking that it exists, so the fallback has
+      # to name a branch both repositories actually have. A dispatch from any other ref would
+      # otherwise resolve to something that is not there and fail at checkout.
+      - name: Resolve the line to pair on
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          case "$REF_NAME" in
+            maintenance-3.1.x | lts-20[0-9][0-9] | develop-20[0-9][0-9]) ;;
+            *) REF_NAME=maintenance-3.1.x ;;
+          esac
+          echo "REFERENCE_BRANCH=$REF_NAME" >> "$GITHUB_ENV"
 
+      # Inlined rather than using ui-team-gh-actions/get-branch: that action interpolates its
+      # branch input straight into a shell command, and a git ref may legally contain $( ) or
+      # backticks. Queried as a full ref so a partial name cannot match by tail.
+      - name: Determine nuxeo-web-ui branch to use
+        id: pick_nuxeo_web_ui_branch
+        env:
+          CANDIDATE: ${{ github.event.inputs.branch_name }}
+          FALLBACK: ${{ env.REFERENCE_BRANCH }}
+        run: |
+          BRANCH="$FALLBACK"
+          # branch_name names the Elements branch being tested, so a Web UI branch of the same
+          # name is a coincidence - except for sync/<release>-to-<dev>, which both repositories
+          # generate from the same template. Matching on that would compare the Elements work
+          # against Web UI's release snapshot instead of the development line.
+          case "$CANDIDATE" in sync/*) CANDIDATE="" ;; esac
+          if [ -n "$CANDIDATE" ] && git ls-remote --exit-code --heads \
+               https://github.com/nuxeo/nuxeo-web-ui "refs/heads/$CANDIDATE" >/dev/null 2>&1; then
+            BRANCH="$CANDIDATE"
+          fi
+          echo "Using nuxeo/nuxeo-web-ui branch: $BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      # Inlined rather than using ui-team-gh-actions/get-branch: that action interpolates its
+      # branch input straight into a shell command, and a git ref may legally contain $( ) or
+      # backticks. Queried as a full ref so a partial name cannot match by tail.
       - name: Determine nuxeo-elements branch to use
         id: pick_nuxeo_elements_branch
-        uses: nuxeo/ui-team-gh-actions/get-branch@ca09d5c52a62e297502d3572c36d813be927982a
-        with:
-          repository: nuxeo/nuxeo-elements
-          branch: ${{ github.event.inputs.branch_name }}
-          default-branch: ${{ env.REFERENCE_BRANCH }}
+        env:
+          CANDIDATE: ${{ github.event.inputs.branch_name }}
+          FALLBACK: ${{ env.REFERENCE_BRANCH }}
+        run: |
+          BRANCH="$FALLBACK"
+          if [ -n "$CANDIDATE" ] && git ls-remote --exit-code --heads \
+               https://github.com/nuxeo/nuxeo-elements "refs/heads/$CANDIDATE" >/dev/null 2>&1; then
+            BRANCH="$CANDIDATE"
+          fi
+          echo "Using nuxeo/nuxeo-elements branch: $BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Checkout nuxeo-web-ui repo
         uses: actions/checkout@v6

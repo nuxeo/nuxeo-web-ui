@@ -5,10 +5,12 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - maintenance-3.1.x
+      - 'develop-20[0-9][0-9]'
 
   push:
     branches:
       - maintenance-3.1.x
+      - 'develop-20[0-9][0-9]'
 
   workflow_dispatch:
 
@@ -23,6 +25,11 @@ on:
         required: true
       SONAR_TOKEN:
         required: true
+
+env:
+  NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
+  # Branch this run targets. Used to pick the matching nuxeo-elements branch to build against.
+  REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
 
 jobs:
   sonar:
@@ -65,7 +72,11 @@ jobs:
         run: npm ci --ignore-scripts
         working-directory: ${{ github.workspace }}
 
+      # A release build must test the artifact it is about to publish, which takes Elements from
+      # the registry via the -rc range in package.json. A pull request must test the Elements
+      # branch it is paired with, which exists only as source. Hence the split below.
       - name: Ensure latest @nuxeo RC packages
+        if: ${{ github.event_name != 'pull_request' && !startsWith(env.REFERENCE_BRANCH, 'develop-') }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
         run: |
@@ -88,6 +99,71 @@ jobs:
             @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
         working-directory: ${{ github.workspace }}
 
+      # Elements is built from the paired branch's source rather than resolved from the registry.
+      # The registry lookup only matched `-rc` versions, which are published from the release
+      # branches, so on a dev branch it resolved whichever release candidate happened to be newest
+      # and never saw that cycle's Elements work. This is the same approach ftest.yaml and
+      # cross-repo.yaml already use.
+      # Inlined rather than using ui-team-gh-actions/get-branch: that action interpolates its
+      # branch input straight into a shell command, and github.head_ref is controlled by whoever
+      # opens the pull request - a git ref may legally contain $( ) or backticks.
+      - name: Determine nuxeo-elements branch to link
+        if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
+        id: pick_nuxeo_elements_branch
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          FALLBACK: ${{ env.REFERENCE_BRANCH }}
+        run: |
+          BRANCH="$FALLBACK"
+          # Both repositories generate sync/<release>-to-<dev> from the same template, so a match
+          # on that name means "a workflow made one here too", not "the paired work lives here".
+          # Pairing on it would test the merged dev work against the other repo's release snapshot.
+          case "$HEAD_REF" in sync/*) HEAD_REF="" ;; esac
+          # Queried as a full ref: ls-remote matches patterns against the tail of a ref name,
+          # so a bare "fix/foo" would also match a branch called "feature/fix/foo" and we would
+          # then try to check out a branch that does not exist.
+          if [ -n "$HEAD_REF" ] && git ls-remote --exit-code --heads \
+               https://github.com/nuxeo/nuxeo-elements "refs/heads/$HEAD_REF" >/dev/null 2>&1; then
+            BRANCH="$HEAD_REF"
+          fi
+          echo "Pairing with nuxeo-elements branch: $BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout the nuxeo-elements repo
+        if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
+        uses: actions/checkout@v6
+        with:
+          repository: nuxeo/nuxeo-elements
+          path: nuxeo-elements
+          fetch-depth: 1
+          ref: ${{ steps.pick_nuxeo_elements_branch.outputs.branch }}
+
+      - name: Pack Elements modules
+        if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
+        run: |
+          pushd nuxeo-elements
+          for d in core ui dataviz testing-helpers; do
+            pushd $d
+            echo "ELEMENTS_$(echo $d | tr 'a-z-' 'A-Z_')=$(npm pack 2>&1 | tail -1)" >> $GITHUB_ENV
+            popd
+          done
+          popd
+        working-directory: ${{ github.workspace }}
+
+      - name: Link elements to Web UI
+        if: ${{ github.event_name == 'pull_request' || startsWith(env.REFERENCE_BRANCH, 'develop-') }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PACKAGES_TOKEN }}
+        run: |
+          # One invocation: the root preinstall hook runs npm ci in three subpackages, so
+          # installing the tarballs one at a time repeats that work four times over.
+          npm install --no-package-lock --@nuxeo:registry="${{ env.NPM_REPOSITORY }}" \
+            nuxeo-elements/core/${ELEMENTS_CORE} \
+            nuxeo-elements/ui/${ELEMENTS_UI} \
+            nuxeo-elements/dataviz/${ELEMENTS_DATAVIZ} \
+            nuxeo-elements/testing-helpers/${ELEMENTS_TESTING_HELPERS}
+        working-directory: ${{ github.workspace }}
+
       - name: Run unit tests with coverage
         # pretest installs Puppeteer Chromium (npm ci --ignore-scripts skips its postinstall).
         run: npm test
@@ -95,11 +171,21 @@ jobs:
 
       - name: Resolve project version and branch
         id: project_meta
+        env:
+          # Through the environment, not interpolated: github.head_ref is chosen by whoever
+          # opens the pull request and a git ref may legally contain $( ) or backticks.
+          # head_ref = PR source branch, ref_name = push branch, inputs.branch = workflow_call.
+          # git HEAD is detached on pull_request and push events, hence not reading it from git.
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_BRANCH: ${{ inputs.branch }}
         run: |
           echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
-          # github.head_ref = PR source branch, github.ref_name = push branch,
-          # inputs.branch = workflow_call. git HEAD is detached on PR/push events.
-          echo "branch=${{ github.head_ref || github.ref_name || inputs.branch }}" >> "$GITHUB_OUTPUT"
+          # inputs.branch before ref_name: in a reusable workflow ref_name is always the
+          # caller's ref, so it would win even though the checkout above honours the input.
+          # Dispatching main.yaml from another ref would then scan one branch and file the
+          # result under another.
+          echo "branch=${HEAD_REF:-${INPUT_BRANCH:-$REF_NAME}}" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}
 
       - name: Build and analyze

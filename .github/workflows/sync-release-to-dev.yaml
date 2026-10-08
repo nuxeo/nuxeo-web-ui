@@ -1,0 +1,141 @@
+name: Sync release branch to dev
+
+# Run this after a release has been promoted.
+#
+# The release job leaves the version bump on the release branch. The dev branch needs
+# that bump before the next cycle's work builds against the right version, and it also
+# needs any hotfix that went straight to the release branch. This opens the pull request
+# that carries both.
+#
+# The pull request is raised from a throwaway branch pointing at the release branch, not
+# from the release branch itself. Both repositories have delete_branch_on_merge enabled,
+# so a pull request headed by a release branch would ask GitHub to delete it on merge, and
+# the "Update branch" button on such a pull request would merge the dev branch back into
+# the release branch. A disposable head avoids both, and keeps github.head_ref from ever
+# naming a release branch - which release-only steps elsewhere key off.
+on:
+  workflow_dispatch:
+    inputs:
+      release_branch:
+        description: 'Release branch that was just promoted'
+        required: true
+        type: choice
+        options:
+          - lts-2025
+          - maintenance-3.1.x
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve the branches for this line
+        id: branches
+        env:
+          RELEASE_BRANCH: ${{ inputs.release_branch }}
+        run: |
+          case "$RELEASE_BRANCH" in
+            lts-2025)          DEV_BRANCH=develop-2025 ;;
+            maintenance-3.1.x) DEV_BRANCH=develop-2023 ;;
+            *)
+              echo "::error::No dev branch mapped for $RELEASE_BRANCH"
+              exit 1
+              ;;
+          esac
+          echo "dev=$DEV_BRANCH" >> "$GITHUB_OUTPUT"
+          # Slash-prefixed so it cannot match the lts-* / develop-* patterns that CI triggers
+          # and branch rulesets use.
+          echo "head=sync/$RELEASE_BRANCH-to-$DEV_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Syncing $RELEASE_BRANCH into $DEV_BRANCH"
+
+      - name: Open the sync pull request
+        env:
+          # A PAT rather than GITHUB_TOKEN: a pull request opened by GITHUB_TOKEN does not
+          # trigger other workflows, so the sync PR would get no checks.
+          GH_TOKEN: ${{ secrets.WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN }}
+          RELEASE_BRANCH: ${{ inputs.release_branch }}
+          DEV_BRANCH: ${{ steps.branches.outputs.dev }}
+          HEAD_BRANCH: ${{ steps.branches.outputs.head }}
+        run: |
+          ahead=$(git rev-list --count "origin/$DEV_BRANCH..origin/$RELEASE_BRANCH")
+          if [ "$ahead" = "0" ]; then
+            echo "::notice::$DEV_BRANCH already contains everything on $RELEASE_BRANCH. Nothing to sync."
+            exit 0
+          fi
+          echo "$RELEASE_BRANCH is $ahead commit(s) ahead of $DEV_BRANCH."
+
+          # Point the throwaway head at the release branch, creating it if this is the first run
+          # and fast-forwarding it otherwise. Reusing one name per line keeps an unmerged sync
+          # pull request updated instead of opening a second one.
+          #
+          # The update is deliberately NOT forced. If somebody has resolved conflicts on an open
+          # sync pull request, or pressed "Update branch", its head carries commits the release
+          # branch does not, and a force update would silently throw that work away. A rejected
+          # fast-forward means exactly that, so stop and let a person finish it by hand.
+          SHA=$(git rev-parse "origin/$RELEASE_BRANCH")
+          # Singular /git/ref: the plural route prefix-matches, so a stray ref would satisfy
+          # this check and the PATCH below would then 404 for a misleading reason.
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$HEAD_BRANCH" >/dev/null 2>&1; then
+            if ! gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/$HEAD_BRANCH" \
+                   -f sha="$SHA" >/dev/null 2>&1; then
+              echo "::error::$HEAD_BRANCH cannot fast-forward to $RELEASE_BRANCH - it carries commits the release branch does not."
+              echo "::error::Merge $RELEASE_BRANCH into the open sync pull request by hand; re-running this would discard that work."
+              exit 1
+            fi
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f ref="refs/heads/$HEAD_BRANCH" -f sha="$SHA" >/dev/null
+          fi
+
+          existing=$(gh pr list --repo "$GITHUB_REPOSITORY" \
+                       --base "$DEV_BRANCH" --head "$HEAD_BRANCH" \
+                       --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            echo "::notice::Sync pull request already open and updated: #$existing"
+            exit 0
+          fi
+
+          {
+            echo "> [!IMPORTANT]"
+            echo "> **Merge this with a merge commit - not squash, not rebase.**"
+            echo "> Squash and rebase give \`$DEV_BRANCH\` the content without the history, so"
+            echo "> the next sync cannot tell this was already merged and re-proposes the whole"
+            echo "> release branch. That repeats every cycle and grows each time."
+            echo
+            echo "Opened automatically after promoting a release on \`$RELEASE_BRANCH\`."
+            echo
+            echo "## What this carries"
+            echo
+            echo "- the post-release version bump, so the next cycle builds against the right version"
+            echo "- any hotfix that went straight to the release branch"
+            echo
+            echo "## Merge it before the next release starts"
+            echo
+            echo "While this is open, \`$DEV_BRANCH\` is on the previous version and is missing"
+            echo "anything that went straight to the release branch. A hotfix left unmerged here"
+            echo "also still needs porting to the other LTS line, which no merge does"
+            echo "automatically, because the two lines share no history."
+            echo
+            echo "## Conflicts in version files are expected sometimes"
+            echo
+            echo "The release job rewrites \`package.json\` and \`package-lock.json\` on"
+            echo "\`$RELEASE_BRANCH\`, and a Dependabot update merged into \`$DEV_BRANCH\` during the"
+            echo "cycle rewrites the same files. When both sides have changed them, git cannot pick"
+            echo "a side on its own."
+            echo
+            echo "Resolve by taking **this branch's** version fields, because the release branch"
+            echo "holds the version that was actually published, then re-running"
+            echo "\`npm install --package-lock-only\` so the lockfile matches."
+          } > sync-pr-body.md
+
+          gh pr create --repo "$GITHUB_REPOSITORY" \
+            --base "$DEV_BRANCH" \
+            --head "$HEAD_BRANCH" \
+            --title "Sync $RELEASE_BRANCH into $DEV_BRANCH after release" \
+            --body-file sync-pr-body.md
