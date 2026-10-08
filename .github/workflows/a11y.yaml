@@ -143,6 +143,10 @@ jobs:
           FALLBACK: ${{ env.REFERENCE_BRANCH }}
         run: |
           BRANCH="$FALLBACK"
+          # Both repositories generate sync/<release>-to-<dev> from the same template, so a match
+          # on that name means "a workflow made one here too", not "the paired work lives here".
+          # Pairing on it would test the merged dev work against the other repo's release snapshot.
+          case "$HEAD_REF" in sync/*) HEAD_REF="" ;; esac
           # Queried as a full ref: ls-remote matches patterns against the tail of a ref name,
           # so a bare "fix/foo" would also match a branch called "feature/fix/foo" and we would
           # then try to check out a branch that does not exist.
