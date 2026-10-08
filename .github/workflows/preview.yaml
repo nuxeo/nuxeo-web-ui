@@ -135,6 +135,13 @@ jobs:
           FALLBACK: ${{ env.REFERENCE_BRANCH }}
         run: |
           BRANCH="$FALLBACK"
+          # On a pull request, BRANCH_NAME is the Web UI head. An Elements branch of the same name
+          # is a coincidence - except for sync/<release>-to-<dev>, which both repositories generate
+          # from the same template, so matching it would pair against Elements' release snapshot.
+          # A manual dispatch names its branch deliberately, so it is left alone.
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            case "$CANDIDATE" in sync/*) CANDIDATE="" ;; esac
+          fi
           if [ -n "$CANDIDATE" ] && git ls-remote --exit-code --heads \
                https://github.com/nuxeo/nuxeo-elements "refs/heads/$CANDIDATE" >/dev/null 2>&1; then
             BRANCH="$CANDIDATE"
