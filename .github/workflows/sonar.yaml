@@ -99,7 +99,6 @@ jobs:
             @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
         working-directory: ${{ github.workspace }}
 
-
       # Elements is built from the paired branch's source rather than resolved from the registry.
       # The registry lookup only ever matched `-rc` versions, which are published from the release
       # branches, so on a dev branch it resolved whichever release candidate happened to be newest

@@ -10,7 +10,6 @@ on:
     inputs:
       branch:
         description: 'Branch to test'
-        default: lts-2025
         type: string
         required: false
     secrets:
@@ -20,7 +19,6 @@ on:
         required: false
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.ref_name }}
   # Branch this PR targets. Used to pick the matching nuxeo-elements branch to build against.
   REFERENCE_BRANCH: ${{ github.base_ref || inputs.branch || github.ref_name }}
   NPM_REPOSITORY: https://packages.nuxeo.com/repository/npm-public/
@@ -38,8 +36,6 @@ jobs:
           comment_on_pr: false
 
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ env.BRANCH_NAME }}
 
       - uses: actions/setup-node@v6
         with:
@@ -85,7 +81,6 @@ jobs:
             @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
             @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
             @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
-
 
       # Elements is built from the paired branch's source rather than resolved from the registry.
       # The registry lookup only ever matched `-rc` versions, which are published from the release
