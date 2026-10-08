@@ -167,11 +167,17 @@ jobs:
 
       - name: Resolve project version and branch
         id: project_meta
+        env:
+          # Through the environment, not interpolated: github.head_ref is chosen by whoever
+          # opens the pull request and a git ref may legally contain $( ) or backticks.
+          # head_ref = PR source branch, ref_name = push branch, inputs.branch = workflow_call.
+          # git HEAD is detached on pull_request and push events, hence not reading it from git.
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_BRANCH: ${{ inputs.branch }}
         run: |
           echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
-          # github.head_ref = PR source branch, github.ref_name = push branch,
-          # inputs.branch = workflow_call. git HEAD is detached on PR/push events.
-          echo "branch=${{ github.head_ref || github.ref_name || inputs.branch }}" >> "$GITHUB_OUTPUT"
+          echo "branch=${HEAD_REF:-${REF_NAME:-$INPUT_BRANCH}}" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}
 
       - name: Build and analyze
