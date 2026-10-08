@@ -71,7 +71,7 @@ jobs:
           pull_request_body: 'New Crowdin pull request with translations develop-2023'
 
           # The commit message
-          commit_message: 'Automatic update of translations from Crowdin lts 2023'
+          commit_message: 'Automatic update of translations from Crowdin'
 
           # Automatically download all the new translations
           download_translations: true

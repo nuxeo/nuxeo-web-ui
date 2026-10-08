@@ -190,5 +190,14 @@ jobs:
           # free text from workflow_dispatch.
           REFERENCE_BRANCH: ${{ github.event.inputs.referenceBranch }}
         run: |
+          # Checked first: the sync workflow takes a choice input, so anything outside the
+          # list fails the dispatch with a 422 that continue-on-error would swallow.
+          case "$REFERENCE_BRANCH" in
+            lts-2025 | maintenance-3.1.x) ;;
+            *)
+              echo "::warning::No dev branch is mapped for $REFERENCE_BRANCH; skipping the sync dispatch."
+              exit 0
+              ;;
+          esac
           gh workflow run sync-release-to-dev.yaml --repo "$GITHUB_REPOSITORY" \
             -f release_branch="$REFERENCE_BRANCH"

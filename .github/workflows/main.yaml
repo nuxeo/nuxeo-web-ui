@@ -66,7 +66,8 @@ jobs:
     steps:
       # main.yaml tags, pushes to Connect and publishes to npm. workflow_dispatch has no branch
       # restriction, so without this a run started from a dev or feature branch would publish a
-      # release candidate built from unreleased code.
+      # release candidate built from unreleased code. This guards release candidates only -
+      # alpha.yaml still publishes -alpha.N from any dispatched ref, by design.
       - name: Refuse to publish from a non-release branch
         env:
           # The full ref, not ref_name: a workflow_dispatch can target a tag, and a tag named
