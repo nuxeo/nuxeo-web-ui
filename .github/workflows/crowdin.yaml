@@ -13,9 +13,10 @@ on:
       WEBUI_JX_BOT_GITHUB_ACTIONS_TOKEN:
         required: true
 
-  # Sync when a commit is done on lts-2025
+  # Sync when a commit is done on develop-2025. New strings now land on the dev branch, so
+  # syncing from lts-2025 would only reach translators at release time.
   push:
-    branches: ["lts-2025"]
+    branches: ["develop-2025"]
     paths:
       - 'i18n/messages.json'
 
@@ -33,13 +34,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: lts-2025
+          ref: develop-2025
 
       - name: Crowdin Action
         id: crowdin-sync
         uses: crowdin/github-action@8868a33591d21088edfc398968173a3b98d51706 # v2.16.2
         with:
-          # Skip the action's internal ref checkout because this workflow already checks out lts-2025 explicitly.
+          # Skip the action's internal ref checkout because this workflow already checks out develop-2025 explicitly.
           skip_ref_checkout: true
 
           # Tokens
@@ -55,11 +56,11 @@ jobs:
           auto_approve_imported: true
 
           # Name of the branch where to merge the translations
-          localization_branch_name: crowdin-translations-update-lts-2025
-          pull_request_base_branch_name: lts-2025
+          localization_branch_name: crowdin-translations-update-develop-2025
+          pull_request_base_branch_name: develop-2025
           create_pull_request: true
-          pull_request_title: 'New Crowdin translations by GitHub Action (lts-2025)'
-          pull_request_body: 'New Crowdin pull request with translations lts 2025'
+          pull_request_title: 'New Crowdin translations by GitHub Action (develop-2025)'
+          pull_request_body: 'New Crowdin pull request with translations develop-2025'
 
           # The commit message
           commit_message: 'Automatic update of translations from Crowdin'
