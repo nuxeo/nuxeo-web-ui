@@ -63,8 +63,14 @@ jobs:
           # dev branches. LTS 2023 (3.1.x) builds on Java 17; 2025 and later on Java 21.
           PACKAGE_VERSION=$(jq -r .version package.json)
           case "$PACKAGE_VERSION" in
-            3.1.*) echo "version=17" >> "$GITHUB_OUTPUT" ;;
-            *)     echo "version=21" >> "$GITHUB_OUTPUT" ;;
+            3.1.*)    echo "version=17" >> "$GITHUB_OUTPUT" ;;
+            20[0-9][0-9].*) echo "version=21" >> "$GITHUB_OUTPUT" ;;
+            *)
+              # Explicit rather than defaulting: an unreadable package.json or a version shape
+              # nobody has taught this about should stop the build, not silently pick a JDK.
+              echo "::error::Cannot derive a JDK version from package.json version '$PACKAGE_VERSION'."
+              exit 1
+              ;;
           esac
 
       - name: Setup Maven build
@@ -120,7 +126,6 @@ jobs:
             @nuxeo/nuxeo-ui-elements@"$ELEMENTS_VERSION" \
             @nuxeo/nuxeo-dataviz-elements@"$ELEMENTS_VERSION" \
             @nuxeo/testing-helpers@"$ELEMENTS_VERSION"
-
 
       # Elements is built from the paired branch's source rather than resolved from the registry.
       # The registry lookup only matched `-rc` versions, which are published from the release

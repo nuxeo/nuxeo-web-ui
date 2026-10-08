@@ -17,7 +17,6 @@ on:
         required: true
 
 env:
-  BRANCH_NAME: ${{ github.head_ref || inputs.branch || github.ref_name }}
 
 jobs:
   lint:
@@ -27,8 +26,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ env.BRANCH_NAME }}
 
       - uses: actions/setup-node@v6
         with:
