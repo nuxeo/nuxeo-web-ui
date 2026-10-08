@@ -67,25 +67,30 @@ jobs:
           scope: '@nuxeo'
 
       - name: Set branch name
+        env:
+          # Through the environment, never interpolated into the script: a git ref may legally
+          # contain $( ) or backticks, and command substitution runs when the assignment is
+          # evaluated - before the whitelist below gets a chance to reject it.
+          INPUT_BRANCH: ${{ github.event.inputs.branch_name }}
+          BASE_REF: ${{ github.base_ref }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            RAW_BRANCH="${GITHUB_HEAD_REF}"
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            RAW_BRANCH="$GITHUB_HEAD_REF"
           else
-            RAW_BRANCH="${{ github.event.inputs.branch_name }}"
+            RAW_BRANCH="$INPUT_BRANCH"
           fi
-          echo "BRANCH_NAME=$RAW_BRANCH" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$RAW_BRANCH" >> "$GITHUB_ENV"
 
           # The line to pair the two repositories on, used as the fallback for the lookups below.
           # BRANCH_NAME is a feature ref, which rarely exists in the sibling repository, so the
-          # fallback is what actually gets used. Only a release or dev branch is usable here:
-          # get-branch returns default-branch without checking it exists, so a manual run started
-          # from a feature branch would otherwise name a ref the sibling repository does not have.
-          REFERENCE_BRANCH="${{ github.base_ref || github.ref_name }}"
+          # fallback is what actually gets used and it has to name a branch that is really there.
+          REFERENCE_BRANCH="${BASE_REF:-$REF_NAME}"
           case "$REFERENCE_BRANCH" in
             maintenance-3.1.x | develop-20[0-9][0-9]) ;;
             *) REFERENCE_BRANCH=maintenance-3.1.x ;;
           esac
-          echo "REFERENCE_BRANCH=$REFERENCE_BRANCH" >> $GITHUB_ENV
+          echo "REFERENCE_BRANCH=$REFERENCE_BRANCH" >> "$GITHUB_ENV"
 
       # Inlined rather than using ui-team-gh-actions/get-branch: that action interpolates its
       # branch input straight into a shell command, and a git ref may legally contain $( ) or
