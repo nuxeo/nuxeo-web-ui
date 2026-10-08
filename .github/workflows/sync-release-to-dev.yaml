@@ -79,9 +79,11 @@ jobs:
           # branch does not, and a force update would silently throw that work away. A rejected
           # fast-forward means exactly that, so stop and let a person finish it by hand.
           SHA=$(git rev-parse "origin/$RELEASE_BRANCH")
-          if gh api "repos/$GITHUB_REPOSITORY/git/refs/heads/$HEAD_BRANCH" >/dev/null 2>&1; then
+          # Singular /git/ref: the plural route prefix-matches, so a stray ref would satisfy
+          # this check and the PATCH below would then 404 for a misleading reason.
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$HEAD_BRANCH" >/dev/null 2>&1; then
             if ! gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/$HEAD_BRANCH" \
-                   -F sha="$SHA" >/dev/null 2>&1; then
+                   -f sha="$SHA" >/dev/null 2>&1; then
               echo "::error::$HEAD_BRANCH cannot fast-forward to $RELEASE_BRANCH - it carries commits the release branch does not."
               echo "::error::Merge $RELEASE_BRANCH into the open sync pull request by hand; re-running this would discard that work."
               exit 1
@@ -100,6 +102,12 @@ jobs:
           fi
 
           {
+            echo "> [!IMPORTANT]"
+            echo "> **Merge this with a merge commit - not squash, not rebase.**"
+            echo "> Squash and rebase give \`$DEV_BRANCH\` the content without the history, so"
+            echo "> the next sync cannot tell this was already merged and re-proposes the whole"
+            echo "> release branch. That repeats every cycle and grows each time."
+            echo
             echo "Opened automatically after promoting a release on \`$RELEASE_BRANCH\`."
             echo
             echo "## What this carries"
