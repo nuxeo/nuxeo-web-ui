@@ -36,6 +36,10 @@ jobs:
           comment_on_pr: false
 
       - uses: actions/checkout@v6
+        with:
+          # Honour an explicit workflow_call branch. Empty on pull_request, which leaves
+          # checkout on the PR merge commit instead of the head branch.
+          ref: ${{ inputs.branch }}
 
       - uses: actions/setup-node@v6
         with:
