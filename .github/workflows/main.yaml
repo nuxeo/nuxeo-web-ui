@@ -75,7 +75,7 @@ jobs:
           REF: ${{ github.ref }}
         run: |
           case "$REF" in
-            refs/heads/maintenance-3.1.x | refs/heads/lts-20[0-9][0-9]) ;;
+            refs/heads/maintenance-3.1.x | refs/heads/lts-2025) ;;
             *)
               echo "::error::This workflow publishes release candidates and must run on a release branch, not $REF."
               exit 1

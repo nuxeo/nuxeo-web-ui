@@ -181,7 +181,11 @@ jobs:
           INPUT_BRANCH: ${{ inputs.branch }}
         run: |
           echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
-          echo "branch=${HEAD_REF:-${REF_NAME:-$INPUT_BRANCH}}" >> "$GITHUB_OUTPUT"
+          # inputs.branch before ref_name: in a reusable workflow ref_name is always the
+          # caller's ref, so it would win even though the checkout above honours the input.
+          # Dispatching main.yaml from another ref would then scan one branch and file the
+          # result under another.
+          echo "branch=${HEAD_REF:-${INPUT_BRANCH:-$REF_NAME}}" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}
 
       - name: Build and analyze
