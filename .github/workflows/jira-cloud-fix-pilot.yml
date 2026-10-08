@@ -1,0 +1,61 @@
+name: Cloud dispatcher branch pilot (no submission)
+
+on:
+  push:
+    branches: [cloud-fix-dispatcher-pilot-20261008]
+    paths:
+      - .github/workflows/jira-cloud-fix-pilot.yml
+      - scripts/cloud-fix/**
+      - tests/cloud-fix/**
+      - docs/cloud-fix-branch-pilot.md
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloud-dispatcher-branch-pilot
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUD_FIX_PILOT_ISSUE_KEY: WEBUI-2366
+      CLOUD_FIX_SUBMISSION_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run dispatcher tests
+        run: python -m unittest discover -s tests/cloud-fix -v
+      - name: Validate push request (no credentials needed)
+        run: python scripts/cloud-fix/dispatcher.py validate
+      - name: Check Jira secret availability
+        id: jira
+        env:
+          JIRA_USERNAME: ${{ secrets.CLOUD_FIX_JIRA_USERNAME }}
+          JIRA_API_TOKEN: ${{ secrets.CLOUD_FIX_JIRA_API_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          configured = bool(os.environ.get('JIRA_USERNAME') and os.environ.get('JIRA_API_TOKEN'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('configured=' + str(configured).lower() + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('Cloud submission is disabled for this branch pilot.\n\n')
+              f.write('Jira read validation will run.\n' if configured else
+                      'Jira read validation is BLOCKED: configure CLOUD_FIX_JIRA_USERNAME and CLOUD_FIX_JIRA_API_TOKEN in repository Actions secrets. Payload validation alone does not verify Jira or Codex Cloud connectivity.\n')
+          PY
+      - name: Validate current WEBUI-2366 Tags through Jira
+        if: steps.jira.outputs.configured == 'true'
+        env:
+          JIRA_USERNAME: ${{ secrets.CLOUD_FIX_JIRA_USERNAME }}
+          JIRA_API_TOKEN: ${{ secrets.CLOUD_FIX_JIRA_API_TOKEN }}
+        run: python scripts/cloud-fix/dispatcher.py prepare --directory "$RUNNER_TEMP/cloud-fix-pilot"
+      - name: Remove temporary ticket data
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/cloud-fix-pilot"
