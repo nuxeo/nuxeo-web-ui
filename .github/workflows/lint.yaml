@@ -16,8 +16,6 @@ on:
       NPM_PACKAGES_TOKEN:
         required: true
 
-env:
-
 jobs:
   lint:
     runs-on: ubuntu-latest
