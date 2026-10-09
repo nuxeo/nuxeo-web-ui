@@ -57,6 +57,12 @@ limitations under the License.
   </template>
 
   <script>
+    // Principals the platform creates internally and never stores in the user directory.
+    // Resolving one via /user/<name> always 404s and makes the server log a WARN for every
+    // call, which floods server.log (WEBUI-2309), so we never ask the server for them.
+    // Declared locally because HTML imports run as classic scripts and cannot import modules.
+    const INTERNAL_PRINCIPALS = new Set(['system']);
+
     Polymer({
       is: 'nuxeo-task6d8-layout',
       behaviors: [Nuxeo.LayoutBehavior],
@@ -127,16 +133,21 @@ limitations under the License.
         const resolved = [];
         for (const actor of userActors) {
           const username = actor.replace('user:', '');
-          try {
-            this.$.user.path = `/user/${encodeURIComponent(username)}`;
-            const entity = await this.$.user.get();
-            resolved.push(entity);
-          } catch (error) {
-            if (error.status !== 404) {
-              console.warn(`Unexpected error resolving user "${username}":`, error);
-            }
-            // system/deleted users — fall back to raw prefixed string
+          if (INTERNAL_PRINCIPALS.has(username)) {
+            // Never resolvable: skip the request entirely and keep the raw prefixed string.
             resolved.push(actor);
+          } else {
+            try {
+              this.$.user.path = `/user/${encodeURIComponent(username)}`;
+              const entity = await this.$.user.get();
+              resolved.push(entity);
+            } catch (error) {
+              if (error.status !== 404) {
+                console.warn(`Unexpected error resolving user "${username}":`, error);
+              }
+              // deleted users: fall back to raw prefixed string
+              resolved.push(actor);
+            }
           }
         }
         if (requestId !== this._participantsRequestId) return;
