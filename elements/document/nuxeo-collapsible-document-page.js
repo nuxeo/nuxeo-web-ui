@@ -95,7 +95,14 @@ Polymer({
       }
 
       nuxeo-document-view {
-        --nuxeo-document-content-height: calc(100vh - 237px - var(--nuxeo-app-top));
+        /*
+         * WEBUI-2314: the chrome this clears is laid out in ems, so it rounds differently with the
+         * theme, the font size and the zoom level and a viewport figure cannot land on it exactly -
+         * this one was 3px over at 1280x900, 5px at 1024x768. One pixel over puts a scrollbar
+         * across the whole tab; under is invisible, since the view scrolls its own content. Aim
+         * short rather than at the edge.
+         */
+        --nuxeo-document-content-height: calc(100vh - 245px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
       }
     </style>
 
