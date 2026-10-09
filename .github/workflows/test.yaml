@@ -41,7 +41,7 @@ jobs:
         with:
           registry-url: 'https://packages.nuxeo.com/repository/npm-public/'
           scope: '@nuxeo'
-          node-version: 22
+          node-version: 24
 
       - name: Cache npm dependencies
         uses: actions/cache@v5
