@@ -56,7 +56,11 @@ class AuditSearch extends mixinBehaviors([FormatBehavior, RoutingBehavior], Nuxe
         }
 
         #table {
-          height: calc(100vh - 370px);
+          /* WEBUI-2314: this budget stopped 23px short of clearing the card the table sits in, so
+             History always carried a scrollbar whose whole range was that gap. See
+             nuxeo-document-content for why a viewport budget is given slack rather than aimed
+             at the edge. */
+          height: calc(100vh - 402px);
         }
       </style>
 
