@@ -55,9 +55,11 @@ Polymer({
         @apply --layout-vertical;
         @apply --layout-flex;
         /* keep compat with deprecated --nuxeo-document-trash-content-min-height css variable */
+        /* WEBUI-2314: a few pixels of slack so em-based chrome rounding cannot open a scrollbar
+           over the whole tab; see nuxeo-document-content for the measurements. */
         --nuxeo-results-view-height: var(
           --nuxeo-document-trash-content-height,
-          var(--nuxeo-document-trash-content-min-height, calc(100vh - 168px - var(--nuxeo-app-top, 0)))
+          var(--nuxeo-document-trash-content-min-height, calc(100vh - 176px - var(--nuxeo-app-top, 0)))
         );
         margin-bottom: var(--nuxeo-document-trash-content-margin-bottom, 0);
       }

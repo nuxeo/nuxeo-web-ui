@@ -95,7 +95,16 @@ Polymer({
       }
 
       nuxeo-document-view {
-        --nuxeo-document-content-height: calc(100vh - 237px - var(--nuxeo-app-top));
+        /*
+         * WEBUI-2314: the chrome this has to clear - the info bar, the tabs, the Details card, the
+         * result actions - is laid out in ems, so its height rounds differently with the theme, the
+         * font size and the zoom level, and a figure taken off the viewport cannot land on it
+         * exactly: this one came out 3px over at 1280x900 and 5px at 1024x768. Overshooting by even
+         * one pixel puts a scrollbar across the whole tab for nothing, while undershooting is
+         * invisible, because the view scrolls its own content either way. So leave a few pixels of
+         * slack rather than aim for the edge.
+         */
+        --nuxeo-document-content-height: calc(100vh - 245px - var(--nuxeo-app-top));
       }
     </style>
 
