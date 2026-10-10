@@ -191,7 +191,7 @@ export const Performance = {
   },
 
   clearMeasures(...args) {
-    if (performance && performance.clearMarks) {
+    if (performance && performance.clearMeasures) {
       performance.clearMeasures(...args);
     }
   },

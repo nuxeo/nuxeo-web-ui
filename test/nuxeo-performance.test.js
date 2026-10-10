@@ -574,18 +574,41 @@ suite('Performance', () => {
       Object.defineProperty(performance, 'measure', { configurable: true, value: orig });
     });
 
-    test('clearMeasures uses clearMeasures when available', () => {
-      const origClear = performance.clearMeasures;
-      const wrongOrig = performance.clearMarks;
-      Object.defineProperty(performance, 'clearMeasures', {
-        configurable: true,
-        value: sinon.stub(),
-      });
-      Object.defineProperty(performance, 'clearMarks', { configurable: true, value: undefined });
-      NuxeoPerf.clearMeasures('z');
-      expect(performance.clearMeasures).to.not.have.been.called;
-      Object.defineProperty(performance, 'clearMeasures', { configurable: true, value: origClear });
-      Object.defineProperty(performance, 'clearMarks', { configurable: true, value: wrongOrig });
+    test('clearMeasures calls clearMeasures when clearMarks is missing', () => {
+      const clearStub = sinon.stub(performance, 'clearMeasures');
+      const marksStub = sinon.stub(performance, 'clearMarks').value(undefined);
+      try {
+        NuxeoPerf.clearMeasures('z');
+        expect(clearStub).to.have.been.calledOnceWithExactly('z');
+      } finally {
+        clearStub.restore();
+        marksStub.restore();
+      }
+    });
+
+    test('clearMeasures is no-op when clearMeasures is missing and clearMarks is available', () => {
+      const clearStub = sinon.stub(performance, 'clearMeasures').value(undefined);
+      const marksStub = sinon.stub(performance, 'clearMarks');
+      try {
+        expect(() => NuxeoPerf.clearMeasures('z')).to.not.throw();
+        expect(marksStub).to.not.have.been.called;
+      } finally {
+        clearStub.restore();
+        marksStub.restore();
+      }
+    });
+
+    test('measureUnique replaces repeated measures when clearMarks is missing', () => {
+      const marksStub = sinon.stub(performance, 'clearMarks').value(undefined);
+      const name = 'webui-2304-unique-measure';
+      try {
+        NuxeoPerf.measureUnique(name);
+        NuxeoPerf.measureUnique(name);
+        expect(performance.getEntriesByName(name, 'measure')).to.have.lengthOf(1);
+      } finally {
+        marksStub.restore();
+        performance.clearMeasures(name);
+      }
     });
   });
 });
