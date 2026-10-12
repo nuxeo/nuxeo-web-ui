@@ -1239,7 +1239,9 @@ Polymer({
     } else {
       this._loadSavedSearchListener = () => {
         if (this.results) {
-          load();
+          // Deliberately not awaited: an event listener cannot return a promise. "void" marks it
+          // ignored without attaching a handler, so a rejection still surfaces as it did before.
+          void load();
           this.removeEventListener('results-changed', this._loadSavedSearchListener);
         }
       };
