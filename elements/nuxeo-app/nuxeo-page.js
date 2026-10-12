@@ -70,10 +70,10 @@ Polymer({
        * WEBUI-2314: on a region that already shows all of its content, the reserved strip is the
        * only thing there is to scroll to, so the tab gets a scrollbar that reveals nothing but the
        * empty strip - the large blank space at the bottom of View, History and Trash. Reserving it
-       * is worth that scrollbar only where the region scrolls past the strip on its own account,
-       * which is the reflow case WEBUI-1320 was raised for; see _updateContentFit. Below that the
-       * attribute hands the room back. scroll-padding-bottom stays either way: it costs no space
-       * and is what keeps focus from landing under the button.
+       * attribute hands that room back; see _updateContentFit for when it is set.
+       * scroll-padding-bottom stays either way because it costs no space. It only does anything
+       * where the region scrolls, and there it keeps what is scrolled into view - keyboard focus
+       * in particular - clear of the button.
        */
       :host([content-fits]) #content {
         padding-bottom: 0;

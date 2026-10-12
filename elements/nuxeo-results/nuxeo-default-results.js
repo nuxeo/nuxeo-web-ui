@@ -49,8 +49,8 @@ Polymer({
       nuxeo-data-list {
         /* Published here too, so nuxeo-results stops falling back to the theme's generic budget,
            which assumes less chrome than this layout has. */
-        --nuxeo-results-view-height: calc(100vh - 248px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
-        min-height: calc(100vh - 248px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)));
+        --nuxeo-results-view-height: calc(100vh - 248px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px)));
+        min-height: calc(100vh - 248px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px)));
       }
 
       nuxeo-data-grid,

@@ -61,7 +61,7 @@ Polymer({
           --nuxeo-document-trash-content-height,
           var(
             --nuxeo-document-trash-content-min-height,
-            calc(100vh - 176px - (var(--nuxeo-app-top, 0) + var(--nuxeo-app-bottom, 0)))
+            calc(100vh - 176px - (var(--nuxeo-app-top, 0px) + var(--nuxeo-app-bottom, 0px)))
           )
         );
         margin-bottom: var(--nuxeo-document-trash-content-margin-bottom, 0);
